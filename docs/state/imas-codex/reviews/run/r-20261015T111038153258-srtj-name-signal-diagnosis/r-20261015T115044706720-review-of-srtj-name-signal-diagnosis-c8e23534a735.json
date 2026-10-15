@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T12:00:44.907Z",
+  "dispatched_at": "2026-10-15T11:51:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py",
+      "line": "544",
+      "severity": "follow-on",
+      "text": "follow-on: the ten-name table is introduced as \"the three questions on which Jev was most permissive\", but the column it introduces holds each name's lowest acceptance values, which is the least permissive reading \u2014 check:bound_to_wrong_object's acceptance value is the probability of its authored acceptable option, so 0.31 means Jev judged the name likely denotes a different object rather than the bound one; the table data is correct and only the column's gloss reads backwards."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "follow-on: _question_values re-derives the per-question acceptance mapping (a dimension's accepted category is the first authored criterion, a Noul check's value is 1 minus its defect probability, a Choice check's is the authored acceptable option's probability) that the sibling measure script already encodes inside its _score at docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:456-471, so the two evidence scripts hold one convention independently and a change to either silently decouples the control from the per-question table."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read from base 19b2e28f to head c8e23534a; the single commit adds the 696-line srtj-name-signal-diagnosis-run.py, the 1101-line results.json, the 65-line fragment and score-by-label.svg (+3383 lines, four new files), touching no source module and no test file.",
+    "done_when": "the done_when names the per-question table, three aggregations with calibration and validation AUC and paired delta, the figure and the ten-name table, plus a rerun logged with the command first and EXIT=0 last; the fragment docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis.html carries all four deliverables, diagnosis-run.log ends EXIT=0, and the control reproduces the recorded 0.515 and 0.560.",
+    "goal": "the node goal is to diagnose which name-review questions carry signal, from the saved answers, without spending; docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:168-341 scores each of the 33 questions alone on calibration and fixes three aggregations before reading validation once each.",
+    "manifest": "read; it names commit c8e23534a, records the diagnosis run at EXIT=0 with the control reproducing 0.515/0.560, cites guard-refusal.log as the declared mutation going red at EXIT=1, correctly declares negative_control none because no test file is in scope, and leaves baseline_suite and after_suite null.",
+    "write_paths": "the declared scope is the fragment html, run.py, results.json and the figures directory docs/figures/sn-review-through-jev/srtj-name-signal-diagnosis; git show --name-only c8e23534a names exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:667 raises RuntimeError when the control does not reproduce and guard-refusal.log shows it red at EXIT=1 under --prove-guard, but no test reddens if the selection rule, the aggregations or the ten-name table regress.",
+    "evidence": "the gate is the script's own rerun, whose log diagnosis-run.log carries the literal command on its last-but-one line and EXIT=0 last, and results.json records control.reproduces true at calibration 0.515135 and validation 0.560235, with each validation AUC read from all 338 names; no baseline_suite or after_suite is recorded, so no base arm backs any delta.",
+    "fit": "docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:1-16 follows the sibling evidence-script idiom and its module docstring carries no plan, section or ticket label, though the file name carries the coordinator-assigned node id.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:168-341 scores each of the 33 questions alone on calibration and builds the per-question table, the three aggregations, the figure and the ten-name table the goal names.",
+    "reuse": "docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:156,567,571,574 imports the measurement script's loaders and _score, evaluation.bootstrap_interval and paired_auc, and jev_review.name_question_table rather than forking them, but run.py:96-121 re-derives the per-question acceptance mapping its own adopted owner already encodes in _score.",
+    "scope_discipline": "git show --name-only c8e23534a names exactly the four declared write paths under docs/evidence/fragments/sn-review-through-jev and docs/figures/sn-review-through-jev, with nothing extra."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to diagnose which name-review questions carry signal, from the saved answers, without spending; docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:168-341 scores each of the 33 questions alone on calibration and fixes three aggregations before reading validation once each.\nVERDICT done_when: the done_when names the per-question table, three aggregations with calibration and validation AUC and paired delta, the figure and the ten-name table, plus a rerun logged with the command first and EXIT=0 last; the fragment docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis.html carries all four deliverables, diagnosis-run.log ends EXIT=0, and the control reproduces the recorded 0.515 and 0.560.\nVERDICT write_paths: the declared scope is the fragment html, run.py, results.json and the figures directory docs/figures/sn-review-through-jev/srtj-name-signal-diagnosis; git show --name-only c8e23534a names exactly those four paths and nothing else.\nVERDICT manifest: read; it names commit c8e23534a, records the diagnosis run at EXIT=0 with the control reproducing 0.515/0.560, cites guard-refusal.log as the declared mutation going red at EXIT=1, correctly declares negative_control none because no test file is in scope, and leaves baseline_suite and after_suite null.\nVERDICT diff: read from base 19b2e28f to head c8e23534a; the single commit adds the 696-line srtj-name-signal-diagnosis-run.py, the 1101-line results.json, the 65-line fragment and score-by-label.svg (+3383 lines, four new files), touching no source module and no test file.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:168-341 scores each of the 33 questions alone on calibration and builds the per-question table, the three aggregations, the figure and the ten-name table the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is the script's own rerun, whose log diagnosis-run.log carries the literal command on its last-but-one line and EXIT=0 last, and results.json records control.reproduces true at calibration 0.515135 and validation 0.560235, with each validation AUC read from all 338 names; no baseline_suite or after_suite is recorded, so no base arm backs any delta.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --name-only c8e23534a names exactly the four declared write paths under docs/evidence/fragments/sn-review-through-jev and docs/figures/sn-review-through-jev, with nothing extra.\nSCORE durability: 15\nJUSTIFICATION durability: docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:667 raises RuntimeError when the control does not reproduce and guard-refusal.log shows it red at EXIT=1 under --prove-guard, but no test reddens if the selection rule, the aggregations or the ten-name table regress.\nSCORE fit: 17\nJUSTIFICATION fit: docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:1-16 follows the sibling evidence-script idiom and its module docstring carries no plan, section or ticket label, though the file name carries the coordinator-assigned node id.\nSCORE reuse: 15\nJUSTIFICATION reuse: docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:156,567,571,574 imports the measurement script's loaders and _score, evaluation.bootstrap_interval and paired_auc, and jev_review.name_question_table rather than forking them, but run.py:96-121 re-derives the per-question acceptance mapping its own adopted owner already encodes in _score.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:544 follow-on: the ten-name table is introduced as \"the three questions on which Jev was most permissive\", but the column it introduces holds each name's lowest acceptance values, which is the least permissive reading - check:bound_to_wrong_object's acceptance value is the probability of its authored acceptable option, so 0.31 means Jev judged the name likely denotes a different object rather than the bound one; the table data is correct and only the column's gloss reads backwards.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:96 follow-on: _question_values re-derives the per-question acceptance mapping (a dimension's accepted category is the first authored criterion, a Noul check's value is 1 minus its defect probability, a Choice check's is the authored acceptable option's probability) that the sibling measure script already encodes inside its _score at docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:456-471, so the two evidence scripts hold one convention independently and a change to either silently decouples the control from the per-question table.\n",
+  "review_run_id": "r-20261015T115044706720-review-of-srtj-name-signal-diagnosis-c8e23534a735",
+  "reviewed_base_sha": "19b2e28f8ff522478918f26adf0d127ed11f4bdf",
+  "reviewed_head_sha": "c8e23534a735523107eb3e5b89141a218a166f6c",
+  "reviewed_run_id": "r-20261015T111038153258-srtj-name-signal-diagnosis",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T11:58:37.159878Z",
+  "total": 104
+}
