@@ -7,7 +7,7 @@
 
 <section id="ssog-rerank-acceptance-large-positive-control">
   <h2>Positive control</h2>
-  <p id="ssog-rerank-acceptance-large-control-result">Passed. All 120 batches rendered the harness compose prompt under both switch settings and the switch changed the rendered-message hash on at least one batch (<code>switch_changes_harness_compose_prompt: true</code>). Nine batches reranked the pool to the order retrieval already gave and hashed identically; the rest differ. Rerank cost of the control: <strong>USD 0.013962</strong>.</p>
+  <p id="ssog-rerank-acceptance-large-control-result">Passed. All 120 batches rendered the harness compose prompt under both switch settings and the switch changed the rendered-message hash on at least one batch (<code>switch_changes_harness_compose_prompt: true</code>). Nine batches reranked the pool to the order retrieval already gave and hashed identically; the rest differ. Rerank cost of the control: <strong>USD 0.014903</strong>. The control is re-rendered at the head of every pass, so this figure is the latest rendering rather than the first attempt's 0.013962.</p>
 </section>
 
 <section id="ssog-rerank-acceptance-large-arms">
@@ -27,7 +27,7 @@
 
 <section id="ssog-rerank-acceptance-large-spend">
   <h2>Spend and per-pass logs</h2>
-  <p id="ssog-rerank-acceptance-large-spend-figure">Total spend <strong>USD 0.020951 of the USD 1.00 ceiling</strong> (control rerank 0.013962, arm B rerank 0.006048 plus earlier arm-B passes, arm A 0). Compose and review ran on the free local seat, so only arm B's rerank spends at all.</p>
+  <p id="ssog-rerank-acceptance-large-spend-figure">Total spend <strong>USD 0.020951 of the USD 1.00 ceiling</strong> (control rerank 0.014903 plus arm B rerank 0.006048, arm A 0), which is the sum of those three recorded components. Compose and review ran on the free local seat, so only arm B's rerank spends at all.</p>
   <ul id="ssog-rerank-acceptance-large-pass-logs">
     <li><code>pass1.log</code>, <code>pass2.log</code>, <code>pass4.log</code> — extraction, control, first arm passes; <code>EXIT=124</code></li>
     <li><code>pass3.log</code> — returned cleanly; <code>EXIT=0</code></li>
