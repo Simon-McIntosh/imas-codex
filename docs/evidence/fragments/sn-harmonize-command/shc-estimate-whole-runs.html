@@ -1,0 +1,153 @@
+<section>
+  <h2 id="shc-estimate-whole-runs">The dry-run cost estimate reads whole runs, and its tests assert independent figures</h2>
+  <p id="shc-estimate-whole-runs-scope">
+    Three follow-ons from the independent review of the estimate landing
+    (<code>shc-dry-run-estimate</code>): the cost read truncated runs, and two
+    tests asserted the literals they had themselves injected. A fourth change
+    gives the dead-reference prose rewrite one owner. Write paths:
+    <code>imas_codex/standard_names/harmonize.py</code>,
+    <code>tests/standard_names/test_harmonize_estimate.py</code>.
+  </p>
+
+  <h3 id="shc-estimate-whole-runs-query">The cost read selects runs, then counts them whole</h3>
+  <p id="shc-estimate-whole-runs-query-text">
+    <code>_DOC_COST_QUERY</code> applied <code>LIMIT $row_cap</code> to the
+    <code>LLMCost</code> row stream <em>before</em> it grouped by
+    <code>run_id</code>. A run with more rows than the cap was cut mid-run, so
+    its summed <code>run_cost</code> and the name list its calls covered were
+    reported for only the rows the cap happened to keep. The read now names the
+    recent run ids first, bounded by a run count, and aggregates every row of
+    each selected run. A per-run bound is stated as a constant and checked on
+    every returned run, so a run that outgrows it is reported rather than
+    silently truncated.
+  </p>
+  <pre id="shc-estimate-whole-runs-query-before"><code># before
+MATCH (c:LLMCost)
+WHERE c.phase IN $phases AND c.llm_at &gt;= datetime($since)
+WITH c ORDER BY c.llm_at DESC LIMIT $row_cap
+WITH c.run_id AS run_id, sum(c.llm_cost) AS run_cost,
+     collect(c.standard_name_ids) AS name_lists
+RETURN run_id AS run_id, run_cost AS run_cost, name_lists AS name_lists</code></pre>
+  <pre id="shc-estimate-whole-runs-query-after"><code># after
+MATCH (c:LLMCost)
+WHERE c.phase IN $phases AND c.llm_at &gt;= datetime($since)
+  AND c.run_id IS NOT NULL
+WITH c.run_id AS run_id, max(c.llm_at) AS newest
+ORDER BY newest DESC
+LIMIT $run_cap
+WITH collect(run_id) AS run_ids
+MATCH (c:LLMCost)
+WHERE c.run_id IN run_ids AND c.phase IN $phases
+  AND c.run_id IS NOT NULL AND c.llm_at &gt;= datetime($since)
+WITH c.run_id AS run_id, sum(c.llm_cost) AS run_cost,
+     collect(c.standard_name_ids) AS name_lists, count(c) AS rows
+RETURN run_id AS run_id, run_cost AS run_cost, name_lists AS name_lists,
+       rows AS rows</code></pre>
+  <p id="shc-estimate-whole-runs-bound">
+    <code>measure_doc_call_cost</code> takes <code>run_cap</code> in place of
+    <code>row_cap</code> and reads each returned <code>rows</code> count against
+    <code>_DOC_COST_ROWS_PER_RUN</code>; over the bound it raises with the run
+    id and its row count rather than returning an understated spend.
+  </p>
+
+  <table id="shc-estimate-whole-runs-measure">
+    <caption>What the whole-run test measures, and why the old query fails it</caption>
+    <thead>
+      <tr><th>Reading</th><th>Old query</th><th>New query</th><th>Expected</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>total_usd</code></td>
+        <td><code>8000.0</code> (the big run cut at the cap)</td>
+        <td><code>8002.5</code></td>
+        <td><code>2.0 * 4001 + 0.5</code></td>
+      </tr>
+      <tr>
+        <td><code>runs</code></td>
+        <td><code>1</code> (the small run dropped whole)</td>
+        <td><code>2</code></td>
+        <td><code>2</code></td>
+      </tr>
+      <tr>
+        <td><code>calls</code></td>
+        <td><code>1</code></td>
+        <td><code>2</code></td>
+        <td><code>2</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-estimate-whole-runs-assertions">Each assertion names a figure the code computes</h3>
+  <p id="shc-estimate-whole-runs-assertions-text">
+    Two assertions restated literals the test had itself handed the code, so
+    they held whatever the code did. Each now reads a quantity the code derives
+    from inputs the test does not echo back.
+  </p>
+  <pre id="shc-estimate-whole-runs-assertions-familyspan-before"><code># before
+applied = outcome["applied"][0]["result"].total_cost
+assert applied == pytest.approx(0.30 + 5.40)   # the test's own drain spends</code></pre>
+  <pre id="shc-estimate-whole-runs-assertions-familyspan-after"><code># after
+assert drain.calls[0][1] == pytest.approx(_FAMILY_CEILING)
+assert drain.calls[1][1] == pytest.approx(_FAMILY_CEILING - drain.spends[0])</code></pre>
+  <pre id="shc-estimate-whole-runs-assertion-totalcost-before"><code># before
+assert result.total_cost == pytest.approx(3.0)   # the cost_fn the test injected</code></pre>
+  <pre id="shc-estimate-whole-runs-assertion-totalcost-after"><code># after
+anchor_charge = cost_fn(f"scope-{_ANCHOR}")
+assert result.total_cost == pytest.approx(anchor_charge)</code></pre>
+  <p id="shc-estimate-whole-runs-assertions-note">
+    The family-span pair asserts the family-cap arithmetic — each batch offered
+    the single ceiling less what the earlier batch charged — rather than the
+    spends the drain was handed. The total-cost assertion reads the hook's own
+    figure, so a stale literal in the test cannot keep it green.
+  </p>
+
+  <h3 id="shc-estimate-whole-runs-drop">One owner for dropping a dead reference</h3>
+  <p id="shc-estimate-whole-runs-drop-text">
+    <code>_drop_doc_reference</code> removed a dead <code>name:</code> reference
+    from documentation prose and restored the visible link text. Its two local
+    regexes restated the syntax owners in <code>doc_links.py</code>, so they
+    could drift from what the derivation actually reads. The markdown spelling
+    is now found by <code>doc_links.find_name_links</code> — the owner of the
+    label-and-target pairs — and the bare <code>name:</code> spelling by
+    <code>doc_links.find_name_references</code>, the owner of the reference
+    syntaxes. Both local regexes are deleted.
+  </p>
+  <p id="shc-estimate-whole-runs-drop-gap">
+    <strong>Signature gap.</strong> <code>resolve_doc_links(gc=None)</code> is
+    named in the brief as the owner of the rewrite, but it does not fit this
+    call. It is a graph-wide pass: it scans <em>every</em> accepted
+    StandardName's documentation, decides which references are dead from the
+    graph (a target that is superseded or exhausted, resolved through
+    <code>REFINED_FROM</code>), rewrites them and writes the cleaned prose back
+    to the graph. <code>_drop_doc_reference</code> is the opposite shape: a pure
+    in-process rewrite of one prose string, given the one target it must drop,
+    run while the reverse-link step is still composing a write batch that has
+    not been written. <code>resolve_doc_links</code> takes no prose and no
+    target, and would neither know which reference to drop nor be correct to
+    call from inside that loop — it would scan and write mid-step. The brief's
+    other owner, <code>find_name_links</code>, is the right one for the syntax
+    half and is what the code now uses; the rewrite half has no fitting owner in
+    <code>doc_links.py</code> beyond the reference parser used here.
+  </p>
+
+  <h3 id="shc-estimate-whole-runs-evidence">Evidence</h3>
+  <ul id="shc-estimate-whole-runs-evidence-list">
+    <li>Gate over the fifteen harmonize test files
+      (<code>grep -rl harmonize tests/standard_names/</code>): base
+      <code>139 passed, 12 deselected, 0 failed</code> →
+      head <code>140 passed, 12 deselected, 0 failed</code>; one added test,
+      zero added failures.</li>
+    <li>Cypher property check
+      (<code>tests/graph/test_cypher_property_check.py</code>), required
+      because the cost read is edited Cypher: <code>4 passed</code>.</li>
+    <li>Negative control — restore <code>LIMIT $row_cap</code> before the
+      grouping and the whole-run test fails:
+      <code>assert 8000.0 == 8002.5</code> (EXIT=1).</li>
+    <li>Negative control — remove the family-cap decrement and the
+      applied-cost test fails:
+      <code>assert 100.0 == 99.7</code> at the second batch's cap (EXIT=1).</li>
+    <li>Negative control — remove the link by which a batch's charge reaches
+      the family total and the total-cost assertion fails:
+      <code>assert 0.0 == 3.0</code> (EXIT=1).</li>
+  </ul>
+</section>

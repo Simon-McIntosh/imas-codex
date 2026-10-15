@@ -29,6 +29,10 @@ from typing import Any
 from imas_codex.graph.models import NameStage
 from imas_codex.standard_names.context import DOCUMENTATION_FAMILY_OPERATOR_KINDS
 from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from imas_codex.standard_names.doc_links import (
+    find_name_links,
+    find_name_references,
+)
 
 # The family-enumeration query is owned by families.py; re-exported so the
 # worklist test can compare the query build_worklist issues against it.
@@ -774,18 +778,37 @@ def stamp_harmonized(
 #: so the cycle's spend is the summed cost of these phases for that name.
 DOC_CALL_PHASES: tuple[str, ...] = ("generate_docs", "refine_docs", "review_docs")
 
-#: How far back the dry run measures, and a row cap so the read stays bounded
-#: however large the ledger grows.
+#: How far back the dry run measures, and how many recent runs it reads. The
+#: read is bounded by the number of runs, never by a row count taken before the
+#: per-run aggregation: a global cap cuts a run mid-way, so its cost and the
+#: names it covered are reported for only the rows the cap happened to keep.
 _DOC_COST_WINDOW_DAYS = 14
-_DOC_COST_ROW_CAP = 4000
+_DOC_COST_RUN_CAP = 200
 
+#: The most rows one run may contribute before the read is treated as no
+#: longer bounded. The window and the run cap already bound the read; this is
+#: the stated per-run bound the reader checks every returned run against, so a
+#: run that outgrows it is reported rather than silently truncated.
+_DOC_COST_ROWS_PER_RUN = 20000
+
+#: The recent runs are selected first, bounded by ``$run_cap``; only then is
+#: every row of those runs aggregated. No row cap is applied before the
+#: grouping, so a run contributes all of its rows whatever its size.
 _DOC_COST_QUERY = """
 MATCH (c:LLMCost)
 WHERE c.phase IN $phases AND c.llm_at >= datetime($since)
-WITH c ORDER BY c.llm_at DESC LIMIT $row_cap
+  AND c.run_id IS NOT NULL
+WITH c.run_id AS run_id, max(c.llm_at) AS newest
+ORDER BY newest DESC
+LIMIT $run_cap
+WITH collect(run_id) AS run_ids
+MATCH (c:LLMCost)
+WHERE c.run_id IN run_ids AND c.phase IN $phases
+  AND c.run_id IS NOT NULL AND c.llm_at >= datetime($since)
 WITH c.run_id AS run_id, sum(c.llm_cost) AS run_cost,
-     collect(c.standard_name_ids) AS name_lists
-RETURN run_id AS run_id, run_cost AS run_cost, name_lists AS name_lists
+     collect(c.standard_name_ids) AS name_lists, count(c) AS rows
+RETURN run_id AS run_id, run_cost AS run_cost, name_lists AS name_lists,
+       rows AS rows
 """
 
 
@@ -812,22 +835,25 @@ def measure_doc_call_cost(
     gc: Any,
     *,
     window_days: int = _DOC_COST_WINDOW_DAYS,
-    row_cap: int = _DOC_COST_ROW_CAP,
+    run_cap: int = _DOC_COST_RUN_CAP,
 ) -> DocCallCostEstimate | None:
     """Measure the cost of one documentation call from the recent ledger.
 
     Reads the ``LLMCost`` rows for the documentation-seat phases
-    (:data:`DOC_CALL_PHASES`) recorded within *window_days*, capped at
-    *row_cap* rows, and returns their spend per documented name. ``None`` when
-    the ledger holds no such measurement, so the caller states the absence
-    rather than falling back to a guess.
+    (:data:`DOC_CALL_PHASES`) recorded within *window_days* across the
+    *run_cap* most recent runs, aggregating every row of each of those runs,
+    and returns their spend per documented name. Every run's row count is
+    checked against :data:`_DOC_COST_ROWS_PER_RUN`, so a run large enough to
+    make the read unbounded is reported rather than silently cut. ``None``
+    when the ledger holds no such measurement, so the caller states the
+    absence rather than falling back to a guess.
     """
     since = (datetime.now(UTC) - timedelta(days=window_days)).isoformat()
     rows = gc.query(
         _DOC_COST_QUERY,
         phases=list(DOC_CALL_PHASES),
         since=since,
-        row_cap=row_cap,
+        run_cap=run_cap,
     )
     runs = 0
     calls: set[str] = set()
@@ -835,6 +861,13 @@ def measure_doc_call_cost(
     for row in rows or []:
         if row.get("run_id") is None:
             continue
+        counted = int(row.get("rows") or 0)
+        if counted > _DOC_COST_ROWS_PER_RUN:
+            raise ValueError(
+                f"run {row['run_id']!r} contributes {counted} LLMCost rows, "
+                f"over the per-run bound of {_DOC_COST_ROWS_PER_RUN}; the read "
+                f"is unbounded and the run's spend would be understated"
+            )
         runs += 1
         total_usd += float(row.get("run_cost") or 0.0)
         for name_list in row.get("name_lists") or []:
@@ -950,14 +983,30 @@ def _drop_doc_reference(documentation: str, target: str) -> str:
     """Remove the reference to *target* from documentation prose.
 
     The derived link index is rebuilt from the documentation, so dropping a
-    link from the index alone would let the next derivation restore it. Both
-    spellings the derivation reads are removed, and a markdown link keeps its
-    visible text.
+    link from the index alone would let the next derivation restore it. The
+    spellings the reference parser reads are found by that parser's own owner
+    — :func:`doc_links.find_name_links` for a markdown link and
+    :func:`doc_links.find_name_references` for a bare ``name:`` reference — so
+    no local pattern can drift from the syntax the derivation accepts. A
+    markdown link keeps its visible text.
     """
     if not documentation:
         return documentation or ""
-    text = re.sub(rf"\[([^\]]*)\]\(name:{re.escape(target)}\)", r"\1", documentation)
-    return re.sub(rf"(?<![\w:/])name:{re.escape(target)}(?![\w])", "", text)
+    links = [link for link in find_name_links(documentation) if link.target == target]
+    for link in reversed(links):
+        documentation = (
+            documentation[: link.start] + link.label + documentation[link.end :]
+        )
+    inline = [
+        reference
+        for reference in find_name_references(documentation)
+        if reference.syntax == "inline_name" and reference.name == target
+    ]
+    for reference in reversed(inline):
+        documentation = (
+            documentation[: reference.start] + documentation[reference.end :]
+        )
+    return documentation
 
 
 def reconcile_family_reverse_links(
