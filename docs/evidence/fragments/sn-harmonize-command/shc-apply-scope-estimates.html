@@ -1,0 +1,329 @@
+<section>
+  <h2 id="shc-apply-scope-estimates">What the completion apply would spend, measured by dry run</h2>
+  <p id="shc-apply-scope-estimates-scope">
+    Estimates the spend of the anchor-gated family apply (§4 of this plan) by
+    dry run, on the boundary family §3 completes and on one non-WEST family per
+    pattern kind. Every number below is read from the live graph by
+    <code>imas-codex sn harmonize</code> and the evidence script; nothing was
+    written. Evidence script:
+    <code>docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py</code>;
+    machine-readable results in
+    <code>shc-apply-scope-estimates-results.json</code>.
+  </p>
+
+  <h3 id="shc-apply-scope-estimates-families">The four families measured</h3>
+  <p id="shc-apply-scope-estimates-families-text">
+    A pattern family is a cohort of live StandardName nodes that share their
+    invariant grammar segments and differ only along the variation axes; the
+    pattern kind names the axis that distinguishes its members. The three
+    chosen families each sit outside the frozen WEST roster, carry at least
+    four members, and carry a current lint finding. The species family also
+    exercises a template placeholder beyond <code>{subject}</code> and
+    <code>{locus}</code>: its <code>templates.yml</code> entry is
+    <code>{modifiers} number density {locus}</code>.
+  </p>
+  <table id="shc-apply-scope-estimates-families-table">
+    <caption>Chosen families, one per pattern kind, plus the §3 boundary family</caption>
+    <thead>
+      <tr>
+        <th>Kind</th><th>Family (seed name)</th><th>Pattern base</th>
+        <th>Invariant</th><th>Members</th><th>Why this family</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>boundary</td>
+        <td><code>flux_surface_averaged_argon_density_at_plasma_boundary</code></td>
+        <td><code>density</code></td>
+        <td><code>flux_surface_averaged</code>, <code>at_plasma_boundary</code></td>
+        <td>17</td>
+        <td>The family §3 completes on; its freeze is what the refusal below reports.</td>
+      </tr>
+      <tr>
+        <td>species</td>
+        <td><code>electron_number_density</code></td>
+        <td><code>number_density</code></td>
+        <td>none</td>
+        <td>7</td>
+        <td>Members differ by subject species (electron, ion, neutral …), and its template carries <code>{modifiers}</code>.</td>
+      </tr>
+      <tr>
+        <td>component</td>
+        <td><code>parallel_conductivity</code></td>
+        <td><code>conductivity</code></td>
+        <td>none</td>
+        <td>5</td>
+        <td>Members differ by vector component (parallel, poloidal, radial, toroidal, vertical).</td>
+      </tr>
+      <tr>
+        <td>locus</td>
+        <td><code>electrostatic_potential</code></td>
+        <td><code>electrostatic_potential</code></td>
+        <td>none</td>
+        <td>5</td>
+        <td>Members differ by the locus that places the quantity (wall, outboard midplane, Langmuir probe position).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-apply-scope-estimates-dryrun">The dry run: planned calls and estimate</h3>
+  <p id="shc-apply-scope-estimates-dryrun-text">
+    Each row is one <code>imas-codex sn harmonize --family &lt;seed&gt; --apply
+    --dry-run</code>. The estimate is the planned call count times the mean
+    measured per-call documentation cost; the basis the CLI prints is the
+    recent <code>LLMCost</code> rows for the documentation seat that mean was
+    taken over. A family that plans no calls prints no basis, because its
+    $0.00 is exact by construction rather than extrapolated.
+  </p>
+  <table id="shc-apply-scope-estimates-dryrun-table">
+    <caption>Planned calls and estimated spend per family</caption>
+    <thead>
+      <tr>
+        <th>Family</th><th>Decision</th><th>Anchor</th><th>Members</th>
+        <th>Planned calls</th><th>Estimate</th><th>Basis</th><th>Log</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>boundary <code>density</code></td>
+        <td><code>refused</code></td>
+        <td><code>flux_surface_averaged_xenon_density_at_plasma_boundary</code></td>
+        <td>17</td>
+        <td>0</td>
+        <td>$0.00</td>
+        <td>none — the apply is refused before any call is planned</td>
+        <td><code>logs/dryrun_flux_surface_averaged_argon_density_at_plasma_boundary.log</code></td>
+      </tr>
+      <tr>
+        <td>species <code>number_density</code></td>
+        <td><code>apply</code></td>
+        <td><code>total_ion_number_density</code></td>
+        <td>7</td>
+        <td>7</td>
+        <td>$2.90</td>
+        <td>7 recent run(s), 23 call(s), $0.41 per call</td>
+        <td><code>logs/dryrun_electron_number_density.log</code></td>
+      </tr>
+      <tr>
+        <td>component <code>conductivity</code></td>
+        <td><code>harmonized</code></td>
+        <td><code>vertical_conductivity</code></td>
+        <td>5</td>
+        <td>0</td>
+        <td>$0.00</td>
+        <td>none — every member already carries the current group signature</td>
+        <td><code>logs/dryrun_parallel_conductivity.log</code></td>
+      </tr>
+      <tr>
+        <td>locus <code>electrostatic_potential</code></td>
+        <td><code>apply</code></td>
+        <td><code>electrostatic_potential_at_langmuir_probe_position</code></td>
+        <td>5</td>
+        <td>5</td>
+        <td>$2.07</td>
+        <td>7 recent run(s), 23 call(s), $0.41 per call</td>
+        <td><code>logs/dryrun_electrostatic_potential.log</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-apply-scope-estimates-total">
+    <strong>Total for the four families as the apply would run it: 12 planned
+    calls, estimated $4.97.</strong> Twelve of the 34 members are actually
+    planned: the boundary family is refused outright and the component family
+    is already harmonized, so neither spends. The spend of the completion apply
+    is therefore governed less by family size than by how much of each family
+    is already harmonized or frozen.
+  </p>
+  <p id="shc-apply-scope-estimates-zero-ops">
+    The plan and the guard disagree, and both numbers are given because the gap
+    is the point. <em>Unguarded</em>, the anchor-gated plan would batch all
+    four families: <strong>29 planned calls, estimated $12.01</strong>
+    (<code>total_planned_calls</code> and <code>total_estimate_usd</code> in
+    the results JSON). <em>Guarded</em>, the recommended-name protection refuses
+    the boundary family for its one member carrying an open catalog request, so
+    the apply plans <strong>12 calls, estimated $4.97</strong>. The $5.15
+    difference — nearly half the unguarded figure — is spend the guard prevents
+    on a family this plan is otherwise trying to complete, which is the honest
+    cost of the freeze rather than a defect in the estimate.
+  </p>
+
+  <h3 id="shc-apply-scope-estimates-refusals">Members the recommended-name protection refuses</h3>
+  <p id="shc-apply-scope-estimates-refusals-text">
+    <code>preview_recommended_refusals</code> reports the members carrying a
+    pending recommended-name request, which the apply will not rename without
+    <code>--force</code>. The boundary family is refused as a whole: one
+    member carries an open catalog request, so the dry run plans zero calls
+    for the family and names that member as the reason.
+  </p>
+  <table id="shc-apply-scope-estimates-refusals-table">
+    <caption>Refused families and the member that refuses them</caption>
+    <thead>
+      <tr><th>Family</th><th>Refused?</th><th>Member carrying the request</th><th>Request</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>boundary <code>density</code></td>
+        <td>yes — apply refused without <code>--force</code></td>
+        <td><code>flux_surface_averaged_electron_density_at_plasma_boundary</code></td>
+        <td>catalog pull request #3</td>
+      </tr>
+      <tr>
+        <td>species <code>number_density</code></td>
+        <td>no</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>component <code>conductivity</code></td>
+        <td>no</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>locus <code>electrostatic_potential</code></td>
+        <td>no</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-apply-scope-estimates-lint">Current lint findings by kind</h3>
+  <p id="shc-apply-scope-estimates-lint-text">
+    Read by the report path of <code>sn harmonize</code>, which runs the lint
+    checks and the link-integrity checks and writes nothing. Every chosen
+    family carries at least one finding, which is what makes it a candidate
+    for an apply at all.
+  </p>
+  <table id="shc-apply-scope-estimates-lint-table">
+    <caption>Lint counts over each family, by check kind</caption>
+    <thead>
+      <tr>
+        <th>Family</th><th>Members</th><th>Drift</th><th>Total findings</th>
+        <th>By kind</th><th>Log</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>boundary <code>density</code></td><td>17</td><td>0.88</td><td>29</td>
+        <td><code>convention_violation=17</code>, <code>link_missing_reverse=12</code></td>
+        <td><code>logs/report_flux_surface_averaged_argon_density_at_plasma_boundary.log</code></td>
+      </tr>
+      <tr>
+        <td>species <code>number_density</code></td><td>7</td><td>0.86</td><td>5</td>
+        <td><code>convention_violation=3</code>, <code>link_dead_link=1</code>, <code>link_missing_reverse=1</code></td>
+        <td><code>logs/report_electron_number_density.log</code></td>
+      </tr>
+      <tr>
+        <td>component <code>conductivity</code></td><td>5</td><td>0.80</td><td>5</td>
+        <td><code>link_missing_reverse=5</code></td>
+        <td><code>logs/report_parallel_conductivity.log</code></td>
+      </tr>
+      <tr>
+        <td>locus <code>electrostatic_potential</code></td><td>5</td><td>0.80</td><td>3</td>
+        <td><code>defining_equation=1</code>, <code>link_missing_reverse=2</code></td>
+        <td><code>logs/report_electrostatic_potential.log</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-apply-scope-estimates-lint-note">
+    Only the boundary and species families carry <code>convention_violation</code>,
+    the lint that a documentation rewrite is what clears. The component and
+    locus families carry link findings only, which is consistent with the
+    component family already reading as <code>harmonized</code>. Neither
+    <code>conductivity</code> nor <code>electrostatic_potential</code> has an
+    entry in the documentation template registry, so a template-opening check
+    has nothing to compile against for them and cannot fire.
+  </p>
+
+  <h3 id="shc-apply-scope-estimates-scores">Documentation-axis scores of every member</h3>
+  <p id="shc-apply-scope-estimates-scores-text">
+    Each member's stored <code>reviewer_score_docs</code>, read from the same
+    pattern-family query the apply plan uses (property checked against
+    <code>imas_codex/schemas/standard_name.yaml</code>, where
+    <code>reviewer_score_docs</code> is a float in <code>[0, 1]</code>). The
+    acceptance score the apply judges against is
+    <code>DEFAULT_MIN_SCORE = 0.85</code>.
+    <strong>No scored member of any of the four families sits below it</strong>;
+    five members carry no stored score at all.
+  </p>
+  <table id="shc-apply-scope-estimates-scores-boundary">
+    <caption>Boundary <code>density</code> family — 17 members</caption>
+    <thead>
+      <tr><th>Member</th><th><code>reviewer_score_docs</code></th><th>vs 0.85</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>flux_surface_averaged_argon_density_at_plasma_boundary</code></td><td>0.9875</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_beryllium_density_at_plasma_boundary</code></td><td>1.0</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_carbon_density_at_plasma_boundary</code></td><td>1.0</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_deuterium_density_at_plasma_boundary</code></td><td>0.93125</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_electron_density_at_plasma_boundary</code></td><td>—</td><td>unscored (the refused member)</td></tr>
+      <tr><td><code>flux_surface_averaged_helium_3_density_at_plasma_boundary</code></td><td>0.9375</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_helium_4_density_at_plasma_boundary</code></td><td>0.875</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_hydrogen_density_at_plasma_boundary</code></td><td>0.9375</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_ion_density_at_plasma_boundary</code></td><td>1.0</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_iron_density_at_plasma_boundary</code></td><td>1.0</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_lithium_density_at_plasma_boundary</code></td><td>0.85</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_neon_density_at_plasma_boundary</code></td><td>1.0</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_nitrogen_density_at_plasma_boundary</code></td><td>0.98125</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_oxygen_density_at_plasma_boundary</code></td><td>0.9875</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_total_ion_density_at_plasma_boundary</code></td><td>—</td><td>unscored</td></tr>
+      <tr><td><code>flux_surface_averaged_tritium_density_at_plasma_boundary</code></td><td>1.0</td><td>at or above</td></tr>
+      <tr><td><code>flux_surface_averaged_xenon_density_at_plasma_boundary</code></td><td>0.9375</td><td>at or above</td></tr>
+    </tbody>
+  </table>
+  <table id="shc-apply-scope-estimates-scores-others">
+    <caption>Species, component and locus families — 17 members</caption>
+    <thead>
+      <tr><th>Family</th><th>Member</th><th><code>reviewer_score_docs</code></th></tr>
+    </thead>
+    <tbody>
+      <tr><td>species</td><td><code>electron_number_density</code></td><td>0.95</td></tr>
+      <tr><td>species</td><td><code>fast_neutral_internal_state_number_density</code></td><td>0.91875</td></tr>
+      <tr><td>species</td><td><code>normalized_ion_species_number_density</code></td><td>0.875</td></tr>
+      <tr><td>species</td><td><code>thermal_ion_charge_state_number_density</code></td><td>0.8875</td></tr>
+      <tr><td>species</td><td><code>total_ion_number_density</code> (anchor)</td><td>0.98125</td></tr>
+      <tr><td>species</td><td><code>total_neutral_number_density</code></td><td>0.9</td></tr>
+      <tr><td>species</td><td><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td><td>—</td></tr>
+      <tr><td>component</td><td><code>parallel_conductivity</code></td><td>0.9375</td></tr>
+      <tr><td>component</td><td><code>poloidal_conductivity</code></td><td>0.9125</td></tr>
+      <tr><td>component</td><td><code>radial_conductivity</code></td><td>0.9375</td></tr>
+      <tr><td>component</td><td><code>toroidal_conductivity</code></td><td>0.875</td></tr>
+      <tr><td>component</td><td><code>vertical_conductivity</code> (anchor)</td><td>0.9875</td></tr>
+      <tr><td>locus</td><td><code>electrostatic_potential</code></td><td>0.85625</td></tr>
+      <tr><td>locus</td><td><code>electrostatic_potential_at_langmuir_probe_position</code> (anchor)</td><td>0.9375</td></tr>
+      <tr><td>locus</td><td><code>floating_electrostatic_potential</code></td><td>0.85</td></tr>
+      <tr><td>locus</td><td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td><td>—</td></tr>
+      <tr><td>locus</td><td><code>plasma_electrostatic_potential_at_wall</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-apply-scope-estimates-scores-note">
+    The two lowest scored members, <code>flux_surface_averaged_lithium_density_at_plasma_boundary</code>
+    and <code>floating_electrostatic_potential</code>, both sit exactly at 0.85
+    and so clear the threshold rather than failing it. An apply rewrites their
+    documentation, so their post-drain score is what the regression comparison
+    the apply records would judge.
+  </p>
+
+  <h3 id="shc-apply-scope-estimates-nowrite">Nothing was written</h3>
+  <p id="shc-apply-scope-estimates-nowrite-text">
+    Every command above is read-only. Each dry run ended with the CLI's own
+    line, <em>“Wrote nothing.”</em>, and each reported
+    <code>decision=refused|apply|harmonized</code> without marking, resetting
+    or draining a member. The report rows ran through
+    <code>run_lint_checks</code> and <code>run_link_integrity</code>, never the
+    audit path that persists findings. The evidence script opens the graph
+    client for reads only and returns <code>"wrote_graph": false</code> in its
+    payload. All nine CLI pass logs carry <code>EXIT=0</code>, and each log's
+    first line is the command it records.
+  </p>
+
+  <h3 id="shc-apply-scope-estimates-evidence">Evidence</h3>
+  <ul id="shc-apply-scope-estimates-evidence-list">
+    <li><code>shc-apply-scope-estimates-results.json</code> — the same four families with members, planned calls, anchor, refusals, lint and member scores, plus the totals and the measured basis.</li>
+    <li><code>shc-apply-scope-estimates-run.py</code> — the read-only script that emitted it; log <code>logs/runpy.log</code>. Its first invocation under <code>uv run</code> failed before reaching the graph: the worktree has no generated <code>imas_codex/graph/schema_context_data.py</code>, and the <code>uv run</code> build hook that would have written it timed out at 120 s. The recorded run resolves <code>imas_codex</code> from the main checkout against the shared environment, which is the same library the CLI pass logs exercised.</li>
+    <li><code>logs/dryrun_*.log</code> — four dry runs, one per family, command on the first line and <code>EXIT=</code> on the last.</li>
+    <li><code>logs/report_*.log</code> — the lint and drift rows the per-family tables above are read from.</li>
+    <li>A fifth report row for <code>squareness_of_plasma_boundary</code> was taken while choosing the locus family (14 members, drift 0.79, 27 findings: <code>convention_violation=14</code>, <code>defining_equation=3</code>, <code>link_missing_reverse=10</code>), log <code>logs/report_squareness_of_plasma_boundary.log</code>; the five-member <code>electrostatic_potential</code> family was chosen instead.</li>
+  </ul>
+</section>
