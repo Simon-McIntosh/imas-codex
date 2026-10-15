@@ -20,13 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-blocks" content="sn-review-through-jev,sn-selection-over-generation,sn-catalog-grouping">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;}">
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="40">
-<meta name="plan-modified" content="2026-10-14">
-<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b,f2b9d9ee2e77922cd107952e8f51a2602519218d,9caea975fe223505bddf301dd8747709159232f2,03559dfe552d88192815516b3a12e3e9916f74ff,439ced57fd4422969f004797d2402211851de29a,2f9e46540ec7f67fe92969c4dd76e41aa9ad7ecb,600fdd64b31603236c6f2d2a7ae73163dcb64c1c">
+<meta name="plan-version" content="41">
+<meta name="plan-modified" content="2026-10-15">
+<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b,f2b9d9ee2e77922cd107952e8f51a2602519218d,9caea975fe223505bddf301dd8747709159232f2,03559dfe552d88192815516b3a12e3e9916f74ff,439ced57fd4422969f004797d2402211851de29a,2f9e46540ec7f67fe92969c4dd76e41aa9ad7ecb,600fdd64b31603236c6f2d2a7ae73163dcb64c1c,a950d7465edc81716afae236d1255b741549bbba,492e0bac4d9ab17d31b2679f8323a5a3fcf4be5c">
 </head>
 <body>
   <main class="plan-doc">
@@ -304,7 +304,7 @@
     </p>
 
     <h2 id="s8">§8 — A golden keeps its split when it grows</h2>
-<section data-reckon="section" data-id="s8" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s8" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p><code>assign_group_splits</code> in <code>imas_codex/standard_names/judgment_goldens.py</code> alternates calibration and validation over the ranked copy groups. Every rebuild re-derives the whole assignment, so a new group shifts every group after it. Folding the 47 ruled synonym pairs into golden D moved 10 of its 15 existing rows from one split to the other (<a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s5-goldens-labelled">§5 landing</a>). No judge has been fitted on a golden's calibration split yet. Once one is, a rebuild that moves a group would put rows the judge was fitted on into validation, and its measured score would no longer be held out.</p><p>A rebuild keeps the split every existing copy group already has in the committed golden file. Only groups new to the file are assigned, still alternating by rank among themselves, so the new groups split evenly. An imbalance already in the file is kept, not corrected. <code>assign_group_splits</code> sees only the rows, so the prior assignment is read from the committed golden and passed in by its caller, <code>_finish</code>. Each builder names its golden file to <code>_finish</code>. The assertion in <code>tests/standard_names/test_judgment_goldens.py</code> that every group sits in one split holds by construction, so it is replaced by one that can fail.</p><p><strong>Done when:</strong> a stubbed rebuild that adds groups to an existing golden leaves every existing row's split unchanged and splits the new groups within one of balance. The test fails with the preservation removed. Rebuilding goldens A, B, C and D from the live graph changes no existing row's split. The goldens test files add no failures against base.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
@@ -428,6 +428,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261014T213411270438-review-of-sje-golden-split-stability-492e0bac4d9a" data-who="reckon-build" data-when="2026-10-14T21:46:37.115Z">
     <div class="r-comment-body"><p>review of r-20261014T205032922028-sje-golden-split-stability at 492e0bac4d9ab17d31b2679f8323a5a3fcf4be5c (base 43bde5857dc571e9ccf5cffc888d682258a3633f) stores scores goal_fidelity 20, evidence 20, scope_discipline 20, durability 18, fit 19, reuse 14 and two follow-on findings; no blocking defect found.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-10-15T06:05:00Z">
+    <div class="r-comment-body"><p>§8 closed. A rebuild keeps every existing copy group's committed split and assigns only new groups. The live rebuild of goldens A–D changes 0 splits (<code>492e0bac4</code>, review 111/120). <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s8-split-stability">evidence</a></p></div>
 </div>
 </section>
 </main>
