@@ -1,0 +1,1101 @@
+{
+  "aggregations": {
+    "existing_score": {
+      "c": null,
+      "calibration": {
+        "auc": {
+          "level": 0.95,
+          "lower": 0.4642909791773318,
+          "n_resamples": 1000,
+          "point": 0.5151345291479821,
+          "seed": 123,
+          "upper": 0.5683981517636748
+        },
+        "n": 363
+      },
+      "validation": {
+        "auc": {
+          "level": 0.95,
+          "lower": 0.505123674443336,
+          "n_resamples": 1000,
+          "point": 0.5602351003294399,
+          "seed": 123,
+          "upper": 0.6159924762418687
+        },
+        "n": 338,
+        "quorum_difference_interval": {
+          "level": 0.95,
+          "lower": -0.21473948043624316,
+          "n_resamples": 1000,
+          "point": -0.13971869554393834,
+          "seed": 123,
+          "upper": -0.06087865669338893
+        },
+        "quorum_matched_n": 259,
+        "quorum_paired": {
+          "auc_a": 0.5864762260393328,
+          "auc_b": 0.7261949215832711,
+          "difference": -0.13971869554393834,
+          "n": 259
+        }
+      }
+    },
+    "logistic_l2": {
+      "c": 10.0,
+      "calibration": {
+        "auc": {
+          "level": 0.95,
+          "lower": 0.736543194863636,
+          "n_resamples": 1000,
+          "point": 0.7871877001921845,
+          "seed": 123,
+          "upper": 0.8419807350316456
+        },
+        "n": 363
+      },
+      "validation": {
+        "auc": {
+          "level": 0.95,
+          "lower": 0.6846250229449091,
+          "n_resamples": 1000,
+          "point": 0.7387316561844864,
+          "seed": 123,
+          "upper": 0.7864653117878845
+        },
+        "n": 338,
+        "quorum_difference_interval": {
+          "level": 0.95,
+          "lower": -0.03786765308696475,
+          "n_resamples": 1000,
+          "point": 0.026605675877520496,
+          "seed": 123,
+          "upper": 0.08634277209842295
+        },
+        "quorum_matched_n": 259,
+        "quorum_paired": {
+          "auc_a": 0.7528005974607916,
+          "auc_b": 0.7261949215832711,
+          "difference": 0.026605675877520496,
+          "n": 259
+        }
+      }
+    },
+    "selected_mean": {
+      "c": null,
+      "calibration": {
+        "auc": {
+          "level": 0.95,
+          "lower": 0.6425684796385226,
+          "n_resamples": 1000,
+          "point": 0.6883247918001281,
+          "seed": 123,
+          "upper": 0.7361392866329783
+        },
+        "n": 363
+      },
+      "validation": {
+        "auc": {
+          "level": 0.95,
+          "lower": 0.6701058746782327,
+          "n_resamples": 1000,
+          "point": 0.7177111410601976,
+          "seed": 123,
+          "upper": 0.7625913746313076
+        },
+        "n": 338,
+        "quorum_difference_interval": {
+          "level": 0.95,
+          "lower": -0.0661622534341928,
+          "n_resamples": 1000,
+          "point": 0.003298481453821278,
+          "seed": 123,
+          "upper": 0.06561776637450795
+        },
+        "quorum_matched_n": 259,
+        "quorum_paired": {
+          "auc_a": 0.7294934030370924,
+          "auc_b": 0.7261949215832711,
+          "difference": 0.003298481453821278,
+          "n": 259
+        }
+      }
+    }
+  },
+  "control": {
+    "calibration": 0.5151345291479821,
+    "reproduces": true,
+    "targets": {
+      "calibration": 0.515,
+      "tolerance": 0.001,
+      "validation": 0.56
+    },
+    "validation": 0.5602351003294399
+  },
+  "coverage": {
+    "answered": 720,
+    "calibration": 363,
+    "names": 701,
+    "questions": 33,
+    "validation": 338
+  },
+  "figure": "figures/sn-review-through-jev/srtj-name-signal-diagnosis/score-by-label.svg",
+  "method": {
+    "question_value": "A dimension question's acceptance value is the probability of its accepting category; a Noul check's is 1 minus its defect probability; a Choice check's is the authored acceptable option's probability.",
+    "score": "The prototype's own score, reused by importing the measurement script's _score: half the mean of four dimension acceptance values plus half the mean of the answered checks.",
+    "selection": "A question is selected when its calibration 95% copy-group bootstrap interval excludes 0.5. A selected question whose AUC is below 0.5 is sign-aligned by complementing its value, since its higher values point at rejection.",
+    "validation": "Every aggregation was fixed on calibration and its validation score read once. Validation AUC is on all scored validation names; \u0394 is the paired difference against the quorum's own score on the names both cover, with the same copy-group bootstrap."
+  },
+  "per_question": [
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.6112564008548449,
+        "n_resamples": 1000,
+        "point": 0.6617552850736708,
+        "seed": 123,
+        "upper": 0.7137777034915918
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "dimension:completeness",
+      "values": {
+        "max": 0.97,
+        "mean": 0.7958402203856749,
+        "min": 0.18,
+        "std": 0.1458896780513786
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.5042631861499672,
+        "n_resamples": 1000,
+        "point": 0.5529628443305573,
+        "seed": 123,
+        "upper": 0.6072834875690281
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "dimension:convention",
+      "values": {
+        "max": 0.96,
+        "mean": 0.6871349862258954,
+        "min": 0.26,
+        "std": 0.1591542764335708
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.4635180620251822,
+        "n_resamples": 1000,
+        "point": 0.5158872517616913,
+        "seed": 123,
+        "upper": 0.5719464455389865
+      },
+      "excludes_half": false,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "dimension:grammar",
+      "values": {
+        "max": 0.96,
+        "mean": 0.6894490358126723,
+        "min": 0.18,
+        "std": 0.1600816751519549
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.5340481609227091,
+        "n_resamples": 1000,
+        "point": 0.5798046124279309,
+        "seed": 123,
+        "upper": 0.6350542402372458
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "dimension:semantic",
+      "values": {
+        "max": 1.0,
+        "mean": 0.8042699724517905,
+        "min": 0.09,
+        "std": 0.17319300482998098
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.3452413679184911,
+        "n_resamples": 1000,
+        "point": 0.3955957719410634,
+        "seed": 123,
+        "upper": 0.4434002389017404
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:malformed_physical_base",
+      "values": {
+        "max": 0.95,
+        "mean": 0.22451790633608812,
+        "min": 0.06000000000000005,
+        "std": 0.29607343401511194
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.35820055967429354,
+        "n_resamples": 1000,
+        "point": 0.3998558616271621,
+        "seed": 123,
+        "upper": 0.4431343930685647
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:unregistered_token_in_closed_segment",
+      "values": {
+        "max": 0.73,
+        "mean": 0.4253443526170798,
+        "min": 0.27,
+        "std": 0.08676036399254032
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.42098748594373325,
+        "n_resamples": 1000,
+        "point": 0.476665598975016,
+        "seed": 123,
+        "upper": 0.5312352366234784
+      },
+      "excludes_half": false,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:decomposition_group_absorbed_into_base",
+      "values": {
+        "max": 0.89,
+        "mean": 0.8187327823691462,
+        "min": 0.6699999999999999,
+        "std": 0.03716603650739327
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.41728471692053903,
+        "n_resamples": 1000,
+        "point": 0.4607623318385651,
+        "seed": 123,
+        "upper": 0.5047746501993318
+      },
+      "excludes_half": false,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:field_region_preposition_wrong",
+      "values": {
+        "max": 0.73,
+        "mean": 0.5855922865013774,
+        "min": 0.31999999999999995,
+        "std": 0.08033243015396292
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.4520144023417727,
+        "n_resamples": 1000,
+        "point": 0.4891575912876361,
+        "seed": 123,
+        "upper": 0.5319735286532161
+      },
+      "excludes_half": false,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:ordered_sample_positional_token",
+      "values": {
+        "max": 0.97,
+        "mean": 0.8471349862258953,
+        "min": 0.30000000000000004,
+        "std": 0.1634293335603343
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.47123554403148465,
+        "n_resamples": 1000,
+        "point": 0.5162556053811659,
+        "seed": 123,
+        "upper": 0.5643112862753197
+      },
+      "excludes_half": false,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:retired_operator_spelling",
+      "values": {
+        "max": 0.92,
+        "mean": 0.8511845730027549,
+        "min": 0.74,
+        "std": 0.03349234662828081
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.342901506864995,
+        "n_resamples": 1000,
+        "point": 0.3910153747597694,
+        "seed": 123,
+        "upper": 0.43636909496454346
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:dropped_distinguishing_axis",
+      "values": {
+        "max": 0.73,
+        "mean": 0.36319559228650133,
+        "min": 0.14,
+        "std": 0.1129920291801949
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.38331958199098914,
+        "n_resamples": 1000,
+        "point": 0.4324631646380525,
+        "seed": 123,
+        "upper": 0.47977390036327744
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:ambiguity_in_isolation",
+      "values": {
+        "max": 0.83,
+        "mean": 0.5940771349862258,
+        "min": 0.33999999999999997,
+        "std": 0.08980489780645937
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.3528794424955653,
+        "n_resamples": 1000,
+        "point": 0.3949391415759129,
+        "seed": 123,
+        "upper": 0.43252655943493984
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:device_attributed_observable",
+      "values": {
+        "max": 0.95,
+        "mean": 0.10523415977961434,
+        "min": 0.030000000000000027,
+        "std": 0.13531979362461383
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.34535026733739455,
+        "n_resamples": 1000,
+        "point": 0.404516335682255,
+        "seed": 123,
+        "upper": 0.4642347018625032
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:over_qualified_modifier",
+      "values": {
+        "max": 0.89,
+        "mean": 0.6957851239669421,
+        "min": 0.22999999999999998,
+        "std": 0.11202433865406192
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.4993058474322383,
+        "n_resamples": 1000,
+        "point": 0.5501441383728379,
+        "seed": 123,
+        "upper": 0.6035328992937872
+      },
+      "excludes_half": false,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:source_fidelity_unsupported_qualifier",
+      "values": {
+        "max": 0.89,
+        "mean": 0.6634986225895317,
+        "min": 0.21999999999999997,
+        "std": 0.13184698482927495
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.5631776648500024,
+        "n_resamples": 1000,
+        "point": 0.6228859705317104,
+        "seed": 123,
+        "upper": 0.6903521273404303
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:bound_to_wrong_object",
+      "values": {
+        "max": 0.99,
+        "mean": 0.42203856749311297,
+        "min": 0.03,
+        "std": 0.3145589919142214
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.4384049424245568,
+        "n_resamples": 1000,
+        "point": 0.4954516335682256,
+        "seed": 123,
+        "upper": 0.5563956580628626
+      },
+      "excludes_half": false,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:collapsed_two_quantities",
+      "values": {
+        "max": 1.0,
+        "mean": 0.9120110192837466,
+        "min": 0.02,
+        "std": 0.18055189310685918
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.4694266659217485,
+        "n_resamples": 1000,
+        "point": 0.5232703395259449,
+        "seed": 123,
+        "upper": 0.577151268115942
+      },
+      "excludes_half": false,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:over_specialised_parent",
+      "values": {
+        "max": 0.85,
+        "mean": 0.6816253443526169,
+        "min": 0.5900000000000001,
+        "std": 0.034931694340663184
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.3483289093380744,
+        "n_resamples": 1000,
+        "point": 0.4015855221012171,
+        "seed": 123,
+        "upper": 0.45215113717314315
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:owner_erased_outline",
+      "values": {
+        "max": 0.81,
+        "mean": 0.7518457300275481,
+        "min": 0.5700000000000001,
+        "std": 0.025153159541802698
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.5668491163011021,
+        "n_resamples": 1000,
+        "point": 0.6076553491351697,
+        "seed": 123,
+        "upper": 0.6503472079858305
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:coupled_vs_launched_confusion",
+      "values": {
+        "max": 0.96,
+        "mean": 0.8777685950413223,
+        "min": 0.44999999999999996,
+        "std": 0.0865483282242457
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.5158378755048715,
+        "n_resamples": 1000,
+        "point": 0.5614830237027546,
+        "seed": 123,
+        "upper": 0.6058243327737292
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:value_provenance_in_name",
+      "values": {
+        "max": 0.96,
+        "mean": 0.9375757575757575,
+        "min": 0.79,
+        "std": 0.021581204623957385
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.44728654831355846,
+        "n_resamples": 1000,
+        "point": 0.4851537475976938,
+        "seed": 123,
+        "upper": 0.5270293731411727
+      },
+      "excludes_half": false,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:non_canonical_operator_join",
+      "values": {
+        "max": 0.8200000000000001,
+        "mean": 0.7430303030303032,
+        "min": 0.62,
+        "std": 0.028316718512057398
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.3640500075212395,
+        "n_resamples": 1000,
+        "point": 0.40839205637411913,
+        "seed": 123,
+        "upper": 0.4510026401207709
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:non_canonical_segment_order",
+      "values": {
+        "max": 0.71,
+        "mean": 0.33212121212121215,
+        "min": 0.17000000000000004,
+        "std": 0.12092010278706719
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.39330684218876055,
+        "n_resamples": 1000,
+        "point": 0.4458680333119795,
+        "seed": 123,
+        "upper": 0.49914518545207187
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:non_canonical_render",
+      "values": {
+        "max": 0.63,
+        "mean": 0.4875757575757575,
+        "min": 0.38,
+        "std": 0.0443585027664006
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.3801574233713678,
+        "n_resamples": 1000,
+        "point": 0.428058936579116,
+        "seed": 123,
+        "upper": 0.4717593777341111
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:non_canonical_locus_token",
+      "values": {
+        "max": 0.91,
+        "mean": 0.6193939393939394,
+        "min": 0.08999999999999997,
+        "std": 0.32286965133611223
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.4014717379439398,
+        "n_resamples": 1000,
+        "point": 0.4470051249199231,
+        "seed": 123,
+        "upper": 0.4945648569540615
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:advisory_alias_collapsed",
+      "values": {
+        "max": 0.95,
+        "mean": 0.7242424242424241,
+        "min": 0.43000000000000005,
+        "std": 0.16101662787931928
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.35722069421801844,
+        "n_resamples": 1000,
+        "point": 0.4033792440743113,
+        "seed": 123,
+        "upper": 0.4473846250439599
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:bare_shape_parameter_missing_surface",
+      "values": {
+        "max": 0.78,
+        "mean": 0.5339118457300276,
+        "min": 0.18000000000000005,
+        "std": 0.0818155753635906
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.5134383303230986,
+        "n_resamples": 1000,
+        "point": 0.5557174887892377,
+        "seed": 123,
+        "upper": 0.6041836714740582
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:model_surname_suffix",
+      "values": {
+        "max": 0.98,
+        "mean": 0.9557851239669419,
+        "min": 0.76,
+        "std": 0.023801939851346387
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.38186626998655065,
+        "n_resamples": 1000,
+        "point": 0.4283792440743113,
+        "seed": 123,
+        "upper": 0.4761887922375764
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:minority_spelling_not_in_roster",
+      "values": {
+        "max": 0.91,
+        "mean": 0.7325619834710746,
+        "min": 0.38,
+        "std": 0.12021694525583469
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.36878990285085766,
+        "n_resamples": 1000,
+        "point": 0.41394939141575915,
+        "seed": 123,
+        "upper": 0.4604677718031364
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:redundant_repeated_segment",
+      "values": {
+        "max": 0.96,
+        "mean": 0.8695316804407713,
+        "min": 0.27,
+        "std": 0.09704760675599335
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.5512941043744616,
+        "n_resamples": 1000,
+        "point": 0.5923286354900705,
+        "seed": 123,
+        "upper": 0.6333925959707875
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:missing_required_segment",
+      "values": {
+        "max": 0.95,
+        "mean": 0.5034986225895316,
+        "min": 0.12,
+        "std": 0.20834423166631263
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.36371464549204247,
+        "n_resamples": 1000,
+        "point": 0.40432415118513776,
+        "seed": 123,
+        "upper": 0.44463008557348493
+      },
+      "excludes_half": true,
+      "inverted": true,
+      "missing": 0,
+      "n": 363,
+      "question": "check:unit_kind_inconsistent",
+      "values": {
+        "max": 0.76,
+        "mean": 0.174931129476584,
+        "min": 0.030000000000000027,
+        "std": 0.19299776100441884
+      }
+    },
+    {
+      "auc": {
+        "level": 0.95,
+        "lower": 0.5289688985612198,
+        "n_resamples": 1000,
+        "point": 0.58195067264574,
+        "seed": 123,
+        "upper": 0.6344377235412422
+      },
+      "excludes_half": true,
+      "inverted": false,
+      "missing": 0,
+      "n": 363,
+      "question": "check:source_binding_drift",
+      "values": {
+        "max": 0.9299999999999999,
+        "mean": 0.8546005509641874,
+        "min": 0.31999999999999995,
+        "std": 0.06462899160725215
+      }
+    }
+  ],
+  "selection": {
+    "inverted": [
+      "check:malformed_physical_base",
+      "check:unregistered_token_in_closed_segment",
+      "check:decomposition_group_absorbed_into_base",
+      "check:field_region_preposition_wrong",
+      "check:ordered_sample_positional_token",
+      "check:dropped_distinguishing_axis",
+      "check:ambiguity_in_isolation",
+      "check:device_attributed_observable",
+      "check:over_qualified_modifier",
+      "check:collapsed_two_quantities",
+      "check:owner_erased_outline",
+      "check:non_canonical_operator_join",
+      "check:non_canonical_segment_order",
+      "check:non_canonical_render",
+      "check:non_canonical_locus_token",
+      "check:advisory_alias_collapsed",
+      "check:bare_shape_parameter_missing_surface",
+      "check:minority_spelling_not_in_roster",
+      "check:redundant_repeated_segment",
+      "check:unit_kind_inconsistent"
+    ],
+    "rule": "calibration 95% interval excludes 0.5",
+    "selected": [
+      "dimension:completeness",
+      "dimension:convention",
+      "dimension:semantic",
+      "check:malformed_physical_base",
+      "check:unregistered_token_in_closed_segment",
+      "check:dropped_distinguishing_axis",
+      "check:ambiguity_in_isolation",
+      "check:device_attributed_observable",
+      "check:over_qualified_modifier",
+      "check:bound_to_wrong_object",
+      "check:owner_erased_outline",
+      "check:coupled_vs_launched_confusion",
+      "check:value_provenance_in_name",
+      "check:non_canonical_segment_order",
+      "check:non_canonical_render",
+      "check:non_canonical_locus_token",
+      "check:advisory_alias_collapsed",
+      "check:bare_shape_parameter_missing_surface",
+      "check:model_surname_suffix",
+      "check:minority_spelling_not_in_roster",
+      "check:redundant_repeated_segment",
+      "check:missing_required_segment",
+      "check:unit_kind_inconsistent",
+      "check:source_binding_drift"
+    ]
+  },
+  "ten_rejected": [
+    {
+      "description": "Physical length of a magnetic field probe coil measured along the direction of its sensitive-axis normal vector, serving as a geometric calibration parameter alongside coil area and turn count.",
+      "lowest": [
+        [
+          "check:bound_to_wrong_object",
+          0.31
+        ],
+        [
+          "check:dropped_distinguishing_axis",
+          0.31000000000000005
+        ],
+        [
+          "check:missing_required_segment",
+          0.37
+        ]
+      ],
+      "name": "normal_extent_of_magnetic_field_probe",
+      "quorum": 0.925,
+      "score": 0.8531896551724139
+    },
+    {
+      "description": "X2 coordinate of filter window outline vertices in the local orthogonal (X1, X2) plane frame, giving the second-axis positions that jointly define the filter aperture boundary shape.",
+      "lowest": [
+        [
+          "check:dropped_distinguishing_axis",
+          0.26
+        ],
+        [
+          "check:missing_required_segment",
+          0.31000000000000005
+        ],
+        [
+          "check:bound_to_wrong_object",
+          0.32
+        ]
+      ],
+      "name": "x2_coordinate_of_filter",
+      "quorum": null,
+      "score": 0.8521551724137931
+    },
+    {
+      "description": "Position along X1 of a neutral beam injector source-outline vertex in the beam-local Cartesian (X1, X2) frame, referenced to the aperture center.",
+      "lowest": [
+        [
+          "check:device_attributed_observable",
+          0.06999999999999995
+        ],
+        [
+          "check:dropped_distinguishing_axis",
+          0.18999999999999995
+        ],
+        [
+          "check:bound_to_wrong_object",
+          0.31
+        ]
+      ],
+      "name": "x1_coordinate_of_neutral_beam_injector",
+      "quorum": null,
+      "score": 0.8485344827586208
+    },
+    {
+      "description": "Signed coordinate along the X2 axis of a vertex on the soft X-ray detector boundary in the detector-local Cartesian (X1, X2) frame. Together with the X1 coordinate, it defines the detector boundary used for line-of-sight acceptance and etendue calculations, distinct from any diagnostic aperture.",
+      "lowest": [
+        [
+          "check:dropped_distinguishing_axis",
+          0.22999999999999998
+        ],
+        [
+          "check:bound_to_wrong_object",
+          0.29
+        ],
+        [
+          "check:missing_required_segment",
+          0.31000000000000005
+        ]
+      ],
+      "name": "x2_coordinate_of_soft_xray_detector",
+      "quorum": null,
+      "score": 0.8480603448275862
+    },
+    {
+      "description": "Signed coordinate along the X2 axis of a vertex on the neutron detector boundary in the detector-local Cartesian (X1, X2) frame, defining the detector's cross-sectional outline.",
+      "lowest": [
+        [
+          "check:dropped_distinguishing_axis",
+          0.21999999999999997
+        ],
+        [
+          "check:bound_to_wrong_object",
+          0.29
+        ],
+        [
+          "check:missing_required_segment",
+          0.33999999999999997
+        ]
+      ],
+      "name": "x2_coordinate_of_neutron_detector",
+      "quorum": null,
+      "score": 0.8455387931034481
+    },
+    {
+      "description": "Second-axis coordinate of a single neutral beam injector ion-source outline vertex in the beam-local Cartesian (X1, X2) frame. It is a signed length coordinate paired with the corresponding X1 coordinate to define the local extraction-grid outline.",
+      "lowest": [
+        [
+          "check:device_attributed_observable",
+          0.09999999999999998
+        ],
+        [
+          "check:dropped_distinguishing_axis",
+          0.22999999999999998
+        ],
+        [
+          "check:missing_required_segment",
+          0.31999999999999995
+        ]
+      ],
+      "name": "x2_coordinate_of_neutral_beam_injector",
+      "quorum": null,
+      "score": 0.8451939655172414
+    },
+    {
+      "description": "Poloidal cross-sectional area of the last closed flux surface",
+      "lowest": [
+        [
+          "check:device_attributed_observable",
+          0.06000000000000005
+        ],
+        [
+          "check:missing_required_segment",
+          0.20999999999999996
+        ],
+        [
+          "check:bound_to_wrong_object",
+          0.26
+        ]
+      ],
+      "name": "poloidal_cross_section_of_plasma_boundary",
+      "quorum": 0.675,
+      "score": 0.8393318965517241
+    },
+    {
+      "description": "Signed coordinate along the X2 axis of a Bragg-crystal outline vertex in the crystal-local Cartesian (X1, X2) frame, parameterizing the cross-sectional boundary of the crystal element in an X-ray crystal spectrometer.",
+      "lowest": [
+        [
+          "check:dropped_distinguishing_axis",
+          0.18000000000000005
+        ],
+        [
+          "check:bound_to_wrong_object",
+          0.32
+        ],
+        [
+          "check:missing_required_segment",
+          0.36
+        ]
+      ],
+      "name": "x2_coordinate_of_bragg_crystal",
+      "quorum": null,
+      "score": 0.8391163793103449
+    },
+    {
+      "description": "Area of the opening cross section of a diagnostic aperture.",
+      "lowest": [
+        [
+          "check:device_attributed_observable",
+          0.24
+        ],
+        [
+          "check:bound_to_wrong_object",
+          0.24
+        ],
+        [
+          "check:missing_required_segment",
+          0.24
+        ]
+      ],
+      "name": "cross_section_of_diagnostic_aperture",
+      "quorum": 0.575,
+      "score": 0.8389224137931035
+    },
+    {
+      "description": "Thermodynamic temperature of the soft X-ray detector assembly, describing its physical thermal state for calibration and monitoring rather than a plasma temperature inferred from radiation.",
+      "lowest": [
+        [
+          "check:unit_kind_inconsistent",
+          0.030000000000000027
+        ],
+        [
+          "check:malformed_physical_base",
+          0.06000000000000005
+        ],
+        [
+          "check:non_canonical_segment_order",
+          0.18000000000000005
+        ]
+      ],
+      "name": "temperature_of_soft_xray_detector",
+      "quorum": 0.90625,
+      "score": 0.8367456896551724
+    }
+  ],
+  "validation_reads": {
+    "existing_score": 1,
+    "logistic_l2": 1,
+    "selected_mean": 1
+  }
+}
