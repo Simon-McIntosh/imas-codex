@@ -3,7 +3,7 @@
 A standard name's physics domain is not authored: it is derived from the DD
 graph. ``IMASNode.physics_domain`` is the one source of truth, a name's
 ``source_domains`` is exactly the set of its current DD sources' domains, and
-its ``physics_domain`` is the single domain :func:`select_*` (see
+its ``physics_domain`` is the single domain ``select_primary_domain`` (see
 ``domain_ranking``) picks from that set. A name with no DD source — a derived
 parent — takes the union of its children's domains through the same function.
 
