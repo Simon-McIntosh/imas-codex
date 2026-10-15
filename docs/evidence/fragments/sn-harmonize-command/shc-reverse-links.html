@@ -130,7 +130,12 @@
     partly written family cannot read as a whole one. Protection is never
     overridden — passing the batch through and letting the writer strip it is
     not protection, it is the same write performed with the guard's own output
-    as the payload.
+    as the payload. The step's returned <code>added</code> and
+    <code>removed</code> counts cover the rows the writer was given and no
+    others: a withheld member's computed additions and removals are computed and
+    then left out of the totals, because counting them would report a change
+    that did not land. Without that, a protected member carrying a dead link
+    would raise <code>removed</code> by one while nothing about it was written.
   </p>
   <h3 id="shc-reverse-links-test">The test, its green run and its red runs</h3>
   <p>
@@ -219,19 +224,35 @@
       clears cannot fail on the clear, so the first finding was invisible to it.
       The pair differs in one file only: the stub.
     </li>
+    <li>
+      <strong>Red, the counts covering the withheld rows</strong>
+      (<code>red_counts_include_withheld.log</code>, <code>EXIT=1</code>): with
+      the totals accumulated over every member that had a change computed rather
+      than over the rows the writer was given, the protected test fails at
+      <code>assert step["removed"] == 0</code> — <code>assert 1 == 0</code>,
+      the probe's dead link counted as a removal even though nothing about the
+      probe was written. The counts assert <code>2</code> added and
+      <code>0</code> removed, which is the anchor's and the boundary's two
+      additions and the withheld probe's removal left out.
+    </li>
   </ul>
   <p>
     The red runs are produced by removing one mechanism each and re-running, so
     each assertion is tied to the code it measures rather than to a shared
-    fixture. Two of them are the step's own source, temporarily changed and
-    restored; the third patches the whole step out from an out-of-tree plugin
-    file, so no test hook is carried in the repository or the environment.
+    fixture. The step-removed control patches the whole step out from an
+    out-of-tree plugin file, so no test hook is carried in the repository or the
+    environment; the others change the step's own source, or the stub, for the
+    length of one run. Every reverted source was restored and verified
+    byte-identical to the committed file afterwards.
   </p>
   <p>
     Gate, run identically at both revisions: the harmonize test files
     (<code>grep -rl harmonize tests/standard_names/</code>) plus
     <code>tests/standard_names/test_house_style_checks.py</code>, under
-    <code>-m "not graph and not slow"</code>.
+    <code>-m "not graph and not slow"</code>. Each log opens with the literal
+    command, the revision sha it ran at and the tree path, and ends with a bare
+    <code>EXIT=</code> line, so the result is tied to the revision it was
+    measured at by the log itself rather than by this page.
   </p>
   <table>
     <thead>

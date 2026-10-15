@@ -1075,15 +1075,20 @@ def reconcile_family_reverse_links(
         for target in targets:
             inbound[target].add(source)
 
+    # The counts are accumulated per member and summed over the rows the writer
+    # is actually given, because a member whose row is withheld is not written
+    # and counting its additions and removals would report a change that did
+    # not land.
     batch: list[dict[str, Any]] = []
-    added = 0
-    removed = 0
+    row_added: dict[str, int] = {}
+    row_removed: dict[str, int] = {}
     for mid in present:
         row = state[mid]
         original_links = list(row.get("links") or [])
         original_docs = row.get("documentation") or ""
         kept: list[str] = []
         documentation = original_docs
+        removed_here = 0
         for link in original_links:
             target = _name_link_target(link)
             if not target:
@@ -1093,7 +1098,7 @@ def reconcile_family_reverse_links(
                 if link not in kept:
                     kept.append(link)
                 continue
-            removed += 1
+            removed_here += 1
             documentation = _drop_doc_reference(documentation, target)
 
         additions = [
@@ -1105,7 +1110,8 @@ def reconcile_family_reverse_links(
             continue
         for source in additions:
             kept.append(f"{_NAME_LINK_PREFIX}{source}")
-        added += len(additions)
+        row_added[mid] = len(additions)
+        row_removed[mid] = removed_here
         if additions:
             refs = ", ".join(f"[{s}](name:{s})" for s in additions)
             documentation = f"{documentation.rstrip()}\n\nRelated quantities: {refs}."
@@ -1130,6 +1136,7 @@ def reconcile_family_reverse_links(
     # cannot read as a whole one.
     protected: list[str] = []
     written = 0
+    writable: list[dict[str, Any]] = []
     if batch:
         from imas_codex.standard_names.protection import filter_protected
 
@@ -1139,8 +1146,8 @@ def reconcile_family_reverse_links(
         written = int((write_fn or write_enrichment_results)(writable) or 0)
     return {
         "members": len(present),
-        "added": added,
-        "removed": removed,
+        "added": sum(row_added.get(row["id"], 0) for row in writable),
+        "removed": sum(row_removed.get(row["id"], 0) for row in writable),
         "written": written,
         "protected": sorted(protected),
     }

@@ -241,28 +241,6 @@ class _ApplyHarness:
         return 0.0
 
 
-def _without_the_step(monkeypatch: Any) -> None:
-    """Remove the reverse-link step, which is the mechanism these tests measure.
-
-    The step is the thing under test, so removing it is the negative control the
-    red run records. It is patched out directly rather than through a switch, so
-    nothing in production code or in the environment has to carry a test hook.
-    """
-    from imas_codex.standard_names import harmonize
-
-    monkeypatch.setattr(
-        harmonize,
-        "reconcile_family_reverse_links",
-        lambda gc, member_ids, **kw: {
-            "members": len(member_ids),
-            "added": 0,
-            "removed": 0,
-            "written": 0,
-            "protected": [],
-        },
-    )
-
-
 def _apply(graph: _LinkGraph, monkeypatch: Any) -> dict[str, Any]:
     """Run the real apply over the fixture with the graph's writer stubbed."""
     from imas_codex.graph import client as graph_client
@@ -400,6 +378,12 @@ def test_a_catalog_edited_member_is_reported_not_silently_skipped(
     # above cannot happen: nothing for it to strip, and one fewer row written.
     assert graph.protected_by_writer == []
     assert step["written"] == 2
+    # The counts cover the rows that were written and no others. The probe's
+    # dead link is a removal the step computed for it, and it is not reported,
+    # because the probe's row was withheld and nothing about it was written:
+    # a count that included it would report a change that did not land.
+    assert step["removed"] == 0
+    assert step["added"] == 2
     assert [row["id"] for write_batch in graph.written for row in write_batch] == [
         _ANCHOR,
         _BOUNDARY,
