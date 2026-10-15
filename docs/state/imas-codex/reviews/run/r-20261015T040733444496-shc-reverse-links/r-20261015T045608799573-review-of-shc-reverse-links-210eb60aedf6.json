@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log (baseline_suite 'NOT RUN'), so the added-failure count was not taken; the after arm (after_gate_full.log) records 1 failed, 153 passed, 13 deselected.",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:1526",
+    "imas_codex/cli/sn.py:6176"
+  ],
+  "completed_at": "2026-10-15T05:10:58.911Z",
+  "dispatched_at": "2026-10-15T04:56:24Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_harmonize_cost_cap.py",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "the fixture's installed graph edges were extended (monkeypatch.setattr(harmonize, 'reconcile_family_reverse_links', ...)) so the new step's read would not reach the object() stub, and this path is outside the node's declared write paths; harmless and disclosed, but a fenced node's scope did not cover it."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_estimate.py",
+      "line": "229",
+      "severity": "follow-on",
+      "text": "same out-of-scope edit as the cost-cap fixture; the declared write paths covered three files (harmonize.py, test_harmonize_reverse_links.py, the fragment) and the diff changes two more test files."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1069",
+      "severity": "follow-on",
+      "text": "the step drops every name: link whose target is not a family member, including legitimate cross-family references such as name:poloidal_magnetic_flux or name:volume_averaged_*_density, and _drop_doc_reference (:1074) strips the reference from the prose as well, so a harmonize apply now deletes valid documentation content beyond the family-scoped missing_reverse finding it repairs."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1102",
+      "severity": "follow-on",
+      "text": "the write goes through write_enrichment_results with its default override=False, whose filter_protected (imas_codex/standard_names/protection.py:331) strips catalog-edited names, so on a family carrying a protected member the reverse link is silently not written while the step still reports written>0 for the rest; the step inherits this from the writer the brief required, and whether a protected member can reach apply_families was not established within this review's read bound."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html",
+      "line": "148",
+      "severity": "follow-on",
+      "text": "the fragment records the after gate at 1 failed, 153 passed but no base gate was run, so the brief's '0 added failures against base' clause is unmeasured and the lone timeout is attributed by argument from the test's import graph rather than by a paired measurement."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production call sites examined: imas_codex/standard_names/harmonize.py:1526, the apply_families call to reconcile_family_reverse_links, and imas_codex/cli/sn.py:6176, the sn harmonize --apply entry point that invokes apply_families; the node's own test file is not counted.",
+    "diff": "read the five commits 1ec4596c7, 8a5dbf760, 336f07576, f98d4e5c8, 210eb60ae against base 033ee2a30; the feature commit adds reconcile_family_reverse_links and wires it into apply_families before the stamp (210 lines of harmonize.py), 8a5dbf760 stubs the new edge in the two cost fixtures, and the last three commit the evidence fragment.",
+    "done_when": "the done_when (docs/plans/sn-harmonize-command.html:229) names a fragment naming the cause of the twelve live findings plus a stubbed fixture apply ending with zero link_missing_reverse findings that fails with the reverse step removed; the fragment (docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html) and green.log/red.log satisfy that clause, but the brief's second clause - 0 added failures against base - was never measured because no base gate was run.",
+    "goal": "the reviewed node's goal is that a harmonize apply leaves no sibling link without its reverse; imas_codex/standard_names/harmonize.py:957 adds reconcile_family_reverse_links, called at :1526 from apply_families once a family's members converge and before _stamp_applied_family, so the apply makes the family's sibling links reciprocal.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T040733444496-shc-reverse-links/manifest.md; five commits 1ec4596c7..210eb60ae, green and red logs and the reviewed node's after gate recorded, with baseline_suite 'NOT RUN' and a FENCE-TIME-EXCEEDED blocker - all read at 06:57 with status complete; the file was rewritten at 07:09 and its status field then read in-progress, with every field this verdict rests on unchanged.",
+    "write_paths": "the declared scope is imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_reverse_links.py and docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html; git diff --stat 033ee2a30..210eb60ae also names tests/standard_names/test_harmonize_cost_cap.py and tests/standard_names/test_harmonize_estimate.py, two files outside the declared write paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_reverse_links.py:278 asserts _missing_reverse(graph) == [] through the real audit function and red.log fails on that same assertion with the step removed, so the assertion reddens on the regression it guards.",
+    "evidence": "the fixture applies are recorded in green.log (3 passed, EXIT=0) and red.log (2 failed, 1 passed, EXIT=1) at tests/standard_names/test_harmonize_reverse_links.py, but the done_when's '0 added failures against base' is unmeasured: the manifest's baseline_suite reads NOT RUN, so added_failure_count is null.",
+    "fit": "imas_codex/standard_names/harmonize.py:957-961 names the step by mechanism and follows the surrounding docstring style, and the test's SHC_NO_REVERSE_STEP switch matches the existing SHC_ convention in tests/standard_names/test_harmonize_apply.py:255.",
+    "goal_fidelity": "imas_codex/standard_names/harmonize.py:957 adds reconcile_family_reverse_links and :1526 calls it once a family's members converge and before the signature is stamped, so a harmonize apply leaves no sibling link without its reverse.",
+    "reuse": "the step writes through the existing owner write_enrichment_results (imas_codex/standard_names/graph_ops.py:9846) rather than adding a second writer, and no repository owner of family sibling-link reconciliation exists for it to fork; _name_link_target is a narrower specialisation of audits.py:_strip_link_prefix rather than a duplicate.",
+    "scope_discipline": "git diff --stat 033ee2a30..210eb60ae names tests/standard_names/test_harmonize_cost_cap.py:104 and tests/standard_names/test_harmonize_estimate.py:229, neither inside the declared write paths of harmonize.py, the new test and the fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is that a harmonize apply leaves no sibling link without its reverse; imas_codex/standard_names/harmonize.py:957 adds reconcile_family_reverse_links, called at :1526 from apply_families once the family converges.\nVERDICT done_when: the done_when (docs/plans/sn-harmonize-command.html:229) names a fragment naming the cause of the twelve findings plus a stubbed fixture apply ending with zero missing_reverse that fails with the step removed; the fragment and the green/red runs satisfy that clause, but the brief's second clause - 0 added failures against base - was never measured because no base gate was run.\nVERDICT write_paths: the declared scope is imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_reverse_links.py and the fragment; the diff also edits tests/standard_names/test_harmonize_cost_cap.py and tests/standard_names/test_harmonize_estimate.py, outside the declared paths.\nVERDICT manifest: read at runs/r-20261015T040733444496-shc-reverse-links/manifest.md at 06:57 with status complete and five commits, green and red logs and the after gate, plus baseline_suite 'NOT RUN' and a FENCE-TIME-EXCEEDED blocker; on re-read at 07:09 its status field read in-progress, every field this verdict rests on unchanged.\nVERDICT diff: read the five commits 1ec4596c7..210eb60ae against base 033ee2a30; the feature commit adds the reconciliation and wires it before the stamp over 210 lines of harmonize.py, plus the new test and the fragment.\nCALL_SITES: imas_codex/standard_names/harmonize.py:1526, imas_codex/cli/sn.py:6176\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/harmonize.py:957 adds reconcile_family_reverse_links and :1526 calls it once a family's members converge and before the stamp, so apply_families leaves no sibling link without its reverse.\nSCORE evidence: 13\nJUSTIFICATION evidence: the fixture applies are recorded in green.log (3 passed, EXIT=0) and red.log (2 failed, 1 passed, EXIT=1) at tests/standard_names/test_harmonize_reverse_links.py, but the done_when's '0 added failures against base' is unmeasured - the manifest's baseline_suite reads NOT RUN, so added_failure_count is null.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: git diff --stat 033ee2a30..210eb60ae names tests/standard_names/test_harmonize_cost_cap.py:104 and tests/standard_names/test_harmonize_estimate.py:229, neither inside the declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_harmonize_reverse_links.py:278 asserts _missing_reverse(graph) == [] through the real audit and red.log fails on that same assertion with the step removed, so the assertion reddens on the regression.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/harmonize.py:957-961 names the step by mechanism and matches the module's docstring style, and SHC_NO_REVERSE_STEP matches the existing SHC_ switch convention in tests/standard_names/test_harmonize_apply.py:255.\nSCORE reuse: 20\nJUSTIFICATION reuse: the step writes through the existing owner write_enrichment_results (imas_codex/standard_names/graph_ops.py:9846) as the brief required, and no repository owner of family link reconciliation exists to fork.\nFINDING tests/standard_names/test_harmonize_cost_cap.py:104 follow-on: the fixture's installed graph edges were extended so the new step's read would not reach the object() stub, outside the declared write paths.\nFINDING tests/standard_names/test_harmonize_estimate.py:229 follow-on: same out-of-scope edit as the cost-cap fixture; the declared write paths covered three files and the diff changes two more test files.\nFINDING imas_codex/standard_names/harmonize.py:1069 follow-on: the step drops every name: link whose target is not a family member, including legitimate cross-family references, and _drop_doc_reference (:1074) also strips the reference from the prose, so an apply deletes valid documentation content beyond the family-scoped finding it repairs.\nFINDING imas_codex/standard_names/harmonize.py:1102 follow-on: the write goes through write_enrichment_results with override=False, whose filter_protected (imas_codex/standard_names/protection.py:331) strips catalog-edited names, so on a family with a protected member the reverse link is silently not written while the step still reports a write.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:148 follow-on: the fragment records the after gate at 1 failed, 153 passed but no base gate was run, so the '0 added failures against base' clause is unmeasured and the lone timeout is attributed by argument rather than a paired measurement.",
+  "review_run_id": "r-20261015T045608799573-review-of-shc-reverse-links-210eb60aedf6",
+  "reviewed_base_sha": "033ee2a3080ac841bf27b1c77986ea343d75e28c",
+  "reviewed_head_sha": "210eb60aedf608d3148084f4600e21617d9ba948",
+  "reviewed_run_id": "r-20261015T040733444496-shc-reverse-links",
+  "scores": {
+    "durability": 19,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "subject": "r-20261015T040733444496-shc-reverse-links",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T05:12:40.899781+00:00",
+  "total": 102
+}
