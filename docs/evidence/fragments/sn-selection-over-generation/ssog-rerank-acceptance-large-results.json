@@ -2,7 +2,7 @@
   "seed": 20261015,
   "n_source_paths": 160,
   "n_extracted_items": 137,
-  "n_batches": 120,
+  "n_batches": 119,
   "source_paths": [
     "waves/coherent_wave/profiles_2d/grid/volume",
     "transport_solver_numerics/solver_1d/grid/rho_pol_norm",
@@ -2259,11 +2259,101 @@
         "differs": true,
         "rerank_cost_usd": 0.000104,
         "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "16e7d5d16d7b4834/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "6aaa44c256173f15f287c1a224aa984c8a464de4e384a9968537e6784b2d4054",
+        "hash_on": "19a939a3d3c6761d8124e97b289cdfb644a9b11bd248b7853f6d4568539753fd",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "1fb077eafee84aac/K",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "46ddd003ac907766a72326b2b6dbc54e8503624f80760db88d57c5e470bbfebf",
+        "hash_on": "0fc014619b630e77fb07a990877572784c1ca989de4c6928180474e71f017a6a",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "42130b4354685fae/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "2e8b4eb684ef25bfaa3224134a0ff1a82c4a719c2fabb49fc15137b848c26321",
+        "hash_on": "3de38c3ae97bfe1ea53040168ca906004cc1ece8c9751a706112901b3f804a9f",
+        "differs": true,
+        "rerank_cost_usd": 9.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ac4133a5cf84009d/s",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "2ac7062b8143abb55d28fa37d6539152f5b27dd42e15a252bb7e5808da2622d0",
+        "hash_on": "f75b6031ebede2dc232def682d08349498da276fba32ef17ecc26fc1b9f7e0d8",
+        "differs": true,
+        "rerank_cost_usd": 0.0001,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ce527475951d6cd7/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "593f39eba527d3726dcf31ed5f6d159e17d682584143fc9c6e38c3e813b1b7cf",
+        "hash_on": "415469baf53a54109a1934cc688bda9ca0d044701c0e4155b641c0c7d716b84b",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "d4fafd82a9165051/W",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "5de67f4a53ff94578da813906b2888770d85fa3ff55d2ea7760c0b66fe6a6a40",
+        "hash_on": "8391f50c9c6d8e47a20014dd21243368c099f08162ca473d46c626587284804b",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "d4fafd82a9165051/W.m^-3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "1ca2372623d98b050bed7d82e3d15b00da2731d1dcd10b5d5b7bc1d5125b606b",
+        "hash_on": "459f2b5f0e4530ac9e0aa4d0727bec6305a7fc7c482b37f654ebd38d04256bf3",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "f4ac20287f1322ab/T",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "459e720086323041a7aedc57c457b6d409fc7f90212eb2c219782850cd209e15",
+        "hash_on": "e126eb12cb80fdfd9c7792ebc0562d5cc7004f16c415d8bbc2b2829687bdff88",
+        "differs": true,
+        "rerank_cost_usd": 0.000114,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "f4ac20287f1322ab/V",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "516ea95d9e7431bba7673b9d384f1fd9e35726d1c5914c3812b061f8b3a46b06",
+        "hash_on": "ae0fd426446111fbd1fed1ab2c399d55fd8cdc2730e2b4f0b526def398b86505",
+        "differs": true,
+        "rerank_cost_usd": 0.000115,
+        "rerank_seat": "typesafe/jev-1.13"
       }
     ],
     "switch_changes_harness_compose_prompt": true,
-    "rerank_cost_usd": 0.013962,
-    "n_batches": 120
+    "rerank_cost_usd": 0.014903,
+    "n_batches": 129
   },
   "arm_a": {
     "records": [
@@ -2525,6 +2615,132 @@
         "reviewer_score": 0.8875,
         "scored": true,
         "accepted": true
+      },
+      {
+        "source_id": "pulse_schedule/density_control/valve/species/element/z_n",
+        "name": "atomic_number",
+        "reviewer_score": 0.5125,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_transport/model/profiles_1d/neutral/state/momentum/flux/radial",
+        "name": "radial_neutral_state_momentum_flux",
+        "reviewer_score": 0.8625,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "plasma_initiation/global_quantities/neutral/element/z_n",
+        "name": "neutral_atomic_number",
+        "reviewer_score": 0.75,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_initiation/global_quantities/ion/element/z_n",
+        "name": "ion_atomic_number",
+        "reviewer_score": 0.7875,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_profiles/profiles_1d/neutral/element/atoms_n",
+        "name": "atomic_count",
+        "reviewer_score": 0.4,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/particles_a_field_parallel",
+        "name": "particle_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "reviewer_score": 0.6375,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/local/limiter/n_i/tungsten/value",
+        "name": "tungsten_density_at_limiter",
+        "reviewer_score": 0.825,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/fusion/neutron_rates/dt/thermal/value",
+        "name": "deuterium_tritium_neutron_source_rate_due_to_thermal_fusion",
+        "reviewer_score": 0.95,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+        "name": "radial_coordinate_of_magnetic_axis",
+        "reviewer_score": 1.0,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "summary/gas_injection_accumulated/neon/value",
+        "name": "accumulated_neon_count_due_to_gas_injection",
+        "reviewer_score": 0.9625,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "langmuir_probes/reciprocating/plunge/collector/heat_flux_parallel",
+        "name": "parallel_heat_flux",
+        "reviewer_score": 0.75,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_initiation/b_field_lines/e_field_parallel",
+        "name": "parallel_breakdown_electric_field",
+        "reviewer_score": 0.775,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "waves/coherent_wave/profiles_2d/grid/volume",
+        "name": "volume_of_flux_surface",
+        "reviewer_score": 0.7375,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/gas_injection_rates/methane/value",
+        "name": "methane_source_rate",
+        "reviewer_score": 0.8125,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/gas_injection_rates/deuterium/value",
+        "name": "deuterium_source_rate_due_to_gas_injection",
+        "reviewer_score": 0.95,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "operational_instrumentation/sensor/direction/x",
+        "name": "x_direction_unit_vector_of_sensor",
+        "reviewer_score": 0.9,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "operational_instrumentation/sensor/direction/y",
+        "name": "y_direction_unit_vector_of_sensor",
+        "reviewer_score": 0.9,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "ece/line_of_sight/first_point/phi",
+        "name": "toroidal_coordinate_of_line_of_sight",
+        "reviewer_score": 0.7125,
+        "scored": true,
+        "accepted": false
       }
     ],
     "cost_usd": 0.0,
@@ -2532,17 +2748,22 @@
       "barometry/gauge/position/z",
       "bolometer/camera/channel/line_of_sight/third_point/z",
       "breeding_blanket/module/cooling/time_slice/temperature_outlet",
+      "breeding_blanket/module/layer/material_volume_fraction",
       "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
       "breeding_blanket/module/time_slice/power_incident_neutron",
       "calorimetry/cooling_loop/temperature_out",
+      "camera_ir/channel/camera/up/y",
       "camera_visible/channel/aperture/centre/z",
       "charge_exchange/channel/ion/a",
       "charge_exchange/channel/ion/velocity_pol",
       "core_profiles/profiles_1d/q",
       "core_transport/model/profiles_1d/total_ion_energy/d",
       "disruption/global_quantities/phi_halo_boundary",
+      "disruption/vacuum_toroidal_field/b0",
       "distributions/distribution/ggd/orbit_frequency_pol/values",
       "distributions/distribution/profiles_2d/density_fast",
+      "divertors/divertor/target/power_radiated",
+      "ece/line_of_sight/first_point/phi",
       "ece/polarizer/polarization_angle",
       "edge_profiles/ggd/ion/state/velocity_exb/parallel",
       "edge_profiles/ggd/ion/state/z_max",
@@ -2550,30 +2771,56 @@
       "edge_profiles/profiles_1d/t_i_average",
       "edge_transport/model/ggd/ion/particles/v/values",
       "edge_transport/model/ggd/neutral/momentum/d/poloidal",
+      "equilibrium/time_slice/global_quantities/magnetic_axis/r",
       "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_parallel_b_field_parallel",
+      "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/particles_a_field_parallel",
       "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_b_field_parallel",
       "gyrokinetics_local/non_linear/fluxes_3d_rotating_frame/energy_b_field_parallel",
       "ic_antennas/antenna/module/voltage/position/r",
       "interferometer/channel/line_of_sight/third_point/z",
       "iron_core/segment/geometry/oblique/z",
+      "langmuir_probes/embedded/v_plasma",
+      "langmuir_probes/reciprocating/plunge/collector/heat_flux_parallel",
       "langmuir_probes/reciprocating/plunge/collector/ion_saturation_current",
       "langmuir_probes/reciprocating/plunge/position_average/phi",
+      "magnetics/b_field_pol_probe/non_linear_response/b_field_linear",
       "magnetics/latency",
       "mhd/ggd/mass_density/values",
+      "mhd_linear/time_slice/toroidal_mode/plasma/phi_potential_perturbed/imaginary",
+      "mhd_linear/time_slice/toroidal_mode/vacuum/b_field_perturbed/coordinate1/imaginary",
       "mse/channel/detector/centre/r",
+      "ntms/time_slice/mode/dwidth_dt",
       "ntms/time_slice/mode/onset/width",
+      "ntms/vacuum_toroidal_field/b0",
+      "operational_instrumentation/sensor/direction/x",
+      "operational_instrumentation/sensor/direction/y",
       "pellets/time_slice/pellet/path_geometry/second_point/phi",
+      "pellets/time_slice/pellet/path_profiles/t_e",
+      "pf_active/coil/element/geometry/annulus/radius_inner",
+      "pf_active/coil/geometry/annulus/z",
+      "plasma_initiation/b_field_lines/e_field_parallel",
+      "plasma_initiation/global_quantities/ion/element/z_n",
+      "plasma_initiation/global_quantities/neutral/element/atoms_n",
+      "plasma_initiation/global_quantities/neutral/element/z_n",
+      "plasma_initiation/profiles_2d/grid/volume_element",
+      "plasma_profiles/ggd/b_field/r",
+      "plasma_profiles/ggd/b_field/radial",
       "plasma_profiles/profiles_1d/grid/rho_tor",
+      "plasma_profiles/profiles_1d/neutral/element/atoms_n",
       "plasma_sources/source/profiles_1d/ion/particles",
       "plasma_transport/model/ggd/ion/state/particles/flux_limiter/values",
+      "plasma_transport/model/profiles_1d/neutral/state/momentum/flux/radial",
       "polarimeter/channel/line_of_sight/second_point/phi",
       "pulse_schedule/density_control/ion/element/a",
+      "pulse_schedule/density_control/ion/element/z_n",
       "pulse_schedule/density_control/valve/species/element/atoms_n",
+      "pulse_schedule/density_control/valve/species/element/z_n",
       "pulse_schedule/density_control/valve/species/fraction",
       "pulse_schedule/event/time_stamp",
       "reflectometer_profile/channel/antenna... ",
       "reflectometer_profile/channel/antenna_detection/centre/phi",
       "reflectometer_profile/channel/line_of_sight_detection/first_point/phi",
+      "refractometer/channel/line_of_sight/second_point/z",
       "sawteeth/profiles_1d/grid/area",
       "soft_x_rays/channel/detector/centre/phi",
       "soft_x_rays/channel/detector/outline/x2",
@@ -2583,25 +2830,35 @@
       "summary/composition/boron/value",
       "summary/composition/hydrogen/value",
       "summary/disruption/halo_current/fraction_pol_max/value",
+      "summary/fusion/neutron_rates/dt/thermal/value",
+      "summary/gas_injection_accumulated/neon/value",
+      "summary/gas_injection_rates/deuterium/value",
+      "summary/gas_injection_rates/methane/value",
       "summary/heating_current_drive/lh/position/value",
       "summary/heating_current_drive/nbi/power/value",
+      "summary/line_average/n_i/tungsten/value",
       "summary/local/divertor_target/n_i/iron/value",
       "summary/local/divertor_target/n_i/neon/value",
       "summary/local/divertor_target/n_i/tritium/value",
       "summary/local/divertor_target/n_i_total/value",
+      "summary/local/limiter/n_i/tungsten/value",
       "summary/pedestal_fits/mtanh/b_field_pedestal_top_lfs/value",
       "summary/pedestal_fits/mtanh/t_e/d_dpsi_norm_max/value",
       "summary/simulation/time_begin",
       "summary/simulation/time_step",
+      "tf/field_map/b_field_tor",
       "thomson_scattering/laser/start_point/r",
       "transport_solver_numerics/solver_1d/drho_tor_dt",
       "wall/description_2d/limiter/unit/midplane_thickness",
+      "wall/description_ggd/ggd/recycling/neutral/element/z_n",
       "wall/description_ggd/ggd/temperature/values",
       "waves/coherent_wave/profiles_1d/ion/state/vibrational_level",
+      "waves/coherent_wave/profiles_2d/grid/volume",
+      "waves/coherent_wave/profiles_2d/ion/element/z_n",
       "workflow/time_loop/workflow_cycle/component/time_interval_elapsed",
       "workflow/time_loop/workflow_cycle/component/time_interval_request"
     ],
-    "units_completed": 59
+    "units_completed": 92
   },
   "arm_b": {
     "records": [
@@ -2807,43 +3064,272 @@
         "reviewer_score": 0.8375,
         "scored": true,
         "accepted": false
+      },
+      {
+        "source_id": "summary/local/divertor_target/n_i/iron/value",
+        "name": "iron_density_at_divertor_target",
+        "reviewer_score": 0.9875,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "sawteeth/profiles_1d/grid/area",
+        "name": null,
+        "reviewer_score": 0.0,
+        "scored": false,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/pedestal_fits/mtanh/b_field_pedestal_top_lfs/value",
+        "name": "magnetic_field_magnitude_at_pedestal_top_low_field_side",
+        "reviewer_score": 0.9375,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "wall/description_ggd/ggd/temperature/values",
+        "name": "temperature_at_wall",
+        "reviewer_score": 0.8875,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "ntms/time_slice/mode/onset/width",
+        "name": "width_of_neoclassical_tearing_mode_onset",
+        "reviewer_score": 0.8625,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "polarimeter/channel/line_of_sight/second_point/phi",
+        "name": "toroidal_coordinate_of_line_of_sight",
+        "reviewer_score": 0.6,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_transport/model/profiles_1d/neutral/state/momentum/flux/radial",
+        "name": "radial_neutral_state_momentum",
+        "reviewer_score": 0.475,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/particles_a_field_parallel",
+        "name": "particle_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "reviewer_score": 0.7375,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "pulse_schedule/density_control/valve/species/element/z_n",
+        "name": "atomic_number",
+        "reviewer_score": 0.55,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_initiation/global_quantities/neutral/element/z_n",
+        "name": "neutral_atomic_number",
+        "reviewer_score": 1.0,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "plasma_initiation/global_quantities/ion/element/z_n",
+        "name": "ion_atomic_number",
+        "reviewer_score": 0.95,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "plasma_initiation/global_quantities/neutral/element/atoms_n",
+        "name": null,
+        "reviewer_score": 0.0,
+        "scored": false,
+        "accepted": false
+      },
+      {
+        "source_id": "langmuir_probes/reciprocating/plunge/collector/heat_flux_parallel",
+        "name": "parallel_heat_flux",
+        "reviewer_score": 0.65,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/local/limiter/n_i/tungsten/value",
+        "name": "tungsten_density_at_limiter",
+        "reviewer_score": 0.95,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+        "name": "radial_coordinate_of_magnetic_axis",
+        "reviewer_score": 0.9625,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "summary/fusion/neutron_rates/dt/thermal/value",
+        "name": "deuterium_tritium_source_rate_due_to_thermal_fusion",
+        "reviewer_score": 0.7125,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/gas_injection_accumulated/neon/value",
+        "name": "accumulated_neon_count_due_to_gas_injection",
+        "reviewer_score": 0.725,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_initiation/b_field_lines/e_field_parallel",
+        "name": "parallel_electric_field",
+        "reviewer_score": 0.825,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "waves/coherent_wave/profiles_2d/grid/volume",
+        "name": "volume_of_flux_surface",
+        "reviewer_score": 0.7375,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "magnetics/b_field_pol_probe/non_linear_response/b_field_linear",
+        "name": "calibration_reference_magnetic_field_of_magnetic_field_probe",
+        "reviewer_score": 0.8125,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/gas_injection_rates/methane/value",
+        "name": "methane_source_rate_due_to_gas_injection",
+        "reviewer_score": 0.0,
+        "scored": false,
+        "accepted": false
+      },
+      {
+        "source_id": "ece/line_of_sight/first_point/phi",
+        "name": "toroidal_coordinate_of_line_of_sight",
+        "reviewer_score": 0.85,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "operational_instrumentation/sensor/direction/x",
+        "name": "x_direction_unit_vector_of_sensor",
+        "reviewer_score": 0.8875,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "operational_instrumentation/sensor/direction/y",
+        "name": "y_direction_unit_vector_of_sensor",
+        "reviewer_score": 0.8875,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "pulse_schedule/density_control/zeff_line_of_sight/second_point/phi",
+        "name": "toroidal_coordinate_of_line_of_sight",
+        "reviewer_score": 0.6875,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "cryostat/description_2d/cryostat/unit/element/outline/r",
+        "name": "radial_outline_of_cryostat",
+        "reviewer_score": 1.0,
+        "scored": true,
+        "accepted": true
       }
     ],
-    "cost_usd": 0.002985,
+    "cost_usd": 0.006048,
     "sources_done": [
       "barometry/gauge/position/z",
+      "bolometer/camera/channel/line_of_sight/third_point/z",
       "breeding_blanket/module/cooling/time_slice/temperature_outlet",
+      "breeding_blanket/module/layer/material_volume_fraction",
       "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
       "breeding_blanket/module/time_slice/power_incident_neutron",
       "calorimetry/cooling_loop/temperature_out",
+      "camera_ir/channel/camera/up/y",
+      "camera_ir/optical_element/material_properties/refractive_index",
       "camera_visible/channel/aperture/centre/z",
       "charge_exchange/channel/ion/a",
       "charge_exchange/channel/ion/velocity_pol",
       "core_profiles/profiles_1d/q",
+      "core_transport/model/profiles_1d/total_ion_energy/d",
+      "cryostat/description_2d/cryostat/unit/element/outline/r",
       "disruption/global_quantities/phi_halo_boundary",
+      "disruption/vacuum_toroidal_field/b0",
       "distributions/distribution/ggd/orbit_frequency_pol/values",
       "distributions/distribution/profiles_2d/density_fast",
+      "divertors/divertor/target/power_radiated",
+      "ece/line_of_sight/first_point/phi",
       "ece/polarizer/polarization_angle",
       "edge_profiles/ggd/ion/state/velocity_exb/parallel",
       "edge_profiles/ggd/ion/state/z_max",
+      "edge_profiles/profiles_1d/ion/state/vibrational_level",
       "edge_profiles/profiles_1d/t_i_average",
       "edge_transport/model/ggd/ion/particles/v/values",
       "edge_transport/model/ggd/neutral/momentum/d/poloidal",
+      "equilibrium/time_slice/constraints/n_e/position/psi",
+      "equilibrium/time_slice/global_quantities/magnetic_axis/r",
       "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_parallel_b_field_parallel",
+      "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/particles_a_field_parallel",
       "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_b_field_parallel",
       "gyrokinetics_local/non_linear/fluxes_3d_rotating_frame/energy_b_field_parallel",
       "ic_antennas/antenna/module/voltage/position/r",
+      "interferometer/channel/line_of_sight/third_point/z",
       "iron_core/segment/geometry/oblique/z",
+      "langmuir_probes/embedded/v_plasma",
+      "langmuir_probes/reciprocating/plunge/collector/heat_flux_parallel",
+      "langmuir_probes/reciprocating/plunge/collector/ion_saturation_current",
       "langmuir_probes/reciprocating/plunge/position_average/phi",
+      "magnetics/b_field_pol_probe/non_linear_response/b_field_linear",
+      "magnetics/latency",
       "mhd/ggd/mass_density/values",
+      "mhd_linear/time_slice/toroidal_mode/plasma/phi_potential_perturbed/imaginary",
+      "mhd_linear/time_slice/toroidal_mode/vacuum/b_field_perturbed/coordinate1/imaginary",
       "mse/channel/detector/centre/r",
+      "ntms/time_slice/mode/dwidth_dt",
+      "ntms/time_slice/mode/onset/width",
+      "ntms/vacuum_toroidal_field/b0",
+      "operational_instrumentation/sensor/direction/x",
+      "operational_instrumentation/sensor/direction/y",
+      "pellets/time_slice/pellet/path_geometry/second_point/phi",
+      "pellets/time_slice/pellet/path_profiles/t_e",
+      "pf_active/coil/element/geometry/annulus/radius_inner",
+      "pf_active/coil/geometry/annulus/z",
+      "plasma_initiation/b_field_lines/e_field_parallel",
+      "plasma_initiation/global_quantities/ion/element/z_n",
+      "plasma_initiation/global_quantities/neutral/element/atoms_n",
+      "plasma_initiation/global_quantities/neutral/element/z_n",
+      "plasma_initiation/profiles_2d/grid/volume_element",
+      "plasma_profiles/ggd/b_field/r",
+      "plasma_profiles/ggd/b_field/radial",
       "plasma_profiles/profiles_1d/grid/rho_tor",
+      "plasma_profiles/profiles_1d/neutral/element/atoms_n",
       "plasma_sources/source/profiles_1d/ion/particles",
       "plasma_transport/model/ggd/ion/state/particles/flux_limiter/values",
+      "plasma_transport/model/profiles_1d/neutral/state/momentum/flux/radial",
+      "polarimeter/channel/line_of_sight/second_point/phi",
       "pulse_schedule/density_control/ion/element/a",
+      "pulse_schedule/density_control/ion/element/z_n",
+      "pulse_schedule/density_control/valve/species/element/atoms_n",
+      "pulse_schedule/density_control/valve/species/element/z_n",
       "pulse_schedule/density_control/valve/species/fraction",
+      "pulse_schedule/density_control/zeff_line_of_sight/second_point/phi",
+      "pulse_schedule/density_control/zeff_line_of_sight/second_point/r",
       "pulse_schedule/event/time_stamp",
       "reflectometer_profile/channel/antenna_detection/centre/phi",
+      "refractometer/channel/line_of_sight/second_point/z",
+      "sawteeth/profiles_1d/grid/area",
       "soft_x_rays/channel/detector/centre/phi",
       "soft_x_rays/channel/detector/outline/x2",
       "spectrometer_x_ray_crystal/channel/crystal/outline/x1",
@@ -2851,51 +3337,65 @@
       "summary/composition/boron/value",
       "summary/composition/hydrogen/value",
       "summary/disruption/halo_current/fraction_pol_max/value",
+      "summary/fusion/neutron_rates/dt/thermal/value",
+      "summary/gas_injection_accumulated/neon/value",
+      "summary/gas_injection_rates/deuterium/value",
+      "summary/gas_injection_rates/methane/value",
       "summary/heating_current_drive/lh/position/value",
       "summary/heating_current_drive/nbi/power/value",
+      "summary/line_average/n_i/tungsten/value",
+      "summary/local/divertor_target/n_i/iron/value",
       "summary/local/divertor_target/n_i/neon/value",
       "summary/local/divertor_target/n_i/tritium/value",
       "summary/local/divertor_target/n_i_total/value",
+      "summary/local/limiter/n_i/tungsten/value",
+      "summary/pedestal_fits/mtanh/b_field_pedestal_top_lfs/value",
       "summary/pedestal_fits/mtanh/n_e/d_dpsi_norm_max/value",
       "summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm?placeholder",
       "summary/pedestal_fits/mtanh/t_e/d_dpsi_norm_max/value",
       "summary/simulation/time_begin",
       "summary/simulation/time_step",
+      "summary/time_width",
+      "tf/field_map/b_field_tor",
       "thomson_scattering/laser/start_point/r",
       "transport_solver_numerics/solver_1d/drho_tor_dt",
       "wall/description_2d/limiter/unit/midplane_thickness",
+      "wall/description_ggd/ggd/recycling/neutral/element/z_n",
+      "wall/description_ggd/ggd/temperature/values",
       "waves/coherent_wave/profiles_1d/ion/state/vibrational_level",
+      "waves/coherent_wave/profiles_2d/grid/volume",
+      "waves/coherent_wave/profiles_2d/ion/element/z_n",
       "workflow/time_loop/workflow_cycle/component/time_interval_elapsed",
       "workflow/time_loop/workflow_cycle/component/time_interval_request"
     ],
-    "units_completed": 48
+    "units_completed": 98
   },
   "status": "blocked",
   "summary": {
     "arm_a": {
-      "candidates": 37,
-      "scored_candidates": 33,
+      "candidates": 55,
+      "scored_candidates": 51,
       "unscored_candidates": 4,
-      "accepted_scored": 13,
-      "acceptance_rate_over_scored": 0.3939393939393939
+      "accepted_scored": 20,
+      "acceptance_rate_over_scored": 0.39215686274509803
     },
     "arm_b": {
-      "candidates": 29,
-      "scored_candidates": 23,
-      "unscored_candidates": 6,
-      "accepted_scored": 7,
-      "acceptance_rate_over_scored": 0.30434782608695654
+      "candidates": 55,
+      "scored_candidates": 46,
+      "unscored_candidates": 9,
+      "accepted_scored": 19,
+      "acceptance_rate_over_scored": 0.41304347826086957
     },
-    "paired_denominator_sources": 20,
-    "paired_acceptance_rate_arm_a": 0.4,
-    "paired_acceptance_rate_arm_b": 0.3,
-    "paired_difference_b_minus_a": -0.10000000000000003,
-    "paired_accepted_arm_a": 8,
-    "paired_accepted_arm_b": 6,
+    "paired_denominator_sources": 39,
+    "paired_acceptance_rate_arm_a": 0.41025641025641024,
+    "paired_acceptance_rate_arm_b": 0.41025641025641024,
+    "paired_difference_b_minus_a": 0.0,
+    "paired_accepted_arm_a": 16,
+    "paired_accepted_arm_b": 16,
     "bootstrap_interval": {
-      "point": -0.11111111111111116,
-      "lower": -0.32172619047619017,
-      "upper": 0.09999999999999998,
+      "point": 0.0,
+      "lower": -0.1578947368421053,
+      "upper": 0.15999999999999992,
       "level": 0.95,
       "n_resamples": 1000,
       "seed": 123
@@ -2903,10 +3403,10 @@
     "bootstrap_interval_excludes_zero": false,
     "bootstrap_error": ""
   },
-  "spend_usd": 0.016947,
+  "spend_usd": 0.020951,
   "sources_remaining": {
-    "arm_a": 61,
-    "arm_b": 72
+    "arm_a": 27,
+    "arm_b": 21
   },
-  "reason": "node time fence reached with units remaining; resume continues from the units already recorded, which the driver skips"
+  "reason": "node time fence reached with units remaining; every finished unit is persisted and the driver skips it on the next pass"
 }

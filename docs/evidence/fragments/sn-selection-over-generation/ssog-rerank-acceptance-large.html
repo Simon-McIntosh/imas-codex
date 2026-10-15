@@ -1,6 +1,6 @@
 <section id="ssog-rerank-acceptance-large-scope">
   <h2>Comparator rerank acceptance on a large held-out draw</h2>
-  <p id="ssog-rerank-acceptance-large-state">Status: <strong>blocked on the node's time fence</strong>. The draw was fixed and the measure started twice (the first node was cut at its own fence, the resumed node at a second one); the arms did not reach the drawn cohort, so the numbers below are a partial pass and the measure must be resumed to reach about 120 held-out sources per arm.</p>
+  <p id="ssog-rerank-acceptance-large-state">Status: <strong>blocked on the node's time fence</strong>. Draw, positive control and record are fixed; three successive nodes ran bounded passes against the same record without reaching the drawn cohort, so the numbers below are a partial pass over the sources composed so far and the measure must be resumed.</p>
   <p id="ssog-rerank-acceptance-large-draw">Draw seed <code>20261015</code>, 160 sources drawn so the harness admits about 120: <strong>120 admitted as standard-name sources</strong> across 120 extraction batches (137 items). Excluded set: 70 sources — the 40 drawn under seed <code>20261014</code> (read from that run's own results record), the 30 sources of the comparator label sheet, and the sheet's 9 boundary-density sources (already inside the 30; recorded as their own group). Composed and reviewed on <code>local/deepseek-v4.1-flash</code>; only arm B reranks the nearby-name comparator block, judged by <code>typesafe/jev-1.13</code>.</p>
   <p id="ssog-rerank-acceptance-large-pass-shape">One arm runs per pass: the rerank switch is read from the environment at call time, so two settings in flight together would rerank the arm meant to run without it. Each pass serves whichever arm has more sources left, so the two arms advance in alternation and their unit counts differ.</p>
 </section>
@@ -12,31 +12,35 @@
 
 <section id="ssog-rerank-acceptance-large-arms">
   <h2>First-pass acceptance, partial pass</h2>
-  <p id="ssog-rerank-acceptance-large-counts">A candidate the reviewer returned no score for is recorded with <code>scored: false</code>, counted separately, and excluded from the rate: it is a reviewer omission, not a rejection, so the rate is taken over scored candidates. Both counts are given per arm because two of arm A's sources were composed by the harness into more than one candidate and several batches return none.</p>
+  <p id="ssog-rerank-acceptance-large-counts">A candidate the reviewer returned no score for is recorded with <code>scored: false</code>, counted separately, and excluded from the rate: it is a reviewer omission, not a rejection, so the rate is taken over scored candidates. Both counts are given per arm because a batch may compose no candidate and a few compose more than one.</p>
+  <p id="ssog-rerank-acceptance-large-unscored">Unscored candidates at this point: 4 in arm A, 9 in arm B — 13 in total, which is 11 per cent of all candidates and is why the rate is stated over scored candidates rather than over all of the arm's candidates.</p>
   <table>
-    <thead><tr><th>arm</th><th>units (batches) run</th><th>sources with a result</th><th>candidates</th><th>scored</th><th>unscored</th><th>accepted (scored)</th><th>acceptance over scored</th></tr></thead>
+    <thead><tr><th>arm</th><th>batches run</th><th>sources with a result</th><th>candidates</th><th>scored</th><th>unscored</th><th>accepted (scored)</th><th>acceptance over scored</th></tr></thead>
     <tbody>
-      <tr><td>A (rerank off)</td><td>59</td><td>71</td><td>37</td><td>33</td><td>4</td><td>13</td><td>0.394</td></tr>
-      <tr><td>B (rerank on)</td><td>48</td><td>56</td><td>29</td><td>23</td><td>6</td><td>7</td><td>0.304</td></tr>
+      <tr><td>A (rerank off)</td><td>92</td><td>112</td><td>55</td><td>51</td><td>4</td><td>20</td><td>0.392</td></tr>
+      <tr><td>B (rerank on)</td><td>98</td><td>117</td><td>55</td><td>46</td><td>9</td><td>19</td><td>0.413</td></tr>
     </tbody>
   </table>
-  <p id="ssog-rerank-acceptance-large-paired">Paired over the <strong>20 sources present in both arms</strong>: acceptance 0.400 (arm A, 8 of 20) vs 0.300 (arm B, 6 of 20), paired difference <strong>−0.100</strong>. The <code>bootstrap_interval</code> from <code>imas_codex/discovery/base/evaluation.py</code> is point −0.111, lower −0.322, upper 0.100 (95%, 1000 resamples): it <strong>does not exclude 0</strong>. With 20 paired sources this is short of the drawn cohort and decides nothing beyond the sign.</p>
-  <p id="ssog-rerank-acceptance-large-id-caveat">Caveat on the pairing key: the arm is joined on the candidate's own <code>source_id</code>, which the harness's candidate extraction derives per candidate rather than copying from the drawn path. Two of the composed candidates carry ids no drawn path matches — one truncated (<code>reflectometer_profile/channel/antenna...</code>) and one carrying a placeholder fragment (<code>summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm?placeholder</code>). Both are present verbatim in the per-unit scratch output, so they are the harness's own values, not a transcription defect; they are left as recorded rather than corrected by hand. A resume should key the pairing on the batch's drawn path instead.</p>
+  <p id="ssog-rerank-acceptance-large-paired">Paired over the <strong>39 sources present in both arms</strong>: acceptance 0.410 in arm A and 0.410 in arm B, each 16 of 39, so the paired difference is <strong>0.000</strong>. The <code>bootstrap_interval</code> from <code>imas_codex/discovery/base/evaluation.py</code> has point 0.000 and spans <strong>[−0.158, 0.160]</strong> (95 per cent, 1000 resamples): it <strong>does not exclude 0</strong>, and the point sits exactly on it. 27 arm-A and 21 arm-B batches remain uncomposed, so this is short of the drawn cohort and decides nothing.</p>
+  <p id="ssog-rerank-acceptance-large-id-caveat">Caveat on the pairing key: the arms are joined on the candidate's own <code>source_id</code>, which the harness's candidate extraction derives per candidate rather than copying from the drawn path. Two of the composed candidates carry ids no drawn path matches — one truncated (<code>reflectometer_profile/channel/antenna...</code>) and one carrying a placeholder fragment (<code>summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm?placeholder</code>). Both appear verbatim in the per-unit scratch output, so they are the harness's own values, not a transcription defect; they are left as recorded rather than corrected by hand. A resume should key the pairing on the batch's drawn path instead.</p>
 </section>
 
 <section id="ssog-rerank-acceptance-large-spend">
   <h2>Spend and per-pass logs</h2>
-  <p id="ssog-rerank-acceptance-large-spend-figure">Total spend <strong>USD 0.016947 of the USD 1.00 ceiling</strong> (control rerank 0.013962, arm B rerank 0.002985, arm A 0). Compose and review ran on the free local seat.</p>
+  <p id="ssog-rerank-acceptance-large-spend-figure">Total spend <strong>USD 0.020951 of the USD 1.00 ceiling</strong> (control rerank 0.013962, arm B rerank 0.006048 plus earlier arm-B passes, arm A 0). Compose and review ran on the free local seat, so only arm B's rerank spends at all.</p>
   <ul id="ssog-rerank-acceptance-large-pass-logs">
-    <li><code>pass1.log</code> — extraction + control; <code>EXIT=124</code></li>
-    <li><code>pass2.log</code> — arm B, 480 s; <code>EXIT=124</code></li>
-    <li><code>pass3.log</code> — arm A, returned cleanly; <code>EXIT=0</code></li>
-    <li><code>pass4.log</code> — arm A; <code>EXIT=124</code></li>
-    <li><code>pass5.log</code> — arm A, +15 sources; <code>EXIT=124</code></li>
+    <li><code>pass1.log</code>, <code>pass2.log</code>, <code>pass4.log</code> — extraction, control, first arm passes; <code>EXIT=124</code></li>
+    <li><code>pass3.log</code> — returned cleanly; <code>EXIT=0</code></li>
+    <li><code>pass5.log</code> — arm A; <code>EXIT=124</code></li>
     <li><code>pass6.log</code> — arm B; <code>EXIT=124</code></li>
     <li><code>pass7.log</code> — arm A; <code>EXIT=124</code></li>
-    <li><code>pass8.log</code> — arm B, +7 sources; <code>EXIT=124</code></li>
-    <li><code>pass9.log</code> — arm A, +8 sources; <code>EXIT=124</code></li>
+    <li><code>pass8.log</code> — arm B; <code>EXIT=124</code></li>
+    <li><code>pass9.log</code> — arm A; <code>EXIT=124</code></li>
+    <li><code>pass10.log</code> — arm B; <code>EXIT=124</code></li>
+    <li><code>pass11.log</code> — returned cleanly; <code>EXIT=0</code></li>
+    <li><code>pass12.log</code> — arm B; <code>EXIT=124</code></li>
+    <li><code>pass13.log</code> — arm B; <code>EXIT=124</code></li>
+    <li><code>pass14.log</code> — arm A; <code>EXIT=124</code></li>
   </ul>
-  <p id="ssog-rerank-acceptance-large-remaining">Remaining when the fence arrived: <strong>61 arm-A and 72 arm-B batches</strong>. A pass cut by the shell's wall bound never reaches the driver's own summary write, so after such a pass the results JSON's <code>summary</code>, <code>sources_remaining</code> and <code>status</code> are stale; those fields here were recomputed from the per-unit records with the driver's own <code>summarise()</code>.</p>
+  <p id="ssog-rerank-acceptance-large-remaining">Remaining when the fence arrived: <strong>27 arm-A and 21 arm-B batches</strong>. A pass cut by the shell's wall bound never reaches the driver's own summary write, so after such a pass the results JSON's <code>summary</code>, <code>sources_remaining</code> and <code>status</code> are stale; before every pass in the latest attempt those fields were recomputed from the per-unit records with the driver's own <code>summarise()</code>, so the pass summary is never the source of the numbers above.</p>
 </section>
