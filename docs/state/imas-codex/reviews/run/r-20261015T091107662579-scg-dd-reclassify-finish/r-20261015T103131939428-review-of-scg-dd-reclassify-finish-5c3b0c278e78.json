@@ -10,6 +10,13 @@
     "imas_codex/graph/client.py:155 (GraphClient)"
   ],
   "completed_at": "2026-10-15T10:46:02.299Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "scg-reclassify-evidence-repair",
+      "recorded_at": "2026-10-15T11:02:50.583792+00:00"
+    }
+  },
   "dispatched_at": "2026-10-15T10:31:46Z",
   "findings": [
     {
