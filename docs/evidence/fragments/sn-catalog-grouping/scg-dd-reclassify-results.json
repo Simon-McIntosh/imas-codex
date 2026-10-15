@@ -2,14 +2,14 @@
   "node": "scg-dd-reclassify",
   "status": "blocked",
   "threshold": 0.8,
-  "tier1_classified": 6350,
+  "tier1_classified": 7235,
   "tier1_total": 12036,
   "tree_settled": 884,
   "tree_settled_share": 0.4436,
   "chat_share": 0.5564,
   "spend_usd": 12.43,
   "spend_ceiling_usd": 25.0,
-  "spend_per_path_usd": 0.001957,
+  "spend_per_path_usd": 0.001942,
   "projected_finish_usd": 11.13,
   "projected_finish_total_usd": 23.56,
   "group_ledger": [
@@ -124,11 +124,26 @@
       ],
       "reset": true,
       "tier1": 885,
-      "complete": false,
-      "spend_usd": 1.683,
-      "exit": null,
+      "complete": true,
+      "spend_usd": 1.62,
+      "exit": 0,
       "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T041014331937-scg-dd-reclassify/pass-g07-a.log",
-      "note": "reset spent at 06:40:52Z (3,568 nodes to embedded); the classify phase was killed after 590 s at the pass ceiling with Tier 1 unwritten, so nothing landed. Drain with a pass that omits the reset flag."
+      "note": "two passes: the reset pass spent and wrote nothing, the drain pass (without a reset) landed the classification. The reset was applied once.",
+      "spend_unlanded_usd": 1.68,
+      "passes": [
+        {
+          "log": "pass-g07-a.log",
+          "landed": false,
+          "spend_usd": 1.68,
+          "note": "killed at the launch ceiling with Tier 1 unwritten"
+        },
+        {
+          "log": "pass-g07-b.log",
+          "landed": true,
+          "spend_usd": 1.62,
+          "note": "no reset; wrote 885 Tier 1 and 2,562 inherited"
+        }
+      ]
     },
     {
       "group": "g08",
@@ -287,14 +302,15 @@
       "g04",
       "g05",
       "g06",
+      "g07",
       "g09",
       "g10",
       "g13",
       "g15"
     ],
-    "reclassified_subset": 111,
-    "reclassified_correct": 93,
-    "reclassified_accuracy": 0.8378,
+    "reclassified_subset": 113,
+    "reclassified_correct": 95,
+    "reclassified_accuracy": 0.8407,
     "reclassified_mismatches": [
       {
         "path": "core_profiles/profiles_1d/grid/rho_pol_norm",
@@ -387,26 +403,26 @@
         "graph": "auxiliary_heating"
       }
     ],
-    "whole_graph_accuracy_vs_labels": 0.7313,
+    "whole_graph_accuracy_vs_labels": 0.7413,
     "estimate_from_plan": 0.89,
     "domain_source_distribution": {
-      "inherited_from_parent": 32788,
-      "llm_classified": 9221,
+      "inherited_from_parent": 35380,
+      "llm_classified": 9758,
       "none_metadata": 7925,
-      "jev_tree": 1928,
+      "jev_tree": 2276,
       "deterministic_override": 6
     }
   },
   "domain_source_distribution": {
-    "inherited_from_parent": 32788,
-    "llm_classified": 9221,
+    "inherited_from_parent": 35380,
+    "llm_classified": 9758,
     "none_metadata": 7925,
-    "jev_tree": 1928,
+    "jev_tree": 2276,
     "deterministic_override": 6
   },
-  "spend_landed_usd": 12.43,
+  "spend_landed_usd": 14.05,
   "spend_unlanded_usd": 1.68,
-  "spend_incurred_usd": 14.11,
+  "spend_incurred_usd": 15.73,
   "groups_complete": [
     "g01",
     "g02",
@@ -414,13 +430,13 @@
     "g04",
     "g05",
     "g06",
+    "g07",
     "g09",
     "g10",
     "g13",
     "g15"
   ],
   "groups_remaining": [
-    "g07",
     "g08",
     "g11",
     "g12",
@@ -430,7 +446,42 @@
     "g18",
     "g19"
   ],
-  "tier1_paths_remaining": 5686,
+  "tier1_paths_remaining": 4801,
   "projected_remaining_usd": 11.13,
-  "projected_total_usd": 25.24
+  "projected_total_usd": 25.24,
+  "stopped_for": "lead decision on the remaining groups and the summary classification",
+  "plasma_profiles_recovery": {
+    "why": "the first pass was killed with its Tier 1 unwritten after its reset had already cleared 3,577 nodes, leaving the IDS with no classification",
+    "total_nodes": 3670,
+    "with_domain_source_before": 93,
+    "with_domain_source_after": 3570,
+    "without_domain_source_after": 100,
+    "without_domain_source_note": "the infrastructure paths under /ids_properties/ and /code/, which the classifier excludes by construction",
+    "passes": [
+      {
+        "log": "pass-g07-a.log",
+        "reset": true,
+        "landed": false,
+        "spend_usd": 1.68,
+        "outcome": "killed at 590 s, Tier 1 unwritten"
+      },
+      {
+        "log": "pass-g07-b.log",
+        "reset": false,
+        "landed": true,
+        "spend_usd": 1.62,
+        "tier1": 885,
+        "inherited": 2562,
+        "outcome": "classification complete, EXIT=0"
+      },
+      {
+        "log": "pass-g07-c.log",
+        "reset": false,
+        "landed": true,
+        "tier1": 0,
+        "outcome": "Tier 1 candidates 0 paths, EXIT=0"
+      }
+    ],
+    "reset_count": 1
+  }
 }
