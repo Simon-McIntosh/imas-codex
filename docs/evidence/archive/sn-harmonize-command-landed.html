@@ -95,6 +95,11 @@
     <p>Documentation now carries the locus definition sentence for every registered locus (merge <code>bbfc184ae</code>, review 105/120). It is rendered from the ISN locus registry's <code>definition</code> and the conventions entry's equation and symbols. The conformance check refines a member whose locus sentence departs from the registry or uses a forbidden variant. Both tests fail with their mechanism removed.</p><p>Follow-ons from the review:</p><ul><li>The new finding class reaches <code>review/audits.py</code>, whose tests (<code>test_house_style_checks.py</code>) were outside the recorded gate. The next harmonize node runs them.</li><li>The identical-sentence test compares against the helper's own output.</li></ul>
   </section>
 
+  <section id="s10-report-pin">
+    <h2>§10 — The report names the anchor the apply will use</h2>
+    <p>Node <code>shc-report-pin</code>, commits <code>c2c541788</code> and <code>c6f003721</code>. <code>report_family_rows</code> and <code>plan_family_applies</code> now both resolve the anchor through one helper, <code>resolve_family_anchor</code>. It reads the recorded pin through <code>pinned_family_anchor</code> and falls back to <code>select_anchor</code> only when no pin is recorded or the family is stamped. Every other <code>select_anchor</code> call site is listed with its decision in the fragment. A stubbed test with a pin and a higher-scoring member shows the report and the dry run naming the pinned anchor. It fails with the report's pin read removed. Harmonize gate: 135 passed against 134 at base. Review 115/120. Follow-on: one added assertion compares two outputs of the same helper.</p>
+  </section>
+
 </main>
 </body>
 </html>

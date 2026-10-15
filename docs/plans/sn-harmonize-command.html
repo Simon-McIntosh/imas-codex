@@ -21,12 +21,12 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-house-style#s4&quot;],&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;,&quot;sn-harmonize-command#s5&quot;,&quot;sn-harmonize-command#s6&quot;,&quot;sn-harmonize-command#s7&quot;,&quot;sn-harmonize-command#s8&quot;,&quot;sn-harmonize-command#s9&quot;,&quot;sn-harmonize-command#s10&quot;,&quot;sn-harmonize-command#s11&quot;,&quot;sn-harmonize-command#s12&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="74">
-<meta name="plan-modified" content="2026-10-14">
+<meta name="plan-version" content="75">
+<meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -229,7 +229,7 @@
 <p>The second apply raised <code>link_missing_reverse</code> from 6 to 12. Regenerated documentation links its siblings, and those siblings do not link back. First find, from the twelve findings on the live family, which side adds the links and why the reverse is not written. The causes could be the prompt's sibling block, the order in which members regenerate, or the lint's definition of a reverse link. Then make the apply leave none.</p><p>The preferred mechanism is deterministic: after the members converge, each member's documentation gains a link to every sibling that links to it. A prompt instruction that the model may ignore is not the mechanism. A reverse link is added only when it is true; a sibling link that should not exist is removed instead.</p><p><strong>Done when:</strong> the fragment <code>docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html</code> names the cause of each of the twelve findings. A stubbed apply over a fixture family whose regenerated members link one-way ends with zero <code>link_missing_reverse</code> findings, and it fails with the reverse step removed.</p>
 
     <h2 id="s10">§10 — The report shows the anchor the apply will use</h2>
-<section data-reckon="section" data-id="s10" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s10" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>After the halted apply, <code>sn harmonize --report</code> named <code>flux_surface_averaged_tritium_density_at_plasma_boundary</code> as the anchor, while the dry run and the apply kept the pinned xenon member. <code>report_family_rows</code> (<code>harmonize.py</code> ~535) re-selects through <code>select_anchor</code>; the plan reads the pin through <code>pinned_family_anchor</code> (~768). The report must read the same pin, so that what the operator sees is what the apply does.</p><p><strong>Done when:</strong> a stubbed test with a recorded pin and a higher-scoring member shows the report and the dry run naming the same anchor, and the test fails with the report's pin read removed.</p>
 
     <h2 id="s11">§11 — The locus is defined once, from the registry</h2>
@@ -438,6 +438,9 @@ crew/reviews/imas-codex/r-20261013T145943345276-shc-pin-anchor.at-4ae756c8581cf6
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261014T213431662469-review-of-shc-report-pin-c6f003721e38" data-who="reckon-build" data-when="2026-10-14T21:46:51.896Z">
     <div class="r-comment-body"><p>review-of-shc-report-pin-c6f003721e38 — independent review of r-20261014T205529707057-shc-report-pin stored at reviews/imas-codex/r-20261014T205529707057-shc-report-pin.json (and .at-c6f003721e38f41f8a6a6ba92e28f8b2a8109550.json): 6 dimensions scored goal_fidelity 18, evidence 20, scope_discipline 20, durability 18, fit 19, reuse 20; 2 follow-on findings; no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-close-s10" data-who="reckon-build" data-when="2026-10-15T06:08:00Z">
+    <div class="r-comment-body"><p>§10 closed. The report and the dry run resolve the anchor through one pin-reading helper, so what the operator sees is what the apply does (<code>c6f003721</code>, review 115/120). <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s10-report-pin">evidence</a></p></div>
 </div>
 </section>
 </main>
