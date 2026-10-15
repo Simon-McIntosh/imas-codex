@@ -18,6 +18,7 @@ from imas_codex.standard_names.judgment_goldens import (
     assign_group_splits,
     build_documentation_sheet,
     build_near_duplicate,
+    write_fixture,
     write_sheet,
 )
 
@@ -47,10 +48,6 @@ def test_fixtures_load_with_independent_labels(filename: str) -> None:
     assert {row["split"] for row in rows} == {"calibration", "validation"}
     assert all(row["label"] in (0, 1) for row in rows)
     assert all(row["source_evidence"] for row in rows)
-    grouped: dict[str, set[str]] = defaultdict(set)
-    for row in rows:
-        grouped[row["copy_group"]].add(row["split"])
-    assert all(len(splits) == 1 for splits in grouped.values())
     assert len({row["domain"] for row in rows}) >= 3
     assert len({row["pattern"] for row in rows}) >= 3
 
@@ -106,6 +103,47 @@ def test_finished_rows_use_shared_group_split_rule() -> None:
     }
     assert assign_group_splits(rows, "copy_group") == expected
     finished = _finish(deepcopy(rows), _StubGraph([]))
+    assert {row["unit"]: row["split"] for row in finished} == {
+        row["unit"]: expected[row["copy_group"]] for row in rows
+    }
+
+
+def test_rebuild_keeps_every_existing_groups_split(tmp_path) -> None:
+    golden = tmp_path / "golden.json"
+    base = [
+        _row(f"fixture/{group}", 0, "fixture", "fixture", group=group)
+        for group in ("alpha", "beta", "gamma", "delta")
+    ]
+    first = _finish(deepcopy(base), _StubGraph([]), golden_path=None)
+    write_fixture(golden, first)
+    before = {row["copy_group"]: row["split"] for row in first}
+    committed = {
+        row["copy_group"]: row["split"] for row in json.loads(golden.read_text())
+    }
+    assert committed == before
+
+    new_groups = ("epsilon", "zeta", "eta", "theta", "iota")
+    grown = base + [
+        _row(f"fixture/{group}", 0, "fixture", "fixture", group=group)
+        for group in new_groups
+    ]
+    rebuilt = _finish(deepcopy(grown), _StubGraph([]), golden_path=golden)
+    after = {row["copy_group"]: row["split"] for row in rebuilt}
+    assert set(after) == set(before) | set(new_groups)
+    assert {group: after[group] for group in before} == before
+
+    fresh = Counter(after[group] for group in new_groups)
+    assert abs(fresh["calibration"] - fresh["validation"]) <= 1
+
+
+def test_golden_without_a_committed_file_splits_as_new(tmp_path) -> None:
+    rows = [
+        _row(f"fixture/{group}", 0, "fixture", "fixture", group=group)
+        for group in ("alpha", "beta", "gamma", "delta")
+    ]
+    absent = tmp_path / "absent.json"
+    finished = _finish(deepcopy(rows), _StubGraph([]), golden_path=absent)
+    expected = assign_group_splits(rows, "copy_group")
     assert {row["unit"]: row["split"] for row in finished} == {
         row["unit"]: expected[row["copy_group"]] for row in rows
     }
