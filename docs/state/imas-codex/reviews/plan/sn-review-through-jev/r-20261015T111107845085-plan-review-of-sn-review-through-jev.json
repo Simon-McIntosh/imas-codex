@@ -1,0 +1,45 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T11:27:18.791Z",
+  "dispatched_at": "2026-10-15T11:11:27Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-review-through-jev.html:186",
+      "id": "anchors_resolve-1",
+      "reason": "the retirement still holds (the call site at 7308\u20137310 is the only production reader), so the node meets the failing tests and updates them rather than taking a wrong path.",
+      "text": "\u00a75 asserts `refine-trigger-comment-dims` and `refine-trigger-comment-chars` have \"only reader \u2026 that trigger call at `workers.py:7304`\", but `tests/standard_names/fanout/test_trigger_dims_align_with_review.py` reads `refine_trigger_comment_dims` in three tests (`test_default_trigger_dims_subset_of_review_dims`, `test_loaded_settings_trigger_dims_subset_of_review_dims`, `test_default_trigger_dims_nonempty`), so retiring the field also breaks those tests; the \"only reader\" clause is the evidence the retirement rests on and it is false as written",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "6d21c5094848c7214d211d96fb4a57e98992567b784d9759335ba40daab15255",
+  "plan_slug": "sn-review-through-jev",
+  "plan_version": 24,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261015T111107845085-plan-review-of-sn-review-through-jev",
+  "reviewed_blob_sha": "61be505118c7c661128a57a8f17cc4bf8dd9686f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a75's \"whose only reader is that trigger call at `workers.py:7304`\" does not resolve: three tests read `refine_trigger_comment_dims` from the config field.",
+    "done_when": "pass \u2014 \u00a75's done-when names its negative control (\"a test fails when a keyword list is reintroduced\") and its A/B names the comment-driven path as the control arm, so the measure can fail.",
+    "evidence_paths": "pass \u2014 \u00a75 directs no gate log or evidence to a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 \u00a75 carries no plan labels, ticket numbers or version tags into symbols or comments.",
+    "reasoning": "pass \u2014 \u00a75's root cause matches \u00a71's cited templates, its mechanism produces its done-when, and the caller it relies on (`should_trigger_fanout` at `workers.py:7304`) is named and live.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable (refine and the fanout trigger read failed checks, not comment prose); the deletion the plan once split across \u00a75 and \u00a77 is now owned once.",
+    "wiring": "pass \u2014 \u00a75's `depends-on` (\u00a73 and \u00a74, the sections producing the per-check probabilities its trigger reduces over) is declared in `plan-section-depends-on` and both targets exist."
+  },
+  "section_digests": {
+    "_document": "543d4a9b36d0ffd3b6d48ae55e20ad33ac58257be049be48bded4d4bde22d77e",
+    "s1": "b8cee26002f21b31c1a5f020a11fedfa75c8e98c039fce1165802727fd21109c",
+    "s2": "b0d251917e3803e82c6003cfad44e327e0dbf0a7c36f72f34588a4dcb7e50352",
+    "s3": "82d51a77c26ae07933f012ccecb84e177e87b43c91b5cc909713ed332088bbf2",
+    "s4": "e78806378f26a26e205e71908b31a7cc50522c0f562ceab8c62c76181e212f2e",
+    "s5": "fb66bee47af8735f6b3deb61469965ea2f6b98d9719a2c3c60275c4806b99782",
+    "s6": "302fcd03fbde84ccac2e27b1a967b5abe0865d72c784a3232ff0113f5720b038",
+    "s7": "fb477768b44f7ce245281c7986ffdfcf74871a6c841ca83d809682f1ebc062f2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T11:30:40.614598+00:00"
+}
