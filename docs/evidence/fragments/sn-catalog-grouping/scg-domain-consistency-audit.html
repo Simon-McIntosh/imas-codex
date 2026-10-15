@@ -229,7 +229,11 @@
     covered by <code>tests/standard_names/test_domain_audit.py</code>: each check
     has a passing and a failing fixture, a derived parent carries its own, an
     order-and-duplicate-only difference must pass, and removing the four
-    comparisons turns the file red (8 failed, 10 passed, recorded in
-    <code>negative-control.log</code>) before the module is restored byte-for-byte.
+    comparisons turns the file red: the recorded control run reads
+    <strong>10 failed, 37 passed</strong> of 47 collected, in
+    <code>negative-control.log</code>, after which the module is restored
+    byte-for-byte. That figure is not transcribed by hand — the census run checks
+    this paragraph against the log it cites and exits non-zero if they disagree,
+    so the record and the log cannot drift apart.
   </p>
 </section>

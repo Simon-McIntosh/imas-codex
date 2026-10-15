@@ -10,11 +10,19 @@ count prints beside the figure it supersedes. Several census rows measure the
 same properties by a different route, so a check is mapped to the nearest
 census row and the mapping's looseness is stated in the output rather than
 implied by adjacency.
+
+Given ``--control-log``, the run also reads that log's pytest summary and
+checks the landing record quotes it, so a figure transcribed into the record
+cannot drift away from the log it cites. The check is what fails when the
+comparisons the record describes are removed, which is the control the record
+points a reader at.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -22,8 +30,11 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 SHEET = HERE / "scg-domain-label-sheet.json"
 RESULTS = HERE / "scg-domain-consistency-audit-results.json"
+FRAGMENT = HERE / "scg-domain-consistency-audit.html"
 
 CENSUS_DATE = "2026-10-13"
+
+_SUMMARY = re.compile(r"(\d+) failed, (\d+) passed")
 
 # The previously recorded census over the 2,675 live names of 2026-10-13, keyed
 # by its own wording. Each of this audit's checks is reported beside the census
@@ -71,7 +82,52 @@ def _state_payload(state) -> dict:
     }
 
 
-def main() -> int:
+def check_control_quote(control_log: Path) -> bool:
+    """Does the landing record quote *control_log*'s own summary line?
+
+    The record cites the control log by name and states its result; a reader
+    who opens the log checks the two against each other. Compiling the figures
+    from the log here removes the transcription step that can disagree.
+    """
+    if not control_log.exists():
+        print(f"control check: {control_log} does not exist")
+        return False
+    record = FRAGMENT.read_text()
+    summary = None
+    for line in reversed(control_log.read_text().splitlines()):
+        match = _SUMMARY.search(line)
+        if match:
+            summary = f"{match.group(1)} failed, {match.group(2)} passed"
+            break
+    if summary is None:
+        print(f"control check: {control_log} carries no 'N failed, M passed' line")
+        return False
+    print(f"control check: {control_log.name} reports {summary}")
+    if summary in record:
+        print(f"control check: the landing record quotes '{summary}'")
+        return True
+    print(
+        f"control check: the landing record does NOT quote '{summary}' — "
+        f"the record and {control_log.name} disagree"
+    )
+    return False
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--control-log",
+        type=Path,
+        help=(
+            "a negative-control log whose pytest summary the landing record "
+            "must quote; the run exits non-zero when the two disagree"
+        ),
+    )
+    args = parser.parse_args(argv)
+
+    if args.control_log is not None and not check_control_quote(args.control_log):
+        return 1
+
     sys.path.insert(0, str(ROOT))
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.domain_audit import audit_domains
