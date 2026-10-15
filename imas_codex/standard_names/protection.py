@@ -169,19 +169,59 @@ class RecommendedNameError(RuntimeError):
     """An apply targeted a name already recommended into a catalog request."""
 
 
+def _request_evidence(pr_ref: str, pr_url: str | None) -> str | None:
+    """Read one roster's candidate request and return its protection evidence.
+
+    A roster protects its members only while its request is **open**. A merged
+    or closed request contributes nothing: a name approved through a merged
+    request is protected by ``name_stage=approved``, which
+    :func:`recommended_name_protections` reads from the graph, and a merged
+    request whose fold-back never ran protects nothing.
+
+    An unreadable state protects, with evidence saying so: a non-200 reply, a
+    malformed URL, or a recorded ``pr_number`` with no readable URL is never
+    permission. Returns ``None`` when the request does not protect.
+    """
+    from imas_codex.standard_names.promote import (
+        _pull_request_call,
+        _pull_request_state,
+        parse_pull_request_url,
+    )
+
+    unreadable = f"candidate_request={pr_ref} (state unreadable)"
+    if not pr_url:
+        return unreadable
+    try:
+        repo, number = parse_pull_request_url(pr_url)
+        status, payload = _pull_request_call(repo, f"/pulls/{number}")
+    except Exception:
+        return unreadable
+    if status != 200 or not isinstance(payload, dict):
+        return unreadable
+    state = _pull_request_state(payload)
+    if state == "OPEN":
+        return f"candidate_request={pr_ref} (open)"
+    if state in {"MERGED", "CLOSED"}:
+        return None
+    return unreadable
+
+
 def _frozen_roster_requests(reviews_dir: Any | None) -> dict[str, str]:
-    """Map each name of an opened frozen review roster to its request evidence.
+    """Map each name of an open frozen review roster to its request evidence.
 
     A frozen review roster under ``manifests/reviews/`` is the reproducible
     batch identity carried through export → PR → merge. Once the roster has
     recorded the candidate pull request it recomposed (``pr_number``/``pr_url``),
-    its members are text a physicist has been asked to review. Folding the
-    request back promotes those members to ``name_stage=approved``, which
-    :func:`recommended_name_protections` reads from the graph; until then the
-    roster itself is the only record that they are committed.
+    its members are text a physicist has been asked to review — but only while
+    that request is open. A closed or merged request contributes nothing;
+    :func:`recommended_name_protections` protects a name that a merged request
+    approved through ``name_stage=approved``. A request whose state cannot be
+    read protects, with evidence saying so.
 
-    Returns ``{standard_name_id: "candidate_request=<url>"}``. Reads files, not
-    the graph; a missing or unreadable roster contributes no evidence.
+    Returns ``{standard_name_id: "candidate_request=<ref> (<state>)"}``. Reads
+    files and each recorded request's state through the shared promote reader,
+    once per roster. A missing or unreadable roster file contributes no
+    evidence.
     """
     from pathlib import Path
 
@@ -200,12 +240,18 @@ def _frozen_roster_requests(reviews_dir: Any | None) -> dict[str, str]:
             continue
         if not isinstance(doc, dict):
             continue
-        if not (doc.get("pr_number") or doc.get("pr_url")):
+        pr_number = doc.get("pr_number")
+        pr_url = doc.get("pr_url")
+        if not (pr_number or pr_url):
             # No candidate request recorded: the batch was never recommended.
             continue
-        pr_ref = doc.get("pr_url") or f"pr_number={doc.get('pr_number')}"
+        pr_ref = str(pr_url) if pr_url else f"pr_number={pr_number}"
+        request_evidence = _request_evidence(pr_ref, str(pr_url) if pr_url else None)
+        if request_evidence is None:
+            # Merged or closed: the roster no longer protects its members.
+            continue
         for name in doc.get("names") or []:
-            evidence.setdefault(str(name), f"candidate_request={pr_ref}")
+            evidence.setdefault(str(name), request_evidence)
     return evidence
 
 
@@ -220,12 +266,16 @@ def recommended_name_protections(
     Three classes make a name committed, so a documentation rewrite would
     change text a physicist has been asked to review, or has already reviewed:
 
-    * a member of a frozen review roster whose candidate request is open;
+    * a member of a frozen review roster whose candidate request is **open** —
+      a closed or merged request protects nothing, and about it the roster is
+      silent; a request whose state cannot be read protects, with evidence
+      naming it;
     * a name at ``name_stage=approved`` (accepted through a merged request);
     * a name at ``name_stage=contested`` (edited by a reviewer during one).
 
     The result is keyed by identity so a caller can name the exact evidence
-    that refused a move. Reads the roster files once and the graph once.
+    that refused a move. Reads each roster's request state once and the graph
+    once.
     """
     names = sorted({name for name in name_ids if name})
     if not names:

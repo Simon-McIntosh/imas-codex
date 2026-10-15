@@ -1,0 +1,68 @@
+<section id="shc-guard-open-requests">
+  <h2>shc-guard-open-requests — the recommended-name guard protects only open requests</h2>
+
+  <p>The recommended-name guard protected every member of a frozen review roster
+  that recorded a pull request, whatever the request's state. A name whose roster
+  request had merged or closed was refused an apply even though nothing was
+  outstanding to protect. <code>_frozen_roster_requests</code> in
+  <code>imas_codex/standard_names/protection.py</code> now reads each roster's
+  request state through the shared promote reader
+  (<code>parse_pull_request_url</code>, <code>_pull_request_call</code>,
+  <code>_pull_request_state</code>) once per roster and protects its members only
+  while the request is <strong>open</strong>. A merged or closed request
+  contributes nothing: a name a merged request approved is protected by
+  <code>name_stage=approved</code>, which <code>recommended_name_protections</code>
+  already reads from the graph, and a merged request whose fold-back never ran
+  protects nothing. A state that cannot be read — a non-200 reply, a malformed
+  URL, or a <code>pr_number</code> with no readable URL — protects, with evidence
+  naming the request and stating that its state could not be read.</p>
+
+  <h3 id="shc-guard-open-requests-table">Behaviour by request state</h3>
+  <table>
+    <thead>
+      <tr><th>roster request state</th><th>protects?</th><th>evidence</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>OPEN</td><td>yes</td><td><code>candidate_request=&lt;url&gt; (open)</code></td></tr>
+      <tr><td>MERGED</td><td>no</td><td>— (roster silent)</td></tr>
+      <tr><td>CLOSED</td><td>no</td><td>— (roster silent)</td></tr>
+      <tr><td>unreadable</td><td>yes</td><td><code>candidate_request=&lt;ref&gt; (state unreadable)</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-guard-open-requests-tests">Stubbed tests</h3>
+  <p><code>tests/standard_names/test_roster_request_state.py</code> stubs the
+  GitHub read and writes roster files under <code>tmp_path</code>. Seven tests
+  cover: an open request protects; a closed request does not; a merged request
+  does not; an unreadable reply protects with evidence; a recorded
+  <code>pr_number</code> with no URL protects and attempts no read; a malformed
+  URL protects; and an <code>approved</code> name stays protected whatever its
+  roster's request state.</p>
+
+  <h3 id="shc-guard-open-requests-live">Live check, read-only</h3>
+  <p>Counted through <code>recommended_name_protections</code> with the live
+  GitHub state, over <code>flux_surface_averaged_electron_density_at_plasma_boundary</code>:</p>
+  <ul>
+    <li><strong>before</strong> (coordinator baseline): 1 protected member — the
+    boundary name;</li>
+    <li><strong>after</strong>: 0 protected members
+    (<code>recommended_name_protections -&gt; {}</code>, <code>EXIT=0</code>).</li>
+  </ul>
+  <p>The zero is a real absence, not a broken reader: of 14 roster files scanned,
+  11 recorded a request and 9 of those carry the boundary name, and every one of
+  the nine read a terminal state. A <code>None</code> return is possible only
+  after a successful 200 with a definite state, so the reader reached the API.
+  The two request states inspected directly:
+  <code>pull/3 -&gt; MERGED</code> and <code>pull/7 -&gt; CLOSED</code>, matching
+  the plan's account. Had any read failed, the name would have stayed protected
+  with <code>state unreadable</code> evidence rather than counting as 0.</p>
+
+  <h3 id="shc-guard-open-requests-gate">Gate</h3>
+  <p>Base (three existing files): 19 passed, <code>EXIT=0</code>. Head (three
+  existing plus the new file): 26 passed, <code>EXIT=0</code> — +7 tests, no added
+  failures. Negative control: restoring protection for any recorded request makes
+  <code>test_closed_request_does_not_protect</code>,
+  <code>test_merged_request_does_not_protect</code> and
+  <code>test_approved_name_stays_protected_whatever_the_roster</code> fail
+  (3 failed, <code>EXIT=1</code>).</p>
+</section>
