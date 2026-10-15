@@ -990,11 +990,15 @@ def reconcile_family_reverse_links(
     ``links``, since the index is derived from the prose and an index edited
     alone would lose the addition at the next derivation.
 
-    A member whose ``name_stage`` is ``approved`` is catalog-edited, and
-    ``write_enrichment_results`` refuses to move its fields while leaving
-    protection in force. That member's reconciliation is therefore *not*
-    written, and the ids are returned under ``"protected"`` so the caller can
-    report them rather than let a partial write look complete.
+    A member whose ``name_stage`` is ``approved`` is catalog-edited: its
+    editorial fields belong to the catalog, so the reconciliation computed for
+    it is not written, and its ``description``, ``documentation`` and ``links``
+    stay exactly as the catalog left them. Such a member's row is withheld from
+    the writer entirely, because the writer does not *skip* a protected row — it
+    strips that row's fields and writes each now-absent field as empty, which
+    would clear the very documentation protection exists to keep. The withheld
+    ids are returned under ``"protected"`` so the caller can report them rather
+    than let a partial write look complete.
 
     The write goes through the ``graph_ops`` function that already persists
     these fields — ``write_enrichment_results`` — called from here rather than
@@ -1116,18 +1120,23 @@ def reconcile_family_reverse_links(
             }
         )
 
-    # Deliver the result through the writer, but never past protection. A member
-    # the catalog has edited keeps its own fields: filter_protected runs with the
-    # same defaults the writer uses, so what it reports as skipped is exactly what
-    # the writer would not have written. Read before writing, and reported, so a
-    # partially written family cannot read as a whole one.
+    # Deliver the result through the writer, but never hand it a protected row.
+    # filter_protected does not skip a catalog-edited name: it strips that
+    # name's editorial fields and returns the stripped row, and the writer turns
+    # each absent field into an empty one (sn.documentation = "", sn.links =
+    # null). Passing the row through would therefore clear the documentation and
+    # links protection exists to keep. The protected rows are dropped before the
+    # writer sees them, and their ids returned, so a partially written family
+    # cannot read as a whole one.
     protected: list[str] = []
     written = 0
     if batch:
         from imas_codex.standard_names.protection import filter_protected
 
         _, protected = filter_protected(batch)
-        written = int((write_fn or write_enrichment_results)(batch) or 0)
+        withheld = set(protected)
+        writable = [row for row in batch if row["id"] not in withheld]
+        written = int((write_fn or write_enrichment_results)(writable) or 0)
     return {
         "members": len(present),
         "added": added,

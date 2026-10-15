@@ -178,9 +178,14 @@ class _LinkGraph:
     def write_enrichment_results(self, results: list[dict[str, Any]]) -> int:
         """Stand in for the graph_ops writer that persists docs + links.
 
-        It honours protection exactly as the real writer does — an
-        ``approved`` name keeps its own editorial fields — so a test that
-        plants a catalog-edited member sees the write refused here too.
+        It reproduces the real writer's protection behaviour down to what it
+        does with a stripped row: ``filter_protected`` hands the row back with
+        its editorial fields removed, and the writer's Cypher writes each
+        now-absent field as an empty one (``documentation = ""``,
+        ``links = null``). A stub that treated a stripped row as *no change*
+        would let "the protected member keeps its documentation" hold for the
+        stub and fail never, which is the opposite of what the production
+        writer does.
         """
         from imas_codex.standard_names.protection import filter_protected
 
@@ -188,15 +193,14 @@ class _LinkGraph:
         self.protected_by_writer.extend(skipped)
         self.written.append([dict(r) for r in filtered])
         for item in filtered:
-            if "documentation" not in item:
-                # Every editorial field was stripped: the real writer issues no
-                # SET for this row, so nothing about the name moves.
-                continue
             node = self.node(item["id"])
             if node is None:
                 continue
-            node["documentation"] = item["documentation"]
-            node["links"] = list(item["links"])
+            node["description"] = item.get("description") or ""
+            node["documentation"] = item.get("documentation") or ""
+            node["links"] = list(item.get("links") or []) or None
+            node["validity_domain"] = item.get("validity_domain")
+            node["constraints"] = item.get("constraints") or None
         return len(filtered)
 
 
@@ -382,10 +386,18 @@ def test_a_catalog_edited_member_is_reported_not_silently_skipped(
 
     step = harmonize.reconcile_family_reverse_links(graph, [_ANCHOR, _BOUNDARY, _PROBE])
 
-    # The step reports the member protection refused...
+    # The step reports the member protection withheld...
     assert step["protected"] == [_PROBE]
-    # ...and that report agrees with what the writer actually withheld.
-    assert graph.protected_by_writer == [_PROBE]
+    # ...and the protected row never reached the writer at all. That is the
+    # point: handed the row, the writer strips it and writes each stripped field
+    # as empty, clearing the member's documentation and links. So the writer
+    # withheld nothing (it saw nothing protected) and wrote only the other two.
+    assert graph.protected_by_writer == []
+    assert step["written"] == 2
+    assert [row["id"] for write_batch in graph.written for row in write_batch] == [
+        _ANCHOR,
+        _BOUNDARY,
+    ]
     # The member keeps its own editorial fields, dead link and all: that is the
     # price of not overriding a catalog edit, and the step says so rather than
     # counting the member among those it reconciled.
