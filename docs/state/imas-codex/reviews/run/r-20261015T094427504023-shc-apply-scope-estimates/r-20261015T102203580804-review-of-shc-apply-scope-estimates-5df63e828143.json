@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "derived by reading the reviewed run's own gate logs: the run changed no product code and no test (manifest tests: none - no product code changed), so it ran no base/after suite arm; all nine logs under its logs/ directory end in EXIT=0 with no failing test id (logs/dryrun_*.log, logs/report_*.log), and its manifest carries no baseline_suite/after_suite JSON, so reckon's read-time annotation reads no arm, which is an unmeasured count rather than a zero.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T10:34:07.963Z",
+  "dispatched_at": "2026-10-15T10:22:19Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-results.json",
+      "line": "66",
+      "severity": "follow-on",
+      "text": "follow-on: the boundary entry carries decision apply, planned_calls 17 and estimate_usd 7.0385, the unguarded plan, while the fragment reports the same family as refused at 0 calls and $0.00, and neither the entry nor total_planned_calls 29 (results.json:31) is labelled unguarded, so a reader of the results JSON alone takes $7.04 as the boundary family's spend when the guarded apply would refuse it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html",
+      "line": "315",
+      "severity": "follow-on",
+      "text": "follow-on: the nowrite paragraph says each dry run ended with the CLI's own line, Wrote nothing., but no cited log retains it - logs/dryrun_*.log contain only the command and EXIT=0 - so the no-write claim rests on the worker's manifest rather than on a retained log."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py",
+      "line": "48",
+      "severity": "follow-on",
+      "text": "follow-on: the component pattern kind is measured on parallel_conductivity, whose members already read harmonized (results.json:121), so the component axis contributes 0 calls and $0.00 and no before/after documentation comparison; the brief asked for one non-WEST family per pattern kind and the three-family measure cannot show a component cost."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py",
+      "line": "39",
+      "severity": "follow-on",
+      "text": "follow-on: the SCOPE why string (and the same text copied into the results JSON why fields) embeds a plan-section label, the 17-member boundary-averaged density family \u00a73 completes on, which the naming rules forbid in code and comments."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from 35bd9f985 to 5df63e828 - two commits, three new files, +704/-0; the repair 5df63e828 replaces the fragment's wrong $5.15 guarded-unguarded difference with $7.0385, tied to the boundary family's own estimate_usd, and names both operands in the results JSON.",
+    "done_when": "the node's done_when asks the fragment and its results JSON to give, for the boundary family and one non-WEST family per pattern kind, members, planned calls, the estimate with its basis, the anchor, refusals, lint by kind and current documentation scores, plus the total and confirmation nothing was written, each figure citing its log; both artefacts carry every item, but each dry-run row cites logs/dryrun_*.log and those logs hold only the command and EXIT=0, so the figures rest on the committed shc-apply-scope-estimates-results.json alone.",
+    "goal": "the node's goal is dry-run estimates for the final family apply and the three-family measure; docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html gives, per family, the members, planned calls, the estimate with its printed basis, the anchor, protection refusals, lint findings by kind and each member's documentation score, plus the four-family totals and a wrote_graph false flag.",
+    "manifest": "read; it names commits f67cd08a0 and 5df63e828, status complete, `tests: none - no product code changed`, ten test_logs, a negative_control_log of logs/diff_check.log, one landing line and three follow_ons, and its stated totals (29 unguarded calls, $12.01) reconcile with the results JSON.",
+    "write_paths": "the declared scope is docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html, -run.py and -results.json; `git diff --stat 35bd9f985 5df63e828` lists exactly those three paths (+704/-0) and nothing else."
+  },
+  "justifications": {
+    "durability": "no test is added (manifest tests: none - no product code changed), so nothing reddens if the script's planning or the fragment's figures regress; the only falsifiable instrument is the uncommitted check in logs/diff_check.log, which does redden at the pre-repair fragment.",
+    "evidence": "the fragment's figures are re-derivable from the committed shc-apply-scope-estimates-results.json (total_planned_calls 29, total_estimate_usd 12.0068) and logs/diff_check.log reddens at the pre-repair fragment, but each dry-run row cites logs/dryrun_*.log and those logs hold only the command and EXIT=0, no figure.",
+    "fit": "the evidence paths follow the <plan-slug>/<node-id> convention and the script delegates every read to the harmonize.py owners, but run.py:39 and the results JSON why fields embed a plan-section label (\u00a73).",
+    "goal_fidelity": "shc-apply-scope-estimates-results.json gives each family's estimate with its measured basis, but the component family chosen at run.py:48 (parallel_conductivity) already reads harmonized, so the component pattern kind contributes 0 calls and $0.00 and no estimate at all.",
+    "reuse": "the script adds one local helper, _lint_by_kind at run.py:61, with no existing owner, and delegates planning, refusal preview, family reporting and cost measurement to imas_codex/standard_names/harmonize.py:1205,1382,548,834 rather than re-deriving them.",
+    "scope_discipline": "`git diff --stat 35bd9f985 5df63e828` changes exactly the three declared paths (+704/-0) and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is dry-run estimates for the final family apply and the three-family measure; docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html gives, per family, the members, planned calls, the estimate with its printed basis, the anchor, protection refusals, lint findings by kind and each member's documentation score, plus the four-family totals and a wrote_graph false flag.\nVERDICT done_when: the node's done_when asks the fragment and its results JSON to give, for the boundary family and one non-WEST family per pattern kind, members, planned calls, the estimate with its basis, the anchor, refusals, lint by kind and current documentation scores, plus the total and confirmation nothing was written, each figure citing its log; both artefacts carry every item, but each dry-run row cites logs/dryrun_*.log and those logs hold only the command and EXIT=0, so the figures rest on the committed shc-apply-scope-estimates-results.json alone.\nVERDICT write_paths: the declared scope is docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html, -run.py and -results.json; `git diff --stat 35bd9f985 5df63e828` lists exactly those three paths (+704/-0) and nothing else.\nVERDICT manifest: read; it names commits f67cd08a0 and 5df63e828, status complete, `tests: none - no product code changed`, ten test_logs, a negative_control_log of logs/diff_check.log, one landing line and three follow_ons, and its stated totals (29 unguarded calls, $12.01) reconcile with the results JSON.\nVERDICT diff: read commit by commit from 35bd9f985 to 5df63e828 - two commits, three new files, +704/-0; the repair 5df63e828 replaces the fragment's wrong $5.15 guarded-unguarded difference with $7.0385, tied to the boundary family's own estimate_usd, and names both operands in the results JSON.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: shc-apply-scope-estimates-results.json gives each family's estimate with its measured basis, but the component family chosen at run.py:48 (parallel_conductivity) already reads harmonized, so the component pattern kind contributes 0 calls and $0.00 and no estimate at all.\nSCORE evidence: 13\nJUSTIFICATION evidence: the fragment's figures are re-derivable from the committed shc-apply-scope-estimates-results.json (total_planned_calls 29, total_estimate_usd 12.0068) and logs/diff_check.log reddens at the pre-repair fragment, but each dry-run row cites logs/dryrun_*.log and those logs hold only the command and EXIT=0, no figure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat 35bd9f985 5df63e828` changes exactly the three declared paths (+704/-0) and nothing else.\nSCORE durability: 10\nJUSTIFICATION durability: no test is added (manifest tests: none - no product code changed), so nothing reddens if the script's planning or the fragment's figures regress; the only falsifiable instrument is the uncommitted check in logs/diff_check.log, which does redden at the pre-repair fragment.\nSCORE fit: 15\nJUSTIFICATION fit: the evidence paths follow the <plan-slug>/<node-id> convention and the script delegates every read to the harmonize.py owners, but run.py:39 and the results JSON why fields embed a plan-section label (\u00a73).\nSCORE reuse: 19\nJUSTIFICATION reuse: the script adds one local helper, _lint_by_kind at run.py:61, with no existing owner, and delegates planning, refusal preview, family reporting and cost measurement to imas_codex/standard_names/harmonize.py:1205,1382,548,834 rather than re-deriving them.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-results.json:66 follow-on: the boundary entry carries decision apply, planned_calls 17 and estimate_usd 7.0385, the unguarded plan, while the fragment reports the same family as refused at 0 calls and $0.00, and neither the entry nor total_planned_calls 29 (results.json:31) is labelled unguarded, so a reader of the results JSON alone takes $7.04 as the boundary family's spend when the guarded apply would refuse it.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html:315 follow-on: the nowrite paragraph says each dry run ended with the CLI's own line, Wrote nothing., but no cited log retains it - logs/dryrun_*.log contain only the command and EXIT=0 - so the no-write claim rests on the worker's manifest rather than on a retained log.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py:48 follow-on: the component pattern kind is measured on parallel_conductivity, whose members already read harmonized (results.json:121), so the component axis contributes 0 calls and $0.00 and no before/after documentation comparison; the brief asked for one non-WEST family per pattern kind and the three-family measure cannot show a component cost.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py:39 follow-on: the SCOPE why string (and the same text copied into the results JSON why fields) embeds a plan-section label, the 17-member boundary-averaged density family \u00a73 completes on, which the naming rules forbid in code and comments.\n",
+  "review_run_id": "r-20261015T102203580804-review-of-shc-apply-scope-estimates-5df63e828143",
+  "reviewed_base_sha": "35bd9f9851f7340d75c1ccb1ad08d780f653e35d",
+  "reviewed_head_sha": "5df63e828143a3de0ae78c03eb77edd332c0f6dc",
+  "reviewed_run_id": "r-20261015T094427504023-shc-apply-scope-estimates",
+  "scores": {
+    "durability": 10,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T10:35:22.041102+00:00",
+  "total": 93
+}
