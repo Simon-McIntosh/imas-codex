@@ -375,10 +375,11 @@ model = "openrouter/openai/gpt-5.5"
 # the decisions endpoint, which takes its own request shape — so it holds a
 # seat separate from the chat classifier that re-judges low-confidence paths.
 # The threshold is the two-level probability below which a path is handed to
-# the chat classifier; 0.9 is the bar the tree benchmark calibrated on its
-# held-out rows.
+# the chat classifier; 0.8 is the bar the tree re-run measured on the
+# rule-labelled paths, where it settles 112 of 201 and beats chat in the
+# 0.8–0.9 band.
 model = "typesafe/jev-1.13"
-threshold = 0.9
+threshold = 0.8
 
 [tool.imas-codex.sn-prose-adjudicator]
 # Adjudicates banned-prose grep flags on refined docs at the campaign

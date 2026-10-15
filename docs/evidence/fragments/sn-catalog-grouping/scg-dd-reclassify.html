@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-catalog-grouping">
+  <title>scg-dd-reclassify — DD path re-classification at threshold 0.8</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <section id="scg-dd-reclassify">
+   <h2>scg-dd-reclassify — DD path re-classification at threshold 0.8</h2>
+
+   <p>
+     <strong>Status: blocked.</strong> Two conditions stopped the node before the
+     full re-classification finished: the time fence (60&nbsp;min) and a
+     pre-existing wiring test that pins the seat threshold. Three IDS groups
+     completed and their paths are re-classified; the remaining groups are
+     recorded in the ledger for a resumed pass. The lead ruled on 2026-10-14
+     that the <code>sn-domain-tree</code> threshold moves from 0.9 to 0.8.
+   </p>
+
+   <h3 id="scg-dd-reclassify-threshold">Threshold set to 0.8</h3>
+   <p>
+     <code>[tool.imas-codex.sn-domain-tree].threshold</code> is now
+     <code>0.8</code> (<code>pyproject.toml:381</code>, comment moved with the
+     value). <code>get_sn_domain_tree_threshold()</code> reads it
+     (<code>imas_codex/settings.py:1480</code>) and the tree routes a path
+     below it to chat (<code>imas_codex/graph/dd_domain_classifier.py:1207</code>).
+   </p>
+
+   <h3 id="scg-dd-reclassify-upsert">The build's path upsert keeps a classified domain</h3>
+   <p>
+     Confirmed from the code, not assumed. The path upsert in
+     <code>imas_codex/graph/build_dd.py:3583</code> writes the IDS default
+     domain only where the node has no classification yet:
+   </p>
+   <pre><code>path.physics_domain = CASE
+    WHEN path.domain_source IS NULL THEN p.physics_domain
+    ELSE path.physics_domain
+END,</code></pre>
+   <p>
+     So a rebuild over a classified path leaves its <code>physics_domain</code>
+     alone. The reset deliberately clears <code>physics_domain</code>,
+     <code>domain_source</code>, <code>domain_model</code>,
+     <code>domain_classified_at</code> and <code>domain_input_hash</code> for
+     <code>embedded</code> (<code>imas_codex/graph/dd_graph_ops.py:595</code>),
+     so re-classification starts clean.
+   </p>
+
+   <h3 id="scg-dd-reclassify-dryrun">Dry run: only classification would run</h3>
+   <p>
+     <code>imas-codex imas dd build --reset-to embedded --dry-run --ids
+     interferometer</code> reported, verbatim:
+   </p>
+   <pre><code>Reset: nodes → embedded
+enrich_worker: Enrichment skipped (dry run)
+refine_worker: Refinement skipped (dry run)
+embed_worker: Embedding skipped (dry run)
+classify_worker: Starting domain classification
+Tier 3 (none/metadata): 0 paths
+Tier 1 candidates: 21 paths
+Tier 2 (inherited): 88 paths</code></pre>
+   <p>
+     A real run skips extract and build too, through
+     the already-built check (<code>dd_workers.py:294</code>), and each worker
+     claims only the status its stage produces, so no stage other than
+     classification writes. The node is not blocked on that check.
+   </p>
+
+   <h3 id="scg-dd-reclassify-run">The run</h3>
+   <p>
+     The classified tier across the whole graph is 12,036 paths (classifiable
+     node categories, outside infrastructure). Reset clears the 55,838 nodes at
+     status <code>classified</code>. Each pass is bounded by
+     <code>timeout 540</code> and runs one IDS group.
+   </p>
+   <table>
+    <thead><tr><th>pass</th><th>IDS members</th><th>reset nodes</th><th>Tier-1 paths</th><th>classification</th></tr></thead>
+    <tbody>
+      <tr><td>g01</td><td>10 small IDSs</td><td>867</td><td>49</td><td>complete</td></tr>
+      <tr><td>g02</td><td>23 IDSs</td><td>4,279</td><td>524</td><td>complete</td></tr>
+      <tr><td>g03</td><td>11 IDSs</td><td>3,268</td><td>561</td><td>complete</td></tr>
+    </tbody>
+   </table>
+   <p>
+     Total: 1,134 of 12,036 Tier-1 paths classified, across 3 groups, each reset
+     once and no group reset twice.
+   </p>
+   <ul>
+     <li><strong>Settled by the tree:</strong> <code>domain_source = jev_tree</code> 542 (47.8%).</li>
+     <li><strong>Sent to chat:</strong> 592 (52.2%).</li>
+     <li><strong>Total spend:</strong> USD 2.37 (g01 0.16 + g02 1.09 + g03 1.12).
+       The plan bounds this at USD 25; at this rate all 12,036 paths project to
+       about USD 25, so the ceiling is the constraining limit.</li>
+   </ul>
+
+   <h3 id="scg-dd-reclassify-readback">The 201 rule-labelled paths, read from the graph</h3>
+   <p>
+     Only the 45 of the 201 paths whose IDS completed a group are read back as
+     re-classified. On that subset the graph's domain matches the rule label on
+     42 of 45 = <strong>0.9333</strong>, beside the plan's estimate of 0.89.
+     The whole-graph readback over all 201 is 0.5473, dominated by paths whose
+     group has not run yet and which still carry the pre-run value. Log at
+     <code>EXIT=0</code>.
+   </p>
+   <p>
+     Post-run domain-source distribution over the whole graph:
+     <code>inherited_from_parent</code> 35,740, <code>llm_classified</code>
+     11,496, <code>none_metadata</code> 7,925, <code>jev_tree</code> 542.
+   </p>
+
+   <h3 id="scg-dd-reclassify-blocker">Blocker: the wiring test pins the threshold</h3>
+   <p>
+     <code>tests/graph/test_dd_build_classify_tree.py</code> fails at head
+     (3 failed, 2 passed). <code>test_the_configured_threshold_is_read_from_the_seat_section</code>
+     asserts <code>get_sn_domain_tree_threshold() == pytest.approx(0.9)</code>,
+     and two routing tests use a probability of 0.85, which is below 0.9 but
+     above 0.8, so it no longer reaches chat. The test file is not in this
+     node's write scope, so the pin (0.9 → 0.8, with its two docstrings) is left
+     for a scope grant.
+   </p>
+  </section>
+ </main>
+</body>
+</html>
