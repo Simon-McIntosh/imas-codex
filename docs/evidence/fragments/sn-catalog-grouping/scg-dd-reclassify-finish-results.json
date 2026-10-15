@@ -480,15 +480,27 @@
     "summary_paths_at_data_management": 4,
     "score_primary": {
       "label_set": "scg-tree-rerun-revised-guidance-results.json",
-      "paths": 201,
+      "instrument": "labels",
+      "paths_scored": 201,
+      "graph_rows": 201,
+      "paths_absent_from_graph": 0,
       "matches": 184,
-      "accuracy": 0.9154
+      "accuracy": 0.9154,
+      "estimate": 0.89,
+      "estimate_note": "the plan's estimate for this classifier's accuracy on the labelled paths, recorded beside the result",
+      "log": "passes/readback-revised-labels.log",
+      "result": "passes/readback-revised-labels.json"
     },
     "score_prior": {
       "label_set": "scg-domain-path-measure-results.json",
-      "paths": 201,
+      "instrument": "labels",
+      "paths_scored": 201,
+      "graph_rows": 201,
+      "paths_absent_from_graph": 0,
       "matches": 135,
-      "accuracy": 0.6716
+      "accuracy": 0.6716,
+      "log": "passes/readback-prerevision-labels.log",
+      "result": "passes/readback-prerevision-labels.json"
     },
     "mismatches_primary": [
       {
@@ -610,7 +622,59 @@
         "domain_source": null,
         "label_set": "scg-tree-rerun-revised-guidance-results.json"
       }
+    ],
+    "score_denominator": {
+      "basis": "labelled paths, not graph rows: the labelled set is fixed and a labelled path the graph does not hold is counted as a miss, so a shrinking graph cannot raise the score",
+      "paths_scored": 201,
+      "graph_rows": 201,
+      "paths_absent_from_graph": 0
+    },
+    "negative_control": {
+      "instrument": "bare-string",
+      "label_set": "scg-tree-rerun-revised-guidance-results.json",
+      "paths_scored": 201,
+      "matches": 0,
+      "accuracy": 0.0,
+      "note": "the pre-repair instrument read each labelled entry as a bare domain string rather than its label field; every label file here maps a path to a record, so it scores zero. It is kept as a runnable --instrument bare-string control.",
+      "log": "passes/readback-control-bare-string.log",
+      "result": "passes/readback-control-bare-string.json"
+    },
+    "readback_logs": [
+      "passes/readback-control-bare-string.log",
+      "passes/readback-revised-labels.log",
+      "passes/readback-prerevision-labels.log"
     ]
   },
-  "not_done": "standard-name domains were not re-derived; that is the next node"
+  "not_done": "standard-name domains were not re-derived; that is the next node",
+  "unclassified_grid_paths": {
+    "paths": [
+      "core_profiles/profiles_1d/grid/rho_pol_norm",
+      "core_profiles/profiles_1d/grid/rho_tor_norm",
+      "core_sources/source/profiles_1d/grid/rho_pol_norm",
+      "core_sources/source/profiles_1d/grid/rho_tor_norm",
+      "ece/channel/beam_tracing/beam/position/rho_tor_norm",
+      "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm"
+    ],
+    "count": 6,
+    "node_category": "coordinate",
+    "domain_source": null,
+    "cause": {
+      "function": "_query_unclassified_paths",
+      "file": "imas_codex/graph/dd_domain_classifier.py",
+      "def_line": 1517,
+      "line": 1544,
+      "property_read": "n.node_category",
+      "detail": "the Tier-1 selector admits only n.node_category IN $categories, where $categories is CLASSIFIABLE_CATEGORIES (imas_codex/graph/dd_domain_classifier.py:85), whose members are quantity, structural, representation, geometry and fit_artifact. coordinate is excluded, so the six grid coordinates are never returned to the classifier.",
+      "inheritance_gap": {
+        "function": "_inherit_from_parent_by_category",
+        "file": "imas_codex/graph/dd_domain_classifier.py",
+        "def_line": 491,
+        "line": 535,
+        "detail": "the Tier-2 fallback for coordinates requires an ancestor with ancestor.domain_source IS NOT NULL within five HAS_PARENT hops. The only ancestors of a grid coordinate are core_profiles/profiles_1d and core_profiles/profiles_1d/grid, both structural with domain_source null, so nothing is inherited and the paths keep the IDS default the build upsert writes (transport, electromagnetic_wave_diagnostics, auxiliary_heating)."
+      },
+      "exclusion_is_right": true,
+      "exclusion_reason": "a grid axis is a coordinate, not a quantity with a subject of its own; CLASSIFIABLE_CATEGORIES excludes it by design, and its docstring states that coordinates inherit from a parent. The defect is the inheritance that cannot reach a classified ancestor here, not the category filter."
+    }
+  },
+  "figure": "docs/figures/sn-catalog-grouping/scg-dd-reclassify-finish/domain-source-and-summary-before-after.svg"
 }
