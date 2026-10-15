@@ -388,22 +388,22 @@ def test_a_catalog_edited_member_is_reported_not_silently_skipped(
 
     # The step reports the member protection withheld...
     assert step["protected"] == [_PROBE]
-    # ...and the protected row never reached the writer at all. That is the
-    # point: handed the row, the writer strips it and writes each stripped field
-    # as empty, clearing the member's documentation and links. So the writer
-    # withheld nothing (it saw nothing protected) and wrote only the other two.
+    # ...and the member keeps its own documentation and links, dead link and
+    # all. This is the assertion the finding is about: handed a protected row
+    # the writer strips it and writes each stripped field as empty — clearing
+    # the member's documentation and links — so it stands before the counts, and
+    # a regression fails here, naming the harm.
+    probe = graph.node(_PROBE)
+    assert f"name:{_GHOST}" in probe["links"]
+    assert probe["documentation"] == _PROBE_DOC
+    # The protected row never reached the writer at all, which is why the harm
+    # above cannot happen: nothing for it to strip, and one fewer row written.
     assert graph.protected_by_writer == []
     assert step["written"] == 2
     assert [row["id"] for write_batch in graph.written for row in write_batch] == [
         _ANCHOR,
         _BOUNDARY,
     ]
-    # The member keeps its own editorial fields, dead link and all: that is the
-    # price of not overriding a catalog edit, and the step says so rather than
-    # counting the member among those it reconciled.
-    probe = graph.node(_PROBE)
-    assert f"name:{_GHOST}" in probe["links"]
-    assert probe["documentation"] == _PROBE_DOC
     # The members that were not protected did get their reconciliation.
     assert f"name:{_PROBE}" in graph.node(_ANCHOR)["links"]
     assert f"name:{_ANCHOR}" in graph.node(_BOUNDARY)["links"]
