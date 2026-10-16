@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/review/jev_review.py:510 review_names calls build_name_state",
+    "imas_codex/standard_names/review/jev_review.py:570 _item_record calls audit_finding_for"
+  ],
+  "completed_at": "2026-10-16T11:04:40Z",
+  "dispatched_at": "2026-10-16T10:56:34Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "402",
+      "severity": "blocking",
+      "text": "blocking: audit_finding_for returns before repeated_token_check when audit_report is None, and _item_record at :571 marks the check unanswered; the receipt call in srtj-noul-polarity-run.py:337 supplies no report, so removing its Jev question leaves this check undecided in the measured arm and in a default review_names call."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py",
+      "line": "341",
+      "severity": "blocking",
+      "text": "blocking: the report encodes an abandoned property-only validation probe as well as a corrected validation read, and the fragment acknowledges exposure before correction; the done_when requires validation to be read once after calibration, so this arm cannot establish that holdout measure without a fresh independent validation cohort."
+    },
+    {
+      "file": "tests/standard_names/test_jev_name_review.py",
+      "line": "151",
+      "severity": "follow-on",
+      "text": "follow-on: the COCOS test supplies psi_like inside its own dd_source_docs fixture, so deleting the DD reader enrichment at srtj-evidence-supply-run.py:108-129 leaves the assertion green; add a reader-bound test or control to protect that connection."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py",
+      "line": "187",
+      "severity": "follow-on",
+      "text": "follow-on: all pending Jev requests are scheduled before the USD 0.50 check at :203, so the ceiling can be exceeded by in-flight requests even though this recorded arm spent only USD 0.165378."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/head-gate-final.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/base-gate.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read the five commits from 2f076bda345d7b47d8fe305e7475eefac75738d5 to 67b874d93c6f476f9f3cf481c6716e7ed7e814d3: they change the state builder and taxonomy, add four focused tests, and add the receipt runner, frozen results and evidence fragment.",
+    "done_when": "The source brief requires the two focused tests, a red COCOS control, a reproducible rescore and one validation read; base-gate.log ends 40 passed EXIT=0, head-gate-final.log ends 44 passed EXIT=0, negative-control.log ends one failed EXIT=1, and rescore-final.log ends EXIT=0, while srtj-evidence-supply.html:4 records an earlier validation exposure.",
+    "goal": "The source brief asks for source-backed COCOS, roster, decomposition, owner evidence and a code-decided repeated-token check; jev_review.py:165-263 supplies the state fields, but its check at :402 can remain undecided.",
+    "manifest": "The source manifest reports five commits, 44 passing head tests, one red COCOS wiring control, USD 0.165378 spent and a shadow verdict; its named gate and rescore logs substantiate those results.",
+    "write_paths": "The source brief declares seven files, and git diff 2f076bda345d7b47d8fe305e7475eefac75738d5..67b874d93c6f476f9f3cf481c6716e7ed7e814d3 changes exactly those seven paths."
+  },
+  "justifications": {
+    "durability": "test_jev_name_review.py:151-203 has independent expected labels, roster values, qualifiers and repeated-token outcomes that redden when their builder or decider is removed, but the COCOS test injects its own reader result and passes if the DD reader connection is removed.",
+    "evidence": "head-gate-final.log and rescore-final.log record successful gates, while srtj-evidence-supply.html:4 admits validation was exposed in an abandoned probe before the corrected arm.",
+    "fit": "jev_review.py:165-170 uses the existing roster loader and :404-408 uses the existing repeated-token audit, with no new forbidden source symbol.",
+    "goal_fidelity": "jev_review.py:259-263 carries the requested evidence, but :402 skips the code decider when review_names receives no audit report.",
+    "reuse": "the capability search found owners in grammar_adapter.py:117, audits.py:3068, workers.py:2143 and the scorer at srtj-name-review-measure-run.py:440, and the landed code calls them rather than reimplementing them.",
+    "scope_discipline": "git diff 2f076bda..67b874d3 changes only the seven files named by the source brief's write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks for source-backed COCOS, roster, decomposition, owner evidence and a code-decided repeated-token check; jev_review.py:165-263 supplies the state fields, but its check at :402 can remain undecided.\nVERDICT done_when: The source brief requires the two focused tests, a red COCOS control, a reproducible rescore and one validation read; base-gate.log ends 40 passed EXIT=0, head-gate-final.log ends 44 passed EXIT=0, negative-control.log ends one failed EXIT=1, and rescore-final.log ends EXIT=0, while srtj-evidence-supply.html:4 records an earlier validation exposure.\nVERDICT write_paths: The source brief declares seven files, and git diff 2f076bda345d7b47d8fe305e7475eefac75738d5..67b874d93c6f476f9f3cf481c6716e7ed7e814d3 changes exactly those seven paths.\nVERDICT manifest: The source manifest reports five commits, 44 passing head tests, one red COCOS wiring control, USD 0.165378 spent and a shadow verdict; its named gate and rescore logs substantiate those results.\nVERDICT diff: Read the five commits from 2f076bda345d7b47d8fe305e7475eefac75738d5 to 67b874d93c6f476f9f3cf481c6716e7ed7e814d3: they change the state builder and taxonomy, add four focused tests, and add the receipt runner, frozen results and evidence fragment.\nCALL_SITES: imas_codex/standard_names/review/jev_review.py:510 review_names calls build_name_state, imas_codex/standard_names/review/jev_review.py:570 _item_record calls audit_finding_for\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: jev_review.py:259-263 carries the requested evidence, but :402 skips the code decider when review_names receives no audit report.\nSCORE evidence: 13\nJUSTIFICATION evidence: head-gate-final.log and rescore-final.log record successful gates, while srtj-evidence-supply.html:4 admits validation was exposed in an abandoned probe before the corrected arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 2f076bda..67b874d3 changes only the seven files named by the source brief's write scope.\nSCORE durability: 14\nJUSTIFICATION durability: test_jev_name_review.py:151-203 has independent expected labels, roster values, qualifiers and repeated-token outcomes that redden when their builder or decider is removed, but the COCOS test injects its own reader result and passes if the DD reader connection is removed.\nSCORE fit: 17\nJUSTIFICATION fit: jev_review.py:165-170 uses the existing roster loader and :404-408 uses the existing repeated-token audit, with no new forbidden source symbol.\nSCORE reuse: 19\nJUSTIFICATION reuse: the capability search found owners in grammar_adapter.py:117, audits.py:3068, workers.py:2143 and the scorer at srtj-name-review-measure-run.py:440, and the landed code calls them rather than reimplementing them.\nFINDING imas_codex/standard_names/review/jev_review.py:402 blocking: audit_finding_for returns before repeated_token_check when audit_report is None, and _item_record at :571 marks the check unanswered; the receipt call in srtj-noul-polarity-run.py:337 supplies no report, so removing its Jev question leaves this check undecided in the measured arm and in a default review_names call.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py:341 blocking: the report encodes an abandoned property-only validation probe as well as a corrected validation read, and the fragment acknowledges exposure before correction; the done_when requires validation to be read once after calibration, so this arm cannot establish that holdout measure without a fresh independent validation cohort.\nFINDING tests/standard_names/test_jev_name_review.py:151 follow-on: the COCOS test supplies psi_like inside its own dd_source_docs fixture, so deleting the DD reader enrichment at srtj-evidence-supply-run.py:108-129 leaves the assertion green; add a reader-bound test or control to protect that connection.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py:187 follow-on: all pending Jev requests are scheduled before the USD 0.50 check at :203, so the ceiling can be exceeded by in-flight requests even though this recorded arm spent only USD 0.165378.\n",
+  "review_run_id": "r-20261016T105518513392-review-of-srtj-evidence-supply-67b874d93c6f",
+  "reviewed_base_sha": "2f076bda345d7b47d8fe305e7475eefac75738d5",
+  "reviewed_head_sha": "67b874d93c6f476f9f3cf481c6716e7ed7e814d3",
+  "reviewed_run_id": "r-20261016T101231058904-srtj-evidence-supply",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T11:00:40.659101+00:00",
+  "total": 98
+}
