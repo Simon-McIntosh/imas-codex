@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="109">
+<meta name="plan-version" content="110">
 <meta name="plan-modified" content="2026-10-16">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab,c5e94c099ff238c7925e506686016698bdb04b64,178cfa68ba0e7aae45c0b76ea3ccc0511eb8c07d,02a113fb8754bf9a57a279726afbdf1d85fc57f8">
 </head>
@@ -592,6 +592,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261016T085434125759-review-of-scg-ids-map-jev-e9d84ca2e0fe" data-who="reckon-build" data-when="2026-10-16T09:11:02.855Z">
     <div class="r-comment-body"><p>review of r-20261016T083230919670-scg-ids-map-jev at base d481ae65642b9ce9974f715a9d83023212bba6da head e9d84ca2e0fe39b5c445c9d7e9d8ffd95101310b — six-dimension record goal_fidelity 19, evidence 14, scope_discipline 20, durability 10, fit 17, reuse 12, total 92, no blocking finding, six follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s3-lead-ruling-ids-map" data-who="lead" data-when="2026-10-16T09:45:00Z">
+    <div class="r-comment-body"><p>Lead ruling on the IDS-to-domain map: write 25 changes. The 21 corrections that both the rules and Jev reached: amns_data → computational_workflow; calorimetry → mechanical_measurement_diagnostics; charge_exchange, mse, spectrometer_mass, spectrometer_uv, spectrometer_visible and spectrometer_x_ray_crystal → spectroscopy; core_instant_changes, core_profiles and plasma_profiles → core_plasma_physics; distribution_sources and distributions → fast_particles; gas_injection and pellets → fueling; gyrokinetics and gyrokinetics_local → gyrokinetics; neutron_diagnostic → neutronics; runaway_electrons → runaway_electrons; thomson_scattering → particle_measurement_diagnostics; waves → waves. Of the two rule-only corrections, spi → fueling is written: it is a pellet injector, its paths read fueling 292 to 43, and Jev's plant_systems answer came from its weakest category step. edge_transport stays edge_plasma_physics. Of the ten third-domain answers, two are written: ece → radiation_measurement_diagnostics and plasma_initiation → plasma_initiation. radiation → core_plasma_physics, because it holds computed emission, not a measurement. Every other IDS keeps its current domain, including the three low-confidence answers (gas_pumping, pulse_schedule, sdn).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261014T182748718064-review-of-scg-domain-precedence-0faae66faa2c" data-who="reckon-build" data-when="2026-10-14T18:38:07.927Z">
     <div class="r-comment-body"><p>review of run r-20261014T180703200185-scg-domain-precedence (head 0faae66faa2ccd151b485115b287dd21cb5a16ff, base bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85) stored as a parsed six-dimension record — goal_fidelity 19, evidence 17, scope_discipline 20, durability 16, fit 18, reuse 17, total 107; one follow-on finding (the chat prompt's category list is not reordered by the precedence it claims to follow)</p></div>
