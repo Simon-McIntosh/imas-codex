@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "f692914ac864690d70872f1e3cf8b415d629f489",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/graph_ops.py:24535 stage_name_for_rescore",
+    "imas_codex/standard_names/edit.py:3970 rescore_name",
+    "imas_codex/cli/sn.py:8436 sn_rescore"
+  ],
+  "completed_at": "2026-10-16T10:54:59Z",
+  "dispatched_at": "2026-10-16T10:49:55Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T103446162116-shc-rescore-cypher-fix/manifest.md",
+      "line": "21",
+      "severity": "blocking",
+      "text": "blocking: baseline_suite and after_suite are empty, so the store's read-time annotation replaces the measured zero added failures with unmeasured; populate both suite receipts before promoting the source run."
+    }
+  ],
+  "head_log_revision": "d80213d18b8830c5546c3adcf9d066a0cb9ac358",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read d80213d18b8830c5546c3adcf9d066a0cb9ac358 and eb38b6494ae1bcd0aa5dd2fe83fe4100febe25aa against f692914ac864690d70872f1e3cf8b415d629f489; they change one predicate, share its query with two tests, and record the receipts in the fragment.",
+    "done_when": "base-dry-run.log reproduces Invalid input 'NOT' with EXIT=1, head-explain.log and head-dry-run.log exit 0, infix-negative-control.log fails both added tests, and the base/head default logs have 8/9 passes with zero added failure IDs.",
+    "goal": "the source goal repairs the server-rejected rescore predicate; imas_codex/standard_names/graph_ops.py:24470 uses prefix NOT and head-dry-run.log reports exhausted to drafted.",
+    "manifest": "the source manifest.md:11-25 names both commits and seven gate logs, but baseline_suite and after_suite at lines 21-22 are empty despite the base/head test receipts.",
+    "write_paths": "the source manifest.md:3 declares graph_ops.py, test_rescore_terminal_status.py, the evidence fragment, and a figures directory; the three changed files stay within those paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_rescore_terminal_status.py:129 fails if the shared statement cannot plan on Neo4j, and line 142 fails if its literal contains infix NOT IN; infix-negative-control.log shows both red.",
+    "evidence": "docs/evidence/fragments/sn-harmonize-command/shc-rescore-cypher-fix.html:14-24 matches the complete gate logs, but source manifest.md:21-22 leaves the machine-readable base and head suite fields empty.",
+    "fit": "imas_codex/standard_names/graph_ops.py:24467 lifts the pre-existing query into a constant next to its owner, and tests/standard_names/test_rescore_terminal_status.py:115 uses the existing graph marker.",
+    "goal_fidelity": "imas_codex/standard_names/graph_ops.py:24470 uses the accepted prefix predicate, and the production call at line 24537 passes that exact statement to GraphClient.",
+    "reuse": "the capability search for rescore eligibility and stage transitions found the existing owner at imas_codex/standard_names/graph_ops.py:24501; the added constant at line 24467 extends that owner and is called at line 24537.",
+    "scope_discipline": "both commits change only imas_codex/standard_names/graph_ops.py, tests/standard_names/test_rescore_terminal_status.py, and the declared evidence fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal repairs the server-rejected rescore predicate; imas_codex/standard_names/graph_ops.py:24470 uses prefix NOT and head-dry-run.log reports exhausted to drafted.\nVERDICT done_when: base-dry-run.log reproduces Invalid input 'NOT' with EXIT=1, head-explain.log and head-dry-run.log exit 0, infix-negative-control.log fails both added tests, and the base/head default logs have 8/9 passes with zero added failure IDs.\nVERDICT write_paths: the source manifest.md:3 declares graph_ops.py, test_rescore_terminal_status.py, the evidence fragment, and a figures directory; the three changed files stay within those paths.\nVERDICT manifest: the source manifest.md:11-25 names both commits and seven gate logs, but baseline_suite and after_suite at lines 21-22 are empty despite the base/head test receipts.\nVERDICT diff: read d80213d18b8830c5546c3adcf9d066a0cb9ac358 and eb38b6494ae1bcd0aa5dd2fe83fe4100febe25aa against f692914ac864690d70872f1e3cf8b415d629f489; they change one predicate, share its query with two tests, and record the receipts in the fragment.\nCALL_SITES: imas_codex/standard_names/graph_ops.py:24535 stage_name_for_rescore, imas_codex/standard_names/edit.py:3970 rescore_name, imas_codex/cli/sn.py:8436 sn_rescore\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_ops.py:24470 uses the accepted prefix predicate, and the production call at line 24537 passes that exact statement to GraphClient.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/evidence/fragments/sn-harmonize-command/shc-rescore-cypher-fix.html:14-24 matches the complete gate logs, but source manifest.md:21-22 leaves the machine-readable base and head suite fields empty.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: both commits change only imas_codex/standard_names/graph_ops.py, tests/standard_names/test_rescore_terminal_status.py, and the declared evidence fragment.\nSCORE durability: 20\nJUSTIFICATION durability: tests/standard_names/test_rescore_terminal_status.py:129 fails if the shared statement cannot plan on Neo4j, and line 142 fails if its literal contains infix NOT IN; infix-negative-control.log shows both red.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/graph_ops.py:24467 lifts the pre-existing query into a constant next to its owner, and tests/standard_names/test_rescore_terminal_status.py:115 uses the existing graph marker.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search for rescore eligibility and stage transitions found the existing owner at imas_codex/standard_names/graph_ops.py:24501; the added constant at line 24467 extends that owner and is called at line 24537.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T103446162116-shc-rescore-cypher-fix/manifest.md:21 blocking: baseline_suite and after_suite are empty, so the store's read-time annotation replaces the measured zero added failures with unmeasured; populate both suite receipts before promoting the source run.\n",
+  "review_run_id": "r-20261016T104850398818-review-of-shc-rescore-cypher-fix-eb38b6494ae1",
+  "reviewed_base_sha": "f692914ac864690d70872f1e3cf8b415d629f489",
+  "reviewed_head_sha": "eb38b6494ae1bcd0aa5dd2fe83fe4100febe25aa",
+  "reviewed_run_id": "r-20261016T103446162116-shc-rescore-cypher-fix",
+  "scores": {
+    "durability": 20,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_base_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T103446162116-shc-rescore-cypher-fix/base-tests.log",
+  "source_head_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T103446162116-shc-rescore-cypher-fix/head-default.log",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T10:53:02.627256+00:00",
+  "total": 115
+}
