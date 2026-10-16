@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T06:22:32.926Z",
+  "dispatched_at": "2026-10-16T06:05:27Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html",
+      "line": "27",
+      "severity": "follow-on",
+      "text": "follow-on: the part 6 comparison says the umbrella measure reached at best 51 of 73 calibration, but scg-name-domain-umbrella-measure-results.json gives 53/73 for ids_then_paths_umbrella_0.500 and 51/73 only for the two set-precedence variants, so the stated best is one name low and reads as a maximum it is not."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "follow-on: \"1 IDSs carry a single domain, 72 are mostly one domain and 15 are mixed\" sums to 88 over 87 IDSs because single_domain_ids (temporary) also sits inside mostly_one_domain_ids in scg-ids-domain-design-results.json, so the three figures are not the partition a reader takes them for."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py",
+      "line": "292",
+      "severity": "follow-on",
+      "text": "follow-on: the second axis never clears its default numeric y ticks, so the figure renders IDS row indices 70 and 80 on an inverted scale with 80 drawn below 70, a mark a reader can misread as a measured quantity."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py",
+      "line": "339",
+      "severity": "follow-on",
+      "text": "follow-on: the figure self-check continues past any text artist whose box is not wholly inside the canvas, so a partly clipped label is skipped by the overlap pass and only the coarser tight-bbox assert at line 326 guards it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit \u2014 c2e4695b6 adds the run script, results JSON, fragment and figure (11,543 insertions) and 2ad3a1fd6 records the measurement timings; every hunk sits inside the declared scope.",
+    "done_when": "the done_when has three clauses \u2014 the fragment and results JSON carry all six parts, a logged rerun reproduces every figure at EXIT=0, and one SVG shows each IDS's mix against its mapped domain; the first holds across scg-ids-domain-design.html and the results JSON's accuracy, jev_reach, ids_mix_summary and blast_radius sections, the second holds at the last line of /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051831209358-scg-ids-domain-design/run.log (EXIT=0), and the third holds as the single ids_domain_mix.svg.",
+    "goal": "the node goal is to design and measure the IDS-first standard-name domain rule with hierarchy and Jev tie-breaks, and docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html carries all six briefed parts \u2014 the consumer use case, today's domain sources with the two stored findings verified, the per-IDS mix, the measured rule on three sets, the designed tie-break and the recommendation.",
+    "manifest": "read; it records status complete, both commits, tests not-applicable with test_logs run.log, and its findings match the artefacts \u2014 I re-verified both stored findings against 2ad3a1fd6, where imas_codex/graph/dd_domain_classifier.py:1028 defines _answer_for with uses at :1164 and :1178, and the documentation field is emitted at :886.",
+    "write_paths": "the brief declares the three fragment files plus the figures directory docs/figures/sn-catalog-grouping/scg-ids-domain-design; the diff 6e0a1c75..2ad3a1fd6 adds exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "no test path is in scope and the manifest carries no baseline/after arms, so the only guards are the asserts in scg-ids-domain-design-run.py:631-659, which are independent of the values under test but fail only if the rerun is exercised.",
+    "evidence": "the run.log EXIT=0 line and the results JSON reconcile with every figure the fragment reports (approved 9/20, calibration 55/73, validation 54/77, jev_reach 1408, blast 1481), and scg-ids-domain-design-run.py:631,656 pins a known-present census and the control counts rather than reporting an unexplained zero.",
+    "fit": "the commits carry conventional subjects with bodies and the fragment follows the brief's mandated filename, but scg-ids-domain-design-run.py:276,278 keeps panel titles and 11 pt tick labels where the plot-style rules ask for 16/14 pt and identity in the caption.",
+    "goal_fidelity": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html carries all six briefed parts, though the comparison it makes in part 6 misstates one umbrella figure at line 27.",
+    "reuse": "scg-ids-domain-design-run.py:37,123,630,633,651 imports the preceding harness module and reuses its RANK, source_rows, sources_for, choose_domain and score, and a search of imas_codex found no owner of an IDS-first rule, a per-IDS modal domain or an IDS-map correction (imas_codex/core/physics_categorization.py only reads the map).",
+    "scope_discipline": "the diff 6e0a1c75..2ad3a1fd6 touches only the three declared fragment files and the one SVG inside the declared figures directory."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to design and measure the IDS-first standard-name domain rule with hierarchy and Jev tie-breaks, and docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html carries all six briefed parts \u2014 the consumer use case, today's domain sources with the two stored findings verified, the per-IDS mix, the measured rule on three sets, the designed tie-break and the recommendation.\nVERDICT done_when: the done_when has three clauses \u2014 the fragment and results JSON carry all six parts, a logged rerun reproduces every figure at EXIT=0, and one SVG shows each IDS's mix against its mapped domain; the first holds across scg-ids-domain-design.html and the results JSON's accuracy, jev_reach, ids_mix_summary and blast_radius sections, the second holds at the last line of /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051831209358-scg-ids-domain-design/run.log (EXIT=0), and the third holds as the single ids_domain_mix.svg.\nVERDICT write_paths: the brief declares the three fragment files plus the figures directory docs/figures/sn-catalog-grouping/scg-ids-domain-design; the diff 6e0a1c75..2ad3a1fd6 adds exactly those four paths and nothing else.\nVERDICT manifest: read; it records status complete, both commits, tests not-applicable with test_logs run.log, and its findings match the artefacts \u2014 I re-verified both stored findings against 2ad3a1fd6, where imas_codex/graph/dd_domain_classifier.py:1028 defines _answer_for with uses at :1164 and :1178, and the documentation field is emitted at :886.\nVERDICT diff: read commit by commit \u2014 c2e4695b6 adds the run script, results JSON, fragment and figure (11,543 insertions) and 2ad3a1fd6 records the measurement timings; every hunk sits inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html carries all six briefed parts, though the comparison it makes in part 6 misstates one umbrella figure at line 27.\nSCORE evidence: 17\nJUSTIFICATION evidence: the run.log EXIT=0 line and the results JSON reconcile with every figure the fragment reports (approved 9/20, calibration 55/73, validation 54/77, jev_reach 1408, blast 1481), and scg-ids-domain-design-run.py:631,656 pins a known-present census and the control counts rather than reporting an unexplained zero.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff 6e0a1c75..2ad3a1fd6 touches only the three declared fragment files and the one SVG inside the declared figures directory.\nSCORE durability: 13\nJUSTIFICATION durability: no test path is in scope and the manifest carries no baseline/after arms, so the only guards are the asserts in scg-ids-domain-design-run.py:631-659, which are independent of the values under test but fail only if the rerun is exercised.\nSCORE fit: 15\nJUSTIFICATION fit: the commits carry conventional subjects with bodies and the fragment follows the brief's mandated filename, but scg-ids-domain-design-run.py:276,278 keeps panel titles and 11 pt tick labels where the plot-style rules ask for 16/14 pt and identity in the caption.\nSCORE reuse: 20\nJUSTIFICATION reuse: scg-ids-domain-design-run.py:37,123,630,633,651 imports the preceding harness module and reuses its RANK, source_rows, sources_for, choose_domain and score, and a search of imas_codex found no owner of an IDS-first rule, a per-IDS modal domain or an IDS-map correction (imas_codex/core/physics_categorization.py only reads the map).\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html:27 follow-on: the part 6 comparison says the umbrella measure reached at best 51 of 73 calibration, but scg-name-domain-umbrella-measure-results.json gives 53/73 for ids_then_paths_umbrella_0.500 and 51/73 only for the two set-precedence variants, so the stated best is one name low and reads as a maximum it is not.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html:13 follow-on: \"1 IDSs carry a single domain, 72 are mostly one domain and 15 are mixed\" sums to 88 over 87 IDSs because single_domain_ids (temporary) also sits inside mostly_one_domain_ids in scg-ids-domain-design-results.json, so the three figures are not the partition a reader takes them for.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py:292 follow-on: the second axis never clears its default numeric y ticks, so the figure renders IDS row indices 70 and 80 on an inverted scale with 80 drawn below 70, a mark a reader can misread as a measured quantity.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py:339 follow-on: the figure self-check continues past any text artist whose box is not wholly inside the canvas, so a partly clipped label is skipped by the overlap pass and only the coarser tight-bbox assert at line 326 guards it.\n",
+  "review_run_id": "r-20261016T060505372392-review-of-scg-ids-domain-design-2ad3a1fd66b2",
+  "reviewed_base_sha": "6e0a1c75baf402e6288e4edec93892a20aa2e217",
+  "reviewed_head_sha": "2ad3a1fd66b2a113ce931b1d4b6028c801e7ace4",
+  "reviewed_run_id": "r-20261016T051831209358-scg-ids-domain-design",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T06:17:53.264055+00:00",
+  "total": 103
+}
