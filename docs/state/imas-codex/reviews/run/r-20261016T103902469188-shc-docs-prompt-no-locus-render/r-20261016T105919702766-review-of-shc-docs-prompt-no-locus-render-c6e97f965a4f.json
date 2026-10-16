@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:9894 render_prompt(\"sn/generate_docs_user\"",
+    "prompt_context) with locus_context at :9889 capable of being None",
+    "imas_codex/standard_names/benchmark.py:900",
+    "imas_codex/standard_names/docs_holdout_eval.py:261"
+  ],
+  "completed_at": "2026-10-16T11:09:44.605Z",
+  "dispatched_at": "2026-10-16T11:00:02Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-docs-prompt-no-locus-render.html",
+      "line": "73",
+      "severity": "follow-on",
+      "text": "the render comparison backing \"the other two prompts do not leak\" cannot fail for them \u2014 render-compare.sh:28-34 writes the same file content into both arms because the node changed neither refine_docs_user.md nor generate_docs_system.md, so IDENTICAL is true by construction; refine_docs_user's non-leak is really carried by the golden test (whose base failure names generate_docs_user, so refine_docs_user matched its golden) and generate_docs_system has no golden capture, leaving its non-leak established only by reading the prior commit's diff, which adds no blank line around that block."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T103902469188-shc-docs-prompt-no-locus-render/head-three-files.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T103902469188-shc-docs-prompt-no-locus-render/base-three-files.log"
+  },
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read both commits from f692914ac to c6e97f965: 935770ec3 relocates the block's leading blank line inside `{% if locus_context %}` and deletes the blank line after `{% endif %}` in generate_docs_user.md, leaving refine_docs_user.md and generate_docs_system.md untouched, and c6e97f965 adds the 81-line evidence fragment.",
+    "done_when": "The done_when names test_no_edit_render_matches_golden (pass at head EXIT=0, fail at f692914ac EXIT=1), the three test files adding no failures, and the fragment recording the diff and every EXIT=; manifest.md:15-21, base-golden-single.log, head-golden-single.log, base-three-files.log and head-three-files.log record all three, and I reproduced the base red from my own tree.",
+    "goal": "The node goal \u2014 the docs prompt renders unchanged when no locus context is passed \u2014 is met: at head the no-locus render of imas_codex/llm/prompts/sn/generate_docs_user.md equals tests/standard_names/golden_edit_prompts/generate_docs_user.txt byte-for-byte (2292 chars), where the base render is 2294.",
+    "manifest": "Read; manifest.md:11-24 records two commits, head 25 passed EXIT=0 against base 1 failed/24 passed EXIT=1, the single golden test EXIT=0 head and EXIT=1 base, the golden file untouched, and a render comparison, and each named log substantiates its entry.",
+    "write_paths": "The source brief declares four write paths (the three sn docs prompts plus the evidence fragment); git diff f692914ac..c6e97f965 changes only imas_codex/llm/prompts/sn/generate_docs_user.md and docs/evidence/fragments/sn-harmonize-command/shc-docs-prompt-no-locus-render.html, both inside them."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_edit_prompt_injection.py:276 compares the render against the independent golden capture in golden_edit_prompts/generate_docs_user.txt and reddens at f692914ac (EXIT=1) when the prompt edit is removed, and tests/standard_names/test_docs_prompt_locus.py guards the with-locus instruction.",
+    "evidence": "head-three-files.log ends \"25 passed\" EXIT=0 and base-three-files.log ends \"1 failed, 24 passed\" EXIT=1, but the fragment's second claim at shc-docs-prompt-no-locus-render.html:73 rests on a comparison at render-compare.sh:28-34 that cannot fail for the two files it judges.",
+    "fit": "the edit keeps the surrounding plain `{% if %}` idiom used by refine_docs_user.md and generate_docs_system.md rather than introducing a trim-block form, adds no plan or ticket label, and changes only one blank line of the with-locus render (2877 to 2876 bytes).",
+    "goal_fidelity": "imas_codex/llm/prompts/sn/generate_docs_user.md:19-22 places the leading blank line inside the conditional and removes the trailing one, and my render of the head file reproduces tests/standard_names/golden_edit_prompts/generate_docs_user.txt exactly while the base file does not.",
+    "reuse": "the change adds no function, class or module \u2014 it is a whitespace relocation in imas_codex/llm/prompts/sn/generate_docs_user.md \u2014 and a search over imas_codex/llm/prompts and imas_codex/llm/prompt_loader.py found Jinja itself as the only owner of conditional whitespace, which the edit uses rather than forking.",
+    "scope_discipline": "git diff f692914ac..c6e97f965 changes only imas_codex/llm/prompts/sn/generate_docs_user.md and the fragment, both named in manifest.md:3."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal \u2014 the docs prompt renders unchanged when no locus context is passed \u2014 is met: at head the no-locus render of imas_codex/llm/prompts/sn/generate_docs_user.md equals tests/standard_names/golden_edit_prompts/generate_docs_user.txt byte-for-byte (2292 chars), where the base render is 2294.\nVERDICT done_when: The done_when names test_no_edit_render_matches_golden (pass at head EXIT=0, fail at f692914ac EXIT=1), the three test files adding no failures, and the fragment recording the diff and every EXIT=; manifest.md:15-21, base-golden-single.log, head-golden-single.log, base-three-files.log and head-three-files.log record all three, and I reproduced the base red from my own tree.\nVERDICT write_paths: The source brief declares four write paths (the three sn docs prompts plus the evidence fragment); git diff f692914ac..c6e97f965 changes only imas_codex/llm/prompts/sn/generate_docs_user.md and docs/evidence/fragments/sn-harmonize-command/shc-docs-prompt-no-locus-render.html, both inside them.\nVERDICT manifest: Read; manifest.md:11-24 records two commits, head 25 passed EXIT=0 against base 1 failed/24 passed EXIT=1, the single golden test EXIT=0 head and EXIT=1 base, the golden file untouched, and a render comparison, and each named log substantiates its entry.\nVERDICT diff: Read both commits from f692914ac to c6e97f965: 935770ec3 relocates the block's leading blank line inside `{% if locus_context %}` and deletes the blank line after `{% endif %}` in generate_docs_user.md, leaving refine_docs_user.md and generate_docs_system.md untouched, and c6e97f965 adds the 81-line evidence fragment.\nCALL_SITES: imas_codex/standard_names/workers.py:9894 render_prompt(\"sn/generate_docs_user\", prompt_context) with locus_context at :9889 capable of being None, imas_codex/standard_names/benchmark.py:900, imas_codex/standard_names/docs_holdout_eval.py:261\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/llm/prompts/sn/generate_docs_user.md:19-22 places the leading blank line inside the conditional and removes the trailing one, and my render of the head file reproduces tests/standard_names/golden_edit_prompts/generate_docs_user.txt exactly while the base file does not.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-three-files.log ends \"25 passed\" EXIT=0 and base-three-files.log ends \"1 failed, 24 passed\" EXIT=1, but the fragment's second claim at shc-docs-prompt-no-locus-render.html:73 rests on a comparison at render-compare.sh:28-34 that cannot fail for the two files it judges.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f692914ac..c6e97f965 changes only imas_codex/llm/prompts/sn/generate_docs_user.md and the fragment, both named in manifest.md:3.\nSCORE durability: 20\nJUSTIFICATION durability: tests/standard_names/test_edit_prompt_injection.py:276 compares the render against the independent golden capture in golden_edit_prompts/generate_docs_user.txt and reddens at f692914ac (EXIT=1) when the prompt edit is removed, and tests/standard_names/test_docs_prompt_locus.py guards the with-locus instruction.\nSCORE fit: 19\nJUSTIFICATION fit: the edit keeps the surrounding plain `{% if %}` idiom used by refine_docs_user.md and generate_docs_system.md rather than introducing a trim-block form, adds no plan or ticket label, and changes only one blank line of the with-locus render (2877 to 2876 bytes).\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no function, class or module \u2014 it is a whitespace relocation in imas_codex/llm/prompts/sn/generate_docs_user.md \u2014 and a search over imas_codex/llm/prompts and imas_codex/llm/prompt_loader.py found Jinja itself as the only owner of conditional whitespace, which the edit uses rather than forking.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-docs-prompt-no-locus-render.html:73 follow-on: the render comparison backing \"the other two prompts do not leak\" cannot fail for them \u2014 render-compare.sh:28-34 writes the same file content into both arms because the node changed neither refine_docs_user.md nor generate_docs_system.md, so IDENTICAL is true by construction; refine_docs_user's non-leak is really carried by the golden test (whose base failure names generate_docs_user, so refine_docs_user matched its golden) and generate_docs_system has no golden capture, leaving its non-leak established only by reading the prior commit's diff, which adds no blank line around that block.\n",
+  "review_run_id": "r-20261016T105919702766-review-of-shc-docs-prompt-no-locus-render-c6e97f965a4f",
+  "reviewed_base_sha": "f692914ac864690d70872f1e3cf8b415d629f489",
+  "reviewed_head_sha": "c6e97f965a4fc9860c7570ef1b6450866ef71415",
+  "reviewed_run_id": "r-20261016T103902469188-shc-docs-prompt-no-locus-render",
+  "scores": {
+    "durability": 20,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T11:07:58.829475+00:00",
+  "total": 117
+}
