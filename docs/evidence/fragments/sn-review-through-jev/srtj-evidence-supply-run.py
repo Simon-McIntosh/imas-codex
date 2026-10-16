@@ -413,8 +413,11 @@ def _render(report: dict) -> None:
         "<p>An initial property-only COCOS probe omitted cluster labels. Its validation "
         "score was seen before the reader was corrected, and five names were refreshed, "
         "three on validation. The corrected receipts were scored calibration first, "
-        "then validation once. The earlier probe makes this arm unsuitable as a pristine "
-        "holdout even though no model or threshold was selected from it.</p>",
+        "but this was a second exposure to the same validation cohort. These "
+        "figures are exploratory and cannot establish a holdout result. The 11 "
+        "untouched validation names in the committed golden have neither graph "
+        "descriptions nor quorum comparators, so they cannot form a fresh matched "
+        "cohort.</p>",
         "<h3>Calibration</h3>",
         "<table><thead><tr><th>Check</th><th>Before AUC [95%]</th><th>After AUC [95%]</th></tr></thead><tbody>",
     ]
@@ -429,7 +432,7 @@ def _render(report: dict) -> None:
             f"<p>{html.escape(key.replace('_', ' '))}: "
             f"{interval(report['calibration'][key])}.</p>"
         )
-    rows.append("<h3>Validation, read once after calibration</h3>")
+    rows.append("<h3>Exploratory validation on an exposed cohort</h3>")
     for key in ("prototype", "logistic"):
         cell = report["validation"][key]
         paired = report["validation"]["quorum"][key]
@@ -444,11 +447,11 @@ def _render(report: dict) -> None:
     lower = report["validation"]["quorum"]["logistic"]["quorum_difference_interval"][
         "lower"
     ]
-    verdict = "passes" if lower > -0.02 else "remains in shadow"
     rows.append(
-        f"<p>Deployment rule: {verdict}; the paired logistic lower bound "
-        f"{lower:+.3f} must exceed −0.020. The arm has no new operating-point or "
-        f"stability claim because the AUC condition already fails. Jev spend USD "
+        f"<p>Deployment rule: no eligible holdout verdict; the exploratory paired "
+        f"logistic lower bound {lower:+.3f} is below the required −0.020. A fresh "
+        f"independently labelled cohort with matched quorum scores is required "
+        f"before deployment can be assessed. Jev spend USD "
         f"{report['spend']['jev_usd']:.6f} of USD 0.50; "
         f"per name USD {report['spend']['per_name_usd']:.6f} and "
         f"{report['spend']['per_name_latency_s']:.2f} s. The results JSON freezes "
