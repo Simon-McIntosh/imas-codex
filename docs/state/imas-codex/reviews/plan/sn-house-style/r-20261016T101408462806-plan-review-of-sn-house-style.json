@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-16T10:25:50.262Z",
+  "dispatched_at": "2026-10-16T10:15:04Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-house-style.html:280",
+      "id": "done_when-1",
+      "reason": "without a stated control the node cannot distinguish a real note-presence check from a gate that flags all documentation, so the gate half of the deliverable rests on a measure that may hold on unfixed code.",
+      "text": "\u00a714's done-when names a revert-sensitive control for its writer arm (\"It fails with the writer reverted to `template.documentation`\") but the gate arm (\"The gate flags documentation that lacks a selected note\") carries none, so nothing shows the gate half of the node's guard fires rather than, say, an over-eager gate that flags documentation whether or not the note-check code is present",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ad0b4298ffb33ac9c8be268ba0016974a55bb303a46e7062e0209816546d9e0c",
+  "plan_slug": "sn-house-style",
+  "plan_version": 59,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-16T10:26:56.030816+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-16T10:26:56.030816+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-house-style.v59.json",
+  "review_run_id": "r-20261016T101408462806-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "4e507bb0ac08cdc5ec4f49c42cc3c059ce5b3fea",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 ISN `concept-and-notation-registry` \u00a76 (the `note` field) and \u00a77 (the accessor) exist; `workers.py ~9661` is the line that takes `template.documentation` alone; `docs_gates.py ~983` is inside `_template_opening_findings`, which checks that opening; the `data-links` target resolves.",
+    "done_when": "a finding \u2014 \u00a714's gate arm states a measure but names no negative control, unlike the writer arm beside it.",
+    "evidence_paths": "pass \u2014 \u00a714 cites only in-repo code paths and a test-delta measure (`tests/standard_names` adds no failures against base); it names no session scratchpad or node-local path.",
+    "naming": "pass \u2014 \u00a714 introduces no symbols and carries no plan labels, stage names or ticket numbers.",
+    "reasoning": "pass \u2014 the premise holds (grep finds no `.note` use in `workers.py` or `docs_gates.py`), the writer's insertion path (`_documentation_with_registry_form`, called at `workers.py:9964` and `:11171`) and the gate's production caller (`house_style_findings` \u2192 `_template_opening_findings`, `docs_gates.py:1022`) are named, and the mechanism can produce the done-when.",
+    "single_goal": "pass \u2014 \u00a714's writer and gate changes are one mechanism applied at two consumers (\"Both the writer and the gate switch to that accessor\"), closable on one verdict.",
+    "wiring": "pass \u2014 \u00a714 declares its cross-plan dependency as a section-level `data-links` ref (`imas-standard-names:concept-and-notation-registry#s7`) that the roadmap resolves beside `plan-section-depends-on` (`reckon/doccheck.py::_section_level_refs` reads both), and it names the node that adds the accessor \u00a714 switches to; the `_document` declarations add `s14: \"implementable\"`, consistent with the section's own `data-status`."
+  },
+  "section_digests": {
+    "_document": "9f91b10a415a7714ed63901af900c844cb66b332e92653a4886cac797106bfc9",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s10": "56c8e08b66e65b8ece8e4714fa4b9f9089b83585768885aea771dfba922b2975",
+    "s11": "40dbcfa9b353fecf593a6d891775677b873bb98529073f97a916054f9528cfbd",
+    "s12": "e6eb4d8f2c193a9476db93b99f5512264202b1205e73bcd661346bf08b7b70ae",
+    "s13": "1039788885461975b6575c93cc104f5bffa19194126a5850e061438a0760c40b",
+    "s14": "1c685930b735cd464c276bd28d9c6a399b731c7084e3fd1ad127628e25418f80",
+    "s2": "a68b18b0a4122caff66d27ab77f0d6f94f3c046d2a034c6ef489ffc38f438ddb",
+    "s3": "50e289cff8fb10f82f4114f3e51de9e7d184bd4777b80c4f5ee7e617bbdd3c56",
+    "s4": "dca02964189096d0d6a3fb9f0ee3c9931308addf7be8f667cad98d98ca36d3a7",
+    "s5": "de1246fd734195b238de2d370de129477d7b7977b048d533e4044874a80187cd",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78",
+    "s7": "5be478ef6ae9f348a0e617cfdb5bc8b20b3a18fd8c8e652a1d97e2393f5681c3",
+    "s8": "91c69e8a7ada6945ec08807258d2ee9be051f27dd4bc9939d6da7046c479741a",
+    "s9": "e80c85c856bfde4820702edd9280d989ec350bede9a5f566bd19d06d32026f51"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T10:26:52.272406+00:00"
+}
