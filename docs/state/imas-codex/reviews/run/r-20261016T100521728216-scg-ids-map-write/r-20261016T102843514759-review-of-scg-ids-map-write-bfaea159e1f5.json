@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "2f076bda345d7b47d8fe305e7475eefac75738d5",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/graph/build_dd.py:1177",
+    "imas_codex/graph/build_dd.py:3495",
+    "imas_codex/core/physics_categorization.py:65",
+    "imas_codex/core/xml_parser.py:381",
+    "imas_codex/clusters/hierarchical.py:42"
+  ],
+  "completed_at": "2026-10-16T10:40:40.270Z",
+  "dispatched_at": "2026-10-16T10:30:20Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-write.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the evidence fragment carries before/after tables but no figure, though the write fence granted docs/figures/sn-catalog-grouping/scg-ids-map-write and the visual-documentation mandate asks for one where a graphic aids understanding."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T100521728216-scg-ids-map-write/negative-control.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control mutation copy was written to a bare /tmp path (/tmp/reckon-crew-scratch/...) rather than under $TMPDIR, so it is not reclaimed with the run's scratch."
+    }
+  ],
+  "head_log_revision": "bfaea159e1f5c795e2dbbe0470483afd8f8f8563",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read both commits against base 2f076bda3 - edab6da8e rewrites the 25 mappings and recomputes the tally, bfaea159e adds the fragment; nothing outside the declared scope.",
+    "done_when": "the done_when names a test reading the shipped map for enum membership, tally equality and the 25 reviewed rows; tests/core/test_ids_domain_map.py asserts all three and after-arm.log records 58 passed EXIT=0.",
+    "goal": "the node goal is to write the lead-ruled 25 IDS-to-domain corrections into the shipped map; imas_codex/definitions/physics/ids_domains.json:ids_domain_mappings carries exactly those 25 and no other row changed.",
+    "manifest": "read; it records base arm 31 passed/0 failures, head arm 58 passed/0 added failures, the spi-reverted negative control at EXIT=1, and three test logs.",
+    "write_paths": "the declared scope is the map JSON, tests/core/test_ids_domain_map.py and the fragment; the diff touches exactly those three paths."
+  },
+  "justifications": {
+    "durability": "tests/core/test_ids_domain_map.py asserts the map against an independent literal table (no value is passed into code under test), and negative-control.log shows reverting spi to plant_systems reddens test_ruled_ids_carry_ruled_domain[spi] and test_tally_equals_mapping_counts.",
+    "evidence": "after-arm.log (58 passed, EXIT=0) and base-arm.log (31 passed, EXIT=0) cover every test file that imports IDS_DOMAINS_FILE or physics_categorizer, and negative-control.log shows the spi revert red at EXIT=1.",
+    "fit": "tests/core/test_ids_domain_map.py reads the shipped file directly like tests/graph/test_physics_domain_guidance.py:134 and introduces no plan label or forbidden name.",
+    "goal_fidelity": "every one of the 25 rows in imas_codex/definitions/physics/ids_domains.json matches the plan ruling at docs/plans/sn-catalog-grouping.html:597 and my diff shows no other mapping changed.",
+    "reuse": "no existing test pins the shipped map's contents - searched tests/ for map readers, finding only tests/core/test_physics_categorization.py (mocked loader) and tests/graph/test_physics_domain_guidance.py (guidance cross-check) - so the new test forks none.",
+    "scope_discipline": "the diff touches only the three declared paths, but no figure was produced though the fence granted docs/figures/sn-catalog-grouping/scg-ids-map-write."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to write the lead-ruled 25 IDS-to-domain corrections into the shipped map; imas_codex/definitions/physics/ids_domains.json:ids_domain_mappings carries exactly those 25 and no other row changed.\nVERDICT done_when: the done_when names a test reading the shipped map for enum membership, tally equality and the 25 reviewed rows; tests/core/test_ids_domain_map.py asserts all three and after-arm.log records 58 passed EXIT=0.\nVERDICT write_paths: the declared scope is the map JSON, tests/core/test_ids_domain_map.py and the fragment; the diff touches exactly those three paths.\nVERDICT manifest: read; it records base arm 31 passed/0 failures, head arm 58 passed/0 added failures, the spi-reverted negative control at EXIT=1, and three test logs.\nVERDICT diff: read both commits against base 2f076bda3 - edab6da8e rewrites the 25 mappings and recomputes the tally, bfaea159e adds the fragment; nothing outside the declared scope.\nCALL_SITES: imas_codex/graph/build_dd.py:1177, imas_codex/graph/build_dd.py:3495, imas_codex/core/physics_categorization.py:65, imas_codex/core/xml_parser.py:381, imas_codex/clusters/hierarchical.py:42\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: every one of the 25 rows in imas_codex/definitions/physics/ids_domains.json matches the plan ruling at docs/plans/sn-catalog-grouping.html:597 and my diff shows no other mapping changed.\nSCORE evidence: 18\nJUSTIFICATION evidence: after-arm.log (58 passed, EXIT=0) and base-arm.log (31 passed, EXIT=0) cover every test file that imports IDS_DOMAINS_FILE or physics_categorizer, and negative-control.log shows the spi revert red at EXIT=1.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the diff touches only the three declared paths, but no figure was produced though the fence granted docs/figures/sn-catalog-grouping/scg-ids-map-write.\nSCORE durability: 19\nJUSTIFICATION durability: tests/core/test_ids_domain_map.py asserts the map against an independent literal table (no value is passed into code under test), and negative-control.log shows reverting spi to plant_systems reddens test_ruled_ids_carry_ruled_domain[spi] and test_tally_equals_mapping_counts.\nSCORE fit: 18\nJUSTIFICATION fit: tests/core/test_ids_domain_map.py reads the shipped file directly like tests/graph/test_physics_domain_guidance.py:134 and introduces no plan label or forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: no existing test pins the shipped map's contents - searched tests/ for map readers, finding only tests/core/test_physics_categorization.py (mocked loader) and tests/graph/test_physics_domain_guidance.py (guidance cross-check) - so the new test forks none.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-write.html:1 follow-on: the evidence fragment carries before/after tables but no figure, though the write fence granted a figures path and the visual-documentation mandate asks for one where a graphic aids understanding.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T100521728216-scg-ids-map-write/negative-control.log:2 follow-on: the negative-control mutation copy was written to a bare /tmp path (/tmp/reckon-crew-scratch/...) rather than under $TMPDIR, so it is not reclaimed with the run's scratch.\n",
+  "review_run_id": "r-20261016T102843514759-review-of-scg-ids-map-write-bfaea159e1f5",
+  "reviewed_base_sha": "2f076bda345d7b47d8fe305e7475eefac75738d5",
+  "reviewed_head_sha": "bfaea159e1f5c795e2dbbe0470483afd8f8f8563",
+  "reviewed_run_id": "r-20261016T100521728216-scg-ids-map-write",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T10:38:18.393486+00:00",
+  "total": 113
+}
