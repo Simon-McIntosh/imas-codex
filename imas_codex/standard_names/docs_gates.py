@@ -737,7 +737,7 @@ def _locus_definition_findings(
         if not phrase:
             continue
         subject = re.compile(
-            rf"(?<![\w-]){phrase}(?!-)(?:\s+[A-Za-z][A-Za-z-]*){{0,2}}\s+(?:is|are)\b",
+            rf"(?<![\w-]){phrase}(?!-)(?:\s+[A-Za-z][A-Za-z-]*)*\s+(?:is|are)\b",
             re.IGNORECASE,
         )
         for sentence in sentences:

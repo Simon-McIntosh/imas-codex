@@ -1,0 +1,68 @@
+<section>
+  <h2 id="shc-writer-no-locus-restatement">The docs writer names the locus but never defines it</h2>
+  <p id="shc-writer-no-locus-restatement-scope">
+    Stops the docs writer from producing a second, paraphrased definition of the
+    locus. Both docs prompts now state that the locus's defining sentence is
+    appended from the registry, so the prose names the locus where a quantity is
+    evaluated and never says what the locus is. The locus gate is widened to
+    flag a locus-subject definition however long its modifier, while a
+    prepositional mention stays exempt. Write paths:
+    <code>imas_codex/llm/prompts/sn/refine_docs_user.md</code>,
+    <code>imas_codex/llm/prompts/sn/generate_docs_user.md</code>,
+    <code>imas_codex/llm/prompts/sn/generate_docs_system.md</code>,
+    <code>imas_codex/standard_names/docs_gates.py</code>,
+    <code>tests/standard_names/test_docs_locus_definition.py</code>,
+    <code>tests/standard_names/test_docs_prompt_locus.py</code>.
+  </p>
+  <p id="shc-writer-no-locus-restatement-prompts">
+    <code>refine_docs_user.md</code> handed the model a
+    <em>Locus gloss (for accurate prose — do NOT quote verbatim)</em> — the
+    registry definition itself — beside a rule to cross-link the locus's
+    position-defining quantity. That invites a paraphrase, which lands as a
+    restatement the gate then flags. The gloss instruction is removed from all
+    three prompts of the writing path; the cross-link is kept.
+    <code>generate_docs_user.md</code> carried no locus block at all, and
+    <code>generate_docs_system.md</code> carried the same gloss instruction as
+    the refine prompt, reaching the same <code>locus_context</code>; both now
+    carry the instruction. A review of the first attempt caught the system half
+    of the generate request, so the removal holds for both halves of the
+    writer, not the refine prompt alone. The block renders for
+    any locus, not only one with a position-defining quantity, so the
+    instruction reaches the boundary family, whose locus has none.
+  </p>
+  <p id="shc-writer-no-locus-restatement-gate">
+    <code>_locus_definition_findings</code> required the copula within two
+    words of the locus phrase, so "The plasma boundary of this configuration is
+    the last closed flux surface" was no longer flagged. The modifier between
+    the phrase and the copula is now unbounded within the clause; the subject
+    test is unchanged, so a phrase governed by a preposition — "the density
+    <em>at</em> the plasma boundary <em>is</em> …" — stays exempt.
+  </p>
+  <p id="shc-writer-no-locus-restatement-family">
+    Gate re-run offline over the 17-member
+    <code>flux_surface_averaged_*_density_at_plasma_boundary</code> family's
+    stored documentation: <strong>17 members, 15 flagged</strong>, 2 cleared
+    (beryllium, oxygen — prepositional mentions only). The prose has not changed
+    yet; the next apply rewrites it, so this is the pre-apply baseline the
+    writer change must remove.
+  </p>
+  <p id="shc-writer-no-locus-restatement-gates">
+    Gate
+    (<code>tests/standard_names/test_docs_locus_definition.py</code>,
+    <code>tests/standard_names/test_docs_prompt_locus.py</code>): base
+    <strong>1 failed / 9 passed</strong> (the stale two-subject test), head
+    <strong>15 passed / 0 failed</strong> — 0 added failures. The stale
+    <code>test_two_subjects_render_the_identical_locus_sentence</code> now
+    asserts the concept's own registry definition and passes.
+  </p>
+  <p id="shc-writer-no-locus-restatement-negative-controls">
+    Negative controls, both observed as declared. Restoring the gloss
+    instruction fails
+    <code>test_refine_docs_prompt_names_locus_without_defining_it</code>
+    (1 failed / 1 passed). Restoring the two-word copula distance fails
+    <code>test_locus_subject_with_a_long_modifier_is_still_a_definition</code>
+    (1 failed). Restoring the system prompt's gloss instruction fails
+    <code>test_generate_docs_system_prompt_names_locus_without_defining_it</code>
+    (1 failed).
+  </p>
+</section>
