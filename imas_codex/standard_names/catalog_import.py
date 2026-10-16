@@ -511,7 +511,7 @@ def check_catalog(
     # domain.  A scalar mirroring the PRODUCED_NAME edge is never written —
     # the comparison reads the same rule the export reads, not a snapshot of
     # it, so the stored field stays authoritative wherever it is set.
-    from imas_codex.standard_names.domain_priority import pick_primary_domain
+    from imas_codex.standard_names.domain_ranking import select_primary_domain
 
     with GraphClient() as gc:
         rows = gc.query(
@@ -555,7 +555,7 @@ def check_catalog(
         if not isinstance(resolved, list):
             resolved = [resolved] if resolved else []
         entry["physics_domain"] = (
-            pick_primary_domain([str(d) for d in resolved]) if resolved else None
+            select_primary_domain([str(d) for d in resolved]) if resolved else None
         )
         graph_entries[row["id"]] = entry
         if row.get("catalog_commit_sha") and not graph_sha:

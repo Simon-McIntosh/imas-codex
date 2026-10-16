@@ -1,0 +1,34 @@
+<section id="scg-domain-selector-one-name">
+  <h2>One name for the domain selector</h2>
+  <table>
+    <thead>
+      <tr><th>Symbol</th><th>Before</th><th>After</th></tr>
+    </thead>
+    <tbody>
+      <tr id="scg-domain-selector-one-name-pick">
+        <td><code>pick_primary_domain</code></td>
+        <td><code>domain_priority.py</code> two-line pass-through to <code>domain_ranking.select_primary_domain</code></td>
+        <td>Deleted. <code>export.py</code> and <code>catalog_import.py</code> import <code>select_primary_domain</code> from <code>domain_ranking</code>.</td>
+      </tr>
+      <tr id="scg-domain-selector-one-name-list">
+        <td><code>domain_list</code></td>
+        <td><code>domain_priority.py</code> second scalar-or-list coercion, no production importer</td>
+        <td>Deleted. <code>domain_key</code> remains the module's only export.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="scg-domain-selector-one-name-measure">
+    Gate over <code>test_domain_priority.py</code>, <code>test_domain_selector.py</code>,
+    <code>test_export_status_authority.py</code>, <code>test_export_deprecation.py</code>,
+    <code>test_catalog_import_divergence.py</code> and
+    <code>test_post_copy_divergence_comparison.py</code>: base 35 passed, head 30 passed,
+    0 added failures. The 5-test drop is the removed <code>pick_primary_domain</code> and
+    <code>domain_list</code> coverage.
+  </p>
+  <p id="scg-domain-selector-one-name-negative-control">
+    Negative control: with the unknown-domain refusal removed from
+    <code>select_primary_domain</code>, <code>test_select_primary_domain_refuses_unknown</code>
+    fails (<code>KeyError: 'unknown_domain'</code>) — the repointed callers exercise the single
+    remaining selector.
+  </p>
+</section>
