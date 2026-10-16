@@ -115,6 +115,11 @@
     <p>One two-level Choice per IDS on the <code>sn-domain-tree</code> seat (<code>typesafe/jev-1.13</code>). The state carries the IDS documentation, 30 seeded leaf paths and the stored path-domain mix, and withholds the current mapped domain. 87 IDSs cost USD 0.024 against a USD 0.50 ceiling. Jev agrees with 21 of the 23 rule-derived corrections, confirms 53 current entries, proposes a third domain for 10 and falls below the confidence floor on 3. It does not confirm two rule corrections: <code>edge_transport</code> → transport and <code>spi</code> → fueling. A <code>--rescore</code> re-run reproduces every figure (EXIT=0). The map file is unchanged; the lead reviews the proposed corrections first. The review scored 92 with six follow-ons: a probe-log body from an earlier revision; a path mix that can re-supply the withheld domain; a rescore that compares the code with itself; a hardcoded IDS count in the fragment; tree composition duplicated from <code>decide_domain_tree</code>; and no figure. Commit <code>e9d84ca2e</code>, merge <code>f8c86ba82</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev.html">fragment</a></p>
   </section>
 
+  <section id="scg-ids-map-write">
+    <h2>§3 — The IDS-to-domain map carries the reviewed corrections</h2>
+    <p><code>ids_domains.json</code> carries the 25 lead-ruled corrections, a recomputed tally (29 domains over 87 IDSs) and revision metadata. <code>tests/core/test_ids_domain_map.py</code> (27 tests) pins enum membership, the tally and every ruled row, and fails with <code>spi</code> reverted (EXIT=1). The map's reader tests add no failures against base. The coordinator checked independently that only the 25 ruled rows moved. On a DD rebuild, the 25 IDS nodes and the default domain of every unclassified path would be rewritten; paths with a <code>domain_source</code> keep their classifier domain. In the live graph that is 2,399 unclassified paths, against 17,886 classified ones in the same IDSs. Review 113, with two follow-ons: no figure, and a negative-control copy written outside <code>$TMPDIR</code>. Commits <code>edab6da8e</code> and <code>bfaea159e</code>, merge <code>854e3980e</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-ids-map-write.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>
