@@ -24464,6 +24464,40 @@ def resubmit_pinned_rename_for_review(
     return rows[0]["outcome"] if rows else ""
 
 
+RESCORE_ELIGIBILITY_QUERY = """
+            MATCH (sn:StandardName {id: $id})
+            WHERE sn.name_stage IN ['exhausted', 'reviewed']
+              AND NOT coalesce(sn.status, '') IN ['deprecated', 'superseded']
+            WITH sn, sn.name_stage AS prior_stage
+            // One compare-and-set transition: if another worker moves the
+            // stage before this MATCH acquires the write, no row is returned
+            // and the caller refuses the rescore. Dry-run retains the same
+            // eligibility query but executes no mutation.
+            FOREACH (_ IN CASE WHEN $dry_run THEN [] ELSE [1] END |
+                SET sn.updated_at = datetime(), sn.name_stage = 'drafted',
+                    sn.reviewer_score_name = null,
+                    sn.review_resubmit_count = 0,
+                    // The stale diagnosis of the last refinement goes; the
+                    // rotations it spent stay. A rescore buys a fresh quorum
+                    // draw on the SAME name, never a fresh rewrite budget —
+                    // refunding one would re-open the paid loop for a name
+                    // that scores low again. `sn edit` carries the new
+                    // steering information that reopens rewriting.
+                    sn.refine_stop_reason = null,
+                    sn.refine_stopped_at = null,
+                    sn.refine_collision_name = null,
+                    sn.claim_token = null,
+                    sn.claimed_at = null,
+                    sn.run_id = coalesce($run_id, sn.run_id),
+                    sn.validation_status = 'pending',
+                    sn.validation_issues = null,
+                    sn.validation_layer_summary = null,
+                    sn.validated_at = null
+            )
+            RETURN prior_stage AS prior_stage
+            """
+
+
 def stage_name_for_rescore(
     sn_id: str,
     *,
@@ -24500,38 +24534,7 @@ def stage_name_for_rescore(
     """
     with GraphClient() as gc:
         rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            WHERE sn.name_stage IN ['exhausted', 'reviewed']
-              AND coalesce(sn.status, '') NOT IN ['deprecated', 'superseded']
-            WITH sn, sn.name_stage AS prior_stage
-            // One compare-and-set transition: if another worker moves the
-            // stage before this MATCH acquires the write, no row is returned
-            // and the caller refuses the rescore. Dry-run retains the same
-            // eligibility query but executes no mutation.
-            FOREACH (_ IN CASE WHEN $dry_run THEN [] ELSE [1] END |
-                SET sn.updated_at = datetime(), sn.name_stage = 'drafted',
-                    sn.reviewer_score_name = null,
-                    sn.review_resubmit_count = 0,
-                    // The stale diagnosis of the last refinement goes; the
-                    // rotations it spent stay. A rescore buys a fresh quorum
-                    // draw on the SAME name, never a fresh rewrite budget —
-                    // refunding one would re-open the paid loop for a name
-                    // that scores low again. `sn edit` carries the new
-                    // steering information that reopens rewriting.
-                    sn.refine_stop_reason = null,
-                    sn.refine_stopped_at = null,
-                    sn.refine_collision_name = null,
-                    sn.claim_token = null,
-                    sn.claimed_at = null,
-                    sn.run_id = coalesce($run_id, sn.run_id),
-                    sn.validation_status = 'pending',
-                    sn.validation_issues = null,
-                    sn.validation_layer_summary = null,
-                    sn.validated_at = null
-            )
-            RETURN prior_stage AS prior_stage
-            """,
+            RESCORE_ELIGIBILITY_QUERY,
             id=sn_id,
             run_id=run_id,
             dry_run=dry_run,

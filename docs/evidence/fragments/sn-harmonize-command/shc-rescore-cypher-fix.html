@@ -1,0 +1,31 @@
+<section>
+  <h2 id="shc-rescore-cypher-fix">Rescore eligibility plans on Neo4j</h2>
+  <p id="shc-rescore-cypher-fix-statement">
+    The eligibility statement used by <code>stage_name_for_rescore</code> had
+    <code>AND coalesce(sn.status, '') NOT IN ['deprecated', 'superseded']</code>.
+    The server rejected that exact predicate with
+    <code>CypherSyntaxError: Invalid input 'NOT'</code>. It now uses
+    <code>AND NOT coalesce(sn.status, '') IN ['deprecated', 'superseded']</code>.
+    The statement is shared by the command and its server <code>EXPLAIN</code> test.
+  </p>
+  <table id="shc-rescore-cypher-fix-gates">
+    <thead><tr><th>Measure</th><th>Result</th><th>Log</th></tr></thead>
+    <tbody>
+      <tr><td>Pre-change dry run, scrape-off-layer density</td><td><code>EXIT=1</code>; <code>Invalid input 'NOT'</code></td><td><code>base-dry-run.log</code></td></tr>
+      <tr><td>Pre-change three-file rescore gate</td><td>8 passed, <code>EXIT=0</code></td><td><code>base-tests.log</code></td></tr>
+      <tr><td>Server <code>EXPLAIN</code> of shared statement, parameters bound</td><td>plan returned; 1 passed, <code>EXIT=0</code></td><td><code>head-explain.log</code></td></tr>
+      <tr><td>Three-file default rescore gate, including static AST scan</td><td>9 passed, 1 deselected, <code>EXIT=0</code>; zero added failures</td><td><code>head-default.log</code></td></tr>
+      <tr><td>Cypher property check</td><td>4 passed, <code>EXIT=0</code></td><td><code>head-property.log</code></td></tr>
+      <tr><td>Temporary infix predicate restored; server and static tests</td><td>both failed, server <code>CypherSyntaxError</code>, <code>EXIT=1</code></td><td><code>infix-negative-control.log</code></td></tr>
+      <tr><td>Repaired CLI dry run, scrape-off-layer density</td><td><code>EXIT=0</code>; would rescore <code>volume_averaged_electron_number_density_over_scrape_off_layer</code> from <code>exhausted</code> to <code>drafted</code></td><td><code>head-dry-run.log</code></td></tr>
+    </tbody>
+  </table>
+  <p id="shc-rescore-cypher-fix-logs">
+    Every named log is under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T103446162116-shc-rescore-cypher-fix/</code>.
+    The production and test change is commit <code>d80213d18b8830c5546c3adcf9d066a0cb9ac358</code>.
+    The temporary mutation was restored, and the worktree statement matches that commit.
+    The dry run made no graph transition or model call; resuming the three paid rescoring
+    operations belongs to the blocked repair node.
+  </p>
+</section>
