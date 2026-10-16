@@ -600,6 +600,63 @@ def _print_build_summary(stats: dict) -> None:
         click.echo(f"Elapsed: {stats['elapsed_seconds']:.1f}s")
 
 
+@dd.command("refresh-domains")
+@click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Report what would change without writing to the graph.",
+)
+def imas_refresh_domains(verbose: bool, dry_run: bool) -> None:
+    """Re-apply the IDS-to-domain map to the graph.
+
+    Reads the map the DD build uses and moves only what differs: each IDS
+    node's ``physics_domain``, and on those IDSs' paths the IDS default where a
+    path carries no classification. A full ``dd build`` rebuilds every version;
+    this refreshes the domains alone, and every changed row's before and after
+    value is printed so the write can be reversed.
+
+    \b
+    Examples:
+        imas-codex imas dd refresh-domains --dry-run   # Report only
+        imas-codex imas dd refresh-domains             # Apply
+    """
+    from imas_codex.cli.discover.common import (
+        make_log_print,
+        setup_logging,
+        use_rich_output,
+    )
+    from imas_codex.graph import GraphClient
+    from imas_codex.graph.build_dd import refresh_physics_domains
+
+    use_rich = use_rich_output()
+    console_obj = setup_logging("imas_dd", "dd", use_rich, verbose=verbose)
+    log_print = make_log_print("imas_dd", console_obj)
+
+    with GraphClient() as gc:
+        result = refresh_physics_domains(gc, dry_run=dry_run)
+
+    mode = "dry run" if dry_run else "apply"
+    log_print(f"\n[bold]IDS domain refresh ({mode})[/bold]")
+    log_print(f"  IDS nodes: {result['ids_total']}")
+    log_print(f"  IDS domains changed: {len(result['ids_changed'])}")
+    log_print(f"  Unclassified paths changed: {result['path_changed_count']}")
+    if not dry_run:
+        log_print(f"  Paths written: {result['applied_path_count']}")
+
+    if result["ids_changed"]:
+        table = Table(title="Changed IDS domains")
+        table.add_column("IDS", style="cyan")
+        table.add_column("before")
+        table.add_column("after")
+        for row in result["ids_changed"]:
+            table.add_row(row["id"], row["before"] or "—", row["after"])
+        console.print(table)
+
+    if dry_run and (result["ids_changed"] or result["path_changed_count"]):
+        log_print("  [dim]dry run: no graph writes[/dim]")
+
+
 @dd.command("status")
 @click.option(
     "--version", "-v", "version_filter", help="Show details for specific version"
