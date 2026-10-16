@@ -25,9 +25,6 @@ _SUBJECT_ELONGATION = "elongation_of_plasma_boundary"
 _SUBJECT_MINOR_RADIUS = "minor_radius_of_plasma_boundary"
 
 _BASE_DOCUMENT = "The model describes the plasma boundary for this quantity."
-_REGISTRY_DEFINITION = (
-    "The surface used to delimit the plasma domain for the quantity being described."
-)
 
 
 def _rendered(name: str, documentation: str) -> str:
@@ -52,12 +49,13 @@ def test_two_subjects_render_the_identical_locus_sentence() -> None:
     elongation = _rendered(_SUBJECT_ELONGATION, _BASE_DOCUMENT)
     minor_radius = _rendered(_SUBJECT_MINOR_RADIUS, _BASE_DOCUMENT)
 
-    expected = _locus_sentence(_plasma_boundary_concept(_SUBJECT_ELONGATION))
+    concept = _plasma_boundary_concept(_SUBJECT_ELONGATION)
+    expected = _locus_sentence(concept)
 
     assert _last_paragraph(elongation) == expected
     assert _last_paragraph(minor_radius) == expected
     assert _last_paragraph(elongation) == _last_paragraph(minor_radius)
-    assert _REGISTRY_DEFINITION in expected
+    assert concept.definition in expected
 
 
 def test_locus_sentence_carries_the_registry_equation_and_symbols() -> None:
@@ -144,6 +142,25 @@ def test_locus_subject_noun_phrase_definition_is_still_a_finding() -> None:
     classes = _locus_definition_classes(_ANCHOR, documentation)
 
     assert HouseStyleFindingClass.LOCUS_DEFINITION in classes
+
+
+def test_locus_subject_with_a_long_modifier_is_still_a_definition() -> None:
+    documentation = (
+        "The plasma boundary of this configuration is the last closed flux surface."
+    )
+    classes = _locus_definition_classes(_ANCHOR, documentation)
+
+    assert HouseStyleFindingClass.LOCUS_DEFINITION in classes
+
+
+def test_prepositional_locus_mention_is_not_a_definition() -> None:
+    documentation = (
+        "The xenon density at the plasma boundary is the local ion number "
+        "density on the last closed flux surface."
+    )
+    classes = _locus_definition_classes(_ANCHOR, documentation)
+
+    assert HouseStyleFindingClass.LOCUS_DEFINITION not in classes
 
 
 def test_registry_locus_sentence_is_not_a_second_definition() -> None:

@@ -20,6 +20,19 @@ kind, unit, or any other identity field.
 
 {% include ("sn/_conventions.md") %}
 
+{% if locus_context %}
+## Locus of this quantity
+
+This entry's locus is **`{{ locus_context.token }}`**. Name the locus where the
+quantity is evaluated, but never define it: the locus's defining sentence is
+appended from the registry and reads identically for every name at this locus,
+so any definition you write duplicates it. Do not restate the locus's meaning,
+its equation, or a gloss of it in your prose.{% if locus_context.defining_quantity %}
+Its position is itself defined by the standard quantity **`{{ locus_context.defining_quantity }}`**.
+Cross-link it inline as `[label](name:{{ locus_context.defining_quantity }})`
+at the first natural mention of the locus.{% endif %}
+{% endif %}
+
 {% if item.derived_children %}
 ## This is a DERIVED PARENT — generalize over its children
 
