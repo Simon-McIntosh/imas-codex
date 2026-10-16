@@ -641,6 +641,71 @@ def _collapsed(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+# Determiners are stripped before the word that governs a locus phrase is
+# read, so ``the plasma boundary`` and ``the plasma-boundary surface`` both
+# leave the same governor to inspect.
+_LOCUS_DETERMINERS = frozenset(
+    {"the", "a", "an", "this", "that", "these", "those", "its", "their", "any"}
+)
+
+# A phrase governed by one of these binds the locus into a larger noun phrase,
+# so it names where a quantity is evaluated rather than what the locus is.
+_LOCUS_PREPOSITIONS = frozenset(
+    {
+        "at",
+        "of",
+        "on",
+        "in",
+        "into",
+        "near",
+        "around",
+        "to",
+        "from",
+        "by",
+        "for",
+        "through",
+        "along",
+        "onto",
+        "between",
+        "across",
+        "within",
+        "against",
+        "beyond",
+        "below",
+        "above",
+        "over",
+        "under",
+        "outside",
+        "inside",
+        "beneath",
+        "adjacent",
+    }
+)
+
+_LOCUS_WORD_RE = re.compile(r"[A-Za-z][A-Za-z-]*")
+
+
+def _defines_locus(sentence: str, subject_pattern: re.Pattern[str]) -> bool:
+    """Whether the locus phrase is the subject a copula predicates on.
+
+    A sentence defines the locus when the locus phrase is what the copula
+    asserts about — ``The plasma boundary is …``, ``The plasma-boundary surface
+    is …``. A phrase bound into a larger noun phrase by a preposition —
+    ``the density at the plasma boundary is …`` — evaluates a quantity there
+    and states nothing about what the locus is, so it is not a second
+    definition and is left alone.
+    """
+
+    for match in subject_pattern.finditer(sentence):
+        preceding = _LOCUS_WORD_RE.findall(sentence[: match.start()])
+        if preceding and preceding[-1].lower() in _LOCUS_DETERMINERS:
+            preceding.pop()
+        if preceding and preceding[-1].lower() in _LOCUS_PREPOSITIONS:
+            continue
+        return True
+    return False
+
+
 def _locus_definition_findings(
     concepts: tuple[Any, ...],
     text: str,
@@ -648,10 +713,13 @@ def _locus_definition_findings(
     """Flag a locus sentence that departs from the locus registry's definition.
 
     A locus is defined once, in the locus registry. A name evaluated at it may
-    state that definition, but a sentence of its own that defines the locus in
-    other words is a second definition and is refined until it carries the
-    registry's. The locus's forbidden variants arrive through the concept's
-    variants and are not reported again here.
+    and does state that definition, but a sentence whose subject is the locus
+    and which defines it in other words is a second definition and is refined
+    until it carries the registry's. A sentence that merely places the locus in
+    a prepositional phrase — naming where a quantity is evaluated rather than
+    what the locus is — is not a definition and is left alone. The locus's
+    forbidden variants arrive through the concept's variants and are not
+    reported again here.
     """
 
     locus_tokens = _locus_registry_tokens()
@@ -668,12 +736,14 @@ def _locus_definition_findings(
         )
         if not phrase:
             continue
-        defining = re.compile(rf"\b{phrase}\b", re.IGNORECASE)
-        asserts = re.compile(r"\b(is|are)\b", re.IGNORECASE)
+        subject = re.compile(
+            rf"(?<![\w-]){phrase}(?!-)(?:\s+[A-Za-z][A-Za-z-]*){{0,2}}\s+(?:is|are)\b",
+            re.IGNORECASE,
+        )
         for sentence in sentences:
-            if not defining.search(sentence) or not asserts.search(sentence):
-                continue
             if definition in _collapsed(sentence):
+                continue
+            if not _defines_locus(sentence, subject):
                 continue
             findings.append(
                 HouseStyleFinding(
