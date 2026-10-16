@@ -1,0 +1,51 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden"
+  ],
+  "added_failures_note": "total capped at 5: the reviewed run added 1 failing test(s) not retired by name (tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden)",
+  "base_log_revision": "ab9e614f174dbccd7af18466f077a17473f6dc97",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T10:59:36Z",
+  "dispatched_at": "2026-10-16T10:55:04Z",
+  "findings": [],
+  "head_log_revision": "e3d366d67aa385fb0ca4b8b1f4a65b650912710e",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "commit f77d08a34c3f9150f1d540009a89694707d823b4 against b45e398f4d6aff281ab702204912c440602c72ae changes only docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29-31, replacing 157 with the log-supported complete-ID accounting.",
+    "done_when": "the source brief.md requires totals and ID attribution; suite-parent.log:2646 and suite-head.log:2657 give both totals, and their complete summary IDs support the fragment's 159 per arm, 158 shared, one added, and one removed at line 29.",
+    "goal": "the source brief.md requires a suite delta at the docs-writer merge; docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:27-45 now reports the complete 158 shared IDs and preserves the added and removed identities.",
+    "manifest": "the source manifest.md records complete baseline_suite and after_suite arms with 159 failure IDs each, plus repair-positive.log and repair-negative-control.log showing the corrected count passes and the parent count fails.",
+    "write_paths": "the source brief.md grants docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html, and commit f77d08a34c3f9150f1d540009a89694707d823b4 changes only that path."
+  },
+  "justifications": {
+    "durability": "repair-negative-control.log fails on the parent fragment's 157 at docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29, but the diff adds no committed test assertion to rerun that check after later edits.",
+    "evidence": "suite-parent.log:2646 and suite-head.log:2657 are complete receipts whose 159 IDs per arm independently yield the fragment's 158 shared at line 29.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:27-45 keeps the existing evidence paragraph and uses the same complete test-ID language as the manifest's suite records.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29-45 now states the log-supported counts and retains the specific added and removed test IDs.",
+    "reuse": "docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29-31 adds prose only, with no function, class, module, or capability to duplicate.",
+    "scope_discipline": "the f77d08a34c3f9150f1d540009a89694707d823b4 diff edits only docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29-31 inside the declared path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief.md requires a suite delta at the docs-writer merge; docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:27-45 now reports the complete 158 shared IDs and preserves the added and removed identities.\nVERDICT done_when: the source brief.md requires totals and ID attribution; suite-parent.log:2646 and suite-head.log:2657 give both totals, and their complete summary IDs support the fragment's 159 per arm, 158 shared, one added, and one removed at line 29.\nVERDICT write_paths: the source brief.md grants docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html, and commit f77d08a34c3f9150f1d540009a89694707d823b4 changes only that path.\nVERDICT manifest: the source manifest.md records complete baseline_suite and after_suite arms with 159 failure IDs each, plus repair-positive.log and repair-negative-control.log showing the corrected count passes and the parent count fails.\nVERDICT diff: commit f77d08a34c3f9150f1d540009a89694707d823b4 against b45e398f4d6aff281ab702204912c440602c72ae changes only docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29-31, replacing 157 with the log-supported complete-ID accounting.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29-45 now states the log-supported counts and retains the specific added and removed test IDs.\nSCORE evidence: 19\nJUSTIFICATION evidence: suite-parent.log:2646 and suite-head.log:2657 are complete receipts whose 159 IDs per arm independently yield the fragment's 158 shared at line 29.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the f77d08a34c3f9150f1d540009a89694707d823b4 diff edits only docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29-31 inside the declared path.\nSCORE durability: 10\nJUSTIFICATION durability: repair-negative-control.log fails on the parent fragment's 157 at docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29, but the diff adds no committed test assertion to rerun that check after later edits.\nSCORE fit: 20\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:27-45 keeps the existing evidence paragraph and uses the same complete test-ID language as the manifest's suite records.\nSCORE reuse: 20\nJUSTIFICATION reuse: docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29-31 adds prose only, with no function, class, module, or capability to duplicate.\n",
+  "review_run_id": "r-20261016T105406637377-review-of-shc-sn-suite-writer-fix-f77d08a34c3f",
+  "reviewed_base_sha": "b45e398f4d6aff281ab702204912c440602c72ae",
+  "reviewed_head_sha": "f77d08a34c3f9150f1d540009a89694707d823b4",
+  "reviewed_run_id": "r-20261016T100634852632-shc-sn-suite-writer-fix",
+  "scores": {
+    "durability": 10,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T10:57:41.827098+00:00",
+  "total": 5
+}
