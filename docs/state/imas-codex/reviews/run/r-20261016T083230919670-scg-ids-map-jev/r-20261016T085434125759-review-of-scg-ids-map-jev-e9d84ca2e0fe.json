@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "not derivable from gate arms: the reviewed manifest records baseline_suite null and after_suite null, so neither arm exists to diff and no failure id can be attributed. The reviewed node is an evidence node whose gate was a script rerun, recorded at rescore.log with EXIT=0 and rows_match=True.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T09:11:02.855Z",
+  "dispatched_at": "2026-10-16T08:55:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py",
+      "line": "302",
+      "severity": "follow-on",
+      "text": "follow-on: probe.log's worker line reads 'cost=0.000309 running=0.000309 category=core_plasma', but run.py:302 prints only '{ids:32s} cost={cost:.6f}' and no 'running=' or 'category=' field occurs anywhere in the committed script, so that log's body came from an earlier revision while its header, rewritten after the run, names the committed command. The declared control for this node is the equilibrium probe, so the one log carrying it does not reconcile with the artefact it is offered as evidence for."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py",
+      "line": "148",
+      "severity": "follow-on",
+      "text": "follow-on: build_state feeds the IDS's stored_path_domain_mix into the state, and the plan records the DD path classification is degenerate (61,337 of 61,366 DD nodes carry exactly their IDS's domain), so the mix re-supplies the current mapped domain the brief deliberately withheld; measured on the landed results, 59 of 87 rows have the current domain as their top path-mix domain and 50 of the 53 confirms_current rows do, so those confirmations cannot be read as independent of the current map (6 rows went against the mix, so it is a bias rather than a dictator)."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py",
+      "line": "362",
+      "severity": "follow-on",
+      "text": "follow-on: rescore() compares recomputed rows against payload['rows'] using the same build_rows that produced them, so the assertion moves with the code under test: it reddens if build_rows is edited later and stays green if build_rows was wrong when the rows were stored, which is the regression a durability claim would have to rest on."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py",
+      "line": "429",
+      "severity": "follow-on",
+      "text": "follow-on: write_fragment hardcodes '87 IDSs scored' in the fragment prose while every other figure in it is interpolated from the payload, so a rerun over a different IDS set would emit a fragment contradicting its own inputs, and --rescore does not regenerate the fragment to catch it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py",
+      "line": "182",
+      "severity": "follow-on",
+      "text": "follow-on: score_one re-implements the two-level tree composition that decide_domain_tree at imas_codex/graph/dd_domain_classifier.py:1086 already owns, duplicating the per-category probability lookup and the category*dimension product rather than extending the owner, whose entry point is path-shaped and cannot carry this IDS-level state; decide_domain_tree has no caller in imas_codex/, so one state-driven core would serve both."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py",
+      "line": "412",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment presents its 21/53/10/3 classification and 33 changed map rows as three tables and no figure, although the declared write paths reserve docs/figures/sn-catalog-grouping/scg-ids-map-jev and the project's figure mandate asks for a graphic wherever one would aid understanding."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no runtime module in imas_codex/ imports, loads or executes the landed evidence script or its two data documents; the production code the change reaches (dd_domain_classifier.build_category_question/build_domain_question/_answer_for and judgment.decide_batch) is called by the change rather than able to reach it.",
+    "diff": "read commit by commit against the base d481ae65642b9ce9974f715a9d83023212bba6da, which is the verified parent of e9d84ca2e0fe; the single commit adds three new files, 11,942 insertions and nothing else.",
+    "done_when": "the done-when asks for the 87-row fragment, the classification and review list, a proposed IDS map carried as data, the spend against the ceiling and a logged rescore rerun at EXIT=0; scg-ids-map-jev.html holds three tables with 66 + 21 + 87 data rows, the results JSON carries proposed_ids_map with 87 entries and spend_usd 0.024302 against spend_ceiling_usd 0.5, and rescore.log records rows_match=True summary_match=True proposed_match=True at EXIT=0.",
+    "goal": "the node goal is to have Jev re-decide the IDS-to-domain map by one Choice per IDS over the DD path classifier's own two-level question, and docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py:169-207 scores each IDS through build_category_question/build_domain_question/_answer_for while run.py:135-151 keeps the current mapped domain out of the state, which is what the lead ruling c-s3-lead-ruling-jev-name-domain in docs/plans/sn-catalog-grouping.html asks for.",
+    "manifest": "read; it reports status complete, names the gate command and its EXIT=0, lists probe.log, sweep.log, rescore.log and fragment.log, and records spend USD 0.024302 against the 0.50 ceiling; its baseline_suite and after_suite are both null, so no base/head gate arms exist to diff.",
+    "write_paths": "the reviewed manifest declares the fragment .html, the run .py and the results .json, plus an unused docs/figures/sn-catalog-grouping/scg-ids-map-jev directory; git show --stat e9d84ca2e -- names exactly those three files and nothing outside them, and imas_codex/definitions/physics/ids_domains.json is absent from the diff."
+  },
+  "justifications": {
+    "durability": "the only guard is run.py:362-364's rescore equality, which recomputes rows with the same build_rows that wrote the stored rows, so it can redden on a later edit to the derivation but stays green on a derivation that was wrong when the rows were stored; no suite test covers run.py.",
+    "evidence": "rescore.log records the named rerun at EXIT=0 with rows_match=True, but probe.log's worker line carries 'running=0.000309 category=core_plasma', two fields run.py:302 cannot print, so the control log the manifest leans on does not calibrate to the landed script.",
+    "fit": "the script follows the docs/evidence/fragments/sn-catalog-grouping/ run-script idiom its peers use and carries no plan, sprint or ticket label in any symbol, comment, filename or commit message, though run.py:32-41 reaches into three underscore-private names of dd_domain_classifier.py as the brief directed.",
+    "goal_fidelity": "run.py:169-207 runs the two-level category-then-domain Choice per IDS and run.py:231-260 classifies every row against the 23 rule-derived corrections, which is the deliverable the lead ruling names.",
+    "reuse": "run.py:32-41 imports build_category_question, build_domain_question, _answer_for, _beamed_categories and _ranked_probabilities from the owning module imas_codex/graph/dd_domain_classifier.py, but run.py:182-207 re-implements the composition (per-category probability lookup and the category*dimension product) that decide_domain_tree at dd_domain_classifier.py:1086 already owns.",
+    "scope_discipline": "git show --stat e9d84ca2e lists only the fragment .html, the run .py and the ids-map results .json, all three declared in the manifest's orientation_write_paths, and the definitions file is untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to have Jev re-decide the IDS-to-domain map by one Choice per IDS over the DD path classifier's own two-level question, and docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py:169-207 scores each IDS through build_category_question/build_domain_question/_answer_for while run.py:135-151 keeps the current mapped domain out of the state, which is what the lead ruling c-s3-lead-ruling-jev-name-domain in docs/plans/sn-catalog-grouping.html asks for.\nVERDICT done_when: the done-when asks for the 87-row fragment, the classification and review list, a proposed IDS map carried as data, the spend against the ceiling and a logged rescore rerun at EXIT=0; scg-ids-map-jev.html holds three tables with 66 + 21 + 87 data rows, the results JSON carries proposed_ids_map with 87 entries and spend_usd 0.024302 against spend_ceiling_usd 0.5, and rescore.log records rows_match=True summary_match=True proposed_match=True at EXIT=0.\nVERDICT write_paths: the reviewed manifest declares the fragment .html, the run .py and the results .json, plus an unused docs/figures/sn-catalog-grouping/scg-ids-map-jev directory; git show --stat e9d84ca2e -- names exactly those three files and nothing outside them, and imas_codex/definitions/physics/ids_domains.json is absent from the diff.\nVERDICT manifest: read; it reports status complete, names the gate command and its EXIT=0, lists probe.log, sweep.log, rescore.log and fragment.log, and records spend USD 0.024302 against the 0.50 ceiling; its baseline_suite and after_suite are both null, so no base/head gate arms exist to diff.\nVERDICT diff: read commit by commit against the base d481ae65642b9ce9974f715a9d83023212bba6da, which is the verified parent of e9d84ca2e0fe; the single commit adds three new files, 11,942 insertions and nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: run.py:169-207 runs the two-level category-then-domain Choice per IDS and run.py:231-260 classifies every row against the 23 rule-derived corrections, which is the deliverable the lead ruling names.\nSCORE evidence: 14\nJUSTIFICATION evidence: rescore.log records the named rerun at EXIT=0 with rows_match=True, but probe.log's worker line carries 'running=0.000309 category=core_plasma', two fields run.py:302 cannot print, so the control log the manifest leans on does not calibrate to the landed script.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat e9d84ca2e lists only the fragment .html, the run .py and the ids-map results .json, all three declared in the manifest's orientation_write_paths, and the definitions file is untouched.\nSCORE durability: 10\nJUSTIFICATION durability: the only guard is run.py:362-364's rescore equality, which recomputes rows with the same build_rows that wrote the stored rows, so it can redden on a later edit to the derivation but stays green on a derivation that was wrong when the rows were stored; no suite test covers run.py.\nSCORE fit: 17\nJUSTIFICATION fit: the script follows the docs/evidence/fragments/sn-catalog-grouping/ run-script idiom its peers use and carries no plan, sprint or ticket label in any symbol, comment, filename or commit message, though run.py:32-41 reaches into three underscore-private names of dd_domain_classifier.py as the brief directed.\nSCORE reuse: 12\nJUSTIFICATION reuse: run.py:32-41 imports build_category_question, build_domain_question, _answer_for, _beamed_categories and _ranked_probabilities from the owning module imas_codex/graph/dd_domain_classifier.py, but run.py:182-207 re-implements the composition (per-category probability lookup and the category*dimension product) that decide_domain_tree at dd_domain_classifier.py:1086 already owns.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py:302 follow-on: probe.log's worker line reads 'cost=0.000309 running=0.000309 category=core_plasma', but run.py:302 prints only '{ids:32s} cost={cost:.6f}' and no 'running=' or 'category=' field occurs anywhere in the committed script, so that log's body came from an earlier revision while its header, rewritten after the run, names the committed command. The declared control for this node is the equilibrium probe, so the one log carrying it does not reconcile with the artefact it is offered as evidence for.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py:148 follow-on: build_state feeds the IDS's stored_path_domain_mix into the state, and the plan records the DD path classification is degenerate (61,337 of 61,366 DD nodes carry exactly their IDS's domain), so the mix re-supplies the current mapped domain the brief deliberately withheld; measured on the landed results, 59 of 87 rows have the current domain as their top path-mix domain and 50 of the 53 confirms_current rows do, so those confirmations cannot be read as independent of the current map (6 rows went against the mix, so it is a bias rather than a dictator).\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py:362 follow-on: rescore() compares recomputed rows against payload['rows'] using the same build_rows that produced them, so the assertion moves with the code under test: it reddens if build_rows is edited later and stays green if build_rows was wrong when the rows were stored, which is the regression a durability claim would have to rest on.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py:429 follow-on: write_fragment hardcodes '87 IDSs scored' in the fragment prose while every other figure in it is interpolated from the payload, so a rerun over a different IDS set would emit a fragment contradicting its own inputs, and --rescore does not regenerate the fragment to catch it.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py:182 follow-on: score_one re-implements the two-level tree composition that decide_domain_tree at imas_codex/graph/dd_domain_classifier.py:1086 already owns, duplicating the per-category probability lookup and the category*dimension product rather than extending the owner, whose entry point is path-shaped and cannot carry this IDS-level state; decide_domain_tree has no caller in imas_codex/, so one state-driven core would serve both.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-map-jev-run.py:412 follow-on: the fragment presents its 21/53/10/3 classification and 33 changed map rows as three tables and no figure, although the declared write paths reserve docs/figures/sn-catalog-grouping/scg-ids-map-jev and the project's figure mandate asks for a graphic wherever one would aid understanding.\n",
+  "review_run_id": "r-20261016T085434125759-review-of-scg-ids-map-jev-e9d84ca2e0fe",
+  "reviewed_base_sha": "d481ae65642b9ce9974f715a9d83023212bba6da",
+  "reviewed_head_sha": "e9d84ca2e0fe39b5c445c9d7e9d8ffd95101310b",
+  "reviewed_run_id": "r-20261016T083230919670-scg-ids-map-jev",
+  "scores": {
+    "durability": 10,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T09:00:00+00:00",
+  "total": 92
+}
