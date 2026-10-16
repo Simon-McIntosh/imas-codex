@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="107">
+<meta name="plan-version" content="108">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -376,6 +376,9 @@
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261016T050923624318-shc-apply-walltime-diagnosis" data-who="reckon-build" data-when="2026-10-16T05:20:13.202Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-apply-walltime-diagnosis.html reports both blocked-apply mechanisms. Wall time: apply_families (harmonize.py:1512) runs one CampaignRunner per family; its per-batch drain (campaign.py:1016 -&gt; sn.py:823 -&gt; run_sn_pools loop.py:1313) re-enters the full CLI-and-pool startup each batch, so cost is fixed per drain call (~8 min) paid per batch, plus a per-member generate/review/refine cycle measured at ~20 min for the anchor; the 17-member family is therefore about 6 hours, wall-time bound not spend bound. Quarantine: family enumeration (families.py:407,549,554) and the stamp query (harmonize.py:729) exclude only superseded, while domain_audit.py:61 LIVE_NAME_STAGES excludes superseded and exhausted, so an exhausted+quarantined member is treated as live and defers or aborts the family (default_revalidate raises, campaign.py:759-764) and the density family cannot stamp. Recommended change wall time: operational, run on a long-lived runner (--cost-limit 8.5, no --force); product follow-on to stop the per-batch run_sn_pools re-entry. Recommended change quarantine: scope decision for the lead, align family membership and stamp to LIVE_NAME_STAGES so exhausted is not a live family member.</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-s3-lead-ruling-convergence" data-who="reckon-build" data-when="2026-10-16T05:35:00Z">
+    <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-16.</strong> Fix convergence first. Before the boundary family is applied again, find why its harmonized documentation fails the review's <code>locus_definition</code> check, and fix whichever side is wrong. Re-running the apply as it is would spend about USD 7 and 6 hours on a review loop. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s3-apply-walltime-diagnosis">evidence</a></p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T063359699428-review-of-shc-score-regression-cec62409e711" data-who="reckon-build" data-when="2026-10-13T06:50:33.699Z">
     <div class="r-comment-body"><p>Review of run r-20261013T050709331171-shc-score-regression (base f2b0a0109, head cec62409e): goal_fidelity 18, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 18 (total 110); zero added failures; three follow-on findings, no blockers. Record: /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T050709331171-shc-score-regression.json</p></div>
 </div>
@@ -399,6 +402,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-lead-ruling-spend" data-who="reckon-build" data-when="2026-10-15T11:25:00Z">
     <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-15.</strong> The three-family measure is approved under a USD 8 ceiling. That covers the species <code>electron_number_density</code> family (USD 2.90) and the locus <code>electrostatic_potential</code> family (USD 2.07). A worker picks an unharmonized component family by dry run and estimates it before it runs. All of it runs after §13 lands, so every run writes a log.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-lead-ruling-exhausted" data-who="reckon-build" data-when="2026-10-16T05:35:00Z">
+    <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-16.</strong> Repair the three exhausted identities first, outside harmonize, then re-run the families with them included. Family enumeration keeps its current liveness rule. USD 1.59 of the USD 8.00 §4 ceiling is spent. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s3-apply-walltime-diagnosis">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>

@@ -130,6 +130,11 @@
     <p>The CLI tests of every command the run-log change touched (bench, release, approve, rescore, edit and harmonize) ran at its merged head <code>0db9968da</code> and at its first parent <code>db4d66dd1</code>. Each revision ran from its own archive extraction. The base passed 146; the head passed 151, the extra five being the new logging tests. There were zero added failures (merge <code>59b317d4d</code>, review 114/120).</p>
   </section>
 
+  <section id="s3-apply-walltime-diagnosis">
+    <h2>§3 and §4 — why the approved applies did not finish</h2>
+    <p>Diagnosed with no spend (merge <code>d742f8fe4</code>, review 102/120).</p><p><strong>Boundary family.</strong> Each batch's drain restarts the six-pool orchestrator (<code>campaign.py:1016</code>, then <code>sn.py:823</code>, then <code>run_sn_pools</code>), which costs about 8 minutes of fixed start-up per batch. But the cost that matters is the anchor's review. It rejected the anchor's rewritten documentation on a <code>locus_definition</code> finding on every pass, so generate, review and refine re-ran: 13 calls in 1,200 s and USD 1.01, and the anchor was never accepted. At that rate the 17-member family would take about 6 hours.</p><p><strong>§4 families.</strong> Family enumeration (<code>families.py:549</code>) and the stamp (<code>harmonize.py:729</code>) exclude only <code>superseded</code>. The domain audit's live-name definition excludes <code>exhausted</code> too. Three exhausted, quarantined members therefore block two families: <code>volume_averaged_electron_number_density_over_scrape_off_layer</code>, <code>plasma_electrostatic_potential_at_outboard_midplane</code> and <code>plasma_electrostatic_potential_at_wall</code>. Revalidation refuses to confirm a quarantined identity (<code>campaign.py:759</code>).</p>
+  </section>
+
 </main>
 </body>
 </html>
