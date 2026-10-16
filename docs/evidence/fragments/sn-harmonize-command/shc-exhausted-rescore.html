@@ -1,0 +1,160 @@
+<section>
+  <h2 id="shc-exhausted-rescore">Three exhausted identities: diagnosed, and the rescore route is blocked by a tool defect</h2>
+  <p id="shc-exhausted-rescore-summary">
+    The three names the §4 families lost to the name axis were diagnosed from the
+    graph. All three cleared the collision screen, so all three are rescorable —
+    but the sanctioned route, <code>imas-codex sn rescore</code>, cannot run at
+    all: it fails on a Cypher syntax error in product code before it reads or
+    writes anything. <strong>No rescore executed; total spend USD 0.00 of the
+    USD 1.50 budget.</strong> The node is blocked on a one-line fix outside its
+    write scope.
+  </p>
+
+  <h3 id="shc-exhausted-rescore-form">The sanctioned route and the defect</h3>
+  <p id="shc-exhausted-rescore-form-defect">
+    <code>sn rescore</code> reverts a name to <code>drafted</code> through
+    <code>stage_name_for_rescore</code> and then runs an inline review quorum.
+    Its first action is a compare-and-set query at
+    <code>imas_codex/standard_names/graph_ops.py:24506</code> whose predicate uses
+    the infix form <code>coalesce(sn.status, '') NOT IN ['deprecated',
+    'superseded']</code>. The server rejects that form; the codebase's own
+    convention is the prefix form <code>NOT coalesce(sn.status, '') IN [...]</code>
+    (used at the same file's lines 1853, 1854, 8288, 8373, 8568 and elsewhere).
+    The failure is deterministic and independent of the name, so it blocks every
+    <code>sn rescore</code> invocation, not only these three.
+  </p>
+  <p id="shc-exhausted-rescore-form-fix">
+    The fix is one line: replace
+    <code>coalesce(sn.status, '') NOT IN ['deprecated', 'superseded']</code> with
+    <code>NOT coalesce(sn.status, '') IN ['deprecated', 'superseded']</code> at
+    <code>graph_ops.py:24506</code>. Product code is outside this node's write
+    fence, so it is reported rather than applied.
+  </p>
+  <p id="shc-exhausted-rescore-form-control">
+    Control (log
+    <code>~/.config/reckon/crew/runs/r-20261016T100729750893-shc-exhausted-rescore/cypher-not-in-control.log</code>):
+    the invalid form is <code>REJECTED: CypherSyntaxError</code> ("Invalid input 'NOT'"),
+    while the valid form is <code>ACCEPTED: [{'c': 2936}]</code>. The accepting arm
+    is the positive control — it proves the connection and the label resolve, so
+    the rejection is the predicate's syntax and not the query's reachability.
+  </p>
+
+  <h3 id="shc-exhausted-rescore-diagnosis">Diagnosis, per name</h3>
+  <p id="shc-exhausted-rescore-diagnosis-general">
+    Exhaustion is a name-axis stop. Each name carried a single review quorum
+    (three reviewers: primary <code>grok-4.5</code>, secondary
+    <code>gpt-5.6-luna</code>, authoritative escalator
+    <code>claude-sonnet-5</code>). The quorum's mean score never reached the
+    acceptance threshold <code>DEFAULT_MIN_SCORE = 0.85</code>
+    (<code>imas_codex/standard_names/defaults.py:13</code>), so refinement ran
+    and the rotation cap <code>DEFAULT_REFINE_ROTATIONS = 3</code> was spent.
+    <code>refine_attempts = 3</code> on all three and
+    <code>refine_collision_name</code> is null on all three, so no exhaustion was
+    caused by a naming collision.
+  </p>
+  <table id="shc-exhausted-rescore-diagnosis-table">
+    <thead>
+      <tr><th>name</th><th>exhaustion reason</th><th>mean score</th><th>refine chain (REFINED_FROM)</th><th>collision screen</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td>
+        <td><code>grammar_invalid</code> — the refiner's proposed successor failed strict grammar validation (deterministic, terminal), so the chain stopped before the cap</td>
+        <td>0.6125</td>
+        <td>← <code>volume_averaged_electron_density_over_scrape_off_layer</code> (superseded) ← <code>electron_density_over_scrape_off_layer</code> (superseded)</td>
+        <td>no live successor; no accepted identity of this quantity (<code>electron_density_over_scrape_off_layer</code> is superseded, not accepted)</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_wall</code></td>
+        <td><code>attempts_exhausted</code> — the refine budget was spent without a successor clearing review</td>
+        <td>0.654</td>
+        <td>← <code>plasma_electrostatic_potential_at_first_wall</code> (superseded) ← <code>electrostatic_potential_at_first_wall</code> (superseded)</td>
+        <td>no live successor; the accepted sibling <code>electrostatic_potential_at_langmuir_probe_position</code> (0.99375) is a different locus binding, not the same identity</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>attempts_exhausted</code> — the refine budget was spent without a successor clearing review</td>
+        <td>0.633</td>
+        <td>← <code>electrostatic_potential_at_outboard_midplane</code> (superseded) ← <code>plasma_electrostatic_potential_at_midplane</code> (superseded)</td>
+        <td>no live successor; no accepted identity carries the invented <code>at_outboard_midplane</code> locus</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-exhausted-rescore-diagnosis-why">
+    Why each scored low: the primary reviewer hard-capped each on source fidelity.
+    For the density name, the bound DD leaf
+    <code>summary/pedestal_fits/mtanh/n_e/offset</code> is a modified-tanh
+    curve-fit offset, not a volume-averaged quantity, so <code>volume_averaged</code>
+    invents an operation the source never performs. For both potential names the
+    reviewer held that the locus is not established by the source: the wall leaf
+    ("Plasma potential", parent "Set of embedded … probes") names no wall, and the
+    midplane leaf (<code>langmuir_probes/reciprocating/plunge/v_plasma</code>)
+    names no midplane. In each case grammar round-trips cleanly, so the stop is
+    semantic, not structural.
+  </p>
+
+  <h3 id="shc-exhausted-rescore-route">The route, its dry run, and its outcome</h3>
+  <p id="shc-exhausted-rescore-route-cmd">
+    For each name the intended command was
+    <code>imas-codex sn rescore &lt;name&gt; --cost-limit 0.50</code>, preceded by
+    <code>--dry-run</code>. The dry run for all three names failed identically
+    with <code>EXIT=1</code> at the query above — before any graph write, so the
+    dry run itself reports nothing about the transition.
+  </p>
+  <ul id="shc-exhausted-rescore-route-logs">
+    <li>midplane dry run: <code>~/.config/reckon/crew/runs/r-20261016T100729750893-shc-exhausted-rescore/dryrun-midplane.log</code> (<code>EXIT=1</code>)</li>
+    <li>wall dry run: <code>~/.config/reckon/crew/runs/r-20261016T100729750893-shc-exhausted-rescore/dryrun-plasma.log</code> (<code>EXIT=1</code>)</li>
+    <li>density dry run: <code>~/.config/reckon/crew/runs/r-20261016T100729750893-shc-exhausted-rescore/dryrun-volume.log</code> (<code>EXIT=1</code>)</li>
+    <li>CLI auto-log (three invocations recorded): <code>~/.local/share/imas-codex/logs/sn_sn-rescore.log</code></li>
+  </ul>
+
+  <h3 id="shc-exhausted-rescore-states">Before and after, per name</h3>
+  <table id="shc-exhausted-rescore-states-table">
+    <thead>
+      <tr><th>name</th><th>before: name_stage</th><th>before: score</th><th>before: validation</th><th>after</th><th>spend</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td>
+        <td><code>exhausted</code> (docs_stage <code>pending</code>)</td>
+        <td>0.5875</td>
+        <td><code>quarantined</code></td>
+        <td>unchanged — no rescore ran</td>
+        <td>USD 0.00</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_wall</code></td>
+        <td><code>exhausted</code> (docs_stage <code>pending</code>)</td>
+        <td>0.6125</td>
+        <td><code>quarantined</code></td>
+        <td>unchanged — no rescore ran</td>
+        <td>USD 0.00</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>exhausted</code> (docs_stage <code>pending</code>)</td>
+        <td>0.5375</td>
+        <td><code>quarantined</code></td>
+        <td>unchanged — no rescore ran</td>
+        <td>USD 0.00</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-exhausted-rescore-states-note">
+    <strong>Total spend: USD 0.00</strong> against the USD 1.50 ceiling. The
+    intended per-name limit was USD 0.50.
+  </p>
+
+  <h3 id="shc-exhausted-rescore-reentry">Which names can re-enter family revalidation</h3>
+  <p id="shc-exhausted-rescore-reentry-body">
+    On the evidence read, <strong>all three cleared the collision screen</strong>
+    (no live successor, no occupied identity) and are eligible for rescore once
+    the tool defect is fixed. None can re-enter the §4 family revalidation today:
+    each remains <code>name_stage = exhausted</code> with
+    <code>validation_status = quarantined</code>, and the family enumeration's
+    liveness rule excludes only <code>superseded</code>, so an exhausted member
+    still defers or aborts its family — the quarantine the brief anticipated.
+    Until the rescore runs and a fresh quorum clears the acceptance threshold, no
+    family including these names can stamp.
+  </p>
+</section>
