@@ -1,0 +1,206 @@
+<h2 id="shc-apply-walltime-diagnosis">Where an apply's wall time goes, and why a quarantined member blocks the family stamp</h2>
+
+<p id="shc-apply-walltime-diagnosis-scope">
+  Two approved spending runs are blocked, and neither block is spend. The boundary-averaged
+  density apply (<code>r-20261015T194702454954-shc-boundary-final-apply</code>) is wall-time
+  bound: 1,200&nbsp;s of an unforced apply produced one member — the anchor, under review and not
+  accepted. The three-family measure (<code>r-20261015T194835422080-shc-three-family-measure</code>)
+  is blocked because a terminal family member cannot pass revalidation, so the density family
+  cannot be stamped. This fragment gives the mechanism and the smallest change for each. Every
+  figure cites a log line or a bounded graph read.
+</p>
+
+<h3 id="shc-apply-walltime-diagnosis-walltime">1. Wall time: a fixed per-invocation startup, paid once per batch, plus a per-member review cycle</h3>
+
+<p id="shc-apply-walltime-diagnosis-walltime-mechanism">
+  <code>sn harmonize --apply</code> enters <code>apply_families</code>
+  (<code>imas_codex/standard_names/harmonize.py:1512</code>). That function builds one
+  <code>CampaignRunner</code> per family and calls <code>runner.run(...)</code>
+  (<code>harmonize.py:1606</code>). <code>CampaignRunner.run</code>
+  (<code>imas_codex/standard_names/campaign.py:929</code>) loops the batches of the
+  anchor-gated plan (<code>campaign.py:989</code>) and, <em>per batch</em>, calls
+  <code>drain_fn(run_id, cap)</code> (<code>campaign.py:1016</code>). The drain is
+  <code>_docs_drain_factory._drain</code> (<code>imas_codex/cli/sn.py:823</code>), which calls
+  <code>_run_sn_cmd</code> (<code>sn.py:846</code>), which starts the six-pool orchestrator
+  <code>run_sn_pools</code> (<code>imas_codex/standard_names/loop.py:1313</code>) from the top.
+  There is no run-scoped cache: <strong>every batch pays the full CLI-and-pool startup again</strong>,
+  because the drain is a fresh process-level call to <code>run_sn_pools</code>, whose
+  reconcile-once-at-startup block (<code>loop.py:1688</code> onward) and pool seeding run each time.
+</p>
+
+<p id="shc-apply-walltime-diagnosis-walltime-split">
+  The run's own captures split the time into three parts:
+</p>
+<ul>
+  <li id="shc-apply-walltime-diagnosis-walltime-fixed">
+    <strong>Fixed startup, ~8 minutes per drain call.</strong> Attempt 1 (563&nbsp;s total) spent
+    "~8&nbsp;min of that 563&nbsp;s on fixed startup (graph resolve, family lint,
+    <code>derive_edges</code> over the catalog, pool start) before the scoped run began at
+    22:03:46&nbsp;local; only ~90&nbsp;s of LLM work followed"
+    (<code>capture-02b-apply-attempts.txt</code>). The graph resolve is visible in the shared CLI
+    log as the repeated <code>imas_codex.remote.tunnel: Local squeue found service node</code> /
+    <code>imas_codex.graph.profiles: SLURM: Neo4j resolved to bolt://…</code> pairs that precede
+    each reset line (<code>~/.local/share/imas-codex/logs/sn_sn-harmonize.log:939&ndash;992</code>).
+    The <code>derive_edges</code> pass is <code>imas_codex.standard_names.derivation.derive_edges</code>
+    (<code>derivation.py:92</code>), invoked from the family assembly / lint path.
+  </li>
+  <li id="shc-apply-walltime-diagnosis-walltime-permember">
+    <strong>Per-member review cycle, ~20 minutes for the anchor.</strong> Attempt 2 ran 1,200&nbsp;s
+    and its last heartbeat read <code>in_flight=1 started=13 completed=12 failed=0 spend=$1.0069</code>;
+    the anchor's docs cycled <code>reviewed (score=0.849)</code> at chain 0/3 then 1/3 and the review
+    <em>held from acceptance</em> on a <code>locus_definition</code> finding, with
+    <code>names_composed=0</code> (<code>capture-02b-apply-attempts.txt</code>). The 13 started / 12
+    completed calls in 1,200&nbsp;s are the generate&rarr;review&rarr;refine chain re-running because
+    the review will not accept; <code>names_composed=0</code> means the member never left the cycle.
+  </li>
+  <li id="shc-apply-walltime-diagnosis-walltime-reset">
+    <strong>Two resets per attempt, one per batch.</strong> The shared log shows four
+    <code>reset_standard_name_docs</code> lines, all <code>1/1</code>, two per apply attempt
+    (<code>sn_sn-harmonize.log:960, 965, 973, 978</code>, at 21:56:51, 21:58:45, 22:10:33 and
+    22:18:43 local). Each is <code>mark_members_for_regen</code>
+    (<code>harmonize.py:677</code>) &rarr; <code>reset_standard_name_docs</code>
+    (<code>harmonize.py:695</code>) for one batch. In attempt 2 the two resets are 8&nbsp;min apart
+    (22:10:33 &rarr; 22:18:43), consistent with the anchor batch's drain taking that long before the
+    next batch was marked.
+  </li>
+</ul>
+
+<p id="shc-apply-walltime-diagnosis-walltime-fixed-vs-member">
+  <strong>Classification of the cost.</strong> The startup is <em>fixed per drain call</em>, which
+  in the anchor-gated plan is <em>per batch</em> — a family is at least two batches (the anchor, then
+  the members; <code>apply_families</code> docstring, <code>harmonize.py:1528&ndash;1536</code>), so a
+  family pays the fixed cost twice. It is not fixed per member and not once per campaign pass. The
+  residual cost is <em>per member</em>: the generate&rarr;review&rarr;refine cycle re-runs whenever
+  review does not accept, and this re-run — not the fixed startup — dominates the per-member time.
+</p>
+
+<p id="shc-apply-walltime-diagnosis-walltime-estimate">
+  <strong>17-member estimate.</strong> Fixed: ~8&nbsp;min&nbsp;&times;&nbsp;2 batches
+  &asymp;&nbsp;16&nbsp;min. Per member: the measured rate is ~20&nbsp;min per member
+  (1,200&nbsp;s &rarr; one member, not accepted; <code>capture-02b-apply-attempts.txt</code>). For 17
+  members that is &asymp;&nbsp;340&nbsp;min. Total &asymp;&nbsp;<strong>6&nbsp;hours</strong> for the
+  unforced 17-member boundary apply. This is consistent with the two prior full applies on this
+  family, which spent USD&nbsp;2.71 and USD&nbsp;6.26 — "consistent with hours of wall time"
+  (<code>capture-02b-apply-attempts.txt</code>). The bound is wall time, not spend: the dry run
+  estimates USD&nbsp;7.04, inside the USD&nbsp;8.50 ceiling.
+</p>
+
+<p id="shc-apply-walltime-diagnosis-walltime-change">
+  <strong>Smallest change (operational + scope decision).</strong> Operational: run the apply on a
+  long-lived runner that is not bounded by the harness per-command limit (600&nbsp;s foreground +
+  600&nbsp;s background), with <code>--cost-limit 8.5</code> and no <code>--force</code> — both
+  failures were kills, not product faults (<code>retry_failures</code> in
+  <code>r-20261015T194702454954-shc-boundary-final-apply/manifest.md</code>: EXIT=124 at 563&nbsp;s,
+  then the harness cap at 1,200&nbsp;s). Product follow-on for the lead to size: the per-batch
+  re-entry into <code>run_sn_pools</code> (<code>campaign.py:1016</code> &rarr;
+  <code>sn.py:823</code>) makes a family pay startup twice; a run-scoped reuse would remove one
+  ~8-minute startup per family. That is a product change with a test that drives
+  <code>apply_families</code> with a counting <code>drain_fn</code> and asserts it is entered once per
+  family rather than once per batch.
+</p>
+
+<h3 id="shc-apply-walltime-diagnosis-quarantine">2. A quarantined, exhausted member blocks the family stamp</h3>
+
+<p id="shc-apply-walltime-diagnosis-quarantine-mechanism">
+  Pattern-family membership is enumerated by
+  <code>fetch_pattern_family</code> &rarr; <code>_PATTERN_FAMILY_MEMBERS_QUERY</code>
+  (<code>imas_codex/standard_names/families.py:605</code> and <code>:547</code>). That query keeps
+  every name whose <code>name_stage</code> is not <code>$superseded</code>
+  (<code>families.py:549, 554</code>), and <code>_LIVE_STAGE_EXCLUSION = "superseded"</code>
+  (<code>families.py:407</code>). The stamp query inside <code>stamp_harmonized</code> uses the same
+  single exclusion, <code>coalesce(c.name_stage, '') &lt;&gt; 'superseded'</code>
+  (<code>harmonize.py:729</code>), and defers any family in which a member's
+  <code>docs_stage</code> is not <code>accepted</code> (<code>harmonize.py:744&ndash;748</code>).
+  An <code>exhausted</code> name is <em>not</em> <code>superseded</code>, so it is enumerated as a live
+  family member and its non-acceptance defers the whole family.
+</p>
+
+<p id="shc-apply-walltime-diagnosis-quarantine-revalidation">
+  The three-family measure died one step earlier, inside the campaign loop. After the drain,
+  <code>CampaignRunner.run</code> calls <code>revalidate_fn(gc, reintroduced_ids, clean_ids)</code>
+  (<code>campaign.py:1056</code>) = <code>default_revalidate</code> (<code>campaign.py:719</code>).
+  When any id in <code>clean_ids</code> is still <code>validation_status='quarantined'</code>, it
+  raises rather than confirming it (<code>campaign.py:759&ndash;764</code>). The density apply
+  (SLURM job 1286605) died on exactly this:
+</p>
+<pre id="shc-apply-walltime-diagnosis-quarantine-trace">
+ValueError: cannot confirm quarantined standard-name identities as valid:
+  volume_averaged_electron_number_density_over_scrape_off_layer
+EXIT=1 WALL_SECONDS=1385
+</pre>
+<p id="shc-apply-walltime-diagnosis-quarantine-trace-src">
+  Source: <code>density-apply.slurm.log</code> (tail), which also shows
+  <code>names_reviewed=5</code> — five members reviewed, so the sixth (the exhausted one) could not be
+  lifted from quarantine and the revalidation refused the batch. Because the raise aborts the run, the
+  family is never stamped; and even if it did not raise, the stamp would defer on the same member at
+  <code>harmonize.py:744</code>.
+</p>
+
+<p id="shc-apply-walltime-diagnosis-quarantine-live-def">
+  <strong>Should an exhausted name be a family member at all?</strong> The domain audit answers no.
+  <code>LIVE_NAME_STAGES = {"accepted", "reviewed", "drafted", "pending"}</code>
+  (<code>imas_codex/standard_names/domain_audit.py:61</code>) — its comment states plainly that "a
+  superseded <em>or exhausted</em> name is not live" (<code>domain_audit.py:56&ndash;58</code>). The
+  family enumeration and the stamp query exclude only <code>superseded</code>, so they disagree with
+  the audit's own live-name definition: an exhausted member is treated as live by the harmonizer and
+  dead by the domain audit. The inconsistency is the mechanism — the family code applies a weaker
+  liveness test than the rest of the package.
+</p>
+
+<h3 id="shc-apply-walltime-diagnosis-members">Terminal or quarantined members of the four families</h3>
+
+<p id="shc-apply-walltime-diagnosis-members-src">
+  Bounded graph read over the four families' member sets (35 names:
+  <code>fetch_pattern_family</code> for the boundary seed; the three §4 families' member lists from
+  <code>species-before.log</code>, <code>locus-before.log</code>, <code>component-before.log</code>).
+  <code>name_stage</code> / <code>validation_status</code> / <code>docs_stage</code> as stored:
+</p>
+<table id="shc-apply-walltime-diagnosis-members-table">
+  <thead><tr><th>family</th><th>member</th><th>name_stage</th><th>validation</th><th>docs_stage</th></tr></thead>
+  <tbody>
+    <tr><td>density (§4)</td><td>volume_averaged_electron_number_density_over_scrape_off_layer</td><td><strong>exhausted</strong></td><td><strong>quarantined</strong></td><td>pending</td></tr>
+    <tr><td>locus / electrostatic_potential (§4)</td><td>plasma_electrostatic_potential_at_outboard_midplane</td><td><strong>exhausted</strong></td><td><strong>quarantined</strong></td><td>pending</td></tr>
+    <tr><td>locus / electrostatic_potential (§4)</td><td>plasma_electrostatic_potential_at_wall</td><td><strong>exhausted</strong></td><td><strong>quarantined</strong></td><td>pending</td></tr>
+  </tbody>
+</table>
+<p id="shc-apply-walltime-diagnosis-members-notes">
+  The <strong>component</strong> family <code>vorticity</code> (6 members) has no terminal member.
+  The <strong>boundary</strong> family (17 members) has no terminal or quarantined member; its
+  non-stamp in the blocked run is a different cause — the interrupted apply left three members
+  mid-regeneration: <code>flux_surface_averaged_electron_density_at_plasma_boundary</code> and
+  <code>flux_surface_averaged_total_ion_density_at_plasma_boundary</code> at
+  <code>docs_stage=drafted</code>, and the anchor
+  <code>flux_surface_averaged_xenon_density_at_plasma_boundary</code> at <code>docs_stage=reviewed</code>
+  — so the §3 block is not a terminal-member block. Two other boundary members carry
+  <code>validation_status=pending</code> (<code>…neon…</code>) or <code>valid</code>; none is
+  quarantined.
+</p>
+
+<p id="shc-apply-walltime-diagnosis-quarantine-change">
+  <strong>Smallest change (scope decision for the lead, with a product shape).</strong> A scope
+  decision is required because the two defensible repairs are different in kind:
+  (a) align the family code with the domain audit — exclude <code>exhausted</code> (and
+  <code>superseded</code>) from <code>_PATTERN_FAMILY_MEMBERS_QUERY</code>
+  (<code>families.py:549, 554, 407</code>) and from the stamp query (<code>harmonize.py:729</code>),
+  using <code>LIVE_NAME_STAGES</code> as the shared predicate. Then the density family becomes six
+  members and the locus family three, and both can stamp; or
+  (b) repair the three exhausted identities outside the harmonize path (they are terminal at the
+  review-attempt cap, per <code>imas_codex/settings.py:1419</code>) and re-run. Option (a) is the
+  product change the evidence supports: it is the smallest change, it makes the harmonizer agree with
+  the audit's own live-name definition, and it removes the block without touching name identities. Its
+  test would assert that a family containing one <code>exhausted</code> member enumerates and stamps on
+  its remaining live members, and that <code>fetch_pattern_family</code> omits the exhausted id — a
+  fixture graph with one exhausted member beside one accepted, checked so the family still forms.
+  Option (b) is the lead's call if the exhausted names should be adjudicated rather than retired from
+  the family.
+</p>
+
+<p id="shc-apply-walltime-diagnosis-summary">
+  <strong>Summary of recommendations.</strong>
+  Wall time: operational — run the apply on a long-lived runner (<code>--cost-limit 8.5</code>, no
+  <code>--force</code>); product follow-on — remove the per-batch re-entry into
+  <code>run_sn_pools</code> so a family pays startup once. Quarantine block: scope decision for the
+  lead — align family membership and the stamp to <code>LIVE_NAME_STAGES</code> so an
+  <code>exhausted</code> name is not a live family member; product change in
+  <code>families.py</code> + <code>harmonize.py</code> with a fixture-graph test.
+</p>
