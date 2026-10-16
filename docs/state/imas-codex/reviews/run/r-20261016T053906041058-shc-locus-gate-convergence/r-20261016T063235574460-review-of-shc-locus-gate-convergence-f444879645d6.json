@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate arms: gate-base.txt and gate-head.txt each carry the single pre-existing failure test_two_subjects_render_the_identical_locus_sentence, so the head adds no failure the base does not already carry.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/docs_gates.py:950",
+    "imas_codex/standard_names/review/audits.py:712",
+    "imas_codex/standard_names/workers.py:10713"
+  ],
+  "completed_at": "2026-10-16T06:43:02.350Z",
+  "dispatched_at": "2026-10-16T06:32:49Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "740",
+      "severity": "follow-on",
+      "text": "follow-on: the subject pattern admits at most two words between the locus phrase and the copula, so a genuine locus-subject definition whose copula is further away is no longer a finding \u2014 \"The plasma boundary of this configuration is the last closed flux surface.\" yields 0 findings at head (verified by running the head module), which contradicts the fragment's claim that a sentence stating the locus in other words is still flagged."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T053906041058-shc-locus-gate-convergence/locus_firing_sentence.py",
+      "line": "29",
+      "severity": "follow-on",
+      "text": "follow-on: this probe hardcodes the pre-change defining/asserts pattern instead of calling _locus_definition_findings, so its output cannot reflect the narrowed gate; firing_sentence_after.txt is byte-identical to firing_sentence_before.txt and evidences nothing about the change."
+    },
+    {
+      "file": "tests/standard_names/test_docs_locus_definition.py",
+      "line": "60",
+      "severity": "follow-on",
+      "text": "follow-on: the hardcoded _REGISTRY_DEFINITION (line 28) no longer matches the live plasma_boundary concept definition, so test_two_subjects_render_the_identical_locus_sentence is red at both base and head and the node left it stale rather than repairing it to assert against the concept's own definition."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T053906041058-shc-locus-gate-convergence/manifest.md",
+      "line": "179",
+      "severity": "follow-on",
+      "text": "follow-on: the tests field names a test file rather than the gate command that ran and its result, so that line carries no measured result to reconcile against gate-base.txt and gate-head.txt."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/docs_gates.py:950 (_locus_definition_findings into house_style_findings), imas_codex/standard_names/review/audits.py:712 (house_style_findings), imas_codex/standard_names/workers.py:10713 (_documentation_conformance_note via conformance_findings)",
+    "diff": "read commit by commit against a0ba6ecf0; c39c73afd adds _LOCUS_DETERMINERS/_LOCUS_PREPOSITIONS/_defines_locus and the narrowed pattern to docs_gates.py plus four tests, f4448796 adds the fragment, and both sit inside the declared scope.",
+    "done_when": "the brief's done-when asks the fragment to report the fired-on sentence, the confirmed cause, and before/after finding counts, plus tests green at head; docs/evidence/fragments/sn-harmonize-command/shc-locus-gate-convergence.html reports revs 0-3 with findings 1/1/1/1 before and 0/0/1/0 after, and the 17-member family measure 17 before / 15 after, and gate-head.txt records 1 failed/34 passed.",
+    "goal": "the node goal is to narrow the locus-definition gate so it fires only on a sentence whose subject is the locus; imas_codex/standard_names/docs_gates.py:740's subject pattern with _defines_locus at docs_gates.py:688 implements exactly that.",
+    "manifest": "read; it records gate-base (1 failed/30 passed), gate-head (1 failed/34 passed), the negative-control arm beside its log gate-negative-control.txt (2 failed/33 passed), the confirmed cause, and the population arm as not completed within budget.",
+    "write_paths": "the manifest declares imas_codex/standard_names/docs_gates.py, tests/standard_names/test_docs_locus_definition.py and docs/evidence/fragments/sn-harmonize-command/shc-locus-gate-convergence.html; every path in git diff a0ba6ecf0..f444879645 is one of those three."
+  },
+  "justifications": {
+    "durability": "gate-negative-control.txt shows tests/standard_names/test_docs_locus_definition.py:123 fails with the pre-change module restored, so the narrowing is guarded; the two added 'still flagged' assertions pass under both patterns and guard nothing this change did.",
+    "evidence": "gate-base.txt and gate-head.txt record 1 failed/30 passed and 1 failed/34 passed against a0ba6ecf0, and probe-family-before/after.txt record the 17->15 family measure, but the task-4 population half was left uncompleted.",
+    "fit": "the frozenset constants and the re.Pattern-taking helper follow docs_gates.py:606's _locus_registry_tokens idiom, and no symbol, comment, filename or commit message carries a plan, sprint or ticket label.",
+    "goal_fidelity": "docs_gates.py:740 requires the locus phrase to precede the copula and _defines_locus at docs_gates.py:688 skips a preposition-governed phrase, so the anchor's real opening passes while the noun-phrase restatement still fires.",
+    "reuse": "a capability search over imas_codex for prose preposition/determiner/subject handling and for any other locus-definition owner found none, so the addition extends docs_gates.py's existing locus-lookup owner rather than forking a capability.",
+    "scope_discipline": "git diff a0ba6ecf0..f444879645 touches only the three declared write paths, and the code commit carries a conventional subject and a body."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to narrow the locus-definition gate so it fires only on a sentence whose subject is the locus; imas_codex/standard_names/docs_gates.py:740's subject pattern with _defines_locus at docs_gates.py:688 implements exactly that.\nVERDICT done_when: the brief's done-when asks the fragment to report the fired-on sentence, the confirmed cause and before/after finding counts, plus tests green at head; docs/evidence/fragments/sn-harmonize-command/shc-locus-gate-convergence.html reports revs 0-3 with findings 1/1/1/1 before and 0/0/1/0 after, and the 17-member family measure 17 before / 15 after, and gate-head.txt records 1 failed/34 passed.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/docs_gates.py, tests/standard_names/test_docs_locus_definition.py and docs/evidence/fragments/sn-harmonize-command/shc-locus-gate-convergence.html; every path in git diff a0ba6ecf0..f444879645 is one of those three.\nVERDICT manifest: read; it records gate-base (1 failed/30 passed), gate-head (1 failed/34 passed), the negative-control arm beside its log gate-negative-control.txt (2 failed/33 passed), the confirmed cause, and the population arm as not completed within budget.\nVERDICT diff: read commit by commit against a0ba6ecf0; c39c73afd adds the determiners, prepositions, _defines_locus and the narrowed pattern to docs_gates.py plus four tests, f4448796 adds the fragment, and both sit inside the declared scope.\nCALL_SITES: imas_codex/standard_names/docs_gates.py:950, imas_codex/standard_names/review/audits.py:712, imas_codex/standard_names/workers.py:10713\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs_gates.py:740 requires the locus phrase to precede the copula and _defines_locus at docs_gates.py:688 skips a preposition-governed phrase, so the anchor's real opening passes while the noun-phrase restatement still fires.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-base.txt and gate-head.txt record 1 failed/30 passed and 1 failed/34 passed against a0ba6ecf0, and probe-family-before/after.txt record the 17 to 15 family measure, but the task-4 population half was left uncompleted.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff a0ba6ecf0..f444879645 touches only the three declared write paths, and the code commit carries a conventional subject and a body.\nSCORE durability: 16\nJUSTIFICATION durability: gate-negative-control.txt shows tests/standard_names/test_docs_locus_definition.py:123 fails with the pre-change module restored, so the narrowing is guarded; the two added 'still flagged' assertions pass under both patterns and guard nothing this change did.\nSCORE fit: 18\nJUSTIFICATION fit: the frozenset constants and the re.Pattern-taking helper follow docs_gates.py:606's _locus_registry_tokens idiom, and no symbol, comment, filename or commit message carries a plan, sprint or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over imas_codex for prose preposition/determiner/subject handling and for any other locus-definition owner found none, so the addition extends docs_gates.py's existing locus-lookup owner rather than forking a capability.\nFINDING imas_codex/standard_names/docs_gates.py:740 follow-on: the subject pattern admits at most two words between the locus phrase and the copula, so a genuine locus-subject definition whose copula is further away is no longer a finding.\nFINDING locus_firing_sentence.py:29 follow-on: the probe hardcodes the pre-change pattern instead of calling _locus_definition_findings, so firing_sentence_after.txt is byte-identical to firing_sentence_before.txt and evidences nothing.\nFINDING tests/standard_names/test_docs_locus_definition.py:60 follow-on: the hardcoded _REGISTRY_DEFINITION is stale against the live plasma_boundary concept, so this test is red at base and head.\nFINDING manifest.md:179 follow-on: the tests field names a file, not the gate command and its result.\n",
+  "review_run_id": "r-20261016T063235574460-review-of-shc-locus-gate-convergence-f444879645d6",
+  "reviewed_base_sha": "a0ba6ecf0db218a6ec6a6642c8e9c9520f45ad68",
+  "reviewed_head_sha": "f444879645d601c567c5313f1a5e7e437350d3fd",
+  "reviewed_run_id": "r-20261016T053906041058-shc-locus-gate-convergence",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T06:55:00+00:00",
+  "total": 108
+}
