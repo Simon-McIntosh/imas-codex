@@ -3,10 +3,10 @@
   "graph_writes": 0,
   "llm_calls": 0,
   "jev_calls": 0,
-  "measured_at_utc": "2026-10-16T05:59:27.124547+00:00",
+  "measured_at_utc": "2026-10-16T06:02:49.107357+00:00",
   "live_names": 2677,
-  "query_seconds": 0.316,
-  "ids_mix_seconds": 0.427,
+  "query_seconds": 0.315,
+  "ids_mix_seconds": 0.449,
   "physics_domain_count": 32,
   "known_present_controls": {
     "live_names_expected": 2677,
