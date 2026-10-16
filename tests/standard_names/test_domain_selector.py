@@ -30,7 +30,7 @@ def test_empty_input_returns_none():
     assert domain_ranking.select_primary_domain([]) is None
 
 
-def test_unknown_domain_is_refused_by_name():
+def test_select_primary_domain_refuses_unknown():
     with pytest.raises(ValueError, match="unknown_domain"):
         domain_ranking.select_primary_domain(["transport", "unknown_domain"])
 
@@ -54,7 +54,6 @@ def test_pure_callers_use_selector(monkeypatch):
         return "sentinel"
 
     monkeypatch.setattr(domain_ranking, "select_primary_domain", sentinel)
-    assert domain_priority.pick_primary_domain(["transport", "general"]) == "sentinel"
     assert domain_priority.domain_key(["transport", "general"]) == "sentinel"
     assert domain_priority.domain_key("transport") == "sentinel"
     assert _resolve_physics_domains(["general", "transport"]) == (
@@ -63,7 +62,6 @@ def test_pure_callers_use_selector(monkeypatch):
     )
     assert calls == [
         {"transport", "general"},
-        {"transport", "general"},
         {"transport"},
         {"transport", "general"},
     ]
@@ -71,6 +69,5 @@ def test_pure_callers_use_selector(monkeypatch):
 
 def test_pure_callers_ignore_arrival_order():
     domains = ["general", "transport"]
-    assert domain_priority.pick_primary_domain(domains) == "transport"
     assert domain_priority.domain_key(domains) == "transport"
     assert _resolve_physics_domains(domains) == ("transport", domains)

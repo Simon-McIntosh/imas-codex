@@ -16,7 +16,7 @@ from imas_codex.graph.dd_domain_classifier import (
 )
 from imas_codex.llm.prompt_loader import get_prompt_content_hash
 from imas_codex.settings import get_model
-from imas_codex.standard_names.domain_priority import pick_primary_domain
+from imas_codex.standard_names.domain_ranking import select_primary_domain
 
 HERE = Path(__file__).resolve().parent
 LABELS = HERE / "scg-domain-label-sheet.json"
@@ -175,9 +175,9 @@ def _derive(
                 ],
                 "stored_domains": stored,
                 "fresh_domains": current,
-                "stored_primary": pick_primary_domain(stored) if stored else None,
-                "fresh_primary": pick_primary_domain(current) if current else None,
-                "derived_domain": pick_primary_domain(current) if current else None,
+                "stored_primary": select_primary_domain(stored) if stored else None,
+                "fresh_primary": select_primary_domain(current) if current else None,
+                "derived_domain": select_primary_domain(current) if current else None,
             }
         )
     scores = {}

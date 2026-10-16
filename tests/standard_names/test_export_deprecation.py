@@ -105,7 +105,7 @@ class TestExportOmitsSupersessionLineage:
                 return_value="2026-08-24T00:00:00Z",
             ),
             patch(
-                "imas_codex.standard_names.export.pick_primary_domain",
+                "imas_codex.standard_names.export.select_primary_domain",
                 side_effect=lambda domains: sorted(domains)[0],
             ),
         ):

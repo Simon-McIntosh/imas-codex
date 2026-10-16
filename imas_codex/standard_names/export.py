@@ -36,7 +36,7 @@ from imas_codex.standard_names.canonical import (
     reorder_entry_dict,
 )
 from imas_codex.standard_names.catalog_ordering import order_entries_by_hierarchy
-from imas_codex.standard_names.domain_priority import pick_primary_domain
+from imas_codex.standard_names.domain_ranking import select_primary_domain
 from imas_codex.standard_names.protection import PROTECTED_FIELDS
 from imas_codex.standard_names.provenance_lifecycle import (
     fetch_public_semantic_sources,
@@ -1557,7 +1557,7 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
             "producing sources; callers must resolve one before entry "
             "conversion rather than minting a bucket the catalog refuses"
         )
-    primary_physics_domain = pick_primary_domain(physics_domains)
+    primary_physics_domain = select_primary_domain(physics_domains)
 
     from imas_codex.standard_names.kind_derivation import derive_kind
 
