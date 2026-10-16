@@ -1,0 +1,660 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "2fdaf318e980af1a41ef93b4aa00459ccbfadab2",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/brief.md",
+    "sha256": "ca8b18b9f680c07f3f33dbf3c9caec034028457a40fd6f7dabdc1a6cfcf763f1"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6277522,
+      "input_tokens_cumulative": 6277522,
+      "output_tokens": 17071,
+      "output_tokens_cumulative": 17071,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 184,
+    "files": 7,
+    "removed": 12
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 174,
+        "name": "test_forbidden_locus_variant_is_refined_rather_than_accepted",
+        "path": "tests/standard_names/test_docs_locus_definition.py"
+      },
+      "run_function": {
+        "line": 69,
+        "name": "test_departing_locus_sentence_is_refined_rather_than_accepted",
+        "path": "tests/standard_names/test_docs_locus_definition.py"
+      },
+      "window_line": 70
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_departing_locus_sentence_is_refined_rather_than_accepted",
+        "path": "tests/standard_names/test_docs_locus_definition.py"
+      },
+      "run_function": {
+        "line": 174,
+        "name": "test_forbidden_locus_variant_is_refined_rather_than_accepted",
+        "path": "tests/standard_names/test_docs_locus_definition.py"
+      },
+      "window_line": 175
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "d0e1b7b5a171fbb733d1c24da42b840037135120",
+    "24943a32da25dfd82554d733ef87d46998cda4e2",
+    "3c4ccc7c1f04d854b9308cee7dbd84582c23a121"
+  ],
+  "completed_at": "2026-10-16T09:27:22.152Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-16T08:36:41Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run pytest -p no:cacheprovider tests/standard_names/test_docs_locus_definition.py tests/standard_names/test_docs_prompt_locus.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/repair-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8571428571428571,
+    "plan": "sn-harmonize-command",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-16T09:36:19.952955+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-16T08:36:19Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 2,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 10,
+    "headroom": 1,
+    "mean_context": 115556,
+    "observed_at": "2026-10-16T08:36:20Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 2,
+      "aggregate_tokens_per_second": 242.635,
+      "detail": "",
+      "mean_tokens_per_second": 28.885,
+      "observed_at": "2026-10-16T08:36:20Z",
+      "runs": 8.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-16T09:27:22.152Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/manifest.md",
+  "member": "disposable-r-20261016T083616040509-shc-writer-no-locus-restatement",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/standard_names/test_docs_prompt_locus.py::test_generate_docs_system_prompt_names_locus_without_defining_it"
+    ],
+    "baseline_failure_ids": [
+      "tests/standard_names/test_docs_locus_definition.py::test_two_subjects_render_the_identical_locus_sentence"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/standard_names/test_docs_prompt_locus.py::test_generate_docs_system_prompt_names_locus_without_defining_it"
+    ],
+    "declaration": "restore the gloss instruction and the prompt test fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/repair-negctl.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/repair-negctl.log",
+    "test_paths": [
+      "tests/standard_names/test_docs_locus_definition.py",
+      "tests/standard_names/test_docs_prompt_locus.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "shc-writer-no-locus-restatement",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/shc-writer-no-locus-restatement.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/brief.md",
+    "brief_sha256": "ca8b18b9f680c07f3f33dbf3c9caec034028457a40fd6f7dabdc1a6cfcf763f1",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1024,
+          "cached_input_tokens": 807847,
+          "input_tokens": 808873,
+          "output_tokens": 2620,
+          "reasoning_output_tokens": 520,
+          "total_tokens": 811493,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "both docs prompts tell the model the locus sentence is appended and never to define the locus, with the paraphrase-inviting gloss instruction removed; the gate flags a locus-subject definition however long its modifier and still passes a prepositional mention; the stale locus test asserts the registry definition and passes; the new tests fail with their changes reverted; the locus and docs-prompt tests add 0 failures against base",
+    "estimated_hours": null,
+    "goal": "Make the docs writer name the locus without defining it",
+    "id": "shc-writer-no-locus-restatement",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-16T08:36:19Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 2,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 10,
+      "headroom": 1,
+      "mean_context": 115556,
+      "observed_at": "2026-10-16T08:36:20Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 2,
+        "aggregate_tokens_per_second": 242.635,
+        "detail": "",
+        "mean_tokens_per_second": 28.885,
+        "observed_at": "2026-10-16T08:36:20Z",
+        "runs": 8.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/manifest.md",
+    "negative_control": "restore the gloss instruction and the prompt test fails",
+    "plan": "sn-harmonize-command",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/llm/prompts/sn/refine_docs_user.md",
+      "imas_codex/llm/prompts/sn/generate_docs_user.md",
+      "imas_codex/standard_names/docs_gates.py",
+      "tests/standard_names/test_docs_locus_definition.py",
+      "tests/standard_names/test_docs_prompt_locus.py",
+      "docs/evidence/fragments/sn-harmonize-command/shc-writer-no-locus-restatement.html",
+      "docs/figures/sn-harmonize-command/shc-writer-no-locus-restatement"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2188665.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "shc-writer-no-locus-restatement",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-16T08:36:31.488988+00:00",
+    "score": 0.6625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.699,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 324.911,
+      "context-estimate": 20.506,
+      "records": 318.096,
+      "verdict-inputs": 344.643
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.8571428571428571,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "3c4ccc7c1f04d854b9308cee7dbd84582c23a121",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "24943a32da25dfd82554d733ef87d46998cda4e2",
+    "reviewed_head_sha": "3c4ccc7c1f04d854b9308cee7dbd84582c23a121",
+    "scores": {
+      "durability": 19,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 115
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261016T083616040509-shc-writer-no-locus-restatement",
+  "scope_acceptances": [
+    {
+      "path": "imas_codex/llm/prompts/sn/generate_docs_system.md",
+      "reason": "the first review found the gloss instruction surviving in the generate system prompt; the repair round's resume added this path to the write scope"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§3",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "39ed33b0-240f-49b8-876b-27abd5dda343",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 16329467,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 679.685,
+    "generated_tokens": 57194,
+    "generation_seconds": 394.479,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.5,
+    "machine_seconds": 285.206,
+    "peak_input_tokens": 178378,
+    "tokens_per_second": 144.99,
+    "wall_tokens_per_second": 84.15
+  },
+  "time_budget": "60m",
+  "tool_steps": 83.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 42507,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: The apply cannot complete within the harness per-command limit (600s foreground + 600s background = 1200s) nor within the node's 60-minute deadline. Measured: 1200s of an unforced apply produced one member (the anchor); under review and not accepted; the handler was stopped twice. Nothing in this node's write scope can change the command's wall time.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 46107,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-15T20:37:03Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-15T19:48:33Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261015T194702454954-shc-boundary-final-apply",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 7784,
+          "worker_pid": 4107240
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "The apply cannot complete within the harness per-command limit (600s foreground + 600s background = 1200s) nor within the node's 60-minute deadline. Measured: 1200s of an unforced apply produced one member (the anchor); under review and not accepted; the handler was stopped twice. Nothing in this node's write scope can change the command's wall time.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-15T20:37:03Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 43167,
+        "log_fresh": false,
+        "manifest_commits": [
+          "f748766bffaed3b9aada102b271a4277f26ef0ec"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "aa2325f57ae440cf3f236e974bd73a95d70f0bd24030f2dddff697c39a273f35",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194702454954-shc-boundary-final-apply/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "flash",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194702454954-shc-boundary-final-apply/manifest.md; resolve the blocker before resuming the run",
+        "node": "shc-boundary-final-apply",
+        "phase": "blocked",
+        "plan": "sn-harmonize-command",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261015T194702454954-shc-boundary-final-apply",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261015T194702454954-shc-boundary-final-apply",
+          "session_id": "ee17da51-306f-4354-b576-959069f972a2",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 43231,
+        "terminal_at": "2026-10-15T20:35:55Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-boundary-final-apply"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 40764,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Density family cannot be stamped because volume_averaged_electron_number_density_over_scrape_off_layer is exhausted and quarantined; the necessary identity repair or family-scope decision exceeds this node's exclusive write paths.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 44364,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-15T20:48:02Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-15T20:17:16Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261015T194835422080-shc-three-family-measure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 688,
+          "worker_pid": 264973
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Density family cannot be stamped because volume_averaged_electron_number_density_over_scrape_off_layer is exhausted and quarantined; the necessary identity repair or family-scope decision exceeds this node's exclusive write paths.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-15T20:48:02Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 42510,
+        "log_fresh": false,
+        "manifest_commits": [
+          "3afd0f655005236a94ad01f46931b2ed6ba0514b",
+          "6dcd5fc618b3cb152a5e7bf44361f6cb364c9e46",
+          "6bdbe16ab7aec183260155f44cce08f24acf2272",
+          "009c4cc945d506a42b10f0e924ebf90b9224f263",
+          "4fc71852cd2b4c04135b0c159215ac767089770c"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "c6c4324365db8045d683b4b11d594bc21155b6e2488a775958c839d0f0076bc4",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/manifest.md; resolve the blocker before resuming the run",
+        "node": "shc-three-family-measure",
+        "phase": "blocked",
+        "plan": "sn-harmonize-command",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261015T194835422080-shc-three-family-measure",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261015T194835422080-shc-three-family-measure",
+          "session_id": "01a1411d-d346-7183-a235-40522349b4ef",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 42542,
+        "terminal_at": "2026-10-15T20:47:25Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-three-family-measure"
+      }
+    ]
+  },
+  "wall_seconds": 3041,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-16T09:27:25Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-16T09:15:56Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261016T083616040509-shc-writer-no-locus-restatement",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7662,
+    "worker_pid": 827552
+  },
+  "worker_seconds": 3007,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
