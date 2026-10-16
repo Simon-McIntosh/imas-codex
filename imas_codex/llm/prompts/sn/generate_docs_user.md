@@ -19,8 +19,8 @@ kind, unit, or any other identity field.
 **Physics domain:** {{ item.physics_domain or "—" }}
 
 {% include ("sn/_conventions.md") %}
-
 {% if locus_context %}
+
 ## Locus of this quantity
 
 This entry's locus is **`{{ locus_context.token }}`**. Name the locus where the
@@ -32,7 +32,6 @@ Its position is itself defined by the standard quantity **`{{ locus_context.defi
 Cross-link it inline as `[label](name:{{ locus_context.defining_quantity }})`
 at the first natural mention of the locus.{% endif %}
 {% endif %}
-
 {% if item.derived_children %}
 ## This is a DERIVED PARENT — generalize over its children
 
