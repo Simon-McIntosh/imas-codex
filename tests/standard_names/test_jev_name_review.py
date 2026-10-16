@@ -176,6 +176,11 @@ def test_state_carries_closed_base_roster_full_parse_and_parent_owner():
     assert "magnetic_flux" in state["neighbourhood"]["physical_base_roster"]["value"]
     assert state["name"]["decomposition"] is not None
     assert state["neighbourhood"]["owner_segment"]["value"] == "boundary"
+    qualified = jev_review.build_name_state({"id": "total_plasma_heating_power"})
+    assert {
+        qualifier["token"]
+        for qualifier in qualified["name"]["decomposition"]["qualifiers"]
+    } >= {"total", "plasma"}
 
 
 def test_state_carries_every_taxonomy_neighbourhood_field():
