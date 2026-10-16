@@ -1,0 +1,68 @@
+{
+  "absent": {},
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/imas_dd.py:637"
+  ],
+  "completed_at": "2026-10-16T12:01:37.391Z",
+  "dispatched_at": "2026-10-16T11:45:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-refresh.html",
+      "line": "51",
+      "severity": "follow-on",
+      "text": "the sentence 'Each statement was checked with EXPLAIN against the live graph' is not backed by any record: no run-dir log contains EXPLAIN and no worker-stream tool call ran it. The statements were executed for real (apply.log, EXIT=0), which subsumes EXPLAIN's parse check, so no residual risk remains, but the fragment asserts an evidence check the run did not perform."
+    },
+    {
+      "file": "docs/figures/sn-catalog-grouping/scg-ids-domain-refresh/ids_moved_by_target.svg",
+      "line": "caption (fragment line 33)",
+      "severity": "follow-on",
+      "text": "the figure caption says 'ten domains take one each' but only eight target domains take a single bar (fast_particles and gyrokinetics take two each); the caption's own arithmetic, 6+4+3+10=23, contradicts the 25 the same paragraph states. figure-render.log repeats the miscount ('ten 1s'), so record and figure agree on a wrong number."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-refresh.html",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "the citation 'the build's path upsert applies at build_dd.py:3583' points at a docstring line of _batch_create_path_nodes in the landed revision; the domain_source IS NULL guard is at build_dd.py:3679 at head (3584 at the 854e3980e base), so the line number is stale for the revision it landed at."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against 854e3980e; 7 files and 2097 insertions, all inside scope; the only properties written are IDS.physics_domain and IMASNode.physics_domain.",
+    "done_when": "every FENCE EVIDENCE clause is recorded: dry-run-1.log 25/2399 EXIT=0, apply.log applied_path_count=2399 EXIT=0, dry-run-2.log 0/0, negative-control.log 2 failed EXIT=1, and the fragment carries counts and a reversal record.",
+    "goal": "build_dd.py:3392 refresh_physics_domains and imas_dd.py:603 `imas dd refresh-domains` deliver the reusable route; the graph now carries the corrected map (25 IDS nodes, 2399 unclassified paths).",
+    "manifest": "read; commits 98979861a and bf3411d6b; baseline_suite at 854e3980e and after_suite at bf3411d6b each completed true with the same fifteen failure ids.",
+    "write_paths": "git diff --stat 854e3980e bf3411d6b lists seven files, each inside the seven-path fence in prompt.txt (which includes the figures directory)."
+  },
+  "justifications": {
+    "durability": "negative-control.log shows both default-tier tests red (EXIT=1) when the domain_source IS NULL guard is stripped from a scratch copy of build_dd.py, and mocked-head.log shows them green at head.",
+    "evidence": "the done-when clauses are logged in dry-run-1.log/apply.log/dry-run-2.log/negative-control.log, but docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-refresh.html:51 asserts an EXPLAIN check that no run-dir log or worker-stream record shows was run.",
+    "fit": "refresh_physics_domains (build_dd.py:3392) sits beside _batch_upsert_ids_nodes and follows it, and the CLI at imas_dd.py:603 mirrors the surrounding setup_logging/make_log_print/rich-table idiom; the landing fragment carries a stale line citation and a caption miscount.",
+    "goal_fidelity": "build_dd.py:3392 reads each IDS's domain through physics_categorizer.get_domain_for_ids and apply.log's read-back reports no IDS node left off its target.",
+    "reuse": "the function extends the build's own reader and no bounded domain-refresh owner was found on a search of imas_codex/ (dd_graph_ops.py:104 mark_paths_enriched applies enrichment results, a different capability), though the guard rule is re-expressed in Cypher rather than shared with build_dd.py:3679.",
+    "scope_discipline": "git diff --stat 854e3980e bf3411d6b lists seven files, each inside the seven-path fence in prompt.txt, with no plan, sprint or index state touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to bring the graph's IDS domains and unclassified path defaults in line with the corrected map through a reusable route; build_dd.py:3392 refresh_physics_domains plus imas_dd.py:603 imas dd refresh-domains [--dry-run] is that route, and the apply moved 25 IDS nodes and 2399 unclassified paths.\nVERDICT done_when: the FENCE EVIDENCE measure (25 IDS nodes and about 2399 paths, no classified path moved, second dry run zero, mocked guard failing without the guard, fragment carrying counts and a reversal record) is recorded: dry-run-1.log (25/2399, EXIT=0), apply.log (applied_path_count=2399, classified 17886->17886, EXIT=0), dry-run-2.log (0/0), negative-control.log (2 failed, EXIT=1).\nVERDICT write_paths: the fence scope in prompt.txt names seven paths including docs/figures/sn-catalog-grouping/scg-ids-domain-refresh; every one of the seven changed paths in the diff is inside that scope.\nVERDICT manifest: read; status complete, commits 98979861a and bf3411d6b, baseline_suite at 854e3980e and after_suite at bf3411d6b both completed true with the same 15 failure ids.\nVERDICT diff: read commit by commit against 854e3980e (98979861a feat, bf3411d6b test+evidence); 7 files, 2097 insertions, all inside scope, no property other than physics_domain written.\nCALL_SITES: imas_codex/cli/imas_dd.py:637\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: build_dd.py:3392 reads each IDS's domain through physics_categorizer.get_domain_for_ids and the read-back in apply.log reports no IDS node left off its target.\nSCORE evidence: 16\nJUSTIFICATION evidence: the done-when clauses are logged in dry-run-1.log/apply.log/dry-run-2.log/negative-control.log, but the fragment at line 51 asserts an EXPLAIN check that no run-dir log or worker-stream record shows was run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 854e3980e bf3411d6b lists seven files, each inside the seven-path fence in prompt.txt, with no plan/sprint/index state touched.\nSCORE durability: 19\nJUSTIFICATION durability: negative-control.log shows both default-tier tests red (EXIT=1) when the domain_source IS NULL guard is stripped from a scratch copy of build_dd.py, and mocked-head.log shows them green at head.\nSCORE fit: 18\nJUSTIFICATION fit: refresh_physics_domains (build_dd.py:3392) sits beside _batch_upsert_ids_nodes and follows it, and the CLI at imas_dd.py:603 mirrors the surrounding setup_logging/make_log_print/rich-table idiom; the landing fragment carries a stale line citation and a caption miscount.\nSCORE reuse: 19\nJUSTIFICATION reuse: the function extends the build's own reader and no bounded domain-refresh owner was found on a search of imas_codex/ (dd_graph_ops.py:104 mark_paths_enriched applies enrichment results, a different capability), though the guard rule is re-expressed in Cypher rather than shared with build_dd.py:3679.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-refresh.html:51 follow-on: the sentence 'Each statement was checked with EXPLAIN against the live graph' is not backed by any record; the statements were executed for real (apply.log, EXIT=0), which subsumes EXPLAIN's parse check, but the fragment asserts a check the run did not perform.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-refresh.html:33 follow-on: the figure caption says 'ten domains take one each' but only eight target domains take one bar; the caption's own arithmetic, 6+4+3+10=23, contradicts the 25 the paragraph states.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-refresh.html:14 follow-on: the citation build_dd.py:3583 for the guard is stale; the domain_source IS NULL guard is at build_dd.py:3679 at head (3584 at the 854e3980e base).\n",
+  "review_run_id": "r-20261016T114449867551-review-of-scg-ids-domain-refresh-bf3411d6b722",
+  "reviewed_base_sha": "854e3980e15d428f206e500244337f53ee2702e4",
+  "reviewed_head_sha": "bf3411d6b72293304b5fc1ae6c5a2f95db63f62a",
+  "reviewed_run_id": "r-20261016T105536475867-scg-ids-domain-refresh",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T11:52:00+00:00",
+  "total": 111
+}
