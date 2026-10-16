@@ -26,7 +26,9 @@
   </table>
   <p id="shc-sn-suite-writer-fix-delta">
     The requested-base and actual-first-parent comparisons have the same delta:
-    157 failure IDs remain shared; one was added and one was removed.
+    158 complete failure or error test IDs remain shared out of 159 at each
+    revision; one was added and one was removed. Parameterized IDs containing
+    spaces are counted through their closing bracket, not at the first space.
     <strong>Added:</strong>
     <code>tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden</code>.
     Its head traceback says <code>sn/generate_docs_user: no-edit render diverged from golden capture</code>.
