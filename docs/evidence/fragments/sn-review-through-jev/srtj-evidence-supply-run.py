@@ -8,8 +8,8 @@ import base64
 import html
 import importlib.util
 import json
+import lzma
 import os
-import zlib
 from pathlib import Path
 
 from imas_codex.discovery.base.evaluation import bootstrap_interval
@@ -23,6 +23,7 @@ from imas_codex.standard_names.review.checks import (
 )
 from imas_codex.standard_names.review.jev_review import _owner_segment
 from imas_codex.standard_names.workers import _DD_CONTEXT_QUERY
+from imas_codex.tools.graph_search import GraphStructureTool
 
 HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "srtj-evidence-supply-results.json"
@@ -83,7 +84,7 @@ def _read_receipts(path: Path) -> dict[str, dict]:
 
 
 def _prepare() -> None:
-    """Read DD context through the compose reader's indexed IMASNode query."""
+    """Read DD context through the COCOS and parent-structure owners."""
     context = json.loads((PRIOR / "name-context.json").read_text())
     entries = context["entries"]
     paths = sorted(
@@ -104,11 +105,17 @@ def _prepare() -> None:
             source[path] = rows[0]
     if not source:
         raise RuntimeError("the IMASNode reader missed every known source path")
+    cocos = asyncio.run(GraphStructureTool(graph).get_dd_cocos_fields())
+    cocos_by_path = {
+        field["path"]: label
+        for label, group in cocos["transformation_types"].items()
+        for field in group["fields"]
+    }
     known = entries["poloidal_magnetic_flux"]
     if not known.get("cocos_label"):
         raise RuntimeError("positive COCOS control is absent in the prior context")
     known_paths = [path.removeprefix("dd:") for path in known.get("source_paths") or []]
-    if not any(source.get(path, {}).get("cocos_label") for path in known_paths):
+    if not any(cocos_by_path.get(path) for path in known_paths):
         raise RuntimeError("the DD reader missed known poloidal flux COCOS labels")
     for entry in entries.values():
         own_paths = [
@@ -118,7 +125,7 @@ def _prepare() -> None:
         ]
         rows = [source[path] for path in own_paths if path in source]
         entry["cocos_label"] = next(
-            (row["cocos_label"] for row in rows if row.get("cocos_label")),
+            (cocos_by_path[path] for path in own_paths if path in cocos_by_path),
             entry.get("cocos_label"),
         )
         entry["parent_path"] = next(
@@ -152,11 +159,22 @@ async def _collect(concurrency: int) -> None:
     checks = [check for check in load_review_checks()[0] if check.axis == "name"]
     questions = polarity.name_question_table(checks)
     existing = _read_receipts(RECEIPTS) if RECEIPTS.exists() else {}
-    booked = sum(row["cost_usd"] for row in existing.values())
+    booked = (
+        sum(json.loads(line)["cost_usd"] for line in RECEIPTS.read_text().splitlines())
+        if RECEIPTS.exists()
+        else 0.0
+    )
     pending = [
         name
         for name in names
-        if name not in existing and context["entries"][name].get("description")
+        if context["entries"][name].get("description")
+        and (
+            name not in existing
+            or (
+                existing[name]["state"]["neighbourhood"]["cocos_label"]["value"]
+                != context["entries"][name].get("cocos_label")
+            )
+        )
     ]
     if booked >= CEILING_USD:
         raise RuntimeError(f"Jev spend {booked:.6f} reached USD {CEILING_USD:.2f}")
@@ -313,21 +331,21 @@ def _score_and_report() -> dict:
         "prototype": diagnosis._quorum_comparison(comparison_rows, prototype_after),
         "logistic": diagnosis._quorum_comparison(comparison_rows, logistic),
     }
-    calls = list(current.values())
+    calls = [json.loads(line) for line in RECEIPTS.read_text().splitlines()]
     report["spend"] = {
         "jev_usd": sum(row["cost_usd"] for row in calls),
         "ceiling_usd": CEILING_USD,
-        "per_name_usd": sum(row["cost_usd"] for row in calls) / len(calls),
-        "per_name_latency_s": sum(row["latency_s"] for row in calls) / len(calls),
+        "per_name_usd": sum(row["cost_usd"] for row in calls) / len(current),
+        "per_name_latency_s": sum(row["latency_s"] for row in calls) / len(current),
     }
     states = {name: row["state"] for name, row in current.items()}
-    frozen = zlib.compress(
-        json.dumps(states, sort_keys=True, separators=(",", ":")).encode(), level=9
+    frozen = lzma.compress(
+        json.dumps(states, sort_keys=True, separators=(",", ":")).encode(), preset=9
     )
     report["frozen_states"] = {
-        "encoding": "base64+zlib+json",
+        "encoding": "base85+lzma+json",
         "count": len(states),
-        "data": base64.b64encode(frozen).decode(),
+        "data": base64.b85encode(frozen).decode(),
     }
     return report
 
@@ -388,20 +406,21 @@ def main() -> None:
     parser.add_argument("--prepare", action="store_true")
     parser.add_argument("--collect", action="store_true")
     parser.add_argument("--rescore", action="store_true")
+    parser.add_argument("--score", action="store_true")
     parser.add_argument("--concurrency", type=int, default=12)
     args = parser.parse_args()
     if args.prepare:
         _prepare()
     if args.collect:
         asyncio.run(_collect(args.concurrency))
-    if args.rescore or args.collect:
+    if args.rescore or args.collect or args.score:
         report = _score_and_report()
         if args.rescore:
             prior = json.loads(RESULTS.read_text())
             if report != prior:
                 raise RuntimeError("frozen receipts no longer reproduce the results")
             states = json.loads(
-                zlib.decompress(base64.b64decode(report["frozen_states"]["data"]))
+                lzma.decompress(base64.b85decode(report["frozen_states"]["data"]))
             )
             if len(states) != report["frozen_states"]["count"]:
                 raise RuntimeError("frozen state count disagrees with the receipt")
