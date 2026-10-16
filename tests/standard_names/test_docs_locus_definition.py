@@ -99,6 +99,61 @@ def test_carried_registry_definition_is_accepted(subject: str) -> None:
     assert HouseStyleFindingClass.LOCUS_DEFINITION not in classes
 
 
+_ANCHOR = "flux_surface_averaged_xenon_density_at_plasma_boundary"
+
+# The opening a boundary-averaged density name actually writes: the subject is
+# the quantity, and the locus appears inside the prepositional phrase that says
+# where the quantity is evaluated.
+_ANCHOR_OPENING = (
+    "The flux-surface-averaged xenon density at the plasma boundary is the "
+    "poloidal flux-surface average of the local xenon ion number density "
+    "evaluated on the last closed flux surface."
+)
+
+
+def _locus_definition_classes(
+    name: str, documentation: str
+) -> set[HouseStyleFindingClass]:
+    return {
+        finding.finding_class
+        for finding in conformance_findings(name, documentation=documentation)
+    }
+
+
+def test_opening_that_evaluates_at_the_locus_is_not_a_second_definition() -> None:
+    classes = _locus_definition_classes(_ANCHOR, _ANCHOR_OPENING)
+
+    assert HouseStyleFindingClass.LOCUS_DEFINITION not in classes
+
+
+def test_locus_subject_definition_is_refined_rather_than_accepted() -> None:
+    documentation = (
+        "The plasma boundary is the flux surface satisfying the confinement "
+        "requirement."
+    )
+    classes = _locus_definition_classes(_SUBJECT_ELONGATION, documentation)
+
+    assert HouseStyleFindingClass.LOCUS_DEFINITION in classes
+
+
+def test_locus_subject_noun_phrase_definition_is_still_a_finding() -> None:
+    documentation = (
+        "The plasma-boundary surface is the flux surface satisfying "
+        r"$\psi=\psi_{\mathrm{LCFS}}$."
+    )
+    classes = _locus_definition_classes(_ANCHOR, documentation)
+
+    assert HouseStyleFindingClass.LOCUS_DEFINITION in classes
+
+
+def test_registry_locus_sentence_is_not_a_second_definition() -> None:
+    sentence = _locus_sentence(_plasma_boundary_concept(_SUBJECT_ELONGATION))
+    documentation = f"{_BASE_DOCUMENT}\n\n{sentence}"
+    classes = _locus_definition_classes(_ANCHOR, documentation)
+
+    assert HouseStyleFindingClass.LOCUS_DEFINITION not in classes
+
+
 def test_forbidden_locus_variant_is_refined_rather_than_accepted() -> None:
     documentation = (
         "The plasma boundary is the separatrix in this configuration, "
