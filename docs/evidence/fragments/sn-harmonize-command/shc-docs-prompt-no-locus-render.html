@@ -1,0 +1,81 @@
+<section>
+  <h2 id="shc-docs-prompt-no-locus-render">The docs locus block renders nothing when there is no locus</h2>
+  <p id="shc-docs-prompt-no-locus-render-scope">
+    The locus instruction the writer gained now leaks no blank line into a
+    render with no locus context. The generate-docs user prompt added a
+    <code>{% if locus_context %}</code> block wrapped in blank lines; with no
+    locus those blank lines still rendered, so the no-locus render gained two
+    newlines and diverged from its golden capture. The blank line that
+    separated the block from the following section is removed and the block's
+    own leading blank line moved inside the conditional, so an absent locus
+    context emits one blank line exactly as before, and the with-locus render
+    still carries the no-restatement instruction verbatim. Write path:
+    <code>imas_codex/llm/prompts/sn/generate_docs_user.md</code>.
+  </p>
+  <p id="shc-docs-prompt-no-locus-render-diff">
+    Diff (one file, 1 insertion, 2 deletions):
+  </p>
+  <pre id="shc-docs-prompt-no-locus-render-diff-body">@@ -20,7 +20,6 @@
+ {% include ("sn/_conventions.md") %}
+-
+ {% if locus_context %}
++
+ ## Locus of this quantity
+
+ This entry's locus is **`{{ locus_context.token }}`**. ... at the first natural mention of the locus.{% endif %}
+ {% endif %}
+-
+ {% if item.derived_children %}</pre>
+  <p id="shc-docs-prompt-no-locus-render-golden">
+    The golden capture is unchanged. <code>git status</code> after the gate
+    shows only <code>imas_codex/llm/prompts/sn/generate_docs_user.md</code>
+    modified; no file under
+    <code>tests/standard_names/golden_edit_prompts/</code> is touched.
+  </p>
+  <table id="shc-docs-prompt-no-locus-render-exits">
+    <caption>Every run and its exit status</caption>
+    <thead>
+      <tr><th>run</th><th>result</th><th>EXIT=</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>test_no_edit_render_matches_golden</code> at base
+            (<code>f692914ac</code>)</td>
+        <td>1 failed — <em>no-edit render diverged from golden capture</em>,
+            two blank lines added after the conventions include</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td><code>test_no_edit_render_matches_golden</code> at head
+            (<code>935770ec3</code>)</td>
+        <td>1 passed</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <td>three docs prompt test files at base</td>
+        <td>1 failed, 24 passed</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>three docs prompt test files at head</td>
+        <td>25 passed</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <td>no-locus render comparison, head vs base (all three prompts)</td>
+        <td>refine and system renders byte-identical; generate differs by the
+            2 bytes the fix removes</td>
+        <td>0</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-docs-prompt-no-locus-render-others">
+    The other two prompts the writer fix changed do not leak. Their no-locus
+    render is byte-identical between base and head — the condition expression
+    changed but no blank line sits outside the block. The same comparison shows
+    which prompt does leak: <code>generate_docs_user</code>, whose render
+    differs by exactly the two bytes the fix removes. That divergence is the
+    instrument's positive control — a comparison reporting the other two
+    unchanged is trustworthy only because it detected the one that was not.
+  </p>
+</section>
