@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="119">
+<meta name="plan-version" content="120">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -405,6 +405,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261016T100634852632-shc-sn-suite-writer-fix" data-who="reckon-build" data-when="2026-10-16T10:53:55Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html — 159 complete failing or error IDs per arm, 158 shared, 1 added and 1 removed.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261016T103902469188-shc-docs-prompt-no-locus-render" data-who="reckon-build" data-when="2026-10-16T10:58:34.224Z">
+    <div class="r-comment-body"><p>Tightened the docs locus conditional in imas_codex/llm/prompts/sn/generate_docs_user.md so the no-locus render is byte-identical to its golden capture — test_no_edit_render_matches_golden passes at head (EXIT=0) and fails at f692914ac (EXIT=1), golden file unchanged, three-file gate 25 passed (base 1 failed / 24 passed), and a render comparison shows refine_docs_user and generate_docs_system leak no blank line (generate_docs_user is the positive control, differing by the 2 bytes removed).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T063359699428-review-of-shc-score-regression-cec62409e711" data-who="reckon-build" data-when="2026-10-13T06:50:33.699Z">
     <div class="r-comment-body"><p>Review of run r-20261013T050709331171-shc-score-regression (base f2b0a0109, head cec62409e): goal_fidelity 18, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 18 (total 110); zero added failures; three follow-on findings, no blockers. Record: /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T050709331171-shc-score-regression.json</p></div>
