@@ -51,6 +51,13 @@ def test_generate_docs_prompt_names_locus_without_defining_it() -> None:
     assert _GLOSS_INSTRUCTION not in rendered
 
 
+def test_generate_docs_system_prompt_names_locus_without_defining_it() -> None:
+    rendered = _render("sn/generate_docs_system")
+
+    assert _APPENDED_INSTRUCTION in rendered
+    assert _GLOSS_INSTRUCTION not in rendered
+
+
 def test_refine_docs_prompt_names_locus_without_defining_it() -> None:
     rendered = _render("sn/refine_docs_user")
 
