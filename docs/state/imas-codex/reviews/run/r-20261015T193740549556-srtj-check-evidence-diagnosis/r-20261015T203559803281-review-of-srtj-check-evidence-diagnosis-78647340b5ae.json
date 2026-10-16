@@ -6,6 +6,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-15T20:48:27.172Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a one-off diagnosis over saved answers whose conclusions (four checks lack their declared evidence in the state, one belongs in code) are carried into the next design node's brief; its non-failing control and duplicated scorer are evidence-script defects that the next node does not import",
+      "recorded_at": "2026-10-16T05:10:45.136146+00:00"
+    }
+  },
   "dispatched_at": "2026-10-15T20:36:16Z",
   "findings": [
     {
