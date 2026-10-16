@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T05:31:53.743Z",
+  "dispatched_at": "2026-10-16T05:20:51Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T050923624318-shc-apply-walltime-diagnosis/manifest.md",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "follow-on: orientation_write_paths declares docs/figures/sn-harmonize-command/shc-apply-walltime-diagnosis, a path outside the brief's single-file write scope that the run never produced, so the manifest names a write path with no artefact behind it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-apply-walltime-diagnosis.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment is not wrapped in a section element, unlike every sibling fragment under docs/evidence/fragments/sn-harmonize-command/, so it departs from the fragment idiom the composed evidence record is built from (it still composes, since reckon/evidence.py takes a bare fragment unchanged)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none - the change is a documentation fragment and adds no code reachable from production runtime; the sole consumer is reckon's evidence composer at promotion, outside this repository.",
+    "diff": "read commit by commit against the base; one commit 182602708 adds only the 206-line diagnostics fragment; its only runtime consumer is reckon/evidence.py:compose_landed_record, which reads a bare fragment unchanged.",
+    "done_when": "the evidence fence requires both mechanisms, the wall-time breakdown with sources, the 17-member estimate, the quarantined members and a recommended change each; shc-apply-walltime-diagnosis.html carries all five and every source it cites resolves, including families.py:407, harmonize.py:729, campaign.py:759-764, sn_sn-harmonize.log:960,965,973,978 and capture-02b-apply-attempts.txt:17,28,42.",
+    "goal": "read the node goal (diagnose the apply wall time and the quarantined-member stamp block) against docs/evidence/fragments/sn-harmonize-command/shc-apply-walltime-diagnosis.html:1-205 - the landed fragment answers it: wall time is a fixed CLI-and-pool startup paid once per drain call (per batch) plus a per-member generate/review/refine cycle, and the block is a family and stamp liveness test that excludes only superseded while the domain audit excludes superseded and exhausted.",
+    "manifest": "read; status complete, tests recorded as none (read-only diagnosis), a landing line, and a bounded graph read over the four families' 35 members; its orientation_write_paths also declares an unproduced figures path.",
+    "write_paths": "the brief's write scope is the single fragment path docs/evidence/fragments/sn-harmonize-command/shc-apply-walltime-diagnosis.html; the diff 0333ba81..182602708 changes exactly that one path and nothing else."
+  },
+  "justifications": {
+    "durability": "the node adds no assertion and no test, so nothing reddens if a cited line (families.py:407 or harmonize.py:729) drifts while the fragment keeps asserting the same mechanism.",
+    "evidence": "each figure cites a log line or a bounded read and I re-resolved thirteen citations to their exact source line; the node is read-only so no executable gate exists, and the manifest records tests none rather than claiming a run.",
+    "fit": "shc-apply-walltime-diagnosis.html:1 opens with a bare h2 while every sibling fragment in docs/evidence/fragments/sn-harmonize-command/ uses a section wrapper.",
+    "goal_fidelity": "shc-apply-walltime-diagnosis.html:29-96 gives the wall-time mechanism (harmonize.py:1512 -> campaign.py:1016 -> sn.py:823 -> loop.py:1313) and its estimate, and :98-140 gives the quarantine mechanism (families.py:407,549,554; harmonize.py:729) against domain_audit.py:61.",
+    "reuse": "the diff adds no function, class or module, so there is no capability to duplicate and no owner to extend.",
+    "scope_discipline": "git diff 0333ba81721e797d03db358056509a5b5f551e80..182602708d69579f10f86b6707511d5673bb8e12 touches only the declared fragment path with no code change."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to diagnose where an apply's wall time goes and why a quarantined member blocks the family stamp; read against docs/evidence/fragments/sn-harmonize-command/shc-apply-walltime-diagnosis.html:1-205, both mechanisms are reported with file-and-line mechanisms and a recommended change each.\nVERDICT done_when: the evidence fence names the fragment as the deliverable and requires both mechanisms, the wall-time breakdown with sources, the 17-member estimate, the quarantined members and a change per problem; the fragment carries all five, and every source it cites resolves (imas_codex/standard_names/families.py:407, harmonize.py:729, campaign.py:759-764, sn_sn-harmonize.log:960,965,973,978, capture-02b-apply-attempts.txt:17,28,42, density-apply.slurm.log tail).\nVERDICT write_paths: the brief's write scope is the single fragment path; git diff 0333ba81..182602708 changes exactly that one path, 206 insertions, nothing else.\nVERDICT manifest: read; it records status complete, tests \"none: a read-only diagnosis\", a landing line, and a bounded graph read over all 35 members of the four families; its orientation_write_paths also declares docs/figures/sn-harmonize-command/shc-apply-walltime-diagnosis, which was never produced (see finding).\nVERDICT diff: read commit by commit against the base (one commit 182602708); it adds only the diagnostics fragment, and the sole runtime consumer of a docs fragment is reckon's composer (reckon/evidence.py:compose_landed_record), which takes a bare fragment unchanged.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: shc-apply-walltime-diagnosis.html:29-96 gives the wall-time mechanism at harmonize.py:1512 -> campaign.py:1016 -> sn.py:823 -> loop.py:1313 and its estimate, and :98-140 gives the quarantine mechanism at families.py:407,549,554 and harmonize.py:729 against domain_audit.py:61.\nSCORE evidence: 16\nJUSTIFICATION evidence: every figure cites a log line or a bounded read and I re-resolved thirteen of them to the exact source line; the node is read-only so no executable gate exists and the manifest records tests \"none: a read-only diagnosis\" honestly rather than claiming a run.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff 0333ba81721e797d03db358056509a5b5f551e80..182602708d69579f10f86b6707511d5673bb8e12 touches only docs/evidence/fragments/sn-harmonize-command/shc-apply-walltime-diagnosis.html, inside the declared write scope, with no code change.\nSCORE durability: 13\nJUSTIFICATION durability: the node adds no assertion and no test (its fence is a docs fragment), so nothing reddens if a cited line drifts - families.py:407 or harmonize.py:729 could move and the fragment would keep asserting the same mechanism unguarded.\nSCORE fit: 17\nJUSTIFICATION fit: shc-apply-walltime-diagnosis.html:1 opens with a bare h2, while every sibling fragment in docs/evidence/fragments/sn-harmonize-command/ wraps its content in a section element, so this one deviates from the fragment idiom though it still composes.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, so there is no capability to duplicate; the change is a documentation fragment and the only existing mechanism it touches (the evidence composer) it does not fork.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T050923624318-shc-apply-walltime-diagnosis/manifest.md:3 follow-on: orientation_write_paths declares docs/figures/sn-harmonize-command/shc-apply-walltime-diagnosis, a path outside the brief's single-file write scope that the run never produced, so the manifest names a write path to which no artefact exists.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-apply-walltime-diagnosis.html:1 follow-on: the fragment is not wrapped in a section element, unlike every sibling fragment under docs/evidence/fragments/sn-harmonize-command/, so it departs from the fragment idiom the composed evidence record is built from.\n",
+  "review_run_id": "r-20261016T052035066900-review-of-shc-apply-walltime-diagnosis-182602708d69",
+  "reviewed_base_sha": "0333ba81721e797d03db358056509a5b5f551e80",
+  "reviewed_head_sha": "182602708d69579f10f86b6707511d5673bb8e12",
+  "reviewed_run_id": "r-20261016T050923624318-shc-apply-walltime-diagnosis",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T05:28:42.270503+00:00",
+  "total": 102
+}
