@@ -1,0 +1,98 @@
+<section>
+  <h2 id="shc-locus-gate-convergence">The locus gate flags a definition, not every mention of the locus</h2>
+  <p id="shc-locus-gate-convergence-scope">
+    Diagnoses why the boundary anchor's documentation never cleared the
+    <code>locus_definition</code> gate across repeated apply attempts, and
+    narrows the gate to the case it was written for. Write paths:
+    <code>imas_codex/standard_names/docs_gates.py</code>,
+    <code>tests/standard_names/test_docs_locus_definition.py</code>.
+  </p>
+  <p id="shc-locus-gate-convergence-cause">
+    Confirmed at <code>imas_codex/standard_names/docs_gates.py</code>:
+    <code>_locus_definition_findings</code> tested the locus phrase
+    (<code>\b{phrase}\b</code>) and a copula (<code>\b(is|are)\b</code>),
+    <em>independently over the same sentence</em>. Any locus mention sharing a
+    sentence with an <code>is</code> or <code>are</code> was therefore a
+    candidate second definition. A house-style opening — "The flux-surface-averaged
+    xenon density at the plasma boundary is the poloidal flux-surface average of the
+    local xenon ion number density …" — matched both patterns and does not carry
+    the registry definition, so the gate fired on it. Nothing in the check
+    distinguished <em>what the locus is</em> from <em>what a quantity is,
+    evaluated there</em>.
+  </p>
+  <p id="shc-locus-gate-convergence-moving-target">
+    The diagnosis is that the target moved rather than that the sentence was
+    stubborn. Each of the anchor's four stored <code>DocsRevision</code> texts
+    fired on a <em>different</em> sentence:
+  </p>
+  <table id="shc-locus-gate-convergence-revisions">
+    <thead>
+      <tr><th>rev</th><th>sentence the finding fired on</th><th>before</th><th>after</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>0</td>
+        <td>The flux-surface-averaged xenon density at the plasma boundary is the poloidal flux-surface average …</td>
+        <td>1</td><td>0</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>It is the flux-surface-averaged counterpart of the local xenon ion density at the plasma boundary …</td>
+        <td>1</td><td>0</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>The plasma-boundary surface is the flux surface satisfying $\psi=\psi_{\mathrm{LCFS}}$</td>
+        <td>1</td><td>1</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>It is the flux-surface-averaged counterpart of the local xenon ion density at the plasma boundary …</td>
+        <td>1</td><td>0</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-locus-gate-convergence-change">
+    Change: the gate now requires the locus phrase to be the <em>subject</em>
+    the copula predicates on, after one determiner is stripped. The pattern
+    admits up to two words between the phrase and the copula, so
+    "The plasma-boundary surface is …" is still a definition, and the word
+    governing the phrase is inspected: a phrase preceded by a preposition
+    ("the density <em>at</em> the plasma boundary <em>is</em> …") names where a
+    quantity is evaluated and is no longer read as a second definition.
+    Semantics kept: a sentence stating the locus in other words is still
+    flagged, the registry's own sentence is still accepted, and the forbidden
+    variant still arrives through <code>forbidden_locus_gloss</code>.
+  </p>
+  <p id="shc-locus-gate-convergence-family">
+    Family measure — the 17-member
+    <code>flux_surface_averaged_*_density_at_plasma_boundary</code> family,
+    offline over the graph's documentation: <strong>17 findings before, 15
+    after</strong>. Cleared: beryllium and oxygen, which had only a
+    prepositional mention. The 15 survivors — argon, carbon, deuterium,
+    electron, helium_3, helium_4, hydrogen, ion, iron, lithium, neon, nitrogen,
+    total_ion, tritium, xenon — each carry a locus-<em>subject</em> restatement,
+    which is a true positive under both patterns and remains refine's work.
+  </p>
+  <p id="shc-locus-gate-convergence-gates">
+    Gates, against base <code>c39c73afd^</code>:
+    base 1 failed / 30 passed; head (<code>c39c73afd</code>) 1 failed / 34
+    passed; <strong>0 added failures</strong>. Negative control (the old
+    sentence pattern restored, head tests) fails
+    <code>test_opening_that_evaluates_at_the_locus_is_not_a_second_definition</code>
+    — the declared string, "restore the old sentence pattern and the
+    opening-sentence test fails", observed as declared.
+  </p>
+  <p id="shc-locus-gate-convergence-preexisting">
+    The one failure in every arm is pre-existing and unrelated:
+    <code>test_two_subjects_render_the_identical_locus_sentence:60</code>
+    asserts a hardcoded <code>_REGISTRY_DEFINITION</code> ("The surface used to
+    delimit the plasma domain for the quantity being described") is a substring
+    of the rendered sentence. The registry's <code>plasma_boundary</code>
+    definition has since been strengthened to "The last closed magnetic flux
+    surface: the outermost flux surface on which field lines close on
+    themselves, …", so the constant is stale. Left in place rather than pointed
+    at <code>concept.definition</code>, because that would make the check
+    assert against itself and hide exactly the drift it now reports.
+  </p>
+</section>
