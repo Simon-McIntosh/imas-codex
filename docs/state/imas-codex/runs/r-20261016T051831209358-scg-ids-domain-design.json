@@ -1,0 +1,4542 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "6e0a1c75baf402e6288e4edec93892a20aa2e217",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051831209358-scg-ids-domain-design/brief.md",
+    "sha256": "2d56860fc93ebd5a75b08774b4b6fbed5c11ae76acc16ff743b9dd3d9a6825c7"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 14323201,
+      "input_tokens_cumulative": 14323201,
+      "output_tokens": 74482,
+      "output_tokens_cumulative": 74482,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 11543,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_transient_lock_only_write_is_exempt",
+        "path": "tests/graph/test_updated_at_coverage.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 429
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_late_failure_rolls_back_materialized_parent",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 429
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_write_taxonomy",
+        "path": "tests/standard_names/test_review_checks.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "_seed_signed_live_rows",
+        "path": "tests/standard_names/test_stale_source_detach.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 429
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 429
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 463,
+        "name": "test_concurrent_authority_drift_invalidates_apply",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 429
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "render",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_multiletter_si_units_round_trip",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_leading_named_unit_is_preserved",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 767,
+        "name": "test_python_tcvpy_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 786,
+        "name": "test_matlab_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_fortran_mds_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_idl_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 838,
+        "name": "test_python_mdsplus_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 856,
+        "name": "test_tdi_function_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_calls_graph_with_underspecified_status",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_graph_error_returns_zero",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_rescan_refreshes_scanner_fields_without_replacing_enrichment",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 792,
+        "name": "test_uddb_table_rows_are_emitted",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 883,
+        "name": "remote_run",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_claim_returns_source_node_field",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_edas_prompt_scopes_category_and_term_context_to_signals",
+        "path": "tests/discovery/test_signal_glossary.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 9,
+        "name": "__init__",
+        "path": "tests/discovery/test_signal_underspecified_members.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "sample_paths",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_enrichment_calls_llm",
+        "path": "tests/graph/test_dd_enrichment.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_enriches_nodes_with_llm",
+        "path": "tests/graph/test_dd_identifier_enrichment.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_gathers_sections_and_identifiers",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "test_public_name_claims_are_exactly_scope_owned",
+        "path": "tests/graph/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_make_script",
+        "path": "tests/ids/test_e2e_codegen.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 489,
+        "name": "test_decimation_code_structure",
+        "path": "tests/ids/test_e2e_codegen.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 218,
+        "name": "test_classify_error_signals_identifies_uncertainty",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 239,
+        "name": "test_classify_error_signals_excludes_physics_error_fields",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_classify_error_signals_excludes_plain_signals",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_classify_error_signals_mixed",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 312,
+        "name": "test_classify_error_signals_lower_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_classify_error_signals_upper_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "test_classify_error_signals_sigma_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 369,
+        "name": "test_classify_error_signals_returns_required_keys",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "test_match_error_signals_to_imas_basic",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 472,
+        "name": "test_match_error_signals_to_imas_missing_data_mappings",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 491,
+        "name": "test_match_error_signals_to_imas_unmatched_parent",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 519,
+        "name": "test_match_error_signals_confidence_reduced",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_parses_mapping_fields",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_cocos_warning_for_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_no_cocos_warning_for_non_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_query",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_mmsys_pattern_reads_the_member_from_the_facility_config",
+        "path": "tests/ids/test_member_identifier_patterns.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "query",
+        "path": "tests/ids/test_member_identifier_patterns.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1354,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1495,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1536,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_code_fence_uses_chunk_language",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1940,
+        "name": "test_wiki_page_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1977,
+        "name": "test_code_file_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 2000,
+        "name": "test_image_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 2050,
+        "name": "test_wiki_page_format",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 2071,
+        "name": "test_code_format_with_line_numbers",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 2090,
+        "name": "test_cross_references_aggregated",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 2126,
+        "name": "test_page_includes_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 2161,
+        "name": "test_code_includes_source_file_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_plan",
+        "path": "tests/llm/test_sn_edit_cascade_reporting.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "sample_standard_names",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_ctx",
+        "path": "tests/standard_names/fanout/test_refine_baseline_noop.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 172,
+        "name": "_persist",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 304,
+        "name": "test_open_edit_propagation_uses_only_the_atomic_transaction",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 588,
+        "name": "test_run_benchmark_mocked",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1680,
+        "name": "test_user_prompt_renders_fixture_item",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_stub_item",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "test_counts_accepted_and_reintroduction_and_drift",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 445,
+        "name": "_two_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 739,
+        "name": "test_halts_on_low_acceptance_and_sets_resume",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_idempotent_re_emit",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_query",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "_review_item",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_reviewer_report",
+        "path": "tests/standard_names/test_dd_gap_evidence_rule.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_transition_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_release_reconcile_resolves_only_proven_unit_correction",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 291,
+        "name": "test_registered_exception_resolution_reports_stale_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unsupported_predicate_remains_manual_and_never_mutates",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 343,
+        "name": "test_missing_release_path_is_not_proof",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 40,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 60,
+        "name": "_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1708,
+        "name": "test_reconcile_fails_closed_when_evidence_changes_after_preflight",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 1719,
+        "name": "query",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 721,
+        "name": "test_from_signal_row",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_docs_prompt_renders_cocos_section",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 367,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "_make_name",
+        "path": "tests/standard_names/test_docs_review_content_gate.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "_rename_plan",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "_accepted_docs_node",
+        "path": "tests/standard_names/test_edit_parity.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "_generate_name_dd_item",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_refine_name_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "_review_names_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "_review_docs_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "_review_docs_parent_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 456,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 938,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_header_omits_catalog_sha",
+        "path": "tests/standard_names/test_export_determinism.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 376,
+        "name": "test_export_emits_generic_source_bindings_and_preserves_accounting",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_graph_entry_carries_physics_domain_into_initial_validation",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_fixture_cohort_round_trips_through_resolved_entry_factory",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "sample_candidates",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_gyrokinetics_constant_paths_qualify_as_eligible",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_mock_extraction_returns_gyrokinetics",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_state_carries_name_segments_kind_unit_description",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_scoped_review_restage_is_atomic_in_seed_expand_and_readback",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_claims_returned_as_dicts",
+        "path": "tests/standard_names/test_polling_claims.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "test_claim_review_docs_returns_scalar_physics_domain",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "_claim_state",
+        "path": "tests/standard_names/test_refine_claim_recovery.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_make_name_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_returns_mapping",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_prefers_accepted_over_drafted",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "test_rename_successor_uses_unanimous_dd_source_unit",
+        "path": "tests/standard_names/test_rename_unit_derivation.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_frozen_artifact_with_source_accounting_loads_for_approval",
+        "path": "tests/standard_names/test_review_artifact_schema.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_write_taxonomy",
+        "path": "tests/standard_names/test_review_checks.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_item",
+        "path": "tests/standard_names/test_review_feedback_render.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 198,
+        "name": "test_review_single_batch_no_explicit_temperature",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_review_neighborhood_enrichment",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 465,
+        "name": "test_review_cli_dry_run",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 470,
+        "name": "_docs_item",
+        "path": "tests/standard_names/test_review_quorum_pool.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_empty_query_segment_filter_hits_backing",
+        "path": "tests/standard_names/test_search_facility_smoke.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_supersede_replay.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_kind_reclassification_defaults_to_an_exact_zero_write_preview",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_list_all",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_list_with_physics_domain_filter",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 359,
+        "name": "test_list_filter_info_in_header",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_list_physics_domain_in_header",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_list_table_format",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "run",
+        "path": "tests/standard_names/test_source_claim_counter_fencing.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_public_refresh_restamps_raw_convergence_without_steering",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 300,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_group",
+        "path": "tests/standard_names/test_stranded_identity_census.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 634,
+        "name": "_label",
+        "path": "tests/standard_names/test_tombstone_supersede.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 699,
+        "name": "test_batch_observations_cannot_downgrade_mechanical_reuse",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 754,
+        "name": "test_editorial_guidance_routes_fold_reject_and_add_honestly",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 814,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 882,
+        "name": "test_code_example_chunks_merged",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 920,
+        "name": "test_code_example_boost_on_overlap",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 719
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_existing_path_returns_true",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_existing_path_no_dd_version",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_version_context_includes_diagnostics",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 721
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_rename_lineage_attached_when_present",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_rename_lineage_absent_when_none",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 720
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 617,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py"
+      },
+      "window_line": 747
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "c2e4695b6d42abba0d6654e396ba4871938b9d00",
+    "2ad3a1fd66b2a113ce931b1d4b6028c801e7ace4"
+  ],
+  "completed_at": "2026-10-16T06:04:29.145Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-16T05:19:09Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync python -I docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051831209358-scg-ids-domain-design/run.log"
+  },
+  "impl_move": {
+    "at_complete": 0.7142857142857143,
+    "at_dispatch": 0.7142857142857143,
+    "plan": "sn-catalog-grouping",
+    "reason": "the design the lead asked for; catalog section 3 stays open for the lead's ruling",
+    "verdict": "waived"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-16T06:18:35.771785+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-16T05:18:35Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 9,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 6,
+    "mean_context": 160000,
+    "observed_at": "2026-10-16T05:18:31Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 9,
+      "aggregate_tokens_per_second": 194.44,
+      "detail": "",
+      "mean_tokens_per_second": 48.61,
+      "observed_at": "2026-10-16T05:18:31Z",
+      "runs": 4.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-16T06:04:29.145Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051831209358-scg-ids-domain-design/manifest.md",
+  "member": "disposable-r-20261016T051831209358-scg-ids-domain-design",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "scg-ids-domain-design",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/scg-ids-domain-design.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051831209358-scg-ids-domain-design/brief.md",
+    "brief_sha256": "2d56860fc93ebd5a75b08774b4b6fbed5c11ae76acc16ff743b9dd3d9a6825c7",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2871,
+          "cached_input_tokens": 718523,
+          "input_tokens": 721396,
+          "output_tokens": 3138,
+          "reasoning_output_tokens": 355,
+          "total_tokens": 724534,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "the fragment reports the domain use case with consumers, today's domain sources and where Jev is used with the two stored findings verified, each IDS's path-domain mix against its mapped domain, the IDS-first rule measured on the approved, calibration and validation sets with the current and a proposed IDS map, a designed Jev tie-break with its reach and cost, and one recommended design; a logged rerun reproduces every figure at EXIT=0",
+    "estimated_hours": null,
+    "goal": "Design and measure the IDS-first standard-name domain rule with hierarchy and Jev tie-breaks",
+    "id": "scg-ids-domain-design",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-16T05:18:35Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 9,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 6,
+      "mean_context": 160000,
+      "observed_at": "2026-10-16T05:18:31Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 9,
+        "aggregate_tokens_per_second": 194.44,
+        "detail": "",
+        "mean_tokens_per_second": 48.61,
+        "observed_at": "2026-10-16T05:18:31Z",
+        "runs": 4.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051831209358-scg-ids-domain-design/manifest.md",
+    "negative_control": "the set-precedence control reproduces 9 of 20 approved and 53 of 73 calibration",
+    "plan": "sn-catalog-grouping",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design.html",
+      "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py",
+      "docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-results.json",
+      "docs/figures/sn-catalog-grouping/scg-ids-domain-design"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 5837734.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "scg-ids-domain-design",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-16T05:18:56.181875+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.5,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 332.121,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1718.319,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 119193.474484,
+        "budget_reason": null,
+        "burn_multiple": 1.112416137608609,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.028827320787037,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031478139915355356,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 79.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 119193.474484,
+        "budget_reason": null,
+        "burn_multiple": 1.112416137608609,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.028827320787037,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031478139915355356,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 79.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 119193.474484,
+        "budget_reason": null,
+        "burn_multiple": 1.112416137608609,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.028827320787037,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031478139915355356,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 79.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 4,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 62.8,
+          "peak_utilisation_p90_pct": 77.0,
+          "peak_utilisation_runs": 623,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 15,
+          "not-run": 21,
+          "passed": 117,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 14
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 332.625484,
+        "budget_reason": null,
+        "burn_multiple": 3.856570561218919,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 344371.667779,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.037993987453704,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1511705777829034,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": true,
+        "utilisation_pct": 53.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 332.625484,
+        "budget_reason": null,
+        "burn_multiple": 3.856570561218919,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 344371.667779,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.037993987453704,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1511705777829034,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": true,
+        "utilisation_pct": 53.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 332.625484,
+        "budget_reason": null,
+        "burn_multiple": 3.856570561218919,
+        "congestion": {
+          "lift": {
+            "ends_at": "2026-10-20T04:58:00+00:00",
+            "ends_on": "time",
+            "form": "uncapped",
+            "group": "codex-sub",
+            "id": "codex-sub-1792002586-64d825",
+            "pace_multiple": null,
+            "remaining_seconds": 344371.667779,
+            "scope": "global"
+          }
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.037993987453704,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 9,
+          "passed": 40,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1511705777829034,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-22T06:13:12+00:00",
+        "stale": true,
+        "utilisation_pct": 53.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude": 0,
+      "claude:claude-opus-5-5:claude": 0,
+      "claude:claude-sonnet-5-5:claude": 0.03,
+      "codex:gpt-6-astra:codex": 0,
+      "codex:gpt-6-luna:codex": 0,
+      "codex:gpt-6-sol:codex": 0.39,
+      "hold": 0.01,
+      "local:deepseek-v4.1-flash:clive": 0.56
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "medium",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "lift": "A lift in force on the lane's budget group: its form (uncapped, drain_by or multiple), who granted it, and when it ends. A lane under a lift is one whose window is meant to be spent, so its burn and pace do not press it while the lift stands.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "A stale reading is a ledger-only budget reading past its shelf life; its budget_age_s says how old it is. An account-surface reading is never stale by age.",
+          "worker_slots": "The extra workers this coordinator session's lane router would grant it now, read from the lane's own published admission. Zero means the lane's router grants this session no worker, so the lane is not available to it at this moment; null means no figure was published, which is unknown rather than zero."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. Read a candidate's worker_slots as the workers this session's lane router grants it: a lane whose worker_slots is 0 grants this session no worker now, so it is not available to the session and a well-defined implementation or test node must not be routed or left queued there; a null worker_slots is no published figure, which is unknown rather than zero. A candidate whose congestion block carries a lift is on a lane whose window is meant to be spent: its burn and pace do not press it while the lift stands, and when the local lane is full, holding or queueing for that lane is no longer the default for work it can serve. A review should prefer the lifted lane's cheaper models. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for, worker_slots, lift and context",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"general\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"moderate\"}},\"goal\":\"Design and measure the IDS-first standard-name domain rule with hierarchy and Jev tie-breaks\",\"done_when\":\"the fragment reports the domain use case with consumers, today's domain sources and where Jev is used with the two stored findings verified, each IDS's path-domain mix against its mapped domain, the IDS-first rule measured on the approved, calibration and validation sets with the current and a proposed IDS map, a designed Jev tie-break with its reach and cost, and one recommended design; a logged rerun reproduces every figure at EXIT=0\",\"estimated_context\":50392,\"estimated_hours\":3.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":4,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":79.0,\"burn_multiple\":1.112416137608609,\"pace_allowance\":0.031478139915355356,\"days_to_reset\":2.028827320787037,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":15.6,\"peak_utilisation_p90_pct\":18.0,\"peak_utilisation_runs\":5},\"budget_source\":null,\"budget_age_s\":119193.474484,\"stale\":true,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":14,\"congestion\":{\"running\":4,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":117,\"failed\":15,\"not-run\":21,\"unknown\":0},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":50392,\"headroom_pct\":78.1,\"peak_utilisation_p50_pct\":62.8,\"peak_utilisation_p90_pct\":77.0,\"peak_utilisation_runs\":623},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":53.0,\"burn_multiple\":3.856570561218919,\"pace_allowance\":0.1511705777829034,\"days_to_reset\":6.037993987453704,\"resets_at\":\"2026-10-22T06:13:12+00:00\",\"worker_slots\":null,\"congestion\":{\"lift\":{\"id\":\"codex-sub-1792002586-64d825\",\"group\":\"codex-sub\",\"form\":\"uncapped\",\"scope\":\"global\",\"pace_multiple\":null,\"ends_at\":\"2026-10-20T04:58:00+00:00\",\"ends_on\":\"time\",\"remaining_seconds\":344371.667779}},\"outcomes\":{\"passed\":40,\"failed\":2,\"not-run\":9,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":332.625484,\"stale\":true,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":119194.713151,\"stale\":true},\"clive\":{\"p50_s\":1909.0,\"p90_s\":7449,\"runs\":150,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":31391.464151,\"stale\":true},\"codex\":{\"p50_s\":1325,\"p90_s\":4293,\"runs\":49,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":333.864151,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":79.0,\"burn_multiple\":1.112416137608609,\"pace_allowance\":0.031478139915355356,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"days_to_reset\":2.0288129843634257,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":14,\"congestion\":{\"running\":4,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":53.0,\"burn_multiple\":3.856570561218919,\"pace_allowance\":0.1511705777829034,\"resets_at\":\"2026-10-22T06:13:12+00:00\",\"days_to_reset\":6.037979651030093,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"admitting\",\"expected_wait_s\":1654.0,\"running\":4,\"waiting\":0,\"headroom\":7,\"worker_slots\":22,\"tokens_per_second\":65.488,\"read_at\":\"2026-10-16T05:18:30.569779+00:00\"}}",
+    "rendered_token_estimate": 1168,
+    "stage_ms": {
+      "budget-snapshot": 615.771,
+      "context-estimate": 30.314,
+      "records": 457.75,
+      "verdict-inputs": 132.384
+    },
+    "template_digest": "c3fe6f493155a9b428ea865abba751e7ff2b809fbe359a520deacbfa7bfb2aaa",
+    "usage": {
+      "cost": 0.000175896,
+      "input_tokens": 4188,
+      "output_tokens": 174
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.7142857142857143,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "2ad3a1fd66b2a113ce931b1d4b6028c801e7ace4",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "6e0a1c75baf402e6288e4edec93892a20aa2e217",
+    "reviewed_head_sha": "2ad3a1fd66b2a113ce931b1d4b6028c801e7ace4",
+    "scores": {
+      "durability": 13,
+      "evidence": 17,
+      "fit": 15,
+      "goal_fidelity": 18,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 103
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261016T051831209358-scg-ids-domain-design",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "153dd943-b94c-4bd4-b35f-e525021f70ca",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 16437771,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2696.488,
+    "generated_tokens": 104519,
+    "generation_seconds": 1916.103,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.8,
+    "machine_seconds": 780.385,
+    "peak_input_tokens": 176774,
+    "tokens_per_second": 54.55,
+    "wall_tokens_per_second": 38.76
+  },
+  "time_budget": "60m",
+  "tool_steps": 184.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 30651,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: The apply cannot complete within the harness per-command limit (600s foreground + 600s background = 1200s) nor within the node's 60-minute deadline. Measured: 1200s of an unforced apply produced one member (the anchor); under review and not accepted; the handler was stopped twice. Nothing in this node's write scope can change the command's wall time.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 34251,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-15T20:37:03Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-15T19:48:33Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261015T194702454954-shc-boundary-final-apply",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 7784,
+          "worker_pid": 4107240
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "The apply cannot complete within the harness per-command limit (600s foreground + 600s background = 1200s) nor within the node's 60-minute deadline. Measured: 1200s of an unforced apply produced one member (the anchor); under review and not accepted; the handler was stopped twice. Nothing in this node's write scope can change the command's wall time.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-15T20:37:03Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 31311,
+        "log_fresh": false,
+        "manifest_commits": [
+          "f748766bffaed3b9aada102b271a4277f26ef0ec"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "aa2325f57ae440cf3f236e974bd73a95d70f0bd24030f2dddff697c39a273f35",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194702454954-shc-boundary-final-apply/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "flash",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194702454954-shc-boundary-final-apply/manifest.md; resolve the blocker before resuming the run",
+        "node": "shc-boundary-final-apply",
+        "phase": "blocked",
+        "plan": "sn-harmonize-command",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261015T194702454954-shc-boundary-final-apply",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261015T194702454954-shc-boundary-final-apply",
+          "session_id": "ee17da51-306f-4354-b576-959069f972a2",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 31374,
+        "terminal_at": "2026-10-15T20:35:55Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-boundary-final-apply"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 28908,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Density family cannot be stamped because volume_averaged_electron_number_density_over_scrape_off_layer is exhausted and quarantined; the necessary identity repair or family-scope decision exceeds this node's exclusive write paths.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 32508,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-15T20:48:02Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-15T20:17:16Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261015T194835422080-shc-three-family-measure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 688,
+          "worker_pid": 264973
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Density family cannot be stamped because volume_averaged_electron_number_density_over_scrape_off_layer is exhausted and quarantined; the necessary identity repair or family-scope decision exceeds this node's exclusive write paths.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-15T20:48:02Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 30654,
+        "log_fresh": false,
+        "manifest_commits": [
+          "3afd0f655005236a94ad01f46931b2ed6ba0514b",
+          "6dcd5fc618b3cb152a5e7bf44361f6cb364c9e46",
+          "6bdbe16ab7aec183260155f44cce08f24acf2272",
+          "009c4cc945d506a42b10f0e924ebf90b9224f263",
+          "4fc71852cd2b4c04135b0c159215ac767089770c"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "c6c4324365db8045d683b4b11d594bc21155b6e2488a775958c839d0f0076bc4",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/manifest.md; resolve the blocker before resuming the run",
+        "node": "shc-three-family-measure",
+        "phase": "blocked",
+        "plan": "sn-harmonize-command",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261015T194835422080-shc-three-family-measure",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261015T194835422080-shc-three-family-measure",
+          "session_id": "01a1411d-d346-7183-a235-40522349b4ef",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 30686,
+        "terminal_at": "2026-10-15T20:47:25Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-three-family-measure"
+      }
+    ]
+  },
+  "wall_seconds": 2720,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-16T06:04:32Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-16T05:19:24Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261016T051831209358-scg-ids-domain-design",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 9963,
+    "worker_pid": 2953705
+  },
+  "worker_seconds": 2672,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
