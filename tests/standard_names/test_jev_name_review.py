@@ -475,6 +475,25 @@ async def test_audit_check_without_a_report_is_unanswered_not_passed(monkeypatch
     assert record["decision"] == "unknown"
 
 
+async def test_repeated_segment_is_decided_without_an_audit_report(monkeypatch):
+    monkeypatch.setattr(jev_review, "rerank_name_comparators", _no_rerank)
+    monkeypatch.setattr(jev_review, "decide_batch", _fake_decide_batch({}, cost=0.0))
+    items = [_item("electron_electron_temperature"), _item("electron_temperature")]
+
+    review = await jev_review.review_names(items)
+
+    repeated = review.items[0]["checks"]["redundant_repeated_segment"]
+    clean = review.items[1]["checks"]["redundant_repeated_segment"]
+    assert repeated["answered"] is True
+    assert repeated["failed"] is True
+    assert repeated["decision"] == "reject"
+    assert "repeated_token" in repeated["audit_finding"]
+    assert repeated["question"] is None
+    assert clean["answered"] is True
+    assert clean["failed"] is False
+    assert clean["decision"] == "accept"
+
+
 async def test_audit_check_with_a_report_is_answered_from_it(monkeypatch):
     # A report that carries no finding for this name still means the audit ran,
     # so the check is answered and accepted rather than left unknown.

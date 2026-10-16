@@ -399,13 +399,15 @@ def audit_finding_for(
     the name belongs to instead, since the finding is a group rather than a
     per-name entry.
     """
-    if audit_report is None or check.audit_finding_class is None:
+    if check.audit_finding_class is None:
         return None
     if check.id == "redundant_repeated_segment":
         from imas_codex.standard_names.audits import repeated_token_check
 
         findings = repeated_token_check({"id": name_id})
         return findings[0] if findings else None
+    if audit_report is None:
+        return None
     finding_class = check.audit_finding_class
     if finding_class == "duplicate_component":
         for component in getattr(audit_report, "duplicate_components", []):
@@ -568,7 +570,9 @@ def _item_record(
     for check in name_checks:
         if check.audit_finding_class is not None:
             finding = audit_finding_for(check, name_id, audit_report)
-            answered = audit_report is not None
+            answered = (
+                audit_report is not None or check.id == "redundant_repeated_segment"
+            )
             check_records[check.id] = {
                 "answered": answered,
                 "failed": answered and finding is not None,
