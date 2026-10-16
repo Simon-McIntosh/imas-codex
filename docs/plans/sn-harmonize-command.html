@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="121">
+<meta name="plan-version" content="122">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -410,7 +410,10 @@
     <div class="r-comment-body"><p>Tightened the docs locus conditional in imas_codex/llm/prompts/sn/generate_docs_user.md so the no-locus render is byte-identical to its golden capture — test_no_edit_render_matches_golden passes at head (EXIT=0) and fails at f692914ac (EXIT=1), golden file unchanged, three-file gate 25 passed (base 1 failed / 24 passed), and a render comparison shows refine_docs_user and generate_docs_system leak no blank line (generate_docs_user is the positive control, differing by the 2 bytes removed).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261016T105919702766-review-of-shc-docs-prompt-no-locus-render-c6e97f965a4f" data-who="reckon-build" data-when="2026-10-16T11:09:44.605Z">
-    <div class="r-comment-body"><p>Reviewed r-20261016T103902469188-shc-docs-prompt-no-locus-render at base f692914ac, head c6e97f965: the node relocates the locus block&#x27;s blank lines in imas_codex/llm/prompts/sn/generate_docs_user.md so the no-locus render equals its golden capture; I reproduced the base red and the head green independently (head no-locus render 2292 bytes == golden 2292, base 2294), scored goal_fidelity 20, evidence 18, scope_discipline 20, durability 20, fit 19, reuse 20 (total 117), and filed one follow-on finding that the render comparison backing the refine/system no-leak claim cannot fail for those two unchanged files. No blocking findings.</p></div>
+    <div class="r-comment-body"><p>Reviewed r-20261016T103902469188-shc-docs-prompt-no-locus-render at base f692914ac, head c6e97f965: the node relocates the locus block's blank lines in imas_codex/llm/prompts/sn/generate_docs_user.md so the no-locus render equals its golden capture; I reproduced the base red and the head green independently (head no-locus render 2292 bytes == golden 2292, base 2294), scored goal_fidelity 20, evidence 18, scope_discipline 20, durability 20, fit 19, reuse 20 (total 117), and filed one follow-on finding that the render comparison backing the refine/system no-leak claim cannot fail for those two unchanged files. No blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-land-s3-suite-and-render" data-who="reckon-build" data-when="2026-10-16T11:18:00Z">
+    <div class="r-comment-body"><p>The writer fix was measured across the whole standard-names package. It added one failure, a golden no-locus render, which is now repaired (merges <code>8cca9c2f3</code> and <code>d05e0f3e5</code>; reviews 109 and 117). The writer path is clean for the boundary family's final apply. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#shc-docs-prompt-no-locus-render">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T063359699428-review-of-shc-score-regression-cec62409e711" data-who="reckon-build" data-when="2026-10-13T06:50:33.699Z">
     <div class="r-comment-body"><p>Review of run r-20261013T050709331171-shc-score-regression (base f2b0a0109, head cec62409e): goal_fidelity 18, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 18 (total 110); zero added failures; three follow-on findings, no blockers. Record: /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T050709331171-shc-score-regression.json</p></div>
@@ -444,6 +447,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261016T103446162116-shc-rescore-cypher-fix" data-who="reckon-build" data-when="2026-10-16T11:04:43Z">
     <div class="r-comment-body"><p>shc-rescore-cypher-fix: prefix NOT coalesce(...) IN now plans under live EXPLAIN (EXIT=0), the static scan passes, both fail under the infix mutation (EXIT=1), the rescore gate adds zero failures (8 base / 9 head passed), and the density dry run reports exhausted to drafted (EXIT=0); docs/evidence/fragments/sn-harmonize-command/shc-rescore-cypher-fix.html</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-land-s4-rescore-cypher-fix" data-who="reckon-build" data-when="2026-10-16T11:18:00Z">
+    <div class="r-comment-body"><p>The exhausted-member repair found <code>sn rescore</code> unrunnable on a Cypher syntax defect. It spent nothing and diagnosed all three names: none exhausted on a collision, two ran out of attempts, and one stopped as grammar-invalid. The fix is merged (<code>2a84c3c0a</code>, review 115), and the repair node has resumed against it to rescore the three names within USD 1.50. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#shc-rescore-cypher-fix">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>

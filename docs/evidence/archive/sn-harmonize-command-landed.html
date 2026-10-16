@@ -140,6 +140,21 @@
     <p>All three docs prompts (refine user, generate user and generate system) now name the locus and leave its definition to the registry sentence. Each previously asked the writer to gloss the locus but not quote it verbatim, which invited exactly the paraphrase the locus gate rejects. The gate now flags a locus-subject definition however long its modifier, and a prepositional mention stays exempt. Re-measured on the boundary-density family: 17 members, 15 flagged. The first review blocked the node because the gloss survived in the generate system prompt; the resumed worker removed it, and the reverted template turns the new test red (EXIT=1). Gate: the two locus test files, 15 passed at <code>3c4ccc7c1</code>, 0 added failures. Second review 115, with three record-prose follow-ons. Merge <code>e3d366d67</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-writer-no-locus-restatement.html">fragment</a></p>
   </section>
 
+  <section id="shc-sn-suite-writer-fix">
+    <h2>§3 — The standard-names suite at the docs-writer fix, by delta</h2>
+    <p>The whole <code>tests/standard_names</code> package ran from separate archives at the writer-fix merge <code>e3d366d67</code>, at its first parent <code>ab9e614f</code>, and at the named base <code>2fdaf318e</code>, whose product files are identical to the first parent's. Each arm has 159 failing or erroring IDs, of which 158 are shared. One failure is added: <code>test_edit_prompt_injection.py::test_no_edit_render_matches_golden</code>, because the generate-docs prompt's new locus block left blank lines in the render with no locus. One is removed: a stale literal-sentence locus test. The first review blocked on the counts, which the manifest had truncated at parameterized IDs; after the repair the re-review scored 109. Merge <code>8cca9c2f3</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html">fragment</a></p>
+  </section>
+
+  <section id="shc-docs-prompt-no-locus-render">
+    <h2>§3 — The docs prompt renders unchanged when there is no locus</h2>
+    <p>The locus block's blank lines now sit inside its conditional in <code>generate_docs_user.md</code>. The render with no locus is byte-identical to the golden capture, which is unchanged. The golden test fails at base (EXIT=1) and passes at head (EXIT=0). The three docs-prompt test files go from 1 failed and 24 passed to 25 passed. Review 117. Merge <code>d05e0f3e5</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-docs-prompt-no-locus-render.html">fragment</a></p>
+  </section>
+
+  <section id="shc-rescore-cypher-fix">
+    <h2>§4 — sn rescore&#x27;s eligibility query parses on the server</h2>
+    <p><code>sn rescore</code> could not run for any name. Its eligibility statement, added on 2026-10-13, wrote <code>coalesce(sn.status, '') NOT IN [...]</code>, which the Neo4j server rejects. It now uses the prefix form, in one module constant that the code and a live <code>EXPLAIN</code> test share. A default-tier static scan rejects the infix form in any <code>MATCH</code> string of the module. With the infix form restored, both tests fail (EXIT=1). The three rescore test files add no failures (8 passed at base, 9 at head). A dry run on the scrape-off-layer density name now reports exhausted → drafted. The first review blocked on empty suite receipts; after the repair it scored 115. Merge <code>2a84c3c0a</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-rescore-cypher-fix.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>
