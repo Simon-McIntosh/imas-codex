@@ -1,0 +1,1771 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "a4a3f9368e9f7a4da275e87c70c397fdc6574e36",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T193740549556-srtj-check-evidence-diagnosis/brief.md",
+    "sha256": "a7300044f79f27c0ca821e933e1b401efaa8988f85eb35e421257545ac9d0597"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 14024982,
+      "input_tokens_cumulative": 14024982,
+      "output_tokens": 98410,
+      "output_tokens_cumulative": 98410,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 5602,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 883,
+        "name": "remote_run",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_edas_prompt_scopes_category_and_term_context_to_signals",
+        "path": "tests/discovery/test_signal_glossary.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "sample_paths",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_gathers_sections_and_identifiers",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "__init__",
+        "path": "tests/graph/test_dd_path_domain_upsert.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 461
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_make_script",
+        "path": "tests/ids/test_e2e_codegen.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 489,
+        "name": "test_decimation_code_structure",
+        "path": "tests/ids/test_e2e_codegen.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 218,
+        "name": "test_classify_error_signals_identifies_uncertainty",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 239,
+        "name": "test_classify_error_signals_excludes_physics_error_fields",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_classify_error_signals_excludes_plain_signals",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_classify_error_signals_mixed",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 312,
+        "name": "test_classify_error_signals_lower_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_classify_error_signals_upper_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "test_classify_error_signals_sigma_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 369,
+        "name": "test_classify_error_signals_returns_required_keys",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "test_match_error_signals_to_imas_basic",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 472,
+        "name": "test_match_error_signals_to_imas_missing_data_mappings",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 491,
+        "name": "test_match_error_signals_to_imas_unmatched_parent",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 519,
+        "name": "test_match_error_signals_confidence_reduced",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "sample_standard_names",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_ctx",
+        "path": "tests/standard_names/fanout/test_refine_baseline_noop.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 588,
+        "name": "test_run_benchmark_mocked",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "test_counts_accepted_and_reintroduction_and_drift",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 445,
+        "name": "_two_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 739,
+        "name": "test_halts_on_low_acceptance_and_sets_resume",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_query",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_docs_prompt_renders_cocos_section",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 367,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 376,
+        "name": "test_export_emits_generic_source_bindings_and_preserves_accounting",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_gyrokinetics_constant_paths_qualify_as_eligible",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_claims_returned_as_dicts",
+        "path": "tests/standard_names/test_polling_claims.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "_claim_state",
+        "path": "tests/standard_names/test_refine_claim_recovery.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_make_name_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_returns_mapping",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_prefers_accepted_over_drafted",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_frozen_artifact_with_source_accounting_loads_for_approval",
+        "path": "tests/standard_names/test_review_artifact_schema.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_review_neighborhood_enrichment",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_supersede_replay.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "__init__",
+        "path": "tests/standard_names/test_sn_approve.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 461
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "__init__",
+        "path": "tests/standard_names/test_sn_approve_undo_fallback.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 461
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_list_all",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_list_with_physics_domain_filter",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 359,
+        "name": "test_list_filter_info_in_header",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_list_physics_domain_in_header",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_list_table_format",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 699,
+        "name": "test_batch_observations_cannot_downgrade_mechanical_reuse",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 754,
+        "name": "test_editorial_guidance_routes_fold_reject_and_add_honestly",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 459
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_version_context_includes_diagnostics",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 380,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 460
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "test_engine_import_does_not_load_cli",
+        "path": "tests/discovery/test_engine_import_order.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 550
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 638,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 550
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_write_taxonomy",
+        "path": "tests/standard_names/test_review_checks.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 524,
+        "name": "render_fragment",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py"
+      },
+      "window_line": 544
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "c8d0f0c1600270dbd270ecac94e3fa0be1efafe2",
+    "78647340b5ae6770b4ad59c66ffb518103a329be"
+  ],
+  "completed_at": "2026-10-15T20:35:19.094Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-15T19:39:02Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "0.484",
+    "0.488"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=\"$PWD\" /home/ITER/mcintos/Code/imas-codex/.venv/bin/python docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T193740549556-srtj-check-evidence-diagnosis/gate-rerun.log"
+  },
+  "impl_move": {
+    "at_complete": 0.2857142857142857,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "sn-review-through-jev",
+    "reason": "a diagnosis that shapes the next design arm; review-through-Jev section 3 stays open",
+    "verdict": "waived"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-15T20:37:55.519622+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-15T19:37:55Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 24,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 10,
+    "headroom": 1,
+    "mean_context": 133333,
+    "observed_at": "2026-10-15T19:37:44Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 24,
+      "aggregate_tokens_per_second": 441.094,
+      "detail": "",
+      "mean_tokens_per_second": 41.613,
+      "observed_at": "2026-10-15T19:37:44Z",
+      "runs": 10.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-15T20:35:19.094Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T193740549556-srtj-check-evidence-diagnosis/manifest.md",
+  "member": "disposable-r-20261015T193740549556-srtj-check-evidence-diagnosis",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "srtj-check-evidence-diagnosis",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/srtj-check-evidence-diagnosis.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T193740549556-srtj-check-evidence-diagnosis/brief.md",
+    "brief_sha256": "a7300044f79f27c0ca821e933e1b401efaa8988f85eb35e421257545ac9d0597",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 670,
+          "cached_input_tokens": 602097,
+          "input_tokens": 602769,
+          "output_tokens": 2645,
+          "reasoning_output_tokens": 528,
+          "total_tokens": 605414,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "for each of the five checks the fragment reports evidence-field coverage in the saved states, firing rates on accepted and rejected calibration names, ten strongest accepted examples, a cause class and a remedy, and a calibration re-score with the simulable remedies plus one validation read of the combined remedy; a logged rerun reproduces every figure at EXIT=0",
+    "estimated_hours": null,
+    "goal": "Find why five defect-worded name-review checks fire on accepted names",
+    "id": "srtj-check-evidence-diagnosis",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-15T19:37:55Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 24,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 10,
+      "headroom": 1,
+      "mean_context": 133333,
+      "observed_at": "2026-10-15T19:37:44Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 24,
+        "aggregate_tokens_per_second": 441.094,
+        "detail": "",
+        "mean_tokens_per_second": 41.613,
+        "observed_at": "2026-10-15T19:37:44Z",
+        "runs": 10.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T193740549556-srtj-check-evidence-diagnosis/manifest.md",
+    "negative_control": "the unmodified prototype score reproduces the re-measure's 0.606 calibration AUC",
+    "plan": "sn-review-through-jev",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis.html",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-results.json",
+      "docs/figures/sn-review-through-jev/srtj-check-evidence-diagnosis"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3466006.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "srtj-check-evidence-diagnosis",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-15T19:38:39.348748+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5002.415,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1588.18,
+      "context-estimate": 92.398,
+      "records": 622.364,
+      "verdict-inputs": 415.037
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "78647340b5ae6770b4ad59c66ffb518103a329be",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a4a3f9368e9f7a4da275e87c70c397fdc6574e36",
+    "reviewed_head_sha": "78647340b5ae6770b4ad59c66ffb518103a329be",
+    "scores": {
+      "durability": 8,
+      "evidence": 16,
+      "fit": 16,
+      "goal_fidelity": 18,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 83
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261015T193740549556-srtj-check-evidence-diagnosis",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "23b1c3fa-fe3a-4198-b9c2-abc3f84c4897",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 14192631,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 3337.754,
+    "generated_tokens": 103612,
+    "generation_seconds": 2570.863,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 72.3,
+    "machine_seconds": 766.891,
+    "peak_input_tokens": 166349,
+    "tokens_per_second": 40.3,
+    "wall_tokens_per_second": 31.04
+  },
+  "time_budget": "60m",
+  "tool_steps": 124.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 23159,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 26759,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-15T12:32:56Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-15T12:12:39Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261015T121155642992-scg-name-domain-rule-measure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 354,
+          "worker_pid": 1042306
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-15T12:32:56Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 25537,
+        "log_fresh": false,
+        "manifest_commits": [
+          "dfb2f2fd7",
+          "38a571f25",
+          "6cfe8f445"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "7db11365911900cd5d1c25bc822e9436cce0299a1c9ab54df57785e08c8086b2",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T121155642992-scg-name-domain-rule-measure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T121155642992-scg-name-domain-rule-measure/review-brief.md --plan sn-catalog-grouping --section '§3' --role review --spec-level exact --node review-of-scg-name-domain-rule-measure-6cfe8f445275 --goal 'attach an independent review to run r-20261015T121155642992-scg-name-domain-rule-measure' --done-when 'the review for r-20261015T121155642992-scg-name-domain-rule-measure stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261015T121155642992-scg-name-domain-rule-measure.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261015T121155642992-scg-name-domain-rule-measure.at-6cfe8f445275a034ca1c9da00a10c3285a68ae3d.json --time-budget 60m --session 4f554c2d-3a28-4c55-8645-67a1e8a30dea --allow-unreconciled-runs --backend codex",
+        "node": "scg-name-domain-rule-measure",
+        "phase": "complete",
+        "plan": "sn-catalog-grouping",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261015T121155642992-scg-name-domain-rule-measure",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 25582,
+        "terminal_at": "2026-10-15T12:32:06Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/scg-name-domain-rule-measure"
+      }
+    ]
+  },
+  "wall_seconds": 3377,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-15T20:35:23Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-15T19:39:29Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261015T193740549556-srtj-check-evidence-diagnosis",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 11980,
+    "worker_pid": 4057048
+  },
+  "worker_seconds": 3286,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
