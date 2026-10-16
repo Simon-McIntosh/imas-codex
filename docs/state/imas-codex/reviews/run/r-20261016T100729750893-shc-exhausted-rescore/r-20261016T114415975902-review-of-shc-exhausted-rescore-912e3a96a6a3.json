@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "absent_note": "",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "basis: the reviewed run r-20261016T100729750893-shc-exhausted-rescore declares neither baseline_suite nor after_suite (both empty in its manifest.md) because it changes no product source or tests; its only control, the Cypher predicate control log, is a positive control (invalid arm rejected, valid arm accepted, count=2936), not a suite. With no base arm and no head arm, added_failure_count is 0 and added_failure_ids empty by the facts recorded, not by a differenced measurement.",
+  "call_site_count": 3,
+  "call_sites": [
+    "reckon/evidence.py:560",
+    "reckon/evidence.py:597",
+    "reckon/resources.py:225"
+  ],
+  "commits_read": [
+    "2f076bda345d7b47d8fe305e7475eefac75738d5",
+    "912e3a96a6a35e6337a00845d72989ac8f64da9e"
+  ],
+  "completed_at": "2026-10-16T12:02:13.965Z",
+  "dispatched_at": "2026-10-16T11:44:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-exhausted-rescore.html",
+      "line": "10-11",
+      "severity": "follow-on",
+      "text": "follow-on: the summary sentence is malformed - \"rather than the source-fidelity cap that / and exhausted them originally\" is missing a verb, so the clause naming what originally exhausted the two names no longer parses; it changes no measurement but a reader cannot tell whether the cap \"had exhausted\" them."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-exhausted-rescore.html",
+      "line": "97-101",
+      "severity": "follow-on",
+      "text": "follow-on: the run-logs list is imprecise about its own evidence - it collapses the three per-name dry-run ids into the wildcard sn-rescore-20261016T1114* (:97) and says \"five invocations\" (:101) where sn_sn-rescore.log records six post-fix invocations (three --dry-run at 13:14:16/13:14:33/13:14:52 and three rescores at 13:15:41/13:17:16/13:23:12), so the per-name dry run the done_when asks for has no per-name id or dedicated log a reader can open; the ids exist only in the run's own session stream (resume-1.jsonl)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read both commits against base 2f076bda3: 13dd3fbb8 (diagnose, 160 lines, fragment only) and 912e3a96a (rescore, fragment rewrite plus the figure).",
+    "done_when": "read the node's done_when; the fragment carries the diagnosis, dry run, log path, before/after state and spend per name (docs/evidence/fragments/sn-harmonize-command/shc-exhausted-rescore.html:64-149) with total 0.3318 <= 1.50.",
+    "goal": "read the node's goal (Diagnose and rescore the three exhausted family members through sn rescore within USD 1.50); the diff delivers that outcome and a live graph read confirms it.",
+    "manifest": "read; the source run's manifest.md reads status complete, head 912e3a96a, spend 0.3318 and follow_ons naming the plasma_ steer.",
+    "write_paths": "read the manifest's declared paths; the two-commit diff lists only the fragment and the figure, both inside them."
+  },
+  "justifications": {
+    "durability": "No test or guard exists that fails if this record regresses: the change is a documentation fragment (docs/evidence/fragments/sn-harmonize-command/shc-exhausted-rescore.html) plus a figure, the node declares negative_control none with a reason, and the fragment's graph-state claims would silently rot if the store changed, so nothing reddens on regression.",
+    "evidence": "The FENCE-EVIDENCE measure is met: the fragment carries, per name, a graph-read diagnosis, the dry run, the rescore log path, before/after stage, score, outcome and spend (docs/evidence/fragments/sn-harmonize-command/shc-exhausted-rescore.html:64-149), and its after-state claims reproduce in the live graph, but two records are imprecise - the dry-run ids are collapsed into a wildcard and the invocation count is five where the log holds six (see finding).",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-exhausted-rescore.html:1-200 follows the fragment idiom - a section with node-id-prefixed element ids and a project-absolute figure src - and introduces no name the naming rules forbid, but the summary carries a malformed sentence and the run-logs list miscounts its own evidence (see findings).",
+    "goal_fidelity": "The node goal is to diagnose and rescore the three exhausted members within USD 1.50; a live graph read returns density name_stage=accepted/1.0/valid and wall 0.7375 and midplane 0.7625 exhausted/valid, and sn_sn-rescore.log:93-290 records the spend 0.0596+0.1478+0.1244=0.3318, so the delivered outcome is the goal.",
+    "reuse": "The diff adds no definition. The node used the mandated evidence-fragment mechanism whose owner is reckon/evidence.py:560 compose_landed_record (fragment_dir at evidence.py:597 composes docs/evidence/fragments/<plan>/), and drove the existing sn rescore route rather than building a parallel one; a search over docs/evidence and reckon/*.py for a second fragment composer found none.",
+    "scope_discipline": "git diff --name-status 2f076bda3..912e3a96a lists exactly docs/evidence/fragments/sn-harmonize-command/shc-exhausted-rescore.html and docs/figures/sn-harmonize-command/shc-exhausted-rescore/rescore-score-before-after.svg, both inside the declared write paths; the diff carries no product code."
+  },
+  "plan_slug": "sn-harmonize-command",
+  "project": "imas-codex",
+  "review_run_id": "r-20261016T114415975902-review-of-shc-exhausted-rescore-912e3a96a6a3",
+  "reviewed_base_sha": "2f076bda345d7b47d8fe305e7475eefac75738d5",
+  "reviewed_head_sha": "912e3a96a6a35e6337a00845d72989ac8f64da9e",
+  "reviewed_revision": "912e3a96",
+  "reviewed_run_id": "r-20261016T100729750893-shc-exhausted-rescore",
+  "scores": {
+    "durability": 10,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T12:03:10.429404+00:00",
+  "total": 100
+}

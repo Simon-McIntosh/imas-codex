@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="122">
+<meta name="plan-version" content="123">
 <meta name="plan-modified" content="2026-10-16">
 </head>
 <body>
@@ -450,6 +450,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-land-s4-rescore-cypher-fix" data-who="reckon-build" data-when="2026-10-16T11:18:00Z">
     <div class="r-comment-body"><p>The exhausted-member repair found <code>sn rescore</code> unrunnable on a Cypher syntax defect. It spent nothing and diagnosed all three names: none exhausted on a collision, two ran out of attempts, and one stopped as grammar-invalid. The fix is merged (<code>2a84c3c0a</code>, review 115), and the repair node has resumed against it to rescore the three names within USD 1.50. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#shc-rescore-cypher-fix">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261016T114415975902-review-of-shc-exhausted-rescore-912e3a96a6a3" data-who="reckon-build" data-when="2026-10-16T12:02:13.965Z">
+    <div class="r-comment-body"><p>review-of-shc-exhausted-rescore-912e3a96a6a3: independent review of run r-20261016T100729750893-shc-exhausted-rescore at 912e3a96a6a35e6337a00845d72989ac8f64da9e (base 2f076bda345d7b47d8fe305e7475eefac75738d5) — record stored parsed with all six dimensions (total 100; goal_fidelity 19 evidence 16 scope_discipline 19 durability 10 fit 16 reuse 20), the after-state claims reproduced by a live graph read, and two follow-on findings (a malformed summary sentence and a run-logs list that miscounts its own evidence); no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
