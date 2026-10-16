@@ -244,21 +244,25 @@ def _score_and_report() -> dict:
     old = _read_receipts(PRIOR / "name-decisions.jsonl")
     checks = [check for check in load_review_checks()[0] if check.axis == "name"]
     old_checks = _old_checks(checks)
-    canonical = {}
-    for row in measure.load_labelled_fixture(measure.FIXTURE):
-        canonical.setdefault(row["canonical_unit"], row)
-    rows = [
-        {
-            "name": name,
-            "label": int(row["label"]),
-            "split": row["split"],
-            "copy_group": row["copy_group"],
-        }
-        for name, row in canonical.items()
-        if name in old and name in current
-    ]
-    calibration = [row for row in rows if row["split"] == "calibration"]
-    validation = [row for row in rows if row["split"] == "validation"]
+    fixture = measure.load_labelled_fixture(measure.FIXTURE)
+
+    def split_rows(split: str) -> list[dict]:
+        canonical = {}
+        for row in fixture:
+            if row["split"] == split:
+                canonical.setdefault(row["canonical_unit"], row)
+        return [
+            {
+                "name": name,
+                "label": int(row["label"]),
+                "split": split,
+                "copy_group": row["copy_group"],
+            }
+            for name, row in canonical.items()
+            if name in old and name in current
+        ]
+
+    calibration = split_rows("calibration")
     if len(calibration) < 300:
         raise RuntimeError("calibration is missing too many matched answers")
     per_check = {}
@@ -281,55 +285,92 @@ def _score_and_report() -> dict:
         }
     prototype_before = {
         row["name"]: measure._score(old[row["name"]]["answers"], old_checks)
-        for row in rows
+        for row in calibration
     }
-    prototype_after = {
+    prototype_after_calibration = {
         row["name"]: measure._score(current[row["name"]]["answers"], checks)
-        for row in rows
+        for row in calibration
     }
     table = diagnosis._question_table(checks)
     question_names = list(table)
     answered = {name: receipt["answers"] for name, receipt in current.items()}
-    logistic_rows = diagnosis._build_rows(
-        measure.load_labelled_fixture(measure.FIXTURE),
+    cal_logistic = diagnosis._build_rows(
+        [row for row in fixture if row["split"] == "calibration"],
         context,
         answered,
         checks,
         table,
         diagnosis._accepted_dimension(table),
     )
-    cal_logistic = [row for row in logistic_rows if row["split"] == "calibration"]
     model = diagnosis._fit_logistic(cal_logistic, question_names)
-    logistic = diagnosis._logistic_scores(model, logistic_rows, question_names)
+    logistic_calibration = diagnosis._logistic_scores(
+        model, cal_logistic, question_names
+    )
     report = {
         "readers": {
-            "cocos_and_parent": "workers._DD_CONTEXT_QUERY, the same IMASNode source read by get_dd_cocos_fields and review enrichment",
+            "cocos": "GraphStructureTool.get_dd_cocos_fields",
+            "parent": "workers._DD_CONTEXT_QUERY, also used by review enrichment",
             "roster": "imas_standard_names.grammar.vocab_loaders.load_physical_bases",
             "decomposition": "grammar_adapter.parse_canonical_name",
             "repeated": "standard_names.audits.repeated_token_check",
         },
+        "reader_coverage": {
+            "source_paths": len(
+                {
+                    path
+                    for entry in context["entries"].values()
+                    for path in entry.get("source_paths") or []
+                    if path.startswith("dd:")
+                }
+            ),
+            "cocos_names": sum(
+                bool(entry.get("cocos_label")) for entry in context["entries"].values()
+            ),
+            "owner_names": sum(
+                bool(entry.get("owner_segment"))
+                for entry in context["entries"].values()
+            ),
+        },
         "calibration": {
             "checks": per_check,
             "prototype_before": _auc(calibration, prototype_before),
-            "prototype_after": _auc(calibration, prototype_after),
-            "logistic": _auc(calibration, logistic),
+            "prototype_after": _auc(calibration, prototype_after_calibration),
+            "logistic": _auc(calibration, logistic_calibration),
             "regularization": float(model.C_[0]),
         },
-        "validation_reads": 1,
+        "validation_reads": {
+            "corrected_arm": 1,
+            "abandoned_property_only_probe": 1,
+            "refreshed_validation_names": 3,
+        },
     }
     # Validation is accessed here once, after the calibration model is fixed.
-    report["validation"] = {
-        "prototype": _auc(validation, prototype_after),
-        "logistic": _auc(validation, logistic),
+    validation = split_rows("validation")
+    prototype_after_validation = {
+        row["name"]: measure._score(current[row["name"]]["answers"], checks)
+        for row in validation
     }
-    comparison_rows = [
-        row
-        for row in logistic_rows
-        if row["split"] == "validation" and row["quorum"] is not None
-    ]
+    val_logistic = diagnosis._build_rows(
+        [row for row in fixture if row["split"] == "validation"],
+        context,
+        answered,
+        checks,
+        table,
+        diagnosis._accepted_dimension(table),
+    )
+    logistic_validation = diagnosis._logistic_scores(
+        model, val_logistic, question_names
+    )
+    report["validation"] = {
+        "prototype": _auc(validation, prototype_after_validation),
+        "logistic": _auc(validation, logistic_validation),
+    }
+    comparison_rows = [row for row in val_logistic if row["quorum"] is not None]
     report["validation"]["quorum"] = {
-        "prototype": diagnosis._quorum_comparison(comparison_rows, prototype_after),
-        "logistic": diagnosis._quorum_comparison(comparison_rows, logistic),
+        "prototype": diagnosis._quorum_comparison(
+            comparison_rows, prototype_after_validation
+        ),
+        "logistic": diagnosis._quorum_comparison(comparison_rows, logistic_validation),
     }
     calls = [json.loads(line) for line in RECEIPTS.read_text().splitlines()]
     report["spend"] = {
@@ -358,9 +399,22 @@ def _render(report: dict) -> None:
     rows = [
         '<section id="srtj-evidence-supply">',
         "<h2>Source evidence for name review</h2>",
-        "<p>The DD source reader supplies COCOS labels and parent paths; the closed "
-        "ISN registry supplies established base spellings; the strict parser supplies "
-        "qualifiers and aggregation. The repeated-token audit decides the remaining check.</p>",
+        "<p>Before wiring, a COCOS-labelled source path produced "
+        "<code>{'observed': False, 'value': None}</code> in the base state. "
+        "<code>GraphStructureTool.get_dd_cocos_fields</code> now supplies both property "
+        "and cluster-derived labels; <code>workers._DD_CONTEXT_QUERY</code> supplies "
+        "parent IMASNode paths. <code>load_physical_bases</code> supplies the closed "
+        "base-spelling roster, and <code>parse_canonical_name</code> supplies the full "
+        "ISN decomposition, including qualifiers and aggregation. "
+        "<code>repeated_token_check</code> decides the remaining check in code. "
+        f"The readers covered {report['reader_coverage']['source_paths']} source paths, "
+        f"with COCOS labels for {report['reader_coverage']['cocos_names']} names and "
+        f"parent owners for {report['reader_coverage']['owner_names']}.</p>",
+        "<p>An initial property-only COCOS probe omitted cluster labels. Its validation "
+        "score was seen before the reader was corrected, and five names were refreshed, "
+        "three on validation. The corrected receipts were scored calibration first, "
+        "then validation once. The earlier probe makes this arm unsuitable as a pristine "
+        "holdout even though no model or threshold was selected from it.</p>",
         "<h3>Calibration</h3>",
         "<table><thead><tr><th>Check</th><th>Before AUC [95%]</th><th>After AUC [95%]</th></tr></thead><tbody>",
     ]
@@ -382,6 +436,8 @@ def _render(report: dict) -> None:
         difference = paired["quorum_difference_interval"]
         rows.append(
             f"<p>{key}: {interval(cell)}; matched quorum n={paired['quorum_matched_n']}, "
+            f"quorum AUC {paired['quorum_paired']['auc_b']:.3f}, "
+            f"matched Jev AUC {paired['quorum_paired']['auc_a']:.3f}, "
             f"paired Δ {difference['point']:+.3f} "
             f"[{difference['lower']:+.3f}, {difference['upper']:+.3f}].</p>"
         )
@@ -391,7 +447,8 @@ def _render(report: dict) -> None:
     verdict = "passes" if lower > -0.02 else "remains in shadow"
     rows.append(
         f"<p>Deployment rule: {verdict}; the paired logistic lower bound "
-        f"{lower:+.3f} must exceed −0.020. Jev spend USD "
+        f"{lower:+.3f} must exceed −0.020. The arm has no new operating-point or "
+        f"stability claim because the AUC condition already fails. Jev spend USD "
         f"{report['spend']['jev_usd']:.6f} of USD 0.50; "
         f"per name USD {report['spend']['per_name_usd']:.6f} and "
         f"{report['spend']['per_name_latency_s']:.2f} s. The results JSON freezes "

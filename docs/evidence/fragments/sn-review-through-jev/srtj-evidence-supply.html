@@ -1,0 +1,20 @@
+<section id="srtj-evidence-supply">
+<h2>Source evidence for name review</h2>
+<p>Before wiring, a COCOS-labelled source path produced <code>{'observed': False, 'value': None}</code> in the base state. <code>GraphStructureTool.get_dd_cocos_fields</code> now supplies both property and cluster-derived labels; <code>workers._DD_CONTEXT_QUERY</code> supplies parent IMASNode paths. <code>load_physical_bases</code> supplies the closed base-spelling roster, and <code>parse_canonical_name</code> supplies the full ISN decomposition, including qualifiers and aggregation. <code>repeated_token_check</code> decides the remaining check in code. The readers covered 928 source paths, with COCOS labels for 10 names and parent owners for 290.</p>
+<p>An initial property-only COCOS probe omitted cluster labels. Its validation score was seen before the reader was corrected, and five names were refreshed, three on validation. The corrected receipts were scored calibration first, then validation once. The earlier probe makes this arm unsuitable as a pristine holdout even though no model or threshold was selected from it.</p>
+<h3>Calibration</h3>
+<table><thead><tr><th>Check</th><th>Before AUC [95%]</th><th>After AUC [95%]</th></tr></thead><tbody>
+<tr><td><code>advisory_alias_collapsed</code></td><td>0.445 [0.401, 0.494]</td><td>0.449 [0.407, 0.494]</td></tr>
+<tr><td><code>minority_spelling_not_in_roster</code></td><td>0.436 [0.390, 0.485]</td><td>0.465 [0.416, 0.515]</td></tr>
+<tr><td><code>over_qualified_modifier</code></td><td>0.404 [0.348, 0.462]</td><td>0.458 [0.404, 0.513]</td></tr>
+<tr><td><code>owner_erased_outline</code></td><td>0.425 [0.368, 0.478]</td><td>0.511 [0.461, 0.564]</td></tr>
+<tr><td><code>redundant_repeated_segment</code></td><td>0.413 [0.366, 0.460]</td><td>0.509 [0.488, 0.528]</td></tr>
+</tbody></table>
+<p>prototype before: 0.606 [0.553, 0.666].</p>
+<p>prototype after: 0.597 [0.541, 0.657].</p>
+<p>logistic: 0.795 [0.744, 0.850].</p>
+<h3>Validation, read once after calibration</h3>
+<p>prototype: 0.646 [0.585, 0.702]; matched quorum n=259, quorum AUC 0.726, matched Jev AUC 0.667, paired Δ -0.059 [-0.125, +0.009].</p>
+<p>logistic: 0.745 [0.690, 0.793]; matched quorum n=259, quorum AUC 0.726, matched Jev AUC 0.765, paired Δ +0.039 [-0.029, +0.104].</p>
+<p>Deployment rule: remains in shadow; the paired logistic lower bound -0.029 must exceed −0.020. The arm has no new operating-point or stability claim because the AUC condition already fails. Jev spend USD 0.165378 of USD 0.50; per name USD 0.000236 and 3.79 s. The results JSON freezes all scored states and the run receipt supports rescore without calls.</p>
+</section>
