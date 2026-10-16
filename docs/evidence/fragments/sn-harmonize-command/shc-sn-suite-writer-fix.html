@@ -1,0 +1,53 @@
+<section id="shc-sn-suite-writer-fix">
+  <h2>The standard-names suite at the docs-writer merge</h2>
+  <p id="shc-sn-suite-writer-fix-revisions">
+    Each revision ran from its own <code>git archive</code> extraction with the five
+    generated files copied from the main checkout. The imported
+    <code>docs_gates.py</code> and resolved working directory both pointed into
+    that extraction. Pytest ran serially because the shared environment has no
+    xdist plugin. The brief names <code>2fdaf318e</code> as the first parent;
+    the merge's actual first parent is <code>ab9e614f</code>.
+    Both were measured. Their product, test, and dependency files are identical,
+    and their failing test IDs match exactly.
+  </p>
+  <table id="shc-sn-suite-writer-fix-results">
+    <thead><tr><th>Revision</th><th>Pytest totals line</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Requested base <code>2fdaf318e</code></td>
+        <td><code>= 47 failed, 7849 passed, 9 skipped, 330 deselected, 39 warnings, 112 errors in 1160.61s (0:19:20) =</code>; EXIT=1</td>
+        <td><a href="file:///home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T100634852632-shc-sn-suite-writer-fix/suite-base.log">requested-base log</a></td></tr>
+      <tr><td>Actual first parent <code>ab9e614f</code></td>
+        <td><code>= 47 failed, 7849 passed, 9 skipped, 330 deselected, 39 warnings, 112 errors in 1146.85s (0:19:06) =</code>; EXIT=1</td>
+        <td><a href="file:///home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T100634852632-shc-sn-suite-writer-fix/suite-parent.log">first-parent log</a></td></tr>
+      <tr><td>Writer-fix merge <code>e3d366d67</code></td>
+        <td><code>= 47 failed, 7854 passed, 9 skipped, 330 deselected, 39 warnings, 112 errors in 1149.45s (0:19:09) =</code>; EXIT=1</td>
+        <td><a href="file:///home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T100634852632-shc-sn-suite-writer-fix/suite-head.log">merge-head log</a></td></tr>
+    </tbody>
+  </table>
+  <p id="shc-sn-suite-writer-fix-delta">
+    The requested-base and actual-first-parent comparisons have the same delta:
+    158 complete failure or error test IDs remain shared out of 159 at each
+    revision; one was added and one was removed. Parameterized IDs containing
+    spaces are counted through their closing bracket, not at the first space.
+    <strong>Added:</strong>
+    <code>tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden</code>.
+    Its head traceback says <code>sn/generate_docs_user: no-edit render diverged from golden capture</code>.
+    The test renders <code>generate_docs_user.md</code> without an edit or locus
+    context and compares every byte to a saved capture. The changed prompt adds
+    a locus conditional whose surrounding blank lines still render with that
+    context absent. This failure directly reaches an edited prompt;
+    <code>docs_gates.py</code> does not participate. The golden capture and the
+    no-edit assertion need reconciliation before the package can be called
+    regression-free.
+    <strong>Removed:</strong>
+    <code>tests/standard_names/test_docs_locus_definition.py::test_two_subjects_render_the_identical_locus_sentence</code>.
+    That test now asserts the selected concept's registry definition rather
+    than a stale literal sentence.
+  </p>
+  <p id="shc-sn-suite-writer-fix-limit">
+    The absolute suite remains red at all three revisions. Archive-based export
+    tests include a shared provenance error because the extraction has no Git
+    metadata; the failing IDs, not an absolute green result, support this delta.
+    The added golden failure is reported for repair outside this measurement node.
+  </p>
+</section>
