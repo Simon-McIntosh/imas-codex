@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/export.py:1560",
+    "imas_codex/standard_names/catalog_import.py:558",
+    "imas_codex/standard_names/harmonize.py:608",
+    "imas_codex/standard_names/review/audits.py:349",
+    "imas_codex/standard_names/review/consolidation.py:192",
+    "imas_codex/standard_names/review/enrichment.py:196",
+    "imas_codex/standard_names/consolidation.py:78"
+  ],
+  "completed_at": "2026-10-16T06:00:25.898Z",
+  "dispatched_at": "2026-10-16T05:48:58Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_export_deprecation.py",
+      "line": "108",
+      "severity": "follow-on",
+      "text": "follow-on: the patch target was renamed from imas_codex.standard_names.export.pick_primary_domain to ...select_primary_domain, a file that the brief excludes from the node's write paths and does not name in its gate list, so the landed diff writes a file outside the declared fence. The edit is mechanically forced (export.py no longer imports the old name, so the patch would fail) and is disclosed in the manifest's evidence_inputs."
+    },
+    {
+      "file": "tests/standard_names/test_export_status_authority.py",
+      "line": "79",
+      "severity": "follow-on",
+      "text": "follow-on: same patch-target rename as test_export_deprecation.py:108; this file is named in the brief's gate but not in its write scope, so the brief under-declared the scope the node actually required rather than the node straying gratuitously."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis-run.py",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: three historical evidence drivers (this one plus scg-classifier-vocabulary-run.py:19 and scg-jev-domain-benchmark-run.py:25) were repointed off the deleted name although no test and no production module imports them (git grep over tests/ and imas_codex/ returns nothing), so this edit was optional maintenance carried outside the fence rather than a repair the gate required."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051649376014-scg-domain-selector-one-name/negative-control.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control log's header names revision 6e0a1c75b (the base) while its body exercises tests/standard_names/test_domain_selector.py::test_select_primary_domain_refuses_unknown, a test name that exists only at the head revision, and the manifest's measurement_module points at the head worktree; the header line therefore mislabels the revision the arm ran at, though the mutated file domain_ranking.py is byte-identical across base and head so the guard's validity is unaffected."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the two changed production callers imas_codex/standard_names/export.py:1560 and imas_codex/standard_names/catalog_import.py:558, and the unchanged production callers that still reach the module through domain_key (harmonize.py:608, review/audits.py:349, review/consolidation.py:192, review/enrichment.py:196) plus consolidation.py:78 which already imported the canonical selector.",
+    "diff": "read commit e6d4b36b9d455ec5b595a8600e3abfe977a4ab96 against its parent 6e0a1c75b; 11 files, 53 insertions and 74 deletions - the two deleted functions, the two repointed importers at export.py:39/1560 and catalog_import.py:514/558, the test updates, and the out-of-scope driver repoints; nothing in the diff computes a domain the selector does not.",
+    "done_when": "the done_when requires (a) grep for the two def lines to return nothing, (b) no importer of pick_primary_domain, (c) a base/head delta gate over the named files, and (d) a negative control that reddens a selector test; all four are recorded - git grep at e6d4b36b9 finds neither def and no .py importer, head-gate.log reads 30 passed EXIT=0 against base-gate.log 35 passed EXIT=0 with 0 added failures, and negative-control.log reads EXIT=1 with 2 failures.",
+    "goal": "the node goal is to collapse the duplicated domain-selector surface so one capability has one name; read against imas_codex/standard_names/domain_priority.py:1-18 the landed change deletes the pick_primary_domain pass-through and the dead domain_list, leaving domain_key as the module's only export, which is exactly the stated goal.",
+    "manifest": "read; status complete, tests recorded as the literal gate command with base 35 passed / head 30 passed and EXIT=0, a landing line, a named negative_control_log, and an evidence_inputs note that discloses the out-of-scope edits for adjudication rather than hiding them.",
+    "write_paths": "read the brief's five-path scope (domain_priority.py, export.py, catalog_import.py, test_domain_priority.py, test_domain_selector.py) and the source manifest's orientation_write_paths; the diff changes six files outside it - tests/standard_names/test_export_deprecation.py:108, tests/standard_names/test_export_status_authority.py:79 and three evidence drivers under docs/evidence/fragments/sn-catalog-grouping/ (see findings)."
+  },
+  "justifications": {
+    "durability": "the node adds no new assertion and removes five (the deleted tests' coverage in test_domain_priority.py), so no test reddens if the deleted duplicate names are reintroduced; the selector's precedence and refusal are guarded only by the pre-existing tests/standard_names/test_domain_selector.py:33, whose guard the negative control confirms fires.",
+    "evidence": "all four clauses of the done_when are recorded with artefacts: git grep over the head tree finds neither def nor any importer, head-gate.log reads 30 passed EXIT=0 against base-gate.log 35 passed EXIT=0 with 0 added failures, and negative-control.log reads EXIT=1 with test_select_primary_domain_refuses_unknown failing on KeyError, though the negative-control header mislabels its revision (see finding).",
+    "fit": "the commit e6d4b36b9 carries a conventional subject and a body, introduces no plan or ticket label, and domain_priority.py:1-18 keeps the surrounding module idiom exactly as export.py:39 and consolidation.py:78 already import the canonical selector.",
+    "goal_fidelity": "domain_priority.py at e6d4b36b9 holds only domain_key, and both former importers of pick_primary_domain (export.py:39, catalog_import.py:514) now import select_primary_domain from domain_ranking, so the duplicate name is gone as the goal states.",
+    "reuse": "the diff adds no function, class or module; it deletes a two-line pass-through over domain_ranking.select_primary_domain (domain_ranking.py:19) and a coercion duplicating graph_ops._ensure_list (graph_ops.py:108) that had no importer, so it extends the owner of the capability by removing a fork rather than creating one.",
+    "scope_discipline": "six files in the diff lie outside the declared write paths - tests/standard_names/test_export_deprecation.py:108, tests/standard_names/test_export_status_authority.py:79 and three docs/evidence fragments run drivers - so the diff does not stay inside the five-path fence the brief declared."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to collapse the duplicated domain-selector surface so one capability has one name; read against imas_codex/standard_names/domain_priority.py:1-18 the landed change deletes pick_primary_domain and the dead domain_list, leaving domain_key as the module's only export, exactly the stated goal.\nVERDICT done_when: the done_when requires the grep to return nothing, no importer of pick_primary_domain, a base/head delta gate over the named files, and a negative control; all four are recorded - head-gate.log reads 30 passed EXIT=0 against base-gate.log 35 passed EXIT=0 with 0 added failures, and negative-control.log reads 2 failed EXIT=1.\nVERDICT write_paths: read the brief's five-path scope and the source manifest's orientation_write_paths; the diff changes six files outside it - tests/standard_names/test_export_deprecation.py:108, tests/standard_names/test_export_status_authority.py:79 and three evidence drivers under docs/evidence/fragments/sn-catalog-grouping/ (see findings).\nVERDICT manifest: read; status complete, tests recorded as the literal gate command with base 35 passed / head 30 passed EXIT=0, a landing line, a negative_control_log path, and an evidence_inputs note disclosing the out-of-scope edits for adjudication.\nVERDICT diff: read commit e6d4b36b9d455ec5b595a8600e3abfe977a4ab96 against its parent 6e0a1c75b; 11 files, 53 insertions / 74 deletions - the two deleted functions, the two repointed importers export.py:39/1560 and catalog_import.py:514/558, the test updates, and the out-of-scope driver repoints.\nCALL_SITES: imas_codex/standard_names/export.py:1560, imas_codex/standard_names/catalog_import.py:558, imas_codex/standard_names/harmonize.py:608, imas_codex/standard_names/review/audits.py:349, imas_codex/standard_names/review/consolidation.py:192, imas_codex/standard_names/review/enrichment.py:196, imas_codex/standard_names/consolidation.py:78\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: domain_priority.py at e6d4b36b9 holds only domain_key, and both former importers of pick_primary_domain (export.py:39, catalog_import.py:514) now import select_primary_domain from domain_ranking, so the duplicate name is gone as the goal states.\nSCORE evidence: 17\nJUSTIFICATION evidence: git grep over the head tree finds neither def nor any importer, head-gate.log reads 30 passed EXIT=0 against base-gate.log 35 passed EXIT=0 with 0 added failures, and negative-control.log reads EXIT=1 with test_select_primary_domain_refuses_unknown failing on KeyError, though the negative-control header mislabels its revision (see finding).\nSCORE scope_discipline: 11\nJUSTIFICATION scope_discipline: six files in the diff lie outside the declared write paths - tests/standard_names/test_export_deprecation.py:108, tests/standard_names/test_export_status_authority.py:79 and three docs evidence drivers - so the diff does not stay inside the five-path fence the brief declared.\nSCORE durability: 13\nJUSTIFICATION durability: the node adds no new assertion and removes five, so no test reddens if the deleted duplicate names are reintroduced; the selector is held only by the pre-existing tests/standard_names/test_domain_selector.py:33, whose guard the negative control confirms fires.\nSCORE fit: 18\nJUSTIFICATION fit: commit e6d4b36b9 carries a conventional subject and a body, introduces no plan or ticket label, and domain_priority.py:1-18 keeps the surrounding module idiom already used by export.py:39 and consolidation.py:78.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; it deletes a two-line pass-through over domain_ranking.select_primary_domain (domain_ranking.py:19) and a coercion duplicating graph_ops._ensure_list (graph_ops.py:108) with no importer, extending the owner by removing a fork rather than creating one.\nFINDING tests/standard_names/test_export_deprecation.py:108 follow-on: the patch target was renamed to export.select_primary_domain, a file outside the brief's write paths and its gate list; the edit is mechanically forced and disclosed in the manifest's evidence_inputs.\nFINDING tests/standard_names/test_export_status_authority.py:79 follow-on: the same patch-target rename, on a file named in the gate but not the write scope, so the brief under-declared the scope the node actually required.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis-run.py:18 follow-on: three historical evidence drivers (this one plus scg-classifier-vocabulary-run.py:19 and scg-jev-domain-benchmark-run.py:25) were repointed although no test or production module imports them, so the edit was optional maintenance carried outside the fence.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T051649376014-scg-domain-selector-one-name/negative-control.log:1 follow-on: the header names revision 6e0a1c75b while its body exercises a test name that exists only at the head revision and the manifest's measurement_module points at the head worktree, so the header mislabels the arm's revision though the mutated file is byte-identical across base and head.\n",
+  "review_run_id": "r-20261016T054844607040-review-of-scg-domain-selector-one-name-e6d4b36b9d45",
+  "reviewed_base_sha": "6e0a1c75baf402e6288e4edec93892a20aa2e217",
+  "reviewed_head_sha": "e6d4b36b9d455ec5b595a8600e3abfe977a4ab96",
+  "reviewed_run_id": "r-20261016T051649376014-scg-domain-selector-one-name",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 11
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T05:55:30.000000+00:00",
+  "total": 98
+}
