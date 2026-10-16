@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden"
+  ],
+  "added_failures_note": "total capped at 5: the reviewed run added 1 failing test(s) not retired by name (tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden)",
+  "base_log_revision": "ab9e614f174dbccd7af18466f077a17473f6dc97",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-16T10:45:06Z",
+  "dispatched_at": "2026-10-16T10:36:25Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html",
+      "line": "29",
+      "severity": "blocking",
+      "text": "blocking: the logs name 159 distinct failing or error test IDs in each arm, 158 shared and one exchanged, while the fragment claims 157 shared and the source manifest records only 158 per arm after truncating parameterized IDs at spaces; the measurement record must use the complete node IDs."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the three receipt anchors on lines 18, 21, and 24 use file:/// URLs under the worker's private run directory, which a browser cannot open from the served plan page, so the evidence page needs reachable log links or plainly stated paths."
+    }
+  ],
+  "head_log_revision": "e3d366d67aa385fb0ca4b8b1f4a65b650912710e",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read parent 2f076bda345d7b47d8fe305e7475eefac75738d5 against b45e398f4d6aff281ab702204912c440602c72ae commit by commit; the sole addition is the 51-line evidence fragment, with no product code or test assertions.",
+    "done_when": "the source prompt's FENCE EVIDENCE requires logged totals and reachability; suite-parent.log:2646 and suite-head.log:2657 contain the quoted totals, while the head traceback at suite-head.log:1624 reaches the edited generate-docs prompt.",
+    "goal": "the source prompt's GOAL measures tests/standard_names at the writer merge against its first parent; docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:27-43 reports the two changed failing IDs, but line 29 miscounts shared IDs.",
+    "manifest": "the source manifest.md records the three complete suite logs and one added plus one removed failing ID, but its baseline_suite and after_suite failure_count fields say 158 where each log names 159 distinct test IDs.",
+    "write_paths": "the source prompt's FENCE SCOPE grants the fragment and its figures directory; commit b45e398f4d6aff281ab702204912c440602c72ae changes only docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertions to test the fragment, while the existing golden assertion shown failing at suite-head.log:1624 catches prompt drift but cannot catch the fragment's incorrect count at line 29.",
+    "evidence": "suite-parent.log:2646 and suite-head.log:2657 support the table totals, but the fragment's line 29 and manifest.md's suite failure_count fields disagree with the complete failing-ID lists.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:13-26 uses the surrounding HTML evidence-table idiom, but its file-scheme receipt links cannot be opened from the served plan page.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:27-43 names the correct added and removed tests, but line 29 gives an incorrect shared count.",
+    "reuse": "the diff at docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:1-51 adds only an evidence section and no function, class, module, or duplicated mechanism to search for.",
+    "scope_discipline": "commit b45e398f4d6aff281ab702204912c440602c72ae changes only docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html within the source prompt's FENCE SCOPE."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source prompt's GOAL measures tests/standard_names at the writer merge against its first parent; docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:27-43 reports the two changed failing IDs, but line 29 miscounts shared IDs.\nVERDICT done_when: the source prompt's FENCE EVIDENCE requires logged totals and reachability; suite-parent.log:2646 and suite-head.log:2657 contain the quoted totals, while the head traceback at suite-head.log:1624 reaches the edited generate-docs prompt.\nVERDICT write_paths: the source prompt's FENCE SCOPE grants the fragment and its figures directory; commit b45e398f4d6aff281ab702204912c440602c72ae changes only docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html.\nVERDICT manifest: the source manifest.md records the three complete suite logs and one added plus one removed failing ID, but its baseline_suite and after_suite failure_count fields say 158 where each log names 159 distinct test IDs.\nVERDICT diff: read parent 2f076bda345d7b47d8fe305e7475eefac75738d5 against b45e398f4d6aff281ab702204912c440602c72ae commit by commit; the sole addition is the 51-line evidence fragment, with no product code or test assertions.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:27-43 names the correct added and removed tests, but line 29 gives an incorrect shared count.\nSCORE evidence: 14\nJUSTIFICATION evidence: suite-parent.log:2646 and suite-head.log:2657 support the table totals, but the fragment's line 29 and manifest.md's suite failure_count fields disagree with the complete failing-ID lists.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: commit b45e398f4d6aff281ab702204912c440602c72ae changes only docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html within the source prompt's FENCE SCOPE.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no assertions to test the fragment, while the existing golden assertion shown failing at suite-head.log:1624 catches prompt drift but cannot catch the fragment's incorrect count at line 29.\nSCORE fit: 16\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:13-26 uses the surrounding HTML evidence-table idiom, but its file-scheme receipt links cannot be opened from the served plan page.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff at docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:1-51 adds only an evidence section and no function, class, module, or duplicated mechanism to search for.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:29 blocking: the logs name 159 distinct failing or error test IDs in each arm, 158 shared and one exchanged, while the fragment claims 157 shared and the source manifest records only 158 per arm after truncating parameterized IDs at spaces; the measurement record must use the complete node IDs.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-sn-suite-writer-fix.html:18 follow-on: the three receipt anchors on lines 18, 21, and 24 use file:/// URLs under the worker's private run directory, which a browser cannot open from the served plan page, so the evidence page needs reachable log links or plainly stated paths.\n",
+  "review_run_id": "r-20261016T103439279535-review-of-shc-sn-suite-writer-fix-b45e398f4d6a",
+  "reviewed_base_sha": "2f076bda345d7b47d8fe305e7475eefac75738d5",
+  "reviewed_head_sha": "b45e398f4d6aff281ab702204912c440602c72ae",
+  "reviewed_run_id": "r-20261016T100634852632-shc-sn-suite-writer-fix",
+  "scores": {
+    "durability": 8,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T10:41:41.754933+00:00",
+  "total": 5
+}
