@@ -1,0 +1,169 @@
+<article id="scg-ids-map-write">
+  <h3>Twenty-five IDS-to-domain corrections written and pinned</h3>
+
+  <p id="scg-ids-map-write-summary">
+    <code>imas_codex/definitions/physics/ids_domains.json</code> now carries the
+    twenty-five reviewed corrections with a tally recomputed from them. Every
+    target domain is a member of the <code>PhysicsDomain</code> enum returned by
+    <code>imas_codex/core/physics_categorization.py</code> (32 members; no
+    addition was needed). No other IDS changed. The map is read at DD build time
+    by <code>_batch_upsert_ids_nodes</code> (each IDS node's domain) and
+    <code>_batch_create_path_nodes</code> (the default for an unclassified
+    IMASNode path), and by <code>clusters/hierarchical.py</code> for domain-level
+    clustering. No graph data was written by this node.
+  </p>
+
+  <table id="scg-ids-map-write-changes">
+    <thead>
+      <tr><th>IDS</th><th>domain before</th><th>domain after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>amns_data</code></td><td>general</td><td>computational_workflow</td></tr>
+      <tr><td><code>calorimetry</code></td><td>plant_systems</td><td>mechanical_measurement_diagnostics</td></tr>
+      <tr><td><code>charge_exchange</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>core_instant_changes</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      <tr><td><code>core_profiles</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      <tr><td><code>distribution_sources</code></td><td>transport</td><td>fast_particles</td></tr>
+      <tr><td><code>distributions</code></td><td>transport</td><td>fast_particles</td></tr>
+      <tr><td><code>ece</code></td><td>electromagnetic_wave_diagnostics</td><td>radiation_measurement_diagnostics</td></tr>
+      <tr><td><code>gas_injection</code></td><td>plant_systems</td><td>fueling</td></tr>
+      <tr><td><code>gyrokinetics</code></td><td>turbulence</td><td>gyrokinetics</td></tr>
+      <tr><td><code>gyrokinetics_local</code></td><td>turbulence</td><td>gyrokinetics</td></tr>
+      <tr><td><code>mse</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>neutron_diagnostic</code></td><td>particle_measurement_diagnostics</td><td>neutronics</td></tr>
+      <tr><td><code>pellets</code></td><td>plant_systems</td><td>fueling</td></tr>
+      <tr><td><code>plasma_initiation</code></td><td>machine_operations</td><td>plasma_initiation</td></tr>
+      <tr><td><code>plasma_profiles</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      <tr><td><code>radiation</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      <tr><td><code>runaway_electrons</code></td><td>transport</td><td>runaway_electrons</td></tr>
+      <tr><td><code>spectrometer_mass</code></td><td>particle_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>spectrometer_uv</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>spectrometer_visible</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>spectrometer_x_ray_crystal</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>spi</code></td><td>plant_systems</td><td>fueling</td></tr>
+      <tr><td><code>thomson_scattering</code></td><td>radiation_measurement_diagnostics</td><td>particle_measurement_diagnostics</td></tr>
+      <tr><td><code>waves</code></td><td>auxiliary_heating</td><td>waves</td></tr>
+    </tbody>
+  </table>
+
+  <p id="scg-ids-map-write-tally-note">
+    The tally block was recomputed from the new mappings. It grows from
+    21 domains to 29: 9 domains are newly populated
+    (core_plasma_physics, fast_particles, fueling, gyrokinetics, neutronics, plasma_initiation, runaway_electrons, spectroscopy, waves) and 1 is emptied and removed
+    (machine_operations). Both tallies sum to 87, the mapping count.
+  </p>
+
+  <div id="scg-ids-map-write-tally" style="display:flex;gap:3rem">
+    <table>
+      <thead><tr><th>domain</th><th>count before</th></tr></thead>
+      <tbody>
+      <tr><td><code>auxiliary_heating</code></td><td>6</td></tr>
+      <tr><td><code>computational_workflow</code></td><td>3</td></tr>
+      <tr><td><code>data_management</code></td><td>4</td></tr>
+      <tr><td><code>divertor_physics</code></td><td>1</td></tr>
+      <tr><td><code>edge_plasma_physics</code></td><td>3</td></tr>
+      <tr><td><code>electromagnetic_wave_diagnostics</code></td><td>6</td></tr>
+      <tr><td><code>equilibrium</code></td><td>3</td></tr>
+      <tr><td><code>general</code></td><td>3</td></tr>
+      <tr><td><code>machine_operations</code></td><td>1</td></tr>
+      <tr><td><code>magnetic_field_diagnostics</code></td><td>2</td></tr>
+      <tr><td><code>magnetic_field_systems</code></td><td>7</td></tr>
+      <tr><td><code>magnetohydrodynamics</code></td><td>5</td></tr>
+      <tr><td><code>mechanical_measurement_diagnostics</code></td><td>2</td></tr>
+      <tr><td><code>particle_measurement_diagnostics</code></td><td>3</td></tr>
+      <tr><td><code>plant_systems</code></td><td>6</td></tr>
+      <tr><td><code>plasma_control</code></td><td>2</td></tr>
+      <tr><td><code>plasma_wall_interactions</code></td><td>1</td></tr>
+      <tr><td><code>radiation_measurement_diagnostics</code></td><td>13</td></tr>
+      <tr><td><code>structural_components</code></td><td>2</td></tr>
+      <tr><td><code>transport</code></td><td>11</td></tr>
+      <tr><td><code>turbulence</code></td><td>3</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>domain</th><th>count after</th></tr></thead>
+      <tbody>
+      <tr><td><code>auxiliary_heating</code></td><td>5</td></tr>
+      <tr><td><code>computational_workflow</code></td><td>4</td></tr>
+      <tr><td><code>core_plasma_physics</code></td><td>4</td></tr>
+      <tr><td><code>data_management</code></td><td>4</td></tr>
+      <tr><td><code>divertor_physics</code></td><td>1</td></tr>
+      <tr><td><code>edge_plasma_physics</code></td><td>3</td></tr>
+      <tr><td><code>electromagnetic_wave_diagnostics</code></td><td>5</td></tr>
+      <tr><td><code>equilibrium</code></td><td>3</td></tr>
+      <tr><td><code>fast_particles</code></td><td>2</td></tr>
+      <tr><td><code>fueling</code></td><td>3</td></tr>
+      <tr><td><code>general</code></td><td>2</td></tr>
+      <tr><td><code>gyrokinetics</code></td><td>2</td></tr>
+      <tr><td><code>magnetic_field_diagnostics</code></td><td>2</td></tr>
+      <tr><td><code>magnetic_field_systems</code></td><td>7</td></tr>
+      <tr><td><code>magnetohydrodynamics</code></td><td>5</td></tr>
+      <tr><td><code>mechanical_measurement_diagnostics</code></td><td>3</td></tr>
+      <tr><td><code>neutronics</code></td><td>1</td></tr>
+      <tr><td><code>particle_measurement_diagnostics</code></td><td>2</td></tr>
+      <tr><td><code>plant_systems</code></td><td>2</td></tr>
+      <tr><td><code>plasma_control</code></td><td>2</td></tr>
+      <tr><td><code>plasma_initiation</code></td><td>1</td></tr>
+      <tr><td><code>plasma_wall_interactions</code></td><td>1</td></tr>
+      <tr><td><code>radiation_measurement_diagnostics</code></td><td>8</td></tr>
+      <tr><td><code>runaway_electrons</code></td><td>1</td></tr>
+      <tr><td><code>spectroscopy</code></td><td>6</td></tr>
+      <tr><td><code>structural_components</code></td><td>2</td></tr>
+      <tr><td><code>transport</code></td><td>4</td></tr>
+      <tr><td><code>turbulence</code></td><td>1</td></tr>
+      <tr><td><code>waves</code></td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4 id="scg-ids-map-write-gate-heading">Gate</h4>
+  <p id="scg-ids-map-write-gate-note">
+    The gate is the new test plus every test file that imports
+    <code>IDS_DOMAINS_FILE</code> or <code>physics_categorizer</code>:
+    <code>tests/core/test_ids_domain_map.py</code>,
+    <code>tests/core/test_physics_categorization.py</code>,
+    <code>tests/graph/test_physics_domain_guidance.py</code> and
+    <code>tests/ids/test_candidates.py</code>. Neither arm had a pre-existing
+    failure. Logs carry the literal command on their first line and a final
+    <code>EXIT=</code> line.
+  </p>
+  <ul id="scg-ids-map-write-gate-results">
+    <li>base arm (the three existing reader files at the base map): 31 passed, <code>EXIT=0</code>.</li>
+    <li>head arm (the same three files plus the new test): 58 passed, <code>EXIT=0</code>, zero added failures.</li>
+    <li>negative control: <code>spi</code> reverted to <code>plant_systems</code> in a scratch copy, the test pointed at it, 2 failed (<code>test_ruled_ids_carry_ruled_domain[spi]</code>, <code>test_tally_equals_mapping_counts</code>), <code>EXIT=1</code>.</li>
+  </ul>
+
+  <h4 id="scg-ids-map-write-rebuild-heading">What a DD rebuild would change</h4>
+  <p id="scg-ids-map-write-rebuild-props">
+    <strong>Properties affected.</strong> An IDS node's <code>physics_domain</code>
+    is set from this map at <code>build_dd.py:1177</code> into <code>ids_info</code>
+    and written by <code>_batch_upsert_ids_nodes</code> at
+    <code>build_dd.py:3364</code>, so a rebuild re-writes all twenty-five IDS
+    nodes to their new domain. Each IMASNode path's default domain also comes
+    from the map (<code>build_dd.py:3495</code>), written by
+    <code>_batch_create_path_nodes</code> at <code>build_dd.py:3583</code>. Nothing
+    else in the map's two readers writes a graph property.
+  </p>
+  <p id="scg-ids-map-write-rebuild-overwrite">
+    <strong>Stored path-classifier domains are not overwritten.</strong> The path
+    upsert assigns the IDS default only on a path that carries no classification:
+    <code>physics_domain = CASE WHEN path.domain_source IS NULL THEN
+    p.physics_domain ELSE path.physics_domain END</code>
+    (<code>build_dd.py:3583&ndash;3586</code>). A path the classifier labelled
+    (<code>domain_source</code> non-null) keeps its stored domain and its
+    provenance through the rebuild. The build path upsert does not write
+    <code>domain_source</code> itself.
+  </p>
+  <p id="scg-ids-map-write-rebuild-route">
+    <strong>Narrowest route to refresh only the IDS nodes.</strong> The IDS-node
+    domain write lives only in <code>_batch_upsert_ids_nodes</code>
+    (<code>build_dd.py:3331</code>), whose sole caller is the full build at
+    <code>build_dd.py:1899</code>; there is no standalone IDS-domain command, and
+    <code>imas-codex imas dd build</code> rebuilds every version. The narrowest
+    existing route is a bounded graph write over the twenty-five IDS nodes alone
+    &mdash; <code>UNWIND $rows MATCH (i:IDS {id: row.id}) SET
+    i.physics_domain = row.domain</code> &mdash; leaving the IMASNode defaults to be
+    picked up by a later build on the paths that still carry no classification.
+    Selecting and running that refresh is the coordinator's call.
+  </p>
+</article>
