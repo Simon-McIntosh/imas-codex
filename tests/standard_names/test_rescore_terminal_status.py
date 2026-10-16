@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import ast
 import re
+from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
 import pytest
 
+from imas_codex.graph.client import GraphClient
+from imas_codex.standard_names import graph_ops
 from imas_codex.standard_names.graph_ops import stage_name_for_rescore
 
 
@@ -34,7 +37,7 @@ class _GuardedGraph:
                 clause = clause.strip()
                 stage_match = re.fullmatch(r"sn\.(\w+) IN (\[[^\]]+\])", clause)
                 status_match = re.fullmatch(
-                    r"coalesce\(sn\.(\w+), '([^']*)'\) NOT IN (\[[^\]]+\])",
+                    r"NOT coalesce\(sn\.(\w+), '([^']*)'\) IN (\[[^\]]+\])",
                     clause,
                 )
                 if stage_match:
@@ -107,3 +110,33 @@ def test_superseded_stage_names_signed_transition_and_existing_successor() -> No
     assert "name_stage='superseded'" in result["reason"]
     assert "signed transition" in result["reason"]
     assert "replacement" in result["reason"]
+
+
+@pytest.mark.graph
+def test_rescore_eligibility_statement_plans_on_server() -> None:
+    with GraphClient() as graph, graph.session() as session:
+        plan = (
+            session.run(
+                "EXPLAIN " + graph_ops.RESCORE_ELIGIBILITY_QUERY,
+                id="volume_averaged_electron_number_density_over_scrape_off_layer",
+                run_id=None,
+                dry_run=True,
+            )
+            .consume()
+            .plan
+        )
+
+    assert plan is not None
+
+
+def test_graph_statements_avoid_infix_not_in() -> None:
+    source = ast.parse(Path(graph_ops.__file__).read_text())
+    invalid = [
+        node.value
+        for node in ast.walk(source)
+        if isinstance(node, ast.Constant)
+        and isinstance(node.value, str)
+        and "MATCH" in node.value
+        and " NOT IN " in node.value
+    ]
+    assert not invalid
