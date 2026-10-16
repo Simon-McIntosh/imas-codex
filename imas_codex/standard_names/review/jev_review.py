@@ -42,6 +42,7 @@ from typing import Any
 
 from imas_codex.discovery.base.judgment import decide_batch
 from imas_codex.standard_names.context import rerank_name_comparators
+from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 from imas_codex.standard_names.review.checks import (
     JevQuestion,
     JevQuestionKind,
@@ -161,6 +162,37 @@ def _observed(value: Any) -> dict[str, Any]:
     return {"observed": True, "value": value}
 
 
+@lru_cache(maxsize=1)
+def _physical_base_roster() -> tuple[str, ...]:
+    """Read the closed base registry also supplied to the incumbent prompt."""
+    from imas_standard_names.grammar.vocab_loaders import load_physical_bases
+
+    return tuple(sorted(load_physical_bases().bases))
+
+
+def _source_cocos_label(item: Mapping[str, Any]) -> str | None:
+    """Take the label the DD source reader obtained from its IMASNode."""
+    if item.get("cocos_label"):
+        return str(item["cocos_label"])
+    for source in item.get("dd_source_docs") or ():
+        if isinstance(source, Mapping) and source.get("cocos_label"):
+            return str(source["cocos_label"])
+    return None
+
+
+def _owner_segment(item: Mapping[str, Any]) -> str | None:
+    """Read the owner from the DD reader's parent IMASNode path."""
+    parent_path = item.get("parent_path")
+    if not parent_path:
+        return item.get("owner_segment")
+    parts = str(parent_path).removeprefix("dd:").split("/")
+    if not parts:
+        return None
+    if parts[-1] in {"outline", "value"} and len(parts) > 1:
+        return parts[-2]
+    return parts[-1]
+
+
 def build_name_state(
     item: Mapping[str, Any],
     *,
@@ -199,6 +231,12 @@ def build_name_state(
         "documentation": item.get("documentation"),
         "segments": segments,
     }
+    try:
+        name_block["decomposition"] = parse_canonical_name(str(name_id)).ir.model_dump(
+            mode="json"
+        )
+    except (TypeError, ValueError):
+        name_block["decomposition"] = None
 
     sibling_value = (
         sibling_names if sibling_names is not None else item.get(_SIBLING_FIELD)
@@ -218,6 +256,11 @@ def build_name_state(
     }
     if _SIBLING_FIELD not in neighbourhood_block:
         neighbourhood_block[_SIBLING_FIELD] = _observed(sibling_value)
+    neighbourhood_block["cocos_label"] = _observed(_source_cocos_label(item))
+    neighbourhood_block["physical_base_roster"] = _observed(
+        list(_physical_base_roster())
+    )
+    neighbourhood_block["owner_segment"] = _observed(_owner_segment(item))
 
     state: dict[str, Any] = {"name": name_block, "neighbourhood": neighbourhood_block}
     if sibling_note:
@@ -358,6 +401,11 @@ def audit_finding_for(
     """
     if audit_report is None or check.audit_finding_class is None:
         return None
+    if check.id == "redundant_repeated_segment":
+        from imas_codex.standard_names.audits import repeated_token_check
+
+        findings = repeated_token_check({"id": name_id})
+        return findings[0] if findings else None
     finding_class = check.audit_finding_class
     if finding_class == "duplicate_component":
         for component in getattr(audit_report, "duplicate_components", []):

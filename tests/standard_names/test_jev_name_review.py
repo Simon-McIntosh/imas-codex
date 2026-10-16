@@ -148,11 +148,57 @@ def test_state_carries_source_docs_and_siblings_when_observed():
     assert nb["sibling_names"]["value"] == ["poloidal_flux", "flux_surface_area"]
 
 
+def test_cocos_source_path_supplies_label_from_dd_reader():
+    item = {
+        "id": "poloidal_magnetic_flux",
+        "source_paths": ["dd:equilibrium/time_slice/profiles_1d/psi"],
+        "dd_source_docs": [
+            {
+                "path": "equilibrium/time_slice/profiles_1d/psi",
+                "cocos_label": "psi_like",
+            }
+        ],
+    }
+    state = jev_review.build_name_state(item)
+    assert state["neighbourhood"]["cocos_label"] == {
+        "observed": True,
+        "value": "psi_like",
+    }
+
+
+def test_state_carries_closed_base_roster_full_parse_and_parent_owner():
+    state = jev_review.build_name_state(
+        {
+            "id": "poloidal_magnetic_flux",
+            "parent_path": "equilibrium/time_slice/boundary/outline",
+        }
+    )
+    assert "magnetic_flux" in state["neighbourhood"]["physical_base_roster"]["value"]
+    assert state["name"]["decomposition"] is not None
+    assert state["neighbourhood"]["owner_segment"]["value"] == "boundary"
+
+
 def test_state_carries_every_taxonomy_neighbourhood_field():
     checks, _ = load_review_checks()
     fields = jev_review.neighbourhood_fields(checks)
     state = jev_review.build_name_state({"id": "x"})
-    assert set(state["neighbourhood"]) == set(fields)
+    assert set(fields) <= set(state["neighbourhood"])
+
+
+def test_repeated_segment_is_decided_by_the_existing_audit():
+    check = next(
+        check
+        for check in load_review_checks()[0]
+        if check.id == "redundant_repeated_segment"
+    )
+    assert check.question is None
+    assert jev_review.audit_finding_for(
+        check, "electron_electron_temperature", AuditReport()
+    )
+    assert (
+        jev_review.audit_finding_for(check, "electron_temperature", AuditReport())
+        is None
+    )
 
 
 # ---------------------------------------------------------------------------
