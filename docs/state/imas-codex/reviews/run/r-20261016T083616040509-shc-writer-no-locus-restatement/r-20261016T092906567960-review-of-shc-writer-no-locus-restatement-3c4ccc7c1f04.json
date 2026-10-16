@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "2fdaf318e980af1a41ef93b4aa00459ccbfadab2",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:9904",
+    "imas_codex/standard_names/benchmark.py:875",
+    "imas_codex/standard_names/docs_holdout_eval.py:264"
+  ],
+  "completed_at": "2026-10-16T09:43:26.688Z",
+  "dispatched_at": "2026-10-16T09:29:40Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/repair-head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the after-arm gate log's second command line names tests/standard_names/test_docs_locus_definition.py twice and omits tests/standard_names/test_docs_prompt_locus.py, while the run collected 15 items across both files, so the log's own record of what it ran disagrees with what it ran and a reader cannot confirm the prompt test ran from the header alone."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/repair-negctl.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control log's provenance line names revision 3c4ccc7c1f04 with no note that the tree measured was the reverted template, where negctl-prompt.log and negctl-gate.log both annotate their reverted tree on that line, so this control's log alone reads as a head-arm run until the manifest's negative_control_note is read."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-writer-no-locus-restatement.html",
+      "line": "59",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment still reads \"Negative controls, both observed as declared\" while three controls are listed, and line 5 still says \"Both docs prompts\" while the writer path it now documents is three prompts, so the landing record's prose was not reconciled with the third prompt and third control it added."
+    }
+  ],
+  "head_log_revision": "3c4ccc7c1f04d854b9308cee7dbd84582c23a121",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read the single gained commit 3c4ccc7c against 24943a32: it replaces the gloss-inviting block at imas_codex/llm/prompts/sn/generate_docs_system.md:425-430 with the registry-append no-restatement instruction and widens the guard to any locus_context, adds tests/standard_names/test_docs_prompt_locus.py:54-57, and updates the evidence fragment's prose; 26 insertions, 6 deletions, no path outside the declared scope.",
+    "done_when": "the repair round's done-when is that reverting the answering commit fails the check the finding names; repair-negctl.log records EXIT=1 with tests/standard_names/test_docs_prompt_locus.py::test_generate_docs_system_prompt_names_locus_without_defining_it red on the reverted template, and repair-head.log records EXIT=0 with 15 passed at 3c4ccc7c, so the measure is met.",
+    "goal": "the node goal is \"Make the docs writer name the locus without defining it\"; the gained commit 3c4ccc7c rewrites imas_codex/llm/prompts/sn/generate_docs_system.md:425-430 so the system half of the generate request carries the same no-restatement instruction as the two user prompts, and imas_codex/standard_names/workers.py:9743 confirms the registry sentence it points to is appended, so the blocking finding f3ac100bbe2 the round was dispatched to answer is met.",
+    "manifest": "read; it records status complete, the three commits, acted f3ac100bbe2 with 3c4ccc7c1f04, the literal gate command, eight gate logs, baseline_suite (1 failure at 2fdaf318e) and after_suite (0 failures at 3c4ccc7c), negative_control_log repair-negctl.log and the family headline 17 members / 15 flagged, and every claim I checked reconciles with the log it cites except the after-arm log's own command line (see the finding on repair-head.log:1).",
+    "write_paths": "the gained diff names exactly docs/evidence/fragments/sn-harmonize-command/shc-writer-no-locus-restatement.html, imas_codex/llm/prompts/sn/generate_docs_system.md and tests/standard_names/test_docs_prompt_locus.py, the three paths the goal lists, and generate_docs_system.md was added to this round's write scope at resume-1-advice.txt:15, so the change is wholly inside the fence."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_docs_prompt_locus.py:54 renders sn/generate_docs_system and asserts the instruction present and the gloss absent, and repair-negctl.log shows it red at EXIT=1 with the commit reverted.",
+    "evidence": "tests/standard_names/test_docs_prompt_locus.py::test_generate_docs_system_prompt_names_locus_without_defining_it is red in repair-negctl.log (EXIT=1) without the fix and green in repair-head.log (15 passed, EXIT=0), though the after-arm log's own command line misstates what ran.",
+    "fit": "the new system-prompt block at imas_codex/llm/prompts/sn/generate_docs_system.md:425-430 reuses the exact wording of the two user prompts and the new test follows the _render idiom at tests/standard_names/test_docs_prompt_locus.py:41, with no plan or ticket label in any name.",
+    "goal_fidelity": "imas_codex/llm/prompts/sn/generate_docs_system.md:425-430 now names the locus and forbids defining it, matching refine_docs_user.md:36-47 and generate_docs_user.md:23-34, so all three prompts of the writing path carry the rule.",
+    "reuse": "the change edits an existing template rendered through imas_codex/llm/prompt_loader.py:render_prompt and adds a test using the file's existing _render helper, so it introduces no capability the repository does not already own.",
+    "scope_discipline": "git diff --stat 24943a32 3c4ccc7c lists only the three declared paths and no other file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is \"Make the docs writer name the locus without defining it\"; the gained commit 3c4ccc7c rewrites imas_codex/llm/prompts/sn/generate_docs_system.md:425-430 so the system half of the generate request carries the same no-restatement instruction as the two user prompts, and imas_codex/standard_names/workers.py:9743 confirms the registry sentence it points to is appended, so the blocking finding f3ac100bbe2 the round was dispatched to answer is met.\nVERDICT done_when: the repair round's done-when is that reverting the answering commit fails the check the finding names; repair-negctl.log records EXIT=1 with tests/standard_names/test_docs_prompt_locus.py::test_generate_docs_system_prompt_names_locus_without_defining_it red on the reverted template, and repair-head.log records EXIT=0 with 15 passed at 3c4ccc7c, so the measure is met.\nVERDICT write_paths: the gained diff names exactly docs/evidence/fragments/sn-harmonize-command/shc-writer-no-locus-restatement.html, imas_codex/llm/prompts/sn/generate_docs_system.md and tests/standard_names/test_docs_prompt_locus.py, the three paths the goal lists, and generate_docs_system.md was added to this round's write scope at resume-1-advice.txt:15, so the change is wholly inside the fence.\nVERDICT manifest: read; it records status complete, the three commits, acted f3ac100bbe2 with 3c4ccc7c1f04, the literal gate command, eight gate logs, baseline_suite (1 failure at 2fdaf318e) and after_suite (0 failures at 3c4ccc7c), negative_control_log repair-negctl.log and the family headline 17 members / 15 flagged, and every claim I checked reconciles with the log it cites except the after-arm log's own command line (see the finding on repair-head.log:1).\nVERDICT diff: read the single gained commit 3c4ccc7c against 24943a32: it replaces the gloss-inviting block at imas_codex/llm/prompts/sn/generate_docs_system.md:425-430 with the registry-append no-restatement instruction and widens the guard to any locus_context, adds tests/standard_names/test_docs_prompt_locus.py:54-57, and updates the evidence fragment's prose; 26 insertions, 6 deletions, no path outside the declared scope.\nCALL_SITES: imas_codex/standard_names/workers.py:9904, imas_codex/standard_names/benchmark.py:875, imas_codex/standard_names/docs_holdout_eval.py:264\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/llm/prompts/sn/generate_docs_system.md:425-430 now names the locus and forbids defining it, matching refine_docs_user.md:36-47 and generate_docs_user.md:23-34, so all three prompts of the writing path carry the rule.\nSCORE evidence: 17\nJUSTIFICATION evidence: tests/standard_names/test_docs_prompt_locus.py::test_generate_docs_system_prompt_names_locus_without_defining_it is red in repair-negctl.log (EXIT=1) without the fix and green in repair-head.log (15 passed, EXIT=0), though the after-arm log's own command line misstates what ran.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 24943a32 3c4ccc7c lists only the three declared paths and no other file.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_docs_prompt_locus.py:54 renders sn/generate_docs_system and asserts the instruction present and the gloss absent, and repair-negctl.log shows it red at EXIT=1 with the commit reverted.\nSCORE fit: 19\nJUSTIFICATION fit: the new system-prompt block at imas_codex/llm/prompts/sn/generate_docs_system.md:425-430 reuses the exact wording of the two user prompts and the new test follows the _render idiom at tests/standard_names/test_docs_prompt_locus.py:41, with no plan or ticket label in any name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change edits an existing template rendered through imas_codex/llm/prompt_loader.py:render_prompt and adds a test using the file's existing _render helper, so it introduces no capability the repository does not already own.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/repair-head.log:1 follow-on: the after-arm gate log's second command line names tests/standard_names/test_docs_locus_definition.py twice and omits tests/standard_names/test_docs_prompt_locus.py, while the run collected 15 items across both files, so the log's own record of what it ran disagrees with what it ran and a reader cannot confirm the prompt test ran from the header alone.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T083616040509-shc-writer-no-locus-restatement/repair-negctl.log:1 follow-on: the negative-control log's provenance line names revision 3c4ccc7c1f04 with no note that the tree measured was the reverted template, where negctl-prompt.log and negctl-gate.log both annotate their reverted tree on that line, so this control's log alone reads as a head-arm run until the manifest's negative_control_note is read.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-writer-no-locus-restatement.html:59 follow-on: the fragment still reads \"Negative controls, both observed as declared\" while three controls are listed, and line 5 still says \"Both docs prompts\" while the writer path it now documents is three prompts, so the landing record's prose was not reconciled with the third prompt and third control it added.\n",
+  "review_run_id": "r-20261016T092906567960-review-of-shc-writer-no-locus-restatement-3c4ccc7c1f04",
+  "reviewed_base_sha": "24943a32da25dfd82554d733ef87d46998cda4e2",
+  "reviewed_head_sha": "3c4ccc7c1f04d854b9308cee7dbd84582c23a121",
+  "reviewed_run_id": "r-20261016T083616040509-shc-writer-no-locus-restatement",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-16T09:41:28.080145+00:00",
+  "total": 115
+}
