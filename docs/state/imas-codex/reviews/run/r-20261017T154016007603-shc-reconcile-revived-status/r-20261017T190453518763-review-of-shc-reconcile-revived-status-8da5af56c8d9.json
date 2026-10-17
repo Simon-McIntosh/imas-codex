@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:1844-1847"
+  ],
+  "completed_at": "2026-10-17T19:09:38Z",
+  "dispatched_at": "2026-10-17T19:05:18Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_reconcile_revived_status.py",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the revived=1 result assertion repeats the changed=1 value supplied by graph.query.side_effect at line 13, so it remains true if the emitted Cypher matches or updates no real name; the separate string assertions catch the recorded predicate removal but this count assertion supplies no independent row evidence."
+    },
+    {
+      "file": "tests/standard_names/test_catalog_status_reconcile.py",
+      "line": "42",
+      "severity": "follow-on",
+      "text": "follow-on: the added mock branch implements its own fold_receipt selection, but the test fixture contains no receipt-backed live superseded name, so the idempotence test never proves a positive revival or an unreceipted exclusion through this graph model."
+    },
+    {
+      "file": "imas_codex/standard_names/loop.py",
+      "line": "1848",
+      "severity": "follow-on",
+      "text": "follow-on: the production loop logs when total_changed is nonzero but prints only drafted, superseded and quarantined; a revival-only run therefore reports zero in every displayed category despite the new revived count, hiding the repair from this summary."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site",
+    "diff": "commit 7472e79d adds the guarded query, count and tests in three files, while commit 8da5af56 adds only the 102-line evidence fragment; the diff from reviewed base to head contains no other paths.",
+    "done_when": "brief.md:43-61 requires a before list, counts, readbacks, EXIT receipts, EXPLAIN and the focused gate; the committed fragment:9-101 records these, with baseline.log at 123 passed and committed-head-gate.log at 124 passed, both EXIT=0.",
+    "goal": "brief.md:1-29 asks for a receipt-gated live catalog-status repair; graph_ops.py:14312-14325 restores draft only for live superseded-status names with a matching fold_identity receipt, and apply-readback.log reports 35 restored.",
+    "manifest": "the source manifest.md names both commits, four changed paths, completed baseline_suite and after_suite with zero failures, negative-control.log at EXIT=1, and apply-readback.log with 35 restored names and a zero-change second pass.",
+    "write_paths": "the source manifest.md declares graph_ops.py, two standard-name test files, the evidence fragment and an unused figure directory; git diff --name-status 9bce21c..8da5af56 lists four files, all inside that scope."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_reconcile_revived_status.py:33-41 rejects removal of the receipt predicate, confirmed by negative-control.log EXIT=1, but its result count at line 19 comes from MagicMock.side_effect and test_catalog_status_reconcile.py:42 has no positive receipt fixture.",
+    "evidence": "docs/evidence/fragments/sn-harmonize-command/shc-reconcile-revived-status.html:14-101 and the underlying before-resumed-corrected.log and apply-readback.log carry 35 before rows, 31-to-0 accepted-superseded, 35 draft readbacks, a zero-change second run and EXIT=0.",
+    "fit": "imas_codex/standard_names/graph_ops.py:14312-14358 extends the existing ordered maintenance queries and result count idiom with a descriptive revived key, though loop.py:1848 omits that key from its production summary.",
+    "goal_fidelity": "imas_codex/standard_names/graph_ops.py:14315-14325 requires live stage, superseded catalog status and a matching fold_identity receipt before setting draft, and apply-readback.log read back all 35 listed names.",
+    "reuse": "the capability search for fold_identity, revival and catalog reconciliation found the existing owner reconcile_catalog_status in imas_codex/standard_names/graph_ops.py:14270 and the fold receipt writer in edit.py:1459; the diff extends that owner and adds no competing production definition.",
+    "scope_discipline": "git diff --name-status 9bce21c..8da5af56 names only imas_codex/standard_names/graph_ops.py, the two declared tests and the declared evidence fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: brief.md:1-29 asks for a receipt-gated live catalog-status repair; graph_ops.py:14312-14325 restores draft only for live superseded-status names with a matching fold_identity receipt, and apply-readback.log reports 35 restored.\nVERDICT done_when: brief.md:43-61 requires a before list, counts, readbacks, EXIT receipts, EXPLAIN and the focused gate; the committed fragment:9-101 records these, with baseline.log at 123 passed and committed-head-gate.log at 124 passed, both EXIT=0.\nVERDICT write_paths: the source manifest.md declares graph_ops.py, two standard-name test files, the evidence fragment and an unused figure directory; git diff --name-status 9bce21c..8da5af56 lists four files, all inside that scope.\nVERDICT manifest: the source manifest.md names both commits, four changed paths, completed baseline_suite and after_suite with zero failures, negative-control.log at EXIT=1, and apply-readback.log with 35 restored names and a zero-change second pass.\nVERDICT diff: commit 7472e79d adds the guarded query, count and tests in three files, while commit 8da5af56 adds only the 102-line evidence fragment; the diff from reviewed base to head contains no other paths.\nCALL_SITES: imas_codex/standard_names/loop.py:1844-1847\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_ops.py:14315-14325 requires live stage, superseded catalog status and a matching fold_identity receipt before setting draft, and apply-readback.log read back all 35 listed names.\nSCORE evidence: 19\nJUSTIFICATION evidence: docs/evidence/fragments/sn-harmonize-command/shc-reconcile-revived-status.html:14-101 and the underlying before-resumed-corrected.log and apply-readback.log carry 35 before rows, 31-to-0 accepted-superseded, 35 draft readbacks, a zero-change second run and EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 9bce21c..8da5af56 names only imas_codex/standard_names/graph_ops.py, the two declared tests and the declared evidence fragment.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_reconcile_revived_status.py:33-41 rejects removal of the receipt predicate, confirmed by negative-control.log EXIT=1, but its result count at line 19 comes from MagicMock.side_effect and test_catalog_status_reconcile.py:42 has no positive receipt fixture.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/graph_ops.py:14312-14358 extends the existing ordered maintenance queries and result count idiom with a descriptive revived key, though loop.py:1848 omits that key from its production summary.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search for fold_identity, revival and catalog reconciliation found the existing owner reconcile_catalog_status in imas_codex/standard_names/graph_ops.py:14270 and the fold receipt writer in edit.py:1459; the diff extends that owner and adds no competing production definition.\nFINDING tests/standard_names/test_reconcile_revived_status.py:19 follow-on: the revived=1 result assertion repeats the changed=1 value supplied by graph.query.side_effect at line 13, so it remains true if the emitted Cypher matches or updates no real name; the separate string assertions catch the recorded predicate removal but this count assertion supplies no independent row evidence.\nFINDING tests/standard_names/test_catalog_status_reconcile.py:42 follow-on: the added mock branch implements its own fold_receipt selection, but the test fixture contains no receipt-backed live superseded name, so the idempotence test never proves a positive revival or an unreceipted exclusion through this graph model.\nFINDING imas_codex/standard_names/loop.py:1848 follow-on: the production loop logs when total_changed is nonzero but prints only drafted, superseded and quarantined; a revival-only run therefore reports zero in every displayed category despite the new revived count, hiding the repair from this summary.\n",
+  "review_run_id": "r-20261017T190453518763-review-of-shc-reconcile-revived-status-8da5af56c8d9",
+  "reviewed_base_sha": "9bce21c03b7ec13d7f73c953c616412a5f731b42",
+  "reviewed_head_sha": "8da5af56c8d964a4892e72d6f11ee6e6f0fb28fc",
+  "reviewed_run_id": "r-20261017T154016007603-shc-reconcile-revived-status",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T19:07:46+00:00",
+  "total": 112
+}
