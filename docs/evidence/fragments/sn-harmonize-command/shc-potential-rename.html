@@ -77,28 +77,32 @@
     <code>before-read.log</code>)</h3>
   <table id="shc-potential-rename-before-table">
     <thead>
-      <tr><th>identity</th><th>name_stage</th><th>docs_stage</th><th>validation_status</th><th>score_name</th><th>refine_stop_reason</th></tr>
+      <tr><th>identity</th><th>name_stage</th><th>docs_stage</th><th>validation_status</th><th>score_name</th><th>refine_stop_reason</th><th>description</th></tr>
     </thead>
     <tbody>
       <tr>
         <td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td>
         <td><code>exhausted</code></td><td><code>pending</code></td><td><code>valid</code></td>
         <td>0.7625</td><td><code>attempts_exhausted</code> (refine_attempts=3)</td>
+        <td>Quasineutral plasma electrostatic potential evaluated at the outboard equatorial midplane, referenced to an electrical ground.</td>
       </tr>
       <tr>
         <td><code>plasma_electrostatic_potential_at_wall</code></td>
         <td><code>exhausted</code></td><td><code>pending</code></td><td><code>valid</code></td>
         <td>0.7375</td><td><code>attempts_exhausted</code> (refine_attempts=3)</td>
+        <td>Electrostatic potential of the plasma evaluated immediately adjacent to the wall surface.</td>
       </tr>
       <tr>
         <td><code>electrostatic_potential_at_outboard_midplane</code> (tombstone)</td>
         <td><code>superseded</code></td><td><code>pending</code></td><td><code>valid</code></td>
         <td>0.6125</td><td><code>superseded_from_stage=refining</code></td>
+        <td>Quasineutral plasma electrostatic potential at the outboard equatorial midplane, relative to an electrical reference.</td>
       </tr>
       <tr>
         <td><code>electrostatic_potential_at_wall</code> (tombstone)</td>
         <td><code>superseded</code></td><td><code>accepted</code></td><td><code>valid</code></td>
         <td>0.825</td><td><code>superseded_from_stage=refining</code></td>
+        <td>Electrostatic potential at wall is the voltage-valued scalar potential of the plasma immediately adjacent to a plasma-facing wall, relative to a chosen electrical reference.</td>
       </tr>
     </tbody>
   </table>
@@ -163,49 +167,124 @@
   <h3 id="shc-potential-rename-after">After (read back, <code>after-read.log</code> / <code>after-probe.log</code>)</h3>
   <table id="shc-potential-rename-after-table">
     <thead>
-      <tr><th>identity</th><th>name_stage</th><th>docs_stage_after</th><th>validation_status</th><th>score_name</th><th>successor recorded</th></tr>
+      <tr><th>identity</th><th>name_stage</th><th>docs_stage_after</th><th>validation_status</th><th>score_name</th><th>successor recorded</th><th>description</th></tr>
     </thead>
     <tbody>
       <tr>
         <td><code>electrostatic_potential_at_outboard_midplane</code></td>
         <td><strong><code>reviewed</code></strong></td><td><code>pending</code></td><td><code>valid</code></td>
         <td>0.6125</td><td>—</td>
+        <td>Quasineutral plasma electrostatic potential at the outboard equatorial midplane, relative to an electrical reference.</td>
       </tr>
       <tr>
         <td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td>
         <td><code>superseded</code></td><td><code>pending</code></td><td><code>valid</code></td>
         <td>0.7625</td>
         <td><code>REFINED_FROM → electrostatic_potential_at_outboard_midplane</code></td>
+        <td>Quasineutral plasma electrostatic potential evaluated at the outboard equatorial midplane, referenced to an electrical ground.</td>
       </tr>
       <tr>
         <td><code>electrostatic_potential_at_wall</code></td>
         <td><strong><code>reviewed</code></strong></td><td><code>accepted</code></td><td><code>valid</code></td>
         <td>0.825</td><td>—</td>
+        <td>Electrostatic potential at wall is the voltage-valued scalar potential of the plasma immediately adjacent to a plasma-facing wall, relative to a chosen electrical reference.</td>
       </tr>
       <tr>
         <td><code>plasma_electrostatic_potential_at_wall</code></td>
         <td><code>superseded</code></td><td><code>pending</code></td><td><code>valid</code></td>
         <td>0.7375</td>
         <td><code>REFINED_FROM → electrostatic_potential_at_wall</code></td>
+        <td>Electrostatic potential of the plasma evaluated immediately adjacent to the wall surface.</td>
       </tr>
     </tbody>
   </table>
+
+  <h3 id="shc-potential-rename-edge-inventory">Per-edge before and after inventory.
+    <code>before-read.log</code> / <code>after-read.log</code></h3>
+  <p id="shc-potential-rename-edge-inventory-intro">
+    Every relationship the four identities carried before the fold and after it.
+    Counts are edges of that type on that identity; — marks an edge absent at that
+    read. Blank identity cells continue the row above.
+  </p>
+  <table id="shc-potential-rename-edge-inventory-table">
+    <thead>
+      <tr><th>identity</th><th>relationship</th><th>before</th><th>after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>plasma_electrostatic_potential_at_outboard_midplane</code> (old)</td><td>outgoing <code>HAS_UNIT → V</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_INTERNAL_CHANGE</code></td><td>2</td><td>3</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_REVIEW</code></td><td>6</td><td>6</td></tr>
+      <tr><td></td><td>outgoing <code>REFINED_FROM → electrostatic_potential_at_outboard_midplane</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>incoming <code>REFINED_FROM</code> from <code>electrostatic_potential_at_outboard_midplane</code></td><td>—</td><td>present (fold)</td></tr>
+      <tr><td></td><td>incoming <code>FOR_STANDARD_NAME</code> from LLMCost</td><td>6</td><td>6</td></tr>
+
+      <tr><td><code>plasma_electrostatic_potential_at_wall</code> (old)</td><td>outgoing <code>HAS_UNIT → V</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_INTERNAL_CHANGE</code></td><td>2</td><td>3</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_REVIEW</code></td><td>6</td><td>6</td></tr>
+      <tr><td></td><td>outgoing <code>REFINED_FROM → plasma_electrostatic_potential_at_first_wall</code></td><td>present</td><td>present (retained)</td></tr>
+      <tr><td></td><td>incoming <code>REFINED_FROM</code> from <code>electrostatic_potential_at_wall</code></td><td>—</td><td>present (fold)</td></tr>
+      <tr><td></td><td>incoming <code>FOR_STANDARD_NAME</code> from LLMCost</td><td>6</td><td>6</td></tr>
+
+      <tr><td><code>electrostatic_potential_at_outboard_midplane</code> (new)</td><td>outgoing <code>HAS_UNIT → V</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_INTERNAL_CHANGE</code></td><td>2</td><td>3</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_REVIEW</code></td><td>3</td><td>3</td></tr>
+      <tr><td></td><td>outgoing <code>REFINED_FROM → plasma_electrostatic_potential_at_midplane</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>REFINED_FROM → plasma_electrostatic_potential_at_outboard_midplane</code></td><td>—</td><td>present (fold)</td></tr>
+      <tr><td></td><td>incoming <code>FOR_STANDARD_NAME</code> from LLMCost</td><td>4</td><td>4</td></tr>
+
+      <tr><td><code>electrostatic_potential_at_wall</code> (new)</td><td>outgoing <code>HAS_UNIT → V</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_LOCUS → wall</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_PHYSICS_DOMAIN → mechanical_measurement_diagnostics</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_INTERNAL_CHANGE</code></td><td>2</td><td>3</td></tr>
+      <tr><td></td><td>outgoing <code>HAS_REVIEW</code></td><td>5</td><td>5</td></tr>
+      <tr><td></td><td>outgoing <code>REFERENCES → electrostatic_potential</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>REFERENCES → floating_electrostatic_potential</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>DOCS_REVISION_OF → electrostatic_potential_at_wall#rev-0</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>outgoing <code>REFINED_FROM → plasma_electrostatic_potential_at_wall</code></td><td>—</td><td>present (fold)</td></tr>
+      <tr><td></td><td>outgoing <code>REFINED_FROM → plasma_electrostatic_potential_at_first_wall</code></td><td>—</td><td>— (reported gap)</td></tr>
+      <tr><td></td><td>incoming <code>REFINED_FROM</code> from <code>electrostatic_potential_at_first_wall</code></td><td>present</td><td>present</td></tr>
+      <tr><td></td><td>incoming <code>FOR_STANDARD_NAME</code> from LLMCost</td><td>7</td><td>7</td></tr>
+    </tbody>
+  </table>
+
   <p id="shc-potential-rename-after-rels">
     Relationship carry check (<code>after-read.log</code>): each new name carries
-    the identity-bearing edges — <code>HAS_UNIT → V</code>, the threaded
+    its identity-bearing edges, with one exception reported below —
+    <code>HAS_UNIT → V</code>, the threaded
     successor lineage (<code>old -[REFINED_FROM]-&gt; new</code>), and its own
     <code>HAS_REVIEW</code> / <code>HAS_INTERNAL_CHANGE</code> set. The fold
     writes one reciprocal <code>REFINED_FROM</code> edge
     (<code>new -[REFINED_FROM]-&gt; old</code>, from
     <code>MERGE (target)-[:REFINED_FROM]-&gt;(old)</code>) so that the pair
     resolves forward in both directions; this is the fold's own declared lineage
-    shape for a chain that closes on the folded name, not a stray edge. No
-    identity relationship was left behind on the old name: neither old name had
-    a producer, parent or child to strand, and the fold's receipt records zero
-    sources and zero projections carried because there were none to carry. The
-    old names retain their own <code>HAS_REVIEW</code> and <code>LLMCost</code>
-    records, which are histories of the retired spelling rather than identity
-    edges.
+    shape for a chain that closes on the folded name. One identity edge is
+    <strong>not</strong> carried forward, and per the brief it is reported here
+    rather than repaired by hand: the WALL pair leaves a lineage edge behind on
+    the WALL retired spelling. After the fold,
+    <code>plasma_electrostatic_potential_at_wall</code> still carries
+    <code>REFINED_FROM -&gt; plasma_electrostatic_potential_at_first_wall</code>
+    (<code>after-read.log</code> line 86), while the revived
+    <code>electrostatic_potential_at_wall</code> carries no corresponding
+    <code>REFINED_FROM -&gt; plasma_electrostatic_potential_at_first_wall</code>
+    edge — its only outgoing <code>REFINED_FROM</code> is the fold edge to the
+    retired spelling (line 164). The MIDPLANE pair does not share this
+    asymmetry: there the old name's <code>REFINED_FROM</code> pointed at the
+    revived name itself (<code>before-read.log</code> line 38), so the fold's
+    reciprocal edge closes the pair in both directions and nothing is stranded.
+    The cause is the fold's own carry shape: it writes exactly one reciprocal
+    edge per pair
+    (<code>MERGE (target)-[:REFINED_FROM]-&gt;(old)</code>) and does not
+    re-point an old name's pre-existing ancestry at the revived spelling, so an
+    old name whose predecessor was a third identity (here
+    <code>plasma_electrostatic_potential_at_first_wall</code>) keeps that edge
+    while the revived name does not gain a matching one. This is a defect in
+    the fold route's carry, not in this deliverable, and it is raised for the
+    coordinator rather than hand-repaired, because a Cypher edit would change
+    relationship provenance outside the sanctioned route. The old names retain
+    their own <code>HAS_REVIEW</code> and <code>LLMCost</code> records, which
+    are histories of their retired spellings rather than identity edges, and,
+    consistent with the carry check, each revived name carries its own such set
+    (midplane <code>HAS_REVIEW</code> ×3, wall ×5).
   </p>
 
   <h3 id="shc-potential-rename-revalidation">Can each new name enter the potential family's revalidation?</h3>
