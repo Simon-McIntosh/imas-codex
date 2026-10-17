@@ -1,0 +1,110 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132427585582-shc-harmonize-finalize/verified-head-gate.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "The error omits the modified member or expected fixed reason, or refusal writes links or stamps the anchor; removing each documented refusal instead prevents the expected exception and fails line 58.",
+      "lines": "61-64"
+    },
+    {
+      "failure_condition": "The quarantine refusal omits the fixed member name, or removal of the refusal permits finalization and triggers pytest.fail; negative-control.log demonstrates the latter.",
+      "lines": "74-78"
+    },
+    {
+      "failure_condition": "Preview errors, omits ready or the fixed count of two missing reverse pairs, or writes links.",
+      "lines": "105-108"
+    },
+    {
+      "failure_condition": "Finalize errors, omits stamped or zero-call output, misses either shared-logger invocation, leaves an audit-detected missing reverse, or misses either fixed reciprocal link.",
+      "lines": "113-119"
+    },
+    {
+      "failure_condition": "A stored signature differs from group_signature of the same fixture rows; a regression inside group_signature itself moves both sides together, so this assertion cannot catch it.",
+      "lines": "123-125"
+    },
+    {
+      "failure_condition": "The independent planner returns another family count, decision other than harmonized, or nonzero calls after stamping.",
+      "lines": "128-130"
+    },
+    {
+      "failure_condition": "An incomplete stamp is not refused with its member named, or the unstamped fixture member gains a signature; stamp-negative-control.log shows the missing-readback mutation reddens.",
+      "lines": "149-151"
+    },
+    {
+      "failure_condition": "The pre-existing planner begins counting a null-stamped member and returns nonzero calls; this assertion documents the planner gap rather than guarding finalization.",
+      "lines": "154-155"
+    },
+    {
+      "failure_condition": "The CLI succeeds for a quarantined fixture, fails to name the fixed member or reason, or writes links.",
+      "lines": "169-172"
+    }
+  ],
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132427585582-shc-harmonize-finalize/base-scratch.log",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6127"
+  ],
+  "completed_at": "2026-10-17T13:57:58Z",
+  "dispatched_at": "2026-10-17T13:51:14Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1463",
+      "severity": "blocking",
+      "text": "blocking: reconcile_family_reverse_links writes writable members before returning its protected list; finalization raises only afterward at line 1464, so an approved member needing a reverse link can make --finalize fail after changing other members, while --dry-run reports ready."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_finalize.py",
+      "line": "123",
+      "severity": "follow-on",
+      "text": "follow-on: the test recomputes group_signature from the same fixture rows and function used to supply the stamp, so a regression that makes group_signature return the same wrong value on both sides leaves this current-signature assertion green."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "Commits 41a60e12, 9a42c063 and 97ecb643 add and refine guarded finalization and its tests; 03915a2e adds the evidence fragment, with protected reconciliation at harmonize.py:1463-1467 occurring before its refusal.",
+    "done_when": "The source brief.md requires refusals, reconciliation, zero planned calls, logging and an importer gate; negative-control.log and stamp-negative-control.log are red, while base-scratch.log and verified-head-gate.log record 88 and 100 passes with zero added failures.",
+    "goal": "The source brief.md asks for a guarded, no-model-call finalize; imas_codex/cli/sn.py:6119-6149 reaches imas_codex/standard_names/harmonize.py:1406-1510, but a protected-member refusal can follow another member's write.",
+    "manifest": "The source manifest.md names four commits and four changed paths, records the two red controls, and provides readable baseline_suite and after_suite receipts with zero failure IDs in either arm.",
+    "write_paths": "The source brief.md grants harmonize.py, sn.py, test_harmonize_finalize.py and shc-harmonize-finalize.html; git diff 25d5ad6e..03915a2e changes exactly those four paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_finalize.py:43-172 reddens on removed quarantine and stamp-readback guards, but line 123 recomputes the same signature as the code and no test exercises a protected-member partial write.",
+    "evidence": "The source base-scratch.log ends 88 passed/EXIT=0, verified-head-gate.log ends 100 passed/EXIT=0, and the two negative-control logs end with distinct failing test IDs/EXIT=1.",
+    "fit": "imas_codex/cli/sn.py:6119-6149 follows the command's existing scope and logging flow, while harmonize.py:1414 and 1463 reuse the campaign policy and family reconciler without forbidden source names.",
+    "goal_fidelity": "imas_codex/standard_names/harmonize.py:1463-1467 reuses reconciliation and stamping, but can report a protected-member refusal after reconciliation has written another member.",
+    "reuse": "imas_codex/standard_names/harmonize.py:1406 extends the existing plan, reconcile and stamp owner; a capability search found reverse-link auditing in review/audits.py:477 but no callable that verifies this exact family readback.",
+    "scope_discipline": "The base-to-head diff contains only the four source-brief.md write paths and its HTML fragment at docs/evidence/fragments/sn-harmonize-command/shc-harmonize-finalize.html:1."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md asks for a guarded, no-model-call finalize; imas_codex/cli/sn.py:6119-6149 reaches imas_codex/standard_names/harmonize.py:1406-1510, but a protected-member refusal can follow another member's write.\nVERDICT done_when: The source brief.md requires refusals, reconciliation, zero planned calls, logging and an importer gate; negative-control.log and stamp-negative-control.log are red, while base-scratch.log and verified-head-gate.log record 88 and 100 passes with zero added failures.\nVERDICT write_paths: The source brief.md grants harmonize.py, sn.py, test_harmonize_finalize.py and shc-harmonize-finalize.html; git diff 25d5ad6e..03915a2e changes exactly those four paths.\nVERDICT manifest: The source manifest.md names four commits and four changed paths, records the two red controls, and provides readable baseline_suite and after_suite receipts with zero failure IDs in either arm.\nVERDICT diff: Commits 41a60e12, 9a42c063 and 97ecb643 add and refine guarded finalization and its tests; 03915a2e adds the evidence fragment, with protected reconciliation at harmonize.py:1463-1467 occurring before its refusal.\nCALL_SITES: imas_codex/cli/sn.py:6127\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/harmonize.py:1463-1467 reuses reconciliation and stamping, but can report a protected-member refusal after reconciliation has written another member.\nSCORE evidence: 18\nJUSTIFICATION evidence: The source base-scratch.log ends 88 passed/EXIT=0, verified-head-gate.log ends 100 passed/EXIT=0, and the two negative-control logs end with distinct failing test IDs/EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The base-to-head diff contains only the four source-brief.md write paths and its HTML fragment at docs/evidence/fragments/sn-harmonize-command/shc-harmonize-finalize.html:1.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_harmonize_finalize.py:43-172 reddens on removed quarantine and stamp-readback guards, but line 123 recomputes the same signature as the code and no test exercises a protected-member partial write.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/cli/sn.py:6119-6149 follows the command's existing scope and logging flow, while harmonize.py:1414 and 1463 reuse the campaign policy and family reconciler without forbidden source names.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/standard_names/harmonize.py:1406 extends the existing plan, reconcile and stamp owner; a capability search found reverse-link auditing in review/audits.py:477 but no callable that verifies this exact family readback.\nFINDING imas_codex/standard_names/harmonize.py:1463 blocking: reconcile_family_reverse_links writes writable members before returning its protected list; finalization raises only afterward at line 1464, so an approved member needing a reverse link can make --finalize fail after changing other members, while --dry-run reports ready.\nFINDING tests/standard_names/test_harmonize_finalize.py:123 follow-on: the test recomputes group_signature from the same fixture rows and function used to supply the stamp, so a regression that makes group_signature return the same wrong value on both sides leaves this current-signature assertion green.\n",
+  "review_run_id": "r-20261017T135036113453-review-of-shc-harmonize-finalize-03915a2edcdf",
+  "reviewed_base_sha": "25d5ad6e534559d61e801a4bd61faaa7a68251fd",
+  "reviewed_commits": [
+    "41a60e1234b53d75e08c84eee851b6ca4288021f",
+    "9a42c0635fd118b9f172452d355dc1fa6c4406fb",
+    "97ecb6437d533f3f82279d1c86a93de8ad1d16f5",
+    "03915a2edcdf114f2e219fc745647f7f58388ae8"
+  ],
+  "reviewed_head_sha": "03915a2edcdf114f2e219fc745647f7f58388ae8",
+  "reviewed_run_id": "r-20261017T132427585582-shc-harmonize-finalize",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    "tests/standard_names/test_harmonize_finalize.py:123"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T14:00:58.864586+00:00",
+  "total": 105
+}
