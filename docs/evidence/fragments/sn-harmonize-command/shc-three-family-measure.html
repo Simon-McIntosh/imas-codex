@@ -28,6 +28,15 @@
     17.639 wall seconds. Its report went from five lint findings to zero,
     and a second apply dry run planned zero calls.
   </p>
+  <table id="shc-three-family-measure-current-scope-table">
+    <caption>Current live scopes before the remaining applies</caption>
+    <thead><tr><th>Family</th><th>Members</th><th>Documentation accepted</th><th>Quarantined</th><th>Pending members</th><th>Lint</th><th>Dry-run estimate</th></tr></thead>
+    <tbody>
+      <tr><td><code>number_density</code></td><td>8</td><td>6</td><td>0</td><td><code>electron_number_density_over_scrape_off_layer</code>; <code>number_density_over_scrape_off_layer</code></td><td>convention_violation 2; link_missing_reverse 3</td><td>8 calls, USD 4.95</td></tr>
+      <tr><td><code>electrostatic_potential</code></td><td>5</td><td>4</td><td>0</td><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>defining_equation 1; link_missing_reverse 4</td><td>5 calls, USD 3.10</td></tr>
+      <tr><td><code>vorticity</code></td><td>6</td><td>6</td><td>0</td><td>none</td><td>clean</td><td>0 calls after finalize</td></tr>
+    </tbody>
+  </table>
   <p id="shc-three-family-measure-authority">
     The threshold is <code>DEFAULT_MIN_SCORE = 0.85</code> in
     <code>imas_codex/standard_names/defaults.py</code>; the documentation

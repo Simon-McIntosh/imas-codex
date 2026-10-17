@@ -78,31 +78,6 @@
     "reason": "The first available, unharmonized non-WEST component family checked by report and dry run; six calls estimated at USD 2.48, within the approximately USD 3.03 reserved after the other two estimates.",
     "unavailable_candidate": "parallel_current_density"
   },
-  "finalizations": [
-    {
-      "seed": "parallel_vorticity",
-      "kind": "component",
-      "dry_run_planned_calls": 0,
-      "dry_run_missing_reverse_pairs": 4,
-      "stamped": true,
-      "model_calls": 0,
-      "spend_usd": 0.0,
-      "wall_seconds": 17.639,
-      "reverse_links": {
-        "added": 4,
-        "members": 6,
-        "protected": [],
-        "removed": 0,
-        "written": 3
-      },
-      "before_lint": {
-        "link_missing_reverse": 4,
-        "symbol_definitions": 1
-      },
-      "after_lint": {},
-      "second_dry_run_calls": 0
-    }
-  ],
   "families": {
     "electron_number_density": {
       "after_job": {
@@ -215,6 +190,109 @@
         "refusals": {},
         "seed": "electron_number_density"
       },
+      "current_before": {
+        "anchor": "total_ion_number_density",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electron_number_density": 1.0,
+          "electron_number_density_over_scrape_off_layer": null,
+          "fast_neutral_internal_state_number_density": 1.0,
+          "normalized_ion_species_number_density": 1.0,
+          "number_density_over_scrape_off_layer": null,
+          "thermal_ion_charge_state_number_density": 1.0,
+          "total_ion_number_density": 0.9375,
+          "total_neutral_number_density": 1.0
+        },
+        "estimate_basis": {
+          "calls": 29,
+          "mean_usd_per_call": 0.6193,
+          "runs": 15,
+          "total_usd": 17.9598
+        },
+        "estimate_usd": 4.9544,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 2,
+          "link_missing_reverse": 3
+        },
+        "lint_total": 5,
+        "member_status": {
+          "electron_number_density": {
+            "docs_stage": "accepted",
+            "id": "electron_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electron_number_density_over_scrape_off_layer": {
+            "docs_stage": "pending",
+            "id": "electron_number_density_over_scrape_off_layer",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "fast_neutral_internal_state_number_density": {
+            "docs_stage": "accepted",
+            "id": "fast_neutral_internal_state_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "normalized_ion_species_number_density": {
+            "docs_stage": "accepted",
+            "id": "normalized_ion_species_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "number_density_over_scrape_off_layer": {
+            "docs_stage": "pending",
+            "id": "number_density_over_scrape_off_layer",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "thermal_ion_charge_state_number_density": {
+            "docs_stage": "accepted",
+            "id": "thermal_ion_charge_state_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "total_ion_number_density": {
+            "docs_stage": "accepted",
+            "id": "total_ion_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "total_neutral_number_density": {
+            "docs_stage": "accepted",
+            "id": "total_neutral_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "electron_number_density",
+          "electron_number_density_over_scrape_off_layer",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "number_density_over_scrape_off_layer",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 8,
+        "refusals": {},
+        "seed": "electron_number_density",
+        "status_counts": {
+          "accepted": 6,
+          "other": 2,
+          "quarantined": 0
+        }
+      },
       "partial": {
         "anchor": "total_ion_number_density",
         "boundary_overlap": [],
@@ -305,6 +383,85 @@
         "planned_calls": 5,
         "refusals": {},
         "seed": "electrostatic_potential"
+      },
+      "current_before": {
+        "anchor": "electrostatic_potential_at_langmuir_probe_position",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electrostatic_potential": 0.85625,
+          "electrostatic_potential_at_langmuir_probe_position": 0.9375,
+          "electrostatic_potential_at_outboard_midplane": null,
+          "electrostatic_potential_at_wall": 0.8625,
+          "floating_electrostatic_potential": 0.85
+        },
+        "estimate_basis": {
+          "calls": 29,
+          "mean_usd_per_call": 0.6193,
+          "runs": 15,
+          "total_usd": 17.9598
+        },
+        "estimate_usd": 3.0965,
+        "invariant": [
+          "electrostatic_potential",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "defining_equation": 1,
+          "link_missing_reverse": 4
+        },
+        "lint_total": 5,
+        "member_status": {
+          "electrostatic_potential": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_langmuir_probe_position": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential_at_langmuir_probe_position",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_outboard_midplane": {
+            "docs_stage": "pending",
+            "id": "electrostatic_potential_at_outboard_midplane",
+            "name_stage": "reviewed",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_wall": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential_at_wall",
+            "name_stage": "reviewed",
+            "validation_status": "valid"
+          },
+          "floating_electrostatic_potential": {
+            "docs_stage": "accepted",
+            "id": "floating_electrostatic_potential",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "electrostatic_potential",
+          "electrostatic_potential_at_langmuir_probe_position",
+          "electrostatic_potential_at_outboard_midplane",
+          "electrostatic_potential_at_wall",
+          "floating_electrostatic_potential"
+        ],
+        "physical_base": "electrostatic_potential",
+        "planned_calls": 5,
+        "refusals": {},
+        "seed": "electrostatic_potential",
+        "status_counts": {
+          "accepted": 4,
+          "other": 1,
+          "quarantined": 0
+        }
       }
     },
     "parallel_vorticity": {
@@ -438,6 +595,31 @@
       }
     }
   },
+  "finalizations": [
+    {
+      "after_lint": {},
+      "before_lint": {
+        "link_missing_reverse": 4,
+        "symbol_definitions": 1
+      },
+      "dry_run_missing_reverse_pairs": 4,
+      "dry_run_planned_calls": 0,
+      "kind": "component",
+      "model_calls": 0,
+      "reverse_links": {
+        "added": 4,
+        "members": 6,
+        "protected": [],
+        "removed": 0,
+        "written": 3
+      },
+      "second_dry_run_calls": 0,
+      "seed": "parallel_vorticity",
+      "spend_usd": 0.0,
+      "stamped": true,
+      "wall_seconds": 17.639
+    }
+  ],
   "fixture": {
     "after": {
       "fixture_low_scoring_member": 0.8,
