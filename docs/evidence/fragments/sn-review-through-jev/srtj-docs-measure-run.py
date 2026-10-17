@@ -115,6 +115,36 @@ def _graph_context() -> dict:
         }
         for row in rows
     }
+    cost_query = """
+    UNWIND $names AS name
+    MATCH (sn:StandardName {id:name})-[:HAS_REVIEW]->
+      (rv:StandardNameReview {review_axis:'docs'})
+    WHERE rv.llm_cost IS NOT NULL
+    RETURN name, rv.llm_cost AS cost, rv.review_group_id AS review_group,
+      rv.reviewed_at AS reviewed_at
+    LIMIT 800
+    """
+    groups = {}
+    for start in range(0, len(names), 80):
+        for result in graph.query(cost_query, names=names[start : start + 80]):
+            group = result["review_group"]
+            if group is None:
+                continue
+            key = (result["name"], group)
+            entry = groups.setdefault(key, {"cost": 0.0, "reviewed_at": ""})
+            entry["cost"] += float(result["cost"])
+            entry["reviewed_at"] = max(
+                entry["reviewed_at"], str(result["reviewed_at"] or "")
+            )
+    latest_costs = {}
+    for (name, _group), entry in groups.items():
+        if (
+            name not in latest_costs
+            or entry["reviewed_at"] > latest_costs[name]["reviewed_at"]
+        ):
+            latest_costs[name] = entry
+    for name, value in matched.items():
+        value["incumbent_cost"] = latest_costs.get(name, {}).get("cost")
     if not any(value["score"] is not None for value in matched.values()):
         raise RuntimeError("no incumbent scores, including the known scored sample")
     if not all(value["document_match"] for value in matched.values()):
@@ -124,6 +154,9 @@ def _graph_context() -> dict:
     context = {
         "by_name": matched,
         "score_coverage": sum(value["score"] is not None for value in matched.values()),
+        "cost_coverage": sum(
+            value["incumbent_cost"] is not None for value in matched.values()
+        ),
         "document_matches": sum(value["document_match"] for value in matched.values()),
         "known_present": matched["electron_energy"],
     }
@@ -139,7 +172,6 @@ def _item(row: dict) -> dict:
         "id": row["unit"],
         "description": row["description"],
         "documentation": row["documentation"],
-        "conventions": row["conventions"],
         "dd_source_docs": [
             {"path": source["path"], "value": source["documentation"]}
             for source in row["dd_sources"]
@@ -271,7 +303,7 @@ def _stability_entries() -> list[dict]:
         }
         key = CLAIM_PREFIX + "0"
         question = docs_question_table(checks, state["documentation_claims"])[key]
-        for mode in ("repeat", "reverse"):
+        for mode in ("original", "repeat", "reverse"):
             if mode == "reverse":
                 question = {
                     **question,
@@ -295,11 +327,11 @@ def _score(answers: dict | None) -> float | None:
         answer = answers.get("dimension:" + dimension)
         if not answer:
             return None
-        accepted = next(
-            iter(
-                docs_question_table(_checks(), [])["dimension:" + dimension]["criteria"]
-            )
-        )
+        accepted = {
+            "description_quality": "precise_definition",
+            "documentation_quality": "normative_definition",
+            "completeness": "complete",
+        }[dimension]
         dimension_values.append(float(answer.get("probabilities", {}).get(accepted, 0)))
     claims = [answer for key, answer in answers.items() if key.startswith(CLAIM_PREFIX)]
     if not claims:
@@ -312,13 +344,14 @@ def _score(answers: dict | None) -> float | None:
         for answer in claims
     ) / len(claims)
     checks = []
+    by_id = {check.id: check for check in _checks()}
     for key, answer in answers.items():
         if not key.startswith("check:") or key.startswith(CLAIM_PREFIX):
             continue
         if answer["type"] == "noul":
             checks.append(1 - float(answer["noul"]))
         else:
-            first = next(iter(answer["probabilities"]))
+            first = by_id[key.removeprefix("check:")].question.options[0]
             checks.append(float(answer["probabilities"][first]))
     return (
         0.5 * sum(dimension_values) / len(dimension_values)
@@ -433,19 +466,28 @@ def _stability_metrics(receipts: dict) -> dict:
         key.removeprefix("repeat:") for key in receipts if key.startswith("repeat:")
     ]
     for name in names:
-        base = receipts["base:" + name]
+        baseline_receipt = receipts["original:" + name]
         repeat = receipts["repeat:" + name]
         reverse = receipts["reverse:" + name]
-        if not repeat["answers"] or not reverse["answers"]:
+        if (
+            not baseline_receipt["answers"]
+            or not repeat["answers"]
+            or not reverse["answers"]
+        ):
             raise RuntimeError("stability answer missing")
+        if (
+            baseline_receipt["state"] != repeat["state"]
+            or baseline_receipt["state"] != reverse["state"]
+        ):
+            raise RuntimeError("stability states differ")
         key = CLAIM_PREFIX + "0"
-        first = base["answers"][key]["choice"]
+        first = baseline_receipt["answers"][key]["choice"]
         again = repeat["answers"][key]["choice"]
         flipped = reverse["answers"][key]["choice"]
         original.append(first)
         reversed_order.append(flipped)
         digest = hashlib.sha256(
-            json.dumps(repeat["state"], sort_keys=True).encode()
+            json.dumps(baseline_receipt["state"], sort_keys=True).encode()
         ).hexdigest()
         repeated.extend(
             [
@@ -484,6 +526,12 @@ def _summarize(receipts: dict, context: dict, calibration: dict) -> dict:
         if key.startswith("base:")
     )
     spend = sum(receipt["cost_usd"] for receipt in receipts.values())
+    incumbent_costs = [
+        context["by_name"][row["unit"]]["incumbent_cost"]
+        for row in rows
+        if context["by_name"][row["unit"]]["score"] is not None
+        and context["by_name"][row["unit"]]["incumbent_cost"] is not None
+    ]
     if spend > CEILING:
         raise RuntimeError("measured spend exceeds ceiling")
     result = {
@@ -494,6 +542,7 @@ def _summarize(receipts: dict, context: dict, calibration: dict) -> dict:
             "model": MODEL,
             "incumbent_graph_document_matches": context["document_matches"],
             "incumbent_score_coverage": context["score_coverage"],
+            "incumbent_cost_coverage": context["cost_coverage"],
         },
         "method": {
             "score": calibration["score_rule"],
@@ -512,6 +561,12 @@ def _summarize(receipts: dict, context: dict, calibration: dict) -> dict:
             "spend_usd": spend,
             "ceiling_usd": CEILING,
             "base": cost_latency_summary(base_calls),
+            "incumbent": {
+                "n": len(incumbent_costs),
+                "mean_usd": sum(incumbent_costs) / len(incumbent_costs)
+                if incumbent_costs
+                else None,
+            },
             "base_claims": base_claims,
             "usd_per_claim": sum(call["cost"] for call in base_calls) / base_claims,
             "seconds_per_claim": sum(call["latency_s"] for call in base_calls)
@@ -526,14 +581,19 @@ def _summarize(receipts: dict, context: dict, calibration: dict) -> dict:
     observed = sum(field["states"] for field in frozen.values())
     variation = changed / observed if observed else None
     result["stability"]["frozen_change_rate"] = variation
+    jev_mean = result["cost"]["base"]["mean_cost"]
+    incumbent_mean = result["cost"]["incumbent"]["mean_usd"]
+    cost_pass = incumbent_mean is not None and jev_mean < incumbent_mean
+    auc_pass = difference is not None and difference > -0.02
+    stability_pass = order <= 0.05 and variation is not None and variation <= 0.05
     result["verdict"] = {
         "rule": "paired validation lower bound > -0.02; threshold fitted on calibration; option-order and frozen-state change each <= 0.05; cost below incumbent",
         "paired_lower_bound": difference,
-        "auc_pass": difference is not None and difference > -0.02,
-        "stability_pass": order <= 0.05 and variation is not None and variation <= 0.05,
-        "cost_pass": None,
-        "status": "shadow",
-        "reason": "Incumbent documentation-review cost not included in graph mirror; replacement requires a verified cost comparator as well as all other gates.",
+        "auc_pass": auc_pass,
+        "stability_pass": stability_pass,
+        "cost_pass": cost_pass,
+        "status": "replace" if auc_pass and stability_pass and cost_pass else "shadow",
+        "reason": "The judge remains unwired unless every validation, stability and cost criterion passes.",
     }
     return result
 
