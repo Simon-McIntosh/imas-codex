@@ -1,0 +1,111 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-16T11:28:43.652Z",
+  "dispatched_at": "2026-10-16T11:20:28Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-house-style.html:122",
+      "id": "done_when-1",
+      "reason": "a section read as complete while its own measure is unmet conceals 139 authoring gaps a downstream node would need to know about, and the closing rationale (\"the remaining concept tokens are ones no equation defines\") is a re-scoping the done-when text does not carry.",
+      "text": "\u00a73's done-when requires \"the accessor run over the WEST roster reports zero tokens without an entry\", but the section is declared `done` while its own recorded census (comment `r-20261013T063935739302-shs-registry-worklist`, line 446) reports 139 distinct tokens with no concepts entry and 79 with no notation entry",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:30",
+      "id": "anchors_resolve-1",
+      "reason": "this is a header record-keeping defect; no mechanism or section rests on it, and the other three header commits resolve.",
+      "text": "the `plan-commits` header cites `363a1ea5677475b3a076c0c712ef1f45bc61601`, a 38-hex-character string that resolves to no object; the real commit is `363a1ea5677475b3a076c0cc712ef1f45bc61601` (one `c` dropped)",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:272",
+      "id": "reasoning-1",
+      "reason": "the stated mechanism (\"so that a regex never reaches the model\") and its guard both test for a regex, while the boundary leak is a plain phrase, so a builder implementing them exactly can satisfy the guard and still hand `the separatrix` to Jev, leaving the over-fire \u00a712 exists to close.",
+      "text": "\u00a712 attributes the plasma-boundary over-fire to the registry's `forbidden_variants` being \"regular expressions (for example `the separatrix` and an equation pattern)\", but `plasma_boundary.forbidden_variants` in `concepts.yml` is the literal phrase `the separatrix` (no metacharacters), and only `flux_surface_averaged.forbidden_variants` is a regex; the done-when's guard only asserts \"no option text contains a regular expression from the registry\"",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "d9f7336593144066798caec68e79abb6d4e7951fe2e3c0c5178581330eb50d0f",
+  "plan_slug": "sn-house-style",
+  "plan_version": 60,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "the plan-commits header carries 363a1ea5677475b3a076c0cc712ef1f45bc61601, 40 hex characters, which git cat-file resolves to a commit; the 38-character string is the reviewer's transcription, not the file's",
+      "when": "2026-10-17T10:30:37.575751+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "the landed judge state carries no forbidden variants of either kind: _judge_state (judge_stage.py ~170) passes only the entry text and the concept's token, phrase and definition, and option texts come from the authored form vocabulary, so the literal 'the separatrix' cannot reach Jev; the guard is narrower than the code, but the defect it names cannot occur on landed code",
+      "when": "2026-10-17T10:30:40.481602+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "section 3 closed on a scope the closure comment states openly (c-s3-worklist-closed, c-close-s3): every WEST pattern selects a template, and the remaining concept and notation gaps are tokens no equation or symbol defines, which the lead's delegated read accepted; the census numbers stay on the record in the landing, so nothing is concealed, and no downstream node depends on those tokens carrying entries",
+      "when": "2026-10-17T10:30:42.967944+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the plan-commits header carries 363a1ea5677475b3a076c0cc712ef1f45bc61601, 40 hex characters, which git cat-file resolves to a commit; the 38-character string is the reviewer's transcription, not the file's",
+      "when": "2026-10-17T10:30:37.575751+00:00"
+    },
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 3 closed on a scope the closure comment states openly (c-s3-worklist-closed, c-close-s3): every WEST pattern selects a template, and the remaining concept and notation gaps are tokens no equation or symbol defines, which the lead's delegated read accepted; the census numbers stay on the record in the landing, so nothing is concealed, and no downstream node depends on those tokens carrying entries",
+      "when": "2026-10-17T10:30:42.967944+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the landed judge state carries no forbidden variants of either kind: _judge_state (judge_stage.py ~170) passes only the entry text and the concept's token, phrase and definition, and option texts come from the authored form vocabulary, so the literal 'the separatrix' cannot reach Jev; the guard is narrower than the code, but the defect it names cannot occur on landed code",
+      "when": "2026-10-17T10:30:40.481602+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-house-style.v60.json",
+  "review_run_id": "r-20261016T111952342731-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "bc14d6c05fa1fca1dd27c9625dcc552b390ec145",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the plan header cites one commit that does not resolve; every other cited file, plan section and href resolves (extensionless hrefs resolved as `<path>.html` per the house convention).",
+    "done_when": "a finding \u2014 \u00a73 is declared done against a done-when that demands zero unregistered tokens, while its own recorded census reports 139 concept gaps and 79 notation gaps.",
+    "evidence_paths": "pass \u2014 every gate and live-run record lands on a durable path (`docs/evidence/fragments/sn-house-style/`, `docs/evidence/archive/sn-house-style-landed.html`, the code-review store), never a node-local temporary or session scratchpad.",
+    "naming": "pass \u2014 the cited symbols are mechanism-named (`run_house_style_checks`, `conventions_context_for`, `_review_single_batch`, `reason=%s`), with no ticket numbers, version tags or stage names carried into code; the section ids s1\u2013s14 are plan structure, not code.",
+    "reasoning": "a finding \u2014 \u00a712 states a root cause (registry `forbidden_variants` are regular expressions, citing `the separatrix`) that the registry content does not support for the boundary case, and its done-when's guard test is correspondingly narrower than the defect.",
+    "single_goal": "pass \u2014 each section carries one deliverable (registry consumer, authored entries, conformance checks, prompt wiring, judge stage, guard, cap record, note insertion), and each opens on one verdict.",
+    "wiring": "pass \u2014 \u00a72's declared `section-depends-on` to `imas-standard-names:concept-and-notation-registry#s2` resolves, and every section's cited source, plan and section anchor resolves; the sn-catalog-audit-instrument supersede asserted in \u00a76 is recorded reciprocally in that plan's own status."
+  },
+  "section_digests": {
+    "_document": "9f91b10a415a7714ed63901af900c844cb66b332e92653a4886cac797106bfc9",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s10": "56c8e08b66e65b8ece8e4714fa4b9f9089b83585768885aea771dfba922b2975",
+    "s11": "40dbcfa9b353fecf593a6d891775677b873bb98529073f97a916054f9528cfbd",
+    "s12": "e6eb4d8f2c193a9476db93b99f5512264202b1205e73bcd661346bf08b7b70ae",
+    "s13": "1039788885461975b6575c93cc104f5bffa19194126a5850e061438a0760c40b",
+    "s14": "6be90cf770d7dc94e3c0b9f43eb16a1b06dd5403024fba32cb03ca7e8c6e37fd",
+    "s2": "a68b18b0a4122caff66d27ab77f0d6f94f3c046d2a034c6ef489ffc38f438ddb",
+    "s3": "50e289cff8fb10f82f4114f3e51de9e7d184bd4777b80c4f5ee7e617bbdd3c56",
+    "s4": "dca02964189096d0d6a3fb9f0ee3c9931308addf7be8f667cad98d98ca36d3a7",
+    "s5": "de1246fd734195b238de2d370de129477d7b7977b048d533e4044874a80187cd",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78",
+    "s7": "5be478ef6ae9f348a0e617cfdb5bc8b20b3a18fd8c8e652a1d97e2393f5681c3",
+    "s8": "91c69e8a7ada6945ec08807258d2ee9be051f27dd4bc9939d6da7046c479741a",
+    "s9": "e80c85c856bfde4820702edd9280d989ec350bede9a5f566bd19d06d32026f51"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T10:30:36.487748+00:00"
+}
