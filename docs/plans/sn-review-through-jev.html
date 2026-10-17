@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-modified" content="2026-10-17">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -314,6 +314,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s3-lead-ruling-promote-cascade" data-who="lead" data-when="2026-10-17T10:25:00Z">
     <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-17: promote the name review into the cascade.</strong> The evidence-supply arm reads validation logistic AUC 0.745 against the quorum, with a paired gain of +0.039 [−0.029, +0.104]. The lower bound misses the −0.02 bar of <code>sn-judgment-evaluation</code> §7 by 0.009. One early probe exposed the validation split, and 3 of its 338 names got refreshed Jev answers before the corrected read. The lead waives both on the record: a near miss, and an arm whose design was fixed from calibration before the exposure. Jev becomes the name reviewer for confident cases, through §5 (refine reads the failed checks) and §6 (the cascade). The chat quorum keeps the uncertain cases, so the cascade is the safety net for the shortfall. No fresh holdout is required before wiring. The quorum is not retired on the name axis (§7) by this ruling.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261016T101231058904-srtj-evidence-supply" data-who="reckon-build" data-when="2026-10-16T11:17:41Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply.html — source evidence and default repeated-token decision, 701 names, exploratory validation logistic AUC 0.745 with paired quorum Δ +0.039 [-0.029,+0.104], no eligible holdout verdict, Jev USD 0.165378 of 0.50.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-choice-probability" data-who="reckon-build" data-when="2026-10-13T18:05:00Z">
     <div class="r-comment-body"><p>The content review of version 10 found that the trigger's maximum was undefined for checks decided by a categorising Choice. A Choice returns an option, not a failure probability. The section now defines it: a Choice check contributes the summed probability of its non-conforming options, and the taxonomy names the conforming options for each Choice question.</p><p>Each of the four Choice checks in <code>review_checks.yaml</code> has one conforming option: <em>the bound source object</em>, <em>one quantity</em>, <em>true of all</em> and <em>supports</em>. For the claim-support check, <em>says nothing</em> counts as a failure, because an unverifiable claim is the case retrieval exists to resolve. A Noul check contributes the probability of its true case. The same review's two stale anchors in §1 are corrected: the fanout call is at <code>workers.py:7304</code>, and <code>_run_rd_quorum_cycles</code> is defined at line 7992.</p></div>
