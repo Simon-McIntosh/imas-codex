@@ -10756,6 +10756,18 @@ def _documentation_conformance_note(item: dict[str, Any]) -> str | None:
     )
 
 
+def _documentation_banned_prose_note(item: dict[str, Any]) -> str | None:
+    """Name the first policy match so refinement can remove the offending prose."""
+    from imas_codex.standard_names.prose_policy import BANNED_PROSE_PATTERNS
+
+    text = f"{item.get('description') or ''}\n{item.get('documentation') or ''}"
+    for category, patterns in BANNED_PROSE_PATTERNS.items():
+        for pattern in patterns:
+            if match := pattern.search(text):
+                return f"banned prose ({category}): {match.group(0)!r}"
+    return None
+
+
 async def process_review_docs_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -10830,22 +10842,23 @@ async def process_review_docs_batch(
             comments = quorum["winning_comments"]
             comments_per_dim = quorum["winning_comments_per_dim"]
             conformance_note = _documentation_conformance_note(item)
-            if conformance_note is not None:
+            prose_note = _documentation_banned_prose_note(item)
+            if conformance_note is not None or prose_note is not None:
                 # Clamp below the accept threshold so the document is routed
                 # to refinement as a below-threshold score is, carrying the
                 # finding as the reason the refiner reads.
                 score = min(score, DEFAULT_MIN_SCORE - 0.001)
-                comments = (
-                    f"{comments}\n{conformance_note}" if comments else conformance_note
-                )
-                comments_per_dim = {
-                    **(comments_per_dim or {}),
-                    "registry_conformance": conformance_note,
-                }
+                notes = [note for note in (conformance_note, prose_note) if note]
+                comments = "\n".join(filter(None, (comments, *notes)))
+                comments_per_dim = dict(comments_per_dim or {})
+                if conformance_note is not None:
+                    comments_per_dim["registry_conformance"] = conformance_note
+                if prose_note is not None:
+                    comments_per_dim["banned_prose"] = prose_note
                 logger.info(
                     "review_docs: %s held from acceptance — %s",
                     sn_id,
-                    conformance_note,
+                    "; ".join(notes),
                 )
             new_stage = await _asyncio.to_thread(
                 persist_reviewed_docs,
