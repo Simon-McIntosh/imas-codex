@@ -1,92 +1,101 @@
 <section>
-  <h2 id="shc-boundary-final-apply">Applying the boundary-averaged density family, unforced — where the run stops</h2>
+  <h2 id="shc-boundary-final-apply">Applying the boundary-averaged density family, unforced</h2>
   <p id="shc-boundary-final-apply-scope">
-    The boundary-averaged density family (<code>flux_surface_averaged_electron_density_at_plasma_boundary</code>,
-    17 members) was to be applied unforced, at a dry-run estimate of USD 7.04, and
-    then shown to converge. The dry run passes and the family is no longer
-    protected, so the guard no longer stands in the way — but the apply itself
-    does not finish: it needs far longer than any single command the harness
-    allows, and than this node's window. Every figure below is read from the CLI's
-    own output and its log; nothing was fabricated.
+    The boundary-averaged density family
+    (<code>flux_surface_averaged_electron_density_at_plasma_boundary</code>,
+    17 members) was applied unforced — no <code>--force</code> — under a USD 8.50
+    cost ceiling, and then checked for convergence and idempotence. The apply
+    <strong>ran to completion</strong> and took all 17 members to acceptance, and it
+    cleared every documentation-convention violation. It did
+    <strong>not</strong> meet the two convergence criteria: eight link-integrity
+    findings remain, and a second <code>--apply --dry-run</code> still plans 17
+    calls rather than zero. Every figure below is read from the CLI's own output,
+    its log, or the graph; nothing was fabricated.
   </p>
 
   <h3 id="shc-boundary-final-apply-dry-run">Step 1 — dry run: PASS</h3>
   <p id="shc-boundary-final-apply-dry-run-text">
-    The report dry run lists the 17-member family and its anchor and is not
-    refused. The <code>--apply --dry-run</code> (which is what prints the call
-    plan and cost) reports <code>decision=apply</code> with no protected-member
-    refusal, the same anchor, 17 planned calls, and an estimate of
-    <strong>USD 7.04</strong> at $0.41 per call — at or below the USD 8.50
-    ceiling. This is the state §14 promised: the family's one formerly-protected
-    member is released.
+    The dry run was taken against the main checkout's code, not this worktree, so it
+    reflects main's fixes. It lists the 17-member family and its anchor and is not
+    refused. The <code>--apply --dry-run</code> — the form that prints the call plan
+    and cost — reports <code>decision=apply</code> with no protected-member refusal,
+    the same anchor, 17 planned calls, and an estimate of <strong>USD 7.20</strong>
+    at $0.42 per call, below the ceiling. This is the state the guard release
+    promised: the family's one formerly-protected member is released, where a
+    protected family was refused outright before it.
   </p>
 
-  <h3 id="shc-boundary-final-apply-lint">Steps 2–4 — apply, convergence, idempotence: NOT met</h3>
+  <h3 id="shc-boundary-final-apply-lint">Step 2 — the apply: completed, all 17 members accepted</h3>
   <p id="shc-boundary-final-apply-lint-text">
-    The apply was attempted twice and both attempts were killed before the family
-    composed. Attempt 1 was cut by the brief's <code>timeout 540</code> at 563&nbsp;s;
-    the CLI had spent about eight minutes of that on fixed startup (graph resolve,
-    family lint, <code>derive_edges</code>, pool start) before the scoped run began,
-    so barely 90&nbsp;s of work ran (<code>names_composed=0</code>, spend
-    $0.009934). Attempt 2 was cut by the harness background cap (600&nbsp;s
-    foreground + 600&nbsp;s background = 1200&nbsp;s); at the kill only the anchor
-    had been generated and reviewed, its review cycling at <code>chain=1/3</code>
-    and held from acceptance on a <code>locus_definition</code> finding, with
-    <code>names_composed=0</code> and spend ~$1.0069. <strong>Twenty minutes
-    produced one member and no acceptance</strong>, so the 17-member family needs a
-    long-lived runner — not a single bounded command. The report and the
-    idempotence dry run below record the resulting state honestly.
+    The apply is wall-time-bound, not cost-bound: it spends about eight minutes on
+    fixed startup (graph resolve, family lint, edge derivation, pool start) before
+    the scoped run begins, and two bounded attempts on the first day produced one
+    member between them before being killed at 563&nbsp;s and 1200&nbsp;s. It was
+    therefore moved to a long-lived runner — slurm job <strong>1287983</strong> on
+    partition <code>all</code>, four hours, four CPUs, 16&nbsp;GB, carrying the same
+    <code>--cost-limit 8.5</code> and still no <code>--force</code>. The job reached
+    <strong>COMPLETED</strong> with exit 0 after 43:04 of wall time.
   </p>
-  <ul id="shc-boundary-final-apply-lint-figures">
-    <li><strong>Lint before</strong> (step 1 report): 29 — <code>convention_violation=17</code>, <code>link_missing_reverse=12</code>.</li>
-    <li><strong>Lint after</strong> (step 3 report): 30 — <code>convention_violation=17</code>, <code>link_missing_reverse=13</code>. Not zero; one reverse link was lost.</li>
-    <li><strong>Convergence</strong> (step 3): not met. The 17 <code>convention_violation</code> findings are unchanged; the family was not applied to completion, so the opening-template and canonical-equation checks are not reached family-wide.</li>
-    <li><strong>Idempotence</strong> (step 4, second <code>--apply --dry-run</code>): <strong>17 planned calls</strong>, not zero — the family remains pending.</li>
-    <li><strong>Per-member documentation scores</strong>: only the anchor's were produced by the run — <code>docs_stage=reviewed score=0.849</code> at <code>chain=0/3</code>, then <code>docs_stage=reviewed score=0.849</code> at <code>chain=1/3</code>, both held from acceptance. No member reached acceptance, so there is no before/after acceptance pair to report.</li>
+  <ul id="shc-boundary-final-apply-apply-figures">
+    <li><code>stop_reason</code> <strong>no_eligible_work</strong>; <code>cost_spent</code> <strong>5.154953</strong>; <code>names_enriched</code> 16; <code>names_reviewed</code> 16; <code>names_regenerated</code> 2; <code>names_composed</code> 0; <code>elapsed_s</code> 1576.88.</li>
+    <li><strong>accepted=17/17</strong> across 2 batches, anchor <code>flux_surface_averaged_xenon_density_at_plasma_boundary</code>. A direct graph read of the 17 ids agrees: all 17 are <code>name_stage='accepted'</code>.</li>
+    <li><strong>0 member(s) below the run's acceptance threshold</strong>; 4 fell without crossing it — beryllium 1.000→0.938, iron 1.000→0.938, nitrogen 0.981→0.944, hydrogen 0.938→0.906.</li>
+    <li>The job also reports a halt and a stamping figure, both relevant to what follows: <code>halted: banned prose reintroduced in 1 doc(s) (cap 0): flux_surface_averaged_beryllium_density_at_plasma_boundary</code> and <code>apply: 1 family(ies) applied, 0 stamped</code>.</li>
+    <li>The anchor itself is the member that could not cross acceptance on the first day, where it cycled <code>docs_stage=reviewed</code> (score 0.938-style quality but held) at chain 0/3 and 1/3 on a <code>locus_definition</code> finding. On this run it reached <code>chain=0/3</code> and was accepted at score <strong>0.938</strong> — the locus gate's narrowing unblocked it, as the sibling convergence node measured independently.</li>
   </ul>
+
+  <h3 id="shc-boundary-final-apply-convergence">Step 3 — report: NOT converged</h3>
+  <p id="shc-boundary-final-apply-convergence-text">
+    The report after the apply reads <code>lint=8</code>, down from 28. Every
+    <code>convention_violation</code> is cleared; the eight that remain are all
+    <code>link_missing_reverse</code>. Read again through the same functions the
+    report composes, <code>run_lint_checks</code> returns <strong>0</strong> findings
+    and <code>run_link_integrity</code> returns the 8.
+  </p>
+  <ul id="shc-boundary-final-apply-convergence-figures">
+    <li><strong>Lint before:</strong> 28 — <code>convention_violation=15</code>, <code>link_missing_reverse=13</code>.</li>
+    <li><strong>Lint after:</strong> 8 — <code>convention_violation=0</code>, <code>link_missing_reverse=8</code>.</li>
+    <li><strong>Zero lint errors: NOT met</strong> (8 remain).</li>
+    <li><strong>One opening template and only the canonical flux-surface-average equation:</strong> the report prints neither check directly; the convention lint that would catch a non-conforming opening or equation returns zero findings, which is evidence for both and not a substitute for the check the plan names.</li>
+    <li><strong>Every member still accepted: MET</strong> — <code>name_stage='accepted'</code> for all 17.</li>
+  </ul>
+  <p id="shc-boundary-final-apply-link-shape">
+    The eight remaining findings have one shape: a member's documentation relates it
+    to a sibling and the sibling does not carry the reverse relation. They resolve to
+    six targets — argon, deuterium and beryllium point at xenon; carbon and nitrogen
+    at neon; hydrogen at helium-4; helium-4 at helium-3; electron and ion at
+    total_ion. This is a link-integrity gap between siblings, not a documentation
+    convention, which is why clearing every convention violation left it standing.
+  </p>
+
+  <h3 id="shc-boundary-final-apply-idempotence">Step 4 — idempotence: NOT met</h3>
+  <p id="shc-boundary-final-apply-idempotence-text">
+    A second <code>--apply --dry-run</code> must plan zero calls; it plans
+    <strong>17</strong>. The family is not marked harmonized, which the apply's own
+    <code>0 stamped</code> figure anticipates — nothing was stamped, so plan mode
+    still sees every member as needing work. The re-planned estimate also rose to
+    <strong>USD 10.45</strong> at $0.61 per call, above the USD 8.50 ceiling, so it
+    was deliberately not run.
+  </p>
 
   <h3 id="shc-boundary-final-apply-spend">Spend against the ceiling</h3>
   <p id="shc-boundary-final-apply-spend-text">
-    Total spend ≈ <strong>USD 1.017</strong> of the USD 8.50 ceiling
-    (attempt 1 $0.009934 + attempt 2 ≈$1.0069). Roughly 12% of the authorized
-    budget was used: the work stopped on the time cap, not on cost — the USD 7.04
-    estimate would have fitted the ceiling had the apply been allowed to run.
-  </p>
-
-  <h3 id="shc-boundary-final-apply-runner">The apply is moved to a long-lived runner</h3>
-  <p id="shc-boundary-final-apply-runner-text">
-    The wall-time bound above is a property of the command, not of the family, so
-    it is answered by giving the apply a runner that outlives a single command
-    rather than by touching the family. On 2026-10-17 the apply was submitted as
-    one batch job — <strong>slurm job 1287983</strong>, partition <code>all</code>,
-    four hours, four CPUs, 16&nbsp;GB — pinned to the same
-    <code>--cost-limit 8.5</code> ceiling and still without <code>--force</code>.
-    It is submitted from inside the fleet allocation (job 1281970 on
-    <code>98dci4-clu-2002</code>); the fleet guard refuses an implicit nested
-    <code>sbatch</code> by default, so the launch is explicit and bound to one
-    task.
-  </p>
-  <p id="shc-boundary-final-apply-runner-rerun">
-    The dry run was re-taken against the main checkout's code before submitting,
-    so the estimate reflects main rather than this worktree. It still lists the
-    17-member family and the same anchor, with
-    <code>decision=apply</code> and no protected-member refusal, and an estimate
-    of <strong>USD 7.20</strong> — below the ceiling. Main's lint path reports
-    <strong>28</strong> where the 2026-10-15 worktree run reported
-    <strong>29</strong> (<code>convention_violation</code> 15 against 17); the
-    family and its anchor are unchanged between the two.
-  </p>
-  <p id="shc-boundary-final-apply-runner-figures">
-    Steps 3 and 4 are therefore reported here only once the job ends: the
-    report's lint count and per-member documentation scores, and the second dry
-    run's call count, will be added with the job's own log and its spend against
-    the ceiling. Until then this section states the runner, and the sections
-    above state the interrupted attempts it replaces.
+    The job reports <code>cost_spent</code> <strong>5.154953</strong> against a
+    <code>cost_limit</code> it prints as <strong>8.106543</strong> — the ceiling
+    passed on the command line was 8.5, and the printed limit is lower by 0.393457,
+    which the CLI reads as budget already consumed. The two interrupted attempts on
+    the first day spent about <strong>1.017</strong>. Total across the node is
+    therefore roughly <strong>6.2</strong> of the USD 8.50 ceiling, about 72%.
+    Roughly a quarter of the authorized budget went unused, and it did so for a
+    stated reason: the apply stopped on <code>no_eligible_work</code>, not on the
+    ceiling, and the follow-up apply was refused on cost by choice rather than by
+    the limit.
   </p>
 
   <h3 id="shc-boundary-final-apply-evidence">Evidence</h3>
   <ul id="shc-boundary-final-apply-evidence-list">
+    <li>Slurm job log, carrying the wrap's <code>EXIT=0</code> and the CLI summary table: <code>apply.slurm.log</code> in the run directory.</li>
     <li>CLI log (stem <code>sn-harmonize</code>): <code>~/.local/share/imas-codex/logs/sn_sn-harmonize.log</code>.</li>
-    <li>Run-directory captures, each carrying its command and <code>EXIT=</code>: <code>capture-01-dry-run-report.txt</code>, <code>capture-02-apply-dry-run.txt</code>, <code>capture-02b-apply-attempts.txt</code>, <code>capture-03-report-after.txt</code>, <code>capture-04-second-apply-dry-run.txt</code>.</li>
+    <li>Run-directory captures, each carrying its command, cwd and <code>EXIT=</code>: <code>capture-01-dry-run-report.txt</code>, <code>capture-02-apply-dry-run.txt</code>, <code>capture-02b-apply-attempts.txt</code>, <code>capture-03-report-after.txt</code>, <code>capture-04-second-apply-dry-run.txt</code>, <code>capture-05-resume-dry-runs.txt</code>, <code>capture-06-job-progress.txt</code>, <code>capture-07-post-apply-steps.txt</code>, <code>capture-08-convergence-detail.txt</code>.</li>
   </ul>
 </section>
