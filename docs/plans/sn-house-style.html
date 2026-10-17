@@ -21,12 +21,12 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;imas-standard-names:concept-and-notation-registry#s2&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;}">
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="60">
-<meta name="plan-modified" content="2026-10-16">
+<meta name="plan-version" content="61">
+<meta name="plan-modified" content="2026-10-17">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
 <body>
@@ -276,7 +276,7 @@
 <p>§12's rebuilt <code>plasma_boundary</code> question in <code>imas_codex/standard_names/review/judge_stage.py</code> ends its canonical criterion with "It may also give the diverted-configuration name for that same surface as a synonym". That admits <em>the separatrix</em> as a general synonym for the boundary. The locked plasma-boundary-gloss decision rules that the plasma boundary is the last closed flux surface and the separatrix is named only where a quantity is defined for a diverted configuration. The ISN registry's <code>plasma_boundary</code> entry lists <code>the separatrix</code> as a forbidden variant. So an entry that glosses the boundary correctly and also calls it the separatrix is judged canonical where the decision makes it non-conforming. Restore the smoke read's framing in <code>docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py</code>: canonical is the last closed flux surface without calling it the separatrix, and any equating of the boundary with the separatrix is forbidden.</p><p><strong>Done when:</strong> a test shows the canonical boundary criterion carries no separatrix synonym and the equated-separatrix option maps to the forbidden verdict, and it fails with the synonym clause restored. A live run of at most ten calls over §12's four fixtures plus one correct last-closed-flux-surface gloss that also calls the boundary the separatrix classifies the four as §12 did and the new one as not canonical, with its driver and raw decisions committed beside the record. The review-pipeline tests add no failure against base.</p>
 
     <h2 id="s14">§14 — The writer inserts each template&#x27;s note</h2>
-<section data-reckon="section" data-id="s14" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="imas-standard-names:concept-and-notation-registry#s7"></section>
+<section data-reckon="section" data-id="s14" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links="imas-standard-names:concept-and-notation-registry#s7"></section>
 <p>A grammar template entry can now carry a <code>note</code> under token conditions (imas-standard-names <code>concept-and-notation-registry</code> §6). There the note holds the sentences that keep near-duplicate names apart (§7), such as the one separating a cold or hot neutral temperature from the neutral temperature. The writer does not render it. <code>imas_codex/standard_names/workers.py</code> (~9661) inserts only <code>template.documentation</code> as the opening, and <code>imas_codex/standard_names/docs_gates.py</code> (~983) checks only that opening. ISN §7 adds one accessor beside <code>select_conventions</code> that returns each selected template's opening and then its note. Both the writer and the gate switch to that accessor, so a note renders after the opening and is checked like the opening. No second rendering of a template sentence is written here.</p><p><strong>Done when:</strong> a test renders the documentation of a name whose selected template carries a note, through the writer's insertion path, and finds the note exactly once after the opening. It fails with the writer reverted to <code>template.documentation</code>. The gate flags documentation that lacks a selected note, and passes the same documentation once the note is present. With the gate's note check removed, the documentation that lacks the note is no longer flagged. <code>tests/standard_names</code> adds no failures against base.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
@@ -474,6 +474,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-14T20:27:00Z">
     <div class="r-comment-body"><p>§3 closed. The WEST worklist is closed. The coordinator read all 46 concept entries under the lead's delegation, and its three corrections landed in ISN: plasma boundary (<code>f9965fd</code>), midplanes and internal inductance (<code>0e43cde</code>). Reviews 101 and 102/120. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s3-entries-closed">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-close-s14" data-who="reckon-build" data-when="2026-10-17T11:36:00Z">
+    <div class="r-comment-body"><p>§14 closed. The docs writer and the house-style gate render and check each template's note through the grammar's <code>template_sentences</code> (commit <code>61321542b</code>, review 115/120), so the near-duplicate sentences reach the documentation. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s14-template-note-writer">evidence</a></p></div>
 </div>
 </section>
 </main>
