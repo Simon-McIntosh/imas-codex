@@ -274,9 +274,13 @@ def test_material_contradiction_probability_vetoes_ambiguous_support():
         "probabilities": {"supports": 0.44, "contradicts": 0.32, "says nothing": 0.24},
     }
     report = AuditReport()
-    assert jev_review.aggregate_docs_review(
+    verdict = jev_review.aggregate_docs_review(
         state, checks, answers, audit_report=report
-    )["contradiction_veto"]
+    )
+    assert verdict["contradiction_veto"]
+    assert state["documentation_claims"][0] in verdict["contradiction_reason"]
+    assert verdict["raw_claim_answers"][0]["choice"] == "supports"
+    assert verdict["claim_answers"][0]["choice"] == "contradicts"
     assert (
         jev_review.score_docs_review(state, checks, answers, audit_report=report) == 0.0
     )
@@ -284,6 +288,27 @@ def test_material_contradiction_probability_vetoes_ambiguous_support():
     assert not jev_review.aggregate_docs_review(
         state, checks, answers, audit_report=report
     )["contradiction_veto"]
+
+
+def test_docs_score_requires_audit_evidence_before_scoring_or_veto():
+    checks, _ = load_review_checks()
+    state = jev_review.build_docs_state(
+        {
+            "id": "argon_density",
+            "documentation": "The argon density is positive.",
+            "conventions": {},
+        }
+    )
+    answers = _top_answers(
+        jev_review.docs_question_table(checks, state["documentation_claims"])
+    )
+    assert (
+        jev_review.score_docs_review(state, checks, answers, audit_report=None) is None
+    )
+    answers["check:claim_contradicts_source:0"] = {"choice": "contradicts"}
+    assert (
+        jev_review.score_docs_review(state, checks, answers, audit_report=None) is None
+    )
 
 
 def test_unanswered_claim_is_unknown_and_unsupported_claim_is_rejected():

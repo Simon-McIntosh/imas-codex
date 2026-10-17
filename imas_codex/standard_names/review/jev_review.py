@@ -688,6 +688,8 @@ def docs_score_components(
     audit_report: Any | None,
 ) -> dict[str, float] | None:
     """Expose calibrated score inputs while keeping absent audits unknown."""
+    if audit_report is None:
+        return None
     values: dict[str, float] = {}
     for dimension, criteria in _DOCS_DIMENSION_CRITERIA.items():
         answer = answers.get(dimension_question_name(dimension))
@@ -736,21 +738,24 @@ def score_docs_review(
     audit_report: Any | None,
     weights: Mapping[str, float] | None = None,
     intercept: float | None = None,
+    veto_claims: bool = True,
 ) -> float | None:
     """Apply calibration weights after the hard contradiction veto."""
-    if any(
-        claim_contradicts(answer)
-        for key, answer in answers.items()
-        if key.startswith("check:claim_contradicts_source:")
-    ):
-        return 0.0
     values = docs_score_components(state, checks, answers, audit_report=audit_report)
     if values is None:
         return None
     selected_weights = DOCS_SCORE_WEIGHTS if weights is None else weights
     selected_intercept = DOCS_SCORE_INTERCEPT if intercept is None else intercept
+    if any(name not in values for name in selected_weights):
+        return None
+    if veto_claims and any(
+        claim_contradicts(answer)
+        for key, answer in answers.items()
+        if key.startswith("check:claim_contradicts_source:")
+    ):
+        return 0.0
     linear = selected_intercept + sum(
-        weight * values.get(name, 0.0) for name, weight in selected_weights.items()
+        weight * values[name] for name, weight in selected_weights.items()
     )
     return 1.0 / (1.0 + math.exp(-max(-50.0, min(50.0, linear))))
 
@@ -793,13 +798,26 @@ def aggregate_docs_review(
     claim_check = next(
         check for check in docs_checks if check.id == "claim_contradicts_source"
     )
-    claim_answers = [
+    raw_claim_answers = [
         answers.get(check_question_name(f"{claim_check.id}:{index}"))
         for index, _claim in enumerate(state["documentation_claims"])
     ]
-    contradiction_veto = any(
-        answer is not None and claim_contradicts(answer) for answer in claim_answers
-    )
+    claim_answers = []
+    contradicted_claims = []
+    for claim, answer in zip(
+        state["documentation_claims"], raw_claim_answers, strict=True
+    ):
+        if answer is not None and claim_contradicts(answer):
+            contradicted_claims.append(claim)
+            if answer.get("choice") != "contradicts":
+                answer = {
+                    **answer,
+                    "raw_choice": answer.get("choice"),
+                    "choice": "contradicts",
+                    "veto_source": "probability",
+                }
+        claim_answers.append(answer)
+    contradiction_veto = bool(contradicted_claims)
     check_records: dict[str, dict[str, Any]] = {}
     for check in docs_checks:
         if check.id == claim_check.id:
@@ -846,7 +864,13 @@ def aggregate_docs_review(
     return {
         "decision": decision,
         "contradiction_veto": contradiction_veto,
+        "contradiction_reason": (
+            "contradicts source: " + "; ".join(contradicted_claims)
+            if contradicted_claims
+            else None
+        ),
         "dimensions": dimensions,
+        "raw_claim_answers": raw_claim_answers,
         "claim_answers": claim_answers,
         "checks": check_records,
     }
