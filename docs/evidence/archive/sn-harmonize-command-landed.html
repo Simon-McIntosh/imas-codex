@@ -155,6 +155,11 @@
     <p><code>sn rescore</code> could not run for any name. Its eligibility statement, added on 2026-10-13, wrote <code>coalesce(sn.status, '') NOT IN [...]</code>, which the Neo4j server rejects. It now uses the prefix form, in one module constant that the code and a live <code>EXPLAIN</code> test share. A default-tier static scan rejects the infix form in any <code>MATCH</code> string of the module. With the infix form restored, both tests fail (EXIT=1). The three rescore test files add no failures (8 passed at base, 9 at head). A dry run on the scrape-off-layer density name now reports exhausted → drafted. The first review blocked on empty suite receipts; after the repair it scored 115. Merge <code>2a84c3c0a</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-rescore-cypher-fix.html">fragment</a></p>
   </section>
 
+  <section id="shc-boundary-convergence-diagnosis">
+    <h2>§3 — Why the boundary family did not converge</h2>
+    <p>The final apply (SLURM job 1287983, 43 min, USD 5.15 of 8.50) took all 17 members to accepted and cleared every convention violation (15 to 0). It left the family unstamped, for four reasons found by a read-only diagnosis:</p><ul><li>16 members carry <code>status = 'superseded'</code> from an 8 September fold that revived them without restoring status (<code>edit.py</code> ~1520), so export drops them.</li><li>The reverse-link reconciliation and the stamp run only when the apply did not halt (<code>harmonize.py</code> ~1613), and the apply halted.</li><li>The 17-call replan is just the missing stamp.</li><li>The halt itself is genuine: the beryllium member carries an estimator recipe that the prose policy rejects, but only after review had already accepted it.</li></ul><p>Review 94. Merge <code>25d5ad6e5</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>
