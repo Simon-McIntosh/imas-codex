@@ -10682,6 +10682,7 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
     }
     return {
         **identity_payload,
+        "veto_item": prepared_item,
         "request_identity": _docs_review_request_identity(identity_payload),
         "expected_exposure": sum(exposures),
         "provider_policy_ceiling_is_separate": True,
@@ -10797,6 +10798,89 @@ async def _documentation_banned_prose_note(
     return None
 
 
+async def _documentation_contradiction_note(
+    item: dict[str, Any], mgr: BudgetManager
+) -> str | None:
+    """Compare authored claims with bound DD text before accepting them."""
+    from imas_codex.settings import get_model
+    from imas_codex.standard_names.budget import LLMCostEvent
+    from imas_codex.standard_names.review import jev_review
+
+    sources = item.get("dd_source_docs") or []
+    if not sources and item.get("dd_documentation"):
+        sources = [{"documentation": item["dd_documentation"]}]
+    if not sources:
+        if item.get("source_paths") or item.get("source_bindings"):
+            logger.warning("review_docs: DD source text unavailable for %s", item["id"])
+            return "DD source text unavailable; claim comparison could not run"
+        return None
+
+    state = jev_review.build_docs_state({**item, "dd_source_docs": sources})
+    claims = state["documentation_claims"]
+    if not claims:
+        return None
+    questions = {
+        key: question
+        for key, question in jev_review.docs_question_table(
+            jev_review._default_checks(), claims
+        ).items()
+        if key.startswith("check:claim_contradicts_source:")
+    }
+    lease = mgr.reserve(0.001, phase="review_docs")
+    if lease is None:
+        logger.warning("review_docs: claim comparison unfunded for %s", item["id"])
+        return "claim comparison unavailable: run budget refused the call"
+    try:
+        model = get_model("sn-judge")
+        results, _ = await jev_review.decide_batch(
+            [state], questions, model=model, service=jev_review.SERVICE
+        )
+        result = results[0] if len(results) == 1 else None
+        if result is None:
+            logger.warning("review_docs: claim comparison failed for %s", item["id"])
+            return "claim comparison unavailable: Jev returned no result"
+        answers, spent = result
+        lease.charge_event(
+            spent,
+            LLMCostEvent(
+                model=model,
+                tokens_in=0,
+                tokens_out=0,
+                sn_ids=(item["id"],),
+                phase="review_docs",
+            ),
+        )
+        verdict = jev_review.aggregate_docs_review(
+            state, jev_review._default_checks(), answers
+        )
+        if verdict["contradiction_veto"]:
+            contradicted = [
+                claim
+                for claim, answer in zip(claims, verdict["claim_answers"], strict=True)
+                if answer is not None and answer.get("choice") == "contradicts"
+            ]
+            dd_text = "; ".join(
+                str(source.get("documentation") or "") for source in sources
+            )
+            return f"contradicts source: {'; '.join(contradicted)}; DD: {dd_text}"
+        if any(
+            answer is None or answer.get("choice") not in {"supports", "says nothing"}
+            for answer in verdict["claim_answers"]
+        ):
+            logger.warning("review_docs: claim answer missing for %s", item["id"])
+            return "claim comparison unavailable: Jev omitted a claim answer"
+        return None
+    except Exception:
+        logger.warning(
+            "review_docs: claim comparison errored for %s; holding candidate",
+            item["id"],
+            exc_info=True,
+        )
+        return "claim comparison unavailable: Jev error"
+    finally:
+        lease.release_unused()
+
+
 async def process_review_docs_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -10872,18 +10956,30 @@ async def process_review_docs_batch(
             comments_per_dim = quorum["winning_comments_per_dim"]
             conformance_note = _documentation_conformance_note(item)
             prose_note = await _documentation_banned_prose_note(item, mgr)
-            if conformance_note is not None or prose_note is not None:
+            contradiction_note = await _documentation_contradiction_note(
+                request.get("veto_item", item), mgr
+            )
+            if any(
+                note is not None
+                for note in (conformance_note, prose_note, contradiction_note)
+            ):
                 # Clamp below the accept threshold so the document is routed
                 # to refinement as a below-threshold score is, carrying the
                 # finding as the reason the refiner reads.
                 score = min(score, DEFAULT_MIN_SCORE - 0.001)
-                notes = [note for note in (conformance_note, prose_note) if note]
+                notes = [
+                    note
+                    for note in (conformance_note, prose_note, contradiction_note)
+                    if note
+                ]
                 comments = "\n".join(filter(None, (comments, *notes)))
                 comments_per_dim = dict(comments_per_dim or {})
                 if conformance_note is not None:
                     comments_per_dim["registry_conformance"] = conformance_note
                 if prose_note is not None:
                     comments_per_dim["banned_prose"] = prose_note
+                if contradiction_note is not None:
+                    comments_per_dim["contradicts_source"] = contradiction_note
                 logger.info(
                     "review_docs: %s held from acceptance — %s",
                     sn_id,

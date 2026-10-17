@@ -31,7 +31,8 @@ registry text and notation. Its question table asks one source-comparison Choice
 per claim and categorises three rubric dimensions. Code gives any contradictory
 claim a veto; a high dimension score cannot offset it.
 
-The module writes no graph state and nothing in the pipeline calls it yet.
+The module writes no graph state. The documentation acceptance path calls its
+claim comparison and veto while leaving the holistic score in shadow.
 Every call goes through the shared decisions owner
 (:func:`imas_codex.discovery.base.judgment.decide_batch`) under the ``sn-judge``
 seat, so there is no third decisions owner.
