@@ -1362,6 +1362,142 @@ def _stamp_applied_family(gc: Any, anchor_id: str) -> bool:
     return stamped
 
 
+class HarmonizeFinalizeError(ValueError):
+    """A family cannot be finalized without another documentation pass."""
+
+
+def _finalize_member_rows(gc: Any, member_ids: list[str]) -> list[dict[str, Any]]:
+    """Read the current lifecycle, prose and links of an exact family roster."""
+    return list(
+        gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.id IN $ids
+            RETURN sn.id AS id, sn.docs_stage AS docs_stage,
+                   sn.validation_status AS validation_status,
+                   sn.description AS description,
+                   sn.documentation AS documentation, sn.links AS links
+            """,
+            ids=member_ids,
+        )
+        or []
+    )
+
+
+def _missing_family_reverse_links(rows: list[dict[str, Any]]) -> list[str]:
+    """Name one-way links between members in the current readback."""
+    links = {
+        row["id"]: {
+            target
+            for link in row.get("links") or []
+            if (target := _name_link_target(link))
+        }
+        for row in rows
+    }
+    return [
+        f"{source} -> {target}"
+        for source, targets in sorted(links.items())
+        for target in sorted(targets & links.keys())
+        if source not in links[target]
+    ]
+
+
+def finalize_families(
+    gc: Any,
+    *,
+    seeds: list[str] | None = None,
+    min_size: int = 1,
+    dry_run: bool = False,
+) -> list[dict[str, Any]]:
+    """Reconcile and stamp drained, clean families without running a campaign."""
+    from imas_codex.standard_names.prose_policy import banned_prose_findings
+
+    plans = plan_family_applies(gc, seeds=seeds, min_size=min_size)
+    if seeds and not plans:
+        raise HarmonizeFinalizeError("No live family contains the requested seed")
+    refusals: list[str] = []
+    before_rows: dict[tuple[str, ...], list[dict[str, Any]]] = {}
+    for plan in plans:
+        ids = plan["members"]
+        rows = _finalize_member_rows(gc, ids)
+        before_rows[tuple(ids)] = rows
+        by_id = {row["id"]: row for row in rows}
+        for member_id in ids:
+            row = by_id.get(member_id)
+            if row is None:
+                refusals.append(f"{member_id}: missing from graph")
+                continue
+            if row.get("docs_stage") != "accepted":
+                refusals.append(
+                    f"{member_id}: docs_stage={row.get('docs_stage')!r}, expected 'accepted'"
+                )
+            if row.get("validation_status") == "quarantined":
+                refusals.append(f"{member_id}: validation_status='quarantined'")
+            for field in ("description", "documentation"):
+                findings = banned_prose_findings(row.get(field) or "")
+                classes = [name for name, count in findings.items() if count]
+                if classes:
+                    refusals.append(
+                        f"{member_id}: banned prose in {field} ({', '.join(classes)})"
+                    )
+    if refusals:
+        raise HarmonizeFinalizeError("Finalization refused: " + "; ".join(refusals))
+
+    results: list[dict[str, Any]] = []
+    for plan in plans:
+        result = {"physical_base": plan["physical_base"], "members": plan["members"]}
+        if dry_run:
+            results.append(
+                {
+                    **result,
+                    "dry_run": True,
+                    "stamped": False,
+                    "missing_reverse_pairs": len(
+                        _missing_family_reverse_links(
+                            before_rows[tuple(plan["members"])]
+                        )
+                    ),
+                    "planned_calls": 0,
+                }
+            )
+            continue
+        links = reconcile_family_reverse_links(gc, plan["members"])
+        if links.get("protected"):
+            raise HarmonizeFinalizeError(
+                "Finalization refused: protected members were not reconciled: "
+                + ", ".join(links["protected"])
+            )
+        rows = _finalize_member_rows(gc, plan["members"])
+        if len(rows) != len(plan["members"]):
+            raise HarmonizeFinalizeError(
+                "Family membership changed during finalization"
+            )
+        missing = _missing_family_reverse_links(rows)
+        if missing:
+            raise HarmonizeFinalizeError(
+                "Reverse links remain missing: " + ", ".join(missing)
+            )
+        if not _stamp_applied_family(gc, plan["anchor"] or plan["members"][0]):
+            raise HarmonizeFinalizeError("Family stamp was not written")
+        replanned = plan_family_applies(gc, seeds=[plan["members"][0]])
+        if (
+            len(replanned) != 1
+            or replanned[0]["decision"] != "harmonized"
+            or replanned[0]["planned_calls"] != 0
+        ):
+            raise HarmonizeFinalizeError("Stamped family still plans model calls")
+        results.append(
+            {
+                **result,
+                "stamped": True,
+                "missing_reverse_pairs": 0,
+                "planned_calls": 0,
+                "reverse_links": links,
+            }
+        )
+    return results
+
+
 def apply_guard_targets(plans: list[dict[str, Any]]) -> list[str]:
     """The names an anchored apply would rewrite: every ``apply`` family's members.
 
@@ -1671,6 +1807,8 @@ __all__ = [
     "DocCallCostEstimate",
     "plan_family_applies",
     "apply_families",
+    "finalize_families",
+    "HarmonizeFinalizeError",
     "reconcile_family_reverse_links",
     "docs_score_regressions",
     "apply_guard_targets",

@@ -1,0 +1,145 @@
+"""Finalize a drained family only after its current members pass the guard."""
+
+from __future__ import annotations
+
+from typing import Any
+
+import pytest
+from click.testing import CliRunner
+
+from imas_codex.standard_names import graph_ops, harmonize
+from tests.standard_names.test_harmonize_reverse_links import (
+    _ANCHOR,
+    _BOUNDARY,
+    _PROBE,
+    _family_nodes,
+    _findings,
+    _LinkGraph,
+)
+
+
+def _fixture(monkeypatch: Any) -> _LinkGraph:
+    from imas_codex.graph import client as graph_client
+
+    graph = _LinkGraph(_family_nodes())
+    monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
+    monkeypatch.setattr(
+        graph_ops, "write_enrichment_results", graph.write_enrichment_results
+    )
+
+    def stamp(families: list[dict[str, Any]]) -> int:
+        for family in families:
+            for member_id in family["members"]:
+                graph.node(member_id)["harmonized_group_signature"] = family[
+                    "signature"
+                ]
+        return len(families)
+
+    monkeypatch.setattr(graph_ops, "stamp_harmonized_families", stamp)
+    monkeypatch.setattr(harmonize, "_clear_family_anchor", lambda *_a: None)
+    return graph
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "reason"),
+    [
+        ("docs_stage", "reviewed", "docs_stage='reviewed'"),
+        ("documentation", "It is obtained from a diagnostic.", "banned prose"),
+        ("validation_status", "quarantined", "validation_status='quarantined'"),
+    ],
+)
+def test_refuses_unclean_member_before_any_write(
+    monkeypatch: Any, field: str, value: str, reason: str
+) -> None:
+    graph = _fixture(monkeypatch)
+    graph.node(_BOUNDARY)[field] = value
+
+    with pytest.raises(harmonize.HarmonizeFinalizeError) as exc:
+        harmonize.finalize_families(graph, seeds=[_ANCHOR])
+
+    assert _BOUNDARY in str(exc.value)
+    assert reason in str(exc.value)
+    assert graph.written == []
+    assert graph.node(_ANCHOR)["harmonized_group_signature"] is None
+
+
+def test_quarantined_member_cannot_gain_a_stamp(monkeypatch: Any) -> None:
+    graph = _fixture(monkeypatch)
+    graph.node(_BOUNDARY)["validation_status"] = "quarantined"
+
+    try:
+        harmonize.finalize_families(graph, seeds=[_ANCHOR])
+    except harmonize.HarmonizeFinalizeError as exc:
+        assert _BOUNDARY in str(exc)
+    else:
+        pytest.fail(
+            "quarantined member was finalized: "
+            f"stamped={graph.node(_BOUNDARY)['harmonized_group_signature'] is not None}"
+        )
+
+
+def test_clean_family_reconciles_stamps_and_plans_no_calls(
+    monkeypatch: Any,
+) -> None:
+    from imas_codex.cli import sn as sn_module
+    from imas_codex.cli.discover import common
+    from imas_codex.discovery.base import llm
+
+    graph = _fixture(monkeypatch)
+    calls: list[tuple[Any, ...]] = []
+    monkeypatch.setattr(
+        common, "setup_logging", lambda *args, **_kw: calls.append(args)
+    )
+
+    def forbidden(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("a model call is forbidden during finalization")
+
+    monkeypatch.setattr(llm, "call_llm_structured", forbidden)
+    monkeypatch.setattr(llm, "acall_llm_structured", forbidden)
+    monkeypatch.setattr(sn_module, "_docs_drain_factory", forbidden)
+
+    preview = CliRunner().invoke(
+        sn_module.sn, ["harmonize", "--family", _ANCHOR, "--finalize", "--dry-run"]
+    )
+    assert preview.exit_code == 0, preview.output
+    assert "ready" in preview.output
+    assert "missing_reverse_pairs=2" in preview.output
+    assert graph.written == []
+
+    result = CliRunner().invoke(
+        sn_module.sn, ["harmonize", "--family", _ANCHOR, "--finalize"]
+    )
+    assert result.exit_code == 0, result.output
+    assert "stamped" in result.output
+    assert "0 model calls" in result.output
+    assert calls == [("sn", "sn-harmonize"), ("sn", "sn-harmonize")]
+    assert _findings(graph, "missing_reverse") == []
+    assert f"name:{_ANCHOR}" in graph.node(_BOUNDARY)["links"]
+    assert f"name:{_PROBE}" in graph.node(_ANCHOR)["links"]
+    signature = harmonize.group_signature(
+        [graph.node(member_id) for member_id in (_ANCHOR, _BOUNDARY, _PROBE)]
+    )
+    assert all(
+        graph.node(member_id)["harmonized_group_signature"] == signature
+        for member_id in (_ANCHOR, _BOUNDARY, _PROBE)
+    )
+    plans = harmonize.plan_family_applies(graph, seeds=[_ANCHOR])
+    assert len(plans) == 1
+    assert plans[0]["decision"] == "harmonized"
+    assert plans[0]["planned_calls"] == 0
+
+
+def test_cli_refusal_names_member_and_reason(monkeypatch: Any) -> None:
+    from imas_codex.cli.discover import common
+    from imas_codex.cli.sn import sn
+
+    graph = _fixture(monkeypatch)
+    monkeypatch.setattr(common, "setup_logging", lambda *_a, **_kw: None)
+    graph.node(_BOUNDARY)["validation_status"] = "quarantined"
+
+    result = CliRunner().invoke(sn, ["harmonize", "--family", _ANCHOR, "--finalize"])
+
+    assert result.exit_code != 0
+    assert _BOUNDARY in result.output
+    assert "quarantined" in result.output
+    assert graph.written == []

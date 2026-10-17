@@ -5969,10 +5969,17 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
     ),
 )
 @click.option(
+    "--finalize",
+    "finalize_mode",
+    is_flag=True,
+    default=False,
+    help="Reconcile and stamp a drained, accepted family without model calls.",
+)
+@click.option(
     "--dry-run",
     "dry_run",
     is_flag=True,
-    help="With --apply: print the planned calls and estimated cost, write nothing.",
+    help="With --apply or --finalize: preview the operation and write nothing.",
 )
 @click.option(
     "--force",
@@ -6007,6 +6014,7 @@ def sn_harmonize(
     min_size: int,
     report_mode: bool,
     apply_mode: bool,
+    finalize_mode: bool,
     dry_run: bool,
     force_reason: str | None,
     cost_limit: float,
@@ -6063,6 +6071,14 @@ def sn_harmonize(
             "exactly one scope is required: --batch, --family, --concept or --all "
             f"(got {len(supplied)}: {', '.join(supplied)})"
         )
+    if sum((report_mode, apply_mode, finalize_mode)) > 1:
+        raise click.UsageError(
+            "--report, --apply and --finalize are mutually exclusive"
+        )
+    if dry_run and not (apply_mode or finalize_mode):
+        raise click.UsageError("--dry-run requires --apply or --finalize")
+    if force_reason and not apply_mode:
+        raise click.UsageError("--force requires --apply")
 
     seeds: list[str] | None = None
     family_ids: list[str] | None = None
@@ -6099,6 +6115,38 @@ def sn_harmonize(
         seeds = family_ids
     else:
         seeds = None  # --all
+
+    if finalize_mode:
+        from imas_codex.standard_names.harmonize import (
+            HarmonizeFinalizeError,
+            finalize_families,
+        )
+
+        try:
+            with GraphClient() as gc:
+                finalized = finalize_families(
+                    gc, seeds=seeds, min_size=min_size, dry_run=dry_run
+                )
+        except HarmonizeFinalizeError as exc:
+            raise click.ClickException(str(exc)) from exc
+        if as_json:
+            console.print(
+                json.dumps(finalized, sort_keys=True), soft_wrap=True, markup=False
+            )
+        else:
+            for family in finalized:
+                state = "ready" if dry_run else "stamped"
+                console.print(
+                    f"family {family['physical_base']}  {state}  "
+                    f"members={len(family['members'])}  "
+                    f"missing_reverse_pairs={family.get('missing_reverse_pairs', 0)}  "
+                    "calls=0"
+                )
+            console.print(
+                f"finalize: {len(finalized)} family(ies) "
+                + ("ready; wrote nothing." if dry_run else "stamped; 0 model calls.")
+            )
+        return
 
     if apply_mode:
         from imas_codex.standard_names.campaign import CampaignBudget
