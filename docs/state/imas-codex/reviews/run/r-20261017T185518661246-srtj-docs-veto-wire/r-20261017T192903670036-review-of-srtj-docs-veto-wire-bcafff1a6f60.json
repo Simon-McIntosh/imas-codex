@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The source's baseline log declares revision 25ac7d8 plus an uncommitted two-source test; its committed-head log declares bcafff1a6. Both completed; the one head failure ID was also in the baseline.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire uv run pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_docs_contradiction_veto.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_prose_hold_before_accept.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_jev_docs_review.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_rd_quorum_integrity.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_e2e_rotation.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_review_docs_stages.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_budget_lease_release.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_review_quorum_pool.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_pool_endpoint_failure_scope.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_docs_conformance_gate.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_display_wiring.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_pool_batch_processors.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_dd_gap_automated_writers.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_conventions_wiring.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_docs_review_dd_context.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_prompt_context_wiring.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/standard_names/test_jev_docs_review.py::test_every_house_style_finding_has_a_named_check_and_is_read_from_audit"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T185518661246-srtj-docs-veto-wire/second-source-committed-gate.log",
+    "revision": "bcafff1a6f6047eb4bfb89413002d19c638e92e4"
+  },
+  "assertion_analysis": {
+    "tests/standard_names/test_docs_contradiction_veto.py:109-120": "The fixed authored and DD sentences fail if refinement comments omit either, and the supported case fails on a score clamp or contradiction note.",
+    "tests/standard_names/test_docs_contradiction_veto.py:121-123": "The reserve assertion fails if the expected reservation is omitted; the charge assertion uses the same fixed cost supplied by the mock and survives hard-coding it.",
+    "tests/standard_names/test_docs_contradiction_veto.py:153-160": "The graph-query assertions fail if the prepared request omits either fixed source path or consults a different first path.",
+    "tests/standard_names/test_docs_contradiction_veto.py:167-171": "The mocked decision fails if the claim question is absent or a state contains more than one DD source.",
+    "tests/standard_names/test_docs_contradiction_veto.py:237-247": "The batch count fails on no persistence; the observed ordered paths, below-threshold score, path in comments, and fixed source text fail if the second bound source is skipped or its contradiction is not carried to refinement.",
+    "tests/standard_names/test_docs_contradiction_veto.py:68-69": "The fixed inward sentence and Choice type fail if the claim splitter or question construction changes.",
+    "tests/standard_names/test_docs_contradiction_veto.py:99-107": "The batch count fails on no persisted result; fixed expected_stage values fail when contradiction or unavailable answers cease to clamp, or support is incorrectly clamped."
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire uv run pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_docs_contradiction_veto.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_prose_hold_before_accept.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_jev_docs_review.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_rd_quorum_integrity.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_e2e_rotation.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_review_docs_stages.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_budget_lease_release.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_review_quorum_pool.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_pool_endpoint_failure_scope.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_docs_conformance_gate.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_display_wiring.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_pool_batch_processors.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_dd_gap_automated_writers.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_conventions_wiring.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_docs_review_dd_context.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-veto-wire/tests/standard_names/test_prompt_context_wiring.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 2,
+    "failure_ids": [
+      "tests/standard_names/test_docs_contradiction_veto.py::test_second_bound_dd_source_can_hold_documentation",
+      "tests/standard_names/test_jev_docs_review.py::test_every_house_style_finding_has_a_named_check_and_is_read_from_audit"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T185518661246-srtj-docs-veto-wire/second-source-base-gate.log",
+    "revision": "25ac7d8ababbd1852234089de8ab52da9ec24613"
+  },
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:854",
+    "imas_codex/standard_names/workers.py:11007",
+    "imas_codex/standard_names/workers.py:11041",
+    "imas_codex/standard_names/workers.py:11070"
+  ],
+  "completed_at": "2026-10-17T19:34:02Z",
+  "dispatched_at": "2026-10-17T19:29:30Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_docs_contradiction_veto.py",
+      "line": "123",
+      "severity": "follow-on",
+      "text": "The asserted 0.0001 is the only cost returned by the mocked decision at line 79; a hard-coded charge of 0.0001 would pass and would not protect real budget booking."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified four production sites",
+    "diff": "four commits reviewed against the recorded base; two implementation commits and two evidence commits.",
+    "done_when": "the expanded gate logs show 2 baseline failures and 1 committed-head failure with zero added IDs.",
+    "goal": "the brief's contradiction veto is wired before documentation acceptance at imas_codex/standard_names/workers.py:11041-11070.",
+    "manifest": "complete with four commits, gate logs, and red controls.",
+    "write_paths": "the four diff paths match the four changed paths in the source manifest."
+  },
+  "justifications": {
+    "durability": "test_docs_contradiction_veto.py:107 and 244-247 redden when the hold or second-source path is removed; line 123 has a fixed-cost blind spot.",
+    "evidence": "second-source-base-gate.log and second-source-committed-gate.log record the completed gate and its failure IDs.",
+    "fit": "workers.py:11044-11064 uses the established clamp and comments path.",
+    "goal_fidelity": "workers.py:10846-10953 holds contradictions and unavailable comparisons.",
+    "reuse": "workers.py calls pipeline.py:692 and jev_review.py:542-688, the owners of DD evidence and claim decisions.",
+    "scope_discipline": "the four changed paths are within the source manifest's declared scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief requires a DD contradiction veto before documentation acceptance; imas_codex/standard_names/workers.py:11041-11064 calls the existing veto path and clamps a contradictory entry below acceptance.\nVERDICT done_when: the brief names contradiction, clean, missing-answer, error, and second-source cases; second-source-base-gate.log:55-58 and second-source-committed-gate.log:51-53 record 2 versus 1 failures, with no added failure ID.\nVERDICT write_paths: the source manifest declares four changed files; git diff 9c6312f74d190b9d8b5f1af3d66d950bc6e56c97..bcafff1a6f6047eb4bfb89413002d19c638e92e4 names only those four paths.\nVERDICT manifest: the source manifest is complete, names four commits and the committed gate log, and records a red veto mutation plus the pre-repair second-source failure.\nVERDICT diff: commits 035e8b97fcb3fbe39b7833f7c32c01301f6803fe and cf3f58acbd48b088aed6d47e24e0c8d7774da65e add the hold and all-bound-source preparation; the other two commits update the scoped evidence fragment.\nCALL_SITES: imas_codex/standard_names/loop.py:854, imas_codex/standard_names/workers.py:11007, imas_codex/standard_names/workers.py:11041, imas_codex/standard_names/workers.py:11070\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/workers.py:10846-10953 compares each bound DD source and returns a hold on contradiction, missing evidence, missing answer, or Jev error.\nSCORE evidence: 18\nJUSTIFICATION evidence: second-source-base-gate.log:55-58 and second-source-committed-gate.log:51-53 show the same taxonomy failure and the newly added source case changing from failed to passed, while the base arm explicitly included an uncommitted test.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 9c6312f74d190b9d8b5f1af3d66d950bc6e56c97..bcafff1a6f6047eb4bfb89413002d19c638e92e4 changes only workers.py, jev_review.py, the declared test, and the declared evidence fragment.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_docs_contradiction_veto.py:107 and 244-247 fail on a removed hold or omitted second bound source, while line 123 cannot detect a hard-coded spend of 0.0001.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/workers.py:11044-11064 follows the existing score-clamp and comments-per-dimension idiom, and the new helper names describe their mechanisms.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search found DD context loading in imas_codex/standard_names/review/pipeline.py:692 and claim splitting, Choice construction, and veto aggregation in jev_review.py:542-688, which workers.py:10713 and 10880-10925 calls.\nFINDING tests/standard_names/test_docs_contradiction_veto.py:123 follow-on: the asserted 0.0001 is also the only spend returned by the mocked decide call at line 79, so hard-coding that amount would keep this assertion green and leave budget booking unguarded.\n",
+  "review_run_id": "r-20261017T192903670036-review-of-srtj-docs-veto-wire-bcafff1a6f60",
+  "reviewed_base_sha": "9c6312f74d190b9d8b5f1af3d66d950bc6e56c97",
+  "reviewed_head_sha": "bcafff1a6f6047eb4bfb89413002d19c638e92e4",
+  "reviewed_run_id": "r-20261017T185518661246-srtj-docs-veto-wire",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T19:32:12Z",
+  "total": 112
+}
