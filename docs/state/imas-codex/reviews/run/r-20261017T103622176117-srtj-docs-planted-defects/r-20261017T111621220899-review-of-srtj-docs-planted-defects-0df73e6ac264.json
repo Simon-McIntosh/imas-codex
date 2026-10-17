@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest leaves baseline_suite and after_suite blank; no suite-arm log pair exists from which to derive an added failure count",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:341 __main__ calls main",
+    "docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:326 main calls build"
+  ],
+  "completed_at": "2026-10-17T11:21:45Z",
+  "dispatched_at": "2026-10-17T11:16:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py",
+      "line": "261",
+      "severity": "follow-on",
+      "text": "follow-on: the exact-substring guard does not test semantic silence or topicality, so reverting an authored control to unrelated trivia or a DD-supported paraphrase can still pass the committed rebuild check."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call sites in the fixture builder",
+    "diff": "Commit d9427ac7e8c6ade02a6fb556ad25dacfb5b8b84c changes contradicts-133 to fast-particle density; commit 0df73e6ac2649cbb5673ec966a7ccf6d8d022e1f replaces generic trivia with 20 authored topical controls and updates the report, with no path outside the declared three.",
+    "done_when": "The brief requires 80 source-linked copies, a byte-for-byte rebuild, and rule/split/domain plus hand-read reporting; topical-build-diff.log records BUILD_EXIT=0 DIFF_EXIT=0 and docs/evidence/fragments/sn-review-through-jev/srtj-docs-planted-defects.html:7-79 carries the counts and comparisons.",
+    "goal": "The source brief requires a planted-contradiction subset with silent controls; docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:48 and :107-188 replace the ambiguous particle claim and add 20 on-topic silent claims.",
+    "manifest": "The source manifest records both repair commits and topical-build-check.log, topical-build-diff.log, topical-controls-audit.log, and parent negative controls; its baseline_suite and after_suite fields are empty.",
+    "write_paths": "The source brief and manifest declare the builder, fixture, and report under docs/evidence/fragments/sn-review-through-jev/; the diff from 11112a496e2e9a06006dbdb6a0e7331f36adddba to 0df73e6ac2649cbb5673ec966a7ccf6d8d022e1f changes only those three paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:240-241 rejects a wrong control count or overlap and :261-262 rejects an exact source copy, but no committed assertion fails when a topical control becomes a semantically supported paraphrase or off-topic trivia.",
+    "evidence": "topical-build-diff.log records BUILD_EXIT=0 DIFF_EXIT=0, topical-controls-negative.log records EXIT=1 for the old trivia fixture, and docs/evidence/fragments/sn-review-through-jev/srtj-docs-planted-defects.html:63-72 reports five manual silent comparisons.",
+    "fit": "docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:107-188 keeps human-authored claims with their physical bases in the existing deterministic evidence builder and adds no forbidden source name.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:48 states fast-particle rather than thermal-particle density, and :107-188 supplies 20 quantity-specific silent claims.",
+    "reuse": "A capability search found only the golden-B rebalance owner at docs/evidence/fragments/sn-judgment-evaluation/golden-documentation-acceptable-rebalance.py:1; docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:107-188 extends the existing claim builder rather than duplicating that label rebalancer.",
+    "scope_discipline": "Both new commits change only docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py, golden-documentation-planted.json, and srtj-docs-planted-defects.html, the three declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief requires a planted-contradiction subset with silent controls; docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:48 and :107-188 replace the ambiguous particle claim and add 20 on-topic silent claims.\nVERDICT done_when: The brief requires 80 source-linked copies, a byte-for-byte rebuild, and rule/split/domain plus hand-read reporting; topical-build-diff.log records BUILD_EXIT=0 DIFF_EXIT=0 and docs/evidence/fragments/sn-review-through-jev/srtj-docs-planted-defects.html:7-79 carries the counts and comparisons.\nVERDICT write_paths: The source brief and manifest declare the builder, fixture, and report under docs/evidence/fragments/sn-review-through-jev/; the diff from 11112a496e2e9a06006dbdb6a0e7331f36adddba to 0df73e6ac2649cbb5673ec966a7ccf6d8d022e1f changes only those three paths.\nVERDICT manifest: The source manifest records both repair commits and topical-build-check.log, topical-build-diff.log, topical-controls-audit.log, and parent negative controls; its baseline_suite and after_suite fields are empty.\nVERDICT diff: Commit d9427ac7e8c6ade02a6fb556ad25dacfb5b8b84c changes contradicts-133 to fast-particle density; commit 0df73e6ac2649cbb5673ec966a7ccf6d8d022e1f replaces generic trivia with 20 authored topical controls and updates the report, with no path outside the declared three.\nCALL_SITES: docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:341 __main__ calls main, docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:326 main calls build\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:48 states fast-particle rather than thermal-particle density, and :107-188 supplies 20 quantity-specific silent claims.\nSCORE evidence: 17\nJUSTIFICATION evidence: topical-build-diff.log records BUILD_EXIT=0 DIFF_EXIT=0, topical-controls-negative.log records EXIT=1 for the old trivia fixture, and docs/evidence/fragments/sn-review-through-jev/srtj-docs-planted-defects.html:63-72 reports five manual silent comparisons.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Both new commits change only docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py, golden-documentation-planted.json, and srtj-docs-planted-defects.html, the three declared write paths.\nSCORE durability: 10\nJUSTIFICATION durability: docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:240-241 rejects a wrong control count or overlap and :261-262 rejects an exact source copy, but no committed assertion fails when a topical control becomes a semantically supported paraphrase or off-topic trivia.\nSCORE fit: 19\nJUSTIFICATION fit: docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:107-188 keeps human-authored claims with their physical bases in the existing deterministic evidence builder and adds no forbidden source name.\nSCORE reuse: 20\nJUSTIFICATION reuse: A capability search found only the golden-B rebalance owner at docs/evidence/fragments/sn-judgment-evaluation/golden-documentation-acceptable-rebalance.py:1; docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:107-188 extends the existing claim builder rather than duplicating that label rebalancer.\nFINDING docs/evidence/fragments/sn-review-through-jev/golden-documentation-planted-build.py:261 follow-on: the exact-substring guard does not test semantic silence or topicality, so reverting an authored control to unrelated trivia or a DD-supported paraphrase can still pass the committed rebuild check.\n",
+  "review_run_id": "r-20261017T111621220899-review-of-srtj-docs-planted-defects-0df73e6ac264",
+  "reviewed_base_sha": "11112a496e2e9a06006dbdb6a0e7331f36adddba",
+  "reviewed_head_sha": "0df73e6ac2649cbb5673ec966a7ccf6d8d022e1f",
+  "reviewed_run_id": "r-20261017T103622176117-srtj-docs-planted-defects",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T11:19:59+00:00",
+  "total": 105
+}
