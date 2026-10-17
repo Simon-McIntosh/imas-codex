@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="64">
+<meta name="plan-version" content="65">
 <meta name="plan-modified" content="2026-10-17">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -153,7 +153,7 @@
     </p>
 
     <h2 id="s4">§4 — Documentation review through Jev, claim by claim</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
     <p>
       The docs rubric already defines physics accuracy as "a claim-level verification against
       the DD ground truth". That is the citation-check pattern:
@@ -395,6 +395,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261017T200215613429-srtj-docs-score-arm" data-who="reckon-build" data-when="2026-10-17T21:26:27Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-arm.html — audit/Jev/combined AUC and paired gains on all and non-rule entries; Jev-only non-rule validation AUC 0.795 [0.683,0.884], gain +0.292 [0.143,0.435], combined non-rule AUC 0.843 [0.747,0.926]; figure paired-auc.svg</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-17T21:50:00Z">
+    <div class="r-comment-body"><p>§4 closed. The calibrated documentation score (code audits plus Jev claims, contradiction veto) reads validation AUC 0.754 against the incumbent's 0.514, a paired gain of +0.240 [0.158, 0.331]; on entries no rule decides, Jev alone gains +0.292 [0.143, 0.435] (merge <code>2e9c53ad4</code>, review 107). It passes the deployment rule and goes to §6's cascade. Two review follow-ons fold into §6: the production veto at <code>workers.py</code> rebuilds its own reason instead of reading <code>contradiction_reason</code>, so the named sentence never reaches a review; and <code>build_docs_audit_report</code> repeats the finding construction <code>run_house_style_checks</code> owns. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#s4-docs-score-arm">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261017T190944853689-review-of-srtj-docs-veto-wire-25ac7d8ababb" data-who="reckon-build" data-when="2026-10-17T19:14:34Z">
     <div class="r-comment-body"><p>Review of 9c6312f74d190b9d8b5f1af3d66d950bc6e56c97..25ac7d8ababbd1852234089de8ab52da9ec24613 stored under the source run's review-records; 102/120, 0 added failures, one blocking multi-source finding.</p></div>
