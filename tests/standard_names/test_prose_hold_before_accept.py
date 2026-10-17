@@ -5,12 +5,14 @@ from __future__ import annotations
 import asyncio
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import workers
+from imas_codex.standard_names import prose_adjudicator, workers
 from imas_codex.standard_names.campaign import measure_batch
 from imas_codex.standard_names.prose_policy import banned_prose_findings
 
 
-def _review(documentation: str) -> tuple[str, dict]:
+def _review(
+    documentation: str, *, genuine_banned: bool = True
+) -> tuple[str, dict, list[dict]]:
     import imas_codex.standard_names.graph_ops as graph_ops
 
     item = {
@@ -45,6 +47,7 @@ def _review(documentation: str) -> tuple[str, dict]:
     }
     persisted = {}
     persisted_stage = []
+    adjudications = []
 
     async def prepare(_item):
         return request
@@ -58,6 +61,18 @@ def _review(documentation: str) -> tuple[str, dict]:
         persisted_stage.append(stage)
         return stage
 
+    async def adjudicate(model, name, text, findings, **kwargs):
+        adjudications.append(
+            {
+                "model": model,
+                "name": name,
+                "text": text,
+                "findings": findings,
+                "budget_manager": kwargs["budget_manager"],
+            }
+        )
+        return genuine_banned
+
     manager = MagicMock()
     manager.run_id = "run"
     with (
@@ -68,12 +83,15 @@ def _review(documentation: str) -> tuple[str, dict]:
         patch.object(graph_ops, "write_reviews"),
         patch.object(graph_ops, "update_review_aggregates"),
         patch.object(graph_ops, "persist_reviewed_docs", persist),
+        patch.object(prose_adjudicator, "_adjudicate_one", adjudicate),
+        patch("imas_codex.settings.get_model", return_value="test/model"),
+        patch("imas_codex.settings.get_reasoning_effort", return_value="low"),
     ):
         processed = asyncio.run(
             workers.process_review_docs_batch([item], manager, asyncio.Event())
         )
     assert processed == 1
-    return persisted_stage[0], persisted
+    return persisted_stage[0], persisted, adjudications
 
 
 def test_estimator_recipe_is_held_and_sent_to_refinement():
@@ -83,21 +101,39 @@ def test_estimator_recipe_is_held_and_sent_to_refinement():
     )
     assert banned_prose_findings(documentation)["estimator_recipe"] == 1
 
-    stage, persisted = _review(documentation)
+    stage, persisted, adjudications = _review(documentation)
 
     assert stage == "reviewed"
     assert "is obtained from" in persisted["comments"].lower()
     assert "is obtained from" in persisted["comments_per_dim"]["banned_prose"].lower()
+    assert adjudications[0]["findings"]["estimator_recipe"] == 1
+    assert adjudications[0]["budget_manager"].run_id == "run"
+
+
+def test_definitional_relation_is_accepted_after_adjudication():
+    documentation = (
+        "The associated [ion particle flux](name:ion_particle_flux) is obtained "
+        "by omitting the kinetic-energy factor from the integrand."
+    )
+    assert banned_prose_findings(documentation)["estimator_recipe"] == 1
+
+    stage, persisted, adjudications = _review(documentation, genuine_banned=False)
+
+    assert stage == "accepted"
+    assert persisted["score"] == 1.0
+    assert "banned_prose" not in persisted["comments_per_dim"]
+    assert adjudications[0]["name"] == "magnetic_field"
 
 
 def test_clean_documentation_is_accepted():
     documentation = "The magnetic field describes magnetic flux density."
     assert all(count == 0 for count in banned_prose_findings(documentation).values())
 
-    stage, persisted = _review(documentation)
+    stage, persisted, adjudications = _review(documentation)
 
     assert stage == "accepted"
     assert persisted["score"] == 1.0
+    assert adjudications == []
 
 
 def test_batch_reports_clean_acceptance_and_prose_quarantine_apart():
