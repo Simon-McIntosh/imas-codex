@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-boundary-finalize-run">
+  <title>The boundary-averaged density family is finalized</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-boundary-finalize-run-title">The boundary-averaged density family is finalized</h1>
+  <p id="shc-boundary-finalize-run-scope">
+    Operational finalization of <code>flux_surface_averaged_*_density_at_plasma_boundary</code>
+    (17 members), read-only at the start and end with one id-scoped revalidation
+    between them. All commands ran against the main checkout at
+    <code>feb0feac0a74ab55757dc016e1bfc00481f92206</code> under
+    <code>PYTHONPATH=/home/ITER/mcintos/Code/imas-codex</code>. Logs are in the run
+    directory <code>r-20261017T190842176730-shc-boundary-finalize-run</code>.
+  </p>
+
+  <h2 id="shc-boundary-finalize-run-before">Before</h2>
+  <p id="shc-boundary-finalize-run-before-body">
+    Read by <code>read_members.py</code> (log <code>before-read.log</code>,
+    <code>EXIT=0</code>). All 17 members carried
+    <code>name_stage='accepted'</code>, <code>docs_stage='accepted'</code>,
+    <code>status='draft'</code>. Sixteen read <code>validation_status='valid'</code>;
+    the beryllium member read <code>quarantined</code> with
+    <code>validation_issues=['campaign: banned prose persisted after refine']</code>.
+    The prose policy's matcher found <strong>0</strong> matches on all 17 documents
+    (17/17 zero-match), confirming the estimator-recipe sentence is gone.
+    <strong>8</strong> one-way sibling links were missing. The stored
+    <code>harmonized_group_signature</code> matched the then-current signature on
+    <strong>0/17</strong> members (13 carried none, 4 carried older values).
+  </p>
+
+  <h2 id="shc-boundary-finalize-run-revalidate">Revalidate the quarantined member</h2>
+  <p id="shc-boundary-finalize-run-revalidate-body">
+    The brief named <code>sn run --revalidate</code> scoped to the one name. That
+    exact form is refused by the CLI: <code>--name</code> is mutually exclusive with
+    <code>--reset/--reseed/--revalidate</code>
+    (<code>imas_codex/cli/sn.py:2073–2076</code>), and the fallback
+    <code>--only validate</code> drain is backlog-wide, not name-scoped — at this
+    revision it would clear 64 pending/quarantined stamps and re-observe 624 null-stamped
+    names catalog-wide (<code>scope-probe.log</code>). The id-scoped counterpart the CLI
+    path itself uses was applied instead, as the prior outline quarantine clearance did:
+    the campaign's own re-audit, which clears the validation stamp on the named cohort
+    then re-runs the deterministic admission gate on exactly those ids, LLM-free
+    (<code>imas_codex/standard_names/campaign.py:807–842</code>). Cohort asserted equal to
+    the one id, description asserted non-null before the stamp was cleared. Log
+    <code>revalidate.log</code>, <code>EXIT=0</code>:
+  </p>
+  <pre id="shc-boundary-finalize-run-revalidate-output">BEFORE quarantined  ['campaign: banned prose persisted after refine']
+AUDIT {'cleared': 1, 'requarantined_ids': [], 'valid_ids': ['flux_surface_averaged_beryllium_density_at_plasma_boundary']}
+AFTER  valid  []  validated_at=2026-10-17T19:17:29.536Z</pre>
+
+  <h2 id="shc-boundary-finalize-run-finalize">Finalize</h2>
+  <p id="shc-boundary-finalize-run-finalize-body">
+    Seed <code>flux_surface_averaged_electron_density_at_plasma_boundary</code>.
+  </p>
+  <pre id="shc-boundary-finalize-run-finalize-dry"># finalize-dry-run.log  (EXIT=0)
+family density  ready  members=17  missing_reverse_pairs=8  calls=0
+finalize: 1 family(ies) ready; wrote nothing.</pre>
+  <pre id="shc-boundary-finalize-run-finalize-apply"># finalize-apply.log  (EXIT=0)
+family density  stamped  members=17  missing_reverse_pairs=0  calls=0
+finalize: 1 family(ies) stamped; 0 model calls.</pre>
+
+  <h2 id="shc-boundary-finalize-run-after">After</h2>
+  <p id="shc-boundary-finalize-run-after-body">
+    Read by <code>read_members.py</code> (log <code>after-read.log</code>,
+    <code>EXIT=0</code>):
+  </p>
+  <ul id="shc-boundary-finalize-run-after-list">
+    <li>all 17 members read <code>name_stage='accepted'</code>,
+      <code>docs_stage='accepted'</code>, <code>status='draft'</code> and
+      <code>validation_status='valid'</code> (16 were already valid; beryllium
+      now valid);</li>
+    <li>prose policy: 17/17 documents zero-match;</li>
+    <li>missing reverse sibling links: <strong>0</strong>;</li>
+    <li>stored signature equals the current signature on <strong>17/17</strong>
+      members: <code>ef0ff417128b1b3edb76e87e8a6bf01c1c25fd299929c4d999e72b4fa931572d</code>.
+      It differs from the pre-finalize current signature only because
+      <code>reconcile_family_reverse_links</code> writes each reciprocal link into the
+      documentation as well as the link list.</li>
+  </ul>
+  <p id="shc-boundary-finalize-run-after-zero">
+    Read-only replan, <code>apply-dry-run-after.log</code> (<code>EXIT=0</code>):
+  </p>
+  <pre id="shc-boundary-finalize-run-after-zero-output">family density  decision=harmonized  members=17  calls=0
+Dry run: 1 family(ies), 0 planned call(s), estimated cost $0.00. Wrote nothing.</pre>
+
+  <h2 id="shc-boundary-finalize-run-spend">Spend</h2>
+  <p id="shc-boundary-finalize-run-spend-body">
+    USD 0.00. The revalidation is the deterministic ISN admission gate and the
+    finalize performs no model calls; both report zero spend. The family's earlier
+    paid work (the apply, USD 8.50 cap) and the beryllium prose edit (USD 0.1366 of a
+    USD 0.50 cap) belong to earlier nodes. This node's spend is USD 0.00 of the
+    USD 0.50 ceiling.
+  </p>
+</main>
+</body>
+</html>
