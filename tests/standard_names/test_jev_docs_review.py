@@ -291,6 +291,7 @@ def test_house_style_finding_lowers_score_with_identical_judgments():
         "id": name_id,
         "description": "Number density of argon.",
         "documentation": "Number density of argon\n\nThe density is positive.",
+        "conventions": conventions_context_for(name_id),
     }
     flawed = {**clean, "documentation": "Wrong opening. The density is positive."}
     clean_report = jev_review.build_docs_audit_report(
