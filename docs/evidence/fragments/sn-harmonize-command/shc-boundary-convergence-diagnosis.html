@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-boundary-convergence-diagnosis">
+  <title>Boundary density family convergence diagnosis</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-boundary-convergence-diagnosis-title">Why the boundary density family did not converge</h1>
+  <p id="shc-boundary-convergence-diagnosis-scope">
+    Read-only diagnosis at revision <code>fb0b964f5569c805545a6c29b68e0ba66e06897e</code>.
+    The bounded live-graph probes and their exact Cypher and output are in
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T113704029531-shc-boundary-convergence-diagnosis/readback.log</code>
+    (lines 1–58, <code>EXIT=0</code>; every query completed in 0.001–0.093 s).
+    The apply receipt is <code>apply.slurm.log</code> and its condensed readback is
+    <code>capture-07-post-apply-steps.txt</code> in the earlier
+    <code>r-20261015T194702454954-shc-boundary-final-apply</code> run directory.
+    Job 1287983 completed with <code>accepted=17/17</code>,
+    <code>halted: banned prose reintroduced in 1 doc(s) (cap 0): flux_surface_averaged_beryllium_density_at_plasma_boundary</code>,
+    and <code>0 stamped</code>. The subsequent report printed eight
+    <code>link_missing_reverse</code> findings; the second dry run printed
+    <code>decision=apply</code> and <code>calls=17</code>. No graph or product write was made here.
+  </p>
+
+  <h2 id="shc-boundary-convergence-diagnosis-status">1. The 16 superseded statuses belong to revived, live identities</h2>
+  <p id="shc-boundary-convergence-diagnosis-status-query">
+    The positive control is the 17 accepted members, selected by the indexed
+    <code>id</code> prefix and suffix and bounded by <code>LIMIT 25</code>. A second
+    bounded read checks their source edges; the catalog-wide accepted-stage
+    count checks that the 16 are an anomaly, not the usual status vocabulary.
+    The three printed outputs are:
+  </p>
+  <pre id="shc-boundary-convergence-diagnosis-status-output">MATCH (n:StandardName) WHERE n.id STARTS WITH $p AND n.id ENDS WITH $s
+  AND n.name_stage=$stage RETURN n.id,n.status,n.docs_stage,... ORDER BY n.id LIMIT 25
+  $p='flux_surface_averaged_', $s='_density_at_plasma_boundary', $stage='accepted'
+MEMBER TALLY 17 Counter({('superseded', 'accepted'): 16, ('draft', 'accepted'): 1})
+MATCH (n:StandardName) WHERE n.id IN $ids
+  OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]-&gt;(n)
+  WITH n,count(DISTINCT src) AS producers
+  OPTIONAL MATCH (dd:IMASNode)-[:HAS_STANDARD_NAME]-&gt;(n)
+  RETURN n.id, producers, count(DISTINCT dd) ORDER BY n.id LIMIT 25
+BINDING TALLY 17 with_producer 17 with_dd 17
+MATCH (n:StandardName {name_stage:'accepted'})
+  RETURN coalesce(n.status,'null') AS status,count(n) AS n ORDER BY status
+CATALOG STATUS [{'status': 'draft', 'n': 2502}, {'status': 'superseded', 'n': 31}]</pre>
+  <p id="shc-boundary-convergence-diagnosis-fold-mechanism">
+    <code>reconcile_catalog_status</code> sets <code>status='superseded'</code>
+    whenever <code>name_stage='superseded'</code>
+    (<code>imas_codex/standard_names/graph_ops.py:14292–14299</code>).
+    The 16 fold receipts all preserve a before image with both fields
+    <code>superseded</code> and <code>updated_at=2026-09-05T15:21:04.031Z</code>.
+    The fold events occurred on 8 September, before either October apply.
+    Each expected after image restores <code>name_stage='reviewed'</code> but
+    retains <code>status='superseded'</code>. This is exactly what
+    <code>_FOLD_NAME_MUTATION_QUERY</code> does: it changes the target's stage and
+    documentation but never its status (<code>edit.py:1520–1545</code>;
+    the revival choice is at <code>edit.py:2909–2916</code>). Later name review
+    accepted them while the catalog status stayed terminal. The receipts prove
+    the status was present by the 5 September before-image timestamp; the
+    reconciliation itself writes no separate change event, so its exact
+    invocation time cannot be proved beyond that recorded stamp.
+  </p>
+  <pre id="shc-boundary-convergence-diagnosis-fold-output">MATCH (n:StandardName) WHERE n.id STARTS WITH $p AND n.id ENDS WITH $s
+  AND n.name_stage='accepted'
+MATCH (n)-[:HAS_INTERNAL_CHANGE]-&gt;(e:StandardNameChange {operation:'fold_identity'})
+  WHERE e.to_name=n.id RETURN n.id,toString(e.changed_at),e.reason ORDER BY n.id LIMIT 25
+FOLD RECEIPTS 16
+argon       2026-09-08T08:42:15.313856Z  superseded/superseded -&gt; reviewed/superseded
+beryllium   2026-09-08T08:42:25.852896Z  superseded/superseded -&gt; reviewed/superseded
+carbon      2026-09-08T08:42:45.065249Z  superseded/superseded -&gt; reviewed/superseded
+deuterium   2026-09-08T08:43:13.596860Z  superseded/superseded -&gt; reviewed/superseded
+electron    2026-09-08T08:43:23.016289Z  superseded/superseded -&gt; reviewed/superseded
+helium_3    2026-09-08T08:43:51.051118Z  superseded/superseded -&gt; reviewed/superseded
+helium_4    2026-09-08T08:44:09.890719Z  superseded/superseded -&gt; reviewed/superseded
+hydrogen    2026-09-08T08:44:28.632014Z  superseded/superseded -&gt; reviewed/superseded
+iron        2026-09-08T08:44:38.070586Z  superseded/superseded -&gt; reviewed/superseded
+lithium     2026-09-08T08:44:56.941643Z  superseded/superseded -&gt; reviewed/superseded
+neon        2026-09-08T08:45:25.714802Z  superseded/superseded -&gt; reviewed/superseded
+nitrogen    2026-09-08T08:45:44.687356Z  superseded/superseded -&gt; reviewed/superseded
+oxygen      2026-09-08T08:45:54.428233Z  superseded/superseded -&gt; reviewed/superseded
+total_ion   2026-09-08T08:47:00.365355Z  superseded/superseded -&gt; reviewed/superseded
+tritium     2026-09-08T08:47:19.187156Z  superseded/superseded -&gt; reviewed/superseded
+xenon       2026-09-08T08:47:37.960628Z  superseded/superseded -&gt; reviewed/superseded
+All 16 before images: updated_at=2026-09-05T15:21:04.031Z.
+Each short name above expands to flux_surface_averaged_&lt;name&gt;_density_at_plasma_boundary.</pre>
+  <p id="shc-boundary-convergence-diagnosis-status-effect">
+    These are live accepted names mislabelled on the catalog axis: all 16
+    have a producing source and DD attachment, and the fold receipts name
+    them as the surviving target. Export excludes them because its candidate
+    predicate checks both <code>status</code> and <code>name_stage</code>
+    (<code>export.py:498–509</code>). Harmonize includes them: its family read
+    filters <code>name_stage</code>, not catalog status, as the 17-row plan
+    readback proves. <code>stamp_harmonized_families</code> likewise tests
+    only <code>docs_stage='accepted'</code> and member count
+    (<code>graph_ops.py:25747–25759</code>); the stale status did not cause the
+    missing stamp. Smallest product repair: make tombstone revival in
+    <code>edit.py</code> atomically restore <code>status='draft'</code> and include
+    that in the fold receipt/postflight expectation. A separately authorized,
+    signed correction should restore draft status on these 16 existing
+    accepted identities; rerunning <code>reconcile_catalog_status</code>
+    cannot repair them because it has no accepted-stage branch.
+  </p>
+
+  <h2 id="shc-boundary-convergence-diagnosis-reverse">2. The reverse-link step was skipped by the halt</h2>
+  <p id="shc-boundary-convergence-diagnosis-reverse-mechanism">
+    The graph read compares each of the 17 members' <code>name:</code> links
+    with the target member's links. It found exactly the eight pairs below,
+    agreeing with the prior report's eight <code>link_missing_reverse</code>
+    findings. <code>reconcile_family_reverse_links</code> constructs the reverse
+    and writes it to both documentation and links
+    (<code>harmonize.py:1012–1199</code>). The apply calls it only inside
+    <code>if not result.halted</code>, immediately before stamping
+    (<code>harmonize.py:1613–1631</code>). The banned-prose halt made that
+    condition false. The status field is not a filter in this step.
+  </p>
+  <pre id="shc-boundary-convergence-diagnosis-reverse-output">MATCH (n:StandardName) WHERE n.id STARTS WITH $p AND n.id ENDS WITH $s
+  AND n.name_stage='accepted' RETURN n.id,n.links ORDER BY n.id LIMIT 25
+MISSING REVERSE 8
+argon     -&gt; xenon
+carbon    -&gt; neon
+deuterium -&gt; xenon
+electron  -&gt; total_ion
+helium_4  -&gt; helium_3
+hydrogen  -&gt; helium_4
+ion       -&gt; total_ion
+nitrogen  -&gt; neon
+All names expand to flux_surface_averaged_&lt;name&gt;_density_at_plasma_boundary.</pre>
+  <p id="shc-boundary-convergence-diagnosis-reverse-remedy">
+    This is unfinished data state caused by the halted finalization, not
+    evidence that reciprocal construction failed. After the beryllium doc is
+    clean, the smallest operation is the existing bounded reverse-link
+    reconciliation on exactly these 17 members, followed by a readback of
+    zero missing pairs. It should not be bypassed by stamping first.
+  </p>
+
+  <h2 id="shc-boundary-convergence-diagnosis-idempotence">3. Every member lacks the current family stamp</h2>
+  <p id="shc-boundary-convergence-diagnosis-idempotence-mechanism">
+    <code>plan_family_applies</code> hashes the 17 ids and their current
+    description/documentation, then plans no calls only if the set of
+    non-null stored <code>harmonized_group_signature</code> values equals that
+    current signature (<code>harmonize.py:105–119, 1230–1252</code>).
+    The read-only planner returned <code>decision=apply</code>, batches of
+    1 anchor and 16 members, and 17 calls. Thirteen members have no stored
+    signature; four carry a different, older signature. All 17 have
+    <code>docs_stage='accepted'</code>, so that axis is not what the planner
+    reads as unconverged. The skipped stamp explains the whole replan.
+  </p>
+  <pre id="shc-boundary-convergence-diagnosis-idempotence-output">plan_family_applies(gc, seeds=['flux_surface_averaged_electron_density_at_plasma_boundary'])
+DECISION apply N 17 CALLS 17
+CURRENT 162c43e67b983ce14fd4cfe54a2876cef9947719b0810e7943ce0c9f33cbe585
+BATCHES [1, 16]
+argon       none
+beryllium   none
+carbon      none
+deuterium   none
+electron    none
+helium_3    none
+helium_4    none
+hydrogen    none
+ion         132f6f08db39c5880664082b741afe6122787b33a11ea8b1f4324bdec348a1fe
+iron        none
+lithium     d6050f7dab1a1d71274c62ede95f28faf7b9f47f9f4c8048b6cf1957c4e9d3ad
+neon        none
+nitrogen    none
+oxygen      5a01f68933a0f778e3fa2ce5cf43eb31537a839dd94c09d55ed82c2e8cf51559
+total_ion   88b0ebc3885c6c36646832250cdd2f0bcc208b3ab1e6065f6f6a4a1bc95779c8
+tritium     none
+xenon       none
+Every stored value differs from CURRENT; all 17 docs_stage='accepted'.
+Each short name expands as above. Full per-member output: readback.log:34–51.</pre>
+  <p id="shc-boundary-convergence-diagnosis-idempotence-remedy">
+    This is unstamped data state, not a planner comparison defect. After
+    removing the prose violation and reconciling links, stamp the resulting
+    current signature with the existing stamping operation, then require a
+    second read-only plan to return zero calls. A recovery route that can
+    finalize an already drained family after those checks, including a valid
+    documentation state check, is the smallest
+    product addition if the current command offers no such route; it avoids
+    another 17 model calls merely to reach the skipped finalization.
+  </p>
+
+  <h2 id="shc-boundary-convergence-diagnosis-halt">4. The prose gate runs after docs acceptance</h2>
+  <p id="shc-boundary-convergence-diagnosis-halt-mechanism">
+    The beryllium document contains the phrase <q>It is obtained from</q>
+    followed by a linked local beryllium density and a prose recipe for
+    replacing its point value with a weighted surface mean. The policy's
+    <code>estimator_recipe</code> regex matches that phrase when no equation
+    follows within 200 characters (<code>prose_policy.py:29–44</code>).
+    The live row confirms <code>name_stage=accepted</code>,
+    <code>docs_stage=accepted</code>, and
+    <code>validation_status=quarantined</code> with the campaign's banned-prose
+    issue. This is a positive match, not an empty or inferred gate result:
+  </p>
+  <pre id="shc-boundary-convergence-diagnosis-halt-output">MATCH (n:StandardName {id:$id}) RETURN n.name_stage,n.docs_stage,n.status,
+  n.validation_status,n.validation_issues,n.description,n.documentation
+$id='flux_surface_averaged_beryllium_density_at_plasma_boundary'
+BERYLLIUM STAGES name_stage=accepted docs_stage=accepted status=superseded
+  validation_status=quarantined
+  validation_issues=['campaign: banned prose persisted after refine']
+BANNED PROSE FINDINGS {'typical_values': 0, 'estimator_recipe': 1, 'procedural_padding': 0}
+MATCH estimator_recipe 'is obtained from'
+  'It is obtained from the local [beryllium ion density at the plasma boundary](name:beryllium_density_at_plasma_boundary) by replacing the pointwise value ...'
+apply.slurm.log: persist_reviewed_docs -&gt; docs_stage=accepted (score=0.938);
+  family ... accepted=17/17 halted: banned prose reintroduced in 1 doc(s) (cap 0): flux_surface_averaged_beryllium_density_at_plasma_boundary</pre>
+  <p id="shc-boundary-convergence-diagnosis-halt-tally">
+    The tally and halt measure different predicates. Review accepted the doc
+    on score and registry conformance (<code>workers.py:10828–10855</code>;
+    <code>graph_ops.py:17644–17865</code>). Only after the drain did
+    <code>measure_batch</code> count <code>docs_stage='accepted'</code> and test
+    banned prose independently (<code>campaign.py:625–659</code>).
+    <code>default_revalidate</code> then set validation to quarantined without
+    changing either accepted stage (<code>campaign.py:721–742, 1048–1065</code>).
+    The convergence gate therefore correctly halted, while the displayed
+    acceptance count remained 17. The smallest data correction is to remove
+    that redundant recipe sentence from this one document and revalidate it.
+    The smallest product correction is to make a positive campaign banned-prose
+    verdict hold documentation from acceptance and route it to refinement before the
+    campaign's post-drain check; also report accepted and quarantined counts
+    separately so a future halt cannot read as clean acceptance.
+  </p>
+
+  <h2 id="shc-boundary-convergence-diagnosis-decision">Classification and next action</h2>
+  <table id="shc-boundary-convergence-diagnosis-decision-table">
+    <thead><tr><th>Finding</th><th>Classification</th><th>Smallest safe next change</th></tr></thead>
+    <tbody>
+      <tr><td>16 live names with superseded catalog status</td><td>Product fold-revival defect plus existing data state</td><td>Restore status in the fold transition and signed-repair these 16 rows to draft.</td></tr>
+      <tr><td>Eight missing reverse links</td><td>Skipped post-halt data finalization</td><td>Run existing scoped reconciliation after the prose issue is cleared; read back zero pairs.</td></tr>
+      <tr><td>17 calls on the second dry run</td><td>Skipped stamp, no planner defect shown</td><td>Stamp the current post-reconciliation signature and verify zero calls; provide a guarded finalization route if needed.</td></tr>
+      <tr><td>Beryllium prose halt despite accepted tally</td><td>One bad document and a product acceptance/reporting gap</td><td>Remove the redundant recipe, revalidate, and hold such prose before docs acceptance in future runs.</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-boundary-convergence-diagnosis-reapply">
+    A paid re-apply should wait. The current dry run still schedules 17 calls
+    and estimates USD 10.45, above the previous USD 8.50 cap; it would repeat
+    generation before the two skipped finalization steps. Resolve the prose
+    and stale catalog statuses, finalize links and stamp under explicit graph
+    write authority, then verify report lint zero and planner calls zero.
+  </p>
+</main>
+</body>
+</html>
