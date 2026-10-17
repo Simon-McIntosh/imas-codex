@@ -148,11 +148,62 @@ def test_state_carries_source_docs_and_siblings_when_observed():
     assert nb["sibling_names"]["value"] == ["poloidal_flux", "flux_surface_area"]
 
 
+def test_cocos_source_path_supplies_label_from_dd_reader():
+    item = {
+        "id": "poloidal_magnetic_flux",
+        "source_paths": ["dd:equilibrium/time_slice/profiles_1d/psi"],
+        "dd_source_docs": [
+            {
+                "path": "equilibrium/time_slice/profiles_1d/psi",
+                "cocos_label": "psi_like",
+            }
+        ],
+    }
+    state = jev_review.build_name_state(item)
+    assert state["neighbourhood"]["cocos_label"] == {
+        "observed": True,
+        "value": "psi_like",
+    }
+
+
+def test_state_carries_closed_base_roster_full_parse_and_parent_owner():
+    state = jev_review.build_name_state(
+        {
+            "id": "poloidal_magnetic_flux",
+            "parent_path": "equilibrium/time_slice/boundary/outline",
+        }
+    )
+    assert "magnetic_flux" in state["neighbourhood"]["physical_base_roster"]["value"]
+    assert state["name"]["decomposition"] is not None
+    assert state["neighbourhood"]["owner_segment"]["value"] == "boundary"
+    qualified = jev_review.build_name_state({"id": "total_plasma_heating_power"})
+    assert {
+        qualifier["token"]
+        for qualifier in qualified["name"]["decomposition"]["qualifiers"]
+    } >= {"total", "plasma"}
+
+
 def test_state_carries_every_taxonomy_neighbourhood_field():
     checks, _ = load_review_checks()
     fields = jev_review.neighbourhood_fields(checks)
     state = jev_review.build_name_state({"id": "x"})
-    assert set(state["neighbourhood"]) == set(fields)
+    assert set(fields) <= set(state["neighbourhood"])
+
+
+def test_repeated_segment_is_decided_by_the_existing_audit():
+    check = next(
+        check
+        for check in load_review_checks()[0]
+        if check.id == "redundant_repeated_segment"
+    )
+    assert check.question is None
+    assert jev_review.audit_finding_for(
+        check, "electron_electron_temperature", AuditReport()
+    )
+    assert (
+        jev_review.audit_finding_for(check, "electron_temperature", AuditReport())
+        is None
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -422,6 +473,25 @@ async def test_audit_check_without_a_report_is_unanswered_not_passed(monkeypatch
     assert record["answered"] is False
     assert record["failed"] is False
     assert record["decision"] == "unknown"
+
+
+async def test_repeated_segment_is_decided_without_an_audit_report(monkeypatch):
+    monkeypatch.setattr(jev_review, "rerank_name_comparators", _no_rerank)
+    monkeypatch.setattr(jev_review, "decide_batch", _fake_decide_batch({}, cost=0.0))
+    items = [_item("electron_electron_temperature"), _item("electron_temperature")]
+
+    review = await jev_review.review_names(items)
+
+    repeated = review.items[0]["checks"]["redundant_repeated_segment"]
+    clean = review.items[1]["checks"]["redundant_repeated_segment"]
+    assert repeated["answered"] is True
+    assert repeated["failed"] is True
+    assert repeated["decision"] == "reject"
+    assert "repeated_token" in repeated["audit_finding"]
+    assert repeated["question"] is None
+    assert clean["answered"] is True
+    assert clean["failed"] is False
+    assert clean["decision"] == "accept"
 
 
 async def test_audit_check_with_a_report_is_answered_from_it(monkeypatch):

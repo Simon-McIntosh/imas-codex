@@ -350,10 +350,7 @@ checks:
   - subject
   - component
   retrieval: false
-  question:
-    kind: noul
-    true_case: defect
-    text: Does the name repeat a redundant segment (e.g. electron_electron)?
+  audit_finding_class: convention_violation
 - id: missing_required_segment
   axis: name
   dimension: completeness

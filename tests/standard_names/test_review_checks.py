@@ -59,6 +59,13 @@ def test_every_check_is_decided_exactly_once(loaded) -> None:
         )
 
 
+def test_repeated_segment_uses_audit_class(loaded) -> None:
+    checks, _ = loaded
+    check = next(check for check in checks if check.id == "redundant_repeated_segment")
+    assert check.question is None
+    assert check.audit_finding_class == "convention_violation"
+
+
 def test_raw_entries_never_carry_both_or_neither() -> None:
     """The loader's guard is checked at the source, not only through the model."""
 
