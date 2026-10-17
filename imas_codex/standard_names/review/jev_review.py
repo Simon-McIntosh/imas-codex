@@ -481,6 +481,7 @@ DOCS_SCORE_WEIGHTS: dict[str, float] = {
     "dimension:documentation_quality": 0.15368999988603704,
 }
 DOCS_SCORE_INTERCEPT = -15.142945942036562
+CONTRADICTION_VETO_PROBABILITY = 0.30
 
 _SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 _DISPLAY_MATH = re.compile(r"\$\$.*?\$\$", re.DOTALL)
@@ -738,7 +739,7 @@ def score_docs_review(
 ) -> float | None:
     """Apply calibration weights after the hard contradiction veto."""
     if any(
-        answer.get("choice") == "contradicts"
+        claim_contradicts(answer)
         for key, answer in answers.items()
         if key.startswith("check:claim_contradicts_source:")
     ):
@@ -752,6 +753,19 @@ def score_docs_review(
         weight * values.get(name, 0.0) for name, weight in selected_weights.items()
     )
     return 1.0 / (1.0 + math.exp(-max(-50.0, min(50.0, linear))))
+
+
+def claim_contradicts(answer: Mapping[str, Any]) -> bool:
+    """Veto a selected contradiction or a substantial conflicting probability.
+
+    A low-confidence Choice can select support while still assigning material
+    probability to contradiction. A hard safety veto should retain that signal.
+    """
+    return (
+        answer.get("choice") == "contradicts"
+        or float(answer.get("probabilities", {}).get("contradicts", 0.0))
+        >= CONTRADICTION_VETO_PROBABILITY
+    )
 
 
 def aggregate_docs_review(
@@ -784,8 +798,7 @@ def aggregate_docs_review(
         for index, _claim in enumerate(state["documentation_claims"])
     ]
     contradiction_veto = any(
-        answer is not None and answer.get("choice") == "contradicts"
-        for answer in claim_answers
+        answer is not None and claim_contradicts(answer) for answer in claim_answers
     )
     check_records: dict[str, dict[str, Any]] = {}
     for check in docs_checks:

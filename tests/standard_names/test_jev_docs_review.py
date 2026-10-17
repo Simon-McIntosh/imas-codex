@@ -255,6 +255,37 @@ def test_one_contradiction_vetoes_top_scores_and_clean_checks():
     )
 
 
+def test_material_contradiction_probability_vetoes_ambiguous_support():
+    checks, _ = load_review_checks()
+    state = jev_review.build_docs_state(
+        {
+            "id": "argon_density",
+            "documentation": "The argon density is negative.",
+            "description": "Number density of argon.",
+            "conventions": {},
+        }
+    )
+    answers = _top_answers(
+        jev_review.docs_question_table(checks, state["documentation_claims"])
+    )
+    claim = "check:claim_contradicts_source:0"
+    answers[claim] = {
+        "choice": "supports",
+        "probabilities": {"supports": 0.44, "contradicts": 0.32, "says nothing": 0.24},
+    }
+    report = AuditReport()
+    assert jev_review.aggregate_docs_review(
+        state, checks, answers, audit_report=report
+    )["contradiction_veto"]
+    assert (
+        jev_review.score_docs_review(state, checks, answers, audit_report=report) == 0.0
+    )
+    answers[claim]["probabilities"]["contradicts"] = 0.04
+    assert not jev_review.aggregate_docs_review(
+        state, checks, answers, audit_report=report
+    )["contradiction_veto"]
+
+
 def test_unanswered_claim_is_unknown_and_unsupported_claim_is_rejected():
     checks, _ = load_review_checks()
     state = jev_review.build_docs_state(

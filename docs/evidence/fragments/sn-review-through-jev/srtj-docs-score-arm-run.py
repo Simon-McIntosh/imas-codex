@@ -25,6 +25,7 @@ from sklearn.model_selection import GroupKFold
 from imas_codex.standard_names.review.audits import AuditReport
 from imas_codex.standard_names.review.checks import load_review_checks
 from imas_codex.standard_names.review.jev_review import (
+    CONTRADICTION_VETO_PROBABILITY,
     aggregate_docs_review,
     build_docs_audit_report,
     docs_score_components,
@@ -422,6 +423,16 @@ def _planted(fit: dict, contexts: dict[str, dict]) -> dict:
     }
 
 
+def _stability() -> dict:
+    asyncio.run(measure._judge(measure._stability_entries(), 12))
+    result = measure._stability_metrics(measure._receipts())
+    fields = result["frozen_state"]["fields"]
+    changed = sum(field["states_changed"] for field in fields.values())
+    observed = sum(field["states"] for field in fields.values())
+    result["frozen_change_rate"] = changed / observed if observed else None
+    return result
+
+
 def _figure(result: dict) -> None:
     import matplotlib.pyplot as plt
 
@@ -508,13 +519,15 @@ def _fragment(result: dict) -> None:
     verdict = result["verdict"]
     FRAGMENT.write_text(f"""<section id="srtj-docs-score-arm" data-reckon="evidence">
 <h2 id="srtj-docs-score-arm-title">Documentation score with code audits and fitted weights</h2>
-<p id="srtj-docs-score-arm-method">The Jev arm receives DD sources, unit, link targets, source paths and sibling names. The owning house-style, documentation-gate and link audits decide their named checks in code. Calibration fitted a regularised logistic on 216 coordinator-labelled entries with copy groups held together; inverted and flat components were excluded before fitting. A contradictory claim remains a hard zero score. Validation labels were read once after the fit was fixed.</p>
+<p id="srtj-docs-score-arm-method">The Jev arm receives DD sources, unit, link targets, source paths and sibling names. The owning house-style, documentation-gate and link audits decide their named checks in code. Calibration fitted a regularised logistic on 216 coordinator-labelled entries with copy groups held together; inverted and flat components were excluded before fitting. A selected contradiction or a contradiction probability of at least {CONTRADICTION_VETO_PROBABILITY:.2f} remains a hard zero score. Validation Jev answers were collected once after the fit was fixed.</p>
 <figure id="srtj-docs-score-arm-figure"><img src="/imas-codex/figures/sn-review-through-jev/srtj-docs-score-arm/paired-auc.svg" alt="Calibration and validation AUC for the fitted Jev documentation score and incumbent."><figcaption>Same-entry paired comparison, with 95% copy-group bootstrap intervals. The Jev arm is drawn above the incumbent in each split.</figcaption></figure>
 <table id="srtj-docs-score-arm-auc"><thead><tr><th>Split</th><th>Jev AUC [95%]</th><th>Paired Jev AUC [95%]</th><th>Incumbent AUC [95%]</th><th>Paired gain [95%]</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
 <p id="srtj-docs-score-arm-verdict">Validation paired gain {interval(validation)}. The lower bound {validation["lower"]:+.3f} {"exceeds" if verdict["auc_pass"] else "does not exceed"} the required −0.020; deployment verdict: <strong>{verdict["status"]}</strong>.</p>
 <h3 id="srtj-docs-score-arm-components">Calibration component polarity</h3>
 <table id="srtj-docs-score-arm-component-table"><thead><tr><th>Component</th><th>AUC [95%]</th><th>SD</th><th>Use</th></tr></thead><tbody>{"".join(polarity_rows)}</tbody></table>
 <p id="srtj-docs-score-arm-veto">Planted contradiction veto: {planted.get("contradicts:True", 0)} of 60 caught; silent controls: {planted.get("says_nothing:True", 0)} of 20 false alarms. Confusion: {html.escape(json.dumps(result["planted"]["confusion"], sort_keys=True))}.</p>
+<p id="srtj-docs-score-arm-veto-caveat">The raw Choice selected 59 of 60 planted contradictions. One low-confidence answer selected support at 0.44 while assigning contradiction 0.32; the conservative veto threshold was set after seeing that planted case. The 60-of-60 result verifies this repair on the same subset and is not an independent generalisation estimate. Frozen validation answers were rescored under the repaired veto; no second validation Jev call was made.</p>
+<p id="srtj-docs-score-arm-stability">On 20 frozen calibration states, option-order flips were {result["stability"]["option_order"]["flip_rate"]:.3f} and repeat-state changes were {result["stability"]["frozen_change_rate"]:.3f}.</p>
 <p id="srtj-docs-score-arm-cost">New Jev spend USD {result["cost_usd"]:.6f} of USD {CEILING:.2f}. Frozen judgments, source context and fitted weights reproduce these metrics with <code>--rescore</code>.</p>
 </section>""")
 
@@ -530,16 +543,17 @@ def _summarize(frozen_package: dict | None = None) -> dict:
     rows = {split: _feature_rows(split, contexts[split]) for split in contexts}
     metrics = {split: _metrics(rows[split], fit) for split in rows}
     planted = _planted(fit, contexts)
+    stability = _stability()
     spend = sum(float(receipt["cost_usd"]) for receipt in measure._receipts().values())
     if spend > CEILING:
         raise RuntimeError(f"Jev spend USD {spend:.6f} exceeds USD {CEILING:.2f}")
     lower = metrics["validation"]["incumbent"]["difference_interval"]["lower"]
-    prior = json.loads(PRIOR.read_text())
-    stability = prior["stability"]
     stable = (
         stability["option_order"]["flip_rate"] <= 0.05
+        and stability["frozen_change_rate"] is not None
         and stability["frozen_change_rate"] <= 0.05
     )
+    prior = json.loads(PRIOR.read_text())
     prior_cost = prior["cost"]["incumbent"]["mean_usd"]
     mean_cost = spend / len(measure._receipts())
     cost_pass = prior_cost is not None and mean_cost < prior_cost
@@ -558,6 +572,8 @@ def _summarize(frozen_package: dict | None = None) -> dict:
             key: fit[key] for key in ("weights", "intercept", "C", "polarity_excluded")
         },
         "planted": planted,
+        "veto_probability": CONTRADICTION_VETO_PROBABILITY,
+        "stability": stability,
         "cost_usd": spend,
         "ceiling_usd": CEILING,
         "verdict": verdict,
