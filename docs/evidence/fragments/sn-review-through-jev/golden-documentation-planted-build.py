@@ -104,28 +104,88 @@ CLAIMS = """
 486|relation|Normalised temperature|The quantity is normalized temperature.|The quantity is absolute temperature without normalization.
 """.strip()
 
-OFF_SOURCE = (
-    "One metre equals one thousand millimetres.",
-    "One kilometre equals one thousand metres.",
-    "One hour contains sixty minutes.",
-    "A circle has a diameter twice its radius.",
-    "A right angle measures ninety degrees.",
-    "One square metre equals ten thousand square centimetres.",
-    "One kilogram equals one thousand grams.",
-    "One megawatt equals one million watts.",
-    "One millisecond equals one thousand microseconds.",
-    "A Euclidean triangle has three sides.",
-    "A rectangle has four right angles.",
-    "The square root of sixteen is four.",
-    "One gigahertz equals one billion hertz.",
-    "One kilovolt equals one thousand volts.",
-    "One newton equals one kilogram metre per second squared.",
-    "One joule equals one newton metre.",
-    "A complete revolution measures two pi radians.",
-    "One millimetre equals one thousand micrometres.",
-    "One microsecond equals one millionth of a second.",
-    "The area of a rectangle equals its length times its width.",
-)
+SILENT_CLAIMS = {
+    342: (
+        "In a wave-heating power balance, this value can be grouped with the absorbed powers of thermal electrons and ions.",
+        "Absorbed powers of different particle populations contribute to a power balance; the DD names only fast-population absorption, not that use.",
+    ),
+    336: (
+        "A scan of this calibration angle can reveal an orientation offset in the polarization-selective optical element.",
+        "An angle-dependent polarization response permits an alignment check; the DD defines the angle and reflection rule, not a scan.",
+    ),
+    158: (
+        "In an axisymmetric current-free region, vacuum toroidal-field strength at another major radius scales inversely with that radius.",
+        "The vacuum toroidal-field reference pair supplies an inverse-radius field scale; the DD specifies only where its reference value is given.",
+    ),
+    408: (
+        "Poloidal beta is used alongside stored energy when assessing pressure support in an equilibrium reconstruction.",
+        "Both are equilibrium pressure measures; the DD gives the beta formula but says nothing about this use or stored-energy comparison.",
+    ),
+    389: (
+        "A Coriolis flow meter can measure this coolant mass flow without first converting a volumetric-flow reading.",
+        "Coriolis meters respond to mass flow; the DD only identifies the measured quantity as a fluid mass-flow rate.",
+    ),
+    481: (
+        "Combining this angle with the detector's major radius gives its horizontal-plane position relative to the machine axis.",
+        "Cylindrical angle and radius locate a point in the transverse plane; the DD states only the angle's orientation.",
+    ),
+    71: (
+        "This angle can orient an element's cross-sectional mesh when a passive-loop geometry is assembled.",
+        "An inclination rotates the element's section geometry; the DD calls it an angle but gives no mesh-building use.",
+    ),
+    24: (
+        "Together with the aperture-to-detector distance, this extent constrains the detector's geometric field of view.",
+        "Detector size and separation constrain viewing geometry; the DD gives camera dimensions only.",
+    ),
+    41: (
+        "Integrating this force density over a conducting component's volume yields its net radial electromagnetic force.",
+        "A volumetric force density integrates to force; the DD records a radial component per grid element without the integral.",
+    ),
+    45: (
+        "Comparing the complex phase of this component with the parallel component can characterize the wave's local polarization.",
+        "Relative phases of electric-field components determine polarization; the DD only says a scalar is stored per grid element.",
+    ),
+    291: (
+        "This fraction can be tracked while tuning electron-cyclotron launch polarization.",
+        "Mode fractions respond to the polarization mix; the DD defines the fraction and its endpoints, not tuning use.",
+    ),
+    417: (
+        "Together with launch height, this angle helps predict a beamlet's vertical position along a straight-line trajectory.",
+        "Launch height plus elevation gives geometric vertical displacement; the DD defines inclination only.",
+    ),
+    406: (
+        "Comparing this length across discharges helps assess changes in the radial width of exhaust heat flux.",
+        "A heat-flux decay length measures radial falloff; the DD identifies the mapped length but no cross-discharge comparison.",
+    ),
+    203: (
+        "Recording this angle helps compare beam-spot orientations from separate beam-tracing runs.",
+        "An ellipse tilt is an orientation observable; the DD identifies the angle but gives no comparison use.",
+    ),
+    93: (
+        "The time derivative of this stored energy can be compared with net heating power in a plasma energy balance.",
+        "A stored-energy change enters an energy balance; the DD gives energy content and time dependence without that comparison.",
+    ),
+    135: (
+        "This effective resistance can vary during a discharge as plasma temperature changes.",
+        "Plasma electrical dissipation depends on its evolving state; the DD gives a power-current formula but no temperature dependence.",
+    ),
+    294: (
+        "This ratio becomes numerically sensitive where magnetic-field magnitude is very small.",
+        "The accepted definition divides by field magnitude; the DD merely says one scalar is stored per grid element.",
+    ),
+    362: (
+        "Varying this coefficient in a neutral-transport model can test the sensitivity of predicted energy losses to the closure.",
+        "A flux-limiter coefficient is a closure parameter; the DD only describes storage of one scalar per grid element.",
+    ),
+    49: (
+        "Comparing this aggregate with species-resolved ion temperatures can reveal ion populations that are not in thermal equilibrium.",
+        "A species mean can be compared with its contributing temperatures; the DD says only that species and charge states are averaged.",
+    ),
+    411: (
+        "Tracking this rate beside the co-passing rate can show how thermal-particle source contributions differ between the two passing-orbit classes.",
+        "The two passing-orbit source rates can be compared; the DD names only a thermal-particle source rate.",
+    ),
+}
 
 
 def stratified_draw(rows: list[dict], count: int, rng: random.Random) -> list[dict]:
@@ -176,16 +236,11 @@ def build() -> dict:
         authored[rank] = (rule, original, planted, source)
     rng = random.Random(SEED)
     contradictions = stratified_draw([acceptable[rank] for rank in authored], 60, rng)
-    control_pool = [
-        row
-        for rank, row in acceptable.items()
-        if rank not in {item["draw_rank"] for item in contradictions}
-        and any(
-            len(source["documentation"].strip()) > 25 for source in row["dd_sources"]
-        )
-    ]
+    selected_ranks = {item["draw_rank"] for item in contradictions}
+    if len(SILENT_CLAIMS) != 20 or selected_ranks.intersection(SILENT_CLAIMS):
+        raise ValueError("Silent controls must be distinct from contradiction copies")
     controls = sorted(
-        rng.sample(control_pool, 20),
+        (acceptable[rank] for rank in SILENT_CLAIMS),
         key=lambda row: (row["split"], row["physics_domain"], row["draw_rank"]),
     )
     copies = []
@@ -194,17 +249,15 @@ def build() -> dict:
             rank = row["draw_rank"]
             if kind == "contradicts":
                 rule, source_faithful, planted, source = authored[rank]
+                silent_basis = None
             else:
                 source = next(
                     source
                     for source in row["dd_sources"]
                     if len(source["documentation"].strip()) > 25
                 )
-                rule, source_faithful, planted = (
-                    "off_source",
-                    None,
-                    OFF_SOURCE[len(copies) - len(contradictions)],
-                )
+                rule, source_faithful = "off_source", None
+                planted, silent_basis = SILENT_CLAIMS[rank]
                 if planted.casefold() in source["documentation"].casefold():
                     raise ValueError(f"Control supported by source: {rank}")
             original_documentation = row["documentation"]
@@ -226,6 +279,7 @@ def build() -> dict:
                     "original_sentence": original_sentence,
                     "source_faithful_sentence": source_faithful,
                     "planted_sentence": planted,
+                    "silent_basis": silent_basis,
                     "dd_source": source,
                     "original_documentation": original_documentation,
                     "documentation": original_documentation.rstrip() + "\n\n" + planted,
@@ -237,7 +291,7 @@ def build() -> dict:
         "source": str(SOURCE.relative_to(ROOT)),
         "source_sha256": hashlib.sha256(source_bytes).hexdigest(),
         "draw": {
-            "method": "one random contradiction per populated split/domain stratum, then seeded shuffle of remaining seats; seeded sample of source-bearing silent controls",
+            "method": "one random contradiction per populated split/domain stratum, then seeded shuffle of remaining seats; manually authored source-bearing silent controls",
             "eligible_contradictions": len(authored),
             "contradiction_ranks": [row["draw_rank"] for row in contradictions],
             "silent_control_ranks": [row["draw_rank"] for row in controls],

@@ -1,7 +1,7 @@
 <section id="srtj-docs-planted-defects">
 <h2>Source-anchored documentation claims</h2>
-<p>Golden B has 400 judgments, of which 146 are acceptable. The builder authors 79 source-anchored contradiction candidates and draws 60 with seed 17341 across populated split and physics-domain strata. It draws 20 additional acceptable, source-bearing entries for true statements that their DD source does not address. Every copy retains the original documentation and appends exactly one labeled sentence. No model created or judged the labels.</p>
-<p>Golden B SHA-256: <code>b8390859634f21394e6f816536d579b9f8275c6feb5ccd24ce0f99f585e55a60</code>. The drawn ranks and rule are stored in the fixture. A rebuild wrote 285651 bytes and produced a zero diff (<code>BUILD_EXIT=0</code>, <code>DIFF_EXIT=0</code>); <code>--check</code> matched the bytes and refused an altered fixture with <code>EXIT=1</code>.</p>
+<p>Golden B has 400 judgments, of which 146 are acceptable. The builder authors 79 source-anchored contradiction candidates and draws 60 with seed 17341 across populated split and physics-domain strata. It selects 20 further accepted, source-bearing entries for on-topic physical claims that their DD source neither supports nor contradicts. Every copy retains the original documentation and appends exactly one labeled sentence. Each silent control stores its physical basis and the gap in the DD wording. No model created or judged the labels.</p>
+<p>Golden B SHA-256: <code>b8390859634f21394e6f816536d579b9f8275c6feb5ccd24ce0f99f585e55a60</code>. The selected ranks and rule are stored in the fixture. A rebuild wrote 293412 bytes and produced a zero diff (<code>BUILD_EXIT=0</code>, <code>DIFF_EXIT=0</code>); <code>--check</code> matched the bytes and refused an altered fixture with <code>EXIT=1</code>.</p>
 <p>The co-passing thermal-particle source rate can be negative and represent a net sink. Its planted claim changes the population to fast particles, which the DD source's “thermal particle density” wording excludes; it does not treat a negative source as a definitional contradiction.</p>
 <h3 id="srtj-docs-planted-defects-counts">Counts</h3>
 <table><thead><tr><th>Rule</th><th>Calibration</th><th>Validation</th><th>Total</th></tr></thead><tbody>
@@ -60,6 +60,16 @@
 <tr><td><code>contradicts-250</code></td><td><code>interferometer/channel/n_e_line_average</code></td><td>The DD divides the line integral by chord length; the added sentence multiplies it.</td></tr>
 <tr><td><code>contradicts-476</code></td><td><code>camera_ir/optical_element/material_properties/roughness</code></td><td>The DD maps zero to specular and one to rough; the added sentence reverses the endpoints.</td></tr>
 </tbody></table>
+<h3 id="srtj-docs-planted-defects-silent-hand-read">Five manual silent-control comparisons</h3>
+<p>I read the original documentation and DD text for these five controls. Each added sentence concerns the entry's quantity, states a valid physical use or relation, and addresses something the DD source leaves open:</p>
+<table><thead><tr><th>Claim ID</th><th>Added claim</th><th>Why the DD says nothing</th></tr></thead><tbody>
+<tr><td><code>says_nothing-342</code></td><td>Fast-electron absorbed power can be grouped with other population powers in a wave-heating balance.</td><td>The DD names absorption by fast particles but gives no balance across populations.</td></tr>
+<tr><td><code>says_nothing-336</code></td><td>A calibration-angle scan can expose an optical-element orientation offset.</td><td>The DD defines polarizer orientation, reflection and sign, not a scan or alignment diagnostic.</td></tr>
+<tr><td><code>says_nothing-481</code></td><td>Toroidal angle and major radius together locate the neutron-detector center in the horizontal plane.</td><td>The DD states only the toroidal angle and its positive orientation.</td></tr>
+<tr><td><code>says_nothing-24</code></td><td>Detector extent and aperture distance constrain geometric field of view.</td><td>The DD gives horizontal and vertical dimensions, with no aperture geometry.</td></tr>
+<tr><td><code>says_nothing-294</code></td><td>The velocity-to-field ratio is numerically sensitive when field magnitude is very small.</td><td>The DD says only that one scalar is stored per grid element; the accepted original gives the quotient.</td></tr>
+</tbody></table>
+<p>The neutron-detector efficiency entry was left out of the accepted controls: its DD source describes detection of a photon while its original documentation describes detection of a neutron. The replacement is the neutron detector's toroidal coordinate, whose DD source agrees with its original subject.</p>
 <h3 id="srtj-docs-planted-defects-examples">Three source-side examples</h3>
 <table><thead><tr><th>Claim</th><th>Original documentation opening</th><th>Added sentence</th><th>DD source text</th></tr></thead><tbody>
 <tr><td>contradicts-12</td><td>The upper-inner squareness of the plasma boundary is the dimensionless Luce shape coefficient quantifying the departure of the upper inboard corner of the last closed flux surface from a reference ellipse.</td><td>The squareness describes the lower inner plasma boundary.</td><td>Upper inner squareness of the plasma boundary (definition from T. Luce, Plasma Phys. Control. Fusion 55 (2013) 095009)</td></tr>
