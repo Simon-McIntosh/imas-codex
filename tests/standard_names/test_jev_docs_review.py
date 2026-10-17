@@ -180,6 +180,27 @@ def test_question_table_asks_three_categories_and_one_choice_per_claim():
     assert "check:claim_contradicts_source" not in table
 
 
+def test_claim_choice_options_follow_taxonomy_order():
+    checks, _ = load_review_checks()
+    reordered = [
+        check.model_copy(
+            update={
+                "question": check.question.model_copy(
+                    update={"options": ["says nothing", "contradicts", "supports"]}
+                )
+            }
+        )
+        if check.id == "claim_contradicts_source"
+        else check
+        for check in checks
+    ]
+    question = jev_review.docs_question_table(reordered, ["The density is positive."])[
+        "check:claim_contradicts_source:0"
+    ]
+    assert list(question["criteria"]) == ["says nothing", "contradicts", "supports"]
+    assert "Any part" in question["criteria"]["contradicts"]
+
+
 def _top_answers(table):
     acceptable = {
         "dimension:description_quality": "precise_definition",
@@ -234,6 +255,62 @@ def test_one_contradiction_vetoes_top_scores_and_clean_checks():
     )
 
 
+def test_material_contradiction_probability_vetoes_ambiguous_support():
+    checks, _ = load_review_checks()
+    state = jev_review.build_docs_state(
+        {
+            "id": "argon_density",
+            "documentation": "The argon density is negative.",
+            "description": "Number density of argon.",
+            "conventions": {},
+        }
+    )
+    answers = _top_answers(
+        jev_review.docs_question_table(checks, state["documentation_claims"])
+    )
+    claim = "check:claim_contradicts_source:0"
+    answers[claim] = {
+        "choice": "supports",
+        "probabilities": {"supports": 0.44, "contradicts": 0.32, "says nothing": 0.24},
+    }
+    report = AuditReport()
+    verdict = jev_review.aggregate_docs_review(
+        state, checks, answers, audit_report=report
+    )
+    assert verdict["contradiction_veto"]
+    assert state["documentation_claims"][0] in verdict["contradiction_reason"]
+    assert verdict["raw_claim_answers"][0]["choice"] == "supports"
+    assert verdict["claim_answers"][0]["choice"] == "contradicts"
+    assert (
+        jev_review.score_docs_review(state, checks, answers, audit_report=report) == 0.0
+    )
+    answers[claim]["probabilities"]["contradicts"] = 0.04
+    assert not jev_review.aggregate_docs_review(
+        state, checks, answers, audit_report=report
+    )["contradiction_veto"]
+
+
+def test_docs_score_requires_audit_evidence_before_scoring_or_veto():
+    checks, _ = load_review_checks()
+    state = jev_review.build_docs_state(
+        {
+            "id": "argon_density",
+            "documentation": "The argon density is positive.",
+            "conventions": {},
+        }
+    )
+    answers = _top_answers(
+        jev_review.docs_question_table(checks, state["documentation_claims"])
+    )
+    assert (
+        jev_review.score_docs_review(state, checks, answers, audit_report=None) is None
+    )
+    answers["check:claim_contradicts_source:0"] = {"choice": "contradicts"}
+    assert (
+        jev_review.score_docs_review(state, checks, answers, audit_report=None) is None
+    )
+
+
 def test_unanswered_claim_is_unknown_and_unsupported_claim_is_rejected():
     checks, _ = load_review_checks()
     state = jev_review.build_docs_state(
@@ -282,3 +359,36 @@ def test_every_house_style_finding_has_a_named_check_and_is_read_from_audit():
         assert (
             jev_review.audit_finding_for(matching[0], "other_density", report) is None
         )
+
+
+def test_house_style_finding_lowers_score_with_identical_judgments():
+    checks, _ = load_review_checks()
+    name_id = "flux_surface_averaged_argon_density_at_plasma_boundary"
+    clean = {
+        "id": name_id,
+        "description": "Number density of argon.",
+        "documentation": "Number density of argon\n\nThe density is positive.",
+        "conventions": conventions_context_for(name_id),
+    }
+    flawed = {**clean, "documentation": "Wrong opening. The density is positive."}
+    clean_report = jev_review.build_docs_audit_report(
+        clean, catalog_names=[clean], known_ids={name_id}
+    )
+    flawed_report = jev_review.build_docs_audit_report(
+        flawed, catalog_names=[flawed], known_ids={name_id}
+    )
+    target = "description_template_opening_mismatch"
+    check = next(check for check in checks if check.id == target)
+    assert jev_review.audit_finding_for(check, name_id, clean_report) is None
+    assert jev_review.audit_finding_for(check, name_id, flawed_report)
+    state = jev_review.build_docs_state(clean, checks=checks)
+    answers = _top_answers(
+        jev_review.docs_question_table(checks, state["documentation_claims"])
+    )
+    clean_score = jev_review.score_docs_review(
+        state, checks, answers, audit_report=clean_report
+    )
+    flawed_score = jev_review.score_docs_review(
+        state, checks, answers, audit_report=flawed_report
+    )
+    assert flawed_score < clean_score

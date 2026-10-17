@@ -41,6 +41,7 @@ seat, so there is no third decisions owner.
 from __future__ import annotations
 
 import logging
+import math
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -462,6 +463,26 @@ _DOCS_DIMENSION_CRITERIA: dict[str, dict[str, str]] = {
     },
 }
 
+# Fitted on coordinator-labelled documentation calibration entries after
+# excluding flat or inverted inputs. The contradiction veto remains separate.
+DOCS_SCORE_WEIGHTS: dict[str, float] = {
+    "audit:defining_equation_missing": 1.4281029956523246,
+    "audit:description_template_opening_mismatch": 3.670467788582173,
+    "audit:non_canonical_equation": 0.00988088041115091,
+    "audit:relationship_link_missing": 0.0958949018903927,
+    "audit:sign_convention_missing": 2.293782934762642,
+    "audit:symbols_undefined": 0.8544845928211299,
+    "check:description_false_of_some_binding": 1.3798742789993892,
+    "check:equation_physically_incorrect": 1.0913023861739364,
+    "check:false_equivalence_with_related": 1.0811825425429835,
+    "check:incompatible_physics_qualifier": 1.0280113111152924,
+    "check:units_in_prose": 1.10749182431996,
+    "dimension:completeness": 1.9758975397558163,
+    "dimension:documentation_quality": 0.15368999988603704,
+}
+DOCS_SCORE_INTERCEPT = -15.142945942036562
+CONTRADICTION_VETO_PROBABILITY = 0.30
+
 _SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 _DISPLAY_MATH = re.compile(r"\$\$.*?\$\$", re.DOTALL)
 _INLINE_MATH = re.compile(r"(?<!\$)\$(?!\$)[^$\n]*\$(?!\$)")
@@ -538,6 +559,11 @@ def build_docs_state(
             documentation, registry_sentences=_registry_texts(item)
         ),
         "description": item.get("description"),
+        "unit": _observed(item.get("unit")),
+        "links": _observed(item.get("links")),
+        "source_paths": _observed(item.get("source_paths")),
+        "sibling_names": _observed(item.get("sibling_names")),
+        "related_neighbours": _observed(item.get("related_neighbours")),
     }
     evidence_fields = {
         evidence_field
@@ -571,27 +597,180 @@ def docs_question_table(
     )
     if claim_check is None or claim_check.question is None:
         raise ValueError("the claim support check is missing from the docs taxonomy")
-    if set(claim_check.question.options) != {"supports", "contradicts", "says nothing"}:
-        raise ValueError("the claim support check has unexpected Choice options")
+    options = claim_check.question.options
     for index, _claim in enumerate(claims):
         table[check_question_name(f"{claim_check.id}:{index}")] = {
             "type": "choice",
             "instructions": (
                 f"{claim_check.question.text} Compare only "
-                f"`documentation_claims[{index}]` with `dd_source_docs.value` and "
-                "`description`. If DD documentation was not observed, choose "
+                f"`documentation_claims[{index}]` with `dd_source_docs.value`, "
+                "`description`, `unit.value`, `links.value`, "
+                "`source_paths.value`, `sibling_names.value` and "
+                "`related_neighbours.value`. A contradiction in any part of "
+                "the sentence is a contradiction even when another part is "
+                "supported. If no observed source bears on the claim, choose "
                 "'says nothing'."
             ),
             "criteria": {
-                "supports": "The DD evidence directly supports this specific claim.",
-                "contradicts": "The DD evidence says the opposite of this specific claim.",
-                "says nothing": "The DD evidence neither supports nor contradicts this claim.",
+                option: {
+                    "supports": "The DD evidence directly supports this specific claim.",
+                    "contradicts": "Any part of this claim conflicts with an observed source, unit, link target, sibling meaning or source path.",
+                    "says nothing": "The observed evidence neither supports nor contradicts this claim.",
+                }[option]
+                for option in options
             },
         }
     for check in docs_checks:
         if check.id != claim_check.id and check.question is not None:
             table[check_question_name(check.id)] = _question_def(check.question)
     return table
+
+
+def build_docs_audit_report(
+    item: Mapping[str, Any],
+    *,
+    catalog_names: Sequence[Mapping[str, Any]],
+    known_ids: set[str],
+) -> Any:
+    """Run the owning deterministic checks against one documented entry."""
+    from imas_standard_names.grammar.terms import AppliedConventions
+
+    from imas_codex.standard_names.docs_gates import house_style_findings
+    from imas_codex.standard_names.review.audits import (
+        AuditReport,
+        LintFinding,
+        run_documentation_gate_checks,
+        run_house_style_checks,
+        run_link_integrity,
+    )
+
+    candidate = dict(item)
+    name_id = str(candidate["id"])
+    selected = candidate.get("conventions")
+    if selected is None:
+        style = run_house_style_checks([candidate])
+    else:
+        style = [
+            LintFinding(
+                name_id=name_id,
+                finding_type="convention_violation",
+                detail=(
+                    f"{finding.finding_class.value}: {finding.detail} "
+                    f"[{finding.registry_entry}]"
+                ),
+            )
+            for finding in house_style_findings(
+                AppliedConventions.model_validate(selected),
+                description=str(candidate.get("description") or ""),
+                documentation=str(candidate.get("documentation") or ""),
+            )
+        ]
+    return AuditReport(
+        lint_findings=[
+            *style,
+            *run_documentation_gate_checks([candidate]),
+        ],
+        link_findings=[
+            finding
+            for finding in run_link_integrity(
+                [dict(name) for name in catalog_names], known_ids=known_ids
+            )
+            if finding.name_id == name_id
+        ],
+    )
+
+
+def docs_score_components(
+    state: Mapping[str, Any],
+    checks: Sequence[ReviewCheck],
+    answers: Mapping[str, Mapping[str, Any]],
+    *,
+    audit_report: Any | None,
+) -> dict[str, float] | None:
+    """Expose calibrated score inputs while keeping absent audits unknown."""
+    if audit_report is None:
+        return None
+    values: dict[str, float] = {}
+    for dimension, criteria in _DOCS_DIMENSION_CRITERIA.items():
+        answer = answers.get(dimension_question_name(dimension))
+        if answer is None:
+            return None
+        values[f"dimension:{dimension}"] = float(
+            answer.get("probabilities", {}).get(next(iter(criteria)), 0.0)
+        )
+    for check in _docs_checks(checks):
+        if check.id == "claim_contradicts_source":
+            continue
+        if check.audit_finding_class is not None:
+            if audit_report is not None:
+                values[f"audit:{check.id}"] = float(
+                    audit_finding_for(check, str(state["name_id"]), audit_report)
+                    is None
+                )
+            continue
+        answer = answers.get(check_question_name(check.id))
+        if answer is None:
+            return None
+        if check.question.kind is JevQuestionKind.NOUL:
+            values[f"check:{check.id}"] = 1 - float(answer["noul"])
+        else:
+            passing = choice_acceptable_form(check.question)
+            values[f"check:{check.id}"] = float(
+                answer.get("probabilities", {}).get(passing, 0.0)
+            )
+    claims = [
+        answers.get(check_question_name(f"claim_contradicts_source:{index}"))
+        for index, _claim in enumerate(state["documentation_claims"])
+    ]
+    if not claims or any(answer is None for answer in claims):
+        return None
+    values["claim:support"] = sum(
+        float(answer.get("probabilities", {}).get("supports", 0.0)) for answer in claims
+    ) / len(claims)
+    return values
+
+
+def score_docs_review(
+    state: Mapping[str, Any],
+    checks: Sequence[ReviewCheck],
+    answers: Mapping[str, Mapping[str, Any]],
+    *,
+    audit_report: Any | None,
+    weights: Mapping[str, float] | None = None,
+    intercept: float | None = None,
+    veto_claims: bool = True,
+) -> float | None:
+    """Apply calibration weights after the hard contradiction veto."""
+    values = docs_score_components(state, checks, answers, audit_report=audit_report)
+    if values is None:
+        return None
+    selected_weights = DOCS_SCORE_WEIGHTS if weights is None else weights
+    selected_intercept = DOCS_SCORE_INTERCEPT if intercept is None else intercept
+    if any(name not in values for name in selected_weights):
+        return None
+    if veto_claims and any(
+        claim_contradicts(answer)
+        for key, answer in answers.items()
+        if key.startswith("check:claim_contradicts_source:")
+    ):
+        return 0.0
+    linear = selected_intercept + sum(
+        weight * values[name] for name, weight in selected_weights.items()
+    )
+    return 1.0 / (1.0 + math.exp(-max(-50.0, min(50.0, linear))))
+
+
+def claim_contradicts(answer: Mapping[str, Any]) -> bool:
+    """Veto a selected contradiction or a substantial conflicting probability.
+
+    A low-confidence Choice can select support while still assigning material
+    probability to contradiction. A hard safety veto should retain that signal.
+    """
+    return (
+        answer.get("choice") == "contradicts"
+        or float(answer.get("probabilities", {}).get("contradicts", 0.0))
+        >= CONTRADICTION_VETO_PROBABILITY
+    )
 
 
 def aggregate_docs_review(
@@ -619,14 +798,26 @@ def aggregate_docs_review(
     claim_check = next(
         check for check in docs_checks if check.id == "claim_contradicts_source"
     )
-    claim_answers = [
+    raw_claim_answers = [
         answers.get(check_question_name(f"{claim_check.id}:{index}"))
         for index, _claim in enumerate(state["documentation_claims"])
     ]
-    contradiction_veto = any(
-        answer is not None and answer.get("choice") == "contradicts"
-        for answer in claim_answers
-    )
+    claim_answers = []
+    contradicted_claims = []
+    for claim, answer in zip(
+        state["documentation_claims"], raw_claim_answers, strict=True
+    ):
+        if answer is not None and claim_contradicts(answer):
+            contradicted_claims.append(claim)
+            if answer.get("choice") != "contradicts":
+                answer = {
+                    **answer,
+                    "raw_choice": answer.get("choice"),
+                    "choice": "contradicts",
+                    "veto_source": "probability",
+                }
+        claim_answers.append(answer)
+    contradiction_veto = bool(contradicted_claims)
     check_records: dict[str, dict[str, Any]] = {}
     for check in docs_checks:
         if check.id == claim_check.id:
@@ -673,7 +864,13 @@ def aggregate_docs_review(
     return {
         "decision": decision,
         "contradiction_veto": contradiction_veto,
+        "contradiction_reason": (
+            "contradicts source: " + "; ".join(contradicted_claims)
+            if contradicted_claims
+            else None
+        ),
         "dimensions": dimensions,
+        "raw_claim_answers": raw_claim_answers,
         "claim_answers": claim_answers,
         "checks": check_records,
     }
