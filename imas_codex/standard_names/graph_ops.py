@@ -14279,12 +14279,14 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
 
     Approval is the sole writer of ``'active'``. Accordingly, this reconcile
     makes superseded pipeline identities ``'superseded'``, repairs every
-    exhausted identity to ``status='draft'``, and makes any remaining null
-    status ``'draft'``. It never writes ``'deprecated'``; that transition
+    exhausted identity to ``status='draft'``, restores receipt-backed revived
+    identities to ``'draft'``, and makes any remaining null status ``'draft'``.
+    It never writes ``'deprecated'``; that transition
     belongs only to withdrawal of a name that was actually active. Terminal
     transitions run first so each changed name is counted once.
 
-    Returns dict: {drafted, superseded, quarantined, deprecated, total_changed}.
+    Returns dict: {drafted, revived, superseded, quarantined, deprecated,
+    total_changed}.
     """
     own = gc is None
     client = GraphClient() if own else gc
@@ -14307,6 +14309,22 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
             RETURN count(sn) AS changed
             """
         )
+        revived_rows = client.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.name_stage IS NOT NULL
+              AND sn.name_stage <> 'superseded'
+              AND sn.name_stage <> 'exhausted'
+              AND sn.status = 'superseded'
+              AND EXISTS {
+                  MATCH (sn)-[:HAS_INTERNAL_CHANGE]->
+                        (change:StandardNameChange {operation: 'fold_identity'})
+                  WHERE change.to_name = sn.id
+              }
+            SET sn.status = 'draft', sn.updated_at = datetime()
+            RETURN count(sn) AS changed
+            """
+        )
         drafted_rows = client.query(
             """
             MATCH (sn:StandardName)
@@ -14322,6 +14340,7 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
     result = {
         "drafted": (drafted_rows[0]["changed"] if drafted_rows else 0)
         + (exhausted_rows[0]["changed"] if exhausted_rows else 0),
+        "revived": revived_rows[0]["changed"] if revived_rows else 0,
         "superseded": superseded_rows[0]["changed"] if superseded_rows else 0,
         "quarantined": 0,
         "deprecated": 0,
@@ -14329,10 +14348,11 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
     result["total_changed"] = sum(result.values())
     if result["total_changed"]:
         logger.info(
-            "reconcile_catalog_status: set %d name(s) to draft, %d to "
-            "superseded; exhausted names remain validation-neutral; "
+            "reconcile_catalog_status: set %d name(s) to draft, revived %d, "
+            "%d to superseded; exhausted names remain validation-neutral; "
             "deprecated writes: 0",
             result["drafted"],
+            result["revived"],
             result["superseded"],
         )
     return result

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-reconcile-revived-status">
+  <title>Catalog status restored for fold revivals</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-reconcile-revived-status-title">Receipt-gated catalog status reconciliation</h1>
+  <p id="shc-reconcile-revived-status-scope">At source revision <code>7472e79d7cb4949a8010f8e6b10de9c019c25d6e</code>,
+    <code>reconcile_catalog_status</code> restored <code>draft</code> status to every live-stage
+    <code>StandardName</code> left at catalog status <code>superseded</code> with an outgoing
+    <code>HAS_INTERNAL_CHANGE</code> fold-identity receipt whose <code>to_name</code> equals the name ID.
+    The one-shot imported the worktree module shown in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T154016007603-shc-reconcile-revived-status/apply-readback.log</code>, not an older installed copy.</p>
+  <h2 id="shc-reconcile-revived-status-before">Before: exactly 35 qualifying names</h2>
+  <p id="shc-reconcile-revived-status-before-counts">The bounded pre-read returned 35 live-stage names with
+    <code>status='superseded'</code>, and each had a matching fold receipt. It found 31 accepted and
+    four reviewed names. All 15 accepted names outside the 16-member boundary family qualified;
+    two other accumulated names and both electrostatic-potential names were reviewed and also qualified.
+    A positive control found all 17 accepted boundary-density members. The accepted-superseded catalog
+    count was 31 and the all-live-stage superseded count was 35.</p>
+  <table id="shc-reconcile-revived-status-rows">
+    <thead><tr><th>Name ID</th><th>Stage before</th><th>Fold receipt time (UTC)</th><th>Status after</th></tr></thead>
+    <tbody>
+<tr><td><code>accumulated_carbon_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:42:35.375706Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_deuterated_methane_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:42:54.593329Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_deuterium_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:43:04.216911Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_helium_3_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:43:41.591232Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_helium_3_prefill_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:44:00.492451Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_hydrogen_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:44:19.346774Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_lithium_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:44:47.610615Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_lithium_prefill_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:45:06.549144Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_methane_carbon_13_count_due_to_gas_injection</code></td><td>reviewed</td><td><time>2026-09-08T08:45:16.07789Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_nitrogen_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:45:35.062071Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_oxygen_prefill_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:46:03.991049Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_particle_count_at_pellet_path_due_to_pellet_injection</code></td><td>accepted</td><td><time>2026-09-08T08:46:13.394518Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_propane_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:46:23.159561Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_silane_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:46:32.413374Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_total_gas_count_at_midplane_due_to_gas_injection</code></td><td>reviewed</td><td><time>2026-09-08T08:46:50.867713Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_tritium_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:47:09.733641Z</time></td><td>draft</td></tr>
+<tr><td><code>accumulated_xenon_count_due_to_gas_injection</code></td><td>accepted</td><td><time>2026-09-08T08:47:28.646391Z</time></td><td>draft</td></tr>
+<tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>reviewed</td><td><time>2026-10-17T10:43:33.135698Z</time></td><td>draft</td></tr>
+<tr><td><code>electrostatic_potential_at_wall</code></td><td>reviewed</td><td><time>2026-10-17T10:43:54.974114Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_argon_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:42:15.313856Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_beryllium_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:42:25.852896Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_carbon_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:42:45.065249Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_deuterium_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:43:13.59686Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_electron_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:43:23.016289Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_helium_3_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:43:51.051118Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_helium_4_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:44:09.890719Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_hydrogen_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:44:28.632014Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_iron_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:44:38.070586Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_lithium_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:44:56.941643Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_neon_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:45:25.714802Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_nitrogen_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:45:44.687356Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_oxygen_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:45:54.428233Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_total_ion_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:47:00.365355Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_tritium_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:47:19.187156Z</time></td><td>draft</td></tr>
+<tr><td><code>flux_surface_averaged_xenon_density_at_plasma_boundary</code></td><td>accepted</td><td><time>2026-09-08T08:47:37.960628Z</time></td><td>draft</td></tr>
+    </tbody>
+  </table>
+  <h2 id="shc-reconcile-revived-status-after">Apply and readback</h2>
+  <p id="shc-reconcile-revived-status-after-counts">The first reconcile reported
+    <code>{'drafted': 0, 'revived': 35, 'superseded': 2, 'quarantined': 0, 'deprecated': 0, 'total_changed': 37}</code>
+    in 0.091 s. The two <code>superseded</code> changes came from its existing terminal-stage transition,
+    outside the 35 receipt-backed revivals. Readback found every listed ID at <code>status='draft'</code>.
+    The accepted-superseded count fell from 31 to 0, exactly the 31 accepted names in the before list;
+    the all-live-stage superseded count fell from 35 to 0. A second reconcile reported zero in every
+    count, including <code>total_changed</code>. The graph write and readbacks ended <code>EXIT=0</code>.</p>
+  <h2 id="shc-reconcile-revived-status-gates">Guards and test exits</h2>
+  <p id="shc-reconcile-revived-status-gates-summary">The branch follows the two terminal transitions,
+    requires a non-null live stage, excludes superseded and exhausted stages, checks superseded catalog
+    status, and uses <code>EXISTS</code> to require a matching fold receipt. The live server planned the
+    emitted statement under <code>EXPLAIN</code> with operator <code>ProduceResults@neo4j</code> and
+    planner <code>IDP</code>. The new mocked-client test checks every predicate and the new count key;
+    removing the receipt condition made that test fail.</p>
+  <table id="shc-reconcile-revived-status-exits">
+    <thead><tr><th>Log in run directory</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td><code>baseline.log</code></td><td>123 passed, 15 deselected; EXIT=0</td></tr>
+      <tr><td><code>before.log</code></td><td>35 qualifying names; EXIT=0</td></tr>
+      <tr><td><code>before-resumed.log</code></td><td>Probe quote syntax error before graph access; EXIT=1</td></tr>
+      <tr><td><code>before-resumed-corrected.log</code></td><td>35 qualifying names, accepted-superseded 31; EXIT=0</td></tr>
+      <tr><td><code>focused-head.log</code></td><td>7 passed; EXIT=0</td></tr>
+      <tr><td><code>explain.log</code></td><td>EXPLAIN succeeded; probe misread dictionary-shaped plan; EXIT=1</td></tr>
+      <tr><td><code>explain-corrected.log</code></td><td>Plan readback succeeded; EXIT=0</td></tr>
+      <tr><td><code>head-gate.log</code></td><td>124 passed, 15 deselected; zero added failures against base; EXIT=0</td></tr>
+      <tr><td><code>negative-control.log</code></td><td>One new test failed after receipt predicate removal; EXIT=1</td></tr>
+      <tr><td><code>restored-focused.log</code></td><td>Restored branch passed; EXIT=0</td></tr>
+      <tr><td><code>apply-readback.log</code></td><td>35 status readbacks, count deltas, zero-change second run; EXIT=0</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-reconcile-revived-status-logs">All logs above are under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T154016007603-shc-reconcile-revived-status/</code>.
+    The two failed read-only probes were scaffolding errors; their corrected logs show the intended
+    measurements. The graph write occurred only in <code>apply-readback.log</code>.</p>
+</main>
+</body>
+</html>

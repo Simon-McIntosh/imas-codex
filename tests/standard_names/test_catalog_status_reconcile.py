@@ -39,6 +39,15 @@ class _CatalogGraph:
             for name in matches:
                 name["status"] = "draft"
             return [{"changed": len(matches)}]
+        elif "HAS_INTERNAL_CHANGE" in cypher:
+            matches = [
+                name
+                for name in self.names
+                if name["name_stage"] not in (None, "superseded", "exhausted")
+                and name["status"] == "superseded"
+                and name.get("fold_receipt", False)
+            ]
+            target = "draft"
         elif "SET sn.status = 'draft'" in cypher:
             matches = [name for name in self.names if name["status"] is None]
             target = "draft"
@@ -129,6 +138,7 @@ def test_reconcile_maps_unset_and_terminal_statuses_idempotently() -> None:
 
     assert reconcile_catalog_status(gc=graph) == {
         "drafted": 5,
+        "revived": 0,
         "superseded": 2,
         "quarantined": 0,
         "deprecated": 0,
@@ -152,6 +162,7 @@ def test_reconcile_maps_unset_and_terminal_statuses_idempotently() -> None:
     }
     assert reconcile_catalog_status(gc=graph) == {
         "drafted": 0,
+        "revived": 0,
         "superseded": 0,
         "quarantined": 0,
         "deprecated": 0,
