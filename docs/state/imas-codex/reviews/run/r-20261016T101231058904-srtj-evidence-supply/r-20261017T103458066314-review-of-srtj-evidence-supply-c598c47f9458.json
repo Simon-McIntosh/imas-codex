@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/review/jev_review.py:535 review_names calls _item_record",
+    "docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-run.py:337 calls review_names",
+    "docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py:490 main calls _render"
+  ],
+  "completed_at": "2026-10-17T10:39:18Z",
+  "dispatched_at": "2026-10-17T10:35:22Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py",
+      "line": "476",
+      "severity": "follow-on",
+      "text": "follow-on: --rescore compares frozen results and exits without calling _render, so the exploratory disclosure at :413-454 can regress while the recorded rescore gate still passes; add a rendering assertion against independent expected wording."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/repair-final-gate.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/repair-base-gate.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read each gained commit from 67b874d93c6f476f9f3cf481c6716e7ed7e814d3 to c598c47f94583bdd8cc71831c8095905dc5d35fa; 58f3f79b changes the audit path and adds one test, while c598c47f changes the renderer and committed fragment to disclose validation exposure.",
+    "done_when": "The source brief names a red default-path control, focused tests, reproducible rescore and a deployment-rule account; repair-repeated-negative-control.log ends one failed EXIT=1, repair-final-gate.log ends 45 passed EXIT=0, repair-rescore.log ends EXIT=0, and the live plan's lead ruling waives a fresh holdout while the fragment states no eligible holdout verdict.",
+    "goal": "The source brief asks for source-backed name evidence and a code-decided repeated-token check; imas_codex/standard_names/review/jev_review.py:402-410 now decides that check without an audit report, and the report at docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply.html:4-17 labels the exposed cohort exploratory.",
+    "manifest": "The source manifest names commits 58f3f79bf0b3e8fe4e2a6e5a196c25dab9ddba2f and c598c47f94583bdd8cc71831c8095905dc5d35fa, the 44-to-45 passing gate, red reversal controls, and the exposed-cohort caveat; its repair logs and fresh-validation-inventory.log support those claims.",
+    "write_paths": "The source brief grants seven files; git diff 67b874d93c6f476f9f3cf481c6716e7ed7e814d3..c598c47f94583bdd8cc71831c8095905dc5d35fa changes only four of those declared paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_jev_name_review.py:478-494 has independent repeated and clean expected outcomes that fail when the old guard returns, but srtj-evidence-supply-run.py:476-490 does not render the amended report during the rescore gate.",
+    "evidence": "repair-base-gate.log and repair-final-gate.log record 44 and 45 passing tests, repair-repeated-negative-control.log records the regression failing, and fresh-validation-inventory.log checks the empty fresh-cohort fields against 701 known scored receipts.",
+    "fit": "imas_codex/standard_names/review/jev_review.py:404-408 uses the existing audits.py:3068 reader and preserves the report-backed path for other checks at :409-410.",
+    "goal_fidelity": "imas_codex/standard_names/review/jev_review.py:404-410 runs the existing audit without a report, and srtj-evidence-supply-run.py:413-454 discloses why the validation score cannot be a holdout verdict.",
+    "reuse": "the capability search found repeated_token_check in imas_codex/standard_names/audits.py:3068 and the changed jev_review.py:405 imports it rather than adding a second repeated-token implementation.",
+    "scope_discipline": "git diff 67b874d9..c598c47f changes only the runner, fragment, review module and test file granted by the source brief."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks for source-backed name evidence and a code-decided repeated-token check; imas_codex/standard_names/review/jev_review.py:402-410 now decides that check without an audit report, and the report at docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply.html:4-17 labels the exposed cohort exploratory.\nVERDICT done_when: The source brief names a red default-path control, focused tests, reproducible rescore and a deployment-rule account; repair-repeated-negative-control.log ends one failed EXIT=1, repair-final-gate.log ends 45 passed EXIT=0, repair-rescore.log ends EXIT=0, and the live plan's lead ruling waives a fresh holdout while the fragment states no eligible holdout verdict.\nVERDICT write_paths: The source brief grants seven files; git diff 67b874d93c6f476f9f3cf481c6716e7ed7e814d3..c598c47f94583bdd8cc71831c8095905dc5d35fa changes only four of those declared paths.\nVERDICT manifest: The source manifest names commits 58f3f79bf0b3e8fe4e2a6e5a196c25dab9ddba2f and c598c47f94583bdd8cc71831c8095905dc5d35fa, the 44-to-45 passing gate, red reversal controls, and the exposed-cohort caveat; its repair logs and fresh-validation-inventory.log support those claims.\nVERDICT diff: Read each gained commit from 67b874d93c6f476f9f3cf481c6716e7ed7e814d3 to c598c47f94583bdd8cc71831c8095905dc5d35fa; 58f3f79b changes the audit path and adds one test, while c598c47f changes the renderer and committed fragment to disclose validation exposure.\nCALL_SITES: imas_codex/standard_names/review/jev_review.py:535 review_names calls _item_record, docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-run.py:337 calls review_names, docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py:490 main calls _render\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/jev_review.py:404-410 runs the existing audit without a report, and srtj-evidence-supply-run.py:413-454 discloses why the validation score cannot be a holdout verdict.\nSCORE evidence: 17\nJUSTIFICATION evidence: repair-base-gate.log and repair-final-gate.log record 44 and 45 passing tests, repair-repeated-negative-control.log records the regression failing, and fresh-validation-inventory.log checks the empty fresh-cohort fields against 701 known scored receipts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 67b874d9..c598c47f changes only the runner, fragment, review module and test file granted by the source brief.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_jev_name_review.py:478-494 has independent repeated and clean expected outcomes that fail when the old guard returns, but srtj-evidence-supply-run.py:476-490 does not render the amended report during the rescore gate.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/review/jev_review.py:404-408 uses the existing audits.py:3068 reader and preserves the report-backed path for other checks at :409-410.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search found repeated_token_check in imas_codex/standard_names/audits.py:3068 and the changed jev_review.py:405 imports it rather than adding a second repeated-token implementation.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py:476 follow-on: --rescore compares frozen results and exits without calling _render, so the exploratory disclosure at :413-454 can regress while the recorded rescore gate still passes; add a rendering assertion against independent expected wording.\n",
+  "review_run_id": "r-20261017T103458066314-review-of-srtj-evidence-supply-c598c47f9458",
+  "reviewed_base_sha": "67b874d93c6f476f9f3cf481c6716e7ed7e814d3",
+  "reviewed_head_sha": "c598c47f94583bdd8cc71831c8095905dc5d35fa",
+  "reviewed_run_id": "r-20261016T101231058904-srtj-evidence-supply",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T10:37:45.903896+00:00",
+  "total": 109
+}

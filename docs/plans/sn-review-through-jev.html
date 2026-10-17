@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-modified" content="2026-10-17">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -320,6 +320,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-17T10:45:00Z">
     <div class="r-comment-body"><p>§3 closed. The Jev name review, with its evidence supplied, reads validation logistic AUC 0.745, a paired gain of +0.039 over the quorum (merge <code>1e651fb87</code>, review 109). The lead promoted it into the cascade with the 0.009 shortfall and the exposed split waived. §4, the documentation axis, starts now. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#s3-evidence-supply">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261017T103458066314-review-of-srtj-evidence-supply-c598c47f9458" data-who="reckon-build" data-when="2026-10-17T10:39:18Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/review-records/r-20261016T101231058904-srtj-evidence-supply.at-c598c47f94583bdd8cc71831c8095905dc5d35fa.json — parsed review of base 67b874d93c6f476f9f3cf481c6716e7ed7e814d3 to head c598c47f94583bdd8cc71831c8095905dc5d35fa; six scores total 109, zero added failures, no blocking and one follow-on finding.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-choice-probability" data-who="reckon-build" data-when="2026-10-13T18:05:00Z">
     <div class="r-comment-body"><p>The content review of version 10 found that the trigger's maximum was undefined for checks decided by a categorising Choice. A Choice returns an option, not a failure probability. The section now defines it: a Choice check contributes the summed probability of its non-conforming options, and the taxonomy names the conforming options for each Choice question.</p><p>Each of the four Choice checks in <code>review_checks.yaml</code> has one conforming option: <em>the bound source object</em>, <em>one quantity</em>, <em>true of all</em> and <em>supports</em>. For the claim-support check, <em>says nothing</em> counts as a failure, because an unverifiable claim is the case retrieval exists to resolve. A Noul check contributes the probability of its true case. The same review's two stale anchors in §1 are corrected: the fanout call is at <code>workers.py:7304</code>, and <code>_run_rd_quorum_cycles</code> is defined at line 7992.</p></div>
