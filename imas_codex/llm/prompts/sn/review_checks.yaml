@@ -524,6 +524,20 @@ checks:
   - documentation
   retrieval: false
   audit_finding_class: forbidden_locus_gloss
+- id: locus_definition_mismatch
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: locus_definition
+- id: non_canonical_equation
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: non_canonical_equation
 - id: minimum_word_count
   axis: docs
   dimension: completeness
@@ -591,7 +605,7 @@ checks:
   retrieval: true
   question:
     kind: choice
-    text: Does this claim agree with its DD source definition?
+    text: Which conflict, if any, does this claim have with its DD source definition?
     options:
     - supports
     - contradicts
