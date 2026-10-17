@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-fold-revival-status">
+  <title>Fold revival restores catalog status</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-fold-revival-status-title">A fold that revives a superseded tombstone restores status draft</h1>
+  <p id="shc-fold-revival-status-change">
+    The fold name-mutation statement wrote the revived target's
+    <code>name_stage</code> but never its catalog <code>status</code>, so a
+    revived identity kept <code>status='superseded'</code> and export dropped it.
+    The statement now writes <code>status='draft'</code> in the same SET when the
+    caller marks the target as a superseded tombstone, and the fold receipt's
+    expected-after image carries the same value, so the postflight exact-state
+    proof compares it. A non-revival fold writes the status back unchanged, and
+    nothing else in the fold changed.
+    Commit <code>96efe9f67</code> reports 2 files, 124 insertions:
+    <code>imas_codex/standard_names/edit.py</code> and
+    <code>tests/standard_names/test_fold_revival_status.py</code>.
+  </p>
+  <p id="shc-fold-revival-status-measure">
+    Head arm: 28 passed, <code>EXIT=0</code> (the new file's two tests plus the
+    four fold/tombstone gate files). Base arm in a scratch tree at
+    <code>25d5ad6e5</code>: 26 passed, <code>EXIT=0</code>. Delta: zero added
+    failures; the two new tests carry the change. Negative control: the single
+    status assignment removed from the fold statement leaves both new tests
+    failing, <code>EXIT=1</code>. <code>EXPLAIN</code> of the production fold
+    statement against the live server returned clean, with a malformed
+    statement refused under the same harness (<code>CypherSyntaxError</code>) as
+    the positive control. <code>tests/graph/test_cypher_property_check.py</code>:
+    4 passed. Logs are in the run directory
+    (<code>gate-head.log</code>, <code>gate-base.log</code>,
+    <code>negative-control.log</code>, <code>explain.log</code>,
+    <code>cypher-property-check.log</code>).
+  </p>
+  <p id="shc-fold-revival-status-writeback">
+    Writeback is a separate node: the 16 boundary-density members, plus
+    <code>electrostatic_potential_at_outboard_midplane</code> and
+    <code>electrostatic_potential_at_wall</code>, already hold
+    <code>status='superseded'</code> on accepted live identities and are not
+    repaired by this code change.
+  </p>
+</main>
+</body>
+</html>
