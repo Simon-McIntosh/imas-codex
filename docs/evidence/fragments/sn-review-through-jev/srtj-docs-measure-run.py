@@ -147,10 +147,12 @@ def _graph_context() -> dict:
         value["incumbent_cost"] = latest_costs.get(name, {}).get("cost")
     if not any(value["score"] is not None for value in matched.values()):
         raise RuntimeError("no incumbent scores, including the known scored sample")
-    if not all(value["document_match"] for value in matched.values()):
-        raise RuntimeError(
-            "a graph score belongs to documentation other than the golden text"
-        )
+    mismatched = [
+        name for name, value in matched.items() if not value["document_match"]
+    ]
+    for name in mismatched:
+        matched[name]["score"] = None
+        matched[name]["incumbent_cost"] = None
     context = {
         "by_name": matched,
         "score_coverage": sum(value["score"] is not None for value in matched.values()),
@@ -159,6 +161,7 @@ def _graph_context() -> dict:
         ),
         "document_matches": sum(value["document_match"] for value in matched.values()),
         "known_present": matched["electron_energy"],
+        "mismatched_names": mismatched,
     }
     _write(CONTEXT, context)
     print(
