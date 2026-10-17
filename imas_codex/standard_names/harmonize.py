@@ -1433,13 +1433,11 @@ def finalize_families(
                 )
             if row.get("validation_status") == "quarantined":
                 refusals.append(f"{member_id}: validation_status='quarantined'")
-            for field in ("description", "documentation"):
-                findings = banned_prose_findings(row.get(field) or "")
-                classes = [name for name, count in findings.items() if count]
-                if classes:
-                    refusals.append(
-                        f"{member_id}: banned prose in {field} ({', '.join(classes)})"
-                    )
+            text = f"{row.get('description') or ''}\n{row.get('documentation') or ''}"
+            findings = banned_prose_findings(text)
+            classes = [name for name, count in findings.items() if count]
+            if classes:
+                refusals.append(f"{member_id}: banned prose ({', '.join(classes)})")
     if refusals:
         raise HarmonizeFinalizeError("Finalization refused: " + "; ".join(refusals))
 

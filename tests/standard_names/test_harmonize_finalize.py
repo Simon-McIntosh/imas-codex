@@ -45,6 +45,7 @@ def _fixture(monkeypatch: Any) -> _LinkGraph:
     [
         ("docs_stage", "reviewed", "docs_stage='reviewed'"),
         ("documentation", "It is obtained from a diagnostic.", "banned prose"),
+        ("description", "In practice, the estimate varies.", "banned prose"),
         ("validation_status", "quarantined", "validation_status='quarantined'"),
     ],
 )
