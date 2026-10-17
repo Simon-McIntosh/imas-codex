@@ -81,9 +81,10 @@
   <h3 id="shc-boundary-final-apply-spend">Spend against the ceiling</h3>
   <p id="shc-boundary-final-apply-spend-text">
     The job reports <code>cost_spent</code> <strong>5.154953</strong> against a
-    <code>cost_limit</code> it prints as <strong>8.106543</strong> — the ceiling
-    passed on the command line was 8.5, and the printed limit is lower by 0.393457,
-    which the CLI reads as budget already consumed. The two interrupted attempts on
+    <code>cost_limit</code> it prints as <strong>8.106543</strong>. The ceiling
+    passed on the command line was 8.5, and the printed limit sits 0.393457 below
+    it; why the CLI prints the lower figure is not something this run established,
+    so the two are recorded as printed rather than reconciled. The two interrupted attempts on
     the first day spent about <strong>1.017</strong>. Total across the node is
     therefore roughly <strong>6.2</strong> of the USD 8.50 ceiling, about 72%.
     Roughly a quarter of the authorized budget went unused, and it did so for a
