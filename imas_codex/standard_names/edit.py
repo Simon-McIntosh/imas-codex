@@ -1541,6 +1541,12 @@ SET old.superseded_from_stage = $predecessor_stage,
     target.documentation = $target_documentation,
     target.docs_stage = $target_docs_stage,
     target.name_stage = coalesce($target_revived_stage, target.name_stage),
+    // A revived tombstone leaves the terminal catalog axis with its stage: a
+    // live identity must not stay hidden behind the 'superseded' status that
+    // export reads to drop superseded names. $target_revived_status is set by
+    // the caller only for a target the snapshot read as a superseded
+    // tombstone, so a non-revival fold writes back the unchanged value.
+    target.status = coalesce($target_revived_status, target.status),
     target.updated_at = datetime($changed_at)
 MERGE (target)-[:REFINED_FROM]->(old)
 RETURN old.name_stage AS old_stage,
@@ -2215,6 +2221,11 @@ def _fold_revival_stage(target_properties: dict[str, Any]) -> str:
     pipeline rather than granting acceptance outright. A target tombstoned
     before this field existed has no recorded prior stage; it revives to
     'drafted', the ordinary unreviewed entry point.
+
+    Revival also restores the catalog ``status`` to 'draft' in the same
+    mutation: the tombstone's 'superseded' status is the terminal axis export
+    reads to exclude a spelling, so a revived identity that kept it would be
+    live by stage and invisible to export at once.
     """
     stage = target_properties.get("superseded_from_stage") or "drafted"
     return _FOLD_REVIVAL_STAGE_CAP.get(stage, stage)
@@ -2563,6 +2574,7 @@ def _fold_expected_state(
     changed_at: str,
     include_domain_mutation: bool,
     target_revived_stage: str | None = None,
+    target_revived_status: str | None = None,
 ) -> dict[str, Any]:
     expected = _fold_verification_state(snapshot)
     # A tombstoned target is revived to target_revived_stage (computed by
@@ -2612,6 +2624,11 @@ def _fold_expected_state(
                 expected["names"]["target"][field] = value
         if target_revived_stage is not None:
             expected["names"]["target"]["name_stage"] = target_revived_stage
+        # A revived superseded tombstone returns to the ordinary catalog axis:
+        # the mutation query writes the same value, so the expected post-state
+        # names it and the postflight proof compares it.
+        if target_revived_status is not None:
+            expected["names"]["target"]["status"] = target_revived_status
         target_reference = {
             "target_element_id": snapshot["target_element_id"],
             "target_labels": snapshot["target_labels"],
@@ -2719,6 +2736,7 @@ def _fold_receipt(
     run_id: str,
     changed_at: str,
     target_revived_stage: str | None = None,
+    target_revived_status: str | None = None,
 ) -> tuple[str, dict[str, Any]]:
     source_ids = sorted(source["id"] for source in old_sources)
     backing_ids = sorted(backing["id"] for backing in old_backings)
@@ -2751,6 +2769,7 @@ def _fold_receipt(
             changed_at=changed_at,
             include_domain_mutation=True,
             target_revived_stage=target_revived_stage,
+            target_revived_status=target_revived_status,
         ),
     }
     return json.dumps(receipt, sort_keys=True, separators=(",", ":")), receipt
@@ -2914,6 +2933,16 @@ def supersede_into(
                     if snapshot["target_properties"].get("name_stage") == "superseded"
                     else None
                 )
+                # A tombstone carries the terminal catalog status as well as
+                # the terminal stage; revival restores it to 'draft' so the
+                # revived identity is visible to export again. Only a target
+                # the snapshot read as status='superseded' is reset.
+                target_revived_status = (
+                    "draft"
+                    if target_revived_stage is not None
+                    and snapshot["target_properties"].get("status") == "superseded"
+                    else None
+                )
                 target_paths = _fold_target_paths(
                     snapshot, old_sources, old_backings, into
                 )
@@ -2932,6 +2961,7 @@ def supersede_into(
                     run_id=run_id,
                     changed_at=changed_at,
                     target_revived_stage=target_revived_stage,
+                    target_revived_status=target_revived_status,
                 )
                 would_strand = sum(
                     1
@@ -3080,6 +3110,7 @@ def supersede_into(
                         target_documentation=target_documentation,
                         target_docs_stage=target_docs_stage,
                         target_revived_stage=target_revived_stage,
+                        target_revived_status=target_revived_status,
                         changed_at=changed_at,
                     )
                 )
