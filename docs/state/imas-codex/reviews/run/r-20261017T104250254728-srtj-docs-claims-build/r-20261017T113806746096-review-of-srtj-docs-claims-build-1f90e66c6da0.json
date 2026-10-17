@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T104250254728-srtj-docs-claims-build/review-head-gate.log",
+    "passed": 62,
+    "revision": "3216eddd72bfbd8cbf13c2674bccb24b131041fb",
+    "summary": "62 passed, 1 warning in 12.36s"
+  },
+  "base_log_revision": "f16519b1d4b9303f931628e23ff63b3d7ee36ef6",
+  "baseline_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T104250254728-srtj-docs-claims-build/splitter-head-gate.log",
+    "passed": 60,
+    "revision": "f16519b1d4b9303f931628e23ff63b3d7ee36ef6",
+    "summary": "60 passed, 1 warning in 13.32s"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T11:42:27Z",
+  "dispatched_at": "2026-10-17T11:38:33Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "552",
+      "severity": "blocking",
+      "text": "blocking: The finite-marker regex omits lexical verbs, so \"The density rises and the temperature falls\" stays one claim although the brief requires clauses joined by a conjunction to be split and independently checked."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "565",
+      "severity": "blocking",
+      "text": "blocking: Math followed by another clause, as in \"The density is $n<0$ and the temperature rises\", passes the tail check as \"The density is and the temperature rises\" and can make a correct entry look unsupported."
+    }
+  ],
+  "head_log_revision": "3216eddd72bfbd8cbf13c2674bccb24b131041fb",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production call sites found at the reviewed head.",
+    "diff": "Read d4f782d, 3216edd and 1f90e66 commit by commit; test_jev_docs_review.py:57-65 adds two effective regression fixtures, jev_review.py:550-565 changes splitting, and the evidence fragment records their gate.",
+    "done_when": "The brief names three focused test files and a veto mutation; review-head-gate.log records 62 passed at 3216eddd and review-source-reversed.log records both new fixtures failing when the repair is removed.",
+    "goal": "The source brief asks for deterministic claims and a contradiction veto; jev_review.py:550-565 repairs the two reported fragments but misses independent clauses with lexical verbs and can emit a malformed claim around math.",
+    "manifest": "The source manifest lists all three gained commits, the 60-to-62 focused gate delta, the two red fixtures and the source reversal; its baseline_suite and after_suite fields are empty, so the named logs supply the readable receipts.",
+    "write_paths": "The source brief grants jev_review.py, review_checks.yaml, test_jev_docs_review.py and the evidence fragment, and the a54bf880..1f90e66 diff changes only the first, third and fourth paths."
+  },
+  "justifications": {
+    "durability": "test_jev_docs_review.py:57-65 reddens when the complete source repair is reversed, but its inputs do not cover lexical-verb conjunctions or math followed by another clause.",
+    "evidence": "review-findings-red.log and review-source-reversed.log each record two named failures, while review-head-gate.log records 62 passed with EXIT=0 at the source repair revision.",
+    "fit": "jev_review.py:469-483 keeps the splitter constants beside its existing regexes and names them by behavior without forbidden plan labels.",
+    "goal_fidelity": "jev_review.py:550-565 fixes the reviewed examples but fails to split two lexical-verb clauses and can submit a math-dependent fragment to source comparison.",
+    "reuse": "The capability search found only sentence splitting in docs_gates.py:726 and audits.py:937; jev_review.py:530 extends the existing claim splitter rather than creating another owner.",
+    "scope_discipline": "The a54bf880..1f90e66 diff touches only jev_review.py, test_jev_docs_review.py and the declared evidence fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks for deterministic claims and a contradiction veto; jev_review.py:550-565 repairs the two reported fragments but misses independent clauses with lexical verbs and can emit a malformed claim around math.\nVERDICT done_when: The brief names three focused test files and a veto mutation; review-head-gate.log records 62 passed at 3216eddd and review-source-reversed.log records both new fixtures failing when the repair is removed.\nVERDICT write_paths: The source brief grants jev_review.py, review_checks.yaml, test_jev_docs_review.py and the evidence fragment, and the a54bf880..1f90e66 diff changes only the first, third and fourth paths.\nVERDICT manifest: The source manifest lists all three gained commits, the 60-to-62 focused gate delta, the two red fixtures and the source reversal; its baseline_suite and after_suite fields are empty, so the named logs supply the readable receipts.\nVERDICT diff: Read d4f782d, 3216edd and 1f90e66 commit by commit; test_jev_docs_review.py:57-65 adds two effective regression fixtures, jev_review.py:550-565 changes splitting, and the evidence fragment records their gate.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: jev_review.py:550-565 fixes the reviewed examples but fails to split two lexical-verb clauses and can submit a math-dependent fragment to source comparison.\nSCORE evidence: 18\nJUSTIFICATION evidence: review-findings-red.log and review-source-reversed.log each record two named failures, while review-head-gate.log records 62 passed with EXIT=0 at the source repair revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The a54bf880..1f90e66 diff touches only jev_review.py, test_jev_docs_review.py and the declared evidence fragment.\nSCORE durability: 16\nJUSTIFICATION durability: test_jev_docs_review.py:57-65 reddens when the complete source repair is reversed, but its inputs do not cover lexical-verb conjunctions or math followed by another clause.\nSCORE fit: 18\nJUSTIFICATION fit: jev_review.py:469-483 keeps the splitter constants beside its existing regexes and names them by behavior without forbidden plan labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search found only sentence splitting in docs_gates.py:726 and audits.py:937; jev_review.py:530 extends the existing claim splitter rather than creating another owner.\nFINDING imas_codex/standard_names/review/jev_review.py:552 blocking: The finite-marker regex omits lexical verbs, so \"The density rises and the temperature falls\" stays one claim although the brief requires clauses joined by a conjunction to be split and independently checked.\nFINDING imas_codex/standard_names/review/jev_review.py:565 blocking: Math followed by another clause, as in \"The density is $n<0$ and the temperature rises\", passes the tail check as \"The density is and the temperature rises\" and can make a correct entry look unsupported.\n",
+  "review_run_id": "r-20261017T113806746096-review-of-srtj-docs-claims-build-1f90e66c6da0",
+  "reviewed_base_sha": "a54bf880cf54806c2e35f8285aedff86b36bc8f3",
+  "reviewed_head_sha": "1f90e66c6da07df1506c70bc20d14f2a60ee26d4",
+  "reviewed_run_id": "r-20261017T104250254728-srtj-docs-claims-build",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T11:40:59.427092+00:00",
+  "total": 106
+}
