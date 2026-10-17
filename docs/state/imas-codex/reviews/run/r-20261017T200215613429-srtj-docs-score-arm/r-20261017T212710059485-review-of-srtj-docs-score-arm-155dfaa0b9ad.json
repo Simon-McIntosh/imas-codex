@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/head-gate-followon-absolute.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Restoring a hardcoded claim-option tuple, or reordering the taxonomy independently of the table, makes the expected literal order differ or raises before the assertion.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:200"
+    },
+    {
+      "failure_condition": "Dropping the any-part-conflicts instruction from the contradiction criterion removes the independently expected substring.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:201"
+    },
+    {
+      "failure_condition": "Restoring a choice-only veto makes lines 280 and 283 fail for a supports answer carrying contradiction probability 0.32, and raising the threshold past 0.04 makes the negative assertion at 288 fail.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:280-288"
+    },
+    {
+      "failure_condition": "Making the fitted score fall back to zero-filled audit components for an absent report turns both None assertions into numeric scores.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:305-311"
+    },
+    {
+      "failure_condition": "Omitting the house-style audit erases the independently expected flawed finding at 383 and makes the clean and flawed scores at 394 equal; negative-audit-input.log records exactly that red.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:382-394"
+    }
+  ],
+  "base_log_revision": "e1c015d0906a705c014cbedeb471f535a305c400",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/base-gate.log",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:10889",
+    "imas_codex/standard_names/workers.py:10924"
+  ],
+  "completed_at": "2026-10-17T21:42:08.397Z",
+  "dispatched_at": "2026-10-17T21:27:25Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "653",
+      "severity": "follow-on",
+      "text": "follow-on: build_docs_audit_report re-implements the convention-violation LintFinding construction that imas_codex/standard_names/review/audits.py:690 run_house_style_checks owns, so a change to the owner's finding text or severity reaches this report only when it is made here by hand."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "867",
+      "severity": "follow-on",
+      "text": "follow-on: contradiction_reason and raw_claim_answers are produced but read only by tests, because the sole production caller at imas_codex/standard_names/workers.py:10924-10938 rebuilds its own reason string from claim_answers, so the named contradictory sentence never reaches a review."
+    }
+  ],
+  "head_log_revision": "155dfaa0b9ada2a966ad8cf8f4b15cba95d73ed3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read commits 301800b1, 5472f62f, 5132f338, 3d41cb0c, 012e6440 and 155dfaa0 against base e1c015d0906a705c014cbedeb471f535a305c400; jev_review.py:629-772 adds the audit report, the fitted score and the probability veto, while the runner, test, fragment, results and figure carry the measurement.",
+    "done_when": "The source brief.md requires the score fragment, a house-style regression assertion that reddens when audit input is removed, and no added docs-gate failures; srtj-docs-score-arm.html, negative-audit-input.log at EXIT=1, and the identical failure id in base-gate.log and head-gate-followon-absolute.log carry those measures.",
+    "goal": "The source brief.md asks the Jev documentation arm to score entries from code-decided audit and claim evidence with calibration-fitted weights; jev_review.py:629-772 delivers that and srtj-docs-score-arm.html reports it measured, though the fitted score has no runtime caller.",
+    "manifest": "The source manifest.md records six commits, six changed paths, complete status, both gate logs, three negative-control logs, the frozen rescore at USD 0.068551 and the post-hoc 0.30-threshold caveat.",
+    "write_paths": "The source brief.md grants jev_review.py, test_jev_docs_review.py, the fragment, the runner, the results and the figure directory; git diff e1c015d0906a705c014cbedeb471f535a305c400..155dfaa0b9ada2a966ad8cf8f4b15cba95d73ed3 changes those six paths and no others."
+  },
+  "justifications": {
+    "durability": "test_jev_docs_review.py:394 fails if the audit's house-style finding stops lowering the score and negative-audit-input.log records that red at EXIT=1, while test_jev_docs_review.py:283-288 guards both sides of the probability veto; line 282 echoes a value the test itself supplied and so holds under a no-op raw_claim_answers, and durability does not rest on it.",
+    "evidence": "srtj-docs-score-arm.html reports the paired non-rule gains with 95% copy-group bootstrap intervals, the 60/60 planted veto with 0/20 silent controls, the 0.050 option-order flip rate and USD 0.068551, and base-gate.log and head-gate-followon-absolute.log record the same single pre-existing failure.",
+    "fit": "jev_review.py:776-873 follows the adjacent aggregate and scoring conventions of the same module and introduces no plan, ticket or version identifier in any added name, comment or docstring.",
+    "goal_fidelity": "jev_review.py:629-772 adds the audit-fed report, the enlarged claim evidence and the fitted weights at jev_review.py:465-490, but the score they produce is reached only from srtj-docs-score-arm-run.py, so no runtime decision depends on it yet.",
+    "reuse": "jev_review.py:646-667 duplicates the convention-violation LintFinding construction that imas_codex/standard_names/review/audits.py:690 run_house_style_checks already owns, although the same function extends that owner by calling run_house_style_checks, run_documentation_gate_checks and run_link_integrity.",
+    "scope_discipline": "git diff e1c015d0906a705c014cbedeb471f535a305c400..155dfaa0b9ada2a966ad8cf8f4b15cba95d73ed3 changes exactly the six paths the source brief.md grants, including the figure under its granted directory."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md asks the Jev documentation arm to score entries from code-decided audit and claim evidence with calibration-fitted weights; jev_review.py:629-772 delivers that and srtj-docs-score-arm.html reports it measured, though the fitted score has no runtime caller.\nVERDICT done_when: The source brief.md requires the score fragment, a house-style regression assertion that reddens when audit input is removed, and no added docs-gate failures; srtj-docs-score-arm.html, negative-audit-input.log at EXIT=1, and the identical failure id in base-gate.log and head-gate-followon-absolute.log carry those measures.\nVERDICT write_paths: The source brief.md grants jev_review.py, test_jev_docs_review.py, the fragment, the runner, the results and the figure directory; git diff e1c015d0906a705c014cbedeb471f535a305c400..155dfaa0b9ada2a966ad8cf8f4b15cba95d73ed3 changes those six paths and no others.\nVERDICT manifest: The source manifest.md records six commits, six changed paths, complete status, both gate logs, three negative-control logs, the frozen rescore at USD 0.068551 and the post-hoc 0.30-threshold caveat.\nVERDICT diff: Read commits 301800b1, 5472f62f, 5132f338, 3d41cb0c, 012e6440 and 155dfaa0 against base e1c015d0906a705c014cbedeb471f535a305c400; jev_review.py:629-772 adds the audit report, the fitted score and the probability veto, while the runner, test, fragment, results and figure carry the measurement.\nCALL_SITES: imas_codex/standard_names/workers.py:10889, imas_codex/standard_names/workers.py:10924\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: jev_review.py:629-772 adds the audit-fed report, the enlarged claim evidence and the fitted weights at jev_review.py:465-490, but the score they produce is reached only from srtj-docs-score-arm-run.py, so no runtime decision depends on it yet.\nSCORE evidence: 18\nJUSTIFICATION evidence: srtj-docs-score-arm.html reports the paired non-rule gains with 95% copy-group bootstrap intervals, the 60/60 planted veto with 0/20 silent controls, the 0.050 option-order flip rate and USD 0.068551, and base-gate.log and head-gate-followon-absolute.log record the same single pre-existing failure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff e1c015d0906a705c014cbedeb471f535a305c400..155dfaa0b9ada2a966ad8cf8f4b15cba95d73ed3 changes exactly the six paths the source brief.md grants, including the figure under its granted directory.\nSCORE durability: 18\nJUSTIFICATION durability: test_jev_docs_review.py:394 fails if the audit's house-style finding stops lowering the score and negative-audit-input.log records that red at EXIT=1, while test_jev_docs_review.py:283-288 guards both sides of the probability veto; line 282 echoes a value the test itself supplied and so holds under a no-op raw_claim_answers, and durability does not rest on it.\nSCORE fit: 18\nJUSTIFICATION fit: jev_review.py:776-873 follows the adjacent aggregate and scoring conventions of the same module and introduces no plan, ticket or version identifier in any added name, comment or docstring.\nSCORE reuse: 15\nJUSTIFICATION reuse: jev_review.py:646-667 duplicates the convention-violation LintFinding construction that imas_codex/standard_names/review/audits.py:690 run_house_style_checks already owns, although the same function extends that owner by calling run_house_style_checks, run_documentation_gate_checks and run_link_integrity.\nFINDING imas_codex/standard_names/review/jev_review.py:653 follow-on: build_docs_audit_report re-implements the convention-violation LintFinding construction that imas_codex/standard_names/review/audits.py:690 run_house_style_checks owns, so a change to the owner's finding text or severity reaches this report only when it is made here by hand.\nFINDING imas_codex/standard_names/review/jev_review.py:867 follow-on: contradiction_reason and raw_claim_answers are produced but read only by tests, because the sole production caller at imas_codex/standard_names/workers.py:10924-10938 rebuilds its own reason string from claim_answers, so the named contradictory sentence never reaches a review.\n",
+  "review_run_id": "r-20261017T212710059485-review-of-srtj-docs-score-arm-155dfaa0b9ad",
+  "reviewed_base_sha": "e1c015d0906a705c014cbedeb471f535a305c400",
+  "reviewed_commits": [
+    "301800b11868ac30b3d4ade1e229557c20bd382b",
+    "5472f62f3ebd84ade66c224ebd80d7b3ef688c5d",
+    "5132f338ed4759c450ad6436b967232cef57e117",
+    "3d41cb0c45ac005648b64ce5902162bb5a96a0f2",
+    "012e64409be0677a6fad37a6f9ad4446b7829178",
+    "155dfaa0b9ada2a966ad8cf8f4b15cba95d73ed3"
+  ],
+  "reviewed_head_sha": "155dfaa0b9ada2a966ad8cf8f4b15cba95d73ed3",
+  "reviewed_run_id": "r-20261017T200215613429-srtj-docs-score-arm",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T21:45:13.213861+00:00",
+  "total": 107
+}
