@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-beryllium-prose-edit">
+  <title>Remove the estimator recipe from the beryllium boundary-density documentation</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-beryllium-prose-edit-title">One steered docs edit clears the estimator recipe from the beryllium boundary-density member</h1>
+  <p id="shc-beryllium-prose-edit-scope">
+    The boundary-density family apply halted on exactly one member because accepted-name
+    documentation still carried an estimator recipe
+    (<a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html">diagnosis</a>,
+    finding 4). This node removes that recipe from
+    <code>flux_surface_averaged_beryllium_density_at_plasma_boundary</code> through one
+    steered <code>sn edit</code> on the documentation axis, and shows the policy matcher
+    falling from one <code>estimator_recipe</code> match to zero. It is a documentation-axis
+    edit: the identity, source binding and spend record survive.
+  </p>
+
+  <h2 id="shc-beryllium-prose-edit-before">1. State before the edit</h2>
+  <p id="shc-beryllium-prose-edit-before-fields">
+    Read at revision <code>25d5ad6e5</code> by
+    <code>prose_edit_check.py</code> (one node selected by its indexed <code>id</code>,
+    read only). The member reads:
+    <code>name_stage=accepted</code>, <code>docs_stage=accepted</code>,
+    <code>status=superseded</code>, <code>validation_status=quarantined</code>,
+    <code>validation_issues=['campaign: banned prose persisted after refine']</code>.
+    The policy matcher reports <code>estimator_recipe=1</code> — the positive control that
+    the pattern sees the recipe present.
+  </p>
+  <pre id="shc-beryllium-prose-edit-before-doc">Number density of beryllium
+
+The flux-surface average is defined by
+
+$$
+\langle n_{\mathrm{Be}}\rangle = \oint n_{\mathrm{Be}}\,dS/|\nabla\psi| \, / \, \oint dS/|\nabla\psi|
+$$
+
+where $\langle n_{\mathrm{Be}}\rangle$ is the averaged beryllium-ion number density, $n_{\mathrm{Be}}$ is the local beryllium-ion number density summed over ion charge states, $S$ is the plasma-boundary flux surface, $dS$ is its surface element, and $\psi$ is the poloidal magnetic flux whose gradient magnitude provides the weighting.
+
+This quantity is a charge-state-summed surface average, not a local point value, a volume average, or a density that includes neutral beryllium. It is obtained from the local [beryllium ion density at the plasma boundary](name:beryllium_density_at_plasma_boundary) by replacing the pointwise value with the inverse-poloidal-flux-gradient-weighted surface mean. It differs from the [volume-averaged beryllium density](name:volume_averaged_beryllium_density), which averages over the confined plasma volume.
+
+The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma. Where $\psi = \psi_{\mathrm{LCFS}}$, $\psi$ is poloidal magnetic flux; $\psi_{\mathrm{LCFS}}$ is its value on the last closed flux surface.</pre>
+  <p id="shc-beryllium-prose-edit-before-note">
+    The flagged sentence is <q>It is obtained from the local [beryllium ion density at the
+    plasma boundary](name:beryllium_density_at_plasma_boundary) by replacing the pointwise
+    value with the inverse-poloidal-flux-gradient-weighted surface mean.</q> The
+    <code>estimator_recipe</code> pattern matches <code>is obtained from</code> when no
+    defining equation follows within 200 characters
+    (<code>imas_codex/standard_names/prose_policy.py:40–44</code>). The snapshot is
+    <code>before-doc.txt</code>; the matcher log is <code>before-read.log</code> in
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132553901647-shc-beryllium-prose-edit/</code>.
+  </p>
+
+  <h2 id="shc-beryllium-prose-edit-dryrun">2. Dry run</h2>
+  <p id="shc-beryllium-prose-edit-dryrun-text">
+    A hint steering the writer to remove the recipe sentence and keep the rest, on the docs
+    axis, scope <code>self</code>, cost limit USD 0.50:
+  </p>
+  <pre id="shc-beryllium-prose-edit-dryrun-command">imas-codex sn edit flux_surface_averaged_beryllium_density_at_plasma_boundary \
+  --hint "Remove the estimator-recipe sentence from the documentation: 'It is obtained from the local [beryllium ion density at the plasma boundary](name:beryllium_density_at_plasma_boundary) by replacing the pointwise value with the inverse-poloidal-flux-gradient-weighted surface mean.' Accepted-name documentation states what the quantity is, not how it is computed from another quantity. Keep every other sentence unchanged: the opening, the flux-surface-average equation and its where-clause, the charge-state-summed surface-average statement, the sibling link to the volume-averaged beryllium density, and the closing last-closed-flux-surface sentence." \
+  --reason "The sentence 'It is obtained from the local ... by replacing the pointwise value with ...' is an estimator recipe, not a definition: it narrates how the value is computed from another quantity. The accepted-name prose policy's estimator_recipe pattern matches 'is obtained from' when no defining equation follows within 200 characters, and this document is the one member the boundary-density family apply halted on (campaign: banned prose persisted after refine). The flux-surface average is already defined by the equation above it, so the recipe is redundant; removing it leaves the definition, the taxonomy and the locus intact." \
+  --axis docs --scope self --dry-run -c 0.50</pre>
+  <pre id="shc-beryllium-prose-edit-dryrun-output">DRY RUN sn edit: flux_surface_averaged_beryllium_density_at_plasma_boundary
+mode=hint axis=docs scope=only_self entry=generate
+
+Actions:
+  - hint attached to 'flux_surface_averaged_beryllium_density_at_plasma_boundary' (axis=docs)
+  - no writes performed</pre>
+
+  <h2 id="shc-beryllium-prose-edit-apply">3. The edit and its receipt</h2>
+  <p id="shc-beryllium-prose-edit-apply-text">
+    The same command without <code>--dry-run</code> stages and reviews inline under scope run
+    id <code>sn-edit-20261017T132933Z</code>. The review accepted the candidate on the
+    documentation axis at <code>score=0.988</code> (<code>chain=0/3</code>,
+    <code>resolution=quorum_consensus</code>). Spend was <b>USD 0.1366</b> of the USD 0.50
+    cap: <code>generate_docs</code> spent $0.0105, <code>review_docs</code> spent $0.1262.
+  </p>
+  <pre id="shc-beryllium-prose-edit-apply-receipt">APPLIED sn edit: flux_surface_averaged_beryllium_density_at_plasma_boundary
+mode=hint axis=docs scope=only_self entry=generate
+  - hint attached (axis=docs)
+  - docs reset for regeneration (eligible=1, reset=1)
+  - scope stamp run_id=sn-edit-20261017T132933Z
+Reviewing inline (scope run_id=sn-edit-20261017T132933Z, budget=$0.50) …
+inline review: accepted / accepted / score 0.99
+Inline review cost: $0.1366
+EDIT_EXIT=0
+
+log: /home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-edit.log
+  line 2382: reset_standard_name_docs: 1/1 reset to docs pending (run_id=sn-edit-20261017T132933Z)
+  line 2423: persist_reviewed_docs: … → docs_stage=accepted (score=0.988, chain=0/3, resolution=quorum_consensus, shortfall=None)
+  line 2431: run_sn_pools: pool=generate_docs processed=1 spent=$0.0105; pool=review_docs processed=1 spent=$0.1262</pre>
+
+  <h2 id="shc-beryllium-prose-edit-after">4. State after the edit — the measure</h2>
+  <p id="shc-beryllium-prose-edit-after-fields">
+    Read back at the same revision. Stages are unchanged on both axes
+    (<code>name_stage=accepted</code>, <code>docs_stage=accepted</code>) and the identity,
+    status and source binding survive. The matcher now reports
+    <code>estimator_recipe=0</code> — the done-when measure. The recipe sentence is gone
+    and the parent-provenance link and the locus sentence survive.
+  </p>
+  <pre id="shc-beryllium-prose-edit-after-doc">Number density of beryllium
+
+The flux-surface average is defined by
+
+$$
+\langle n_{\mathrm{Be}}\rangle = \oint n_{\mathrm{Be}}\,dS/|\nabla\psi| \, /\, \oint dS/|\nabla\psi|
+$$
+
+where $\langle n_{\mathrm{Be}}\rangle$ is the averaged beryllium-ion number density, $n_{\mathrm{Be}}$ is the local beryllium-ion number density, $S$ is the plasma-boundary flux surface, $dS$ is its surface element, and $\psi$ is the poloidal magnetic flux whose gradient magnitude is $|\nabla\psi|$.
+
+This quantity is summed over all beryllium ion charge states and excludes neutral beryllium. It is a flux-surface average, not a local point value, volume average, or chord average.
+
+It is the flux-surface-averaged counterpart of the local [beryllium ion density at the plasma boundary](name:beryllium_density_at_plasma_boundary). It differs from the [volume-averaged beryllium density](name:volume_averaged_beryllium_density), which uses a volume rather than a flux-surface domain.
+
+The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined plasma. Where $\psi = \psi_{\mathrm{LCFS}}$, $\psi$ is poloidal magnetic flux; $\psi_{\mathrm{LCFS}}$ is its value on the last closed flux surface.</pre>
+  <p id="shc-beryllium-prose-edit-policy-check">
+    Policy check, run by <code>prose_edit_check.py</code> over the read-back documentation
+    (log <code>after-read.log</code>, snapshot <code>after-doc.txt</code>):
+  </p>
+  <pre id="shc-beryllium-prose-edit-policy-output">before: {"typical_values": 0, "estimator_recipe": 1, "procedural_padding": 0}  (doc_len 1299)
+after:  {"typical_values": 0, "estimator_recipe": 0, "procedural_padding": 0}  (doc_len 1240)</pre>
+  <p id="shc-beryllium-prose-edit-quarantine">
+    <b>Quarantine retained.</b> After the edit the member still reads
+    <code>validation_status=quarantined</code> with
+    <code>validation_issues=['campaign: banned prose persisted after refine']</code>.
+    <code>sn edit</code> does not run the campaign revalidation, so clearing that field is
+    a separate step (revalidate this member once the ban is lifted). The field and its value
+    are recorded here as the brief requires.
+  </p>
+  <p id="shc-beryllium-prose-edit-recipe-absent">
+    The recipe is not reintroduced by the refine: the read-back documentation contains no
+    <code>is obtained from</code>, <code>is computed</code>, <code>is calculated</code>,
+    <code>is estimated</code>, or <code>can be obtained</code> form — the writer expressed the
+    parent relationship as <q>the flux-surface-averaged counterpart of the local …</q>, which
+    the matcher does not flag.
+  </p>
+</main>
+</body>
+</html>
