@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's own manifest records baseline_suite: null and after_suite: null, so it declares no armed gate arms and the added-failure count was not taken; its only gates are the prose-policy matcher runs before-read.log and after-read.log, in no pytest or ctest format, reporting no failing test id in either arm",
+  "call_site_count": 2,
+  "call_sites": [
+    "reckon/evidence.py:compose_landed_record",
+    "reckon/resources.py:_is_evidence_fragment"
+  ],
+  "completed_at": "2026-10-17T13:49:19.927Z",
+  "dispatched_at": "2026-10-17T13:37:02Z",
+  "evidence_inputs": {
+    "changed_paths": [
+      "docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html"
+    ],
+    "node": "shc-beryllium-prose-edit",
+    "reviewed_base_sha": "25d5ad6e534559d61e801a4bd61faaa7a68251fd",
+    "reviewed_head_sha": "d1dd1d9583a0083d763fc9b6f4a207e8f4b88a96"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html",
+      "line": "103",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's section 4 says the recipe sentence is gone and only the parent-provenance link and the locus sentence survive, but the after document it prints at :110-:119 also rewrote the equation's where-clause and the charge-state-summary sentence relative to the before document at :47-:53, so the steered hint's \"keep every other sentence unchanged\" was not held and the fragment understates the edit's extent."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132553901647-shc-beryllium-prose-edit/manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's tests: value carries an unsubstituted <snapshot> placeholder where the brief requires the literal command that ran, so the exact gate invocation is not recoverable from the record alone and the snapshot path survives only inside the log JSON."
+    }
+  ],
+  "follow_ons": [
+    "the fragment understates the edit's extent: the where-clause and the charge-state-summary sentence were also rewritten by the docs regenerate",
+    "revalidating the member on the campaign axis remains a separate step outside this node"
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against 25d5ad6e534559d61e801a4bd61faaa7a68251fd; d1dd1d9583a0083d763fc9b6f4a207e8f4b88a96 adds only the 144-line fragment as a new file, its body states the change, and it carries no AI attribution.",
+    "done_when": "the done_when names docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html and requires the before and after documentation, the dry run, the command and its log path, the spend, and the zero-match policy check; the fragment carries all six \u2014 before doc and fields at :40-:56, dry-run command and output at :58-:78, apply receipt with log path and spend at :81-:95, after doc at :109-:125, and the matcher before 1 to after 0 at :130.",
+    "goal": "the node goal is to clear the estimator recipe from flux_surface_averaged_beryllium_density_at_plasma_boundary's documentation through one steered `sn edit` on the docs axis, with the before/after recorded in a fragment; the delivered commit d1dd1d958 adds exactly that fragment and its printed after document at :110-:119 carries no estimator-recipe form, so the goal the git change can carry is met \u2014 the graph documentation edit itself is a live write that the diff cannot contain.",
+    "manifest": "read; it states status complete with one commit, and its prose_edit_check.py runs read before (estimator_recipe=1, doc_len 1299) and after (estimator_recipe=0, doc_len 1240) both EXIT=0, but its tests: value carries an unsubstituted <snapshot> placeholder where the literal command is required.",
+    "write_paths": "the source manifest declares docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html and the figure topic directory docs/figures/sn-harmonize-command/shc-beryllium-prose-edit; the diff's single file is inside that set and the figure directory stays empty because the done_when names no artifact."
+  },
+  "justifications": {
+    "durability": "no test guards the re-introduction of the recipe; the before/after matcher counts shown at docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html:130 are a discriminating measurement of the edit's effect, not a persisted regression test, and the node's write paths commit no test file.",
+    "evidence": "the gate is the policy matcher the done_when asserts and its result is recorded in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132553901647-shc-beryllium-prose-edit/before-read.log (estimator_recipe=1, EXIT=0) and after-read.log (estimator_recipe=0, doc_len 1240, EXIT=0), a before/after pair whose positive control shows the pattern seeing the recipe, though the exact command is recorded descriptively rather than verbatim.",
+    "fit": "the fragment follows the full-document idiom of its cited predecessor docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:1, and reckon/evidence.py:_fragment_body_bytes composes its main-element content, with no name the naming rules forbid.",
+    "goal_fidelity": "the landed change is the evidence fragment the goal names, and its printed after documentation at docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html:118 carries no estimator-recipe form, though the graph edit it evidences is a live write the diff cannot contain.",
+    "reuse": "the change adds no code definition, and its read helper calls the repository's owner of the policy vocabulary, imas_codex/standard_names/prose_policy.py:27 banned_prose_findings, rather than re-implementing the estimator_recipe pattern.",
+    "scope_discipline": "the only path in the diff is docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html, exactly the fragment write path the manifest declares."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 25d5ad6e534559d61e801a4bd61faaa7a68251fd\nreviewed_head_sha: d1dd1d9583a0083d763fc9b6f4a207e8f4b88a96\n\nVERDICT goal: the node goal is to clear the estimator recipe from flux_surface_averaged_beryllium_density_at_plasma_boundary's documentation through one steered `sn edit` on the docs axis, with the before/after recorded in a fragment; the delivered commit d1dd1d958 adds exactly that fragment and its printed after document at :110-:119 carries no estimator-recipe form, so the goal the git change can carry is met \u2014 the graph documentation edit itself is a live write that the diff cannot contain.\nVERDICT done_when: the done_when names docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html and requires the before and after documentation, the dry run, the command and its log path, the spend, and the zero-match policy check; the fragment carries all six \u2014 before doc and fields at :40-:56, dry-run command and output at :58-:78, apply receipt with log path and spend at :81-:95, after doc at :109-:125, and the matcher before 1 to after 0 at :130.\nVERDICT write_paths: the source manifest declares docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html and the figure topic directory docs/figures/sn-harmonize-command/shc-beryllium-prose-edit; the diff's single file is inside that set and the figure directory stays empty because the done_when names no artifact.\nVERDICT manifest: read; it states status complete with one commit, and its prose_edit_check.py runs read before (estimator_recipe=1, doc_len 1299) and after (estimator_recipe=0, doc_len 1240) both EXIT=0, but its tests: value carries an unsubstituted <snapshot> placeholder where the literal command is required.\nVERDICT diff: read commit by commit against 25d5ad6e534559d61e801a4bd61faaa7a68251fd; d1dd1d9583a0083d763fc9b6f4a207e8f4b88a96 adds only the 144-line fragment as a new file, its body states the change, and it carries no AI attribution.\nCALL_SITES: reckon/evidence.py:compose_landed_record, reckon/resources.py:_is_evidence_fragment\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the landed change is the evidence fragment the goal names, and its printed after documentation at docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html:118 carries no estimator-recipe form, though the graph edit it evidences is a live write the diff cannot contain.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate is the policy matcher the done_when asserts and its result is recorded in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132553901647-shc-beryllium-prose-edit/before-read.log (estimator_recipe=1, EXIT=0) and after-read.log (estimator_recipe=0, doc_len 1240, EXIT=0), a before/after pair whose positive control shows the pattern seeing the recipe, though the exact command is recorded descriptively rather than verbatim.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the only path in the diff is docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html, exactly the fragment write path the manifest declares.\nSCORE durability: 10\nJUSTIFICATION durability: no test guards the re-introduction of the recipe; the before/after matcher counts shown at docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html:130 are a discriminating measurement of the edit's effect, not a persisted regression test, and the node's write paths commit no test file.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the full-document idiom of its cited predecessor docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:1, and reckon/evidence.py:_fragment_body_bytes composes its main-element content, with no name the naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no code definition, and its read helper calls the repository's owner of the policy vocabulary, imas_codex/standard_names/prose_policy.py:27 banned_prose_findings, rather than re-implementing the estimator_recipe pattern.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-beryllium-prose-edit.html:103 follow-on: the fragment's section 4 says the recipe sentence is gone and only the parent-provenance link and the locus sentence survive, but the after document it prints at :110-:119 also rewrote the equation's where-clause and the charge-state-summary sentence relative to the before document at :47-:53, so the steered hint's \"keep every other sentence unchanged\" was not held and the fragment understates the edit's extent.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132553901647-shc-beryllium-prose-edit/manifest.md:11 follow-on: the manifest's tests: value carries an unsubstituted <snapshot> placeholder where the brief requires the literal command that ran, so the exact gate invocation is not recoverable from the record alone and the snapshot path survives only inside the log JSON.",
+  "review_run_id": "r-20261017T133640653562-review-of-shc-beryllium-prose-edit-d1dd1d9583a0",
+  "reviewed_base_sha": "25d5ad6e534559d61e801a4bd61faaa7a68251fd",
+  "reviewed_head_sha": "d1dd1d9583a0083d763fc9b6f4a207e8f4b88a96",
+  "reviewed_run_id": "r-20261017T132553901647-shc-beryllium-prose-edit",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "review",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T13:47:18.671104+00:00",
+  "total": 103
+}
