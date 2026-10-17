@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run is a documentation node and its manifest names no baseline_suite and no after_suite gate arm, so no base-vs-head log pair exists to reduce. The diff changes one docs fragment and no code or test, so no added failure is possible, but the count is recorded as unmeasured rather than as a measured zero per the store's own rule.",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T19:52:55.374Z",
+  "dispatched_at": "2026-10-17T19:43:07Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103312335949-shc-potential-rename/dryrun-wall-edit.log",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: the log's terminal line is EXIT=0, not the EXIT=2 the fragment reports for this dry run at shc-potential-rename.html:56. The BLOCKED box on lines 2-8 corroborates the refusal, but the log's own last line is the exit status the capture rule reads, so the cited evidence disagrees with the exit the fragment cites it for; the log also carries two EXIT lines (EXIT=2 then a bare EXIT=0) on one command line, which is a malformed capture."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html",
+      "line": "98",
+      "severity": "follow-on",
+      "text": "follow-on: the before table presents superseded_from_stage=refining for the two tombstones (lines 98 and 104) as a before-read fact, but before-read.log, which the table header cites, does not carry that field at all; the value appears only in after-probe.log:9,12, post-fold. The before-state is inferred from the post-fold read rather than read before the fold, so the column does not evidence what it is headed as."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html",
+      "line": "301",
+      "severity": "follow-on",
+      "text": "follow-on: the revalidation paragraph attributes the observed name_stage=reviewed to _FOLD_REVIVAL_STAGE_CAP, but that cap maps only accepted->reviewed and returns a 'refining' source stage unchanged (imas_codex/standard_names/edit.py:2144,2231), so the mechanism the fragment cites does not produce the observed stage for a tombstone read at superseded_from_stage='refining'. The manifest records this as 'OBSERVED, NOT EXPLAINED'; the fragment, which is the deliverable, does not carry that caveat."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: all three commit subjects carry the plan name as their scope, docs(sn-harmonize-command), at 77ed20949, fb64a1bfc and 4d94cf7d7, which the commit-message rule forbids (no plan filenames in commit messages). A commit body may reference its plan; the subject may not."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the change is a documentation fragment and no runtime code reaches it; its only consumer is the reckon plan page docs/plans/sn-harmonize-command.html, which the coordinator splices the fragment into and whose landing comment sits at docs/plans/sn-harmonize-command.html:520.",
+    "diff": "read commit by commit against 4aff576e8; 77ed20949 adds the 231-line fragment, fb64a1bfc states the authority basis and records the route deviation, 4d94cf7d7 adds the description columns and the per-edge inventory table and corrects the carry claim; all three are docs-only and touch only the declared file.",
+    "done_when": "the brief's done-when asks the fragment to carry, for both renames, the before and after reads, the dry runs and commands with their log paths, the spend per name, and whether each name can enter the family's revalidation and why; every one of those sits in the fragment (before and after tables, the dry-run table, the spend table, the revalidation paragraph) and its table values reconcile line-for-line with before-read.log and after-read.log.",
+    "goal": "the node goal is to drop the redundant plasma_ qualifier from the two potential names so they take the family's bare electrostatic_potential_at_<locus> form; the fragment records the outcome through the sanctioned fold route and the recorded graph reads show both bare names now rest live at name_stage=reviewed.",
+    "manifest": "read; status complete, the three commits listed, the two blockers (route deviation; WALL carry defect) raised, the fold logs and spend USD 0.00 recorded, and negative_control_log 'none' with a reversion-check note; baseline_suite and after_suite are empty, consistent with a docs-only node that runs no suite.",
+    "write_paths": "the manifest declares docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html plus a figures directory; git diff 4aff576e8..4d94cf7d7 changes only that HTML file, so the diff stays inside the declared scope."
+  },
+  "justifications": {
+    "durability": "There is no executable guard: the deliverable is a prose fragment and a graph state, the reviewed manifest names no gate suite, and a later re-fold or a stale claim in the fragment would redden nothing, so the graph reads at before-read.log and after-read.log are the only check that exists.",
+    "evidence": "The reads are recorded and reconcile with the fragment's tables, but two cited values do not sit in the logs named for them (the before-state superseded_from_stage=refining at shc-potential-rename.html:98, and the wall dry run's exit at dryrun-wall-edit.log:10, whose terminal line is EXIT=0 against the fragment's EXIT=2), so the evidence is strong but not clean.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html follows the shape of its sibling evidence fragments (for example shc-exhausted-rescore.html) and adds no symbol, but the three commit subjects carry the plan name as their scope.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:182 records both bare names at name_stage=reviewed with validation_status=valid, matching after-read.log:3-4, so the ruled outcome landed; the deviation from the brief's named mechanism is disclosed and raised rather than hidden.",
+    "reuse": "The diff adds no function, class or module, so no capability is forked; the fold it reports runs entirely through the repository's own sn supersede path (imas_codex/standard_names/edit.py:2144).",
+    "scope_discipline": "git diff 4aff576e8..4d94cf7d7 in the reviewed worktree lists exactly one file, docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html, the node's declared write path."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to drop the redundant plasma_ qualifier from the two potential names so they take the family's bare electrostatic_potential_at_<locus> form; the fragment records the outcome through the sanctioned fold route and the recorded graph reads show both bare names now rest live at name_stage=reviewed.\nVERDICT done_when: the brief's done-when asks the fragment to carry, for both renames, the before and after reads, the dry runs and commands with their log paths, the spend per name, and whether each name can enter the family's revalidation and why; every one of those sits in the fragment (before and after tables, the dry-run table, the spend table, the revalidation paragraph) and its table values reconcile line-for-line with before-read.log and after-read.log.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html plus a figures directory; git diff 4aff576e8..4d94cf7d7 changes only that HTML file, so the diff stays inside the declared scope.\nVERDICT manifest: read; status complete, the three commits listed, the two blockers (route deviation; WALL carry defect) raised, the fold logs and spend USD 0.00 recorded, and negative_control_log 'none' with a reversion-check note; baseline_suite and after_suite are empty, consistent with a docs-only node that runs no suite.\nVERDICT diff: read commit by commit against 4aff576e8; 77ed20949 adds the 231-line fragment, fb64a1bfc states the authority basis and records the route deviation, 4d94cf7d7 adds the description columns and the per-edge inventory table and corrects the carry claim; all three are docs-only and touch only the declared file.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:182 records both bare names at name_stage=reviewed with validation_status=valid, matching after-read.log:3-4, so the ruled outcome landed; the deviation from the brief's named mechanism is disclosed and raised rather than hidden.\nSCORE evidence: 15\nJUSTIFICATION evidence: The reads are recorded and reconcile with the fragment's tables, but two cited values do not sit in the logs named for them (the before-state superseded_from_stage=refining at shc-potential-rename.html:98, and the wall dry run's exit at dryrun-wall-edit.log:10, whose terminal line is EXIT=0 against the fragment's EXIT=2), so the evidence is strong but not clean.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 4aff576e8..4d94cf7d7 in the reviewed worktree lists exactly one file, docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html, the node's declared write path.\nSCORE durability: 12\nJUSTIFICATION durability: There is no executable guard: the deliverable is a prose fragment and a graph state, the reviewed manifest names no gate suite, and a later re-fold or a stale claim in the fragment would redden nothing, so the graph reads at before-read.log and after-read.log are the only check that exists.\nSCORE fit: 17\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html follows the shape of its sibling evidence fragments (for example shc-exhausted-rescore.html) and adds no symbol, but the three commit subjects carry the plan name as their scope.\nSCORE reuse: 20\nJUSTIFICATION reuse: The diff adds no function, class or module, so no capability is forked; the fold it reports runs entirely through the repository's own sn supersede path (imas_codex/standard_names/edit.py:2144).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103312335949-shc-potential-rename/dryrun-wall-edit.log:10 follow-on: the log's terminal line is EXIT=0, not the EXIT=2 the fragment reports for this dry run at shc-potential-rename.html:56, so the cited evidence disagrees with the exit the fragment cites it for.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:98 follow-on: the before table presents superseded_from_stage=refining for the two tombstones as a before-read fact, but before-read.log does not carry that field; the value appears only in after-probe.log:9,12 post-fold.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:301 follow-on: the revalidation paragraph attributes the observed name_stage=reviewed to _FOLD_REVIVAL_STAGE_CAP, but that cap maps only accepted->reviewed and leaves a 'refining' source unchanged (imas_codex/standard_names/edit.py:2144,2231), so the cited mechanism does not produce the observed stage.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1 follow-on: all three commit subjects carry the plan name as their scope, docs(sn-harmonize-command), which the commit-message rule forbids.\n",
+  "review_run_id": "r-20261017T194233158647-review-of-shc-potential-rename",
+  "reviewed_base_sha": "4aff576e85bff3c31534cc9c8a26f313ff101f6f",
+  "reviewed_head_sha": "4d94cf7d71afc1887e181b20766955efd65b50cf",
+  "reviewed_run_id": "r-20261017T103312335949-shc-potential-rename",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T19:58:00+00:00",
+  "total": 102,
+  "verdict": "SOUND WITH FINDINGS"
+}
