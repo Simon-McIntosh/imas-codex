@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: reviewed manifest.md leaves baseline_suite and after_suite empty and names no gate suite logs; no base/head failure delta can be computed",
+  "call_site_count": 1,
+  "call_sites": [
+    "reckon/evidence.py:560 compose_landed_record"
+  ],
+  "commits_read": [
+    "4aff576e85bff3c31534cc9c8a26f313ff101f6f",
+    "77ed2094930c104e975a09ed078a88d438ffd915"
+  ],
+  "completed_at": "2026-10-17T11:03:43Z",
+  "dispatched_at": "2026-10-17T10:59:24Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html",
+      "line": "117",
+      "severity": "blocking",
+      "text": "blocking: brief.md:20-29 explicitly requires sn edit --rename as the only sanctioned apply route, while both committed applies use sn supersede; the dry-run collision explains the deviation but does not authorize it under this exact node."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html",
+      "line": "181",
+      "severity": "blocking",
+      "text": "blocking: the claim that no identity edge remains on an old name is contradicted by after-read.log, where plasma_electrostatic_potential_at_wall still has REFINED_FROM to plasma_electrostatic_potential_at_first_wall and the bare wall name has no corresponding edge, violating brief.md:31-34's relationship carry requirement."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html",
+      "line": "59",
+      "severity": "blocking",
+      "text": "blocking: the before and after tables omit the descriptions, and the prose omits the per-edge before and after inventory that brief.md:14-19 and 36-43 require the fragment to carry; the logs contain those reads but the committed deliverable does not."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "follow-on: the text says the edit refusal names sn supersede as an alternate, while dryrun-midplane.log and dryrun-wall-edit.log say only that the target already exists, so the stated authority is not supported by the cited receipt."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: the cited dryrun-wall-edit.log reports BLOCKED and EXIT=2, then ends with EXIT=0, leaving its final status inconsistent with the fragment's EXIT=2 claim."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "commit 77ed2094930c104e975a09ed078a88d438ffd915 adds only docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1-231 and no test assertions.",
+    "done_when": "brief.md:36-43 requires before and after reads, commands, spend, and revalidation eligibility; fragment:55-215 covers most fields but omits descriptions and a complete relationship carry check.",
+    "goal": "brief.md:1-3 asks for two bare plasma-potential names; the committed fragment:6-16 records both as live, but fragment:116-125 documents a different apply command than the mandated route.",
+    "manifest": "the reviewed run's manifest.md reports complete at 77ed2094930c104e975a09ed078a88d438ffd915, names the fold logs, and declares no test or baseline_suite/after_suite measurements.",
+    "write_paths": "brief.md:47-49 declares the evidence fragment, and the single changed path in 4aff576e85bff3c31534cc9c8a26f313ff101f6f..77ed2094930c104e975a09ed078a88d438ffd915 is that fragment."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1-231 adds no assertion or test that would fail if its graph-state account regressed; manifest.md names no test gate.",
+    "evidence": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:55-187 cites successful before and after graph reads, but it omits descriptions and claims complete edge carry that after-read.log contradicts.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1-231 follows the existing section and table fragment form, but lines 26-29 misstate what the refusal log actually says.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:6-16 records both bare names live, while lines 116-125 show the exact command route in brief.md:20-29 was not used.",
+    "reuse": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1 adds no definition, and reckon/evidence.py:560 already owns composing this plan's fragments.",
+    "scope_discipline": "docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1-231 is the only file in the commit and lies within brief.md:47-49's declared path."
+  },
+  "plan_slug": "sn-harmonize-command",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: brief.md:1-3 asks for two bare plasma-potential names; the committed fragment:6-16 records both as live, but fragment:116-125 documents a different apply command than the mandated route.\nVERDICT done_when: brief.md:36-43 requires before and after reads, commands, spend, and revalidation eligibility; fragment:55-215 covers most fields but omits descriptions and a complete relationship carry check.\nVERDICT write_paths: brief.md:47-49 declares the evidence fragment, and the single changed path in 4aff576e85bff3c31534cc9c8a26f313ff101f6f..77ed2094930c104e975a09ed078a88d438ffd915 is that fragment.\nVERDICT manifest: the reviewed run's manifest.md reports complete at 77ed2094930c104e975a09ed078a88d438ffd915, names the fold logs, and declares no test or baseline_suite/after_suite measurements.\nVERDICT diff: commit 77ed2094930c104e975a09ed078a88d438ffd915 adds only docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1-231 and no test assertions.\nCALL_SITES: reckon/evidence.py:560 compose_landed_record\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:6-16 records both bare names live, while lines 116-125 show the exact command route in brief.md:20-29 was not used.\nSCORE evidence: 9\nJUSTIFICATION evidence: docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:55-187 cites successful before and after graph reads, but it omits descriptions and claims complete edge carry that after-read.log contradicts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1-231 is the only file in the commit and lies within brief.md:47-49's declared path.\nSCORE durability: 2\nJUSTIFICATION durability: docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1-231 adds no assertion or test that would fail if its graph-state account regressed; manifest.md names no test gate.\nSCORE fit: 15\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1-231 follows the existing section and table fragment form, but lines 26-29 misstate what the refusal log actually says.\nSCORE reuse: 20\nJUSTIFICATION reuse: docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:1 adds no definition, and reckon/evidence.py:560 already owns composing this plan's fragments.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:117 blocking: brief.md:20-29 explicitly requires sn edit --rename as the only sanctioned apply route, while both committed applies use sn supersede; the dry-run collision explains the deviation but does not authorize it under this exact node.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:181 blocking: the claim that no identity edge remains on an old name is contradicted by after-read.log, where plasma_electrostatic_potential_at_wall still has REFINED_FROM to plasma_electrostatic_potential_at_first_wall and the bare wall name has no corresponding edge, violating brief.md:31-34's relationship carry requirement.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:59 blocking: the before and after tables omit the descriptions, and the prose omits the per-edge before and after inventory that brief.md:14-19 and 36-43 require the fragment to carry; the logs contain those reads but the committed deliverable does not.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:26 follow-on: the text says the edit refusal names sn supersede as an alternate, while dryrun-midplane.log and dryrun-wall-edit.log say only that the target already exists, so the stated authority is not supported by the cited receipt.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-potential-rename.html:37 follow-on: the cited dryrun-wall-edit.log reports BLOCKED and EXIT=2, then ends with EXIT=0, leaving its final status inconsistent with the fragment's EXIT=2 claim.\n",
+  "review_run_id": "r-20261017T105858339315-review-of-shc-potential-rename-77ed2094930c",
+  "reviewed_base_sha": "4aff576e85bff3c31534cc9c8a26f313ff101f6f",
+  "reviewed_head_sha": "77ed2094930c104e975a09ed078a88d438ffd915",
+  "reviewed_run_id": "r-20261017T103312335949-shc-potential-rename",
+  "scores": {
+    "durability": 2,
+    "evidence": 9,
+    "fit": 15,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T11:02:21.057632+00:00",
+  "total": 80
+}
