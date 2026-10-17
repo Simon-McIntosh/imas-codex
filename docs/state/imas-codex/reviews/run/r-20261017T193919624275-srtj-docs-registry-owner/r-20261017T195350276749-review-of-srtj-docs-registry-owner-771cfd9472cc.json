@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T193919624275-srtj-docs-registry-owner/committed-gate.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "No assertion was added. The diff deletes the raw taxonomy source assertion; the existing parsed-check assertion at test_review_checks.py:50-56 fails if a loaded check has both or neither decision source.",
+      "lines": "tests/standard_names/test_review_checks.py:67-75 (deleted)"
+    },
+    {
+      "failure_condition": "These unchanged assertions fail if the shared opening matcher stops recognizing a selected opening: the authored opening leaks into documentation_claims and house style emits a TEMPLATE_OPENING finding. The source mutation log shows both failures.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:135; tests/standard_names/test_house_style_checks.py:250"
+    }
+  ],
+  "base_log_revision": "b32d672a2d0a86ea3a4b6eb2b044bd77292f0b9c",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T193919624275-srtj-docs-registry-owner/base-gate.log",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/docs_gates.py:_template_findings",
+    "imas_codex/standard_names/review/jev_review.py:_registry_texts",
+    "imas_codex/standard_names/review/audits.py:712",
+    "imas_codex/standard_names/workers.py:10881"
+  ],
+  "completed_at": "2026-10-17T19:58:26Z",
+  "dispatched_at": "2026-10-17T19:54:17Z",
+  "findings": [],
+  "head_log_revision": "771cfd9472ccdd66d766cbff4dfa586bb70052ec",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/docs_gates.py:_template_findings, imas_codex/standard_names/review/jev_review.py:_registry_texts, imas_codex/standard_names/review/audits.py:712, imas_codex/standard_names/workers.py:10881",
+    "diff": "Commit 1ac46a3e adds registry_template_texts in docs_gates.py:574, replaces both callers' copied matching, and removes the redundant test; commit 771cfd947 adds the one-line evidence fragment.",
+    "done_when": "The source brief.md requires no private matcher import, unchanged gate behavior, and a two-file opening mutation; committed-gate.log:38-40 repeats the base failure and opening-negative-control-both.log:41-44 records both named tests failing at EXIT=1.",
+    "goal": "The source brief.md requests one docs_gates owner for registry template text and removal of a redundant taxonomy assertion; docs_gates.py:574 supplies the shared helper, jev_review.py:490 consumes it, and test_review_checks.py deletes the duplicate test.",
+    "manifest": "The source manifest.md records commits 1ac46a3e and 771cfd947, the four changed paths, baseline_suite and after_suite, the two-test mutation log, and status complete; its failure IDs match base-gate.log:38 and committed-gate.log:38.",
+    "write_paths": "The source brief.md grants docs_gates.py, jev_review.py, test_review_checks.py, and the evidence fragment; git diff b32d672a..771cfd947 changes exactly those four paths."
+  },
+  "justifications": {
+    "durability": "no assertion was added in the diff, but the independent expected outputs in test_jev_docs_review.py:135 and test_house_style_checks.py:250 both fail when docs_gates.py:584-591 stops matching openings, as the mutation log records.",
+    "evidence": "base-gate.log:38-40 and committed-gate.log:38-40 have the same failure ID and zero added failures, while opening-negative-control-both.log:41-44 and opening-restored.log:23-24 show red and green controls.",
+    "fit": "RegistryTemplateTexts and registry_template_texts at docs_gates.py:564-574 keep selection next to _opening_line and _template_opening_pattern and introduce no forbidden source name.",
+    "goal_fidelity": "docs_gates.py:574 owns template opening and note selection, and jev_review.py:475-490 imports only its public helper while test_review_checks.py removes the duplicate assertion.",
+    "reuse": "a capability search found the existing owner at docs_gates.py:538-559 and _template_findings at docs_gates.py:1019, and the addition extends that owner for jev_review.py:490 rather than duplicating it.",
+    "scope_discipline": "the two commits change only the four source brief.md write paths, with the one-line evidence fragment recording the gate result."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md requests one docs_gates owner for registry template text and removal of a redundant taxonomy assertion; docs_gates.py:574 supplies the shared helper, jev_review.py:490 consumes it, and test_review_checks.py deletes the duplicate test.\nVERDICT done_when: The source brief.md requires no private matcher import, unchanged gate behavior, and a two-file opening mutation; committed-gate.log:38-40 repeats the base failure and opening-negative-control-both.log:41-44 records both named tests failing at EXIT=1.\nVERDICT write_paths: The source brief.md grants docs_gates.py, jev_review.py, test_review_checks.py, and the evidence fragment; git diff b32d672a..771cfd947 changes exactly those four paths.\nVERDICT manifest: The source manifest.md records commits 1ac46a3e and 771cfd947, the four changed paths, baseline_suite and after_suite, the two-test mutation log, and status complete; its failure IDs match base-gate.log:38 and committed-gate.log:38.\nVERDICT diff: Commit 1ac46a3e adds registry_template_texts in docs_gates.py:574, replaces both callers' copied matching, and removes the redundant test; commit 771cfd947 adds the one-line evidence fragment.\nCALL_SITES: imas_codex/standard_names/docs_gates.py:_template_findings, imas_codex/standard_names/review/jev_review.py:_registry_texts, imas_codex/standard_names/review/audits.py:712, imas_codex/standard_names/workers.py:10881\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs_gates.py:574 owns template opening and note selection, and jev_review.py:475-490 imports only its public helper while test_review_checks.py removes the duplicate assertion.\nSCORE evidence: 19\nJUSTIFICATION evidence: base-gate.log:38-40 and committed-gate.log:38-40 have the same failure ID and zero added failures, while opening-negative-control-both.log:41-44 and opening-restored.log:23-24 show red and green controls.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commits change only the four source brief.md write paths, with the one-line evidence fragment recording the gate result.\nSCORE durability: 19\nJUSTIFICATION durability: no assertion was added in the diff, but the independent expected outputs in test_jev_docs_review.py:135 and test_house_style_checks.py:250 both fail when docs_gates.py:584-591 stops matching openings, as the mutation log records.\nSCORE fit: 19\nJUSTIFICATION fit: RegistryTemplateTexts and registry_template_texts at docs_gates.py:564-574 keep selection next to _opening_line and _template_opening_pattern and introduce no forbidden source name.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search found the existing owner at docs_gates.py:538-559 and _template_findings at docs_gates.py:1019, and the addition extends that owner for jev_review.py:490 rather than duplicating it.\n",
+  "review_run_id": "r-20261017T195350276749-review-of-srtj-docs-registry-owner-771cfd9472cc",
+  "reviewed_base_sha": "b32d672a2d0a86ea3a4b6eb2b044bd77292f0b9c",
+  "reviewed_commits": [
+    "1ac46a3e8687dea0eb6e645b21543719e1c210ec",
+    "771cfd9472ccdd66d766cbff4dfa586bb70052ec"
+  ],
+  "reviewed_head_sha": "771cfd9472ccdd66d766cbff4dfa586bb70052ec",
+  "reviewed_run_id": "r-20261017T193919624275-srtj-docs-registry-owner",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T20:00:39.983461+00:00",
+  "total": 117
+}
