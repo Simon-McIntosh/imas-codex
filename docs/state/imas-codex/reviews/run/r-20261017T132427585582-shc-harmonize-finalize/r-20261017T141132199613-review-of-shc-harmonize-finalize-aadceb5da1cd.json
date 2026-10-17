@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132427585582-shc-harmonize-finalize/repair-head-gate.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Returning without refusal, omitting the fixed approved member or reason, writing any row, or stamping the anchor fails; the parent-state control fails both dry-run and apply.",
+      "lines": "184-190"
+    },
+    {
+      "failure_condition": "Removing the batch-wide hold lets another pending row be written before the approved member is refused.",
+      "lines": "203-205"
+    },
+    {
+      "failure_condition": "Removing open-roster detection prevents the fixed member and request reason from appearing in the refusal.",
+      "lines": "221-223"
+    }
+  ],
+  "base_log_revision": "25d5ad6e534559d61e801a4bd61faaa7a68251fd",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132427585582-shc-harmonize-finalize/base-scratch.log",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6127"
+  ],
+  "completed_at": "2026-10-17T14:15:55Z",
+  "dispatched_at": "2026-10-17T14:11:59Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1192",
+      "severity": "follow-on",
+      "text": "follow-on: the late batch check uses filter_protected, which recognizes approved names but not an open roster or contested name acquired after the earlier preflight; such a change can leave a protected family partly reconciled."
+    }
+  ],
+  "head_log_revision": "9dddc72c8fcf150d627047cf353e1ef8fa6c7e26",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "Commit 9dddc72c adds protection preflight and batch-wide withholding plus four test cases in harmonize.py:1017,1192,1425,1474 and test_harmonize_finalize.py:177-223; commit aadceb5d updates the evidence table at shc-harmonize-finalize.html:9-10.",
+    "done_when": "The source brief.md requires protected-family refusal, reconciliation, zero planned calls and a gate by delta; protection-reverted.log fails two approved-member cases with EXIT=1, while repair-head-gate.log reports 104 passed and EXIT=0 against 88 passed and EXIT=0 in base-scratch.log.",
+    "goal": "The source run's brief.md requests guarded no-model-call finalization; imas_codex/standard_names/harmonize.py:1425-1454 now refuses recommended members before dry-run or apply, and lines 1474-1480 withhold a pending reconciliation batch on late approved protection.",
+    "manifest": "The source run's manifest.md names commits 9dddc72c and aadceb5d, those three gained paths, the parent-state negative control, and readable baseline_suite and after_suite gate receipts with no failure IDs.",
+    "write_paths": "The source brief.md grants harmonize.py, sn.py, test_harmonize_finalize.py and shc-harmonize-finalize.html; the 03915a2e..aadceb5d diff changes only the latter evidence file, harmonize.py and test_harmonize_finalize.py."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_finalize.py:184-205 fails if preflight refusal or batch-wide withholding is removed, and lines 218-223 fails if open-roster protection is omitted.",
+    "evidence": "The source protection-reverted.log shows both new approved-member cases failing at parent 03915a2e, while repair-head-gate.log records 104 passes at 9dddc72c and base-scratch.log records 88 passes at the original base.",
+    "fit": "imas_codex/standard_names/harmonize.py:1420 calls the existing protection owner and line 1192 extends the existing reconciler with a descriptive option and no forbidden source name.",
+    "goal_fidelity": "imas_codex/standard_names/harmonize.py:1425-1454 refuses protected members before writes, and lines 1474-1480 prevent the reviewed approved-member partial write.",
+    "reuse": "Capability search over imas_codex/standard_names found recommended_name_protections in protection.py:258 and filter_protected in protection.py:381, both reused by harmonize.py:1426,1192 instead of duplicated.",
+    "scope_discipline": "The two gained commits change only the declared harmonize.py, test_harmonize_finalize.py and shc-harmonize-finalize.html paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source run's brief.md requests guarded no-model-call finalization; imas_codex/standard_names/harmonize.py:1425-1454 now refuses recommended members before dry-run or apply, and lines 1474-1480 withhold a pending reconciliation batch on late approved protection.\nVERDICT done_when: The source brief.md requires protected-family refusal, reconciliation, zero planned calls and a gate by delta; protection-reverted.log fails two approved-member cases with EXIT=1, while repair-head-gate.log reports 104 passed and EXIT=0 against 88 passed and EXIT=0 in base-scratch.log.\nVERDICT write_paths: The source brief.md grants harmonize.py, sn.py, test_harmonize_finalize.py and shc-harmonize-finalize.html; the 03915a2e..aadceb5d diff changes only the latter evidence file, harmonize.py and test_harmonize_finalize.py.\nVERDICT manifest: The source run's manifest.md names commits 9dddc72c and aadceb5d, those three gained paths, the parent-state negative control, and readable baseline_suite and after_suite gate receipts with no failure IDs.\nVERDICT diff: Commit 9dddc72c adds protection preflight and batch-wide withholding plus four test cases in harmonize.py:1017,1192,1425,1474 and test_harmonize_finalize.py:177-223; commit aadceb5d updates the evidence table at shc-harmonize-finalize.html:9-10.\nCALL_SITES: imas_codex/cli/sn.py:6127\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/harmonize.py:1425-1454 refuses protected members before writes, and lines 1474-1480 prevent the reviewed approved-member partial write.\nSCORE evidence: 19\nJUSTIFICATION evidence: The source protection-reverted.log shows both new approved-member cases failing at parent 03915a2e, while repair-head-gate.log records 104 passes at 9dddc72c and base-scratch.log records 88 passes at the original base.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The two gained commits change only the declared harmonize.py, test_harmonize_finalize.py and shc-harmonize-finalize.html paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_harmonize_finalize.py:184-205 fails if preflight refusal or batch-wide withholding is removed, and lines 218-223 fails if open-roster protection is omitted.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/harmonize.py:1420 calls the existing protection owner and line 1192 extends the existing reconciler with a descriptive option and no forbidden source name.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability search over imas_codex/standard_names found recommended_name_protections in protection.py:258 and filter_protected in protection.py:381, both reused by harmonize.py:1426,1192 instead of duplicated.\nFINDING imas_codex/standard_names/harmonize.py:1192 follow-on: the late batch check uses filter_protected, which recognizes approved names but not an open roster or contested name acquired after the earlier preflight; such a change can leave a protected family partly reconciled.\n",
+  "review_run_id": "r-20261017T141132199613-review-of-shc-harmonize-finalize-aadceb5da1cd",
+  "reviewed_base_sha": "03915a2edcdf114f2e219fc745647f7f58388ae8",
+  "reviewed_commits": [
+    "9dddc72c8fcf150d627047cf353e1ef8fa6c7e26",
+    "aadceb5da1cd523a9f96fdb15554fbb4b39af1ce"
+  ],
+  "reviewed_head_sha": "aadceb5da1cd523a9f96fdb15554fbb4b39af1ce",
+  "reviewed_run_id": "r-20261017T132427585582-shc-harmonize-finalize",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T14:18:10.167410+00:00",
+  "total": 116
+}
