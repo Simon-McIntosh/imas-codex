@@ -539,6 +539,7 @@ class BatchOutcome:
     requested: int
     touched: int
     accepted: int
+    accepted_reintroduced: int = 0
     reintroduced_ids: list[str] = field(default_factory=list)
     name_drift: list[str] = field(default_factory=list)
     cost: float = 0.0
@@ -556,6 +557,16 @@ class BatchOutcome:
 
     @property
     def banned_prose_reintroduced(self) -> int:
+        return len(self.reintroduced_ids)
+
+    @property
+    def accepted_clean(self) -> int:
+        """Accepted docs excluding those the prose gate will quarantine."""
+        return self.accepted - self.accepted_reintroduced
+
+    @property
+    def quarantined(self) -> int:
+        """Docs whose positive prose verdict routes them to quarantine."""
         return len(self.reintroduced_ids)
 
 
@@ -616,6 +627,7 @@ def measure_batch(
     """
     by_id = {r["id"]: r for r in refreshed_rows}
     accepted = 0
+    accepted_ids: set[str] = set()
     flagged: list[tuple[str, str, dict[str, int]]] = []
     drift: list[str] = []
     touched = 0
@@ -631,6 +643,7 @@ def measure_batch(
         touched += 1
         if (row.get("docs_stage") or "") == "accepted":
             accepted += 1
+            accepted_ids.add(sid)
         text = f"{row.get('description') or ''}\n{row.get('documentation') or ''}"
         findings = banned_prose_findings(text)
         if any(v > 0 for v in findings.values()):
@@ -657,6 +670,7 @@ def measure_batch(
         requested=len(batch_ids),
         touched=touched,
         accepted=accepted,
+        accepted_reintroduced=len(accepted_ids.intersection(reintroduced)),
         reintroduced_ids=reintroduced,
         name_drift=drift,
         cost=cost,
@@ -877,6 +891,7 @@ class CampaignResult:
     batches_run: int = 0
     total_touched: int = 0
     total_accepted: int = 0
+    total_quarantined: int = 0
     total_cost: float = 0.0
     total_audit_requarantined: int = 0
     total_audit_cleared: int = 0
@@ -895,6 +910,7 @@ class CampaignResult:
             "batches_run": self.batches_run,
             "total_touched": self.total_touched,
             "total_accepted": self.total_accepted,
+            "total_quarantined": self.total_quarantined,
             "total_cost": round(self.total_cost, 4),
             "total_audit_requarantined": self.total_audit_requarantined,
             "total_audit_cleared": self.total_audit_cleared,
@@ -1061,7 +1077,8 @@ class CampaignRunner:
             # Accounting.
             result.batches_run += 1
             result.total_touched += outcome.touched
-            result.total_accepted += outcome.accepted
+            result.total_accepted += outcome.accepted_clean
+            result.total_quarantined += outcome.quarantined
             result.total_cost += cost
             result.total_audit_requarantined += outcome.audit_requarantined
             result.total_audit_cleared += outcome.audit_cleared
