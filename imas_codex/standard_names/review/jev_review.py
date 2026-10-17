@@ -1,4 +1,4 @@
-"""Name-axis review judged by Jev, built from the named-check taxonomy.
+"""Name and documentation review built from the named-check taxonomy.
 
 Review is a judgment, and judgment is what the decisions endpoint does. This
 module turns one candidate name into a judgment state and one taxonomy into a
@@ -26,6 +26,11 @@ names. Every neighbourhood field records whether it was observed, because
 unknown is not the same as empty and a check that reads an unobserved field is
 not reading a field it was shown to be absent.
 
+The documentation builder splits model-written prose into claims, excluding
+registry text and notation. Its question table asks one source-comparison Choice
+per claim and categorises three rubric dimensions. Code gives any contradictory
+claim a veto; a high dimension score cannot offset it.
+
 The module writes no graph state and nothing in the pipeline calls it yet.
 Every call goes through the shared decisions owner
 (:func:`imas_codex.discovery.base.judgment.decide_batch`) under the ``sn-judge``
@@ -35,6 +40,7 @@ seat, so there is no third decisions owner.
 from __future__ import annotations
 
 import logging
+import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -59,8 +65,9 @@ SERVICE = "standard-names"
 # Pipeline-cost step the calls book to, matching the other judge stages.
 COST_STEP = "sn_judge"
 
-# The axis this module builds for. The documentation axis is built beside it.
+# The two axes share question and audit helpers.
 NAME_AXIS = "name"
+DOCS_AXIS = "docs"
 
 # Grammar-segment fields the candidate name decomposes into. A name's segments
 # are the closed-vocabulary slots of the grammar, so they are carried flat.
@@ -126,6 +133,10 @@ def derive_dimension_decision(dimension: str, category: str | None) -> str:
 
 def _name_checks(checks: Sequence[ReviewCheck]) -> list[ReviewCheck]:
     return [check for check in checks if check.axis == NAME_AXIS]
+
+
+def _docs_checks(checks: Sequence[ReviewCheck]) -> list[ReviewCheck]:
+    return [check for check in checks if check.axis == DOCS_AXIS]
 
 
 @lru_cache(maxsize=1)
@@ -420,10 +431,264 @@ def audit_finding_for(
     for finding in getattr(audit_report, "lint_findings", []):
         if finding.name_id == name_id and finding.finding_type == finding_class:
             return f"[{finding_class}] {name_id}: {finding.detail}"
+        if (
+            finding.name_id == name_id
+            and finding.finding_type == "convention_violation"
+            and finding.detail.startswith(f"{finding_class}:")
+        ):
+            return f"[{finding_class}] {name_id}: {finding.detail}"
     for finding in getattr(audit_report, "link_findings", []):
         if finding.name_id == name_id and finding.finding_type == finding_class:
             return f"[{finding_class}] {name_id}: {finding.detail}"
     return None
+
+
+_DOCS_DIMENSION_CRITERIA: dict[str, dict[str, str]] = {
+    "description_quality": {
+        "precise_definition": "One concise physical definition of the bound quantity.",
+        "imprecise_definition": "A definition with ambiguous wording or an omitted physical distinction.",
+        "not_a_definition": "Multiple lines, editorial filler, or text that does not define the quantity.",
+    },
+    "documentation_quality": {
+        "normative_definition": "A physical definition with readable notation and no recipe or padding.",
+        "partial_definition": "A physical definition whose explanation or notation is incomplete.",
+        "non_normative": "A diagnostic list, recipe, padding, or broken notation instead of a definition.",
+    },
+    "completeness": {
+        "complete": "The text covers the bound source meaning and needed distinctions and relationships.",
+        "minor_gap": "The meaning is mostly present but a relevant distinction or relationship is missing.",
+        "incomplete": "The text omits a necessary part of the bound quantity's meaning.",
+    },
+}
+
+_SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
+_DISPLAY_MATH = re.compile(r"\$\$.*?\$\$", re.DOTALL)
+_INLINE_MATH = re.compile(r"(?<!\$)\$(?!\$)[^$\n]*\$(?!\$)")
+_MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
+
+
+def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
+    """Find exact registry text inserted into this documentation entry."""
+    from imas_standard_names.grammar.terms import AppliedConventions
+
+    from imas_codex.standard_names.context import conventions_context_for
+    from imas_codex.standard_names.docs_gates import (
+        _template_opening_pattern,
+        locus_definition_sentence,
+    )
+
+    texts = [str(value) for value in item.get("registry_sentences") or ()]
+    selected = item.get("conventions")
+    if selected is None and item.get("id"):
+        selected = conventions_context_for(str(item["id"]))
+    if not selected:
+        return tuple(texts)
+    conventions = AppliedConventions.model_validate(selected)
+    documentation = str(item.get("documentation") or "")
+    opening = next(
+        (line.strip() for line in documentation.splitlines() if line.strip()), ""
+    )
+    for template in conventions.templates:
+        pattern = _template_opening_pattern(template.documentation)
+        if pattern is not None and pattern.fullmatch(opening):
+            texts.append(opening)
+        note = getattr(template, "note", None)
+        if note:
+            note_pattern = _template_opening_pattern(str(note))
+            if note_pattern is not None:
+                texts.extend(
+                    line.strip()
+                    for line in documentation.splitlines()
+                    if note_pattern.fullmatch(line.strip())
+                )
+    for concept in conventions.concepts:
+        sentence = locus_definition_sentence(concept)
+        if sentence and sentence in documentation:
+            texts.append(sentence)
+    return tuple(texts)
+
+
+def split_documentation_claims(
+    documentation: str, *, registry_sentences: Sequence[str] = ()
+) -> list[str]:
+    """Keep each authored sentence intact for source comparison."""
+    registry = {
+        " ".join(sentence.split()) for sentence in registry_sentences if sentence
+    }
+    claims: list[str] = []
+    for paragraph in re.split(r"\n\s*\n", documentation):
+        paragraph = paragraph.strip()
+        if not paragraph or " ".join(paragraph.split()) in registry:
+            continue
+        if _DISPLAY_MATH.fullmatch(paragraph):
+            continue
+        lines = [
+            line.strip()
+            for line in paragraph.splitlines()
+            if line.strip() and not _DISPLAY_MATH.fullmatch(line.strip())
+        ]
+        prose = " ".join(lines)
+        prose = _DISPLAY_MATH.sub("[equation]", prose)
+        prose = _INLINE_MATH.sub("[equation]", prose)
+        prose = _MARKDOWN_LINK.sub(r"\1", prose)
+        for sentence in _SENTENCE_BOUNDARY.split(prose):
+            claim = " ".join(sentence.split())
+            if claim and claim not in registry:
+                claims.append(claim)
+    return claims
+
+
+def build_docs_state(
+    item: Mapping[str, Any], *, checks: Sequence[ReviewCheck] | None = None
+) -> dict[str, Any]:
+    """Carry one entry's claims and DD evidence without incumbent comments."""
+    documentation = str(item.get("documentation") or "")
+    state = {
+        "name_id": item.get("id") or item.get("standard_name"),
+        "documentation": documentation,
+        "documentation_claims": split_documentation_claims(
+            documentation, registry_sentences=_registry_texts(item)
+        ),
+        "description": item.get("description"),
+    }
+    evidence_fields = {
+        evidence_field
+        for check in _docs_checks(checks or _default_checks())
+        for evidence_field in check.evidence_fields
+    }
+    for evidence_field in sorted(
+        evidence_fields - {"id", "documentation", "description"}
+    ):
+        state[evidence_field] = _observed(item.get(evidence_field))
+    return state
+
+
+def docs_question_table(
+    checks: Sequence[ReviewCheck], claims: Sequence[str]
+) -> dict[str, dict[str, Any]]:
+    """Build three rubric categories and one source comparison per claim."""
+    docs_checks = _docs_checks(checks)
+    dimensions = {check.dimension for check in docs_checks}
+    table: dict[str, dict[str, Any]] = {}
+    for dimension, criteria in _DOCS_DIMENSION_CRITERIA.items():
+        if dimension in dimensions:
+            table[dimension_question_name(dimension)] = {
+                "type": "choice",
+                "instructions": f"Which {dimension.replace('_', ' ')} level describes this entry?",
+                "criteria": criteria,
+            }
+    claim_check = next(
+        (check for check in docs_checks if check.id == "claim_contradicts_source"),
+        None,
+    )
+    if claim_check is None or claim_check.question is None:
+        raise ValueError("the claim support check is missing from the docs taxonomy")
+    if set(claim_check.question.options) != {"supports", "contradicts", "says nothing"}:
+        raise ValueError("the claim support check has unexpected Choice options")
+    for index, _claim in enumerate(claims):
+        table[check_question_name(f"{claim_check.id}:{index}")] = {
+            "type": "choice",
+            "instructions": (
+                f"{claim_check.question.text} Compare only "
+                f"`documentation_claims[{index}]` with `dd_source_docs.value` and "
+                "`description`. If DD documentation was not observed, choose "
+                "'says nothing'."
+            ),
+            "criteria": {
+                "supports": "The DD evidence directly supports this specific claim.",
+                "contradicts": "The DD evidence says the opposite of this specific claim.",
+                "says nothing": "The DD evidence neither supports nor contradicts this claim.",
+            },
+        }
+    for check in docs_checks:
+        if check.id != claim_check.id and check.question is not None:
+            table[check_question_name(check.id)] = _question_def(check.question)
+    return table
+
+
+def aggregate_docs_review(
+    state: Mapping[str, Any],
+    checks: Sequence[ReviewCheck],
+    answers: Mapping[str, Mapping[str, Any]],
+    *,
+    audit_report: Any | None = None,
+) -> dict[str, Any]:
+    """Derive the docs decision, with any contradictory claim as a veto."""
+    docs_checks = _docs_checks(checks)
+    dimensions: dict[str, str] = {}
+    for dimension, criteria in _DOCS_DIMENSION_CRITERIA.items():
+        if any(check.dimension == dimension for check in docs_checks):
+            choice = (answers.get(dimension_question_name(dimension)) or {}).get(
+                "choice"
+            )
+            dimensions[dimension] = (
+                "accept"
+                if choice == next(iter(criteria))
+                else "reject"
+                if choice in criteria
+                else "unknown"
+            )
+    claim_check = next(
+        check for check in docs_checks if check.id == "claim_contradicts_source"
+    )
+    claim_answers = [
+        answers.get(check_question_name(f"{claim_check.id}:{index}"))
+        for index, _claim in enumerate(state["documentation_claims"])
+    ]
+    contradiction_veto = any(
+        answer is not None and answer.get("choice") == "contradicts"
+        for answer in claim_answers
+    )
+    check_records: dict[str, dict[str, Any]] = {}
+    for check in docs_checks:
+        if check.id == claim_check.id:
+            continue
+        finding = audit_finding_for(check, str(state["name_id"]), audit_report)
+        answer = answers.get(check_question_name(check.id))
+        answered = (
+            audit_report is not None
+            if check.audit_finding_class
+            else answer is not None
+        )
+        failed = (
+            finding is not None
+            if check.audit_finding_class
+            else check_failed(check, answer)
+        )
+        check_records[check.id] = {
+            "answered": answered,
+            "failed": failed,
+            "decision": _check_decision(answered, failed),
+            "audit_finding": finding,
+            "answer": answer,
+        }
+    if (
+        contradiction_veto
+        or "reject" in dimensions.values()
+        or any(record["failed"] for record in check_records.values())
+    ):
+        decision = "reject"
+    elif (
+        "unknown" in dimensions.values()
+        or not claim_answers
+        or any(
+            answer is None or answer.get("choice") not in {"supports", "says nothing"}
+            for answer in claim_answers
+        )
+        or any(not record["answered"] for record in check_records.values())
+    ):
+        decision = "unknown"
+    elif any(answer.get("choice") == "says nothing" for answer in claim_answers):
+        decision = "reject"
+    else:
+        decision = "accept"
+    return {
+        "decision": decision,
+        "contradiction_veto": contradiction_veto,
+        "dimensions": dimensions,
+        "claim_answers": claim_answers,
+        "checks": check_records,
+    }
 
 
 @dataclass
