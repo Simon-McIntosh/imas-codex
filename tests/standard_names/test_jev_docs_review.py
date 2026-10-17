@@ -282,3 +282,36 @@ def test_every_house_style_finding_has_a_named_check_and_is_read_from_audit():
         assert (
             jev_review.audit_finding_for(matching[0], "other_density", report) is None
         )
+
+
+def test_house_style_finding_lowers_score_with_identical_judgments():
+    checks, _ = load_review_checks()
+    name_id = "flux_surface_averaged_argon_density_at_plasma_boundary"
+    clean = {
+        "id": name_id,
+        "description": "Number density of argon.",
+        "documentation": "Number density of argon\n\nThe density is positive.",
+    }
+    flawed = {**clean, "documentation": "Wrong opening. The density is positive."}
+    clean_report = jev_review.build_docs_audit_report(
+        clean, catalog_names=[clean], known_ids={name_id}
+    )
+    flawed_report = jev_review.build_docs_audit_report(
+        flawed, catalog_names=[flawed], known_ids={name_id}
+    )
+    target = "description_template_opening_mismatch"
+    check = next(check for check in checks if check.id == target)
+    assert jev_review.audit_finding_for(check, name_id, clean_report) is None
+    assert jev_review.audit_finding_for(check, name_id, flawed_report)
+    state = jev_review.build_docs_state(clean, checks=checks)
+    answers = _top_answers(
+        jev_review.docs_question_table(checks, state["documentation_claims"])
+    )
+    weight = {f"audit:{target}": 1.0}
+    clean_score = jev_review.score_docs_review(
+        state, checks, answers, audit_report=clean_report, weights=weight
+    )
+    flawed_score = jev_review.score_docs_review(
+        state, checks, answers, audit_report=flawed_report, weights=weight
+    )
+    assert flawed_score < clean_score

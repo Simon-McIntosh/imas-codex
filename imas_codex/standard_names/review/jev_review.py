@@ -41,6 +41,7 @@ seat, so there is no third decisions owner.
 from __future__ import annotations
 
 import logging
+import math
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -538,6 +539,11 @@ def build_docs_state(
             documentation, registry_sentences=_registry_texts(item)
         ),
         "description": item.get("description"),
+        "unit": _observed(item.get("unit")),
+        "links": _observed(item.get("links")),
+        "source_paths": _observed(item.get("source_paths")),
+        "sibling_names": _observed(item.get("sibling_names")),
+        "related_neighbours": _observed(item.get("related_neighbours")),
     }
     evidence_fields = {
         evidence_field
@@ -571,27 +577,139 @@ def docs_question_table(
     )
     if claim_check is None or claim_check.question is None:
         raise ValueError("the claim support check is missing from the docs taxonomy")
-    if set(claim_check.question.options) != {"supports", "contradicts", "says nothing"}:
+    options = claim_check.question.options
+    if set(options) != {"supports", "contradicts", "says nothing"}:
         raise ValueError("the claim support check has unexpected Choice options")
     for index, _claim in enumerate(claims):
         table[check_question_name(f"{claim_check.id}:{index}")] = {
             "type": "choice",
             "instructions": (
                 f"{claim_check.question.text} Compare only "
-                f"`documentation_claims[{index}]` with `dd_source_docs.value` and "
-                "`description`. If DD documentation was not observed, choose "
+                f"`documentation_claims[{index}]` with `dd_source_docs.value`, "
+                "`description`, `unit.value`, `links.value`, "
+                "`source_paths.value`, `sibling_names.value` and "
+                "`related_neighbours.value`. A contradiction in any part of "
+                "the sentence is a contradiction even when another part is "
+                "supported. If no observed source bears on the claim, choose "
                 "'says nothing'."
             ),
             "criteria": {
-                "supports": "The DD evidence directly supports this specific claim.",
-                "contradicts": "The DD evidence says the opposite of this specific claim.",
-                "says nothing": "The DD evidence neither supports nor contradicts this claim.",
+                option: {
+                    "supports": "The DD evidence directly supports this specific claim.",
+                    "contradicts": "Any part of this claim conflicts with an observed source, unit, link target, sibling meaning or source path.",
+                    "says nothing": "The observed evidence neither supports nor contradicts this claim.",
+                }[option]
+                for option in options
             },
         }
     for check in docs_checks:
         if check.id != claim_check.id and check.question is not None:
             table[check_question_name(check.id)] = _question_def(check.question)
     return table
+
+
+def build_docs_audit_report(
+    item: Mapping[str, Any],
+    *,
+    catalog_names: Sequence[Mapping[str, Any]],
+    known_ids: set[str],
+) -> Any:
+    """Run the owning deterministic checks against one documented entry."""
+    from imas_codex.standard_names.review.audits import (
+        AuditReport,
+        run_documentation_gate_checks,
+        run_house_style_checks,
+        run_link_integrity,
+    )
+
+    candidate = dict(item)
+    name_id = str(candidate["id"])
+    return AuditReport(
+        lint_findings=[
+            *run_house_style_checks([candidate]),
+            *run_documentation_gate_checks([candidate]),
+        ],
+        link_findings=[
+            finding
+            for finding in run_link_integrity(
+                [dict(name) for name in catalog_names], known_ids=known_ids
+            )
+            if finding.name_id == name_id
+        ],
+    )
+
+
+def docs_score_components(
+    state: Mapping[str, Any],
+    checks: Sequence[ReviewCheck],
+    answers: Mapping[str, Mapping[str, Any]],
+    *,
+    audit_report: Any | None,
+) -> dict[str, float] | None:
+    """Expose calibrated score inputs while keeping absent audits unknown."""
+    values: dict[str, float] = {}
+    for dimension, criteria in _DOCS_DIMENSION_CRITERIA.items():
+        answer = answers.get(dimension_question_name(dimension))
+        if answer is None:
+            return None
+        values[f"dimension:{dimension}"] = float(
+            answer.get("probabilities", {}).get(next(iter(criteria)), 0.0)
+        )
+    for check in _docs_checks(checks):
+        if check.id == "claim_contradicts_source":
+            continue
+        if check.audit_finding_class is not None:
+            if audit_report is not None:
+                values[f"audit:{check.id}"] = float(
+                    audit_finding_for(check, str(state["name_id"]), audit_report)
+                    is None
+                )
+            continue
+        answer = answers.get(check_question_name(check.id))
+        if answer is None:
+            return None
+        if check.question.kind is JevQuestionKind.NOUL:
+            values[f"check:{check.id}"] = 1 - float(answer["noul"])
+        else:
+            passing = choice_acceptable_form(check.question)
+            values[f"check:{check.id}"] = float(
+                answer.get("probabilities", {}).get(passing, 0.0)
+            )
+    claims = [
+        answers.get(check_question_name(f"claim_contradicts_source:{index}"))
+        for index, _claim in enumerate(state["documentation_claims"])
+    ]
+    if not claims or any(answer is None for answer in claims):
+        return None
+    values["claim:support"] = sum(
+        float(answer.get("probabilities", {}).get("supports", 0.0)) for answer in claims
+    ) / len(claims)
+    return values
+
+
+def score_docs_review(
+    state: Mapping[str, Any],
+    checks: Sequence[ReviewCheck],
+    answers: Mapping[str, Mapping[str, Any]],
+    *,
+    audit_report: Any | None,
+    weights: Mapping[str, float],
+    intercept: float = 0.0,
+) -> float | None:
+    """Apply calibration weights after the hard contradiction veto."""
+    if any(
+        answer.get("choice") == "contradicts"
+        for key, answer in answers.items()
+        if key.startswith("check:claim_contradicts_source:")
+    ):
+        return 0.0
+    values = docs_score_components(state, checks, answers, audit_report=audit_report)
+    if values is None:
+        return None
+    linear = intercept + sum(
+        weight * values.get(name, 0.0) for name, weight in weights.items()
+    )
+    return 1.0 / (1.0 + math.exp(-max(-50.0, min(50.0, linear))))
 
 
 def aggregate_docs_review(
