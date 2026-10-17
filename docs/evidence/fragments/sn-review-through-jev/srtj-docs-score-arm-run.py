@@ -259,7 +259,7 @@ def _polarity(rows: list[dict]) -> dict:
             "interval": interval,
             "sd": float(np.std(values)),
             "pass_rate": float(np.mean(values)),
-            "selected": interval["point"] >= 0.5 and np.std(values) >= 0.02,
+            "selected": bool(interval["point"] >= 0.5 and np.std(values) >= 0.02),
         }
     return result
 

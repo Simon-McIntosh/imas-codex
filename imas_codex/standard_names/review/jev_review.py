@@ -463,6 +463,25 @@ _DOCS_DIMENSION_CRITERIA: dict[str, dict[str, str]] = {
     },
 }
 
+# Fitted on coordinator-labelled documentation calibration entries after
+# excluding flat or inverted inputs. The contradiction veto remains separate.
+DOCS_SCORE_WEIGHTS: dict[str, float] = {
+    "audit:defining_equation_missing": 1.4281029956523246,
+    "audit:description_template_opening_mismatch": 3.670467788582173,
+    "audit:non_canonical_equation": 0.00988088041115091,
+    "audit:relationship_link_missing": 0.0958949018903927,
+    "audit:sign_convention_missing": 2.293782934762642,
+    "audit:symbols_undefined": 0.8544845928211299,
+    "check:description_false_of_some_binding": 1.3798742789993892,
+    "check:equation_physically_incorrect": 1.0913023861739364,
+    "check:false_equivalence_with_related": 1.0811825425429835,
+    "check:incompatible_physics_qualifier": 1.0280113111152924,
+    "check:units_in_prose": 1.10749182431996,
+    "dimension:completeness": 1.9758975397558163,
+    "dimension:documentation_quality": 0.15368999988603704,
+}
+DOCS_SCORE_INTERCEPT = -15.142945942036562
+
 _SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 _DISPLAY_MATH = re.compile(r"\$\$.*?\$\$", re.DOTALL)
 _INLINE_MATH = re.compile(r"(?<!\$)\$(?!\$)[^$\n]*\$(?!\$)")
@@ -578,8 +597,6 @@ def docs_question_table(
     if claim_check is None or claim_check.question is None:
         raise ValueError("the claim support check is missing from the docs taxonomy")
     options = claim_check.question.options
-    if set(options) != {"supports", "contradicts", "says nothing"}:
-        raise ValueError("the claim support check has unexpected Choice options")
     for index, _claim in enumerate(claims):
         table[check_question_name(f"{claim_check.id}:{index}")] = {
             "type": "choice",
@@ -716,8 +733,8 @@ def score_docs_review(
     answers: Mapping[str, Mapping[str, Any]],
     *,
     audit_report: Any | None,
-    weights: Mapping[str, float],
-    intercept: float = 0.0,
+    weights: Mapping[str, float] | None = None,
+    intercept: float | None = None,
 ) -> float | None:
     """Apply calibration weights after the hard contradiction veto."""
     if any(
@@ -729,8 +746,10 @@ def score_docs_review(
     values = docs_score_components(state, checks, answers, audit_report=audit_report)
     if values is None:
         return None
-    linear = intercept + sum(
-        weight * values.get(name, 0.0) for name, weight in weights.items()
+    selected_weights = DOCS_SCORE_WEIGHTS if weights is None else weights
+    selected_intercept = DOCS_SCORE_INTERCEPT if intercept is None else intercept
+    linear = selected_intercept + sum(
+        weight * values.get(name, 0.0) for name, weight in selected_weights.items()
     )
     return 1.0 / (1.0 + math.exp(-max(-50.0, min(50.0, linear))))
 

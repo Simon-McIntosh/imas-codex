@@ -180,6 +180,27 @@ def test_question_table_asks_three_categories_and_one_choice_per_claim():
     assert "check:claim_contradicts_source" not in table
 
 
+def test_claim_choice_options_follow_taxonomy_order():
+    checks, _ = load_review_checks()
+    reordered = [
+        check.model_copy(
+            update={
+                "question": check.question.model_copy(
+                    update={"options": ["says nothing", "contradicts", "supports"]}
+                )
+            }
+        )
+        if check.id == "claim_contradicts_source"
+        else check
+        for check in checks
+    ]
+    question = jev_review.docs_question_table(reordered, ["The density is positive."])[
+        "check:claim_contradicts_source:0"
+    ]
+    assert list(question["criteria"]) == ["says nothing", "contradicts", "supports"]
+    assert "Any part" in question["criteria"]["contradicts"]
+
+
 def _top_answers(table):
     acceptable = {
         "dimension:description_quality": "precise_definition",
@@ -308,11 +329,10 @@ def test_house_style_finding_lowers_score_with_identical_judgments():
     answers = _top_answers(
         jev_review.docs_question_table(checks, state["documentation_claims"])
     )
-    weight = {f"audit:{target}": 1.0}
     clean_score = jev_review.score_docs_review(
-        state, checks, answers, audit_report=clean_report, weights=weight
+        state, checks, answers, audit_report=clean_report
     )
     flawed_score = jev_review.score_docs_review(
-        state, checks, answers, audit_report=flawed_report, weights=weight
+        state, checks, answers, audit_report=flawed_report
     )
     assert flawed_score < clean_score
