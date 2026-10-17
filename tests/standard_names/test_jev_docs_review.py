@@ -34,7 +34,27 @@ def test_claim_splitter_separates_sentences_and_conjoined_clauses(
     assert jev_review.split_documentation_claims(documentation) == expected
 
 
-def test_claim_splitter_excludes_math_links_and_inserted_registry_text():
+@pytest.mark.parametrize(
+    ("documentation", "expected"),
+    [
+        (
+            "The density is negative [related](name:argon_density).",
+            ["The density is negative related"],
+        ),
+        ("The density is negative $n<0$.", ["The density is negative"]),
+    ],
+)
+def test_inline_markup_keeps_surrounding_claim(documentation, expected):
+    assert jev_review.split_documentation_claims(documentation) == expected
+
+
+def test_declarative_sentence_with_unlisted_verb_is_a_claim():
+    assert jev_review.split_documentation_claims("The pressure peaks at the axis.") == [
+        "The pressure peaks at the axis"
+    ]
+
+
+def test_claim_splitter_excludes_registry_text_and_equations_but_keeps_prose():
     opening = "Number density of argon"
     note = "This form distinguishes the cold population."
     locus = "The plasma boundary is the last closed flux surface."
@@ -52,6 +72,8 @@ def test_claim_splitter_excludes_math_links_and_inserted_registry_text():
     ) == [
         "The density is measured locally",
         "the profile is radial",
+        "The relation is",
+        "The related quantity is argon density",
         "The density increases at the edge",
     ]
 
@@ -147,10 +169,22 @@ def test_question_table_asks_three_categories_and_one_choice_per_claim():
 
 
 def _top_answers(table):
+    acceptable = {
+        "dimension:description_quality": "precise_definition",
+        "dimension:documentation_quality": "normative_definition",
+        "dimension:completeness": "complete",
+        "check:description_false_of_some_binding": "true of all",
+    }
     answers = {}
     for key, question in table.items():
         if question["type"] == "choice":
-            answers[key] = {"choice": next(iter(question["criteria"]))}
+            choice = (
+                "supports"
+                if key.startswith("check:claim_contradicts_source:")
+                else acceptable[key]
+            )
+            assert choice in question["criteria"]
+            answers[key] = {"choice": choice}
         else:
             answers[key] = {"noul": 0.0}
     return answers

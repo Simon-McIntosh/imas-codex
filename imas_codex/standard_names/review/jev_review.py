@@ -466,15 +466,9 @@ _CONJUNCTION = re.compile(r"\s+(and|but|whereas)\s+", re.IGNORECASE)
 _CLAUSE_SUBJECT = re.compile(
     r"^(?i:the|a|an|it|this|that|these|those)\b|^[A-Z][a-z]+\b",
 )
-_CLAUSE_VERB = re.compile(
-    r"\b(?:is|are|was|were|has|have|equals|measures|denotes|represents|"
-    r"depends|varies|increases|decreases|includes|excludes)\b",
-    re.IGNORECASE,
-)
-_MATH_OR_LINK = re.compile(
-    r"\$\$.*?\$\$|\$[^$\n]*\$|\[[^\]]+\]\((?:name:|#)[^)]+\)",
-    re.DOTALL,
-)
+_DISPLAY_MATH = re.compile(r"\$\$.*?\$\$", re.DOTALL)
+_INLINE_MATH = re.compile(r"(?<!\$)\$(?!\$)[^$\n]*\$(?!\$)")
+_MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 
 
 def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
@@ -521,11 +515,13 @@ def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
 def split_documentation_claims(
     documentation: str, *, registry_sentences: Sequence[str] = ()
 ) -> list[str]:
-    """Split model-written prose into claims without registry text or notation."""
+    """Split authored prose, keeping words around links and math as claims."""
     prose = documentation
     for sentence in sorted((s for s in registry_sentences if s), key=len, reverse=True):
         prose = prose.replace(sentence, " ")
-    prose = re.sub(r"\$\$.*?\$\$", " ", prose, flags=re.DOTALL)
+    prose = _DISPLAY_MATH.sub(" ", prose)
+    prose = _INLINE_MATH.sub(" ", prose)
+    prose = _MARKDOWN_LINK.sub(r"\1", prose)
     claims: list[str] = []
     for sentence in _SENTENCE_BOUNDARY.split(prose):
         for line in sentence.splitlines():
@@ -536,17 +532,15 @@ def split_documentation_claims(
             clauses: list[str] = []
             current = parts[0]
             for joiner, following in zip(parts[1::2], parts[2::2], strict=True):
-                if _CLAUSE_SUBJECT.match(following) and _CLAUSE_VERB.search(following):
+                if _CLAUSE_SUBJECT.match(following) and len(current.split()) >= 3:
                     clauses.append(current)
                     current = following
                 else:
                     current = f"{current} {joiner} {following}"
             clauses.append(current)
             for clause in clauses:
-                if _MATH_OR_LINK.search(clause):
-                    continue
-                claim = clause.strip(" \t.,;:!")
-                if claim and _CLAUSE_VERB.search(claim):
+                claim = re.sub(r"\s+", " ", clause).strip(" \t.,;:!?")
+                if claim:
                     claims.append(claim)
     return claims
 
