@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": null,
+  "assertion_analysis": [
+    {
+      "failure_condition": "A configured change would have to move the recomputed aggregate calibration AUC off the recorded 0.6097 while the script still exited 0; the check is printed as a comparison (run.py:740) and main() returns 0 unconditionally (run.py:754), so a regression in the aggregation would neither fail the run nor be read automatically.",
+      "lines": "693-702, 740-754"
+    },
+    {
+      "failure_condition": "Any figure text artist whose bounding box leaves the canvas, or any two overlapping, has to occur for _figure to raise (run.py:379-384); this is a genuine guard, but it protects the figure only and nothing about the scores.",
+      "lines": "376-384"
+    },
+    {
+      "failure_condition": "The control compares recomputed_auc, re-derived from the raw frozen answers through _aggregate, against measured_auc read from stored['splits']['calibration']['jev']['point'] (run.py:697-701): two independent derivations, not one value compared against itself, so the comparison is not a self-comparison.",
+      "lines": "695-701"
+    }
+  ],
+  "base_log_revision": "9c6312f74d190b9d8b5f1af3d66d950bc6e56c97",
+  "baseline_suite_log": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T19:51:46.048Z",
+  "dispatched_at": "2026-10-17T19:44:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-diagnosis-run.py",
+      "line": "695",
+      "severity": "follow-on",
+      "text": "follow-on: the node's declared control compares the recomputed aggregate calibration AUC against the measured 0.6097 (run.py:695-702) but main() returns 0 without ever failing on a mismatch (run.py:754), so the control is recorded in the log and not enforced; a regression in _aggregate's weights would still exit 0 and write the fragment, and the manifest's 'must equal' claim would be silently false."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-diagnosis-run.py",
+      "line": "376",
+      "severity": "follow-on",
+      "text": "follow-on: _figure re-implements the figure text-clipping/overlap guard (run.py:376-384) that the sibling fragment docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:732-736 already carries inline, with no shared owner; extracting a single artifact-check helper is outside this node's declared write scope, so the duplication is recorded rather than repaired here."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-diagnosis-run.py",
+      "line": "509",
+      "severity": "follow-on",
+      "text": "follow-on: the HTML fragment builder uses percent-formatting throughout (run.py:509-681 and _fmt_interval/_ranked_changes), which the worker's own manifest records as 29 UP031 ruff findings, against the repository's f-string idiom; the change is mechanical but touches every formatted string and is not required by the node's done_when."
+    }
+  ],
+  "head_log_revision": "05e9988630823d02cda927e78b2d1f1c0daf3d0b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the diff adds a docs evidence fragment and a standalone run script; a repository-wide search found no importer of srtj-docs-score-diagnosis-run.py, and the commit adds no runtime code, so no production call site can reach the change.",
+    "diff": "Commit 05e998863 against base 9c6312f74 adds four files only: the fragment html (73 lines), its results json (721 lines), the run script (758 lines) and one svg figure (2470 lines), all under the two declared fragment/figure directories.",
+    "done_when": "The source brief's 'Done when' requires a fragment and results JSON answering five questions with numbers, one per-component AUC figure with a dotted line at 0.5, ranked changes, and a run script reproducing every figure at EXIT=0 without network calls; negative-control.log records the recomputed aggregate calibration AUC 0.6097 equal to the measured 0.6097 over 216 entries and EXIT=0.",
+    "goal": "The source brief.md asks why the documentation score sits near chance on calibration only, answered with numbers from the frozen answers; the fragment srtj-docs-score-diagnosis.html:6-69 answers all five questions with per-component AUC and intervals, a label-versus-question gap, the claim-state evidence, the incumbent, and eight ranked changes.",
+    "manifest": "The source run's manifest.md names commit 05e998863, the four declared paths, status complete, and reads tests as the run script reproducing the measured 0.6097; it records baseline_suite and after_suite as 'not run' with the reason that a read-only diagnosis reaches no suite.",
+    "write_paths": "The source brief.md grants the fragment html, its run.py, its results json and the figure directory docs/figures/sn-review-through-jev/srtj-docs-score-diagnosis; git show --name-status on 05e998863 lists exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "The figure-save guard at run.py:379-384 raises if any figure text is clipped or overlaps, but the node's declared control of the recomputed AUC (run.py:695-702) is only printed and main() returns 0 regardless (run.py:754), so no test or guard fails if the aggregation regresses.",
+    "evidence": "negative-control.log records 'control: recomputed 0.6097 vs measured 0.6097 over 216 calibration entries' and EXIT=0, a reproduction of the measured arm's aggregate AUC by an independent re-derivation from the raw frozen answers, so the done_when's EXIT=0 reproduction is measured and recorded.",
+    "fit": "srtj-docs-score-diagnosis-run.py adds no forbidden name and follows the surrounding fragment style, but its fragment builder at run.py:509-681 uses percent-formatting throughout (the manifest's own 29 UP031 findings) against the repository's f-string idiom.",
+    "goal_fidelity": "srtj-docs-score-diagnosis.html:6-24 answers question 1 with per-component calibration AUC and 95% intervals, :27-54 answers question 2, :57-58 question 3, :60 question 4 and :62-69 question 5, matching the brief's five questions.",
+    "reuse": "The run script reuses roc_auc and bootstrap_interval from imas_codex/discovery/base/evaluation.py:98,144 and load_review_checks/DOCS_AXIS from imas_codex/standard_names/review/, but run.py:376-384 re-implements the figure text check that the sibling srtj-docs-measure-run.py:732-736 already carries, with no shared owner.",
+    "scope_discipline": "git show --name-status 05e998863 lists only the four declared paths (the two fragment files, the run script and the figure directory), with nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md asks why the documentation score sits near chance on calibration only, answered with numbers from the frozen answers; the fragment srtj-docs-score-diagnosis.html:6-69 answers all five questions with per-component AUC and intervals, a label-versus-question gap, the claim-state evidence, the incumbent, and eight ranked changes.\nVERDICT done_when: The source brief's 'Done when' requires a fragment and results JSON answering five questions with numbers, one per-component AUC figure with a dotted line at 0.5, ranked changes, and a reference run script reproducing every figure at EXIT=0 without network calls; negative-control.log records the recomputed aggregate calibration AUC 0.6097 equal to the measured 0.6097 over 216 entries and EXIT=0.\nVERDICT write_paths: The source brief.md grants the fragment html, its run.py, its results json and the figure directory docs/figures/sn-review-through-jev/srtj-docs-score-diagnosis; git show --name-status on 05e998863 lists exactly those four paths and nothing else.\nVERDICT manifest: The source run's manifest.md names commit 05e998863, the four declared paths, status complete, and reads tests as the run script reproducing the measured 0.6097; it records baseline_suite and after_suite as 'not run' with the reason that a read-only diagnosis reaches no suite.\nVERDICT diff: Commit 05e998863 against base 9c6312f74 adds four files only: the fragment html (73 lines), its results json (721 lines), the run script (758 lines) and one svg figure (2470 lines), all under the two declared fragment/figure directories.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: fragment html:6-24 answers question 1 with per-component calibration AUC and 95% intervals, :27-54 question 2, :57-58 question 3, :60 question 4 and :62-69 question 5, matching the brief's five questions.\nSCORE evidence: 18\nJUSTIFICATION evidence: negative-control.log records the recomputed 0.6097 equal to the measured 0.6097 over 216 entries and EXIT=0, a reproduction of the measured arm's aggregate AUC re-derived independently from the raw frozen answers.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --name-status 05e998863 lists only the four declared paths, with nothing the goal does not imply.\nSCORE durability: 13\nJUSTIFICATION durability: run.py:379-384 raises if figure text is clipped or overlaps, but the declared control of the recomputed AUC (run.py:695-702) is only printed and main() returns 0 regardless (run.py:754), so no guard fails if the aggregation regresses.\nSCORE fit: 15\nJUSTIFICATION fit: run.py adds no forbidden name but its fragment builder at run.py:509-681 uses percent-formatting throughout against the repository's f-string idiom.\nSCORE reuse: 16\nJUSTIFICATION reuse: run.py reuses roc_auc/bootstrap_interval from evaluation.py:98,144 and the review-check loaders, but run.py:376-384 re-implements the figure text check that sibling srtj-docs-measure-run.py:732-736 already carries, with no shared owner.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-diagnosis-run.py:695 follow-on: the declared control compares the recomputed aggregate AUC against the measured 0.6097 but main() returns 0 without failing on a mismatch, so a regression in the aggregation would still exit 0 and write the fragment.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-diagnosis-run.py:376 follow-on: _figure re-implements the figure text-clipping/overlap guard that sibling srtj-docs-measure-run.py:732-736 already carries, with no shared owner; extraction is outside this node's write scope.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-diagnosis-run.py:509 follow-on: the fragment builder uses percent-formatting throughout (the manifest's own 29 UP031 findings) against the repository's f-string idiom.\n",
+  "review_run_id": "r-20261017T194409326426-review-of-srtj-docs-score-diagnosis-05e998863082",
+  "reviewed_base_sha": "9c6312f74d190b9d8b5f1af3d66d950bc6e56c97",
+  "reviewed_commits": [
+    "05e9988630823d02cda927e78b2d1f1c0daf3d0b"
+  ],
+  "reviewed_head_sha": "05e9988630823d02cda927e78b2d1f1c0daf3d0b",
+  "reviewed_run_id": "r-20261017T185448885850-srtj-docs-score-diagnosis",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T19:53:20.364946+00:00",
+  "total": 101
+}
