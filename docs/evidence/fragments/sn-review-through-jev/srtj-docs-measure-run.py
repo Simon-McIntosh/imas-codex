@@ -8,9 +8,9 @@ import base64
 import hashlib
 import html
 import json
+import lzma
 import os
 import time
-import zlib
 from collections import Counter
 from pathlib import Path
 
@@ -546,6 +546,7 @@ def _summarize(receipts: dict, context: dict, calibration: dict) -> dict:
             "incumbent_graph_document_matches": context["document_matches"],
             "incumbent_score_coverage": context["score_coverage"],
             "incumbent_cost_coverage": context["cost_coverage"],
+            "mismatched_names": context["mismatched_names"],
         },
         "method": {
             "score": calibration["score_rule"],
@@ -596,18 +597,37 @@ def _summarize(receipts: dict, context: dict, calibration: dict) -> dict:
         "stability_pass": stability_pass,
         "cost_pass": cost_pass,
         "status": "replace" if auc_pass and stability_pass and cost_pass else "shadow",
-        "reason": "The judge remains unwired unless every validation, stability and cost criterion passes.",
+        "reason": (
+            f"Validation paired AUC lower bound {difference:+.3f} does not exceed "
+            "the required -0.020; the judge remains unwired."
+            if not auc_pass and difference is not None
+            else "The measured deployment criteria pass."
+            if auc_pass and stability_pass and cost_pass
+            else "One or more stability or cost criteria do not pass; the judge remains unwired."
+        ),
     }
     return result
 
 
-def _freeze(receipts: dict) -> str:
-    raw = json.dumps(receipts, ensure_ascii=False, separators=(",", ":")).encode()
-    return base64.b64encode(zlib.compress(raw, level=9)).decode()
+def _freeze(receipts: dict, context: dict, calibration: dict) -> str:
+    compact = {
+        key: {
+            field: value
+            for field, value in receipt.items()
+            if field not in {"key", "question_count"}
+        }
+        for key, receipt in receipts.items()
+    }
+    raw = json.dumps(
+        {"receipts": compact, "context": context, "calibration": calibration},
+        ensure_ascii=False,
+        separators=(",", ":"),
+    ).encode()
+    return base64.b64encode(lzma.compress(raw, preset=9)).decode()
 
 
 def _thaw(value: str) -> dict:
-    return json.loads(zlib.decompress(base64.b64decode(value)))
+    return json.loads(lzma.decompress(base64.b64decode(value)))
 
 
 def _figure(result: dict) -> None:
@@ -645,6 +665,32 @@ def _figure(result: dict) -> None:
     ax.spines[["top", "right"]].set_visible(False)
     fig.legend(loc="upper center", bbox_to_anchor=(0.5, 1.02), ncol=2, frameon=False)
     fig.tight_layout(rect=(0, 0, 1, 0.88))
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    texts = [
+        *ax.get_xticklabels(),
+        *ax.get_yticklabels(),
+        ax.xaxis.label,
+        ax.yaxis.label,
+        *fig.legends[0].get_texts(),
+    ]
+    visible = [artist for artist in texts if artist.get_visible() and artist.get_text()]
+    boxes = [
+        (artist.get_text(), artist.get_window_extent(renderer)) for artist in visible
+    ]
+    canvas = fig.bbox
+    for label, box in boxes:
+        if (
+            box.x0 < canvas.x0
+            or box.y0 < canvas.y0
+            or box.x1 > canvas.x1
+            or box.y1 > canvas.y1
+        ):
+            raise RuntimeError(f"figure text is clipped: {label}")
+    for index, (first, first_box) in enumerate(boxes):
+        for second, second_box in boxes[index + 1 :]:
+            if first_box.overlaps(second_box):
+                raise RuntimeError(f"figure text overlaps: {first} / {second}")
     FIGURE.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIGURE, format="svg", metadata={"Date": None})
     plt.close(fig)
@@ -657,12 +703,12 @@ def _fragment(result: dict) -> None:
         return f"{interval['point']:.3f} [{interval['lower']:.3f}, {interval['upper']:.3f}]"
 
     rows = "".join(
-        f"<tr><th>{split}</th><td>{splits[split]['incumbent']['n']}</td><td>{fmt(splits[split]['incumbent']['jev_interval'])}</td><td>{fmt(splits[split]['incumbent']['incumbent_interval'])}</td><td>{fmt(splits[split]['incumbent']['difference_interval'])}</td></tr>"
+        f"<tr><th>{split}</th><td>{splits[split]['n']}</td><td>{fmt(splits[split]['jev'])}</td><td>{splits[split]['incumbent']['n']}</td><td>{fmt(splits[split]['incumbent']['jev_interval'])}</td><td>{fmt(splits[split]['incumbent']['incumbent_interval'])}</td><td>{fmt(splits[split]['incumbent']['difference_interval'])}</td></tr>"
         for split in ("calibration", "validation")
     )
     confusion = result["planted"]["confusion"]
     claim_rows = "".join(
-        f"<tr><th>{expected}</th>"
+        f"<tr><th>{expected.replace('_', ' ')}</th>"
         + "".join(
             f"<td>{confusion[expected].get(answer, 0)}</td>"
             for answer in ("supports", "contradicts", "says nothing")
@@ -676,14 +722,14 @@ def _fragment(result: dict) -> None:
     verdict = result["verdict"]
     text = f"""<section id="srtj-docs-measure" data-reckon="evidence">
 <h2 id="srtj-docs-measure-heading">Documentation review measured on golden B</h2>
-<p id="srtj-docs-measure-method">400 coordinator-labelled entries, with 216 calibration and 184 validation entries. The graph documentation hash matched all {result["inputs"]["incumbent_graph_document_matches"]} golden texts; {result["inputs"]["incumbent_score_coverage"]} carried an incumbent documentation score. The fixed score combines dimension, named-check and claim probabilities, with a hard contradiction veto. Its operating threshold {result["method"]["threshold"]:.4f} was chosen on calibration before the validation split was read once. Bootstrap resamples copy groups together.</p>
+<p id="srtj-docs-measure-method">400 coordinator-labelled entries, with 216 calibration and 184 validation entries. The graph documentation hash matched {result["inputs"]["incumbent_graph_document_matches"]} of 400 golden texts; {result["inputs"]["incumbent_score_coverage"]} carried a usable incumbent documentation score. The fixed score combines dimension, named-check and claim probabilities, with a hard contradiction veto. Its operating threshold {result["method"]["threshold"]:.4f} was chosen on calibration before the validation split was read once. Bootstrap resamples copy groups together.</p>
 <figure id="srtj-docs-measure-figure"><img src="/imas-codex/figures/sn-review-through-jev/srtj-docs-measure/paired-auc.svg" alt="Paired Jev and incumbent AUC estimates with 95% intervals for calibration and validation."><figcaption>Each split compares the same entries with both scores available. Intervals use 1,000 paired bootstrap draws by copy group.</figcaption></figure>
-<table id="srtj-docs-measure-auc"><thead><tr><th>split</th><th>paired entries</th><th>Jev AUC [95%]</th><th>incumbent AUC [95%]</th><th>Jev − incumbent [95%]</th></tr></thead><tbody>{rows}</tbody></table>
+<table id="srtj-docs-measure-auc"><thead><tr><th>split</th><th>all entries</th><th>Jev AUC [95%]</th><th>paired entries</th><th>paired Jev AUC [95%]</th><th>incumbent AUC [95%]</th><th>Jev − incumbent [95%]</th></tr></thead><tbody>{rows}</tbody></table>
 <table id="srtj-docs-measure-claims"><caption>Planted claim against Jev's selected relation</caption><thead><tr><th>planted label</th><th>supports</th><th>contradicts</th><th>says nothing</th></tr></thead><tbody>{claim_rows}</tbody></table>
 <p id="srtj-docs-measure-veto">The contradiction veto fired on {veto.get("contradicts:True", 0)} of 60 contradiction copies and missed {veto.get("contradicts:False", 0)}. It fired on {veto.get("says_nothing:True", 0)} of 20 silent controls. A contradiction copy that passes the veto is counted as a miss, even if another dimension rejects it.</p>
 <p id="srtj-docs-measure-stability">On {stability["claims"]} fixed claims, reversing the Choice criteria changed {stability["option_order"]["flips"]} of {stability["option_order"]["n"]} answers ({stability["option_order"]["flip_rate"]:.1%}). Repeating a frozen state changed {stability["frozen_change_rate"]:.1%} of claim answers.</p>
-<p id="srtj-docs-measure-cost">Jev spent USD {cost["spend_usd"]:.4f} of the USD {cost["ceiling_usd"]:.2f} ceiling. Base judgments averaged USD {cost["base"]["mean_cost"]:.6f} and {cost["base"]["mean_latency_s"]:.3f} s per entry; across {cost["base_claims"]} claims, USD {cost["usd_per_claim"]:.6f} and {cost["seconds_per_claim"]:.3f} s per claim.</p>
-<p id="srtj-docs-measure-verdict"><strong>Deployment verdict: {html.escape(verdict["status"])}.</strong> Paired validation lower bound {verdict["paired_lower_bound"]:.3f} versus the required −0.020; stability {"passes" if verdict["stability_pass"] else "fails"} its 5% limits. {html.escape(verdict["reason"])}</p>
+<p id="srtj-docs-measure-cost">Jev spent USD {cost["spend_usd"]:.4f} of the USD {cost["ceiling_usd"]:.2f} ceiling. Base judgments averaged USD {cost["base"]["mean_cost"]:.6f} and {cost["base"]["mean_latency_s"]:.3f} s per entry; latest incumbent review groups averaged USD {cost["incumbent"]["mean_usd"]:.4f} across {cost["incumbent"]["n"]} matched entries. Across {cost["base_claims"]} Jev claims, USD {cost["usd_per_claim"]:.6f} and {cost["seconds_per_claim"]:.3f} s per claim.</p>
+<p id="srtj-docs-measure-verdict"><strong>Deployment verdict: {html.escape(verdict["status"])}.</strong> {html.escape(verdict["reason"])} Stability and cost {"pass" if verdict["stability_pass"] and verdict["cost_pass"] else "do not both pass"} their required bounds.</p>
 </section>"""
     FRAGMENT.write_text(text)
 
@@ -695,7 +741,7 @@ def _finalize() -> None:
     calibration = json.loads(CALIBRATION.read_text())
     context = _graph_context()
     result = _summarize(receipts, context, calibration)
-    result["frozen_zlib_b64"] = _freeze(receipts)
+    result["frozen_lzma_b64"] = _freeze(receipts, context, calibration)
     if len(json.dumps(result).encode()) > 300_000:
         raise RuntimeError("results JSON exceeds repository data-file size limit")
     _write(RESULTS, result)
@@ -717,9 +763,10 @@ def _finalize() -> None:
 
 def _rescore() -> None:
     saved = json.loads(RESULTS.read_text())
-    receipts = _thaw(saved["frozen_zlib_b64"])
-    calibration = json.loads(CALIBRATION.read_text())
-    context = json.loads(CONTEXT.read_text())
+    frozen = _thaw(saved["frozen_lzma_b64"])
+    receipts = frozen["receipts"]
+    calibration = frozen["calibration"]
+    context = frozen["context"]
     rebuilt = _summarize(receipts, context, calibration)
     for key, value in rebuilt.items():
         if saved[key] != value:
