@@ -1,0 +1,80 @@
+<section id="srtj-docs-planted-defects">
+<h2>Source-anchored documentation claims</h2>
+<p>Golden B has 400 judgments, of which 146 are acceptable. The builder authors 79 source-anchored contradiction candidates and draws 60 with seed 17341 across populated split and physics-domain strata. It selects 20 further accepted, source-bearing entries for on-topic physical claims that their DD source neither supports nor contradicts. Every copy retains the original documentation and appends exactly one labeled sentence. Each silent control stores its physical basis and the gap in the DD wording. No model created or judged the labels.</p>
+<p>Golden B SHA-256: <code>b8390859634f21394e6f816536d579b9f8275c6feb5ccd24ce0f99f585e55a60</code>. The selected ranks and rule are stored in the fixture. A rebuild wrote 293412 bytes and produced a zero diff (<code>BUILD_EXIT=0</code>, <code>DIFF_EXIT=0</code>); <code>--check</code> matched the bytes and refused an altered fixture with <code>EXIT=1</code>.</p>
+<p>The co-passing thermal-particle source rate can be negative and represent a net sink. Its planted claim changes the population to fast particles, which the DD source's “thermal particle density” wording excludes; it does not treat a negative source as a definitional contradiction.</p>
+<h3 id="srtj-docs-planted-defects-counts">Counts</h3>
+<table><thead><tr><th>Rule</th><th>Calibration</th><th>Validation</th><th>Total</th></tr></thead><tbody>
+<tr><td>direction</td><td>13</td><td>11</td><td>24</td></tr>
+<tr><td>locus</td><td>5</td><td>2</td><td>7</td></tr>
+<tr><td>relation</td><td>12</td><td>17</td><td>29</td></tr>
+<tr><td>off_source</td><td>9</td><td>11</td><td>20</td></tr>
+<tr><th>Total</th><th>39</th><th>41</th><th>80</th></tr></tbody></table>
+<p>The contradiction class is balanced at 30 calibration and 30 validation entries. The silent controls contain 9 calibration and 11 validation entries. The rule totals are 24 direction reversals, 7 wrong loci, 29 wrong physical relations, and 20 off-source truths.</p>
+<table><thead><tr><th>Physics domain</th><th>Contradicts</th><th>Says nothing</th><th>Total</th></tr></thead><tbody>
+<tr><td>auxiliary_heating</td><td>4</td><td>4</td><td>8</td></tr>
+<tr><td>b_field_non_axisymmetric</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>camera_visible</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>camera_x_rays</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>divertor_physics</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>divertors</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>ec_launchers</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>ece</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>edge_plasma_physics</td><td>1</td><td>1</td><td>2</td></tr>
+<tr><td>electromagnetic_wave_diagnostics</td><td>3</td><td>2</td><td>5</td></tr>
+<tr><td>equilibrium</td><td>2</td><td>4</td><td>6</td></tr>
+<tr><td>langmuir_probes</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>magnetic_field_diagnostics</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>magnetic_field_systems</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>magnetics</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>magnetohydrodynamics</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>mechanical_measurement_diagnostics</td><td>1</td><td>1</td><td>2</td></tr>
+<tr><td>mhd</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td>mhd_linear</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>neutron_diagnostic</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>particle_measurement_diagnostics</td><td>2</td><td>1</td><td>3</td></tr>
+<tr><td>pf_active</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>pf_passive</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td>plant_systems</td><td>4</td><td>0</td><td>4</td></tr>
+<tr><td>plasma_transport</td><td>1</td><td>1</td><td>2</td></tr>
+<tr><td>plasma_wall_interactions</td><td>4</td><td>0</td><td>4</td></tr>
+<tr><td>radiation_measurement_diagnostics</td><td>3</td><td>1</td><td>4</td></tr>
+<tr><td>soft_x_rays</td><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>structural_components</td><td>2</td><td>1</td><td>3</td></tr>
+<tr><td>transport</td><td>5</td><td>2</td><td>7</td></tr>
+<tr><td>turbulence</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>wall</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><td>waves</td><td>2</td><td>0</td><td>2</td></tr>
+<tr><th>Total</th><th>60</th><th>20</th><th>80</th></tr></tbody></table>
+<h3 id="srtj-docs-planted-defects-hand-read">Ten manual DD comparisons</h3>
+<p>I read each of these added sentences beside its stored DD source and the accepted original documentation. In each case the DD source states the opposite relation, direction, or locus:</p>
+<table><thead><tr><th>Claim ID</th><th>DD source path</th><th>Comparison</th></tr></thead><tbody>
+<tr><td><code>contradicts-12</code></td><td><code>equilibrium/time_slice/boundary/squareness_upper_inner</code></td><td>The DD names the upper inner boundary; the added sentence names the lower inner boundary.</td></tr>
+<tr><td><code>contradicts-19</code></td><td><code>ece/channel/beam_tracing/beam/wave_vector/k_z_norm</code></td><td>The DD divides k_z by norm(k); the added sentence reverses numerator and denominator.</td></tr>
+<tr><td><code>contradicts-42</code></td><td><code>tf/b_field_phi_vacuum_r</code></td><td>The DD fixes positive sign as anti-clockwise from above; the added sentence says clockwise.</td></tr>
+<tr><td><code>contradicts-65</code></td><td><code>distribution_sources/source/markers/weights</code></td><td>The DD counts real particles per marker; the added sentence reverses that ratio.</td></tr>
+<tr><td><code>contradicts-107</code></td><td><code>ec_launchers/beam/phase/curvature</code></td><td>The DD pairs positive with divergent and negative with convergent; the added sentence swaps both signs.</td></tr>
+<tr><td><code>contradicts-147</code></td><td><code>pf_active/coil/resistance_additional</code></td><td>The DD adds dynamic resistance to static resistance; the added sentence subtracts it.</td></tr>
+<tr><td><code>contradicts-176</code></td><td><code>disruption/global_quantities/phi_halo_boundary</code></td><td>The DD evaluates toroidal flux at the halo boundary; the added sentence places it at the magnetic axis.</td></tr>
+<tr><td><code>contradicts-194</code></td><td><code>equilibrium/time_slice/profiles_1d/b_field_min</code></td><td>The DD specifies the minimum modulus on a flux surface; the added sentence specifies the maximum.</td></tr>
+<tr><td><code>contradicts-250</code></td><td><code>interferometer/channel/n_e_line_average</code></td><td>The DD divides the line integral by chord length; the added sentence multiplies it.</td></tr>
+<tr><td><code>contradicts-476</code></td><td><code>camera_ir/optical_element/material_properties/roughness</code></td><td>The DD maps zero to specular and one to rough; the added sentence reverses the endpoints.</td></tr>
+</tbody></table>
+<h3 id="srtj-docs-planted-defects-silent-hand-read">Five manual silent-control comparisons</h3>
+<p>I read the original documentation and DD text for these five controls. Each added sentence concerns the entry's quantity, states a valid physical use or relation, and addresses something the DD source leaves open:</p>
+<table><thead><tr><th>Claim ID</th><th>Added claim</th><th>Why the DD says nothing</th></tr></thead><tbody>
+<tr><td><code>says_nothing-342</code></td><td>Fast-electron absorbed power can be grouped with other population powers in a wave-heating balance.</td><td>The DD names absorption by fast particles but gives no balance across populations.</td></tr>
+<tr><td><code>says_nothing-336</code></td><td>A calibration-angle scan can expose an optical-element orientation offset.</td><td>The DD defines polarizer orientation, reflection and sign, not a scan or alignment diagnostic.</td></tr>
+<tr><td><code>says_nothing-481</code></td><td>Toroidal angle and major radius together locate the neutron-detector center in the horizontal plane.</td><td>The DD states only the toroidal angle and its positive orientation.</td></tr>
+<tr><td><code>says_nothing-24</code></td><td>Detector extent and aperture distance constrain geometric field of view.</td><td>The DD gives horizontal and vertical dimensions, with no aperture geometry.</td></tr>
+<tr><td><code>says_nothing-294</code></td><td>The velocity-to-field ratio is numerically sensitive when field magnitude is very small.</td><td>The DD says only that one scalar is stored per grid element; the accepted original gives the quotient.</td></tr>
+</tbody></table>
+<p>The neutron-detector efficiency entry was left out of the accepted controls: its DD source describes detection of a photon while its original documentation describes detection of a neutron. The replacement is the neutron detector's toroidal coordinate, whose DD source agrees with its original subject.</p>
+<h3 id="srtj-docs-planted-defects-examples">Three source-side examples</h3>
+<table><thead><tr><th>Claim</th><th>Original documentation opening</th><th>Added sentence</th><th>DD source text</th></tr></thead><tbody>
+<tr><td>contradicts-12</td><td>The upper-inner squareness of the plasma boundary is the dimensionless Luce shape coefficient quantifying the departure of the upper inboard corner of the last closed flux surface from a reference ellipse.</td><td>The squareness describes the lower inner plasma boundary.</td><td>Upper inner squareness of the plasma boundary (definition from T. Luce, Plasma Phys. Control. Fusion 55 (2013) 095009)</td></tr>
+<tr><td>contradicts-250</td><td>Number density of free electrons per physical volume averaged along a complete propagation chord is the path-normalized continuum count density of the unqualified free-electron population along that chord.</td><td>Line-averaged density multiplies the line integral by the line-of-sight length.</td><td>Line average density, possibly obtained by a combination of multiple interferometry wavelengths. Corresponds to the density integrated along the full line-of-sight and then divided by the length of the line-of-sight</td></tr>
+<tr><td>contradicts-476</td><td>Roughness of an optical element is an optical roughness parameter that quantifies how the element partitions reflected radiation between a specular component and a diffuse component.</td><td>Roughness zero is perfectly rough and one is perfectly specular.</td><td>Roughness parameter of the material. Varies in range [0, 1]. 0 is perfectly specular, 1 is perfectly rough</td></tr>
+</tbody></table>
+<p>The fixture carries the full original and modified documentation for every copy, the DD source path and text, its original golden-B identity, its split and domain, the rule, the entry-level acceptability label, and the claim-level label. A later evaluation can compare each model claim verdict directly against <code>claim_label</code>.</p>
+</section>
