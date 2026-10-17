@@ -466,6 +466,21 @@ _CONJUNCTION = re.compile(r"\s+(and|but|whereas)\s+", re.IGNORECASE)
 _CLAUSE_SUBJECT = re.compile(
     r"^(?i:the|a|an|it|this|that|these|those)\b|^[A-Z][a-z]+\b",
 )
+# An ambiguous conjunction stays in one claim; both sides need an explicit
+# finite marker before separating them into independently judged clauses.
+_FINITE_CLAUSE = re.compile(
+    r"\b(?:is|are|was|were|has|have|had|does|do|did|can|could|may|might|"
+    r"must|shall|should|will|would)\b",
+    re.IGNORECASE,
+)
+# A removed math span can leave a connector without its object. The gap marks
+# only those clauses, so complete prose alongside math is still judged.
+_DANGLING_MATH_TAIL = re.compile(
+    r"\b(?:is|are|was|were|be|been|being|equals?|defines?|means?|denotes?|"
+    r"represents?|of|in|on|at|to|from|with|by|for|as)\b$",
+    re.IGNORECASE,
+)
+_MATH_GAP = "\ufff0"
 _DISPLAY_MATH = re.compile(r"\$\$.*?\$\$", re.DOTALL)
 _INLINE_MATH = re.compile(r"(?<!\$)\$(?!\$)[^$\n]*\$(?!\$)")
 _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
@@ -519,8 +534,8 @@ def split_documentation_claims(
     prose = documentation
     for sentence in sorted((s for s in registry_sentences if s), key=len, reverse=True):
         prose = prose.replace(sentence, " ")
-    prose = _DISPLAY_MATH.sub(" ", prose)
-    prose = _INLINE_MATH.sub(" ", prose)
+    prose = _DISPLAY_MATH.sub(f" {_MATH_GAP} ", prose)
+    prose = _INLINE_MATH.sub(f" {_MATH_GAP} ", prose)
     prose = _MARKDOWN_LINK.sub(r"\1", prose)
     claims: list[str] = []
     for sentence in _SENTENCE_BOUNDARY.split(prose):
@@ -532,15 +547,22 @@ def split_documentation_claims(
             clauses: list[str] = []
             current = parts[0]
             for joiner, following in zip(parts[1::2], parts[2::2], strict=True):
-                if _CLAUSE_SUBJECT.match(following) and len(current.split()) >= 3:
+                if (
+                    _CLAUSE_SUBJECT.match(following)
+                    and _FINITE_CLAUSE.search(current)
+                    and _FINITE_CLAUSE.search(following)
+                ):
                     clauses.append(current)
                     current = following
                 else:
                     current = f"{current} {joiner} {following}"
             clauses.append(current)
             for clause in clauses:
-                claim = re.sub(r"\s+", " ", clause).strip(" \t.,;:!?")
-                if claim:
+                had_math = _MATH_GAP in clause
+                claim = re.sub(r"\s+", " ", clause.replace(_MATH_GAP, " ")).strip(
+                    " \t.,;:!?"
+                )
+                if claim and not (had_math and _DANGLING_MATH_TAIL.search(claim)):
                     claims.append(claim)
     return claims
 
