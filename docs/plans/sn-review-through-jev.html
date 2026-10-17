@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-10-17">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -110,7 +110,7 @@
     </p>
 
     <h2 id="s3">§3 — Name review through Jev, measured, not wired</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Build the Jev name review as question and state builders that nothing calls yet, in one
       module that §4 extends for the documentation axis: one state builder and one question
@@ -317,6 +317,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261016T101231058904-srtj-evidence-supply" data-who="reckon-build" data-when="2026-10-16T11:17:41Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply.html — source evidence and default repeated-token decision, 701 names, exploratory validation logistic AUC 0.745 with paired quorum Δ +0.039 [-0.029,+0.104], no eligible holdout verdict, Jev USD 0.165378 of 0.50.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-17T10:45:00Z">
+    <div class="r-comment-body"><p>§3 closed. The Jev name review, with its evidence supplied, reads validation logistic AUC 0.745, a paired gain of +0.039 over the quorum (merge <code>1e651fb87</code>, review 109). The lead promoted it into the cascade with the 0.009 shortfall and the exposed split waived. §4, the documentation axis, starts now. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#s3-evidence-supply">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-choice-probability" data-who="reckon-build" data-when="2026-10-13T18:05:00Z">
     <div class="r-comment-body"><p>The content review of version 10 found that the trigger's maximum was undefined for checks decided by a categorising Choice. A Choice returns an option, not a failure probability. The section now defines it: a Choice check contributes the summed probability of its non-conforming options, and the taxonomy names the conforming options for each Choice question.</p><p>Each of the four Choice checks in <code>review_checks.yaml</code> has one conforming option: <em>the bound source object</em>, <em>one quantity</em>, <em>true of all</em> and <em>supports</em>. For the claim-support check, <em>says nothing</em> counts as a failure, because an unverifiable claim is the case retrieval exists to resolve. A Noul check contributes the probability of its true case. The same review's two stale anchors in §1 are corrected: the fanout call is at <code>workers.py:7304</code>, and <code>_run_rd_quorum_cycles</code> is defined at line 7992.</p></div>
