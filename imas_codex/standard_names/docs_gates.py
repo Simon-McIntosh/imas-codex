@@ -519,6 +519,7 @@ class HouseStyleFindingClass(StrEnum):
     FORBIDDEN_LOCUS_GLOSS = "forbidden_locus_gloss"
     LOCUS_DEFINITION = "locus_definition"
     TEMPLATE_OPENING = "template_opening"
+    TEMPLATE_NOTE = "template_note"
     NON_CANONICAL_EQUATION = "non_canonical_equation"
 
 
@@ -966,36 +967,58 @@ def _forbidden_symbol_findings(
     return findings
 
 
-def _template_opening_findings(
+def _template_findings(
     templates: tuple[Any, ...],
     documentation: str,
 ) -> list[HouseStyleFinding]:
-    """Flag a documentation opening that follows none of the selected templates.
+    """Flag a documentation body that departs from its selected templates.
 
     One pattern can select several templates, and an opening need only follow
     one of them. Only an opening matching none is a finding, so a name with two
-    selected templates is not reported for the one it did not follow.
+    selected templates is not reported for the one it did not follow. Each
+    distinct note a selected template carries is required as well: the notes
+    are what keep near-duplicate names apart, so documentation omitting one is
+    reported.
     """
 
+    findings: list[HouseStyleFinding] = []
     opening = _opening_line(documentation)
     compiled: list[tuple[Any, re.Pattern[str]]] = []
     for template in templates:
         pattern = _template_opening_pattern(template.documentation)
         if pattern is not None:
             compiled.append((template, pattern))
-    if not compiled or any(pattern.match(opening) for _, pattern in compiled):
-        return []
-    required = "; ".join(template.documentation for template, _ in compiled)
-    return [
-        HouseStyleFinding(
-            finding_class=HouseStyleFindingClass.TEMPLATE_OPENING,
-            registry_entry=f"template:{compiled[0][0].base}",
-            detail=(
-                f"documentation opens as '{opening[:60]}', which does not "
-                f"follow any selected template: {required}"
-            ),
+    if compiled and not any(pattern.match(opening) for _, pattern in compiled):
+        required = "; ".join(template.documentation for template, _ in compiled)
+        findings.append(
+            HouseStyleFinding(
+                finding_class=HouseStyleFindingClass.TEMPLATE_OPENING,
+                registry_entry=f"template:{compiled[0][0].base}",
+                detail=(
+                    f"documentation opens as '{opening[:60]}', which does not "
+                    f"follow any selected template: {required}"
+                ),
+            )
         )
-    ]
+    seen_notes: set[str] = set()
+    for template in templates:
+        note = template.note.strip()
+        if not note or note in seen_notes:
+            continue
+        seen_notes.add(note)
+        if note in documentation:
+            continue
+        findings.append(
+            HouseStyleFinding(
+                finding_class=HouseStyleFindingClass.TEMPLATE_NOTE,
+                registry_entry=f"template:{template.base}",
+                detail=(
+                    "documentation omits the note its selected template "
+                    f"carries: {note}"
+                ),
+            )
+        )
+    return findings
 
 
 def house_style_findings(
@@ -1008,10 +1031,10 @@ def house_style_findings(
 
     The registry supplies what a name's own gate cannot decide: the canonical
     equation form and its forbidden variants, the canonical symbol per quantity,
-    and the opening each pattern template requires. The forbidden locus gloss
-    arrives through the same concept variants, so a gloss equating two loci is
-    reported without a separate lookup. A locus is defined once in its registry,
-    so a sentence defining it in other words is reported as well.
+    and the opening and note each pattern template requires. The forbidden locus
+    gloss arrives through the same concept variants, so a gloss equating two loci
+    is reported without a separate lookup. A locus is defined once in its
+    registry, so a sentence defining it in other words is reported as well.
     """
 
     prose = f"{description}\n\n{documentation}"
@@ -1019,7 +1042,7 @@ def house_style_findings(
         *_forbidden_variant_findings(conventions.concepts, prose),
         *_locus_definition_findings(conventions.concepts, prose),
         *_forbidden_symbol_findings(conventions.notation, prose),
-        *_template_opening_findings(conventions.templates, documentation),
+        *_template_findings(conventions.templates, documentation),
         *_non_canonical_equation_findings(conventions.concepts, prose),
     ]
 

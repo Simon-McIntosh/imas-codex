@@ -130,3 +130,39 @@ def test_name_without_selected_template_keeps_model_opening(writer: str) -> None
     persisted = _persisted_documentation("magnetic_field", document, writer)
 
     assert persisted == document
+
+
+_NOTE_NAME = "total_thermal_electron_density"
+_NOTE_OPENING = "Number density of electron"
+
+
+def _selected_template_notes(name: str) -> list[str]:
+    """The note sentences the grammar selects for *name*, in order."""
+    from imas_standard_names.grammar.terms import (
+        select_conventions,
+        template_sentences,
+    )
+
+    openings = {
+        template.documentation for template in select_conventions(name).templates
+    }
+    return [
+        sentence for sentence in template_sentences(name) if sentence not in openings
+    ]
+
+
+@pytest.mark.parametrize("writer", ["generate", "refine"])
+def test_template_note_is_written_once_after_the_opening(writer: str) -> None:
+    notes = _selected_template_notes(_NOTE_NAME)
+    assert notes, "the selected template must carry a note for this check"
+    note = notes[0]
+    document = (
+        "A model-written opening about the total electron density."
+        "\n\nFurther documentation remains."
+    )
+
+    persisted = _persisted_documentation(_NOTE_NAME, document, writer)
+
+    assert persisted.count(note) == 1
+    assert persisted.index(note) > persisted.index(_NOTE_OPENING)
+    assert "Further documentation remains." in persisted

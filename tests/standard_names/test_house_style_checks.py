@@ -263,6 +263,47 @@ def test_opening_matching_no_template_is_flagged_once() -> None:
     assert len(template_findings) == 1
 
 
+_NOTE_NAME = "total_thermal_electron_density"
+_NOTE_OPENING = "Number density of electron"
+
+
+def _selected_template_note(name: str) -> str:
+    """The note sentence the grammar selects for *name*."""
+    from imas_standard_names.grammar.terms import (
+        select_conventions,
+        template_sentences,
+    )
+
+    openings = {
+        template.documentation for template in select_conventions(name).templates
+    }
+    notes = [s for s in template_sentences(name) if s not in openings]
+    assert notes, f"{name} must select a note for this check"
+    return notes[0]
+
+
+def _note_template_findings(name: str, note: str | None) -> list:
+    opening = f"{_NOTE_OPENING}."
+    documentation = opening if note is None else f"{opening}\n\n{note}"
+    return [
+        finding
+        for finding in conformance_findings(name, documentation=documentation)
+        if finding.finding_class is HouseStyleFindingClass.TEMPLATE_NOTE
+    ]
+
+
+def test_missing_template_note_is_flagged() -> None:
+    findings = _note_template_findings(_NOTE_NAME, None)
+    assert len(findings) == 1
+    assert findings[0].registry_entry == "template:density"
+
+
+def test_template_note_present_is_not_flagged() -> None:
+    assert (
+        _note_template_findings(_NOTE_NAME, _selected_template_note(_NOTE_NAME)) == []
+    )
+
+
 _SIGN_SENSITIVE_NAME = "poloidal_magnetic_flux"
 
 
