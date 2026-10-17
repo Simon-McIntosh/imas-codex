@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite (25d5ad6e5) failure_count 0 with no ids, after_suite (e2fe5ec8e) failure_count 0 with no ids; gate-head.log records 28 passed and gate-base.log 26 passed, the two added tests accounting for the delta.",
+  "base_log_revision": "25d5ad6e534559d61e801a4bd61faaa7a68251fd",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:7420 sn_supersede"
+  ],
+  "completed_at": "2026-10-17T13:51:37.666Z",
+  "dispatched_at": "2026-10-17T13:42:52Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_fold_revival_status.py",
+      "line": "66",
+      "severity": "follow-on",
+      "text": "follow-on: neither added test folds onto a non-tombstoned target, so the change's stated invariant that a non-revival fold writes the status back unchanged is guarded by no assertion; a regression that replaced the coalesce with the bare $target_revived_status would null an already-live target's status and no test in the gate would redden, because the mirror mock keys its status write on the same declared clause the assertion is meant to police."
+    }
+  ],
+  "head_log_revision": "e2fe5ec8e516554e6d4493120024ec04c00350f8",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 25d5ad6e5; 96efe9f67 changes imas_codex/standard_names/edit.py (adds target.status to _FOLD_NAME_MUTATION_QUERY at :1549 and threads target_revived_status through _fold_expected_state, _fold_receipt and supersede_into) and adds tests/standard_names/test_fold_revival_status.py (93 lines, two tests); e2fe5ec8e adds the 50-line landing html fragment.",
+    "done_when": "the four done_when clauses are all measured: revival leaves status draft and the receipt shows it (tests/standard_names/test_fold_revival_status.py:80,92); removing the assignment leaves both new tests failing (negative-control.log, 2 failed, EXIT=1); the fold statement plans under EXPLAIN against the live server (explain.log, EXPLAIN rows 0, EXIT=0) with a malformed statement refused as CypherSyntaxError; and the five gate files add no failures against base (gate-head.log 28 passed EXIT=0 vs gate-base.log 26 passed EXIT=0).",
+    "goal": "goal is \"Make a fold that revives a superseded tombstone restore its catalog status to draft\"; imas_codex/standard_names/edit.py:1549 writes target.status in the fold SET, and edit.py:2940 sets $target_revived_status='draft' only when the snapshot's target read status='superseded', so a non-revival fold writes the unchanged value through the coalesce.",
+    "manifest": "read at the reviewed run's manifest.md; it declares status complete, commits 96efe9f67,e2fe5ec8e, the literal gate command with its five log paths, negative_control_log, and both baseline_suite and after_suite arms completed true with failure_count 0 and no failure_ids.",
+    "write_paths": "declared paths are imas_codex/standard_names/edit.py, tests/standard_names/test_fold_revival_status.py, docs/evidence/fragments/sn-harmonize-command/shc-fold-revival-status.html and an unused docs/figures/sn-harmonize-command/shc-fold-revival-status dir; git show --stat 96efe9f67 is edit.py and the test file, e2fe5ec8e is the landing html, all inside the fence and no generated model or shared index touched."
+  },
+  "justifications": {
+    "durability": "the two added assertions (tests/standard_names/test_fold_revival_status.py:80,92) are verified to redden when the status SET clause is removed (negative-control.log, 2 failed EXIT=1), but neither covers a non-revival fold, leaving the unchanged-status branch of the coalesce unguarded.",
+    "evidence": "the gate asserts the done_when's measure and its result is recorded -- gate-head.log 28 passed EXIT=0 and gate-base.log 26 passed EXIT=0 give zero added failures, negative-control.log shows 2 failed EXIT=1 with the assignment removed, and explain.log shows the statement planning live.",
+    "fit": "the new target_revived_status parameter mirrors the pre-existing target_revived_stage thread (imas_codex/standard_names/edit.py:2577,2739,2940) and the added comments describe the mechanism without plan, ticket or version labels.",
+    "goal_fidelity": "imas_codex/standard_names/edit.py:1549 writes the target status in the same statement as its revived name_stage, and edit.py:2940 sets it to draft only for a snapshot target that was status='superseded', which is exactly the goal.",
+    "reuse": "no new capability is introduced; the change extends the fold's existing mutation statement and revival computation (imas_codex/standard_names/edit.py:1520,2206) and the repository owns no other revival-status mechanism.",
+    "scope_discipline": "every path in the two commits (imas_codex/standard_names/edit.py, tests/standard_names/test_fold_revival_status.py, docs/evidence/fragments/sn-harmonize-command/shc-fold-revival-status.html) is inside the reviewed node's declared write paths, with no plan meta or shared index touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is \"Make a fold that revives a superseded tombstone restore its catalog status to draft\"; the landed change writes target.status = coalesce($target_revived_status, target.status) in _FOLD_NAME_MUTATION_QUERY (imas_codex/standard_names/edit.py:1549) and computes $target_revived_status='draft' only for a snapshot whose target reads status='superseded' (imas_codex/standard_names/edit.py:2940).\nVERDICT done_when: the done_when names four clauses and all four are recorded -- a revived tombstone leaves status draft with the receipt after image showing it (tests/standard_names/test_fold_revival_status.py:78,88), the assignment removed leaves both new tests failing (negative-control.log, 2 failed, EXIT=1), the fold statement plans under EXPLAIN (explain.log, EXPLAIN rows 0, EXIT=0, with a malformed-statement positive control refused as CypherSyntaxError), and the five gate files add no failures against base (gate-head.log 28 passed EXIT=0 against gate-base.log 26 passed EXIT=0).\nVERDICT write_paths: the declared paths are imas_codex/standard_names/edit.py, tests/standard_names/test_fold_revival_status.py, docs/evidence/fragments/sn-harmonize-command/shc-fold-revival-status.html and an unused docs/figures/... dir; git show --stat on both commits touches only the first three, every changed path inside the fence.\nVERDICT manifest: read; status complete, commits 96efe9f67 and e2fe5ec8e, the gate command and all five logs named, and both baseline_suite and after_suite arms completed with failure_count 0.\nVERDICT diff: read commit by commit against base 25d5ad6e5 -- 96efe9f67 threads target_revived_status through the fold mutation statement, _fold_expected_state (edit.py:2630), _fold_receipt and supersede_into and adds the two-case test file; e2fe5ec8e adds the landing html fragment.\nCALL_SITES: imas_codex/cli/sn.py:7420 sn_supersede\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/edit.py:1549 writes the target's status in the same SET as its name_stage, and edit.py:2940 sets it to draft only when the snapshot target was superseded.\nSCORE evidence: 20\nJUSTIFICATION evidence: every clause of the done_when is measured -- gate-head.log 28 passed EXIT=0 and gate-base.log 26 passed EXIT=0 (zero added failures), negative-control.log 2 failed EXIT=1, and explain.log EXIT=0 with a refused positive control.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat on 96efe9f67 touches only imas_codex/standard_names/edit.py and tests/standard_names/test_fold_revival_status.py, and e2fe5ec8e only the landing html, all inside the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: the two added assertions (tests/standard_names/test_fold_revival_status.py:80,92) both redden when the status SET clause is removed, shown in negative-control.log, but neither exercises a non-revival fold, so a regression that dropped the coalesce fallback would null an already-live target's status uncaught.\nSCORE fit: 20\nJUSTIFICATION fit: the new parameter target_revived_status mirrors the existing target_revived_stage thread (imas_codex/standard_names/edit.py:2577,2739,2940) and the comments describe the mechanism with no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing fold owner -- _FOLD_NAME_MUTATION_QUERY and _fold_revival_stage (imas_codex/standard_names/edit.py:1520,2206) -- and adds no second revival mechanism or duplicated definition.\nFINDING tests/standard_names/test_fold_revival_status.py:66 follow-on: neither added test folds onto a non-tombstoned target, so the change's stated invariant that a non-revival fold writes the status back unchanged is guarded by no assertion; a regression that replaced the coalesce with the bare $target_revived_status would null an already-live target's status and no test in the gate would redden, because the mirror mock keys its status write on the same declared clause the assertion is meant to police.\nREVIEWED_BASE_SHA: 25d5ad6e534559d61e801a4bd61faaa7a68251fd\nREVIEWED_HEAD_SHA: e2fe5ec8e516554e6d4493120024ec04c00350f8",
+  "review_run_id": "r-20261017T134234318204-review-of-shc-fold-revival-status-e2fe5ec8e516",
+  "reviewed_base_sha": "25d5ad6e534559d61e801a4bd61faaa7a68251fd",
+  "reviewed_head_sha": "e2fe5ec8e516554e6d4493120024ec04c00350f8",
+  "reviewed_run_id": "r-20261017T132353682496-shc-fold-revival-status",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T13:50:12.556527+00:00",
+  "total": 117
+}
