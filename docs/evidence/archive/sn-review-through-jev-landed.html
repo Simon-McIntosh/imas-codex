@@ -70,6 +70,11 @@
     <p>Documentation acceptance in <code>process_review_docs_batch</code> now runs the claim veto from the documentation axis through <code>decide_batch</code>.</p><ul><li>Every DD source bound to the name is compared separately.</li><li>A contradicting claim holds the entry below the threshold, with the sentence and the contradicted source path recorded in the refiner's <code>contradicts_source</code> comment.</li><li>A Jev error or a missing answer also holds the entry, rather than passing it.</li></ul><p>The hold test fails with the veto call removed. The gate has 1 failed and 184 passed, against 2 failed and 183 passed at base. The first review scored 102, blocking because only the first bound source was compared; after the repair the second review scored 112. This also gives the documentation axis its first production caller, answering the code-health review's unreached-module finding. The holistic score stays in shadow. Merge <code>b32d672a2</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-veto-wire.html">fragment</a></p>
   </section>
 
+  <section id="s4-score-diagnosis">
+    <h2>§4 — Why the documentation score sits near chance</h2>
+    <p>A calibration-only diagnosis of the frozen measurement found three compounding causes. It reproduced the measured AUC of 0.610 as its control and did not open validation.</p><ul><li><strong>Blind to links and house style.</strong> Of the 144 failing labels, 81% fail on house style (52%) or links (29%), but the 15 code-decided checks for those families never entered the score.</li><li><strong>Claims starved of evidence.</strong> 69% of claims say nothing, because the DD text is a median 22 characters (65 of 216 entries are under 8). The claim state carries no units, links, siblings or source paths.</li><li><strong>Components that cancel.</strong> Two named checks are inverted and one is flat, so the check mean partly cancels.</li></ul><p>Reweighting alone lifts calibration AUC from 0.610 to 0.657 [0.575, 0.743] with no new calls. The incumbent's 0.514 is explained by its own flatness: only 31 distinct values. Review 101. Merge <code>3251a887f</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-score-diagnosis.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>
