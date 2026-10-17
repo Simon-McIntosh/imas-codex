@@ -20,9 +20,11 @@ from tests.standard_names.test_harmonize_reverse_links import (
 
 def _fixture(monkeypatch: Any) -> _LinkGraph:
     from imas_codex.graph import client as graph_client
+    from imas_codex.standard_names import protection
 
     graph = _LinkGraph(_family_nodes())
     monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
+    monkeypatch.setattr(protection, "_frozen_roster_requests", lambda *_a: {})
     monkeypatch.setattr(
         graph_ops, "write_enrichment_results", graph.write_enrichment_results
     )
@@ -169,4 +171,53 @@ def test_cli_refusal_names_member_and_reason(monkeypatch: Any) -> None:
     assert result.exit_code != 0
     assert _BOUNDARY in result.output
     assert "quarantined" in result.output
+    assert graph.written == []
+
+
+@pytest.mark.parametrize("dry_run", [True, False])
+def test_catalog_protected_member_refuses_before_any_write(
+    monkeypatch: Any, dry_run: bool
+) -> None:
+    graph = _fixture(monkeypatch)
+    graph.node(_PROBE)["name_stage"] = "approved"
+
+    with pytest.raises(harmonize.HarmonizeFinalizeError) as exc:
+        harmonize.finalize_families(graph, seeds=[_ANCHOR], dry_run=dry_run)
+
+    assert _PROBE in str(exc.value)
+    assert "protected" in str(exc.value)
+    assert graph.written == []
+    assert graph.node(_ANCHOR)["harmonized_group_signature"] is None
+
+
+def test_late_protection_refuses_all_reconciliation_writes(monkeypatch: Any) -> None:
+    from imas_codex.standard_names import protection
+
+    graph = _fixture(monkeypatch)
+    graph.node(_PROBE)["name_stage"] = "approved"
+    monkeypatch.setattr(protection, "recommended_name_protections", lambda *_a: {})
+
+    with pytest.raises(harmonize.HarmonizeFinalizeError) as exc:
+        harmonize.finalize_families(graph, seeds=[_ANCHOR])
+
+    assert _PROBE in str(exc.value)
+    assert graph.written == []
+    assert graph.node(_ANCHOR)["harmonized_group_signature"] is None
+
+
+def test_open_review_roster_refuses_dry_run(monkeypatch: Any) -> None:
+    from imas_codex.standard_names import protection
+
+    graph = _fixture(monkeypatch)
+    monkeypatch.setattr(
+        protection,
+        "_frozen_roster_requests",
+        lambda *_a: {_PROBE: "candidate request is open"},
+    )
+
+    with pytest.raises(harmonize.HarmonizeFinalizeError) as exc:
+        harmonize.finalize_families(graph, seeds=[_ANCHOR], dry_run=True)
+
+    assert _PROBE in str(exc.value)
+    assert "candidate request is open" in str(exc.value)
     assert graph.written == []

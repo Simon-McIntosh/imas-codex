@@ -1014,6 +1014,7 @@ def reconcile_family_reverse_links(
     member_ids: list[str],
     *,
     write_fn: Any | None = None,
+    refuse_protected: bool = False,
 ) -> dict[str, Any]:
     """Make every family sibling link reciprocal across a converged family.
 
@@ -1048,6 +1049,9 @@ def reconcile_family_reverse_links(
     would clear the very documentation protection exists to keep. The withheld
     ids are returned under ``"protected"`` so the caller can report them rather
     than let a partial write look complete.
+
+    With ``refuse_protected``, a protected row in the pending batch prevents
+    writes to every member. Finalization uses this after its scope preflight.
 
     The write goes through the ``graph_ops`` function that already persists
     these fields — ``write_enrichment_results`` — called from here rather than
@@ -1190,9 +1194,10 @@ def reconcile_family_reverse_links(
         from imas_codex.standard_names.protection import filter_protected
 
         _, protected = filter_protected(batch)
-        withheld = set(protected)
-        writable = [row for row in batch if row["id"] not in withheld]
-        written = int((write_fn or write_enrichment_results)(writable) or 0)
+        if not (refuse_protected and protected):
+            withheld = set(protected)
+            writable = [row for row in batch if row["id"] not in withheld]
+            written = int((write_fn or write_enrichment_results)(writable) or 0)
     return {
         "members": len(present),
         "added": sum(row_added.get(row["id"], 0) for row in writable),
@@ -1412,11 +1417,17 @@ def finalize_families(
 ) -> list[dict[str, Any]]:
     """Reconcile and stamp drained, clean families without running a campaign."""
     from imas_codex.standard_names.prose_policy import banned_prose_findings
+    from imas_codex.standard_names.protection import recommended_name_protections
 
     plans = plan_family_applies(gc, seeds=seeds, min_size=min_size)
     if seeds and not plans:
         raise HarmonizeFinalizeError("No live family contains the requested seed")
-    refusals: list[str] = []
+    member_ids = sorted({mid for plan in plans for mid in plan["members"]})
+    protected = recommended_name_protections(gc, member_ids)
+    refusals = [
+        f"{member_id}: protected ({reason})"
+        for member_id, reason in sorted(protected.items())
+    ]
     before_rows: dict[tuple[str, ...], list[dict[str, Any]]] = {}
     for plan in plans:
         ids = plan["members"]
@@ -1460,7 +1471,9 @@ def finalize_families(
                 }
             )
             continue
-        links = reconcile_family_reverse_links(gc, plan["members"])
+        links = reconcile_family_reverse_links(
+            gc, plan["members"], refuse_protected=True
+        )
         if links.get("protected"):
             raise HarmonizeFinalizeError(
                 "Finalization refused: protected members were not reconciled: "
