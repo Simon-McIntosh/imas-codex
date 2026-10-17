@@ -45,7 +45,7 @@ CLAIMS = """
 115|direction|Component along Z axis|The divertor-target coordinate is along the Z axis.|The divertor-target coordinate is along the X axis.
 125|relation|Fluid temperature|This quantity is the fluid temperature at the port.|This quantity is the fluid pressure at the port instead of its temperature.
 131|direction|Height|The probe coordinate measures height.|The probe coordinate measures major radius rather than height.
-133|relation|Source rate of thermal particle density|The quantity is a source rate for thermal particle density.|The quantity is a sink rate that removes thermal particle density.
+133|relation|Source rate of thermal particle density|The quantity is a source rate for thermal particle density.|The quantity is a source rate for fast-particle density rather than thermal particle density.
 135|relation|int(e_field.j.dV) / Ip^2|Plasma resistance divides the electric-field current-density integral by squared plasma current.|Plasma resistance multiplies the electric-field current-density integral by squared plasma current.
 146|direction|Component along Y axis|The shatter-cone major-axis component is along Y.|The shatter-cone major-axis component is along X instead of Y.
 147|relation|adding this dynamic quantity to the static resistance|Effective coil resistance adds the dynamic resistance to the static resistance.|Effective coil resistance subtracts the dynamic resistance from the static resistance.
