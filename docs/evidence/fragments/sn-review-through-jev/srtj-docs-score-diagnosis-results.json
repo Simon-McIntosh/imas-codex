@@ -1,0 +1,721 @@
+{
+  "node": "srtj-docs-score-diagnosis",
+  "plan": "imas-codex:sn-review-through-jev",
+  "scope": "calibration split only; no validation label read; no network call",
+  "control": {
+    "n": 216,
+    "recomputed_auc": 0.6097125771604939,
+    "measured_auc": 0.6097125771604938,
+    "measured_lower": 0.5270736954078357,
+    "measured_upper": 0.7058523463831994,
+    "recomputed_mean": 0.7990752493519854
+  },
+  "components": [
+    {
+      "family": "aggregate",
+      "name": "aggregate score",
+      "auc": 0.6097125771604939,
+      "lower": 0.5270736954078357,
+      "upper": 0.7058523463831994,
+      "sd": 0.1166847386132027,
+      "distinct": 205,
+      "modal_share": 0.018518518518518517,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "question",
+      "name": "question:description_quality",
+      "auc": 0.566454475308642,
+      "lower": 0.4721724130185059,
+      "upper": 0.6600206451157539,
+      "sd": 0.040520342399196815,
+      "distinct": 20,
+      "modal_share": 0.21296296296296297,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "question",
+      "name": "question:documentation_quality",
+      "auc": 0.6003568672839507,
+      "lower": 0.510578214598564,
+      "upper": 0.6973314565998755,
+      "sd": 0.06902540237361536,
+      "distinct": 25,
+      "modal_share": 0.1388888888888889,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "question",
+      "name": "question:completeness",
+      "auc": 0.5912905092592593,
+      "lower": 0.5061360958936789,
+      "upper": 0.6816300600147884,
+      "sd": 0.11221840233078319,
+      "distinct": 46,
+      "modal_share": 0.07407407407407407,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:description_not_single_definition",
+      "auc": 0.5282118055555556,
+      "lower": 0.44022047162369743,
+      "upper": 0.6128204846963154,
+      "sd": 0.08446616842074557,
+      "distinct": 35,
+      "modal_share": 0.09259259259259259,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:description_false_of_some_binding",
+      "auc": 0.5975597993827161,
+      "lower": 0.5136763487790175,
+      "upper": 0.6900925609394404,
+      "sd": 0.10596893551850256,
+      "distinct": 43,
+      "modal_share": 0.0787037037037037,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:units_in_prose",
+      "auc": 0.5152391975308642,
+      "lower": 0.42688149898736377,
+      "upper": 0.6167864377463768,
+      "sd": 0.18772188517282556,
+      "distinct": 40,
+      "modal_share": 0.2638888888888889,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:cocos_number_in_prose",
+      "auc": 0.5438368055555555,
+      "lower": 0.4510990517419089,
+      "upper": 0.6350901316955058,
+      "sd": 0.009301639124251452,
+      "distinct": 6,
+      "modal_share": 0.38425925925925924,
+      "inverted": false,
+      "flat": true
+    },
+    {
+      "family": "named check",
+      "name": "check:latex_escaping_broken",
+      "auc": 0.4893904320987654,
+      "lower": 0.40090369208001636,
+      "upper": 0.5767761552870878,
+      "sd": 0.04854623095339659,
+      "distinct": 19,
+      "modal_share": 0.19444444444444445,
+      "inverted": true,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:non_normative_documentation",
+      "auc": 0.4903549382716049,
+      "lower": 0.4118939489237539,
+      "upper": 0.5833071936687132,
+      "sd": 0.07026691957302938,
+      "distinct": 32,
+      "modal_share": 0.09722222222222222,
+      "inverted": true,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:raw_dd_reference_in_prose",
+      "auc": 0.5458140432098765,
+      "lower": 0.455764796720575,
+      "upper": 0.6221787648970747,
+      "sd": 0.26368438713454107,
+      "distinct": 36,
+      "modal_share": 0.09259259259259259,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:false_equivalence_with_related",
+      "auc": 0.5740740740740741,
+      "lower": 0.5000559479852921,
+      "upper": 0.645518340855902,
+      "sd": 0.04281621549515844,
+      "distinct": 23,
+      "modal_share": 0.16666666666666666,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:incompatible_physics_qualifier",
+      "auc": 0.5848283179012345,
+      "lower": 0.5119191220531404,
+      "upper": 0.6688022212543554,
+      "sd": 0.0415846930264191,
+      "distinct": 22,
+      "modal_share": 0.13425925925925927,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "named check",
+      "name": "check:equation_physically_incorrect",
+      "auc": 0.5339988425925926,
+      "lower": 0.43975031939675785,
+      "upper": 0.615503693853428,
+      "sd": 0.0405931670681166,
+      "distinct": 16,
+      "modal_share": 0.2638888888888889,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "claim channel",
+      "name": "claim: fraction contradicts",
+      "auc": 0.49667245370370366,
+      "lower": 0.4778463431786217,
+      "upper": 0.5202718801329557,
+      "sd": 0.06266533710498387,
+      "distinct": 5,
+      "modal_share": 0.9814814814814815,
+      "inverted": true,
+      "flat": true
+    },
+    {
+      "family": "claim channel",
+      "name": "claim: fraction says nothing",
+      "auc": 0.5250289351851851,
+      "lower": 0.4510562761480051,
+      "upper": 0.5900087071830266,
+      "sd": 0.2859875073420326,
+      "distinct": 31,
+      "modal_share": 0.3148148148148148,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "family": "claim channel",
+      "name": "claim: fraction supports",
+      "auc": 0.4692804783950617,
+      "lower": 0.4014691498997841,
+      "upper": 0.5441275770987475,
+      "sd": 0.28500040396392295,
+      "distinct": 31,
+      "modal_share": 0.3287037037037037,
+      "inverted": true,
+      "flat": false
+    },
+    {
+      "family": "claim channel",
+      "name": "claim: mean P(contradicts)",
+      "auc": 0.47989004629629634,
+      "lower": 0.3967876504882431,
+      "upper": 0.5615816933285206,
+      "sd": 0.060522539578339134,
+      "distinct": 68,
+      "modal_share": 0.25462962962962965,
+      "inverted": true,
+      "flat": false
+    },
+    {
+      "family": "veto",
+      "name": "contradiction veto (pass=1)",
+      "auc": 0.5034722222222223,
+      "lower": 0.4801336993494484,
+      "upper": 0.5221536568213784,
+      "sd": 0.13481684980149108,
+      "distinct": 2,
+      "modal_share": 0.9814814814814815,
+      "inverted": false,
+      "flat": true
+    }
+  ],
+  "label_gap": {
+    "by_check": [
+      {
+        "label_check": "house_style",
+        "property": "conventions registry notation, forbidden spellings, catalog-level conventions",
+        "count": 75,
+        "share_of_failures": 0.5208333333333334,
+        "labels": [
+          0
+        ],
+        "mean_aggregate": 0.8089845935545935
+      },
+      {
+        "label_check": "(pass)",
+        "property": "passes every check",
+        "count": 72,
+        "share_of_failures": null,
+        "labels": [
+          1
+        ],
+        "mean_aggregate": 0.8131864262666346
+      },
+      {
+        "label_check": "links",
+        "property": "every name-link points at a name whose meaning matches its text",
+        "count": 42,
+        "share_of_failures": 0.2916666666666667,
+        "labels": [
+          0
+        ],
+        "mean_aggregate": 0.773456037414966
+      },
+      {
+        "label_check": "subject",
+        "property": "provenance: the documented quantity matches the DD source path",
+        "count": 12,
+        "share_of_failures": 0.08333333333333333,
+        "labels": [
+          0
+        ],
+        "mean_aggregate": 0.7278386363636363
+      },
+      {
+        "label_check": "physics",
+        "property": "definitions, equations, signs and units",
+        "count": 7,
+        "share_of_failures": 0.04861111111111111,
+        "labels": [
+          0
+        ],
+        "mean_aggregate": 0.829226984126984
+      },
+      {
+        "label_check": "scope",
+        "property": "the name is neither narrowed to one machine nor widened; relationships are true",
+        "count": 5,
+        "share_of_failures": 0.034722222222222224,
+        "labels": [
+          0
+        ],
+        "mean_aggregate": 0.8024027777777778
+      },
+      {
+        "label_check": "complete",
+        "property": "nothing truncated, unresolved or self-contradictory; the opening template matches",
+        "count": 3,
+        "share_of_failures": 0.020833333333333332,
+        "labels": [
+          0
+        ],
+        "mean_aggregate": 0.7803888888888889
+      }
+    ],
+    "failing": 144,
+    "passing": 72,
+    "checks_never_asked": [
+      "defining_equation_missing",
+      "description_template_opening_mismatch",
+      "forbidden_equation_variant",
+      "forbidden_locus_gloss",
+      "forbidden_symbol_spelling",
+      "link_dead",
+      "link_hygiene",
+      "link_missing_reverse",
+      "link_unresolved",
+      "locus_definition_mismatch",
+      "minimum_word_count",
+      "non_canonical_equation",
+      "relationship_link_missing",
+      "sign_convention_missing",
+      "symbols_undefined"
+    ]
+  },
+  "sample": [
+    {
+      "unit": "alpha_angle_of_ferritic_element",
+      "label": 0,
+      "label_check": "house_style",
+      "label_note": "first line never reaches 'angle', against '{qualifier} angle'",
+      "aggregate": 0.8482777777777779
+    },
+    {
+      "unit": "alpha_angle_of_plasma_filament",
+      "label": 0,
+      "label_check": "house_style",
+      "label_note": "first line never reaches 'angle', against '{qualifier} angle'; atan2(Z,R) and the counterclockwise sense match the source",
+      "aggregate": 0.8560111111111111
+    },
+    {
+      "unit": "area_of_correction_coil",
+      "label": 0,
+      "label_check": "house_style",
+      "label_note": "opens 'Non-negative full geometric area of' against 'Area {locus}'",
+      "aggregate": 0.7821333333333335
+    },
+    {
+      "unit": "area_of_first_wall",
+      "label": 0,
+      "label_check": "house_style",
+      "label_note": "opens 'The first-wall area is' against 'Area {locus}'; unresolved [energy flux at the wall]",
+      "aggregate": 0.8366833333333333
+    },
+    {
+      "unit": "argon_density_at_pedestal_top",
+      "label": 0,
+      "label_check": "house_style",
+      "label_note": "opens 'The local argon-ion number density at' against 'Number density of {subject}'",
+      "aggregate": 0.7952666666666667
+    },
+    {
+      "unit": "brightness_of_visible_camera",
+      "label": 0,
+      "label_check": "house_style",
+      "label_note": "B_vis where the registry brightness symbol is L_gamma; unresolved [spectral radiance]",
+      "aggregate": 0.7316333333333334
+    },
+    {
+      "unit": "calibration_factor_of_visible_camera",
+      "label": 0,
+      "label_check": "house_style",
+      "label_note": "writes C_vis where the registry factor symbol is k; unresolved [factor of visible camera]",
+      "aggregate": 0.8196333333333333
+    },
+    {
+      "unit": "absorbed_radiated_power_at_wall",
+      "label": 1,
+      "label_check": "(pass)",
+      "label_note": "incident minus reflected plasma radiation integrated over the wall, as power_radiated; opening fits '{modifiers} power {locus}'; P as the registry gives; links resolve",
+      "aggregate": 0.8678333333333332
+    },
+    {
+      "unit": "alpha_angle_of_passive_loop_element",
+      "label": 1,
+      "label_check": "(pass)",
+      "label_note": "atan2 inclination from the outward radial direction; opening fits '{qualifier} angle'; alpha per registry; link resolves",
+      "aggregate": 0.6996888888888888
+    },
+    {
+      "unit": "atomic_number",
+      "label": 1,
+      "label_check": "(pass)",
+      "label_note": "z_n sources; opens per the 'Atomic number' template; Z per registry; links resolve",
+      "aggregate": 0.8316833333333333
+    },
+    {
+      "unit": "back_surface_distance_of_antenna_strap",
+      "label": 1,
+      "label_check": "(pass)",
+      "label_note": "minimum strap-to-conductor clearance matches distance_to_conductor; links resolve",
+      "aggregate": 0.8609
+    },
+    {
+      "unit": "bandwidth_of_ece_channel",
+      "label": 1,
+      "label_check": "(pass)",
+      "label_note": "full IF bandpass width f_high - f_low as the source; no registry entry applies; links resolve",
+      "aggregate": 0.8634333333333334
+    },
+    {
+      "unit": "calibration_polarization_angle_of_optical_element",
+      "label": 1,
+      "label_check": "(pass)",
+      "label_note": "signed alignment angle from x1, counter-clockwise looking toward the plasma, as the polarizer source; opening fits '{qualifier} angle'; alpha as the registry gives",
+      "aggregate": 0.8540333333333334
+    },
+    {
+      "unit": "co_passing_thermal_particle_source_rate",
+      "label": 1,
+      "label_check": "(pass)",
+      "label_note": "flux-surface-averaged net source for the co-passing orbit class matches its source; S per registry; template holds; links resolve",
+      "aggregate": 0.8232619047619048
+    },
+    {
+      "unit": "area_of_rogowski_coil",
+      "label": 0,
+      "label_check": "links",
+      "label_note": "unresolved [Rogowski-coil voltage]; otherwise V = sigma mu_0 n A dI/dt with an 'Area {locus}' opening and A as the registry gives",
+      "aggregate": 0.0
+    },
+    {
+      "unit": "argon_prefill_count",
+      "label": 0,
+      "label_check": "links",
+      "label_note": "unresolved [tritium prefill count]; template and N notation hold",
+      "aggregate": 0.8055333333333334
+    },
+    {
+      "unit": "coolant_pressure",
+      "label": 0,
+      "label_check": "links",
+      "label_note": "unresolved [cooling-circuit inlet pressure] and [coolant flow through a plant component port]",
+      "aggregate": 0.8010666666666667
+    },
+    {
+      "unit": "coolant_pressure_at_cooling_circuit_inlet",
+      "label": 0,
+      "label_check": "links",
+      "label_note": "unresolved [pressure at a cooling-circuit inlet]",
+      "aggregate": 0.7943333333333333
+    },
+    {
+      "unit": "area_of_diagnostic_aperture",
+      "label": 0,
+      "label_check": "subject",
+      "label_note": "bound to bolometer detector/surface as well as aperture/surface; a detector's collecting area is not an aperture area, and the text stretches to cover it; also opens 'Diagnostic aperture area is' against 'Area {locus}' and an unresolved [width of a diagnostic aperture]",
+      "aggregate": 0.8276083333333334
+    },
+    {
+      "unit": "diamagnetic_momentum_diffusivity",
+      "label": 0,
+      "label_check": "physics",
+      "label_note": "extends the diamagnetic-drift contribution to neutral populations, which carry no charge to drift",
+      "aggregate": 0.7791666666666667
+    }
+  ],
+  "claim_evidence": {
+    "claims_per_entry": {
+      "min": 1,
+      "max": 11,
+      "median": 7.0,
+      "distribution": {
+        "1": 1,
+        "3": 5,
+        "4": 18,
+        "5": 31,
+        "6": 45,
+        "7": 38,
+        "8": 40,
+        "9": 27,
+        "10": 7,
+        "11": 4
+      }
+    },
+    "says_nothing_fraction": {
+      "mean": 0.686944177221955,
+      "median": 0.75,
+      "all_silent": 68,
+      "over_ninety_percent": 68,
+      "bearing_evidence": 56
+    },
+    "dd_source_characters": {
+      "mean": 44.5,
+      "median": 22.0,
+      "under_eight": 65
+    },
+    "enriched_description_characters": {
+      "mean": 178.21759259259258,
+      "median": 163.0
+    },
+    "pearson_dd_length_says_nothing": -0.6165906234472688,
+    "state_fields_unobserved": {
+      "unit": 216,
+      "links": 216,
+      "related_neighbours": 216,
+      "source_paths": 216
+    },
+    "state_carried": [
+      "documentation",
+      "documentation_claims",
+      "description",
+      "dd_source_docs"
+    ]
+  },
+  "incumbent": {
+    "n": 210,
+    "auc": 0.6027854866892796,
+    "lower": 0.5190182119550798,
+    "upper": 0.6777259775105802,
+    "mean": 0.9302678571428571,
+    "minimum": 0.5625,
+    "maximum": 1.0,
+    "distinct": 31,
+    "lead_overlap": {
+      "n": 29,
+      "labels": {
+        "0": 20,
+        "1": 9
+      },
+      "mean_score": 0.9290178571428572
+    }
+  },
+  "simulations": [
+    {
+      "change": "baseline (reproduces 0.610)",
+      "needs_new_calls": false,
+      "auc": 0.6097125771604939,
+      "lower": 0.5270736954078357,
+      "upper": 0.7058523463831994,
+      "sd": 0.1166847386132027,
+      "distinct": 205,
+      "modal_share": 0.018518518518518517,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "change": "drop the near-chance claim term, renormalise",
+      "needs_new_calls": false,
+      "auc": 0.6454957561728395,
+      "lower": 0.5643622340012426,
+      "upper": 0.734762000806777,
+      "sd": 0.12060717938982495,
+      "distinct": 186,
+      "modal_share": 0.018518518518518517,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "change": "drop the inverted checks",
+      "needs_new_calls": false,
+      "auc": 0.6217689043209876,
+      "lower": 0.5399006666135698,
+      "upper": 0.7171398869637164,
+      "sd": 0.11636997891571119,
+      "distinct": 198,
+      "modal_share": 0.018518518518518517,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "change": "drop the flat COCOS check",
+      "needs_new_calls": false,
+      "auc": 0.6123649691358024,
+      "lower": 0.530376547709601,
+      "upper": 0.7082546949085061,
+      "sd": 0.1161587852243331,
+      "distinct": 188,
+      "modal_share": 0.018518518518518517,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "change": "flip the inverted checks before combining",
+      "needs_new_calls": false,
+      "auc": 0.6189718364197532,
+      "lower": 0.5349100207071311,
+      "upper": 0.7123776259731113,
+      "sd": 0.11110219024852203,
+      "distinct": 194,
+      "modal_share": 0.018518518518518517,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "change": "drop the claim term, inverted and flat checks",
+      "needs_new_calls": false,
+      "auc": 0.6571662808641975,
+      "lower": 0.575238642281174,
+      "upper": 0.7431337685173383,
+      "sd": 0.11968372226756942,
+      "distinct": 186,
+      "modal_share": 0.018518518518518517,
+      "inverted": false,
+      "flat": false
+    },
+    {
+      "change": "aggregate without the veto",
+      "needs_new_calls": false,
+      "auc": 0.609471450617284,
+      "lower": 0.5267953824127596,
+      "upper": 0.7055937256935442,
+      "sd": 0.04524832473022711,
+      "distinct": 208,
+      "modal_share": 0.009259259259259259,
+      "inverted": false,
+      "flat": false
+    }
+  ],
+  "ranked_changes": [
+    {
+      "change": "drop the claim term, inverted and flat checks",
+      "mechanism": "Removes all three defects at once: the near-chance claim term, the two inverted checks and the constant check. This is the largest calibration-only gain available with no new judge call.",
+      "calibration_auc": 0.6571662808641975,
+      "lower": 0.575238642281174,
+      "upper": 0.7431337685173383,
+      "needs_new_calls": false,
+      "cost_usd": 0.0,
+      "cost_note": "none"
+    },
+    {
+      "change": "drop the near-chance claim term, renormalise",
+      "mechanism": "The claim channel carries weight 0.2 in the aggregate but scores near chance alone, so it adds noise rather than signal; renormalising the dimension and check weights over the remaining 0.8 leaves only the components that separate.",
+      "calibration_auc": 0.6454957561728395,
+      "lower": 0.5643622340012426,
+      "upper": 0.734762000806777,
+      "needs_new_calls": false,
+      "cost_usd": 0.0,
+      "cost_note": "none"
+    },
+    {
+      "change": "drop the inverted checks",
+      "mechanism": "Two checks score below chance, so their higher values point at rejection rather than acceptance; removing them from the check mean stops them from cancelling the checks that do carry signal.",
+      "calibration_auc": 0.6217689043209876,
+      "lower": 0.5399006666135698,
+      "upper": 0.7171398869637164,
+      "needs_new_calls": false,
+      "cost_usd": 0.0,
+      "cost_note": "none"
+    },
+    {
+      "change": "flip the inverted checks before combining",
+      "mechanism": "The same information the inverted checks already carry, read the right way round; a polarity flip keeps their weight instead of discarding it.",
+      "calibration_auc": 0.6189718364197532,
+      "lower": 0.5349100207071311,
+      "upper": 0.7123776259731113,
+      "needs_new_calls": false,
+      "cost_usd": 0.0,
+      "cost_note": "none"
+    },
+    {
+      "change": "drop the flat COCOS check",
+      "mechanism": "One check is near-constant across the calibration entries, so it cannot move the mean in either direction and only dilutes the checks that vary.",
+      "calibration_auc": 0.6123649691358024,
+      "lower": 0.530376547709601,
+      "upper": 0.7082546949085061,
+      "needs_new_calls": false,
+      "cost_usd": 0.0,
+      "cost_note": "none"
+    },
+    {
+      "change": "aggregate without the veto",
+      "mechanism": "The veto fires on 4 of 216 calibration entries, so dropping it changes almost nothing; it is reported to bound how much of the near-chance result the veto could explain.",
+      "calibration_auc": 0.609471450617284,
+      "lower": 0.5267953824127596,
+      "upper": 0.7055937256935442,
+      "needs_new_calls": false,
+      "cost_usd": 0.0,
+      "cost_note": "none"
+    },
+    {
+      "change": "ask the 15 documentation checks the judge is never shown",
+      "mechanism": "Every check whose question is None is absent from the prompt, so the score is blind to whatever the labels fail those entries on. The link, registry-notation, opening-template and symbol checks are all in that set.",
+      "calibration_auc": null,
+      "lower": null,
+      "upper": null,
+      "needs_new_calls": true,
+      "cost_usd": 0.05227784208900331,
+      "cost_note": "3240 new claims over 216 entries at USD 1.61e-05 each, USD 0.0523 total, 290 s added latency"
+    },
+    {
+      "change": "enrich the claim state with units, links, siblings and source paths",
+      "mechanism": "The claim state carries only documentation, documentation_claims, description and dd_source_docs; units, links, neighbours and source paths are unobserved, so where the DD text is a few characters the judge can only record that it cannot decide.",
+      "calibration_auc": null,
+      "lower": null,
+      "upper": null,
+      "needs_new_calls": true,
+      "cost_usd": 0.02376,
+      "cost_note": "a full re-judge of the 216 entries at USD 0.00011 each, USD 0.0238 total"
+    }
+  ],
+  "cost": {
+    "usd_per_claim": 1.6135136447223245e-05,
+    "seconds_per_claim": 0.08959732293320868,
+    "base": {
+      "mean_cost": 0.00011,
+      "mean_latency_s": 0.609038
+    }
+  },
+  "figure": "docs/figures/sn-review-through-jev/srtj-docs-score-diagnosis/calibration-component-auc.svg"
+}
