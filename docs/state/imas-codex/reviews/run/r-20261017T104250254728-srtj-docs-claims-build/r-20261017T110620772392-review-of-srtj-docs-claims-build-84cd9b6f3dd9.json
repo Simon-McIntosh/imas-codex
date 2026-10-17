@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "ac7a88a67596624ace066701ea19cf063edd17ca",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T11:13:07Z",
+  "dispatched_at": "2026-10-17T11:06:51Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "546",
+      "severity": "blocking",
+      "text": "blocking: A clause containing an inline link or inline math is discarded wholesale, so authored prose such as \"The density is negative [related](name:argon_density).\" receives no source comparison or contradiction veto."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "549",
+      "severity": "blocking",
+      "text": "blocking: The fixed verb list omits ordinary claims such as \"The pressure peaks at the axis.\", silently removing them from the per-claim question table and making the claimed claim coverage incomplete."
+    },
+    {
+      "file": "tests/standard_names/test_jev_docs_review.py",
+      "line": "153",
+      "severity": "follow-on",
+      "text": "follow-on: _top_answers selects the first criterion that jev_review.py:639 also treats as acceptance, so reordering the quality levels to put an imprecise level first leaves the asserted all-accept result at line 178 green while reversing its meaning."
+    }
+  ],
+  "head_log_revision": "a8f2db9e2d92dd1f3195ea687f76414a03776469",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "ddbd13aff86d3ac5330c1917d364ad8090784320 adds the builder and tests, fd87d485aad1007d261792d8c1b75eac916e77d1 and 84cd9b6f3dd99c8a297e29da6634df96d80ea545 add and update the evidence anchor, and a8f2db9e2d92dd1f3195ea687f76414a03776469 repairs rendered-note exclusion; jev_review.py:546-550 still drops checkable prose.",
+    "done_when": "The source brief names the three focused test files and a veto mutation; base-gate.log ends with 45 passed and EXIT=0, head-gate-final.log ends with 57 passed and EXIT=0, and negative-control-final.log fails the veto test with EXIT=1.",
+    "goal": "The source brief requires a deterministic claim splitter, DD-backed per-claim choices, a contradiction veto, three quality categories, and named house-style checks; imas_codex/standard_names/review/jev_review.py:521-704 implements those pieces, but its splitter omits ordinary claims.",
+    "manifest": "The source manifest names all four commits and its base, head, veto, and registry-note logs; the logged 45-pass, 57-pass, and one-failure outcomes agree with it, while baseline_suite and after_suite are blank despite readable gate logs.",
+    "write_paths": "The source manifest declares jev_review.py, review_checks.yaml, test_jev_docs_review.py, and the evidence fragment; the diff from ac7a88a67596624ace066701ea19cf063edd17ca to 84cd9b6f3dd99c8a297e29da6634df96d80ea545 changes only those four paths."
+  },
+  "justifications": {
+    "durability": "test_jev_docs_review.py:181 reddens when the veto is removed, but lines 37-56 do not guard mixed prose with markup or unlisted verbs and the top-level fixture at line 153 follows the production criteria order.",
+    "evidence": "head-gate-final.log records 57 passed and EXIT=0 at a8f2db9e2d92dd1f3195ea687f76414a03776469, and negative-control-final.log records the veto test failing with EXIT=1 when the veto branch was removed.",
+    "fit": "jev_review.py:579-619 extends the existing taxonomy and question helpers in their owner module, but line 639 derives acceptance from mapping order rather than a named top level.",
+    "goal_fidelity": "jev_review.py:521-704 builds the requested judgment path, but lines 546-550 can omit a false authored claim before the contradiction veto sees it.",
+    "reuse": "the capability search found generic sentence splits in docs_gates.py:726 and audits.py:937, while jev_review.py:521 adds claim and conjunction handling in the existing review owner and reuses the docs_gates.py:537,614 registry helpers.",
+    "scope_discipline": "the diff from ac7a88a67596624ace066701ea19cf063edd17ca to 84cd9b6f3dd99c8a297e29da6634df96d80ea545 changes only the four source-manifest write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief requires a deterministic claim splitter, DD-backed per-claim choices, a contradiction veto, three quality categories, and named house-style checks; imas_codex/standard_names/review/jev_review.py:521-704 implements those pieces, but its splitter omits ordinary claims.\nVERDICT done_when: The source brief names the three focused test files and a veto mutation; base-gate.log ends with 45 passed and EXIT=0, head-gate-final.log ends with 57 passed and EXIT=0, and negative-control-final.log fails the veto test with EXIT=1.\nVERDICT write_paths: The source manifest declares jev_review.py, review_checks.yaml, test_jev_docs_review.py, and the evidence fragment; the diff from ac7a88a67596624ace066701ea19cf063edd17ca to 84cd9b6f3dd99c8a297e29da6634df96d80ea545 changes only those four paths.\nVERDICT manifest: The source manifest names all four commits and its base, head, veto, and registry-note logs; the logged 45-pass, 57-pass, and one-failure outcomes agree with it, while baseline_suite and after_suite are blank despite readable gate logs.\nVERDICT diff: ddbd13aff86d3ac5330c1917d364ad8090784320 adds the builder and tests, fd87d485aad1007d261792d8c1b75eac916e77d1 and 84cd9b6f3dd99c8a297e29da6634df96d80ea545 add and update the evidence anchor, and a8f2db9e2d92dd1f3195ea687f76414a03776469 repairs rendered-note exclusion; jev_review.py:546-550 still drops checkable prose.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: jev_review.py:521-704 builds the requested judgment path, but lines 546-550 can omit a false authored claim before the contradiction veto sees it.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-gate-final.log records 57 passed and EXIT=0 at a8f2db9e2d92dd1f3195ea687f76414a03776469, and negative-control-final.log records the veto test failing with EXIT=1 when the veto branch was removed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff from ac7a88a67596624ace066701ea19cf063edd17ca to 84cd9b6f3dd99c8a297e29da6634df96d80ea545 changes only the four source-manifest write paths.\nSCORE durability: 12\nJUSTIFICATION durability: test_jev_docs_review.py:181 reddens when the veto is removed, but lines 37-56 do not guard mixed prose with markup or unlisted verbs and the top-level fixture at line 153 follows the production criteria order.\nSCORE fit: 15\nJUSTIFICATION fit: jev_review.py:579-619 extends the existing taxonomy and question helpers in their owner module, but line 639 derives acceptance from mapping order rather than a named top level.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search found generic sentence splits in docs_gates.py:726 and audits.py:937, while jev_review.py:521 adds claim and conjunction handling in the existing review owner and reuses the docs_gates.py:537,614 registry helpers.\nFINDING imas_codex/standard_names/review/jev_review.py:546 blocking: A clause containing an inline link or inline math is discarded wholesale, so authored prose such as \"The density is negative [related](name:argon_density).\" receives no source comparison or contradiction veto.\nFINDING imas_codex/standard_names/review/jev_review.py:549 blocking: The fixed verb list omits ordinary claims such as \"The pressure peaks at the axis.\", silently removing them from the per-claim question table and making the claimed claim coverage incomplete.\nFINDING tests/standard_names/test_jev_docs_review.py:153 follow-on: _top_answers selects the first criterion that jev_review.py:639 also treats as acceptance, so reordering the quality levels to put an imprecise level first leaves the asserted all-accept result at line 178 green while reversing its meaning.\n",
+  "review_run_id": "r-20261017T110620772392-review-of-srtj-docs-claims-build-84cd9b6f3dd9",
+  "reviewed_base_sha": "ac7a88a67596624ace066701ea19cf063edd17ca",
+  "reviewed_head_sha": "84cd9b6f3dd99c8a297e29da6634df96d80ea545",
+  "reviewed_run_id": "r-20261017T104250254728-srtj-docs-claims-build",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T11:11:09.717308+00:00",
+  "total": 98
+}
