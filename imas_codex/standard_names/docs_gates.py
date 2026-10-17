@@ -560,6 +560,55 @@ def _opening_line(text: str) -> str:
     return ""
 
 
+@dataclass(frozen=True)
+class RegistryTemplateTexts:
+    """Selected template text and its presence in one documentation entry."""
+
+    opening: str
+    candidate_openings: tuple[tuple[Any, str], ...]
+    opening_matches: bool
+    rendered_texts: tuple[str, ...]
+    missing_notes: tuple[tuple[Any, str], ...]
+
+
+def registry_template_texts(
+    templates: tuple[Any, ...], documentation: str
+) -> RegistryTemplateTexts:
+    """Find selected template openings and notes carried by documentation."""
+
+    opening = _opening_line(documentation)
+    lines = tuple(line.strip() for line in documentation.splitlines())
+    candidates: list[tuple[Any, str]] = []
+    opening_matches = False
+    rendered: list[str] = []
+    missing_notes: list[tuple[Any, str]] = []
+    seen_notes: set[str] = set()
+    for template in templates:
+        pattern = _template_opening_pattern(template.documentation)
+        if pattern is not None:
+            candidates.append((template, template.documentation))
+            opening_matches |= pattern.match(opening) is not None
+            if pattern.fullmatch(opening):
+                rendered.append(opening)
+        note = str(getattr(template, "note", None) or "").strip()
+        if not note:
+            continue
+        note_pattern = _template_opening_pattern(note)
+        if note_pattern is not None:
+            rendered.extend(line for line in lines if note_pattern.fullmatch(line))
+        if note not in seen_notes:
+            seen_notes.add(note)
+            if note not in documentation:
+                missing_notes.append((template, note))
+    return RegistryTemplateTexts(
+        opening=opening,
+        candidate_openings=tuple(candidates),
+        opening_matches=opening_matches,
+        rendered_texts=tuple(rendered),
+        missing_notes=tuple(missing_notes),
+    )
+
+
 def _display_math_spans(text: str) -> list[tuple[int, int]]:
     return [match.span() for match in _DISPLAY_MATH_RE.finditer(text)]
 
@@ -982,32 +1031,20 @@ def _template_findings(
     """
 
     findings: list[HouseStyleFinding] = []
-    opening = _opening_line(documentation)
-    compiled: list[tuple[Any, re.Pattern[str]]] = []
-    for template in templates:
-        pattern = _template_opening_pattern(template.documentation)
-        if pattern is not None:
-            compiled.append((template, pattern))
-    if compiled and not any(pattern.match(opening) for _, pattern in compiled):
-        required = "; ".join(template.documentation for template, _ in compiled)
+    selected = registry_template_texts(templates, documentation)
+    if selected.candidate_openings and not selected.opening_matches:
+        required = "; ".join(text for _, text in selected.candidate_openings)
         findings.append(
             HouseStyleFinding(
                 finding_class=HouseStyleFindingClass.TEMPLATE_OPENING,
-                registry_entry=f"template:{compiled[0][0].base}",
+                registry_entry=f"template:{selected.candidate_openings[0][0].base}",
                 detail=(
-                    f"documentation opens as '{opening[:60]}', which does not "
+                    f"documentation opens as '{selected.opening[:60]}', which does not "
                     f"follow any selected template: {required}"
                 ),
             )
         )
-    seen_notes: set[str] = set()
-    for template in templates:
-        note = template.note.strip()
-        if not note or note in seen_notes:
-            continue
-        seen_notes.add(note)
-        if note in documentation:
-            continue
+    for template, note in selected.missing_notes:
         findings.append(
             HouseStyleFinding(
                 finding_class=HouseStyleFindingClass.TEMPLATE_NOTE,

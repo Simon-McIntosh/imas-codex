@@ -474,8 +474,8 @@ def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
 
     from imas_codex.standard_names.context import conventions_context_for
     from imas_codex.standard_names.docs_gates import (
-        _template_opening_pattern,
         locus_definition_sentence,
+        registry_template_texts,
     )
 
     texts = [str(value) for value in item.get("registry_sentences") or ()]
@@ -486,22 +486,9 @@ def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
         return tuple(texts)
     conventions = AppliedConventions.model_validate(selected)
     documentation = str(item.get("documentation") or "")
-    opening = next(
-        (line.strip() for line in documentation.splitlines() if line.strip()), ""
+    texts.extend(
+        registry_template_texts(conventions.templates, documentation).rendered_texts
     )
-    for template in conventions.templates:
-        pattern = _template_opening_pattern(template.documentation)
-        if pattern is not None and pattern.fullmatch(opening):
-            texts.append(opening)
-        note = getattr(template, "note", None)
-        if note:
-            note_pattern = _template_opening_pattern(str(note))
-            if note_pattern is not None:
-                texts.extend(
-                    line.strip()
-                    for line in documentation.splitlines()
-                    if note_pattern.fullmatch(line.strip())
-                )
     for concept in conventions.concepts:
         sentence = locus_definition_sentence(concept)
         if sentence and sentence in documentation:
