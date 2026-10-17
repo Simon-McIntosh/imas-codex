@@ -3,10 +3,11 @@
   <table id="shc-prose-hold-before-accept-measure">
     <thead><tr><th>Check</th><th>Result</th></tr></thead>
     <tbody>
-      <tr><td>Estimator recipe at review</td><td>Reviewed for refinement with “is obtained from”; clean document accepted</td></tr>
+      <tr><td>Estimator recipe at review</td><td>Positive prose-adjudicator verdict: reviewed for refinement with “is obtained from”</td></tr>
+      <tr><td>Definitional relation at review</td><td>Regex candidate cleared by the same adjudicator: accepted at score 1.0</td></tr>
       <tr><td>Batch accounting fixture</td><td>2 stored docs_stage=accepted values; 1 clean acceptance; 1 prose quarantine</td></tr>
-      <tr><td>Negative control</td><td>2 failed, 1 passed, EXIT=1 with the hold absent</td></tr>
-      <tr><td>Covered gate</td><td>Base: 474 passed, 3 setup errors; edited head: 477 passed, same 3 setup errors; 0 added failures</td></tr>
+      <tr><td>Negative control</td><td>Parent revision with the repaired test: definitional relation fails, EXIT=1 without adjudication</td></tr>
+      <tr><td>Covered gate</td><td>Prior commit: 477 passed, 3 setup errors; repair: 478 passed, same 3 setup errors; 0 added failures</td></tr>
     </tbody>
   </table>
 </section>
