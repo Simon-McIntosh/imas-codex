@@ -130,6 +130,32 @@ def test_clean_family_reconciles_stamps_and_plans_no_calls(
     assert plans[0]["planned_calls"] == 0
 
 
+def test_stamp_readback_requires_every_member_current_signature(
+    monkeypatch: Any,
+) -> None:
+    graph = _fixture(monkeypatch)
+
+    def incomplete_stamp(families: list[dict[str, Any]]) -> int:
+        family = families[0]
+        for member_id in family["members"][:-1]:
+            graph.node(member_id)["harmonized_group_signature"] = family["signature"]
+        return 1
+
+    monkeypatch.setattr(graph_ops, "stamp_harmonized_families", incomplete_stamp)
+
+    with pytest.raises(harmonize.HarmonizeFinalizeError) as exc:
+        harmonize.finalize_families(graph, seeds=[_ANCHOR])
+
+    assert "Current family signature missing" in str(exc.value)
+    assert _PROBE in str(exc.value)
+    assert graph.node(_PROBE)["harmonized_group_signature"] is None
+    # The planner ignores null stamps when comparing the stored signature set.
+    # Its zero-call result alone therefore cannot prove every member was stamped.
+    assert (
+        harmonize.plan_family_applies(graph, seeds=[_ANCHOR])[0]["planned_calls"] == 0
+    )
+
+
 def test_cli_refusal_names_member_and_reason(monkeypatch: Any) -> None:
     from imas_codex.cli.discover import common
     from imas_codex.cli.sn import sn

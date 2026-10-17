@@ -1376,7 +1376,8 @@ def _finalize_member_rows(gc: Any, member_ids: list[str]) -> list[dict[str, Any]
             RETURN sn.id AS id, sn.docs_stage AS docs_stage,
                    sn.validation_status AS validation_status,
                    sn.description AS description,
-                   sn.documentation AS documentation, sn.links AS links
+                   sn.documentation AS documentation, sn.links AS links,
+                   sn.harmonized_group_signature AS harmonized_group_signature
             """,
             ids=member_ids,
         )
@@ -1466,7 +1467,7 @@ def finalize_families(
                 + ", ".join(links["protected"])
             )
         rows = _finalize_member_rows(gc, plan["members"])
-        if len(rows) != len(plan["members"]):
+        if {row["id"] for row in rows} != set(plan["members"]):
             raise HarmonizeFinalizeError(
                 "Family membership changed during finalization"
             )
@@ -1477,6 +1478,19 @@ def finalize_families(
             )
         if not _stamp_applied_family(gc, plan["anchor"] or plan["members"][0]):
             raise HarmonizeFinalizeError("Family stamp was not written")
+        stamped_rows = _finalize_member_rows(gc, plan["members"])
+        if {row["id"] for row in stamped_rows} != set(plan["members"]):
+            raise HarmonizeFinalizeError("Family membership changed after stamping")
+        signature = group_signature(stamped_rows)
+        unstamped = [
+            row["id"]
+            for row in stamped_rows
+            if row.get("harmonized_group_signature") != signature
+        ]
+        if unstamped:
+            raise HarmonizeFinalizeError(
+                "Current family signature missing on: " + ", ".join(unstamped)
+            )
         replanned = plan_family_applies(gc, seeds=[plan["members"][0]])
         if (
             len(replanned) != 1
