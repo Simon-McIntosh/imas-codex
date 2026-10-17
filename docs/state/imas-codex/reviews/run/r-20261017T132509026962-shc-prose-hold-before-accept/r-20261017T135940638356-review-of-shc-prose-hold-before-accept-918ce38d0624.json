@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132509026962-shc-prose-hold-before-accept/repair-gate.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "The worker does not pass the estimator recipe findings to adjudication.",
+      "lines": "109"
+    },
+    {
+      "failure_condition": "The adjudicator receives no budget manager keyword or receives one whose run id differs from the test fixture; this does not prove a reservation or charge.",
+      "lines": "110"
+    },
+    {
+      "failure_condition": "The policy matcher stops flagging the fixed definitional sentence as a candidate.",
+      "lines": "118"
+    },
+    {
+      "failure_condition": "A cleared candidate is still held, its score is clamped, or a banned-prose comment is retained.",
+      "lines": "122-124"
+    },
+    {
+      "failure_condition": "The worker sends a different item name to the adjudicator.",
+      "lines": "125"
+    },
+    {
+      "failure_condition": "The worker invokes the adjudicator even for clean documentation.",
+      "lines": "136"
+    }
+  ],
+  "base_log_revision": "25d5ad6e534559d61e801a4bd61faaa7a68251fd",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132509026962-shc-prose-hold-before-accept/head-gate.log",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:10873",
+    "imas_codex/standard_names/loop.py:854",
+    "imas_codex/standard_names/graph_ops.py:17644"
+  ],
+  "completed_at": "2026-10-17T14:05:02Z",
+  "dispatched_at": "2026-10-17T14:00:10Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_prose_hold_before_accept.py",
+      "line": "110",
+      "severity": "follow-on",
+      "text": "follow-on: The budget assertion reads run_id from a mock whose run_id the helper itself set to \"run\"; it verifies a forwarded keyword but cannot establish that a real budget reservation or charge occurs, so durability must not rest on it."
+    },
+    {
+      "file": "tests/standard_names/test_prose_hold_before_accept.py",
+      "line": "113",
+      "severity": "follow-on",
+      "text": "follow-on: No added test raises from the adjudicator; changing workers.py:10780-10788 to clear on an outage would leave the four focused tests green and silently permit candidate prose."
+    }
+  ],
+  "head_log_revision": "99bd65bddb0f08d0f93c73747a455f6f6f270e4f",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Commit e7f528926 changes adjudication and tests in workers.py and test_prose_hold_before_accept.py; commit 918ce38d0 updates only shc-prose-hold-before-accept.html with the repaired result.",
+    "done_when": "The source brief.md requires a red hold control and a base-to-head gate; repair-negative-control.log fails the parent revision at the acceptance assertion, repair-final-focused.log records 4 passes, and head-gate.log versus repair-gate.log records zero added failure IDs.",
+    "goal": "The source brief.md asks for a pre-acceptance prose hold without false positives; imas_codex/standard_names/workers.py:10759 now adjudicates regex candidates and clears legitimate definitions before the hold.",
+    "manifest": "The source manifest.md names e7f528926 and 918ce38d0, their three changed paths, the focused and broad gate logs, and the parent-revision negative control.",
+    "write_paths": "The source brief.md grants workers.py, campaign.py, the focused test, and the evidence fragment; git diff 99bd65bdd..918ce38d changes only workers.py, the focused test, and that fragment."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_prose_hold_before_accept.py:109 fails if policy findings are not forwarded, 118 if the fixture is no longer flagged, 122-124 if a cleared verdict still holds or lowers score, 125 if the wrong name is sent, and 136 if clean prose calls the adjudicator, while line 110 is self-sourced and no added assertion makes adjudicator failure exercise the fallback.",
+    "evidence": "tests/standard_names/test_prose_hold_before_accept.py:113-125 has a parent-revision red control and the source run's repair-gate.log records 478 passed with the same three error IDs as head-gate.log.",
+    "fit": "imas_codex/standard_names/workers.py:10763 calls prose_adjudicator.py's existing per-item mechanism and retains the surrounding review score-clamp and refinement path at workers.py:10874.",
+    "goal_fidelity": "imas_codex/standard_names/workers.py:10771-10796 calls the existing semantic adjudicator and holds only confirmed candidate prose, answering the prior false-positive finding.",
+    "reuse": "Capability search for prose adjudication found imas_codex/standard_names/prose_adjudicator.py:_adjudicate_one, which workers.py:10763 directly extends into the review path rather than duplicating its policy or model call.",
+    "scope_discipline": "The gained diff changes only the three granted paths named in the source brief.md, with the evidence edit at docs/evidence/fragments/sn-harmonize-command/shc-prose-hold-before-accept.html:6-12."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md asks for a pre-acceptance prose hold without false positives; imas_codex/standard_names/workers.py:10759 now adjudicates regex candidates and clears legitimate definitions before the hold.\nVERDICT done_when: The source brief.md requires a red hold control and a base-to-head gate; repair-negative-control.log fails the parent revision at the acceptance assertion, repair-final-focused.log records 4 passes, and head-gate.log versus repair-gate.log records zero added failure IDs.\nVERDICT write_paths: The source brief.md grants workers.py, campaign.py, the focused test, and the evidence fragment; git diff 99bd65bdd..918ce38d changes only workers.py, the focused test, and that fragment.\nVERDICT manifest: The source manifest.md names e7f528926 and 918ce38d0, their three changed paths, the focused and broad gate logs, and the parent-revision negative control.\nVERDICT diff: Commit e7f528926 changes adjudication and tests in workers.py and test_prose_hold_before_accept.py; commit 918ce38d0 updates only shc-prose-hold-before-accept.html with the repaired result.\nCALL_SITES: imas_codex/standard_names/workers.py:10873, imas_codex/standard_names/loop.py:854, imas_codex/standard_names/graph_ops.py:17644\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/workers.py:10771-10796 calls the existing semantic adjudicator and holds only confirmed candidate prose, answering the prior false-positive finding.\nSCORE evidence: 19\nJUSTIFICATION evidence: tests/standard_names/test_prose_hold_before_accept.py:113-125 has a parent-revision red control and the source run's repair-gate.log records 478 passed with the same three error IDs as head-gate.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The gained diff changes only the three granted paths named in the source brief.md, with the evidence edit at docs/evidence/fragments/sn-harmonize-command/shc-prose-hold-before-accept.html:6-12.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_prose_hold_before_accept.py:109 fails if policy findings are not forwarded, 118 if the fixture is no longer flagged, 122-124 if a cleared verdict still holds or lowers score, 125 if the wrong name is sent, and 136 if clean prose calls the adjudicator, while line 110 is self-sourced and no added assertion makes adjudicator failure exercise the fallback.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/workers.py:10763 calls prose_adjudicator.py's existing per-item mechanism and retains the surrounding review score-clamp and refinement path at workers.py:10874.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability search for prose adjudication found imas_codex/standard_names/prose_adjudicator.py:_adjudicate_one, which workers.py:10763 directly extends into the review path rather than duplicating its policy or model call.\nFINDING tests/standard_names/test_prose_hold_before_accept.py:110 follow-on: The budget assertion reads run_id from a mock whose run_id the helper itself set to \"run\"; it verifies a forwarded keyword but cannot establish that a real budget reservation or charge occurs, so durability must not rest on it.\nFINDING tests/standard_names/test_prose_hold_before_accept.py:113 follow-on: No added test raises from the adjudicator; changing workers.py:10780-10788 to clear on an outage would leave the four focused tests green and silently permit candidate prose.\n",
+  "review_run_id": "r-20261017T135940638356-review-of-shc-prose-hold-before-accept-918ce38d0624",
+  "reviewed_base_sha": "99bd65bddb0f08d0f93c73747a455f6f6f270e4f",
+  "reviewed_commits": [
+    "e7f528926d6f100bdd2c5378f9af972e7c4b7720",
+    "918ce38d062491bab2975d9bf5edb2bd5ae65602"
+  ],
+  "reviewed_head_sha": "918ce38d062491bab2975d9bf5edb2bd5ae65602",
+  "reviewed_run_id": "r-20261017T132509026962-shc-prose-hold-before-accept",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    {
+      "file": "tests/standard_names/test_prose_hold_before_accept.py",
+      "line": "110",
+      "reason": "The expected run id is the same literal the test put on its mock manager, so it verifies argument forwarding only."
+    }
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T14:03:10.678981+00:00",
+  "total": 114
+}
