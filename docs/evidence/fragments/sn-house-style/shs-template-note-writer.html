@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>The documentation writer renders each template's note</title>
+</head>
+<body>
+  <section id="shs-template-note-writer-landing">
+    <h2>Both registry consumers read the grammar's template sentences</h2>
+
+    <p id="shs-template-note-writer-change">
+      The grammar's <code>template_sentences</code> is now the source of the
+      sentences a name selects: each selected template's opening, and then its
+      note once per distinct note. Two imas-codex consumers were reading
+      <code>AppliedTemplate.documentation</code> alone and so never saw the note.
+    </p>
+
+    <p id="shs-template-note-writer-writer">
+      <strong>Writer</strong> (<code>imas_codex/standard_names/workers.py</code>):
+      <code>_instantiated_template_sentences</code> fills every placeholder a
+      sentence carries from the name's own segments — only <code>{subject}</code>
+      and <code>{locus}</code> are ever fillable, so a sentence needing
+      <code>{zone}</code> or <code>{component}</code> renders nothing —
+      and returns the first renderable opening with the notes that render.
+      <code>_documentation_with_registry_form</code> writes that opening at the
+      model opening's line and appends each note once, immediately after it; a
+      note already present in the written documentation is not written twice.
+      A name with no renderable opening and no renderable note keeps its model
+      opening unchanged, so <code>electron_temperature</code> is untouched while
+      <code>upper_triangularity</code>, whose two selected openings both need an
+      unfillable placeholder, gains only its note.
+    </p>
+
+    <p id="shs-template-note-writer-gate">
+      <strong>Gate</strong> (<code>imas_codex/standard_names/docs_gates.py</code>):
+      <code>_template_findings</code> checks the opening as before and additionally
+      reports a <code>template_note</code> finding, on registry entry
+      <code>template:&lt;base&gt;</code>, for each distinct note a selected template
+      carries that the documentation omits. A note appearing anywhere in the body
+      satisfies it.
+    </p>
+
+    <p id="shs-template-note-writer-source">
+      No second rendering of a template sentence exists in imas-codex: both
+      consumers now resolve sentences through the grammar accessor, and neither
+      reimplements the selection or the note deduplication.
+    </p>
+  </section>
+
+  <section id="shs-template-note-writer-measure">
+    <h2>Measure</h2>
+
+    <p id="shs-template-note-writer-name">
+      The measured name is <code>total_thermal_electron_density</code>. It selects
+      two conditioned <code>density</code> entries that share one note, and the
+      accessor returns the opening, then the note, then the opening again for the
+      second entry. The writer classifies a sentence as an opening by equality
+      with a selected template's <code>documentation</code>, which is what keeps
+      the repeated opening from being rendered a second time.
+    </p>
+
+    <ul id="shs-template-note-writer-checks">
+      <li>
+        Writer,
+        <code>tests/standard_names/test_docs_opening_insertion.py::test_template_note_is_written_once_after_the_opening[generate|refine]</code>:
+        the note appears exactly once in the persisted documentation and after the
+        opening <code>Number density of electron</code>, through the writer's
+        insertion path.
+      </li>
+      <li>
+        Writer negative control — the writer reverted to
+        <code>template.documentation</code>: both arms fail with the note's count
+        at <strong>0</strong>. Log
+        <code>negative-control-writer-revert.log</code>, <code>EXIT=1</code>.
+      </li>
+      <li>
+        Gate,
+        <code>tests/standard_names/test_house_style_checks.py::test_missing_template_note_is_flagged</code>:
+        documentation carrying only the opening raises exactly one
+        <code>template_note</code> finding, on <code>template:density</code>.
+      </li>
+      <li>
+        Gate,
+        <code>::test_template_note_present_is_not_flagged</code>: the same
+        documentation with the note appended raises none.
+      </li>
+      <li>
+        Gate negative control — the note check removed from
+        <code>_template_findings</code>: the missing-note arm fails, the
+        present-note arm still passes. Log
+        <code>negative-control-gate-note-check-removed.log</code>,
+        <code>EXIT=1</code>.
+      </li>
+    </ul>
+
+    <p id="shs-template-note-writer-delta">
+      Gate files (<code>tests/standard_names/test_docs_opening_insertion.py</code>,
+      <code>tests/standard_names/test_house_style_checks.py</code>, and every other
+      file importing <code>docs_gates</code> or the writer function): the run at
+      the committed revision reports <strong>88 passed, 11 deselected</strong>
+      against a base of <strong>84 passed, 11 deselected</strong> — the four added
+      tests and zero added failures.
+    </p>
+  </section>
+</body>
+</html>

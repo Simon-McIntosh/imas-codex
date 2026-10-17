@@ -9636,19 +9636,41 @@ def _nearby_names_for_docs_gen(gc: Any, items: list[dict]) -> list[dict]:
     return nearby
 
 
-def _instantiated_documentation_opening(
-    name: str, templates: tuple[Any, ...]
-) -> str | None:
-    """Fill a selected opening only when its name segments supply every field."""
-    from imas_standard_names.grammar.parser import ParseError, parse
-    from imas_standard_names.grammar.vocab_loaders import load_subjects
+def _fill_template_sentence(sentence: str, fields: dict[str, str]) -> str:
+    """Substitute a name's own segments into one template sentence.
 
-    from imas_codex.standard_names.docs_gates import _template_opening_pattern
+    Every ``{placeholder}`` the sentence carries is filled from the name. A
+    sentence whose name supplies no value for one of its placeholders renders
+    nothing, so a half-filled opening is never written.
+    """
+    filled = sentence.strip()
+    for placeholder in set(_re.findall(r"\{([^{}]+)\}", filled)):
+        if placeholder not in fields:
+            return ""
+        filled = filled.replace(f"{{{placeholder}}}", fields[placeholder])
+    return filled
+
+
+def _instantiated_template_sentences(
+    name: str, templates: tuple[Any, ...]
+) -> tuple[str | None, tuple[str, ...]]:
+    """Fill the template sentences the grammar selects for one name.
+
+    The grammar owns which sentences a name selects and in what order: each
+    selected template's opening, then its note once per distinct note. Each
+    sentence renders only where the name itself supplies its placeholders, so
+    a name that does not fill its template's fields keeps the written opening.
+
+    Returns the first renderable opening and the notes that render.
+    """
+    from imas_standard_names.grammar.parser import ParseError, parse
+    from imas_standard_names.grammar.terms import template_sentences
+    from imas_standard_names.grammar.vocab_loaders import load_subjects
 
     try:
         ir = parse(name, strict=True).ir
     except ParseError:
-        return None
+        return None, ()
     subject_tokens = [q.token for q in ir.qualifiers if q.token in load_subjects()]
     fields: dict[str, str] = {}
     if len(subject_tokens) == 1:
@@ -9657,26 +9679,25 @@ def _instantiated_documentation_opening(
         fields["locus"] = (
             f"{ir.locus.relation.value} {ir.locus.token.replace('_', ' ')}"
         )
-    for template in templates:
-        opening = template.documentation.strip()
-        placeholders = set(_re.findall(r"\{([^{}]+)\}", opening))
-        if opening and placeholders <= fields.keys():
-            for placeholder in placeholders:
-                opening = opening.replace(f"{{{placeholder}}}", fields[placeholder])
-            pattern = _template_opening_pattern(template.documentation)
-            if (
-                not _re.search(r"\{[^{}]+\}", opening)
-                and pattern is not None
-                and pattern.fullmatch(opening)
-            ):
-                return opening
-    return None
+    openings = {template.documentation.strip() for template in templates}
+    opening: str | None = None
+    notes: list[str] = []
+    for sentence in template_sentences(name):
+        filled = _fill_template_sentence(sentence, fields)
+        if not filled:
+            continue
+        if sentence.strip() in openings:
+            if opening is None:
+                opening = filled
+        elif filled not in notes:
+            notes.append(filled)
+    return opening, tuple(notes)
 
 
 def _documentation_with_registry_form(
     name: str, documentation: str, conventions: dict[str, Any] | None
 ) -> str:
-    """Write the selected opening and canonical forms before persistence."""
+    """Write the selected openings, notes and canonical forms before persistence."""
     from imas_standard_names.grammar.terms import AppliedConventions
 
     from imas_codex.standard_names.docs_gates import (
@@ -9693,17 +9714,21 @@ def _documentation_with_registry_form(
     if not conventions:
         return written
     applied = AppliedConventions.model_validate(conventions)
-    opening = _instantiated_documentation_opening(name, applied.templates)
-    if opening is not None:
+    opening, notes = _instantiated_template_sentences(name, applied.templates)
+    missing_notes = [note for note in notes if note not in written]
+    if opening is not None or missing_notes:
         lines = written.splitlines()
         model_opening = _opening_line(written)
         first = next(
             (i for i, line in enumerate(lines) if line.strip() == model_opening), None
         )
         if first is None:
-            written = opening
+            written = "\n\n".join(
+                ([opening] if opening is not None else []) + missing_notes
+            )
         else:
-            lines[first] = opening
+            block = [opening if opening is not None else lines[first], *missing_notes]
+            lines[first : first + 1] = ["\n\n".join(block)]
             written = "\n".join(lines)
 
     concepts = {f"concept:{concept.token}": concept for concept in applied.concepts}
