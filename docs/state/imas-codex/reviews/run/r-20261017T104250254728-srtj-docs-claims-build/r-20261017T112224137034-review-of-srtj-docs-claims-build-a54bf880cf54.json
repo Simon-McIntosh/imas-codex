@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "a8f2db9e2d92dd1f3195ea687f76414a03776469",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T11:27:15Z",
+  "dispatched_at": "2026-10-17T11:22:55Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "535",
+      "severity": "blocking",
+      "text": "blocking: Replacing the verb check with a three-word threshold splits a noun phrase such as 'The density of hydrogen and the density of deuterium are measured together' into 'The density of hydrogen' and a predicate-bearing clause; the first is not a claim, so a true entry can receive a spurious unsupported-claim rejection."
+    },
+    {
+      "file": "tests/standard_names/test_jev_docs_review.py",
+      "line": "75",
+      "severity": "blocking",
+      "text": "blocking: The fixture expects 'The relation is' after inline equation removal; jev_review.py:523-544 sends that incomplete fragment to the source-comparison Choice, making a correct equation appear unsupported and turning the test into a guard for the defect."
+    }
+  ],
+  "head_log_revision": "f16519b1d4b9303f931628e23ff63b3d7ee36ef6",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found at the reviewed head",
+    "diff": "f16519b1 changes the claim splitter and its test assertions; a54bf880 updates only the evidence fragment, and jev_review.py:535 can split a noun phrase while test_jev_docs_review.py:75 expects an incomplete residue as a claim.",
+    "done_when": "The source brief names three focused test files and a veto mutation; splitter-head-gate.log records 60 passed and EXIT=0, and negative-control-current.log records the veto test failing with EXIT=1.",
+    "goal": "The source brief asks for a claim splitter and DD-backed veto; jev_review.py:519-545 now preserves prose around markup, but lines 523 and 535 can turn nonclaims into source-comparison questions.",
+    "manifest": "The source manifest names f16519b1 and a54bf880, the 57-to-60 gate delta, three red-to-green splitter fixtures, and the veto control; its suite fields are blank, but the named log receipts are readable.",
+    "write_paths": "The source manifest declares jev_review.py, review_checks.yaml, test_jev_docs_review.py, and the evidence fragment; the 84cd9b6f..a54bf880 diff changes only the first, third, and fourth paths."
+  },
+  "justifications": {
+    "durability": "test_jev_docs_review.py:47-54 fails under the old omission and lines 171-187 pin accepting choices independently of criteria order, but line 75 positively asserts a nonclaim and no assertion rejects a noun-phrase split.",
+    "evidence": "head-gate-final.log has 57 passed at the code-equivalent pre-repair revision and splitter-head-gate.log has 60 passed at f16519b1; splitter-defects-red.log and negative-control-current.log have EXIT=1 with named failures.",
+    "fit": "jev_review.py:469-471 and 519-545 follow the module's regex and helper style, while the added symbols and test names describe behavior without forbidden stage labels.",
+    "goal_fidelity": "jev_review.py:519-545 restores checkable prose and the veto remains at line 645, but lines 523 and 535 can submit fragments that are not factual claims.",
+    "reuse": "The capability search found sentence splitting in docs_gates.py:726 and audits.py:937 but no existing claim and conjunction splitter; jev_review.py:515 changes the documentation review owner instead of duplicating one.",
+    "scope_discipline": "The 84cd9b6f..a54bf880 diff touches only jev_review.py, test_jev_docs_review.py, and the declared evidence fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks for a claim splitter and DD-backed veto; jev_review.py:519-545 now preserves prose around markup, but lines 523 and 535 can turn nonclaims into source-comparison questions.\nVERDICT done_when: The source brief names three focused test files and a veto mutation; splitter-head-gate.log records 60 passed and EXIT=0, and negative-control-current.log records the veto test failing with EXIT=1.\nVERDICT write_paths: The source manifest declares jev_review.py, review_checks.yaml, test_jev_docs_review.py, and the evidence fragment; the 84cd9b6f..a54bf880 diff changes only the first, third, and fourth paths.\nVERDICT manifest: The source manifest names f16519b1 and a54bf880, the 57-to-60 gate delta, three red-to-green splitter fixtures, and the veto control; its suite fields are blank, but the named log receipts are readable.\nVERDICT diff: f16519b1 changes the claim splitter and its test assertions; a54bf880 updates only the evidence fragment, and jev_review.py:535 can split a noun phrase while test_jev_docs_review.py:75 expects an incomplete residue as a claim.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: jev_review.py:519-545 restores checkable prose and the veto remains at line 645, but lines 523 and 535 can submit fragments that are not factual claims.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-gate-final.log has 57 passed at the code-equivalent pre-repair revision and splitter-head-gate.log has 60 passed at f16519b1; splitter-defects-red.log and negative-control-current.log have EXIT=1 with named failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 84cd9b6f..a54bf880 diff touches only jev_review.py, test_jev_docs_review.py, and the declared evidence fragment.\nSCORE durability: 14\nJUSTIFICATION durability: test_jev_docs_review.py:47-54 fails under the old omission and lines 171-187 pin accepting choices independently of criteria order, but line 75 positively asserts a nonclaim and no assertion rejects a noun-phrase split.\nSCORE fit: 19\nJUSTIFICATION fit: jev_review.py:469-471 and 519-545 follow the module's regex and helper style, while the added symbols and test names describe behavior without forbidden stage labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search found sentence splitting in docs_gates.py:726 and audits.py:937 but no existing claim and conjunction splitter; jev_review.py:515 changes the documentation review owner instead of duplicating one.\nFINDING imas_codex/standard_names/review/jev_review.py:535 blocking: Replacing the verb check with a three-word threshold splits a noun phrase such as 'The density of hydrogen and the density of deuterium are measured together' into 'The density of hydrogen' and a predicate-bearing clause; the first is not a claim, so a true entry can receive a spurious unsupported-claim rejection.\nFINDING tests/standard_names/test_jev_docs_review.py:75 blocking: The fixture expects 'The relation is' after inline equation removal; jev_review.py:523-544 sends that incomplete fragment to the source-comparison Choice, making a correct equation appear unsupported and turning the test into a guard for the defect.\n",
+  "review_run_id": "r-20261017T112224137034-review-of-srtj-docs-claims-build-a54bf880cf54",
+  "reviewed_base_sha": "84cd9b6f3dd99c8a297e29da6634df96d80ea545",
+  "reviewed_head_sha": "a54bf880cf54806c2e35f8285aedff86b36bc8f3",
+  "reviewed_run_id": "r-20261017T104250254728-srtj-docs-claims-build",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T11:25:19.548382+00:00",
+  "total": 104
+}
