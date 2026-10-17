@@ -1,0 +1,195 @@
+<section>
+  <h2 id="shc-exhausted-rescore">Three exhausted identities rescored: one accepted, two re-exhausted on the same-name quorum</h2>
+  <p id="shc-exhausted-rescore-summary">
+    The three names the §4 families lost to the name axis were diagnosed from the
+    graph, then rescored through the sanctioned route
+    <code>imas-codex sn rescore &lt;name&gt; --cost-limit 0.50</code>. All three
+    dry runs passed (the one-line Cypher defect that blocked the first attempt is
+    fixed on main). <strong>One name was accepted at score 1.00; two re-exhausted</strong>
+    with a fresh quorum, both now on the same defect — a redundant
+    <code>plasma_</code> qualifier — rather than the source-fidelity cap that
+    and exhausted them originally. <strong>Total spend USD 0.3318 of the USD 1.50
+    ceiling</strong> (USD 0.50 per name, unused). Only the accepted name can
+    re-enter family revalidation; the two re-exhausted names cannot.
+  </p>
+
+  <figure id="shc-exhausted-rescore-figure">
+    <img src="/imas-codex/figures/sn-harmonize-command/shc-exhausted-rescore/rescore-score-before-after.svg"
+         alt="Reviewer score before and after rescore for the three names, against the 0.85 acceptance threshold" />
+    <figcaption id="shc-exhausted-rescore-figure-cap">
+      Reviewer score before and after the rescore, per name, against the
+      acceptance threshold <code>DEFAULT_MIN_SCORE = 0.85</code>. Before scores
+      are the stored <code>reviewer_score_name</code> that made each name
+      exhausted; after scores are the fresh quorum's final (authoritative) score.
+      The density name crosses the threshold and is accepted; both potential
+      names improve but stay below it and re-exhaust.
+    </figcaption>
+  </figure>
+
+  <h3 id="shc-exhausted-rescore-route-defect">The first attempt's blocker, and its fix</h3>
+  <p id="shc-exhausted-rescore-route-defect-body">
+    The first attempt was blocked before it could run: <code>sn rescore</code>'s
+    first query used the Cypher infix form
+    <code>coalesce(sn.status, '') NOT IN [...]</code>, which the Neo4j server
+    rejects (<code>Invalid input 'NOT'</code>), while the codebase's prefix form
+    <code>NOT coalesce(...) IN [...]</code> is accepted (control log
+    <code>cypher-not-in-control.log</code>: invalid arm
+    <code>REJECTED: CypherSyntaxError</code>, valid arm
+    <code>ACCEPTED: [{'c': 2936}]</code>). The fix landed on main (merge
+    <code>2a84c3c0a</code>) as <code>RESCORE_ELIGIBILITY_QUERY</code>, and every
+    command below was run against the main checkout's code
+    (<code>PYTHONPATH=/home/ITER/mcintos/Code/imas-codex</code>), confirmed in
+    the running code with
+    <code>python -c 'import imas_codex.standard_names.graph_ops as g; print(hasattr(g, "RESCORE_ELIGIBILITY_QUERY"))'</code>
+    → <code>True</code>.
+  </p>
+
+  <h3 id="shc-exhausted-rescore-diagnosis">Diagnosis, per name</h3>
+  <p id="shc-exhausted-rescore-diagnosis-general">
+    Exhaustion is a name-axis stop. Each name carried a review quorum (three
+    reviewers: primary <code>grok-4.5</code>, secondary
+    <code>gpt-5.6-luna</code>, authoritative escalator
+    <code>claude-sonnet-5</code>). The quorum's score never reached
+    <code>DEFAULT_MIN_SCORE = 0.85</code>
+    (<code>imas_codex/standard_names/defaults.py:13</code>), so refinement ran and
+    the rotation cap <code>DEFAULT_REFINE_ROTATIONS = 3</code> was spent.
+    <code>refine_attempts = 3</code> on all three and
+    <code>refine_collision_name</code> is null on all three, so no exhaustion was
+    caused by a naming collision or an existing better spelling — the collision
+    screen clears on all three (no live successor, no accepted identity occupying
+    the concept), so all three were eligible to rescore.
+  </p>
+  <table id="shc-exhausted-rescore-diagnosis-table">
+    <thead>
+      <tr><th>name</th><th>exhaustion reason</th><th>refine chain (REFINED_FROM)</th><th>collision screen</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td>
+        <td><code>grammar_invalid</code> — the refiner's proposed <em>successor</em> failed strict grammar validation (deterministic, terminal), so the chain stopped early</td>
+        <td>← <code>volume_averaged_electron_density_over_scrape_off_layer</code> (superseded) ← <code>electron_density_over_scrape_off_layer</code> (superseded)</td>
+        <td>no live successor; no accepted identity of this quantity</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_wall</code></td>
+        <td><code>attempts_exhausted</code> — the refine budget was spent without a successor clearing review</td>
+        <td>← <code>plasma_electrostatic_potential_at_first_wall</code> (superseded) ← <code>electrostatic_potential_at_first_wall</code> (superseded)</td>
+        <td>no live successor; the accepted sibling <code>electrostatic_potential_at_langmuir_probe_position</code> is a different locus binding</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>attempts_exhausted</code> — the refine budget was spent without a successor clearing review</td>
+        <td>← <code>electrostatic_potential_at_outboard_midplane</code> (superseded) ← <code>plasma_electrostatic_potential_at_midplane</code> (superseded)</td>
+        <td>no live successor; no accepted identity carries the <code>at_outboard_midplane</code> locus</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-exhausted-rescore-run">The route: dry run, rescore, and result</h3>
+  <p id="shc-exhausted-rescore-run-cmd">
+    Each name was dry-run first (<code>--dry-run</code>, which executes the
+    eligibility query but performs no mutation), then rescored with
+    <code>--cost-limit 0.50</code>. All three dry runs pass and print the
+    transition they would make (<code>exhausted → drafted</code>), each
+    <code>EXIT=0</code>. The rescores ran and each drew a fresh quorum.
+  </p>
+  <ul id="shc-exhausted-rescore-run-logs">
+    <li>dry run (all three, <code>EXIT=0</code>): <code>would rescore &lt;name&gt; (exhausted → drafted, run_id=sn-rescore-20261016T1114*)</code></li>
+    <li>density rescore: <code>run_id=sn-rescore-20261016T111541Z</code> — <code>EXIT=0</code></li>
+    <li>wall rescore: <code>run_id=sn-rescore-20261016T111716Z</code> — <code>EXIT=3</code></li>
+    <li>midplane rescore: <code>run_id=sn-rescore-20261016T112312Z</code> — <code>EXIT=3</code></li>
+    <li>CLI auto-log for all five invocations: <code>~/.local/share/imas-codex/logs/sn_sn-rescore.log</code></li>
+  </ul>
+
+  <h3 id="shc-exhausted-rescore-states">Before and after, per name</h3>
+  <table id="shc-exhausted-rescore-states-table">
+    <thead>
+      <tr><th>name</th><th>before: name_stage / score / validation</th><th>outcome</th><th>after: name_stage / score / validation</th><th>spend</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td>
+        <td><code>exhausted</code> / 0.5875 / <code>quarantined</code></td>
+        <td><strong>accepted</strong></td>
+        <td><code>accepted</code> / <strong>1.0</strong> / <code>valid</code></td>
+        <td>USD 0.0596</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_wall</code></td>
+        <td><code>exhausted</code> / 0.6125 / <code>quarantined</code></td>
+        <td>re-exhausted</td>
+        <td><code>exhausted</code> / 0.7375 / <code>valid</code></td>
+        <td>USD 0.1478</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>exhausted</code> / 0.5375 / <code>quarantined</code></td>
+        <td>re-exhausted</td>
+        <td><code>exhausted</code> / 0.7625 / <code>valid</code></td>
+        <td>USD 0.1244</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-exhausted-rescore-states-note">
+    <strong>Total spend: USD 0.3318</strong> against the USD 1.50 ceiling (USD
+    0.50 per name); USD 1.1682 unused. The stored after-field
+    <code>validation_status = valid</code> on all three is the admission gate
+    passing — the LLM-free admission check. The two re-exhausted names carry
+    <code>refine_stop_reason = attempts_exhausted</code> again and
+    <code>refine_attempts = 3</code>; the accepted name's
+    <code>refine_stop_reason</code> is cleared.
+  </p>
+
+  <h3 id="shc-exhausted-rescore-quorums">The two re-exhausted names' new review comments</h3>
+  <p id="shc-exhausted-rescore-quorums-body">
+    Both names re-exhausted on the <em>same</em> defect, and it is not the one
+    that exhausted them originally. The original quorums hard-capped each on
+    source fidelity (an invented wall/midplane locus the bound DD leaf never
+    names). The new quorums do not re-test that axis — the reviewers report the
+    source ID as N/A in this path — and instead dock the redundant
+    <code>plasma_</code> qualifier against the accepted bare
+    <code>electrostatic_potential</code> family. The steer they name:
+    drop <code>plasma_</code>, leaving
+    <code>electrostatic_potential_at_wall</code> /
+    <code>electrostatic_potential_at_outboard_midplane</code>.
+  </p>
+  <table id="shc-exhausted-rescore-quorums-table">
+    <thead>
+      <tr><th>name</th><th>primary grok-4.5</th><th>secondary gpt-5.6-luna</th><th>escalator claude-sonnet-5</th><th>final</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_wall</code> (group <code>ba491ca9</code>)</td>
+        <td>0.85 — <code>plasma_</code> prefix redundant given <code>_at_</code> semantics; inconsistent with the bare <code>electrostatic_potential</code> family</td>
+        <td>0.85 — projection drops the registered <code>plasma</code> qualifier (representation inconsistency)</td>
+        <td>0.7375 — <code>plasma_</code> breaks the bare <code>electrostatic_potential_at_&lt;position&gt;</code> pattern; could collide with a future bare <code>electrostatic_potential_at_wall</code></td>
+        <td>0.7375</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_outboard_midplane</code> (group <code>47acdf9b</code>)</td>
+        <td>0.8125 — <code>plasma_</code> redundant for this base; diverges from <code>electrostatic_potential_at_langmuir_probe_position</code>, whose prose says "plasma electrostatic potential" yet omits the prefix</td>
+        <td>1.0 — fully canonical, no defect</td>
+        <td>0.7625 — <code>plasma</code> sits in the <code>channel_qualifier</code> slot the grammar ties to channel tokens, not to <code>electrostatic_potential</code>; contradicts same-base neighbours</td>
+        <td>0.7625</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-exhausted-rescore-reentry">Which names can re-enter family revalidation</h3>
+  <p id="shc-exhausted-rescore-reentry-body">
+    <strong>Only <code>volume_averaged_electron_number_density_over_scrape_off_layer</code>
+    can re-enter §4 family revalidation.</strong> It is now
+    <code>name_stage = accepted</code> with <code>validation_status = valid</code>,
+    so its family's enumeration no longer meets an exhausted member.
+  </p>
+  <p id="shc-exhausted-rescore-reentry-blocked">
+    <strong>The two potential names cannot.</strong> Each remains
+    <code>name_stage = exhausted</code>, and the family enumeration's liveness
+    rule excludes only <code>superseded</code>, so an exhausted member still
+    defers or aborts its family — the quarantine the brief anticipated. Each now
+    carries a specific, actionable steer (drop <code>plasma_</code>), so a
+    subsequent <code>sn edit</code> re-entry is the path; a further
+    <code>sn rescore</code> on the same name would only redraw the same
+    same-name quorum, which is why neither was retried here.
+  </p>
+</section>
