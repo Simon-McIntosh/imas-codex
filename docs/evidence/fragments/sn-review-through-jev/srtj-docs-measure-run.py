@@ -13,6 +13,7 @@ import os
 import time
 from collections import Counter
 from pathlib import Path
+from types import SimpleNamespace
 
 from imas_codex.discovery.base.evaluation import (
     bootstrap_interval,
@@ -431,6 +432,8 @@ def _planted_metrics(receipts: dict, threshold: float) -> dict:
     copies = json.loads(PLANTED.read_text())["copies"]
     table = {expected: Counter() for expected in ("contradicts", "says_nothing")}
     veto = Counter()
+    decision_rejections = Counter()
+    isolated_rejections = 0
     scored = Counter()
     for row in copies:
         receipt = receipts.get("plant:" + row["id"])
@@ -450,6 +453,44 @@ def _planted_metrics(receipts: dict, threshold: float) -> dict:
         table[row["claim_label"]][answer["choice"]] += 1
         decision = aggregate_docs_review(receipt["state"], checks, receipt["answers"])
         veto[row["claim_label"] + ":" + str(decision["contradiction_veto"])] += 1
+        decision_rejections[
+            row["claim_label"] + ":" + str(decision["decision"] == "reject")
+        ] += 1
+        if row["claim_label"] == "contradicts":
+            isolated_answers = {
+                "dimension:description_quality": {"choice": "precise_definition"},
+                "dimension:documentation_quality": {"choice": "normative_definition"},
+                "dimension:completeness": {"choice": "complete"},
+            }
+            for check in checks:
+                if check.id == "claim_contradicts_source" or check.question is None:
+                    continue
+                isolated_answers["check:" + check.id] = (
+                    {"noul": 0.0}
+                    if check.question.kind.value == "noul"
+                    else {"choice": check.question.options[0]}
+                )
+            for index in range(len(claims)):
+                isolated_answers[CLAIM_PREFIX + str(index)] = {
+                    "choice": "contradicts" if index == matches[0] else "supports"
+                }
+            isolated = aggregate_docs_review(
+                receipt["state"],
+                checks,
+                isolated_answers,
+                audit_report=SimpleNamespace(),
+            )
+            if not isolated["contradiction_veto"] or isolated["decision"] != "reject":
+                raise AssertionError(
+                    f"a sole contradictory claim did not reject {row['id']}: "
+                    f"{isolated['decision']}"
+                )
+            isolated_rejections += 1
+            if decision["contradiction_veto"] and decision["decision"] != "reject":
+                raise AssertionError(
+                    f"contradiction veto did not reject {row['id']}: "
+                    f"{decision['decision']}"
+                )
         score = _score(receipt["answers"])
         scored[
             row["claim_label"] + ":" + str(score is not None and score >= threshold)
@@ -457,6 +498,8 @@ def _planted_metrics(receipts: dict, threshold: float) -> dict:
     return {
         "confusion": {key: dict(value) for key, value in table.items()},
         "veto": dict(veto),
+        "decision_rejections": dict(decision_rejections),
+        "isolated_contradiction_rejections": isolated_rejections,
         "threshold_accept": dict(scored),
     }
 
@@ -717,6 +760,7 @@ def _fragment(result: dict) -> None:
         for expected in ("contradicts", "says_nothing")
     )
     veto = result["planted"]["veto"]
+    decisions = result["planted"]["decision_rejections"]
     cost = result["cost"]
     stability = result["stability"]
     verdict = result["verdict"]
@@ -726,7 +770,7 @@ def _fragment(result: dict) -> None:
 <figure id="srtj-docs-measure-figure"><img src="/imas-codex/figures/sn-review-through-jev/srtj-docs-measure/paired-auc.svg" alt="Paired Jev and incumbent AUC estimates with 95% intervals for calibration and validation."><figcaption>Each split compares the same entries with both scores available. Intervals use 1,000 paired bootstrap draws by copy group.</figcaption></figure>
 <table id="srtj-docs-measure-auc"><thead><tr><th>split</th><th>all entries</th><th>Jev AUC [95%]</th><th>paired entries</th><th>paired Jev AUC [95%]</th><th>incumbent AUC [95%]</th><th>Jev − incumbent [95%]</th></tr></thead><tbody>{rows}</tbody></table>
 <table id="srtj-docs-measure-claims"><caption>Planted claim against Jev's selected relation</caption><thead><tr><th>planted label</th><th>supports</th><th>contradicts</th><th>says nothing</th></tr></thead><tbody>{claim_rows}</tbody></table>
-<p id="srtj-docs-measure-veto">The contradiction veto fired on {veto.get("contradicts:True", 0)} of 60 contradiction copies and missed {veto.get("contradicts:False", 0)}. It fired on {veto.get("says_nothing:True", 0)} of 20 silent controls. A contradiction copy that passes the veto is counted as a miss, even if another dimension rejects it.</p>
+<p id="srtj-docs-measure-veto">The contradiction veto fired on {veto.get("contradicts:True", 0)} of 60 contradiction copies and missed {veto.get("contradicts:False", 0)}. The aggregate decision rejected {decisions.get("contradicts:True", 0)} of those copies; when every other dimension and named check was set to its passing form, the sole contradictory claim still rejected {result["planted"]["isolated_contradiction_rejections"]} of 60. The veto fired on {veto.get("says_nothing:True", 0)} of 20 silent controls. A contradiction copy that passes the veto is counted as a miss, even if another dimension rejects it.</p>
 <p id="srtj-docs-measure-stability">On {stability["claims"]} fixed claims, reversing the Choice criteria changed {stability["option_order"]["flips"]} of {stability["option_order"]["n"]} answers ({stability["option_order"]["flip_rate"]:.1%}). Repeating a frozen state changed {stability["frozen_change_rate"]:.1%} of claim answers.</p>
 <p id="srtj-docs-measure-cost">Jev spent USD {cost["spend_usd"]:.4f} of the USD {cost["ceiling_usd"]:.2f} ceiling. Base judgments averaged USD {cost["base"]["mean_cost"]:.6f} and {cost["base"]["mean_latency_s"]:.3f} s per entry; latest incumbent review groups averaged USD {cost["incumbent"]["mean_usd"]:.4f} across {cost["incumbent"]["n"]} matched entries. Across {cost["base_claims"]} Jev claims, USD {cost["usd_per_claim"]:.6f} and {cost["seconds_per_claim"]:.3f} s per claim.</p>
 <p id="srtj-docs-measure-verdict"><strong>Deployment verdict: {html.escape(verdict["status"])}.</strong> {html.escape(verdict["reason"])} Stability and cost {"pass" if verdict["stability_pass"] and verdict["cost_pass"] else "do not both pass"} their required bounds.</p>
