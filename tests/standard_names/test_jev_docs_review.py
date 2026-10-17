@@ -16,21 +16,19 @@ from imas_codex.standard_names.review.checks import load_review_checks
     [
         (
             "The current is positive. The field is toroidal.",
-            ["The current is positive", "The field is toroidal"],
+            ["The current is positive.", "The field is toroidal."],
         ),
         (
             "The current is positive and the field is toroidal.",
-            ["The current is positive", "the field is toroidal"],
+            ["The current is positive and the field is toroidal."],
         ),
         (
             "The current and field are measured together.",
-            ["The current and field are measured together"],
+            ["The current and field are measured together."],
         ),
     ],
 )
-def test_claim_splitter_separates_sentences_and_conjoined_clauses(
-    documentation, expected
-):
+def test_claim_splitter_keeps_each_sentence_as_one_claim(documentation, expected):
     assert jev_review.split_documentation_claims(documentation) == expected
 
 
@@ -39,9 +37,9 @@ def test_claim_splitter_separates_sentences_and_conjoined_clauses(
     [
         (
             "The density is negative [related](name:argon_density).",
-            ["The density is negative related"],
+            ["The density is negative related."],
         ),
-        ("The density is negative $n<0$.", ["The density is negative"]),
+        ("The density is negative $n<0$.", ["The density is negative [equation]."]),
     ],
 )
 def test_inline_markup_keeps_surrounding_claim(documentation, expected):
@@ -50,19 +48,23 @@ def test_inline_markup_keeps_surrounding_claim(documentation, expected):
 
 def test_declarative_sentence_with_unlisted_verb_is_a_claim():
     assert jev_review.split_documentation_claims("The pressure peaks at the axis.") == [
-        "The pressure peaks at the axis"
+        "The pressure peaks at the axis."
     ]
 
 
 def test_coordinated_noun_phrase_stays_one_claim():
     assert jev_review.split_documentation_claims(
         "The density of hydrogen and the density of deuterium are measured together."
-    ) == ["The density of hydrogen and the density of deuterium are measured together"]
+    ) == ["The density of hydrogen and the density of deuterium are measured together."]
 
 
-def test_math_removal_does_not_leave_a_fragment_claim():
-    assert jev_review.split_documentation_claims("The relation is $n = N/V$.") == []
-    assert jev_review.split_documentation_claims("The density is $n<0$.") == []
+def test_inline_math_keeps_sentence_with_equation_placeholder():
+    assert jev_review.split_documentation_claims("The relation is $n = N/V$.") == [
+        "The relation is [equation]."
+    ]
+    assert jev_review.split_documentation_claims("The density is $n<0$.") == [
+        "The density is [equation]."
+    ]
 
 
 def test_claim_splitter_excludes_registry_text_and_equations_but_keeps_prose():
@@ -81,10 +83,10 @@ def test_claim_splitter_excludes_registry_text_and_equations_but_keeps_prose():
     assert jev_review.split_documentation_claims(
         documentation, registry_sentences=[opening, note, locus]
     ) == [
-        "The density is measured locally",
-        "the profile is radial",
-        "The related quantity is argon density",
-        "The density increases at the edge",
+        "The density is measured locally and the profile is radial.",
+        "The relation is [equation].",
+        "The related quantity is argon density.",
+        "The density increases at the edge.",
     ]
 
 
@@ -101,7 +103,7 @@ def test_docs_state_carries_source_and_description_without_review_comments():
             "conventions": {},
         }
     )
-    assert state["documentation_claims"] == ["The argon density is positive"]
+    assert state["documentation_claims"] == ["The argon density is positive."]
     assert state["description"] == "Number density of argon."
     assert state["dd_source_docs"]["value"][0]["documentation"] == "Argon density."
     assert "reviewer_comments" not in str(state)
@@ -130,7 +132,7 @@ def test_docs_state_excludes_selected_registry_opening():
             "documentation": "Number density of argon\n\nThe density is positive.",
         }
     )
-    assert state["documentation_claims"] == ["The density is positive"]
+    assert state["documentation_claims"] == ["The density is positive."]
 
 
 def test_docs_state_excludes_rendered_template_note():
@@ -149,7 +151,7 @@ def test_docs_state_excludes_rendered_template_note():
             "conventions": conventions,
         }
     )
-    assert state["documentation_claims"] == ["The density is positive"]
+    assert state["documentation_claims"] == ["The density is positive."]
 
 
 def test_question_table_asks_three_categories_and_one_choice_per_claim():
