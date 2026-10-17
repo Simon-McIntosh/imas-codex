@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import random
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -207,9 +208,9 @@ def build() -> dict:
                 if planted.casefold() in source["documentation"].casefold():
                     raise ValueError(f"Control supported by source: {rank}")
             original_documentation = row["documentation"]
-            original_sentence = original_documentation.split(". ", 1)[0].strip()
-            if not original_sentence.endswith("."):
-                original_sentence += "."
+            original_sentence = re.split(
+                r"(?<=[.!?])\s+", original_documentation, maxsplit=1
+            )[0].strip()
             copies.append(
                 {
                     "id": f"{kind}-{rank}",
