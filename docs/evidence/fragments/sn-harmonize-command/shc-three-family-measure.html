@@ -1,5 +1,5 @@
 <section id="shc-three-family-measure">
-  <h2 id="shc-three-family-measure-title">Three-family measure: density and component complete, locus pending</h2>
+  <h2 id="shc-three-family-measure-title">Three-family measure: density and component complete, replacement locus pending</h2>
   <p id="shc-three-family-measure-outcome">
     The USD 8.00 measure remains incomplete. The initial seven-member
     <code>number_density</code> apply was interrupted at the mandatory
@@ -42,6 +42,41 @@
       <tr><td><code>total_neutral_number_density</code></td><td>1.00000</td><td>1.00000</td></tr>
     </tbody>
   </table>
+  <p id="shc-three-family-measure-potential-halt">
+    The unforced five-member electrostatic-potential apply ran in SLURM job
+    <code>1288356</code> under a USD 4.666044 limit. It selected five,
+    touched three, spent USD 1.054900 over 22:27, and reported zero
+    quarantined members. It halted without a stamp on name-axis drift in
+    <code>electrostatic_potential_at_outboard_midplane</code> and
+    <code>electrostatic_potential_at_wall</code>. Lint fell from
+    defining_equation 1 plus link_missing_reverse 4 to
+    link_missing_reverse 1; four members remain accepted, one pending.
+    The second dry run still plans five calls. No reviewed score fell.
+    The accepted <code>electrostatic_potential_at_wall</code> is distinct
+    from the folded-away <code>plasma_electrostatic_potential_at_wall</code>.
+  </p>
+  <table id="shc-three-family-measure-potential-scores">
+    <caption>Potential documentation scores before the halted apply and in its own review</caption>
+    <thead><tr><th>Member</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td><code>electrostatic_potential</code></td><td>0.85625</td><td>0.93750</td></tr>
+      <tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>0.93750</td><td>0.94375</td></tr>
+      <tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>absent</td><td>absent</td></tr>
+      <tr><td><code>electrostatic_potential_at_wall</code></td><td>0.86250</td><td>0.86250</td></tr>
+      <tr><td><code>floating_electrostatic_potential</code></td><td>0.85000</td><td>0.93750</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-three-family-measure-gap-choice">
+    The replacement locus scope is <code>gap</code>, with
+    <code>gap_at_closest_wall_point</code> (anchor),
+    <code>gap_at_outboard_midplane</code>, and
+    <code>gap_at_plasma_boundary</code>. All three are accepted and
+    non-WEST, none quarantined or protected, and none overlaps the
+    boundary-density family. The report has six convention violations;
+    the first dry run plans three calls for USD 1.83. This is the first
+    checked three-position alternative after the potential halt that
+    fits the remaining USD 3.611144.
+  </p>
   <p id="shc-three-family-measure-resumption">
     On 2026-10-17 the repaired density family had eight live members:
     six accepted, zero quarantined, two pending. The folded potential family
@@ -94,12 +129,10 @@
     boundary-density apply, as checked from the live family query.
   </p>
   <p id="shc-three-family-measure-budget">
-    Total spend is USD 3.333956 of the approved USD 8.00 ceiling; USD 4.666044
-    remains. Fourteen reviews across the three density attempts cost
-    USD 0.238140 per review on average; the complete eight-member density
-    family cost USD 0.416745 per unique member, including the two failed
-    attempts. The fresh potential dry run plans five calls at USD 3.18,
-    inside the remainder. A WEST limit will use the completed locus measure too.
+    Total spend is USD 4.388856 of the approved USD 8.00 ceiling; USD 3.611144
+    remains. The potential halt added USD 1.054900 to the USD 3.333956
+    spent on density. The three-call gap estimate of USD 1.83 fits that
+    remainder. A WEST limit will use the completed locus measure too.
   </p>
 
   <h3 id="shc-three-family-measure-lint">Lint findings by kind</h3>

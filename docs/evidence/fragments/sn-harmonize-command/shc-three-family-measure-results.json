@@ -97,15 +97,45 @@
       "slurm_state": "COMPLETED",
       "stamped": true,
       "wall_seconds": 1287
+    },
+    {
+      "command": "uv run --no-sync imas-codex sn harmonize --family electrostatic_potential --apply --cost-limit 4.666044 --json",
+      "cost_limit_usd": 4.666044,
+      "exit_status": 0,
+      "halt_reasons": [
+        "name-axis drift on 2 name(s) in a docs-only campaign: electrostatic_potential_at_outboard_midplane, electrostatic_potential_at_wall"
+      ],
+      "halted": true,
+      "job_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/potential-apply-main.slurm.log",
+      "pipeline_wall_seconds": 1345,
+      "planned_calls": 5,
+      "post_attempt_lint": {
+        "link_missing_reverse": 1
+      },
+      "receipt_cost_spent_usd": 1.0549,
+      "receipt_total_accepted": 3,
+      "receipt_total_quarantined": 0,
+      "receipt_total_selected": 5,
+      "receipt_total_touched": 3,
+      "score_regressions": {
+        "below_threshold": [],
+        "fell": []
+      },
+      "second_dry_run_calls": 5,
+      "seed": "electrostatic_potential",
+      "slurm_job_id": 1288356,
+      "slurm_state": "COMPLETED",
+      "stamped": false,
+      "wall_seconds": 1347
     }
   ],
   "budget": {
     "ceiling_usd": 8.0,
-    "measured_cost_per_complete_family_name_usd": 0.416745,
-    "observed_spend_per_reviewed_name_usd": 0.23814,
-    "remaining_usd": 4.666044,
-    "reviewed_names": 14,
-    "spent_usd": 3.333956,
+    "measured_cost_per_complete_family_name_usd": null,
+    "observed_spend_per_reviewed_name_usd": 0.258168,
+    "remaining_usd": 3.611144,
+    "reviewed_names": 17,
+    "spent_usd": 4.388856,
     "west_limit_reason": "Density is complete; reserve a WEST limit after the potential family also completes.",
     "west_limit_usd": null
   },
@@ -479,6 +509,84 @@
       }
     },
     "electrostatic_potential": {
+      "after_job": {
+        "anchor": "electrostatic_potential_at_langmuir_probe_position",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electrostatic_potential": 0.9375,
+          "electrostatic_potential_at_langmuir_probe_position": 0.94375,
+          "electrostatic_potential_at_outboard_midplane": null,
+          "electrostatic_potential_at_wall": 0.8625,
+          "floating_electrostatic_potential": 0.9375
+        },
+        "estimate_basis": {
+          "calls": 34,
+          "mean_usd_per_call": 0.6106,
+          "runs": 19,
+          "total_usd": 20.7615
+        },
+        "estimate_usd": 3.0532,
+        "invariant": [
+          "electrostatic_potential",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "link_missing_reverse": 1
+        },
+        "lint_total": 1,
+        "member_status": {
+          "electrostatic_potential": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_langmuir_probe_position": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential_at_langmuir_probe_position",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_outboard_midplane": {
+            "docs_stage": "pending",
+            "id": "electrostatic_potential_at_outboard_midplane",
+            "name_stage": "reviewed",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_wall": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential_at_wall",
+            "name_stage": "reviewed",
+            "validation_status": "valid"
+          },
+          "floating_electrostatic_potential": {
+            "docs_stage": "accepted",
+            "id": "floating_electrostatic_potential",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "electrostatic_potential",
+          "electrostatic_potential_at_langmuir_probe_position",
+          "electrostatic_potential_at_outboard_midplane",
+          "electrostatic_potential_at_wall",
+          "floating_electrostatic_potential"
+        ],
+        "physical_base": "electrostatic_potential",
+        "planned_calls": 5,
+        "refusals": {},
+        "seed": "electrostatic_potential",
+        "status_counts": {
+          "accepted": 4,
+          "other": 1,
+          "quarantined": 0
+        }
+      },
       "before": {
         "anchor": "electrostatic_potential_at_langmuir_probe_position",
         "boundary_overlap": [],
@@ -597,6 +705,70 @@
         "status_counts": {
           "accepted": 4,
           "other": 1,
+          "quarantined": 0
+        }
+      }
+    },
+    "gap_at_plasma_boundary": {
+      "before": {
+        "anchor": "gap_at_closest_wall_point",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "gap_at_closest_wall_point": 1.0,
+          "gap_at_outboard_midplane": 0.975,
+          "gap_at_plasma_boundary": 0.9125
+        },
+        "estimate_basis": {
+          "calls": 34,
+          "mean_usd_per_call": 0.6106,
+          "runs": 19,
+          "total_usd": 20.7615
+        },
+        "estimate_usd": 1.8319,
+        "invariant": [
+          "gap",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 6
+        },
+        "lint_total": 6,
+        "member_status": {
+          "gap_at_closest_wall_point": {
+            "docs_stage": "accepted",
+            "id": "gap_at_closest_wall_point",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "gap_at_outboard_midplane": {
+            "docs_stage": "accepted",
+            "id": "gap_at_outboard_midplane",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "gap_at_plasma_boundary": {
+            "docs_stage": "accepted",
+            "id": "gap_at_plasma_boundary",
+            "name_stage": "exhausted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "gap_at_closest_wall_point",
+          "gap_at_outboard_midplane",
+          "gap_at_plasma_boundary"
+        ],
+        "physical_base": "gap",
+        "planned_calls": 3,
+        "refusals": {},
+        "seed": "gap_at_plasma_boundary",
+        "status_counts": {
+          "accepted": 3,
+          "other": 0,
           "quarantined": 0
         }
       }
@@ -784,11 +956,24 @@
     },
     "threshold": 0.85
   },
+  "locus_replacement": {
+    "anchor": "gap_at_closest_wall_point",
+    "dry_run_calls": 3,
+    "dry_run_estimate_usd": 1.83,
+    "members": [
+      "gap_at_closest_wall_point",
+      "gap_at_outboard_midplane",
+      "gap_at_plasma_boundary"
+    ],
+    "reason": "The potential apply halted on name-axis drift; gap is the first checked three-position locus family with no protected or quarantined member, no boundary overlap, and an estimate below the remaining ceiling.",
+    "remaining_before_apply_usd": 3.611144,
+    "seed": "gap_at_plasma_boundary"
+  },
   "result": {
     "component_family_complete": true,
     "density_family_complete": true,
     "members_below_threshold_after_completed_apply": [],
-    "reason": "Density and vorticity are stamped and have clean reports; potential still requires an apply.",
+    "reason": "Density and vorticity are complete; potential halted on name-axis drift. A three-member gap locus replacement is ready under the remaining cap.",
     "three_families_applied": false
   },
   "west_roster_check": {
