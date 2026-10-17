@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The source manifest left baseline_suite and after_suite empty; their named base-gate.log and head-gate.log both completed with the same failure id, giving an empty head-minus-base set. The head log identifies a working tree over the base, not the later commit.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=\"$PWD\" uv run pytest -p no:cacheprovider tests/standard_names/test_docs_contradiction_veto.py tests/standard_names/test_prose_hold_before_accept.py tests/standard_names/test_jev_docs_review.py tests/standard_names/test_rd_quorum_integrity.py tests/standard_names/test_e2e_rotation.py tests/standard_names/test_review_docs_stages.py tests/standard_names/test_budget_lease_release.py tests/standard_names/test_review_quorum_pool.py tests/standard_names/test_pool_endpoint_failure_scope.py tests/standard_names/test_docs_conformance_gate.py tests/standard_names/test_display_wiring.py tests/standard_names/test_pool_batch_processors.py tests/standard_names/test_dd_gap_automated_writers.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/standard_names/test_jev_docs_review.py::test_every_house_style_finding_has_a_named_check_and_is_read_from_audit"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T185518661246-srtj-docs-veto-wire/head-gate.log",
+    "revision": "working-tree over 9c6312f74d190b9d8b5f1af3d66d950bc6e56c97"
+  },
+  "assertion_analysis": {
+    "tests/standard_names/test_docs_contradiction_veto.py:107": "Fails if contradiction, missing answer, or error is accepted, or if a supported claim is held; the expected stage is a fixed parameter independent of the persisted score.",
+    "tests/standard_names/test_docs_contradiction_veto.py:109-117": "Fail if the contradiction comment omits the authored sentence or the fixed DD source sentence.",
+    "tests/standard_names/test_docs_contradiction_veto.py:119-120": "Fail if a supported claim is clamped or given a contradiction comment.",
+    "tests/standard_names/test_docs_contradiction_veto.py:121": "Fails if no budget reserve occurs or its amount or phase changes.",
+    "tests/standard_names/test_docs_contradiction_veto.py:123": "Fails if the mocked reported spend is not passed to charge_event; it does not independently measure actual provider spend.",
+    "tests/standard_names/test_docs_contradiction_veto.py:69": "Fails if claim splitting omits or changes the fixed inward sentence.",
+    "tests/standard_names/test_docs_contradiction_veto.py:70": "Fails if the per-claim question key or Choice type is removed.",
+    "tests/standard_names/test_docs_contradiction_veto.py:99": "Fails if the batch produces no persisted result; it remains green if only the veto is removed."
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=\"$PWD\" uv run pytest -p no:cacheprovider tests/standard_names/test_prose_hold_before_accept.py tests/standard_names/test_jev_docs_review.py tests/standard_names/test_rd_quorum_integrity.py tests/standard_names/test_e2e_rotation.py tests/standard_names/test_review_docs_stages.py tests/standard_names/test_budget_lease_release.py tests/standard_names/test_review_quorum_pool.py tests/standard_names/test_pool_endpoint_failure_scope.py tests/standard_names/test_docs_conformance_gate.py tests/standard_names/test_display_wiring.py tests/standard_names/test_pool_batch_processors.py tests/standard_names/test_dd_gap_automated_writers.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/standard_names/test_jev_docs_review.py::test_every_house_style_finding_has_a_named_check_and_is_read_from_audit"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T185518661246-srtj-docs-veto-wire/base-gate.log",
+    "revision": "9c6312f74d190b9d8b5f1af3d66d950bc6e56c97"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:854",
+    "imas_codex/standard_names/workers.py:10685",
+    "imas_codex/standard_names/workers.py:10959"
+  ],
+  "completed_at": "2026-10-17T19:14:34Z",
+  "dispatched_at": "2026-10-17T19:10:10Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "10809",
+      "severity": "blocking",
+      "text": "blocking: live preparation enriches only source_paths[0] at workers.py:10397-10414, then this fallback compares claims with that one dd_documentation; a contradiction in another bound DD source can pass acceptance, while the test injects dd_source_docs through a mocked preparation at tests/standard_names/test_docs_contradiction_veto.py:31-44 and 90."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "commit 035e8b97f adds the veto hook and five parameterized cases; 25ac7d8ab adds the result fragment, but the test mocks request preparation at tests/standard_names/test_docs_contradiction_veto.py:90.",
+    "done_when": "the brief names contradiction, clean, missing-answer and error cases plus the focused gate; base-gate.log and head-gate.log share one failure while negative-control.log records five failures with the veto removed.",
+    "goal": "the source brief asks for a DD contradiction veto before documentation acceptance; imas_codex/standard_names/workers.py:10959 invokes it, but workers.py:10809-10811 may supply only the first bound source.",
+    "manifest": "the source manifest is complete and names commits 035e8b97f and 25ac7d8ab, the one shared gate failure, and the EXIT=1 negative control.",
+    "write_paths": "the source manifest declares workers.py, jev_review.py, the new veto test and the evidence fragment; git diff 9c6312f..25ac7d8 changes exactly those four paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_docs_contradiction_veto.py:107 reddens on a removed hold as negative-control.log shows, while the independent sentence assertions at lines 109-117 redden if refiner evidence is dropped.",
+    "evidence": "base-gate.log:47-49 and head-gate.log:48-50 prove zero added failures, and negative-control.log:62-68 proves the hook matters, while tests/standard_names/test_docs_contradiction_veto.py:90 bypasses live request preparation.",
+    "fit": "workers.py:10962-10983 follows the existing score clamp and comments pattern, and the new helper at workers.py:10801 has a capability name without plan labels.",
+    "goal_fidelity": "workers.py:10809-10811 compares claims against supplied DD text and holds contradictions, but its first-source fallback does not cover every bound DD source.",
+    "reuse": "a capability search found the claim splitter, question builder and veto in imas_codex/standard_names/review/jev_review.py:541-689, and workers.py:10818-10850 calls that owner rather than adding a second veto.",
+    "scope_discipline": "git diff 9c6312f..25ac7d8 changes only the four paths declared in the source manifest."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief asks for a DD contradiction veto before documentation acceptance; imas_codex/standard_names/workers.py:10959 invokes it, but workers.py:10809-10811 may supply only the first bound source.\nVERDICT done_when: the brief names contradiction, clean, missing-answer and error cases plus the focused gate; base-gate.log and head-gate.log share one failure while negative-control.log records five failures with the veto removed.\nVERDICT write_paths: the source manifest declares workers.py, jev_review.py, the new veto test and the evidence fragment; git diff 9c6312f..25ac7d8 changes exactly those four paths.\nVERDICT manifest: the source manifest is complete and names commits 035e8b97f and 25ac7d8ab, the one shared gate failure, and the EXIT=1 negative control.\nVERDICT diff: commit 035e8b97f adds the veto hook and five parameterized cases; 25ac7d8ab adds the result fragment, but the test mocks request preparation at tests/standard_names/test_docs_contradiction_veto.py:90.\nCALL_SITES: imas_codex/standard_names/loop.py:854, imas_codex/standard_names/workers.py:10685, imas_codex/standard_names/workers.py:10959\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: workers.py:10809-10811 compares claims against supplied DD text and holds contradictions, but its first-source fallback does not cover every bound DD source.\nSCORE evidence: 15\nJUSTIFICATION evidence: base-gate.log:47-49 and head-gate.log:48-50 prove zero added failures, and negative-control.log:62-68 proves the hook matters, while tests/standard_names/test_docs_contradiction_veto.py:90 bypasses live request preparation.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 9c6312f..25ac7d8 changes only the four paths declared in the source manifest.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_docs_contradiction_veto.py:107 reddens on a removed hold as negative-control.log shows, while the independent sentence assertions at lines 109-117 redden if refiner evidence is dropped.\nSCORE fit: 18\nJUSTIFICATION fit: workers.py:10962-10983 follows the existing score clamp and comments pattern, and the new helper at workers.py:10801 has a capability name without plan labels.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search found the claim splitter, question builder and veto in imas_codex/standard_names/review/jev_review.py:541-689, and workers.py:10818-10850 calls that owner rather than adding a second veto.\nFINDING imas_codex/standard_names/workers.py:10809 blocking: live preparation enriches only source_paths[0] at workers.py:10397-10414, then this fallback compares claims with that one dd_documentation; a contradiction in another bound DD source can pass acceptance, while the test injects dd_source_docs through a mocked preparation at tests/standard_names/test_docs_contradiction_veto.py:31-44 and 90.\n",
+  "review_run_id": "r-20261017T190944853689-review-of-srtj-docs-veto-wire-25ac7d8ababb",
+  "reviewed_base_sha": "9c6312f74d190b9d8b5f1af3d66d950bc6e56c97",
+  "reviewed_head_sha": "25ac7d8ababbd1852234089de8ab52da9ec24613",
+  "reviewed_run_id": "r-20261017T185518661246-srtj-docs-veto-wire",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T19:13:02.921181+00:00",
+  "total": 102
+}
