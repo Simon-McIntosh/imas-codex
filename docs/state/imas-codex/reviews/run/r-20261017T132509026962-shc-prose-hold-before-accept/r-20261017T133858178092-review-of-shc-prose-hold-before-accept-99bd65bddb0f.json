@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132509026962-shc-prose-hold-before-accept/head-gate.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "The review path returns no processed item.",
+      "lines": "75"
+    },
+    {
+      "failure_condition": "The policy matcher no longer recognizes the fixed estimator recipe.",
+      "lines": "84"
+    },
+    {
+      "failure_condition": "The hold is removed or the persisted comments omit the matched phrase or banned_prose dimension.",
+      "lines": "88-90"
+    },
+    {
+      "failure_condition": "The matcher falsely flags the fixed clean sentence.",
+      "lines": "95"
+    },
+    {
+      "failure_condition": "The clean path is held or its score changes from the fixed quorum score of 1.0.",
+      "lines": "99-100"
+    },
+    {
+      "failure_condition": "The fixed two-row fixture loses raw acceptance counting, clean acceptance subtraction, quarantine counting, or the recipe id.",
+      "lines": "123-126"
+    }
+  ],
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132509026962-shc-prose-hold-before-accept/base-gate.log",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:854",
+    "imas_codex/standard_names/graph_ops.py:17644",
+    "imas_codex/standard_names/campaign.py:1042",
+    "imas_codex/cli/sn.py:2868",
+    "imas_codex/cli/sn.py:6246"
+  ],
+  "completed_at": "2026-10-17T13:43:53Z",
+  "dispatched_at": "2026-10-17T13:39:27Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "10845",
+      "severity": "blocking",
+      "text": "blocking: A regex candidate is treated as a final banned-prose verdict; campaign.py:619-625 says candidates are over-inclusive and production sn.py:2863 supplies an adjudicator, so legitimate definitional documentation can be repeatedly refined or exhausted without acceptance."
+    },
+    {
+      "file": "imas_codex/standard_names/campaign.py",
+      "line": "555",
+      "severity": "follow-on",
+      "text": "follow-on: accept_rate still divides raw accepted by touched, so allowing one prose quarantine can satisfy the convergence acceptance threshold despite accepted_clean being lower."
+    },
+    {
+      "file": "tests/standard_names/test_prose_hold_before_accept.py",
+      "line": "123",
+      "severity": "follow-on",
+      "text": "follow-on: The assertions inspect BatchOutcome only; changing CampaignRunner.run at campaign.py:1080 back to raw accepted would restore the misleading command total while all three added tests remain green."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Commit 61e926512d2f changes the hold, accounting and tests, and commit 99bd65bddb0f adds the evidence fragment; workers.py:10845 and campaign.py:1080 are the operative changes.",
+    "done_when": "The source brief.md names the new focused test and importer gate; reproduction.log records 2 failing tests with the hold absent, final-focused.log records 3 passing tests, and base-gate.log versus head-gate.log records zero added failures.",
+    "goal": "The source brief.md asks for a banned-prose acceptance hold and separate campaign counts; workers.py:10845 adds the hold and campaign.py:1080 separates the totals, but the hold treats candidate matches as final verdicts.",
+    "manifest": "The source manifest.md names both commits, the four changed paths, the negative control, and base-gate.log plus head-gate.log with the same three setup errors.",
+    "write_paths": "The source brief.md grants workers.py, campaign.py, the new test, and the evidence fragment; git diff 25d5ad6e..99bd65bd changes only those four paths."
+  },
+  "justifications": {
+    "durability": "In tests/standard_names/test_prose_hold_before_accept.py:75-126, processed fails if the review path stops, the fixed policy and phrase expectations fail if matching or comments disappear, stage and score expectations fail if bad text is accepted or clean text held, and the fixed batch counts and id fail if accounting changes; reverting campaign.py:1080 or holding a candidate the adjudicator clears still leaves these assertions green.",
+    "evidence": "reproduction.log and final-focused.log demonstrate the positive hold and clean acceptance, while base-gate.log and head-gate.log show 474 versus 477 passes with the same three errors, but tests/standard_names/test_prose_hold_before_accept.py:79-100 has no adjudicated-clear case.",
+    "fit": "workers.py:10846 follows the adjacent registry-conformance score-clamp idiom, but campaign.py:619-625 explicitly separates regex candidates from genuine banned prose and the new guard skips that distinction.",
+    "goal_fidelity": "workers.py:10845 clamps every regex hit even though campaign.py:619-625 defines that hit as an over-inclusive candidate needing adjudication before it becomes a banned-prose verdict.",
+    "reuse": "workers.py:10759 extracts a first matching phrase from prose_policy.py:92's existing compiled policy patterns, while campaign.py:563-570 extends BatchOutcome as the owner of batch accounting; the repository search found no pre-existing first-phrase formatter.",
+    "scope_discipline": "The base-to-head diff changes only the four files named in the source brief.md write scope, with the evidence fragment at docs/evidence/fragments/sn-harmonize-command/shc-prose-hold-before-accept.html:1."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md asks for a banned-prose acceptance hold and separate campaign counts; workers.py:10845 adds the hold and campaign.py:1080 separates the totals, but the hold treats candidate matches as final verdicts.\nVERDICT done_when: The source brief.md names the new focused test and importer gate; reproduction.log records 2 failing tests with the hold absent, final-focused.log records 3 passing tests, and base-gate.log versus head-gate.log records zero added failures.\nVERDICT write_paths: The source brief.md grants workers.py, campaign.py, the new test, and the evidence fragment; git diff 25d5ad6e..99bd65bd changes only those four paths.\nVERDICT manifest: The source manifest.md names both commits, the four changed paths, the negative control, and base-gate.log plus head-gate.log with the same three setup errors.\nVERDICT diff: Commit 61e926512d2f changes the hold, accounting and tests, and commit 99bd65bddb0f adds the evidence fragment; workers.py:10845 and campaign.py:1080 are the operative changes.\nCALL_SITES: imas_codex/standard_names/loop.py:854, imas_codex/standard_names/graph_ops.py:17644, imas_codex/standard_names/campaign.py:1042, imas_codex/cli/sn.py:2868, imas_codex/cli/sn.py:6246\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: workers.py:10845 clamps every regex hit even though campaign.py:619-625 defines that hit as an over-inclusive candidate needing adjudication before it becomes a banned-prose verdict.\nSCORE evidence: 17\nJUSTIFICATION evidence: reproduction.log and final-focused.log demonstrate the positive hold and clean acceptance, while base-gate.log and head-gate.log show 474 versus 477 passes with the same three errors, but tests/standard_names/test_prose_hold_before_accept.py:79-100 has no adjudicated-clear case.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The base-to-head diff changes only the four files named in the source brief.md write scope, with the evidence fragment at docs/evidence/fragments/sn-harmonize-command/shc-prose-hold-before-accept.html:1.\nSCORE durability: 14\nJUSTIFICATION durability: In tests/standard_names/test_prose_hold_before_accept.py:75-126, processed fails if the review path stops, the fixed policy and phrase expectations fail if matching or comments disappear, stage and score expectations fail if bad text is accepted or clean text held, and the fixed batch counts and id fail if accounting changes; reverting campaign.py:1080 or holding a candidate the adjudicator clears still leaves these assertions green.\nSCORE fit: 16\nJUSTIFICATION fit: workers.py:10846 follows the adjacent registry-conformance score-clamp idiom, but campaign.py:619-625 explicitly separates regex candidates from genuine banned prose and the new guard skips that distinction.\nSCORE reuse: 20\nJUSTIFICATION reuse: workers.py:10759 extracts a first matching phrase from prose_policy.py:92's existing compiled policy patterns, while campaign.py:563-570 extends BatchOutcome as the owner of batch accounting; the repository search found no pre-existing first-phrase formatter.\nFINDING imas_codex/standard_names/workers.py:10845 blocking: A regex candidate is treated as a final banned-prose verdict; campaign.py:619-625 says candidates are over-inclusive and production sn.py:2863 supplies an adjudicator, so legitimate definitional documentation can be repeatedly refined or exhausted without acceptance.\nFINDING imas_codex/standard_names/campaign.py:555 follow-on: accept_rate still divides raw accepted by touched, so allowing one prose quarantine can satisfy the convergence acceptance threshold despite accepted_clean being lower.\nFINDING tests/standard_names/test_prose_hold_before_accept.py:123 follow-on: The assertions inspect BatchOutcome only; changing CampaignRunner.run at campaign.py:1080 back to raw accepted would restore the misleading command total while all three added tests remain green.\n",
+  "review_run_id": "r-20261017T133858178092-review-of-shc-prose-hold-before-accept-99bd65bddb0f",
+  "reviewed_base_sha": "25d5ad6e534559d61e801a4bd61faaa7a68251fd",
+  "reviewed_commits": [
+    "61e926512d2f994b9b03185fd257b5d9eea51245",
+    "99bd65bddb0f08d0f93c73747a455f6f6f270e4f"
+  ],
+  "reviewed_head_sha": "99bd65bddb0f08d0f93c73747a455f6f6f270e4f",
+  "reviewed_run_id": "r-20261017T132509026962-shc-prose-hold-before-accept",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T13:45:22.728103+00:00",
+  "total": 100
+}
