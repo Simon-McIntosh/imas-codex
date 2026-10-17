@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": null,
+  "assertion_analysis": {
+    "figure label guard": "scg-name-domain-jev-run.py:396-408 fails on a clipped or overlapping text artist, so moving a direct label over the data reddens it.",
+    "known-present source-domain": "scg-name-domain-jev-run.py:648 fails if the reused loader stops returning electron_temperature's core_plasma_physics source; reverting the loader reproduces the failure.",
+    "shuffled-label control": "scg-name-domain-jev-run.py:300-305, 942-981 permutes labels with a fixed seed and fails when the drop does not exceed the bootstrap half-width; reverting the scorer to read a constant choice would leave shuffled and unshuffled equal and the control would redden."
+  },
+  "base_log_revision": "a20a564b8363db7785be9e4a7415df2ca3d4c4da",
+  "baseline_suite_log": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T22:01:37.001Z",
+  "dispatched_at": "2026-10-17T21:52:56Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev-run.py",
+      "line": "565",
+      "severity": "follow-on",
+      "text": "follow-on: the shuffled-label paragraph is emitted whenever shuffle_check is present and states the drop exceeds the half-width without reading shuffle['passed'], so a failed control would still be published as a demonstrated pass."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev-run.py",
+      "line": "656",
+      "severity": "follow-on",
+      "text": "follow-on: four labelled names have empty source_paths in the census, so their only candidate is general and every arm scores them wrong while they remain in the cohort denominators; three sit in the 73 calibration names, so 58/73 and every paired margin carry names no arm can win."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev.html",
+      "line": "25",
+      "severity": "follow-on",
+      "text": "follow-on: the controls table publishes validation for both controls but the fragment never states Jev's validation total (54/77 in the results JSON)."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev-run.py",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the module docstring documents a --continue mode while argparse defines --resume at line 630, so the documented resume flag does not exist."
+    }
+  ],
+  "head_log_revision": "c65af331438bff39d60ffe468720eedf93ccd702",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "one commit c65af3314 against base a20a564b83 adds four files, the measurement and its evidence only.",
+    "done_when": "the done_when items are all present in scg-name-domain-jev.html:5-28, the accuracy figure and the 170 per_name rows, and the JSON metrics match a recount from per_name exactly.",
+    "goal": "the node's goal is a read-only per-name Jev domain Choice measured against two rule controls; scg-name-domain-jev.html:3-27 and scg-name-domain-jev-results.json carry the controls, the Jev arms with paired intervals, the pre-registered rule, validation read once, the spend and one figure.",
+    "manifest": "read; status complete, commit c65af3314, shuffle-check log recorded with a final EXIT=0 line.",
+    "write_paths": "git show --stat c65af3314 lists exactly the four declared paths."
+  },
+  "justifications": {
+    "durability": "scg-name-domain-jev-run.py:648 asserts electron_temperature carries core_plasma_physics and :396-408 refuses a clipped or overlapping label, but nothing asserts the control reproduction at :460.",
+    "evidence": "scg-name-domain-jev-results.json metrics reproduce per_name exactly and the shuffle log's EXIT=0 records the negative control, but the brief's figure render check appears in no gate log.",
+    "fit": "the script follows the harness idiom of scg-name-domain-rule-measure-run.py and draws with the data-ink style at scg-name-domain-jev-run.py:330, but its docstring at :21 names a --continue flag the parser does not define.",
+    "goal_fidelity": "scg-name-domain-jev-run.py:876-921 pre-registers the rule, reads validation only when approved and calibration both beat both controls, and writes the fragment and figure, which is what the goal states.",
+    "reuse": "scg-name-domain-jev-run.py:78-88 imports the rule, design and umbrella harnesses by path and reuses base.interval and design.choose, while option_text at :131 re-renders guidance already loaded at imas_codex/definitions/physics/__init__.py:36.",
+    "scope_discipline": "git show --stat c65af3314 contains only the four declared paths and no graph write is made (scg-name-domain-jev-run.py:116)."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal is a read-only per-name Jev domain Choice measured against two rule controls; scg-name-domain-jev.html:3-27 and scg-name-domain-jev-results.json carry the controls at the current graph, the Jev arms with paired intervals, the pre-registered rule, validation read once, the spend and one figure.\nVERDICT done_when: The done_when asks the fragment for both controls, Jev with paired intervals, the pre-registered rule and its timestamp, validation read once, the spend and one correctness figure, and the JSON for every name's options, Jev answer and probability, label and both control answers; scg-name-domain-jev.html:5-28, docs/figures/sn-catalog-grouping/scg-name-domain-jev/accuracy.svg and the 170 per_name rows in scg-name-domain-jev-results.json hold each, and the JSON metrics match a recount from per_name exactly (approved 12/9/9, calibration 58/53/55, validation 54/52/53).\nVERDICT write_paths: The four declared write paths are the fragment, the run script, the results JSON and the figure directory; git show --stat c65af3314 lists exactly those four files and nothing else.\nVERDICT manifest: Read; it reports status complete, commit c65af3314, and a tests field whose shuffled-label control is the log at /tmp/reckon-crew-scratch/r-20261017T213405302387-scg-name-domain-jev/logs/shuffle_check.log, whose last line reads EXIT=0.\nVERDICT diff: Read commit c65af3314 against base a20a564b83: one commit, four added files (fragment 200 lines, run script 985 lines, results JSON, figure), the measurement and its evidence only, with the controls reproduced at 9/20, 53/73 and 52/77 exactly as the fragment claims.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scg-name-domain-jev-run.py:876-921 pre-registers the rule, reads validation only when approved and calibration both beat both controls, and writes the fragment and figure, which is what the goal states.\nSCORE evidence: 17\nJUSTIFICATION evidence: scg-name-domain-jev-results.json metrics reproduce per_name exactly and the shuffle log's EXIT=0 records the negative control, but the brief's figure render check appears in no gate log because the reviewed run's log directory holds only shuffle_check.log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat c65af3314 contains only the four declared paths, no graph write is made (scg-name-domain-jev-run.py:116 reads IDS.physics_domain), and the graph_writes 0 field is recorded.\nSCORE durability: 15\nJUSTIFICATION durability: scg-name-domain-jev-run.py:648 asserts electron_temperature carries core_plasma_physics and :396-408 refuses a clipped or overlapping label, but nothing asserts the control reproduction at :460 or that validation was unread when the rule was written.\nSCORE fit: 16\nJUSTIFICATION fit: the script follows the harness idiom of scg-name-domain-rule-measure-run.py and draws with the data-ink style at scg-name-domain-jev-run.py:330, but its docstring at :21 names a --continue flag the parser does not define (:630).\nSCORE reuse: 17\nJUSTIFICATION reuse: scg-name-domain-jev-run.py:78-88 imports the rule, design and umbrella harnesses by path and reuses base.interval and design.choose, while option_text at :131 re-renders guidance that imas_codex/definitions/physics/__init__.py:36 already loads.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev-run.py:565 follow-on: the shuffled-label paragraph is emitted whenever shuffle_check is present and states \"the drop exceeds it\" without reading shuffle['passed'], so a failed control would still be published as a demonstrated pass in a fragment rebuilt by --rescore.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev-run.py:656 follow-on: four labelled names have empty source_paths in the census, so their only candidate is general and every arm scores them wrong while they stay in the cohort denominators; three of them are among the 73 calibration names, so the reported 58/73 and every paired margin carry up to three names no arm can win.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev.html:25 follow-on: the controls table publishes validation for both controls but the fragment never states Jev's validation total (54/77 in the results JSON), which a reader can recover only by counting the figure or the 77 per-name rows.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev-run.py:21 follow-on: the module docstring documents a --continue mode while argparse defines --resume at :630, so the documented resume flag does not exist.\n",
+  "review_run_id": "r-20261017T215239611117-review-of-scg-name-domain-jev-c65af331438b",
+  "reviewed_base_sha": "a20a564b8363db7785be9e4a7415df2ca3d4c4da",
+  "reviewed_commits": [
+    "c65af331438bff39d60ffe468720eedf93ccd702"
+  ],
+  "reviewed_head_sha": "c65af331438bff39d60ffe468720eedf93ccd702",
+  "reviewed_run_id": "r-20261017T213405302387-scg-name-domain-jev",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T21:58:00+00:00",
+  "total": 102
+}
