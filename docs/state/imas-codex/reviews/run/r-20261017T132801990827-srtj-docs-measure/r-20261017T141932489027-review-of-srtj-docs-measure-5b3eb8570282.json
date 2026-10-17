@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "after_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132801990827-srtj-docs-measure/repair-rescore.log",
+    "revision": "5b3eb857028240e8eb4cb310e1d7a60c8379a09f",
+    "summary": "rescore reproduced every stored figure"
+  },
+  "base_log_revision": null,
+  "baseline_gate": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T14:23:43Z",
+  "dispatched_at": "2026-10-17T14:19:57Z",
+  "findings": [],
+  "head_log_revision": "5b3eb857028240e8eb4cb310e1d7a60c8379a09f",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production runtime code reaches the standalone evidence script; search in imas_codex and scripts found none.",
+    "diff": "Read commit 5b3eb857028240e8eb4cb310e1d7a60c8379a09f against parent c013a8b1c197896acb5da5af3f945eabd4fd6592; it adds decision and isolated contradiction assertions in docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:430-504 and updates the stored results and HTML claim.",
+    "done_when": "The source brief requires a call-free rescore and a veto-removal failure; repair-rescore.log ends EXIT=0, repair-parent-negative-retry.log ends EXIT=1, and veto-production-mutation.log ends EXIT=1.",
+    "goal": "The source brief requires a measured golden B comparison and veto outcome; docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:430-504 now checks 60 planted aggregate and isolated rejections, and srtj-docs-measure.html:7 reports them.",
+    "manifest": "Read the source run manifest.md:5-29; it records 5b3eb857028240e8eb4cb310e1d7a60c8379a09f, a rescore at EXIT=0, red and green controls, and empty baseline_suite and after_suite fields.",
+    "write_paths": "The source brief grants docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py, the results JSON, evidence HTML and figure directory; git diff c013a8b1c197896acb5da5af3f945eabd4fd6592..5b3eb857028240e8eb4cb310e1d7a60c8379a09f changes only the first three granted paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:483-492 raises when a sole contradictory claim or a vetoed planted copy fails to reject; veto-production-mutation.log demonstrates the production reject-branch regression makes the new assertion fail.",
+    "evidence": "repair-parent-negative-retry.log reproduces the missing guard at EXIT=1, veto-production-mutation.log refuses removal of the production reject branch at EXIT=1, and repair-rescore.log confirms the stored result at EXIT=0; manifest.md:21-22 supplies no paired suite delta.",
+    "fit": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:477-482 reuses the existing aggregate_docs_review interface and the changed source adds no forbidden plan-labelled symbol or filename.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:454-493 checks the production aggregate decision for planted contradictions and for an isolated contradiction while the existing golden B figures remain in srtj-docs-measure.html:5-10.",
+    "reuse": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:454,477 calls the existing aggregate_docs_review owner at imas_codex/standard_names/review/jev_review.py:609 rather than adding a competing decision implementation.",
+    "scope_discipline": "git diff c013a8b1c197896acb5da5af3f945eabd4fd6592..5b3eb857028240e8eb4cb310e1d7a60c8379a09f touches only the three declared measurement paths and adds no runtime code outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief requires a measured golden B comparison and veto outcome; docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:430-504 now checks 60 planted aggregate and isolated rejections, and srtj-docs-measure.html:7 reports them.\nVERDICT done_when: The source brief requires a call-free rescore and a veto-removal failure; repair-rescore.log ends EXIT=0, repair-parent-negative-retry.log ends EXIT=1, and veto-production-mutation.log ends EXIT=1.\nVERDICT write_paths: The source brief grants docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py, the results JSON, evidence HTML and figure directory; git diff c013a8b1c197896acb5da5af3f945eabd4fd6592..5b3eb857028240e8eb4cb310e1d7a60c8379a09f changes only the first three granted paths.\nVERDICT manifest: Read the source run manifest.md:5-29; it records 5b3eb857028240e8eb4cb310e1d7a60c8379a09f, a rescore at EXIT=0, red and green controls, and empty baseline_suite and after_suite fields.\nVERDICT diff: Read commit 5b3eb857028240e8eb4cb310e1d7a60c8379a09f against parent c013a8b1c197896acb5da5af3f945eabd4fd6592; it adds decision and isolated contradiction assertions in docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:430-504 and updates the stored results and HTML claim.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:454-493 checks the production aggregate decision for planted contradictions and for an isolated contradiction while the existing golden B figures remain in srtj-docs-measure.html:5-10.\nSCORE evidence: 17\nJUSTIFICATION evidence: repair-parent-negative-retry.log reproduces the missing guard at EXIT=1, veto-production-mutation.log refuses removal of the production reject branch at EXIT=1, and repair-rescore.log confirms the stored result at EXIT=0; manifest.md:21-22 supplies no paired suite delta.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff c013a8b1c197896acb5da5af3f945eabd4fd6592..5b3eb857028240e8eb4cb310e1d7a60c8379a09f touches only the three declared measurement paths and adds no runtime code outside them.\nSCORE durability: 19\nJUSTIFICATION durability: docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:483-492 raises when a sole contradictory claim or a vetoed planted copy fails to reject; veto-production-mutation.log demonstrates the production reject-branch regression makes the new assertion fail.\nSCORE fit: 19\nJUSTIFICATION fit: docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:477-482 reuses the existing aggregate_docs_review interface and the changed source adds no forbidden plan-labelled symbol or filename.\nSCORE reuse: 20\nJUSTIFICATION reuse: docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:454,477 calls the existing aggregate_docs_review owner at imas_codex/standard_names/review/jev_review.py:609 rather than adding a competing decision implementation.\n",
+  "review_run_id": "r-20261017T141932489027-review-of-srtj-docs-measure-5b3eb8570282",
+  "reviewed_base_sha": "c013a8b1c197896acb5da5af3f945eabd4fd6592",
+  "reviewed_head_sha": "5b3eb857028240e8eb4cb310e1d7a60c8379a09f",
+  "reviewed_run_id": "r-20261017T132801990827-srtj-docs-measure",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T14:22:08Z",
+  "total": 114
+}
