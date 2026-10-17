@@ -1,0 +1,231 @@
+<section>
+  <h2 id="shc-potential-rename">The two plasma potential names take the family's bare form</h2>
+  <p id="shc-potential-rename-summary">
+    The two potential identities that re-exhausted on a redundant
+    <code>plasma_</code> qualifier now carry the family's bare
+    <code>electrostatic_potential_at_&lt;locus&gt;</code> form:
+    <code>plasma_electrostatic_potential_at_outboard_midplane</code> →
+    <code>electrostatic_potential_at_outboard_midplane</code> and
+    <code>plasma_electrostatic_potential_at_wall</code> →
+    <code>electrostatic_potential_at_wall</code>. <strong>Spend: USD 0.00</strong>
+    (the sanctioned route is an atomic graph fold, which draws no review quorum).
+    Both bare names are live (<code>name_stage=reviewed</code>,
+    <code>validation_status=valid</code>) and each old spelling is superseded with
+    its successor recorded, so both can re-enter the potential family's
+    revalidation.
+  </p>
+
+  <h3 id="shc-potential-rename-route">The route: <code>sn edit --rename</code> is refused, <code>sn supersede</code> is the sanctioned fold</h3>
+  <p id="shc-potential-rename-route-body">
+    Both target names <em>already exist</em> in the graph as
+    <code>name_stage=superseded</code> tombstones — they are the ancestors the
+    two <code>plasma_</code> names were refined <em>from</em>. The brief's route,
+    <code>sn edit --rename OLD:NEW</code>, is therefore refused by design: the
+    rename collision check protects the occupied id. Both dry runs are recorded
+    below. The refusal is the check the brief's step 1 asked for ("confirm that
+    neither new name already exists") returning negative, and the command's own
+    refusal names the sanctioned alternate — the fold
+    <code>sn supersede OLD --into NEW</code> (also the repair the
+    <code>sn-edit</code> skill documents for "the target id already exists").
+  </p>
+  <p id="shc-potential-rename-rename-refusal">
+    <code>sn edit</code> dry runs, both <code>EXIT=2</code> /
+    <code>BLOCKED</code>:
+  </p>
+  <ul id="shc-potential-rename-rename-refusal-logs">
+    <li><code>sn edit plasma_electrostatic_potential_at_outboard_midplane --rename electrostatic_potential_at_outboard_midplane --dry-run</code> → <code>BLOCKED: a StandardName 'electrostatic_potential_at_outboard_midplane' already exists</code> — log <code>dryrun-midplane.log</code></li>
+    <li><code>sn edit plasma_electrostatic_potential_at_wall --rename electrostatic_potential_at_wall --dry-run</code> → <code>BLOCKED: a StandardName 'electrostatic_potential_at_wall' already exists</code> — log <code>dryrun-wall-edit.log</code></li>
+  </ul>
+  <p id="shc-potential-rename-fold-why">
+    The fold is admitted because each tombstone's successor lineage
+    <em>closes back onto the name being folded</em>
+    (<code>_fold_tombstone_target_reason</code> / <code>_fold_lineage_walk</code>):
+    the requested spelling and the exhausted spelling are one identity at two
+    spellings, not a third identity being taken. Neither tombstone carries a
+    producer, a parent or a child, so it is a free identity for re-occupation.
+    The wall chain is
+    <code>electrostatic_potential_at_wall</code> →
+    <code>electrostatic_potential_at_first_wall</code> →
+    <code>plasma_electrostatic_potential_at_first_wall</code> →
+    <code>plasma_electrostatic_potential_at_wall</code> before folding; the
+    midplane tombstone is the exhausted name's direct
+    <code>REFINED_FROM</code> predecessor.
+  </p>
+
+  <h3 id="shc-potential-rename-before">Before (read 2026-10-17, ahead of the fold.
+    <code>before-read.log</code>)</h3>
+  <table id="shc-potential-rename-before-table">
+    <thead>
+      <tr><th>identity</th><th>name_stage</th><th>docs_stage</th><th>validation_status</th><th>score_name</th><th>refine_stop_reason</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>exhausted</code></td><td><code>pending</code></td><td><code>valid</code></td>
+        <td>0.7625</td><td><code>attempts_exhausted</code> (refine_attempts=3)</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_wall</code></td>
+        <td><code>exhausted</code></td><td><code>pending</code></td><td><code>valid</code></td>
+        <td>0.7375</td><td><code>attempts_exhausted</code> (refine_attempts=3)</td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_outboard_midplane</code> (tombstone)</td>
+        <td><code>superseded</code></td><td><code>pending</code></td><td><code>valid</code></td>
+        <td>0.6125</td><td><code>superseded_from_stage=refining</code></td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_wall</code> (tombstone)</td>
+        <td><code>superseded</code></td><td><code>accepted</code></td><td><code>valid</code></td>
+        <td>0.825</td><td><code>superseded_from_stage=refining</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-potential-rename-before-rels">
+    Relationship read of each old name (<code>before-read.log</code>): the only
+    producer-ward edges are <code>FOR_STANDARD_NAME</code> from <strong>LLMCost</strong>
+    accounting nodes (LLMCost is not an identity source); <code>PRODUCED_NAME</code>
+    producer count is <strong>0</strong> for both, confirming the brief's
+    "neither has a producer". Each carries <code>HAS_UNIT → V</code>,
+    <code>HAS_REVIEW</code> (six name-axis review records), and
+    <code>HAS_INTERNAL_CHANGE</code> records. Neither carries a
+    <code>HAS_PARENT</code> edge, so both are leaves (default rename scope
+    <code>--scope self</code>; the shared-base guard did not fire because
+    <code>plasma</code> sits in a qualifier slot, not the physical base token).
+  </p>
+
+  <h3 id="shc-potential-rename-dryrun">The fold: dry runs, commands and logs</h3>
+  <table id="shc-potential-rename-dryrun-table">
+    <thead>
+      <tr><th>step</th><th>command</th><th>log</th><th>result</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>dry run (midplane)</td>
+        <td><code>sn supersede plasma_electrostatic_potential_at_outboard_midplane --into electrostatic_potential_at_outboard_midplane --dry-run</code></td>
+        <td><code>supersede-dryrun-midplane.log</code></td>
+        <td><code>EXIT=0</code>; <code>would supersede …</code>; sources to carry: 0</td>
+      </tr>
+      <tr>
+        <td>dry run (wall)</td>
+        <td><code>sn supersede plasma_electrostatic_potential_at_wall --into electrostatic_potential_at_wall --dry-run</code></td>
+        <td><code>supersede-dryrun-wall.log</code></td>
+        <td><code>EXIT=0</code>; <code>would supersede …</code>; sources to carry: 0</td>
+      </tr>
+      <tr>
+        <td>apply (midplane)</td>
+        <td><code>sn supersede plasma_electrostatic_potential_at_outboard_midplane --into electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>supersede-apply-midplane.log</code></td>
+        <td><code>EXIT=0</code>; old <code>exhausted → superseded</code>; sources carried: 0</td>
+      </tr>
+      <tr>
+        <td>apply (wall)</td>
+        <td><code>sn supersede plasma_electrostatic_potential_at_wall --into electrostatic_potential_at_wall</code></td>
+        <td><code>supersede-apply-wall.log</code></td>
+        <td><code>EXIT=0</code>; old <code>exhausted → superseded</code>; sources carried: 0</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-potential-rename-logs-note">
+    Every command is logged under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103312335949-shc-potential-rename/</code>,
+    each carrying its literal command as the first line and its
+    <code>EXIT=</code> status as the last. Each was run against the main
+    checkout's code
+    (<code>PYTHONPATH=/home/ITER/mcintos/Code/imas-codex</code>,
+    <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv</code>).
+    No direct Cypher write was issued: the fold is a single atomic transaction
+    (<code>supersede_into</code>) with a typed before/after receipt and a
+    postflight exact-state proof.
+  </p>
+
+  <h3 id="shc-potential-rename-after">After (read back, <code>after-read.log</code> / <code>after-probe.log</code>)</h3>
+  <table id="shc-potential-rename-after-table">
+    <thead>
+      <tr><th>identity</th><th>name_stage</th><th>docs_stage_after</th><th>validation_status</th><th>score_name</th><th>successor recorded</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>electrostatic_potential_at_outboard_midplane</code></td>
+        <td><strong><code>reviewed</code></strong></td><td><code>pending</code></td><td><code>valid</code></td>
+        <td>0.6125</td><td>—</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>superseded</code></td><td><code>pending</code></td><td><code>valid</code></td>
+        <td>0.7625</td>
+        <td><code>REFINED_FROM → electrostatic_potential_at_outboard_midplane</code></td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_wall</code></td>
+        <td><strong><code>reviewed</code></strong></td><td><code>accepted</code></td><td><code>valid</code></td>
+        <td>0.825</td><td>—</td>
+      </tr>
+      <tr>
+        <td><code>plasma_electrostatic_potential_at_wall</code></td>
+        <td><code>superseded</code></td><td><code>pending</code></td><td><code>valid</code></td>
+        <td>0.7375</td>
+        <td><code>REFINED_FROM → electrostatic_potential_at_wall</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-potential-rename-after-rels">
+    Relationship carry check (<code>after-read.log</code>): each new name carries
+    the identity-bearing edges — <code>HAS_UNIT → V</code>, the threaded
+    successor lineage (<code>old -[REFINED_FROM]-&gt; new</code>), and its own
+    <code>HAS_REVIEW</code> / <code>HAS_INTERNAL_CHANGE</code> set. The fold
+    writes one reciprocal <code>REFINED_FROM</code> edge
+    (<code>new -[REFINED_FROM]-&gt; old</code>, from
+    <code>MERGE (target)-[:REFINED_FROM]-&gt;(old)</code>) so that the pair
+    resolves forward in both directions; this is the fold's own declared lineage
+    shape for a chain that closes on the folded name, not a stray edge. No
+    identity relationship was left behind on the old name: neither old name had
+    a producer, parent or child to strand, and the fold's receipt records zero
+    sources and zero projections carried because there were none to carry. The
+    old names retain their own <code>HAS_REVIEW</code> and <code>LLMCost</code>
+    records, which are histories of the retired spelling rather than identity
+    edges.
+  </p>
+
+  <h3 id="shc-potential-rename-revalidation">Can each new name enter the potential family's revalidation?</h3>
+  <p id="shc-potential-rename-revalidation-body">
+    <strong>Yes, both.</strong> Family enumeration excludes only
+    <code>name_stage='superseded'</code> members
+    (<code>_LIVE_STAGE_EXCLUSION</code> in
+    <code>imas_codex/standard_names/families.py</code>, applied as
+    <code>coalesce(m.name_stage,'') &lt;&gt; $superseded</code>). Each revived name
+    now rests at <code>name_stage='reviewed'</code> with
+    <code>validation_status='valid'</code> — a live stage — so the potential
+    family no longer meets an exhausted member at these spellings and can
+    enumerate and revalidate them. Revival is deliberately capped one hop short
+    of acceptance (<code>_FOLD_REVIVAL_STAGE_CAP</code>), so the names re-enter
+    the review pipeline without being granted acceptance outright. The old
+    <code>plasma_</code> spellings are now <code>superseded</code> and are
+    excluded from enumeration, which is the intended convergence.
+  </p>
+  <p id="shc-potential-rename-sibling">
+    The family's accepted anchor for this quantity,
+    <code>electrostatic_potential_at_langmuir_probe_position</code>
+    (<code>name_stage=accepted</code>, score 0.99375, docs_stage
+    <code>accepted</code>), is untouched and confirms the bare form both new
+    names now adopt.
+  </p>
+
+  <h3 id="shc-potential-rename-spend">Spend per name</h3>
+  <table id="shc-potential-rename-spend-table">
+    <thead>
+      <tr><th>name folded</th><th>route</th><th>LLM spend</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td><td><code>sn supersede</code> (atomic fold)</td><td>USD 0.00</td></tr>
+      <tr><td><code>plasma_electrostatic_potential_at_wall</code></td><td><code>sn supersede</code> (atomic fold)</td><td>USD 0.00</td></tr>
+      <tr><td colspan="2"><strong>total</strong></td><td><strong>USD 0.00 of the USD 1.00 ceiling</strong></td></tr>
+    </tbody>
+  </table>
+  <p id="shc-potential-rename-spend-note">
+    The fold is a deterministic graph operation with no review quorum, so it
+    draws no LLM spend. The <code>sn edit --rename</code> dry runs were also
+    free (<code>--dry-run</code> executes no review). The ceiling was therefore
+    not the binding constraint; the route was.
+  </p>
+</section>
