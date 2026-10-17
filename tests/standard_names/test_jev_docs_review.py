@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from imas_codex.standard_names.context import conventions_context_for
 from imas_codex.standard_names.docs_gates import HouseStyleFindingClass
 from imas_codex.standard_names.review import jev_review
 from imas_codex.standard_names.review.audits import AuditReport, LintFinding
@@ -95,6 +96,25 @@ def test_docs_state_excludes_selected_registry_opening():
         {
             "id": "flux_surface_averaged_argon_density_at_plasma_boundary",
             "documentation": "Number density of argon\n\nThe density is positive.",
+        }
+    )
+    assert state["documentation_claims"] == ["The density is positive"]
+
+
+def test_docs_state_excludes_rendered_template_note():
+    conventions = conventions_context_for(
+        "flux_surface_averaged_argon_density_at_plasma_boundary"
+    )
+    conventions["templates"][0]["note"] = "The {subject} population is distinct."
+    state = jev_review.build_docs_state(
+        {
+            "id": "flux_surface_averaged_argon_density_at_plasma_boundary",
+            "documentation": (
+                "Number density of argon\n\n"
+                "The argon population is distinct.\n\n"
+                "The density is positive."
+            ),
+            "conventions": conventions,
         }
     )
     assert state["documentation_claims"] == ["The density is positive"]

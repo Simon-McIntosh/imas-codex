@@ -503,8 +503,14 @@ def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
         if pattern is not None and pattern.fullmatch(opening):
             texts.append(opening)
         note = getattr(template, "note", None)
-        if note and str(note) in documentation:
-            texts.append(str(note))
+        if note:
+            note_pattern = _template_opening_pattern(str(note))
+            if note_pattern is not None:
+                texts.extend(
+                    line.strip()
+                    for line in documentation.splitlines()
+                    if note_pattern.fullmatch(line.strip())
+                )
     for concept in conventions.concepts:
         sentence = locus_definition_sentence(concept)
         if sentence and sentence in documentation:
