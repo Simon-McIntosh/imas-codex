@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T104250254728-srtj-docs-claims-build/sentence-rule-committed-gate.log",
+    "passed": 62,
+    "revision": "bf022046215bf9477825c8740e26343456556d89",
+    "summary": "62 passed, 1 warning in 12.07s"
+  },
+  "base_log_revision": "3216eddd72bfbd8cbf13c2674bccb24b131041fb",
+  "baseline_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T104250254728-srtj-docs-claims-build/review-head-gate.log",
+    "passed": 62,
+    "revision": "3216eddd72bfbd8cbf13c2674bccb24b131041fb",
+    "summary": "62 passed, 1 warning in 12.36s"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T11:57:27.930Z",
+  "dispatched_at": "2026-10-17T11:46:20Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "534",
+      "severity": "follow-on",
+      "text": "follow-on: the brief defines a claim as a sentence \"or a clause joined by a conjunction\", and the landed splitter returns whole sentences only, so a conjoined sentence contributes one Choice and a clause-level mismatch cannot surface as its own answer; plan \u00a74 states only that code splits the documentation into claims, which sentence scope satisfies, but the brief's parenthetical is a stated requirement the landed code does not implement."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T104250254728-srtj-docs-claims-build/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are empty in the source manifest, so the added-failure delta and the base/head gate revisions are read from the named gate logs rather than from the fields the manifest contract declares for them."
+    }
+  ],
+  "head_log_revision": "bf022046215bf9477825c8740e26343456556d89",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production call site reaches the documentation axis at the reviewed head: split_documentation_claims, build_docs_state, docs_question_table and aggregate_docs_review appear only in jev_review.py and its test file.",
+    "diff": "Two commits were gained on the base: 3120c7f52 rewrites split_documentation_claims to sentence scope and updates the fixtures, and bf022046215b changes only the evidence fragment's data attributes.",
+    "done_when": "The brief's measure is the three focused test files plus a recorded veto mutation; sentence-rule-committed-gate.log records 62 passed with EXIT=0 at bf022046215b and negative-control-current.log records the veto-removed test failing with EXIT=1.",
+    "goal": "The source brief asks for deterministic claim splitting, one Choice per claim against the DD source, a contradiction veto, three categorising questions and house-style named checks; jev_review.py:511-538 builds the splitter and jev_review.py:609-691 builds the veto, so the goal is met except that claims are sentences rather than clauses joined by a conjunction.",
+    "manifest": "Read; it lists the eleven commits, the 62-to-62 focused gate, the red and green sentence fixtures and the veto mutation, but its baseline_suite and after_suite keys are empty, so the gate numbers come from the named logs instead.",
+    "write_paths": "The brief grants jev_review.py, review_checks.yaml, tests/standard_names/test_jev_docs_review.py and the evidence fragment, and the 1f90e66c6d..bf022046215b diff changes only the first, third and fourth paths."
+  },
+  "justifications": {
+    "durability": "test_jev_docs_review.py:21-24 reddens if the splitter reintroduces clause splitting, and sentence-rule-red.log shows the four sentence fixtures failing with EXIT=1 at the previous head before passing at the landed one.",
+    "evidence": "sentence-rule-committed-gate.log records 62 passed with EXIT=0 at bf022046215b, but the manifest's baseline_suite and after_suite are empty and the veto control in negative-control-current.log was measured at a54bf880 rather than at the landed head.",
+    "fit": "jev_review.py:511-538 names the splitter by behaviour and keeps its regexes beside the module's existing markup patterns, carrying no plan, sprint or ticket label.",
+    "goal_fidelity": "jev_review.py:534 keeps each sentence as one claim, so the brief's \"clauses joined by a conjunction\" is not split, while plan \u00a74's \"splits the documentation into claims\" is satisfied.",
+    "reuse": "The capability search over imas_codex/ found only purpose-specific sentence splits at docs_gates.py:727 and audits.py:937, neither of which handles registry text or math, so jev_review.py:511 extends the module's own claim splitter rather than forking one.",
+    "scope_discipline": "The 1f90e66c6d..bf022046215b diff changes only jev_review.py, tests/standard_names/test_jev_docs_review.py and the declared evidence fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks for deterministic claim splitting, one Choice per claim against the DD source, a contradiction veto, three categorising questions and house-style named checks; jev_review.py:511-538 builds the splitter and jev_review.py:609-691 builds the veto, so the goal is met except that claims are sentences rather than clauses joined by a conjunction.\nVERDICT done_when: The brief's measure is the three focused test files plus a recorded veto mutation; sentence-rule-committed-gate.log records 62 passed with EXIT=0 at bf022046215b and negative-control-current.log records the veto-removed test failing with EXIT=1.\nVERDICT write_paths: The brief grants jev_review.py, review_checks.yaml, tests/standard_names/test_jev_docs_review.py and the evidence fragment, and the 1f90e66c6d..bf022046215b diff changes only the first, third and fourth paths.\nVERDICT manifest: Read; it lists the eleven commits, the 62-to-\u2026 focused gate, the red and green sentence fixtures and the veto mutation, but its baseline_suite and after_suite keys are empty, so the gate numbers come from the named logs instead.\nVERDICT diff: Two commits were gained on the base: 3120c7f52 rewrites split_documentation_claims to sentence scope and updates the fixtures, and bf022046215b changes only the evidence fragment's data attributes.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: jev_review.py:534 keeps each sentence as one claim, so the brief's \"clauses joined by a conjunction\" is not split, while plan \u00a74's \"splits the documentation into claims\" is satisfied.\nSCORE evidence: 16\nJUSTIFICATION evidence: sentence-rule-committed-gate.log records 62 passed with EXIT=0 at bf022046215b, but the manifest's baseline_suite and after_suite are empty and the veto control in negative-control-current.log was measured at a54bf880 rather than at the landed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 1f90e66c6d..bf022046215b diff changes only jev_review.py, tests/standard_names/test_jev_docs_review.py and the declared evidence fragment.\nSCORE durability: 18\nJUSTIFICATION durability: test_jev_docs_review.py:21-24 reddens if the splitter reintroduces clause splitting, and sentence-rule-red.log shows the four sentence fixtures failing with EXIT=1 at the previous head before passing at the landed one.\nSCORE fit: 19\nJUSTIFICATION fit: jev_review.py:511-538 names the splitter by behaviour and keeps its regexes beside the module's existing markup patterns, carrying no plan, sprint or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: The capability search over imas_codex/ found only purpose-specific sentence splits at docs_gates.py:727 and audits.py:937, neither of which handles registry text or math, so jev_review.py:511 extends the module's own claim splitter rather than forking one.\nFINDING imas_codex/standard_names/review/jev_review.py:534 follow-on: the brief defines a claim as a sentence \"or a clause joined by a conjunction\", and the landed splitter returns whole sentences only, so a conjoined sentence contributes one Choice and a clause-level mismatch cannot surface as its own answer; plan \u00a74 states only that code splits the documentation into claims, which sentence scope satisfies, but the brief's parenthetical is a stated requirement the landed code does not implement.\nFINDING manifest.md:21 follow-on: baseline_suite and after_suite are empty in the source manifest, so the added-failure delta and the base/head gate revisions are read from the named gate logs rather than from the fields the manifest contract declares for them.\n",
+  "review_run_id": "r-20261017T114603906199-review-of-srtj-docs-claims-build-bf022046215b",
+  "reviewed_base_sha": "1f90e66c6da07df1506c70bc20d14f2a60ee26d4",
+  "reviewed_head_sha": "bf022046215bf9477825c8740e26343456556d89",
+  "reviewed_run_id": "r-20261017T104250254728-srtj-docs-claims-build",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T11:58:00+00:00",
+  "total": 109
+}
