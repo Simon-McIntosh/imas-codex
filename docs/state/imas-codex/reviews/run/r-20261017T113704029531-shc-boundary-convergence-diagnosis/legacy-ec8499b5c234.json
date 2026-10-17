@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest records no baseline_suite or after_suite gate logs; its probes are not comparable suite arms",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-17T11:38:00Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the only artifact check is a one-off structural assertion over IDs and line count, so there is no committed regression check that would fail if one of the four conclusions stopped matching its evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "commit 4db96a4c452e adds one 244-line evidence fragment; its four sections cite the logged measurements and named code locations, with no product or test changes.",
+    "done_when": "brief.md:47-48 requires four cited answers; readback.log records 17 members, 16 fold receipts, eight reverse pairs, 17 planned calls, and one positive estimator_recipe match, while artifact-check.log records PASS and EXIT=0 but checks structure rather than every causal claim.",
+    "goal": "brief.md:25-48 asks for four bounded diagnoses and smallest repairs; docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:31-239 answers status, reverse links, idempotence, and the prose halt with classifications and next actions.",
+    "manifest": "manifest.md records complete, commit 4db96a4c452e, the changed fragment path, readback.log and artifact-check.log at EXIT=0, and explicitly states no regression test was added for this read-only diagnosis.",
+    "write_paths": "brief.md:52 declares only docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html, and git show 4db96a4c452e changes exactly that path."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:1-244 adds no executable assertions, and the one-off 23-ID check in artifact-check.log would pass if a documented causal explanation became wrong while the IDs remained.",
+    "evidence": "docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:36-55,129-140,159-184,199-214 reproduces positive row counts and the positive prose match from readback.log, but artifact-check.log verifies document structure rather than the cited code mechanisms.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:1-19 uses the evidence-fragment metadata and prefixed anchors, and its source citation labels are confined to documentation rather than new code names.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:31-239 covers all four questions and distinguishes product defects from unfinished data state, while qualifying the unprovable exact status-set time at line 77.",
+    "reuse": "docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:1-244 adds no function, class, or module and references the existing reverse-link reconciliation and stamping owners instead of duplicating them; a search of the existing sn-harmonize-command fragments found no duplicate diagnosis.",
+    "scope_discipline": "git show 4db96a4c452e contains only docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html, the one path declared in brief.md:52."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: brief.md:25-48 asks for four bounded diagnoses and smallest repairs; docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:31-239 answers status, reverse links, idempotence, and the prose halt with classifications and next actions.\nVERDICT done_when: brief.md:47-48 requires four cited answers; readback.log records 17 members, 16 fold receipts, eight reverse pairs, 17 planned calls, and one positive estimator_recipe match, while artifact-check.log records PASS and EXIT=0 but checks structure rather than every causal claim.\nVERDICT write_paths: brief.md:52 declares only docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html, and git show 4db96a4c452e changes exactly that path.\nVERDICT manifest: manifest.md records complete, commit 4db96a4c452e, the changed fragment path, readback.log and artifact-check.log at EXIT=0, and explicitly states no regression test was added for this read-only diagnosis.\nVERDICT diff: commit 4db96a4c452e adds one 244-line evidence fragment; its four sections cite the logged measurements and named code locations, with no product or test changes.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:31-239 covers all four questions and distinguishes product defects from unfinished data state, while qualifying the unprovable exact status-set time at line 77.\nSCORE evidence: 17\nJUSTIFICATION evidence: docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:36-55,129-140,159-184,199-214 reproduces positive row counts and the positive prose match from readback.log, but artifact-check.log verifies document structure rather than the cited code mechanisms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show 4db96a4c452e contains only docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html, the one path declared in brief.md:52.\nSCORE durability: 1\nJUSTIFICATION durability: docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:1-244 adds no executable assertions, and the one-off 23-ID check in artifact-check.log would pass if a documented causal explanation became wrong while the IDs remained.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:1-19 uses the evidence-fragment metadata and prefixed anchors, and its source citation labels are confined to documentation rather than new code names.\nSCORE reuse: 20\nJUSTIFICATION reuse: docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:1-244 adds no function, class, or module and references the existing reverse-link reconciliation and stamping owners instead of duplicating them; a search of the existing sn-harmonize-command fragments found no duplicate diagnosis.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-boundary-convergence-diagnosis.html:19 follow-on: the only artifact check is a one-off structural assertion over IDs and line count, so there is no committed regression check that would fail if one of the four conclusions stopped matching its evidence.\n",
+  "review_run_id": "legacy-ec8499b5c234",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "fb0b964f5569c805545a6c29b68e0ba66e06897e",
+  "reviewed_head_sha": "4db96a4c452e0c1de39ef2004fac96ca63b98d03",
+  "reviewed_run_id": "r-20261017T113704029531-shc-boundary-convergence-diagnosis",
+  "reviewer": "review-of-shc-boundary-convergence-diagnosis-4db96a4c452e",
+  "scores": {
+    "durability": 1,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T11:54:58.785143+00:00",
+  "total": 94
+}
