@@ -1,0 +1,137 @@
+<article id="scg-ids-domain-refresh">
+  <h3>The IDS domain refresh applied the map to the graph</h3>
+
+  <p id="scg-ids-domain-refresh-summary">
+    The corrected IDS-to-domain map is now in the graph, written through one
+    reusable route: <code>imas_codex.graph.build_dd.refresh_physics_domains</code>
+    (<code>build_dd.py</code>), exposed as
+    <code>imas-codex imas dd refresh-domains [--dry-run]</code>. Each IDS's domain
+    is read from <code>physics_categorizer.get_domain_for_ids</code> &mdash; the
+    build's own reader &mdash; not from the JSON, so the route and the build can
+    never disagree, and it writes only where the stored value differs. On each
+    changed IDS's paths it writes the IDS default only on a path that carries no
+    classification, the same <code>domain_source IS NULL</code> guard the build's
+    path upsert applies at <code>build_dd.py:3583</code>.
+  </p>
+
+  <p id="scg-ids-domain-refresh-shape">
+    The apply moved <strong>25 IDS nodes</strong> and
+    <strong>2,399 unclassified paths</strong>. No classified path was touched:
+    over the changed IDSs the paths carrying a <code>domain_source</code> stayed
+    at <strong>17,886</strong> before and after, and their domains are
+    bit-identical (recorded per row in the reversal file below). A second dry run
+    immediately afterwards reported <strong>zero</strong> IDS changes and
+    <strong>zero</strong> path changes.
+  </p>
+
+  <figure>
+    <img src="/imas-codex/figures/sn-catalog-grouping/scg-ids-domain-refresh/ids_moved_by_target.svg" alt="Bar chart of the twenty-five corrected IDS nodes grouped by the domain they moved into">
+    <figcaption>
+      Where the twenty-five corrected IDS nodes land, by target domain.
+      <code>spectroscopy</code> takes six (the four spectrometers, MSE and charge
+      exchange), <code>core_plasma_physics</code> four, <code>fueling</code>
+      three; ten domains take one each. Counts are read from the rows the apply
+      moved.
+    </figcaption>
+  </figure>
+
+  <h4 id="scg-ids-domain-refresh-route-heading">The route</h4>
+  <p id="scg-ids-domain-refresh-route">
+    <code>refresh_physics_domains(client, *, dry_run=False)</code> reads every
+    <code>:IDS</code> node, compares each row's stored <code>physics_domain</code>
+    to the map's target, and returns <code>ids_total</code>,
+    <code>ids_changed</code>, <code>path_changed</code>,
+    <code>path_changed_count</code> and <code>applied_path_count</code>; the last
+    three carry the before and after value of every changed row so the run can be
+    reversed. The two statements it writes set exactly one property each:
+    <code>SET i.physics_domain = row.after</code> over the IDS rows, and
+    <code>SET p.physics_domain = $domain</code> over the guarded path statement.
+    Nothing else is written, so <code>path_count</code>, <code>dd_version</code>
+    and the lifecycle fields keep their values. Each statement was checked with
+    <code>EXPLAIN</code> against the live graph.
+  </p>
+
+  <h4 id="scg-ids-domain-refresh-changes-heading">The twenty-five rows moved</h4>
+  <table id="scg-ids-domain-refresh-changes">
+    <thead>
+      <tr><th>IDS</th><th>domain before</th><th>domain after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>amns_data</code></td><td>general</td><td>computational_workflow</td></tr>
+      <tr><td><code>calorimetry</code></td><td>plant_systems</td><td>mechanical_measurement_diagnostics</td></tr>
+      <tr><td><code>charge_exchange</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>core_instant_changes</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      <tr><td><code>core_profiles</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      <tr><td><code>distribution_sources</code></td><td>transport</td><td>fast_particles</td></tr>
+      <tr><td><code>distributions</code></td><td>transport</td><td>fast_particles</td></tr>
+      <tr><td><code>ece</code></td><td>electromagnetic_wave_diagnostics</td><td>radiation_measurement_diagnostics</td></tr>
+      <tr><td><code>gas_injection</code></td><td>plant_systems</td><td>fueling</td></tr>
+      <tr><td><code>gyrokinetics</code></td><td>turbulence</td><td>gyrokinetics</td></tr>
+      <tr><td><code>gyrokinetics_local</code></td><td>turbulence</td><td>gyrokinetics</td></tr>
+      <tr><td><code>mse</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>neutron_diagnostic</code></td><td>particle_measurement_diagnostics</td><td>neutronics</td></tr>
+      <tr><td><code>pellets</code></td><td>plant_systems</td><td>fueling</td></tr>
+      <tr><td><code>plasma_initiation</code></td><td>machine_operations</td><td>plasma_initiation</td></tr>
+      <tr><td><code>plasma_profiles</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      <tr><td><code>radiation</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      <tr><td><code>runaway_electrons</code></td><td>transport</td><td>runaway_electrons</td></tr>
+      <tr><td><code>spectrometer_mass</code></td><td>particle_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>spectrometer_uv</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>spectrometer_visible</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>spectrometer_x_ray_crystal</code></td><td>radiation_measurement_diagnostics</td><td>spectroscopy</td></tr>
+      <tr><td><code>spi</code></td><td>plant_systems</td><td>fueling</td></tr>
+      <tr><td><code>thomson_scattering</code></td><td>radiation_measurement_diagnostics</td><td>particle_measurement_diagnostics</td></tr>
+      <tr><td><code>waves</code></td><td>auxiliary_heating</td><td>waves</td></tr>
+    </tbody>
+  </table>
+
+  <h4 id="scg-ids-domain-refresh-counts-heading">Counts</h4>
+  <ul id="scg-ids-domain-refresh-counts">
+    <li>dry run 1: <strong>87</strong> IDS nodes read, <strong>25</strong> changed, <strong>2,399</strong> unclassified paths to move, <code>EXIT=0</code>.</li>
+    <li>apply: <strong>25</strong> IDS writes, <strong>2,399</strong> path writes (<code>applied_path_count=2399</code>), <code>EXIT=0</code>.</li>
+    <li>read-back: 87 IDS nodes read, IDS nodes not carrying their target after the apply: <code>[]</code>.</li>
+    <li>dry run 2 (immediately after the apply): <strong>0</strong> IDS changes, <strong>0</strong> path changes.</li>
+    <li>classified paths over the changed IDSs: <strong>17,886</strong> before and <strong>17,886</strong> after &mdash; none moved.</li>
+  </ul>
+
+  <p id="scg-ids-domain-refresh-reversal">
+    Every changed row's before and after value is saved as a reversal record in
+    <code>docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-refresh-rows.json</code>
+    &mdash; 25 IDS rows and 2,399 path rows as
+    <code>[id, before, after]</code>. Reversing means setting each IDS node and
+    each path back to its <code>before</code> value.
+  </p>
+
+  <h4 id="scg-ids-domain-refresh-gate-heading">Gate</h4>
+  <p id="scg-ids-domain-refresh-gate-note">
+    The gate is the new test file plus every <code>tests/graph</code> file that
+    imports <code>build_dd</code>, run with <code>-m graph</code> where they are
+    graph-marked. Both arms carry the literal command on their first line and a
+    final <code>EXIT=</code> line. Logs live in the run directory
+    <code>~/.config/reckon/crew/runs/r-20261016T105536475867-scg-ids-domain-refresh/</code>.
+  </p>
+  <ul id="scg-ids-domain-refresh-gate-results">
+    <li>default-tier arms: base <strong>1 failed, 161 passed</strong>; head <strong>1 failed, 163 passed</strong> &mdash; <strong>0 added failures</strong> (<code>base-arm.log</code>, <code>head-arm.log</code>).</li>
+    <li>mocked statement tests at head: <strong>2 passed</strong>, <code>EXIT=0</code> (<code>mocked-head.log</code>).</li>
+    <li>negative control (the <code>domain_source IS NULL</code> guard removed): <strong>2 failed</strong>, <code>EXIT=1</code> (<code>negative-control.log</code>).</li>
+    <li>graph-marked gate over the <code>build_dd</code>-importing files: base <strong>2 failed, 117 passed</strong>; head <strong>2 failed, 118 passed</strong> &mdash; <strong>0 added failures</strong> (<code>base-arm-graph.log</code>, <code>graph-gate.log</code>).</li>
+    <li>whole <code>tests/graph</code> under <code>-m graph</code>: base <strong>15 failed, 277 passed</strong>; head <strong>15 failed, 278 passed</strong> &mdash; the same fifteen ids, <strong>0 added failures</strong> (<code>base-arm-graph-full.log</code>, <code>head-arm-graph-full.log</code>).</li>
+    <li>figure render check: the SVG rendered to a PNG and read back &mdash; 13 labelled bars, no clipped or overlapping text, no label on data; in-figure bbox assert passed (<code>figure-render.log</code>).</li>
+  </ul>
+
+  <h4 id="scg-ids-domain-refresh-preexisting-heading">Pre-existing failures, not this node's</h4>
+  <p id="scg-ids-domain-refresh-preexisting">
+    Both arms fail the same ids, so none is added by this change. The
+    default-tier arm fails
+    <code>tests/graph/test_dd_path_domain_upsert.py::test_path_upsert_keeps_classified_domain_and_defaults_unclassified_path</code>,
+    which asserts a <code>core_profiles</code> path still defaults to
+    <code>transport</code> &mdash; stale against the map now that the IDS's domain
+    is <code>core_plasma_physics</code>; it goes red at the base revision too, so
+    it belongs to the map write, not to this route. The graph-marked arm's
+    failures are live-graph state: the two COCOS completeness and cluster-span
+    tests (a concurrent COCOS node is working in that area), plus data-quality,
+    schema-compliance, grammar-compliance, referential-integrity and
+    standard-name integrity tests that read the shared graph. All fail at the
+    base revision.
+  </p>
+</article>

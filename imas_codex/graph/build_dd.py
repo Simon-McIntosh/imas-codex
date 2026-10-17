@@ -28,6 +28,7 @@ import re
 from collections.abc import Callable
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any
 
 import imas
 import numpy as np
@@ -3386,6 +3387,100 @@ def _batch_upsert_ids_nodes(
             ids_list=ids_list,
             version=version,
         )
+
+
+def refresh_physics_domains(
+    client: GraphClient,
+    *,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Apply the current IDS-to-domain map to the graph.
+
+    The map read by the DD build (``physics_categorizer``) is the single source
+    for each IDS's domain. This reads what the graph stores and moves only what
+    differs:
+
+    - a changed IDS node's ``physics_domain``;
+    - on each such IDS's IMASNode paths, the IDS default only where the path
+      carries no classification (``domain_source IS NULL``), the same guard the
+      build's path upsert applies.
+
+    No other property is written, so ``path_count``, ``dd_version`` and the
+    lifecycle fields keep their values. Returns the counts and the before and
+    after value of every changed row, so the write can be reversed.
+    """
+    ids_rows = client.query(
+        """
+        MATCH (i:IDS)
+        RETURN i.id AS id, i.physics_domain AS domain
+        ORDER BY i.id
+        """
+    )
+
+    changed_ids: list[dict[str, Any]] = []
+    for row in ids_rows:
+        target = physics_categorizer.get_domain_for_ids(row["id"]).value
+        if target != row.get("domain"):
+            changed_ids.append(
+                {"id": row["id"], "before": row.get("domain"), "after": target}
+            )
+
+    path_rows: list[dict[str, Any]] = []
+    for row in changed_ids:
+        for path in client.query(
+            """
+            MATCH (p:IMASNode {ids: $ids})
+            WHERE p.domain_source IS NULL
+              AND (p.physics_domain IS NULL OR p.physics_domain <> $domain)
+            RETURN p.id AS id, p.physics_domain AS before
+            ORDER BY p.id
+            """,
+            ids=row["id"],
+            domain=row["after"],
+        ):
+            path_rows.append(
+                {
+                    "id": path["id"],
+                    "ids": row["id"],
+                    "before": path.get("before"),
+                    "after": row["after"],
+                }
+            )
+
+    applied_path_count = 0
+    if not dry_run:
+        if changed_ids:
+            client.query(
+                """
+                UNWIND $rows AS row
+                MATCH (i:IDS {id: row.id})
+                SET i.physics_domain = row.after
+                """,
+                rows=changed_ids,
+            )
+        for row in changed_ids:
+            result = client.query(
+                """
+                MATCH (p:IMASNode {ids: $ids})
+                WHERE p.domain_source IS NULL
+                  AND (p.physics_domain IS NULL OR p.physics_domain <> $domain)
+                SET p.physics_domain = $domain
+                RETURN count(p) AS changed
+                """,
+                ids=row["id"],
+                domain=row["after"],
+            )
+            if result:
+                applied_path_count += result[0].get("changed", 0)
+
+    return {
+        "dry_run": dry_run,
+        "ids_total": len(ids_rows),
+        "ids_changed": changed_ids,
+        "path_changed": path_rows,
+        "path_changed_count": len(path_rows),
+        "applied_path_count": applied_path_count,
+    }
 
 
 def _classify_node(
