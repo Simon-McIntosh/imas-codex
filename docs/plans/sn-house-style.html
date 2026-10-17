@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="63">
 <meta name="plan-modified" content="2026-10-17">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -477,6 +477,12 @@
 </div>
 <div class="r-comment" data-section="s14" data-id="c-close-s14" data-who="reckon-build" data-when="2026-10-17T11:36:00Z">
     <div class="r-comment-body"><p>§14 closed. The docs writer and the house-style gate render and check each template's note through the grammar's <code>template_sentences</code> (commit <code>61321542b</code>, review 115/120), so the near-duplicate sentences reach the documentation. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s14-template-note-writer">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-run-r-20261017T103206216027-shs-template-note-writer" data-who="reckon-build" data-when="2026-10-17T11:20:23.620Z">
+    <div class="r-comment-body"><p>landed a local commit on a detached worktree (61321542b, base 4aff576e8) that switches both registry consumers to the grammar's template_sentences accessor — the writer's _documentation_with_registry_form now writes the selected opening and each selected note once, through _instantiated_template_sentences, and the house-style gate's _template_findings adds a template_note finding for a selected note the documentation omits — with the landing record at docs/evidence/fragments/sn-house-style/shs-template-note-writer.html; no figure is written because the done-when declares no artifact, and no plan HTML, plan meta line or plan version was touched.</p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-run-r-20261017T112103688873-review-of-shs-template-note-writer-61321542b8a1" data-who="reckon-build" data-when="2026-10-17T11:32:51.719Z">
+    <div class="r-comment-body"><p>review of run r-20261017T103206216027-shs-template-note-writer at base 4aff576e85bf head 61321542b8a1 stored a parsed record scoring all six dimensions (goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 19, reuse 20; total 115) with added_failure_count 0 and added_failure_ids [] derived from base-gate.log (84 passed) and after-gate-committed.log (88 passed); the record is at review-records/ inside the reviewed run&#x27;s directory, never in a worktree; one follow-on finding names the raw-note substring check in docs_gates.py:1009.</p></div>
 </div>
 </section>
 </main>
