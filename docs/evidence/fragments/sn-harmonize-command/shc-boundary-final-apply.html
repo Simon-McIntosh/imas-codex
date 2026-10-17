@@ -53,6 +53,37 @@
     estimate would have fitted the ceiling had the apply been allowed to run.
   </p>
 
+  <h3 id="shc-boundary-final-apply-runner">The apply is moved to a long-lived runner</h3>
+  <p id="shc-boundary-final-apply-runner-text">
+    The wall-time bound above is a property of the command, not of the family, so
+    it is answered by giving the apply a runner that outlives a single command
+    rather than by touching the family. On 2026-10-17 the apply was submitted as
+    one batch job — <strong>slurm job 1287983</strong>, partition <code>all</code>,
+    four hours, four CPUs, 16&nbsp;GB — pinned to the same
+    <code>--cost-limit 8.5</code> ceiling and still without <code>--force</code>.
+    It is submitted from inside the fleet allocation (job 1281970 on
+    <code>98dci4-clu-2002</code>); the fleet guard refuses an implicit nested
+    <code>sbatch</code> by default, so the launch is explicit and bound to one
+    task.
+  </p>
+  <p id="shc-boundary-final-apply-runner-rerun">
+    The dry run was re-taken against the main checkout's code before submitting,
+    so the estimate reflects main rather than this worktree. It still lists the
+    17-member family and the same anchor, with
+    <code>decision=apply</code> and no protected-member refusal, and an estimate
+    of <strong>USD 7.20</strong> — below the ceiling. Main's lint path reports
+    <strong>28</strong> where the 2026-10-15 worktree run reported
+    <strong>29</strong> (<code>convention_violation</code> 15 against 17); the
+    family and its anchor are unchanged between the two.
+  </p>
+  <p id="shc-boundary-final-apply-runner-figures">
+    Steps 3 and 4 are therefore reported here only once the job ends: the
+    report's lint count and per-member documentation scores, and the second dry
+    run's call count, will be added with the job's own log and its spend against
+    the ceiling. Until then this section states the runner, and the sections
+    above state the interrupted attempts it replaces.
+  </p>
+
   <h3 id="shc-boundary-final-apply-evidence">Evidence</h3>
   <ul id="shc-boundary-final-apply-evidence-list">
     <li>CLI log (stem <code>sn-harmonize</code>): <code>~/.local/share/imas-codex/logs/sn_sn-harmonize.log</code>.</li>
