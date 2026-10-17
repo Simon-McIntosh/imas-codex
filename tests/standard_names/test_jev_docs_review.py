@@ -54,6 +54,17 @@ def test_declarative_sentence_with_unlisted_verb_is_a_claim():
     ]
 
 
+def test_coordinated_noun_phrase_stays_one_claim():
+    assert jev_review.split_documentation_claims(
+        "The density of hydrogen and the density of deuterium are measured together."
+    ) == ["The density of hydrogen and the density of deuterium are measured together"]
+
+
+def test_math_removal_does_not_leave_a_fragment_claim():
+    assert jev_review.split_documentation_claims("The relation is $n = N/V$.") == []
+    assert jev_review.split_documentation_claims("The density is $n<0$.") == []
+
+
 def test_claim_splitter_excludes_registry_text_and_equations_but_keeps_prose():
     opening = "Number density of argon"
     note = "This form distinguishes the cold population."
@@ -72,7 +83,6 @@ def test_claim_splitter_excludes_registry_text_and_equations_but_keeps_prose():
     ) == [
         "The density is measured locally",
         "the profile is radial",
-        "The relation is",
         "The related quantity is argon density",
         "The density increases at the edge",
     ]
