@@ -10311,6 +10311,30 @@ def _canonical_docs_review_item(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _bound_docs_review_dd_paths(item: dict[str, Any]) -> list[str]:
+    """List every DD path bound to the name, preserving source order."""
+    bindings = item.get("source_bindings") or []
+    paths = [
+        binding.get("dd_path") or binding.get("source_id") or binding.get("id")
+        for binding in bindings
+        if binding and binding.get("source_type") == "dd"
+    ]
+    if not paths:
+        paths = item.get("source_paths") or []
+        if isinstance(paths, str):
+            try:
+                paths = json.loads(paths)
+            except (json.JSONDecodeError, TypeError):
+                paths = [paths]
+    if isinstance(paths, str):
+        paths = [paths]
+    return list(
+        dict.fromkeys(
+            strip_dd_prefix(path) for path in paths if isinstance(path, str) and path
+        )
+    )
+
+
 def _load_docs_review_source_item(sn_id: str) -> dict[str, Any]:
     """Read the same prompt-bearing projection returned by a docs claim."""
     from imas_codex.graph.client import GraphClient
@@ -10680,8 +10704,22 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         "conditional_exposure": conditional_exposure,
         "escalation_input_token_bound": escalation_input_token_bound,
     }
+    veto_item = _canonical_docs_review_item(prepared_item)
+    veto_item["source_paths"] = _bound_docs_review_dd_paths(veto_item)
+    if veto_item["source_paths"]:
+        from imas_codex.standard_names.review.pipeline import _fetch_review_dd_context
+
+        try:
+            await _asyncio.to_thread(_fetch_review_dd_context, [veto_item])
+        except Exception:
+            logger.warning(
+                "review_docs: DD source batch read failed for %s",
+                veto_item["id"],
+                exc_info=True,
+            )
     return {
         **identity_payload,
+        "veto_item": veto_item,
         "request_identity": _docs_review_request_identity(identity_payload),
         "expected_exposure": sum(exposures),
         "provider_policy_ceiling_is_separate": True,
@@ -10797,6 +10835,134 @@ async def _documentation_banned_prose_note(
     return None
 
 
+async def _documentation_contradiction_note(
+    item: dict[str, Any], mgr: BudgetManager
+) -> str | None:
+    """Compare authored claims with bound DD text before accepting them."""
+    from imas_codex.settings import get_model
+    from imas_codex.standard_names.budget import LLMCostEvent
+    from imas_codex.standard_names.review import jev_review
+
+    required_paths = _bound_docs_review_dd_paths(item)
+    sources = item.get("dd_source_docs") or []
+    if not sources and not required_paths and item.get("dd_documentation"):
+        sources = [{"documentation": item["dd_documentation"]}]
+    present_paths = {
+        strip_dd_prefix(str(source.get("id") or source.get("path") or ""))
+        for source in sources
+    }
+    missing_paths = [path for path in required_paths if path not in present_paths]
+    if missing_paths:
+        logger.warning(
+            "review_docs: DD source text missing for %s at %s",
+            item["id"],
+            ", ".join(missing_paths),
+        )
+        return "DD source text unavailable at " + ", ".join(missing_paths)
+    empty_paths = [
+        str(source.get("id") or source.get("path") or "DD source")
+        for source in sources
+        if not (source.get("documentation") or source.get("description"))
+    ]
+    if empty_paths:
+        logger.warning(
+            "review_docs: DD source text empty for %s at %s",
+            item["id"],
+            ", ".join(empty_paths),
+        )
+        return "DD source text unavailable at " + ", ".join(empty_paths)
+    if not sources:
+        if item.get("source_paths") or item.get("source_bindings"):
+            logger.warning("review_docs: DD source text unavailable for %s", item["id"])
+            return "DD source text unavailable; claim comparison could not run"
+        return None
+
+    states = [
+        jev_review.build_docs_state({**item, "dd_source_docs": [source]})
+        for source in sources
+    ]
+    claims = states[0]["documentation_claims"]
+    if not claims:
+        return None
+    questions = {
+        key: question
+        for key, question in jev_review.docs_question_table(
+            jev_review._default_checks(), claims
+        ).items()
+        if key.startswith("check:claim_contradicts_source:")
+    }
+    lease = mgr.reserve(0.001 * len(sources), phase="review_docs")
+    if lease is None:
+        logger.warning("review_docs: claim comparison unfunded for %s", item["id"])
+        return "claim comparison unavailable: run budget refused the call"
+    try:
+        model = get_model("sn-judge")
+        results, _ = await jev_review.decide_batch(
+            states, questions, model=model, service=jev_review.SERVICE
+        )
+        if len(results) != len(sources):
+            logger.warning("review_docs: claim result count differs for %s", item["id"])
+            return "claim comparison unavailable: Jev omitted a DD source"
+        contradictions = []
+        unavailable = []
+        for source, state, result in zip(sources, states, results, strict=True):
+            source_path = str(source.get("id") or source.get("path") or "DD source")
+            if result is None:
+                unavailable.append(source_path)
+                continue
+            answers, spent = result
+            lease.charge_event(
+                spent,
+                LLMCostEvent(
+                    model=model,
+                    tokens_in=0,
+                    tokens_out=0,
+                    sn_ids=(item["id"],),
+                    phase="review_docs",
+                ),
+            )
+            verdict = jev_review.aggregate_docs_review(
+                state, jev_review._default_checks(), answers
+            )
+            if verdict["contradiction_veto"]:
+                contradicted = [
+                    claim
+                    for claim, answer in zip(
+                        claims, verdict["claim_answers"], strict=True
+                    )
+                    if answer is not None and answer.get("choice") == "contradicts"
+                ]
+                dd_text = source.get("documentation") or source.get("description") or ""
+                contradictions.append(
+                    f"{source_path}: {'; '.join(contradicted)}; DD: {dd_text}"
+                )
+            elif any(
+                answer is None
+                or answer.get("choice") not in {"supports", "says nothing"}
+                for answer in verdict["claim_answers"]
+            ):
+                unavailable.append(source_path)
+        if contradictions:
+            return "contradicts source: " + " | ".join(contradictions)
+        if unavailable:
+            logger.warning(
+                "review_docs: claim answer missing for %s at %s",
+                item["id"],
+                ", ".join(unavailable),
+            )
+            return "claim comparison unavailable at " + ", ".join(unavailable)
+        return None
+    except Exception:
+        logger.warning(
+            "review_docs: claim comparison errored for %s; holding candidate",
+            item["id"],
+            exc_info=True,
+        )
+        return "claim comparison unavailable: Jev error"
+    finally:
+        lease.release_unused()
+
+
 async def process_review_docs_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -10872,18 +11038,30 @@ async def process_review_docs_batch(
             comments_per_dim = quorum["winning_comments_per_dim"]
             conformance_note = _documentation_conformance_note(item)
             prose_note = await _documentation_banned_prose_note(item, mgr)
-            if conformance_note is not None or prose_note is not None:
+            contradiction_note = await _documentation_contradiction_note(
+                request.get("veto_item", item), mgr
+            )
+            if any(
+                note is not None
+                for note in (conformance_note, prose_note, contradiction_note)
+            ):
                 # Clamp below the accept threshold so the document is routed
                 # to refinement as a below-threshold score is, carrying the
                 # finding as the reason the refiner reads.
                 score = min(score, DEFAULT_MIN_SCORE - 0.001)
-                notes = [note for note in (conformance_note, prose_note) if note]
+                notes = [
+                    note
+                    for note in (conformance_note, prose_note, contradiction_note)
+                    if note
+                ]
                 comments = "\n".join(filter(None, (comments, *notes)))
                 comments_per_dim = dict(comments_per_dim or {})
                 if conformance_note is not None:
                     comments_per_dim["registry_conformance"] = conformance_note
                 if prose_note is not None:
                     comments_per_dim["banned_prose"] = prose_note
+                if contradiction_note is not None:
+                    comments_per_dim["contradicts_source"] = contradiction_note
                 logger.info(
                     "review_docs: %s held from acceptance — %s",
                     sn_id,
