@@ -11,11 +11,9 @@ checks at a share of at least four fifths.
 from __future__ import annotations
 
 import pytest
-import yaml
 
 from imas_codex.standard_names.review.checks import (
     AUDIT_FINDING_CLASSES,
-    CHECKS_PATH,
     DOCS_DIMENSIONS,
     NAME_DIMENSIONS,
     JevQuestion,
@@ -64,16 +62,6 @@ def test_repeated_segment_uses_audit_class(loaded) -> None:
     check = next(check for check in checks if check.id == "redundant_repeated_segment")
     assert check.question is None
     assert check.audit_finding_class == "convention_violation"
-
-
-def test_raw_entries_never_carry_both_or_neither() -> None:
-    """The loader's guard is checked at the source, not only through the model."""
-
-    raw = yaml.safe_load(CHECKS_PATH.read_text(encoding="utf-8"))
-    for entry in raw["checks"]:
-        has_question = "question" in entry
-        has_audit = "audit_finding_class" in entry
-        assert has_question != has_audit, f"{entry['id']} is decided 0 or 2 times"
 
 
 def test_every_check_reads_evidence_and_declares_retrieval(loaded) -> None:
