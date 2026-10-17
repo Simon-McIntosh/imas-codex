@@ -120,6 +120,11 @@
     <p><code>ids_domains.json</code> carries the 25 lead-ruled corrections, a recomputed tally (29 domains over 87 IDSs) and revision metadata. <code>tests/core/test_ids_domain_map.py</code> (27 tests) pins enum membership, the tally and every ruled row, and fails with <code>spi</code> reverted (EXIT=1). The map's reader tests add no failures against base. The coordinator checked independently that only the 25 ruled rows moved. On a DD rebuild, the 25 IDS nodes and the default domain of every unclassified path would be rewritten; paths with a <code>domain_source</code> keep their classifier domain. In the live graph that is 2,399 unclassified paths, against 17,886 classified ones in the same IDSs. Review 113, with two follow-ons: no figure, and a negative-control copy written outside <code>$TMPDIR</code>. Commits <code>edab6da8e</code> and <code>bfaea159e</code>, merge <code>854e3980e</code>.</p><p><a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-ids-map-write.html">fragment</a></p>
   </section>
 
+  <section id="s4-close">
+    <h2>§4 — near-duplicate spellings adjudicated for the WEST roster</h2>
+    <p>Every overlap touching the WEST roster carries a recorded ruling with its pairs: all six were ruled distinct, covering nine pairs (<code>docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-rulings.json</code>, commit <code>3d303d46c</code>). No synonym fold or ISN vocabulary filing was needed inside the roster. Two overlaps are separated by their locus or base definitions alone. The three that needed a separating sentence (cold or hot neutral temperature against neutral temperature, unqualified triangularity against upper and lower, total electron density against thermal and fast) now render through conditioned template notes in ISN <code>templates.yml</code> (imas-standard-names merge <code>e1ea7f1</code>, 2026-10-16), and a test asserts that each renders exactly once, on the names it describes. The remaining 107 overlaps and 207 pairs stay in the worklist (<code>scg-near-duplicate-worklist.html</code>) for the post-WEST pass. The sentences reach imas-codex's rendered documentation at the next ISN release and pin bump; imas-codex pins 0.9.3.</p>
+  </section>
+
 </main>
 </body>
 </html>

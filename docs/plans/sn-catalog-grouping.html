@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-presentation">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-integrity-backlog#s6&quot;,&quot;sn-house-style#s2&quot;],&quot;s7&quot;:[&quot;sn-catalog-grouping#s6&quot;]}">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="115">
+<meta name="plan-version" content="116">
 <meta name="plan-modified" content="2026-10-17">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab,c5e94c099ff238c7925e506686016698bdb04b64,178cfa68ba0e7aae45c0b76ea3ccc0511eb8c07d,02a113fb8754bf9a57a279726afbdf1d85fc57f8">
 </head>
@@ -231,7 +231,7 @@
     </p>
 
     <h2 id="s4">§4 — Near-duplicate spellings, adjudicated once</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Generate the worklist by extending <code>synonym_check</code> in
       <code>imas_codex/standard_names/audits.py</code>, the existing name near-duplicate detector,
@@ -361,6 +361,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-west-rulings-20261013" data-who="reckon-build" data-when="2026-10-13T06:40:00Z">
     <div class="r-comment-body"><p>All six overlaps touching WEST are ruled distinct (commit <code>3d303d46c</code>, <code>docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-rulings.json</code>), covering nine pairs including the non-WEST carbon-velocity pair that shares the locus overlap. No synonym fold or ISN vocabulary filing is needed inside the roster. Two overlaps are separated by their locus or base definitions alone. Three carry a separating sentence for the house-style template of their pattern: cold or hot neutral against the whole population, unqualified triangularity as the mean of upper and lower, and total density as thermal plus fast. Those sentences land in ISN <code>templates.yml</code> with the house-style §3 authoring, and §4 closes when they do. The 107 remaining overlaps stay in the worklist for the post-WEST pass.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-17T22:00:00Z">
+    <div class="r-comment-body"><p>§4 closed. Every WEST overlap carries a ruling (all distinct, nine pairs), and the three separating sentences render in ISN templates (imas-standard-names merge <code>e1ea7f1</code>). They reach imas-codex's rendered docs at the next ISN release and pin bump. 107 overlaps remain in the worklist for the post-WEST pass. <a href="/imas-codex/evidence/archive/sn-catalog-grouping-landed.html#s4-close">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T072746142048-scg-domain-label-sheet" data-who="reckon-build" data-when="2026-10-13T08:02:55.981Z">
     <div class="r-comment-body"><p>Blind physics-domain label sheet at docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet.json holds 20 reference rows (five fixed + fifteen most-DD-bound, one per physical base) and 150 sampled rows split 73 calibration / 77 validation by pattern family, 23 of the sample rows carrying a null stored domain; the stored domains live only in scg-domain-incumbent.json, the 32 ISN physics-domain options are read from the installed ISN package, and a logged check refuses any sheet row carrying a domain field.</p></div>
