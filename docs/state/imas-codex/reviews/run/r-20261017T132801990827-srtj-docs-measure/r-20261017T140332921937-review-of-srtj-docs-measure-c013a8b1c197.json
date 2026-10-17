@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "after_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T132801990827-srtj-docs-measure/rescore-final.log",
+    "revision": "c013a8b1c197896acb5da5af3f945eabd4fd6592",
+    "summary": "rescore reproduced every stored figure"
+  },
+  "base_log_revision": null,
+  "baseline_gate": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-17T14:09:17Z",
+  "dispatched_at": "2026-10-17T14:03:59Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py",
+      "line": "451",
+      "severity": "blocking",
+      "text": "blocking: planted metrics count aggregate_docs_review's contradiction_veto flag but never assert decision == reject; removing the production reject branch at jev_review.py:666 while leaving the flag makes the claimed 60/60 veto result and rescore stay green, contrary to the plan's required veto-removal test."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py",
+      "line": "342",
+      "severity": "follow-on",
+      "text": "follow-on: _score repeats the contradiction veto owned by jev_review.py:638-641, so the measurement can reject an entry even if the production decision stops doing so."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py",
+      "line": "771",
+      "severity": "follow-on",
+      "text": "follow-on: rebuilt calibration metrics and threshold come from the same frozen calibration object used to make the saved values at line 559, so this comparison cannot detect a calibration-only scoring or fitting regression."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are empty, so no added-failure count can be derived from paired source suite logs; the review records it as unknown rather than zero."
+    }
+  ],
+  "head_log_revision": "c013a8b1c197896acb5da5af3f945eabd4fd6592",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production runtime call site reaches the standalone evidence script; the search in imas_codex and scripts found none.",
+    "diff": "Read 6824979786f5, ede14d1b2c0, 52bb273d5a95 and c013a8b1c197 commit by commit; they add and revise the measurement script, then freeze the results, evidence fragment and figure.",
+    "done_when": "The brief requires a logged rescore and the plan requires a test to fail when the veto is removed; rescore-final.log ends EXIT=0, while veto-mutation-control.log changes an answer and ends EXIT=0, leaving the veto-removal condition untested.",
+    "goal": "The source brief requires golden B measurement, a planted confusion table, stability, cost and a deployment verdict; srtj-docs-measure.html:3-11 reports each, but the veto measure does not prove actual rejection.",
+    "manifest": "Read manifest.md:5-29; it lists four commits, frozen receipts and a head rescore, while baseline_suite and after_suite at lines 21-22 are empty.",
+    "write_paths": "The source brief declares the measure script, results JSON, evidence HTML and figure directory; all four paths in the c2992efc71cd..c013a8b1c197 diff are within that scope."
+  },
+  "justifications": {
+    "durability": "srtj-docs-measure-run.py:451-455 and 771 compare stored metrics and the veto flag, so removing the production reject branch while preserving the flag leaves the rescore green.",
+    "evidence": "rescore-final.log records EXIT=0 at c013a8b1c197, whereas veto-mutation-control.log records EXIT=0 for an answer mutation and manifest.md:21-22 supplies no baseline or after suite.",
+    "fit": "srtj-docs-measure-run.py:17-35 uses the shared evaluation and judgment owners and its figure at lines 633-696 follows the repository plot style.",
+    "goal_fidelity": "srtj-docs-measure.html:3-11 reports the requested figures, but srtj-docs-measure-run.py:451-455 measures the veto flag without checking the production rejection.",
+    "reuse": "srtj-docs-measure-run.py:342-343 duplicates the contradiction veto already owned by imas_codex/standard_names/review/jev_review.py:638-641 rather than extending or calling that owner.",
+    "scope_discipline": "git diff c2992efc71cd..c013a8b1c197 changes only the four paths declared by the source brief."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief requires golden B measurement, a planted confusion table, stability, cost and a deployment verdict; srtj-docs-measure.html:3-11 reports each, but the veto measure does not prove actual rejection.\nVERDICT done_when: The brief requires a logged rescore and the plan requires a test to fail when the veto is removed; rescore-final.log ends EXIT=0, while veto-mutation-control.log changes an answer and ends EXIT=0, leaving the veto-removal condition untested.\nVERDICT write_paths: The source brief declares the measure script, results JSON, evidence HTML and figure directory; all four paths in the c2992efc71cd..c013a8b1c197 diff are within that scope.\nVERDICT manifest: Read manifest.md:5-29; it lists four commits, frozen receipts and a head rescore, while baseline_suite and after_suite at lines 21-22 are empty.\nVERDICT diff: Read 6824979786f5, ede14d1b2c0, 52bb273d5a95 and c013a8b1c197 commit by commit; they add and revise the measurement script, then freeze the results, evidence fragment and figure.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: srtj-docs-measure.html:3-11 reports the requested figures, but srtj-docs-measure-run.py:451-455 measures the veto flag without checking the production rejection.\nSCORE evidence: 14\nJUSTIFICATION evidence: rescore-final.log records EXIT=0 at c013a8b1c197, whereas veto-mutation-control.log records EXIT=0 for an answer mutation and manifest.md:21-22 supplies no baseline or after suite.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff c2992efc71cd..c013a8b1c197 changes only the four paths declared by the source brief.\nSCORE durability: 6\nJUSTIFICATION durability: srtj-docs-measure-run.py:451-455 and 771 compare stored metrics and the veto flag, so removing the production reject branch while preserving the flag leaves the rescore green.\nSCORE fit: 18\nJUSTIFICATION fit: srtj-docs-measure-run.py:17-35 uses the shared evaluation and judgment owners and its figure at lines 633-696 follows the repository plot style.\nSCORE reuse: 5\nJUSTIFICATION reuse: srtj-docs-measure-run.py:342-343 duplicates the contradiction veto already owned by imas_codex/standard_names/review/jev_review.py:638-641 rather than extending or calling that owner.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:451 blocking: planted metrics count aggregate_docs_review's contradiction_veto flag but never assert decision == reject; removing the production reject branch at jev_review.py:666 while leaving the flag makes the claimed 60/60 veto result and rescore stay green, contrary to the plan's required veto-removal test.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:342 follow-on: _score repeats the contradiction veto owned by jev_review.py:638-641, so the measurement can reject an entry even if the production decision stops doing so.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:771 follow-on: rebuilt calibration metrics and threshold come from the same frozen calibration object used to make the saved values at line 559, so this comparison cannot detect a calibration-only scoring or fitting regression.\nFINDING manifest.md:21 follow-on: baseline_suite and after_suite are empty, so no added-failure count can be derived from paired source suite logs; the review records it as unknown rather than zero.\n",
+  "review_run_id": "r-20261017T140332921937-review-of-srtj-docs-measure-c013a8b1c197",
+  "reviewed_base_sha": "c2992efc71cd7217c7c9460983b0a9198921d8f8",
+  "reviewed_head_sha": "c013a8b1c197896acb5da5af3f945eabd4fd6592",
+  "reviewed_run_id": "r-20261017T132801990827-srtj-docs-measure",
+  "scores": {
+    "durability": 6,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T14:07:36.390486+00:00",
+  "total": 79
+}
