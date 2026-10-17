@@ -1,0 +1,102 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/head-gate-committed.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Restoring the hardcoded claim options or changing their order independently of the reordered taxonomy makes the expected literal order differ or raises before the assertion.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:200"
+    },
+    {
+      "failure_condition": "Removing the any-part contradiction instruction from the claim criterion removes the independently expected text.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:201"
+    },
+    {
+      "failure_condition": "Restoring a choice-only veto makes both positive veto assertions fail for a supports answer with contradiction probability 0.32; lowering the threshold through 0.04 makes the negative assertion fail.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:277-286"
+    },
+    {
+      "failure_condition": "Omitting the owning house-style audit erases the independently expected flawed finding, while a false positive on the clean entry breaks the clean assertion.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:357-358"
+    },
+    {
+      "failure_condition": "Removing audit input from score components makes clean and flawed scores equal; the source negative-audit-input.log records exactly this red result.",
+      "lines": "tests/standard_names/test_jev_docs_review.py:369"
+    }
+  ],
+  "base_log_revision": "e1c015d0906a705c014cbedeb471f535a305c400",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/base-gate.log",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:10881",
+    "imas_codex/standard_names/workers.py:10889",
+    "imas_codex/standard_names/workers.py:10924"
+  ],
+  "completed_at": "2026-10-17T21:00:51Z",
+  "dispatched_at": "2026-10-17T20:55:48Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "10933",
+      "severity": "follow-on",
+      "text": "follow-on: The new probability veto in jev_review.py:758-768 can reject a claim whose selected choice remains supports, but this runtime caller only collects selected contradictions, so its rejection reason omits the contradictory sentence needed for refinement."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "753",
+      "severity": "follow-on",
+      "text": "follow-on: A caller can pass audit_report=None and still receive a numeric fitted score because missing audit components default to zero, so the score does not distinguish absent deterministic evidence from measured failing checks; current measurement calls pass reports."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-arm.html",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: The 0.30 veto threshold was selected after the one missed planted contradiction, so 60/60 on that same subset verifies the repair but cannot independently support the replace verdict's veto generalisation; run a fresh planted or held-out contradiction cohort."
+    }
+  ],
+  "head_log_revision": "3d41cb0c45ac005648b64ce5902162bb5a96a0f2",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read commits 301800b1, 5472f62f, 5132f338, and 3d41cb0c against base e1c015d0906a705c014cbedeb471f535a305c400 through head 3d41cb0c45ac005648b64ce5902162bb5a96a0f2; jev_review.py:629-768 adds the audit, fitted score, and veto, while the runner, test, fragment, results, and figure contain the measured arm.",
+    "done_when": "The source brief.md requires a score fragment, a house-style regression assertion with audit removal red, and no added docs gate failures; srtj-docs-score-arm.html:5-12, negative-audit-input.log:23-30, base-gate.log:38-40, and head-gate-committed.log:45-47 show those measures, with the planted veto caveat at fragment:10.",
+    "goal": "The source brief.md asks for audit evidence, enriched claims, and calibration-only fitted weights in the Jev arm; jev_review.py:559-755 and srtj-docs-score-arm.html:3-12 deliver and measure them, although the fitted score has no runtime caller.",
+    "manifest": "The source manifest.md records four commits, six changed paths, complete status, base and head gate logs, the negative control, frozen rescore, 0.068551 USD spend, and the post-hoc planted-veto caveat.",
+    "write_paths": "The source brief.md grants jev_review.py, test_jev_docs_review.py, the score fragment, runner, results, and figure directory; git diff e1c015d0906a705c014cbedeb471f535a305c400..3d41cb0c45ac005648b64ce5902162bb5a96a0f2 changes only those six paths."
+  },
+  "justifications": {
+    "durability": "test_jev_docs_review.py:357-369 compares independently audited clean and flawed entries, and negative-audit-input.log shows that omitting the audit makes the score assertion fail; test lines 200-201 and 277-286 also guard option order, contradiction wording, and both sides of the veto threshold.",
+    "evidence": "srtj-docs-score-arm.html:5-12 reports paired gain +0.240 [0.158,0.331], 60/60 planted veto and USD 0.068551 with a same-subset threshold caveat, and base-gate.log plus head-gate-committed.log record the same single failure.",
+    "fit": "jev_review.py:629-680 calls the owning audits and jev_review.py:683-755 follows the adjacent check and score conventions, while its absent-audit default at line 753 needs a guarded result before runtime adoption.",
+    "goal_fidelity": "jev_review.py:629-755 implements the audit-fed fitted score and srtj-docs-score-arm.html:5 reports validation AUC 0.753, while the score itself is reached by the measurement runner at srtj-docs-score-arm-run.py:324.",
+    "reuse": "A capability search found audit composition at review/audits.py:774-808 and the measured bootstrap and receipts at srtj-docs-measure-run.py:71-80,203-255,385-410; jev_review.py:629-680 calls those audit owners and the new runner imports the measured scorer instead of copying it.",
+    "scope_discipline": "git diff e1c015d..3d41cb0c changes only the six paths granted by the source brief.md, including the figure under its granted directory."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md asks for audit evidence, enriched claims, and calibration-only fitted weights in the Jev arm; jev_review.py:559-755 and srtj-docs-score-arm.html:3-12 deliver and measure them, although the fitted score has no runtime caller.\nVERDICT done_when: The source brief.md requires a score fragment, a house-style regression assertion with audit removal red, and no added docs gate failures; srtj-docs-score-arm.html:5-12, negative-audit-input.log:23-30, base-gate.log:38-40, and head-gate-committed.log:45-47 show those measures, with the planted veto caveat at fragment:10.\nVERDICT write_paths: The source brief.md grants jev_review.py, test_jev_docs_review.py, the score fragment, runner, results, and figure directory; git diff e1c015d0906a705c014cbedeb471f535a305c400..3d41cb0c45ac005648b64ce5902162bb5a96a0f2 changes only those six paths.\nVERDICT manifest: The source manifest.md records four commits, six changed paths, complete status, base and head gate logs, the negative control, frozen rescore, 0.068551 USD spend, and the post-hoc planted-veto caveat.\nVERDICT diff: Read commits 301800b1, 5472f62f, 5132f338, and 3d41cb0c against base e1c015d0906a705c014cbedeb471f535a305c400 through head 3d41cb0c45ac005648b64ce5902162bb5a96a0f2; jev_review.py:629-768 adds the audit, fitted score, and veto, while the runner, test, fragment, results, and figure contain the measured arm.\nCALL_SITES: imas_codex/standard_names/workers.py:10881, imas_codex/standard_names/workers.py:10889, imas_codex/standard_names/workers.py:10924\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: jev_review.py:629-755 implements the audit-fed fitted score and srtj-docs-score-arm.html:5 reports validation AUC 0.753, while the score itself is reached by the measurement runner at srtj-docs-score-arm-run.py:324.\nSCORE evidence: 16\nJUSTIFICATION evidence: srtj-docs-score-arm.html:5-12 reports paired gain +0.240 [0.158,0.331], 60/60 planted veto and USD 0.068551 with a same-subset threshold caveat, and base-gate.log plus head-gate-committed.log record the same single failure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff e1c015d..3d41cb0c changes only the six paths granted by the source brief.md, including the figure under its granted directory.\nSCORE durability: 17\nJUSTIFICATION durability: test_jev_docs_review.py:357-369 compares independently audited clean and flawed entries, and negative-audit-input.log shows that omitting the audit makes the score assertion fail; test lines 200-201 and 277-286 also guard option order, contradiction wording, and both sides of the veto threshold.\nSCORE fit: 18\nJUSTIFICATION fit: jev_review.py:629-680 calls the owning audits and jev_review.py:683-755 follows the adjacent check and score conventions, while its absent-audit default at line 753 needs a guarded result before runtime adoption.\nSCORE reuse: 19\nJUSTIFICATION reuse: A capability search found audit composition at review/audits.py:774-808 and the measured bootstrap and receipts at srtj-docs-measure-run.py:71-80,203-255,385-410; jev_review.py:629-680 calls those audit owners and the new runner imports the measured scorer instead of copying it.\nFINDING imas_codex/standard_names/workers.py:10933 follow-on: The new probability veto in jev_review.py:758-768 can reject a claim whose selected choice remains supports, but this runtime caller only collects selected contradictions, so its rejection reason omits the contradictory sentence needed for refinement.\nFINDING imas_codex/standard_names/review/jev_review.py:753 follow-on: A caller can pass audit_report=None and still receive a numeric fitted score because missing audit components default to zero, so the score does not distinguish absent deterministic evidence from measured failing checks; current measurement calls pass reports.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-arm.html:10 follow-on: The 0.30 veto threshold was selected after the one missed planted contradiction, so 60/60 on that same subset verifies the repair but cannot independently support the replace verdict's veto generalisation; run a fresh planted or held-out contradiction cohort.\n",
+  "review_run_id": "r-20261017T205520029346-review-of-srtj-docs-score-arm-3d41cb0c45ac",
+  "reviewed_base_sha": "e1c015d0906a705c014cbedeb471f535a305c400",
+  "reviewed_commits": [
+    "301800b11868ac30b3d4ade1e229557c20bd382b",
+    "5472f62f3ebd84ade66c224ebd80d7b3ef688c5d",
+    "5132f338ed4759c450ad6436b967232cef57e117",
+    "3d41cb0c45ac005648b64ce5902162bb5a96a0f2"
+  ],
+  "reviewed_head_sha": "3d41cb0c45ac005648b64ce5902162bb5a96a0f2",
+  "reviewed_run_id": "r-20261017T200215613429-srtj-docs-score-arm",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T21:02:02.757994+00:00",
+  "total": 108
+}
