@@ -1,5 +1,5 @@
 <section id="shc-three-family-measure">
-  <h2 id="shc-three-family-measure-title">Three-family measure: density apply blocked by a quarantined member</h2>
+  <h2 id="shc-three-family-measure-title">Three-family measure: component complete, density and locus pending</h2>
   <p id="shc-three-family-measure-outcome">
     The USD 8.00 measure remains incomplete. The initial seven-member
     <code>number_density</code> apply was interrupted at the mandatory
@@ -15,7 +15,18 @@
     <code>validation_status=quarantined</code>, with no documentation score.
     The family was not stamped; its second dry run still plans seven calls.
     The locus and component applies were held after this second counted
-    failure, because identity repair lies outside this node's write paths.
+    failure, while identity repair lay outside this node's write paths.
+  </p>
+  <p id="shc-three-family-measure-resumption">
+    On 2026-10-17 the repaired density family had eight live members:
+    six accepted, zero quarantined, two pending. The folded potential family
+    had five: four accepted, zero quarantined, one pending. Vorticity had six
+    accepted and zero quarantined members with clean prose. Its guarded
+    <code>--finalize --dry-run</code> planned zero model calls and four
+    missing reverse pairs. The real finalize added four reverse links,
+    wrote three members, stamped the family, and spent USD 0.00 in
+    17.639 wall seconds. Its report went from five lint findings to zero,
+    and a second apply dry run planned zero calls.
   </p>
   <p id="shc-three-family-measure-authority">
     The threshold is <code>DEFAULT_MIN_SCORE = 0.85</code> in
@@ -34,7 +45,7 @@
     <tbody>
       <tr><td>Species</td><td><code>electron_number_density</code>; <code>total_ion_number_density</code></td><td>7</td><td>7; USD 2.90 before</td><td>Six reviewed; family failed, USD 1.587256 including the interrupted attempt</td></tr>
       <tr><td>Locus</td><td><code>electrostatic_potential</code>; <code>electrostatic_potential_at_langmuir_probe_position</code></td><td>5</td><td>5; USD 2.07 from the live estimate</td><td>Not started</td></tr>
-      <tr><td>Component</td><td><code>parallel_vorticity</code>; <code>vorticity</code></td><td>6</td><td>6; USD 2.48</td><td>Not started</td></tr>
+      <tr><td>Component</td><td><code>parallel_vorticity</code>; <code>vorticity</code></td><td>6</td><td>6; USD 3.72 on the new apply dry run</td><td>Finalized at zero model calls and USD 0.00</td></tr>
     </tbody>
   </table>
   <p id="shc-three-family-measure-component-choice">
@@ -63,7 +74,7 @@
     <tbody>
       <tr><td><code>number_density</code></td><td>convention_violation 3; link_dead_link 1; link_missing_reverse 1</td><td>convention_violation 1; link_missing_reverse 3</td></tr>
       <tr><td><code>electrostatic_potential</code></td><td>defining_equation 1; link_missing_reverse 2</td><td>No apply</td></tr>
-      <tr><td><code>vorticity</code></td><td>link_missing_reverse 4; symbol_definitions 1</td><td>No apply</td></tr>
+      <tr><td><code>vorticity</code></td><td>link_missing_reverse 4; symbol_definitions 1</td><td>clean after finalize</td></tr>
     </tbody>
   </table>
 
@@ -83,22 +94,22 @@
       <tr><td>Locus</td><td><code>floating_electrostatic_potential</code></td><td>0.85000</td><td>no apply</td></tr>
       <tr><td>Locus</td><td><code>plasma_electrostatic_potential_at_outboard_midplane</code></td><td>absent</td><td>no apply</td></tr>
       <tr><td>Locus</td><td><code>plasma_electrostatic_potential_at_wall</code></td><td>absent</td><td>no apply</td></tr>
-      <tr><td>Component</td><td><code>parallel_vorticity</code></td><td>0.91875</td><td>no apply</td></tr>
-      <tr><td>Component</td><td><code>poloidal_vorticity</code></td><td>0.89375</td><td>no apply</td></tr>
-      <tr><td>Component</td><td><code>radial_vorticity</code></td><td>0.93750</td><td>no apply</td></tr>
-      <tr><td>Component</td><td><code>toroidal_vorticity</code></td><td>0.86875</td><td>no apply</td></tr>
-      <tr><td>Component</td><td><code>vertical_vorticity</code></td><td>0.91875</td><td>no apply</td></tr>
-      <tr><td>Component</td><td><code>vorticity</code> (anchor)</td><td>0.96250</td><td>no apply</td></tr>
+      <tr><td>Component</td><td><code>parallel_vorticity</code></td><td>0.91875</td><td>0.91875</td></tr>
+      <tr><td>Component</td><td><code>poloidal_vorticity</code></td><td>0.89375</td><td>0.89375</td></tr>
+      <tr><td>Component</td><td><code>radial_vorticity</code></td><td>0.93750</td><td>0.93750</td></tr>
+      <tr><td>Component</td><td><code>toroidal_vorticity</code></td><td>0.86875</td><td>0.86875</td></tr>
+      <tr><td>Component</td><td><code>vertical_vorticity</code></td><td>0.91875</td><td>0.91875</td></tr>
+      <tr><td>Component</td><td><code>vorticity</code> (anchor)</td><td>0.96250</td><td>0.96250</td></tr>
     </tbody>
   </table>
   <p id="shc-three-family-measure-next">
     The score comparison detects one fall:
     <code>total_ion_number_density</code> moved from 0.98125 to 0.93750, still
     above the 0.85 acceptance threshold. No scored member fell below 0.85,
-    but the quarantined member has no after score. Next action: repair or
-    explicitly remove that exhausted identity from this family before
-    another apply, then repeat the guarded dry run and apply with at most
-    USD 6.412744 remaining. A zero-call second dry run and a WEST limit still
-    require a completed family.
+    but the former quarantined member had no after score in that failed
+    attempt. The repaired density family still has two pending members;
+    potential has one. Their next applies require fresh dry-run estimates
+    within the USD 6.412744 remaining. A completed spending family is still
+    needed to set the WEST limit.
   </p>
 </section>

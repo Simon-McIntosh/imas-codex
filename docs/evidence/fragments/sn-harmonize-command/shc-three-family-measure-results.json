@@ -31,43 +31,43 @@
       "wall_seconds": 673
     },
     {
-      "seed": "electron_number_density",
-      "slurm_job_id": 1286605,
-      "command": "uv run imas-codex sn harmonize --family electron_number_density --apply --cost-limit 7.869964 --json",
-      "slurm_state": "FAILED",
-      "exit_status": 1,
-      "wall_seconds": 1385,
       "anchor_batch": {
-        "stop_reason": "no_eligible_work",
-        "cost_spent_usd": 0.139569,
         "cost_limit_usd": 7.869964,
+        "cost_spent_usd": 0.139569,
         "names_enriched": 1,
         "names_reviewed": 1,
-        "pipeline_elapsed_seconds": 483.730311
+        "pipeline_elapsed_seconds": 483.730311,
+        "stop_reason": "no_eligible_work"
       },
+      "command": "uv run imas-codex sn harmonize --family electron_number_density --apply --cost-limit 7.869964 --json",
+      "exit_status": 1,
+      "failure": "cannot confirm quarantined standard-name identities as valid: volume_averaged_electron_number_density_over_scrape_off_layer",
       "member_batch": {
-        "stop_reason": "no_eligible_work",
-        "cost_spent_usd": 1.317651,
         "cost_limit_usd": 7.730395,
+        "cost_spent_usd": 1.317651,
         "names_enriched": 5,
         "names_reviewed": 5,
-        "pipeline_elapsed_seconds": 744.440299
+        "pipeline_elapsed_seconds": 744.440299,
+        "stop_reason": "no_eligible_work"
       },
-      "receipt_cost_spent_usd": 1.45722,
-      "failure": "cannot confirm quarantined standard-name identities as valid: volume_averaged_electron_number_density_over_scrape_off_layer",
-      "post_attempt_planned_calls": 7,
       "post_attempt_lint": {
         "convention_violation": 1,
         "link_missing_reverse": 3
-      }
+      },
+      "post_attempt_planned_calls": 7,
+      "receipt_cost_spent_usd": 1.45722,
+      "seed": "electron_number_density",
+      "slurm_job_id": 1286605,
+      "slurm_state": "FAILED",
+      "wall_seconds": 1385
     }
   ],
   "budget": {
     "ceiling_usd": 8.0,
-    "reviewed_names": 6,
-    "observed_spend_per_reviewed_name_usd": 0.264543,
     "measured_cost_per_complete_family_name_usd": null,
+    "observed_spend_per_reviewed_name_usd": 0.264543,
     "remaining_usd": 6.412744,
+    "reviewed_names": 6,
     "spent_usd": 1.587256,
     "west_limit_reason": "Six members were reviewed, but the family apply failed and its seven-call dry run remained nonzero. This partial run cannot set a defensible WEST limit.",
     "west_limit_usd": null
@@ -78,6 +78,31 @@
     "reason": "The first available, unharmonized non-WEST component family checked by report and dry run; six calls estimated at USD 2.48, within the approximately USD 3.03 reserved after the other two estimates.",
     "unavailable_candidate": "parallel_current_density"
   },
+  "finalizations": [
+    {
+      "seed": "parallel_vorticity",
+      "kind": "component",
+      "dry_run_planned_calls": 0,
+      "dry_run_missing_reverse_pairs": 4,
+      "stamped": true,
+      "model_calls": 0,
+      "spend_usd": 0.0,
+      "wall_seconds": 17.639,
+      "reverse_links": {
+        "added": 4,
+        "members": 6,
+        "protected": [],
+        "removed": 0,
+        "written": 3
+      },
+      "before_lint": {
+        "link_missing_reverse": 4,
+        "symbol_definitions": 1
+      },
+      "after_lint": {},
+      "second_dry_run_calls": 0
+    }
+  ],
   "families": {
     "electron_number_density": {
       "after_job": {
@@ -92,23 +117,6 @@
           "total_ion_number_density": 0.9375,
           "total_neutral_number_density": 1.0,
           "volume_averaged_electron_number_density_over_scrape_off_layer": null
-        },
-        "score_regressions": {
-          "below_threshold": [],
-          "fell": [
-            {
-              "id": "total_ion_number_density",
-              "before": 0.98125,
-              "after": 0.9375
-            }
-          ]
-        },
-        "unreviewed_member_state": {
-          "id": "volume_averaged_electron_number_density_over_scrape_off_layer",
-          "name_stage": "exhausted",
-          "docs_stage": "pending",
-          "validation_status": "quarantined",
-          "reviewer_score_docs": null
         },
         "estimate_basis": {
           "calls": 29,
@@ -141,7 +149,24 @@
         "physical_base": "number_density",
         "planned_calls": 7,
         "refusals": {},
-        "seed": "electron_number_density"
+        "score_regressions": {
+          "below_threshold": [],
+          "fell": [
+            {
+              "after": 0.9375,
+              "before": 0.98125,
+              "id": "total_ion_number_density"
+            }
+          ]
+        },
+        "seed": "electron_number_density",
+        "unreviewed_member_state": {
+          "docs_stage": "pending",
+          "id": "volume_averaged_electron_number_density_over_scrape_off_layer",
+          "name_stage": "exhausted",
+          "reviewer_score_docs": null,
+          "validation_status": "quarantined"
+        }
       },
       "before": {
         "anchor": "total_ion_number_density",
@@ -283,6 +308,90 @@
       }
     },
     "parallel_vorticity": {
+      "after": {
+        "anchor": "vorticity",
+        "boundary_overlap": [],
+        "decision": "harmonized",
+        "documentation_scores": {
+          "parallel_vorticity": 0.91875,
+          "poloidal_vorticity": 0.89375,
+          "radial_vorticity": 0.9375,
+          "toroidal_vorticity": 0.8687499999999999,
+          "vertical_vorticity": 0.91875,
+          "vorticity": 0.9625
+        },
+        "estimate_basis": {
+          "calls": 29,
+          "mean_usd_per_call": 0.6193,
+          "runs": 15,
+          "total_usd": 17.9598
+        },
+        "estimate_usd": 0.0,
+        "invariant": [
+          "vorticity",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {},
+        "lint_total": 0,
+        "member_status": {
+          "parallel_vorticity": {
+            "docs_stage": "accepted",
+            "id": "parallel_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "poloidal_vorticity": {
+            "docs_stage": "accepted",
+            "id": "poloidal_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "radial_vorticity": {
+            "docs_stage": "accepted",
+            "id": "radial_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "toroidal_vorticity": {
+            "docs_stage": "accepted",
+            "id": "toroidal_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "vertical_vorticity": {
+            "docs_stage": "accepted",
+            "id": "vertical_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "vorticity": {
+            "docs_stage": "accepted",
+            "id": "vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "parallel_vorticity",
+          "poloidal_vorticity",
+          "radial_vorticity",
+          "toroidal_vorticity",
+          "vertical_vorticity",
+          "vorticity"
+        ],
+        "physical_base": "vorticity",
+        "planned_calls": 0,
+        "refusals": {},
+        "seed": "parallel_vorticity",
+        "status_counts": {
+          "accepted": 6,
+          "other": 0,
+          "quarantined": 0
+        }
+      },
       "before": {
         "anchor": "vorticity",
         "boundary_overlap": [],
@@ -357,6 +466,7 @@
     "threshold": 0.85
   },
   "result": {
+    "component_family_complete": true,
     "members_below_threshold_after_completed_apply": null,
     "reason": "The SLURM apply completed six documentation reviews but failed revalidation of a quarantined seventh identity. The family was not stamped, and the second dry run still plans all seven calls.",
     "three_families_applied": false

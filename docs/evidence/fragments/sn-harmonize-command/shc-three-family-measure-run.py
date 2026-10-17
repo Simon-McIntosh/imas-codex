@@ -49,6 +49,31 @@ def snapshot(seed: str, phase: str) -> None:
         if overlap:
             raise RuntimeError(f"family overlaps the boundary apply: {overlap}")
         refusals = preview_recommended_refusals(graph, [plan])[0]
+        states = list(
+            graph.query(
+                """
+                MATCH (member:StandardName)
+                WHERE member.id IN $ids
+                RETURN member.id AS id,
+                       member.name_stage AS name_stage,
+                       member.docs_stage AS docs_stage,
+                       member.validation_status AS validation_status
+                ORDER BY id
+                """,
+                ids=plan["members"],
+            )
+            or []
+        )
+        if {row["id"] for row in states} != set(plan["members"]):
+            raise RuntimeError("the status read missed a family member")
+        accepted = sum(
+            row.get("docs_stage") == "accepted"
+            and row.get("validation_status") != "quarantined"
+            for row in states
+        )
+        quarantined = sum(
+            row.get("validation_status") == "quarantined" for row in states
+        )
         data = {
             "seed": seed,
             "physical_base": plan["physical_base"],
@@ -76,6 +101,12 @@ def snapshot(seed: str, phase: str) -> None:
             "lint": report["lint"],
             "lint_total": report["lint_total"],
             "documentation_scores": plan["member_scores"],
+            "status_counts": {
+                "accepted": accepted,
+                "quarantined": quarantined,
+                "other": len(states) - accepted - quarantined,
+            },
+            "member_status": {row["id"]: row for row in states},
             "boundary_overlap": overlap,
         }
     payload = read_results()
@@ -108,7 +139,10 @@ def main() -> None:
     subcommands = parser.add_subparsers(dest="command", required=True)
     snap = subcommands.add_parser("snapshot")
     snap.add_argument("seed")
-    snap.add_argument("phase", choices=("before", "partial", "after_job", "after"))
+    snap.add_argument(
+        "phase",
+        choices=("before", "partial", "after_job", "current_before", "after"),
+    )
     subcommands.add_parser("fixture")
     args = parser.parse_args()
     if args.command == "snapshot":
