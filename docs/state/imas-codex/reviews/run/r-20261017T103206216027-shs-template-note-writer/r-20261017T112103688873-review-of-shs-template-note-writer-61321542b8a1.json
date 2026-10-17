@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:9989 process_generate_docs_batch calls _documentation_with_registry_form",
+    "imas_codex/standard_names/workers.py:11196 process_refine_docs_batch calls _documentation_with_registry_form",
+    "imas_codex/standard_names/docs_gates.py:1059 conformance_findings calls house_style_findings which calls _template_findings at :1045",
+    "imas_codex/standard_names/review/audits.py:712 calls house_style_findings"
+  ],
+  "completed_at": "2026-10-17T11:32:51.719Z",
+  "dispatched_at": "2026-10-17T11:21:22Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "1009",
+      "severity": "follow-on",
+      "text": "follow-on: the note check tests the raw template note as a literal substring while imas_codex/standard_names/workers.py:9639-9652 writes the placeholder-filled note, so a note that ever gains a {placeholder} would be reported as missing however correct the documentation is; the opening check avoids this by matching through _template_opening_pattern, and the note check should compare the note's filled form the same way."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103206216027-shs-template-note-writer/logs/after-gate-committed.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103206216027-shs-template-note-writer/logs/base-gate.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read commit 61321542b against base 4aff576e8 file by file; docs_gates.py replaces _template_opening_findings with _template_findings adding the TEMPLATE_NOTE class and a note check while keeping the opening check unchanged, workers.py replaces _instantiated_documentation_opening with _fill_template_sentence plus _instantiated_template_sentences reading the grammar's template_sentences accessor, both test files gain the note assertions the done-when names, and the evidence fragment is new.",
+    "done_when": "plan \u00a714's done-when asks that the note render exactly once after the opening through the writer's insertion path, that the writer-reverted control fails, that the gate flags a missing note and passes it present, that the gate-note-removed control stops flagging, and that tests/standard_names adds no failures; tests/standard_names/test_docs_opening_insertion.py:150-152 asserts count==1 and ordering, negative-control-writer-revert.log records both arms red with the note count at 0, tests/standard_names/test_house_style_checks.py:295-303 pin both gate directions, negative-control-gate-note-check-removed.log records the missing-note arm red, and after-gate-committed.log records 88 passed against base-gate.log's 84.",
+    "goal": "the node goal is that the documentation writer and the house-style gate render and check each selected template's note, not only its opening; imas_codex/standard_names/workers.py:9717 _instantiated_template_sentences now appends the notes and imas_codex/standard_names/docs_gates.py:1005 checks them.",
+    "manifest": "read; it names commit 61321542b at base 4aff576e8, states the seven-file gate at 84 base / 88 after with zero added failures and no retries, names the declared writer-revert control plus a second gate-note-removed control, and its four logs under logs/ support each claim.",
+    "write_paths": "the brief grants five paths; git diff 4aff576e8..61321542b changes exactly those five, and the manifest's additional docs/figures/sn-house-style/shs-template-note-writer path carries no file."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_docs_opening_insertion.py:150-152 reddens when the writer is reverted (negative-control-writer-revert.log, both arms red with the note count at 0) and its expected note is read from the grammar accessor while the asserted string is the writer's persisted output, so the two sides do not move together.",
+    "evidence": "after-gate-committed.log records 88 passed / 0 failed against base-gate.log's 84 / 0, and negative-control-writer-revert.log (EXIT=1) and negative-control-gate-note-check-removed.log (EXIT=1) both fire at head, so all four done-when arms are recorded rather than claimed.",
+    "fit": "imas_codex/standard_names/workers.py:9639 _fill_template_sentence and imas_codex/standard_names/docs_gates.py:970 _template_findings follow the surrounding private-helper idiom and carry no plan, section or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/workers.py:9717-9734 writes each distinct note after the opening and imas_codex/standard_names/docs_gates.py:1005-1020 reports a note the documentation omits, which is the goal.",
+    "reuse": "the capability search over imas_codex/standard_names and imas_standard_names.grammar found no other owner of template-sentence selection or note deduplication; imas_codex/standard_names/workers.py:9657 reads the grammar's own template_sentences accessor rather than re-deriving selection.",
+    "scope_discipline": "git diff 4aff576e8..61321542b touches only the five paths the brief grants, and no file was written under the manifest's extra docs/figures path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that the documentation writer and the house-style gate render and check each selected template's note, not only its opening; imas_codex/standard_names/workers.py:9717 _instantiated_template_sentences now appends the notes and imas_codex/standard_names/docs_gates.py:1005 checks them.\nVERDICT done_when: plan \u00a714's done-when asks that the note render exactly once after the opening through the writer's insertion path, that the writer-reverted control fails, that the gate flags a missing note and passes it present, that the gate-note-removed control stops flagging, and that tests/standard_names adds no failures; tests/standard_names/test_docs_opening_insertion.py:150-152 asserts count==1 and ordering, negative-control-writer-revert.log records both arms red with the note count at 0, tests/standard_names/test_house_style_checks.py:295-303 pin both gate directions, negative-control-gate-note-check-removed.log records the missing-note arm red, and after-gate-committed.log records 88 passed against base-gate.log's 84.\nVERDICT write_paths: the brief grants five paths (imas_codex/standard_names/workers.py, imas_codex/standard_names/docs_gates.py, tests/standard_names/test_docs_opening_insertion.py, tests/standard_names/test_house_style_checks.py, docs/evidence/fragments/sn-house-style/shs-template-note-writer.html); git diff 4aff576e8..61321542b changes exactly those five, and the manifest's additional docs/figures/sn-house-style/shs-template-note-writer path carries no file.\nVERDICT manifest: read; it names commit 61321542b at base 4aff576e8, states the seven-file gate at 84 base / 88 after with zero added failures and no retries, names the declared writer-revert control plus a second gate-note-removed control, and its four logs under logs/ support each claim.\nVERDICT diff: read commit 61321542b against base 4aff576e8 file by file; docs_gates.py replaces _template_opening_findings with _template_findings (adding the TEMPLATE_NOTE class and a note check) while keeping the opening check unchanged, workers.py replaces _instantiated_documentation_opening with _fill_template_sentence plus _instantiated_template_sentences that read the grammar's template_sentences accessor, both test files gain the note assertions the done-when names, and the evidence fragment is new.\nCALL_SITES: imas_codex/standard_names/workers.py:9989 process_generate_docs_batch calls _documentation_with_registry_form, imas_codex/standard_names/workers.py:11196 process_refine_docs_batch calls _documentation_with_registry_form, imas_codex/standard_names/docs_gates.py:1059 conformance_findings calls house_style_findings which calls _template_findings at :1045, imas_codex/standard_names/review/audits.py:712 calls house_style_findings\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/workers.py:9717-9734 writes each distinct note after the opening and imas_codex/standard_names/docs_gates.py:1005-1020 reports a note the documentation omits, which is the goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: after-gate-committed.log records 88 passed / 0 failed against base-gate.log's 84 / 0, and negative-control-writer-revert.log (EXIT=1) and negative-control-gate-note-check-removed.log (EXIT=1) both fire at head, so all four done-when arms are recorded rather than claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 4aff576e8..61321542b touches only the five paths the brief grants, and no file was written under the manifest's extra docs/figures path.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_docs_opening_insertion.py:150-152 reddens when the writer is reverted (negative-control-writer-revert.log, both arms red with the note count at 0) and its expected note is read from the grammar accessor while the asserted string is the writer's persisted output, so the two sides do not move together.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/workers.py:9639 _fill_template_sentence and imas_codex/standard_names/docs_gates.py:970 _template_findings follow the surrounding private-helper idiom and carry no plan, section or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search over imas_codex/standard_names and imas_standard_names.grammar found no other owner of template-sentence selection or note deduplication; imas_codex/standard_names/workers.py:9657 reads the grammar's own template_sentences accessor rather than re-deriving selection.\nFINDING imas_codex/standard_names/docs_gates.py:1009 follow-on: the note check tests the raw template note as a literal substring while imas_codex/standard_names/workers.py:9639-9652 writes the placeholder-filled note, so a note that ever gains a {placeholder} would be reported as missing however correct the documentation is; the opening check avoids this by matching through _template_opening_pattern, and the note check should compare the note's filled form the same way.\n",
+  "review_run_id": "r-20261017T112103688873-review-of-shs-template-note-writer-61321542b8a1",
+  "reviewed_base_sha": "4aff576e85bff3c31534cc9c8a26f313ff101f6f",
+  "reviewed_head_sha": "61321542b8a16243ad1ad4f510c35d57e3a2d035",
+  "reviewed_run_id": "r-20261017T103206216027-shs-template-note-writer",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-17T11:31:15.573505+00:00",
+  "total": 115
+}
