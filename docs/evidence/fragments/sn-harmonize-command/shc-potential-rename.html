@@ -15,18 +15,39 @@
     revalidation.
   </p>
 
-  <h3 id="shc-potential-rename-route">The route: <code>sn edit --rename</code> is refused, <code>sn supersede</code> is the sanctioned fold</h3>
+  <h3 id="shc-potential-rename-route">The route and its authority: <code>sn edit --rename</code> is refused, <code>sn supersede</code> is the sanctioned fold</h3>
+  <p id="shc-potential-rename-authority">
+    <strong>Authority for the change.</strong> The brief carries the operative
+    ruling itself at its head: "The lead ruled on 2026-10-17 to drop the redundant
+    <code>plasma_</code> qualifier", naming both identities and both target
+    spellings. Plan <code>sn-harmonize-command</code> §4 — the section the brief
+    cites as the authority — scopes the harmonize command's convergence-and-cost
+    proof over one non-WEST family per pattern kind, on its own text; it does not
+    prescribe a rename mechanism. So the lead's 2026-10-17 ruling governs
+    <em>what</em> this node changes, and the brief's step 2 names the mechanism it
+    expects for that change: <code>sn edit --rename OLD:NEW</code>.
+  </p>
   <p id="shc-potential-rename-route-body">
-    Both target names <em>already exist</em> in the graph as
-    <code>name_stage=superseded</code> tombstones — they are the ancestors the
-    two <code>plasma_</code> names were refined <em>from</em>. The brief's route,
-    <code>sn edit --rename OLD:NEW</code>, is therefore refused by design: the
-    rename collision check protects the occupied id. Both dry runs are recorded
-    below. The refusal is the check the brief's step 1 asked for ("confirm that
-    neither new name already exists") returning negative, and the command's own
-    refusal names the sanctioned alternate — the fold
-    <code>sn supersede OLD --into NEW</code> (also the repair the
-    <code>sn-edit</code> skill documents for "the target id already exists").
+    <strong>Why the named mechanism cannot express it.</strong> Both target names
+    already exist in the graph as <code>name_stage=superseded</code> tombstones —
+    they are the ancestors the two <code>plasma_</code> names were refined
+    <em>from</em>. The rename collision check protects the occupied id, so
+    <code>sn edit --rename</code> is refused by design. Both dry runs are recorded
+    below. The command's own refusal names the sanctioned alternate for an existing
+    target id — the atomic fold <code>sn supersede OLD --into NEW</code> — and the
+    <code>sn-edit</code> skill documents the same route in its "Renaming another
+    name onto a tombstone's spelling is refused" paragraph.
+  </p>
+  <p id="shc-potential-rename-deviation">
+    <strong>Deviation, recorded and raised.</strong> This node therefore departs
+    from the brief's step 2 mechanism while delivering the outcome the lead ruled:
+    it folds the two <code>plasma_</code> names onto the bare form with
+    <code>sn supersede</code> rather than with <code>--rename</code>. A dispatched
+    worker cannot widen its own brief, and the fold is not reversible without
+    discarding the ruled outcome, so the deviation is recorded here and raised as a
+    blocker in the run manifest for the coordinator to acknowledge or rule on. It is
+    disclosed in full, not hidden: both refused <code>--rename</code> dry runs sit
+    beside the four fold commands and their logs below.
   </p>
   <p id="shc-potential-rename-rename-refusal">
     <code>sn edit</code> dry runs, both <code>EXIT=2</code> /
