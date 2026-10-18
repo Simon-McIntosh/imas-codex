@@ -1,0 +1,77 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "revive-outboard-midplane-separatrix-distance",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-revived-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "revive_superseded_identity",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "radial_separatrix_distance_at_outboard_midplane"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "radial_separatrix_distance_at_outboard_midplane:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "radial_separatrix_distance_at_outboard_midplane"
+          ]
+        }
+      ],
+      "id": "radial_separatrix_distance_at_outboard_midplane",
+      "identity": {
+        "id": "radial_separatrix_distance_at_outboard_midplane",
+        "kind": "standard_name",
+        "target_id": "radial_separatrix_distance_at_outboard_midplane"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "name_stage": "drafted",
+              "status": "draft",
+              "superseded_from_stage": null
+            }
+          },
+          "id": "radial_separatrix_distance_at_outboard_midplane:revive",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "radial_separatrix_distance_at_outboard_midplane"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "radial_separatrix_distance_at_outboard_midplane",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "5f7f3def5a3c15a8c0194bbbc4a64c97f7b9be21d23933d1a8c92cf76b4d19c5"
+  }
+}

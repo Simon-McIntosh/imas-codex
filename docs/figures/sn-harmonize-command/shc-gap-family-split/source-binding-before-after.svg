@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="660" viewBox="0 0 1400 660" role="img">
+  <title>Four data-dictionary sources before and after the gap-family split</title>
+  <desc>Before the split, gap_at_outboard_midplane holds all four sources. After it, gap_at_outboard_midplane holds only the separatrix separation and the revived radial_separatrix_distance_at_outboard_midplane holds the three midplane measurement distances.</desc>
+
+  <g font-family="DejaVu Sans, sans-serif" font-size="19" fill="#1a1a1a">
+    <text x="70" y="36">before — one name held all four sources</text>
+    <text x="70" y="356">after — the gap name keeps the separation, the revived name takes the three measurements</text>
+  </g>
+
+  <g font-family="DejaVu Sans, sans-serif" font-size="14" fill="#5a5a5a" text-anchor="middle">
+    <text x="700" y="64">name_stage accepted · status draft · four sources held</text>
+    <text x="220" y="384">accepted · draft</text>
+    <text x="860" y="384">drafted · draft (docs pending)</text>
+  </g>
+
+  <g stroke="#1a1a1a" stroke-width="1.2" fill="none">
+    <rect x="380" y="76" width="640" height="40"/>
+    <rect x="70" y="396" width="300" height="40"/>
+    <rect x="390" y="396" width="940" height="40"/>
+  </g>
+
+  <g font-family="DejaVu Sans Mono, monospace" font-size="17" fill="#1a1a1a" text-anchor="middle">
+    <text x="700" y="101">gap_at_outboard_midplane</text>
+    <text x="220" y="421">gap_at_outboard_midplane</text>
+    <text x="860" y="421">radial_separatrix_distance_at_outboard_midplane</text>
+  </g>
+
+  <g stroke-width="1.6" fill="none">
+    <path stroke="#8c8c8c" d="M 700 116 L 700 166 L 220 166 L 220 196"/>
+    <path stroke="#31688e" d="M 700 116 L 700 166 L 540 166 L 540 196"/>
+    <path stroke="#31688e" d="M 700 116 L 700 166 L 860 166 L 860 196"/>
+    <path stroke="#31688e" d="M 700 116 L 700 166 L 1180 166 L 1180 196"/>
+
+    <path stroke="#8c8c8c" d="M 220 436 L 220 470 L 220 500"/>
+    <path stroke="#31688e" d="M 860 436 L 860 470 L 1180 470 L 1180 500"/>
+    <path stroke="#31688e" d="M 860 436 L 860 470 L 860 500"/>
+    <path stroke="#31688e" d="M 860 436 L 860 470 L 540 470 L 540 500"/>
+  </g>
+
+  <g stroke-width="1.6" fill="none">
+    <rect x="70" y="196" width="300" height="70" stroke="#8c8c8c"/>
+    <rect x="390" y="196" width="300" height="70" stroke="#31688e"/>
+    <rect x="710" y="196" width="300" height="70" stroke="#31688e"/>
+    <rect x="1030" y="196" width="300" height="70" stroke="#31688e"/>
+
+    <rect x="70" y="500" width="300" height="70" stroke="#8c8c8c"/>
+    <rect x="390" y="500" width="300" height="70" stroke="#31688e"/>
+    <rect x="710" y="500" width="300" height="70" stroke="#31688e"/>
+    <rect x="1030" y="500" width="300" height="70" stroke="#31688e"/>
+  </g>
+
+  <g font-family="DejaVu Sans Mono, monospace" font-size="12" text-anchor="middle">
+    <g fill="#5a5a5a">
+      <text x="220" y="224">summary/boundary</text>
+      <text x="220" y="246">distance_inner_outer_separatrices/value</text>
+      <text x="220" y="528">summary/boundary</text>
+      <text x="220" y="550">distance_inner_outer_separatrices/value</text>
+    </g>
+    <g fill="#31688e">
+      <text x="540" y="224">langmuir_probes/reciprocating/plunge</text>
+      <text x="540" y="246">distance_separatrix_midplane</text>
+      <text x="860" y="224">langmuir_probes/embedded</text>
+      <text x="860" y="246">distance_separatrix_midplane</text>
+      <text x="1180" y="224">thomson_scattering/channel</text>
+      <text x="1180" y="246">distance_separatrix_midplane</text>
+      <text x="540" y="528">langmuir_probes/reciprocating/plunge</text>
+      <text x="540" y="550">distance_separatrix_midplane</text>
+      <text x="860" y="528">langmuir_probes/embedded</text>
+      <text x="860" y="550">distance_separatrix_midplane</text>
+      <text x="1180" y="528">thomson_scattering/channel</text>
+      <text x="1180" y="550">distance_separatrix_midplane</text>
+    </g>
+  </g>
+
+  <g font-family="DejaVu Sans, sans-serif" font-size="14" text-anchor="middle">
+    <text x="220" y="596" fill="#5a5a5a">stays</text>
+    <text x="540" y="596" fill="#31688e">moves</text>
+    <text x="860" y="596" fill="#31688e">moves</text>
+    <text x="1180" y="596" fill="#31688e">moves</text>
+  </g>
+
+  <g font-family="DejaVu Sans, sans-serif" font-size="14" fill="#5a5a5a">
+    <text x="70" y="634">every source id is prefixed dd: · the edge is PRODUCED_NAME · each source is held by exactly one live name in both panels</text>
+  </g>
+</svg>
