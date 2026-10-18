@@ -19,6 +19,7 @@
     "reason": "one unreceipted Jev call at the snapshot dry-run rate",
     "usd": 0.6556937222222222
   },
+  "budget_shortfall_usd": 7.091404672222218,
   "budget_spend_usd": 1.8814566722222223,
   "candidate_pool": {
     "all_families": 849,
@@ -36,7 +37,7 @@
     },
     "validation_removed": 54
   },
-  "cap_envelope_usd": 41.802292949999995,
+  "cap_envelope_usd": 50.10145667222222,
   "confirmed_spend_usd": 1.22576295,
   "dry_run_estimate_basis": {
     "calls": 36,
@@ -44,14 +45,9 @@
     "runs": 21,
     "source": "snapshot LLMCost rows"
   },
-  "dry_run_estimate_total_usd": 40.65301077777777,
+  "dry_run_estimate_total_usd": 47.209948,
   "dry_run_estimate_usd_per_call": 0.6556937222222222,
   "dry_runs": [
-    {
-      "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.9670811666666665,
-      "seed": "toroidal_angle_of_along_pellet_path"
-    },
     {
       "calls_per_arm": 3,
       "estimate_per_arm_usd": 1.9670811666666665,
@@ -65,22 +61,12 @@
     {
       "calls_per_arm": 3,
       "estimate_per_arm_usd": 1.9670811666666665,
-      "seed": "effective_area_of_langmuir_probe"
-    },
-    {
-      "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.9670811666666665,
-      "seed": "energy_flux_at_wall_due_to_eddy_current"
+      "seed": "length_of_passive_loop_element"
     },
     {
       "calls_per_arm": 3,
       "estimate_per_arm_usd": 1.9670811666666665,
       "seed": "neutral_power_of_divertor_due_to_recombination"
-    },
-    {
-      "calls_per_arm": 4,
-      "estimate_per_arm_usd": 2.622774888888889,
-      "seed": "electron_particle_flux_at_wall_due_to_pumping"
     },
     {
       "calls_per_arm": 3,
@@ -90,38 +76,64 @@
     {
       "calls_per_arm": 3,
       "estimate_per_arm_usd": 1.9670811666666665,
-      "seed": "length_of_antenna_strap"
+      "seed": "momentum_flux_due_to_e_cross_b_drift"
     },
     {
       "calls_per_arm": 3,
       "estimate_per_arm_usd": 1.9670811666666665,
-      "seed": "length_of_passive_loop_element"
+      "seed": "lower_bound_wavelength_of_visible_camera"
+    },
+    {
+      "calls_per_arm": 4,
+      "estimate_per_arm_usd": 2.622774888888889,
+      "seed": "neutron_source_rate_due_to_thermal_fusion"
+    },
+    {
+      "calls_per_arm": 5,
+      "estimate_per_arm_usd": 3.278468611111111,
+      "seed": "energy_flux_at_wall_due_to_recombination"
+    },
+    {
+      "calls_per_arm": 6,
+      "estimate_per_arm_usd": 3.934162333333333,
+      "seed": "current_density_due_to_anomalous_transport"
     }
   ],
+  "eligible_differing_anchor_count": 21,
+  "eligible_differing_size_counts": {
+    "3": 7,
+    "4": 1,
+    "5": 1,
+    "6": 7,
+    "7": 4,
+    "9": 1
+  },
   "failed_applies": [],
   "failure": {
-    "at": "2026-10-18T13:50:23.162341+00:00",
-    "message": "Only 7 three-member differing-anchor families fit",
+    "at": "2026-10-18T13:57:52.852055+00:00",
+    "message": "Dry-run estimate or apply cap reaches USD 42",
     "type": "RuntimeError"
   },
   "isolation_proof": [
     {
       "arm": "heuristic",
-      "at": "2026-10-18T13:50:21.380814+00:00",
+      "at": "2026-10-18T13:54:52.066869+00:00",
       "live_nodes": 1770101,
       "live_probe": 0,
       "live_uri": "bolt://98dci4-gpu-0002:7687",
       "marked_scratch_nodes": 1770102,
-      "neo4j_log": "/tmp/anchor-compare-k0kqudec/heuristic/logs/neo4j-temp.log",
+      "neo4j_log": "/tmp/anchor-compare-ubpeplb8/heuristic/logs/neo4j-temp.log",
       "restored_scratch_nodes": 1770101,
       "scratch_nodes": 1770101,
       "scratch_probe": 1,
       "scratch_uri": "bolt://127.0.0.1:27697"
     }
   ],
-  "minimum_ten_family_calls": 60,
-  "minimum_ten_family_estimate_usd": 39.34162333333333,
-  "outcome_status": "blocked",
+  "minimum_ten_family_calls": 72,
+  "minimum_ten_family_estimate_usd": 47.209948,
+  "minimum_total_with_reserved_spend_usd": 49.09140467222222,
+  "new_attempt_apply_count": 0,
+  "outcome_status": "blocked_budget",
   "paired_family_count": 0,
   "partial_receipts": [
     {
@@ -165,29 +177,16 @@
   "previous_isolation_proof": [
     {
       "arm": "heuristic",
-      "at": "2026-10-18T13:04:05.200712+00:00",
+      "at": "2026-10-18T13:50:21.380814+00:00",
       "live_nodes": 1770101,
       "live_probe": 0,
       "live_uri": "bolt://98dci4-gpu-0002:7687",
       "marked_scratch_nodes": 1770102,
-      "neo4j_log": "/tmp/anchor-compare-vmye_96m/heuristic/logs/neo4j-temp.log",
+      "neo4j_log": "/tmp/anchor-compare-k0kqudec/heuristic/logs/neo4j-temp.log",
       "restored_scratch_nodes": 1770101,
       "scratch_nodes": 1770101,
       "scratch_probe": 1,
       "scratch_uri": "bolt://127.0.0.1:27697"
-    },
-    {
-      "arm": "jev",
-      "at": "2026-10-18T13:06:34.431501+00:00",
-      "live_nodes": 1770101,
-      "live_probe": 0,
-      "live_uri": "bolt://98dci4-gpu-0002:7687",
-      "marked_scratch_nodes": 1770102,
-      "neo4j_log": "/tmp/anchor-compare-vmye_96m/jev/logs/neo4j-temp.log",
-      "restored_scratch_nodes": 1770101,
-      "scratch_nodes": 1770101,
-      "scratch_probe": 1,
-      "scratch_uri": "bolt://127.0.0.1:27698"
     }
   ],
   "previous_selected": [
@@ -391,7 +390,7 @@
   ],
   "previous_spend_usd": 0.021194586,
   "receipt_scan_positive_control": "The same parser found 4, 4, and 8 completed model response lines and three cost_spent summaries in the earlier sessions; the terminated Jev second session has no finalized summary, so no zero-spend claim is made.",
-  "resumed_at": "2026-10-18T13:47:59.192331+00:00",
+  "resumed_at": "2026-10-18T13:52:33.414263+00:00",
   "ruling": "2026-10-18 lead: USD 42.00 total including prior spend; all ten paired families",
   "same_anchor_count": 5,
   "scored_candidates": [
@@ -3741,36 +3740,19 @@
   "scratch_cleanup_verified": {
     "closed_bolt_ports": [
       27697,
-      27698
+      27698,
+      28697,
+      28698
     ],
-    "tree_absent": true,
-    "verified_at": "2026-10-18T12:23:51.597891+00:00"
+    "positive_control": "ss -ltn displayed other local listeners before the scratch-port absence was recorded",
+    "tree_absent": true
   },
   "scratch_removed": {
-    "at": "2026-10-18T13:50:39.407831+00:00",
-    "tree": "/tmp/anchor-compare-k0kqudec"
+    "at": "2026-10-18T13:58:08.831927+00:00",
+    "tree": "/tmp/anchor-compare-ubpeplb8"
   },
-  "scratch_tree": "/tmp/anchor-compare-k0kqudec",
+  "scratch_tree": "/tmp/anchor-compare-ubpeplb8",
   "selected": [
-    {
-      "heuristic_anchor": "toroidal_angle_of_launching_position",
-      "jev_anchor": "toroidal_angle_of_control_surface",
-      "jev_asked": [
-        "toroidal_angle_of_launching_position",
-        "toroidal_angle_of_control_surface"
-      ],
-      "jev_cost": 7.6062e-05,
-      "jev_reason": null,
-      "jev_scored": 2,
-      "kind": "position+geometry",
-      "members": [
-        "toroidal_angle_of_along_pellet_path",
-        "toroidal_angle_of_control_surface",
-        "toroidal_angle_of_launching_position"
-      ],
-      "physical_base": "",
-      "seed": "toroidal_angle_of_along_pellet_path"
-    },
     {
       "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
       "jev_anchor": "y_coordinate_of_diagnostic_aperture",
@@ -3811,42 +3793,24 @@
       "seed": "angular_width_of_camera"
     },
     {
-      "heuristic_anchor": "wetted_area_of_langmuir_probe",
-      "jev_anchor": "effective_area_of_langmuir_probe",
+      "heuristic_anchor": "major_length_of_passive_loop_element",
+      "jev_anchor": "length_of_passive_loop_element",
       "jev_asked": [
-        "effective_area_of_langmuir_probe",
-        "wetted_area_of_langmuir_probe"
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element",
+        "length_of_passive_loop_element"
       ],
-      "jev_cost": 6.732600000000001e-05,
+      "jev_cost": 0.000107772,
       "jev_reason": null,
-      "jev_scored": 2,
+      "jev_scored": 3,
       "kind": "unclassified",
       "members": [
-        "effective_area_of_langmuir_probe",
-        "front_surface_area_of_langmuir_probe",
-        "wetted_area_of_langmuir_probe"
+        "length_of_passive_loop_element",
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element"
       ],
-      "physical_base": "area",
-      "seed": "effective_area_of_langmuir_probe"
-    },
-    {
-      "heuristic_anchor": "incident_energy_flux_at_wall_due_to_eddy_current",
-      "jev_anchor": "energy_flux_at_wall_due_to_eddy_current",
-      "jev_asked": [
-        "energy_flux_at_wall_due_to_eddy_current",
-        "incident_energy_flux_at_wall_due_to_eddy_current"
-      ],
-      "jev_cost": 8.358000000000001e-05,
-      "jev_reason": null,
-      "jev_scored": 2,
-      "kind": "position",
-      "members": [
-        "energy_flux_at_wall_due_to_eddy_current",
-        "energy_flux_due_to_eddy_current",
-        "incident_energy_flux_at_wall_due_to_eddy_current"
-      ],
-      "physical_base": "energy",
-      "seed": "energy_flux_at_wall_due_to_eddy_current"
+      "physical_base": "length",
+      "seed": "length_of_passive_loop_element"
     },
     {
       "heuristic_anchor": "power_of_divertor_due_to_recombination",
@@ -3869,28 +3833,6 @@
       "seed": "neutral_power_of_divertor_due_to_recombination"
     },
     {
-      "heuristic_anchor": "neutral_particle_flux_at_wall_due_to_pumping",
-      "jev_anchor": "flux_at_wall_due_to_pumping",
-      "jev_asked": [
-        "flux_due_to_pumping",
-        "flux_at_wall_due_to_pumping",
-        "electron_particle_flux_at_wall_due_to_pumping",
-        "neutral_particle_flux_at_wall_due_to_pumping"
-      ],
-      "jev_cost": 0.000146454,
-      "jev_reason": null,
-      "jev_scored": 4,
-      "kind": "subject+position",
-      "members": [
-        "electron_particle_flux_at_wall_due_to_pumping",
-        "flux_at_wall_due_to_pumping",
-        "flux_due_to_pumping",
-        "neutral_particle_flux_at_wall_due_to_pumping"
-      ],
-      "physical_base": "flux",
-      "seed": "electron_particle_flux_at_wall_due_to_pumping"
-    },
-    {
       "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
       "jev_anchor": "current_density_due_to_wave_driven_current_drive",
       "jev_asked": [
@@ -3911,43 +3853,116 @@
       "seed": "current_density_due_to_wave_driven_current_drive"
     },
     {
-      "heuristic_anchor": "length_of_antenna_strap",
-      "jev_anchor": "major_length_of_antenna_strap",
+      "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
       "jev_asked": [
-        "length_of_antenna_strap",
-        "major_length_of_antenna_strap"
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_due_to_e_cross_b_drift"
       ],
-      "jev_cost": 6.946799999999999e-05,
+      "jev_cost": 0.00015141000000000002,
       "jev_reason": null,
-      "jev_scored": 2,
-      "kind": "unclassified",
+      "jev_scored": 3,
+      "kind": "component",
       "members": [
-        "length_of_antenna_strap",
-        "major_length_of_antenna_strap",
-        "minor_length_of_antenna_strap"
+        "momentum_flux_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
       ],
-      "physical_base": "length",
-      "seed": "length_of_antenna_strap"
+      "physical_base": "momentum",
+      "seed": "momentum_flux_due_to_e_cross_b_drift"
     },
     {
-      "heuristic_anchor": "major_length_of_passive_loop_element",
-      "jev_anchor": "length_of_passive_loop_element",
+      "heuristic_anchor": "wavelength_of_visible_camera",
+      "jev_anchor": "lower_bound_wavelength_of_visible_camera",
       "jev_asked": [
-        "major_length_of_passive_loop_element",
-        "minor_length_of_passive_loop_element",
-        "length_of_passive_loop_element"
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
       ],
-      "jev_cost": 0.000107772,
+      "jev_cost": 0.00010281599999999999,
       "jev_reason": null,
       "jev_scored": 3,
       "kind": "unclassified",
       "members": [
-        "length_of_passive_loop_element",
-        "major_length_of_passive_loop_element",
-        "minor_length_of_passive_loop_element"
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
       ],
-      "physical_base": "length",
-      "seed": "length_of_passive_loop_element"
+      "physical_base": "wavelength",
+      "seed": "lower_bound_wavelength_of_visible_camera"
+    },
+    {
+      "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
+      "jev_anchor": "source_rate_due_to_thermal_fusion",
+      "jev_asked": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "jev_cost": 0.00017077199999999997,
+      "jev_reason": null,
+      "jev_scored": 4,
+      "kind": "subject",
+      "members": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "physical_base": "source_rate",
+      "seed": "neutron_source_rate_due_to_thermal_fusion"
+    },
+    {
+      "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+      "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+      "jev_asked": [
+        "energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination"
+      ],
+      "jev_cost": 0.00023553600000000003,
+      "jev_reason": null,
+      "jev_scored": 5,
+      "kind": "subject",
+      "members": [
+        "energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination"
+      ],
+      "physical_base": "energy",
+      "seed": "energy_flux_at_wall_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+      "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+      "jev_asked": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport"
+      ],
+      "jev_cost": 0.000220332,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_anomalous_transport"
     }
   ],
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
@@ -3958,13 +3973,13 @@
   "stopped_instances": [
     {
       "arm": "heuristic",
-      "at": "2026-10-18T13:50:38.173822+00:00",
-      "tree": "/tmp/anchor-compare-k0kqudec/heuristic"
+      "at": "2026-10-18T13:58:07.859444+00:00",
+      "tree": "/tmp/anchor-compare-ubpeplb8/heuristic"
     }
   ],
   "unscored_count": 38,
   "validation_search": {
-    "at": "2026-10-18T13:50:23.137411+00:00",
+    "at": "2026-10-18T13:54:53.418875+00:00",
     "member_rows": 1228,
     "properties": [
       "validation_status",
