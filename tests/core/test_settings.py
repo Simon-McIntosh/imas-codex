@@ -469,7 +469,7 @@ class TestDiscoveryFunctionSeats:
         settings.register_model_endpoints()
 
         model = settings.get_model("cluster-labels")
-        assert model == "openrouter/openai/gpt-5.4"
+        assert model == "openrouter/openai/gpt-6.1-sol"
         assert settings.get_model_endpoint(model) is None
 
 
