@@ -57,6 +57,7 @@ N_SHUFFLES = 1000
 SHUFFLE_SEED = 20261017
 BOOTSTRAP_RESAMPLES = 1000
 BOOTSTRAP_SEED = 123
+LABEL_PERMUTATION_SEED = 20261018
 CEILING_USD = 0.50
 JUDGE_BUDGET_S = float(os.environ.get("RISK_JUDGE_BUDGET_S", "110"))
 CONCURRENCY = int(os.environ.get("RISK_CONCURRENCY", "12"))
@@ -654,29 +655,70 @@ def _analytic_recall(labels, fraction: float, *, defects_first: bool) -> float:
     return max(0, count - (n - d)) / d
 
 
-def _copy_group_bootstrap(labels, values, groups, fraction) -> dict:
+def _random_count(n: int, fraction: float) -> int:
+    """How many items a read at ``fraction`` takes from ``n``, after rounding."""
+    return max(1, int(round(n * fraction)))
+
+
+def _random_expectation(n: int, fraction: float) -> float:
+    """The recall a random order has in expectation at ``fraction``, exactly.
+
+    A random order reads ``count = max(1, round(n * fraction))`` items, the same
+    rounded count the recall itself uses, and each defect is among them with
+    probability ``count / n``, so the expected recall is ``count / n`` — not the
+    rounded fraction it approximates. The table prints the count beside it.
+    """
+    return _random_count(n, fraction) / n
+
+
+def _composite_interval(labels, values, groups, fraction) -> dict:
+    """Percentile bootstrap of the composite order's recall, resampled by copy group.
+
+    The grouping and the draw are the shared owner's, not a local
+    reimplementation: ``_group_indices`` builds one index array per copy group,
+    so near-duplicate spellings move together instead of counting as
+    independent evidence, and the draw reads a group index for each group
+    ``len(groups)`` times with replacement — the same draw
+    ``bootstrap_interval`` makes. Drawing a group more than once, and dropping
+    others, is what a bootstrap resample is; an interval built from a set of
+    drawn groups samples without replacement and is narrower than the
+    distribution it claims to describe. The owner's interval is over an AUC and
+    takes no statistic argument, so the recall-at-fraction statistic is applied
+    to each resample here while the resampling itself stays the owner's.
+
+    A resample holding no defect has no recall, so it is redrawn;
+    ``n_resamples`` is the number of usable draws.
+    """
     import numpy as np
 
+    from imas_codex.discovery.base.evaluation import _group_indices
+
     point = _recall_at(_order_by(values, reverse=True), labels, fraction)
-    unique = sorted(set(groups))
+    index_groups = _group_indices(groups, len(labels))
+    y = np.asarray(labels)
+    score = np.asarray(values, dtype=float)
     rng = np.random.default_rng(BOOTSTRAP_SEED)
-    draws = []
-    for _ in range(BOOTSTRAP_RESAMPLES):
-        picked = rng.integers(0, len(unique), size=len(unique))
-        chosen = {unique[i] for i in picked}
-        subset = [i for i, g in enumerate(groups) if g in chosen]
-        sub_labels = [labels[i] for i in subset]
-        sub_values = [values[i] for i in subset]
-        if sum(1 for label in sub_labels if label == 0) == 0:
+    draws: list[float] = []
+    attempts = 0
+    while len(draws) < BOOTSTRAP_RESAMPLES and attempts < BOOTSTRAP_RESAMPLES * 100:
+        attempts += 1
+        picks = rng.integers(0, len(index_groups), len(index_groups))
+        index = np.concatenate([index_groups[pick] for pick in picks])
+        resampled_labels = y[index]
+        if np.unique(resampled_labels).size < 2:
             continue
         draws.append(
-            _recall_at(_order_by(sub_values, reverse=True), sub_labels, fraction)
+            _recall_at(
+                _order_by(score[index], reverse=True), resampled_labels, fraction
+            )
         )
     arr = np.asarray(draws, dtype=float)
     return {
         "point": point,
         "lower": float(np.percentile(arr, 2.5)) if arr.size else float("nan"),
         "upper": float(np.percentile(arr, 97.5)) if arr.size else float("nan"),
+        "n_resamples": int(arr.size),
+        "groups": len(index_groups),
     }
 
 
@@ -705,11 +747,13 @@ def _golden_orders(items, incumbent: dict[str, float | None]) -> dict:
         "n": len(items),
         "n_defects": sum(1 for label in labels if label == 0),
         "incumbent_missing": missing,
-        "random_expected": {f"{f:.2f}": f for f in FRACTIONS},
+        "random_expected": {
+            f"{f:.2f}": _random_expectation(len(items), f) for f in FRACTIONS
+        },
         "random_band": _random_band(labels, FRACTIONS),
         "recall": recall,
         "composite_interval": {
-            f"{f:.2f}": _copy_group_bootstrap(
+            f"{f:.2f}": _composite_interval(
                 labels, risk, [i["copy_group"] for i in items], f
             )
             for f in FRACTIONS
@@ -935,7 +979,11 @@ def _fragment(report: dict) -> None:
                     f"<tr><td>{title}</td><td>{split}</td><td>{block['n']}</td>"
                     f"<td>{labels[order]}</td>{cells}</tr>"
                 )
-            cells = "".join(f"<td>{_fmt(f)}</td>" for f in FRACTIONS)
+            cells = "".join(
+                f"<td>{_fmt(block['random_expected'][f'{f:.2f}'])}"
+                f" ({_random_count(block['n'], f)}/{block['n']})</td>"
+                for f in FRACTIONS
+            )
             rows.append(
                 f"<tr><td>{title}</td><td>{split}</td><td>{block['n']}</td>"
                 f"<td>random (expected)</td>{cells}</tr>"
@@ -1002,12 +1050,42 @@ at each read fraction. Every cell lands on its analytic value on all four golden
 A scratch copy whose recall is taken from the tail of the order instead of its head puts six cells
 per split off their value and exits non-zero, so a recall computation that stopped reading the
 order cannot pass the check.</p>
+<p id="ssog-risk-order-invariance">Those two arms test the recall arithmetic, not the risk that
+feeds it: a scorer that read a row's label into its risk would rank its own ground truth and pass
+both arms untouched, because both arms supply the order rather than the risk. A third control
+closes that path. Each split's risk vector is recomputed from every row's own stored checks, and
+again with the labels permuted among the rows of that split under a fixed seed, and the two vectors
+must be identical. The risk a row published is also required to equal the risk recomputed from its
+label-free inputs, so a leak on the way into the results file is caught as well as a leak in the
+scoring path. The control fails too when the permutation is the identity, which would compare the
+vector with itself and test nothing. A scratch copy whose risk reads the label reddens it and exits
+non-zero.</p>
+<p id="ssog-risk-order-band-check">The shuffled-label band check the original brief asked for is
+deliberately not run. Shuffled labels destroy any correspondence between the order and the truth, so
+a shuffled order's recall lands inside the random band for any order whatever the scorer does; it
+would report agreement whether or not the risk read the labels, and is therefore not evidence about
+the scorer. It is replaced by the invariance control above, which tests the same property — that the
+risk is independent of the labels — directly, and can fail. The <code>random 95% band</code> rows
+and the <code>random (expected)</code> rows are kept to state what an uninformative order scores,
+not as a control.</p>
 <figure id="ssog-risk-order-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg" alt="Recall of known defects against the fraction of items read for the risk composite, the mean sensitivity order and the random band, on each golden's calibration split."><figcaption>Recall of known defects against the fraction of items read, calibration split. Each order is one line; the dotted grey pair bounds the random order's 95% interval over {N_SHUFFLES} seeded shuffles.</figcaption></figure>
 <table id="ssog-risk-order-table"><thead><tr><th>Golden</th><th>Split</th><th>Items</th><th>Order</th><th>Recall@10%</th><th>Recall@25%</th><th>Recall@50%</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
 <p id="ssog-risk-order-interval">The <code>risk composite 95% interval</code> rows are copy-group
 bootstrap intervals for the composite order's recall, resampled by copy group so that near-duplicate
 spellings do not count as independent evidence; the same numbers are stored in the results JSON
-under <code>composite_interval</code>.</p>
+under <code>composite_interval</code>. The grouping and the resampling are the shared owner's:
+<code>_group_indices</code> builds one index array per copy group and the draw reads a group index
+for each group, with replacement — the same draw the shared <code>bootstrap_interval</code> makes,
+so a drawn group can be taken more than once. The owner's interval is over an AUC and takes no
+statistic argument, so the recall at each read fraction is applied to each resample here while the
+resampling itself stays the owner's. Relative to drawing distinct groups, resampling with
+replacement draws more often from over-represented groups, so the interval is the wider and more
+conservative of the two, and a resample with one class only is redrawn rather than counted.</p>
+<p id="ssog-risk-order-random-expected">The <code>random (expected)</code> rows give the exact
+recall a random order has in expectation, <code>count/N</code>, where <code>count</code> is the
+rounded number of items a read at that fraction takes — the same rounded count the recall uses —
+and <code>N</code> is the split's item count. Each cell prints that count beside it, so the value
+is read against the items it was computed on rather than against the unrounded fraction.</p>
 </section>"""
     )
 
@@ -1039,6 +1117,79 @@ def _label_reading_controls(labels) -> dict:
     return out
 
 
+def _scorer_risk(row: dict) -> float:
+    """One row's risk, from that row's own checks.
+
+    The single place a risk is derived from a stored row, so the invariance
+    control below can be pointed at the whole scoring path rather than at a
+    restatement of it. It reads ``checks`` and nothing else: a row's label is
+    the ground truth the measurement is scored against, and a risk that reads it
+    is not a prediction.
+    """
+    return _item_risk(row["checks"])[0]
+
+
+def _risks_agree(stored, recomputed) -> bool:
+    """Whether a stored risk is the value the scoring path produces.
+
+    A risk with no checks is negative infinity, which the results file carries
+    as null; both sides are therefore read as non-finite-equal.
+    """
+    import math
+
+    try:
+        left = float(stored)
+    except (TypeError, ValueError):
+        return False
+    return (math.isnan(left) and math.isnan(recomputed)) or left == recomputed
+
+
+def label_invariance_control(
+    rows: list[dict], seed: int = LABEL_PERMUTATION_SEED
+) -> dict:
+    """The risk vector must not move when the labels move.
+
+    The scorer's risk is recomputed from each row's own checks twice: once with
+    the row's own label and once with the labels permuted among the rows of the
+    split under a fixed seed. If the two vectors differ, the scorer read the
+    labels it is supposed to be scored against and every recall number it
+    produced is circular. A third clause binds the published number to that
+    path: the risk a row stores must equal the risk recomputed from its own
+    checks, so a risk that reads a label on the way into the results file is
+    caught even when the scoring path itself is clean. The control also reports
+    how many rows changed place, and fails when none did: a permutation that is
+    the identity would compare the vector with itself and pass without testing
+    anything.
+    """
+    import random
+
+    permuted = list(range(len(rows)))
+    random.Random(seed).shuffle(permuted)
+    moved = sum(1 for i, source in enumerate(permuted) if source != i)
+    before = [_scorer_risk(row) for row in rows]
+    after = [
+        _scorer_risk({**row, "label": rows[source]["label"]})
+        for row, source in zip(rows, permuted, strict=True)
+    ]
+    differing = [
+        index
+        for index, (first, second) in enumerate(zip(before, after, strict=True))
+        if first != second
+    ]
+    unbound = [
+        index
+        for index, (row, value) in enumerate(zip(rows, before, strict=True))
+        if not _risks_agree(row.get("risk"), value)
+    ]
+    return {
+        "rows": len(rows),
+        "rows_label_changed_place": moved,
+        "rows_risk_changed": len(differing),
+        "rows_stored_risk_unbound": len(unbound),
+        "ok": not differing and moved > 0 and not unbound,
+    }
+
+
 def controls(path: Path | None = None) -> int:
     report = json.loads((path or RESULTS).read_text())
     out = {}
@@ -1048,12 +1199,15 @@ def controls(path: Path | None = None) -> int:
             items = [i for i in report["items"][key] if i["split"] == split]
             labels = [i["label"] for i in items]
             cells = _label_reading_controls(labels)
+            invariance = label_invariance_control(items)
             passed = all(c["ok"] for arm in cells.values() for c in arm.values())
+            passed = passed and invariance["ok"]
             ok = ok and passed
             out[f"{key}:{split}"] = {
                 "n": len(items),
                 "n_defects": sum(1 for label in labels if label == 0),
                 "controls": cells,
+                "risk_label_invariance": invariance,
                 "ok": passed,
             }
     print(json.dumps(out, indent=1))
@@ -1137,11 +1291,22 @@ def verify(path: Path | None = None) -> int:
 
     for key in ("name", "docs"):
         for split in ("calibration", "validation"):
-            labels = [i["label"] for i in report["items"][key] if i["split"] == split]
+            items = [i for i in report["items"][key] if i["split"] == split]
+            labels = [i["label"] for i in items]
             for arm, cells in _label_reading_controls(labels).items():
                 for fraction, cell in cells.items():
                     if not cell["ok"]:
                         bad.append(f"{key}:{split}:{arm}@{fraction}")
+            invariance = label_invariance_control(items)
+            print(
+                f"{key}:{split}: label invariance — {invariance['rows']} rows,"
+                f" {invariance['rows_label_changed_place']} changed place,"
+                f" {invariance['rows_risk_changed']} risk values moved,"
+                f" {invariance['rows_stored_risk_unbound']} stored risks unbound",
+                flush=True,
+            )
+            if not invariance["ok"]:
+                bad.append(f"{key}:{split}:label_invariance")
     print(f"verification failures: {bad}", flush=True)
 
     print("VERIFY_PASS" if not bad else "VERIFY_FAIL", flush=True)
