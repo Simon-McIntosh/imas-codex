@@ -40,6 +40,19 @@ RUN_DIR = Path(
 RESULTS = Path(__file__).with_name("ssog-anchor-ab-results.json")
 ROSTERS = Path("imas_codex/standard_names/manifests/reviews")
 SPEND_LIMIT = 30.0
+PRIOR_DOC_CALL_COST = 0.41403
+PRIOR_COST_EVIDENCE = (
+    "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html"
+)
+VARIATION_AXES = (
+    "subject",
+    "component",
+    "coordinate",
+    "position",
+    "geometry",
+    "region",
+    "device",
+)
 DEADLINE = datetime.fromisoformat("2026-10-18T11:22:36+00:00")
 
 
@@ -74,13 +87,16 @@ def west_roster() -> tuple[set[str], list[dict]]:
     return names, evidence
 
 
-def kind(family: dict) -> str:
-    labels = ("physical", "geometric", "transformation", "process", "object")
-    values = family["invariant"]
-    return (
-        "+".join(label for label, value in zip(labels, values, strict=True) if value)
-        or "unclassified"
-    )
+def kind(family: dict, traits: dict[str, dict]) -> str:
+    varied = [
+        axis
+        for axis in VARIATION_AXES
+        if len(
+            {str(traits[member["id"]].get(axis) or "") for member in family["members"]}
+        )
+        > 1
+    ]
+    return "+".join(varied) or "unclassified"
 
 
 async def scored_candidates(families: list[dict], data: dict) -> list[dict]:
@@ -93,12 +109,12 @@ async def scored_candidates(families: list[dict], data: dict) -> list[dict]:
             members = family["members"]
             heuristic = resolve_family_anchor(members)
             judged = await score_family_anchor(
-                None, None, None, members, pattern=kind(family)
+                None, None, None, members, pattern="|".join(family["invariant"])
             )
             return {
                 "seed": sorted(m["id"] for m in members)[0],
                 "physical_base": family["physical_base"],
-                "kind": kind(family),
+                "kind": family["kind"],
                 "members": sorted(m["id"] for m in members),
                 "heuristic_anchor": heuristic,
                 "jev_anchor": judged.choice,
@@ -133,7 +149,7 @@ def select(candidates: list[dict]) -> list[dict]:
     picked: list[dict] = []
     represented: set[str] = set()
     for row in differing:
-        if row["kind"] not in represented:
+        if len(row["members"]) <= 4 and row["kind"] not in represented:
             picked.append(row)
             represented.add(row["kind"])
             if len(picked) == 10:
@@ -333,6 +349,36 @@ def main() -> None:
                     }
                     save(data)
                     print(f"candidate pool: {data['candidate_pool']}", flush=True)
+                    ids = sorted(
+                        {
+                            member["id"]
+                            for family in eligible
+                            for member in family["members"]
+                        }
+                    )
+                    trait_rows = gc.query(
+                        "UNWIND $ids AS sid MATCH (m:StandardName {id: sid}) "
+                        "RETURN m.id AS id, m.subject AS subject, m.component AS component, "
+                        "m.coordinate AS coordinate, m.position AS position, m.geometry AS geometry, "
+                        "m.region AS region, m.device AS device",
+                        ids=ids,
+                    )
+                    traits = {row["id"]: row for row in trait_rows}
+                    if len(traits) != len(ids):
+                        raise RuntimeError(
+                            "Variation-axis read omitted eligible members"
+                        )
+                    for family in eligible:
+                        family["kind"] = kind(family, traits)
+                    if all(family["kind"] == "unclassified" for family in eligible):
+                        raise RuntimeError(
+                            "Variation-axis classification saw no nonuniform property"
+                        )
+                    data["variation_kind_counts"] = {
+                        label: sum(family["kind"] == label for family in eligible)
+                        for label in sorted({family["kind"] for family in eligible})
+                    }
+                    save(data)
                     candidates = asyncio.run(scored_candidates(eligible, data))
                     data["same_anchor_count"] = sum(
                         row["jev_anchor"] == row["heuristic_anchor"]
@@ -342,6 +388,10 @@ def main() -> None:
                     data["unscored_count"] = sum(
                         row["jev_anchor"] is None for row in candidates
                     )
+                    data["scorer_spend_usd"] = sum(
+                        row["jev_cost"] for row in candidates
+                    )
+                    data["spend_usd"] = data["scorer_spend_usd"]
                     selected = select(candidates)
                     data["selected"] = selected
                     if len(selected) < 10:
@@ -350,10 +400,21 @@ def main() -> None:
                         )
                     estimate = measure_doc_call_cost(gc)
                     if estimate is None:
-                        raise RuntimeError(
-                            "Snapshot has no measured documentation call cost for dry-run estimate"
-                        )
-                    data["dry_run_estimate_usd_per_call"] = estimate.mean_usd
+                        rate = PRIOR_DOC_CALL_COST
+                        data["dry_run_estimate_basis"] = {
+                            "source": "prior measured documentation-call rate; snapshot CLI reports unavailable",
+                            "path": PRIOR_COST_EVIDENCE,
+                            "rate_usd": rate,
+                        }
+                    else:
+                        rate = estimate.mean_usd
+                        data["dry_run_estimate_basis"] = {
+                            "source": "snapshot LLMCost rows",
+                            "runs": estimate.runs,
+                            "calls": estimate.calls,
+                            "rate_usd": rate,
+                        }
+                    data["dry_run_estimate_usd_per_call"] = rate
                     data["dry_runs"] = []
                     for row in selected:
                         cli(row["seed"], uri, "--apply", "--dry-run")
@@ -362,8 +423,7 @@ def main() -> None:
                             {
                                 "seed": row["seed"],
                                 "calls_per_arm": planned["planned_calls"],
-                                "estimate_per_arm_usd": planned["planned_calls"]
-                                * estimate.mean_usd,
+                                "estimate_per_arm_usd": planned["planned_calls"] * rate,
                             }
                         )
                         save(data)
@@ -371,10 +431,15 @@ def main() -> None:
                         item["estimate_per_arm_usd"] for item in data["dry_runs"]
                     )
                     data["dry_run_estimate_total_usd"] = estimated
+                    cap_envelope = data["scorer_spend_usd"] + 2 * len(selected) * 1.49
+                    data["cap_envelope_usd"] = cap_envelope
                     save(data)
-                    if estimated >= SPEND_LIMIT:
+                    if (
+                        estimated + data["scorer_spend_usd"] >= SPEND_LIMIT
+                        or cap_envelope >= SPEND_LIMIT
+                    ):
                         raise RuntimeError(
-                            f"Dry-run estimate ${estimated:.2f} reaches budget"
+                            f"Dry-run estimate ${estimated:.2f} or cap ${cap_envelope:.2f} reaches budget"
                         )
                 else:
                     selected = data["selected"]
@@ -390,10 +455,13 @@ def main() -> None:
         heur_lint = sum(row["lint_after"] for row in heur.values())
         jev_lint = sum(row["lint_after"] for row in jev.values())
         lower = []
+        missing = []
         for seed, row in jev.items():
             for member, value in row["scores_after"].items():
                 baseline = heur[seed]["scores_after"].get(member)
-                if value is not None and baseline is not None and value < baseline:
+                if value is None or baseline is None:
+                    missing.append({"seed": seed, "member": member})
+                elif value < baseline:
                     lower.append(
                         {
                             "seed": seed,
@@ -403,10 +471,11 @@ def main() -> None:
                         }
                     )
         data["verdict"] = {
-            "adopt_jev": jev_lint < heur_lint and not lower,
+            "adopt_jev": jev_lint < heur_lint and not lower and not missing,
             "heuristic_lint_after": heur_lint,
             "jev_lint_after": jev_lint,
             "lower_scores": lower,
+            "missing_comparisons": missing,
             "decided_at": now(),
         }
         save(data)
