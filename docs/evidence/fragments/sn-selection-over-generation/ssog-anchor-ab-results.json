@@ -3,6 +3,8 @@
     "registered_at": "2026-10-18T10:45:18.869980+00:00",
     "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
   },
+  "apply_spend_usd": null,
+  "arm_comparison_complete": false,
   "candidate_pool": {
     "all_families": 848,
     "eligible": 119,
@@ -13,6 +15,7 @@
     }
   },
   "cap_envelope_usd": 29.821194586,
+  "confirmed_scorer_spend_usd": 0.021194586,
   "dry_run_estimate_basis": {
     "path": "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html",
     "rate_usd": 0.41403,
@@ -72,6 +75,16 @@
       "seed": "length_of_passive_loop_element"
     }
   ],
+  "failure": {
+    "applies_completed": 0,
+    "apply_receipt": null,
+    "arm": "heuristic",
+    "error": "Neo.DatabaseError.Statement.ExecutionFailed: NOT PART OF CHAIN! RelationshipTraversalCursor[id=4555635]",
+    "reproduction_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/measurement-corrected.log",
+    "seed": "toroidal_angle_of_along_pellet_path",
+    "stage": "first harmonize apply",
+    "why_stopped": "The archived scratch graph failed a relationship traversal in the first apply; the assigned snapshot cannot support this comparison. No fresh live-graph export is permitted."
+  },
   "isolation_proof": [
     {
       "arm": "heuristic",
@@ -83,6 +96,7 @@
       "scratch_uri": "bolt://127.0.0.1:27697"
     }
   ],
+  "outcome_status": "blocked",
   "same_anchor_count": 14,
   "scored_candidates": [
     {
@@ -3455,6 +3469,18 @@
     }
   ],
   "scorer_spend_usd": 0.021194586,
+  "scratch_cleanup_verified": {
+    "closed_bolt_ports": [
+      27697,
+      27698
+    ],
+    "tree_absent": true,
+    "verified_at": "2026-10-18T11:07:37.233734+00:00"
+  },
+  "scratch_removed": {
+    "at": "2026-10-18T11:06:54.443128+00:00",
+    "tree": "/tmp/anchor-compare-gwlue9vk"
+  },
   "scratch_tree": "/tmp/anchor-compare-gwlue9vk",
   "selected": [
     {
@@ -3657,7 +3683,7 @@
   ],
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-ff4d0f1-20261012T035511Z.tar.gz",
   "spend_limit_usd": 30.0,
-  "spend_usd": 0.021194586,
+  "spend_usd": null,
   "started_at": "2026-10-18T10:45:18.869950+00:00",
   "unscored_count": 65,
   "variation_kind_counts": {
@@ -3676,6 +3702,7 @@
     "subject+region": 1,
     "unclassified": 13
   },
+  "verdict": null,
   "west_search": {
     "distinct_names": 476,
     "files": [
