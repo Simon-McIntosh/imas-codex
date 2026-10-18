@@ -101,10 +101,19 @@ def main(role: str) -> None:
                 candidate_by_task[task] = model
             elif getattr(response_type, "__name__", "") == "_RefineJudgement":
                 prompt = kwargs["messages"][-1]["content"]
-                path = prompt.split("## DD path\n", 1)[1].split("\n", 1)[0]
+                prior_name = prompt.split("## Previous (rejected) name — score", 1)[
+                    1
+                ].split("\n", 2)[1]
+                matches = [row for row in corpus if row["prior_name"] == prior_name]
+                if len(matches) != 1:
+                    raise RuntimeError(
+                        f"Refine item key is ambiguous for {prior_name!r}: {len(matches)} matches"
+                    )
                 candidate = candidate_by_task.get(task)
                 if candidate:
-                    outcomes[candidate][path] = float(response.defect_resolution)
+                    outcomes[candidate][matches[0]["sn_id"]] = float(
+                        response.defect_resolution
+                    )
         return response, cost, usage
 
     async def traced_review(candidates, reviewer_model, *args, **kwargs):
@@ -179,7 +188,7 @@ def main(role: str) -> None:
     sn_bench.main(args=command[2:], standalone_mode=False)
     report = json.loads(raw_path.read_text())
     if role == "refine":
-        fixture = [{"id": row["path"]} for row in corpus]
+        fixture = [{"id": row["sn_id"]} for row in corpus]
     elif role == "docs":
         fixture = [{"id": row["name"]} for row in corpus]
     elif role.startswith("breaker"):
@@ -201,6 +210,12 @@ def main(role: str) -> None:
         ]
     results["raw_reports"][role] = report
     results["item_outcomes"][role] = {"fixture": fixture, "by_model": dict(outcomes)}
+    if role == "refine":
+        for row in report["results"]:
+            if len(outcomes.get(row["model"], {})) != row["n"]:
+                raise RuntimeError(
+                    f"Refine outcomes for {row['model']} do not match judged count"
+                )
     results["total_spend_usd"] = round(measured_spend(), 6)
     RESULTS.write_text(json.dumps(results, indent=2) + "\n")
     print(
