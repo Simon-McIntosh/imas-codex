@@ -1,0 +1,107 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "assertion_analysis": [
+    {
+      "failure_condition": "A sheet row carrying an unexpected or leaking key makes sheet_leaks return a finding and check_sheet return 1; the planted arm row is refused in sheet-check.log at the head.",
+      "lines": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:718-725"
+    },
+    {
+      "failure_condition": "A row whose source_path is blank makes sheet_blank_paths return a finding; sheet-check-mutated.log shows row-075 refused at EXIT=1.",
+      "lines": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:697-703"
+    },
+    {
+      "failure_condition:": "A corpus critique that differs from the stored run raises, so a retry prompt that had drifted stops the pass rather than being measured.",
+      "lines": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:750-753"
+    }
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T13:03:29.676Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the comparison needs the refine call without the bench's judge; a no-judge mode in run_refine_bench is a product change outside this evidence-fenced node",
+      "recorded_at": "2026-10-18T13:02:40.827873+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-18T12:47:23Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py",
+      "line": "670",
+      "severity": "blocking",
+      "text": "blocking: the arm key for every new sheet row is built as {arm: [case_id] for arm in ARMS}, so all 82 rows of srtj-refine-ab-key.json name both arms as producers although only 2 identical output pairs were produced by both; the scoring node that reads this key after labelling cannot attribute a label to an arm, so the A/B cannot be scored from it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py",
+      "line": "815",
+      "severity": "blocking",
+      "text": "blocking: arms[arm][\"outputs\"] is the count of the in-process ok receipts (118 and 116, i.e. 240 minus the 6 errors) and so counts the 20 answers that returned an empty refined name as outputs, while srtj-refine-ab-run.html:54-61 states an empty answer is not an output; arms[arm][\"failures\"] reports only the model-side errors, so the manifest's \"counted as a failure throughout\" is untrue of the delivered results JSON."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run-results.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the committed results JSON was not produced by the committed script - it omits the top-level retried_keys the script emits at line 875 and its retried_note and per-arm key order differ from the script's (JSON written 14:31, script last edited 14:38), so a reader cannot tell which logic produced the delivered numbers."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py",
+      "line": "715",
+      "severity": "follow-on",
+      "text": "follow-on: check_sheet proves it refuses a leaked field and a blank source path but has no case for a row whose refined_name is empty, so the rule the head commit added - that an answer without a name never reaches the sheet - is the one sheet rule with no guard."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py",
+      "line": "447",
+      "severity": "follow-on",
+      "text": "follow-on: run_arms repeats the refine rendering and structured call owned by imas_codex/standard_names/benchmark_roles.py:616 run_refine_bench, so a change to that call path must be made twice; the node is fenced to evidence paths and cannot extend the owner."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read all three commits against base 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0; the head commit adds DD source context, the empty-name retry, token capture and the spend figure over 5 paths.",
+    "done_when": "The source brief.md names cohort counts, spend, parse rates, identical outputs and a planted sheet leak; srtj-refine-ab-run.html reports each and sheet-check-mutated.log records EXIT=1, but the per-arm Outputs column counts empty answers.",
+    "goal": "The source brief.md needs 120 paired refines and a blind DD-context sheet; srtj-refine-ab-run-results.json records all 120 cases and both arm outputs, but srtj-refine-ab-label-sheet.json covers only 42 cases and srtj-refine-ab-key.json names both arms for every row.",
+    "manifest": "The source manifest.md records commits 3923ff4a9dd01db50851fe644c10d96f6b7b0c2a, 39821adb4125105d9a5a0dec9c97abdd248c8d39 and 4a876734bbf6930b998bb541762d1985b5f373c9, both sheet-check logs, and no baseline_suite or after_suite gate.",
+    "write_paths": "The source brief.md grants four evidence paths and the dispatch orientation grants the figure directory; the diff from 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0 to 4a876734bbf6930b998bb541762d1985b5f373c9 changes exactly those five paths."
+  },
+  "justifications": {
+    "durability": "srtj-refine-ab-run.py:718-725 has a real negative control proven red in sheet-check-mutated.log, but nothing at srtj-refine-ab-run.py:706-730 fails for an empty refined_name or for the arm-key misattribution.",
+    "evidence": "srtj-refine-ab-run.py:815 counts the 20 empty-name answers as outputs while srtj-refine-ab-run.html:54-61 says an empty answer is not an output, and srtj-refine-ab-run-results.json lacks the retried_keys the script at line 875 emits.",
+    "fit": "srtj-refine-ab-run.py:1-21 follows the evidence-fragment idiom and reuses the production owners build_refine_prompt_context and review_names rather than hand-rolling them.",
+    "goal_fidelity": "srtj-refine-ab-run.py:667-671 writes both arms into every sheet row's key entry, so the blind sheet's intended arm attribution is lost.",
+    "reuse": "srtj-refine-ab-run.py:447-609 re-implements the refine render-and-call sequence owned by imas_codex/standard_names/benchmark_roles.py:616 run_refine_bench without extending it.",
+    "scope_discipline": "the diff from 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0 to 4a876734bbf6930b998bb541762d1985b5f373c9 changes only the four evidence paths the source brief.md grants plus the figure directory the dispatch granted."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is a blind A/B sheet over 120 held-out refine cases, one rotation per arm; srtj-refine-ab-run-results.json holds all 120 cases and both arm outputs, but srtj-refine-ab-label-sheet.json carries only 42 of them and srtj-refine-ab-key.json misattributes every row to both arms.\nVERDICT done_when: The brief's done_when names cohort counts, exclusions, seed, per-arm calls and spend under the ceiling, per-arm parse rate, identical outputs and a planted-leak sheet check; srtj-refine-ab-run.html:13-140 reports them and sheet-check-mutated.log records EXIT=1.\nVERDICT write_paths: The brief grants four evidence paths and the dispatch orientation adds docs/figures/sn-review-through-jev/srtj-refine-ab-run; the diff from 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0 to 4a876734bbf6930b998bb541762d1985b5f373c9 changes exactly those five paths.\nVERDICT manifest: Read; it records the three commits and both sheet-check logs and asserts \"an ok response with an empty refined name is counted as a failure throughout\", which the arms block of srtj-refine-ab-run-results.json contradicts.\nVERDICT diff: Read all three commits against base 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0; the head commit adds DD source context and the empty-name retry and token capture, and adds the spend figure.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: srtj-refine-ab-run.py:667-671 writes both arms into every sheet row's key entry, so the blind sheet's intended arm attribution is lost.\nSCORE evidence: 10\nJUSTIFICATION evidence: srtj-refine-ab-run.py:815 counts the 20 empty-name answers as outputs while srtj-refine-ab-run.html:54-61 says an empty answer is not an output, and docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run-results.json lacks the retried_keys the script at line 875 emits.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff from 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0 to 4a876734bbf6930b998bb541762d1985b5f373c9 changes only the four evidence paths the source brief.md grants plus the figure directory the dispatch granted.\nSCORE durability: 10\nJUSTIFICATION durability: srtj-refine-ab-run.py:718-725 has a real negative control proven red in sheet-check-mutated.log, but nothing at srtj-refine-ab-run.py:706-730 fails for an empty refined_name or for the arm-key misattribution.\nSCORE fit: 17\nJUSTIFICATION fit: srtj-refine-ab-run.py:1-21 follows the evidence-fragment idiom and reuses the production owners build_refine_prompt_context and review_names rather than hand-rolling them.\nSCORE reuse: 5\nJUSTIFICATION reuse: srtj-refine-ab-run.py:447-609 re-implements the refine render-and-call sequence owned by imas_codex/standard_names/benchmark_roles.py:616 run_refine_bench without extending run_refine_bench.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:670 blocking: the arm key for every new sheet row is built as {arm: [case_id] for arm in ARMS}, so all 82 rows of srtj-refine-ab-key.json name both arms as producers although only 2 identical output pairs were produced by both; the scoring node that reads this key after labelling cannot attribute a label to an arm, so the A/B cannot be scored from it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:815 blocking: arms[arm][\"outputs\"] is len of the in-process ok receipts (118 and 116, i.e. 240 minus the 6 errors) and so counts the 20 answers that returned an empty refined name as outputs, while srtj-refine-ab-run.html:54-61 states an empty answer is not an output and that the parse rate is the share of outputs carrying a name; arms[arm][\"failures\"] likewise reports only the model-side errors, so the manifest's \"counted as a failure throughout\" is untrue of the delivered results JSON.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run-results.json:1 follow-on: the committed results JSON was not produced by the committed script \u2014 it omits the top-level retried_keys the script emits at line 875 and its retried_note and per-arm key order differ from the script's, the JSON having been written at 14:31 and the script last edited at 14:38, so a reader cannot tell which logic produced the delivered numbers.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:715 follow-on: check_sheet proves it refuses a leaked field and a blank source path but has no case for a row whose refined_name is empty, so the rule the head commit added \u2014 that an answer without a name never reaches the sheet \u2014 is the one sheet rule with no guard.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:447 follow-on: run_arms repeats the refine rendering and structured call owned by imas_codex/standard_names/benchmark_roles.py:616 run_refine_bench, so a change to that call path must be made twice; the node is fenced to evidence paths and cannot extend the owner.",
+  "review_run_id": "r-20261018T124642555875-review-of-srtj-refine-ab-run",
+  "reviewed_base_sha": "4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0",
+  "reviewed_commits": [
+    "3923ff4a9dd01db50851fe644c10d96f6b7b0c2a",
+    "39821adb4125105d9a5a0dec9c97abdd248c8d39",
+    "4a876734bbf6930b998bb541762d1985b5f373c9"
+  ],
+  "reviewed_head_sha": "4a876734bbf6930b998bb541762d1985b5f373c9",
+  "reviewed_run_id": "r-20261018T101616902704-srtj-refine-ab-run",
+  "scores": {
+    "durability": 10,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T13:01:39.277835+00:00",
+  "total": 73
+}
