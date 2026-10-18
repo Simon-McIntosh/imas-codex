@@ -11,6 +11,13 @@
     "imas_codex/standard_names/docs_gates.py:12"
   ],
   "completed_at": "2026-10-18T18:40:02Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "isn-grammar-sync-0-10-0",
+      "recorded_at": "2026-10-18T18:42:35.360793+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T18:34:38Z",
   "findings": [
     {
