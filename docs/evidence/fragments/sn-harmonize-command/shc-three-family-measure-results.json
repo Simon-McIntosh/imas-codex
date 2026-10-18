@@ -1,0 +1,1141 @@
+{
+  "acceptance_threshold": 0.85,
+  "apply_attempts": [
+    {
+      "command": "timeout 540 uv run imas-codex sn harmonize --family electron_number_density --apply --cost-limit 8.00 --json",
+      "exit_status": 124,
+      "llm_cost_rows": {
+        "generate_docs": {
+          "calls": 1,
+          "usd": 0.009678
+        },
+        "review_docs": {
+          "calls": 2,
+          "usd": 0.120358
+        }
+      },
+      "llm_run_id": "36afdad7-bf84-424b-9c3d-ec3c48189209",
+      "pipeline_elapsed_seconds": 540.640386,
+      "post_attempt_anchor_score": null,
+      "post_attempt_lint": {
+        "convention_violation": 3,
+        "link_dead_link": 1,
+        "link_missing_reverse": 1
+      },
+      "post_attempt_planned_calls": 7,
+      "receipt_cost_spent_usd": 0.130036,
+      "receipt_names_enriched": 1,
+      "receipt_names_reviewed": 0,
+      "seed": "electron_number_density",
+      "stop_reason": "interrupted",
+      "wall_seconds": 673
+    },
+    {
+      "anchor_batch": {
+        "cost_limit_usd": 7.869964,
+        "cost_spent_usd": 0.139569,
+        "names_enriched": 1,
+        "names_reviewed": 1,
+        "pipeline_elapsed_seconds": 483.730311,
+        "stop_reason": "no_eligible_work"
+      },
+      "command": "uv run imas-codex sn harmonize --family electron_number_density --apply --cost-limit 7.869964 --json",
+      "exit_status": 1,
+      "failure": "cannot confirm quarantined standard-name identities as valid: volume_averaged_electron_number_density_over_scrape_off_layer",
+      "member_batch": {
+        "cost_limit_usd": 7.730395,
+        "cost_spent_usd": 1.317651,
+        "names_enriched": 5,
+        "names_reviewed": 5,
+        "pipeline_elapsed_seconds": 744.440299,
+        "stop_reason": "no_eligible_work"
+      },
+      "post_attempt_lint": {
+        "convention_violation": 1,
+        "link_missing_reverse": 3
+      },
+      "post_attempt_planned_calls": 7,
+      "receipt_cost_spent_usd": 1.45722,
+      "seed": "electron_number_density",
+      "slurm_job_id": 1286605,
+      "slurm_state": "FAILED",
+      "wall_seconds": 1385
+    },
+    {
+      "batch_receipt_cost_rows_usd": [
+        0.106603,
+        1.640145
+      ],
+      "batch_receipt_cost_usd": 1.746748,
+      "command": "uv run --no-sync imas-codex sn harmonize --family electron_number_density --apply --cost-limit 6.412744 --json",
+      "cost_limit_usd": 6.412744,
+      "exit_status": 0,
+      "halt_reasons": [],
+      "halted": false,
+      "job_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/density-apply-main.slurm.log",
+      "pipeline_wall_seconds": 1285,
+      "planned_calls": 8,
+      "post_attempt_lint": {},
+      "receipt_cost_spent_usd": 1.7467,
+      "receipt_names_reviewed": 8,
+      "receipt_total_accepted": 8,
+      "receipt_total_quarantined": 0,
+      "receipt_total_selected": 8,
+      "score_regressions": {
+        "below_threshold": [],
+        "fell": [
+          {
+            "after": 0.875,
+            "before": 1.0,
+            "id": "fast_neutral_internal_state_number_density"
+          },
+          {
+            "after": 0.86875,
+            "before": 1.0,
+            "id": "normalized_ion_species_number_density"
+          }
+        ]
+      },
+      "second_dry_run_calls": 0,
+      "seed": "electron_number_density",
+      "slurm_job_id": 1288331,
+      "slurm_state": "COMPLETED",
+      "stamped": true,
+      "wall_seconds": 1287
+    },
+    {
+      "batch_receipt_cost_rows_usd": [
+        0.12594,
+        0.929002
+      ],
+      "batch_receipt_cost_usd": 1.054942,
+      "command": "uv run --no-sync imas-codex sn harmonize --family electrostatic_potential --apply --cost-limit 4.666044 --json",
+      "cost_limit_usd": 4.666044,
+      "exit_status": 0,
+      "halt_reasons": [
+        "name-axis drift on 2 name(s) in a docs-only campaign: electrostatic_potential_at_outboard_midplane, electrostatic_potential_at_wall"
+      ],
+      "halted": true,
+      "job_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/potential-apply-main.slurm.log",
+      "pipeline_wall_seconds": 1345,
+      "planned_calls": 5,
+      "post_attempt_lint": {
+        "link_missing_reverse": 1
+      },
+      "receipt_cost_spent_usd": 1.0549,
+      "receipt_total_accepted": 3,
+      "receipt_total_quarantined": 0,
+      "receipt_total_selected": 5,
+      "receipt_total_touched": 3,
+      "score_regressions": {
+        "below_threshold": [],
+        "fell": []
+      },
+      "second_dry_run_calls": 5,
+      "seed": "electrostatic_potential",
+      "slurm_job_id": 1288356,
+      "slurm_state": "COMPLETED",
+      "stamped": false,
+      "wall_seconds": 1347
+    },
+    {
+      "batch_receipt_cost_rows_usd": [
+        0.638733,
+        2.204729
+      ],
+      "batch_receipt_cost_usd": 2.843462,
+      "command": "uv run --no-sync imas-codex sn harmonize --family gap_at_plasma_boundary --apply --cost-limit 3.611144 --json",
+      "cost_limit_usd": 3.611144,
+      "exit_status": 0,
+      "finalize_dry_run_refusal": "gap_at_outboard_midplane: docs_stage='exhausted', expected 'accepted'",
+      "halt_reasons": [
+        "docs acceptance 0.00% < 90.00% (0/1 touched)",
+        "name-axis drift on 1 name(s) in a docs-only campaign: gap_at_plasma_boundary"
+      ],
+      "halted": true,
+      "job_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/gap-apply-main.slurm.log",
+      "pipeline_wall_seconds": 2439,
+      "planned_calls": 3,
+      "post_attempt_lint": {
+        "convention_violation": 4,
+        "sign_convention": 1
+      },
+      "receipt_cost_spent_usd": 2.8435,
+      "receipt_total_accepted": 1,
+      "receipt_total_quarantined": 0,
+      "receipt_total_selected": 3,
+      "receipt_total_touched": 2,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.75,
+            "before": 0.975,
+            "id": "gap_at_outboard_midplane"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.8875,
+            "before": 1.0,
+            "id": "gap_at_closest_wall_point"
+          },
+          {
+            "after": 0.75,
+            "before": 0.975,
+            "id": "gap_at_outboard_midplane"
+          }
+        ]
+      },
+      "second_dry_run_calls": 3,
+      "seed": "gap_at_plasma_boundary",
+      "slurm_job_id": 1288360,
+      "slurm_state": "COMPLETED",
+      "stamped": false,
+      "wall_seconds": 2440
+    }
+  ],
+  "budget": {
+    "ceiling_usd": 8.0,
+    "family_costs_exact_usd": {
+      "density_completed_apply": 1.746748,
+      "density_initial_attempts": 1.587256,
+      "gap_halted_apply": 2.843462,
+      "potential_halted_apply": 1.054942
+    },
+    "measured_cost_per_attempted_name_usd": 0.452026,
+    "measured_cost_per_complete_family_name_usd": null,
+    "measured_worst_family_per_name_usd": 0.947821,
+    "observed_spend_per_reviewed_name_usd": 0.258168,
+    "remaining_usd": 0.767592,
+    "reviewed_names": 17,
+    "spent_usd": 7.232408,
+    "unique_attempted_names": 16,
+    "west_limit_reason": "17 WEST names times the highest observed spend per name, USD 2.843462 / 3 gap names = USD 0.947821, gives USD 16.112951; round the hard cap up to USD 16.12. This is a planning bound, not permission to run.",
+    "west_limit_status": "conditional planning cap only; WEST run is on hold because no eligible locus family converged and a documentation score fell below acceptance",
+    "west_limit_usd": 16.12,
+    "west_roster_name_count": 17
+  },
+  "component_selection": {
+    "already_harmonized": "parallel_conductivity",
+    "chosen_seed": "parallel_vorticity",
+    "reason": "The first available, unharmonized non-WEST component family checked by report and dry run; six calls estimated at USD 2.48, within the approximately USD 3.03 reserved after the other two estimates.",
+    "unavailable_candidate": "parallel_current_density"
+  },
+  "families": {
+    "electron_number_density": {
+      "after": {
+        "anchor": "total_neutral_number_density",
+        "boundary_overlap": [],
+        "decision": "harmonized",
+        "documentation_scores": {
+          "electron_number_density": 1.0,
+          "electron_number_density_over_scrape_off_layer": 1.0,
+          "fast_neutral_internal_state_number_density": 0.875,
+          "normalized_ion_species_number_density": 0.86875,
+          "number_density_over_scrape_off_layer": 1.0,
+          "thermal_ion_charge_state_number_density": 1.0,
+          "total_ion_number_density": 1.0,
+          "total_neutral_number_density": 1.0
+        },
+        "estimate_basis": {
+          "calls": 31,
+          "mean_usd_per_call": 0.6357,
+          "runs": 17,
+          "total_usd": 19.7066
+        },
+        "estimate_usd": 0.0,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {},
+        "lint_total": 0,
+        "member_status": {
+          "electron_number_density": {
+            "docs_stage": "accepted",
+            "id": "electron_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electron_number_density_over_scrape_off_layer": {
+            "docs_stage": "accepted",
+            "id": "electron_number_density_over_scrape_off_layer",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "fast_neutral_internal_state_number_density": {
+            "docs_stage": "accepted",
+            "id": "fast_neutral_internal_state_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "normalized_ion_species_number_density": {
+            "docs_stage": "accepted",
+            "id": "normalized_ion_species_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "number_density_over_scrape_off_layer": {
+            "docs_stage": "accepted",
+            "id": "number_density_over_scrape_off_layer",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "thermal_ion_charge_state_number_density": {
+            "docs_stage": "accepted",
+            "id": "thermal_ion_charge_state_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "total_ion_number_density": {
+            "docs_stage": "accepted",
+            "id": "total_ion_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "total_neutral_number_density": {
+            "docs_stage": "accepted",
+            "id": "total_neutral_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "electron_number_density",
+          "electron_number_density_over_scrape_off_layer",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "number_density_over_scrape_off_layer",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 0,
+        "refusals": {},
+        "seed": "electron_number_density",
+        "status_counts": {
+          "accepted": 8,
+          "other": 0,
+          "quarantined": 0
+        }
+      },
+      "after_job": {
+        "anchor": "total_ion_number_density",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electron_number_density": 1.0,
+          "fast_neutral_internal_state_number_density": 1.0,
+          "normalized_ion_species_number_density": 1.0,
+          "thermal_ion_charge_state_number_density": 1.0,
+          "total_ion_number_density": 0.9375,
+          "total_neutral_number_density": 1.0,
+          "volume_averaged_electron_number_density_over_scrape_off_layer": null
+        },
+        "estimate_basis": {
+          "calls": 29,
+          "mean_usd_per_call": 0.4233,
+          "runs": 12,
+          "total_usd": 12.2748
+        },
+        "estimate_usd": 2.9629,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 1,
+          "link_missing_reverse": 3
+        },
+        "lint_total": 4,
+        "members": [
+          "electron_number_density",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density",
+          "volume_averaged_electron_number_density_over_scrape_off_layer"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 7,
+        "refusals": {},
+        "score_regressions": {
+          "below_threshold": [],
+          "fell": [
+            {
+              "after": 0.9375,
+              "before": 0.98125,
+              "id": "total_ion_number_density"
+            }
+          ]
+        },
+        "seed": "electron_number_density",
+        "unreviewed_member_state": {
+          "docs_stage": "pending",
+          "id": "volume_averaged_electron_number_density_over_scrape_off_layer",
+          "name_stage": "exhausted",
+          "reviewer_score_docs": null,
+          "validation_status": "quarantined"
+        }
+      },
+      "before": {
+        "anchor": "total_ion_number_density",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electron_number_density": 0.95,
+          "fast_neutral_internal_state_number_density": 0.91875,
+          "normalized_ion_species_number_density": 0.875,
+          "thermal_ion_charge_state_number_density": 0.8875,
+          "total_ion_number_density": 0.98125,
+          "total_neutral_number_density": 0.9,
+          "volume_averaged_electron_number_density_over_scrape_off_layer": null
+        },
+        "estimate_basis": {
+          "calls": 23,
+          "mean_usd_per_call": 0.414,
+          "runs": 7,
+          "total_usd": 9.5226
+        },
+        "estimate_usd": 2.8982,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 3,
+          "link_dead_link": 1,
+          "link_missing_reverse": 1
+        },
+        "lint_total": 5,
+        "members": [
+          "electron_number_density",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density",
+          "volume_averaged_electron_number_density_over_scrape_off_layer"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 7,
+        "refusals": {},
+        "seed": "electron_number_density"
+      },
+      "current_before": {
+        "anchor": "total_ion_number_density",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electron_number_density": 1.0,
+          "electron_number_density_over_scrape_off_layer": null,
+          "fast_neutral_internal_state_number_density": 1.0,
+          "normalized_ion_species_number_density": 1.0,
+          "number_density_over_scrape_off_layer": null,
+          "thermal_ion_charge_state_number_density": 1.0,
+          "total_ion_number_density": 0.9375,
+          "total_neutral_number_density": 1.0
+        },
+        "estimate_basis": {
+          "calls": 29,
+          "mean_usd_per_call": 0.6193,
+          "runs": 15,
+          "total_usd": 17.9598
+        },
+        "estimate_usd": 4.9544,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 2,
+          "link_missing_reverse": 3
+        },
+        "lint_total": 5,
+        "member_status": {
+          "electron_number_density": {
+            "docs_stage": "accepted",
+            "id": "electron_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electron_number_density_over_scrape_off_layer": {
+            "docs_stage": "pending",
+            "id": "electron_number_density_over_scrape_off_layer",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "fast_neutral_internal_state_number_density": {
+            "docs_stage": "accepted",
+            "id": "fast_neutral_internal_state_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "normalized_ion_species_number_density": {
+            "docs_stage": "accepted",
+            "id": "normalized_ion_species_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "number_density_over_scrape_off_layer": {
+            "docs_stage": "pending",
+            "id": "number_density_over_scrape_off_layer",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "thermal_ion_charge_state_number_density": {
+            "docs_stage": "accepted",
+            "id": "thermal_ion_charge_state_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "total_ion_number_density": {
+            "docs_stage": "accepted",
+            "id": "total_ion_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "total_neutral_number_density": {
+            "docs_stage": "accepted",
+            "id": "total_neutral_number_density",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "electron_number_density",
+          "electron_number_density_over_scrape_off_layer",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "number_density_over_scrape_off_layer",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 8,
+        "refusals": {},
+        "seed": "electron_number_density",
+        "status_counts": {
+          "accepted": 6,
+          "other": 2,
+          "quarantined": 0
+        }
+      },
+      "partial": {
+        "anchor": "total_ion_number_density",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electron_number_density": 0.95,
+          "fast_neutral_internal_state_number_density": 0.91875,
+          "normalized_ion_species_number_density": 0.875,
+          "thermal_ion_charge_state_number_density": 0.8875,
+          "total_ion_number_density": null,
+          "total_neutral_number_density": 0.9,
+          "volume_averaged_electron_number_density_over_scrape_off_layer": null
+        },
+        "estimate_basis": {
+          "calls": 24,
+          "mean_usd_per_call": 0.4026,
+          "runs": 9,
+          "total_usd": 9.6626
+        },
+        "estimate_usd": 2.8183,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 3,
+          "link_dead_link": 1,
+          "link_missing_reverse": 1
+        },
+        "lint_total": 5,
+        "members": [
+          "electron_number_density",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density",
+          "volume_averaged_electron_number_density_over_scrape_off_layer"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 7,
+        "refusals": {},
+        "seed": "electron_number_density"
+      }
+    },
+    "electrostatic_potential": {
+      "after_job": {
+        "anchor": "electrostatic_potential_at_langmuir_probe_position",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electrostatic_potential": 0.9375,
+          "electrostatic_potential_at_langmuir_probe_position": 0.94375,
+          "electrostatic_potential_at_outboard_midplane": null,
+          "electrostatic_potential_at_wall": 0.8625,
+          "floating_electrostatic_potential": 0.9375
+        },
+        "estimate_basis": {
+          "calls": 34,
+          "mean_usd_per_call": 0.6106,
+          "runs": 19,
+          "total_usd": 20.7615
+        },
+        "estimate_usd": 3.0532,
+        "invariant": [
+          "electrostatic_potential",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "link_missing_reverse": 1
+        },
+        "lint_total": 1,
+        "member_status": {
+          "electrostatic_potential": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_langmuir_probe_position": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential_at_langmuir_probe_position",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_outboard_midplane": {
+            "docs_stage": "pending",
+            "id": "electrostatic_potential_at_outboard_midplane",
+            "name_stage": "reviewed",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_wall": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential_at_wall",
+            "name_stage": "reviewed",
+            "validation_status": "valid"
+          },
+          "floating_electrostatic_potential": {
+            "docs_stage": "accepted",
+            "id": "floating_electrostatic_potential",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "electrostatic_potential",
+          "electrostatic_potential_at_langmuir_probe_position",
+          "electrostatic_potential_at_outboard_midplane",
+          "electrostatic_potential_at_wall",
+          "floating_electrostatic_potential"
+        ],
+        "physical_base": "electrostatic_potential",
+        "planned_calls": 5,
+        "refusals": {},
+        "seed": "electrostatic_potential",
+        "status_counts": {
+          "accepted": 4,
+          "other": 1,
+          "quarantined": 0
+        }
+      },
+      "before": {
+        "anchor": "electrostatic_potential_at_langmuir_probe_position",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electrostatic_potential": 0.85625,
+          "electrostatic_potential_at_langmuir_probe_position": 0.9375,
+          "floating_electrostatic_potential": 0.85,
+          "plasma_electrostatic_potential_at_outboard_midplane": null,
+          "plasma_electrostatic_potential_at_wall": null
+        },
+        "estimate_basis": {
+          "calls": 23,
+          "mean_usd_per_call": 0.414,
+          "runs": 7,
+          "total_usd": 9.5226
+        },
+        "estimate_usd": 2.0701,
+        "invariant": [
+          "electrostatic_potential",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "defining_equation": 1,
+          "link_missing_reverse": 2
+        },
+        "lint_total": 3,
+        "members": [
+          "electrostatic_potential",
+          "electrostatic_potential_at_langmuir_probe_position",
+          "floating_electrostatic_potential",
+          "plasma_electrostatic_potential_at_outboard_midplane",
+          "plasma_electrostatic_potential_at_wall"
+        ],
+        "physical_base": "electrostatic_potential",
+        "planned_calls": 5,
+        "refusals": {},
+        "seed": "electrostatic_potential"
+      },
+      "current_before": {
+        "anchor": "electrostatic_potential_at_langmuir_probe_position",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electrostatic_potential": 0.85625,
+          "electrostatic_potential_at_langmuir_probe_position": 0.9375,
+          "electrostatic_potential_at_outboard_midplane": null,
+          "electrostatic_potential_at_wall": 0.8625,
+          "floating_electrostatic_potential": 0.85
+        },
+        "estimate_basis": {
+          "calls": 29,
+          "mean_usd_per_call": 0.6193,
+          "runs": 15,
+          "total_usd": 17.9598
+        },
+        "estimate_usd": 3.0965,
+        "invariant": [
+          "electrostatic_potential",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "defining_equation": 1,
+          "link_missing_reverse": 4
+        },
+        "lint_total": 5,
+        "member_status": {
+          "electrostatic_potential": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_langmuir_probe_position": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential_at_langmuir_probe_position",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_outboard_midplane": {
+            "docs_stage": "pending",
+            "id": "electrostatic_potential_at_outboard_midplane",
+            "name_stage": "reviewed",
+            "validation_status": "valid"
+          },
+          "electrostatic_potential_at_wall": {
+            "docs_stage": "accepted",
+            "id": "electrostatic_potential_at_wall",
+            "name_stage": "reviewed",
+            "validation_status": "valid"
+          },
+          "floating_electrostatic_potential": {
+            "docs_stage": "accepted",
+            "id": "floating_electrostatic_potential",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "electrostatic_potential",
+          "electrostatic_potential_at_langmuir_probe_position",
+          "electrostatic_potential_at_outboard_midplane",
+          "electrostatic_potential_at_wall",
+          "floating_electrostatic_potential"
+        ],
+        "physical_base": "electrostatic_potential",
+        "planned_calls": 5,
+        "refusals": {},
+        "seed": "electrostatic_potential",
+        "status_counts": {
+          "accepted": 4,
+          "other": 1,
+          "quarantined": 0
+        }
+      }
+    },
+    "gap_at_plasma_boundary": {
+      "after_job": {
+        "anchor": "gap_at_closest_wall_point",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "gap_at_closest_wall_point": 0.8875,
+          "gap_at_outboard_midplane": 0.75,
+          "gap_at_plasma_boundary": 0.9125
+        },
+        "estimate_basis": {
+          "calls": 36,
+          "mean_usd_per_call": 0.6557,
+          "runs": 21,
+          "total_usd": 23.605
+        },
+        "estimate_usd": 1.9671,
+        "invariant": [
+          "gap",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 4,
+          "sign_convention": 1
+        },
+        "lint_total": 5,
+        "member_status": {
+          "gap_at_closest_wall_point": {
+            "docs_stage": "accepted",
+            "id": "gap_at_closest_wall_point",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "gap_at_outboard_midplane": {
+            "docs_stage": "exhausted",
+            "id": "gap_at_outboard_midplane",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "gap_at_plasma_boundary": {
+            "docs_stage": "accepted",
+            "id": "gap_at_plasma_boundary",
+            "name_stage": "exhausted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "gap_at_closest_wall_point",
+          "gap_at_outboard_midplane",
+          "gap_at_plasma_boundary"
+        ],
+        "physical_base": "gap",
+        "planned_calls": 3,
+        "refusals": {},
+        "seed": "gap_at_plasma_boundary",
+        "status_counts": {
+          "accepted": 2,
+          "other": 1,
+          "quarantined": 0
+        }
+      },
+      "before": {
+        "anchor": "gap_at_closest_wall_point",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "gap_at_closest_wall_point": 1.0,
+          "gap_at_outboard_midplane": 0.975,
+          "gap_at_plasma_boundary": 0.9125
+        },
+        "estimate_basis": {
+          "calls": 34,
+          "mean_usd_per_call": 0.6106,
+          "runs": 19,
+          "total_usd": 20.7615
+        },
+        "estimate_usd": 1.8319,
+        "invariant": [
+          "gap",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 6
+        },
+        "lint_total": 6,
+        "member_status": {
+          "gap_at_closest_wall_point": {
+            "docs_stage": "accepted",
+            "id": "gap_at_closest_wall_point",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "gap_at_outboard_midplane": {
+            "docs_stage": "accepted",
+            "id": "gap_at_outboard_midplane",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "gap_at_plasma_boundary": {
+            "docs_stage": "accepted",
+            "id": "gap_at_plasma_boundary",
+            "name_stage": "exhausted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "gap_at_closest_wall_point",
+          "gap_at_outboard_midplane",
+          "gap_at_plasma_boundary"
+        ],
+        "physical_base": "gap",
+        "planned_calls": 3,
+        "refusals": {},
+        "seed": "gap_at_plasma_boundary",
+        "status_counts": {
+          "accepted": 3,
+          "other": 0,
+          "quarantined": 0
+        }
+      }
+    },
+    "parallel_vorticity": {
+      "after": {
+        "anchor": "vorticity",
+        "boundary_overlap": [],
+        "decision": "harmonized",
+        "documentation_scores": {
+          "parallel_vorticity": 0.91875,
+          "poloidal_vorticity": 0.89375,
+          "radial_vorticity": 0.9375,
+          "toroidal_vorticity": 0.8687499999999999,
+          "vertical_vorticity": 0.91875,
+          "vorticity": 0.9625
+        },
+        "estimate_basis": {
+          "calls": 29,
+          "mean_usd_per_call": 0.6193,
+          "runs": 15,
+          "total_usd": 17.9598
+        },
+        "estimate_usd": 0.0,
+        "invariant": [
+          "vorticity",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {},
+        "lint_total": 0,
+        "member_status": {
+          "parallel_vorticity": {
+            "docs_stage": "accepted",
+            "id": "parallel_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "poloidal_vorticity": {
+            "docs_stage": "accepted",
+            "id": "poloidal_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "radial_vorticity": {
+            "docs_stage": "accepted",
+            "id": "radial_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "toroidal_vorticity": {
+            "docs_stage": "accepted",
+            "id": "toroidal_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "vertical_vorticity": {
+            "docs_stage": "accepted",
+            "id": "vertical_vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "vorticity": {
+            "docs_stage": "accepted",
+            "id": "vorticity",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "parallel_vorticity",
+          "poloidal_vorticity",
+          "radial_vorticity",
+          "toroidal_vorticity",
+          "vertical_vorticity",
+          "vorticity"
+        ],
+        "physical_base": "vorticity",
+        "planned_calls": 0,
+        "refusals": {},
+        "seed": "parallel_vorticity",
+        "status_counts": {
+          "accepted": 6,
+          "other": 0,
+          "quarantined": 0
+        }
+      },
+      "before": {
+        "anchor": "vorticity",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "parallel_vorticity": 0.91875,
+          "poloidal_vorticity": 0.89375,
+          "radial_vorticity": 0.9375,
+          "toroidal_vorticity": 0.8687499999999999,
+          "vertical_vorticity": 0.91875,
+          "vorticity": 0.9625
+        },
+        "estimate_basis": {
+          "calls": 23,
+          "mean_usd_per_call": 0.414,
+          "runs": 7,
+          "total_usd": 9.5226
+        },
+        "estimate_usd": 2.4842,
+        "invariant": [
+          "vorticity",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "link_missing_reverse": 4,
+          "symbol_definitions": 1
+        },
+        "lint_total": 5,
+        "members": [
+          "parallel_vorticity",
+          "poloidal_vorticity",
+          "radial_vorticity",
+          "toroidal_vorticity",
+          "vertical_vorticity",
+          "vorticity"
+        ],
+        "physical_base": "vorticity",
+        "planned_calls": 6,
+        "refusals": {},
+        "seed": "parallel_vorticity"
+      }
+    }
+  },
+  "finalizations": [
+    {
+      "after_lint": {},
+      "before_lint": {
+        "link_missing_reverse": 4,
+        "symbol_definitions": 1
+      },
+      "dry_run_missing_reverse_pairs": 4,
+      "dry_run_planned_calls": 0,
+      "kind": "component",
+      "model_calls": 0,
+      "reverse_links": {
+        "added": 4,
+        "members": 6,
+        "protected": [],
+        "removed": 0,
+        "written": 3
+      },
+      "second_dry_run_calls": 0,
+      "seed": "parallel_vorticity",
+      "spend_usd": 0.0,
+      "stamped": true,
+      "wall_seconds": 17.639
+    }
+  ],
+  "fixture": {
+    "after": {
+      "fixture_low_scoring_member": 0.8,
+      "fixture_stable_member": 0.9
+    },
+    "before": {
+      "fixture_low_scoring_member": 0.95,
+      "fixture_stable_member": 0.9
+    },
+    "result": {
+      "below_threshold": [
+        {
+          "after": 0.8,
+          "before": 0.95,
+          "id": "fixture_low_scoring_member"
+        }
+      ],
+      "fell": [
+        {
+          "after": 0.8,
+          "before": 0.95,
+          "id": "fixture_low_scoring_member"
+        }
+      ]
+    },
+    "threshold": 0.85
+  },
+  "locus_replacement": {
+    "anchor": "gap_at_closest_wall_point",
+    "dry_run_calls": 3,
+    "dry_run_estimate_usd": 1.83,
+    "members": [
+      "gap_at_closest_wall_point",
+      "gap_at_outboard_midplane",
+      "gap_at_plasma_boundary"
+    ],
+    "reason": "Chosen after the potential halt because three accepted position variants had a three-call USD 1.83 dry run and no boundary-family overlap. A later positive-control roster search found all three names in WEST review rosters, so the non-WEST condition was not met.",
+    "remaining_before_apply_usd": 3.611144,
+    "seed": "gap_at_plasma_boundary",
+    "valid_non_west": false,
+    "west_roster_counts": {
+      "gap_at_closest_wall_point": 2,
+      "gap_at_outboard_midplane": 14,
+      "gap_at_plasma_boundary": 1
+    }
+  },
+  "result": {
+    "component_family_complete": true,
+    "density_family_complete": true,
+    "gap_family_complete": false,
+    "members_below_threshold_after_completed_apply": [
+      "gap_at_outboard_midplane"
+    ],
+    "reason": "Density and vorticity converged; electrostatic potential halted on name-axis drift. Gap halted with gap_at_outboard_midplane at 0.75 below the 0.85 threshold and is present in WEST rosters, so it is not a valid non-WEST replacement. No further apply is authorized.",
+    "three_families_applied": false,
+    "three_non_west_families_converged": false,
+    "west_run_ready": false
+  },
+  "west_roster_check": {
+    "chosen_family_member_matches": 0,
+    "gap_members_checked": {
+      "gap_at_closest_wall_point": 2,
+      "gap_at_outboard_midplane": 14,
+      "gap_at_plasma_boundary": 1
+    },
+    "positive_control": "flux_surface_averaged_electron_density_at_plasma_boundary",
+    "positive_control_match_count": 10,
+    "positive_control_matches": "present in multiple review rosters",
+    "searched": "imas_codex/standard_names/manifests/reviews"
+  }
+}

@@ -1,0 +1,150 @@
+<section id="shc-three-family-measure">
+  <h2 id="shc-three-family-measure-title">Three-family cost measure: convergence gate failed</h2>
+  <p id="shc-three-family-measure-verdict">
+    The USD 8.00 measurement spent USD 7.232408, leaving USD 0.767592.
+    The species family converged and the component family was finalized
+    without model calls. The electrostatic-potential locus family halted on
+    name-axis drift. Its gap replacement also halted: one member's rewritten
+    documentation scored 0.75000, below the 0.85000 acceptance threshold.
+    A later roster check found all three gap members in WEST review rosters,
+    so gap also fails the non-WEST scope condition. This evidence does not
+    meet the three non-WEST family convergence gate, and the WEST run is held.
+  </p>
+  <table id="shc-three-family-measure-family-results">
+    <caption>Family attempts, including the two failed locus scopes</caption>
+    <thead>
+      <tr><th>Kind and seed</th><th>Members; anchor</th><th>Calls and measured cost</th><th>Wall time</th><th>After status</th><th>Second dry run</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Species: <code>electron_number_density</code></td>
+        <td>8; apply anchor <code>total_ion_number_density</code> (clean report later selected <code>total_neutral_number_density</code>)</td>
+        <td>8 planned; USD 1.746748 completed apply, USD 3.334004 including two earlier interrupted/failed attempts</td>
+        <td>21:27 completed apply</td><td>stamped; accepted 8, quarantined 0, pending 0</td><td>0 calls</td>
+      </tr>
+      <tr>
+        <td>Component: <code>parallel_vorticity</code></td>
+        <td>6; <code>vorticity</code></td>
+        <td>0 model calls; USD 0.000000 guarded finalize</td>
+        <td>17.639 seconds</td><td>stamped; accepted 6, quarantined 0, pending 0</td><td>0 calls</td>
+      </tr>
+      <tr>
+        <td>Locus: <code>electrostatic_potential</code></td>
+        <td>5; <code>electrostatic_potential_at_langmuir_probe_position</code></td>
+        <td>5 planned; USD 1.054942</td>
+        <td>22:27</td><td>halted, unstamped; accepted 4, quarantined 0, pending 1</td><td>5 calls</td>
+      </tr>
+      <tr>
+        <td>Replacement locus: <code>gap_at_plasma_boundary</code></td>
+        <td>3; <code>gap_at_closest_wall_point</code></td>
+        <td>3 planned; USD 2.843462</td>
+        <td>40:40</td><td>halted, unstamped; accepted 2, quarantined 0, pending 1</td><td>3 calls</td>
+      </tr>
+    </tbody>
+  </table>
+  <table id="shc-three-family-measure-lint">
+    <caption>Lint findings by kind before and after each action</caption>
+    <thead><tr><th>Family</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td><code>number_density</code></td><td>convention_violation 2; link_missing_reverse 3</td><td>none</td></tr>
+      <tr><td><code>vorticity</code></td><td>link_missing_reverse 4; symbol_definitions 1</td><td>none</td></tr>
+      <tr><td><code>electrostatic_potential</code></td><td>defining_equation 1; link_missing_reverse 4</td><td>link_missing_reverse 1</td></tr>
+      <tr><td><code>gap</code></td><td>convention_violation 6</td><td>convention_violation 4; sign_convention 1</td></tr>
+    </tbody>
+  </table>
+  <table id="shc-three-family-measure-scores">
+    <caption>Stored documentation scores before each action versus its own review or finalize result</caption>
+    <thead><tr><th>Kind</th><th>Member</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>Species</td><td><code>electron_number_density</code></td><td>1.00000</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>electron_number_density_over_scrape_off_layer</code></td><td>not scored</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>fast_neutral_internal_state_number_density</code></td><td>1.00000</td><td>0.87500</td></tr>
+      <tr><td>Species</td><td><code>normalized_ion_species_number_density</code></td><td>1.00000</td><td>0.86875</td></tr>
+      <tr><td>Species</td><td><code>number_density_over_scrape_off_layer</code></td><td>not scored</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>thermal_ion_charge_state_number_density</code></td><td>1.00000</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>total_ion_number_density</code></td><td>0.93750</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>total_neutral_number_density</code></td><td>1.00000</td><td>1.00000</td></tr>
+      <tr><td>Component</td><td><code>parallel_vorticity</code></td><td>0.91875</td><td>0.91875</td></tr>
+      <tr><td>Component</td><td><code>poloidal_vorticity</code></td><td>0.89375</td><td>0.89375</td></tr>
+      <tr><td>Component</td><td><code>radial_vorticity</code></td><td>0.93750</td><td>0.93750</td></tr>
+      <tr><td>Component</td><td><code>toroidal_vorticity</code></td><td>0.86875</td><td>0.86875</td></tr>
+      <tr><td>Component</td><td><code>vertical_vorticity</code></td><td>0.91875</td><td>0.91875</td></tr>
+      <tr><td>Component</td><td><code>vorticity</code></td><td>0.96250</td><td>0.96250</td></tr>
+      <tr><td>Locus attempt</td><td><code>electrostatic_potential</code></td><td>0.85625</td><td>0.93750</td></tr>
+      <tr><td>Locus attempt</td><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>0.93750</td><td>0.94375</td></tr>
+      <tr><td>Locus attempt</td><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>not scored</td><td>not scored</td></tr>
+      <tr><td>Locus attempt</td><td><code>electrostatic_potential_at_wall</code></td><td>0.86250</td><td>0.86250</td></tr>
+      <tr><td>Locus attempt</td><td><code>floating_electrostatic_potential</code></td><td>0.85000</td><td>0.93750</td></tr>
+      <tr><td>Locus replacement</td><td><code>gap_at_closest_wall_point</code></td><td>1.00000</td><td>0.88750</td></tr>
+      <tr><td>Locus replacement</td><td><code>gap_at_outboard_midplane</code></td><td>0.97500</td><td>0.75000</td></tr>
+      <tr><td>Locus replacement</td><td><code>gap_at_plasma_boundary</code></td><td>0.91250</td><td>0.91250</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-three-family-measure-score-interpretation">
+    The accepted documentation threshold is <code>DEFAULT_MIN_SCORE = 0.85</code>
+    in <code>imas_codex/standard_names/defaults.py</code>. The gap apply's
+    own comparison named <code>gap_at_outboard_midplane</code> under
+    <code>below_threshold</code>: 0.97500 before, 0.75000 after.
+    <code>gap_at_closest_wall_point</code> also fell from 1.00000 to
+    0.88750 but stayed accepted. Density had two score falls, to 0.87500
+    and 0.86875, both above the threshold. Potential had none.
+    The no-graph, no-spend fixture changed
+    <code>fixture_low_scoring_member</code> from 0.95 to 0.80 and reported
+    that member by name; its <code>fixture.log</code> ends <code>EXIT=0</code>.
+  </p>
+  <p id="shc-three-family-measure-halts">
+    The potential apply halted on name-axis drift in
+    <code>electrostatic_potential_at_outboard_midplane</code> and
+    <code>electrostatic_potential_at_wall</code>. The gap apply halted on
+    documentation acceptance and name-axis drift in
+    <code>gap_at_plasma_boundary</code>. A read-only
+    <code>--finalize --dry-run</code> then refused
+    <code>gap_at_outboard_midplane</code> because its
+    <code>docs_stage</code> is <code>exhausted</code>, not
+    <code>accepted</code>. No real finalize or further apply followed.
+  </p>
+  <p id="shc-three-family-measure-scope-check">
+    The gap family was selected after a three-call USD 1.83 dry run with
+    three accepted members and no boundary-family overlap. The later WEST
+    roster check found <code>gap_at_closest_wall_point</code> in 2 review
+    files, <code>gap_at_outboard_midplane</code> in 14, and
+    <code>gap_at_plasma_boundary</code> in 1. The same search found the
+    known boundary-density member in 10 files, so its positive control
+    was present. Gap cannot count as the required non-WEST locus family.
+    <code>parallel_conductivity</code> already planned zero calls;
+    <code>parallel_current_density</code> had no live family; the chosen
+    non-WEST component, <code>parallel_vorticity</code>, was clean and
+    accepted, so guarded finalize stamped it without spend.
+  </p>
+  <table id="shc-three-family-measure-budget">
+    <caption>Batch receipts reconciled to six decimal places (family summaries round to four)</caption>
+    <thead><tr><th>Action</th><th>Batch receipt cost [USD]</th></tr></thead>
+    <tbody>
+      <tr><td>Earlier density attempts</td><td>1.587256</td></tr>
+      <tr><td>Completed density apply, job 1288331</td><td>0.106603 + 1.640145 = 1.746748</td></tr>
+      <tr><td>Halted potential apply, job 1288356</td><td>0.125940 + 0.929002 = 1.054942</td></tr>
+      <tr><td>Halted gap apply, job 1288360</td><td>0.638733 + 2.204729 = 2.843462</td></tr>
+      <tr><th>Total against USD 8.000000 ceiling</th><th>7.232408; remaining 0.767592</th></tr>
+    </tbody>
+  </table>
+  <p id="shc-three-family-measure-west-limit">
+    Across the 16 unique names in the three spending scopes, observed
+    spend was USD 0.452026 per attempted name, including the density
+    retries and both halted locus attempts. The most expensive scope
+    was gap at USD 2.843462 / 3 = USD 0.947821 per name. For the
+    previously measured 17-name WEST boundary family, 17 times that
+    observed high is USD 16.112951; USD 16.12 is a conditional hard
+    cost limit rounded upward. It is a planning bound only. The WEST
+    apply must remain on hold until an eligible non-WEST locus family
+    converges with no score below 0.85 and the name-axis drift is
+    resolved. The USD 8.00 ceiling here authorizes no WEST spend.
+  </p>
+  <p id="shc-three-family-measure-evidence">
+    The detailed member lists, status fields, scores, call estimates
+    and receipts are in <code>shc-three-family-measure-results.json</code>.
+    The read-only snapshot and regression fixture live in
+    <code>shc-three-family-measure-run.py</code>. The job and check logs,
+    including the CLI's final JSON receipts and <code>EXIT=</code> lines,
+    are under the run directory named in the manifest.
+  </p>
+</section>
