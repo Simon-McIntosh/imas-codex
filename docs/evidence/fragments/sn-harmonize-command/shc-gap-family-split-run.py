@@ -1,71 +1,107 @@
 #!/usr/bin/env python
-"""Read the gap-family split's before-state and exercise the sanctioned owners.
+"""Split the gap family: revive the measurement distance, then move its sources.
 
-The node moves three midplane measurement distances off
-``gap_at_outboard_midplane`` onto a revived
-``radial_separatrix_distance_at_outboard_midplane``.  The revival of a
-superseded identity is a precondition for the move: the sanctioned
-PRODUCED_NAME mover refuses a retired successor, so the target must be live
-before any source can be retargeted onto it.
+``gap_at_outboard_midplane`` holds four data-dictionary sources. One of them —
+the separatrix separation, ``dd:summary/boundary/distance_inner_outer_separatrices/value``
+— is what the name means, and stays. The other three are midplane measurement
+distances that the name was never about, and the ruling moves them to
+``radial_separatrix_distance_at_outboard_midplane``, which parses on ISN's new
+``separatrix_distance`` base.
 
-This script performs no write.  It reads the before-state with a
-property-existence control on every property it reports, binds each of the
-family's four sources to whichever live names currently hold it, parses both
-names through the project's own ISN grammar, and runs the sanctioned owners in
-their preview modes so their verdicts are recorded rather than inferred.
+That target is a tombstone, and the sanctioned source mover refuses a retired
+successor, so the revival comes first. The revival goes through the signed
+repair envelope rather than through an owner code change: one ``set_properties``
+row returns the identity to a live stage and a non-terminal catalog status, with
+the ruling recorded as its authority.
 
-Usage:
-    uv run --no-sync python docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-run.py
+Nothing here builds Cypher. The revival is ``apply_signed_manifest`` over an
+authority built by ``build_repair_authority``; the move is
+``retarget_standard_name_sources``. Modes, in the order a run uses them:
+
+    read      the before-state, with an existence control on every property
+    build     emit the signed authority artifact
+    preview   dry-run the authority and return its digest
+    apply     commit it under the preview's digest
+    move      retarget the three measurement sources
+    after     the done-when readback of both names and all four sources
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import sys
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.cascade import _isn_parser, _isn_round_trip_ok
 from imas_codex.standard_names.edit import supersede_into
+from imas_codex.standard_names.provenance_lifecycle import (
+    retarget_standard_name_sources,
+)
+from imas_codex.standard_names.repair_authority import build_repair_authority
+from imas_codex.standard_names.signed_manifest import (
+    apply_signed_manifest,
+    signed_payload_sha256,
+)
 
 TARGET = "radial_separatrix_distance_at_outboard_midplane"
 HOLDER = "gap_at_outboard_midplane"
-FAMILY = [
-    TARGET,
-    HOLDER,
-    "distance_at_outboard_midplane",
-    "radial_gap",
-]
-#: The four sources the two names must hold between them, before and after.
-FAMILY_SOURCES = [
-    "dd:summary/boundary/distance_inner_outer_separatrices/value",
+FAMILY = [TARGET, HOLDER, "distance_at_outboard_midplane", "radial_gap"]
+
+#: What each name means, and which source carries it. The split's whole point is
+#: that one name held four sources of two different kinds.
+SEPARATRIX_SOURCE = "dd:summary/boundary/distance_inner_outer_separatrices/value"
+MEASUREMENT_SOURCES = [
     "dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane",
     "dd:langmuir_probes/embedded/distance_separatrix_midplane",
     "dd:thomson_scattering/channel/distance_separatrix_midplane",
 ]
+FAMILY_SOURCES = [SEPARATRIX_SOURCE, *MEASUREMENT_SOURCES]
+
 #: Properties every StandardName carries, used as the read's positive control.
 CONTROL_PRESENT = "id"
-#: A property no StandardName is expected to carry, used as the negative
-#: control: the same read must report this one as absent.
+#: A property no StandardName carries, used as the negative control: the same
+#: read must report this one as absent on every node.
 CONTROL_ABSENT = "this_property_is_never_set_by_any_writer"
 LIVE_STAGES = ("pending", "drafted", "reviewed", "accepted", "approved", "refining")
+
+AUTHORITY_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "shc-gap-family-split-manifest.json",
+)
+AUTHORITY_MODE = "external_reviewed"
+REVIVE_OPERATION = "revive_superseded_identity"
+REVIVE_OPERATION_ID = "revive-outboard-midplane-separatrix-distance"
+REVIVE_REASON = (
+    "revive radial_separatrix_distance_at_outboard_midplane so the midplane "
+    "measurement distances can move off gap_at_outboard_midplane; authority is "
+    "comment c-s4-lead-ruling-gap-split on plan sn-harmonize-command section 4"
+)
+MOVE_OPERATION = "source_migration_manifest"
+MOVE_REASON = (
+    "the midplane measurement distances are not the outboard-midplane gap; the "
+    "ruling in c-s4-lead-ruling-gap-split moves them to the revived "
+    "radial_separatrix_distance_at_outboard_midplane"
+)
+RUN_ID = os.environ.get(
+    "SHC_GAP_FAMILY_RUN_ID", "r-20261018T194720843228-shc-gap-family-split"
+)
 
 
 def read_names(gc: GraphClient) -> dict[str, object]:
     """Read the family's lifecycle scalars with an existence control each.
 
-    Every reported property is read together with its ``properties()``
-    membership, so a null value and a missing property cannot be confused: a
-    writer that never set the property and a writer that cleared it both read
-    as null through a bare property access, and only the membership tells them
-    apart.
+    Every property is read from the node's ``properties()`` map, so a null
+    value and a property no writer ever set cannot be confused: a bare property
+    access reports both as null, and only the membership tells them apart.
     """
     rows = list(
         gc.query(
             """
             MATCH (sn:StandardName)
             WHERE sn.id IN $ids
-            RETURN sn.id AS id,
-                   properties(sn) AS props
+            RETURN sn.id AS id, properties(sn) AS props
             ORDER BY sn.id
             """,
             ids=FAMILY,
@@ -74,7 +110,7 @@ def read_names(gc: GraphClient) -> dict[str, object]:
     out: dict[str, object] = {}
     for row in rows:
         props = dict(row["props"])
-        entry = {
+        out[row["id"]] = {
             "name_stage": props.get("name_stage"),
             "status": props.get("status"),
             "docs_stage": props.get("docs_stage"),
@@ -97,16 +133,16 @@ def read_names(gc: GraphClient) -> dict[str, object]:
             "control_present": CONTROL_PRESENT in props,
             "control_absent": CONTROL_ABSENT in props,
         }
-        out[row["id"]] = entry
     return out
 
 
 def read_source_bindings(gc: GraphClient) -> dict[str, object]:
-    """Bind every family source to the live names holding it, before the move.
+    """Bind every family source to the names holding it, live and retired.
 
-    A source bound to more than one live name, or to none, is the failure the
-    move must not create, so the reading enumerates all holders -- live and
-    retired -- rather than only the one this node cares about.
+    A source held by two live names, or by none, is the failure this node must
+    not create, so the reading enumerates every holder and reports the scalar
+    mirror beside the edge: the two agree in a consistent graph and diverge in
+    the middle of a bad migration.
     """
     rows = list(
         gc.query(
@@ -114,11 +150,8 @@ def read_source_bindings(gc: GraphClient) -> dict[str, object]:
             MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
             WHERE src.id IN $ids
             RETURN src.id AS source_id,
-                   collect({
-                     name: sn.id,
-                     stage: sn.name_stage,
-                     status: sn.status
-                   }) AS holders,
+                   collect({name: sn.id, stage: sn.name_stage,
+                            status: sn.status}) AS holders,
                    src.produced_sn_id AS scalar_target
             ORDER BY src.id
             """,
@@ -127,19 +160,18 @@ def read_source_bindings(gc: GraphClient) -> dict[str, object]:
     )
     out: dict[str, object] = {}
     for row in rows:
-        holders = [dict(h) for h in row["holders"]]
-        live = [h for h in holders if h.get("stage") in LIVE_STAGES]
+        holders = [dict(holder) for holder in row["holders"]]
+        live = [holder for holder in holders if holder.get("stage") in LIVE_STAGES]
         out[row["source_id"]] = {
             "holders": holders,
-            "live_holders": [h["name"] for h in live],
+            "live_holders": [holder["name"] for holder in live],
             "live_holder_count": len(live),
             "scalar_target": row["scalar_target"],
             "scalar_matches_live_holder": (
                 len(live) == 1 and row["scalar_target"] == live[0]["name"]
             ),
         }
-    missing = sorted(set(FAMILY_SOURCES) - set(out))
-    out["_missing_sources"] = missing
+    out["_missing_sources"] = sorted(set(FAMILY_SOURCES) - set(out))
     return out
 
 
@@ -159,9 +191,11 @@ def parse_name(name: str) -> dict[str, object]:
 def writer_quiescence(gc: GraphClient) -> dict[str, object]:
     """Count the graph's live writer reservations.
 
-    A signed apply needs a quiet graph.  Claims and binding locks are the
-    reservations a concurrent writer holds while it composes or migrates, so a
-    nonzero count here means the apply must wait.
+    A signed apply reads the whole participant closure inside its transaction,
+    so a concurrent writer composing on the same family would make the digest
+    the preview returns describe a state the apply no longer sees. Claims and
+    binding locks are that concurrency, so the reading is taken before each
+    write and recorded.
     """
     rows = list(
         gc.query(
@@ -189,14 +223,12 @@ def writer_quiescence(gc: GraphClient) -> dict[str, object]:
 
 
 def revive_previews() -> dict[str, object]:
-    """Run the sanctioned fold-revival owner in preview mode, per donor.
+    """Preview the fold-revival owner that was refused for this identity.
 
-    ``supersede_into(old, into)`` is the owner that restores a superseded
-    identity: folding a live name into a superseded tombstone re-occupies the
-    tombstone instead of leaving the carried sources with no live name.  It is
-    exercised here only as a preview; the donor set is every retired member of
-    the family, which is the whole set of names a fold could legitimately
-    absorb.
+    Kept in the record because the refusal is what routes the revival through
+    the signed envelope instead: an owner that cannot restore a tombstone is
+    not evidence that the identity is unrestorable, but it is evidence that the
+    revival needs authorisation rather than a flag.
     """
     previews: dict[str, object] = {}
     for donor in ("distance_at_outboard_midplane", "radial_gap"):
@@ -207,9 +239,11 @@ def revive_previews() -> dict[str, object]:
     return previews
 
 
-def main() -> int:
+def read_state() -> dict:
+    """The whole before- or after-state in one reading."""
     with GraphClient() as gc:
-        payload = {
+        state = {
+            "uri": gc.uri,
             "names": read_names(gc),
             "source_bindings": read_source_bindings(gc),
             "isn_grammar": {
@@ -218,22 +252,189 @@ def main() -> int:
             },
             "writer_quiescence": writer_quiescence(gc),
         }
-    payload["revive_previews"] = revive_previews()
-    payload["negative_control"] = {
-        "assertion": (
-            "the pre-apply readback must report the three measurement sources "
-            "on gap_at_outboard_midplane and must fail any assertion that they "
-            "are held by the revived name"
-        ),
-        "three_measurement_sources_on_holder": sorted(
-            source
-            for source, entry in payload["source_bindings"].items()  # type: ignore[union-attr]
-            if isinstance(entry, dict)
-            and entry.get("live_holders") == [HOLDER]
-            and source != FAMILY_SOURCES[0]
-        ),
+    return state
+
+
+def after_state_assertion(state: dict) -> dict[str, object]:
+    """Whether a reading is the split's post-state, source by source.
+
+    This is the assertion the pre-state readback must fail: it names, for every
+    family source, the one live name expected to hold it.
+    """
+    expected = {
+        **dict.fromkeys(MEASUREMENT_SOURCES, TARGET),
+        SEPARATRIX_SOURCE: HOLDER,
     }
-    print(json.dumps(payload, indent=2, default=str, sort_keys=True))
+    bindings = state["source_bindings"]
+    per_source = {}
+    for source, name in sorted(expected.items()):
+        entry = bindings.get(source) or {}
+        per_source[source] = {
+            "expected_live_holder": name,
+            "observed_live_holders": entry.get("live_holders"),
+            "ok": entry.get("live_holders") == [name]
+            and entry.get("scalar_matches_live_holder") is True,
+        }
+    names = state["names"]
+    target_live = names.get(TARGET, {}).get("name_stage") in LIVE_STAGES
+    holder_live = names.get(HOLDER, {}).get("name_stage") in LIVE_STAGES
+    holds = {
+        "target_docs_stage": names.get(TARGET, {}).get("docs_stage"),
+        "holder_docs_stage": names.get(HOLDER, {}).get("docs_stage"),
+    }
+    return {
+        "per_source": per_source,
+        "revived_name_is_live": target_live,
+        "holder_is_live": holder_live,
+        "documentation": holds,
+        "ok": target_live
+        and holder_live
+        and all(item["ok"] for item in per_source.values()),
+    }
+
+
+def build_row() -> dict:
+    """One signed row returning the tombstone to a live lifecycle state.
+
+    The three values move together because they are one decision: the name axis
+    leaves the terminal stage, the catalog axis stops excluding the spelling
+    from export, and the recorded prior stage — which for this identity is
+    itself the terminal one — is cleared so nothing downstream reads a live
+    name as having been superseded from a superseded state.
+    """
+    return {
+        "id": TARGET,
+        "identity": {"id": TARGET, "kind": "standard_name", "target_id": TARGET},
+        "participants": [{"id": TARGET, "kind": "node", "graph_label": "StandardName"}],
+        "mutations": [
+            {
+                "id": f"{TARGET}:revive",
+                "order": 0,
+                "kind": "set_properties",
+                "participant_id": TARGET,
+                "arguments": {
+                    "properties": {
+                        "name_stage": "drafted",
+                        "status": "draft",
+                        "superseded_from_stage": None,
+                    }
+                },
+            }
+        ],
+        "guards": [
+            {
+                "id": f"{TARGET}:out-of-allowlist-immutability",
+                "kind": "collateral_immutability",
+                "implementation": "out-of-allowlist-immutability",
+                "participant_ids": [TARGET],
+            }
+        ],
+        "orphan_policy": "refuse",
+        "selection": {
+            "id": "artifact-rows",
+            "mode": "exact_complete_signed_cohort",
+            "predicate": "artifact-rows",
+        },
+    }
+
+
+def build_authority() -> dict:
+    return {
+        "operation_id": REVIVE_OPERATION_ID,
+        "authority_mode": AUTHORITY_MODE,
+        "orphan_policy": "refuse",
+        "selection": {
+            "id": "artifact-rows",
+            "mode": "exact_complete_signed_cohort",
+            "predicate": "artifact-rows",
+        },
+        "receipt_policy": {
+            "id": "one-per-revived-identity",
+            "operation": REVIVE_OPERATION,
+            "cardinality": "per_target",
+            "expected_count": "admitted_rows",
+            "link_participant_kind": "standard_name",
+            "replay_projection": ["manifest_sha256", "row_id"],
+        },
+        "rows": [build_row()],
+    }
+
+
+def write_authority() -> dict:
+    built = build_repair_authority(build_authority())
+    with open(AUTHORITY_PATH, "wb") as handle:
+        handle.write(built.content)
+    return {
+        "authority_path": AUTHORITY_PATH,
+        "authority_file_sha256": built.file_sha256,
+        "authority_payload_sha256": built.payload_sha256,
+        "rows": 1,
+    }
+
+
+def run_authority(apply: bool, digest: str | None) -> dict:
+    raw = open(AUTHORITY_PATH, "rb").read()
+    result = apply_signed_manifest(
+        AUTHORITY_PATH,
+        authority_file_sha256=hashlib.sha256(raw).hexdigest(),
+        authority_payload_sha256=signed_payload_sha256(json.loads(raw)),
+        reason=REVIVE_REASON,
+        apply=apply,
+        manifest_sha256=digest if apply else None,
+        run_id=RUN_ID,
+    )
+    return {
+        key: value
+        for key, value in result.items()
+        if key not in {"manifest", "admitted_actions"}
+    }
+
+
+def move_sources() -> dict:
+    """Move the three measurement sources onto the revived name.
+
+    The move names every source and its expected current target, so it is a
+    compare-and-set on exactly this cohort: a source that has moved since the
+    readback makes it fail rather than quietly migrate a different set.
+    """
+    with GraphClient() as gc:
+        quiet = writer_quiescence(gc)
+        moved = retarget_standard_name_sources(
+            gc,
+            HOLDER,
+            TARGET,
+            operation=MOVE_OPERATION,
+            reason=MOVE_REASON,
+            origin="signed_manifest",
+            run_id=RUN_ID,
+            source_ids=MEASUREMENT_SOURCES,
+            expected_current_bindings=dict.fromkeys(MEASUREMENT_SOURCES, HOLDER),
+        )
+    return {"moved": moved, "expected": len(MEASUREMENT_SOURCES), "quiescence": quiet}
+
+
+def main() -> int:
+    mode = sys.argv[1] if len(sys.argv) > 1 else "read"
+    if mode == "read":
+        state = read_state()
+        state["negative_control"] = after_state_assertion(state)
+        state["revive_previews"] = revive_previews()
+        print(json.dumps(state, indent=2, default=str, sort_keys=True))
+    elif mode == "build":
+        print(json.dumps(write_authority(), indent=2))
+    elif mode == "preview":
+        print(json.dumps(run_authority(False, None), indent=2, default=str))
+    elif mode == "apply":
+        digest = sys.argv[2]
+        print(json.dumps(run_authority(True, digest), indent=2, default=str))
+    elif mode == "move":
+        print(json.dumps(move_sources(), indent=2, default=str))
+    elif mode == "after":
+        state = read_state()
+        state["after_state_assertion"] = after_state_assertion(state)
+        print(json.dumps(state, indent=2, default=str, sort_keys=True))
+    else:
+        raise SystemExit(f"unknown mode: {mode}")
     return 0
 
 

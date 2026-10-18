@@ -5,33 +5,45 @@
 <meta name="reckon-type" content="evidence-fragment">
 <meta name="plan-slug" content="sn-harmonize-command">
 <meta name="node-id" content="shc-gap-family-split">
-<title>The gap-family split is blocked: the revive owner cannot restore this tombstone</title>
+<title>The gap family is split: the revived name holds the three midplane distances</title>
 </head>
 <body>
 <main>
-<h1 id="shc-gap-family-split-title">The gap-family split is blocked: the revive owner cannot restore this tombstone</h1>
+<h1 id="shc-gap-family-split-title">The gap family is split: the revived name holds the three midplane distances</h1>
 
 <p id="shc-gap-family-split-summary">
-<strong>Outcome: blocked before any write.</strong> The plan's ruling for this
-family is that <code>gap_at_outboard_midplane</code> keeps the separatrix
-separation and the three midplane measurement distances move to a revived
-<code>radial_separatrix_distance_at_outboard_midplane</code>. Moving them has a
-sanctioned owner, but that owner refuses a retired successor, so the revival
-must come first — and the owner the graph uses to restore a superseded
-identity cannot restore <em>this</em> one. The graph is unchanged: all four
-family sources still sit on <code>gap_at_outboard_midplane</code>, each bound
-to exactly one live name. No LLM spend.
+<strong>Outcome: delivered by a signed lifecycle transition followed by the
+sanctioned source move.</strong> <code>gap_at_outboard_midplane</code> kept the
+separatrix separation, <code>dd:summary/boundary/distance_inner_outer_separatrices/value</code>,
+and the three midplane measurement distances now sit on
+<code>radial_separatrix_distance_at_outboard_midplane</code>. The revive ran as
+one signed <code>set_properties</code> row with the plan's ruling as its
+authority; the move ran through
+<code>retarget_standard_name_sources</code> and reported
+<strong>3 moved of 3 expected</strong>. Both names' documentation is untouched.
+No LLM call was made: every step is a graph write path or a deterministic read.
+</p>
+
+<p id="shc-gap-family-split-route">
+The first pass at this node reported blocked, because the only owner that
+restores a superseded identity refused, and a fix to that owner is a lifecycle
+rule change reserved to the coordinator. The coordinator authorised the route
+the codebase's own refusals name — "a signed transition in
+<code>imas_codex/standard_names/signed_manifest.py</code>" — rather than an owner
+edit, and that is what ran. The refusal analysis is kept below because it is
+what makes the signed route a decision rather than a shortcut.
 </p>
 
 <h2 id="shc-gap-family-split-state">Before-state, with an existence control on every property</h2>
 
 <p>
-Read at base <code>dd8023d5b</code>. Each property is read from the node's
-<code>properties()</code> map, so a null value and a property no writer ever set
-are distinguished: <code>id</code> is the positive control (present on every
-node) and <code>this_property_is_never_set_by_any_writer</code> is the negative
-control (absent on every node). Both controls read as expected for all four
-names, so the nulls below are cleared properties, not failed reads.
+Read immediately before the preview (run at base <code>323721d9a</code>) on the
+unmodified graph. Each property is read from the node's <code>properties()</code>
+map, so a null value and a
+property no writer ever set are distinguished: <code>id</code> is the positive
+control (present on every node) and
+<code>this_property_is_never_set_by_any_writer</code> is the negative control
+(absent on every node). Both controls read as expected for all four names.
 </p>
 
 <table id="shc-gap-family-split-names">
@@ -47,7 +59,7 @@ names, so the nulls below are cleared properties, not failed reads.
 <tr>
 <td><code>radial_separatrix_distance_at_outboard_midplane</code></td>
 <td>superseded</td><td>superseded</td><td>pending</td>
-<td><strong>superseded</strong></td><td>m</td>
+<td><strong>superseded</strong> (property present)</td><td>m</td>
 </tr>
 <tr>
 <td><code>distance_at_outboard_midplane</code></td>
@@ -63,82 +75,25 @@ names, so the nulls below are cleared properties, not failed reads.
 </table>
 
 <p>
-The revived name's <code>superseded_from_stage</code> reads
+The revived name's <code>superseded_from_stage</code> read
 <strong>superseded</strong> — the stage it recorded was already the terminal
-one. That single value decides this node's outcome; see the refusal below.
+one. That single value is why the revival could not go through the fold owner.
 </p>
 
-<h2 id="shc-gap-family-split-sources">All four sources, and their single live holder, before the move</h2>
+<h2 id="shc-gap-family-split-figure">What moved</h2>
 
-<p>
-Each source's <code>PRODUCED_NAME</code> holders are enumerated in full
-(retired holders included), with the scalar mirror
-<code>produced_sn_id</code> read beside the edges. All four are held by exactly
-one live name, and the scalar agrees with the edge for all four:
-<code>dd:summary/boundary/distance_inner_outer_separatrices/value</code> (stays)
-and the three measurement distances
-(<code>dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane</code>,
-<code>dd:langmuir_probes/embedded/distance_separatrix_midplane</code> and
-<code>dd:thomson_scattering/channel/distance_separatrix_midplane</code>.
-</p>
+<figure id="shc-gap-family-split-figure">
+  <img src="/imas-codex/figures/sn-harmonize-command/shc-gap-family-split/source-binding-before-after.svg"
+       alt="Before: one name box with four source boxes beneath it. After: the gap name above the separatrix source and the revived name above the three midplane measurement sources, the moving three drawn in blue." />
+  <figcaption>The four sources and their holder, before (top) and after
+    (bottom). The edge drawn is <code>PRODUCED_NAME</code>; every source id is
+    prefixed <code>dd:</code>. Blue marks the three sources the ruling moved and
+    grey the one the gap name keeps. Each source was held by exactly one live
+    name in both panels — the move relocated three edges and created no state in
+    which a source was unheld or doubly held.</figcaption>
+</figure>
 
-<table id="shc-gap-family-split-bindings">
-<thead>
-<tr><th>source</th><th>holders (stage)</th><th>live holders</th><th>scalar target</th></tr>
-</thead>
-<tbody>
-<tr>
-<td><code>dd:summary/boundary/distance_inner_outer_separatrices/value</code></td>
-<td><code>gap_at_outboard_midplane</code> (accepted)</td><td>1</td><td>matches</td>
-</tr>
-<tr>
-<td><code>dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane</code></td>
-<td><code>gap_at_outboard_midplane</code> (accepted)</td><td>1</td><td>matches</td>
-</tr>
-<tr>
-<td><code>dd:langmuir_probes/embedded/distance_separatrix_midplane</code></td>
-<td><code>gap_at_outboard_midplane</code> (accepted)</td><td>1</td><td>matches</td>
-</tr>
-<tr>
-<td><code>dd:thomson_scattering/channel/distance_separatrix_midplane</code></td>
-<td><code>gap_at_outboard_midplane</code> (accepted)</td><td>1</td><td>matches</td>
-</tr>
-</tbody>
-</table>
-
-<h2 id="shc-gap-family-split-grammar">The revived name parses on ISN 0.10.0</h2>
-
-<p>
-Parsed through the project's own grammar call
-(<code>cascade._isn_parser.parse</code>) with a compose round-trip, not read
-from the ruling. The ruling's predicted decomposition is confirmed exactly,
-and the two names differ in their <em>base</em>, which is what makes the split
-a real distinction rather than a respelling:
-</p>
-
-<table id="shc-gap-family-split-parse">
-<thead>
-<tr><th>name</th><th>base</th><th>component / projection</th><th>position (locus)</th><th>round-trip</th></tr>
-</thead>
-<tbody>
-<tr>
-<td><code>radial_separatrix_distance_at_outboard_midplane</code></td>
-<td><code>separatrix_distance</code> (quantity)</td>
-<td>axis <code>radial</code>, shape <code>component</code></td>
-<td>relation <code>at</code>, token <code>outboard_midplane</code></td>
-<td>ok</td>
-</tr>
-<tr>
-<td><code>gap_at_outboard_midplane</code></td>
-<td><code>gap</code> (quantity)</td>
-<td>none</td>
-<td>relation <code>at</code>, token <code>outboard_midplane</code></td>
-<td>ok</td>
-</tr>
-</tbody>
-</table>
-
-<h2 id="shc-gap-family-split-owners">The owners, named, and where each one stops</h2>
+<h2 id="shc-gap-family-split-owners">Why a signed transition, and not the fold owner</h2>
 
 <ol>
 <li>
@@ -146,11 +101,11 @@ a real distinction rather than a respelling:
 <strong>The PRODUCED_NAME move has an owner and it is not the obstacle.</strong>
 <code>retarget_standard_name_sources</code>
 (<code>imas_codex/standard_names/provenance_lifecycle.py:505</code>) moves
-<code>PRODUCED_NAME</code>, its scalar mirror, the upstream
-<code>HAS_STANDARD_NAME</code> projection and both names' <code>source_paths</code>
-in one compare-and-set transaction, and verifies the count. It requires the
-target to be live: when the only live holder is the old name and the new name is
-retired it raises
+<code>PRODUCED_NAME</code>, its scalar mirror
+<code>produced_sn_id</code>, the upstream <code>HAS_STANDARD_NAME</code>
+projection and both names' <code>source_paths</code> in one compare-and-set
+transaction, and verifies the count. It requires the target to be live: when the
+only live holder is the old name and the new name is retired it raises
 <code>SourceRetiredSuccessorConflictError</code>. That is why the revival is a
 precondition rather than a parallel step.
 </p>
@@ -162,10 +117,8 @@ precondition rather than a parallel step.
 (<code>imas_codex/standard_names/edit.py:2886</code>, the writer behind
 <code>imas-codex sn supersede</code>; target-tombstone revival at
 <code>edit.py:2931-2945</code>, stage chosen by <code>_fold_revival_stage</code>
-at <code>edit.py:2212-2231</code>). Folding a live name into a superseded
-tombstone re-occupies the tombstone instead of leaving carried sources with no
-fold. Every donor the family offers was exercised in preview
-(<code>dry_run=True</code>, no write):
+at <code>edit.py:2212-2231</code>). Every donor the family offers was exercised
+in preview (<code>dry_run=True</code>, no write):
 </p>
 <table id="shc-gap-family-split-previews">
 <thead><tr><th>donor (old)</th><th>target (into)</th><th>verdict</th></tr></thead>
@@ -186,7 +139,7 @@ fold. Every donor the family offers was exercised in preview
 So there is <em>no admissible donor</em> in this family: one retired member
 lacks a clean fold ledger, the other carries a competing successor lineage. No
 live name outside the family may be sacrificed to revive a tombstone, because
-folding destroys the donor.
+the fold destroys the donor it consumes.
 </p>
 </li>
 <li>
@@ -198,96 +151,351 @@ terminal for this input.</strong> <code>_fold_revival_stage</code>
 only by <code>_FOLD_REVIVAL_STAGE_CAP = {"accepted": "reviewed"}</code>
 (<code>edit.py:2144</code>). This tombstone records
 <code>superseded_from_stage = "superseded"</code>, which is not a live stage and
-is not in the cap, so the revival would write <code>name_stage = "superseded"</code>
-while <code>supersede_into</code> resets the catalog <code>status</code> to
-<code>draft</code> (its own comment at <code>edit.py:2936-2945</code> exists
-precisely to keep those two axes consistent). The name would end live on
-neither axis. This is the defect, and it is in the owner rather than in the
-data path.
+is not in the cap, so a fold would write <code>name_stage = "superseded"</code>
+while <code>supersede_into</code> reset the catalog <code>status</code> to
+<code>draft</code> — live on neither axis. The fallback at
+<code>edit.py:2230</code> is recorded as a follow-on, not changed here.
 </p>
 </li>
 </ol>
 
-<h2 id="shc-gap-family-split-blocker">What would unblock it, and why this node did not do it</h2>
+<h2 id="shc-gap-family-split-authority">The authority, and the row it signs</h2>
 
 <p>
-The codebase's own refusals name the alternative route twice — the rename
-refusal at <code>edit.py:3209</code> ("return it to draft with a signed
-transition in <code>imas_codex/standard_names/signed_manifest.py</code>") and the rescore
-refusal at <code>graph_ops.py:24587</code>. The signed repair envelope in
-<code>imas_codex/standard_names/signed_manifest.py</code> carries lifecycle
-authority (<code>signed-lifecycle-and-claim</code>) and admits a
-<code>set_properties</code> mutation, which is enough to move the tombstone to
-a live stage and status in one signed, receipt-bearing transaction. Two routes
-are therefore open, and both are the coordinator's to choose because both
-change a lifecycle rule rather than apply one:
+The signed envelope's own writers were used throughout — no hand Cypher, and no
+edge dropped and re-added. The authority is a file beside this run script:
 </p>
 
-<ul>
-<li>
-<strong>Fix the owner:</strong> the fallback
-in <code>_fold_revival_stage</code> (<code>edit.py:2230</code>) should treat a
-recorded prior stage that is itself terminal as absent and revive to
-<code>drafted</code>, exactly as it already does when the field was never set.
-A one-line change, and it repairs every identity tombstoned twice, not only this
-one.
-</li>
-<li>
-<strong>Or authorise the signed transition:</strong> a
-<code>set_properties</code> repair row returning this tombstone to
-<code>name_stage='drafted'</code>, <code>status='draft'</code>,
-<code>superseded_from_stage=null</code>, after which the move follows through
-<code>retarget_standard_name_sources</code> unchanged.
-</li>
-</ul>
+<table id="shc-gap-family-split-authority-table">
+<thead><tr><th>item</th><th>value</th></tr></thead>
+<tbody>
+<tr><td>artifact</td><td><code>docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-manifest.json</code></td></tr>
+<tr><td>builder</td><td><code>build_repair_authority</code> — <code>imas_codex/standard_names/repair_authority.py:135</code></td></tr>
+<tr><td>schema</td><td><code>imas-codex.repair-authority.v1</code></td></tr>
+<tr><td><code>authority_mode</code></td><td><code>external_reviewed</code></td></tr>
+<tr><td>authority</td><td>lead ruling recorded as comment <code>c-s4-lead-ruling-gap-split</code> on plan <code>sn-harmonize-command</code> §4 (2026-10-18)</td></tr>
+<tr><td><code>authority_file_sha256</code></td><td><code>eda4cad76b700fe589d9bdf846c1e23b04d73c6336218a6c189770844308a866</code></td></tr>
+<tr><td><code>authority_payload_sha256</code></td><td><code>5f7f3def5a3c15a8c0194bbbc4a64c97f7b9be21d23933d1a8c92cf76b4d19c5</code></td></tr>
+</tbody>
+</table>
 
 <p>
-Neither was taken: the brief reserves a change to an owner — and any choice
-between two lifecycle semantics — to the coordinator, and instructs the worker
-to stop and report the owner and the reason instead. Hand Cypher is excluded by
-the same brief, and no writer is live to argue a case for either semantics on
-merit.
+The authority carries one row and one mutation: a <code>set_properties</code>
+mutation on <code>radial_separatrix_distance_at_outboard_midplane</code> setting
+<code>name_stage='drafted'</code>, <code>status='draft'</code> and
+<code>superseded_from_stage=null</code>, guarded by
+<code>out-of-allowlist-immutability</code>. The three values move together
+because they are one decision: the name axis leaves the terminal stage, the
+catalog axis stops excluding the spelling from export, and the recorded prior
+stage — which for this identity was itself the terminal one — is cleared. That
+guard is also the reason the apply touched one node rather than the family: the
+collateral-immutability hash covers <code>StandardNameSource</code> nodes, so a
+<code>StandardName</code> property change is inside the envelope when no
+participant source is written.
 </p>
 
-<h2 id="shc-gap-family-split-quiet">Quiet-graph check (recorded although no apply ran)</h2>
+<h2 id="shc-gap-family-split-quiet">The graph was quiet, three times</h2>
 
 <p>
-Reservations are the write quiescence instrument: a concurrent writer holds a
-<code>claim_token</code> on the family or a <code>binding_lock_token</code> on a
-name while it composes or migrates. Read immediately before the previews:
-<strong>0 claimed names, 0 claimed sources</strong>
-(<code>quiet: true</code>). No other writer was mid-composition, so had a
-revive been available the apply would have been safe to run at that moment.
+A signed apply reads the whole participant closure inside its transaction, so a
+concurrent writer composing on the same family would make the digest the preview
+returns describe a state the apply no longer sees. Reservations are the write
+quiescence instrument: a writer holds a <code>claim_token</code> on a name or a
+<code>binding_lock_token</code> on a name while it composes, and a
+<code>claim_token</code> on a source while it migrates.
 </p>
+
+<table id="shc-gap-family-split-quiescence">
+<thead><tr><th>read taken</th><th>claimed names</th><th>claimed sources</th><th>quiet</th></tr></thead>
+<tbody>
+<tr><td>before the preview</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>between the preview and the apply</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>inside the move, before it writes</td><td>0</td><td>0</td><td>yes</td></tr>
+</tbody>
+</table>
+
+<h2 id="shc-gap-family-split-receipt">Preview, then apply, and the receipts</h2>
+
+<p>
+The apply ran under the digest the preview returned, so the manifest the graph
+committed is the one that was previewed. Both receipts are
+<code>imas-codex.signed-repair-receipt.v1</code>.
+</p>
+
+<pre id="shc-gap-family-split-preview-receipt"><code>preview  outcome=would_apply  would_change=1  changed=0  refusals=[]
+         manifest_sha256=e70e4cebc5f6c1c55e719e893077ae92187734499e67b7088f72048785b6822d
+
+apply    outcome=applied  changed=1  mutations=1  receipt_rows=1  persistent_writes=2
+         refusals=[]
+         change_ids=[sn-change:signed-manifest:e70e4cebc5f6c1c55e719e893077ae92187734499e67b7088f72048785b6822d:c8d275cd0a9a2f2b742b39c7]</code></pre>
+
+<p>
+<code>would_change=1</code> against <code>changed=0</code> in the preview is the
+preview's whole claim: the row was admissible and would change one node.
+<code>persistent_writes=2</code> for one mutation is the changed node plus its
+receipt row, and the receipt was read back from the graph rather than taken from
+the apply's return value:
+</p>
+
+<pre id="shc-gap-family-split-change-readback"><code>MATCH (c:StandardNameChange {authority_file_sha256: $file_sha256})
+  id            sn-change:signed-manifest:e70e4ceb…b6822d:c8d275cd0a9a2f2b742b39c7
+  operation     revive_superseded_identity
+  run_id        r-20261018T194720843228-shc-gap-family-split
+  manifest       e70e4cebc5f6c1c55e719e893077ae92187734499e67b7088f72048785b6822d</code></pre>
+
+<h2 id="shc-gap-family-split-move">The move, through its owner</h2>
+
+<p>
+<code>retarget_standard_name_sources</code> was called with
+<code>old_name=gap_at_outboard_midplane</code>,
+<code>new_name=radial_separatrix_distance_at_outboard_midplane</code>,
+<code>operation='source_migration_manifest'</code>,
+<code>origin='signed_manifest'</code>, the three measurement source ids, and an
+<code>expected_current_bindings</code> naming <code>gap_at_outboard_midplane</code>
+for each of the three. It returned <strong>3</strong> against
+<strong>3</strong> expected — the writer verifies its own count, and the numbers
+agreeing is the check.
+</p>
+
+<p>
+The <code>expected_current_bindings</code> mapping is what makes the move a
+compare-and-set rather than a blind migration: a source that had moved since the
+readback would have failed the call instead of quietly migrating a different
+cohort. Because the call is one transaction over an explicit cohort, the two
+names held all four sources between them at every commit point — three edges
+were relocated in a single commit, and no source was ever unheld or doubly held.
+The graph's own change records corroborate the two writes:
+</p>
+
+<table id="shc-gap-family-split-changes">
+<thead><tr><th>change id</th><th><code>operation</code></th><th><code>origin</code></th></tr></thead>
+<tbody>
+<tr><td><code>sn-change:signed-manifest:e70e4ceb…b6822d:c8d275cd0a9a2f2b742b39c7</code></td><td><code>revive_superseded_identity</code></td><td>from the apply</td></tr>
+<tr><td><code>sn-change:source-migration:0c9cf54c352e42748419e73fcaeb24642a8692323ff4dabf921d00cb4a63c5a8</code></td><td><code>source_migration_manifest</code></td><td><code>source_migration_manifest</code> (idempotency anchor, reason = the manifest hash)</td></tr>
+<tr><td><code>sn-change:335dd5dc-c665-46bb-88ad-39cbbf456339</code></td><td><code>source_migration_manifest</code></td><td><code>signed_manifest</code> (the event record, carrying the human-readable reason)</td></tr>
+</tbody>
+</table>
+
+<h2 id="shc-gap-family-split-after">After-state: both names, all four sources</h2>
+
+<p>
+Same read as the before-state, including both controls, so the two tables are
+comparable row for row.
+</p>
+
+<table id="shc-gap-family-split-after-names">
+<thead>
+<tr><th>name</th><th><code>name_stage</code></th><th><code>status</code></th><th><code>docs_stage</code></th><th><code>superseded_from_stage</code></th><th>controls</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gap_at_outboard_midplane</code></td>
+<td>accepted</td><td>draft</td><td>exhausted</td>
+<td>absent (property not set)</td><td>present / absent as expected</td>
+</tr>
+<tr>
+<td><code>radial_separatrix_distance_at_outboard_midplane</code></td>
+<td><strong>drafted</strong></td><td><strong>draft</strong></td><td>pending</td>
+<td><strong>absent (property removed)</strong></td><td>present / absent as expected</td>
+</tr>
+<tr>
+<td><code>distance_at_outboard_midplane</code></td>
+<td>superseded</td><td>superseded</td><td>pending</td>
+<td>absent (property not set)</td><td>present / absent as expected</td>
+</tr>
+<tr>
+<td><code>radial_gap</code></td>
+<td>superseded</td><td>superseded</td><td>pending</td>
+<td>drafted</td><td>present / absent as expected</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The revival's requested <code>superseded_from_stage=null</code> landed as a
+<em>removed property</em> rather than a set-to-null one, because
+<code>SET target += $properties</code> deletes a key assigned null. That is the
+better end state and it is visible only because the read reports property
+existence beside the value — a bare property access reports a removed key and a
+null-valued key identically.
+</p>
+
+<p>
+<strong>Documentation was untouched on both names.</strong>
+<code>gap_at_outboard_midplane</code> reads <code>docs_stage = exhausted</code>
+before and after, and the revived name reads <code>docs_stage = pending</code>
+before and after: the owner sets no documentation stage, and
+<code>pending</code> is what this name already held, so the revived name is
+recorded as awaiting documentation rather than as documented. No documentation
+field was written by this node.
+</p>
+
+<table id="shc-gap-family-split-after-bindings">
+<thead>
+<tr><th>source</th><th>live holder before</th><th>live holder after</th><th>scalar agrees</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dd:summary/boundary/distance_inner_outer_separatrices/value</code></td>
+<td><code>gap_at_outboard_midplane</code></td>
+<td><code>gap_at_outboard_midplane</code></td><td>yes</td>
+</tr>
+<tr>
+<td><code>dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane</code></td>
+<td><code>gap_at_outboard_midplane</code></td>
+<td><code>radial_separatrix_distance_at_outboard_midplane</code></td><td>yes</td>
+</tr>
+<tr>
+<td><code>dd:langmuir_probes/embedded/distance_separatrix_midplane</code></td>
+<td><code>gap_at_outboard_midplane</code></td>
+<td><code>radial_separatrix_distance_at_outboard_midplane</code></td><td>yes</td>
+</tr>
+<tr>
+<td><code>dd:thomson_scattering/channel/distance_separatrix_midplane</code></td>
+<td><code>gap_at_outboard_midplane</code></td>
+<td><code>radial_separatrix_distance_at_outboard_midplane</code></td><td>yes</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Every source is held by exactly one live name after the move, and the scalar
+mirror <code>produced_sn_id</code> agrees with the edge for all four. The
+<code>source_paths</code> projections agree as well, which is the fourth thing
+the mover keeps in step:
+<code>gap_at_outboard_midplane → [dd:summary/boundary/distance_inner_outer_separatrices/value]</code>
+and the revived name →
+<code>[dd:langmuir_probes/embedded/distance_separatrix_midplane, dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane, dd:thomson_scattering/channel/distance_separatrix_midplane]</code>.
+The after-state assertion over all four sources returns
+<code>ok = true</code>.
+</p>
+
+<h2 id="shc-gap-family-split-lineage">Lineage left in place</h2>
+
+<p>
+The split relocated sources and changed nothing about lineage. Two
+<code>REFINED_FROM</code> edges remain in the family —
+<code>gap_at_outboard_midplane → radial_gap</code> and
+<code>radial_separatrix_distance_at_outboard_midplane → distance_at_outboard_midplane</code>
+— and there is no <code>HAS_SUCCESSOR</code> edge anywhere in the family, in
+either direction, so nothing in the graph still records the revived name as
+retired or as someone's successor.
+</p>
+
+<h2 id="shc-gap-family-split-grammar">The revived name parses on ISN 0.10.0</h2>
+
+<p>
+Parsed through the project's own grammar call
+(<code>cascade._isn_parser.parse</code>) with a compose round-trip, not read
+from the ruling. The two names differ in their <em>base</em>, which is what makes
+the split a real distinction rather than a respelling:
+</p>
+
+<table id="shc-gap-family-split-parse">
+<thead>
+<tr><th>name</th><th>base</th><th>projection</th><th>position (locus)</th><th>round-trip</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><code>radial_separatrix_distance_at_outboard_midplane</code></td>
+<td><code>separatrix_distance</code> (quantity)</td>
+<td>axis <code>radial</code>, shape <code>component</code></td>
+<td>relation <code>at</code>, token <code>outboard_midplane</code></td>
+<td>ok</td>
+</tr>
+<tr>
+<td><code>gap_at_outboard_midplane</code></td>
+<td><code>gap</code> (quantity)</td>
+<td>none</td>
+<td>relation <code>at</code>, token <code>outboard_midplane</code></td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
 
 <h2 id="shc-gap-family-split-negative">Negative control</h2>
 
 <p>
-The readback run opens on the unmodified graph. It reports the three
-measurement sources held by <code>gap_at_outboard_midplane</code> and by no
-other live name, and the after-state assertion of the intended split —
-"<code>radial_separatrix_distance_at_outboard_midplane</code> holds the three
-measurement sources" — <strong>fails</strong> against this reading. The
-control therefore discriminates: a readback that could not tell the two states
-apart would pass both, and this one passes only the pre-state.
+The same readback was run against the pre-apply graph state and against the
+post-apply state. Its assertion names, for every family source, the one live
+name expected to hold it in the split's end state. Against the before-state it
+<strong>fails</strong> (<code>ok = false</code>): the three measurement sources
+are reported on <code>gap_at_outboard_midplane</code>, and the revived name is
+not live. Against the after-state it <strong>passes</strong>
+(<code>ok = true</code>). A readback that could not tell the two states apart
+would pass both, and this one passes only the post-state.
 </p>
 
-<pre id="shc-gap-family-split-readback"><code>negative_control.three_measurement_sources_on_holder =
-  dd:langmuir_probes/embedded/distance_separatrix_midplane
-  dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane
-  dd:thomson_scattering/channel/distance_separatrix_midplane</code></pre>
+<pre id="shc-gap-family-split-readback"><code>before: after_state_assertion.ok = false
+  dd:langmuir_probes/embedded/distance_separatrix_midplane          -> [gap_at_outboard_midplane]          fail
+  dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane -> [gap_at_outboard_midplane]       fail
+  dd:thomson_scattering/channel/distance_separatrix_midplane        -> [gap_at_outboard_midplane]          fail
+  dd:summary/boundary/distance_inner_outer_separatrices/value       -> [gap_at_outboard_midplane]          pass
+after:  after_state_assertion.ok = true
+  dd:langmuir_probes/embedded/distance_separatrix_midplane          -> [radial_separatrix_distance_at_outboard_midplane]  pass
+  dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane -> [radial_separatrix_distance_at_outboard_midplane]  pass
+  dd:thomson_scattering/channel/distance_separatrix_midplane        -> [radial_separatrix_distance_at_outboard_midplane]  pass
+  dd:summary/boundary/distance_inner_outer_separatrices/value       -> [gap_at_outboard_midplane]                           pass</code></pre>
+
+<h2 id="shc-gap-family-split-figure-check">The figure was rendered and inspected</h2>
+
+<p>
+The figure was rendered to PNG (<code>convert -density 140</code>) and looked
+at, then placed by a layout check that refuses a figure whose text collides,
+overruns its box, routes a connector through a caption, or escapes the canvas.
+The first render failed it on three counts — both connector trunks crossed their
+holder's caption line, the revived name's label overran its box, and the longest
+source label overran the 300&nbsp;px column — and the coordinates were
+re-cut until it read clean. The checker was itself controlled: on four
+deliberately broken inputs (two labels on one point, a label past the canvas
+edge, a label wider than its box, a path through a label) it reported one
+finding each, and on a clean control it reported none.
+</p>
+
+<h2 id="shc-gap-family-split-spend">Spend and placement</h2>
+
+<p>
+<strong>No LLM spend.</strong> The revive is a signed manifest the coordinator
+authorised and this node composed; the move is a deterministic writer; every
+readback is Cypher. No model was called at any point in either pass at this
+node. The graph work ran in place on the fleet allocation
+(<code>SLURM_JOB_ID=1281970</code>, <code>98dci4-clu-2002</code>), which is where
+a session already on compute runs its heavy gates.
+</p>
+
+<h2 id="shc-gap-family-split-followon">Follow-on</h2>
+
+<p>
+<code>_fold_revival_stage</code> (<code>imas_codex/standard_names/edit.py:2230</code>)
+falls back to <code>"drafted"</code> when <code>superseded_from_stage</code> is
+unset, but passes through a recorded value that is itself terminal
+(<code>"superseded"</code>), producing a fold that leaves the name live on
+neither axis. Treating a recorded-but-terminal prior stage as absent would
+repair every identity tombstoned twice, not only this one. It is recorded here,
+not changed: an owner edit changes a lifecycle rule, and this node ran under an
+authorisation for the signed route instead.
+</p>
 
 <h2 id="shc-gap-family-split-repro">Reproduction</h2>
 
-<pre><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
-  uv run --no-sync python docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-run.py</code></pre>
+<p>
+The run script is mode-driven, in the order the run used them:
+</p>
+
+<pre><code>export UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD"
+S=docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-run.py
+
+uv run --no-sync python "$S" read       # before-state, controls, fold previews
+uv run --no-sync python "$S" build      # emit the signed authority artifact
+uv run --no-sync python "$S" preview    # returns the digest; records would_change
+uv run --no-sync python "$S" apply &lt;digest&gt;
+uv run --no-sync python "$S" move       # retarget the three measurement sources
+uv run --no-sync python "$S" after      # the done-when readback, with controls</code></pre>
 
 <p>
-The script writes nothing. Its full JSON readback (names with property
-existence, source bindings, the ISN parse of both names, the fold previews and
-the quiescence reading) is reproduced in
-<code>shc-gap-family-split-run.py</code>'s own verbatim output, captured at
-revision <code>dd8023d5b</code> with <code>EXIT=0</code>.
+<code>read</code> and <code>after</code> write nothing. <code>apply</code>
+refuses without a digest, and <code>move</code> refuses unless every source's
+current binding is the one it was told to expect.
 </p>
 
 </main>
