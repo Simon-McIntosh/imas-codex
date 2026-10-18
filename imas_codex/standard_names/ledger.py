@@ -1,19 +1,8 @@
-"""Ledger invariants — read-only queries that assert provenance integrity.
+"""Read-only provenance views over the graph ledger.
 
-The graph is the provenance ledger: every materialized ``StandardName`` that
-is neither superseded nor exhausted MUST resolve to >=1
-``StandardNameSource`` via ``PRODUCED_NAME``. DD, derived, facility-signal,
-and manual sources are equally authoritative for this invariant. These queries
-surface the two ways that invariant breaks:
-
-- **orphans** — a live name with no ``PRODUCED_NAME`` source at all.
-- **edge/scalar desyncs** — a source whose ``produced_sn_id`` scalar names a
-  live name but whose ``PRODUCED_NAME`` edge is missing (reattachable).
-
-Deterministic error-siblings (``model='deterministic:dd_error_modifier'``) are
-excluded from the orphan set by design: their source ``IMASNode`` is never
-extracted as a ``StandardNameSource``; their provenance rides on
-``StandardName.source_paths``.
+The shared source audit classifies all live names without a producing edge,
+including exhausted names. The edge/scalar desync query separately finds
+active source targets whose recorded scalar and edge disagree.
 """
 
 from __future__ import annotations
@@ -22,45 +11,9 @@ from typing import Any
 
 from imas_codex.graph.client import GraphClient
 
-#: Canonical "live" predicate used across the SN codebase — a name is live
-#: unless it has been refined away (``superseded``) or hit the rotation cap
-#: (``exhausted``). Those terminal nodes retain historical edges but are not
-#: current provenance targets.
+#: Current source targets for desync repair and other active-name maintenance.
+#: Exhausted names still enter the source-loss audit through its own predicate.
 LIVE_NAME = "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']"
-
-#: An id-only ``StandardName`` created as the endpoint of a structural
-#: relationship is graph scaffolding, not a lifecycle name. Any populated
-#: lifecycle axis or origin proves that the node has begun materialization.
-_MATERIALIZED_LIFECYCLE = """
-    (sn.name_stage IS NOT NULL
-     OR sn.docs_stage IS NOT NULL
-     OR sn.status IS NOT NULL
-     OR sn.validation_status IS NOT NULL
-     OR sn.origin IS NOT NULL)
-"""
-
-_LIFECYCLE_FIELDS = (
-    "name_stage",
-    "docs_stage",
-    "status",
-    "validation_status",
-    "origin",
-)
-
-#: Deterministic error-siblings carry no StandardNameSource by construction.
-_NOT_ERROR_SIBLING = "coalesce(sn.model, '') <> 'deterministic:dd_error_modifier'"
-
-_FIND_ORPHANS = f"""
-    MATCH (sn:StandardName)
-    WHERE {_MATERIALIZED_LIFECYCLE}
-      AND {LIVE_NAME}
-      AND {_NOT_ERROR_SIBLING}
-      AND NOT (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-    RETURN sn.id AS sn_id, sn.name_stage AS name_stage,
-           sn.docs_stage AS docs_stage, sn.status AS status,
-           sn.validation_status AS validation_status, sn.origin AS origin
-    ORDER BY sn.id
-"""
 
 # A genuine desync is a source that HAS produced a name (status composed /
 # attached) whose ``PRODUCED_NAME`` edge went missing. A source still pending
