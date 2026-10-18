@@ -3,7 +3,18 @@
     "registered_at": "2026-10-18T10:45:18.869980+00:00",
     "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
   },
+  "apply_failure": {
+    "arm": "heuristic",
+    "command_exit": 1,
+    "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+    "error": "ValueError: cannot confirm quarantined standard-name identities as valid: toroidal_angle_of_along_pellet_path",
+    "family_seed": "toroidal_angle_of_along_pellet_path",
+    "investigation": "The guard refused to overwrite a quarantined identity with valid; the available log does not establish why that identity was quarantined.",
+    "paired_results_valid": false,
+    "source": "default_revalidate in imas_codex/standard_names/campaign.py"
+  },
   "arm_comparison_complete": false,
+  "arms": {},
   "candidate_pool": {
     "all_families": 849,
     "eligible": 118,
@@ -13,7 +24,7 @@
       "west_roster": 59
     }
   },
-  "cap_envelope_usd": 29.84229295,
+  "cap_envelope_usd": 41.802292949999995,
   "confirmed_spend_usd": 0.04229295,
   "dry_run_estimate_basis": {
     "calls": 36,
@@ -76,35 +87,84 @@
     }
   ],
   "failure": {
-    "applies_completed": 0,
-    "applies_started": 0,
-    "error": "Dry-run estimate $40.65 or cap $29.84 reaches budget",
-    "estimated_two_arm_spend_usd": 40.65301077777777,
-    "per_call_rate_usd": 0.6556937222222222,
-    "planned_calls_both_arms": 62,
-    "reproduction_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/measurement-approved.log",
-    "stage": "dry-run budget gate",
-    "why_stopped": "Ten family dry runs exceed the USD 30 estimate gate; the per-apply caps would halt work mid-family."
+    "at": "2026-10-18T13:27:27.694825+00:00",
+    "message": "Harmonize command failed for toroidal_angle_of_along_pellet_path: 1; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+    "type": "RuntimeError"
   },
   "isolation_proof": [
     {
       "arm": "heuristic",
-      "at": "2026-10-18T12:07:55.785616+00:00",
+      "at": "2026-10-18T13:04:05.200712+00:00",
       "live_nodes": 1770101,
       "live_probe": 0,
       "live_uri": "bolt://98dci4-gpu-0002:7687",
       "marked_scratch_nodes": 1770102,
-      "neo4j_log": "/tmp/anchor-compare-q5hlmw4c/heuristic/logs/neo4j-temp.log",
+      "neo4j_log": "/tmp/anchor-compare-vmye_96m/heuristic/logs/neo4j-temp.log",
       "restored_scratch_nodes": 1770101,
       "scratch_nodes": 1770101,
       "scratch_probe": 1,
       "scratch_uri": "bolt://127.0.0.1:27697"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T13:06:34.431501+00:00",
+      "live_nodes": 1770101,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/anchor-compare-vmye_96m/jev/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27698"
     }
   ],
   "minimum_ten_family_calls": 60,
   "minimum_ten_family_estimate_usd": 39.34162333333333,
-  "outcome_status": "blocked_budget",
+  "outcome_status": "blocked_guard",
+  "partial_receipts": [
+    {
+      "arm": "heuristic",
+      "batch": "anchor",
+      "completed_model_responses_logged": 4,
+      "family_seed": "toroidal_angle_of_along_pellet_path",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+      "pool_cost_spent_usd": 0.260063,
+      "pool_elapsed_seconds": 624.833674
+    },
+    {
+      "arm": "heuristic",
+      "batch": "remaining members",
+      "completed_model_responses_logged": 4,
+      "family_seed": "toroidal_angle_of_along_pellet_path",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+      "pool_cost_spent_usd": 0.224477,
+      "pool_elapsed_seconds": 430.922582
+    },
+    {
+      "arm": "jev",
+      "batch": "anchor",
+      "completed_model_responses_logged": 8,
+      "family_seed": "toroidal_angle_of_along_pellet_path",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-jev-toroidal_angle_of_along_pellet_path.log",
+      "pool_cost_spent_usd": 0.69893,
+      "pool_elapsed_seconds": 934.554378
+    },
+    {
+      "arm": "jev",
+      "batch": "remaining members",
+      "completed_model_responses_logged": null,
+      "family_seed": "toroidal_angle_of_along_pellet_path",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-jev-toroidal_angle_of_along_pellet_path.log",
+      "pool_cost_spent_usd": null,
+      "pool_elapsed_seconds": null,
+      "status": "terminated during paired cleanup before a pool receipt"
+    }
+  ],
   "previous_spend_usd": 0.021194586,
+  "receipt_scan_positive_control": "The same parser found 4, 4, and 8 completed model response lines and three cost_spent summaries in the earlier sessions; the terminated Jev second session has no finalized summary, so no zero-spend claim is made.",
+  "resumed_at": "2026-10-18T13:01:25.973859+00:00",
+  "ruling": "2026-10-18 lead: USD 42.00 total including prior spend; all ten paired families",
   "same_anchor_count": 12,
   "scored_candidates": [
     {
@@ -3459,10 +3519,10 @@
     "verified_at": "2026-10-18T12:23:51.597891+00:00"
   },
   "scratch_removed": {
-    "at": "2026-10-18T12:23:12.673921+00:00",
-    "tree": "/tmp/anchor-compare-q5hlmw4c"
+    "at": "2026-10-18T13:27:59.762812+00:00",
+    "tree": "/tmp/anchor-compare-vmye_96m"
   },
-  "scratch_tree": "/tmp/anchor-compare-q5hlmw4c",
+  "scratch_tree": "/tmp/anchor-compare-vmye_96m",
   "selected": [
     {
       "heuristic_anchor": "toroidal_angle_of_launching_position",
@@ -3663,9 +3723,22 @@
     }
   ],
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
-  "spend_limit_usd": 30.0,
-  "spend_usd": 0.04229295,
+  "spend_completeness": "confirmed lower bound; final Jev pool session has no receipt",
+  "spend_limit_usd": 42.0,
+  "spend_usd": 1.22576295,
   "started_at": "2026-10-18T12:05:51.572895+00:00",
+  "stopped_instances": [
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T13:27:42.752444+00:00",
+      "tree": "/tmp/anchor-compare-vmye_96m/heuristic"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T13:27:57.758624+00:00",
+      "tree": "/tmp/anchor-compare-vmye_96m/jev"
+    }
+  ],
   "unscored_count": 64,
   "variation_kind_counts": {
     "component": 37,
