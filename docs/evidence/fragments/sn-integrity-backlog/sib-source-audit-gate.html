@@ -46,7 +46,7 @@ by <code>back_surface_distance_of_antenna_strap</code>; the recorded
 <code>REFINED_FROM</code> links to the holder. The earlier fixed operation list
 did not follow that recorded source movement. The read-only live log records
 an independent sourceless count of 264 and a positive control of 2,795 names
-with a producer. It lists every query duration; the longest took 0.477 seconds,
+with a producer. It lists every query duration; all took under 0.5 seconds,
 well below
 the ten-second bound.</p>
 
@@ -75,7 +75,9 @@ read is logged as <code>source-loss probe did not run</code>, with a distinct
 <code>None</code> result rather than an empty finding.</p>
 
 <h2 id="sib-source-audit-gate-verification">Verification record</h2>
-<p><code>fixture-final.log</code> ends <code>12 passed; EXIT=0</code>.
+<p><code>fixture-final.log</code> ends <code>13 passed; EXIT=0</code>, including
+a real-graph check that a deprecated child exempts neither the classifier's
+derived parent nor export's per-candidate evidence test.
 <code>live-read-final.log</code> ends <code>EXIT=0</code> and records the independent
 total and census comparison. The real-graph tests used a disposable Neo4j
 instance on node-local scratch, refused the project graph URI, and removed
