@@ -4,23 +4,53 @@
     "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
   },
   "apply_failure": {
+    "anchor": "x_coordinate_of_diagnostic_aperture",
     "arm": "heuristic",
+    "bound_probe_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/review-breaker-bound-probe.log",
+    "breaker_model": "openrouter/openai/gpt-6.1-sol",
+    "catalog_max_input_tokens": null,
     "command_exit": 1,
-    "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
-    "error": "ValueError: cannot confirm quarantined standard-name identities as valid: toroidal_angle_of_along_pellet_path",
-    "family_seed": "toroidal_angle_of_along_pellet_path",
-    "investigation": "The guard refused to overwrite a quarantined identity with valid; the available log does not establish why that identity was quarantined.",
-    "paired_results_valid": false,
-    "source": "default_revalidate in imas_codex/standard_names/campaign.py"
+    "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-vertical_coordinate_of_diagnostic_aperture.log",
+    "docs_pool_processed": 1,
+    "exception": "ValueError: escalator catalog input allowance is not bounded",
+    "guard": "prepare_docs_review_request requires a bounded escalator catalog input allowance",
+    "ledger_calls": 1,
+    "ledger_spend_usd": 0.086856,
+    "review_pool_processed": 0,
+    "seed": "vertical_coordinate_of_diagnostic_aperture",
+    "stamped": false
   },
   "arm_comparison_complete": false,
   "arms": {},
-  "budget_gate_this_attempt": "not reached because node-local /tmp is read-only",
+  "attempt_history": [
+    {
+      "at": "2026-10-18T21:05:52.254241+00:00",
+      "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/measurement-rotated.log",
+      "error": "OSError: [Errno 30] Read-only file system: '/tmp/anchor-compare-epkb2_1w'",
+      "new_applies": 0,
+      "new_dry_runs": 0,
+      "new_model_spend_usd": 0.0,
+      "new_scratch_tree_created": false,
+      "probe_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/tmp-write-probe.log",
+      "status": "blocked_before_scratch_load"
+    }
+  ],
+  "budget_gate_this_attempt": {
+    "cap_envelope_usd": 49.96145667222222,
+    "ceiling_usd": 50.0,
+    "confirmed_prior_usd": 1.22576295,
+    "paired_estimate_usd": 41.70208410000002,
+    "paired_planned_calls": 72,
+    "passed": true,
+    "projected_total_usd": 43.58354077222224,
+    "rotated_call_rate_usd": 0.5791956125000003,
+    "unreceipted_jev_reserve_usd": 0.6556937222222222
+  },
   "budget_reservation": {
     "reason": "one unreceipted Jev call at the snapshot dry-run rate",
     "usd": 0.6556937222222222
   },
-  "budget_spend_usd": 1.8814566722222223,
+  "budget_spend_usd": 1.9683126722222224,
   "candidate_pool": {
     "all_families": 849,
     "before_validation": 118,
@@ -38,7 +68,7 @@
     "validation_removed": 54
   },
   "cap_envelope_usd": 49.96145667222222,
-  "confirmed_spend_usd": 1.22576295,
+  "confirmed_spend_usd": 1.31261895,
   "dry_run_estimate_basis": {
     "calls": 36,
     "historical_rate_usd": 0.6556937222222222,
@@ -88,7 +118,7 @@
   },
   "dry_run_estimate_total_usd": 41.70208410000002,
   "dry_run_estimate_usd_per_call": 0.5791956125000003,
-  "dry_run_seat_basis": "prior snapshot receipt pricing; ten new dry runs were blocked before scratch load",
+  "dry_run_seat_basis": "main checkout GPT-6 seats; snapshot LLMCost token usage repriced at active model rates",
   "dry_runs": [
     {
       "calls_per_arm": 3,
@@ -150,7 +180,23 @@
     "7": 4,
     "9": 1
   },
-  "failed_applies": [],
+  "failed_applies": [
+    {
+      "anchor": "x_coordinate_of_diagnostic_aperture",
+      "arm": "heuristic",
+      "ended_at": "2026-10-18T21:54:35.571806+00:00",
+      "error": "RuntimeError: Harmonize command failed for vertical_coordinate_of_diagnostic_aperture: 1; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-vertical_coordinate_of_diagnostic_aperture.log",
+      "ledger_calls": 1,
+      "ledger_spend_usd": 0.086856,
+      "seed": "vertical_coordinate_of_diagnostic_aperture",
+      "started_at": "2026-10-18T21:43:04.438420+00:00"
+    }
+  ],
+  "failure": {
+    "at": "2026-10-18T21:54:35.695937+00:00",
+    "message": "Harmonize command failed for vertical_coordinate_of_diagnostic_aperture: 1; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-vertical_coordinate_of_diagnostic_aperture.log",
+    "type": "RuntimeError"
+  },
   "historical_budget_gate": {
     "ceiling_usd": 42.0,
     "estimate_usd": 47.209948,
@@ -162,6 +208,32 @@
     {
       "arm": "heuristic",
       "at": "2026-10-18T21:38:02.402307+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz/heuristic/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27697"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T21:43:01.113553+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz/jev/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27698"
+    },
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T21:43:01.401886+00:00",
       "live_nodes": 1771117,
       "live_probe": 0,
       "live_uri": "bolt://98dci4-gpu-0002:7687",
@@ -188,8 +260,10 @@
     ]
   },
   "new_attempt_apply_count": 0,
-  "new_model_spend_by_model_usd": {},
-  "outcome_status": "selecting",
+  "new_model_spend_by_model_usd": {
+    "openrouter/openai/gpt-6.1-sol": 0.086856
+  },
+  "outcome_status": "blocked",
   "paired_family_count": 0,
   "partial_receipts": [
     {
@@ -233,18 +307,41 @@
   "previous_isolation_proof": [],
   "previous_selected": [],
   "previous_spend_usd": 0.021194586,
+  "prior_quarantine_refusal": {
+    "arm": "heuristic",
+    "command_exit": 1,
+    "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+    "error": "ValueError: cannot confirm quarantined standard-name identities as valid: toroidal_angle_of_along_pellet_path",
+    "family_seed": "toroidal_angle_of_along_pellet_path",
+    "investigation": "The guard refused to overwrite a quarantined identity with valid; the available log does not establish why that identity was quarantined.",
+    "paired_results_valid": false,
+    "source": "default_revalidate in imas_codex/standard_names/campaign.py"
+  },
   "receipt_scan_positive_control": "The same parser found 4, 4, and 8 completed model response lines and three cost_spent summaries in the earlier sessions; the terminated Jev second session has no finalized summary, so no zero-spend claim is made.",
   "resumed_at": "2026-10-18T21:34:34.422541+00:00",
   "rotated_attempt": {
-    "at": "2026-10-18T21:05:52.254241+00:00",
-    "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/measurement-rotated.log",
-    "error": "OSError: [Errno 30] Read-only file system: '/tmp/anchor-compare-epkb2_1w'",
-    "new_applies": 0,
-    "new_dry_runs": 0,
-    "new_model_spend_usd": 0.0,
-    "new_scratch_tree_created": false,
-    "probe_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/tmp-write-probe.log",
-    "status": "blocked_before_scratch_load"
+    "new_applies_completed": 0,
+    "new_dry_runs": 10,
+    "new_model_spend_usd": 0.086856,
+    "paired_family_count": 0,
+    "paired_planned_calls": 72,
+    "per_model_spend_usd": {
+      "openrouter/openai/gpt-6.1-sol": 0.086856
+    },
+    "scratch_graph_tree_removed": {
+      "at": "2026-10-18T21:55:07.694922+00:00",
+      "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz"
+    },
+    "scratch_outer_removed": {
+      "at": "2026-10-18T21:56:17.880272+00:00",
+      "removed_entries": [
+        "anchor-compare-ux3nwihz",
+        "container-tmp",
+        "uv-0eddeb8af90d716e.lock"
+      ],
+      "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq"
+    },
+    "status": "blocked_after_first_heuristic_apply"
   },
   "ruling": "2026-10-18 lead: USD 50 total including USD 1.22576295 confirmed prior spend and reserved unreceipted Jev call; use GPT-6 seats from main",
   "same_anchor_count": 5,
@@ -3602,7 +3699,10 @@
     "positive_control": "ss -ltn displayed other local listeners before the scratch-port absence was recorded",
     "tree_absent": true
   },
-  "scratch_removed": null,
+  "scratch_removed": {
+    "at": "2026-10-18T21:55:07.694922+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz"
+  },
   "scratch_tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz",
   "selected": [
     {
@@ -3820,9 +3920,20 @@
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
   "spend_completeness": "confirmed lower bound; final Jev pool session has no receipt",
   "spend_limit_usd": 50.0,
-  "spend_usd": 1.22576295,
+  "spend_usd": 1.31261895,
   "started_at": "2026-10-18T12:05:51.572895+00:00",
-  "stopped_instances": [],
+  "stopped_instances": [
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T21:54:50.704524+00:00",
+      "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz/heuristic"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T21:55:05.708538+00:00",
+      "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz/jev"
+    }
+  ],
   "unscored_count": 38,
   "validation_search": {
     "at": "2026-10-18T21:38:04.827787+00:00",
