@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T095402139792-srtj-template-note-check/head-suite.log",
+  "assertion_analysis": [],
+  "base_log_revision": "c2ee43dd73a1b5451a41008103e0b9821c775cc5",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T095402139792-srtj-template-note-check/base-suite.log",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/review/checks.py:270",
+    "imas_codex/standard_names/review/jev_review.py:145",
+    "imas_codex/standard_names/review/jev_review.py:399",
+    "imas_codex/standard_names/workers.py:10890"
+  ],
+  "completed_at": "2026-10-18T10:11:17.512Z",
+  "dispatched_at": "2026-10-18T10:01:22Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_jev_docs_review.py",
+      "line": "360",
+      "severity": "follow-on",
+      "text": "follow-on: the added check's dimension and evidence_fields are not pinned by any test, so a later edit could set the wrong docs dimension or a wrong evidence field and stay green."
+    }
+  ],
+  "head_log_revision": "61d2c4e81b2c1eac1aed60dd844cddc1951d05ec",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Commit 61d2c4e81 adds one seven-line taxonomy entry at imas_codex/llm/prompts/sn/review_checks.yaml:540-546 and commit d79649caf adds the ten-line evidence fragment; no test file was changed.",
+    "done_when": "The source brief.md's done-when requires the named test passing at head and failing at base, three gated files with zero added failures, and the audit emission located; base-suite.log shows 1 failed/47 passed EXIT=1, head-suite.log shows 48 passed EXIT=0, and audit-probe.log shows the emission.",
+    "goal": "The source brief.md asks for a `template_note` check in imas_codex/llm/prompts/sn/review_checks.yaml on the docs axis with audit_finding_class `template_note`; the landed diff adds exactly that entry at lines 540-546.",
+    "manifest": "The source manifest.md names commits 61d2c4e81 and d79649caf, the two changed paths, a negative_control_log at base-suite.log, and readable baseline_suite/after_suite JSON with zero added failure ids.",
+    "write_paths": "The source brief.md grants review_checks.yaml, test_review_checks.py and the evidence fragment; the 61d2c4e81..d79649caf diff touches only review_checks.yaml and srtj-template-note-check.html, both inside that scope."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_jev_docs_review.py:362 fails with AssertionError template_note whenever the entry is absent, as base-suite.log shows, but lines 356-362 pin only axis and audit_finding_class and leave the dimension and evidence_fields unguarded.",
+    "evidence": "base-suite.log records the named test failing with AssertionError template_note and EXIT=1 at c2ee43dd7 while head-suite.log records 48 passed EXIT=0, and audit-probe.log shows the detector emitting template_note.",
+    "fit": "imas_codex/llm/prompts/sn/review_checks.yaml:540-546 matches the field order and shape of its sibling audit-backed entries at lines 533-539 and 424-430.",
+    "goal_fidelity": "imas_codex/llm/prompts/sn/review_checks.yaml:540-546 is a docs-axis check named template_note docking documentation_quality on documentation with retrieval false and audit_finding_class template_note.",
+    "reuse": "The change adds no definition; it extends the existing taxonomy owner in imas_codex/standard_names/review_checks.yaml whose loader checks.py:270 and consumer jev_review.py:399 already own audit-backed checks.",
+    "scope_discipline": "The 61d2c4e81..d79649caf diff changes only imas_codex/llm/prompts/sn/review_checks.yaml and docs/evidence/fragments/sn-review-through-jev/srtj-template-note-check.html, both declared."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md asks for a `template_note` check in imas_codex/llm/prompts/sn/review_checks.yaml on the docs axis with audit_finding_class `template_note`; the landed diff adds exactly that entry at lines 540-546.\nVERDICT done_when: The source brief.md's done-when requires the named test passing at head and failing at base, three gated files with zero added failures, and the audit emission located; base-suite.log shows 1 failed/47 passed EXIT=1, head-suite.log shows 48 passed EXIT=0, and audit-probe.log shows the emission.\nVERDICT write_paths: The source brief.md grants review_checks.yaml, test_review_checks.py and the evidence fragment; the 61d2c4e81..d79649caf diff touches only review_checks.yaml and srtj-template-note-check.html, both inside that scope.\nVERDICT manifest: The source manifest.md names commits 61d2c4e81 and d79649caf, the two changed paths, a negative_control_log at base-suite.log, and readable baseline_suite/after_suite JSON with zero added failure ids.\nVERDICT diff: Commit 61d2c4e81 adds one seven-line taxonomy entry at imas_codex/llm/prompts/sn/review_checks.yaml:540-546 and commit d79649caf adds the ten-line evidence fragment; no test file was changed.\nCALL_SITES: imas_codex/standard_names/review/checks.py:270, imas_codex/standard_names/review/jev_review.py:145, imas_codex/standard_names/review/jev_review.py:399, imas_codex/standard_names/workers.py:10890\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/llm/prompts/sn/review_checks.yaml:540-546 is a docs-axis check named template_note docking documentation_quality on documentation with retrieval false and audit_finding_class template_note.\nSCORE evidence: 20\nJUSTIFICATION evidence: base-suite.log records the named test failing with AssertionError template_note and EXIT=1 at c2ee43dd7 while head-suite.log records 48 passed EXIT=0, and audit-probe.log shows the detector emitting template_note.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 61d2c4e81..d79649caf diff changes only imas_codex/llm/prompts/sn/review_checks.yaml and docs/evidence/fragments/sn-review-through-jev/srtj-template-note-check.html, both declared.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_jev_docs_review.py:362 fails with AssertionError template_note whenever the entry is absent, as base-suite.log shows, but lines 356-362 pin only axis and audit_finding_class and leave the dimension and evidence_fields unguarded.\nSCORE fit: 20\nJUSTIFICATION fit: imas_codex/llm/prompts/sn/review_checks.yaml:540-546 matches the field order and shape of its sibling audit-backed entries at lines 533-539 and 424-430.\nSCORE reuse: 20\nJUSTIFICATION reuse: The change adds no definition; it extends the existing taxonomy owner in imas_codex/standard_names/review_checks.yaml whose loader checks.py:270 and consumer jev_review.py:399 already own audit-backed checks.\nFINDING tests/standard_names/test_jev_docs_review.py:360 follow-on: the added check's dimension and evidence_fields are not pinned by any test, so a later edit could set the wrong docs dimension or a wrong evidence field and stay green.",
+  "review_run_id": "r-20261018T100103611718-review-of-srtj-template-note-check-d79649caf81f",
+  "reviewed_base_sha": "c2ee43dd73a1b5451a41008103e0b9821c775cc5",
+  "reviewed_commits": [
+    "61d2c4e81b2c1eac1aed60dd844cddc1951d05ec",
+    "d79649caf81fa32038e3ba2d458a0dcf888032ad"
+  ],
+  "reviewed_head_sha": "d79649caf81fa32038e3ba2d458a0dcf888032ad",
+  "reviewed_run_id": "r-20261018T095402139792-srtj-template-note-check",
+  "scores": {
+    "durability": 17,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:14:20.337350+00:00",
+  "total": 117
+}

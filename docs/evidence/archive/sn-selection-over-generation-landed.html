@@ -70,6 +70,11 @@
     <p>Node <code>ssog-rerank-acceptance-large</code>, head <code>6b6c459c0</code>, run to completion across three resumes on the free local seat for USD 0.022. The held-out draw used seed 20261015: 160 drawn, 120 admitted, 119 batches. The positive control changed the rendered compose prompt hash on 117 of 129 control batches.</p><table><thead><tr><th>arm</th><th>first-pass accepted / scored</th></tr></thead><tbody><tr><td>A, rerank off</td><td>23 / 62 (0.371)</td></tr><tr><td>B, rerank on</td><td>21 / 54 (0.389)</td></tr><tr><td>paired, the 48 sources scored in both arms</td><td>0.396 against 0.396, difference 0.000, bootstrap interval [−0.140, 0.140]</td></tr></tbody></table><p>No acceptance difference, which agrees with the earlier 29-source run and the nDCG@10 measure. Under the lead's ruling the comparator rerank stays off. Review 91/120, no added failures. Durability is exempted for a measurement. Follow-ons:</p><ul><li>the batch set was re-extracted each pass rather than pinned, so the control counts 129 batches against a 119-batch draw;</li><li>pairing keys on each candidate's own source, so only 48 of 119 sources pair.</li></ul><p>Neither could hide a gain of the size adoption would need.</p>
   </section>
 
+  <section id="ssog-jev-anchor-score">
+    <h2>§7 — the Jev anchor scorer</h2>
+    <p>An async Jev Score in <code>imas_codex/standard_names/families.py</code> asks, for each eligible member of a family, how well its documentation would serve as the template for the whole family (merge <code>c68cd3a45</code>, reviews 116 and 115/120, zero added failures). The state carries the member's name, description and documentation, the family pattern, and the house-style template the grammar package renders for it. The template is read from a member that parses, and a family for which none resolves is refused rather than judged without it. Ties resolve exactly as <code>select_anchor</code> would, including its accepted-parent rule. It changes no caller of <code>select_anchor</code>. One read-only live call on a real family recorded the members' scores beside the heuristic's choice. Gate: 236 passed. Record: <code>docs/evidence/fragments/sn-selection-over-generation/ssog-jev-anchor-score.html</code>.</p>
+  </section>
+
 </main>
 </body>
 </html>

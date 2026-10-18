@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": null,
+  "assertion_analysis": [
+    {
+      "failure_condition": "Reinstating a broken recall computation (taking the order's tail instead of its head) reddens six cells per golden and split and makes controls exit non-zero; I reproduced this against the committed runner: the unmodified head is EXIT=0 and the tail-reading copy is EXIT=1, so the assertion fails on the defect it guards.",
+      "lines": "905-929"
+    },
+    {
+      "failure_condition": "Reverting the gap judging leaves name rows whose checks carry no question id, so unjudged is non-empty and verify prints VERIFY_FAIL with EXIT=1, as the run's negative-control.log records.",
+      "lines": "962-969"
+    },
+    {
+      "failure_condition": "No assertion covers the documentation coverage: verify inspects only the name rows, so a run in which 32 of 128 pending documentation names are cancelled at the judge budget and left unanswered still passes controls and verify at EXIT=0.",
+      "lines": "441-463"
+    }
+  ],
+  "base_log_revision": null,
+  "baseline_suite_log": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T10:38:10.488Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the duplicated copy-group bootstrap lives in a measurement script; giving bootstrap_interval in imas_codex/discovery/base/evaluation.py a pluggable statistic is a product change outside a measurement node, and the learned-acceptance section that reuses these goldens will extend the owner",
+      "recorded_at": "2026-10-18T10:39:27.839973+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-18T10:19:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html",
+      "line": "15",
+      "severity": "blocking",
+      "text": "blocking: 32 of the 128 documentation names needing a judgement carry none, covering 38 of the 190 golden rows (14 of them known defects), and the counts line reports only \"96 judged here, 0 calls failed\" with no unjudged count; the page's own arithmetic shows the gap, since 32 reused + 96 judged + 14 unscored = 142 and 174 names are claimed, and the same page reports the name axis's unjudged count explicitly, so a reader is told golden C's recall rests on a complete judgement set when a fifth of its rows were scored on audit checks alone."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "419",
+      "severity": "follow-on",
+      "text": "follow-on: run_pending (ssog-risk-order-run.py:419-432) cancels every task still pending at JUDGE_BUDGET_S and never revisits it, and because answers stays None while failed is appended only when judge raises, a cancelled entry is recorded neither as judged nor as failed; this round judged 96 of 128 pending names with failed_calls 0, where the prior round judged 124 with 4 failed, so the shortfall is invisible and the manifest reads it as an improvement."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "953",
+      "severity": "follow-on",
+      "text": "follow-on: verify asserts the name-axis coverage claim and both label-reading controls but never inspects the documentation rows, so the 32 unjudged documentation names pass the node's own gate and the fragment is regenerated with an unreconciled counts line."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "558",
+      "severity": "follow-on",
+      "text": "follow-on: _copy_group_bootstrap re-implements the copy-group resampling imas_codex/discovery/base/evaluation.py:127-141 owns instead of calling _group_indices, and the manifest's declination of this repair is recorded only in the run manifest, not in the code it concerns."
+    }
+  ],
+  "head_log_revision": "890d803490fb8f51dce3d3cc3f491bf87bb88813",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against base f8a85ca9; 64c6b7f57 brings the four artefacts, f7f3390bc the gap judging and the first control, and 670cc4d6e/e0a60e02e/890d80349 replace the tautological control with two analytic ones, route gap rows through review_names, sanitize non-finite floats and re-render the figure, every path inside the declared write paths.",
+    "done_when": "the brief's done-when names the recall table, counts, spend, one recall-versus-fraction figure and a results JSON; ssog-risk-order.html:10-40 carries the table, counts and controls paragraph, the figure is committed at docs/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg and renders clean, and results.json holds all 737 name and 190 documentation rows, but the label-reading evidence is now two analytic controls (ssog-risk-order-run.py:905-929) rather than the shuffled run the brief asked for.",
+    "goal": "the source brief asks the node to measure how well a Jev risk composite finds known defects first; ssog-risk-order-run.py:584-620 builds every item's risk from its axis's named checks and reports recall for both goldens on both splits, so the delivered object is the measurement the goal names, though 38 documentation rows carry no Jev judgement.",
+    "manifest": "read; it declares status complete, commits 64c6b7f57..890d80349, the four changed paths, measure/controls/verify/render logs at EXIT=0, and a declined out-of-scope repair, but its claim that this round judged 96 documentation items against 124 before omits that only 96 of 128 pending names were judged at all.",
+    "write_paths": "the brief grants the two evidence files under docs/evidence/fragments/sn-selection-over-generation/, results.json, and the figure path docs/figures/sn-selection-over-generation/ssog-risk-order; all three new commits touch only those four paths."
+  },
+  "justifications": {
+    "durability": "the label-reading control at ssog-risk-order-run.py:905-929 reddens on a reinstated tail-read (six cells per split, EXIT=1) and the name-coverage guard at ssog-risk-order-run.py:962-969 reddens on reverted gap judging, but no guard covers the documentation coverage gap because verify at ssog-risk-order-run.py:953-983 inspects only the name rows.",
+    "evidence": "measure.log, controls.log and verify.log each end EXIT=0 and I reproduced both arms of the control (head EXIT=0, tail-read EXIT=1), but ssog-risk-order.html:15 states 96 documentation names judged and 0 calls failed without the 32 names left unjudged, so the page overstates its coverage.",
+    "fit": "helpers are named by mechanism and no commit carries an AI trailer, but ssog-risk-order-run.py is a plan-slug filename the brief mandates and the docs sentence it emits at ssog-risk-order-run.py:881-883 does not reconcile with its own totals.",
+    "goal_fidelity": "ssog-risk-order-run.py:584-620 reports the composite, mean and incumbent recall for both goldens on both splits, but the documentation rows at ssog-risk-order-run.py:441-463 include 38 rows scored on audit checks alone, so the delivered measurement is partial.",
+    "reuse": "imas_codex/discovery/base/evaluation.py:127 _group_indices and :143 bootstrap_interval own copy-group-aware resampling and ssog-risk-order-run.py:558-581 _copy_group_bootstrap duplicates that mechanism rather than calling the owner.",
+    "scope_discipline": "the f8a85ca9..890d80349 diff touches only the two fragment files, results.json and docs/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg, all four inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief asks the node to measure how well a Jev risk composite finds known defects first; docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:584-620 builds every item's risk from its axis's named checks and reports recall for both goldens on both splits, so the delivered object is the measurement the goal names, though 38 documentation rows carry no Jev judgement.\nVERDICT done_when: the brief's done-when names the recall table, counts, spend, one recall-versus-fraction figure and a results JSON; ssog-risk-order.html:10-40 carries the table, counts and controls paragraph, the figure is committed at docs/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg and renders clean, and results.json holds all 737 name and 190 documentation rows, but the label-reading evidence is now two analytic controls (ssog-risk-order-run.py:905-929) rather than the shuffled run the brief asked for.\nVERDICT write_paths: the brief grants the two evidence files under docs/evidence/fragments/sn-selection-over-generation/, results.json, and the figure path docs/figures/sn-selection-over-generation/ssog-risk-order; all three new commits touch only those four paths.\nVERDICT manifest: read; it declares status complete, commits 64c6b7f57..890d80349, the four changed paths, measure/controls/verify/render logs at EXIT=0, and a declined out-of-scope repair, but its claim that this round judged 96 documentation items against 124 before omits that only 96 of 128 pending names were judged at all.\nVERDICT diff: read commit by commit against base f8a85ca9; 64c6b7f57 brings the four artefacts, f7f3390bc the gap judging and the first control, and 670cc4d6e/e0a60e02e/890d80349 replace the tautological control with two analytic ones, route gap rows through review_names, sanitize non-finite floats and re-render the figure, every path inside the declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: ssog-risk-order-run.py:584-620 reports the composite, mean and incumbent recall for both goldens on both splits, but the documentation rows at ssog-risk-order-run.py:441-463 include 38 rows scored on audit checks alone, so the delivered measurement is partial.\nSCORE evidence: 13\nJUSTIFICATION evidence: measure.log, controls.log and verify.log each end EXIT=0 and I reproduced both arms of the control (head EXIT=0, tail-read EXIT=1), but ssog-risk-order.html:15 states 96 documentation names judged and 0 calls failed without the 32 names left unjudged, so the page overstates its coverage.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the f8a85ca9..890d80349 diff touches only the two fragment files, results.json and docs/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg, all four inside the declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: the label-reading control at ssog-risk-order-run.py:905-929 reddens on a reinstated tail-read (six cells per split, EXIT=1) and the name-coverage guard at ssog-risk-order-run.py:962-969 reddens on reverted gap judging, but no guard covers the documentation coverage gap because verify at ssog-risk-order-run.py:953-983 inspects only the name rows.\nSCORE fit: 15\nJUSTIFICATION fit: helpers are named by mechanism and no commit carries an AI trailer, but ssog-risk-order-run.py is a plan-slug filename the brief mandates and the docs sentence it emits at ssog-risk-order-run.py:881-883 does not reconcile with its own totals.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/discovery/base/evaluation.py:127 _group_indices and :143 bootstrap_interval own copy-group-aware resampling and ssog-risk-order-run.py:558-581 _copy_group_bootstrap duplicates that mechanism rather than calling the owner.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:15 blocking: 32 of the 128 documentation names needing a judgement carry none, covering 38 of the 190 golden rows (14 of them known defects), and the counts line reports only \"96 judged here, 0 calls failed\" with no unjudged count; the page's own arithmetic shows the gap, since 32 reused + 96 judged + 14 unscored = 142 and 174 names are claimed, and the same page reports the name axis's unjudged count explicitly, so a reader is told golden C's recall rests on a complete judgement set when a fifth of its rows were scored on audit checks alone.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:419 follow-on: run_pending cancels every task still pending at JUDGE_BUDGET_S and never revisits it, and because answers stays None while failed is appended only when judge raises, a cancelled entry is recorded neither as judged nor as failed; this round judged 96 of 128 pending names with failed_calls 0, where the prior round judged 124 with 4 failed, so the shortfall is invisible and the manifest reads it as an improvement.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:953 follow-on: verify asserts the name-axis coverage claim and both label-reading controls but never inspects the documentation rows, so the 32 unjudged documentation names pass the node's own gate and the fragment is regenerated with an unreconciled counts line.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:558 follow-on: _copy_group_bootstrap re-implements the copy-group resampling imas_codex/discovery/base/evaluation.py:127-141 owns instead of calling _group_indices, and the manifest's declination of this repair is recorded only in the run manifest, not in the code it concerns.",
+  "review_run_id": "r-20261018T101849503877-review-of-ssog-risk-order-890d803490fb",
+  "reviewed_base_sha": "f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710",
+  "reviewed_commits": [
+    "64c6b7f57a034e9fc813e1275405653dd7ef610d",
+    "f7f3390bc910f1225feed724a6519492a936faf5",
+    "670cc4d6eb1abc0b120771840d3b9263cc0c41af",
+    "e0a60e02ee7db8afb8ff578c16e69d2a87295c2d",
+    "890d803490fb8f51dce3d3cc3f491bf87bb88813"
+  ],
+  "reviewed_head_sha": "890d803490fb8f51dce3d3cc3f491bf87bb88813",
+  "reviewed_run_id": "r-20261017T215136022889-ssog-risk-order",
+  "schema": "crew-review-record",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T10:39:45.796618+00:00",
+  "total": 83
+}

@@ -1,0 +1,94 @@
+<!-- A family's documentation template is chosen by a Jev Score per eligible
+     member, with the heuristic only breaking ties.
+     Module: imas_codex/standard_names/families.py (score_family_anchor).
+     Test: tests/standard_names/test_jev_anchor_score.py. -->
+<section id="ssog-jev-anchor-score" data-reckon="evidence">
+  <h2 id="ssog-jev-anchor-score-heading">Each family member scored as the family's template</h2>
+
+  <p id="ssog-jev-anchor-score-question">
+    <code>score_family_anchor</code> asks one Score per eligible member — a member
+    <code>select_anchor</code> would consider, meaning a non-placeholder description
+    with documentation present. The question is <em>"How well would this member's
+    documentation serve as the template for the whole family?"</em>, with the member's
+    name, description and documentation, the family's pattern, and the house-style
+    template the grammar renders for that pattern
+    (<code>conventions_context_for</code>, the accessor the docs prompt already
+    renders its conventions block through) as state. That template is read from
+    the family's own members — the first whose id the grammar parses — because
+    every member shares the family's pattern, so an unparseable or absent parent
+    id cannot leave the state's template empty. A family whose members all fail
+    to parse is refused with a reason and no choice, never asked without a
+    template. Its five levels, low first, are code-authored criteria:
+  </p>
+  <ol id="ssog-jev-anchor-score-levels">
+    <li id="ssog-jev-anchor-score-level-0">Names or describes a quantity other than the family's, or contradicts the family's pattern — templating from it would mislead every other member.</li>
+    <li id="ssog-jev-anchor-score-level-1">Specific to this member alone: no opening or structure that could carry over to the family's other members.</li>
+    <li id="ssog-jev-anchor-score-level-2">Reusable in parts: states the family's shared quantity but departs from the house style in terminology or structure, so a member templated from it would need rewriting.</li>
+    <li id="ssog-jev-anchor-score-level-3">A good template: states the family's quantity and follows the house style, with only minor member-specific detail a sibling would carry harmlessly.</li>
+    <li id="ssog-jev-anchor-score-level-4">An ideal template: states the family's quantity, follows the house style and its fill-in slots exactly, and carries no member-specific detail that would mislead a sibling.</li>
+  </ol>
+
+  <p id="ssog-jev-anchor-score-choice">
+    The highest expected score is the candidate anchor; a tie falls to
+    <code>select_anchor</code>'s own ranking over the tied members, with the
+    family's parent id, docs stage and description passed through when the parent
+    is itself one of the tied members, so the heuristic's accepted-parent rule
+    applies here exactly as it does over the whole family. A failed or unscored
+    call leaves its member unscored and a family with no scored member returns no
+    choice, never a default. Nothing here changes <code>select_anchor</code> or its
+    callers: this node builds the scorer and spends only its own calls.
+  </p>
+
+  <h3 id="ssog-jev-anchor-score-tests-heading">Tests and the negative control</h3>
+  <p id="ssog-jev-anchor-score-tests">
+    <code>tests/standard_names/test_jev_anchor_score.py</code> (14 tests), decisions
+    stubbed, covers: the highest expected score wins; a tie falls to
+    <code>select_anchor</code>'s order (equal scores, the higher
+    <code>reviewer_score_docs</code> member chosen over bare id order; and an
+    accepted parent tied at the top taking the tie, so the accepted-parent rule
+    fires); an ineligible member is never asked; a family of ineligible members
+    makes no call and returns no choice; a failed call returns no choice when no
+    other member scored; a failed member does not block the scored choice; the
+    template is resolved from a member that parses when the parent id does not;
+    a family with no template anywhere is refused with a reason and no call; the
+    state carries the house-style template, the pattern and the member fields;
+    the question's levels are distinct rungs of an ordinal scale whose top beats
+    its bottom; the parent node is offered as a template; and the template
+    accessor reuses the docs context rather than a copy.
+  </p>
+  <p id="ssog-jev-anchor-score-negative-control">
+    Negative controls (<code>negative_control_followon.log</code>): three declared
+    mutations, each restoring <code>families.py</code> byte-identically afterwards
+    (sha256 checked before and after in the log). <em>The template is left out of
+    the state</em> removes <code>"house_style_template": template</code> and fails
+    the template-in-state test; <em>the template is read from the parent id alone,
+    never from a member</em> restores the parent-only lookup and fails the
+    member-resolution test; <em>the tie-break drops the family's parent before
+    calling select_anchor</em> fails the accepted-parent tie-break test. All three
+    report <code>FAILED</code> and <code>EXIT=1</code>, and none of those test ids
+    appears in the head arm's failures.
+  </p>
+
+  <h3 id="ssog-jev-anchor-score-gate-heading">Gate: zero added failures</h3>
+  <p id="ssog-jev-anchor-score-gate">
+    Gate files: <code>test_jev_anchor_score.py</code> plus the 22 existing
+    <code>tests/standard_names/*.py</code> that import <code>families</code>
+    (<code>grep -l families tests/standard_names/*.py</code>). Base arm
+    (<code>gate_base.log</code>, the 22 existing files with <code>families.py</code>
+    at <code>da2bc81d</code>): <strong>222 passed, 0 failed, EXIT=0</strong>. Head arm
+    (<code>gate_head.log</code>, all 23 files): <strong>236 passed, 0 failed,
+    EXIT=0</strong> — 14 added tests, zero added failures.
+  </p>
+
+  <h3 id="ssog-jev-anchor-score-dry-heading">One read-only live call</h3>
+  <p id="ssog-jev-anchor-score-dry">
+    One family (<code>physical_base = momentum</code>, pattern
+    <code>momentum||||</code>) was read from the live graph and every eligible member
+    scored — <strong>191 members</strong>, <strong>USD 0.00792</strong>, read only,
+    nothing written. The judge's anchor differed from the heuristic's:
+    <code>poloidal_neutral_momentum_flux</code> (expected 2.63) against the
+    heuristic's <code>total_momentum_convection_velocity</code> (expected 1.47); no
+    tie arose at the top of this run, and all 191 members yielded a template. Full
+    per-member scores and distributions: <code>dry_run.log</code>.
+  </p>
+</section>
