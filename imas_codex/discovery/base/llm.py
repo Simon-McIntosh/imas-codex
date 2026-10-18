@@ -2151,10 +2151,9 @@ def _build_kwargs(
         # every branch (api_base / proxy / direct) and preserves cache_control.
         kwargs["messages"] = _ensure_json_in_messages(kwargs["messages"])
     if temperature is not None:
-        # GPT-5.x models reject temperature=0.0 with a 400 error; clamp to None
-        # (provider default) so callers that pin temperature=0.0 don't break.
-        if temperature == 0.0 and re.search(r"gpt-5", model):
-            logger.debug("Clamping temperature=0.0 → None for GPT-5.x model %s", model)
+        # GPT reasoning models reject temperature=0.0; use the provider default.
+        if temperature == 0.0 and re.search(r"gpt-[56](?:\.|-|$)", model):
+            logger.debug("Clamping temperature=0.0 for GPT model %s", model)
         else:
             kwargs["temperature"] = temperature
     if seed is not None:
