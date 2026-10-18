@@ -37,17 +37,35 @@ interval 0.385-0.602. The interval is taken over the refits
 rather than as a bootstrap of one of them, because a single shuffle's bootstrap
 resamples the validation rows around one fixed randomised weight set — reporting
 the validation set's spread under one noise draw, not whether the fit has skill.
-That the fit reads no validation label is shown separately and directly, by
-permuting the validation labels and refitting through the same fit path, which
-must leave the weights identical
-(weights_identical=True, permutation
-non-identity=True). Each control's
-own measured result is recorded with EXIT= in the run log. Both fire on a
-one-line scratch copy: a fit that reads every row rather than the calibration
-split reddens the leakage control — the weights move under the permutation — and
-lifts the validation AUC to 0.791, which would have flipped the verdict to
-adopt; a null control that skips the shuffle collapses its interval onto the real
-AUC (0.706) and no longer contains 0.5.</p>
+That the fit reads no validation label is shown separately and directly by
+moving the validation labels between their slots with the feature vectors held
+in place and refitting through the same fit path, which must leave the weights
+identical (largest coefficient change
+0.0e+00,
+weights_identical=True, permutation
+non-identity=True). What that
+comparison can see is measured on the same run rather than assumed of it: the
+same permutation pushed through a fit that reads every row must move its
+weights, and it moves them by
+0.390
+(leaked_fit_detected=True), so the
+control is known to be able to fail. A variant that permutes whole validation
+rows instead of labels would have no such power and is refused here: it moves
+every feature with its own label, leaving the row multiset — and so every fit
+that is a function of it — unchanged, so the only thing such a comparison reads
+is whether the solver's output shifts when its input rows are reordered. Two
+measured variants show the difference. Put a fit that reads every row in a
+canonical order, so that reordering cannot reach it, and the whole-row variant
+reports it as passing (largest coefficient change 0.0); the label-moving
+comparison reads the same fit at 0.390 and does not. Each control's own measured
+result is recorded with EXIT= in the run log, and the driver's exit status is the
+conjunction of the four, so a run with any control red cannot ship behind a zero.
+Both also fire on a one-line scratch copy: the fit that reads every row rather
+than the calibration split lifts the validation AUC to 0.791, which would have
+flipped the verdict to adopt, and reddens the leakage control; a null control
+that skips the shuffle collapses its interval onto the real AUC (0.706) and no
+longer contains 0.5, and that run exits 1 where the same run exits 0 when the
+status is not taken from the controls.</p>
 <p id="ssog-learned-acceptance-spend">Spend: USD 0.00 of the
 USD 1.00 ceiling. All 737 golden A name rows already carry frozen Jev answers in the risk-order results, so no judgment was bought; the features are reused rather than re-elicited.</p>
 <figure id="ssog-learned-acceptance-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-learned-acceptance/roc-curves.svg" alt="Validation ROC curves for the learned logistic model and the hand-set composite."><figcaption>Validation ROC. The learned curve sits above the composite across the operating range; the two are close enough that the paired difference interval reaches zero.</figcaption></figure>

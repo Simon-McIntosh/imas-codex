@@ -219,13 +219,48 @@ def _null_control(X_cal, y_cal, X_val, y_val) -> dict:
     }
 
 
-def _leakage_control(items, feature_ids) -> dict:
-    """Permuting the validation labels must leave the fitted weights identical.
+def _fit_every_row(items, feature_ids):
+    """A deliberately leaky fit path: every row's label, not the calibration split.
 
-    The permutation is applied to the rows before the fit path runs, so a fit
-    that read a validation label — rather than only calibration rows — would
-    move its weights. An identity permutation would compare the fit with itself
-    and test nothing, so it is refused rather than counted as a pass.
+    It exists so the leakage control can measure its own power. Nothing in the
+    measurement path calls it.
+    """
+    X, y, _, _ = _arrays(items, feature_ids)
+    return _fit(X, y)
+
+
+def _same_weights(a, b) -> bool:
+    import numpy as np
+
+    return bool(
+        np.array_equal(a.coef_, b.coef_) and np.array_equal(a.intercept_, b.intercept_)
+    )
+
+
+def _max_coef_delta(a, b) -> float:
+    import numpy as np
+
+    return float(np.max(np.abs(a.coef_ - b.coef_)))
+
+
+def _leakage_control(items, feature_ids) -> dict:
+    """Move the validation labels between their slots, features held in place.
+
+    A fit that consumed a leaky validation label has to move when the labels
+    move, while a fit reading only calibration rows cannot: its inputs are
+    untouched, so its weights come back bit-identical.
+
+    Permuting whole validation rows is not this test and is refused here for
+    that reason. It reorders (feature, label) pairs without breaking a single
+    pairing, so every fit that is a function of the row multiset — including one
+    that reads all rows — is invariant to it, and the comparison would see only
+    row-order rounding while reporting a passing control.
+
+    An identity permutation would compare the fit with itself and test nothing,
+    and a control whose power is assumed rather than measured can pass while
+    detecting nothing, so both are required of it: the permutation must be
+    non-identity, and the same permutation pushed through a fit that reads every
+    row must move, which is what shows the comparison can fail.
     """
     import numpy as np
 
@@ -236,17 +271,22 @@ def _leakage_control(items, feature_ids) -> dict:
     identity = bool(np.array_equal(perm, np.arange(len(val_rows))))
     permuted = [dict(row) for row in items]
     for pos, src in enumerate(perm):
-        permuted[val_rows[pos]] = {**items[val_rows[src]]}
+        permuted[val_rows[pos]]["label"] = items[val_rows[src]]["label"]
     after_model, _ = _fit_items(permuted, feature_ids)
-    identical = bool(
-        np.array_equal(base_model.coef_, after_model.coef_)
-        and np.array_equal(base_model.intercept_, after_model.intercept_)
-    )
+    identical = _same_weights(base_model, after_model)
+
+    leaked_model, _ = _fit_every_row(items, feature_ids)
+    leaked_after, _ = _fit_every_row(permuted, feature_ids)
+    leaked_delta = _max_coef_delta(leaked_model, leaked_after)
+    leaked_moves = leaked_delta > 0.0
     return {
-        "validation_rows_permuted": len(val_rows),
+        "validation_labels_permuted": len(val_rows),
         "identity_permutation": identity,
         "weights_identical": identical,
-        "passes": bool(identical and not identity),
+        "max_coef_delta": _max_coef_delta(base_model, after_model),
+        "leaked_fit_detected": leaked_moves,
+        "leaked_max_coef_delta": leaked_delta,
+        "passes": bool(identical and not identity and leaked_moves),
     }
 
 
@@ -380,17 +420,35 @@ interval {controls["null"]["validation"]}. The interval is taken over the refits
 rather than as a bootstrap of one of them, because a single shuffle's bootstrap
 resamples the validation rows around one fixed randomised weight set — reporting
 the validation set's spread under one noise draw, not whether the fit has skill.
-That the fit reads no validation label is shown separately and directly, by
-permuting the validation labels and refitting through the same fit path, which
-must leave the weights identical
-(weights_identical={controls["leakage"]["weights_identical"]}, permutation
-non-identity={not controls["leakage"]["identity_permutation"]}). Each control's
-own measured result is recorded with EXIT= in the run log. Both fire on a
-one-line scratch copy: a fit that reads every row rather than the calibration
-split reddens the leakage control — the weights move under the permutation — and
-lifts the validation AUC to 0.791, which would have flipped the verdict to
-adopt; a null control that skips the shuffle collapses its interval onto the real
-AUC (0.706) and no longer contains 0.5.</p>
+That the fit reads no validation label is shown separately and directly by
+moving the validation labels between their slots with the feature vectors held
+in place and refitting through the same fit path, which must leave the weights
+identical (largest coefficient change
+{controls["leakage"]["max_coef_delta"]:.1e},
+weights_identical={controls["leakage"]["weights_identical"]}, permutation
+non-identity={not controls["leakage"]["identity_permutation"]}). What that
+comparison can see is measured on the same run rather than assumed of it: the
+same permutation pushed through a fit that reads every row must move its
+weights, and it moves them by
+{controls["leakage"]["leaked_max_coef_delta"]:.3f}
+(leaked_fit_detected={controls["leakage"]["leaked_fit_detected"]}), so the
+control is known to be able to fail. A variant that permutes whole validation
+rows instead of labels would have no such power and is refused here: it moves
+every feature with its own label, leaving the row multiset — and so every fit
+that is a function of it — unchanged, so the only thing such a comparison reads
+is whether the solver's output shifts when its input rows are reordered. Two
+measured variants show the difference. Put a fit that reads every row in a
+canonical order, so that reordering cannot reach it, and the whole-row variant
+reports it as passing (largest coefficient change 0.0); the label-moving
+comparison reads the same fit at 0.390 and does not. Each control's own measured
+result is recorded with EXIT= in the run log, and the driver's exit status is the
+conjunction of the four, so a run with any control red cannot ship behind a zero.
+Both also fire on a one-line scratch copy: the fit that reads every row rather
+than the calibration split lifts the validation AUC to 0.791, which would have
+flipped the verdict to adopt, and reddens the leakage control; a null control
+that skips the shuffle collapses its interval onto the real AUC (0.706) and no
+longer contains 0.5, and that run exits 1 where the same run exits 0 when the
+status is not taken from the controls.</p>
 <p id="ssog-learned-acceptance-spend">Spend: USD {spend["usd"]:.2f} of the
 USD {spend["ceiling_usd"]:.2f} ceiling. {spend["reason"]}</p>
 <figure id="ssog-learned-acceptance-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-learned-acceptance/roc-curves.svg" alt="Validation ROC curves for the learned logistic model and the hand-set composite."><figcaption>Validation ROC. The learned curve sits above the composite across the operating range; the two are close enough that the paired difference interval reaches zero.</figcaption></figure>
@@ -543,11 +601,22 @@ def measure() -> dict:
     _note(
         f"control leakage_weights_identical={leakage['weights_identical']} "
         f"permutation_non_identity={not leakage['identity_permutation']} "
+        f"leaked_fit_detected={leakage['leaked_fit_detected']} "
         f"passed={leakage['passes']}"
     )
     _note(f"verdict adopted={adopted}")
-    _note("EXIT=0")
+    _note(f"EXIT={0 if _controls_pass(report) else 1}")
     return report
+
+
+def _controls_pass(report: dict) -> bool:
+    """Every control's own test file — the run is red while any one of them is."""
+    return bool(
+        report["controls"]["instrument"]["passes"]
+        and report["controls"]["composite_recompute"]["passes"]
+        and report["controls"]["null"]["contains_half"]
+        and report["controls"]["leakage"]["passes"]
+    )
 
 
 def verify(report: dict) -> int:
@@ -558,6 +627,7 @@ def verify(report: dict) -> int:
         "composite_recompute": report["controls"]["composite_recompute"]["passes"],
         "null_contains_half": report["controls"]["null"]["contains_half"],
         "leakage": report["controls"]["leakage"]["passes"],
+        "controls_all_pass": _controls_pass(report),
         "features_present": report["features"]["n"] == len(report["features"]["ids"]),
         "verdict_matches_interval": report["verdict"]["adopted"]
         == (report["paired"]["lower"] > 0.0),
@@ -574,8 +644,8 @@ def main(argv=None) -> int:
     parser.add_argument("command", choices=("measure", "verify"))
     args = parser.parse_args(argv)
     if args.command == "measure":
-        measure()
-        return 0
+        report = measure()
+        return 0 if _controls_pass(report) else 1
     return verify(json.loads(RESULTS.read_text()))
 
 

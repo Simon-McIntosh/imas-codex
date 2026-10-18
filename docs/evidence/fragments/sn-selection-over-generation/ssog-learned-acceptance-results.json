@@ -162,9 +162,12 @@
       "validation": "0.385-0.602"
     },
     "leakage": {
-      "validation_rows_permuted": 357,
+      "validation_labels_permuted": 357,
       "identity_permutation": false,
       "weights_identical": true,
+      "max_coef_delta": 0.0,
+      "leaked_fit_detected": true,
+      "leaked_max_coef_delta": 0.39007493161954887,
       "passes": true
     }
   },
