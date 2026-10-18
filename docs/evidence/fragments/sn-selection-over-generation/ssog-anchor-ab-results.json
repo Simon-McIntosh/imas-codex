@@ -3,101 +3,109 @@
     "registered_at": "2026-10-18T10:45:18.869980+00:00",
     "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
   },
-  "apply_spend_usd": null,
   "arm_comparison_complete": false,
   "candidate_pool": {
-    "all_families": 848,
-    "eligible": 119,
+    "all_families": 849,
+    "eligible": 118,
     "exclusions": {
-      "harmonized": 2,
-      "too_small": 668,
+      "harmonized": 3,
+      "too_small": 669,
       "west_roster": 59
     }
   },
-  "cap_envelope_usd": 29.821194586,
-  "confirmed_scorer_spend_usd": 0.021194586,
+  "cap_envelope_usd": 29.84229295,
+  "confirmed_spend_usd": 0.04229295,
   "dry_run_estimate_basis": {
-    "path": "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html",
-    "rate_usd": 0.41403,
-    "source": "prior measured documentation-call rate; snapshot CLI reports unavailable"
+    "calls": 36,
+    "rate_usd": 0.6556937222222222,
+    "runs": 21,
+    "source": "snapshot LLMCost rows"
   },
-  "dry_run_estimate_total_usd": 25.669860000000003,
-  "dry_run_estimate_usd_per_call": 0.41403,
+  "dry_run_estimate_total_usd": 40.65301077777777,
+  "dry_run_estimate_usd_per_call": 0.6556937222222222,
   "dry_runs": [
     {
       "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
+      "estimate_per_arm_usd": 1.9670811666666665,
       "seed": "toroidal_angle_of_along_pellet_path"
     },
     {
       "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
+      "estimate_per_arm_usd": 1.9670811666666665,
+      "seed": "vertical_coordinate_of_diagnostic_aperture"
+    },
+    {
+      "calls_per_arm": 3,
+      "estimate_per_arm_usd": 1.9670811666666665,
       "seed": "angular_width_of_camera"
     },
     {
       "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
+      "estimate_per_arm_usd": 1.9670811666666665,
       "seed": "effective_area_of_langmuir_probe"
     },
     {
       "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
+      "estimate_per_arm_usd": 1.9670811666666665,
       "seed": "energy_flux_at_wall_due_to_eddy_current"
     },
     {
       "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
-      "seed": "deuterium_source_rate_due_to_injection"
+      "estimate_per_arm_usd": 1.9670811666666665,
+      "seed": "neutral_power_of_divertor_due_to_recombination"
     },
     {
       "calls_per_arm": 4,
-      "estimate_per_arm_usd": 1.65612,
+      "estimate_per_arm_usd": 2.622774888888889,
       "seed": "electron_particle_flux_at_wall_due_to_pumping"
     },
     {
       "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
-      "seed": "current_due_to_wave_driven_current_drive"
-    },
-    {
-      "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
+      "estimate_per_arm_usd": 1.9670811666666665,
       "seed": "current_density_due_to_wave_driven_current_drive"
     },
     {
       "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
+      "estimate_per_arm_usd": 1.9670811666666665,
       "seed": "length_of_antenna_strap"
     },
     {
       "calls_per_arm": 3,
-      "estimate_per_arm_usd": 1.2420900000000001,
+      "estimate_per_arm_usd": 1.9670811666666665,
       "seed": "length_of_passive_loop_element"
     }
   ],
   "failure": {
     "applies_completed": 0,
-    "apply_receipt": null,
-    "arm": "heuristic",
-    "error": "Neo.DatabaseError.Statement.ExecutionFailed: NOT PART OF CHAIN! RelationshipTraversalCursor[id=4555635]",
-    "reproduction_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/measurement-corrected.log",
-    "seed": "toroidal_angle_of_along_pellet_path",
-    "stage": "first harmonize apply",
-    "why_stopped": "The archived scratch graph failed a relationship traversal in the first apply; the assigned snapshot cannot support this comparison. No fresh live-graph export is permitted."
+    "applies_started": 0,
+    "error": "Dry-run estimate $40.65 or cap $29.84 reaches budget",
+    "estimated_two_arm_spend_usd": 40.65301077777777,
+    "per_call_rate_usd": 0.6556937222222222,
+    "planned_calls_both_arms": 62,
+    "reproduction_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/measurement-approved.log",
+    "stage": "dry-run budget gate",
+    "why_stopped": "Ten family dry runs exceed the USD 30 estimate gate; the per-apply caps would halt work mid-family."
   },
   "isolation_proof": [
     {
       "arm": "heuristic",
-      "at": "2026-10-18T10:47:05.648831+00:00",
+      "at": "2026-10-18T12:07:55.785616+00:00",
       "live_nodes": 1770101,
+      "live_probe": 0,
       "live_uri": "bolt://98dci4-gpu-0002:7687",
-      "neo4j_log": "/tmp/anchor-compare-gwlue9vk/heuristic/logs/neo4j-temp.log",
-      "scratch_nodes": 1768490,
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/anchor-compare-q5hlmw4c/heuristic/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
       "scratch_uri": "bolt://127.0.0.1:27697"
     }
   ],
-  "outcome_status": "blocked",
-  "same_anchor_count": 14,
+  "minimum_ten_family_calls": 60,
+  "minimum_ten_family_estimate_usd": 39.34162333333333,
+  "outcome_status": "blocked_budget",
+  "previous_spend_usd": 0.021194586,
+  "same_anchor_count": 12,
   "scored_candidates": [
     {
       "heuristic_anchor": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
@@ -123,7 +131,7 @@
     },
     {
       "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
-      "jev_anchor": "x_coordinate_of_diagnostic_aperture",
+      "jev_anchor": "y_coordinate_of_diagnostic_aperture",
       "jev_asked": [
         "vertical_coordinate_of_diagnostic_aperture",
         "x_coordinate_of_diagnostic_aperture",
@@ -354,7 +362,7 @@
     },
     {
       "heuristic_anchor": "toroidal_current_due_to_wave_driven_current_drive",
-      "jev_anchor": "current_per_toroidal_mode_due_to_wave_driven_current_drive",
+      "jev_anchor": "toroidal_current_due_to_wave_driven_current_drive",
       "jev_asked": [
         "current_due_to_wave_driven_current_drive",
         "toroidal_current_due_to_wave_driven_current_drive",
@@ -560,7 +568,7 @@
     },
     {
       "heuristic_anchor": "toroidal_current_density_due_to_ion_inertia",
-      "jev_anchor": "radial_current_density_due_to_ion_inertia",
+      "jev_anchor": "vertical_current_density_due_to_ion_inertia",
       "jev_asked": [
         "current_density_due_to_ion_inertia",
         "parallel_current_density_due_to_ion_inertia",
@@ -921,9 +929,9 @@
       "members": [
         "electrostatic_potential",
         "electrostatic_potential_at_langmuir_probe_position",
-        "floating_electrostatic_potential",
-        "plasma_electrostatic_potential_at_outboard_midplane",
-        "plasma_electrostatic_potential_at_wall"
+        "electrostatic_potential_at_outboard_midplane",
+        "electrostatic_potential_at_wall",
+        "floating_electrostatic_potential"
       ],
       "physical_base": "electrostatic_potential",
       "seed": "electrostatic_potential"
@@ -1009,7 +1017,7 @@
     },
     {
       "heuristic_anchor": "energy_flux_at_wall_due_to_surface_emission",
-      "jev_anchor": "energy_flux_at_wall_due_to_surface_emission",
+      "jev_anchor": "electron_kinetic_energy_flux_at_wall_due_to_surface_emission",
       "jev_asked": [
         "kinetic_energy_flux_at_wall_due_to_surface_emission",
         "energy_flux_at_wall_due_to_surface_emission",
@@ -1201,7 +1209,7 @@
     },
     {
       "heuristic_anchor": "particle_flux_at_wall_due_to_surface_emission",
-      "jev_anchor": "particle_flux_at_wall_due_to_surface_emission",
+      "jev_anchor": "flux_at_wall_due_to_surface_emission",
       "jev_asked": [
         "flux_at_wall_due_to_surface_emission",
         "flux_due_to_surface_emission",
@@ -1370,7 +1378,7 @@
     },
     {
       "heuristic_anchor": "radial_perturbed_plasma_magnetic_field_imaginary_part",
-      "jev_anchor": "toroidal_perturbed_plasma_magnetic_field_imaginary_part",
+      "jev_anchor": "radial_perturbed_vacuum_magnetic_field_imaginary_part",
       "jev_asked": [
         "poloidal_perturbed_vacuum_magnetic_field_imaginary_part",
         "radial_perturbed_vacuum_magnetic_field_imaginary_part",
@@ -1535,7 +1543,7 @@
     },
     {
       "heuristic_anchor": "total_momentum_convection_velocity",
-      "jev_anchor": "poloidal_neutral_momentum_flux",
+      "jev_anchor": "momentum_flux",
       "jev_asked": [
         "neutral_species_momentum_convection_velocity",
         "momentum_damping_rate",
@@ -2062,7 +2070,7 @@
         "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
         "momentum_flux_due_to_perturbed_parallel_vector_potential"
       ],
-      "jev_cost": 0.000239022,
+      "jev_cost": 0.00023877,
       "jev_reason": null,
       "jev_scored": 5,
       "kind": "component",
@@ -2077,35 +2085,8 @@
       "seed": "momentum_flux_due_to_perturbed_parallel_vector_potential"
     },
     {
-      "heuristic_anchor": "total_ion_number_density",
-      "jev_anchor": "fast_neutral_internal_state_number_density",
-      "jev_asked": [
-        "thermal_ion_charge_state_number_density",
-        "fast_neutral_internal_state_number_density",
-        "normalized_ion_species_number_density",
-        "total_ion_number_density",
-        "total_neutral_number_density",
-        "electron_number_density"
-      ],
-      "jev_cost": 0.00021802199999999998,
-      "jev_reason": null,
-      "jev_scored": 6,
-      "kind": "subject+region",
-      "members": [
-        "electron_number_density",
-        "fast_neutral_internal_state_number_density",
-        "normalized_ion_species_number_density",
-        "thermal_ion_charge_state_number_density",
-        "total_ion_number_density",
-        "total_neutral_number_density",
-        "volume_averaged_electron_number_density_over_scrape_off_layer"
-      ],
-      "physical_base": "number_density",
-      "seed": "electron_number_density"
-    },
-    {
       "heuristic_anchor": "mode_reference_phase",
-      "jev_anchor": "neoclassical_tearing_mode_phase",
+      "jev_anchor": "mode_reference_phase",
       "jev_asked": [
         "neoclassical_tearing_mode_phase",
         "toroidal_linear_mhd_mode_reference_phase",
@@ -2162,7 +2143,7 @@
     },
     {
       "heuristic_anchor": "incident_radiated_power_of_breeder_blanket_module",
-      "jev_anchor": "incident_radiated_power_of_breeder_blanket_module",
+      "jev_anchor": "incident_neutron_power_of_breeder_blanket_module",
       "jev_asked": [
         "radiated_power_of_breeder_blanket_module",
         "power_of_breeder_blanket_module",
@@ -2283,7 +2264,7 @@
     },
     {
       "heuristic_anchor": "power_due_to_recombination",
-      "jev_anchor": "neutral_power_at_wall_due_to_recombination",
+      "jev_anchor": "power_due_to_recombination",
       "jev_asked": [
         "power_due_to_recombination",
         "power_at_divertor_target_due_to_recombination",
@@ -2309,15 +2290,15 @@
     },
     {
       "heuristic_anchor": "power_of_divertor_due_to_recombination",
-      "jev_anchor": null,
+      "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
       "jev_asked": [
         "power_of_divertor_due_to_recombination",
         "neutral_power_of_divertor_due_to_recombination",
         "plasma_power_of_divertor_due_to_recombination"
       ],
-      "jev_cost": 0.0,
+      "jev_cost": 0.00012205199999999999,
       "jev_reason": null,
-      "jev_scored": 0,
+      "jev_scored": 3,
       "kind": "subject",
       "members": [
         "neutral_power_of_divertor_due_to_recombination",
@@ -2611,7 +2592,7 @@
     },
     {
       "heuristic_anchor": "trapped_thermal_particle_source_rate",
-      "jev_anchor": "counter_passing_thermal_particle_source_rate",
+      "jev_anchor": "neon_source_rate",
       "jev_asked": [
         "neutral_internal_state_source_rate",
         "volume_averaged_runaway_electron_source_rate",
@@ -2722,7 +2703,7 @@
     },
     {
       "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
-      "jev_anchor": "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
+      "jev_anchor": "source_rate_due_to_thermal_fusion",
       "jev_asked": [
         "neutron_source_rate_due_to_thermal_fusion",
         "source_rate_due_to_thermal_fusion",
@@ -2771,7 +2752,7 @@
     },
     {
       "heuristic_anchor": "upper_thickness_of_breeder_blanket_module",
-      "jev_anchor": "upper_thickness_of_breeder_blanket_module",
+      "jev_anchor": "lower_thickness_of_breeder_blanket_module",
       "jev_asked": [
         "lower_thickness_of_breeder_blanket_module",
         "upper_thickness_of_breeder_blanket_module"
@@ -3468,20 +3449,20 @@
       "seed": "first_local_tangential_width_of_diagnostic_aperture"
     }
   ],
-  "scorer_spend_usd": 0.021194586,
+  "scorer_spend_usd": 0.021098364,
   "scratch_cleanup_verified": {
     "closed_bolt_ports": [
       27697,
       27698
     ],
     "tree_absent": true,
-    "verified_at": "2026-10-18T11:07:37.233734+00:00"
+    "verified_at": "2026-10-18T12:23:51.597891+00:00"
   },
   "scratch_removed": {
-    "at": "2026-10-18T11:06:54.443128+00:00",
-    "tree": "/tmp/anchor-compare-gwlue9vk"
+    "at": "2026-10-18T12:23:12.673921+00:00",
+    "tree": "/tmp/anchor-compare-q5hlmw4c"
   },
-  "scratch_tree": "/tmp/anchor-compare-gwlue9vk",
+  "scratch_tree": "/tmp/anchor-compare-q5hlmw4c",
   "selected": [
     {
       "heuristic_anchor": "toroidal_angle_of_launching_position",
@@ -3501,6 +3482,26 @@
       ],
       "physical_base": "",
       "seed": "toroidal_angle_of_along_pellet_path"
+    },
+    {
+      "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+      "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+      "jev_asked": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "jev_cost": 0.000103068,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "coordinate",
+      "members": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "physical_base": "",
+      "seed": "vertical_coordinate_of_diagnostic_aperture"
     },
     {
       "heuristic_anchor": "toroidal_angular_width_of_camera",
@@ -3560,24 +3561,24 @@
       "seed": "energy_flux_at_wall_due_to_eddy_current"
     },
     {
-      "heuristic_anchor": "source_rate_due_to_injection",
-      "jev_anchor": "deuterium_source_rate_due_to_injection",
+      "heuristic_anchor": "power_of_divertor_due_to_recombination",
+      "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
       "jev_asked": [
-        "source_rate_due_to_injection",
-        "deuterium_source_rate_due_to_injection",
-        "electron_source_rate_due_to_injection"
+        "power_of_divertor_due_to_recombination",
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination"
       ],
-      "jev_cost": 0.000111594,
+      "jev_cost": 0.00012205199999999999,
       "jev_reason": null,
       "jev_scored": 3,
       "kind": "subject",
       "members": [
-        "deuterium_source_rate_due_to_injection",
-        "electron_source_rate_due_to_injection",
-        "source_rate_due_to_injection"
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination",
+        "power_of_divertor_due_to_recombination"
       ],
-      "physical_base": "source_rate",
-      "seed": "deuterium_source_rate_due_to_injection"
+      "physical_base": "power",
+      "seed": "neutral_power_of_divertor_due_to_recombination"
     },
     {
       "heuristic_anchor": "neutral_particle_flux_at_wall_due_to_pumping",
@@ -3600,26 +3601,6 @@
       ],
       "physical_base": "flux",
       "seed": "electron_particle_flux_at_wall_due_to_pumping"
-    },
-    {
-      "heuristic_anchor": "toroidal_current_due_to_wave_driven_current_drive",
-      "jev_anchor": "current_per_toroidal_mode_due_to_wave_driven_current_drive",
-      "jev_asked": [
-        "current_due_to_wave_driven_current_drive",
-        "toroidal_current_due_to_wave_driven_current_drive",
-        "current_per_toroidal_mode_due_to_wave_driven_current_drive"
-      ],
-      "jev_cost": 0.000124656,
-      "jev_reason": null,
-      "jev_scored": 3,
-      "kind": "component",
-      "members": [
-        "current_due_to_wave_driven_current_drive",
-        "current_per_toroidal_mode_due_to_wave_driven_current_drive",
-        "toroidal_current_due_to_wave_driven_current_drive"
-      ],
-      "physical_base": "current",
-      "seed": "current_due_to_wave_driven_current_drive"
     },
     {
       "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
@@ -3681,11 +3662,11 @@
       "seed": "length_of_passive_loop_element"
     }
   ],
-  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-ff4d0f1-20261012T035511Z.tar.gz",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
   "spend_limit_usd": 30.0,
-  "spend_usd": null,
-  "started_at": "2026-10-18T10:45:18.869950+00:00",
-  "unscored_count": 65,
+  "spend_usd": 0.04229295,
+  "started_at": "2026-10-18T12:05:51.572895+00:00",
+  "unscored_count": 64,
   "variation_kind_counts": {
     "component": 37,
     "component+device": 1,
@@ -3699,7 +3680,6 @@
     "subject+component+position": 4,
     "subject+component+position+region": 1,
     "subject+position": 7,
-    "subject+region": 1,
     "unclassified": 13
   },
   "verdict": null,
