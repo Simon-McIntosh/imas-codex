@@ -16,7 +16,7 @@ from imas_codex.standard_names.review.cascade import (
     route_name,
 )
 
-_CALIBRATION_SHA256 = "12cfa1f195cfd278c4415b02ee8bf1f424fe2f4b384cecd5b6bbd5d42b46c9b4"
+_CALIBRATION_SHA256 = "a797be9b51cceb5bb1691a98240c2f2be17066fecfbc46837f6664d3336fc9bb"
 
 
 def _assert_calibration_digest(artifact):
@@ -29,6 +29,9 @@ def _assert_calibration_digest(artifact):
 def test_calibration_artifact_digest_recomputes_from_committed_content():
     artifact = json.loads(Path(cascade._THRESHOLDS).read_text())
     assert artifact["source_split"] == "calibration"
+    for axis in ("name", "docs"):
+        assert artifact[axis]["unjudged_count"] == 0
+        assert sum(artifact[axis]["route_counts"].values()) == artifact[axis]["n"]
     _assert_calibration_digest(artifact)
 
 
@@ -45,50 +48,49 @@ def test_calibration_digest_rejects_unrederived_edit(field):
         _assert_calibration_digest(altered)
 
 
+class _AggregateGraph:
+    def __init__(self):
+        self.reviews = [
+            {"judge_kind": "incumbent", "is_canonical": True, "score": 0.4},
+            {"judge_kind": "incumbent", "is_canonical": True, "score": 0.5},
+        ]
+        self.aggregate = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def query(self, statement, **params):
+        before_aggregate = statement.split("WITH sn, count(r)", 1)[0]
+        excludes_shadow = (
+            "coalesce(r.judge_kind, '') = 'jev'" in before_aggregate
+            and "coalesce(r.is_canonical, false) = false" in before_aggregate
+        )
+        reviews = [
+            review
+            for review in self.reviews
+            if not (
+                excludes_shadow
+                and review["judge_kind"] == "jev"
+                and not review["is_canonical"]
+            )
+        ]
+        scores = [review["score"] for review in reviews if review["score"] is not None]
+        self.aggregate = (
+            len(reviews),
+            sum(scores) / len(scores) if scores else None,
+            len(reviews) > 1 and max(scores) - min(scores) >= params["threshold"],
+        )
+        return [{"id": "temperature"}]
+
+
 @pytest.mark.parametrize("shadow_score", [None, 0.99])
 def test_shadow_jev_row_does_not_change_review_aggregates(monkeypatch, shadow_score):
     from imas_codex.standard_names import graph_ops
 
-    class AggregateGraph:
-        def __init__(self):
-            self.reviews = [
-                {"judge_kind": "incumbent", "is_canonical": True, "score": 0.4},
-                {"judge_kind": "incumbent", "is_canonical": True, "score": 0.5},
-            ]
-            self.aggregate = None
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *_args):
-            return False
-
-        def query(self, statement, **params):
-            before_aggregate = statement.split("WITH sn, count(r)", 1)[0]
-            excludes_shadow = (
-                "coalesce(r.judge_kind, '') = 'jev'" in before_aggregate
-                and "coalesce(r.is_canonical, false) = false" in before_aggregate
-            )
-            reviews = [
-                review
-                for review in self.reviews
-                if not (
-                    excludes_shadow
-                    and review["judge_kind"] == "jev"
-                    and not review["is_canonical"]
-                )
-            ]
-            scores = [
-                review["score"] for review in reviews if review["score"] is not None
-            ]
-            self.aggregate = (
-                len(reviews),
-                sum(scores) / len(scores) if scores else None,
-                len(reviews) > 1 and max(scores) - min(scores) >= params["threshold"],
-            )
-            return [{"id": "temperature"}]
-
-    graph = AggregateGraph()
+    graph = _AggregateGraph()
     monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
     assert graph_ops.update_review_aggregates(["temperature"]) == 1
     incumbent_aggregate = graph.aggregate
@@ -423,9 +425,7 @@ def test_deciding_result_reaches_name_stage(monkeypatch, route, expected_stage):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("failure", ["lease", "judgment"])
 @pytest.mark.parametrize("deciding", [False, True])
-async def test_unjudged_review_has_no_route_and_keeps_full_incumbent(
-    monkeypatch, failure, deciding
-):
+async def test_unjudged_review_keeps_full_incumbent(monkeypatch, failure, deciding):
     from imas_codex import settings
 
     stored = []
@@ -434,8 +434,8 @@ async def test_unjudged_review_has_no_route_and_keeps_full_incumbent(
     async def fail_judgment(_item, _model):
         raise RuntimeError("Jev unavailable")
 
-    async def store(*args):
-        stored.append(args)
+    async def store(*args, **kwargs):
+        stored.append((args, kwargs))
 
     async def incumbent(*, models):
         calls.append(list(models))
@@ -456,8 +456,71 @@ async def test_unjudged_review_has_no_route_and_keeps_full_incumbent(
         incumbent,
         mgr=Manager(),
     )
-    assert stored == []
+    assert len(stored) == 1
+    assert stored[0][0][3].route == "unjudged"
+    assert ("lease" if failure == "lease" else "Jev unavailable") in stored[0][1][
+        "reason"
+    ]
     assert calls == [["primary", "secondary"]]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("axis", ["name", "docs"])
+@pytest.mark.parametrize("failure", ["lease", "call"])
+async def test_unjudged_shadow_row_preserves_incumbent_and_aggregate(
+    monkeypatch, axis, failure
+):
+    from imas_codex import settings
+    from imas_codex.standard_names import graph_ops
+
+    graph = _AggregateGraph()
+    stored = []
+    calls = []
+    incumbent_result = {"winning_score": 0.4, "resolution_method": "quorum_consensus"}
+
+    def write_reviews(rows):
+        stored.extend(rows)
+        graph.reviews.extend(rows)
+
+    async def fail_judgment(_item, _model):
+        raise RuntimeError("Jev unavailable")
+
+    async def incumbent(*, models):
+        calls.append(list(models))
+        return incumbent_result
+
+    class Manager:
+        def reserve(self, *_args, **_kwargs):
+            return None if failure == "lease" else MagicMock()
+
+    monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
+    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    monkeypatch.setattr(graph_ops, "write_reviews", write_reviews)
+    monkeypatch.setattr(
+        cascade, "_name_judgment" if axis == "name" else "_docs_judgment", fail_judgment
+    )
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda: False)
+    graph_ops.update_review_aggregates(["temperature"])
+    before = graph.aggregate
+    result = await cascade.adjudicate_review(
+        axis,
+        {"id": "temperature"},
+        ["primary", "secondary"],
+        incumbent,
+        mgr=Manager(),
+    )
+    assert result is incumbent_result
+    assert calls == [["primary", "secondary"]]
+    assert len(stored) == 1
+    row = stored[0]
+    assert row["judge_kind"] == "jev" and row["is_canonical"] is False
+    assert row["score"] is None
+    assert json.loads(row["judge_answers_json"])["cascade:route"] == "unjudged"
+    reason = json.loads(row["comments"])["failure_reason"]
+    assert ("lease" if failure == "lease" else "Jev unavailable") in reason
+    assert "unjudged" not in cascade._calibration()[axis]["route_shares"]
+    graph_ops.update_review_aggregates(["temperature"])
+    assert graph.aggregate == before == (2, 0.45, False)
 
 
 @pytest.mark.asyncio

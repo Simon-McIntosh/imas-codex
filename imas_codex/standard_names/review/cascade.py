@@ -150,6 +150,8 @@ async def _store_route(
     route: CascadeRoute,
     answers: Mapping[str, Any],
     cost: float,
+    *,
+    reason: str | None = None,
 ) -> None:
     from imas_codex.standard_names.graph_ops import write_reviews
     from imas_codex.standard_names.review.pipeline import _build_review_record
@@ -162,7 +164,11 @@ async def _store_route(
         judgment=_judgment_payload(answers, route),
         judgment_model=model,
         comments=json.dumps(
-            {"route": route.route, "failed_checks": route.failed_checks}
+            {
+                "route": route.route,
+                "failed_checks": route.failed_checks,
+                **({"failure_reason": reason} if reason is not None else {}),
+            }
         ),
         cost_usd=cost,
     )
@@ -173,6 +179,19 @@ async def _store_route(
         resolution_method="cascade_route",
     )
     await asyncio.to_thread(write_reviews, [record])
+
+
+async def _store_unjudged(
+    item: Mapping[str, Any], axis: str, model: str, reason: str
+) -> None:
+    try:
+        await _store_route(
+            item, axis, model, CascadeRoute("unjudged", None), {}, 0.0, reason=reason
+        )
+    except Exception:
+        logger.exception(
+            "Jev unjudged record could not be stored for %s", item.get("id")
+        )
 
 
 def _failed_check_instructions(
@@ -307,13 +326,16 @@ async def adjudicate_review(
     from imas_codex.settings import get_model
     from imas_codex.standard_names.budget import LLMCostEvent
 
+    model = "sn-judge:unavailable"
     try:
         model = get_model("sn-judge")
         lease = mgr.reserve(0.001, phase="review_" + axis)
-    except Exception:
+    except Exception as exc:
         logger.exception("Jev cascade reservation unavailable for %s", item.get("id"))
+        await _store_unjudged(item, axis, model, f"{type(exc).__name__}: {exc}")
         return await incumbent(models=models)
     if lease is None:
+        await _store_unjudged(item, axis, model, "review lease refused")
         return await incumbent(models=models)
     try:
         if axis == "name":
@@ -332,11 +354,15 @@ async def adjudicate_review(
                 phase="review_" + axis,
             ),
         )
-    except Exception:
+    except Exception as exc:
         logger.exception("Jev cascade judgment unavailable for %s", item.get("id"))
+        await _store_unjudged(item, axis, model, f"{type(exc).__name__}: {exc}")
         return await incumbent(models=models)
     finally:
-        lease.release_unused()
+        try:
+            lease.release_unused()
+        except Exception:
+            logger.exception("Jev cascade lease release failed for %s", item.get("id"))
     try:
         await _store_route(item, axis, model, route, answers, spent)
     except Exception:
