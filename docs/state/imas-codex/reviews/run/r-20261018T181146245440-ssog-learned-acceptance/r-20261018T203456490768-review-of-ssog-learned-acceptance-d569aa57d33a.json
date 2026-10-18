@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest has no baseline_suite or after_suite receipt from which to derive a suite-failure delta",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:741",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:744"
+  ],
+  "completed_at": "2026-10-18T20:41:20Z",
+  "dispatched_at": "2026-10-18T20:35:36Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py",
+      "line": "122",
+      "severity": "follow-on",
+      "text": "follow-on: _composite duplicates the risk-order driver's _item_risk at ssog-risk-order-run.py:108 rather than extending or wrapping its owner, so a future change to the hand-set risk rule can make the two arms silently diverge."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "follow-on: split membership is taken from the risk-results row while the fragment says it comes from the golden fixture; no comparison to the fixture guards the calibration/validation assignment against source drift."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py",
+      "line": "726",
+      "severity": "follow-on",
+      "text": "follow-on: verdict_matches_interval compares two fields produced from the same paired result, so changing the paired lower bound and adopted flag together leaves this assertion true; verify also does not independently replay the published AUCs or fitted weights."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: the caption says the learned ROC curve stays above the composite from about false-positive rate 0.10 onward and then says the composite crosses above it below 0.2; the rendered curves confirm the latter, so the first claim misstates that range."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "git show of 992f2e41, 9e9401ee, 13bb31de and d569aa57 against base 7b5c7dff adds the evidence artifacts, pins SVG output, repairs label permutation and exit status, then replays controls and revises the caption in docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py.",
+    "done_when": "brief.md requires AUC intervals, named weights, two controls, spend and an SVG; followons-verify-and-caption.log records 0.706 versus 0.645, paired +0.061 [-0.001,+0.126], four passing controls and EXIT=0, while docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:75-78 publishes the spend, figure and weights.",
+    "goal": "brief.md asks for a learned acceptance comparison; docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:18-25 reports both validation AUCs, the paired interval, weights at line 78, and the non-adoption decision.",
+    "manifest": "manifest.md names four commits, all changed paths and its measure, verify and mutation logs, but has no baseline_suite or after_suite receipt, so an added suite-failure count cannot be measured.",
+    "write_paths": "manifest.md declares the evidence driver, HTML, results JSON and figure directory; git diff 7b5c7dff3cb9bce817b8dc0a1b9b8e638e26cdd1..d569aa57d33a661cdda70b1528b5a4a686132ae0 changes only those four paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:169-303 has independent oracle, stored-risk, shuffled-label and label-permutation controls with recorded red mutations, but verify at lines 695-727 does not independently check the published AUCs or weights.",
+    "evidence": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:545-571 computes copy-group intervals and the adoption rule, and followons-verify-and-caption.log records EXIT=0, but its header identifies precommit working-tree changes rather than the immutable reviewed head.",
+    "fit": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:545-565 uses the shared copy-group bootstrap and its figure at lines 342-390 follows the plot style, while docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:77 contains a contradictory low-FPR curve description.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:18-25 reports the requested comparison and non-adoption rule, although docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:104 reads split membership from risk results while the fragment at line 17 attributes it to the fixture.",
+    "reuse": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:122 duplicates the max-and-mean risk capability already owned by docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:108 instead of extending or wrapping that owner; AUC and intervals reuse imas_codex/discovery/base/evaluation.py:98,144.",
+    "scope_discipline": "the base-to-head diff lists only docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py, its sibling HTML and JSON, and the declared roc-curves.svg path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: brief.md asks for a learned acceptance comparison; docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:18-25 reports both validation AUCs, the paired interval, weights at line 78, and the non-adoption decision.\nVERDICT done_when: brief.md requires AUC intervals, named weights, two controls, spend and an SVG; followons-verify-and-caption.log records 0.706 versus 0.645, paired +0.061 [-0.001,+0.126], four passing controls and EXIT=0, while docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:75-78 publishes the spend, figure and weights.\nVERDICT write_paths: manifest.md declares the evidence driver, HTML, results JSON and figure directory; git diff 7b5c7dff3cb9bce817b8dc0a1b9b8e638e26cdd1..d569aa57d33a661cdda70b1528b5a4a686132ae0 changes only those four paths.\nVERDICT manifest: manifest.md names four commits, all changed paths and its measure, verify and mutation logs, but has no baseline_suite or after_suite receipt, so an added suite-failure count cannot be measured.\nVERDICT diff: git show of 992f2e41, 9e9401ee, 13bb31de and d569aa57 against base 7b5c7dff adds the evidence artifacts, pins SVG output, repairs label permutation and exit status, then replays controls and revises the caption in docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py.\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:741, docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:744\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:18-25 reports the requested comparison and non-adoption rule, although docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:104 reads split membership from risk results while the fragment at line 17 attributes it to the fixture.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:545-571 computes copy-group intervals and the adoption rule, and followons-verify-and-caption.log records EXIT=0, but its header identifies precommit working-tree changes rather than the immutable reviewed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the base-to-head diff lists only docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py, its sibling HTML and JSON, and the declared roc-curves.svg path.\nSCORE durability: 12\nJUSTIFICATION durability: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:169-303 has independent oracle, stored-risk, shuffled-label and label-permutation controls with recorded red mutations, but verify at lines 695-727 does not independently check the published AUCs or weights.\nSCORE fit: 16\nJUSTIFICATION fit: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:545-565 uses the shared copy-group bootstrap and its figure at lines 342-390 follows the plot style, while docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:77 contains a contradictory low-FPR curve description.\nSCORE reuse: 5\nJUSTIFICATION reuse: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:122 duplicates the max-and-mean risk capability already owned by docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:108 instead of extending or wrapping that owner; AUC and intervals reuse imas_codex/discovery/base/evaluation.py:98,144.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:122 follow-on: _composite duplicates the risk-order driver's _item_risk at ssog-risk-order-run.py:108 rather than extending or wrapping its owner, so a future change to the hand-set risk rule can make the two arms silently diverge.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:104 follow-on: split membership is taken from the risk-results row while the fragment says it comes from the golden fixture; no comparison to the fixture guards the calibration/validation assignment against source drift.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:726 follow-on: verdict_matches_interval compares two fields produced from the same paired result, so changing the paired lower bound and adopted flag together leaves this assertion true; verify also does not independently replay the published AUCs or fitted weights.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:77 follow-on: the caption says the learned ROC curve stays above the composite from about false-positive rate 0.10 onward and then says the composite crosses above it below 0.2; the rendered curves confirm the latter, so the first claim misstates that range.\n",
+  "review_run_id": "r-20261018T203456490768-review-of-ssog-learned-acceptance-d569aa57d33a",
+  "reviewed_base_sha": "7b5c7dff3cb9bce817b8dc0a1b9b8e638e26cdd1",
+  "reviewed_head_sha": "d569aa57d33a661cdda70b1528b5a4a686132ae0",
+  "reviewed_run_id": "r-20261018T181146245440-ssog-learned-acceptance",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T20:43:05.812108+00:00",
+  "total": 87
+}
