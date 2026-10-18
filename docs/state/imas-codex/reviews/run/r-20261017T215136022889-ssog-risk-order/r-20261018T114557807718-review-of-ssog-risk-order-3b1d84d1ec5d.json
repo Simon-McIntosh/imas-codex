@@ -1,0 +1,111 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "after_suite_log": null,
+  "assertion_analysis": [
+    {
+      "failure_condition": "If _recall_at takes the order tail instead of its head, the analytic first/last recall cells differ and controls exits nonzero; the worker's controls-red.log records this mutation with EXIT=1.",
+      "lines": "1031-1037"
+    },
+    {
+      "failure_condition": "A status outside the four, a missing row status, or a status for an unrelated id makes _coverage_failures report a defect; the worker's planted pending and missing-status logs show VERIFY_FAIL.",
+      "lines": "1081-1089"
+    },
+    {
+      "failure_condition": "A serialized row whose reused flag differs from its status is rejected; a wrong source entry reused flag moves both representations together, so this assertion does not detect that regression.",
+      "lines": "1094-1098"
+    },
+    {
+      "failure_condition": "A missing or non-enumerated status makes recomputed counts differ from recorded totals; because totals and statuses originate in _axis_coverage, the check guards corruption of the stored record rather than the provenance of an answer.",
+      "lines": "1100-1117"
+    }
+  ],
+  "base_log_revision": null,
+  "baseline_suite_log": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T11:57:00Z",
+  "dispatched_at": "2026-10-18T11:46:26Z",
+  "failure_delta_status": "unavailable: source manifest has no baseline_suite or after_suite arms, and named gate logs have no EXIT receipts; zero cannot be inferred",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "665",
+      "severity": "blocking",
+      "text": "the sampled group indexes are converted to a set at line 666, so a group drawn twice appears only once in a replicate; the claimed copy-group bootstrap intervals in the table are intervals from distinct-group subsamples rather than bootstrap resamples and must be recomputed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "1015",
+      "severity": "blocking",
+      "text": "the source brief explicitly requires re-running the composite scorer with labels shuffled within each split and checking 25% recall against the random band; analytic first/last orders exercise _recall_at only, so a scorer that leaks labels into risk can pass both controls and the required gate is absent."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md",
+      "line": "24",
+      "severity": "blocking",
+      "text": "the manifest reports EXIT=0 for measure, controls, verify and render, but those logs do not end in EXIT= and do not start with a revision and command; line 25 also places two annotated paths in negative_control_log instead of the required bare path, so the gate receipts are not auditable as declared."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "708",
+      "severity": "follow-on",
+      "text": "random_expected is the nominal fraction rather than the actual expected recall count/N after rounding; for golden C calibration, 10% reads 9 of 94 rows, making the exact expectation 9/94 = 0.0957 rather than the displayed 0.100."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "1094",
+      "severity": "follow-on",
+      "text": "the status-versus-reused assertion compares two fields derived from the same entry['reused'] value at lines 564 and 570, so changing that source classification moves both sides together and the check cannot independently prove frozen-answer provenance."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read six commits from f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710 through 3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b: 64c6b7f57 adds the measurement, f7f3390bc and 670cc4d6e revise judging and controls, e0a60e02e and 890d80349 update text and figure, and 3b1d84d1e accounts for both axes; docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:657-680 still discards bootstrap draw multiplicity.",
+    "done_when": "the source brief requires table, counts, spend, figure, per-item JSON and a shuffled-label run with EXIT; docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:10-36 and results.json contain the first four, while docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1015-1160 substitutes analytic recall controls and has no shuffled-label scorer gate.",
+    "goal": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md:1 and the source brief ask for measured defect recall in a Jev risk order; docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:736-819 builds both goldens and splits, and docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:36 reports the orders, but the interval calculation is not a copy-group bootstrap.",
+    "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md:20-31 reports complete, six commits, four paths and passing measures, but its baseline_suite and after_suite are absent, its named gate logs lack EXIT receipts, and negative_control_log at line 25 is not a bare path.",
+    "write_paths": "the source brief grants docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html, ssog-risk-order-run.py, ssog-risk-order-results.json and docs/figures/sn-selection-over-generation/ssog-risk-order; the f8a85ca9..3b1d84d1 diff changes only those four paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1031-1037 reddens if recall reads the tail, and docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1081-1117 rejects corrupted status maps, but neither tests that composite risk was computed independently of the labels and the reuse comparison at lines 1094-1098 mirrors one input.",
+    "evidence": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:28-34 reports analytic controls in place of the brief's shuffled-label run, and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/verify.log:1-4 has no revision, command or EXIT receipt.",
+    "fit": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1151-1181 exposes a small CLI matching the evidence scripts, though its mandated plan-slug filename and retrospective comments at lines 497-505 depart from the repository's durable naming and comment rules.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:736-819 computes A and C recall at all three fractions, but docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:665-674 makes the displayed group-bootstrap intervals mathematically different from the requested measure.",
+    "reuse": "imas_codex/discovery/base/evaluation.py:128-141 already owns copy-group resampling, while docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:657-674 duplicates it and discards repeated draws.",
+    "scope_discipline": "the f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710..3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b diff changes exactly the four paths declared in the source brief, including docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:1-41 and the figure under its granted directory."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md:1 and the source brief ask for measured defect recall in a Jev risk order; docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:736-819 builds both goldens and splits, and docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:36 reports the orders, but the interval calculation is not a copy-group bootstrap.\nVERDICT done_when: the source brief requires table, counts, spend, figure, per-item JSON and a shuffled-label run with EXIT; docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:10-36 and results.json contain the first four, while docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1015-1160 substitutes analytic recall controls and has no shuffled-label scorer gate.\nVERDICT write_paths: the source brief grants docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html, ssog-risk-order-run.py, ssog-risk-order-results.json and docs/figures/sn-selection-over-generation/ssog-risk-order; the f8a85ca9..3b1d84d1 diff changes only those four paths.\nVERDICT manifest: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md:20-31 reports complete, six commits, four paths and passing measures, but its baseline_suite and after_suite are absent, its named gate logs lack EXIT receipts, and negative_control_log at line 25 is not a bare path.\nVERDICT diff: read six commits from f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710 through 3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b: 64c6b7f57 adds the measurement, f7f3390bc and 670cc4d6e revise judging and controls, e0a60e02e and 890d80349 update text and figure, and 3b1d84d1e accounts for both axes; docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:657-680 still discards bootstrap draw multiplicity.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:736-819 computes A and C recall at all three fractions, but docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:665-674 makes the displayed group-bootstrap intervals mathematically different from the requested measure.\nSCORE evidence: 9\nJUSTIFICATION evidence: docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:28-34 reports analytic controls in place of the brief's shuffled-label run, and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/verify.log:1-4 has no revision, command or EXIT receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710..3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b diff changes exactly the four paths declared in the source brief, including docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order.html:1-41 and the figure under its granted directory.\nSCORE durability: 11\nJUSTIFICATION durability: docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1031-1037 reddens if recall reads the tail, and docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1081-1117 rejects corrupted status maps, but neither tests that composite risk was computed independently of the labels and the reuse comparison at lines 1094-1098 mirrors one input.\nSCORE fit: 15\nJUSTIFICATION fit: docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1151-1181 exposes a small CLI matching the evidence scripts, though its mandated plan-slug filename and retrospective comments at lines 497-505 depart from the repository's durable naming and comment rules.\nSCORE reuse: 4\nJUSTIFICATION reuse: imas_codex/discovery/base/evaluation.py:128-141 already owns copy-group resampling, while docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:657-674 duplicates it and discards repeated draws.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:665 blocking: the sampled group indexes are converted to a set at line 666, so a group drawn twice appears only once in a replicate; the claimed copy-group bootstrap intervals in the table are intervals from distinct-group subsamples rather than bootstrap resamples and must be recomputed.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1015 blocking: the source brief explicitly requires re-running the composite scorer with labels shuffled within each split and checking 25% recall against the random band; analytic first/last orders exercise _recall_at only, so a scorer that leaks labels into risk can pass both controls and the required gate is absent.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md:24 blocking: the manifest reports EXIT=0 for measure, controls, verify and render, but those logs do not end in EXIT= and do not start with a revision and command; line 25 also places two annotated paths in negative_control_log instead of the required bare path, so the gate receipts are not auditable as declared.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:708 follow-on: random_expected is the nominal fraction rather than the actual expected recall count/N after rounding; for golden C calibration, 10% reads 9 of 94 rows, making the exact expectation 9/94 = 0.0957 rather than the displayed 0.100.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1094 follow-on: the status-versus-reused assertion compares two fields derived from the same entry['reused'] value at lines 564 and 570, so changing that source classification moves both sides together and the check cannot independently prove frozen-answer provenance.",
+  "review_run_id": "r-20261018T114557807718-review-of-ssog-risk-order-3b1d84d1ec5d",
+  "reviewed_base_sha": "f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710",
+  "reviewed_commits": [
+    "64c6b7f57a034e9fc813e1275405653dd7ef610d",
+    "f7f3390bc910f1225feed724a6519492a936faf5",
+    "670cc4d6eb1abc0b120771840d3d9263cc0c41af",
+    "e0a60e02ee7db8afb8ff578c16e69d2a87295c2d",
+    "890d803490fb8f51dce3d3cc3f491bf87bb88813",
+    "3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b"
+  ],
+  "reviewed_head_sha": "3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b",
+  "reviewed_run_id": "r-20261017T215136022889-ssog-risk-order",
+  "schema": "crew-review-record",
+  "scores": {
+    "durability": 11,
+    "evidence": 9,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1094-1098 compares status and reused, both produced from entry['reused']"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T12:00:53.700785+00:00",
+  "total": 75
+}
