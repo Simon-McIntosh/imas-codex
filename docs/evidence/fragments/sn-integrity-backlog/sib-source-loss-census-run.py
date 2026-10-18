@@ -240,6 +240,16 @@ def main() -> None:
 
     def writer_for(item: dict) -> tuple[str, str]:
         operations = set(item["operations"])
+        if {
+            "detach_inconsistent_attachment",
+            "detach_stale_source_binding",
+        } <= operations:
+            return (
+                "unknown: multiple detachment writers",
+                "attachment_audit.py:240 and signed_manifest.py:4904 both record "
+                "detachment; the unordered change rows do not establish which "
+                "writer removed the final producing edge",
+            )
         if "detach_inconsistent_attachment" in operations:
             return (
                 "attachment_audit.py:240",
@@ -604,7 +614,7 @@ def write_report(output: dict) -> None:
 <tr><td><code>graph_ops.py:22627-22640</code></td><td><code>supersede_exhausted_standard_name_orphans</code> selects exhausted, non-derived, sourceless names without a successor condition. It does not move or copy sources.</td></tr>
 <tr><td><code>harmonize.py:703-760</code>; <code>graph_ops.py:25746-25797</code></td><td>Harmonize stamps family signatures and documentation state; it does not move or copy <code>PRODUCED_NAME</code>.</td></tr>
 <tr><td><code>catalog_import.py:51-101</code>; <code>graph_ops.py:5547-5561, 5810-5835, 7698</code></td><td>Catalog import provenance stamps existing names only. <code>write_standard_names</code> can create a name and DD projection without a producer edge; the composed-source finalizer separately creates <code>PRODUCED_NAME</code>. A name written outside that finalizer can therefore remain unbound.</td></tr>
-<tr><td><code>attachment_audit.py:240-271, 1170-1185, 2758-2767</code>; <code>signed_manifest.py:4904</code></td><td>Consistency reconciliation and signed stale-source detachment delete producer edges. A recorded detachment identifies the responsible writer for eight census names.</td></tr>
+<tr><td><code>attachment_audit.py:240-271, 1170-1185, 2758-2767</code>; <code>signed_manifest.py:4904</code></td><td>Consistency reconciliation and signed stale-source detachment delete producer edges. When both operations occur on one name, the unordered change records do not establish which removed its final edge; attribution remains unknown.</td></tr>
 </tbody></table></div>
 <p>Per-name attribution is in the results JSON. Where only a historical path or source-migration receipt survives, the remover is recorded as <code>unknown</code>: the census searched source mirrors, DD projections, lineage and change operations, and found no later deletion receipt. The earlier move is proved, but blaming that move for the later absence would exceed the evidence.</p>
 <div class="scroll"><table><thead><tr><th>Attribution</th><th>Names</th></tr></thead><tbody>{writer_rows}</tbody></table></div>

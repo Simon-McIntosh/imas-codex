@@ -21,14 +21,15 @@
 <tr><td><code>graph_ops.py:22627-22640</code></td><td><code>supersede_exhausted_standard_name_orphans</code> selects exhausted, non-derived, sourceless names without a successor condition. It does not move or copy sources.</td></tr>
 <tr><td><code>harmonize.py:703-760</code>; <code>graph_ops.py:25746-25797</code></td><td>Harmonize stamps family signatures and documentation state; it does not move or copy <code>PRODUCED_NAME</code>.</td></tr>
 <tr><td><code>catalog_import.py:51-101</code>; <code>graph_ops.py:5547-5561, 5810-5835, 7698</code></td><td>Catalog import provenance stamps existing names only. <code>write_standard_names</code> can create a name and DD projection without a producer edge; the composed-source finalizer separately creates <code>PRODUCED_NAME</code>. A name written outside that finalizer can therefore remain unbound.</td></tr>
-<tr><td><code>attachment_audit.py:240-271, 1170-1185, 2758-2767</code>; <code>signed_manifest.py:4904</code></td><td>Consistency reconciliation and signed stale-source detachment delete producer edges. A recorded detachment identifies the responsible writer for eight census names.</td></tr>
+<tr><td><code>attachment_audit.py:240-271, 1170-1185, 2758-2767</code>; <code>signed_manifest.py:4904</code></td><td>Consistency reconciliation and signed stale-source detachment delete producer edges. When both operations occur on one name, the unordered change records do not establish which removed its final edge; attribution remains unknown.</td></tr>
 </tbody></table></div>
 <p>Per-name attribution is in the results JSON. Where only a historical path or source-migration receipt survives, the remover is recorded as <code>unknown</code>: the census searched source mirrors, DD projections, lineage and change operations, and found no later deletion receipt. The earlier move is proved, but blaming that move for the later absence would exceed the evidence.</p>
 <div class="scroll"><table><thead><tr><th>Attribution</th><th>Names</th></tr></thead><tbody><tr><td>unknown after path or lineage evidence</td><td>120</td></tr>
 <tr><td>unknown after prior binding</td><td>116</td></tr>
 <tr><td>unknown initial writer</td><td>17</td></tr>
-<tr><td>attachment_audit.py:240</td><td>7</td></tr>
-<tr><td>signed_manifest.py:4904</td><td>1</td></tr></tbody></table></div>
+<tr><td>attachment_audit.py:240</td><td>6</td></tr>
+<tr><td>signed_manifest.py:4904</td><td>1</td></tr>
+<tr><td>unknown: multiple detachment writers</td><td>1</td></tr></tbody></table></div>
 <h2 id="sib-source-loss-census-names">All sourceless live names</h2>
 <p>The JSON contains every name, its stage, population, source evidence, unrelated live source holders, repair source, writer attribution and uncertainty. <code>recorded_path</code> and <code>ancestor_or_successor_edge</code> can support deterministic history repair; <code>binding_receipt_without_path</code> and <code>none</code> need DD search.</p>
 <div class="scroll"><table><thead><tr><th>Name</th><th>Stage</th><th>Population</th><th>Live successor</th><th>Writer</th><th>Repair source</th><th>Recorded path sample</th></tr></thead><tbody><tr><td>absorbed_coolant_power_of_plant_component_port</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>unknown after prior binding</td><td>recorded_path</td><td>—</td></tr>
@@ -265,7 +266,7 @@
 <tr><td>trapped_fast_particle_power_density_due_to_collisions</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>unknown after path or lineage evidence</td><td>recorded_path</td><td>distributions/distribution/profiles_1d/trapped/collisions/electrons/power_fast</td></tr>
 <tr><td>tritium_prefill_count</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>unknown after path or lineage evidence</td><td>recorded_path</td><td>summary/gas_injection_prefill/tritium/value</td></tr>
 <tr><td>vertical_centroid_of_coil_conductor_element</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>attachment_audit.py:240</td><td>recorded_path</td><td>dd:ferritic/object/axisymmetric/annulus/z, dd:ferritic/object/axisymmetric/oblique/z, dd:ferritic/object/axisymmetric/rectangle/z</td></tr>
-<tr><td>vertical_coordinate_of_active_limiter_point</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>attachment_audit.py:240</td><td>recorded_path</td><td>dd:plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/z, plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/z</td></tr>
+<tr><td>vertical_coordinate_of_active_limiter_point</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>unknown: multiple detachment writers</td><td>recorded_path</td><td>dd:plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/z, plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/z</td></tr>
 <tr><td>vertical_coordinate_of_closest_wall_point</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>unknown after path or lineage evidence</td><td>recorded_path</td><td>equilibrium/time_slice/boundary/closest_wall_point/z</td></tr>
 <tr><td>vertical_coordinate_of_coil_conductor</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>attachment_audit.py:240</td><td>recorded_path</td><td>dd:ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z, ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z</td></tr>
 <tr><td>vertical_coordinate_of_halo_boundary</td><td>exhausted</td><td>dropped_edge</td><td>—</td><td>unknown after path or lineage evidence</td><td>recorded_path</td><td>disruption/halo_currents/area/end_point/z</td></tr>
