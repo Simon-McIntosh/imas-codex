@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest has empty baseline_suite and after_suite fields and no paired completed gate logs; the set difference is unmeasured, not zero.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T19:11:14Z",
+  "dispatched_at": "2026-10-18T19:05:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "439",
+      "severity": "blocking",
+      "text": "blocking: The unchained-holder input includes lineage_paths and historical_edges from relatives rather than only sources this name recorded; 28 of the 72 committed unchained rows have no own recorded path or resolution ID, so their holder identity is not established by the required evidence."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "447",
+      "severity": "blocking",
+      "text": "blocking: Subtracting descendants but not ancestors allows a source-holding ancestor to be labeled unchained even though a lineage chain links it to the sourceless name, distorting the holder and dropped-edge populations."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "40",
+      "severity": "blocking",
+      "text": "blocking: Any one matching source qualifies an exhausted predecessor as an orphan even when other sources it recorded were dropped; the single-source and wrong-source fixtures at :61-96 cannot catch a partial transfer before retirement."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census.html",
+      "line": "14",
+      "severity": "blocking",
+      "text": "blocking: The report explicitly has no observed orphan witness, while the plan requires a named graph witness for every population in addition to a planted fixture, so that done-when remains unmet and needs a decision if the live population is truly empty."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "613",
+      "severity": "follow-on",
+      "text": "follow-on: The unchained-holder assertion reads the same unchained_live_holders field that classify used to assign that population, so a regression in locating or validating holders leaves the assertion green; the dropped-edge checks at :603-611 likewise reuse source_locations."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read commits 04585599c776eeb46389a9e89e175bccbe37ce66, 8239e26028b359ce61a7f1f0ce47382f5ef8432f, 2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa and 2bce27f965ae5e53eddea3d5d942b2538409d1e1 against base 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f; the driver adds fixture, graph-count, witness and output-size assertions that can fail on wrong classes, truncated reads, absent witnesses or oversized output, alongside holder checks that reuse classifier inputs.",
+    "done_when": "The plan at docs/plans/sn-integrity-backlog.html:237 requires independent totals, five controls and a named witness per population; five-population-census-final.log records 264 total, 240 exhausted and five passing fixtures, but sib-source-loss-census.html:14 records no live orphan witness.",
+    "goal": "The source brief.md:1-3 asks for a read-only census of lost DD source bindings, and sib-source-loss-census.html:5-15 reports 264 sourceless live names across the plan's five populations, subject to the lineage findings below.",
+    "manifest": "The source run manifest.md:11-25 names four commits, all three changed paths and final and negative-control logs; its baseline_suite and after_suite fields are empty, so an added-failure delta is unmeasured.",
+    "write_paths": "The source brief.md write scope grants the census HTML, driver, results JSON and an unused figure directory, and the diff from 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f to 2bce27f965ae5e53eddea3d5d942b2538409d1e1 changes only the three granted census files."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:75-96 has fixtures that fail if classes or a wrong-source successor regress, while :603-616 rechecks the same holder fields used by classify and has no partial-transfer or ancestor-holder control.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:588-625 checks independently queried totals and four observed populations, but sib-source-loss-census.html:14 names no observed orphan and source manifest.md:21-22 supplies no paired suite arms.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:101-108 uses GraphClient with a ten-second read bound and :684-717 escapes generated HTML values, matching the surrounding evidence-script style.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:439-447 can call a source holder unchained using a relative's path or a chained ancestor, so the five-way result does not reliably implement the plan's holder definition.",
+    "reuse": "A capability search found imas_codex/standard_names/graph_ops.py:14522 owns repair of a narrower detached pipeline cohort, while docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:111 adds a read-only all-name census rather than a second repair path.",
+    "scope_discipline": "The diff changes only docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py, sib-source-loss-census-results.json and sib-source-loss-census.html within the source brief.md write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md:1-3 asks for a read-only census of lost DD source bindings, and sib-source-loss-census.html:5-15 reports 264 sourceless live names across the plan's five populations, subject to the lineage findings below.\nVERDICT done_when: The plan at docs/plans/sn-integrity-backlog.html:237 requires independent totals, five controls and a named witness per population; five-population-census-final.log records 264 total, 240 exhausted and five passing fixtures, but sib-source-loss-census.html:14 records no live orphan witness.\nVERDICT write_paths: The source brief.md write scope grants the census HTML, driver, results JSON and an unused figure directory, and the diff from 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f to 2bce27f965ae5e53eddea3d5d942b2538409d1e1 changes only the three granted census files.\nVERDICT manifest: The source run manifest.md:11-25 names four commits, all three changed paths and final and negative-control logs; its baseline_suite and after_suite fields are empty, so an added-failure delta is unmeasured.\nVERDICT diff: Read commits 04585599c776eeb46389a9e89e175bccbe37ce66, 8239e26028b359ce61a7f1f0ce47382f5ef8432f, 2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa and 2bce27f965ae5e53eddea3d5d942b2538409d1e1 against base 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f; the driver adds fixture, graph-count, witness and output-size assertions that can fail on wrong classes, truncated reads, absent witnesses or oversized output, alongside holder checks that reuse classifier inputs.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:439-447 can call a source holder unchained using a relative's path or a chained ancestor, so the five-way result does not reliably implement the plan's holder definition.\nSCORE evidence: 14\nJUSTIFICATION evidence: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:588-625 checks independently queried totals and four observed populations, but sib-source-loss-census.html:14 names no observed orphan and source manifest.md:21-22 supplies no paired suite arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff changes only docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py, sib-source-loss-census-results.json and sib-source-loss-census.html within the source brief.md write scope.\nSCORE durability: 12\nJUSTIFICATION durability: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:75-96 has fixtures that fail if classes or a wrong-source successor regress, while :603-616 rechecks the same holder fields used by classify and has no partial-transfer or ancestor-holder control.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:101-108 uses GraphClient with a ten-second read bound and :684-717 escapes generated HTML values, matching the surrounding evidence-script style.\nSCORE reuse: 20\nJUSTIFICATION reuse: A capability search found imas_codex/standard_names/graph_ops.py:14522 owns repair of a narrower detached pipeline cohort, while docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:111 adds a read-only all-name census rather than a second repair path.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:439 blocking: The unchained-holder input includes lineage_paths and historical_edges from relatives rather than only sources this name recorded; 28 of the 72 committed unchained rows have no own recorded path or resolution ID, so their holder identity is not established by the required evidence.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:447 blocking: Subtracting descendants but not ancestors allows a source-holding ancestor to be labeled unchained even though a lineage chain links it to the sourceless name, distorting the holder and dropped-edge populations.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:40 blocking: Any one matching source qualifies an exhausted predecessor as an orphan even when other sources it recorded were dropped; the single-source and wrong-source fixtures at :61-96 cannot catch a partial transfer before retirement.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census.html:14 blocking: The report explicitly has no observed orphan witness, while the plan requires a named graph witness for every population in addition to a planted fixture, so that done-when remains unmet and needs a decision if the live population is truly empty.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:613 follow-on: The unchained-holder assertion reads the same unchained_live_holders field that classify used to assign that population, so a regression in locating or validating holders leaves the assertion green; the dropped-edge checks at :603-611 likewise reuse source_locations.\n",
+  "review_run_id": "r-20261018T190506623540-review-of-sib-source-loss-census-2bce27f965ae",
+  "reviewed_base_sha": "993ddf413d290b09d1c8ea7518e2fdc4a0209b2f",
+  "reviewed_head_sha": "2bce27f965ae5e53eddea3d5d942b2538409d1e1",
+  "reviewed_run_id": "r-20261018T174214503390-sib-source-loss-census",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 12,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T19:09:59.700980+00:00",
+  "total": 96
+}
