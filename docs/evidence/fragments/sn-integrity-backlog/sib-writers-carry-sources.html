@@ -22,35 +22,39 @@ producer on its predecessor.</p>
 <h2 id="sib-writers-carry-sources-writers">Writer checks</h2>
 <p>All red and green logs are under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T205400851812-sib-writers-carry-sources/</code>.
-The final removal control applied four edits to an extracted scratch copy of
+The first removal control applied four edits to an extracted scratch copy of
 commit <code>7e210992c63bc1fc2b413b8f24ddf4ca2bc7844d</code>, replacing
 each writer's invariant call with <code>pass</code>. Its log prints the module
-paths and resolved working directory; the assigned tree remained intact.</p>
+paths and resolved working directory. A second control removed the rename
+transaction's call from a scratch copy of the final source. The assigned tree
+remained intact.</p>
 <table id="sib-writers-carry-sources-table">
 <thead><tr><th>Writer</th><th>Call site</th><th>Red removal control</th><th>Green head</th></tr></thead>
 <tbody>
-<tr><td>Human rename</td><td><code>imas_codex/standard_names/edit.py:3368</code></td><td><code>red-all-writers.log</code>: <code>test_rename_refuses_a_sourceless_predecessor[drafted]</code> and <code>[superseded]</code> fail</td><td><code>final-head.log</code>: both pass</td></tr>
-<tr><td>Name creation</td><td><code>imas_codex/standard_names/graph_ops.py:5928</code></td><td><code>red-all-writers.log</code>: <code>test_name_creation_refuses_an_unbound_identity</code> fails</td><td><code>final-head.log</code>: passes</td></tr>
-<tr><td>Consistency reconciliation</td><td><code>imas_codex/standard_names/attachment_audit.py:1201</code></td><td><code>red-all-writers.log</code>: <code>test_consistency_reconciliation_refuses_last_source_removal</code> fails</td><td><code>final-head.log</code>: passes</td></tr>
-<tr><td>Signed stale-source detachment</td><td><code>imas_codex/standard_names/signed_manifest.py:4086</code></td><td><code>red-all-writers.log</code>: <code>test_signed_detachment_refuses_nonderived_parent_without_source</code> fails</td><td><code>final-head.log</code>: passes</td></tr>
+<tr><td>Human rename</td><td><code>imas_codex/standard_names/edit.py:3368</code> preflight; <code>imas_codex/standard_names/graph_ops.py:19338</code> transaction</td><td><code>red-all-writers.log</code>: <code>test_rename_refuses_a_sourceless_predecessor[drafted]</code> and <code>[superseded]</code> fail; <code>red-rename-transaction.log</code>: <code>test_rename_transaction_rolls_back_an_unbound_successor</code> fails</td><td><code>final-head-resumed.log</code>: all pass</td></tr>
+<tr><td>Name creation</td><td><code>imas_codex/standard_names/graph_ops.py:5928</code></td><td><code>red-all-writers.log</code>: <code>test_name_creation_refuses_an_unbound_identity</code> fails</td><td><code>final-head-resumed.log</code>: passes</td></tr>
+<tr><td>Consistency reconciliation</td><td><code>imas_codex/standard_names/attachment_audit.py:1201</code></td><td><code>red-all-writers.log</code>: <code>test_consistency_reconciliation_refuses_last_source_removal</code> fails</td><td><code>final-head-resumed.log</code>: passes</td></tr>
+<tr><td>Signed stale-source detachment</td><td><code>imas_codex/standard_names/signed_manifest.py:4086</code></td><td><code>red-all-writers.log</code>: <code>test_signed_detachment_refuses_nonderived_parent_without_source</code> fails</td><td><code>final-head-resumed.log</code>: passes</td></tr>
 </tbody>
 </table>
 <p><code>red-all-writers.log</code> ends <code>5 failed, 1 passed; EXIT=1</code>.
+<code>red-rename-transaction.log</code> ends <code>1 failed; EXIT=1</code>:
+without the transaction call, the rollback test reports <code>DID NOT RAISE</code>.
 The passing test covers the invariant itself: derived parent, retired identity,
 one remaining source, and no source. The signed case plants a non-derived name
 with a child: the existing child-count check admits it, while the shared source
-check refuses it. The head gate ends <code>249 passed, 38 deselected; EXIT=0</code>.
+check refuses it. The head gate ends <code>250 passed, 38 deselected; EXIT=0</code>.
 No live graph write or LLM call was made.</p>
 
 <h2 id="sib-writers-carry-sources-delta">Covering-test delta</h2>
 <p>The same six covering test files ran from extracted base revision
 <code>5f79e844a5b1df6df42e1c8698459249d5ba822c</code> and committed head
-<code>7e210992c63bc1fc2b413b8f24ddf4ca2bc7844d</code>, with the shared
+<code>a3b384e5a3bebfa5ee781374dc068761b8dc1fe5</code>, with the shared
 project environment and each measured tree on <code>PYTHONPATH</code>.
-<code>covering-base.log</code> and <code>covering-final-head.log</code>
+<code>covering-base-resumed.log</code> and <code>covering-head-resumed.log</code>
 each end <code>243 passed, 38 deselected; EXIT=0</code>, so the covering
 selection added zero failures. The seven-file gate including the new writer
-tests is <code>final-head.log</code> above.</p>
+tests is <code>final-head-resumed.log</code> above.</p>
 </main>
 </body>
 </html>
