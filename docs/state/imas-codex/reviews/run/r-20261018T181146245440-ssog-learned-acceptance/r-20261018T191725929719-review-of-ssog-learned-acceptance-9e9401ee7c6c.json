@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:582",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:576"
+  ],
+  "completed_at": "2026-10-18T19:27:49Z",
+  "dispatched_at": "2026-10-18T19:17:58Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py",
+      "line": "239",
+      "severity": "blocking",
+      "text": "blocking: the leakage control permutes complete validation rows, preserving every label-feature pairing; an all-row fit is mathematically unchanged, so exact-array inequality from row-order rounding could falsely appear to detect leakage, and the claimed validation-label negative control is invalid."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py",
+      "line": "549",
+      "severity": "blocking",
+      "text": "blocking: measure prints EXIT=0 and main returns zero at line 578 regardless of instrument, composite, null, or leakage passes, so a failed control can ship green evidence."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py",
+      "line": "557",
+      "severity": "follow-on",
+      "text": "follow-on: verify reads the controls' stored passes booleans and checks feature count against the same feature list from which it was created, so it will not detect changed inputs, an omitted feature whose count moves with the list, or an incorrect original calculation."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html",
+      "line": "53",
+      "severity": "follow-on",
+      "text": "follow-on: the caption says the learned curve is above the composite across the operating range, while roc-curves.svg shows the composite above it in parts of the low false-positive range."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read 992f2e41dcfc and 9e9401ee7c6c commit by commit against 7b5c7dff3cb9; the first adds the four evidence artifacts and the second pins the SVG hash salt in the driver at line 263.",
+    "done_when": "The done_when in brief.md names AUC intervals, weights, two controls, spend, and an SVG; measure.log records 0.706 versus 0.645, paired +0.061 [-0.001,+0.126] at reviewed head 9e9401ee7c6c, while docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:549 never refuses a failed control.",
+    "goal": "The source goal in brief.md requires a calibrated logistic acceptance comparison; docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:20-26 publishes both AUCs, weights, and a non-adoption verdict, but its leakage claim lacks a valid control.",
+    "manifest": "The reviewed manifest.md names both commits and measure.log/verify.log with EXIT=0, but supplies neither baseline_suite nor after_suite, so added failures are unmeasured rather than zero.",
+    "write_paths": "The declared paths in manifest.md cover the four additions in git diff 7b5c7dff3cb9..9e9401ee7c6c: the evidence HTML, driver, results JSON, and ROC SVG."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:239 moves feature-label pairs together, so a fit using validation labels can still pass the purported leakage guard; lines 557-563 inspect stored booleans rather than replaying the controls.",
+    "evidence": "measure.log records both AUCs and EXIT=0 at the reviewed head, but docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:549 prints success even when a control fails and manifest.md has no base or head suite receipt.",
+    "fit": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:411 uses the shared evaluation owner and line 263 makes the SVG reproducible, while lines 223-228 and 383-390 describe a label permutation that the code does not make.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:20-26 publishes the requested comparison and verdict, but line 47 claims a validation-label control that line 239 of the driver does not perform.",
+    "reuse": "the capability search found logistic fitting in docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-arm-run.py:270 for a different feature study; this evidence-specific driver reuses imas_codex/discovery/base/evaluation.py:98,144 for AUC and copy-group intervals rather than duplicating that owner.",
+    "scope_discipline": "git diff 7b5c7dff3cb9..9e9401ee7c6c lists only the four paths declared in manifest.md."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal in brief.md requires a calibrated logistic acceptance comparison; docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:20-26 publishes both AUCs, weights, and a non-adoption verdict, but its leakage claim lacks a valid control.\nVERDICT done_when: The done_when in brief.md names AUC intervals, weights, two controls, spend, and an SVG; measure.log records 0.706 versus 0.645, paired +0.061 [-0.001,+0.126] at reviewed head 9e9401ee7c6c, while docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:549 never refuses a failed control.\nVERDICT write_paths: The declared paths in manifest.md cover the four additions in git diff 7b5c7dff3cb9..9e9401ee7c6c: the evidence HTML, driver, results JSON, and ROC SVG.\nVERDICT manifest: The reviewed manifest.md names both commits and measure.log/verify.log with EXIT=0, but supplies neither baseline_suite nor after_suite, so added failures are unmeasured rather than zero.\nVERDICT diff: Read 992f2e41dcfc and 9e9401ee7c6c commit by commit against 7b5c7dff3cb9; the first adds the four evidence artifacts and the second pins the SVG hash salt in the driver at line 263.\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:582, docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:576\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:20-26 publishes the requested comparison and verdict, but line 47 claims a validation-label control that line 239 of the driver does not perform.\nSCORE evidence: 10\nJUSTIFICATION evidence: measure.log records both AUCs and EXIT=0 at the reviewed head, but docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:549 prints success even when a control fails and manifest.md has no base or head suite receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 7b5c7dff3cb9..9e9401ee7c6c lists only the four paths declared in manifest.md.\nSCORE durability: 3\nJUSTIFICATION durability: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:239 moves feature-label pairs together, so a fit using validation labels can still pass the purported leakage guard; lines 557-563 inspect stored booleans rather than replaying the controls.\nSCORE fit: 16\nJUSTIFICATION fit: docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:411 uses the shared evaluation owner and line 263 makes the SVG reproducible, while lines 223-228 and 383-390 describe a label permutation that the code does not make.\nSCORE reuse: 19\nJUSTIFICATION reuse: the capability search found logistic fitting in docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-arm-run.py:270 for a different feature study; this evidence-specific driver reuses imas_codex/discovery/base/evaluation.py:98,144 for AUC and copy-group intervals rather than duplicating that owner.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:239 blocking: the leakage control permutes complete validation rows, preserving every label-feature pairing; an all-row fit is mathematically unchanged, so exact-array inequality from row-order rounding could falsely appear to detect leakage, and the claimed validation-label negative control is invalid.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:549 blocking: measure prints EXIT=0 and main returns zero at line 578 regardless of instrument, composite, null, or leakage passes, so a failed control can ship green evidence.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:557 follow-on: verify reads the controls' stored passes booleans and checks feature count against the same feature list from which it was created, so it will not detect changed inputs, an omitted feature whose count moves with the list, or an incorrect original calculation.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html:53 follow-on: the caption says the learned curve is above the composite across the operating range, while roc-curves.svg shows the composite above it in parts of the low false-positive range.\n",
+  "review_run_id": "r-20261018T191725929719-review-of-ssog-learned-acceptance-9e9401ee7c6c",
+  "reviewed_base_sha": "7b5c7dff3cb9bce817b8dc0a1b9b8e638e26cdd1",
+  "reviewed_head_sha": "9e9401ee7c6c335070ac7417110df0645409f749",
+  "reviewed_run_id": "r-20261018T181146245440-ssog-learned-acceptance",
+  "scores": {
+    "durability": 3,
+    "evidence": 10,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T19:29:37.896406+00:00",
+  "total": 82
+}
