@@ -62,6 +62,11 @@
       "wall_seconds": 1385
     },
     {
+      "batch_receipt_cost_rows_usd": [
+        0.106603,
+        1.640145
+      ],
+      "batch_receipt_cost_usd": 1.746748,
       "command": "uv run --no-sync imas-codex sn harmonize --family electron_number_density --apply --cost-limit 6.412744 --json",
       "cost_limit_usd": 6.412744,
       "exit_status": 0,
@@ -99,6 +104,11 @@
       "wall_seconds": 1287
     },
     {
+      "batch_receipt_cost_rows_usd": [
+        0.12594,
+        0.929002
+      ],
+      "batch_receipt_cost_usd": 1.054942,
       "command": "uv run --no-sync imas-codex sn harmonize --family electrostatic_potential --apply --cost-limit 4.666044 --json",
       "cost_limit_usd": 4.666044,
       "exit_status": 0,
@@ -127,17 +137,83 @@
       "slurm_state": "COMPLETED",
       "stamped": false,
       "wall_seconds": 1347
+    },
+    {
+      "batch_receipt_cost_rows_usd": [
+        0.638733,
+        2.204729
+      ],
+      "batch_receipt_cost_usd": 2.843462,
+      "command": "uv run --no-sync imas-codex sn harmonize --family gap_at_plasma_boundary --apply --cost-limit 3.611144 --json",
+      "cost_limit_usd": 3.611144,
+      "exit_status": 0,
+      "finalize_dry_run_refusal": "gap_at_outboard_midplane: docs_stage='exhausted', expected 'accepted'",
+      "halt_reasons": [
+        "docs acceptance 0.00% < 90.00% (0/1 touched)",
+        "name-axis drift on 1 name(s) in a docs-only campaign: gap_at_plasma_boundary"
+      ],
+      "halted": true,
+      "job_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/gap-apply-main.slurm.log",
+      "pipeline_wall_seconds": 2439,
+      "planned_calls": 3,
+      "post_attempt_lint": {
+        "convention_violation": 4,
+        "sign_convention": 1
+      },
+      "receipt_cost_spent_usd": 2.8435,
+      "receipt_total_accepted": 1,
+      "receipt_total_quarantined": 0,
+      "receipt_total_selected": 3,
+      "receipt_total_touched": 2,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.75,
+            "before": 0.975,
+            "id": "gap_at_outboard_midplane"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.8875,
+            "before": 1.0,
+            "id": "gap_at_closest_wall_point"
+          },
+          {
+            "after": 0.75,
+            "before": 0.975,
+            "id": "gap_at_outboard_midplane"
+          }
+        ]
+      },
+      "second_dry_run_calls": 3,
+      "seed": "gap_at_plasma_boundary",
+      "slurm_job_id": 1288360,
+      "slurm_state": "COMPLETED",
+      "stamped": false,
+      "wall_seconds": 2440
     }
   ],
   "budget": {
     "ceiling_usd": 8.0,
+    "family_costs_exact_usd": {
+      "density_completed_apply": 1.746748,
+      "density_initial_attempts": 1.587256,
+      "gap_halted_apply": 2.843462,
+      "potential_halted_apply": 1.054942
+    },
+    "measured_cost_per_attempted_name_usd": 0.452026,
     "measured_cost_per_complete_family_name_usd": null,
+    "measured_worst_family_per_name_usd": 0.947821,
     "observed_spend_per_reviewed_name_usd": 0.258168,
-    "remaining_usd": 3.611144,
+    "remaining_usd": 0.767592,
     "reviewed_names": 17,
-    "spent_usd": 4.388856,
-    "west_limit_reason": "Density is complete; reserve a WEST limit after the potential family also completes.",
-    "west_limit_usd": null
+    "spent_usd": 7.232408,
+    "unique_attempted_names": 16,
+    "west_limit_reason": "17 WEST names times the highest observed spend per name, USD 2.843462 / 3 gap names = USD 0.947821, gives USD 16.112951; round the hard cap up to USD 16.12. This is a planning bound, not permission to run.",
+    "west_limit_status": "conditional planning cap only; WEST run is on hold because no eligible locus family converged and a documentation score fell below acceptance",
+    "west_limit_usd": 16.12,
+    "west_roster_name_count": 17
   },
   "component_selection": {
     "already_harmonized": "parallel_conductivity",
@@ -710,6 +786,69 @@
       }
     },
     "gap_at_plasma_boundary": {
+      "after_job": {
+        "anchor": "gap_at_closest_wall_point",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "gap_at_closest_wall_point": 0.8875,
+          "gap_at_outboard_midplane": 0.75,
+          "gap_at_plasma_boundary": 0.9125
+        },
+        "estimate_basis": {
+          "calls": 36,
+          "mean_usd_per_call": 0.6557,
+          "runs": 21,
+          "total_usd": 23.605
+        },
+        "estimate_usd": 1.9671,
+        "invariant": [
+          "gap",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 4,
+          "sign_convention": 1
+        },
+        "lint_total": 5,
+        "member_status": {
+          "gap_at_closest_wall_point": {
+            "docs_stage": "accepted",
+            "id": "gap_at_closest_wall_point",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "gap_at_outboard_midplane": {
+            "docs_stage": "exhausted",
+            "id": "gap_at_outboard_midplane",
+            "name_stage": "accepted",
+            "validation_status": "valid"
+          },
+          "gap_at_plasma_boundary": {
+            "docs_stage": "accepted",
+            "id": "gap_at_plasma_boundary",
+            "name_stage": "exhausted",
+            "validation_status": "valid"
+          }
+        },
+        "members": [
+          "gap_at_closest_wall_point",
+          "gap_at_outboard_midplane",
+          "gap_at_plasma_boundary"
+        ],
+        "physical_base": "gap",
+        "planned_calls": 3,
+        "refusals": {},
+        "seed": "gap_at_plasma_boundary",
+        "status_counts": {
+          "accepted": 2,
+          "other": 1,
+          "quarantined": 0
+        }
+      },
       "before": {
         "anchor": "gap_at_closest_wall_point",
         "boundary_overlap": [],
@@ -965,20 +1104,37 @@
       "gap_at_outboard_midplane",
       "gap_at_plasma_boundary"
     ],
-    "reason": "The potential apply halted on name-axis drift; gap is the first checked three-position locus family with no protected or quarantined member, no boundary overlap, and an estimate below the remaining ceiling.",
+    "reason": "Chosen after the potential halt because three accepted position variants had a three-call USD 1.83 dry run and no boundary-family overlap. A later positive-control roster search found all three names in WEST review rosters, so the non-WEST condition was not met.",
     "remaining_before_apply_usd": 3.611144,
-    "seed": "gap_at_plasma_boundary"
+    "seed": "gap_at_plasma_boundary",
+    "valid_non_west": false,
+    "west_roster_counts": {
+      "gap_at_closest_wall_point": 2,
+      "gap_at_outboard_midplane": 14,
+      "gap_at_plasma_boundary": 1
+    }
   },
   "result": {
     "component_family_complete": true,
     "density_family_complete": true,
-    "members_below_threshold_after_completed_apply": [],
-    "reason": "Density and vorticity are complete; potential halted on name-axis drift. A three-member gap locus replacement is ready under the remaining cap.",
-    "three_families_applied": false
+    "gap_family_complete": false,
+    "members_below_threshold_after_completed_apply": [
+      "gap_at_outboard_midplane"
+    ],
+    "reason": "Density and vorticity converged; electrostatic potential halted on name-axis drift. Gap halted with gap_at_outboard_midplane at 0.75 below the 0.85 threshold and is present in WEST rosters, so it is not a valid non-WEST replacement. No further apply is authorized.",
+    "three_families_applied": false,
+    "three_non_west_families_converged": false,
+    "west_run_ready": false
   },
   "west_roster_check": {
     "chosen_family_member_matches": 0,
+    "gap_members_checked": {
+      "gap_at_closest_wall_point": 2,
+      "gap_at_outboard_midplane": 14,
+      "gap_at_plasma_boundary": 1
+    },
     "positive_control": "flux_surface_averaged_electron_density_at_plasma_boundary",
+    "positive_control_match_count": 10,
     "positive_control_matches": "present in multiple review rosters",
     "searched": "imas_codex/standard_names/manifests/reviews"
   }
