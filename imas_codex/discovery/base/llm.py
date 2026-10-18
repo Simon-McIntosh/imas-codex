@@ -297,8 +297,42 @@ def get_catalog_model_info(model: str) -> dict[str, Any]:
     Both the provider-qualified and bare vendor spellings are tried, because
     trying only one silently discards the published context limit for half the
     fleet and falls back to the far looser policy ceiling.
+
+    A production seat can precede LiteLLM's bundled catalog, and such a route
+    carries no catalog ``max_input_tokens``.  The project's checked-in pricing
+    table records the allowance for a route newer than the catalog, so its
+    value fills the gap.  A route recorded by neither keeps the catalog's
+    empty answer, which leaves the caller's bounded-input guard refusing an
+    unbounded model rather than silently admitting one.
     """
-    return _lookup_catalog(model, route_only=False)[0]
+    info = _lookup_catalog(model, route_only=False)[0]
+    if info.get("max_input_tokens") is not None:
+        return info
+    allowance = _checked_in_input_allowance(model)
+    if allowance is None:
+        return info
+    return {**info, "max_input_tokens": allowance}
+
+
+def _checked_in_input_allowance(model: str) -> int | None:
+    """Return the pricing table's recorded input allowance for *model*.
+
+    The value is the OpenRouter model endpoint's context length, read from the
+    source the table names and recorded beside it, so a route newer than the
+    catalog has one owner for its bound.  An entry that is absent, or records
+    no positive allowance, returns ``None``.
+    """
+    from imas_codex.settings import _get_section
+
+    catalog = _get_section("llm").get("openrouter-pricing", {})
+    for key in (model, ensure_model_prefix(model)):
+        raw = catalog.get(key)
+        if not isinstance(raw, dict):
+            continue
+        value = raw.get("max-input-tokens")
+        if isinstance(value, int) and value > 0:
+            return value
+    return None
 
 
 def get_openrouter_max_price(model: str) -> dict[str, float]:
