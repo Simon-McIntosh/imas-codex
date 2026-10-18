@@ -1,0 +1,230 @@
+<h2 id="refine-ab-run">Refine instruction arms: comments against failed checks</h2>
+<p class="plan-meta">Plan: <code>sn-review-through-jev</code> · section 5 · run <code>srtj-refine-ab-run</code> · 2026-10-18</p>
+
+<p>This fragment reports the blind refine A/B: what a refine call produces when the
+ancestor's <em>comments</em> drive the instruction versus when its <em>failed checks</em> do.
+The outputs are labelled blind on a separate sheet; that labelling is not this
+node's work.</p>
+
+<h3>Cohort</h3>
+
+<table>
+  <tbody>
+    <tr><th>REFINED_FROM population</th><td>889 cases</td></tr>
+    <tr><th>Excluded, named in a golden fixture</th><td>404 cases</td></tr>
+    <tr><th>Distinct golden strings excluded on</th><td>8,667</td></tr>
+    <tr><th>Ancestors judged on the name axis</th><td>160</td></tr>
+    <tr><th>Rejected: ancestor passed every check</th><td>8</td></tr>
+    <tr><th>Eligible after the failed-check gate</th><td>152</td></tr>
+    <tr><th>Selected cohort</th><td>120 cases</td></tr>
+    <tr><th>Cohort selection seed</th><td><code>20261018</code></td></tr>
+    <tr><th>Sheet shuffle seed</th><td><code>20261020</code></td></tr>
+    <tr><th>Ancestor review seat</th><td><code>typesafe/jev-1.13</code>, USD 0.0358</td></tr>
+  </tbody>
+</table>
+
+<p>Exclusion collects every string a golden fixture carries and splits on
+<strong>::</strong>, because the fixtures key a name unit under <code>unit</code>,
+<code>canonical_unit</code> or <code>copy_group</code> and some pack a pattern and a
+name into one string. That is a superset of the units they name, so no held-out
+case can be one the goldens already label. The draw is strided across the
+loader's own <code>physics_domain</code> strata at the fixed seed, and a case
+enters the cohort only when its ancestor failed at least one check on the name
+axis and carries a non-empty critique.</p>
+
+<figure id="srtj-refine-ab-run-spend"><img src="/imas-codex/figures/sn-review-through-jev/srtj-refine-ab-run/spend-against-ceiling.svg" alt="Cumulative refine spend against call number, a steady rise through the 240 cohort calls and a final rise through the retry calls, drawn against the brief ceiling of 12 dollars and the ruled ceiling of 33 dollars"><figcaption>Cumulative refine spend in the order the calls were made. The cohort's 240 calls are drawn first and the retry pass continues the rise at the end of the series. The dotted lines are the brief's 12.00 ceiling, reached part-way through the cohort, and the 33.00 ceiling the ruling set; the series ends at 32.66, a third of a dollar below it. Ancestor review is not drawn: at 0.0358 it is thinner than the line.</figcaption></figure>
+
+<h3>Arms</h3>
+
+<table>
+  <thead>
+    <tr><th>Arm</th><th>Calls made</th><th>Spend</th><th>Mean/call</th><th>Outputs</th><th>Empty answers</th><th>Model errors</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>comments</td><td>133</td><td>$16.2837</td><td>$0.1224</td><td>108</td><td>10</td><td>2</td></tr>
+    <tr><td>checks</td><td>138</td><td>$16.3774</td><td>$0.1187</td><td>106</td><td>10</td><td>4</td></tr>
+    <tr><td><strong>total incl. Jev</strong></td><td>271</td><td><strong>$32.6969</strong></td><td></td><td></td><td></td><td></td></tr>
+  </tbody>
+</table>
+
+<p>Seat: <code>openrouter/openai/gpt-5.5</code>, <code>reasoning_effort=high</code>. The
+refine judge was deliberately not run — the outputs are for blind labelling, and a
+reviewer score would be an input the labeller must not see.</p>
+
+<p><strong>An answer is only an output when it carries a name.</strong> Over the 240 cohort
+calls, 214 returned a refined name and 26 did not: 20 came back marked ok with an
+<em>empty</em> refined name, and 6 raised model-side. The outputs column counts the
+214; the failures are named beside it in their two kinds, 20 empty answers and 6
+model errors. Outputs and failures are counted per case and arm — the last call
+made for that pair — so an arm's calls made exceeds its outputs plus its failures
+by exactly the calls it retried. The 20 empty answers are counted as failures
+throughout — an ok status is the transport's verdict on the call, not evidence of
+a name — so they are retried like a model error and they never reach the sheet.
+Every name that was returned parses against the grammar: 108 of 108 on the
+comments arm and 106 of 106 on the checks arm, so nothing reaches the sheet that
+the grammar rejects. The spend column is every call made in the arm, the retries
+included: a retry does not unpay for the attempt that failed before it.</p>
+
+<h3>Retry pass</h3>
+
+<p>The 29 calls that failed or answered empty on their first attempt were each
+retried once, which is 29 of the 240 cohort calls re-asked and none of the
+successful ones. The pass made <strong>31</strong> calls: two keys carry a third call, made by
+an earlier retry launch and repeated by the run that closed the pass, so the arm
+split is 13 calls on the comments arm and 18 on the checks arm. It cost
+<strong>USD 4.0787</strong>, no call was skipped for the ceiling and none exhausted its
+attempts. After the pass, 20 calls still answer with an empty name and 6 still
+raise; together they are the 26 calls that contribute no output.</p>
+
+<p>A retry call is identified as a receipt line whose case and arm already have an
+earlier line, which is the only instrument that works here: the receipt's own
+<code>attempt</code> field cannot separate the passes, because the retry receipts were
+written by a launch that predates the counter and every line in the file reads
+<code>attempt: 1</code>. The two counts agree — 31 lines repeat a case and arm, and 271 lines
+stand 31 above the 240 calls — and the script raises if they ever part.</p>
+
+<p>Retrying is only honest if the retried call is the call that was asked the first
+time. The pass therefore rebuilds every case from the corpus loader at the same
+seed and asserts that its stored critique matches the critique the original call
+was given, so a prompt that had drifted would stop the pass rather than be
+measured.</p>
+
+<h3>Tokens</h3>
+
+<p>Token usage was not captured for the 240 cohort calls. Their receipts carry
+<code>null</code> prompt and completion counts — the counts were never written, so they are
+absent, and reading them as zero would be a claim the run cannot support. The
+receipt writer now records prompt and completion tokens from the response usage of
+every call and refuses to write a receipt whose outcome is ok and whose token
+counts are null. The retry pass is the first pass under that rule: 29 of its 31
+calls carry both counts, and the two that do not are model-side errors that raised
+without exposing usage.</p>
+
+<h3>Ceiling</h3>
+
+<p><strong>Ruled 2026-10-18: raise the ceiling to USD 33.00 total, including what had
+already been spent, and complete all 120 cases.</strong> The brief's original USD 12
+and its 120-case cohort cannot both hold: at this seat the measured price is
+$0.118 to $0.124 per call, so the 240 calls price at about USD 29 to 33 and the
+original ceiling was reached at 89 calls, part-way through the cohort.</p>
+
+<p>The run resumed from its per-call receipts, so only the calls not already bought
+were paid for. Refine spent <strong>USD 32.6611</strong> over all 271 calls, of which the
+first pass was 28.6182 and the retry pass 4.0787; with the ancestor review at
+0.0358 the run stands at <strong>USD 32.6969 of the USD 33.00 ceiling</strong>. Receipts are
+appended and flushed as each call returns, so the pass is resumable and its spend
+is auditable line by line.</p>
+
+<h3>DD source context</h3>
+
+<p>Every sheet row carries the DD source the refined name is bound to — its path, its
+description and its unit — because the labeller is judging a name against the data
+element it names and cannot do that from the name alone.</p>
+
+<p>When a corpus case carries no source path, the source is read from the graph
+instead: the case's ancestor name and its refined name are looked up through
+<code>(StandardNameSource {id: 'dd:&lt;path&gt;'})-[:PRODUCED_NAME]-&gt;(StandardName)</code>, and the
+<code>IMASNode</code> reached that way supplies the description and the unit. Of the 224
+names asked, <strong>24 resolve this way</strong>.</p>
+
+<p>A case whose source cannot be resolved from the case, its ancestor or its refined
+name contributes <strong>no row</strong>: it is dropped and counted, never shipped with a
+blank path. <strong>62</strong> of the 104 complete cases are dropped on that ground. A further
+7 cases would resolve only through the other binding the graph carries,
+<code>IMASNode-[:HAS_STANDARD_NAME]-&gt;StandardName</code>; that projection is recorded in the
+results as a measured diagnostic and is not used: it binds a DD node to whatever
+name is projected onto it, which is not the provenance <code>PRODUCED_NAME</code> records.</p>
+
+<h3>Blind sheet</h3>
+
+<table>
+  <tbody>
+    <tr><th>Cohort cases</th><td>120</td></tr>
+    <tr><th>Cases returning a name in both arms</th><td>104</td></tr>
+    <tr><th>Cases returning a name in one arm or none</th><td>16</td></tr>
+    <tr><th>Complete cases dropped for having no DD source</th><td>62</td></tr>
+    <tr><th>Cases contributing a row</th><td>42</td></tr>
+    <tr><th>Identical across the two arms</th><td>2 case pairs</td></tr>
+    <tr><th>Distinct outputs, i.e. sheet rows</th><td>82</td></tr>
+    <tr><th>Rows with a blank source path</th><td>0</td></tr>
+    <tr><th>Shuffle seed</th><td><code>20261020</code></td></tr>
+  </tbody>
+</table>
+
+<p>Each row carries the sheet id, the DD source path, description and unit, the
+ancestor name, and the refined name and description — and nothing else. Identical
+outputs collapse to one row, whether they came from the two arms of one case or
+from different cases, which is why 42 contributing cases produce 82 rows rather
+than 84. The 16 incomplete cases are those where an arm raised or answered with an
+empty name; they contribute nothing to the sheet.</p>
+
+<p>The rows are shuffled at seed <code>20261020</code>, recorded here so the shuffle is
+reproducible. The sheet-to-case-and-arm key is written to
+<code>srtj-refine-ab-key.json</code> in the run directory only, and is never committed here.</p>
+
+<h3>The arm key, and how it is held</h3>
+
+<p>The key records, for each row, which case and which arm produced the output that
+row carries. It is built from the outputs, never from the arm loop: a row credits
+an arm only for the cases whose output for that arm is that row's output. A row
+therefore names both arms exactly when the two arms produced the same output for
+the case in question, which is 2 rows here, and a row that names one arm is
+evidence about that arm alone. Building the key from the loop instead — marking
+every row with both arms — would credit each arm for outputs it did not produce,
+which is the defect this shape removes.</p>
+
+<p>Three assertions hold the key to the outputs, and the build refuses to write
+either file when any of them fails:</p>
+
+<ul>
+  <li>every output the run produced for a case and arm appears in exactly one row;</li>
+  <li>every credit names a case and arm whose output is that row's output;</li>
+  <li>the number of rows listing both arms equals the number of identical output pairs.</li>
+</ul>
+
+<p><code>--check-key</code> re-derives the population from the receipts and the graph and
+re-runs those three against the delivered key, so the check does not inherit the
+builder's mistakes. It then plants the defect the assertions exist to catch — a
+copy of the delivered key with one row crediting both arms for a case whose two
+outputs differ — and requires the check to refuse it.</p>
+
+<table>
+  <tbody>
+    <tr><th>Delivered key</th><td>82 rows, 84 produced outputs, 2 identical pairs, 2 both-arms rows · <code>EXIT=0</code></td></tr>
+    <tr><th>Planted: one row credits both arms where the outputs differ</th><td>refused, naming the case and <em>credited to 2 rows (row-001, row-002)</em> · <code>EXIT=1</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Sheet check, and its negative control</h3>
+
+<p>The check reads the committed sheet and fails on any row carrying an unexpected
+field, any field that would disclose the arm or the sheet-to-case mapping, any row
+with a blank DD source path, and any row with a blank refined name. It then plants
+three rows — one carrying <code>arm</code>, one with a blank <code>source_path</code>, one with a blank
+<code>refined_name</code> — and requires the detector to refuse all three, because an
+over-permissive check would otherwise report a safety it does not provide.</p>
+
+<table>
+  <tbody>
+    <tr><th>Committed sheet</th><td>82 rows clean; all three planted rows refused · <code>EXIT=0</code></td></tr>
+    <tr><th>One row's <code>source_path</code> blanked</th><td>refused as <code>row-019: blank source_path</code> · <code>EXIT=1</code></td></tr>
+    <tr><th>One row's <code>refined_name</code> blanked</th><td>refused as <code>row-031: blank refined_name</code> · <code>EXIT=1</code></td></tr>
+  </tbody>
+</table>
+
+<p>The logs are in the run directory as <code>sheet-check.log</code>,
+<code>sheet-check-mutated.log</code> and <code>sheet-check-mutated-name.log</code>, each carrying
+its command and its exit status. The committed sheet is the clean one, restored
+from a backup taken before each mutation and re-checked clean at <code>EXIT=0</code>.</p>
+
+<h3>How the delivered files were produced</h3>
+
+<p>The results JSON, the label sheet and the key reported here were regenerated from
+the receipts by the committed script in its rescore mode, which buys no call: it
+reads the receipt lines, sums the spend over every one of them, and rebuilds the
+three files. Nothing in that pass reaches the provider, so a file reported here is
+what the committed code makes of the committed receipts. The regeneration is
+<code>rescore.log</code> in the run directory and ends <code>EXIT=0</code>; the label sheet it wrote
+is byte-identical to the committed one, so the sheet the labeller gets is the
+sheet the code produces. The two checks above were then run against that
+regenerated state.</p>
