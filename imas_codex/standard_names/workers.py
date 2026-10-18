@@ -10925,16 +10925,9 @@ async def _documentation_contradiction_note(
                 state, jev_review._default_checks(), answers
             )
             if verdict["contradiction_veto"]:
-                contradicted = [
-                    claim
-                    for claim, answer in zip(
-                        claims, verdict["claim_answers"], strict=True
-                    )
-                    if answer is not None and answer.get("choice") == "contradicts"
-                ]
                 dd_text = source.get("documentation") or source.get("description") or ""
                 contradictions.append(
-                    f"{source_path}: {'; '.join(contradicted)}; DD: {dd_text}"
+                    f"{source_path}: {verdict['contradiction_reason']}; DD: {dd_text}"
                 )
             elif any(
                 answer is None

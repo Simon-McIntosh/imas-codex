@@ -627,12 +627,8 @@ def build_docs_audit_report(
     known_ids: set[str],
 ) -> Any:
     """Run the owning deterministic checks against one documented entry."""
-    from imas_standard_names.grammar.terms import AppliedConventions
-
-    from imas_codex.standard_names.docs_gates import house_style_findings
     from imas_codex.standard_names.review.audits import (
         AuditReport,
-        LintFinding,
         run_documentation_gate_checks,
         run_house_style_checks,
         run_link_integrity,
@@ -640,28 +636,9 @@ def build_docs_audit_report(
 
     candidate = dict(item)
     name_id = str(candidate["id"])
-    selected = candidate.get("conventions")
-    if selected is None:
-        style = run_house_style_checks([candidate])
-    else:
-        style = [
-            LintFinding(
-                name_id=name_id,
-                finding_type="convention_violation",
-                detail=(
-                    f"{finding.finding_class.value}: {finding.detail} "
-                    f"[{finding.registry_entry}]"
-                ),
-            )
-            for finding in house_style_findings(
-                AppliedConventions.model_validate(selected),
-                description=str(candidate.get("description") or ""),
-                documentation=str(candidate.get("documentation") or ""),
-            )
-        ]
     return AuditReport(
         lint_findings=[
-            *style,
+            *run_house_style_checks([candidate]),
             *run_documentation_gate_checks([candidate]),
         ],
         link_findings=[
