@@ -33,18 +33,30 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent
 
-NAME_GOLDEN = REPO / "docs/evidence/fragments/sn-judgment-evaluation/golden-name-acceptable.json"
-DOCS_GOLDEN = REPO / "docs/evidence/fragments/sn-judgment-evaluation/golden-description-object.json"
+NAME_GOLDEN = (
+    REPO / "docs/evidence/fragments/sn-judgment-evaluation/golden-name-acceptable.json"
+)
+DOCS_GOLDEN = (
+    REPO
+    / "docs/evidence/fragments/sn-judgment-evaluation/golden-description-object.json"
+)
 NAME_FROZEN = Path(os.environ["RISK_NAME_RECEIPTS"])
 DOCS_FROZEN = Path(os.environ["RISK_DOCS_FROZEN"])
 
 RESULTS = HERE / "ssog-risk-order-results.json"
 FRAGMENT = HERE / "ssog-risk-order.html"
-FIGURE = REPO / "docs/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg"
+FIGURE = (
+    REPO / "docs/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg"
+)
 
 FRACTIONS = (0.10, 0.25, 0.50)
 N_SHUFFLES = 1000
 SHUFFLE_SEED = 20261017
+# The control's own permutation is drawn from a seed outside the band's draw
+# range, so the reported point is an independent sample of the null rather than
+# the band's first draw. Two seeds that shared a draw range made the control
+# tautological: the point was a member of the sample it was compared against.
+CONTROL_SEED = 20261018
 BOOTSTRAP_RESAMPLES = 1000
 BOOTSTRAP_SEED = 123
 CEILING_USD = 0.50
@@ -127,32 +139,46 @@ def _name_items(checks):
     question_checks = {c.id for c in name_checks if c.question is not None}
     golden = json.loads(NAME_GOLDEN.read_text())
     frozen = _name_frozen()
+
+    rows = [
+        {
+            "unit": row["unit"],
+            "name": _short(row["unit"]),
+            "label": row["label"],
+            "split": row["split"],
+            "copy_group": row["copy_group"],
+        }
+        for row in golden
+    ]
+    uncovered = sorted(
+        {r["name"] for r in rows if not (frozen.get(r["name"]) or {}).get("answers")}
+    )
+    gap, gap_cost = _judge_name_gap(uncovered, name_checks) if uncovered else ({}, 0.0)
+
     items = []
-    for row in golden:
-        name = _short(row["unit"])
-        record = frozen.get(name)
-        answers = (record or {}).get("answers") or {}
+    for row in rows:
+        record = frozen.get(row["name"])
+        answers = (record or {}).get("answers") or gap.get(row["name"]) or {}
         failures: dict[str, float] = {}
         excluded: list[str] = []
         for check in name_checks:
             if check.question is not None:
-                probability = _defect_probability(check, answers.get(f"check:{check.id}"))
+                probability = _defect_probability(
+                    check, answers.get(f"check:{check.id}")
+                )
                 if probability is not None:
                     failures[check.id] = probability
             elif check.id == "redundant_repeated_segment":
-                finding = audit_finding_for(check, name, None)
+                finding = audit_finding_for(check, row["name"], None)
                 failures[check.id] = 1.0 if finding else 0.0
             else:
                 excluded.append(check.id)
         risk, mean = _item_risk(failures)
         items.append(
             {
-                "unit": row["unit"],
-                "name": name,
-                "label": row["label"],
-                "split": row["split"],
-                "copy_group": row["copy_group"],
-                "reused": bool(answers),
+                **row,
+                "reused": bool(record and record.get("answers")),
+                "answered": bool(answers),
                 "risk": risk,
                 "mean": mean,
                 "checks": failures,
@@ -162,11 +188,79 @@ def _name_items(checks):
     meta = {
         "question_checks": len(question_checks),
         "audit_checks": len(name_checks) - len(question_checks),
+        "rows": len(items),
+        "reused": sum(1 for i in items if i["reused"]),
+        "gap_judged": sum(1 for i in items if i["answered"] and not i["reused"]),
+        "unjudged": sum(1 for i in items if not i["answered"]),
+        "gap_spend_usd": gap_cost,
         "excluded_audit_checks": sorted(
-            {c.id for c in name_checks if c.id not in question_checks and c.id != "redundant_repeated_segment"}
+            {
+                c.id
+                for c in name_checks
+                if c.id not in question_checks and c.id != "redundant_repeated_segment"
+            }
         ),
     }
     return items, meta
+
+
+def _graph_name_props(names: list[str]) -> dict[str, dict]:
+    """Whatever the graph holds for a name, so a judgement reads what is there."""
+    from imas_codex.graph.client import GraphClient
+
+    if not names:
+        return {}
+    graph = GraphClient()
+    query = """
+    UNWIND $names AS name
+    OPTIONAL MATCH (sn:StandardName {id: name})
+    RETURN name, sn.id AS found_id, sn.description AS description,
+      sn.documentation AS documentation, sn.kind AS kind, sn.unit AS unit,
+      sn.physical_base AS physical_base, sn.subject AS subject,
+      sn.component AS component, sn.coordinate AS coordinate,
+      sn.position AS position, sn.process AS process
+    """
+    out: dict[str, dict] = {}
+    for start in range(0, len(names), 80):
+        for row in graph.query(query, names=names[start : start + 80]):
+            name = row.pop("name")
+            out[name] = {k: v for k, v in row.items() if v is not None}
+    return out
+
+
+def _judge_name_gap(names: list[str], name_checks) -> tuple[dict[str, dict], float]:
+    """Ask Jev for the name rows no frozen judgment covers.
+
+    A name with no catalog node is judged from its own text and grammar, which
+    is how the review reads a candidate it has not yet accepted.
+    """
+    from imas_codex.discovery.base.judgment import decide_batch
+    from imas_codex.settings import get_model
+    from imas_codex.standard_names.review.jev_review import (
+        SERVICE,
+        build_name_state,
+        name_question_table,
+    )
+
+    props = _graph_name_props(names)
+    states = [build_name_state({"id": name, **props.get(name, {})}) for name in names]
+    questions = name_question_table(name_checks)
+    judge_model = get_model("sn-judge")
+
+    async def run():
+        return await decide_batch(
+            states,
+            questions,
+            model=judge_model,
+            service=SERVICE,
+            concurrency=CONCURRENCY,
+        )
+
+    results, cost = asyncio.run(run())
+    answers: dict[str, dict] = {}
+    for name, result in zip(names, results, strict=True):
+        answers[name] = result[0] if result is not None else {}
+    return answers, cost
 
 
 # --------------------------------------------------------------------------
@@ -266,10 +360,17 @@ def _docs_items(checks):
             unscored.append(name)
             continue
         entries.append(
-            {"name": name, "item": _docs_item_from_graph(name, row), "answers": None, "reused": False}
+            {
+                "name": name,
+                "item": _docs_item_from_graph(name, row),
+                "answers": None,
+                "reused": False,
+            }
         )
 
-    catalogue = [{"id": e["name"], "links": e["item"].get("links") or []} for e in entries]
+    catalogue = [
+        {"id": e["name"], "links": e["item"].get("links") or []} for e in entries
+    ]
     known_ids = {e["name"] for e in entries}
     for entry in entries:
         entry["audit"] = build_docs_audit_report(
@@ -288,10 +389,16 @@ def _docs_items(checks):
         async def judge(entry, semaphore):
             async with semaphore:
                 state = build_docs_state(entry["item"], checks=docs_checks)
-                questions = docs_question_table(docs_checks, state["documentation_claims"])
+                questions = docs_question_table(
+                    docs_checks, state["documentation_claims"]
+                )
                 try:
                     results, cost = await decide_batch(
-                        [state], questions, model=judge_model, service=SERVICE, concurrency=1
+                        [state],
+                        questions,
+                        model=judge_model,
+                        service=SERVICE,
+                        concurrency=1,
                     )
                 except Exception:  # noqa: BLE001 - one bad call must not sink the batch
                     failed.append(entry["name"])
@@ -332,11 +439,15 @@ def _docs_items(checks):
             if check.question is not None:
                 if check.id == "claim_contradicts_source":
                     continue
-                probability = _defect_probability(check, answers.get(check_question_name(check.id)))
+                probability = _defect_probability(
+                    check, answers.get(check_question_name(check.id))
+                )
                 if probability is not None:
                     failures[check.id] = probability
             else:
-                from imas_codex.standard_names.review.jev_review import audit_finding_for
+                from imas_codex.standard_names.review.jev_review import (
+                    audit_finding_for,
+                )
 
                 finding = audit_finding_for(check, name, report)
                 failures[check.id] = 1.0 if finding else 0.0
@@ -417,6 +528,13 @@ def _shuffled_draws(risk, labels, fraction):
     return draws
 
 
+def _control_permutation(labels: list[int]) -> list[int]:
+    """The control's own shuffled labelling, seeded outside the band draws."""
+    perm = labels[:]
+    random.Random(CONTROL_SEED).shuffle(perm)
+    return perm
+
+
 def _copy_group_bootstrap(labels, values, groups, fraction) -> dict:
     import numpy as np
 
@@ -432,7 +550,9 @@ def _copy_group_bootstrap(labels, values, groups, fraction) -> dict:
         sub_values = [values[i] for i in subset]
         if sum(1 for label in sub_labels if label == 0) == 0:
             continue
-        draws.append(_recall_at(_order_by(sub_values, reverse=True), sub_labels, fraction))
+        draws.append(
+            _recall_at(_order_by(sub_values, reverse=True), sub_labels, fraction)
+        )
     arr = np.asarray(draws, dtype=float)
     return {
         "point": point,
@@ -470,7 +590,9 @@ def _golden_orders(items, incumbent: dict[str, float | None]) -> dict:
         "random_band": _random_band(labels, FRACTIONS),
         "recall": recall,
         "composite_interval": {
-            f"{f:.2f}": _copy_group_bootstrap(labels, risk, [i["copy_group"] for i in items], f)
+            f"{f:.2f}": _copy_group_bootstrap(
+                labels, risk, [i["copy_group"] for i in items], f
+            )
             for f in FRACTIONS
         },
     }
@@ -485,7 +607,7 @@ def _graph_scores(names: list[str], *, docs: bool) -> dict[str, float | None]:
         "UNWIND $names AS name OPTIONAL MATCH (sn:StandardName {id: name}) "
         f"RETURN name, sn.{prop} AS score LIMIT 80"
     )
-    out: dict[str, float | None] = {n: None for n in names}
+    out: dict[str, float | None] = dict.fromkeys(names)
     for start in range(0, len(names), 80):
         for row in graph.query(query, names=names[start : start + 80]):
             out[row["name"]] = row["score"]
@@ -523,26 +645,40 @@ def measure() -> dict:
         "name_axis": name_meta,
         "docs_axis": docs_meta,
         "spend": {
-            "reused_name": sum(1 for i in name_items if i["reused"]),
+            "reused_name": name_meta["reused"],
+            "name_gap_judged": name_meta["gap_judged"],
+            "name_unjudged": name_meta["unjudged"],
+            "name_gap_usd": name_meta["gap_spend_usd"],
             "reused_docs": docs_meta["reused"],
             "new_calls": docs_meta["new_calls"],
             "new_usd": docs_meta["spend_usd"],
+            "total_new_usd": name_meta["gap_spend_usd"] + docs_meta["spend_usd"],
             "ceiling_usd": CEILING_USD,
         },
         "goldens": {},
         "items": {
             "name": [
                 {
-                    "unit": i["unit"], "label": i["label"], "split": i["split"],
-                    "risk": i["risk"], "mean": i["mean"], "checks": i["checks"],
+                    "unit": i["unit"],
+                    "label": i["label"],
+                    "split": i["split"],
+                    "risk": i["risk"],
+                    "mean": i["mean"],
+                    "checks": i["checks"],
                     "excluded_checks": i["excluded_checks"],
+                    "reused": i["reused"],
+                    "answered": i["answered"],
                 }
                 for i in name_items
             ],
             "docs": [
                 {
-                    "unit": i["unit"], "label": i["label"], "split": i["split"],
-                    "risk": i["risk"], "mean": i["mean"], "checks": i["checks"],
+                    "unit": i["unit"],
+                    "label": i["label"],
+                    "split": i["split"],
+                    "risk": i["risk"],
+                    "mean": i["mean"],
+                    "checks": i["checks"],
                 }
                 for i in docs_indexed
             ],
@@ -582,10 +718,23 @@ def _figure(report: dict) -> None:
                 continue
             ax.plot(xs, curve, "-", color=colour, linewidth=3.0, label=order, zorder=3)
         band = block["random_band"]
-        ax.plot(xs, [band[f"{f:.2f}"]["p2_5"] for f in FRACTIONS], ":",
-                color="#929292", linewidth=1.2, zorder=1)
-        ax.plot(xs, [band[f"{f:.2f}"]["p97_5"] for f in FRACTIONS], ":",
-                color="#929292", linewidth=1.2, label="random 95% band", zorder=1)
+        ax.plot(
+            xs,
+            [band[f"{f:.2f}"]["p2_5"] for f in FRACTIONS],
+            ":",
+            color="#929292",
+            linewidth=1.2,
+            zorder=1,
+        )
+        ax.plot(
+            xs,
+            [band[f"{f:.2f}"]["p97_5"] for f in FRACTIONS],
+            ":",
+            color="#929292",
+            linewidth=1.2,
+            label="random 95% band",
+            zorder=1,
+        )
         ax.set_xlabel("fraction read [%]")
         ax.set_ylabel("defect recall")
         ax.set_xlim(0, 52)
@@ -595,10 +744,15 @@ def _figure(report: dict) -> None:
             ax.spines[side].set_visible(False)
     handles, labels = axes[1].get_legend_handles_labels()
     seen = {}
-    for handle, label in zip(handles, labels):
+    for handle, label in zip(handles, labels, strict=True):
         seen.setdefault(label, handle)
-    fig.legend(list(seen.values()), list(seen), loc="upper center",
-               bbox_to_anchor=(0.5, 1.02), ncol=len(seen))
+    fig.legend(
+        list(seen.values()),
+        list(seen),
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.02),
+        ncol=len(seen),
+    )
     fig.tight_layout(rect=(0, 0, 1, 0.90))
     FIGURE.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIGURE, format="svg", metadata={"Date": None})
@@ -624,12 +778,16 @@ def _fragment(report: dict) -> None:
         "mean": "mean (sensitivity)",
         "incumbent": "incumbent score",
     }
-    for key, title in (("name", "golden A — names"), ("docs", "golden C — descriptions")):
+    for key, title in (
+        ("name", "golden A — names"),
+        ("docs", "golden C — descriptions"),
+    ):
         for split in ("calibration", "validation"):
             block = report["goldens"][key][split]
             for order in ("composite", "mean", "incumbent"):
                 cells = "".join(
-                    f"<td>{_fmt(block['recall'][order][f'{f:.2f}'])}</td>" for f in FRACTIONS
+                    f"<td>{_fmt(block['recall'][order][f'{f:.2f}'])}</td>"
+                    for f in FRACTIONS
                 )
                 rows.append(
                     f"<tr><td>{title}</td><td>{split}</td><td>{block['n']}</td>"
@@ -647,12 +805,12 @@ def _fragment(report: dict) -> None:
             )
             rows.append(
                 f"<tr><td>{title}</td><td>{split}</td><td>{block['n']}</td>"
-                f"<td>random 95% band</td><td colspan=\"3\">{band}</td></tr>"
+                f'<td>random 95% band</td><td colspan="3">{band}</td></tr>'
             )
             if block["incumbent_missing"]:
                 rows.append(
                     f"<tr><td>{title}</td><td>{split}</td><td>{block['n']}</td>"
-                    f"<td>incumbent score missing</td><td colspan=\"3\">"
+                    f'<td>incumbent score missing</td><td colspan="3">'
                     f"{block['incumbent_missing']} of {block['n']} rows carry no stored score</td></tr>"
                 )
     spend = report["spend"]
@@ -668,16 +826,18 @@ acceptable level, or one when an audit finding class is present. The item's risk
 over its checks, ties broken by the mean; the mean is carried as a sensitivity order. The
 incumbent order reads each item's stored review score lowest-first from the graph
 (<code>reviewer_score</code> for names, <code>reviewer_score_docs</code> for documentation).</p>
-<p id="ssog-risk-order-counts">Name axis: {nm['question_checks']} Jev checks and
-{nm['audit_checks']} audit checks; the audit checks not decidable without a full catalog audit
-were excluded: {', '.join(nm['excluded_audit_checks']) or 'none'}. Documentation axis:
-{dm['names']} names, {dm['reused']} reused from the frozen documentation score arm,
-{dm['new_calls']} judged here, {dm['failed_calls']} calls failed,
-{len(dm['unscored'])} names had no documentation and are unscored. Spend:
-USD {spend['new_usd']:.6f} of a USD {spend['ceiling_usd']:.2f} ceiling; reused judgments:
-{spend['reused_name']} name rows and {spend['reused_docs']} documentation rows.</p>
+<p id="ssog-risk-order-counts">Name axis: {nm["question_checks"]} Jev checks and
+{nm["audit_checks"]} audit checks; the audit checks not decidable without a full catalog audit
+were excluded: {", ".join(nm["excluded_audit_checks"]) or "none"}. Of {nm["rows"]} name rows,
+{nm["reused"]} carry a frozen judgment and {nm["gap_judged"]} were judged here to fill the gap,
+so {nm["unjudged"]} rows carry no Jev answer (each then scores only on its audit checks).
+Documentation axis: {dm["names"]} names, {dm["reused"]} reused from the frozen documentation
+score arm, {dm["new_calls"]} judged here, {dm["failed_calls"]} calls failed,
+{len(dm["unscored"])} names had no documentation and are unscored. Spend:
+USD {spend["name_gap_usd"]:.6f} for the name gap and USD {spend["new_usd"]:.6f} for documentation,
+{spend["total_new_usd"]:.6f} in total, of a USD {spend["ceiling_usd"]:.2f} ceiling.</p>
 <figure id="ssog-risk-order-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg" alt="Recall of known defects against the fraction of items read for the risk composite, the mean sensitivity order and the random band, on each golden's calibration split."><figcaption>Recall of known defects against the fraction of items read, calibration split. Each order is one line; the dotted grey pair bounds the random order's 95% interval over {N_SHUFFLES} seeded shuffles.</figcaption></figure>
-<table id="ssog-risk-order-table"><thead><tr><th>Golden</th><th>Split</th><th>Items</th><th>Order</th><th>Recall@10%</th><th>Recall@25%</th><th>Recall@50%</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
+<table id="ssog-risk-order-table"><thead><tr><th>Golden</th><th>Split</th><th>Items</th><th>Order</th><th>Recall@10%</th><th>Recall@25%</th><th>Recall@50%</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
 <p id="ssog-risk-order-interval">Copy-group bootstrap 95% interval for the composite order's
 recall, per golden and split, is recorded in the results JSON under
 <code>composite_interval</code>.</p>
@@ -693,23 +853,64 @@ def shuffle() -> int:
         items = [i for i in report["items"]["name"] if i["split"] == split]
         labels = [i["label"] for i in items]
         risk = [i["risk"] for i in items]
-        rng = random.Random(SHUFFLE_SEED)
-        shuffled = labels[:]
-        rng.shuffle(shuffled)
         order = _order_by(risk, reverse=True)
+        shuffled = _control_permutation(labels)
         recall = _recall_at(order, shuffled, 0.25)
-        band = _band(_shuffled_draws(risk, labels, 0.25))
+        draws = _shuffled_draws(risk, labels, 0.25)
+        band = _band(draws)
         inside = bool(band["p2_5"] <= recall <= band["p97_5"])
-        ok = ok and inside
-        out[split] = {"recall_25": recall, "band": band, "inside": inside}
+        # The control only means something when its own shuffled labelling is
+        # not one of the labellings the band was built from.
+        independent = recall != draws[0]
+        ok = ok and inside and independent
+        out[split] = {
+            "recall_25": recall,
+            "band": band,
+            "inside": inside,
+            "independent_of_band_sample": independent,
+        }
     print(json.dumps(out, indent=1))
+    return 0 if ok else 1
+
+
+def verify(path: Path | None = None) -> int:
+    """Check the two claims the repair rests on, against the stored results."""
+    checks = _load_checks()
+    question_ids = {c.id for c in checks if c.axis == "name" and c.question is not None}
+    report = json.loads((path or RESULTS).read_text())
+    rows = report["items"]["name"]
+    # A row is judged when at least one question check decided it. A row whose
+    # only decided checks are audit bits carries no Jev answer, which is the
+    # coverage gap the field alone would hide in a pre-repair results file.
+    unjudged = [
+        r
+        for r in rows
+        if not any(check_id in question_ids for check_id in r.get("checks", {}))
+    ]
+    print(f"name rows: {len(rows)}; unjudged: {len(unjudged)}", flush=True)
+    if unjudged:
+        print("unjudged sample:", [r["unit"] for r in unjudged[:5]], flush=True)
+
+    labels = [r["label"] for r in rows]
+    risk = [r["risk"] for r in rows]
+    order = _order_by(risk, reverse=True)
+    shuffled = _control_permutation(labels)
+    draws = _shuffled_draws(risk, labels, 0.25)
+    tautological = _recall_at(order, shuffled, 0.25) == draws[0]
+    print(f"control recall equals band draw 0: {tautological}", flush=True)
+
+    ok = not unjudged and not tautological
+    print("VERIFY_PASS" if ok else "VERIFY_FAIL", flush=True)
     return 0 if ok else 1
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("measure", "shuffle", "render"))
+    parser.add_argument("mode", choices=("measure", "shuffle", "render", "verify"))
+    parser.add_argument("--results", type=Path, default=None)
     args = parser.parse_args()
+    if args.mode == "verify":
+        return verify(args.results)
     if args.mode == "render":
         report = json.loads(RESULTS.read_text())
         for key in ("name", "docs"):
@@ -728,7 +929,11 @@ def main() -> int:
         RESULTS.write_text(json.dumps(report, separators=(",", ":")))
         _figure(report)
         _fragment(report)
-        print(json.dumps({"spend": report["spend"], "docs": report["docs_axis"]}, indent=1))
+        print(
+            json.dumps(
+                {"spend": report["spend"], "docs": report["docs_axis"]}, indent=1
+            )
+        )
         return 0
     return shuffle()
 
