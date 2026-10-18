@@ -885,6 +885,13 @@ omits the checks whose answer is a flag rather than a scored probability, so the
 defect probability: {", ".join(dm.get("excluded_checks") or []) or "none"}. Spend:
 USD {spend["name_gap_usd"]:.6f} for the name gap and USD {spend["new_usd"]:.6f} for documentation,
 {spend["total_new_usd"]:.6f} in total, of a USD {spend["ceiling_usd"]:.2f} ceiling.</p>
+<p id="ssog-risk-order-controls">The scorer's recall is checked against two orders whose recall is
+known in closed form: an order with every defect first must reach
+<code>min(count, D)/D</code> and one with every defect last <code>max(0, count - (N-D))/D</code>,
+at each read fraction. Every cell lands on its analytic value on all four golden and split pairs.
+A scratch copy whose recall is taken from the tail of the order instead of its head puts six cells
+per split off their value and exits non-zero, so a recall computation that stopped reading the
+order cannot pass the check.</p>
 <figure id="ssog-risk-order-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg" alt="Recall of known defects against the fraction of items read for the risk composite, the mean sensitivity order and the random band, on each golden's calibration split."><figcaption>Recall of known defects against the fraction of items read, calibration split. Each order is one line; the dotted grey pair bounds the random order's 95% interval over {N_SHUFFLES} seeded shuffles.</figcaption></figure>
 <table id="ssog-risk-order-table"><thead><tr><th>Golden</th><th>Split</th><th>Items</th><th>Order</th><th>Recall@10%</th><th>Recall@25%</th><th>Recall@50%</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
 <p id="ssog-risk-order-interval">The <code>risk composite 95% interval</code> rows are copy-group
