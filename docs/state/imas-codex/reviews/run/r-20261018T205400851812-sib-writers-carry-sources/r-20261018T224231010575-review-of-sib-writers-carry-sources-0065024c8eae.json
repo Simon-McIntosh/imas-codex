@@ -1,0 +1,111 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "absent_note": "",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms: baseline_suite (covering-base-real.log, revision 5f79e844, completed true, exit 0, 243 passed) records failure_ids [] and after_suite (covering-head-final.log, revision b6c4f017f, completed true, exit 0, 243 passed) records failure_ids [], so head adds zero failures over the covering selection.",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/edit.py:3368",
+    "imas_codex/standard_names/graph_ops.py:5928",
+    "imas_codex/standard_names/graph_ops.py:19338",
+    "imas_codex/standard_names/attachment_audit.py:1201",
+    "imas_codex/standard_names/signed_manifest.py:4086",
+    "imas_codex/standard_names/attachment_audit.py:2838"
+  ],
+  "commits_read": [
+    "24b8638cc61f70a177f740dd35d8c32cfbf9af43",
+    "b0d60a50ed63e6c7e70ea667fa3e3beb5c92cd7c",
+    "7e210992c63bc1fc2b413b8f24ddf4ca2bc7844d",
+    "febccd64cd97c95ef07f3982a9e074133ca2e9a3",
+    "02b674e8cbddc90547590ee36800f05f50e25ef3",
+    "a3b384e5a3bebfa5ee781374dc068761b8dc1fe5",
+    "0c885e8b9cff06a4b29a262cec4d8f2d684aaf3a",
+    "df920d5dd642679c0c67db950bf2e3004322d449",
+    "976d5379018d1692c10879f567abc8747c8c01ef",
+    "6caec9cebcc8e5f989c8d0a105998199b6f79c85",
+    "dc794ee59c38357c52c0127160712921bf3e72db",
+    "b6c4f017f1289ade40b229aef4c52b520bc72654",
+    "0065024c8eae925096b569a6958b7958cff05e29"
+  ],
+  "completed_at": "2026-10-18T22:52:11.653Z",
+  "dispatched_at": "2026-10-18T22:42:50Z",
+  "emission": [
+    "VERDICT goal: the source brief.md asks four writers to refuse a live non-derived name with no producer in their own transaction, and imas_codex/standard_names/source_invariant.py:51 is called from edit.py:3368, graph_ops.py:5928 and :19338, attachment_audit.py:1201 and signed_manifest.py:4086.",
+    "VERDICT done_when: the brief's gate is a failing test per writer at EXIT=, the four invariant cases, zero added covering failures and an evidence page, and red-all-writers.log (5 failed/EXIT=1), red-rename-transaction.log (1 failed/EXIT=1), covering-base-real.log and covering-head-final.log (243 passed/EXIT=0 each) and sib-writers-carry-sources.html record exactly that.",
+    "VERDICT write_paths: the manifest.md declares seven paths plus the accepted graph_ops.py call-site lines, and git diff --stat 5f79e844..0065024c8eae names only the declared seven files, all inside scope.",
+    "VERDICT manifest: read; it reports status complete, thirteen commits to 0065024c8eae, final-head-committed.log 249 passed/EXIT=0, real-query-committed.log 5 passed/EXIT=0, covering delta 243/243, and five real-graph mutation controls red at EXIT=1.",
+    "VERDICT diff: read all thirteen commits against base 5f79e844 commit by commit; one new module, a shared guard at five production sites, two in-transaction wrappers, twelve tests and the evidence page, with the last four commits adding the ephemeral-graph differential controls.",
+    "CALL_SITES: imas_codex/standard_names/edit.py:3368, imas_codex/standard_names/graph_ops.py:5928, imas_codex/standard_names/graph_ops.py:19338, imas_codex/standard_names/attachment_audit.py:1201, imas_codex/standard_names/signed_manifest.py:4086, imas_codex/standard_names/attachment_audit.py:2838",
+    "SCORE goal_fidelity: 18",
+    "JUSTIFICATION goal_fidelity: imas_codex/standard_names/source_invariant.py:51 supplies the one named refusal and every writer calls it inside its own transaction, so each leaves no live non-derived name without a producer.",
+    "SCORE evidence: 19",
+    "JUSTIFICATION evidence: red-real-writer.log ends 1 failed/EXIT=1 with DID NOT RAISE and covering-base-real.log and covering-head-final.log each end 243 passed/EXIT=0, so the done_when's arms are recorded rather than claimed.",
+    "SCORE scope_discipline: 18",
+    "JUSTIFICATION scope_discipline: every path in git diff --name-status 5f79e844..0065024c8eae is inside the write-path set declared in manifest.md, and the graph_ops.py lines stay at the writer entry point and rename transaction.",
+    "SCORE durability: 16",
+    "JUSTIFICATION durability: tests/standard_names/test_writers_carry_sources.py:46-121 runs the production predicate on an ephemeral graph and reddens under the recorded mutations, while the rename, reconciliation and signed writers are covered only by pre-deciding doubles at test_writers_carry_sources.py:132, :206 and :249.",
+    "SCORE fit: 16",
+    "JUSTIFICATION fit: imas_codex/standard_names/source_invariant.py:8-14 follows the repository's named-refusal and coalesce idiom, though graph_ops.py:5508 gates its transaction branch on isinstance(GraphClient, type), a guard against a test patch.",
+    "SCORE reuse: 14",
+    "JUSTIFICATION reuse: attachment_audit.py:2838 delegates to the new owner but signed_manifest.py:4052 keeps its own live_producers check and the transaction wrapper is duplicated at graph_ops.py:5510 and attachment_audit.py:1082.",
+    "FINDING imas_codex/standard_names/source_invariant.py:30 follow-on: the shared query counts a producer regardless of source status while signed_manifest.py:4056 counts only non-stale producers, so the two notions of 'sourced' can disagree.",
+    "FINDING imas_codex/standard_names/signed_manifest.py:4052 follow-on: _verify_postconditions keeps its own live_producers/live_children refusal beside the added shared invariant at :4086, so the rule has two implementations in one function.",
+    "FINDING imas_codex/standard_names/graph_ops.py:5510 follow-on: the session/_TransactionQuery rollback wrapper is written twice (graph_ops.py:5508-5531 and attachment_audit.py:1082-1103) with no shared owner."
+  ],
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/source_invariant.py",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: find_sourceless_live_names counts every incoming PRODUCED_NAME edge as a producer regardless of the source's status, whereas the signed-detachment flow at signed_manifest.py:4056 treats a producer as live only when live.status <> 'stale'; a name left bound solely to a stale source would therefore pass the shared invariant while the signed flow's own query calls it unsourced, so the two notions of 'has a source' can disagree if the invariant is reached on a path that does not clear bindings first."
+    },
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": "4052",
+      "severity": "follow-on",
+      "text": "follow-on: _verify_postconditions already refuses a target with live_producers < 1 and live_children < 1 in its own target_post query, and the node adds the shared invariant at signed_manifest.py:4086 beside it rather than folding the older check onto the new owner, so the rule 'a detached target must keep a producer' now has two implementations in one function that can drift."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "5510",
+      "severity": "follow-on",
+      "text": "follow-on: the transaction wrapper that opens a session, runs the body through _TransactionQuery and rolls back on refusal is written twice (graph_ops.py:5508-5531 and attachment_audit.py:1082-1103) with no shared owner, so a fix to the rollback or the GraphClient detection must be made in both places."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read all thirteen commits from 24b8638c through 0065024c8eae against base 5f79e844 commit by commit: one new module, a shared guard called from five production sites, two in-transaction wrappers, seven writer/transaction tests plus five real-graph tests, and the evidence page; the last four commits add the ephemeral-graph differential controls that execute the production predicate directly.",
+    "done_when": "The source brief.md gate asks for one failing test per writer at EXIT=, the four invariant cases, zero added covering failures, and an evidence page naming each writer with call site and red/green runs; red-all-writers.log ends 5 failed/1 passed/EXIT=1, red-rename-transaction.log ends 1 failed/EXIT=1, covering-base-real.log and covering-head-final.log each end 243 passed/EXIT=0, final-head-committed.log ends 249 passed/EXIT=0, real-query-committed.log ends 5 passed/EXIT=0, and sib-writers-carry-sources.html tabulates each writer with call site and both runs.",
+    "goal": "The source brief.md requires four writers to refuse a live non-derived name left with no producer, checked inside each writer's own transaction; the head adds imas_codex/standard_names/source_invariant.py:51 (require_producing_sources) and calls it from edit.py:3368, graph_ops.py:5928 and :19338, attachment_audit.py:1201 and signed_manifest.py:4086, wrapping write_standard_names and reconcile_attachment_consistency in caller-owned transactions so a refusal rolls the write back.",
+    "manifest": "Read the source manifest.md at run r-20261018T205400851812-sib-writers-carry-sources; it reports status complete, thirteen commits ending 0065024c8eae, the 249-test head gate at EXIT=0, the 5-test real-graph gate at EXIT=0, covering delta 243/243, and five direct real-graph mutation controls red at EXIT=1.",
+    "write_paths": "The source manifest.md declares seven write paths plus the graph_ops.py call-site lines the coordinator accepts at promotion; git diff --stat 5f79e844..0065024c8eae names exactly those seven paths (source_invariant.py, edit.py, attachment_audit.py, signed_manifest.py, graph_ops.py, tests/standard_names/test_writers_carry_sources.py, docs/evidence/fragments/sn-integrity-backlog/sib-writers-carry-sources.html), with no path outside the declared scope."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_writers_carry_sources.py:46-121 executes the production predicate on an ephemeral Neo4j and reddens under the recorded mutations, but the rename, reconciliation and signed writers are guarded only by Query doubles that pre-decide the refusal (test_writers_carry_sources.py:129-134, 203-208, 248-268), so their predicate path is never run at head.",
+    "evidence": "The done_when's removal control is recorded, not asserted: red-real-writer.log ends 1 failed/EXIT=1 with DID NOT RAISE, covering-base-real.log and covering-head-final.log each end 243 passed/EXIT=0, and final-head-committed.log ends 249 passed/EXIT=0.",
+    "fit": "imas_codex/standard_names/source_invariant.py:8-14 follows the repository's named-refusal and coalesce-filter idiom, but graph_ops.py:5508 keys its transaction branch on isinstance(GraphClient, type), an idiom that guards a test patch rather than a production state.",
+    "goal_fidelity": "imas_codex/standard_names/source_invariant.py:51 gives the one named refusal and every writer calls it in its own transaction, so a rename, a creation and both detachers now refuse or roll back a live non-derived name left with no PRODUCED_NAME source.",
+    "reuse": "imas_codex/standard_names/attachment_audit.py:2838 now delegates to the shared owner, but signed_manifest.py:4052 still computes its own live_producers/live_children refusal instead of routing through source_invariant, and the transaction wrapper is written twice (graph_ops.py:5510, attachment_audit.py:1082).",
+    "scope_discipline": "git diff --name-status 5f79e844..0065024c8eae lists exactly the seven files named in the source manifest.md write-path set, and the graph_ops.py additions stay at the writer's entry point and its rename transaction."
+  },
+  "plan_slug": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "review_run_id": "r-20261018T224231010575-review-of-sib-writers-carry-sources-0065024c8eae",
+  "reviewed_base_sha": "5f79e844a5b1df6df42e1c8698459249d5ba822c",
+  "reviewed_head_sha": "0065024c8eae925096b569a6958b7958cff05e29",
+  "reviewed_revision": "0065024c8eae",
+  "reviewed_run_id": "r-20261018T205400851812-sib-writers-carry-sources",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T22:53:04.339577+00:00"
+}
