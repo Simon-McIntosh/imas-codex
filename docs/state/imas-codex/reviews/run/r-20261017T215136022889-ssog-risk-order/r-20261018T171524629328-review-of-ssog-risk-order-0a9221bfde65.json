@@ -1,0 +1,105 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "after_suite_log": null,
+  "assertion_analysis": [
+    {
+      "failure_condition": "the control permutes each split's labels under seed 20262018, recomputes the risk and requires recall@0.25 of the risk-ordered labels to fall inside the random band built from the same permuted labels; a scorer that reads row['label'] re-derives its order from the permutation and lands above the band. negative-control.log probe 1 records recall 0.414847/0.410138/0.600000/0.705882, inside False on all four pairs, exit 1.",
+      "lines": "1204-1251 (shuffle_band_control)"
+    },
+    {
+      "failure_condition": "if _scorer_risk read a label, permuting the labels would change the risk vector; the control fails when the recomputed vector differs, when the permutation is the identity, or when the stored risk no longer equals the risk recomputed from the row's own checks. negative-control.log probe 1 records 196/184/48/46 moved values and 229/217/40/34 published risks no longer equal, exit 1.",
+      "lines": "1158-1201 (label_invariance_control)"
+    },
+    {
+      "failure_condition": "a status outside the four, a row giving no status, or four counts that do not sum to the axis total fails; because both the status map and the counts come from one classification, this guards the record's self-consistency and not the provenance of an answer.",
+      "lines": "1278-1334 (_coverage_failures)"
+    }
+  ],
+  "base_log_revision": null,
+  "baseline_suite_log": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T17:37:26.554Z",
+  "dispatched_at": "2026-10-18T17:16:02Z",
+  "failure_delta_status": "unavailable: the reviewed run's manifest declares no baseline_suite or after_suite arm, so no failure delta exists to derive and zero is not inferred",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "708",
+      "severity": "follow-on",
+      "text": "follow-on: the composite interval repeats bootstrap_interval's draw loop with only the statistic changed, so the resampling capability the repository already owns is forked rather than extended, and no gate reddens if run.py:708-709 regressed to the without-replacement set draw the fourth review removed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "1310",
+      "severity": "follow-on",
+      "text": "follow-on: the coverage guard compares recorded against item[\"reused\"], and on both axes those descend from the same classification, so the two sides move together and the assertion cannot detect a wrong source classification; it guards only the record's self-consistency."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the module docstring opens \"Measure how well a Jev risk composite founds known defects first\", a typo for \"finds\"; cosmetic but it is the first line a reader sees."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "follow-on: the source manifest declares no baseline_suite or after_suite arm, so added_failure_count cannot be derived and is recorded unmeasured; correct for a measurement node but it means the review carries no failure delta."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read eight revisions from f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710 to 0a9221bfde65e386943e5a392cc6396cd2693843; the head revision 0a9221bfd changes only run.py and the fragment, restoring the shuffled-label band control and replacing the paragraph that said it was deliberately not run.",
+    "done_when": "the brief requires on both goldens and splits the recall table, the counts and spend, one figure, per-item JSON, and a shuffled-label re-run recorded with EXIT= whose recall at 25% falls inside the random band; all are present at 0a9221bfd, with verify.log printing the band line (seed 20262018, in-band-seeds False, inside on all four pairs) and negative-control.log showing the probe redden when the scorer reads a label.",
+    "goal": "the node measures how well a Jev risk composite finds known defects first; the head adds the shuffled-label band control the prior review found missing, so the risk's order path is now shown to carry no label information on both goldens and both splits.",
+    "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md:5 reports complete, lists eight revisions and the four controls, and negative_control_log at line 28 is now a single bare path; no baseline_suite or after_suite arm is declared, which is expected for a measurement node.",
+    "write_paths": "the brief grants ssog-risk-order.html, ssog-risk-order-run.py, ssog-risk-order-results.json and docs/figures/sn-selection-over-generation/ssog-risk-order; the f8a85ca9a..0a9221bfd diff changes exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "the restored control is a genuine detector at run.py:1204, reddening on a label leak and asserting its seed lies outside BAND_SEEDS, but the interval resample at run.py:708 and the coverage guard at run.py:1310 have no gate that reddens if they regress.",
+    "evidence": "verify.log at 0a9221bfd is EXIT=0 VERIFY_PASS and negative-control.log shows the restored band control reddening on a planted label-reading scorer, so the assertion the run added could have failed and was made to; the composite interval at run.py:708 remains ungated and the source manifest declares no baseline_suite or after_suite arm, so no failure delta is derivable.",
+    "fit": "run.py:1-23 names each subcommand by what it does and cites mechanism, the four controls are individually justified in the fragment paragraph, and the module lives under the plan-slug evidence-fragment directory the brief granted.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:622-676 builds the profile-likelihood random band and the composite order, and the head adds the band control at run.py:1204 that closes the one gap the plan's measure left open, though the module docstring at run.py:1 still reads \"founds\".",
+    "reuse": "run.py:694 imports _group_indices from imas_codex.discovery.base.evaluation:128 but run.py:708-709 copies that owner's resample loop from evaluation.py:183-193, because bootstrap_interval at evaluation.py:144 hardcodes roc_auc and accepts no statistic.",
+    "scope_discipline": "the f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710..0a9221bfde65e386943e5a392cc6396cd2693843 diff changes only the four declared paths, and the head revision touches run.py and the fragment alone with no production file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node measures how well a Jev risk composite finds known defects first; the head adds the shuffled-label band control the prior review found missing, so the risk's order path is now shown to carry no label information on both goldens and both splits.\nVERDICT done_when: the brief requires on both goldens and splits the recall table, the counts and spend, one figure, per-item JSON, and a shuffled-label re-run recorded with EXIT= whose recall at 25% falls inside the random band; all are present at 0a9221bfd, with verify.log printing the band line (seed 20262018, in-band-seeds False, inside on all four pairs) and negative-control.log showing the probe redden when the scorer reads a label.\nVERDICT write_paths: the brief grants ssog-risk-order.html, ssog-risk-order-run.py, ssog-risk-order-results.json and docs/figures/sn-selection-over-generation/ssog-risk-order; the f8a85ca9a..0a9221bfd diff changes exactly those four paths and nothing else.\nVERDICT manifest: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md:5 reports complete, lists eight revisions and the four controls, and negative_control_log at line 28 is now a single bare path; no baseline_suite or after_suite arm is declared, which is expected for a measurement node.\nVERDICT diff: read eight revisions from f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710 to 0a9221bfde65e386943e5a392cc6396cd2693843; the head revision 0a9221bfd changes only run.py and the fragment, restoring the shuffled-label band control and replacing the paragraph that said it was deliberately not run.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:622-676 builds the profile-likelihood random band and the composite order, and the head adds the band control at run.py:1204 that closes the one gap the plan's measure left open, though the module docstring at run.py:1 still reads \"founds\".\nSCORE evidence: 17\nJUSTIFICATION evidence: verify.log at 0a9221bfd is EXIT=0 VERIFY_PASS and negative-control.log shows the restored band control reddening on a planted label-reading scorer, so the assertion the run added could have failed and was made to; the composite interval at run.py:708 remains ungated and the source manifest declares no baseline_suite or after_suite arm, so no failure delta is derivable.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710..0a9221bfde65e386943e5a392cc6396cd2693843 diff changes only the four declared paths, and the head revision touches run.py and the fragment alone with no production file.\nSCORE durability: 16\nJUSTIFICATION durability: the restored control is a genuine detector at run.py:1204, reddening on a label leak and asserting its seed lies outside BAND_SEEDS, but the interval resample at run.py:708 and the coverage guard at run.py:1310 have no gate that reddens if they regress.\nSCORE fit: 16\nJUSTIFICATION fit: run.py:1-23 names each subcommand by what it does and cites mechanism, the four controls are individually justified in the fragment paragraph, and the module lives under the plan-slug evidence-fragment directory the brief granted.\nSCORE reuse: 12\nJUSTIFICATION reuse: run.py:694 imports _group_indices from imas_codex.discovery.base.evaluation:128 but run.py:708-709 copies that owner's resample loop from evaluation.py:183-193, because bootstrap_interval at evaluation.py:144 hardcodes roc_auc and accepts no statistic.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:708 follow-on: the composite interval repeats bootstrap_interval's draw loop with only the statistic changed, so the resampling capability the repository already owns is forked rather than extended, and no gate reddens if run.py:708-709 regressed to the without-replacement set draw the fourth review removed.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1310 follow-on: the coverage guard compares recorded against item[\"reused\"], and on both axes those descend from the same classification, so the two sides move together and the assertion cannot detect a wrong source classification; it guards only the record's self-consistency.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1 follow-on: the module docstring opens \"Measure how well a Jev risk composite founds known defects first\", a typo for \"finds\"; cosmetic but it is the first line a reader sees.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T215136022889-ssog-risk-order/manifest.md:26 follow-on: the source manifest declares no baseline_suite or after_suite arm, so added_failure_count cannot be derived and is recorded unmeasured; correct for a measurement node but it means the review carries no failure delta.",
+  "review_run_id": "r-20261018T171524629328-review-of-ssog-risk-order-0a9221bfde65",
+  "reviewed_base_sha": "f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710",
+  "reviewed_commits": [
+    "64c6b7f57a034e9fc813e1275405653dd7ef610d",
+    "f7f3390bc910f1225feed724a6519492a936faf5",
+    "670cc4d6eb1abc0b120771840d3d9263cc0c41af",
+    "e0a60e02ee7db8afb8ff578c16e69d2a87295c2d",
+    "890d803490fb8f51dce3d3cc3f491bf87bb88813",
+    "3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b",
+    "7ee81c3660eaf906183a703408e30a852bce35e9",
+    "0a9221bfde65e386943e5a392cc6396cd2693843"
+  ],
+  "reviewed_head_sha": "0a9221bfde65e386943e5a392cc6396cd2693843",
+  "reviewed_run_id": "r-20261017T215136022889-ssog-risk-order",
+  "schema": "crew-review-record",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:1310-1313 compares recorded against item[\"reused\"], both read from the same entry classification"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T17:53:47.351478+00:00",
+  "total": 99
+}
