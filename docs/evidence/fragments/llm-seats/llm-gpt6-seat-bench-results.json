@@ -97,6 +97,62 @@
         "corpus": "REFINED_FROM history",
         "n_cases": 8
       }
+    },
+    "docs": {
+      "role": "docs",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-5.6-luna",
+          "n": 8,
+          "cost": 0.5212092400000001,
+          "metrics": {
+            "rubric_score": 0.9422,
+            "banned_prose_rate": 0.125,
+            "banned_prose_findings": 1.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 8,
+          "cost": 0.5917422,
+          "metrics": {
+            "rubric_score": 0.9844,
+            "banned_prose_rate": 0.0,
+            "banned_prose_findings": 0.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 8,
+          "cost": 0.47975492000000003,
+          "metrics": {
+            "rubric_score": 0.9516,
+            "banned_prose_rate": 0.0,
+            "banned_prose_findings": 0.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/openai/gpt-5.6-luna",
+      "judge_model": "openrouter/anthropic/claude-opus-4.8",
+      "sample_ids": [
+        "radiative_extraordinary_mode_temperature_at_ece_channel",
+        "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+        "beryllium_density_at_divertor_target",
+        "thermal_plasma_pressure",
+        "toroidal_coordinate_at_beam_tracing_point",
+        "inverse_of_square_of_major_radius",
+        "normalized_toroidal_flux_coordinate_at_internal_transport_barrier",
+        "pulse_duration"
+      ],
+      "seed": 0,
+      "axis": null,
+      "timestamp": "2026-10-18T18:31:23.217180+00:00",
+      "provenance": {
+        "n_docs": 8
+      }
     }
   },
   "item_outcomes": {
@@ -159,10 +215,70 @@
           "breakdown_initial_time": 0.1
         }
       }
+    },
+    "docs": {
+      "fixture": [
+        {
+          "id": "radiative_extraordinary_mode_temperature_at_ece_channel"
+        },
+        {
+          "id": "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror"
+        },
+        {
+          "id": "beryllium_density_at_divertor_target"
+        },
+        {
+          "id": "thermal_plasma_pressure"
+        },
+        {
+          "id": "toroidal_coordinate_at_beam_tracing_point"
+        },
+        {
+          "id": "inverse_of_square_of_major_radius"
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate_at_internal_transport_barrier"
+        },
+        {
+          "id": "pulse_duration"
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-5.6-luna": {
+          "radiative_extraordinary_mode_temperature_at_ece_channel": 0.975,
+          "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror": 0.875,
+          "beryllium_density_at_divertor_target": 0.975,
+          "thermal_plasma_pressure": 1.0,
+          "toroidal_coordinate_at_beam_tracing_point": 0.75,
+          "inverse_of_square_of_major_radius": 1.0,
+          "normalized_toroidal_flux_coordinate_at_internal_transport_barrier": 0.9875,
+          "pulse_duration": 0.975
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "radiative_extraordinary_mode_temperature_at_ece_channel": 0.975,
+          "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror": 0.975,
+          "beryllium_density_at_divertor_target": 0.975,
+          "thermal_plasma_pressure": 0.9875,
+          "toroidal_coordinate_at_beam_tracing_point": 0.9875,
+          "inverse_of_square_of_major_radius": 1.0,
+          "normalized_toroidal_flux_coordinate_at_internal_transport_barrier": 0.9875,
+          "pulse_duration": 0.9875
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "radiative_extraordinary_mode_temperature_at_ece_channel": 0.85,
+          "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror": 0.9875,
+          "beryllium_density_at_divertor_target": 0.9,
+          "thermal_plasma_pressure": 0.9875,
+          "toroidal_coordinate_at_beam_tracing_point": 0.975,
+          "inverse_of_square_of_major_radius": 0.9625,
+          "normalized_toroidal_flux_coordinate_at_internal_transport_barrier": 0.975,
+          "pulse_duration": 0.975
+        }
+      }
     }
   },
   "analysis": {},
-  "total_spend_usd": 2.424295,
+  "total_spend_usd": 5.965632,
   "superseded_runs": [
     {
       "role": "refine",
@@ -228,6 +344,69 @@
         "openrouter/openai/gpt-5.5": 6,
         "openrouter/openai/gpt-6.1-sol": 6,
         "openrouter/openai/gpt-6-luna": 6
+      }
+    },
+    {
+      "role": "docs",
+      "reason": "The capture instrument keyed all three rubric outputs by the held-out judge model, losing candidate-level pairing.",
+      "report": {
+        "role": "docs",
+        "results": [
+          {
+            "model": "openrouter/openai/gpt-5.6-luna",
+            "n": 8,
+            "cost": 0.79893381,
+            "metrics": {
+              "rubric_score": 0.9641,
+              "banned_prose_rate": 0.0,
+              "banned_prose_findings": 0.0
+            },
+            "error": null
+          },
+          {
+            "model": "openrouter/openai/gpt-6.1-sol",
+            "n": 8,
+            "cost": 0.6715568000000001,
+            "metrics": {
+              "rubric_score": 0.9766,
+              "banned_prose_rate": 0.0,
+              "banned_prose_findings": 0.0
+            },
+            "error": null
+          },
+          {
+            "model": "openrouter/openai/gpt-6-luna",
+            "n": 8,
+            "cost": 0.478140005,
+            "metrics": {
+              "rubric_score": 0.9688,
+              "banned_prose_rate": 0.0,
+              "banned_prose_findings": 0.0
+            },
+            "error": null
+          }
+        ],
+        "incumbent": "openrouter/openai/gpt-5.6-luna",
+        "judge_model": "openrouter/anthropic/claude-opus-4.8",
+        "sample_ids": [
+          "radiative_extraordinary_mode_temperature_at_ece_channel",
+          "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+          "beryllium_density_at_divertor_target",
+          "thermal_plasma_pressure",
+          "toroidal_coordinate_at_beam_tracing_point",
+          "inverse_of_square_of_major_radius",
+          "normalized_toroidal_flux_coordinate_at_internal_transport_barrier",
+          "pulse_duration"
+        ],
+        "seed": 0,
+        "axis": null,
+        "timestamp": "2026-10-18T18:26:59.317250+00:00",
+        "provenance": {
+          "n_docs": 8
+        }
+      },
+      "captured_outcome_count": {
+        "openrouter/anthropic/claude-opus-4.8": 8
       }
     }
   ]
