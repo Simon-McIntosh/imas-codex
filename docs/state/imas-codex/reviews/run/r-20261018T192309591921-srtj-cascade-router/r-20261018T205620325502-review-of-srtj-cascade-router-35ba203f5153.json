@@ -1,0 +1,149 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T192309591921-srtj-cascade-router/repair-head-suite-committed.log",
+    "passed": 262,
+    "revision": "35ba203f5153f6e2ec80e317a78fd8f398136f9c",
+    "summary": "262 passed, 1 warning in 47.83s"
+  },
+  "assertion_analysis": [
+    {
+      "fails_if": "The store omits the route, emits multiple rows, makes the row canonical, gives it a scalar score, or changes its judge kind.",
+      "test": "test_shadow_review_record_is_noncanonical"
+    },
+    {
+      "fails_if": "The direct result loses the named failure or the existing trigger refuses the supplied positive check; this unit test alone does not cover the worker handoff.",
+      "test": "test_failed_checks_feed_existing_refine_trigger"
+    },
+    {
+      "fails_if": "The production note substitutes a generic claim for contradiction_reason, as reproduced at base.",
+      "test": "test_contradiction_note_uses_named_reason"
+    },
+    {
+      "fails_if": "build_docs_audit_report bypasses run_house_style_checks when conventions are supplied, as reproduced at base.",
+      "test": "test_docs_audit_calls_house_style_owner"
+    },
+    {
+      "fails_if": "The router mishandles the independent planted 0.8 acceptance edge; it does not fail when the committed threshold artifact drifts.",
+      "test": "test_accept_at_threshold"
+    },
+    {
+      "fails_if": "The router ignores the independent planted 0.6 failure cutoff or drops its check ID; it does not fail when the committed artifact drifts.",
+      "test": "test_refine_at_check_threshold"
+    },
+    {
+      "fails_if": "The router does not emit chat_below_reject below the independent planted 0.2 cutoff; this test enshrines the blocking out-of-band route.",
+      "test": "test_reject_boundary_has_separate_chat_label"
+    },
+    {
+      "fails_if": "The shadow path omits the stored route, narrows the incumbent seats, or changes the mocked incumbent score.",
+      "test": "test_shadow_records_route_and_keeps_incumbent_result"
+    },
+    {
+      "fails_if": "Accept/refine invokes incumbent, chat uses more than the first seat, the mocked score changes, or the failed check is dropped; its chat method assertion depends on the supplied route string.",
+      "test": "test_deciding_routes_use_one_chat_seat"
+    },
+    {
+      "fails_if": "Restoring the prior stage authority gate rejects the direct result or records a quorum shortfall; the red repair log confirms both route cases fail on the prior revision.",
+      "test": "test_deciding_result_reaches_name_stage"
+    },
+    {
+      "fails_if": "A missing lease or raised Jev judgment stores a route or narrows the incumbent seat list.",
+      "test": "test_unjudged_review_has_no_route_and_keeps_full_incumbent"
+    },
+    {
+      "fails_if": "An empty documentation decision silently receives a route rather than raising ValueError.",
+      "test": "test_empty_docs_judgment_is_unjudged"
+    },
+    {
+      "fails_if": "An unanswered name judgment silently receives a route rather than raising ValueError.",
+      "test": "test_empty_name_judgment_is_unjudged"
+    },
+    {
+      "fails_if": "Removing the worker's failed-check extraction, prompt handoff or check-trigger argument makes the captured context or trigger arguments differ.",
+      "test": "test_refine_worker_receives_named_checks"
+    }
+  ],
+  "base_log_revision": "11d9ca59f3d2432c4a8ccd71248faef0ff3e9c8a",
+  "baseline_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T192309591921-srtj-cascade-router/repair-base-suite.log",
+    "passed": 251,
+    "revision": "11d9ca59f3d2432c4a8ccd71248faef0ff3e9c8a",
+    "summary": "251 passed, 1 warning in 42.73s"
+  },
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8970 process_review_name_batch",
+    "imas_codex/standard_names/workers.py:11039 process_review_docs_batch",
+    "imas_codex/standard_names/workers.py:7279 process_refine_name_batch",
+    "imas_codex/standard_names/workers.py:11284 process_refine_docs_batch",
+    "imas_codex/standard_names/graph_ops.py:17206 persist_reviewed_name",
+    "imas_codex/standard_names/graph_ops.py:17788 persist_reviewed_docs",
+    "imas_codex/standard_names/graph_ops.py:6263 update_review_aggregates"
+  ],
+  "completed_at": "2026-10-18T21:03:02Z",
+  "dispatched_at": "2026-10-18T20:56:47Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": "70",
+      "severity": "blocking",
+      "text": "blocking: A check-clear score below reject_threshold is labeled chat_below_reject and cascade.py:348 sends it to the chat reviewer; the plan and source brief allow chat only in the uncertain band and specify exactly three routes, so the zero observed calibration count does not make this fourth runtime route valid."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "6285",
+      "severity": "follow-on",
+      "text": "follow-on: The newly stored noncanonical Jev review reaches update_review_aggregates, whose count(r) includes it in review_count even though its score is null; shadow mode therefore inflates the review count used outside this node."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "146",
+      "severity": "follow-on",
+      "text": "follow-on: The threshold fixture replaces the calibration loader, so changing committed cascade_thresholds.json cutoffs or weights leaves all edge assertions green; the tests protect routing comparisons but not calibration artifact integrity."
+    }
+  ],
+  "head_log_revision": "35ba203f5153f6e2ec80e317a78fd8f398136f9c",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified seven production call sites listed in CALL_SITES, including the four workers.py router/refine hooks and both graph stage writers.",
+    "diff": "Read 0c0bc4e6, 11d9ca59 and 35ba203f commit by commit against b8b973a5; the last repairs stage authority and unjudged storage, while cascade.py:70 and tests/test_review_cascade.py:184 preserve the out-of-band chat path.",
+    "done_when": "The source brief names threshold-edge, shadow, deciding, folded-defect and covering gates; repair-negative-control.log records 10 red IDs, repair-base-suite.log records 251 passes, repair-head-suite-committed.log records 262 passes, and the replay logs count 363 name and 216 docs items.",
+    "goal": "The source brief requests a calibrated shadow router with a default-off deciding path; imas_codex/standard_names/review/cascade.py:47-72 implements the routes, but line 70 still sends a check-clear low-tail item to chat outside the planned uncertain band.",
+    "manifest": "The source manifest names three commits, seven changed paths, an 11d9ca59 baseline and a 35ba203f head; both suite logs end EXIT=0 with zero failure IDs, matching its stated delta.",
+    "write_paths": "The source manifest declares seven files including imas_codex/standard_names/graph_ops.py, and the b8b973a5..35ba203f diff changes exactly those seven; the initial brief lists six, while the manifest records a later grant for graph_ops.py."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_cascade.py:181-185 independently pins the reject edge and the red repair log confirms it fires, but the assertion preserves the forbidden low-tail chat route and the planted fixture at :146 bypasses the committed cutoff artifact.",
+    "evidence": "repair-base-suite.log and repair-head-suite-committed.log record 251 and 262 passes with zero failures, while repair-negative-control.log records 10 failed IDs absent at head and the calibration replay logs count known-present inputs.",
+    "fit": "imas_codex/standard_names/review/cascade.py:155 uses the existing review-record builder and workers.py:8974 keeps the production hook short, while graph_ops.py:16940 names explicit authority methods in the established stage gate.",
+    "goal_fidelity": "imas_codex/standard_names/review/cascade.py:70 creates a fourth route that still calls chat below the reject threshold, contrary to the three routes required by the source brief and plan \u00a76.",
+    "reuse": "Capability searches found no existing calibrated route owner, and cascade.py:155, :291-294 and workers.py:7330 reuse the pipeline record builder, documentation scorer and fanout trigger owners.",
+    "scope_discipline": "The seven changed paths in the b8b973a5..35ba203f diff match the source manifest's orientation_write_paths, although imas_codex/standard_names/graph_ops.py was absent from the initial brief and relies on its recorded later grant."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief requests a calibrated shadow router with a default-off deciding path; imas_codex/standard_names/review/cascade.py:47-72 implements the routes, but line 70 still sends a check-clear low-tail item to chat outside the planned uncertain band.\nVERDICT done_when: The source brief names threshold-edge, shadow, deciding, folded-defect and covering gates; repair-negative-control.log records 10 red IDs, repair-base-suite.log records 251 passes, repair-head-suite-committed.log records 262 passes, and the replay logs count 363 name and 216 docs items.\nVERDICT write_paths: The source manifest declares seven files including imas_codex/standard_names/graph_ops.py, and the b8b973a5..35ba203f diff changes exactly those seven; the initial brief lists six, while the manifest records a later grant for graph_ops.py.\nVERDICT manifest: The source manifest names three commits, seven changed paths, an 11d9ca59 baseline and a 35ba203f head; both suite logs end EXIT=0 with zero failure IDs, matching its stated delta.\nVERDICT diff: Read 0c0bc4e6, 11d9ca59 and 35ba203f commit by commit against b8b973a5; the last repairs stage authority and unjudged storage, while cascade.py:70 and tests/test_review_cascade.py:184 preserve the out-of-band chat path.\nCALL_SITES: imas_codex/standard_names/workers.py:8970 process_review_name_batch, imas_codex/standard_names/workers.py:11039 process_review_docs_batch, imas_codex/standard_names/workers.py:7279 process_refine_name_batch, imas_codex/standard_names/workers.py:11284 process_refine_docs_batch, imas_codex/standard_names/graph_ops.py:17206 persist_reviewed_name, imas_codex/standard_names/graph_ops.py:17788 persist_reviewed_docs, imas_codex/standard_names/graph_ops.py:6263 update_review_aggregates\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/cascade.py:70 creates a fourth route that still calls chat below the reject threshold, contrary to the three routes required by the source brief and plan \u00a76.\nSCORE evidence: 18\nJUSTIFICATION evidence: repair-base-suite.log and repair-head-suite-committed.log record 251 and 262 passes with zero failures, while repair-negative-control.log records 10 failed IDs absent at head and the calibration replay logs count known-present inputs.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: The seven changed paths in the b8b973a5..35ba203f diff match the source manifest's orientation_write_paths, although imas_codex/standard_names/graph_ops.py was absent from the initial brief and relies on its recorded later grant.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_review_cascade.py:181-185 independently pins the reject edge and the red repair log confirms it fires, but the assertion preserves the forbidden low-tail chat route and the planted fixture at :146 bypasses the committed cutoff artifact.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/review/cascade.py:155 uses the existing review-record builder and workers.py:8970 keeps the production hook short, while graph_ops.py:16940 names explicit authority methods in the established stage gate.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches found no existing calibrated route owner, and cascade.py:155, :291-294 and workers.py:7330 reuse the pipeline record builder, documentation scorer and fanout trigger owners.\nFINDING imas_codex/standard_names/review/cascade.py:70 blocking: A check-clear score below reject_threshold is labeled chat_below_reject and cascade.py:348 sends it to the chat reviewer; the plan and source brief allow chat only in the uncertain band and specify exactly three routes, so the zero observed calibration count does not make this fourth runtime route valid.\nFINDING imas_codex/standard_names/graph_ops.py:6285 follow-on: The newly stored noncanonical Jev review reaches update_review_aggregates, whose count(r) includes it in review_count even though its score is null; shadow mode therefore inflates the review count used outside this node.\nFINDING tests/standard_names/test_review_cascade.py:146 follow-on: The threshold fixture replaces the calibration loader, so changing committed cascade_thresholds.json cutoffs or weights leaves all edge assertions green; the tests protect routing comparisons but not calibration artifact integrity.\n",
+  "review_run_id": "r-20261018T205620325502-review-of-srtj-cascade-router-35ba203f5153",
+  "reviewed_base_sha": "b8b973a5e017782546a4ccf307cf04dcb12b2f9b",
+  "reviewed_head_sha": "35ba203f5153f6e2ec80e317a78fd8f398136f9c",
+  "reviewed_run_id": "r-20261018T192309591921-srtj-cascade-router",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T21:00:32.258215+00:00",
+  "total": 103
+}
