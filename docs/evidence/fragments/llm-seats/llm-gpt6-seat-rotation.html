@@ -1,0 +1,46 @@
+<section id="gpt6-seat-rotation">
+  <h3>GPT seat rotation: every live seat on its ruled GPT-6 model</h3>
+  <p>The seat bench (<code>llm-gpt6-seat-bench.html</code>) was ruled on 2026-10-18: GPT seats use the latest GPT models; <code>gpt-6-luna</code> takes the seats the bench shows it capable for, <code>gpt-6.1-sol</code> the seats it does not, and seats with no bench move generation for generation. GPT-6 pricing and family handling were already on <code>main</code>; this change is seat configuration only, in <code>pyproject.toml</code>.</p>
+
+  <h4>Mapping as applied</h4>
+  <table><thead><tr><th>Seat</th><th>From</th><th>To</th><th>Basis</th></tr></thead><tbody>
+    <tr><td><code>[sn-refine]</code></td><td><code>openrouter/openai/gpt-5.5</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>bench: capable, +0.14 over sol</td></tr>
+    <tr><td><code>[sn-classifier]</code></td><td><code>openrouter/openai/gpt-5.5</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>bench: equal accuracy; gold covers two domains</td></tr>
+    <tr><td><code>[sn-docs]</code></td><td><code>openrouter/openai/gpt-5.6-luna</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>bench: luna below the rule, sol best</td></tr>
+    <tr><td><code>[sn-review.docs]</code> third model (breaker)</td><td><code>openrouter/openai/gpt-5.5</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>bench: flips too sparse for luna; sol matches gpt-5.5 at a third of the cost</td></tr>
+    <tr><td><code>[sn-review.names]</code> third model (escalator)</td><td><code>openrouter/openai/gpt-5.5</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>generation for generation</td></tr>
+    <tr><td><code>[sn-review.names.profiles.default]</code> second model</td><td><code>openrouter/openai/gpt-5.6-luna</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>generation for generation</td></tr>
+    <tr><td><code>[sn-prose-adjudicator]</code></td><td><code>openrouter/openai/gpt-5.6-luna</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>generation for generation; no bench role</td></tr>
+    <tr><td><code>[cluster-labels]</code></td><td><code>openrouter/openai/gpt-5.4</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>generation for generation; no bench role</td></tr>
+  </tbody></table>
+  <p>Each seat keeps its reasoning-effort and other keys; each model id is spelled <code>openrouter/openai/&lt;model&gt;</code>. Comments naming the old model in a rotated seat were updated to name the new one: the <code>sn-review.names</code> escalator comment, the <code>sn-review.names.profiles.default</code> comment, and the <code>sn-review.docs</code> comment.</p>
+
+  <h4>Fallbacks rotated with the seats</h4>
+  <p><code>_MODEL_DEFAULTS</code> in <code>imas_codex/settings.py</code> is what a seat resolves to when its <code>pyproject.toml</code> entry is absent. Every seat currently sets its key, so a stale default is invisible &mdash; and then silently returns the pipeline to a superseded model the moment a key is removed or a section is not present. The lead ruled on 2026-10-18 that fallbacks name the latest models too, so each <code>gpt-5.x</code> default was rotated generation for generation by the same rule as the seats: a luna-generation default takes <code>gpt-6-luna</code>, a full model takes <code>gpt-6.1-sol</code>.</p>
+  <table><thead><tr><th>Default</th><th>From</th><th>To</th></tr></thead><tbody>
+    <tr><td><code>sn-docs</code></td><td><code>openrouter/openai/gpt-5.5</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td></tr>
+    <tr><td><code>sn-classifier</code></td><td><code>openrouter/openai/gpt-5.5</code></td><td><code>openrouter/openai/gpt-6-luna</code></td></tr>
+    <tr><td><code>sn-prose-adjudicator</code></td><td><code>openrouter/openai/gpt-5.6-luna</code></td><td><code>openrouter/openai/gpt-6-luna</code></td></tr>
+    <tr><td><code>cluster-labels</code></td><td><code>openrouter/openai/gpt-5.4</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td></tr>
+    <tr><td><code>ids-mapping</code></td><td><code>openrouter/openai/gpt-5.4</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td></tr>
+  </tbody></table>
+  <p>The first four follow the seat each shadows. <code>ids-mapping</code> is the one default with no matching GPT seat to follow: its <code>pyproject.toml</code> entry already runs on the local lane, so its fallback is rotated by the stated rule rather than by a seat, taking <code>gpt-6.1-sol</code> as the full model of the current generation.</p>
+
+  <h4>Assertion the rotation broke, repaired</h4>
+  <p><code>tests/core/test_settings.py::TestDiscoveryFunctionSeats::test_cluster_labels_keeps_openrouter_seat</code> pinned <code>cluster-labels</code> to the pre-rotation <code>gpt-5.4</code>, so the seat move turned it red. The expected id is updated to <code>openrouter/openai/gpt-6.1-sol</code>, keeping the assertion's intent that the seat stays on an OpenRouter model whose endpoint is unresolved rather than moving to the local lane &mdash; a local seat would miss the whole label cache on the next DD build.</p>
+
+  <h4>Seats and settings left alone</h4>
+  <ul>
+    <li>Non-production reviewer profiles: <code>quality-cost-balanced</code> (pins <code>gpt-5.4</code>), <code>opus-only</code>, <code>local-only</code>. These are opt-in alternatives, not the active production profile.</li>
+    <li><code>[sn-benchmark]</code> measurement panels: <code>compose-models</code>, <code>candidate-models</code>, <code>reviewer-model</code> and <code>reviewer-models</code> are the measurement slate, not production seats.</li>
+    <li>Switch-back comments: the <code>[sn-compose]</code> switch-back comment naming <code>gpt-5.5</code>, and the commented <code>[sn-fanout]</code> proposer alternative naming <code>gpt-5.5</code>. Neither is a live seat.</li>
+  </ul>
+
+  <h4>Measure: no live seat or fallback names a gpt-5 model</h4>
+  <p>A grep for <code>gpt-5</code> over <code>pyproject.toml</code> returns 16 hits, every one inside an excluded set named above: the <code>[sn-compose]</code> switch-back comment (line 498), the <code>quality-cost-balanced</code> profile (line 723), the <code>[sn-benchmark]</code> panels (lines 752&ndash;756, 780, 796), the commented <code>[sn-fanout]</code> proposer alternative (line 828), and the <code>openrouter-pricing</code> table (lines 907&ndash;954, which prices retired models and is not a seat). No live seat names a <code>gpt-5.x</code> model.</p>
+  <p>The same grep over <code>imas_codex/settings.py</code> returns 8 hits, all of them inside <code>_SN_BENCHMARK_DEFAULTS</code> (lines 1956&ndash;1961, 1975, 1983) &mdash; the measurement panels, the same exclusion the <code>[sn-benchmark]</code> list gets. No <code>_MODEL_DEFAULTS</code> entry names a <code>gpt-5</code> model.</p>
+
+  <h4>Test evidence</h4>
+  <p><code>tests/core/test_gpt6_seat_rotation.py</code> resolves all eight rotated seats through the project's own accessors &mdash; <code>settings.get_model</code> for the five scalar seats, and <code>get_sn_review_docs_models</code>, <code>get_sn_review_profile_models("default")</code> and <code>get_model_source_models("sn-review:names")</code> for the three chain seats &mdash; and asserts each resolves to its new model. A ninth assertion walks <code>_MODEL_DEFAULTS</code> and requires no entry to name a <code>gpt-5</code> model, holding the fallback path to the same rotation. Run against the base sources it fails 9 of 9 at <code>EXIT=1</code>; against the rotated tree it passes 9 of 9 at <code>EXIT=0</code>.</p>
+  <p>The model-settings gate (<code>tests/core/test_settings.py</code>, <code>test_gpt6_model_support.py</code>, <code>test_model_seat_names.py</code>, <code>tests/discovery/test_llm_*.py</code>) now runs <strong>218 passed, 0 failed at both arms</strong> (<code>EXIT=0</code> each). Against the base sources it is 218 passed; the merged tree adds no failure, the added <code>test_cluster_labels_keeps_openrouter_seat</code> failure having been repaired in this change.</p>
+</section>

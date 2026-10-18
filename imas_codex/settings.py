@@ -191,14 +191,14 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # seat so the standard-names stage's model changes independently of the
     # discovery and mapping seats.
     "sn-judge": "typesafe/jev-1.13",
-    "cluster-labels": "openrouter/openai/gpt-5.4",
-    "ids-mapping": "openrouter/openai/gpt-5.4",
+    "cluster-labels": "openrouter/openai/gpt-6.1-sol",
+    "ids-mapping": "openrouter/openai/gpt-6.1-sol",
     "agent": "openrouter/anthropic/claude-sonnet-4.6",
     "compaction": "openrouter/anthropic/claude-haiku-4.5",
     "reasoning": "openrouter/anthropic/claude-sonnet-4.6",
     "dd-enrichment": "openrouter/anthropic/claude-sonnet-4.6",
     "sn-compose": "openrouter/anthropic/claude-sonnet-4.6",
-    "sn-docs": "openrouter/openai/gpt-5.5",
+    "sn-docs": "openrouter/openai/gpt-6.1-sol",
     # Refinement must synthesize a corrected candidate from reviewer feedback,
     # so it uses compose-tier capability rather than a lightweight classifier.
     "sn-refine": "openrouter/anthropic/claude-sonnet-4.6",
@@ -215,7 +215,7 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # Physics-domain classifier for DD paths (SN names inherit the domain).
     # Owns a seat rather than borrowing a generic one so the model choice is
     # attributable to the SN pipeline.
-    "sn-classifier": "openrouter/openai/gpt-5.5",
+    "sn-classifier": "openrouter/openai/gpt-6-luna",
     # The two-level category-then-domain Choice over the physics-domain
     # guidance, which decides a domain from a probability distribution rather
     # than from free text. It runs through the decisions endpoint, so it holds
@@ -226,7 +226,7 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # Adjudicates banned-prose grep flags on refined docs at the campaign
     # convergence gate; quorum-independent. Active model in
     # [tool.imas-codex.sn-prose-adjudicator].
-    "sn-prose-adjudicator": "openrouter/openai/gpt-5.6-luna",
+    "sn-prose-adjudicator": "openrouter/openai/gpt-6-luna",
     # PR-description synthesis for catalog review PRs: grounds on the release
     # message, the frozen batch artifact, and the per-domain catalog diff to
     # write a concise human summary. Summarisation task — language tier.
