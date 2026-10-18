@@ -1,0 +1,686 @@
+[
+ {
+  "sheet_id": "row-060",
+  "source_path": "",
+  "source_description": "Normalized particle flux driven by electrostatic potential (E×B drift)",
+  "source_unit": "1",
+  "ancestor_name": "normalized_particle_flux_due_to_e_cross_b_drift",
+  "refined_name": "particle_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+  "refined_description": "Normalized particle flux contribution driven by the perturbed parallel magnetic field."
+ },
+ {
+  "sheet_id": "row-037",
+  "source_path": "",
+  "source_description": "Initial Stokes parameter describing the reference polarization state of the probing beam before plasma interaction, per polarimeter channel line-of-sight.",
+  "source_unit": "m",
+  "ancestor_name": "initial_stokes_parameter_of_polarimeter_beam",
+  "refined_name": "initial_wavelength_of_wave_beam",
+  "refined_description": "Wavelength of the probing wave beam before plasma interaction."
+ },
+ {
+  "sheet_id": "row-018",
+  "source_path": "",
+  "source_description": "Line-of-sight integrated fast-ion spectral-line emissivity from charge-exchange emission.",
+  "source_unit": "m^-2.s^-1.sr^-1",
+  "ancestor_name": "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+  "refined_name": "fast_ion_radiance_at_spectral_line_due_to_charge_exchange",
+  "refined_description": "Photon radiance from fast-ion charge exchange in a selected spectral line."
+ },
+ {
+  "sheet_id": "row-028",
+  "source_path": "dd:core_profiles/global_quantities/t_e_peaking",
+  "source_description": "Electron temperature at magnetic axis divided by its volume average inside the plasma boundary.",
+  "source_unit": "1",
+  "ancestor_name": "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_inside_flux_surface",
+  "refined_name": "ratio_of_electron_temperature_at_magnetic_axis_to_volume_averaged_electron_temperature",
+  "refined_description": "Electron temperature at the magnetic axis divided by the volume-averaged electron temperature."
+ },
+ {
+  "sheet_id": "row-013",
+  "source_path": "",
+  "source_description": "Power conducted along magnetic field lines in the halo plasma region during a disruption",
+  "source_unit": "W",
+  "ancestor_name": "power_over_halo_region",
+  "refined_name": "field_aligned_power_over_halo_region_due_to_conduction",
+  "refined_description": "Power transported by field-aligned conduction across the halo plasma."
+ },
+ {
+  "sheet_id": "row-073",
+  "source_path": "",
+  "source_description": "Total power equal to the time derivative of diamagnetic stored plasma energy.",
+  "source_unit": "W",
+  "ancestor_name": "total_diamagnetic_stored_power",
+  "refined_name": "time_derivative_of_total_diamagnetic_energy",
+  "refined_description": "Power equal to the rate of change of total plasma diamagnetic stored energy."
+ },
+ {
+  "sheet_id": "row-069",
+  "source_path": "dd:equilibrium/time_slice/boundary_secondary_separatrix/distance_inner_outer",
+  "source_description": "Radial separation between the inner and outer secondary separatrices on the outboard side.",
+  "source_unit": "m",
+  "ancestor_name": "radial_inner_outer_distance_of_secondary_separatrix",
+  "refined_name": "radial_distance_at_outboard_midplane_separatrix",
+  "refined_description": "Radial separation between inner and outer secondary separatrix branches at the outboard midplane."
+ },
+ {
+  "sheet_id": "row-021",
+  "source_path": "dd:disruption/profiles_1d/power_density_conductive_losses",
+  "source_description": "Volumetric thermal plasma power loss from conductive heat transport during a disruption.",
+  "source_unit": "W.m^-3",
+  "ancestor_name": "thermal_plasma_power_density_due_to_conductive_losses",
+  "refined_name": "total_thermal_power_density_due_to_conductive_losses",
+  "refined_description": "Combined electron and ion thermal power removed per volume by conductive transport."
+ },
+ {
+  "sheet_id": "row-030",
+  "source_path": "",
+  "source_description": "Normalized energy flux due to perturbed parallel magnetic field is the signed normalized contribution of compressional magnetic-field fluctuations parallel to the equilibrium magnetic field to flux-surface-normal turbulent energy transport. For a linear eigenmode, it is the corresponding rotating-frame weight for that energy-flux contribution.",
+  "source_unit": "1",
+  "ancestor_name": "normalized_energy_flux_due_to_perturbed_parallel_magnetic_field",
+  "refined_name": "normalized_radial_gyrocenter_energy_flux_due_to_perturbed_parallel_magnetic_field",
+  "refined_description": "Dimensionless radial gyrocenter energy flux caused by the perturbed parallel magnetic field."
+ },
+ {
+  "sheet_id": "row-031",
+  "source_path": "",
+  "source_description": "Diameter of the focused image spot at the focal plane of the CXRS line-of-sight optics",
+  "source_unit": "m",
+  "ancestor_name": "diameter_of_line_of_sight",
+  "refined_name": "viewing_diameter_of_line_of_sight",
+  "refined_description": "Diameter of the focused viewing spot at the image plane for a line of sight."
+ },
+ {
+  "sheet_id": "row-055",
+  "source_path": "dd:bolometer/power_radiated_total",
+  "source_description": "Total electromagnetic power radiated by the plasma across all wavelengths and emission processes.",
+  "source_unit": "W",
+  "ancestor_name": "total_radiated_power",
+  "refined_name": "total_plasma_radiated_power",
+  "refined_description": "Total electromagnetic power radiated by the plasma over its full volume."
+ },
+ {
+  "sheet_id": "row-010",
+  "source_path": "",
+  "source_description": "Total perpendicular magnetic field magnitude at the plasma position during plasma initiation, computed as the quadrature sum of stray and eddy current fields.",
+  "source_unit": "T",
+  "ancestor_name": "perpendicular_magnetic_field",
+  "refined_name": "poloidal_total_stray_magnetic_field_magnitude_due_to_eddy_current",
+  "refined_description": "Magnitude of total poloidal stray magnetic field due to eddy currents during plasma initiation."
+ },
+ {
+  "sheet_id": "row-027",
+  "source_path": "dd:core_profiles/global_quantities/t_e_peaking",
+  "source_description": "Electron temperature at magnetic axis divided by its volume average inside the plasma boundary.",
+  "source_unit": "1",
+  "ancestor_name": "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_inside_flux_surface",
+  "refined_name": "ratio_of_electron_temperature_at_magnetic_axis_to_volume_averaged_electron_temperature",
+  "refined_description": "Electron temperature at the magnetic axis divided by its volume average within the plasma boundary."
+ },
+ {
+  "sheet_id": "row-076",
+  "source_path": "",
+  "source_description": "Signed conventional current circulating through a non-axisymmetric correction-coil winding and determining its electromagnetic excitation.",
+  "source_unit": "A",
+  "ancestor_name": "current_of_correction_coil",
+  "refined_name": "current_of_coil_conductor",
+  "refined_description": "Signed conventional current flowing through a coil conductor."
+ },
+ {
+  "sheet_id": "row-012",
+  "source_path": "dd:ferritic/object/axisymmetric/oblique/beta",
+  "source_description": "Beta inclination angle of a ferritic element oblique cross-section, measured counterclockwise from upward vertical.",
+  "source_unit": "rad",
+  "ancestor_name": "beta_angle_of_ferritic_element",
+  "refined_name": "vertical_angle_of_ferritic_element",
+  "refined_description": "Inclination angle of a ferritic element cross-section measured counterclockwise from upward vertical."
+ },
+ {
+  "sheet_id": "row-042",
+  "source_path": "",
+  "source_description": "Total magnitude of the stray magnetic field at the plasma position during plasma initiation.",
+  "source_unit": "T",
+  "ancestor_name": "stray_magnetic_field_magnitude",
+  "refined_name": "stray_magnetic_field_magnitude",
+  "refined_description": "Stray magnetic field magnitude at the plasma position during initiation."
+ },
+ {
+  "sheet_id": "row-061",
+  "source_path": "",
+  "source_description": "Width of the focused viewing spot at the image plane of a line of sight.",
+  "source_unit": "m",
+  "ancestor_name": "viewing_width_of_line_of_sight",
+  "refined_name": "viewing_diameter_of_diagnostic_aperture",
+  "refined_description": "Diameter of the focused viewing image spot defined at the diagnostic aperture image plane."
+ },
+ {
+  "sheet_id": "row-020",
+  "source_path": "",
+  "source_description": "Normalized atomic count of a pellet is the total inventory of atomic nuclei associated with one pellet after division by a fixed reference inventory of 10^20 atomic nuclei, independent of molecular bonding, phase, or species.",
+  "source_unit": "1",
+  "ancestor_name": "normalized_atomic_count_of_pellet",
+  "refined_name": "normalized_molecular_gas_count",
+  "refined_description": "Reference-normalized count of molecules in propellant gas."
+ },
+ {
+  "sheet_id": "row-050",
+  "source_path": "dd:equilibrium/time_slice/boundary_secondary_separatrix/distance_inner_outer",
+  "source_description": "Radial distance from measurement position to separatrix, mapped to outboard midplane, positive outside separatrix.",
+  "source_unit": "m",
+  "ancestor_name": "radial_distance_at_outboard_midplane",
+  "refined_name": "radial_coordinate_of_outboard_midplane_separatrix",
+  "refined_description": "Radial coordinate of the outboard-midplane separatrix in the right-handed cylindrical (R, phi, Z) frame."
+ },
+ {
+  "sheet_id": "row-072",
+  "source_path": "dd:summary/plasma_duration/value",
+  "source_description": "Duration of existence of a confined plasma during a single pulse",
+  "source_unit": "s",
+  "ancestor_name": "plasma_duration",
+  "refined_name": "plasma_pulse_confinement_time",
+  "refined_description": "Elapsed time from plasma formation to loss of confinement during a pulse."
+ },
+ {
+  "sheet_id": "row-034",
+  "source_path": "dd:summary/local/separatrix_average/velocity_phi/krypton/value",
+  "source_description": "Density-weighted toroidal bulk velocity of krypton ions, averaged over all ionization states and the last closed magnetic flux surface in the right-handed cylindrical (R, φ, Z) frame.",
+  "source_unit": "m.s^-1",
+  "ancestor_name": "toroidal_flux_surface_averaged_krypton_velocity_at_plasma_boundary",
+  "refined_name": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+  "refined_description": "Flux-surface-averaged density-weighted toroidal velocity of krypton ions at the plasma boundary."
+ },
+ {
+  "sheet_id": "row-063",
+  "source_path": "",
+  "source_description": "Amplitude of the current on an ICRH antenna strap module.",
+  "source_unit": "A",
+  "ancestor_name": "current_of_antenna_strap_amplitude",
+  "refined_name": "root_mean_square_wave_current_of_antenna_strap",
+  "refined_description": "Root mean square radio-frequency current flowing along an ion cyclotron heating antenna strap."
+ },
+ {
+  "sheet_id": "row-048",
+  "source_path": "",
+  "source_description": "Total thermal energy deposited in a plasma-facing component, as measured by calorimetry over the entire discharge.",
+  "source_unit": "J",
+  "ancestor_name": "total_energy",
+  "refined_name": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+  "refined_description": "Total discharge-accumulated energy absorbed by coolant from a calorimetry component."
+ },
+ {
+  "sheet_id": "row-017",
+  "source_path": "",
+  "source_description": "Line-of-sight integrated fast-ion spectral-line emissivity from charge-exchange emission.",
+  "source_unit": "m^-2.s^-1.sr^-1",
+  "ancestor_name": "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+  "refined_name": "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
+  "refined_description": "Photon radiance of a selected fast-ion charge-exchange spectral line along a viewing path."
+ },
+ {
+  "sheet_id": "row-053",
+  "source_path": "dd:wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+  "source_description": "Incident energy flux from neutral particle recombination at the wall.",
+  "source_unit": "m^-2.s^-1",
+  "ancestor_name": "neutral_energy_flux_due_to_recombination",
+  "refined_name": "incident_neutral_energy_flux_at_wall_due_to_recombination",
+  "refined_description": "Incident neutral energy flux at the wall caused by surface recombination."
+ },
+ {
+  "sheet_id": "row-025",
+  "source_path": "dd:wall/description_2d/limiter/unit/power_nuclear",
+  "source_description": "Total nuclear heating power deposited in limiter tile material by neutrons and gamma radiation.",
+  "source_unit": "W",
+  "ancestor_name": "total_deposited_nuclear_heating_power_of_limiter_tile",
+  "refined_name": "nuclear_heating_power_of_limiter_tile",
+  "refined_description": "Heating power deposited in one limiter tile by neutron and gamma interactions."
+ },
+ {
+  "sheet_id": "row-023",
+  "source_path": "",
+  "source_description": "Spectral response function of a spectrometer channel, convolved with the line-integrated emission to yield detector count rate",
+  "source_unit": "m.sr",
+  "ancestor_name": "spectral_instrument_function_of_spectrometer_channel",
+  "refined_name": "spectral_factor_of_spectrometer_channel",
+  "refined_description": "Spectral response factor of a spectrometer channel instrument function."
+ },
+ {
+  "sheet_id": "row-067",
+  "source_path": "dd:summary/global_quantities/power_loss/value",
+  "source_description": "Total net thermal and kinetic power crossing the last closed flux surface into the scrape-off layer.",
+  "source_unit": "W",
+  "ancestor_name": "net_power_at_plasma_boundary",
+  "refined_name": "surface_integrated_flux_surface_normal_net_plasma_energy_flux_at_plasma_boundary",
+  "refined_description": "Surface-integrated net plasma energy flux normal to the plasma boundary, outward to the scrape-off layer."
+ },
+ {
+  "sheet_id": "row-002",
+  "source_path": "dd:divertors/divertor/power_currents",
+  "source_description": "Total ohmic-dissipation power deposited on divertor targets.",
+  "source_unit": "W",
+  "ancestor_name": "total_deposited_power_at_divertor_target_due_to_ohmic_dissipation",
+  "refined_name": "power_of_divertor_due_to_ohmic_dissipation",
+  "refined_description": "Power dissipated by electric currents, summed over the complete divertor assembly."
+ },
+ {
+  "sheet_id": "row-075",
+  "source_path": "",
+  "source_description": "Signed conventional current circulating through a non-axisymmetric correction-coil winding and determining its electromagnetic excitation.",
+  "source_unit": "A",
+  "ancestor_name": "current_of_correction_coil",
+  "refined_name": "non_axisymmetric_current_of_coil_conductor",
+  "refined_description": "Signed conventional current carried by a non-axisymmetric coil conductor."
+ },
+ {
+  "sheet_id": "row-004",
+  "source_path": "dd:reflectometer_fluctuation/channel/doppler/shift",
+  "source_description": "Doppler beat frequency of the main peak in the reflected probing-wave spectrum.",
+  "source_unit": "Hz",
+  "ancestor_name": "reflected_wave_doppler_beat_frequency",
+  "refined_name": "difference_of_reflected_wave_frequency_and_launched_wave_frequency",
+  "refined_description": "Frequency difference between reflected and launched electromagnetic waves."
+ },
+ {
+  "sheet_id": "row-019",
+  "source_path": "",
+  "source_description": "Normalized atomic count of a pellet is the total inventory of atomic nuclei associated with one pellet after division by a fixed reference inventory of 10^20 atomic nuclei, independent of molecular bonding, phase, or species.",
+  "source_unit": "1",
+  "ancestor_name": "normalized_atomic_count_of_pellet",
+  "refined_name": "normalized_molecular_gas_count",
+  "refined_description": "Reference-normalized count of propellant-gas molecules."
+ },
+ {
+  "sheet_id": "row-057",
+  "source_path": "",
+  "source_description": "Total volume within the breeder blanket occupied by lead-lithium coolant-breeder material.",
+  "source_unit": "m^3",
+  "ancestor_name": "total_coolant_volume_of_breeder_blanket",
+  "refined_name": "volume_of_breeder_blanket",
+  "refined_description": "Volume of lead-lithium breeder material contained in a breeder blanket."
+ },
+ {
+  "sheet_id": "row-022",
+  "source_path": "dd:disruption/profiles_1d/power_density_conductive_losses",
+  "source_description": "Volumetric thermal plasma power loss from conductive heat transport during a disruption.",
+  "source_unit": "W.m^-3",
+  "ancestor_name": "thermal_plasma_power_density_due_to_conductive_losses",
+  "refined_name": "total_power_density_due_to_conductive_losses",
+  "refined_description": "Total volumetric plasma power loss rate due to conductive losses."
+ },
+ {
+  "sheet_id": "row-040",
+  "source_path": "",
+  "source_description": "Elapsed time from plasma formation to loss of confinement during a discharge.",
+  "source_unit": "s",
+  "ancestor_name": "plasma_confinement_time",
+  "refined_name": "pulse_duration",
+  "refined_description": "Duration from plasma formation to loss of confinement during one discharge pulse."
+ },
+ {
+  "sheet_id": "row-003",
+  "source_path": "dd:reflectometer_fluctuation/channel/doppler/shift",
+  "source_description": "Doppler beat frequency of the main peak in the reflected probing-wave spectrum.",
+  "source_unit": "Hz",
+  "ancestor_name": "reflected_wave_doppler_beat_frequency",
+  "refined_name": "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency",
+  "refined_description": "Frequency offset between the reflected-wave spectral peak and the launched wave."
+ },
+ {
+  "sheet_id": "row-006",
+  "source_path": "",
+  "source_description": "Flux-surface average of the squared gradient of the radial flux coordinate divided by squared major radius, defining a radial metric coefficient for flux-coordinate transport equations.",
+  "source_unit": "1",
+  "ancestor_name": "radial_flux_surface_averaged_metric",
+  "refined_name": "flux_surface_averaged_inverse_of_major_radius",
+  "refined_description": "Flux-surface average of the reciprocal of major radius."
+ },
+ {
+  "sheet_id": "row-011",
+  "source_path": "dd:ferritic/object/axisymmetric/oblique/beta",
+  "source_description": "Beta inclination angle of a ferritic element oblique cross-section, measured counterclockwise from upward vertical.",
+  "source_unit": "rad",
+  "ancestor_name": "beta_angle_of_ferritic_element",
+  "refined_name": "vertical_angle_of_ferritic_element",
+  "refined_description": "Angle of a ferritic element cross-section, positive counterclockwise from upward vertical."
+ },
+ {
+  "sheet_id": "row-046",
+  "source_path": "",
+  "source_description": "Coefficient in the Rutherford equation governing neoclassical tearing mode island width evolution.",
+  "source_unit": "m^-1",
+  "ancestor_name": "coefficient_of_neoclassical_tearing_mode",
+  "refined_name": "net_coefficient_due_to_neoclassical_tearing_mode",
+  "refined_description": "Net Rutherford equation coefficient for neoclassical tearing mode island width evolution."
+ },
+ {
+  "sheet_id": "row-054",
+  "source_path": "dd:wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+  "source_description": "Incident energy flux from neutral particle recombination at the wall.",
+  "source_unit": "m^-2.s^-1",
+  "ancestor_name": "neutral_energy_flux_due_to_recombination",
+  "refined_name": "incident_neutral_energy_flux_at_wall_due_to_recombination",
+  "refined_description": "Incident neutral-particle energy flux at the wall due to surface recombination."
+ },
+ {
+  "sheet_id": "row-047",
+  "source_path": "",
+  "source_description": "Coefficient in the Rutherford equation governing neoclassical tearing mode island width evolution.",
+  "source_unit": "m^-1",
+  "ancestor_name": "coefficient_of_neoclassical_tearing_mode",
+  "refined_name": "net_coefficient_due_to_neoclassical_tearing_mode",
+  "refined_description": "Net coefficient in the Rutherford equation for neoclassical tearing-mode island width evolution."
+ },
+ {
+  "sheet_id": "row-001",
+  "source_path": "dd:divertors/divertor/power_currents",
+  "source_description": "Total ohmic-dissipation power deposited on divertor targets.",
+  "source_unit": "W",
+  "ancestor_name": "total_deposited_power_at_divertor_target_due_to_ohmic_dissipation",
+  "refined_name": "power_of_divertor_due_to_ohmic_dissipation",
+  "refined_description": "Electrical-current dissipation power deposited on the complete divertor assembly."
+ },
+ {
+  "sheet_id": "row-032",
+  "source_path": "",
+  "source_description": "Diameter of the focused image spot at the focal plane of the CXRS line-of-sight optics",
+  "source_unit": "m",
+  "ancestor_name": "diameter_of_line_of_sight",
+  "refined_name": "viewing_diameter_of_line_of_sight",
+  "refined_description": "Diameter of the focused viewing spot at a line-of-sight image plane."
+ },
+ {
+  "sheet_id": "row-045",
+  "source_path": "",
+  "source_description": "Radius of an iron-core segment is the non-negative geometry radius used to define that segment’s boundary in the poloidal cross-section of the right-handed cylindrical (R, φ, Z) frame, where R is major radius and Z is vertical height. It is axis-referenced only for boundary geometry defined about the toroidal symmetry axis; otherwise it is the radius about the specified arc center.",
+  "source_unit": "m",
+  "ancestor_name": "radius_of_iron_core_segment",
+  "refined_name": "curvature_inverse_of_arc_of_circle_center",
+  "refined_description": "Radius of curvature of an arc defining an iron-core segment boundary."
+ },
+ {
+  "sheet_id": "row-044",
+  "source_path": "",
+  "source_description": "Radius of an iron-core segment is the non-negative geometry radius used to define that segment’s boundary in the poloidal cross-section of the right-handed cylindrical (R, φ, Z) frame, where R is major radius and Z is vertical height. It is axis-referenced only for boundary geometry defined about the toroidal symmetry axis; otherwise it is the radius about the specified arc center.",
+  "source_unit": "m",
+  "ancestor_name": "radius_of_iron_core_segment",
+  "refined_name": "curvature_inverse_of_iron_core_segment",
+  "refined_description": "Radius of curvature of an arc defining an iron-core segment boundary."
+ },
+ {
+  "sheet_id": "row-064",
+  "source_path": "",
+  "source_description": "Amplitude of the current on an ICRH antenna strap module.",
+  "source_unit": "A",
+  "ancestor_name": "current_of_antenna_strap_amplitude",
+  "refined_name": "root_mean_square_wave_current_of_antenna_strap",
+  "refined_description": "Root-mean-square radio-frequency current flowing along an antenna strap."
+ },
+ {
+  "sheet_id": "row-062",
+  "source_path": "",
+  "source_description": "Width of the focused viewing spot at the image plane of a line of sight.",
+  "source_unit": "m",
+  "ancestor_name": "viewing_width_of_line_of_sight",
+  "refined_name": "diameter_of_diagnostic_aperture",
+  "refined_description": "Diameter of the focused fiber image spot at the image plane."
+ },
+ {
+  "sheet_id": "row-066",
+  "source_path": "dd:divertors/divertor/power_nuclear",
+  "source_description": "Power deposited as nuclear heating in the divertor structure by fusion reactions.",
+  "source_unit": "W",
+  "ancestor_name": "nuclear_heating_power_of_divertor_due_to_fusion",
+  "refined_name": "deposited_power_of_divertor_due_to_fusion",
+  "refined_description": "Power deposited in the divertor structure by fusion reactions."
+ },
+ {
+  "sheet_id": "row-036",
+  "source_path": "",
+  "source_description": "Initial Stokes parameter describing the reference polarization state of the probing beam before plasma interaction, per polarimeter channel line-of-sight.",
+  "source_unit": "m",
+  "ancestor_name": "initial_stokes_parameter_of_polarimeter_beam",
+  "refined_name": "s0_initial_stokes_parameter_of_polarimeter_beam",
+  "refined_description": "Initial S0 Stokes parameter of the polarimeter beam before plasma interaction."
+ },
+ {
+  "sheet_id": "row-014",
+  "source_path": "",
+  "source_description": "Power conducted along magnetic field lines in the halo plasma region during a disruption",
+  "source_unit": "W",
+  "ancestor_name": "power_over_halo_region",
+  "refined_name": "field_aligned_power_over_halo_region_due_to_conduction",
+  "refined_description": "Power transported by field-aligned conduction over the halo plasma region."
+ },
+ {
+  "sheet_id": "row-049",
+  "source_path": "",
+  "source_description": "Total thermal energy deposited in a plasma-facing component, as measured by calorimetry over the entire discharge.",
+  "source_unit": "J",
+  "ancestor_name": "total_energy",
+  "refined_name": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+  "refined_description": "Total discharge-accumulated coolant-absorbed energy of a calorimetry component."
+ },
+ {
+  "sheet_id": "row-039",
+  "source_path": "dd:equilibrium/time_slice/profiles_1d/gm2",
+  "source_description": "Flux-surface-averaged magnitude of the radial gradient of the poloidal flux coordinate, gm7 = ⟨|∇ρ|⟩",
+  "source_unit": "1",
+  "ancestor_name": "radial_flux_surface_averaged_metric_magnitude",
+  "refined_name": "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+  "refined_description": "Flux-surface average of the squared toroidal flux coordinate gradient magnitude divided by squared major radius."
+ },
+ {
+  "sheet_id": "row-071",
+  "source_path": "dd:summary/plasma_duration/value",
+  "source_description": "Duration of existence of a confined plasma during a single pulse",
+  "source_unit": "s",
+  "ancestor_name": "plasma_duration",
+  "refined_name": "plasma_pulse_confinement_time",
+  "refined_description": "Elapsed time for which plasma remains confined during a discharge pulse."
+ },
+ {
+  "sheet_id": "row-051",
+  "source_path": "dd:equilibrium/time_slice/boundary_secondary_separatrix/distance_inner_outer",
+  "source_description": "Radial distance from measurement position to separatrix, mapped to outboard midplane, positive outside separatrix.",
+  "source_unit": "m",
+  "ancestor_name": "radial_distance_at_outboard_midplane",
+  "refined_name": "radial_gap_of_separatrix",
+  "refined_description": "Radial gap between the inner and outer branches of the secondary separatrix."
+ },
+ {
+  "sheet_id": "row-038",
+  "source_path": "dd:equilibrium/time_slice/profiles_1d/gm2",
+  "source_description": "Flux-surface-averaged magnitude of the radial gradient of the poloidal flux coordinate, gm7 = ⟨|∇ρ|⟩",
+  "source_unit": "1",
+  "ancestor_name": "radial_flux_surface_averaged_metric_magnitude",
+  "refined_name": "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+  "refined_description": "Dimensionless flux-surface average of squared toroidal-flux-coordinate gradient over squared major radius."
+ },
+ {
+  "sheet_id": "row-005",
+  "source_path": "",
+  "source_description": "Flux-surface average of the squared gradient of the radial flux coordinate divided by squared major radius, defining a radial metric coefficient for flux-coordinate transport equations.",
+  "source_unit": "1",
+  "ancestor_name": "radial_flux_surface_averaged_metric",
+  "refined_name": "radial_flux_surface_averaged_metric",
+  "refined_description": "Flux-surface-averaged inverse major radius metric coefficient."
+ },
+ {
+  "sheet_id": "row-068",
+  "source_path": "dd:summary/global_quantities/power_loss/value",
+  "source_description": "Total net thermal and kinetic power crossing the last closed flux surface into the scrape-off layer.",
+  "source_unit": "W",
+  "ancestor_name": "net_power_at_plasma_boundary",
+  "refined_name": "surface_integrated_flux_surface_normal_net_plasma_energy_flux_at_plasma_boundary",
+  "refined_description": "Net surface-integrated plasma energy flux crossing the plasma boundary into the scrape-off layer."
+ },
+ {
+  "sheet_id": "row-041",
+  "source_path": "",
+  "source_description": "Elapsed time from plasma formation to loss of confinement during a discharge.",
+  "source_unit": "s",
+  "ancestor_name": "plasma_confinement_time",
+  "refined_name": "plasma_duration",
+  "refined_description": "Elapsed time between plasma formation and loss of confinement during one discharge."
+ },
+ {
+  "sheet_id": "row-058",
+  "source_path": "",
+  "source_description": "Total volume within the breeder blanket occupied by lead-lithium coolant-breeder material.",
+  "source_unit": "m^3",
+  "ancestor_name": "total_coolant_volume_of_breeder_blanket",
+  "refined_name": "volume_of_breeder_blanket",
+  "refined_description": "Volume of lead-lithium breeder material contained in the breeder blanket."
+ },
+ {
+  "sheet_id": "row-074",
+  "source_path": "",
+  "source_description": "Total power equal to the time derivative of diamagnetic stored plasma energy.",
+  "source_unit": "W",
+  "ancestor_name": "total_diamagnetic_stored_power",
+  "refined_name": "time_derivative_of_total_diamagnetic_energy",
+  "refined_description": "Rate of change of total diamagnetic stored energy in the plasma."
+ },
+ {
+  "sheet_id": "row-052",
+  "source_path": "dd:spi/injector/shatter_cone/origin/r",
+  "source_description": "Major-radius coordinate of the shatter-cone origin, defined as its perpendicular distance from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.",
+  "source_unit": "m",
+  "ancestor_name": "radial_coordinate_of_shattering_position",
+  "refined_name": "radial_coordinate_of_shatter_cone",
+  "refined_description": "Radial coordinate of the shatter-cone origin in the right-handed cylindrical (R, phi, Z) frame."
+ },
+ {
+  "sheet_id": "row-056",
+  "source_path": "dd:bolometer/power_radiated_total",
+  "source_description": "Total electromagnetic power radiated by the plasma across all wavelengths and emission processes.",
+  "source_unit": "W",
+  "ancestor_name": "total_radiated_power",
+  "refined_name": "total_plasma_radiated_power",
+  "refined_description": "Volume-integrated power radiated by the plasma over all photon-emission mechanisms."
+ },
+ {
+  "sheet_id": "row-016",
+  "source_path": "",
+  "source_description": "Standard deviation of the fluctuating floating electrostatic potential.",
+  "source_unit": "V",
+  "ancestor_name": "fluctuating_floating_electrostatic_potential_amplitude",
+  "refined_name": "root_mean_square_fluctuating_electrostatic_potential",
+  "refined_description": "Root-mean-square level of electrostatic-potential fluctuations."
+ },
+ {
+  "sheet_id": "row-007",
+  "source_path": "dd:summary/plasma_duration/value",
+  "source_description": "Duration of existence of a confined plasma during a single pulse",
+  "source_unit": "s",
+  "ancestor_name": "plasma_duration",
+  "refined_name": "pulse_confinement_time",
+  "refined_description": "Elapsed time during a discharge pulse for which confined plasma is present."
+ },
+ {
+  "sheet_id": "row-024",
+  "source_path": "",
+  "source_description": "Spectral response function of a spectrometer channel, convolved with the line-integrated emission to yield detector count rate",
+  "source_unit": "m.sr",
+  "ancestor_name": "spectral_instrument_function_of_spectrometer_channel",
+  "refined_name": "spectral_factor_of_spectrometer_channel",
+  "refined_description": "Spectral response factor converting a channel input emission spectrum to detector count rate."
+ },
+ {
+  "sheet_id": "row-033",
+  "source_path": "dd:divertors/divertor/target/power_incident_fraction",
+  "source_description": "Fraction of the total incident power on the divertor that is deposited on a specific divertor target, characterizing power sharing between targets.",
+  "source_unit": "1",
+  "ancestor_name": "incident_fraction_at_divertor_target",
+  "refined_name": "ratio_of_deposited_power_at_divertor_target_to_total_incident_power_of_divertor",
+  "refined_description": "Deposited power on one divertor target divided by total incident power on the divertor."
+ },
+ {
+  "sheet_id": "row-035",
+  "source_path": "dd:summary/local/separatrix_average/velocity_phi/krypton/value",
+  "source_description": "Density-weighted toroidal bulk velocity of krypton ions, averaged over all ionization states and the last closed magnetic flux surface in the right-handed cylindrical (R, φ, Z) frame.",
+  "source_unit": "m.s^-1",
+  "ancestor_name": "toroidal_flux_surface_averaged_krypton_velocity_at_plasma_boundary",
+  "refined_name": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+  "refined_description": "Density-weighted toroidal velocity of krypton ions averaged over the plasma boundary and ionization states."
+ },
+ {
+  "sheet_id": "row-008",
+  "source_path": "dd:summary/plasma_duration/value",
+  "source_description": "Duration of existence of a confined plasma during a single pulse",
+  "source_unit": "s",
+  "ancestor_name": "plasma_duration",
+  "refined_name": "plasma_pulse_confinement_time",
+  "refined_description": "Elapsed time for which plasma is present and confined during a discharge pulse."
+ },
+ {
+  "sheet_id": "row-029",
+  "source_path": "",
+  "source_description": "Normalized energy flux due to perturbed parallel magnetic field is the signed normalized contribution of compressional magnetic-field fluctuations parallel to the equilibrium magnetic field to flux-surface-normal turbulent energy transport. For a linear eigenmode, it is the corresponding rotating-frame weight for that energy-flux contribution.",
+  "source_unit": "1",
+  "ancestor_name": "normalized_energy_flux_due_to_perturbed_parallel_magnetic_field",
+  "refined_name": "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+  "refined_description": "Dimensionless energy flux due to perturbed parallel magnetic field."
+ },
+ {
+  "sheet_id": "row-015",
+  "source_path": "",
+  "source_description": "Standard deviation of the fluctuating floating electrostatic potential.",
+  "source_unit": "V",
+  "ancestor_name": "fluctuating_floating_electrostatic_potential_amplitude",
+  "refined_name": "root_mean_square_fluctuating_floating_electrostatic_potential",
+  "refined_description": "Standard deviation of fluctuations in the floating electrostatic potential."
+ },
+ {
+  "sheet_id": "row-070",
+  "source_path": "dd:equilibrium/time_slice/boundary_secondary_separatrix/distance_inner_outer",
+  "source_description": "Radial separation between the inner and outer secondary separatrices on the outboard side.",
+  "source_unit": "m",
+  "ancestor_name": "radial_inner_outer_distance_of_secondary_separatrix",
+  "refined_name": "radial_distance_at_outboard_midplane_separatrix",
+  "refined_description": "Radial separation of the inner and outer secondary separatrices on the outboard side."
+ },
+ {
+  "sheet_id": "row-065",
+  "source_path": "dd:divertors/divertor/power_nuclear",
+  "source_description": "Power deposited as nuclear heating in the divertor structure by fusion reactions.",
+  "source_unit": "W",
+  "ancestor_name": "nuclear_heating_power_of_divertor_due_to_fusion",
+  "refined_name": "deposited_power_of_divertor_due_to_fusion",
+  "refined_description": "Power deposited in the divertor structure by fusion nuclear reactions."
+ },
+ {
+  "sheet_id": "row-059",
+  "source_path": "",
+  "source_description": "Normalized particle flux driven by electrostatic potential (E×B drift)",
+  "source_unit": "1",
+  "ancestor_name": "normalized_particle_flux_due_to_e_cross_b_drift",
+  "refined_name": "particle_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+  "refined_description": "Normalized particle flux contribution from the perturbed parallel magnetic field."
+ },
+ {
+  "sheet_id": "row-009",
+  "source_path": "",
+  "source_description": "Total perpendicular magnetic field magnitude at the plasma position during plasma initiation, computed as the quadrature sum of stray and eddy current fields.",
+  "source_unit": "T",
+  "ancestor_name": "perpendicular_magnetic_field",
+  "refined_name": "poloidal_stray_magnetic_field_magnitude_due_to_eddy_current",
+  "refined_description": "Magnitude of the poloidal stray magnetic field due to eddy currents during plasma initiation."
+ },
+ {
+  "sheet_id": "row-043",
+  "source_path": "",
+  "source_description": "Total magnitude of the stray magnetic field at the plasma position during plasma initiation.",
+  "source_unit": "T",
+  "ancestor_name": "stray_magnetic_field_magnitude",
+  "refined_name": "stray_magnetic_field",
+  "refined_description": "Stray magnetic field magnitude at the plasma position during plasma initiation."
+ },
+ {
+  "sheet_id": "row-026",
+  "source_path": "dd:wall/description_2d/limiter/unit/power_nuclear",
+  "source_description": "Total nuclear heating power deposited in limiter tile material by neutrons and gamma radiation.",
+  "source_unit": "W",
+  "ancestor_name": "total_deposited_nuclear_heating_power_of_limiter_tile",
+  "refined_name": "nuclear_heating_power_of_limiter_tile",
+  "refined_description": "Nuclear heating power deposited in a limiter tile by neutron and gamma interactions."
+ }
+]
