@@ -1,0 +1,180 @@
+{
+  "schema": "learned-acceptance",
+  "source": {
+    "features": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-results.json",
+    "fixture": "docs/evidence/fragments/sn-judgment-evaluation/golden-name-acceptable.json"
+  },
+  "features": {
+    "ids": [
+      "advisory_alias_collapsed",
+      "ambiguity_in_isolation",
+      "bare_shape_parameter_missing_surface",
+      "bound_to_wrong_object",
+      "collapsed_two_quantities",
+      "coupled_vs_launched_confusion",
+      "decomposition_group_absorbed_into_base",
+      "device_attributed_observable",
+      "dropped_distinguishing_axis",
+      "field_region_preposition_wrong",
+      "malformed_physical_base",
+      "minority_spelling_not_in_roster",
+      "missing_required_segment",
+      "model_surname_suffix",
+      "non_canonical_locus_token",
+      "non_canonical_operator_join",
+      "non_canonical_render",
+      "non_canonical_segment_order",
+      "ordered_sample_positional_token",
+      "over_qualified_modifier",
+      "over_specialised_parent",
+      "owner_erased_outline",
+      "redundant_repeated_segment",
+      "retired_operator_spelling",
+      "source_binding_drift",
+      "source_fidelity_unsupported_qualifier",
+      "unit_kind_inconsistent",
+      "unregistered_token_in_closed_segment",
+      "value_provenance_in_name"
+    ],
+    "n": 29
+  },
+  "splits": {
+    "calibration": 380,
+    "validation": 357
+  },
+  "labels": {
+    "validation_accept": 140,
+    "validation_defect": 217,
+    "calibration_accept": 151
+  },
+  "learned": {
+    "point": 0.705793285055958,
+    "lower": 0.6452571354888654,
+    "upper": 0.7592263832394021,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+  },
+  "composite": {
+    "point": 0.6451777485187624,
+    "lower": 0.5878939279140891,
+    "upper": 0.6992023385858874,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+  },
+  "paired": {
+    "point": 0.060615536537195536,
+    "lower": -0.0007710412400668279,
+    "upper": 0.12557033639143717,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+  },
+  "weights": {
+    "feature_ids": [
+      "advisory_alias_collapsed",
+      "ambiguity_in_isolation",
+      "bare_shape_parameter_missing_surface",
+      "bound_to_wrong_object",
+      "collapsed_two_quantities",
+      "coupled_vs_launched_confusion",
+      "decomposition_group_absorbed_into_base",
+      "device_attributed_observable",
+      "dropped_distinguishing_axis",
+      "field_region_preposition_wrong",
+      "malformed_physical_base",
+      "minority_spelling_not_in_roster",
+      "missing_required_segment",
+      "model_surname_suffix",
+      "non_canonical_locus_token",
+      "non_canonical_operator_join",
+      "non_canonical_render",
+      "non_canonical_segment_order",
+      "ordered_sample_positional_token",
+      "over_qualified_modifier",
+      "over_specialised_parent",
+      "owner_erased_outline",
+      "redundant_repeated_segment",
+      "retired_operator_spelling",
+      "source_binding_drift",
+      "source_fidelity_unsupported_qualifier",
+      "unit_kind_inconsistent",
+      "unregistered_token_in_closed_segment",
+      "value_provenance_in_name"
+    ],
+    "coefficients": [
+      -0.2580976803452434,
+      -0.03934515714874478,
+      -0.46141705066800215,
+      -0.2825910074580642,
+      0.29538175558497587,
+      -0.16534743965774956,
+      -0.12113678163286902,
+      -0.15503078296071177,
+      0.17697351559059005,
+      0.2200250342661685,
+      -0.035493939948849106,
+      0.4825173496787493,
+      -0.2949611192054696,
+      0.3075072511055669,
+      0.08643526279872336,
+      -0.8336322464726821,
+      -0.07877313936055426,
+      0.06105186228115818,
+      0.07828702186371571,
+      0.22505438344609657,
+      -0.06546403949036574,
+      0.3742666174161497,
+      -0.06640802750413023,
+      0.46419014289931965,
+      -0.04403984066990405,
+      -0.4114550902765594,
+      0.08931048371748683,
+      -0.06462915365959213,
+      -0.09971290160579353
+    ],
+    "intercept": -0.5522390166532264,
+    "scale": "standardised"
+  },
+  "controls": {
+    "instrument": {
+      "oracle_auc": 1.0,
+      "inverted_auc": 0.0,
+      "passes": true
+    },
+    "composite_recompute": {
+      "max_risk_abs_error": 0.0,
+      "max_mean_abs_error": 0.0,
+      "passes": true
+    },
+    "null": {
+      "shuffles": 200,
+      "master_seed": 20261018,
+      "mean_auc": 0.4985771889400922,
+      "sd_auc": 0.058567276617062944,
+      "min_auc": 0.3718235681369322,
+      "max_auc": 0.6520408163265307,
+      "lower": 0.3849720210664911,
+      "upper": 0.6023164911125741,
+      "contains_half": true,
+      "passes": true,
+      "validation": "0.385-0.602"
+    },
+    "leakage": {
+      "validation_rows_permuted": 357,
+      "identity_permutation": false,
+      "weights_identical": true,
+      "passes": true
+    }
+  },
+  "verdict": {
+    "adopted": false,
+    "reason": "Do not adopt: the learned model's validation AUC exceeds the hand-set composite's by +0.061, but the paired difference interval (-0.001 to +0.126) reaches zero, so the gain is not larger than its own interval and the section's adoption rule is not met."
+  },
+  "spend": {
+    "usd": 0.0,
+    "ceiling_usd": 1.0,
+    "reason": "All 737 golden A name rows already carry frozen Jev answers in the risk-order results, so no judgment was bought; the features are reused rather than re-elicited."
+  }
+}

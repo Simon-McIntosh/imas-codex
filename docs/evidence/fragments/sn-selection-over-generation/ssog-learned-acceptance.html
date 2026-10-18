@@ -1,0 +1,55 @@
+<section id="ssog-learned-acceptance" data-reckon="evidence">
+<h2 id="ssog-learned-acceptance-title">Acceptance learned from judgments</h2>
+<p id="ssog-learned-acceptance-method">Golden A's name rows carry Jev's per-check
+answers, frozen by the risk-order run. Each row becomes 29 features — one
+failure probability per named check — and one label: 1 for an accepted name, 0
+for a known defect. The hand-set composite is the risk-order run's risk, the
+maximum failure probability over the checks with the mean breaking exact ties,
+read here as an acceptance score so that both arms score the same direction
+(higher is more acceptable). A standardised logistic regression (L2,
+C=1.0, lbfgs) is fitted on the calibration split alone
+(380 rows) and read once on the validation split
+(357 rows: 140
+accepted, 217 defects). The split
+membership and the copy-group bootstrap are
+<code>imas_codex.discovery.base.evaluation</code>'s; the split labels come from
+the fixture, not from a split drawn here.</p>
+<p id="ssog-learned-acceptance-result">On validation the learned model scores
+AUC 0.706 (95% interval 0.645-0.759) and the hand-set composite AUC
+0.645 (95% interval 0.588-0.699). The paired difference (learned minus composite over
+the same units) is +0.061 with 95% interval
+-0.001 to +0.126. Both arms are scored as
+acceptance and resampled by copy group, so near-duplicate spellings move
+together; the same numbers are in the results JSON.</p>
+<p id="ssog-learned-acceptance-verdict">Do not adopt: the learned model's validation AUC exceeds the hand-set composite's by +0.061, but the paired difference interval (-0.001 to +0.126) reaches zero, so the gain is not larger than its own interval and the section's adoption rule is not met.</p>
+<p id="ssog-learned-acceptance-controls">Four controls. The AUC reader is shown
+an oracle rank and its inverse and must return 1.000 and 0.000
+(measured 1.000 and
+0.000). Every row's published risk must
+equal the composite recomputed from its own checks, so a leak or a
+re-definition on the way into the features is caught (largest risk error
+0.00e+00, largest mean error
+0.00e+00). The null control
+refits under 200 calibration-label shuffles and takes
+the interval of the resulting validation AUCs, which must contain 0.5: measured
+mean 0.499, sd 0.059,
+interval 0.385-0.602. The interval is taken over the refits
+rather than as a bootstrap of one of them, because a single shuffle's bootstrap
+resamples the validation rows around one fixed randomised weight set — reporting
+the validation set's spread under one noise draw, not whether the fit has skill.
+That the fit reads no validation label is shown separately and directly, by
+permuting the validation labels and refitting through the same fit path, which
+must leave the weights identical
+(weights_identical=True, permutation
+non-identity=True). Each control's
+own measured result is recorded with EXIT= in the run log. Both fire on a
+one-line scratch copy: a fit that reads every row rather than the calibration
+split reddens the leakage control — the weights move under the permutation — and
+lifts the validation AUC to 0.791, which would have flipped the verdict to
+adopt; a null control that skips the shuffle collapses its interval onto the real
+AUC (0.706) and no longer contains 0.5.</p>
+<p id="ssog-learned-acceptance-spend">Spend: USD 0.00 of the
+USD 1.00 ceiling. All 737 golden A name rows already carry frozen Jev answers in the risk-order results, so no judgment was bought; the features are reused rather than re-elicited.</p>
+<figure id="ssog-learned-acceptance-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-learned-acceptance/roc-curves.svg" alt="Validation ROC curves for the learned logistic model and the hand-set composite."><figcaption>Validation ROC. The learned curve sits above the composite across the operating range; the two are close enough that the paired difference interval reaches zero.</figcaption></figure>
+<table id="ssog-learned-acceptance-weights"><thead><tr><th>Rank</th><th>Check id</th><th>Weight (standardised)</th></tr></thead><tbody><tr><td>1</td><td><code>non_canonical_operator_join</code></td><td>-0.834</td></tr><tr><td>2</td><td><code>minority_spelling_not_in_roster</code></td><td>+0.483</td></tr><tr><td>3</td><td><code>retired_operator_spelling</code></td><td>+0.464</td></tr><tr><td>4</td><td><code>bare_shape_parameter_missing_surface</code></td><td>-0.461</td></tr><tr><td>5</td><td><code>source_fidelity_unsupported_qualifier</code></td><td>-0.411</td></tr><tr><td>6</td><td><code>owner_erased_outline</code></td><td>+0.374</td></tr><tr><td>7</td><td><code>model_surname_suffix</code></td><td>+0.308</td></tr><tr><td>8</td><td><code>collapsed_two_quantities</code></td><td>+0.295</td></tr><tr><td>9</td><td><code>missing_required_segment</code></td><td>-0.295</td></tr><tr><td>10</td><td><code>bound_to_wrong_object</code></td><td>-0.283</td></tr><tr><td>11</td><td><code>advisory_alias_collapsed</code></td><td>-0.258</td></tr><tr><td>12</td><td><code>over_qualified_modifier</code></td><td>+0.225</td></tr><tr><td>13</td><td><code>field_region_preposition_wrong</code></td><td>+0.220</td></tr><tr><td>14</td><td><code>dropped_distinguishing_axis</code></td><td>+0.177</td></tr><tr><td>15</td><td><code>coupled_vs_launched_confusion</code></td><td>-0.165</td></tr><tr><td>16</td><td><code>device_attributed_observable</code></td><td>-0.155</td></tr><tr><td>17</td><td><code>decomposition_group_absorbed_into_base</code></td><td>-0.121</td></tr><tr><td>18</td><td><code>value_provenance_in_name</code></td><td>-0.100</td></tr><tr><td>19</td><td><code>unit_kind_inconsistent</code></td><td>+0.089</td></tr><tr><td>20</td><td><code>non_canonical_locus_token</code></td><td>+0.086</td></tr><tr><td>21</td><td><code>non_canonical_render</code></td><td>-0.079</td></tr><tr><td>22</td><td><code>ordered_sample_positional_token</code></td><td>+0.078</td></tr><tr><td>23</td><td><code>redundant_repeated_segment</code></td><td>-0.066</td></tr><tr><td>24</td><td><code>over_specialised_parent</code></td><td>-0.065</td></tr><tr><td>25</td><td><code>unregistered_token_in_closed_segment</code></td><td>-0.065</td></tr><tr><td>26</td><td><code>non_canonical_segment_order</code></td><td>+0.061</td></tr><tr><td>27</td><td><code>source_binding_drift</code></td><td>-0.044</td></tr><tr><td>28</td><td><code>ambiguity_in_isolation</code></td><td>-0.039</td></tr><tr><td>29</td><td><code>malformed_physical_base</code></td><td>-0.035</td></tr></tbody></table>
+</section>
