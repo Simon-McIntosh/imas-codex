@@ -174,7 +174,8 @@ def cli(seed: str, uri: str, *flags: str) -> None:
         PYTHONPATH=str(Path.cwd()),
     )
     print("command: " + " ".join(command), flush=True)
-    completed = subprocess.run(command, env=env, check=False)
+    remaining = (DEADLINE - datetime.now(UTC)).total_seconds()
+    completed = subprocess.run(command, env=env, check=False, timeout=max(1, remaining))
     if completed.returncode:
         raise RuntimeError(
             f"Harmonize command failed for {seed}: {completed.returncode}"
@@ -214,9 +215,12 @@ def measure_arm(
         after_scores = scores(gc, seed)
         receipt = gc.query(
             "MATCH (r:SNRun) WHERE r.started_at IS NOT NULL "
-            "RETURN r.id AS id, r.cost_spent AS spend, r.started_at AS started "
+            "OPTIONAL MATCH (c:LLMCost {for_run: r.id}) "
+            "RETURN r.id AS id, r.cost_spent AS spend, r.started_at AS started, "
+            "count(c) AS calls, sum(c.llm_cost) AS llm_spend "
             "ORDER BY r.started_at DESC LIMIT 1"
         )
+        receipt = [{**item, "started": str(item["started"])} for item in receipt]
         spend = float(receipt[0].get("spend") or 0) if receipt else 0.0
         data["spend_usd"] += spend
         data.setdefault("arms", {}).setdefault(arm, []).append(
