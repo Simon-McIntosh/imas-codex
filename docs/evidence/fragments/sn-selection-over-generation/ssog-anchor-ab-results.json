@@ -15,11 +15,11 @@
   },
   "arm_comparison_complete": false,
   "arms": {},
+  "budget_gate_this_attempt": "not reached because node-local /tmp is read-only",
   "budget_reservation": {
     "reason": "one unreceipted Jev call at the snapshot dry-run rate",
     "usd": 0.6556937222222222
   },
-  "budget_shortfall_usd": 7.091404672222218,
   "budget_spend_usd": 1.8814566722222223,
   "candidate_pool": {
     "all_families": 849,
@@ -37,7 +37,7 @@
     },
     "validation_removed": 54
   },
-  "cap_envelope_usd": 50.10145667222222,
+  "cap_envelope_usd": 49.96145667222222,
   "confirmed_spend_usd": 1.22576295,
   "dry_run_estimate_basis": {
     "calls": 36,
@@ -47,6 +47,7 @@
   },
   "dry_run_estimate_total_usd": 47.209948,
   "dry_run_estimate_usd_per_call": 0.6556937222222222,
+  "dry_run_seat_basis": "prior snapshot receipt pricing; ten new dry runs were blocked before scratch load",
   "dry_runs": [
     {
       "calls_per_arm": 3,
@@ -110,10 +111,17 @@
   },
   "failed_applies": [],
   "failure": {
-    "at": "2026-10-18T13:57:52.852055+00:00",
-    "message": "Dry-run estimate or apply cap reaches USD 42",
-    "type": "RuntimeError"
+    "at": "2026-10-18T21:05:52.254241+00:00",
+    "message": "Node-local /tmp is read-only before Neo4j load or new dry run",
+    "type": "OSError"
   },
+  "historical_budget_gate": {
+    "ceiling_usd": 42.0,
+    "estimate_usd": 47.209948,
+    "seat_basis": "snapshot receipts before GPT-6 seat rotation",
+    "shortfall_usd": 7.091404672222218
+  },
+  "historical_snapshot_dry_run_estimate_usd": 47.209948,
   "isolation_proof": [
     {
       "arm": "heuristic",
@@ -129,11 +137,23 @@
       "scratch_uri": "bolt://127.0.0.1:27697"
     }
   ],
+  "measurement_cwd": "/home/ITER/mcintos/Code/imas-codex",
+  "measurement_module": "/home/ITER/mcintos/Code/imas-codex/imas_codex/standard_names/harmonize.py",
   "minimum_ten_family_calls": 72,
   "minimum_ten_family_estimate_usd": 47.209948,
   "minimum_total_with_reserved_spend_usd": 49.09140467222222,
+  "model_seats": {
+    "sn-docs": "openrouter/openai/gpt-6.1-sol",
+    "sn-refine": "openrouter/openai/gpt-6-luna",
+    "sn-review.docs": [
+      "openrouter/anthropic/claude-sonnet-5",
+      "openrouter/x-ai/grok-4.5",
+      "openrouter/openai/gpt-6.1-sol"
+    ]
+  },
   "new_attempt_apply_count": 0,
-  "outcome_status": "blocked_budget",
+  "new_model_spend_by_model_usd": {},
+  "outcome_status": "blocked",
   "paired_family_count": 0,
   "partial_receipts": [
     {
@@ -390,8 +410,19 @@
   ],
   "previous_spend_usd": 0.021194586,
   "receipt_scan_positive_control": "The same parser found 4, 4, and 8 completed model response lines and three cost_spent summaries in the earlier sessions; the terminated Jev second session has no finalized summary, so no zero-spend claim is made.",
-  "resumed_at": "2026-10-18T13:52:33.414263+00:00",
-  "ruling": "2026-10-18 lead: USD 42.00 total including prior spend; all ten paired families",
+  "resumed_at": "2026-10-18T21:05:52.254241+00:00",
+  "rotated_attempt": {
+    "at": "2026-10-18T21:05:52.254241+00:00",
+    "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/measurement-rotated.log",
+    "error": "OSError: [Errno 30] Read-only file system: '/tmp/anchor-compare-epkb2_1w'",
+    "new_applies": 0,
+    "new_dry_runs": 0,
+    "new_model_spend_usd": 0.0,
+    "new_scratch_tree_created": false,
+    "probe_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/tmp-write-probe.log",
+    "status": "blocked_before_scratch_load"
+  },
+  "ruling": "2026-10-18 lead: USD 50 total including USD 1.22576295 confirmed prior spend and reserved unreceipted Jev call; use GPT-6 seats from main",
   "same_anchor_count": 5,
   "scored_candidates": [
     {
@@ -3967,7 +3998,7 @@
   ],
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
   "spend_completeness": "confirmed lower bound; final Jev pool session has no receipt",
-  "spend_limit_usd": 42.0,
+  "spend_limit_usd": 50.0,
   "spend_usd": 1.22576295,
   "started_at": "2026-10-18T12:05:51.572895+00:00",
   "stopped_instances": [
