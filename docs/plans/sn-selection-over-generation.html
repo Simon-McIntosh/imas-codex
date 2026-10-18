@@ -24,8 +24,8 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="58">
-<meta name="plan-modified" content="2026-10-15">
+<meta name="plan-version" content="59">
+<meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
   <main class="plan-doc">
@@ -336,6 +336,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-13T09:05:00Z">
     <div class="r-comment-body"><p>§3 landed: Jev's link-label AUC is 0.757 (0.68 to 0.82) over 180 labelled links. The deterministic self-link flag alone scores 0.799, and the paired difference is −0.04 (−0.13 to +0.04). On non-self links Jev scores 0.759 (0.61 to 0.89, 13 bad links). The self-link check carries the measurable value; the judgment is not shown to add to it at this sample size (merge <code>e14a6b0eb</code>, review 101/120). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s3">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling" data-who="Simon McIntosh" data-when="2026-10-18T07:10:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-10-18: run §7's full A/B now, ten families at most USD 30. Order: first the Jev anchor scorer, built beside <code>select_anchor</code> without changing either of its callers. Then the A/B in a scratch copy of the graph, never the live one. Each family is harmonized once from the heuristic anchor and once from the Jev anchor pinned through the existing <code>harmonized_anchor</code> record.</p></div>
 </div>
 </section>
 </main>
