@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="189">
+<meta name="plan-version" content="190">
 <meta name="plan-modified" content="2026-10-18">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -697,6 +697,9 @@
 </div>
 <div class="r-comment" data-section="s35" data-id="c-close-s35" data-who="reckon-build" data-when="2026-10-18T20:25:00Z">
     <div class="r-comment-body"><p>§35 closed. Of the 264 sourceless live names, 199 are dropped edges, 189 of them exhausted. A source each one recorded is held by no live name, and §31's orphan lifecycle would retire them with their quantity lost. 31 have their source held by a name with no chain to them, 30 were never bound, 2 are true orphans and 2 are derived parents (merge <code>419e4fcf0</code>, review 107). §37's classifier takes the census's rule into code and must recognise every rename and rebind operation. Until it lands, nothing that triggers the orphan lifecycle runs. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s35-source-census">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s37" data-id="c-s37-gate-measure-stale" data-who="reckon-build" data-when="2026-10-18T21:10:00Z">
+    <div class="r-comment-body"><p>Correction, 2026-10-18. Gate <code>g-s38-needs-source-audit</code> still reads its original measure: the export refusing a planted dropped-edge name through <code>_has_producing_source</code>. That text is superseded, and the plan editor offers no operation that changes a declared gate's measure. The review finding <code>wiring-1</code> was answered as acted before that was confirmed, and only the section's prose was changed. The gate is passed on §37's done-when as now written. That is one classifier over every live name with no incoming <code>PRODUCED_NAME</code> and six planted names, with the export refusing before it builds its population, the orphan lifecycle retiring only the orphan, and <code>find_provenance_orphans</code> reporting the dropped-edge exhausted name. Its required evidence, <code>sib-source-audit-gate.html</code>, is unchanged.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
