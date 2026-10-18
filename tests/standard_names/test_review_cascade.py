@@ -1,7 +1,10 @@
 """The review cascade's threshold boundaries and execution modes."""
 
 import asyncio
+import hashlib
 import json
+from copy import deepcopy
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -12,6 +15,88 @@ from imas_codex.standard_names.review.cascade import (
     route_docs,
     route_name,
 )
+
+_CALIBRATION_SHA256 = "12cfa1f195cfd278c4415b02ee8bf1f424fe2f4b384cecd5b6bbd5d42b46c9b4"
+
+
+def _assert_calibration_digest(artifact):
+    assert artifact["content_sha256"] == _CALIBRATION_SHA256
+    content = {key: value for key, value in artifact.items() if key != "content_sha256"}
+    encoded = json.dumps(content, sort_keys=True, separators=(",", ":")).encode()
+    assert hashlib.sha256(encoded).hexdigest() == artifact["content_sha256"]
+
+
+def test_calibration_artifact_digest_recomputes_from_committed_content():
+    artifact = json.loads(Path(cascade._THRESHOLDS).read_text())
+    assert artifact["source_split"] == "calibration"
+    _assert_calibration_digest(artifact)
+
+
+@pytest.mark.parametrize("field", ["accept_threshold", "score_weight"])
+def test_calibration_digest_rejects_unrederived_edit(field):
+    artifact = json.loads(Path(cascade._THRESHOLDS).read_text())
+    altered = deepcopy(artifact)
+    if field == "accept_threshold":
+        altered["docs"]["accept_threshold"] += 0.01
+    else:
+        key = next(iter(altered["name"]["score_weights"]))
+        altered["name"]["score_weights"][key] += 0.01
+    with pytest.raises(AssertionError):
+        _assert_calibration_digest(altered)
+
+
+@pytest.mark.parametrize("shadow_score", [None, 0.99])
+def test_shadow_jev_row_does_not_change_review_aggregates(monkeypatch, shadow_score):
+    from imas_codex.standard_names import graph_ops
+
+    class AggregateGraph:
+        def __init__(self):
+            self.reviews = [
+                {"judge_kind": "incumbent", "is_canonical": True, "score": 0.4},
+                {"judge_kind": "incumbent", "is_canonical": True, "score": 0.5},
+            ]
+            self.aggregate = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def query(self, statement, **params):
+            before_aggregate = statement.split("WITH sn, count(r)", 1)[0]
+            excludes_shadow = (
+                "coalesce(r.judge_kind, '') = 'jev'" in before_aggregate
+                and "coalesce(r.is_canonical, false) = false" in before_aggregate
+            )
+            reviews = [
+                review
+                for review in self.reviews
+                if not (
+                    excludes_shadow
+                    and review["judge_kind"] == "jev"
+                    and not review["is_canonical"]
+                )
+            ]
+            scores = [
+                review["score"] for review in reviews if review["score"] is not None
+            ]
+            self.aggregate = (
+                len(reviews),
+                sum(scores) / len(scores) if scores else None,
+                len(reviews) > 1 and max(scores) - min(scores) >= params["threshold"],
+            )
+            return [{"id": "temperature"}]
+
+    graph = AggregateGraph()
+    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    assert graph_ops.update_review_aggregates(["temperature"]) == 1
+    incumbent_aggregate = graph.aggregate
+    graph.reviews.append(
+        {"judge_kind": "jev", "is_canonical": False, "score": shadow_score}
+    )
+    assert graph_ops.update_review_aggregates(["temperature"]) == 1
+    assert graph.aggregate == incumbent_aggregate == (2, 0.45, False)
 
 
 @pytest.mark.asyncio

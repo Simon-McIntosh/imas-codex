@@ -6268,8 +6268,9 @@ def update_review_aggregates(
     """Recompute per-StandardName aggregates from attached StandardNameReview nodes.
 
     Sets ``review_count``, ``review_mean_score``, and ``review_disagreement``
-    across all attached StandardNameReview nodes. Axis-specific score and
-    resolution-method mirrors are owned by their dedicated write paths.
+    across attached reviews except non-canonical Jev shadow judgments.
+    Axis-specific score and resolution-method mirrors are owned by their
+    dedicated write paths.
 
     Returns the number of StandardName nodes updated.
     """
@@ -6282,6 +6283,8 @@ def update_review_aggregates(
             MATCH (sn:StandardName {id: sid})
             WHERE NOT (coalesce(sn.name_stage, '') IN $frozen_name_stages)
             OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
+            WHERE NOT (coalesce(r.judge_kind, '') = 'jev'
+                       AND coalesce(r.is_canonical, false) = false)
             WITH sn, count(r) AS n, avg(r.score) AS mean,
                  CASE WHEN count(r) > 1 THEN max(r.score) - min(r.score) ELSE 0.0 END AS spread
             SET sn.updated_at = datetime(), sn.review_count = n,
