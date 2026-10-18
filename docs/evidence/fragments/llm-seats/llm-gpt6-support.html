@@ -1,0 +1,33 @@
+<section id="gpt-model-support-record">
+  <h3>Current GPT models are priced and callable</h3>
+  <p>The call layer can price and make structured calls to both models. No production model seat changed.</p>
+
+  <h4>Checked-in OpenRouter prices</h4>
+  <p>USD per million tokens, retrieved 2026-10-18 at 14:26 UTC from each model's own endpoint. Long-context prices apply from 272,000 prompt tokens. The source response is preserved in the run's <code>pricing-source.log</code>.</p>
+  <table>
+    <thead><tr><th>Model and source</th><th>Prompt</th><th>Completion</th><th>Cache read</th><th>Cache write</th><th>Long-context prompt / completion / cache read / cache write</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://openrouter.ai/api/v1/model/openai/gpt-6.1-sol"><code>openrouter/openai/gpt-6.1-sol</code></a></td><td>2.00</td><td>10.00</td><td>0.10</td><td>2.50</td><td>4.00 / 15.00 / 0.20 / 5.00</td></tr>
+      <tr><td><a href="https://openrouter.ai/api/v1/model/openai/gpt-6-luna"><code>openrouter/openai/gpt-6-luna</code></a></td><td>0.10</td><td>0.50</td><td>0.01</td><td>0.125</td><td>0.20 / 0.75 / 0.02 / 0.25</td></tr>
+    </tbody>
+  </table>
+  <p>Both entries carry <code>source</code> and <code>verified-at = "2026-10-18"</code>. Price resolution now returns the checked-in rates and long-context overrides, with exact cache rates asserted by the test; it previously raised <code>ProviderPricingUnbounded: OpenRouter expected price unavailable for openrouter/openai/gpt-6.1-sol</code>.</p>
+
+  <h4>Model-family request path</h4>
+  <p>GPT reasoning requests already share provider-native <code>reasoning.effort</code>, <code>max_tokens</code> defaults, OpenRouter direct routing when a key is present, and explicit JSON-schema structured output. The GPT-6 models now share the GPT-5 rule that omits unsupported <code>temperature = 0.0</code>. Both models are also in the default composition and candidate benchmark slates. The request-shape tests assert the direct model ID, key, token default, omitted temperature, reasoning effort, and structured response format for each model. The verified endpoint advertises support for <code>reasoning</code>, <code>response_format</code>, and <code>structured_outputs</code>.</p>
+
+  <h4>Live structured calls</h4>
+  <p>One <code>acall_llm_structured</code> call per model, each returning validated <code>{"value":"ok"}</code> with non-null cost:</p>
+  <table>
+    <thead><tr><th>Model</th><th>Tokens</th><th>Cost USD</th></tr></thead>
+    <tbody>
+      <tr><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>45</td><td>0.000186</td></tr>
+      <tr><td><code>openrouter/openai/gpt-6-luna</code></td><td>45</td><td>0.0000093</td></tr>
+    </tbody>
+  </table>
+  <p>Total charged: <strong>USD 0.0001953</strong>, below the USD 0.05 cap. Receipt: <code>probe.log</code> in run <code>r-20261018T141802120380-llm-gpt6-support</code>.</p>
+
+  <h4>Guard and gate</h4>
+  <p>With both new pricing entries removed from the in-memory catalog, both parameterized price-resolution cases reach <code>get_openrouter_expected_price</code> and raise <code>ProviderPricingUnbounded: OpenRouter expected price unavailable</code>; <code>repair-negative-control.log</code> ends <code>EXIT=1</code>. A separate test removes both catalog sources and asserts this refusal directly. <code>refusal-check.log</code> verifies two call-layer refusals and ends <code>EXIT=0</code>. With the predecessor test file extracted from the parent of <code>7ff8c09ced00af348080f507f5ca47a2ccea9bf9</code>, the same mutation stops at <code>KeyError: 'prompt'</code>; <code>rollback-check.log</code> rejects that trace with <code>EXIT=1</code>.</p>
+  <p>The baseline gate at <code>078b20ea335c73a9e3649cf8f728eea908666b06</code> completed with <strong>213 passed, 0 failed</strong> (<code>baseline-gate.log</code>). The repaired gate, later committed as <code>7ff8c09ced00af348080f507f5ca47a2ccea9bf9</code>, completed with <strong>220 passed, 0 failed</strong> (<code>repair-gate.log</code>): <strong>zero added failures</strong>. All named logs live under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141802120380-llm-gpt6-support/</code>.</p>
+</section>
