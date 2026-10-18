@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-18T21:15:51.129Z",
+  "dispatched_at": "2026-10-18T21:08:24Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:214",
+      "id": "wiring-1",
+      "reason": "as with \u00a77's answered wiring-1, an s3 node can be dispatched and run the repair before \u00a738 lands, recording names whose sources are still missing as undecided rather than repairing them, which is the exact work \u00a738 exists to make possible.",
+      "text": "\u00a73's repair bullet says it \"runs after the DD re-classification and after `sn-integrity-backlog` \u00a738 restores the lost DD sources\", a cross-plan ordering dependency, yet line 23's `plan-section-depends-on` still carries only `sn-judgment-evaluation#s3` for s3",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:199",
+      "id": "reasoning-1",
+      "reason": "a node implementing \u00a73 as written retires a symbol that is not there and leaves the live name-domain selector deciding, so the done-when line 229-230 (\"No selector other than the stored Jev decision and recorded corrections sets a name's domain\") cannot be met and \u00a76's `select_primary_domain` keeps setting the domain the section says it must stop setting.",
+      "text": "\u00a73 says \"The three existing selectors (`pick_primary_domain`, `domain_rank` with `maybe_promote_domain`, and the derived parents' most-frequent-child rule) stop deciding a name's domain\", but `pick_primary_domain` no longer exists (removed by the one-name selector work, whose fragment `scg-domain-selector-one-name.html` records the deletion; no definition in `imas_codex/` at HEAD), while `select_primary_domain` \u2014 the selector the landed audit (`imas_codex/standard_names/domain_audit.py:21`) and the writers `consolidation.py:78`, `export.py:1560`, `catalog_import.py:558` actually call to produce a name's domain \u2014 is named nowhere in \u00a73, and \u00a73's own done-when closes on",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:228",
+      "id": "done_when-1",
+      "reason": "a name the Choice declines to decide is exempted from every check, so a node can reach audit-zero by leaving names undecided (the 2,675 live names minus the twenty the done-when pins separately), and the gate passes with the repair the section exists to make substantially undone; the fix is a bound on the undecided set, as \u00a75's cluster-count measure does not need.",
+      "text": "\u00a73's done-when requires \"The consistency audit reports zero on every check over the live names, against the census above, apart from the undecided names it lists\", with no bound on that exemption and no measure of the undecided share",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "18fc226c4e345c196706cd9c8dc41ad0eead628d66b61fd7aa105fe5fe0ec839",
+  "plan_slug": "sn-catalog-grouping",
+  "plan_version": 120,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261018T210736639380-plan-review-of-sn-catalog-grouping",
+  "reviewed_blob_sha": "205bda27801a32f0f00807adc37ed7616301ac86",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 merge `9845ff555` (\"merge: measured per-name Jev domain choice\") and commit `5b31377c7` both resolve; the fragment paths \u00a73 defers to are present in HEAD.",
+    "done_when": "a finding \u2014 the consistency audit's \"zero on every check ... apart from the undecided names it lists\" is an unbounded exemption, so the gate passes with the repair undone.",
+    "evidence_paths": "pass \u2014 every \u00a73 evidence artefact sits in `docs/evidence/fragments/sn-catalog-grouping/` and is tracked in HEAD (`scg-dd-domain-diagnosis.html`, `scg-domain-label-sheet.json`, `scg-name-domain-jev.html`, `scg-domain-path-measure.html`), not a session scratchpad.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach a symbol or comment; \u00a7-references are internal to plan documents.",
+    "reasoning": "a finding \u2014 the \"three existing selectors\" list names `pick_primary_domain` (deleted; grep finds no definition in HEAD) and omits `select_primary_domain`, the live selector the done-when must retire.",
+    "single_goal": "pass \u2014 \u00a73 carries one goal, a name's domain consistent with its stored decision and its sources.",
+    "wiring": "a finding \u2014 \u00a73's repair bullet now consumes `sn-integrity-backlog` \u00a738, but `plan-section-depends-on` for s3 still lists only `sn-judgment-evaluation#s3`."
+  },
+  "section_digests": {
+    "_document": "5e08912f1329ab7aa99252f85efc8b3589b7bb68d5431c06caf1f692c95f9ca0",
+    "s1": "6bc3b44a7fd794158b4e454dd07668ea7d805f53ea1a5e11fac0c4b9a32edd70",
+    "s2": "badc6d06874b81a42ccd8772957595e0e1e9cb7d1a7fe7c9f3ade7c219cb3b72",
+    "s3": "94f658b1e319524a3bd573f079eba2c0988c11fcf828fe888044b4d4396d3da0",
+    "s4": "7cd0454d13ab9a70c3e44752b5b15dcc7a96f90ed71f0fe117a7874db5ca5459",
+    "s5": "6a583a112984f320b52d30c670be604713b3d4204e41c7dd12230c311f9ff0e3",
+    "s6": "bb189dc63d49610444a849deb1b41dce68a4a488b1ee57faee869cc6fc573261",
+    "s7": "6017f8b911a31c5ff59f612049b378e54c6d1e13e12ef5b5c37ea4362ae03842"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T21:22:56.741805+00:00"
+}
