@@ -5,21 +5,230 @@
     "confidence_method": "percentile bootstrap of matched fixture items, 10000 draws, seed 1729; recompute each role's primary metric within each draw",
     "negative_control": "pairing each low-cost output with a shuffled full-model output of the same role must give a paired-difference interval containing zero",
     "seed": 1729,
-    "models": ["live incumbent", "openrouter/openai/gpt-6.1-sol", "openrouter/openai/gpt-6-luna"],
+    "models": [
+      "live incumbent",
+      "openrouter/openai/gpt-6.1-sol",
+      "openrouter/openai/gpt-6-luna"
+    ],
     "samples": {
-      "refine": {"n": 8, "reason": "One generation and one held-out judge call per model and item; cap their combined cost while covering multiple domains."},
-      "docs": {"n": 8, "reason": "One generation and one held-out rubric call per model and item; cap the expensive judge."},
-      "breaker-names": {"n": 12, "reason": "Retain opportunities for verdict flips while bounding production review prompts."},
-      "breaker-docs": {"n": 12, "reason": "Retain opportunities for verdict flips while bounding one docs review call per item."},
-      "classifier": {"n": 24, "reason": "Cover more gold paths because classification runs in batches and has no held-out judge."}
+      "refine": {
+        "n": 8,
+        "reason": "One generation and one held-out judge call per model and item; cap their combined cost while covering multiple domains."
+      },
+      "docs": {
+        "n": 8,
+        "reason": "One generation and one held-out rubric call per model and item; cap the expensive judge."
+      },
+      "breaker-names": {
+        "n": 12,
+        "reason": "Retain opportunities for verdict flips while bounding production review prompts."
+      },
+      "breaker-docs": {
+        "n": 12,
+        "reason": "Retain opportunities for verdict flips while bounding one docs review call per item."
+      },
+      "classifier": {
+        "n": 24,
+        "reason": "Cover more gold paths because classification runs in batches and has no held-out judge."
+      }
     },
     "judge": "openrouter/anthropic/claude-opus-4.8",
-    "judge_price_usd_per_million_tokens": {"prompt": 5.0, "completion": 25.0},
+    "judge_price_usd_per_million_tokens": {
+      "prompt": 5.0,
+      "completion": 25.0
+    },
     "budget_ceiling_usd": 10.0,
     "budget_stop_before_next_call_usd": 8.0
   },
-  "raw_reports": {},
-  "item_outcomes": {},
+  "raw_reports": {
+    "refine": {
+      "role": "refine",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-5.5",
+          "n": 8,
+          "cost": 0.6535679999999999,
+          "metrics": {
+            "defect_resolution": 0.7812,
+            "collateral_change": 0.2312,
+            "valid_refine_rate": 1.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 8,
+          "cost": 0.16558280000000003,
+          "metrics": {
+            "defect_resolution": 0.6562,
+            "collateral_change": 0.25,
+            "valid_refine_rate": 1.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 8,
+          "cost": 0.07778088,
+          "metrics": {
+            "defect_resolution": 0.7937,
+            "collateral_change": 0.2,
+            "valid_refine_rate": 1.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/openai/gpt-5.5",
+      "judge_model": "openrouter/anthropic/claude-opus-4.8",
+      "sample_ids": [
+        "volume_averaged_linear_electron_decay_time_due_to_disruption",
+        "ion_mass",
+        "power_of_divertor_due_to_ohmic_dissipation",
+        "effective_charge_at_separatrix",
+        "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency",
+        "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux",
+        "magnetic_field_magnitude_at_pedestal_top_low_field_side",
+        "breakdown_initial_time"
+      ],
+      "seed": 0,
+      "axis": "names",
+      "timestamp": "2026-10-18T18:20:57.899504+00:00",
+      "provenance": {
+        "corpus": "REFINED_FROM history",
+        "n_cases": 8
+      }
+    }
+  },
+  "item_outcomes": {
+    "refine": {
+      "fixture": [
+        {
+          "id": "volume_averaged_linear_electron_decay_time_due_to_disruption"
+        },
+        {
+          "id": "ion_mass"
+        },
+        {
+          "id": "power_of_divertor_due_to_ohmic_dissipation"
+        },
+        {
+          "id": "effective_charge_at_separatrix"
+        },
+        {
+          "id": "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency"
+        },
+        {
+          "id": "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux"
+        },
+        {
+          "id": "magnetic_field_magnitude_at_pedestal_top_low_field_side"
+        },
+        {
+          "id": "breakdown_initial_time"
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-5.5": {
+          "effective_charge_at_separatrix": 1.0,
+          "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux": 0.75,
+          "power_of_divertor_due_to_ohmic_dissipation": 1.0,
+          "volume_averaged_linear_electron_decay_time_due_to_disruption": 0.9,
+          "magnetic_field_magnitude_at_pedestal_top_low_field_side": 0.7,
+          "breakdown_initial_time": 0.2,
+          "ion_mass": 0.85,
+          "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency": 0.85
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "effective_charge_at_separatrix": 1.0,
+          "power_of_divertor_due_to_ohmic_dissipation": 1.0,
+          "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux": 0.0,
+          "magnetic_field_magnitude_at_pedestal_top_low_field_side": 0.7,
+          "breakdown_initial_time": 0.1,
+          "ion_mass": 0.8,
+          "volume_averaged_linear_electron_decay_time_due_to_disruption": 0.95,
+          "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency": 0.7
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "effective_charge_at_separatrix": 1.0,
+          "power_of_divertor_due_to_ohmic_dissipation": 1.0,
+          "ion_mass": 0.85,
+          "magnetic_field_magnitude_at_pedestal_top_low_field_side": 0.8,
+          "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency": 0.85,
+          "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux": 0.75,
+          "volume_averaged_linear_electron_decay_time_due_to_disruption": 1.0,
+          "breakdown_initial_time": 0.1
+        }
+      }
+    }
+  },
   "analysis": {},
-  "total_spend_usd": 0.0
+  "total_spend_usd": 2.424295,
+  "superseded_runs": [
+    {
+      "role": "refine",
+      "reason": "The capture instrument used DD path as an item key; three fixtures have empty paths, so matched outcomes were incomplete.",
+      "report": {
+        "role": "refine",
+        "results": [
+          {
+            "model": "openrouter/openai/gpt-5.5",
+            "n": 8,
+            "cost": 1.18732,
+            "metrics": {
+              "defect_resolution": 0.6625,
+              "collateral_change": 0.2125,
+              "valid_refine_rate": 1.0
+            },
+            "error": null
+          },
+          {
+            "model": "openrouter/openai/gpt-6.1-sol",
+            "n": 8,
+            "cost": 0.25588320000000003,
+            "metrics": {
+              "defect_resolution": 0.6562,
+              "collateral_change": 0.225,
+              "valid_refine_rate": 1.0
+            },
+            "error": null
+          },
+          {
+            "model": "openrouter/openai/gpt-6-luna",
+            "n": 8,
+            "cost": 0.08416054500000002,
+            "metrics": {
+              "defect_resolution": 0.7438,
+              "collateral_change": 0.2375,
+              "valid_refine_rate": 1.0
+            },
+            "error": null
+          }
+        ],
+        "incumbent": "openrouter/openai/gpt-5.5",
+        "judge_model": "openrouter/anthropic/claude-opus-4.8",
+        "sample_ids": [
+          "volume_averaged_linear_electron_decay_time_due_to_disruption",
+          "ion_mass",
+          "power_of_divertor_due_to_ohmic_dissipation",
+          "effective_charge_at_separatrix",
+          "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency",
+          "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux",
+          "magnetic_field_magnitude_at_pedestal_top_low_field_side",
+          "breakdown_initial_time"
+        ],
+        "seed": 0,
+        "axis": "names",
+        "timestamp": "2026-10-18T18:15:55.880791+00:00",
+        "provenance": {
+          "corpus": "REFINED_FROM history",
+          "n_cases": 8
+        }
+      },
+      "captured_outcome_count": {
+        "openrouter/openai/gpt-5.5": 6,
+        "openrouter/openai/gpt-6.1-sol": 6,
+        "openrouter/openai/gpt-6-luna": 6
+      }
+    }
+  ]
 }
