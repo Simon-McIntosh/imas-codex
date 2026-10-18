@@ -14,15 +14,36 @@ class Answer(BaseModel):
 
 
 @pytest.mark.parametrize(
-    ("model", "prompt", "completion", "cache_read", "cache_write", "long_completion"),
+    (
+        "model",
+        "prompt",
+        "completion",
+        "cache_read",
+        "cache_write",
+        "long_completion",
+        "long_cache_read",
+        "long_cache_write",
+    ),
     [
-        ("openrouter/openai/gpt-6.1-sol", 2.0, 10.0, 0.10, 2.50, 15.0),
-        ("openrouter/openai/gpt-6-luna", 0.10, 0.50, 0.01, 0.125, 0.75),
+        ("openrouter/openai/gpt-6.1-sol", 2.0, 10.0, 0.10, 2.50, 15.0, 0.20, 5.0),
+        ("openrouter/openai/gpt-6-luna", 0.10, 0.50, 0.01, 0.125, 0.75, 0.02, 0.25),
     ],
 )
 def test_checked_in_price_resolves_with_long_context(
-    model, prompt, completion, cache_read, cache_write, long_completion
+    model,
+    prompt,
+    completion,
+    cache_read,
+    cache_write,
+    long_completion,
+    long_cache_read,
+    long_cache_write,
 ):
+    expected_price = llm.get_openrouter_expected_price(model, input_tokens=1000)
+    long_price = llm.get_openrouter_expected_price(model, input_tokens=272000)
+    assert expected_price["prompt"] == prompt
+    assert long_price["completion"] == long_completion
+
     pricing = settings.get_openrouter_pricing(model)
     assert pricing["prompt"] == prompt
     assert pricing["completion"] == completion
@@ -33,15 +54,20 @@ def test_checked_in_price_resolves_with_long_context(
         == f"https://openrouter.ai/api/v1/model/{model.removeprefix('openrouter/')}"
     )
     assert pricing["verified_at"]
-    assert pricing["overrides"][0]["cache_read"] > cache_read
-    assert pricing["overrides"][0]["cache_write"] > cache_write
-    assert (
-        llm.get_openrouter_expected_price(model, input_tokens=1000)["prompt"] == prompt
-    )
-    assert (
-        llm.get_openrouter_expected_price(model, input_tokens=272000)["completion"]
-        == long_completion
-    )
+    assert pricing["overrides"][0]["cache_read"] == long_cache_read
+    assert pricing["overrides"][0]["cache_write"] == long_cache_write
+
+
+@pytest.mark.parametrize(
+    "model", ["openrouter/openai/gpt-6.1-sol", "openrouter/openai/gpt-6-luna"]
+)
+def test_unpriced_model_is_refused_by_call_layer(model, monkeypatch):
+    monkeypatch.setattr(settings, "get_openrouter_pricing", lambda _model: {})
+    monkeypatch.setattr(llm, "_lookup_catalog", lambda *_args, **_kwargs: ({}, False))
+    with pytest.raises(
+        llm.ProviderPricingUnbounded, match="expected price unavailable"
+    ):
+        llm.get_openrouter_expected_price(model, input_tokens=1000)
 
 
 @pytest.mark.parametrize(
