@@ -31,6 +31,13 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-10-18T18:03:05.920981+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "the ordering is already wired: gate g-s38-needs-source-audit on \u00a737 holds \u00a738 until sib-source-audit-gate.html exists, which the scheduler reads; the section-record link list is not editable through the current plan editor, so the gate is the dependency of record",
+      "when": "2026-10-18T18:03:14.273531+00:00"
     }
   ],
   "responses": {
@@ -39,6 +46,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-18T18:03:05.920981+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the ordering is already wired: gate g-s38-needs-source-audit on \u00a737 holds \u00a738 until sib-source-audit-gate.html exists, which the scheduler reads; the section-record link list is not editable through the current plan editor, so the gate is the dependency of record",
+      "when": "2026-10-18T18:03:14.273531+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261018T174304668726-plan-review-of-sn-integrity-backlog.json",
