@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="merged-head-check">
+<title>Today's landings at the merged head: 37 added failures, none in the new test files</title>
+</head>
+<body>
+<main>
+<h1 id="merged-head-check-title">Today's landings hold together for the new tests; 37 added failures appear at the merged head</h1>
+
+<p id="merged-head-check-summary">Measured from a <code>git archive</code> of each revision, not from a shared tree.
+The new test files the landings brought (<code>test_writers_carry_sources.py</code>,
+<code>test_review_cascade.py</code>, <code>test_catalog_input_limits.py</code>,
+<code>test_gpt6_seat_rotation.py</code>) all pass at the merged head.
+The 37 added failures all sit in files already present at the base, and 24 of the 37 do not
+reproduce on a second head run — a load-dependent flake class, not a defect of the landings.
+The 13 that reproduce are reported as found, not fixed.</p>
+
+<h2 id="merged-head-check-revisions">Revisions and selection</h2>
+<table id="merged-head-check-revisions-table">
+<tbody>
+<tr><th>head</th><td><code>ffc883c5b4006c08a1abccd6da080ce1f1f8ca77</code> (<code>git rev-parse HEAD</code> at start)</td></tr>
+<tr><th>base</th><td><code>3347cfb8e2ec5eb379f44cc1ae40b609c0fce3b5</code> (before the first landing, an ancestor of head)</td></tr>
+<tr><th>selection</th><td>the seven named files, plus every <code>tests/standard_names/*.py</code> whose basename contains <code>review</code>, <code>audit</code>, <code>attachment</code>, <code>signed</code> or <code>export</code></td></tr>
+<tr><th>head selection</th><td>119 files</td></tr>
+<tr><th>base selection</th><td>115 files — the four named files absent at base (<code>test_writers_carry_sources.py</code>, <code>test_review_cascade.py</code>, <code>test_catalog_input_limits.py</code>, <code>test_gpt6_seat_rotation.py</code>) are omitted; the 112 glob-derived files are identical at both revisions</td></tr>
+</tbody>
+</table>
+
+<h2 id="merged-head-check-arms">Arms</h2>
+<table id="merged-head-check-arms-table">
+<thead><tr><th>Arm</th><th>Tree</th><th>Command (each in its archive as cwd)</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>head</td><td><code>$TMPDIR/head</code> (archive of head + five generated files from the main checkout)</td><td><code>PYTHONPATH=&lt;head&gt; python -m pytest -p no:cacheprovider -n 8 &lt;119 files&gt;</code></td><td><strong>64 failed, 1867 passed, 2 skipped, 2 errors</strong> in 350.29s, <code>EXIT=1</code></td></tr>
+<tr><td>base</td><td><code>$TMPDIR/base</code> (archive of base + the same five generated files)</td><td>same, <code>&lt;115 files&gt;</code></td><td><strong>29 failed, 1848 passed, 2 skipped</strong> in 248.99s, <code>EXIT=1</code></td></tr>
+<tr><td>head rerun</td><td>the head archive, the ten files carrying added failures</td><td>same, <code>-n 8</code></td><td><strong>18 failed, 87 passed</strong> in 153.45s, <code>EXIT=1</code> — 13 of the 37 added ids still fail, 5 different ids fail</td></tr>
+<tr><td>env change</td><td>—</td><td><code>uv sync --extra test</code> from the main checkout was asked to supply <code>pytest-xdist</code>; the fence refused it read-only</td><td><code>EXIT=2</code>, <code>Read-only file system</code>; <code>pytest-xdist 3.8.0</code> then supplied from a scratch <code>--target</code> dir on <code>PYTHONPATH</code>. The shared <code>.venv</code> was not modified.</td></tr>
+</tbody>
+</table>
+<p id="merged-head-check-logs">Logs (run directory <code>runs/r-20261018T230234101589-merged-head-check/</code>):
+<code>head.log</code> (ends <code>EXIT=1</code>), <code>base.log</code> (ends <code>EXIT=1</code>),
+<code>head-rerun.log</code> (ends <code>EXIT=1</code>). Every head/base log carries a header naming the
+revision, the tree, the imported module path and the resolved cwd.</p>
+<p id="merged-head-check-deviation">Deviation from the brief: the shared <code>.venv</code> interpreter was invoked
+directly instead of <code>uv run --no-sync</code>, and <code>pytest-xdist</code> was taken from a scratch
+target directory, because the fence makes the shared environment read-only and the env lacked xdist.
+The selection, revision, loader and parallelism are otherwise as written.</p>
+
+<h2 id="merged-head-check-added">Added failures — 37 ids (head, not base)</h2>
+<p>Zero failures at base were absent from head, so nothing was fixed by these landings either.
+<em>stable</em> = still failing on the head rerun; <em>passed on rerun</em> = did not reproduce.</p>
+<table id="merged-head-check-added-table">
+<thead><tr><th>Test id</th><th>Rerun</th><th>Traceback summary</th></tr></thead>
+<tbody>
+<tr><td><code>tests/standard_names/test_export_catalog_files.py::TestReviewBodyCarriesExclusionLedger::test_body_link_resolves_to_the_committed_ledger</code></td><td>passed on rerun</td><td>(short summary line only; see log)</td></tr>
+<tr><td><code>tests/standard_names/test_export_report_gate.py::test_unsuccessful_export_stops_assembly_and_publication</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_export_report_is_published.py::TestExportReportIsPublished::test_accounting_arithmetic_verifiable_from_committed_files</code></td><td>passed on rerun</td><td>(short summary line only; see log)</td></tr>
+<tr><td><code>tests/standard_names/test_export_report_is_published.py::TestExportReportIsPublished::test_report_absent_staging_still_publishes</code></td><td>passed on rerun</td><td>(short summary line only; see log)</td></tr>
+<tr><td><code>tests/standard_names/test_export_report_is_published.py::TestExportReportIsPublished::test_report_copied_and_committed[.export_report.json]</code></td><td>passed on rerun</td><td>(short summary line only; see log)</td></tr>
+<tr><td><code>tests/standard_names/test_review_body_authored.py::test_authored_body_reaches_pr_unchanged_apart_from_preview_line</code></td><td>stable</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_body_ledger_link.py::test_body_lacking_the_ledger_gains_exactly_one_markdown_link</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_docs_three_models_disagreement_runs_escalator</code></td><td>stable</td><td>assert 1 == 3 · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for docume...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:09:20.388077+00:00&#x27;, ...}]) · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for docume...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:20:32.430472+00:00&#x27;, ...}])</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_docs_two_models_agreement_writes_two_cycles</code></td><td>stable</td><td>assert 1 == 2 · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for docume...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:09:17.666091+00:00&#x27;, ...}]) · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for docume...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:20:30.237921+00:00&#x27;, ...}])</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_names_batch_response_is_unwrapped</code></td><td>stable</td><td>TypeError: &#x27;&gt;&#x27; not supported between instances of &#x27;NoneType&#x27; and &#x27;float&#x27;</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_names_empty_reviews_batch_is_a_failed_cycle</code></td><td>stable</td><td>assert &#x27;write_reviews_calls&#x27; not in {&#x27;write_reviews_calls&#x27;: [[{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no u..._per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:09:18.367378+00:00&#x27;, ...}]]} · assert &#x27;write_reviews_calls&#x27; not in {&#x27;write_reviews_calls&#x27;: [[{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no u..._per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:20:45.017815+00:00&#x27;, ...}]]}</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_names_single_model_chain_uses_single_review</code></td><td>stable</td><td>assert -1 == 0</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_names_three_models_agreement_skips_cycle_two</code></td><td>stable</td><td>assert 1 == 2 · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for name r...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:09:18.084072+00:00&#x27;, ...}]) · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for name r...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:20:44.685277+00:00&#x27;, ...}])</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_names_three_models_disagreement_runs_escalator</code></td><td>stable</td><td>assert 1 == 3 · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for name r...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:09:17.497181+00:00&#x27;, ...}]) · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for name r...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:20:29.182336+00:00&#x27;, ...}])</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_names_two_models_agreement_writes_two_cycles</code></td><td>stable</td><td>assert 1 == 2 · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for name r...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:09:17.209540+00:00&#x27;, ...}]) · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for name r...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:20:28.887538+00:00&#x27;, ...}])</td></tr>
+<tr><td><code>tests/standard_names/test_review_quorum_pool.py::test_names_two_models_disagreement_no_escalator_marks_max_cycles</code></td><td>stable</td><td>assert 1 == 2 · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for name r...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:09:17.357180+00:00&#x27;, ...}]) · +  where 1 = len([{&#x27;comments&#x27;: &#x27;{&quot;route&quot;: &quot;unjudged&quot;, &quot;failed_checks&quot;: [], &quot;failure_reason&quot;: &quot;ValueError: no usable judgment for name r...ts_per_dim_json&#x27;: None, &#x27;cycle_index&#x27;: -1, &#x27;id&#x27;: &#x27;test_field:typesafe-jev-1-13:2026-10-18T23:20:29.039163+00:00&#x27;, ...}])</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_batch_rc_counter_continues_past_a_labelled_tag</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_collect_catalog_changes</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_dry_run_version_and_artifact_carry_the_label</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_dry_run_writes_no_roster_and_moves_no_candidate</code></td><td>passed on rerun</td><td>(short summary line only; see log)</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_frozen_artifact_is_schema_valid_with_the_label</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_pr_target_fork_uses_origin_slug</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_real_run_writes_exactly_one_artifact_and_advances_candidate_once</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_assembly_reproduces_and_closes_sparse_baseline_failure</code></td><td>stable</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_export_restores_approved_entry_bytes[- name: approved_name\n  unit: A\n]</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_release_can_cut_and_tag_without_opening_pr</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_release_dry_run_no_push_no_pr</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_release_explicit_pr_text_wins_verbatim</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_at_closed_pr_head</code></td><td>stable</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_release_refuses_branch_with_unique_commits</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_release_scopes_dd_caveats_to_batch_names</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_release_uses_injected_notes_builder</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_unavailable_dd_gap_read_is_visible_but_not_release_blocking</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release_preview_link.py::test_release_names_missing_preview_link_invariant</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_review_release_preview_link.py::test_release_writes_and_reads_back_exact_pr_preview_address</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+<tr><td><code>tests/standard_names/test_reviewer_profiles.py::test_configured_default_profile_uses_blind_pair_and_disagreement_breaker</code></td><td>stable</td><td>AssertionError: assert [&#x27;openrouter/...ude-sonnet-5&#x27;] == [&#x27;openrouter/...ude-sonnet-5&#x27;] ·  · At index 1 diff: &#x27;openrouter/openai/gpt-6-luna&#x27; != &#x27;openrouter/openai/gpt-5.6-luna&#x27;</td></tr>
+<tr><td><code>tests/standard_names/test_sn_approve_reviewer_base.py::test_additive_pr_detects_edit_against_cut_time_catalog</code></td><td>passed on rerun</td><td>Failed: Timeout (&gt;30.0s) from pytest-timeout.</td></tr>
+</tbody>
+</table>
+
+<h2 id="merged-head-check-attribution">The 13 reproducing ids</h2>
+<ul id="merged-head-check-stable-by-module">
+<li><code>tests/standard_names/test_review_body_authored.py</code> — 1</li>
+<li><code>tests/standard_names/test_review_quorum_pool.py</code> — 9</li>
+<li><code>tests/standard_names/test_review_release.py</code> — 2</li>
+<li><code>tests/standard_names/test_reviewer_profiles.py</code> — 1</li>
+</ul>
+<table id="merged-head-check-attribution-table">
+<tbody>
+<tr><th>quorum pool (9 ids)</th><td><code>test_review_quorum_pool.py</code>: the pooled route returns <code>route: "unjudged"</code> with <code>failure_reason: "ValueError: no usable judgment for name/document"</code>, so a cycle that should carry 2 or 3 reviews carries 1, and <code>test_names_batch_response_is_unwrapped</code> trips <code>TypeError: '&gt;' not supported between instances of 'NoneType' and 'float'</code>. The same "no usable judgment" text is the cascade router's own log line (<code>cascade.py:358</code>), so this cluster is attributed to the Jev cascade router landing (<code>f69054241</code>) rather than to the writers-carry-sources or seat-rotation work.</td></tr>
+<tr><th>reviewer profiles (1 id)</th><td><code>test_reviewer_profiles.py::test_configured_default_profile_uses_blind_pair_and_disagreement_breaker</code>: the default profile's second seat reads <code>openrouter/openai/gpt-6-luna</code> where the test expects <code>openrouter/openai/gpt-5.6-luna</code> — attributed to the GPT-6 seat rotation (<code>45ef1ab0f</code>); the test's expected roster was not updated.</td></tr>
+<tr><th>timeouts (3 ids)</th><td>three <code>Failed: Timeout (&gt;30.0s) from pytest-timeout.</code> in <code>test_review_body_authored.py</code> and <code>test_review_release.py</code>: the load-fragile release class of §26, reported here but not a defect of these landings.</td></tr>
+</tbody>
+</table>
+<p id="merged-head-check-flake">The instrument was checked before the absence was believed: the head arm ran a
+second time over the ten files carrying added failures, and 24 of the 37 did not reproduce while five
+<em>different</em> ids failed there (e.g. <code>test_review_release.py::test_review_release_full_flow</code>).
+A per-run-rotating failure set under <code>-n 8</code> on a shared allocation is the §26 signature, so the
+37 count is an upper bound on real additions; 13 reproduce.</p>
+
+<h2 id="merged-head-check-base-backlog">Pre-existing failures — 29 ids at both revisions</h2>
+<pre id="merged-head-check-common">tests/standard_names/test_export_bound_adjacent.py::test_bound_adjacent_is_distinct_and_ledger_closes
+tests/standard_names/test_export_domain_resolution.py::test_accepted_name_with_source_domain_never_resolves_to_the_bucket
+tests/standard_names/test_export_exclusion_ledger.py::test_export_emits_generic_source_bindings_and_preserves_accounting
+tests/standard_names/test_export_exclusion_ledger.py::test_export_keeps_catalog_semantic_advisories
+tests/standard_names/test_export_exclusion_ledger.py::test_export_ledger_closes_over_fixture_population
+tests/standard_names/test_export_exclusion_ledger.py::test_export_publishes_derived_producer_parent
+tests/standard_names/test_export_exclusion_ledger.py::test_export_validates_cross_links_against_full_catalog
+tests/standard_names/test_export_exclusion_ledger.py::test_generated_roles_mark_quantity_parent_and_leaf
+tests/standard_names/test_export_exclusion_ledger.py::test_manifest_sources_reconcile_emitted_excluded_and_non_nameable
+tests/standard_names/test_export_exclusion_ledger.py::test_quantity_token_duals_pass_identity_collision_gate
+tests/standard_names/test_export_exit_accounting.py::test_domain_and_quarantine_exits_are_counted
+tests/standard_names/test_export_exit_accounting.py::test_exempt_origin_can_publish_below_declared_min_score
+tests/standard_names/test_export_exit_accounting.py::test_reconciling_cut_passes
+tests/standard_names/test_export_exit_accounting.py::test_retired_stage_batch_member_is_counted_not_vanished
+tests/standard_names/test_export_producer_predicate.py::test_export_refuses_name_with_no_producing_source
+tests/standard_names/test_export_producer_predicate.py::test_keyless_refusal_disappears_with_the_key_presence_form
+tests/standard_names/test_export_producer_predicate.py::test_refusal_disappears_when_the_predicate_is_reverted
+tests/standard_names/test_export_release_holds.py::test_release_holds_close_the_identity_ledger
+tests/standard_names/test_export_resolution_method.py::test_export_resolves_accepting_docs_review_method_and_keeps_absence_closed
+tests/standard_names/test_export_waiver_intermediates.py::test_the_cut_carries_a_waived_source_whose_chain_reached_nothing
+tests/standard_names/test_export_waiver_intermediates.py::test_the_cut_reads_a_chain_reaching_exactly_the_bound_without_refusing
+tests/standard_names/test_review_body_authored.py::test_synthesized_body_still_gets_exclusion_ledger_paragraph
+tests/standard_names/test_review_release.py::test_plain_final_reclaims_branch_contained_in_main
+tests/standard_names/test_review_release.py::test_plain_final_uses_fork_branch_and_defers_tag
+tests/standard_names/test_review_release.py::test_review_branch_transport_ignores_upstream_remote
+tests/standard_names/test_review_release.py::test_review_export_restores_approved_entry_bytes[- name: approved_name\n  unit: kA\n]
+tests/standard_names/test_review_release.py::test_review_release_full_flow
+tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_contained_in_main
+tests/standard_names/test_review_release_checkout.py::test_review_release_restores_clean_main_with_remote_refs
+</pre>
+</main>
+</body>
+</html>
