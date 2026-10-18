@@ -2,8 +2,9 @@
 <h2 id="ssog-learned-acceptance-title">Acceptance learned from judgments</h2>
 <p id="ssog-learned-acceptance-method">Golden A's name rows carry Jev's per-check
 answers, frozen by the risk-order run. Each row becomes 29 features — one
-failure probability per named check — and one label: 1 for an accepted name, 0
-for a known defect. The hand-set composite is the risk-order run's risk, the
+failure probability per named check a row and its answers can decide, the
+taxonomy's name-axis questions plus the one audit check a name settles on its
+own — and one label: 1 for an accepted name, 0 for a known defect. The hand-set composite is the risk-order run's risk, the
 maximum failure probability over the checks with the mean breaking exact ties,
 read here as an acceptance score so that both arms score the same direction
 (higher is more acceptable). A standardised logistic regression (L2,
@@ -40,8 +41,8 @@ the validation set's spread under one noise draw, not whether the fit has skill.
 That the fit reads no validation label is shown separately and directly by
 moving the validation labels between their slots with the feature vectors held
 in place and refitting through the same fit path, which must leave the weights
-identical (largest coefficient change
-0.0e+00,
+unchanged to within 1e-12 (largest
+coefficient change 0.0e+00,
 weights_identical=True, permutation
 non-identity=True). What that
 comparison can see is measured on the same run rather than assumed of it: the
@@ -59,7 +60,12 @@ canonical order, so that reordering cannot reach it, and the whole-row variant
 reports it as passing (largest coefficient change 0.0); the label-moving
 comparison reads the same fit at 0.390 and does not. Each control's own measured
 result is recorded with EXIT= in the run log, and the driver's exit status is the
-conjunction of the four, so a run with any control red cannot ship behind a zero.
+conjunction of the four, so a run with any control red cannot ship behind a
+zero. The verify subcommand takes no control's stored boolean as its answer: it
+recomputes all four from the same inputs, checks the feature list against the
+review taxonomy's name-axis checks that a row can decide, and requires the
+stored numbers to agree with the replay, so a record whose controls were edited
+or whose inputs have moved comes back red.
 Both also fire on a one-line scratch copy: the fit that reads every row rather
 than the calibration split lifts the validation AUC to 0.791, which would have
 flipped the verdict to adopt, and reddens the leakage control; a null control
@@ -68,6 +74,6 @@ longer contains 0.5, and that run exits 1 where the same run exits 0 when the
 status is not taken from the controls.</p>
 <p id="ssog-learned-acceptance-spend">Spend: USD 0.00 of the
 USD 1.00 ceiling. All 737 golden A name rows already carry frozen Jev answers in the risk-order results, so no judgment was bought; the features are reused rather than re-elicited.</p>
-<figure id="ssog-learned-acceptance-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-learned-acceptance/roc-curves.svg" alt="Validation ROC curves for the learned logistic model and the hand-set composite."><figcaption>Validation ROC. The learned curve sits above the composite across the operating range; the two are close enough that the paired difference interval reaches zero.</figcaption></figure>
+<figure id="ssog-learned-acceptance-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-learned-acceptance/roc-curves.svg" alt="Validation ROC curves for the learned logistic model and the hand-set composite."><figcaption>Validation ROC. The learned curve is the higher of the two over most of the range, leading by up to 0.13 true-positive rate at a false-positive rate of 0.38 and staying above from about a false-positive rate of 0.10 outward. The composite leads it in the first few percent of the false-positive rate, by 0.07 true-positive rate at 0.014, and crosses back over it in short stretches below 0.2; across that low range the composite is above on about a third of the interval. The two curves are close enough over the whole span that the paired difference interval reaches zero, so the learned model is not adopted.</figcaption></figure>
 <table id="ssog-learned-acceptance-weights"><thead><tr><th>Rank</th><th>Check id</th><th>Weight (standardised)</th></tr></thead><tbody><tr><td>1</td><td><code>non_canonical_operator_join</code></td><td>-0.834</td></tr><tr><td>2</td><td><code>minority_spelling_not_in_roster</code></td><td>+0.483</td></tr><tr><td>3</td><td><code>retired_operator_spelling</code></td><td>+0.464</td></tr><tr><td>4</td><td><code>bare_shape_parameter_missing_surface</code></td><td>-0.461</td></tr><tr><td>5</td><td><code>source_fidelity_unsupported_qualifier</code></td><td>-0.411</td></tr><tr><td>6</td><td><code>owner_erased_outline</code></td><td>+0.374</td></tr><tr><td>7</td><td><code>model_surname_suffix</code></td><td>+0.308</td></tr><tr><td>8</td><td><code>collapsed_two_quantities</code></td><td>+0.295</td></tr><tr><td>9</td><td><code>missing_required_segment</code></td><td>-0.295</td></tr><tr><td>10</td><td><code>bound_to_wrong_object</code></td><td>-0.283</td></tr><tr><td>11</td><td><code>advisory_alias_collapsed</code></td><td>-0.258</td></tr><tr><td>12</td><td><code>over_qualified_modifier</code></td><td>+0.225</td></tr><tr><td>13</td><td><code>field_region_preposition_wrong</code></td><td>+0.220</td></tr><tr><td>14</td><td><code>dropped_distinguishing_axis</code></td><td>+0.177</td></tr><tr><td>15</td><td><code>coupled_vs_launched_confusion</code></td><td>-0.165</td></tr><tr><td>16</td><td><code>device_attributed_observable</code></td><td>-0.155</td></tr><tr><td>17</td><td><code>decomposition_group_absorbed_into_base</code></td><td>-0.121</td></tr><tr><td>18</td><td><code>value_provenance_in_name</code></td><td>-0.100</td></tr><tr><td>19</td><td><code>unit_kind_inconsistent</code></td><td>+0.089</td></tr><tr><td>20</td><td><code>non_canonical_locus_token</code></td><td>+0.086</td></tr><tr><td>21</td><td><code>non_canonical_render</code></td><td>-0.079</td></tr><tr><td>22</td><td><code>ordered_sample_positional_token</code></td><td>+0.078</td></tr><tr><td>23</td><td><code>redundant_repeated_segment</code></td><td>-0.066</td></tr><tr><td>24</td><td><code>over_specialised_parent</code></td><td>-0.065</td></tr><tr><td>25</td><td><code>unregistered_token_in_closed_segment</code></td><td>-0.065</td></tr><tr><td>26</td><td><code>non_canonical_segment_order</code></td><td>+0.061</td></tr><tr><td>27</td><td><code>source_binding_drift</code></td><td>-0.044</td></tr><tr><td>28</td><td><code>ambiguity_in_isolation</code></td><td>-0.039</td></tr><tr><td>29</td><td><code>malformed_physical_base</code></td><td>-0.035</td></tr></tbody></table>
 </section>

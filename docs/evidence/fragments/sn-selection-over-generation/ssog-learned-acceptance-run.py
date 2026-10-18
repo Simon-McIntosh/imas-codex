@@ -15,7 +15,7 @@ is written here.
 
 Subcommands:
     measure   fit, evaluate, write the figure, the results JSON and the fragment
-    verify    recompute the recorded claims from the stored results file
+    verify    replay the controls from the inputs and check the record against them
 """
 
 from __future__ import annotations
@@ -58,6 +58,14 @@ NULL_MASTER_SEED = 20261018
 NULL_LOWER_PCT = 2.5
 NULL_UPPER_PCT = 97.5
 LEAKAGE_PERMUTATION_SEED = 20261018
+# A fit whose inputs are untouched must come back with the same parameters. The
+# comparison is stated as this bound rather than as array equality, so the log
+# and the fragment carry the rule the control is judged by.
+LEAKAGE_WEIGHT_TOL = 1e-12
+# Of the name axis's audit checks, the one asking whether a name repeats a
+# segment is decided per row from the name itself; the rest need a full catalog
+# audit, so a row carries them no value for and they are not features here.
+TAXONOMY_DECIDABLE_AUDIT = ("redundant_repeated_segment",)
 
 LEARNED_COLOUR = "#246c78"
 COMPOSITE_COLOUR = "#929292"
@@ -229,11 +237,14 @@ def _fit_every_row(items, feature_ids):
     return _fit(X, y)
 
 
-def _same_weights(a, b) -> bool:
+def _weights_unchanged(a, b, tol=LEAKAGE_WEIGHT_TOL) -> bool:
+    """Whether two fits agree within the control's stated bound, coefficients and
+    intercept alike."""
     import numpy as np
 
     return bool(
-        np.array_equal(a.coef_, b.coef_) and np.array_equal(a.intercept_, b.intercept_)
+        np.max(np.abs(a.coef_ - b.coef_)) <= tol
+        and np.max(np.abs(a.intercept_ - b.intercept_)) <= tol
     )
 
 
@@ -273,21 +284,54 @@ def _leakage_control(items, feature_ids) -> dict:
     for pos, src in enumerate(perm):
         permuted[val_rows[pos]]["label"] = items[val_rows[src]]["label"]
     after_model, _ = _fit_items(permuted, feature_ids)
-    identical = _same_weights(base_model, after_model)
+    identical = _weights_unchanged(base_model, after_model)
 
     leaked_model, _ = _fit_every_row(items, feature_ids)
     leaked_after, _ = _fit_every_row(permuted, feature_ids)
     leaked_delta = _max_coef_delta(leaked_model, leaked_after)
-    leaked_moves = leaked_delta > 0.0
     return {
         "validation_labels_permuted": len(val_rows),
         "identity_permutation": identity,
+        "weight_tolerance": LEAKAGE_WEIGHT_TOL,
         "weights_identical": identical,
         "max_coef_delta": _max_coef_delta(base_model, after_model),
-        "leaked_fit_detected": leaked_moves,
+        "leaked_fit_detected": bool(leaked_delta > LEAKAGE_WEIGHT_TOL),
         "leaked_max_coef_delta": leaked_delta,
-        "passes": bool(identical and not identity and leaked_moves),
+        "passes": bool(
+            identical and not identity and leaked_delta > LEAKAGE_WEIGHT_TOL
+        ),
     }
+
+
+def _run_controls(items, feature_ids, X, y, split) -> dict:
+    """Every control, from the inputs, on the one path measure and verify share."""
+    cal = split == "calibration"
+    val = split == "validation"
+    return {
+        "instrument": _instrument_check(y[val]),
+        "composite_recompute": _composite_recompute_check(items, feature_ids),
+        "null": _null_control(X[cal], y[cal], X[val], y[val]),
+        "leakage": _leakage_control(items, feature_ids),
+    }
+
+
+def _taxonomy_feature_ids() -> list[str]:
+    """The name axis's checks the taxonomy marks decidable from a row and its answers.
+
+    A check carrying a question contributes its failure probability; an audit
+    check contributes one only where it is decidable from the name itself, which
+    is the set named in TAXONOMY_DECIDABLE_AUDIT. The list is read from the
+    taxonomy rather than from the inputs, so a check the taxonomy adds or drops
+    shows up as a failing feature-count check rather than as a silent widening.
+    """
+    from imas_codex.standard_names.review.checks import load_review_checks
+
+    question_ids = {
+        check.id
+        for check in load_review_checks()[0]
+        if check.axis == "name" and check.question is not None
+    }
+    return sorted(question_ids | set(TAXONOMY_DECIDABLE_AUDIT))
 
 
 # --------------------------------------------------------------------------
@@ -385,8 +429,9 @@ def _write_fragment(report: dict) -> None:
 <h2 id="ssog-learned-acceptance-title">Acceptance learned from judgments</h2>
 <p id="ssog-learned-acceptance-method">Golden A's name rows carry Jev's per-check
 answers, frozen by the risk-order run. Each row becomes 29 features — one
-failure probability per named check — and one label: 1 for an accepted name, 0
-for a known defect. The hand-set composite is the risk-order run's risk, the
+failure probability per named check a row and its answers can decide, the
+taxonomy's name-axis questions plus the one audit check a name settles on its
+own — and one label: 1 for an accepted name, 0 for a known defect. The hand-set composite is the risk-order run's risk, the
 maximum failure probability over the checks with the mean breaking exact ties,
 read here as an acceptance score so that both arms score the same direction
 (higher is more acceptable). A standardised logistic regression (L2,
@@ -423,8 +468,8 @@ the validation set's spread under one noise draw, not whether the fit has skill.
 That the fit reads no validation label is shown separately and directly by
 moving the validation labels between their slots with the feature vectors held
 in place and refitting through the same fit path, which must leave the weights
-identical (largest coefficient change
-{controls["leakage"]["max_coef_delta"]:.1e},
+unchanged to within {controls["leakage"]["weight_tolerance"]:.0e} (largest
+coefficient change {controls["leakage"]["max_coef_delta"]:.1e},
 weights_identical={controls["leakage"]["weights_identical"]}, permutation
 non-identity={not controls["leakage"]["identity_permutation"]}). What that
 comparison can see is measured on the same run rather than assumed of it: the
@@ -442,7 +487,12 @@ canonical order, so that reordering cannot reach it, and the whole-row variant
 reports it as passing (largest coefficient change 0.0); the label-moving
 comparison reads the same fit at 0.390 and does not. Each control's own measured
 result is recorded with EXIT= in the run log, and the driver's exit status is the
-conjunction of the four, so a run with any control red cannot ship behind a zero.
+conjunction of the four, so a run with any control red cannot ship behind a
+zero. The verify subcommand takes no control's stored boolean as its answer: it
+recomputes all four from the same inputs, checks the feature list against the
+review taxonomy's name-axis checks that a row can decide, and requires the
+stored numbers to agree with the replay, so a record whose controls were edited
+or whose inputs have moved comes back red.
 Both also fire on a one-line scratch copy: the fit that reads every row rather
 than the calibration split lifts the validation AUC to 0.791, which would have
 flipped the verdict to adopt, and reddens the leakage control; a null control
@@ -451,7 +501,7 @@ longer contains 0.5, and that run exits 1 where the same run exits 0 when the
 status is not taken from the controls.</p>
 <p id="ssog-learned-acceptance-spend">Spend: USD {spend["usd"]:.2f} of the
 USD {spend["ceiling_usd"]:.2f} ceiling. {spend["reason"]}</p>
-<figure id="ssog-learned-acceptance-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-learned-acceptance/roc-curves.svg" alt="Validation ROC curves for the learned logistic model and the hand-set composite."><figcaption>Validation ROC. The learned curve sits above the composite across the operating range; the two are close enough that the paired difference interval reaches zero.</figcaption></figure>
+<figure id="ssog-learned-acceptance-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-learned-acceptance/roc-curves.svg" alt="Validation ROC curves for the learned logistic model and the hand-set composite."><figcaption>Validation ROC. The learned curve is the higher of the two over most of the range, leading by up to 0.13 true-positive rate at a false-positive rate of 0.38 and staying above from about a false-positive rate of 0.10 outward. The composite leads it in the first few percent of the false-positive rate, by 0.07 true-positive rate at 0.014, and crosses back over it in short stretches below 0.2; across that low range the composite is above on about a third of the interval. The two curves are close enough over the whole span that the paired difference interval reaches zero, so the learned model is not adopted.</figcaption></figure>
 {_fmt_weights(weights, feature_ids)}
 </section>
 """
@@ -476,8 +526,9 @@ def measure() -> dict:
     val = split == "validation"
     groups_val = [g for g, is_val in zip(groups, val, strict=True) if is_val]
 
-    instrument = _instrument_check(y[val])
-    composite_check = _composite_recompute_check(items, feature_ids)
+    controls = _run_controls(items, feature_ids, X, y, split)
+    instrument = controls["instrument"]
+    composite_check = controls["composite_recompute"]
 
     risk = np.array([item["stored_risk"] for item in items])
     mean = np.array([item["stored_mean"] for item in items])
@@ -514,8 +565,8 @@ def measure() -> dict:
         seed=BOOTSTRAP_SEED,
     )
 
-    null = _null_control(X[cal], y[cal], X[val], y_val)
-    leakage = _leakage_control(items, feature_ids)
+    null = controls["null"]
+    leakage = controls["leakage"]
 
     adopted = bool(paired["lower"] > 0.0)
     if adopted:
@@ -600,38 +651,82 @@ def measure() -> dict:
     )
     _note(
         f"control leakage_weights_identical={leakage['weights_identical']} "
+        f"weight_tolerance={leakage['weight_tolerance']:.0e} "
         f"permutation_non_identity={not leakage['identity_permutation']} "
         f"leaked_fit_detected={leakage['leaked_fit_detected']} "
         f"passed={leakage['passes']}"
     )
     _note(f"verdict adopted={adopted}")
-    _note(f"EXIT={0 if _controls_pass(report) else 1}")
+    _note(f"EXIT={0 if _controls_pass(report['controls']) else 1}")
     return report
 
 
-def _controls_pass(report: dict) -> bool:
+def _controls_pass(controls: dict) -> bool:
     """Every control's own test file — the run is red while any one of them is."""
     return bool(
-        report["controls"]["instrument"]["passes"]
-        and report["controls"]["composite_recompute"]["passes"]
-        and report["controls"]["null"]["contains_half"]
-        and report["controls"]["leakage"]["passes"]
+        controls["instrument"]["passes"]
+        and controls["composite_recompute"]["passes"]
+        and controls["null"]["contains_half"]
+        and controls["leakage"]["passes"]
     )
 
 
 def verify(report: dict) -> int:
-    """Recompute the recorded claims from the results file; return 0 iff they hold."""
-    ok = True
+    """Replay every control from the inputs; return 0 iff the record holds.
+
+    Nothing here takes a stored pass flag as the answer: each control is
+    recomputed from the same inputs the run read, the feature list is compared
+    against the review taxonomy, and the stored numbers must then agree with what
+    the replay produced. A record whose controls were edited, or whose inputs
+    have moved since it was written, fails here even though its own booleans
+    still read true, and a control that comes back red on the replay fails it too.
+    """
+    items = _items()
+    feature_ids = _feature_ids(items)
+    X, y, split, _ = _arrays(items, feature_ids)
+    replayed = _run_controls(items, feature_ids, X, y, split)
+    stored = report["controls"]
+    taxonomy = _taxonomy_feature_ids()
+
+    def same(a, b, tol=1e-9) -> bool:
+        return abs(float(a) - float(b)) <= tol
+
     checks = {
-        "instrument": report["controls"]["instrument"]["passes"],
-        "composite_recompute": report["controls"]["composite_recompute"]["passes"],
-        "null_contains_half": report["controls"]["null"]["contains_half"],
-        "leakage": report["controls"]["leakage"]["passes"],
-        "controls_all_pass": _controls_pass(report),
-        "features_present": report["features"]["n"] == len(report["features"]["ids"]),
+        "features_match_taxonomy": sorted(report["features"]["ids"]) == taxonomy,
+        "feature_count_matches_taxonomy": report["features"]["n"] == len(taxonomy),
+        "instrument_replays": same(
+            replayed["instrument"]["oracle_auc"], stored["instrument"]["oracle_auc"]
+        )
+        and same(
+            replayed["instrument"]["inverted_auc"],
+            stored["instrument"]["inverted_auc"],
+        ),
+        "composite_replays": same(
+            replayed["composite_recompute"]["max_risk_abs_error"],
+            stored["composite_recompute"]["max_risk_abs_error"],
+        )
+        and same(
+            replayed["composite_recompute"]["max_mean_abs_error"],
+            stored["composite_recompute"]["max_mean_abs_error"],
+        ),
+        "null_replays": same(replayed["null"]["lower"], stored["null"]["lower"])
+        and same(replayed["null"]["upper"], stored["null"]["upper"])
+        and replayed["null"]["contains_half"] == stored["null"]["contains_half"],
+        "leakage_replays": replayed["leakage"]["weights_identical"]
+        == stored["leakage"]["weights_identical"]
+        and same(
+            replayed["leakage"]["max_coef_delta"], stored["leakage"]["max_coef_delta"]
+        )
+        and same(
+            replayed["leakage"]["leaked_max_coef_delta"],
+            stored["leakage"]["leaked_max_coef_delta"],
+        )
+        and replayed["leakage"]["passes"] == stored["leakage"]["passes"],
+        "controls_pass_on_replay": _controls_pass(replayed),
         "verdict_matches_interval": report["verdict"]["adopted"]
         == (report["paired"]["lower"] > 0.0),
     }
+    ok = True
     for name, value in checks.items():
         _note(f"verify {name}: {value}")
         ok = ok and bool(value)
@@ -645,7 +740,7 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     if args.command == "measure":
         report = measure()
-        return 0 if _controls_pass(report) else 1
+        return 0 if _controls_pass(report["controls"]) else 1
     return verify(json.loads(RESULTS.read_text()))
 
 

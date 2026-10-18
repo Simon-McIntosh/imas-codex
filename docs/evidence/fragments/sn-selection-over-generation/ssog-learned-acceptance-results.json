@@ -164,6 +164,7 @@
     "leakage": {
       "validation_labels_permuted": 357,
       "identity_permutation": false,
+      "weight_tolerance": 1e-12,
       "weights_identical": true,
       "max_coef_delta": 0.0,
       "leaked_fit_detected": true,
