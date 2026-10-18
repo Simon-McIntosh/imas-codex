@@ -2833,15 +2833,6 @@ def count_unattributed_detachments(gc: Any | None = None) -> int:
 
 def _find_orphaned_names(gc: Any, sn_ids: list[str]) -> list[str]:
     """Names among *sn_ids* left with no producing source after detachment."""
-    if not sn_ids:
-        return []
-    rows = gc.query(
-        """
-        UNWIND $ids AS sn_id
-        MATCH (sn:StandardName {id: sn_id})
-        WHERE NOT (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-        RETURN sn.id AS id
-        """,
-        ids=sn_ids,
-    )
-    return sorted(r["id"] for r in rows)
+    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+
+    return find_sourceless_live_names(gc, sn_ids)

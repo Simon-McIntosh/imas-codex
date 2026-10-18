@@ -1,69 +1,117 @@
 """Identity writes preserve a producing source for every live name."""
 
+import os
+from collections.abc import Iterator
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+from neo4j import GraphDatabase
 
+from imas_codex.graph.client import GraphClient
+from imas_codex.settings import get_graph_uri
+from imas_codex.standard_names.attachment_audit import _find_orphaned_names
 from imas_codex.standard_names.source_invariant import (
     MissingStandardNameSource,
-    _is_sourceless_name,
     require_producing_sources,
 )
 
 
-def test_source_invariant_classifies_touched_names() -> None:
-    class Query:
-        def __init__(self, *, origin=None, stage=None, sources=0, children=0):
-            self.origin = origin
-            self.stage = stage
-            self.sources = sources
-            self.children = children
+@pytest.fixture
+def source_graph() -> Iterator[GraphClient]:
+    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    if not uri:
+        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.fail("source invariant tests require an ephemeral graph")
+    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+    if uri.rstrip("/") == project_uri.rstrip("/"):
+        pytest.fail("source invariant tests refuse the project graph")
+    with GraphDatabase.driver(uri, auth=None) as driver:
+        driver.verify_connectivity()
+    with GraphClient(
+        uri=uri,
+        username="neo4j",
+        password="",
+        graph_name="ephemeral-source-invariant",
+    ) as graph:
+        graph.query("MATCH (node) DETACH DELETE node")
+        try:
+            yield graph
+        finally:
+            graph.query("MATCH (node) DETACH DELETE node")
 
-        def query(self, cypher, **params):
-            assert "PRODUCED_NAME" in cypher
-            assert "HAS_PARENT" in cypher
-            assert params["ids"] == ["electron_temperature"]
-            missing = (
-                (self.stage != "superseded" or not params["retired_is_exempt"])
-                and self.sources == 0
-                and not (self.origin == "derived" and self.children)
-            )
-            return [{"id": "electron_temperature"}] if missing else []
 
-    require_producing_sources(
-        Query(origin="derived", children=1), ["electron_temperature"]
+@pytest.mark.graph
+def test_real_invariant_refuses_missing_origin(source_graph: GraphClient) -> None:
+    source_graph.query(
+        "CREATE (:StandardName {id: 'electron_temperature', name_stage: 'drafted'})"
     )
-    require_producing_sources(Query(stage="superseded"), ["electron_temperature"])
-    with pytest.raises(MissingStandardNameSource):
-        require_producing_sources(
-            Query(stage="superseded"),
-            ["electron_temperature"],
-            retired_is_exempt=False,
-        )
-    require_producing_sources(Query(sources=1), ["electron_temperature"])
+    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == [
+        "electron_temperature"
+    ]
     with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
-        require_producing_sources(Query(), ["electron_temperature"])
+        require_producing_sources(source_graph, ["electron_temperature"])
 
 
-def test_invariant_query_keeps_names_with_missing_origin() -> None:
-    class CaptureQuery:
-        statement = ""
+@pytest.mark.graph
+def test_real_invariant_allows_derived_parent(source_graph: GraphClient) -> None:
+    source_graph.query(
+        """
+        CREATE (parent:StandardName {
+            id: 'electron_temperature', origin: 'derived', name_stage: 'drafted'
+        })
+        CREATE (child:StandardName {
+            id: 'electron_temperature_at_axis', name_stage: 'drafted'
+        })-[:HAS_PARENT]->(parent)
+        """
+    )
+    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
+    require_producing_sources(source_graph, ["electron_temperature"])
 
-        def query(self, cypher, **params):
-            self.statement = cypher
-            assert params["ids"] == ["electron_temperature"]
-            return []
 
-    capture = CaptureQuery()
-    require_producing_sources(capture, ["electron_temperature"])
-    assert "coalesce(sn.origin, '') = 'derived'" in capture.statement
-    assert "sn.origin = 'derived'" not in capture.statement
-    assert _is_sourceless_name(None, has_live_child=False, producers=0)
-    assert _is_sourceless_name(None, has_live_child=True, producers=0)
-    assert _is_sourceless_name("derived", has_live_child=False, producers=0)
-    assert not _is_sourceless_name("derived", has_live_child=True, producers=0)
-    assert not _is_sourceless_name(None, has_live_child=False, producers=1)
+@pytest.mark.graph
+def test_real_invariant_allows_retired_name(source_graph: GraphClient) -> None:
+    source_graph.query(
+        "CREATE (:StandardName {id: 'electron_temperature', name_stage: 'superseded'})"
+    )
+    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
+    require_producing_sources(source_graph, ["electron_temperature"])
+    with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
+        require_producing_sources(
+            source_graph, ["electron_temperature"], retired_is_exempt=False
+        )
+
+
+@pytest.mark.graph
+def test_real_invariant_allows_one_source(source_graph: GraphClient) -> None:
+    source_graph.query(
+        """
+        CREATE (name:StandardName {
+            id: 'electron_temperature', name_stage: 'drafted'
+        })
+        CREATE (:StandardNameSource {
+            id: 'dd:core_profiles/profiles_1d/electrons/temperature'
+        })-[:PRODUCED_NAME]->(name)
+        """
+    )
+    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
+    require_producing_sources(source_graph, ["electron_temperature"])
+
+
+@pytest.mark.graph
+def test_real_name_creation_rolls_back_without_source(
+    source_graph: GraphClient,
+) -> None:
+    from imas_codex.standard_names.graph_ops import write_standard_names
+
+    with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
+        write_standard_names([{"id": "electron_temperature"}], gc=source_graph)
+    rows = source_graph.query(
+        "MATCH (name:StandardName {id: 'electron_temperature'}) "
+        "RETURN count(name) AS count"
+    )
+    assert rows == [{"count": 0}]
 
 
 @pytest.mark.parametrize("stage", ["drafted", "superseded"])
