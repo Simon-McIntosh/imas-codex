@@ -160,7 +160,11 @@ def main(role: str) -> None:
     benchmark.score_with_reviewer = traced_review
     dd_domain_classifier._classify_batch = traced_classify
 
-    sample = results["pre_registration"]["samples"][role]["n"]
+    sample = (
+        results.get("execution_controls", {})
+        .get("sample_overrides", {})
+        .get(role, results["pre_registration"]["samples"][role]["n"])
+    )
     raw_path = RUN / f"raw-{role}.json"
     incumbent = {
         "refine": lambda: get_model("sn-refine"),

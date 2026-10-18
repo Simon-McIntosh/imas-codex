@@ -842,6 +842,21 @@
     "timestamp_utc": "2026-10-18T18:45:39Z",
     "budget_stop_before_next_call_usd": 9.0,
     "max_concurrent_metered_calls": 1,
-    "reason": "With USD 7.824536 charged and the largest completed call USD 0.250840, serialize remaining calls and retain at least USD 1.00 headroom against the USD 10 ceiling."
-  }
+    "reason": "With USD 7.824536 charged and the largest completed call USD 0.250840, serialize remaining calls and retain at least USD 1.00 headroom against the USD 10 ceiling.",
+    "sample_overrides": {
+      "breaker-names": 8
+    },
+    "sample_override_timestamp_utc": "2026-10-18T18:49:09Z",
+    "sample_override_reason": "The first 12-case names breaker run spent over six minutes on the incumbent first batch and timed out once; eight seeded cases avoid the second review batch and leave time for paired evidence under the fixed deadline."
+  },
+  "failed_attempts": [
+    {
+      "role": "breaker-names",
+      "sample": 12,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T180610585160-llm-gpt6-seat-bench/breaker-names.log",
+      "exit_status": 143,
+      "observed_call_cost_usd": 0.2508396,
+      "reason": "Incumbent Sonnet-5 first batch timed out then returned after 370 seconds; the run was stopped while entering the second batch."
+    }
+  ]
 }
