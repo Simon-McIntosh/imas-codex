@@ -1,0 +1,143 @@
+{
+  "description": "Fetched context_length for every route in the checked-in OpenRouter pricing table.",
+  "fetched_at": "2026-10-18T22:49:27.183798+00:00",
+  "route_count": 15,
+  "differences": [],
+  "records": [
+    {
+      "route": "openrouter/anthropic/claude-fable-5",
+      "url": "https://openrouter.ai/api/v1/model/anthropic/claude-fable-5",
+      "table_max_input_tokens": 1000000,
+      "fetched_at": "2026-10-18T22:49:26.206605+00:00",
+      "context_length": 1000000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/anthropic/claude-haiku-4.5",
+      "url": "https://openrouter.ai/api/v1/model/anthropic/claude-haiku-4.5",
+      "table_max_input_tokens": 200000,
+      "fetched_at": "2026-10-18T22:49:26.287492+00:00",
+      "context_length": 200000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/anthropic/claude-opus-4.8",
+      "url": "https://openrouter.ai/api/v1/model/anthropic/claude-opus-4.8",
+      "table_max_input_tokens": 1000000,
+      "fetched_at": "2026-10-18T22:49:26.353168+00:00",
+      "context_length": 1000000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/anthropic/claude-sonnet-4.6",
+      "url": "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-4.6",
+      "table_max_input_tokens": 1000000,
+      "fetched_at": "2026-10-18T22:49:26.415662+00:00",
+      "context_length": 1000000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/anthropic/claude-sonnet-5",
+      "url": "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5",
+      "table_max_input_tokens": 1000000,
+      "fetched_at": "2026-10-18T22:49:26.481076+00:00",
+      "context_length": 1000000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/deepseek/deepseek-v4-flash",
+      "url": "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-flash",
+      "table_max_input_tokens": 1048576,
+      "fetched_at": "2026-10-18T22:49:26.562659+00:00",
+      "context_length": 1048576,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/deepseek/deepseek-v4.1-flash",
+      "url": "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4.1-flash",
+      "table_max_input_tokens": 1048576,
+      "fetched_at": "2026-10-18T22:49:26.627274+00:00",
+      "context_length": 1048576,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/google/gemini-3.1-flash-lite-preview",
+      "url": "https://openrouter.ai/api/v1/model/google/gemini-3.1-flash-lite-preview",
+      "table_max_input_tokens": 1048576,
+      "fetched_at": "2026-10-18T22:49:26.695222+00:00",
+      "context_length": 1048576,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/google/gemini-3.1-pro-preview",
+      "url": "https://openrouter.ai/api/v1/model/google/gemini-3.1-pro-preview",
+      "table_max_input_tokens": 1048576,
+      "fetched_at": "2026-10-18T22:49:26.757328+00:00",
+      "context_length": 1048576,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/openai/gpt-5.4",
+      "url": "https://openrouter.ai/api/v1/model/openai/gpt-5.4",
+      "table_max_input_tokens": 1050000,
+      "fetched_at": "2026-10-18T22:49:26.820424+00:00",
+      "context_length": 1050000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/openai/gpt-5.5",
+      "url": "https://openrouter.ai/api/v1/model/openai/gpt-5.5",
+      "table_max_input_tokens": 1050000,
+      "fetched_at": "2026-10-18T22:49:26.887307+00:00",
+      "context_length": 1050000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/openai/gpt-5.6-luna",
+      "url": "https://openrouter.ai/api/v1/model/openai/gpt-5.6-luna",
+      "table_max_input_tokens": 1050000,
+      "fetched_at": "2026-10-18T22:49:26.951843+00:00",
+      "context_length": 1050000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/openai/gpt-6-luna",
+      "url": "https://openrouter.ai/api/v1/model/openai/gpt-6-luna",
+      "table_max_input_tokens": 1050000,
+      "fetched_at": "2026-10-18T22:49:27.022242+00:00",
+      "context_length": 1050000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/openai/gpt-6.1-sol",
+      "url": "https://openrouter.ai/api/v1/model/openai/gpt-6.1-sol",
+      "table_max_input_tokens": 1050000,
+      "fetched_at": "2026-10-18T22:49:27.087267+00:00",
+      "context_length": 1050000,
+      "error": null,
+      "matches_table": true
+    },
+    {
+      "route": "openrouter/x-ai/grok-4.5",
+      "url": "https://openrouter.ai/api/v1/model/x-ai/grok-4.5",
+      "table_max_input_tokens": 500000,
+      "fetched_at": "2026-10-18T22:49:27.183768+00:00",
+      "context_length": 500000,
+      "error": null,
+      "matches_table": true
+    }
+  ]
+}
