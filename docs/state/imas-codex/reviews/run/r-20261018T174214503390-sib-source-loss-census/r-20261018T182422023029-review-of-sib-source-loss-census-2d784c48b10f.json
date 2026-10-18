@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed run's manifest has empty baseline_suite and after_suite fields and no completed paired suite logs; the set difference is unmeasured, so count is null rather than zero.",
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T18:33:58Z",
+  "dispatched_at": "2026-10-18T18:25:37Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "33",
+      "severity": "blocking",
+      "text": "blocking: classify assigns dropped_edge whenever historical evidence exists without enforcing the plan's no-live-holder condition; the committed results label 62 exhausted names dropped while recording an unrelated live holder for their source path, so the reported 222 endangered exhausted names conflate two populations."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "345",
+      "severity": "blocking",
+      "text": "blocking: any reachable successor with any producing edge qualifies an exhausted name as an orphan; no source identity is compared with the predecessor, and the sole orphan witness has no own recorded path, so the fixture and witness do not prove the successor holds the predecessor's sources."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "533",
+      "severity": "follow-on",
+      "text": "follow-on: exhausted_source_location_counts and exhausted_dropped_edges are built from the same filtered rows, so this equality still passes if a dropped-edge row is omitted or misclassified and adds no independent regression protection."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production import or call site reaches the standalone census script; its own command-line entry point is internal to the added module.",
+    "diff": "Read 04585599c776eeb46389a9e89e175bccbe37ce66, 8239e26028b359ce61a7f1f0ce47382f5ef8432f and 2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa against base 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f; they add the census artifacts, correct ambiguous writer attribution and add independent count and source-location checks.",
+    "done_when": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:38-59 exercises planted classes and :531 checks 264 classified rows against an independent graph count; followon-census.log records every query below ten seconds and EXIT=0, while source identity for the orphan and 62 live-held dropped rows is not tested.",
+    "goal": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census.html:5-15 and the results JSON enumerate 264 sourceless live names and 62 comparison cases, but the dropped-edge and orphan criteria are not fully established.",
+    "manifest": "The source run manifest.md:11-25 names all three commits and paths and cites followon-census.log, whose 264 count and EXIT=0 agree; baseline_suite and after_suite at :21-22 are empty, so an added-failure delta cannot be measured.",
+    "write_paths": "The source brief grants three census artifacts and an unused figure directory; git diff 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f..2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa changes only the three granted artifacts."
+  },
+  "justifications": {
+    "durability": "sib-source-loss-census-run.py:51, :57-59, :531 and :552 can fail on wrong fixture classes, derived-childless cases, omitted graph names and changed witnesses, while :533-536 compares two aggregates from the same filtered rows.",
+    "evidence": "followon-census.log:4-20 records positive graph populations, four fixtures and 264 independent sourceless names, but its header names 8239e260 plus uncommitted additions and source manifest.md:21-22 has no completed suite arms.",
+    "fit": "sib-source-loss-census-run.py:64-71 uses the repository GraphClient and enforces the ten-second read bound, and :654-686 escapes generated HTML as the surrounding evidence scripts do.",
+    "goal_fidelity": "sib-source-loss-census-run.py:33-35 labels a name dropped whenever history exists even when the committed results record a live source holder, contrary to the population rule in docs/plans/sn-integrity-backlog.html:237.",
+    "reuse": "A capability search found imas_codex/standard_names/graph_ops.py:14522, which reattaches a narrower pipeline-origin cohort; sib-source-loss-census-run.py:24 adds the first read-only four-population census rather than duplicating that repair owner.",
+    "scope_discipline": "The diff to 2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa adds only sib-source-loss-census-run.py, sib-source-loss-census-results.json and sib-source-loss-census.html within the source brief's declared paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census.html:5-15 and the results JSON enumerate 264 sourceless live names and 62 comparison cases, but the dropped-edge and orphan criteria are not fully established.\nVERDICT done_when: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:38-59 exercises planted classes and :531 checks 264 classified rows against an independent graph count; followon-census.log records every query below ten seconds and EXIT=0, while source identity for the orphan and 62 live-held dropped rows is not tested.\nVERDICT write_paths: The source brief grants three census artifacts and an unused figure directory; git diff 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f..2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa changes only the three granted artifacts.\nVERDICT manifest: The source run manifest.md:11-25 names all three commits and paths and cites followon-census.log, whose 264 count and EXIT=0 agree; baseline_suite and after_suite at :21-22 are empty, so an added-failure delta cannot be measured.\nVERDICT diff: Read 04585599c776eeb46389a9e89e175bccbe37ce66, 8239e26028b359ce61a7f1f0ce47382f5ef8432f and 2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa against base 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f; they add the census artifacts, correct ambiguous writer attribution and add independent count and source-location checks.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: sib-source-loss-census-run.py:33-35 labels a name dropped whenever history exists even when the committed results record a live source holder, contrary to the population rule in docs/plans/sn-integrity-backlog.html:237.\nSCORE evidence: 16\nJUSTIFICATION evidence: followon-census.log:4-20 records positive graph populations, four fixtures and 264 independent sourceless names, but its header names 8239e260 plus uncommitted additions and source manifest.md:21-22 has no completed suite arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff to 2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa adds only sib-source-loss-census-run.py, sib-source-loss-census-results.json and sib-source-loss-census.html within the source brief's declared paths.\nSCORE durability: 14\nJUSTIFICATION durability: sib-source-loss-census-run.py:51, :57-59, :531 and :552 can fail on wrong fixture classes, derived-childless cases, omitted graph names and changed witnesses, while :533-536 compares two aggregates from the same filtered rows.\nSCORE fit: 18\nJUSTIFICATION fit: sib-source-loss-census-run.py:64-71 uses the repository GraphClient and enforces the ten-second read bound, and :654-686 escapes generated HTML as the surrounding evidence scripts do.\nSCORE reuse: 20\nJUSTIFICATION reuse: A capability search found imas_codex/standard_names/graph_ops.py:14522, which reattaches a narrower pipeline-origin cohort; sib-source-loss-census-run.py:24 adds the first read-only four-population census rather than duplicating that repair owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:33 blocking: classify assigns dropped_edge whenever historical evidence exists without enforcing the plan's no-live-holder condition; the committed results label 62 exhausted names dropped while recording an unrelated live holder for their source path, so the reported 222 endangered exhausted names conflate two populations.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:345 blocking: any reachable successor with any producing edge qualifies an exhausted name as an orphan; no source identity is compared with the predecessor, and the sole orphan witness has no own recorded path, so the fixture and witness do not prove the successor holds the predecessor's sources.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:533 follow-on: exhausted_source_location_counts and exhausted_dropped_edges are built from the same filtered rows, so this equality still passes if a dropped-edge row is omitted or misclassified and adds no independent regression protection.\n",
+  "review_run_id": "r-20261018T182422023029-review-of-sib-source-loss-census-2d784c48b10f",
+  "reviewed_base_sha": "993ddf413d290b09d1c8ea7518e2fdc4a0209b2f",
+  "reviewed_head_sha": "2d784c48b10fb88e9c909d8293e9d44ce0cc8bfa",
+  "reviewed_run_id": "r-20261018T174214503390-sib-source-loss-census",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T18:30:14Z",
+  "total": 101
+}
