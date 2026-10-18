@@ -18,6 +18,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-18T11:54:13Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the comparison script needs the refine call without the bench's own judge; giving run_refine_bench a no-judge mode is a product change outside a measurement node",
+      "recorded_at": "2026-10-18T11:55:30.351411+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T11:47:13Z",
   "findings": [
     {
