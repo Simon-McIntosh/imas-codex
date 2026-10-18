@@ -45,7 +45,14 @@ def source_graph() -> Iterator[GraphClient]:
 @pytest.mark.graph
 def test_real_invariant_refuses_missing_origin(source_graph: GraphClient) -> None:
     source_graph.query(
-        "CREATE (:StandardName {id: 'electron_temperature', name_stage: 'drafted'})"
+        """
+        CREATE (parent:StandardName {
+            id: 'electron_temperature', name_stage: 'drafted'
+        })
+        CREATE (child:StandardName {
+            id: 'electron_temperature_at_axis', name_stage: 'drafted'
+        })-[:HAS_PARENT]->(parent)
+        """
     )
     assert _find_orphaned_names(source_graph, ["electron_temperature"]) == [
         "electron_temperature"
