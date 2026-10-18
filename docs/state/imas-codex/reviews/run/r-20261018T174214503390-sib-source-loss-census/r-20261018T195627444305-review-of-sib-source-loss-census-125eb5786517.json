@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's own baseline_suite and after_suite manifest fields are blank, so the paired base/after arms it records are third-review-property-base.log (revision 2bce27f965ae5e53eddea3d5d942b2538409d1e1, 4 passed, EXIT=0) and third-review-property-after.log (same revision plus scoped census changes, 4 passed, EXIT=0); the after-minus-base failing-id set is therefore empty. The census driver gate is a single head run (fourth-review-census.log, EXIT=0) with a red parent-revision fixture control rather than a paired suite baseline.",
+  "added_failure_ids": [],
+  "added_failures_note": "0 added failures across the paired property-check gate; no paired census-driver base arm exists, only a head run and a red parent-revision fixture control.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T20:14:55.789Z",
+  "dispatched_at": "2026-10-18T19:57:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "275",
+      "severity": "follow-on",
+      "text": "follow-on: verify_bindings recomputes each name's population with the same chain rule and the same inputs as classify, and its verification_names query at :434 is byte-identical to the names query at :316, so the advertised independent population check re-runs one definition twice and cannot catch a shared error in the five-population rule; only the live_sourceless_count and exhausted_sourceless_count queries are independently defined."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T174214503390-sib-source-loss-census/fourth-review-negative-control.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the command line reads  git show HEAD:... | uv run python -c <ancestor-held orphan fixture> , carrying a placeholder rather than the literal command, so the refusal (EXIT=1, AssertionError, ancestor-held: dropped_edge) cannot be reproduced from the log alone."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: CHAIN_CHANGE_OPERATIONS and SOURCE_RECEIPT_OPERATIONS are closed whitelists over a live operation vocabulary of 85 values; identity- and source-moving operations present in the graph (semantics_preserving_rename, revert_rename, backfill_refine, campaign_docs_refine, move_source_snapshot, rebind_sources) are absent, so a name whose source one of them moved is attributed unknown and its holder can read as unchained."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none - the census is a standalone evidence script reachable only through its __main__ entry point at sib-source-loss-census-run.py:1108, and no production module imports it",
+    "diff": "Read all seven commits against base 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f; c55e706699a72869574df5f9d0058a3236f1f4a8 rewrites classify in docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:50-68 to chained_held_source_ids and adds the ancestor-held fixture at :117-126, and 125eb57865175427889e580c5526552dddfdb562 regenerates the two artifacts at driver c55e7066; every changed path is one of the three granted.",
+    "done_when": "docs/plans/sn-integrity-backlog.html section 35 requires five populations, an independently checked total, a planted fixture of each kind and a named witness per population; the census log records 264 classified rows equal to independent_live_sourceless_count 264 and 240 exhausted equal to independent_exhausted_sourceless_count 240, with five planted fixtures and a named witness for each population.",
+    "goal": "The source brief.md census section asks for a read-only census separating moved from dropped sources, and docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census.html:7-15 reports 264 names as 2 derived parents, 2 orphans, 31 unchained holders, 199 dropped edges and 30 never bound, naming hard_xray_rate as the live orphan witness.",
+    "manifest": "The source manifest.md records seven commits, the census run EXIT=0 with its independent 264/240 cross-check, and points negative_control_log at fourth-review-negative-control.log; baseline_suite and after_suite are left blank.",
+    "write_paths": "The source brief.md write scope grants sib-source-loss-census.html, sib-source-loss-census-run.py and sib-source-loss-census-results.json; git diff --stat from 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f to 125eb57865175427889e580c5526552dddfdb562 changes exactly those three paths, 1476 insertions."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:117-126 asserts a hand-built ancestor-held dict classifies as orphan_awaiting_retirement, and fourth-review-negative-control.log shows that fixture reddening on the pre-fix classifier with EXIT=1, but the same-file verify_bindings at :275 reruns the same rule over the same inputs so it cannot redden on a shared definitional error.",
+    "evidence": "fourth-review-census.log records the driver revision, tree and literal command, and docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:333-359 reads independent live- and exhausted-sourceless totals while :926-930 cross-checks every population, but the non-literal negative-control command line and the same-definition verification weaken it.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:158-165 bounds every graph read at ten seconds and :963 caps the artifact at 300000 bytes, matching the surrounding evidence-script idiom, and the fragment file name is the plan-assigned landing path.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:50-68 places every own source held by a chained relative into orphan_awaiting_retirement and every unheld or unresolved own source into dropped_edge, matching the plan's five-population separation.",
+    "reuse": "A capability search found imas_codex/standard_names/ledger.py:96 owning a narrower live-sourceless query and imas_codex/standard_names/graph_ops.py:14522 owning a pipeline-only reattach; the read-only five-population classifier in docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:50 extends neither and duplicates nothing, though its own lineage walk at :621-639 is bespoke without an owner.",
+    "scope_discipline": "The diff from 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f to 125eb57865175427889e580c5526552dddfdb562 changes only the three census files granted in the source brief.md write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md census section asks for a read-only census separating moved from dropped sources, and docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census.html:7-15 reports 264 names as 2 derived parents, 2 orphans, 31 unchained holders, 199 dropped edges and 30 never bound, naming hard_xray_rate as the live orphan witness.\nVERDICT done_when: docs/plans/sn-integrity-backlog.html section 35 requires five populations, an independently checked total, a planted fixture of each kind and a named witness per population; the census log records 264 classified rows equal to independent_live_sourceless_count 264 and 240 exhausted equal to independent_exhausted_sourceless_count 240, with five planted fixtures and a named witness for each population.\nVERDICT write_paths: The source brief.md write scope grants sib-source-loss-census.html, sib-source-loss-census-run.py and sib-source-loss-census-results.json; git diff --stat from 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f to 125eb57865175427889e580c5526552dddfdb562 changes exactly those three paths, 1476 insertions.\nVERDICT manifest: The source manifest.md records seven commits, the census run EXIT=0 with its independent 264/240 cross-check, and points negative_control_log at fourth-review-negative-control.log; baseline_suite and after_suite are left blank.\nVERDICT diff: Read all seven commits against base 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f; c55e706699a72869574df5f9d0058a3236f1f4a8 rewrites classify in docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:50-68 to chained_held_source_ids and adds the ancestor-held fixture at :117-126, and 125eb57865175427889e580c5526552dddfdb562 regenerates the two artifacts at driver c55e7066; every changed path is one of the three granted.\nCALL_SITES: none - the census is a standalone evidence script reachable only through its __main__ entry point at sib-source-loss-census-run.py:1108, and no production module imports it\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:50-68 places every own source held by a chained relative into orphan_awaiting_retirement and every unheld or unresolved own source into dropped_edge, matching the plan's five-population separation.\nSCORE evidence: 16\nJUSTIFICATION evidence: fourth-review-census.log records the driver revision, tree and literal command, and docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:333-359 reads independent live- and exhausted-sourceless totals while :926-930 cross-checks every population, but the non-literal negative-control command line and the same-definition verification weaken it.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff from 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f to 125eb57865175427889e580c5526552dddfdb562 changes only the three census files granted in the source brief.md write scope.\nSCORE durability: 16\nJUSTIFICATION durability: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:117-126 asserts a hand-built ancestor-held dict classifies as orphan_awaiting_retirement, and fourth-review-negative-control.log shows that fixture reddening on the pre-fix classifier with EXIT=1, but the same-file verify_bindings at :275 reruns the same rule over the same inputs so it cannot redden on a shared definitional error.\nSCORE fit: 17\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:158-165 bounds every graph read at ten seconds and :963 caps the artifact at 300000 bytes, matching the surrounding evidence-script idiom, and the fragment file name is the plan-assigned landing path.\nSCORE reuse: 19\nJUSTIFICATION reuse: A capability search found imas_codex/standard_names/ledger.py:96 owning a narrower live-sourceless query and imas_codex/standard_names/graph_ops.py:14522 owning a pipeline-only reattach; the read-only five-population classifier in docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:50 extends neither and duplicates nothing, though its own lineage walk at :621-639 is bespoke without an owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:275 follow-on: verify_bindings recomputes each name's population with the same chain rule and the same inputs as classify, and its verification_names query at :434 is byte-identical to the names query at :316, so the advertised independent population check re-runs one definition twice and cannot catch a shared error in the five-population rule; only the live_sourceless_count and exhausted_sourceless_count queries are independently defined.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T174214503390-sib-source-loss-census/fourth-review-negative-control.log:2 follow-on: the command line reads  git show HEAD:... | uv run python -c <ancestor-held orphan fixture> , carrying a placeholder rather than the literal command, so the refusal (EXIT=1, AssertionError, ancestor-held: dropped_edge) cannot be reproduced from the log alone.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:30 follow-on: CHAIN_CHANGE_OPERATIONS and SOURCE_RECEIPT_OPERATIONS are closed whitelists over a live operation vocabulary of 85 values; identity- and source-moving operations present in the graph (semantics_preserving_rename, revert_rename, backfill_refine, campaign_docs_refine, move_source_snapshot, rebind_sources) are absent, so a name whose source one of them moved is attributed unknown and its holder can read as unchained.\n",
+  "review_run_id": "r-20261018T195627444305-review-of-sib-source-loss-census-125eb5786517",
+  "reviewed_base_sha": "993ddf413d290b09d1c8ea7518e2fdc4a0209b2f",
+  "reviewed_head_sha": "125eb57865175427889e580c5526552dddfdb562",
+  "reviewed_run_id": "r-20261018T174214503390-sib-source-loss-census",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T20:12:53.041904+00:00",
+  "total": 107
+}
