@@ -243,7 +243,12 @@ def test_one_contradiction_vetoes_top_scores_and_clean_checks():
         state, checks, answers, audit_report=AuditReport()
     )
     assert set(result["dimensions"].values()) == {"accept"}
-    assert not any(record["failed"] for record in result["checks"].values())
+    assert result["checks"]["claim_contradicts_source"]["failed"]
+    assert not any(
+        record["failed"]
+        for check_id, record in result["checks"].items()
+        if check_id != "claim_contradicts_source"
+    )
     assert result["contradiction_veto"] is True
     assert result["decision"] == "reject"
     answers["check:claim_contradicts_source:0"] = {"choice": "supports"}
@@ -332,6 +337,12 @@ def test_unanswered_claim_is_unknown_and_unsupported_claim_is_rejected():
         == "unknown"
     )
     answers[key] = {"choice": "says nothing"}
+    assert (
+        jev_review.aggregate_docs_review(
+            state, checks, answers, audit_report=AuditReport()
+        )["checks"]["claim_contradicts_source"]["failure_probability"]
+        == 1.0
+    )
     assert (
         jev_review.aggregate_docs_review(
             state, checks, answers, audit_report=AuditReport()

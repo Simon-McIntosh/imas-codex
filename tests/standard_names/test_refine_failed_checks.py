@@ -9,6 +9,7 @@ import yaml
 
 from imas_codex.llm.prompt_loader import render_prompt
 from imas_codex.standard_names import benchmark_roles
+from imas_codex.standard_names.fanout.config import FanoutSettings
 from imas_codex.standard_names.fanout.trigger import (
     should_trigger_fanout,
     should_trigger_fanout_from_checks,
@@ -193,6 +194,12 @@ def test_check_trigger_does_not_read_comments():
     )
     assert fire is True
     assert excerpt == ""
+
+
+def test_comment_trigger_remains_the_default():
+    settings = FanoutSettings()
+    assert settings.refine_trigger_source == "comments"
+    assert settings.refine_trigger_check_threshold == 0.5
 
 
 @pytest.mark.parametrize(

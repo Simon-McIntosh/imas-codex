@@ -95,7 +95,7 @@ _CORE_FIELDS: frozenset[str] = frozenset(
 _SIBLING_FIELD = "sibling_names"
 
 # The probability at or above which a check is read as failed.
-NOUL_FAIL_PROBABILITY = 0.5
+CHECK_FAIL_PROBABILITY = 0.5
 
 # Ordered categories per review dimension, best first. The judge places a
 # candidate in one; the decision is derived in code and the categories are not
@@ -364,9 +364,8 @@ def check_failure_probability(
             for option in question.options
             if option not in question.conforming
         )
-    return float(
-        answer.get("choice") in set(question.options) - set(question.conforming)
-    )
+    choice = answer.get("choice")
+    return float(choice is not None and choice not in question.conforming)
 
 
 def check_failed(
@@ -380,7 +379,7 @@ def check_failed(
         return False
     return (
         check_failure_probability(check, answer, audit_finding=audit_finding)
-        >= NOUL_FAIL_PROBABILITY
+        >= CHECK_FAIL_PROBABILITY
     )
 
 
@@ -814,6 +813,24 @@ def aggregate_docs_review(
         claim_answers.append(answer)
     contradiction_veto = bool(contradicted_claims)
     check_records: dict[str, dict[str, Any]] = {}
+    claims_answered = bool(claim_answers) and all(
+        answer is not None for answer in claim_answers
+    )
+    claim_failed = any(check_failed(claim_check, answer) for answer in claim_answers)
+    check_records[claim_check.id] = {
+        "answered": claims_answered,
+        "failed": claim_failed,
+        "failure_probability": max(
+            (
+                check_failure_probability(claim_check, answer)
+                for answer in claim_answers
+            ),
+            default=0.0,
+        ),
+        "decision": _check_decision(claims_answered, claim_failed),
+        "audit_finding": None,
+        "answer": claim_answers,
+    }
     for check in docs_checks:
         if check.id == claim_check.id:
             continue
@@ -852,8 +869,6 @@ def aggregate_docs_review(
         or any(not record["answered"] for record in check_records.values())
     ):
         decision = "unknown"
-    elif any(answer.get("choice") == "says nothing" for answer in claim_answers):
-        decision = "reject"
     else:
         decision = "accept"
     return {
@@ -1018,13 +1033,14 @@ def _item_record(
             answered = (
                 audit_report is not None or check.id == "redundant_repeated_segment"
             )
+            failed = answered and check_failed(check, audit_finding=finding)
             check_records[check.id] = {
                 "answered": answered,
-                "failed": answered and finding is not None,
+                "failed": failed,
                 "failure_probability": check_failure_probability(
                     check, audit_finding=finding
                 ),
-                "decision": _check_decision(answered, finding is not None),
+                "decision": _check_decision(answered, failed),
                 "audit_finding": finding,
                 "question": None,
             }
