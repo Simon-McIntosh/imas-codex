@@ -98,6 +98,7 @@ class JevQuestion(BaseModel):
     kind: JevQuestionKind
     text: str
     options: list[str] = Field(default_factory=list)
+    conforming: list[str] = Field(default_factory=list)
     # A Noul carries its polarity explicitly: the field states that the
     # question's true case is the defect the check names. The reader fails a
     # Noul when its probability is high, so a question whose true case is the
@@ -111,8 +112,18 @@ class JevQuestion(BaseModel):
         if self.kind is JevQuestionKind.CHOICE:
             if len(self.options) < 2:
                 raise ValueError("a Choice question requires at least two options")
+            if (
+                not self.conforming
+                or any(not option.strip() for option in self.conforming)
+                or not set(self.conforming) <= set(self.options)
+            ):
+                raise ValueError(
+                    "a Choice question requires conforming options from its options"
+                )
         elif self.options:
             raise ValueError("a Noul question carries no options")
+        elif self.conforming:
+            raise ValueError("a Noul question carries no conforming options")
         return self
 
 

@@ -116,10 +116,18 @@ _(no prior revision history — this is the first docs refine attempt)_
 {% endif %}
 {% set _cur_score_docs = reviewer_score_docs | default(none, true) %}
 {% set _cur_comments_docs = reviewer_comments_per_dim_docs | default(none, true) %}
-{% if _cur_score_docs is not none or _cur_comments_docs %}
+{% if _cur_score_docs is not none or _cur_comments_docs or failed_checks is defined %}
 ### Current node docs review
 
 - **Reviewer score:** {{ "%.2f"|format(_cur_score_docs) if _cur_score_docs is not none else "—" }}
+{% if failed_checks is defined %}
+- **Failed checks:**
+{% for check in failed_checks %}
+  - **{{ check.id }}** — {{ check.criterion }}
+    - Evidence: {{ check.evidence }}
+    - Segment or sentence: {{ check.segment or check.sentence }}
+{% endfor %}
+{% else %}
 - **Per-dimension comments:**
 {% set _per_dim_docs = (_cur_comments_docs | fromjson) if _cur_comments_docs else {} %}
 {% if _per_dim_docs %}
@@ -128,6 +136,7 @@ _(no prior revision history — this is the first docs refine attempt)_
 {% endfor %}
 {% else %}
   _(no per-dimension comments recorded)_
+{% endif %}
 {% endif %}
 
 {% endif %}

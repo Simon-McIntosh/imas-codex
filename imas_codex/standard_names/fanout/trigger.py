@@ -11,11 +11,11 @@ Public surface
 - :func:`extract_reviewer_excerpt` — flatten the dim-allow-listed
   values of ``reviewer_comments_per_dim_name`` (parsing the JSON-string
   representation if necessary) into a single truncated excerpt.
-- :func:`should_trigger_fanout` — return ``(fire, excerpt)`` where
-  ``fire`` is ``True`` only when *all* of the predicate's clauses hold
-  (chain length, deterministic chain-history enrichment, keyword
-  presence in the allow-list
-  excerpt).
+- :func:`should_trigger_fanout` — return ``(fire, excerpt)`` from the
+  selected trigger source. The default comment source retains its chain
+  history and keyword rules.
+- :func:`should_trigger_fanout_from_checks` — fire on the maximum failure
+  probability among answered checks that request retrieval.
 - :func:`assign_arm` — deterministic 50/50 (or
   ``refine_fanout_arm_percent``) within-cohort A/B label, hashing
   ``(sn_id, cycle_index)`` via blake2b for stability across runs.
@@ -28,13 +28,34 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping, Sequence
 from typing import Any
+
+from imas_codex.standard_names.review.checks import ReviewCheck
 
 __all__ = [
     "assign_arm",
     "extract_reviewer_excerpt",
     "should_trigger_fanout",
+    "should_trigger_fanout_from_checks",
 ]
+
+
+def should_trigger_fanout_from_checks(
+    checks: Sequence[ReviewCheck],
+    check_results: Mapping[str, Mapping[str, Any]],
+    *,
+    threshold: float,
+) -> bool:
+    """Fire when a retrieval check's measured failure probability reaches the threshold."""
+    probabilities = [
+        float(check_results[check.id].get("failure_probability", 0.0))
+        for check in checks
+        if check.retrieval
+        and check.id in check_results
+        and check_results[check.id].get("answered", False)
+    ]
+    return bool(probabilities) and max(probabilities) >= threshold
 
 
 def _parse_comments(raw: object) -> dict[str, str]:
@@ -110,10 +131,14 @@ def should_trigger_fanout(
     keywords: tuple[str, ...] | list[str],
     dims: tuple[str, ...] | list[str],
     char_cap: int,
+    trigger_source: str = "comments",
+    checks: Sequence[ReviewCheck] = (),
+    check_results: Mapping[str, Mapping[str, Any]] | None = None,
+    check_threshold: float = 0.5,
 ) -> tuple[bool, str]:
-    """Return ``(fire, excerpt)`` for the fan-out trigger predicate.
+    """Return ``(fire, excerpt)`` for the selected fan-out trigger.
 
-    Fan-out fires only when *all* of:
+    The comment path fires only when *all* of:
 
     1. ``chain_length > 0`` — the candidate has been refined at least
        once, so reviewer feedback exists to draw signal from.
@@ -123,11 +148,21 @@ def should_trigger_fanout(
     3. At least one allow-listed reviewer-comment value contains a
        trigger keyword (case-insensitive).
 
-    The returned ``excerpt`` is the truncated allow-listed comment
+    The returned ``excerpt`` on the comment path is the truncated allow-listed comment
     block, suitable for direct injection into the proposer prompt.
+    The check path never reads comments and returns an empty excerpt.
     When ``fire`` is ``False`` the excerpt is still returned so
     callers can log it — but they must not pass it to ``run_fanout``.
     """
+    if trigger_source == "checks":
+        return (
+            should_trigger_fanout_from_checks(
+                checks, check_results or {}, threshold=check_threshold
+            ),
+            "",
+        )
+    if trigger_source != "comments":
+        raise ValueError(f"unknown refine trigger source: {trigger_source}")
     if chain_length <= 0:
         return False, ""
     if not chain_history:

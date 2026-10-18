@@ -28,6 +28,7 @@ from __future__ import annotations
 import hashlib
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -125,6 +126,12 @@ class FanoutSettings(BaseModel):
 
     refine_trigger_comment_chars: int = 800
     """Total excerpt length cap."""
+
+    refine_trigger_source: Literal["comments", "checks"] = "comments"
+    """Select the active refine trigger; comments remain the A/B control."""
+
+    refine_trigger_check_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
+    """Minimum failure probability for a retrieval check to trigger fan-out."""
 
     refine_fanout_arm_percent: int = 50
     """Within-cohort A/B on-arm percentage.

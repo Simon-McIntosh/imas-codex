@@ -102,10 +102,18 @@ _(no prior refinement history — this is the first refine attempt)_
 {% endif %}
 {% set _cur_score = item.reviewer_score_name | default(none, true) %}
 {% set _cur_comments = item.reviewer_comments_per_dim_name | default(none, true) %}
-{% if _cur_score is not none or _cur_comments %}
+{% if _cur_score is not none or _cur_comments or failed_checks is defined %}
 ### Current node review (name: `{{ item.id }}`)
 
 - **Reviewer score:** {{ "%.2f"|format(_cur_score) if _cur_score is not none else "—" }}
+{% if failed_checks is defined %}
+- **Failed checks:**
+{% for check in failed_checks %}
+  - **{{ check.id }}** — {{ check.criterion }}
+    - Evidence: {{ check.evidence }}
+    - Segment or sentence: {{ check.segment or check.sentence }}
+{% endfor %}
+{% else %}
 - **Per-dimension comments:**
 {% set _per_dim = (_cur_comments | fromjson) if _cur_comments else {} %}
 {% if _per_dim %}
@@ -114,6 +122,7 @@ _(no prior refinement history — this is the first refine attempt)_
 {% endfor %}
 {% else %}
   _(no per-dimension comments recorded)_
+{% endif %}
 {% endif %}
 
 {% endif %}

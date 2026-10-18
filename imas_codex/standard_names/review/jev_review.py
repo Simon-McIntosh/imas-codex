@@ -94,10 +94,8 @@ _CORE_FIELDS: frozenset[str] = frozenset(
 # against — so they are named here rather than derived from the checks.
 _SIBLING_FIELD = "sibling_names"
 
-# The probability at or above which a Noul's true case is read as the defect
-# holding. The model returns a probability rather than a verdict, and the fail
-# is derived here rather than asked of it, so this midpoint is the classifier.
-NOUL_FAIL_PROBABILITY = 0.5
+# The probability at or above which a check is read as failed.
+CHECK_FAIL_PROBABILITY = 0.5
 
 # Ordered categories per review dimension, best first. The judge places a
 # candidate in one; the decision is derived in code and the categories are not
@@ -329,32 +327,10 @@ def _dimension_question_def(dimension: str) -> dict[str, Any]:
     }
 
 
-def choice_acceptable_form(question: JevQuestion) -> str:
-    """The acceptable form of a Choice question, or a refusal when it is unreadable.
-
-    The taxonomy authors a Choice question's options with the acceptable form
-    first and the defective forms after it, so the split the check reads is the
-    first option against the rest. A question whose options carry no readable
-    acceptable form — fewer than two options, so there is no defect set to
-    split off, or a blank first option — is refused rather than read from
-    whichever option happens to be first, because a mis-split decides the check
-    silently in the wrong direction.
-    """
-    options = question.options
-    if len(options) < 2 or not options[0].strip():
-        raise ValueError(
-            f"Choice question {question.text!r} carries no identifiable "
-            "acceptable form: its options must list the acceptable form first, "
-            "with at least one defective form beside it"
-        )
-    return options[0]
-
-
 def _question_def(question: JevQuestion) -> dict[str, Any]:
     """Render one taxonomy question as the decisions-endpoint definition."""
     if question.kind is JevQuestionKind.NOUL:
         return {"type": "noul", "instructions": question.text}
-    choice_acceptable_form(question)
     return {
         "type": "choice",
         "instructions": question.text,
@@ -362,31 +338,49 @@ def _question_def(question: JevQuestion) -> dict[str, Any]:
     }
 
 
-def check_failed(check: ReviewCheck, answer: Mapping[str, Any] | None) -> bool:
-    """Whether one answered check names the defect it asks about.
-
-    A Noul's true case is the defect, so it fails when its probability is at or
-    above :data:`NOUL_FAIL_PROBABILITY`. A Choice fails when its selected option
-    is one of the defective forms — every option but the first, which the
-    taxonomy authors as the acceptable form. An unanswered check does not fail;
-    a missing answer is unknown, not a pass, and is reported as unanswered by
-    the caller rather than as a failing check.
-    """
+def check_failure_probability(
+    check: ReviewCheck,
+    answer: Mapping[str, Any] | None = None,
+    *,
+    audit_finding: str | None = None,
+) -> float:
+    """Return the probability that this check found its named defect."""
+    question = check.question
+    if question is None:
+        return float(audit_finding is not None)
     if not answer:
-        return False
-    if check.question is None:
-        return False
-    if check.question.kind is JevQuestionKind.NOUL:
+        return 0.0
+    if question.kind is JevQuestionKind.NOUL:
         value = answer.get("noul")
         return (
-            isinstance(value, int | float)
-            and not isinstance(value, bool)
-            and float(value) >= NOUL_FAIL_PROBABILITY
+            float(value)
+            if isinstance(value, int | float) and not isinstance(value, bool)
+            else 0.0
+        )
+    probabilities = answer.get("probabilities")
+    if isinstance(probabilities, Mapping):
+        return sum(
+            float(probabilities.get(option, 0.0))
+            for option in question.options
+            if option not in question.conforming
         )
     choice = answer.get("choice")
-    if choice is None:
+    return float(choice is not None and choice not in question.conforming)
+
+
+def check_failed(
+    check: ReviewCheck,
+    answer: Mapping[str, Any] | None = None,
+    *,
+    audit_finding: str | None = None,
+) -> bool:
+    """Read the check's failure probability against the review threshold."""
+    if check.question is not None and not answer:
         return False
-    return str(choice) != str(choice_acceptable_form(check.question))
+    return (
+        check_failure_probability(check, answer, audit_finding=audit_finding)
+        >= CHECK_FAIL_PROBABILITY
+    )
 
 
 def _check_decision(answered: bool, failed: bool) -> str:
@@ -714,9 +708,9 @@ def docs_score_components(
         if check.question.kind is JevQuestionKind.NOUL:
             values[f"check:{check.id}"] = 1 - float(answer["noul"])
         else:
-            passing = choice_acceptable_form(check.question)
-            values[f"check:{check.id}"] = float(
-                answer.get("probabilities", {}).get(passing, 0.0)
+            values[f"check:{check.id}"] = sum(
+                float(answer.get("probabilities", {}).get(option, 0.0))
+                for option in check.question.conforming
             )
     claims = [
         answers.get(check_question_name(f"claim_contradicts_source:{index}"))
@@ -819,6 +813,24 @@ def aggregate_docs_review(
         claim_answers.append(answer)
     contradiction_veto = bool(contradicted_claims)
     check_records: dict[str, dict[str, Any]] = {}
+    claims_answered = bool(claim_answers) and all(
+        answer is not None for answer in claim_answers
+    )
+    claim_failed = any(check_failed(claim_check, answer) for answer in claim_answers)
+    check_records[claim_check.id] = {
+        "answered": claims_answered,
+        "failed": claim_failed,
+        "failure_probability": max(
+            (
+                check_failure_probability(claim_check, answer)
+                for answer in claim_answers
+            ),
+            default=0.0,
+        ),
+        "decision": _check_decision(claims_answered, claim_failed),
+        "audit_finding": None,
+        "answer": claim_answers,
+    }
     for check in docs_checks:
         if check.id == claim_check.id:
             continue
@@ -829,14 +841,14 @@ def aggregate_docs_review(
             if check.audit_finding_class
             else answer is not None
         )
-        failed = (
-            finding is not None
-            if check.audit_finding_class
-            else check_failed(check, answer)
+        failure_probability = check_failure_probability(
+            check, answer, audit_finding=finding
         )
+        failed = answered and check_failed(check, answer, audit_finding=finding)
         check_records[check.id] = {
             "answered": answered,
             "failed": failed,
+            "failure_probability": failure_probability,
             "decision": _check_decision(answered, failed),
             "audit_finding": finding,
             "answer": answer,
@@ -857,8 +869,6 @@ def aggregate_docs_review(
         or any(not record["answered"] for record in check_records.values())
     ):
         decision = "unknown"
-    elif any(answer.get("choice") == "says nothing" for answer in claim_answers):
-        decision = "reject"
     else:
         decision = "accept"
     return {
@@ -1023,10 +1033,14 @@ def _item_record(
             answered = (
                 audit_report is not None or check.id == "redundant_repeated_segment"
             )
+            failed = answered and check_failed(check, audit_finding=finding)
             check_records[check.id] = {
                 "answered": answered,
-                "failed": answered and finding is not None,
-                "decision": _check_decision(answered, finding is not None),
+                "failed": failed,
+                "failure_probability": check_failure_probability(
+                    check, audit_finding=finding
+                ),
+                "decision": _check_decision(answered, failed),
                 "audit_finding": finding,
                 "question": None,
             }
@@ -1038,6 +1052,7 @@ def _item_record(
         check_records[check.id] = {
             "answered": answered,
             "failed": failed,
+            "failure_probability": check_failure_probability(check, answer),
             "decision": _check_decision(answered, failed),
             "answer": answer,
             "question": questions.get(question_name),
