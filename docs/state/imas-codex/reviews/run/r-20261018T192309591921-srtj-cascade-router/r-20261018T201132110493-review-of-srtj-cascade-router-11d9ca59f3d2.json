@@ -1,0 +1,150 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T192309591921-srtj-cascade-router/after-base-selection.log",
+    "passed": 163,
+    "revision": "11d9ca59f3d2432c4a8ccd71248faef0ff3e9c8a",
+    "summary": "163 passed, 1 warning in 28.05s"
+  },
+  "assertion_analysis": [
+    {
+      "assertions": "len(stored)==1; judge_kind==jev; is_canonical is False; score is None; cascade:route==refine",
+      "fails_if": "The store writes zero or multiple rows, loses the Jev kind, marks the row canonical, writes a scalar score, or omits the route, respectively.",
+      "test": "test_shadow_review_record_is_noncanonical"
+    },
+    {
+      "assertions": "checks[0].id==source_fidelity_unsupported_qualifier; fires",
+      "fails_if": "The direct result loses or changes that check ID, or the manually supplied check probability no longer triggers fanout; removing the workers.py handoff does not fail either assertion.",
+      "test": "test_failed_checks_feed_existing_refine_trigger"
+    },
+    {
+      "assertions": "named sentence in note",
+      "fails_if": "The production note again substitutes its reconstructed generic claim for contradiction_reason; the base log shows this exact failure.",
+      "test": "test_contradiction_note_uses_named_reason"
+    },
+    {
+      "assertions": "marker in report.lint_findings",
+      "fails_if": "build_docs_audit_report bypasses run_house_style_checks when conventions are supplied; the base log shows this exact failure.",
+      "test": "test_docs_audit_calls_house_style_owner"
+    },
+    {
+      "assertions": "at threshold routes accept; epsilon below routes chat",
+      "fails_if": "The route stops using the supplied threshold edge correctly; a changed threshold artifact moves both the test input and router cutoff and does not fail these assertions.",
+      "test": "test_accept_at_threshold[name,docs]"
+    },
+    {
+      "assertions": "at cutoff routes refine; failed_checks equals chosen ID; epsilon below with high acceptance routes accept",
+      "fails_if": "The first configured check is ignored, its ID is lost, or its comparator mishandles the edge; a changed first cutoff moves both test input and router cutoff.",
+      "test": "test_refine_at_check_threshold[name,docs]"
+    },
+    {
+      "assertions": "accept threshold minus 0.01 routes chat",
+      "fails_if": "A check-clear score just under acceptance stops routing to chat; a changed accept cutoff moves the test input with it and no reject edge is tested.",
+      "test": "test_uncertain_without_failed_check_calls_chat[name,docs]"
+    },
+    {
+      "assertions": "records==[accept]; calls==[[primary,secondary]]; winning_score==0.2",
+      "fails_if": "adjudicate_review fails to call its mocked store, omits either incumbent model, or replaces the mocked incumbent score; removing either production workers.py call site would not fail it.",
+      "test": "test_shadow_records_route_and_keeps_incumbent_result"
+    },
+    {
+      "assertions": "calls equals expected_calls; winning_score equals expected_score; refine carries first failed check ID",
+      "fails_if": "adjudicate_review invokes the mocked incumbent on an accept/refine, invokes more than the first chat model, returns another direct score, or drops the mocked failed check; later graph_ops stage refusal is never reached.",
+      "test": "test_deciding_routes_use_one_chat_seat[name,docs,accept,refine,chat]"
+    }
+  ],
+  "base_log_revision": "b8b973a5e017782546a4ccf307cf04dcb12b2f9b",
+  "baseline_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T192309591921-srtj-cascade-router/baseline.log",
+    "passed": 163,
+    "revision": "b8b973a5e017782546a4ccf307cf04dcb12b2f9b",
+    "summary": "163 passed, 1 warning in 27.67s"
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8970 process_review_name_batch",
+    "imas_codex/standard_names/workers.py:11039 process_review_docs_batch",
+    "imas_codex/standard_names/workers.py:7279 process_refine_name_batch",
+    "imas_codex/standard_names/workers.py:11284 process_refine_docs_batch",
+    "imas_codex/standard_names/workers.py:10963 _documentation_contradiction_note"
+  ],
+  "completed_at": "2026-10-18T20:19:55Z",
+  "dispatched_at": "2026-10-18T20:12:04Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": "246",
+      "severity": "blocking",
+      "text": "blocking: Direct accept and refine return jev_cascade_* methods, which graph_ops.py:16961-16972 treats as quorum shortfalls; direct accepts are parked and name refinements are ineligible, so the deciding mode cannot deliver its stated routes."
+    },
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": "68",
+      "severity": "blocking",
+      "text": "blocking: A check-clear score below reject_threshold goes to chat even though the plan and brief reserve chat for the uncertain band; the committed evidence fragment acknowledges the out-of-band fallback and no test asserts the reject boundary."
+    },
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": "308",
+      "severity": "blocking",
+      "text": "blocking: A refused lease or failed Jev call leaves the default chat route and cascade.py:334 stores it as a judgment-backed shadow route with empty answers, corrupting route-share measurements with cases that were never judged."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "145",
+      "severity": "follow-on",
+      "text": "follow-on: The accept and check threshold tests read the same committed cutoff values that the router reads, so changing a cutoff in cascade_thresholds.json moves their inputs and expected results together and leaves them green."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "51",
+      "severity": "follow-on",
+      "text": "follow-on: The trigger test constructs check_results itself from the direct result and calls should_trigger_fanout directly; deleting workers.py:7272-7330, the production handoff to refinement, would leave this assertion green."
+    }
+  ],
+  "head_log_revision": "11d9ca59f3d2432c4a8ccd71248faef0ff3e9c8a",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read the two commits against b8b973a5e017782546a4ccf307cf04dcb12b2f9b; jev_review.py:639-642 and workers.py:10963 repair the folded defects, while cascade.py:47-343 adds the routes, store and dispatch with tests and calibration data.",
+    "done_when": "The brief names threshold-edge, shadow and deciding tests plus folded-defect reproductions and zero added failures; negative-control.log has four failed route IDs, defect-reproduction.log has two failed IDs, head-suite.log has 217 passes, and baseline.log with after-base-selection.log each has 163 passes.",
+    "goal": "The source brief asks for a calibrated shadow router with a usable default-off deciding mode; cascade.py:47-70 routes both axes, but cascade.py:246 emits a resolution method that graph_ops.py:16961-16972 rejects for direct acceptance and name refinement.",
+    "manifest": "The source manifest lists commits 0c0bc4e6ffa205499f282bc5a65cc214a892dbbe and 11d9ca59f3d2432c4a8ccd71248faef0ff3e9c8a and all six changed paths, while its baseline_suite command includes environment assignments absent from baseline.log's command header.",
+    "write_paths": "The source brief and manifest grant cascade.py, cascade_thresholds.json, workers.py, jev_review.py, test_review_cascade.py and the evidence fragment, with the manifest also granting a figures directory; the diff changes only the six named files."
+  },
+  "justifications": {
+    "durability": "test_review_cascade.py:121 and :139 fail when the two folded defects return, but :145-169 read cutoffs from the same artifact as the router and :226-277 never reach stage persistence.",
+    "evidence": "head-suite.log records 217 passes and the matched baseline.log and after-base-selection.log each record 163 passes, while the calibration logs name 363 name and 216 documentation items but no persistence gate covers graph_ops.py:16961-16972.",
+    "fit": "cascade.py:155-173 builds the existing noncanonical review record and workers.py:8968-8993 keeps hooks small, although cascade.py:246 conflicts with the existing stage authority contract.",
+    "goal_fidelity": "cascade.py:68-70 sends check-clear scores below the reject threshold to chat, and cascade.py:246 makes direct decisions fail the existing quorum gate at graph_ops.py:16961-16972.",
+    "reuse": "Capability searches found no previous calibrated review router; cascade.py:254-290 calls the jev_review.py judgment owners, cascade.py:155 uses pipeline.py's record builder, and workers.py:7330 uses the existing fanout trigger.",
+    "scope_discipline": "The b8b973a5..11d9ca59 diff changes only the six paths listed in the source manifest's orientation_write_paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks for a calibrated shadow router with a usable default-off deciding mode; cascade.py:47-70 routes both axes, but cascade.py:246 emits a resolution method that graph_ops.py:16961-16972 rejects for direct acceptance and name refinement.\nVERDICT done_when: The brief names threshold-edge, shadow and deciding tests plus folded-defect reproductions and zero added failures; negative-control.log has four failed route IDs, defect-reproduction.log has two failed IDs, head-suite.log has 217 passes, and baseline.log with after-base-selection.log each has 163 passes.\nVERDICT write_paths: The source brief and manifest grant cascade.py, cascade_thresholds.json, workers.py, jev_review.py, test_review_cascade.py and the evidence fragment, with the manifest also granting a figures directory; the diff changes only the six named files.\nVERDICT manifest: The source manifest lists commits 0c0bc4e6ffa205499f282bc5a65cc214a892dbbe and 11d9ca59f3d2432c4a8ccd71248faef0ff3e9c8a and all six changed paths, while its baseline_suite command includes environment assignments absent from baseline.log's command header.\nVERDICT diff: Read the two commits against b8b973a5e017782546a4ccf307cf04dcb12b2f9b; jev_review.py:639-642 and workers.py:10963 repair the folded defects, while cascade.py:47-343 adds the routes, store and dispatch with tests and calibration data.\nCALL_SITES: imas_codex/standard_names/workers.py:8970 process_review_name_batch, imas_codex/standard_names/workers.py:11039 process_review_docs_batch, imas_codex/standard_names/workers.py:7279 process_refine_name_batch, imas_codex/standard_names/workers.py:11284 process_refine_docs_batch, imas_codex/standard_names/workers.py:10963 _documentation_contradiction_note\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: cascade.py:68-70 sends check-clear scores below the reject threshold to chat, and cascade.py:246 makes direct decisions fail the existing quorum gate at graph_ops.py:16961-16972.\nSCORE evidence: 16\nJUSTIFICATION evidence: head-suite.log records 217 passes and the matched baseline.log and after-base-selection.log each record 163 passes, while the calibration logs name 363 name and 216 documentation items but no persistence gate covers graph_ops.py:16961-16972.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The b8b973a5..11d9ca59 diff changes only the six paths listed in the source manifest's orientation_write_paths.\nSCORE durability: 11\nJUSTIFICATION durability: test_review_cascade.py:121 and :139 fail when the two folded defects return, but :145-169 read cutoffs from the same artifact as the router and :226-277 never reach stage persistence.\nSCORE fit: 16\nJUSTIFICATION fit: cascade.py:155-173 builds the existing noncanonical review record and workers.py:8968-8993 keeps hooks small, although cascade.py:246 conflicts with the existing stage authority contract.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches found no previous calibrated review router; cascade.py:254-290 calls the jev_review.py judgment owners, cascade.py:155 uses pipeline.py's record builder, and workers.py:7330 uses the existing fanout trigger.\nFINDING imas_codex/standard_names/review/cascade.py:246 blocking: Direct accept and refine return jev_cascade_* methods, which graph_ops.py:16961-16972 treats as quorum shortfalls; direct accepts are parked and name refinements are ineligible, so the deciding mode cannot deliver its stated routes.\nFINDING imas_codex/standard_names/review/cascade.py:68 blocking: A check-clear score below reject_threshold goes to chat even though the plan and brief reserve chat for the uncertain band; the committed evidence fragment acknowledges the out-of-band fallback and no test asserts the reject boundary.\nFINDING imas_codex/standard_names/review/cascade.py:308 blocking: A refused lease or failed Jev call leaves the default chat route and cascade.py:334 stores it as a judgment-backed shadow route with empty answers, corrupting route-share measurements with cases that were never judged.\nFINDING tests/standard_names/test_review_cascade.py:145 follow-on: The accept and check threshold tests read the same committed cutoff values that the router reads, so changing a cutoff in cascade_thresholds.json moves their inputs and expected results together and leaves them green.\nFINDING tests/standard_names/test_review_cascade.py:51 follow-on: The trigger test constructs check_results itself from the direct result and calls should_trigger_fanout directly; deleting workers.py:7272-7330, the production handoff to refinement, would leave this assertion green.\n",
+  "review_run_id": "r-20261018T201132110493-review-of-srtj-cascade-router-11d9ca59f3d2",
+  "reviewed_base_sha": "b8b973a5e017782546a4ccf307cf04dcb12b2f9b",
+  "reviewed_head_sha": "11d9ca59f3d2432c4a8ccd71248faef0ff3e9c8a",
+  "reviewed_run_id": "r-20261018T192309591921-srtj-cascade-router",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 10,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T20:17:28.212395+00:00",
+  "total": 93
+}
