@@ -63,10 +63,12 @@ VARIATION_AXES = (
     "region",
     "device",
 )
-DEADLINE = datetime.fromisoformat("2026-10-18T13:54:30+00:00")
+DEADLINE = datetime.fromisoformat("2026-10-18T14:42:47+00:00")
 
 
 def apply_cap(planned_calls: int) -> float:
+    if planned_calls == 3:
+        return 2.0
     return round(planned_calls * 0.674, 2)
 
 
@@ -341,7 +343,7 @@ def measure_arm(
         before_scores = scores(gc, seed)
         ceiling = min(
             apply_cap(int(plan[0]["planned_calls"])),
-            SPEND_LIMIT - data["spend_usd"] - 0.02,
+            SPEND_LIMIT - data.get("budget_spend_usd", data["spend_usd"]) - 0.02,
         )
         if ceiling <= 0:
             raise RuntimeError("No budget remains before next apply")
@@ -352,7 +354,39 @@ def measure_arm(
             raise RuntimeError("LLMCost receipt query missed known snapshot rows")
         started_at = now()
         started = time.monotonic()
-        outcome = cli(seed, uri, "--apply", "--cost-limit", f"{ceiling:.2f}", "--json")
+        try:
+            outcome = cli(
+                seed, uri, "--apply", "--cost-limit", f"{ceiling:.2f}", "--json"
+            )
+        except Exception as exc:
+            ended_at = now()
+            ledger = gc.query(
+                "MATCH (c:LLMCost) "
+                "WHERE c.llm_at >= datetime($started) AND c.llm_at <= datetime($ended) "
+                "RETURN count(c) AS calls, coalesce(sum(c.llm_cost), 0.0) AS spend",
+                started=started_at,
+                ended=ended_at,
+            )[0]
+            partial_spend = float(ledger["spend"])
+            data["spend_usd"] += partial_spend
+            if "confirmed_spend_usd" in data:
+                data["confirmed_spend_usd"] += partial_spend
+            if "budget_spend_usd" in data:
+                data["budget_spend_usd"] += partial_spend
+            data.setdefault("failed_applies", []).append(
+                {
+                    "arm": arm,
+                    "seed": seed,
+                    "anchor": plan[0]["anchor"],
+                    "started_at": started_at,
+                    "ended_at": ended_at,
+                    "ledger_calls": int(ledger["calls"]),
+                    "ledger_spend_usd": partial_spend,
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
+            )
+            save(data)
+            raise
         elapsed = time.monotonic() - started
         ended_at = now()
         after = report_family_rows(gc, seeds=[seed])[0]
@@ -386,6 +420,10 @@ def measure_arm(
             "ledger_session_ids": ledger["session_ids"],
         }
         data["spend_usd"] += reported
+        if "confirmed_spend_usd" in data:
+            data["confirmed_spend_usd"] += reported
+        if "budget_spend_usd" in data:
+            data["budget_spend_usd"] += reported
         data.setdefault("arms", {}).setdefault(arm, []).append(
             {
                 "seed": seed,
@@ -575,6 +613,266 @@ def resume_applies() -> None:
                 f"EXIT={child_proc.returncode if child_proc else 'unknown'}\n"
             )
             child_stream.close()
+        for arm, place, proc in instances:
+            stop_temp_neo4j(proc)
+            data["stopped_instances"].append(
+                {"arm": arm, "tree": str(place), "at": now()}
+            )
+        shutil.rmtree(scratch)
+        data["scratch_removed"] = {"tree": str(scratch), "at": now()}
+        save(data)
+
+
+def run_filtered_pairs() -> None:
+    data = json.loads(RESULTS.read_text())
+    if data["source_export"] != str(ARCHIVE):
+        raise RuntimeError("Cached anchor scores belong to another export")
+    if data["adoption_rule"]["registered_at"] != RULE_REGISTERED_AT:
+        raise RuntimeError("Pre-registered adoption rule changed")
+    confirmed_prior = float(data["spend_usd"])
+    unreceipted_reserve = float(data["dry_run_estimate_usd_per_call"])
+    data["previous_selected"] = data["selected"]
+    data["previous_isolation_proof"] = data.get("isolation_proof", [])
+    data.update(
+        resumed_at=now(),
+        spend_limit_usd=SPEND_LIMIT,
+        confirmed_spend_usd=confirmed_prior,
+        budget_spend_usd=confirmed_prior + unreceipted_reserve,
+        budget_reservation={
+            "reason": "one unreceipted Jev call at the snapshot dry-run rate",
+            "usd": unreceipted_reserve,
+        },
+        arms={},
+        isolation_proof=[],
+        stopped_instances=[],
+        scratch_removed=None,
+        verdict=None,
+        outcome_status="selecting",
+        paired_family_count=0,
+        failed_applies=[],
+    )
+    data.pop("failure", None)
+    save(data)
+    west, roster_evidence = west_roster()
+    data["west_search"] = {"files": roster_evidence, "distinct_names": len(west)}
+    save(data)
+    scratch = Path(tempfile.mkdtemp(prefix="anchor-compare-", dir=os.environ["TMPDIR"]))
+    data["scratch_tree"] = str(scratch)
+    save(data)
+    live_uri = GraphClient().uri
+    if live_uri.startswith(("bolt://127.0.0.1", "bolt://localhost")):
+        raise RuntimeError("Live URI unexpectedly resolves to loopback")
+    instances = []
+    try:
+        with tarfile.open(ARCHIVE, "r:gz") as archive:
+            member = next(item for item in archive if item.name.endswith("/graph.dump"))
+            dump = scratch / "neo4j.dump"
+            with archive.extractfile(member) as source, dump.open("wb") as target:
+                shutil.copyfileobj(source, target)
+        print(f"extracted dump: {dump.stat().st_size} bytes", flush=True)
+        heur_place, heur_proc, heur_log = make_instance(
+            scratch, dump, "heuristic", 27697
+        )
+        instances.append(("heuristic", heur_place, heur_proc))
+        heur_uri = "bolt://127.0.0.1:27697"
+        with GraphClient(uri=heur_uri) as heur_gc:
+            prove_isolation(heur_gc, live_uri, heur_uri, "heuristic", data, heur_log)
+            families = fetch_pattern_families(heur_gc, min_size=1)
+            base_eligible = []
+            exclusions = {"too_small": 0, "west_roster": 0, "harmonized": 0}
+            for family in families:
+                members = family["members"]
+                ids = {m["id"] for m in members}
+                if len(ids) < 3:
+                    exclusions["too_small"] += 1
+                elif ids & west:
+                    exclusions["west_roster"] += 1
+                elif {
+                    m.get("harmonized_group_signature")
+                    for m in members
+                    if m.get("harmonized_group_signature")
+                } == {group_signature(members)}:
+                    exclusions["harmonized"] += 1
+                else:
+                    base_eligible.append(family)
+            member_ids = sorted(
+                {m["id"] for family in base_eligible for m in family["members"]}
+            )
+            statuses = heur_gc.query(
+                "UNWIND $ids AS sid MATCH (m:StandardName {id: sid}) "
+                "RETURN m.id AS id, m.validation_status AS validation_status, "
+                "m.docs_stage AS docs_stage, m.name_stage AS name_stage",
+                ids=member_ids,
+            )
+            by_id = {row["id"]: row for row in statuses}
+            if len(by_id) != len(member_ids):
+                raise RuntimeError("Validation read omitted known family members")
+            if not any(row["validation_status"] for row in statuses) or not any(
+                row["docs_stage"] or row["name_stage"] for row in statuses
+            ):
+                raise RuntimeError("Validation read saw no known status values")
+            excluded = {"quarantined": 0, "docs_exhausted": 0, "name_exhausted": 0}
+            eligible = []
+            removed = []
+            for family in base_eligible:
+                reasons = set()
+                for member in family["members"]:
+                    row = by_id[member["id"]]
+                    if row["validation_status"] == "quarantined":
+                        reasons.add("quarantined")
+                    if row["docs_stage"] == "exhausted":
+                        reasons.add("docs_exhausted")
+                    if row["name_stage"] == "exhausted":
+                        reasons.add("name_exhausted")
+                if reasons:
+                    removed.append(
+                        {
+                            "seed": min(m["id"] for m in family["members"]),
+                            "reasons": sorted(reasons),
+                        }
+                    )
+                    for reason in reasons:
+                        excluded[reason] += 1
+                else:
+                    eligible.append(family)
+            data["candidate_pool"] = {
+                "all_families": len(families),
+                "before_validation": len(base_eligible),
+                "eligible": len(eligible),
+                "exclusions": exclusions,
+                "validation_removed": len(removed),
+                "validation_exclusions": excluded,
+            }
+            data["validation_search"] = {
+                "at": now(),
+                "read_from": heur_uri,
+                "properties": ["validation_status", "docs_stage", "name_stage"],
+                "member_rows": len(statuses),
+                "removed_families": removed,
+            }
+            save(data)
+            print(f"candidate pool: {data['candidate_pool']}", flush=True)
+            cached = {row["seed"]: row for row in data["scored_candidates"]}
+            candidates = []
+            for family in eligible:
+                ids = sorted(m["id"] for m in family["members"])
+                row = cached.get(ids[0])
+                if row is None or row["members"] != ids:
+                    raise RuntimeError(f"Cached anchor score missing for {ids[0]}")
+                candidates.append(row)
+            data["same_anchor_count"] = sum(
+                row["jev_anchor"] == row["heuristic_anchor"]
+                for row in candidates
+                if row["jev_anchor"]
+            )
+            data["unscored_count"] = sum(
+                row["jev_anchor"] is None for row in candidates
+            )
+            selected = select([row for row in candidates if len(row["members"]) == 3])
+            if len(selected) != 10:
+                raise RuntimeError(
+                    f"Only {len(selected)} three-member differing-anchor families fit"
+                )
+            data["selected"] = selected
+            estimate = measure_doc_call_cost(heur_gc)
+            if estimate is None:
+                raise RuntimeError("Snapshot lacks a measured documentation-call rate")
+            rate = estimate.mean_usd
+            data["dry_run_estimate_basis"] = {
+                "source": "snapshot LLMCost rows",
+                "runs": estimate.runs,
+                "calls": estimate.calls,
+                "rate_usd": rate,
+            }
+            data["dry_run_estimate_usd_per_call"] = rate
+            data["dry_runs"] = []
+            for row in selected:
+                cli(row["seed"], heur_uri, "--apply", "--dry-run")
+                planned = plan_family_applies(heur_gc, seeds=[row["seed"]])[0]
+                if planned["decision"] != "apply" or planned["planned_calls"] != 3:
+                    raise RuntimeError(
+                        f"Unexpected dry-run plan for {row['seed']}: {planned}"
+                    )
+                data["dry_runs"].append(
+                    {
+                        "seed": row["seed"],
+                        "calls_per_arm": 3,
+                        "estimate_per_arm_usd": 3 * rate,
+                    }
+                )
+                save(data)
+            estimated = 2 * sum(
+                item["estimate_per_arm_usd"] for item in data["dry_runs"]
+            )
+            data["dry_run_estimate_total_usd"] = estimated
+            data["cap_envelope_usd"] = data["budget_spend_usd"] + 2 * sum(
+                apply_cap(item["calls_per_arm"]) for item in data["dry_runs"]
+            )
+            save(data)
+            if (
+                data["budget_spend_usd"] + estimated >= SPEND_LIMIT
+                or data["cap_envelope_usd"] >= SPEND_LIMIT
+            ):
+                raise RuntimeError("Dry-run estimate or apply cap reaches USD 42")
+            jev_place, jev_proc, jev_log = make_instance(scratch, dump, "jev", 27698)
+            instances.append(("jev", jev_place, jev_proc))
+            jev_uri = "bolt://127.0.0.1:27698"
+            with GraphClient(uri=jev_uri) as jev_gc:
+                prove_isolation(jev_gc, live_uri, jev_uri, "jev", data, jev_log)
+                prove_isolation(
+                    heur_gc, live_uri, heur_uri, "heuristic", data, heur_log
+                )
+                data["outcome_status"] = "applying"
+                save(data)
+                for row in selected:
+                    require_time()
+                    for arm, uri, gc in (
+                        ("heuristic", heur_uri, heur_gc),
+                        ("jev", jev_uri, jev_gc),
+                    ):
+                        os.environ["NEO4J_URI"] = uri
+                        os.environ["ANCHOR_ARM"] = arm
+                        measure_arm(gc, uri, [row], arm, data)
+                    data["paired_family_count"] += 1
+                    save(data)
+        heur = {row["seed"]: row for row in data["arms"]["heuristic"]}
+        jev = {row["seed"]: row for row in data["arms"]["jev"]}
+        if len(heur) != 10 or len(jev) != 10:
+            raise RuntimeError("Ten complete families are required in each arm")
+        lower = []
+        missing = []
+        for seed, row in jev.items():
+            for member, value in row["scores_after"].items():
+                baseline = heur[seed]["scores_after"].get(member)
+                if value is None or baseline is None:
+                    missing.append({"seed": seed, "member": member})
+                elif value < baseline:
+                    lower.append(
+                        {
+                            "seed": seed,
+                            "member": member,
+                            "heuristic": baseline,
+                            "jev": value,
+                        }
+                    )
+        heur_lint = sum(row["lint_after"] for row in heur.values())
+        jev_lint = sum(row["lint_after"] for row in jev.values())
+        data["verdict"] = {
+            "adopt_jev": jev_lint < heur_lint and not lower and not missing,
+            "heuristic_lint_after": heur_lint,
+            "jev_lint_after": jev_lint,
+            "lower_scores": lower,
+            "missing_comparisons": missing,
+            "decided_at": now(),
+        }
+        data["outcome_status"] = "complete"
+        save(data)
+    except Exception as exc:
+        data["failure"] = {"at": now(), "type": type(exc).__name__, "message": str(exc)}
+        data["outcome_status"] = "blocked"
+        save(data)
+        raise
+    finally:
         for arm, place, proc in instances:
             stop_temp_neo4j(proc)
             data["stopped_instances"].append(
@@ -857,5 +1155,7 @@ if __name__ == "__main__":
         arm_worker(sys.argv[2])
     elif len(sys.argv) == 2 and sys.argv[1] == "--resume-applies":
         resume_applies()
+    elif len(sys.argv) == 2 and sys.argv[1] == "--filtered-pairs":
+        run_filtered_pairs()
     else:
         main()
