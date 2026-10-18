@@ -68,12 +68,12 @@ VARIATION_AXES = (
     "region",
     "device",
 )
-DEADLINE = datetime.fromisoformat("2026-10-18T22:30:48+00:00")
+DEADLINE = datetime.fromisoformat("2026-10-18T23:40:19+00:00")
 
 
 def apply_cap(planned_calls: int) -> float:
     if planned_calls == 3:
-        return 1.99
+        return 1.98
     return round(planned_calls * 0.674, 2)
 
 
@@ -749,7 +749,7 @@ def run_filtered_pairs() -> None:
     if data["adoption_rule"]["registered_at"] != RULE_REGISTERED_AT:
         raise RuntimeError("Pre-registered adoption rule changed")
     confirmed_prior = float(data["spend_usd"])
-    unreceipted_reserve = float(data["dry_run_estimate_usd_per_call"])
+    unreceipted_reserve = float(data["budget_reservation"]["usd"])
     data["previous_selected"] = data["selected"]
     data["previous_isolation_proof"] = data.get("isolation_proof", [])
     data.update(
