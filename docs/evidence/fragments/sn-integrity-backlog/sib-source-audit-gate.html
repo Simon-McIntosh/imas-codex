@@ -74,6 +74,30 @@ predecessor. The probe returns the exhausted dropped-edge name, and its raised
 read is logged as <code>source-loss probe did not run</code>, with a distinct
 <code>None</code> result rather than an empty finding.</p>
 
+<h2 id="sib-source-audit-gate-stale-source">Stale producers</h2>
+<p>A stale source does not count as a producer for the writer invariant.
+<code>source_invariant.py</code> now counts only a bound source whose
+<code>status &lt;&gt; 'stale'</code>, the same predicate as the signed-detachment
+postcondition in <code>signed_manifest.py:4056</code>. Cypher also excludes a
+source with null status from both counts: neither has evidence that it is live.
+On disposable Neo4j, <code>test_stale_binding_does_not_satisfy_writer_invariant</code>
+observes a refusal with stale and null status, then observes admission when
+the status becomes <code>composed</code>. Removing the status predicate makes
+the test fail in <code>negative-stale-producer.log</code>, ending
+<code>EXIT=1</code>. The source-loss census itself remains an edge-absence
+classification, as its section defines.</p>
+
+<h2 id="sib-source-audit-gate-rebuild">Existing rebuild scope</h2>
+<p>The provenance rebuild also reads <code>find_provenance_orphans</code>.
+That probe now reports exhausted names, but the rebuild owns only active,
+materialized identities and excludes deterministic error siblings.
+<code>_active_rebuild_orphans</code> applies that scope at each of the
+rebuild's four probe reads. Its test gives the rebuild an active unresolved
+name plus exhausted findings from all reported populations; only the active
+name may be retired, and none of the exhausted names is bound. Removing the
+filter after the probe makes the test fail in <code>negative-rebuild.log</code>,
+ending <code>EXIT=1</code>.</p>
+
 <h2 id="sib-source-audit-gate-verification">Verification record</h2>
 <p><code>fixture-final.log</code> ends <code>13 passed; EXIT=0</code>, including
 a real-graph check that a deprecated child exempts neither the classifier's
@@ -82,18 +106,16 @@ derived parent nor export's per-candidate evidence test.
 total and census comparison. The real-graph tests used a disposable Neo4j
 instance on node-local scratch, refused the project graph URI, and removed
 their planted nodes after each test.</p>
-<p>The existing covering tests need updates for the new contract.
-<code>base-focused-archive.log</code> has 14 passed and <code>EXIT=0</code>;
-<code>head-focused-final.log</code> has 10 failures and <code>EXIT=1</code>
-because export fixtures provide a graph client with no source-audit query
-answers and ledger tests assert the stage filter and old query shape.
-The real-graph orphan lifecycle tests move from five passed on base
-(<code>orphan-base.log</code>) to two failures on head
-(<code>orphan-head.log</code>): their nominal orphan has no recorded source,
-so the new rule correctly marks it never bound. Those three existing test
-files are outside this node's write grant. The loop covering selection has
-17 passed on both base and head (<code>loop-base.log</code> and
-<code>loop-head.log</code>).</p>
+<p>The resumed default selection of the updated export predicate, ledger,
+rebuild, loop and audit tests has 50 passed, no failures, in
+<code>resume-default.log</code>. The disposable graph selection has 19 passed
+in <code>resume-graph-final-worktree.log</code>. The broader export covering
+base at <code>f6905424189b4379324408127c73b5de3ba0e8e6</code> has
+114 passed and <code>EXIT=0</code> in <code>resume-covering-base.log</code>.
+Its first resumed head run has 33 failures and three setup errors: ten more
+export fixture files return no row for the new audit count query. Those
+fixtures require a clean-audit response so their existing refusal checks can
+reach the behavior they test. The final head delta awaits that fixture update.</p>
 </main>
 </body>
 </html>
