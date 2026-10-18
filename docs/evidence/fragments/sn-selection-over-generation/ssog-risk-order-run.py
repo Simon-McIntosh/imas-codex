@@ -55,6 +55,9 @@ FIGURE = (
 FRACTIONS = (0.10, 0.25, 0.50)
 N_SHUFFLES = 1000
 SHUFFLE_SEED = 20261017
+BAND_SEEDS = frozenset(SHUFFLE_SEED + draw for draw in range(N_SHUFFLES))
+SHUFFLE_CONTROL_SEED = SHUFFLE_SEED + N_SHUFFLES + 1  # past the band's own seed range
+SHUFFLE_CONTROL_FRACTION = 0.25
 BOOTSTRAP_RESAMPLES = 1000
 BOOTSTRAP_SEED = 123
 LABEL_PERMUTATION_SEED = 20261018
@@ -1060,14 +1063,22 @@ label-free inputs, so a leak on the way into the results file is caught as well 
 scoring path. The control fails too when the permutation is the identity, which would compare the
 vector with itself and test nothing. A scratch copy whose risk reads the label reddens it and exits
 non-zero.</p>
-<p id="ssog-risk-order-band-check">The shuffled-label band check the original brief asked for is
-deliberately not run. Shuffled labels destroy any correspondence between the order and the truth, so
-a shuffled order's recall lands inside the random band for any order whatever the scorer does; it
-would report agreement whether or not the risk read the labels, and is therefore not evidence about
-the scorer. It is replaced by the invariance control above, which tests the same property — that the
-risk is independent of the labels — directly, and can fail. The <code>random 95% band</code> rows
-and the <code>random (expected)</code> rows are kept to state what an uninformative order scores,
-not as a control.</p>
+<p id="ssog-risk-order-band-check">A fourth control reads the same property through the labels' own
+distribution. Each split's labels are permuted under one seed drawn from a base outside the random
+band's seed range — asserted, because a control seed inside that range reproduces a band sample
+exactly and compares the recall with a copy of itself — the scorer's risk is recomputed on the
+permuted rows, and the recall of the resulting order at 25% is required to fall inside the random
+band computed for those permuted labels. A scorer that reads its own checks cannot follow the
+permutation: its order is fixed, it faces randomly labelled defects, and it lands inside the band. A
+scorer that reads a label into its risk re-derives its order from the permutation, ranks the
+permuted defects first and lands <em>above</em> the band, so the control can fail and does when the
+scorer leaks. The four controls therefore prove four different things, and no measured value moves
+if any one of them is dropped: defects-first and defects-last prove the recall arithmetic against a
+recall known in closed form; label invariance proves the risk values do not depend on the labels;
+and this shuffled-label band proves the order the risk induces carries no label information. A
+scratch copy whose scorer reads the labels reddens the invariance and the band together and exits
+non-zero. The <code>random 95% band</code> rows and the <code>random (expected)</code> rows state
+what an uninformative order scores and are what the band control is read against.</p>
 <figure id="ssog-risk-order-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg" alt="Recall of known defects against the fraction of items read for the risk composite, the mean sensitivity order and the random band, on each golden's calibration split."><figcaption>Recall of known defects against the fraction of items read, calibration split. Each order is one line; the dotted grey pair bounds the random order's 95% interval over {N_SHUFFLES} seeded shuffles.</figcaption></figure>
 <table id="ssog-risk-order-table"><thead><tr><th>Golden</th><th>Split</th><th>Items</th><th>Order</th><th>Recall@10%</th><th>Recall@25%</th><th>Recall@50%</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
 <p id="ssog-risk-order-interval">The <code>risk composite 95% interval</code> rows are copy-group
@@ -1190,6 +1201,54 @@ def label_invariance_control(
     }
 
 
+def shuffle_band_control(
+    rows: list[dict], fraction: float = SHUFFLE_CONTROL_FRACTION
+) -> dict:
+    """The risk must carry no label information, tested through shuffled labels.
+
+    The labels of one split are permuted under a seed drawn from a base outside
+    the random band's own seed range, the scorer's risk is recomputed on the
+    permuted rows, and the recall of the resulting order at ``fraction`` is
+    required to fall inside the random band computed for those same permuted
+    labels. A scorer that reads its rows' checks cannot follow the permutation —
+    its order is fixed, so it faces randomly labelled defects and lands inside
+    the band. A scorer that reads a label into its risk re-derives its order
+    from the permutation, ranks the permuted defects first and lands above the
+    band, which is what makes this control able to fail.
+
+    The seed is asserted to be outside every band seed, because a control drawn
+    from the band's own seed range reproduces a band sample exactly and compares
+    the recall with a copy of itself rather than with the distribution.
+    """
+    import random
+
+    seed = SHUFFLE_CONTROL_SEED
+    permutation = list(range(len(rows)))
+    random.Random(seed).shuffle(permutation)
+    moved = sum(1 for index, source in enumerate(permutation) if source != index)
+    shuffled = [
+        {**row, "label": rows[source]["label"]}
+        for row, source in zip(rows, permutation, strict=True)
+    ]
+    labels = [row["label"] for row in shuffled]
+    risk = [_scorer_risk(row) for row in shuffled]
+    recall = _recall_at(_order_by(risk, reverse=True), labels, fraction)
+    band = _random_band(labels, (fraction,))[f"{fraction:.2f}"]
+    inside = band["p2_5"] <= recall <= band["p97_5"]
+    seed_clear = seed not in BAND_SEEDS
+    return {
+        "seed": seed,
+        "fraction": fraction,
+        "seed_in_band_seeds": not seed_clear,
+        "rows": len(rows),
+        "rows_label_changed_place": moved,
+        "recall": recall,
+        "band": band,
+        "inside": inside,
+        "ok": inside and seed_clear and moved > 0,
+    }
+
+
 def controls(path: Path | None = None) -> int:
     report = json.loads((path or RESULTS).read_text())
     out = {}
@@ -1200,14 +1259,16 @@ def controls(path: Path | None = None) -> int:
             labels = [i["label"] for i in items]
             cells = _label_reading_controls(labels)
             invariance = label_invariance_control(items)
+            shuffled = shuffle_band_control(items)
             passed = all(c["ok"] for arm in cells.values() for c in arm.values())
-            passed = passed and invariance["ok"]
+            passed = passed and invariance["ok"] and shuffled["ok"]
             ok = ok and passed
             out[f"{key}:{split}"] = {
                 "n": len(items),
                 "n_defects": sum(1 for label in labels if label == 0),
                 "controls": cells,
                 "risk_label_invariance": invariance,
+                "shuffled_label_band": shuffled,
                 "ok": passed,
             }
     print(json.dumps(out, indent=1))
@@ -1307,6 +1368,18 @@ def verify(path: Path | None = None) -> int:
             )
             if not invariance["ok"]:
                 bad.append(f"{key}:{split}:label_invariance")
+            shuffled = shuffle_band_control(items)
+            print(
+                f"{key}:{split}: shuffled-label band — seed {shuffled['seed']}"
+                f" (in band seeds: {shuffled['seed_in_band_seeds']}),"
+                f" {shuffled['rows_label_changed_place']} of {shuffled['rows']} relabelled,"
+                f" recall@{shuffled['fraction']:.2f} {shuffled['recall']:.6f}"
+                f" in band {shuffled['band']['p2_5']:.6f}-{shuffled['band']['p97_5']:.6f}"
+                f" -> inside {shuffled['inside']}",
+                flush=True,
+            )
+            if not shuffled["ok"]:
+                bad.append(f"{key}:{split}:shuffled_label_band")
     print(f"verification failures: {bad}", flush=True)
 
     print("VERIFY_PASS" if not bad else "VERIFY_FAIL", flush=True)
