@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import random
 import sys
 import time
 from collections import defaultdict
@@ -251,5 +252,133 @@ def main(role: str) -> None:
     )
 
 
+def _primary(role: str, fixture: list[dict], values: dict, indices: list[int]) -> float:
+    rows = [fixture[index] for index in indices]
+    if role in ("refine", "docs"):
+        return sum(values[row["id"]] for row in rows) / len(rows)
+    if role == "classifier":
+        return sum(values[row["id"]] == row["expected"] for row in rows) / len(rows)
+    scores = [values[row["id"]] for row in rows]
+    pair_means = [row["pair_mean"] for row in rows]
+    accepted = [row["final_accepted"] for row in rows]
+    return benchmark_roles.verdict_flip_quality(scores, pair_means, accepted)[0]
+
+
+def _interval(values: list[float]) -> list[float]:
+    ordered = sorted(values)
+    return [
+        ordered[int(0.025 * (len(ordered) - 1))],
+        ordered[int(0.975 * (len(ordered) - 1))],
+    ]
+
+
+def analyze() -> None:
+    results = json.loads(RESULTS.read_text())
+    events = [json.loads(line) for line in EVENTS.read_text().splitlines()]
+    spent = sum(event.get("cost_usd", 0.0) for event in events)
+    if spent >= results["pre_registration"]["budget_ceiling_usd"]:
+        raise RuntimeError(f"Spend ceiling exceeded: USD {spent:.6f}")
+    results["total_spend_usd"] = round(spent, 6)
+    analysis: dict[str, dict] = {}
+    for role, report in results["raw_reports"].items():
+        captured = results["item_outcomes"][role]
+        fixture = captured["fixture"]
+        by_model = captured["by_model"]
+        ids = [row["id"] for row in fixture]
+        for model in (MODEL_SOL, MODEL_LUNA, report["incumbent"]):
+            if model not in by_model or not set(ids) <= set(by_model[model]):
+                raise RuntimeError(f"Incomplete matched outcomes: {role} {model}")
+        rng = random.Random(1729)
+        draws = [[rng.randrange(len(fixture)) for _ in fixture] for _ in range(10000)]
+        full = list(range(len(fixture)))
+        model_stats: dict[str, dict] = {}
+        cutoff = max(
+            (
+                run["report"]["timestamp"]
+                for run in results.get("superseded_runs", [])
+                if run["role"] == role
+            ),
+            default="",
+        )
+        if role == "breaker-names":
+            cutoff = results["execution_controls"]["sample_override_timestamp_utc"]
+        for row in report["results"]:
+            model = row["model"]
+            vals = [_primary(role, fixture, by_model[model], draw) for draw in draws]
+            calls = [
+                event
+                for event in events
+                if event["role"] == role
+                and event.get("model") == model
+                and event.get("timestamp_utc", "") > cutoff
+            ]
+            model_stats[model] = {
+                "primary": _primary(role, fixture, by_model[model], full),
+                "interval_95": _interval(vals),
+                "candidate_call_count": len(calls),
+                "candidate_cost_per_call_usd": sum(event["cost_usd"] for event in calls)
+                / len(calls)
+                if calls
+                else None,
+                "candidate_latency_per_call_seconds": sum(
+                    event["latency_seconds"] for event in calls
+                )
+                / len(calls)
+                if calls
+                else None,
+                "effective_cost_per_item_usd": row["cost"] / len(fixture),
+            }
+        differences = [
+            _primary(role, fixture, by_model[MODEL_LUNA], draw)
+            - _primary(role, fixture, by_model[MODEL_SOL], draw)
+            for draw in draws
+        ]
+        diff_ci = _interval(differences)
+        shuffled = dict(by_model[MODEL_SOL])
+        permuted = [shuffled[item_id] for item_id in ids]
+        rng.shuffle(permuted)
+        shuffled = dict(zip(ids, permuted, strict=True))
+        control_ci = _interval(
+            [
+                _primary(role, fixture, by_model[MODEL_LUNA], draw)
+                - _primary(role, fixture, shuffled, draw)
+                for draw in draws
+            ]
+        )
+        analysis[role] = {
+            "sample_size": len(fixture),
+            "primary_metric": {
+                "refine": "defect_resolution",
+                "docs": "rubric_score",
+                "breaker-names": "verdict_flip_quality",
+                "breaker-docs": "verdict_flip_quality",
+                "classifier": "accuracy",
+            }[role],
+            "models": model_stats,
+            "luna_minus_sol": _primary(role, fixture, by_model[MODEL_LUNA], full)
+            - _primary(role, fixture, by_model[MODEL_SOL], full),
+            "paired_interval_95": diff_ci,
+            "capable_under_rule": diff_ci[0] >= -0.05,
+            "shuffled_control_interval_95": control_ci,
+            "shuffled_control_contains_zero": control_ci[0] <= 0 <= control_ci[1],
+        }
+    results["analysis"] = analysis
+    RESULTS.write_text(json.dumps(results, indent=2) + "\n")
+    print(
+        json.dumps(
+            {
+                role: {
+                    "difference": row["luna_minus_sol"],
+                    "interval": row["paired_interval_95"],
+                    "capable": row["capable_under_rule"],
+                }
+                for role, row in analysis.items()
+            },
+            indent=2,
+        )
+    )
+    print(f"total_spend_usd={spent:.6f}")
+
+
 if __name__ == "__main__":
-    main(sys.argv[1])
+    analyze() if sys.argv[1] == "analyze" else main(sys.argv[1])
