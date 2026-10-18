@@ -29,7 +29,7 @@ import os
 import random
 import sys
 import time as _time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -48,11 +48,12 @@ KEY_PATH = RUN_DIR / "srtj-refine-ab-key.json"
 RECEIPTS = RUN_DIR / "srtj-refine-receipts.jsonl"
 
 SEED = 20261018
-SHEET_SEED = 20261019
+SHEET_SEED = 20261020
 COHORT_SIZE = 120
 JUDGE_POOL = 160
 CEILING_USD = 33.0
-HEADROOM_USD = 1.2
+HEADROOM_USD = 0.5
+MAX_ATTEMPTS = 2
 CONCURRENCY = 6
 ARMS = ("comments", "checks")
 
@@ -98,6 +99,33 @@ ALLOWED_ROW_FIELDS = frozenset(
 
 def log(message: str) -> None:
     print(message, flush=True)
+
+
+DD_SOURCE_QUERY = """
+UNWIND $ids AS nid
+MATCH (sn:StandardName {id: nid})<-[:PRODUCED_NAME]-(src:StandardNameSource)
+WHERE src.id STARTS WITH 'dd:'
+WITH nid, src.id AS source_id
+ORDER BY source_id
+WITH nid, collect(source_id)[0] AS source_id
+WITH nid, source_id, substring(source_id, 3) AS path
+OPTIONAL MATCH (node:IMASNode {id: path})
+OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit:Unit)
+RETURN nid, source_id, path, node.description AS description,
+       node.documentation AS documentation, unit.id AS unit
+"""
+
+# The same binding seen from the DD node side (IMASNode -> HAS_STANDARD_NAME).
+# The brief routes DD context through PRODUCED_NAME; this second count is
+# measured so the rows it would reach that PRODUCED_NAME does not are reported.
+DD_PROJECTION_QUERY = """
+UNWIND $ids AS nid
+MATCH (node:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName {id: nid})
+OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit:Unit)
+RETURN nid, node.id AS source_id, node.description AS description,
+       node.documentation AS documentation, unit.id AS unit
+ORDER BY nid, source_id
+"""
 
 
 def save_json(path: Path, value) -> None:
@@ -213,7 +241,7 @@ def failed_check_records(record: dict) -> list[dict]:
         question = check.get("question") or {}
         answer = check.get("answer") or {}
         if "choice" in answer:
-            evidence = f"chosen: {answer.get("choice")}"
+            evidence = f"chosen: {answer.get('choice')}"
         elif "noul" in answer:
             evidence = f"failure probability {float(answer['noul']):.2f}"
         elif check.get("audit_finding"):
@@ -231,6 +259,61 @@ def failed_check_records(record: dict) -> list[dict]:
             }
         )
     return out
+
+
+def resolve_dd_sources(gc, names: list[str]) -> tuple[dict[str, dict], dict[str, dict]]:
+    """The DD source each name is bound to, through ``PRODUCED_NAME``.
+
+    Returns ``(by_name, by_projection)``.  ``by_name`` holds the ancestor's and
+    the refined name's dd source — path, description and unit — keyed on the
+    name id; a name with no such binding is absent, and the row it would have
+    carried is dropped rather than shipped without DD context.  ``by_projection``
+    is the same binding read from the DD node side, kept only to measure how
+    many rows the two routes disagree about.
+    """
+    wanted = sorted({n for n in names if n})
+    if not wanted:
+        return {}, {}
+
+    by_name: dict[str, dict] = {}
+    for row in gc.query(DD_SOURCE_QUERY, ids=wanted):
+        by_name.setdefault(
+            row["nid"],
+            {
+                "source_path": row["source_id"],
+                "source_description": row["description"] or row["documentation"] or "",
+                "source_unit": row["unit"] or "",
+            },
+        )
+
+    by_projection: dict[str, dict] = {}
+    for row in gc.query(DD_PROJECTION_QUERY, ids=wanted):
+        by_projection.setdefault(
+            row["nid"],
+            {
+                "source_path": f"dd:{row['source_id']}",
+                "source_description": row["description"] or row["documentation"] or "",
+                "source_unit": row["unit"] or "",
+            },
+        )
+    return by_name, by_projection
+
+
+def case_dd_source(case: dict, by_name: dict[str, dict]) -> dict | None:
+    """The DD context a case contributes, or None when it has no DD source."""
+    if case.get("path"):
+        return {
+            "source_path": case["path"],
+            "source_description": case.get("source_description")
+            or case.get("description")
+            or "",
+            "source_unit": case.get("source_unit") or case.get("unit") or "",
+        }
+    for name in (case.get("prior_name"), case.get("sn_id")):
+        found = by_name.get(name or "")
+        if found and found.get("source_path"):
+            return dict(found)
+    return None
 
 
 async def build_cohort(gc) -> dict:
@@ -308,18 +391,52 @@ async def build_cohort(gc) -> dict:
     }
 
 
+def receipt_lines() -> list[dict]:
+    """Every receipt line, one per call made — a retried call has two.
+
+    Spend is summed over these rather than over the last receipt per key: a
+    retry does not unpay for the attempt that failed before it.
+    """
+    if not RECEIPTS.exists():
+        return []
+    return [
+        json.loads(line)
+        for line in RECEIPTS.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
 def load_receipts() -> dict:
+    """The last receipt per (case, arm), with empty outputs read as failures.
+
+    A call the provider answered but whose structured response carries no name
+    is not an output: it is recorded here as ``empty_name`` so that it is
+    counted as a failure, retried like one, and never reaches the sheet.  The
+    receipts written before token capture carries ``prompt_tokens: null`` and
+    ``completion_tokens: null`` — absent evidence, never zero.
+    """
     if not RECEIPTS.exists():
         return {}
     out = {}
-    for line in RECEIPTS.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            row = json.loads(line)
-            out[(row["case"], row["arm"])] = row
+    for row in receipt_lines():
+        if row.get("outcome") == "ok" and not row.get("refined_name"):
+            row = {**row, "outcome": "empty_name"}
+        out[(row["case"], row["arm"])] = row
     return out
 
 
 def append_receipt(row: dict) -> None:
+    if row.get("outcome") in {"ok", "empty_name"}:
+        missing = [
+            field
+            for field in ("prompt_tokens", "completion_tokens")
+            if row.get(field) is None
+        ]
+        if missing:
+            raise RuntimeError(
+                f"receipt for {row.get('case')}/{row.get('arm')} lacks "
+                f"{missing}; the provider answered, so its usage must be recorded"
+            )
     RECEIPTS.parent.mkdir(parents=True, exist_ok=True)
     with RECEIPTS.open("a", encoding="utf-8") as stream:
         stream.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
@@ -362,8 +479,15 @@ async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
             examples[domain] = []
 
     receipts = load_receipts()
-    booked = already_spent + sum(r["cost_usd"] for r in receipts.values())
-    state = {"spent": booked, "calls": 0, "skipped": 0}
+    booked = already_spent + sum(r["cost_usd"] for r in receipt_lines())
+    state = {
+        "spent": booked,
+        "calls": 0,
+        "skipped": 0,
+        "exhausted": 0,
+        "costs": [],
+        "arm_costs": {arm: [] for arm in ARMS},
+    }
     log(f"resume: {len(receipts)} receipts, USD {booked:.4f} booked including Jev")
     sem = asyncio.Semaphore(CONCURRENCY)
     ceiling = CEILING_USD - HEADROOM_USD
@@ -371,8 +495,12 @@ async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
     async def one(case: dict, arm: str) -> None:
         key = (case["sn_id"], arm)
         done = receipts.get(key)
-        # A call that failed is retried once; only a produced output ends the work.
+        # A call that failed, or answered without a name, is retried once; only
+        # a response that actually produced a name ends the work.
         if done is not None and done.get("outcome") == "ok":
+            return
+        if done is not None and int(done.get("attempt") or 1) >= MAX_ATTEMPTS:
+            state["exhausted"] += 1
             return
         async with sem:
             if state["spent"] >= ceiling:
@@ -407,8 +535,13 @@ async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
             if effort:
                 kwargs["reasoning_effort"] = effort
             cost = 0.0
+            prompt_tokens = None
+            completion_tokens = None
             try:
-                refined, cost, _ = await acall_llm_structured(**kwargs)
+                result = await acall_llm_structured(**kwargs)
+                refined, cost = result.parsed, result.cost
+                prompt_tokens = result.input_tokens
+                completion_tokens = result.output_tokens
                 name = (
                     _resolve_name(
                         {
@@ -433,24 +566,33 @@ async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
                     }
                 )
             except Exception as exc:  # an arm failing is itself an outcome
+                prompt_tokens = getattr(exc, "input_tokens", None)
+                completion_tokens = getattr(exc, "output_tokens", None)
                 row.update(
                     {
-                        "outcome": cost and "ok" or f"error:{type(exc).__name__}",
+                        "outcome": f"error:{type(exc).__name__}",
                         "refined_name": "",
                         "refined_description": "",
                         "parses": False,
                     }
                 )
             row["cost_usd"] = float(cost or 0.0)
+            row["prompt_tokens"] = prompt_tokens
+            row["completion_tokens"] = completion_tokens
+            row["attempt"] = 1 + (
+                int(done.get("attempt") or 1) if done is not None else 0
+            )
             row["latency_s"] = round(_time.time() - started, 2)
             row["prompt_chars"] = len(user) + len(system or "")
             state["spent"] += row["cost_usd"]
+            state["costs"].append(row["cost_usd"])
+            state["arm_costs"][arm].append(row["cost_usd"])
             state["calls"] += 1
             receipts[key] = row
             append_receipt(row)
             log(
                 f"  [{state['calls']:3d}] {case['sn_id'][:42]:42s} {arm:8s} "
-                f"${row['cost_usd']:.4f} booked ${state["spent"]:.4f} {row["outcome"]}"
+                f"${row['cost_usd']:.4f} booked ${state['spent']:.4f} {row['outcome']}"
             )
 
     await asyncio.gather(*[one(c, arm) for c in cohort for arm in ARMS])
@@ -460,18 +602,31 @@ async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
         "spent_usd": state["spent"],
         "arm_calls": state["calls"],
         "skipped_for_ceiling": state["skipped"],
+        "exhausted_attempts": state["exhausted"],
+        "costs": state["costs"],
+        "arm_costs": state["arm_costs"],
         "receipts": receipts,
     }
 
 
-def build_sheet(cohort: list[dict], receipts: dict) -> tuple[list[dict], dict]:
-    """One row per distinct refined output; identical outputs collapse."""
+def build_sheet(
+    cohort: list[dict], receipts: dict, dd_sources: dict[str, dict]
+) -> tuple[list[dict], dict]:
+    """One row per distinct refined output; identical outputs collapse.
+
+    Every row carries the DD context of the case that produced it, read from the
+    case's own source path or, where it has none, from the ancestor's or the
+    refined name's bound DD source. A case with no resolvable DD source
+    contributes no row: it is counted in ``cases_without_dd_source`` rather than
+    shipped with a blank path.
+    """
     rows = []
     key = {}
     by_output = {}
     identical_pairs = 0
     complete = []
     incomplete = {}
+    no_dd_source = []
 
     for case in cohort:
         outputs = {}
@@ -484,6 +639,10 @@ def build_sheet(cohort: list[dict], receipts: dict) -> tuple[list[dict], dict]:
         if len(outputs) != len(ARMS):
             continue
         complete.append(case["sn_id"])
+        source = case_dd_source(case, dd_sources)
+        if not source or not source.get("source_path"):
+            no_dd_source.append(case["sn_id"])
+            continue
         if outputs["comments"] == outputs["checks"]:
             identical_pairs += 1
         for arm in ARMS:
@@ -497,10 +656,9 @@ def build_sheet(cohort: list[dict], receipts: dict) -> tuple[list[dict], dict]:
             rows.append(
                 {
                     "sheet_id": sheet_id,
-                    "source_path": case["path"],
-                    "source_description": case.get("source_description")
-                    or case["description"],
-                    "source_unit": case.get("source_unit") or case["unit"],
+                    "source_path": source["source_path"],
+                    "source_description": source["source_description"],
+                    "source_unit": source["source_unit"],
                     "ancestor_name": case["prior_name"],
                     "refined_name": name,
                     "refined_description": description,
@@ -518,6 +676,7 @@ def build_sheet(cohort: list[dict], receipts: dict) -> tuple[list[dict], dict]:
         "identical_output_pairs": identical_pairs,
         "cases_in_sheet": complete,
         "cases_incomplete": incomplete,
+        "cases_without_dd_source": no_dd_source,
         "sheet_seed": SHEET_SEED,
         "cohort_seed": SEED,
     }
@@ -535,65 +694,144 @@ def sheet_leaks(rows: list[dict]) -> list[str]:
     return findings
 
 
+def sheet_blank_paths(rows: list[dict]) -> list[str]:
+    """Rows shipped without DD source context, which must never happen."""
+    return [
+        f"{row.get('sheet_id')}: blank source_path"
+        for row in rows
+        if not str(row.get("source_path") or "").strip()
+    ]
+
+
 def check_sheet() -> int:
-    """Fail if the sheet carries a hidden field, and prove the check can fail."""
+    """Fail on a hidden field or a blank DD path, and prove both can fail."""
     rows = json.loads(SHEET.read_text(encoding="utf-8"))
-    findings = sheet_leaks(rows)
+    findings = sheet_leaks(rows) + sheet_blank_paths(rows)
     if findings:
-        log("FAIL: committed label sheet carries hidden fields")
+        log("FAIL: committed label sheet carries hidden fields or blank DD paths")
         for finding in findings:
             log(f"  {finding}")
         return 1
     if not rows:
         log("FAIL: label sheet is empty, so the check proves nothing")
         return 1
-    caught = sheet_leaks([{**rows[0], "arm": "checks"}])
-    if not caught:
+    planted_arm = sheet_leaks([{**rows[0], "arm": "checks"}])
+    planted_blank = sheet_blank_paths([{**rows[0], "source_path": ""}])
+    if not planted_arm:
         log("FAIL: the planted leaking row was not caught")
         return 1
-    log(f"OK: {len(rows)} rows clean; planted row refused: {caught[0]}")
+    if not planted_blank:
+        log("FAIL: the planted blank-path row was not caught")
+        return 1
+    log(
+        f"OK: {len(rows)} rows clean; planted arm row refused: {planted_arm[0]}; "
+        f"planted blank-path row refused: {planted_blank[0]}"
+    )
     return 0
 
 
-async def main() -> int:
+def resume_cohort() -> tuple[list[dict], dict]:
+    """Rebuild the stored cohort from the corpus, with its stored critique.
+
+    The refine prompt is rendered from the case dict, so a retry must see the
+    case the first call saw.  Every case is re-read from the same loader at the
+    same seed and its critique compared against the stored run, which proves the
+    retried prompt is the prompt the earlier call was given.
+    """
+    from imas_codex.standard_names.benchmark_roles import load_refine_corpus
+
+    stored = json.loads(RESULTS.read_text(encoding="utf-8"))
+    corpus = {c["sn_id"]: c for c in load_refine_corpus(sample=100000, seed=SEED)}
+    cohort = []
+    for entry in stored["cases"]:
+        case = corpus.get(entry["sn_id"])
+        if case is None:
+            raise RuntimeError(f"{entry['sn_id']} is absent from the corpus")
+        if case["critique"] != entry["critique"]:
+            raise RuntimeError(
+                f"{entry['sn_id']}: the corpus critique differs from the stored run"
+            )
+        cohort.append(
+            {
+                **case,
+                "failed_checks": entry["failed_checks"],
+                "ancestor_checks": entry["ancestor_checks"],
+            }
+        )
+    log(f"resumed cohort of {len(cohort)} cases from {RESULTS.name}")
+    return cohort, dict(stored["cohort"])
+
+
+async def main(resume: bool = False) -> int:
     from imas_codex.graph.client import GraphClient
 
     gc = GraphClient()
-    cohort_info = await build_cohort(gc)
+    if resume:
+        cohort, cohort_info = resume_cohort()
+    else:
+        cohort_info = await build_cohort(gc)
+        cohort = cohort_info["accepted"][:COHORT_SIZE]
     log(
         f"population {cohort_info['population']} | golden-excluded "
         f"{cohort_info['excluded_by_golden']} | judged "
-        f"{cohort_info['candidates_judged']} | accepted "
-        f"{len(cohort_info['accepted'])} | jev USD {cohort_info['review_cost_usd']:.4f}"
+        f"{cohort_info['candidates_judged']} | rejected "
+        f"{cohort_info['rejection_reasons']} | jev USD "
+        f"{cohort_info['review_cost_usd']:.4f}"
     )
-    log(f"rejections: {cohort_info['rejection_reasons']}")
-    cohort = cohort_info["accepted"][:COHORT_SIZE]
     log(f"cohort {len(cohort)} cases -> {len(cohort) * len(ARMS)} refine calls")
 
     arms = await run_arms(cohort, gc, cohort_info["review_cost_usd"])
-    rows, key = build_sheet(cohort, arms["receipts"])
+    names = sorted({c["prior_name"] for c in cohort} | {c["sn_id"] for c in cohort})
+    dd_sources, projections = resolve_dd_sources(gc, names)
+    log(f"DD sources bound through PRODUCED_NAME: {len(dd_sources)} of {len(names)}")
+    rows, key = build_sheet(cohort, arms["receipts"], dd_sources)
     save_json(SHEET, rows)
     save_json(KEY_PATH, key)
+
+    projection_only = [
+        c["sn_id"]
+        for c in cohort
+        if not case_dd_source(c, dd_sources)
+        and any(
+            projections.get(name, {}).get("source_path")
+            for name in (c["prior_name"], c["sn_id"])
+        )
+    ]
 
     per_arm = {}
     for arm in ARMS:
         arm_rows = [r for r in arms["receipts"].values() if r["arm"] == arm]
         ok = [r for r in arm_rows if r["outcome"] == "ok"]
+        arm_costs = arms["arm_costs"][arm]
         per_arm[arm] = {
             "calls": len(arm_rows),
+            "calls_made": len(arm_costs),
+            "retry_calls": len(arm_costs) - len(arm_rows),
             "errors": len(arm_rows) - len(ok),
-            "spend_usd": round(sum(r["cost_usd"] for r in arm_rows), 6),
+            "spend_usd": round(sum(arm_costs), 6),
+            "spend_note": (
+                "every call made in this arm, cohort calls and retries alike"
+            ),
             "outputs": len(ok),
             "parsed": sum(1 for r in ok if r["parses"]),
             "parse_rate": round(sum(1 for r in ok if r["parses"]) / len(ok), 4)
             if ok
             else 0.0,
-            "mean_cost_usd": round(
-                sum(r["cost_usd"] for r in arm_rows) / len(arm_rows), 6
-            )
-            if arm_rows
+            "mean_cost_usd": round(sum(arm_costs) / len(arm_costs), 6)
+            if arm_costs
             else 0.0,
+            "failures": {
+                kind: sum(1 for r in arm_rows if r["outcome"] == kind)
+                for kind in sorted({r["outcome"] for r in arm_rows} - {"ok"})
+            },
+            "retried": sum(1 for r in arm_rows if int(r.get("attempt") or 1) > 1),
+            "with_tokens": sum(1 for r in arm_rows if r.get("prompt_tokens")),
         }
+
+    lines = receipt_lines()
+    counts = Counter((row["case"], row["arm"]) for row in lines)
+    retried_keys = {key for key, n in counts.items() if n > 1}
+    retry_calls = len(lines) - len(arms["receipts"])
 
     results = {
         "cohort": {k: v for k, v in cohort_info.items() if k != "accepted"},
@@ -601,21 +839,62 @@ async def main() -> int:
         "arms": per_arm,
         "model": arms["model"],
         "reasoning_effort": arms["reasoning_effort"],
-        "refine_spend_usd": round(
-            sum(r["cost_usd"] for r in arms["receipts"].values()), 6
+        "refine_spend_usd": round(sum(arms["costs"]), 6),
+        "refine_spend_note": (
+            "Every refine call made, retries included. Summing one cost per "
+            "case-and-arm instead would drop the first attempt of each retried "
+            "call and understate the pass."
         ),
         "total_spend_usd": round(arms["spent_usd"], 6),
         "ceiling_usd": CEILING_USD,
         "skipped_for_ceiling": arms["skipped_for_ceiling"],
+        "exhausted_attempts": arms["exhausted_attempts"],
+        "tokens": {
+            "captured_from": "the retry pass; the cohort calls predate capture",
+            "earlier_calls": None,
+            "with_tokens": sum(1 for r in receipt_lines() if r.get("prompt_tokens")),
+            "note": (
+                "Calls made before tokens were captured carry null prompt and "
+                "completion counts: the data was never written, so it is "
+                "absent, not zero. The receipt writer now records prompt and "
+                "completion tokens from the response usage for every call and "
+                "refuses a receipt whose outcome is ok and whose token counts "
+                "are null."
+            ),
+            "retry_pass_without_tokens": sum(
+                1
+                for r in receipt_lines()
+                if r.get("prompt_tokens") is None
+                and (r.get("case"), r.get("arm")) in retried_keys
+            ),
+            "retry_pass_without_tokens_note": (
+                "model-side errors that raised without exposing usage"
+            ),
+        },
+        "retried_calls": retry_calls,
+        "retried_keys": len(retried_keys),
+        "retried_note": (
+            "A failed or empty first call is retried once. Retry calls are "
+            "counted from the receipt lines, not from the per-key receipts: "
+            "the attempt field on a retry receipt counts from the stored "
+            "attempt, and a key retried by an earlier launch carries a third "
+            "call."
+        ),
         "identical_output_pairs": key["identical_output_pairs"],
         "sheet_rows": len(rows),
         "sheet_cases": len(key["cases_in_sheet"]),
         "sheet_incomplete": key["cases_incomplete"],
+        "sheet_cases_without_dd_source": key["cases_without_dd_source"],
+        "dd_sources_bound": len(dd_sources),
+        "dd_names_asked": len(names),
+        "cases_dd_source_only_via_projection": projection_only,
+        "sheet_seed": SHEET_SEED,
         "cases": [
             {
                 "sn_id": c["sn_id"],
                 "prior_name": c["prior_name"],
                 "path": c["path"],
+                "dd_source": case_dd_source(c, dd_sources),
                 "description": c["description"],
                 "unit": c["unit"],
                 "critique": c["critique"],
@@ -639,7 +918,8 @@ async def main() -> int:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--check-sheet", action="store_true")
+    parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
     if args.check_sheet:
         sys.exit(check_sheet())
-    sys.exit(asyncio.run(main()))
+    sys.exit(asyncio.run(main(resume=args.resume)))

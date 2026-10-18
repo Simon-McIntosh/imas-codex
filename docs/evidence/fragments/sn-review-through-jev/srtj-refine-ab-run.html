@@ -18,7 +18,7 @@ node's work.</p>
     <tr><th>Eligible after the failed-check gate</th><td>152</td></tr>
     <tr><th>Selected cohort</th><td>120 cases</td></tr>
     <tr><th>Cohort selection seed</th><td><code>20261018</code></td></tr>
-    <tr><th>Sheet shuffle seed</th><td><code>20261019</code></td></tr>
+    <tr><th>Sheet shuffle seed</th><td><code>20261020</code></td></tr>
     <tr><th>Ancestor review seat</th><td><code>typesafe/jev-1.13</code>, USD 0.0358</td></tr>
   </tbody>
 </table>
@@ -32,79 +32,141 @@ loader's own <code>physics_domain</code> strata at the fixed seed, and a case
 enters the cohort only when its ancestor failed at least one check on the name
 axis and carries a non-empty critique.</p>
 
+<figure id="srtj-refine-ab-run-spend"><img src="/imas-codex/figures/sn-review-through-jev/srtj-refine-ab-run/spend-against-ceiling.svg" alt="Cumulative refine spend against call number, a steady rise through the 240 cohort calls and a final rise through the retry calls, drawn against the brief ceiling of 12 dollars and the ruled ceiling of 33 dollars"><figcaption>Cumulative refine spend in the order the calls were made. The cohort's 240 calls are drawn first and the retry pass continues the rise at the end of the series. The dotted lines are the brief's 12.00 ceiling, reached part-way through the cohort, and the 33.00 ceiling the ruling set; the series ends at 32.66, a third of a dollar below it. Ancestor review is not drawn: at 0.0358 it is thinner than the line.</figcaption></figure>
+
 <h3>Arms</h3>
 
 <table>
   <thead>
-    <tr><th>Arm</th><th>Calls</th><th>Spend</th><th>Mean/call</th><th>Outputs</th><th>Grammatical</th><th>Parse rate</th></tr>
+    <tr><th>Arm</th><th>Calls made</th><th>Spend</th><th>Mean/call</th><th>Outputs</th><th>Names</th><th>Name rate</th></tr>
   </thead>
   <tbody>
-    <tr><td>comments</td><td>120</td><td>$14.2113</td><td>$0.1184</td><td>117</td><td>108</td><td>0.923</td></tr>
-    <tr><td>checks</td><td>120</td><td>$14.3710</td><td>$0.1198</td><td>116</td><td>103</td><td>0.888</td></tr>
-    <tr><td><strong>total incl. Jev</strong></td><td>240</td><td><strong>$28.6182</strong></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>comments</td><td>133</td><td>$16.2837</td><td>$0.1224</td><td>118</td><td>108</td><td>0.900</td></tr>
+    <tr><td>checks</td><td>138</td><td>$16.3774</td><td>$0.1187</td><td>116</td><td>106</td><td>0.883</td></tr>
+    <tr><td><strong>total incl. Jev</strong></td><td>271</td><td><strong>$32.6969</strong></td><td></td><td></td><td></td><td></td></tr>
   </tbody>
 </table>
 
 <p>Seat: <code>openrouter/openai/gpt-5.5</code>, <code>reasoning_effort=high</code>. The
 refine judge was deliberately not run — the outputs are for blind labelling, and a
-reviewer score would be an input the labeller must not see. Seven of the 240 calls
-failed model-side (three in the comments arm, four in the checks arm) and produced no
-output; each was retried once, and the receipts record the outcome either way.</p>
+reviewer score would be an input the labeller must not see.</p>
+
+<p><strong>An answer is only an output when it carries a name.</strong> Over the 240 cohort
+calls, 214 returned a refined name and 26 did not: 20 came back marked ok with an
+<em>empty</em> refined name, and 6 raised model-side. The 20 empty answers are counted
+as failures throughout — an ok status is the transport's verdict on the call, not
+evidence of a name — so they are retried like a failure, they never reach the
+sheet, and the parse rate above is the share of outputs that carry a name. The
+spend column is every call made in the arm, the retries included: a retry does not
+unpay for the attempt that failed before it.</p>
+
+<h3>Retry pass</h3>
+
+<p>The 29 calls that failed or answered empty on their first attempt were each
+retried once, which is 29 of the 240 cohort calls re-asked and none of the
+successful ones. The pass made <strong>31</strong> calls: two keys carry a third call, made by
+an earlier retry launch and repeated by the run that closed the pass, so the arm
+split is 13 calls on the comments arm and 18 on the checks arm. It cost
+<strong>USD 4.0787</strong>, no call was skipped for the ceiling and none exhausted its
+attempts. After the pass, 20 calls still answer with an empty name and 6 still
+raise; together they are the 26 calls that contribute no output.</p>
+
+<p>Retrying is only honest if the retried call is the call that was asked the first
+time. The pass therefore rebuilds every case from the corpus loader at the same
+seed and asserts that its stored critique matches the critique the original call
+was given, so a prompt that had drifted would stop the pass rather than be
+measured.</p>
+
+<h3>Tokens</h3>
+
+<p>Token usage was not captured for the 240 cohort calls. Their receipts carry
+<code>null</code> prompt and completion counts — the counts were never written, so they are
+absent, and reading them as zero would be a claim the run cannot support. The
+receipt writer now records prompt and completion tokens from the response usage of
+every call and refuses to write a receipt whose outcome is ok and whose token
+counts are null. The retry pass is the first pass under that rule: 29 of its 31
+calls carry both counts, and the two that do not are model-side errors that raised
+without exposing usage.</p>
 
 <h3>Ceiling</h3>
 
 <p><strong>Ruled 2026-10-18: raise the ceiling to USD 33.00 total, including what had
 already been spent, and complete all 120 cases.</strong> The brief's original USD 12
 and its 120-case cohort cannot both hold: at this seat the measured price is
-$0.118 to $0.120 per call, so the 240 calls price at about USD 29 to 33 and the
+$0.118 to $0.124 per call, so the 240 calls price at about USD 29 to 33 and the
 original ceiling was reached at 89 calls, part-way through the cohort.</p>
 
-<p>The first pass therefore stopped at USD 11.8151 with 39 cases carrying both arms.
-The ruling raised the ceiling and the run resumed from its per-call receipts, so
-only the calls not already bought were paid for; the Jev pass and the earlier 89
-calls were not re-purchased. The completed run spent <strong>USD 28.6182</strong>
-against the USD 33.00 ceiling, with no call skipped. Receipts are appended as each
-call returns, so the whole pass is resumable and its spend is auditable line by
-line.</p>
+<p>The run resumed from its per-call receipts, so only the calls not already bought
+were paid for. Refine spent <strong>USD 32.6611</strong> over all 271 calls, of which the
+first pass was 28.6182 and the retry pass 4.0787; with the ancestor review at
+0.0358 the run stands at <strong>USD 32.6969 of the USD 33.00 ceiling</strong>. Receipts are
+appended and flushed as each call returns, so the pass is resumable and its spend
+is auditable line by line.</p>
+
+<h3>DD source context</h3>
+
+<p>Every sheet row carries the DD source the refined name is bound to — its path, its
+description and its unit — because the labeller is judging a name against the data
+element it names and cannot do that from the name alone.</p>
+
+<p>When a corpus case carries no source path, the source is read from the graph
+instead: the case's ancestor name and its refined name are looked up through
+<code>(StandardNameSource {id: 'dd:&lt;path&gt;'})-[:PRODUCED_NAME]-&gt;(StandardName)</code>, and the
+<code>IMASNode</code> reached that way supplies the description and the unit. Of the 224
+names asked, <strong>24 resolve this way</strong>.</p>
+
+<p>A case whose source cannot be resolved from the case, its ancestor or its refined
+name contributes <strong>no row</strong>: it is dropped and counted, never shipped with a
+blank path. <strong>62</strong> of the 104 complete cases are dropped on that ground. A further
+7 cases would resolve only through the other binding the graph carries,
+<code>IMASNode-[:HAS_STANDARD_NAME]-&gt;StandardName</code>; that projection is recorded in the
+results as a measured diagnostic and is not used: it binds a DD node to whatever
+name is projected onto it, which is not the provenance <code>PRODUCED_NAME</code> records.</p>
 
 <h3>Blind sheet</h3>
 
 <table>
   <tbody>
     <tr><th>Cohort cases</th><td>120</td></tr>
-    <tr><th>Cases contributing both arms</th><td>102</td></tr>
-    <tr><th>Cases with one arm or none</th><td>18</td></tr>
-    <tr><th>Identical across the two arms</th><td>4 case pairs</td></tr>
-    <tr><th>Distinct outputs, i.e. sheet rows</th><td>200</td></tr>
+    <tr><th>Cases returning a name in both arms</th><td>104</td></tr>
+    <tr><th>Cases returning a name in one arm or none</th><td>16</td></tr>
+    <tr><th>Complete cases dropped for having no DD source</th><td>62</td></tr>
+    <tr><th>Cases contributing a row</th><td>42</td></tr>
+    <tr><th>Identical across the two arms</th><td>2 case pairs</td></tr>
+    <tr><th>Distinct outputs, i.e. sheet rows</th><td>82</td></tr>
+    <tr><th>Rows with a blank source path</th><td>0</td></tr>
+    <tr><th>Shuffle seed</th><td><code>20261020</code></td></tr>
   </tbody>
 </table>
 
 <p>Each row carries the sheet id, the DD source path, description and unit, the
 ancestor name, and the refined name and description — and nothing else. Identical
 outputs collapse to one row, whether they came from the two arms of one case or
-from different cases. The 18 incomplete cases are those whose arm failed
-model-side; they contribute nothing to the sheet.</p>
+from different cases, which is why 42 contributing cases produce 82 rows rather
+than 84. The 16 incomplete cases are those where an arm raised or answered with an
+empty name; they contribute nothing to the sheet.</p>
 
-<p>The rows are shuffled at seed <code>20261019</code>. The sheet-to-case-and-arm key
-is written to <code>srtj-refine-ab-key.json</code> in the run directory only, and
-is never committed here.</p>
+<p>The rows are shuffled at seed <code>20261020</code>, recorded here so the shuffle is
+reproducible. The sheet-to-case-and-arm key is written to
+<code>srtj-refine-ab-key.json</code> in the run directory only, and is never committed here.</p>
 
 <h3>Sheet check, and its negative control</h3>
 
-<p>The check reads the committed sheet, fails if any row carries an unexpected field
-or any field that would disclose the arm or the sheet-to-case mapping, and then plants
-a row carrying <code>arm</code> and requires that the detector catch it — an empty or
-over-permissive check would otherwise report a safety it does not provide.</p>
+<p>The check reads the committed sheet and fails on any row carrying an unexpected
+field, any field that would disclose the arm or the sheet-to-case mapping, and any
+row with a blank DD source path. It then plants two rows — one carrying
+<code>arm</code>, one with a blank <code>source_path</code> — and requires the detector to refuse both,
+because an empty or over-permissive check would otherwise report a safety it does
+not provide.</p>
 
 <table>
   <tbody>
-    <tr><th>Committed sheet</th><td>200 rows clean; planted row refused · <code>EXIT=0</code></td></tr>
-    <tr><th>One row mutated to carry <code>arm</code></th><td>refused, naming <code>row-158</code> and the field · <code>EXIT=1</code></td></tr>
+    <tr><th>Committed sheet</th><td>82 rows clean; both planted rows refused · <code>EXIT=0</code></td></tr>
+    <tr><th>One row's <code>source_path</code> blanked</th><td>refused, naming <code>row-075</code> and the field · <code>EXIT=1</code></td></tr>
   </tbody>
 </table>
 
 <p>Both logs are in the run directory as <code>sheet-check.log</code> and
-<code>sheet-check-mutated.log</code>, each carrying its command and its exit status.
-The mutation was applied to the working copy and reverted from a backup taken
-before it; the committed sheet is the clean one, re-checked at <code>EXIT=0</code>
-after the restore.</p>
+<code>sheet-check-mutated.log</code>, each carrying its command and its exit status. The
+committed sheet is the clean one, restored from a backup taken before the mutation
+and re-checked clean at <code>EXIT=0</code>.</p>
