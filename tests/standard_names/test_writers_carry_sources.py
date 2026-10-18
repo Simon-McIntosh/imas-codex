@@ -157,5 +157,10 @@ def test_signed_detachment_refuses_nonderived_parent_without_source() -> None:
         return []
 
     graph.query.side_effect = query
-    with pytest.raises(MissingStandardNameSource):
+    with (
+        patch.object(
+            signed, "_out_of_allowlist_source_hash", return_value=(0, "empty")
+        ),
+        pytest.raises(MissingStandardNameSource),
+    ):
         signed._verify_postconditions(graph, authority, [], "manifest")
