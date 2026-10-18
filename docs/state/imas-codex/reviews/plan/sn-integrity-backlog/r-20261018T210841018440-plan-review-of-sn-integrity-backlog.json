@@ -23,14 +23,21 @@
       "finding": "wiring-1",
       "reason": "already recorded: comment c-s37-gate-measure-stale states the gate's measure text is superseded, that the editor cannot change a declared gate's measure, and that the gate is passed on \u00a737's current done-when",
       "when": "2026-10-18T21:27:05.513336+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "the section-record link list is a structured region the plan editor refuses to change; \u00a738's order after \u00a737 is held by gate g-s38-needs-source-audit (section s37, gating s38), which the scheduler reads",
+      "when": "2026-10-18T22:00:01.770139+00:00"
     }
   ],
   "responses": {
     "wiring-1": {
       "action": "declined",
       "by": "",
-      "reason": "already recorded: comment c-s37-gate-measure-stale states the gate's measure text is superseded, that the editor cannot change a declared gate's measure, and that the gate is passed on \u00a737's current done-when",
-      "when": "2026-10-18T21:27:05.513336+00:00"
+      "reason": "the section-record link list is a structured region the plan editor refuses to change; \u00a738's order after \u00a737 is held by gate g-s38-needs-source-audit (section s37, gating s38), which the scheduler reads",
+      "when": "2026-10-18T22:00:01.770139+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261018T210841018440-plan-review-of-sn-integrity-backlog.json",
