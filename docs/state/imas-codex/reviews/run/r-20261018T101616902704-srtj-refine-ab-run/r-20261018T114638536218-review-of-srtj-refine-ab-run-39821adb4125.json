@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Adding an unexpected or prohibited key to a sheet row makes sheet_leaks return a finding.",
+      "lines": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:526-531"
+    },
+    {
+      "failure_condition": "An empty sheet or detector that permits a planted arm field makes check_sheet return nonzero; sheet-check-mutated.log shows the planted field refused at EXIT=1.",
+      "lines": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:536-555"
+    }
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T11:54:13Z",
+  "dispatched_at": "2026-10-18T11:47:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py",
+      "line": "500",
+      "severity": "blocking",
+      "text": "blocking: 120 of 200 blind-sheet rows have an empty source_path, although 80 rows prove the field can be populated; the labeller lacks the DD location required to judge those names against their source."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py",
+      "line": "429",
+      "severity": "blocking",
+      "text": "blocking: 22 arm responses across 14 cases are marked ok with an empty refined_name, so srtj-refine-ab-run.html:42-43 overstates outputs and line 85 wrongly calls all 18 omitted cases model-side failures; correct the accounting before treating the 102-case sheet as a 120-case comparison."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py",
+      "line": "414",
+      "severity": "blocking",
+      "text": "blocking: the per-call result discards token usage and receipts contain no token field, leaving an explicit source-brief deliverable unrecorded."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py",
+      "line": "383",
+      "severity": "follow-on",
+      "text": "follow-on: run_arms repeats the refine rendering and structured call owned by imas_codex/standard_names/benchmark_roles.py:616 run_refine_bench, so future changes to that call path must be made twice."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read both commits against base 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0; srtj-refine-ab-run.py builds and runs the arms and the second commit raises the ceiling, adds retries, and rebuilds the 200-row sheet and report.",
+    "done_when": "The source brief.md names cohort counts, spend, parse rates, identical outputs, and a planted sheet leak; srtj-refine-ab-run.html reports these and sheet-check-mutated.log records EXIT=1, but the report classifies 14 empty-name cases as model failures.",
+    "goal": "The source brief.md requires 120 paired refines and a blind DD-context sheet; srtj-refine-ab-run-results.json records 240 arm calls but srtj-refine-ab-label-sheet.json has 120/200 rows without a source path and covers only 102 paired cases.",
+    "manifest": "The source manifest.md records commits 3923ff4a9dd01db50851fe644c10d96f6b7b0c2a and 39821adb4125105d9a5a0dec9c97abdd248c8d39, both sheet-check logs, and no baseline_suite or after_suite gate.",
+    "write_paths": "The source brief.md grants four evidence paths; git diff 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0..39821adb4125105d9a5a0dec9c97abdd248c8d39 changes exactly those four paths."
+  },
+  "justifications": {
+    "durability": "srtj-refine-ab-run.py:526-555 and sheet-check-mutated.log guard against leaked fields, but no assertion fails for blank DD paths, empty names counted as outputs, or omitted token counts.",
+    "evidence": "sheet-check-mutated.log proves the arm-field guard fires at EXIT=1, but srtj-refine-ab-run.html:42-43 counts empty names as outputs and line 85 attributes 14 such incomplete cases to model-side failures.",
+    "fit": "srtj-refine-ab-run.py:231-265 uses the existing review_names owner and line 383 uses build_refine_prompt_context, while the new evidence runner remains separate from production runtime.",
+    "goal_fidelity": "srtj-refine-ab-run.py:500 writes an empty source_path in 120 of 200 committed sheet rows, and line 414 discards per-call token data required by the source brief.",
+    "reuse": "srtj-refine-ab-run.py:327-464 duplicates refine prompt rendering and structured model calls already owned by imas_codex/standard_names/benchmark_roles.py:616 run_refine_bench rather than extending that execution path.",
+    "scope_discipline": "the diff from 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0 to 39821adb4125105d9a5a0dec9c97abdd248c8d39 changes only the four paths named in the source brief.md."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md requires 120 paired refines and a blind DD-context sheet; srtj-refine-ab-run-results.json records 240 arm calls but srtj-refine-ab-label-sheet.json has 120/200 rows without a source path and covers only 102 paired cases.\nVERDICT done_when: The source brief.md names cohort counts, spend, parse rates, identical outputs, and a planted sheet leak; srtj-refine-ab-run.html reports these and sheet-check-mutated.log records EXIT=1, but the report classifies 14 empty-name cases as model failures.\nVERDICT write_paths: The source brief.md grants four evidence paths; git diff 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0..39821adb4125105d9a5a0dec9c97abdd248c8d39 changes exactly those four paths.\nVERDICT manifest: The source manifest.md records commits 3923ff4a9dd01db50851fe644c10d96f6b7b0c2a and 39821adb4125105d9a5a0dec9c97abdd248c8d39, both sheet-check logs, and no baseline_suite or after_suite gate.\nVERDICT diff: Read both commits against base 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0; srtj-refine-ab-run.py builds and runs the arms and the second commit raises the ceiling, adds retries, and rebuilds the 200-row sheet and report.\nCALL_SITES: none\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: srtj-refine-ab-run.py:500 writes an empty source_path in 120 of 200 committed sheet rows, and line 414 discards per-call token data required by the source brief.\nSCORE evidence: 10\nJUSTIFICATION evidence: sheet-check-mutated.log proves the arm-field guard fires at EXIT=1, but srtj-refine-ab-run.html:42-43 counts empty names as outputs and line 85 attributes 14 such incomplete cases to model-side failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff from 4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0 to 39821adb4125105d9a5a0dec9c97abdd248c8d39 changes only the four paths named in the source brief.md.\nSCORE durability: 8\nJUSTIFICATION durability: srtj-refine-ab-run.py:526-555 and sheet-check-mutated.log guard against leaked fields, but no assertion fails for blank DD paths, empty names counted as outputs, or omitted token counts.\nSCORE fit: 16\nJUSTIFICATION fit: srtj-refine-ab-run.py:231-265 uses the existing review_names owner and line 383 uses build_refine_prompt_context, while the new evidence runner remains separate from production runtime.\nSCORE reuse: 5\nJUSTIFICATION reuse: srtj-refine-ab-run.py:327-464 duplicates refine prompt rendering and structured model calls already owned by imas_codex/standard_names/benchmark_roles.py:616 run_refine_bench rather than extending that execution path.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:500 blocking: 120 of 200 blind-sheet rows have an empty source_path, although 80 rows prove the field can be populated; the labeller lacks the DD location required to judge those names against their source.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:429 blocking: 22 arm responses across 14 cases are marked ok with an empty refined_name, so srtj-refine-ab-run.html:42-43 overstates outputs and line 85 wrongly calls all 18 omitted cases model-side failures; correct the accounting before treating the 102-case sheet as a 120-case comparison.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:414 blocking: the per-call result discards token usage and receipts contain no token field, leaving an explicit source-brief deliverable unrecorded.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run.py:383 follow-on: run_arms repeats the refine rendering and structured call owned by imas_codex/standard_names/benchmark_roles.py:616 run_refine_bench, so future changes to that call path must be made twice.",
+  "review_run_id": "r-20261018T114638536218-review-of-srtj-refine-ab-run-39821adb4125",
+  "reviewed_base_sha": "4f73a21af44de4b2e66d70edc5bbd6ffb5b458f0",
+  "reviewed_commits": [
+    "3923ff4a9dd01db50851fe644c10d96f6b7b0c2a",
+    "39821adb4125105d9a5a0dec9c97abdd248c8d39"
+  ],
+  "reviewed_head_sha": "39821adb4125105d9a5a0dec9c97abdd248c8d39",
+  "reviewed_run_id": "r-20261018T101616902704-srtj-refine-ab-run",
+  "scores": {
+    "durability": 8,
+    "evidence": 10,
+    "fit": 16,
+    "goal_fidelity": 9,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T11:51:42.316201+00:00",
+  "total": 68
+}
