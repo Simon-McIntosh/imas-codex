@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 37,
+  "added_failure_ids": [
+    "tests/standard_names/test_export_catalog_files.py::TestReviewBodyCarriesExclusionLedger::test_body_link_resolves_to_the_committed_ledger",
+    "tests/standard_names/test_export_report_gate.py::test_unsuccessful_export_stops_assembly_and_publication",
+    "tests/standard_names/test_export_report_is_published.py::TestExportReportIsPublished::test_accounting_arithmetic_verifiable_from_committed_files",
+    "tests/standard_names/test_export_report_is_published.py::TestExportReportIsPublished::test_report_absent_staging_still_publishes",
+    "tests/standard_names/test_export_report_is_published.py::TestExportReportIsPublished::test_report_copied_and_committed[.export_report.json]",
+    "tests/standard_names/test_review_body_authored.py::test_authored_body_reaches_pr_unchanged_apart_from_preview_line",
+    "tests/standard_names/test_review_body_ledger_link.py::test_body_lacking_the_ledger_gains_exactly_one_markdown_link",
+    "tests/standard_names/test_review_quorum_pool.py::test_docs_three_models_disagreement_runs_escalator",
+    "tests/standard_names/test_review_quorum_pool.py::test_docs_two_models_agreement_writes_two_cycles",
+    "tests/standard_names/test_review_quorum_pool.py::test_names_batch_response_is_unwrapped",
+    "tests/standard_names/test_review_quorum_pool.py::test_names_empty_reviews_batch_is_a_failed_cycle",
+    "tests/standard_names/test_review_quorum_pool.py::test_names_single_model_chain_uses_single_review",
+    "tests/standard_names/test_review_quorum_pool.py::test_names_three_models_agreement_skips_cycle_two",
+    "tests/standard_names/test_review_quorum_pool.py::test_names_three_models_disagreement_runs_escalator",
+    "tests/standard_names/test_review_quorum_pool.py::test_names_two_models_agreement_writes_two_cycles",
+    "tests/standard_names/test_review_quorum_pool.py::test_names_two_models_disagreement_no_escalator_marks_max_cycles",
+    "tests/standard_names/test_review_release.py::test_batch_rc_counter_continues_past_a_labelled_tag",
+    "tests/standard_names/test_review_release.py::test_collect_catalog_changes",
+    "tests/standard_names/test_review_release.py::test_dry_run_version_and_artifact_carry_the_label",
+    "tests/standard_names/test_review_release.py::test_dry_run_writes_no_roster_and_moves_no_candidate",
+    "tests/standard_names/test_review_release.py::test_frozen_artifact_is_schema_valid_with_the_label",
+    "tests/standard_names/test_review_release.py::test_pr_target_fork_uses_origin_slug",
+    "tests/standard_names/test_review_release.py::test_real_run_writes_exactly_one_artifact_and_advances_candidate_once",
+    "tests/standard_names/test_review_release.py::test_review_assembly_reproduces_and_closes_sparse_baseline_failure",
+    "tests/standard_names/test_review_release.py::test_review_export_restores_approved_entry_bytes[- name: approved_name\\n  unit: A\\n]",
+    "tests/standard_names/test_review_release.py::test_review_release_can_cut_and_tag_without_opening_pr",
+    "tests/standard_names/test_review_release.py::test_review_release_dry_run_no_push_no_pr",
+    "tests/standard_names/test_review_release.py::test_review_release_explicit_pr_text_wins_verbatim",
+    "tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_at_closed_pr_head",
+    "tests/standard_names/test_review_release.py::test_review_release_refuses_branch_with_unique_commits",
+    "tests/standard_names/test_review_release.py::test_review_release_scopes_dd_caveats_to_batch_names",
+    "tests/standard_names/test_review_release.py::test_review_release_uses_injected_notes_builder",
+    "tests/standard_names/test_review_release.py::test_unavailable_dd_gap_read_is_visible_but_not_release_blocking",
+    "tests/standard_names/test_review_release_preview_link.py::test_release_names_missing_preview_link_invariant",
+    "tests/standard_names/test_review_release_preview_link.py::test_release_writes_and_reads_back_exact_pr_preview_address",
+    "tests/standard_names/test_reviewer_profiles.py::test_configured_default_profile_uses_blind_pair_and_disagreement_breaker",
+    "tests/standard_names/test_sn_approve_reviewer_base.py::test_additive_pr_detects_edit_against_cut_time_catalog"
+  ],
+  "added_failures_note": "Derived from the reviewed run's own gate logs, not from its fragment: head.log ends '64 failed, 1867 passed, 2 skipped, 9 warnings, 2 errors' / EXIT=1 and base.log ends '29 failed, 1848 passed, 2 skipped' / EXIT=1; the ids failing at head and absent from base number 37 test ids (29 + 37 = 66 = head's 64 failed + 2 errors), and 0 base failures are absent from head.",
+  "call_sites": [
+    "reckon/evidence.py:597 (external repo; composes the plan's cumulative record from docs/evidence/fragments/<plan-slug>/, and reads this fragment by path and meta)"
+  ],
+  "completed_at": "2026-10-18T23:40:14.821Z",
+  "dispatched_at": "2026-10-18T23:29:25Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/merged-head-check.html",
+      "line": "114",
+      "severity": "follow-on",
+      "text": "follow-on: the flake paragraph offers 'five different ids fail there' (merged-head-check.html:114) as evidence of a per-run-rotating failure set, but all five ids it points at (test_review_release_full_flow, test_plain_final_reclaims_branch_contained_in_main, test_review_release_reclaims_branch_contained_in_main, test_review_branch_transport_ignores_upstream_remote, test_synthesized_body_still_gets_exclusion_ledger_paragraph) also appear in the first head arm and in base.log, so they are the pre-existing base backlog rather than rotation; the conclusion survives on the 24 non-reproducing ids, but that sentence overstates what the rerun shows."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/merged-head-check.html",
+      "line": "58",
+      "severity": "follow-on",
+      "summary": "five added-failure rows substitute a placeholder for the traceback summary the done_when requires, though the log carries one",
+      "text": "follow-on: five of the 37 rows (:58, :60, :61, :62, :77) carry '(short summary line only; see log)' where the done_when asks for each added id's traceback summary, although head.log:1088-1106 holds a --tb=short traceback for each of them, so the record is weaker than the log it cites."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T230234101589-merged-head-check/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline_suite and after_suite failure_ids fields carry prose ('pre-existing 29 ids at both revisions; see base.log', '37 added ids listed in the fragment, plus the 29 pre-existing ids') rather than the id lists the run's own base.log and head.log hold, so a reader of the structured record cannot compute the delta without re-deriving it from the logs as this review did."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the single commit 1a046f45cc1d against its parent ffc883c5b: it adds one new evidence fragment, 151 lines, recording the revisions, the selection, the arm totals, the 37 added ids in a table and the pre-existing 29-id backlog, with no code change.",
+    "done_when": "The brief's done_when names docs/evidence/fragments/sn-integrity-backlog/merged-head-check.html and requires both revisions, the exact selection, the two logs' paths and totals each ending EXIT=, and each added id with its traceback summary; merged-head-check.html:43-45 names the three logs and their EXIT=1 endings, :46 lists the 37 ids, and 32 of the 37 carry a traceback summary while five (:58, :60, :61, :62, :77) carry '(short summary line only; see log)'.",
+    "goal": "The source brief.md asks for the day's four landings measured together at one revision, from a git archive of each arm, with the added failures reported and not fixed; docs/evidence/fragments/sn-integrity-backlog/merged-head-check.html:14-52 names head ffc883c5b and base 3347cfb8e, the 119/115-file selection and the two arms.",
+    "manifest": "Read the source manifest.md at run r-20261018T230234101589-merged-head-check: status complete, one commit 1a046f45c, head arm 64 failed/1867 passed/2 skipped/2 errors in 350.29s, base arm 29 failed/1848 passed in 248.99s, 37 added ids from 29+37=66, and a declared env deviation (the shared .venv was read-only to the fence, so xdist came from a scratch --target dir).",
+    "write_paths": "The source manifest.md declares the single path docs/evidence/fragments/sn-integrity-backlog/merged-head-check.html; git show --stat 1a046f45cc1d lists exactly that one file, one insertion of 151 lines, and nothing else."
+  },
+  "justifications": {
+    "durability": "The commit adds no executable assertion, so nothing reddens if the fragment is edited or removed; its claims are re-derivable only from the run's logs, which is a weaker guard than a test that fails on regression.",
+    "evidence": "head.log:2274 ends '64 failed, 1867 passed, 2 skipped, 9 warnings, 2 errors in 350.29s' and base.log:756 ends '29 failed, 1848 passed, 2 skipped in 248.99s', and I re-derived 37 added test ids from those two logs, matching the fragment; five rows (:58, :60, :61, :62, :77) substitute a placeholder for the traceback summary the done_when requires, and the reviewed manifest's baseline_suite/after_suite failure_ids fields carry prose rather than the ids their own logs hold.",
+    "fit": "merged-head-check.html:1-10 carries the same doctype, reckon-type evidence-fragment meta, plan-slug, node-id and h1-id shape as its sibling docs/evidence/fragments/sn-integrity-backlog/approval-setup-errors.html:1-10, though its node-id drops the sib- prefix its siblings use.",
+    "goal_fidelity": "merged-head-check.html:20-52 records both revisions, the 119/115-file selection and all three arm totals, which is the whole of the brief's deliverable.",
+    "reuse": "The change adds no definition; the fragment is discovered and composed by reckon/evidence.py:597, which walks docs/evidence/fragments/<plan-slug>/ as the existing owner of the evidence-fragment capability, so the addition extends that owner rather than forking it.",
+    "scope_discipline": "git show --stat 1a046f45cc1d names one file, docs/evidence/fragments/sn-integrity-backlog/merged-head-check.html, which is the single write path the source manifest.md declares."
+  },
+  "plan_slug": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "review_run_id": "r-20261018T232903231422-review-of-merged-head-check-1a046f45cc1d",
+  "reviewed_base_sha": "ffc883c5b4006c08a1abccd6da080ce1f1f8ca77",
+  "reviewed_head_sha": "1a046f45cc1d3a591d68d70048e66be693810ed0",
+  "reviewed_revision": "1a046f45cc1",
+  "reviewed_run_id": "r-20261018T232903231422-review-of-merged-head-check-1a046f45cc1d",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T23:41:58.381613+00:00"
+}
