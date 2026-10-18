@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="77">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -147,7 +147,7 @@
     </p>
 
     <h2 id="s6">§6 — Acceptance learned from judgments</h2>
-    <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       The feature-discovery pattern: treat Jev's answers (check probabilities and dimension
       distributions) as features, and fit a small, inspectable model (logistic regression first)
@@ -390,6 +390,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261018T181146245440-ssog-learned-acceptance" data-who="reckon-build" data-when="2026-10-18T20:22:21Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html — validation AUC 0.706 (95% interval 0.645-0.759) for the fitted logistic model against 0.645 (0.588-0.699) for the hand-set composite; paired difference +0.061 (95% interval -0.001 to +0.126) reaches zero, so the model is not adopted; the fitted weights are published beside the verdict, named by check id.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-18T21:00:00Z">
+    <div class="r-comment-body"><p>§6 closed: not adopted. The learned weighting reads validation AUC 0.706 against the hand-set composite's 0.645. The paired gain, +0.061 [−0.001, +0.126], reaches zero, so it does not beat the composite by more than its interval as the section's rule requires. The weights are published for reuse; the learned order is not wired (merge <code>1868e988f</code>, review 87, USD 0). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s6-learned-acceptance">evidence</a></p></div>
 </div>
 </section>
 </main>
