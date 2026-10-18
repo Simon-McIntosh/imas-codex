@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "absent_note": "",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms: baseline_suite (covering-base-origin-fixed.log, revision 5f79e844, completed, exit 0, 243 passed) records failure_ids [] and after_suite (covering-head-origin-fixed.log, revision df920d5dd, completed, exit 0, 243 passed) records failure_ids [], so head adds zero failures against base over the covering selection.",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/edit.py:3368",
+    "imas_codex/standard_names/graph_ops.py:5928",
+    "imas_codex/standard_names/graph_ops.py:19338",
+    "imas_codex/standard_names/attachment_audit.py:1201",
+    "imas_codex/standard_names/signed_manifest.py:4086",
+    "imas_codex/standard_names/provenance_rebuild.py:531",
+    "imas_codex/standard_names/attachment_audit.py:2767"
+  ],
+  "commits_read": [
+    "24b8638cc61f70a177f740dd35d8c32cfbf9af43",
+    "b0d60a50ed63e6c7e70ea667fa3e3beb5c92cd7c",
+    "7e210992c63bc1fc2b413b8f24ddf4ca2bc7844d",
+    "febccd64cd97c95ef07f3982a9e074133ca2e9a3",
+    "02b674e8cbddc90547590ee36800f05f50e25ef3",
+    "a3b384e5a3bebfa5ee781374dc068761b8dc1fe5",
+    "0c885e8b9cff06a4b29a262cec4d8f2d684aaf3a",
+    "df920d5dd642679c0c67db950bf2e3004322d449",
+    "976d5379018d1692c10879f567abc8747c8c01ef"
+  ],
+  "completed_at": "2026-10-18T22:17:26.056Z",
+  "dispatched_at": "2026-10-18T22:06:10Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_writers_carry_sources.py",
+      "line": "20-34",
+      "severity": "blocking",
+      "text": "blocking: the Query double at :20-34 computes the expected answer itself (missing = (stage != superseded or not retired_is_exempt) and sources == 0 and not (origin == 'derived' and children)) and returns rows on that basis, so require_producing_sources is only ever asked whether it raises on a pre-decided row list. The production predicate at imas_codex/standard_names/source_invariant.py:44-49 is never executed by this test: deleting the superseded exemption or the whole AND NOT (derived-parent) clause leaves it green, so four of the done_when's invariant cases (derived parent passes, retired name passes, one source passes, none raises) are simulated rather than asserted. Put the regression back by removing AND NOT ({_derived_parent_cypher()}) from source_invariant.py:48 and the test does not redden; assert against the Cypher the invariant builds, or against a double that evaluates the emitted predicate, so the classification is verifiable."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "5519",
+      "severity": "follow-on",
+      "text": "follow-on: the in-transaction branch added at graph_ops.py:5508-5528 (and its twin at imas_codex/standard_names/attachment_audit.py:1086-1103) is selected only when type(gc) is GraphClient, but every test in the covering selection hands in a MagicMock, a FakeGraph or a _ScopedClient, so the branch never executes in any recorded arm. The only production caller passing a real client, attachment_audit.py:2767 and provenance_rebuild.py:531, therefore has its new transactional path, and its rollback on refusal, landed without a gate; the node's own evidence page concedes the doubles route on query text and do not evaluate Cypher."
+    },
+    {
+      "file": "imas_codex/standard_names/source_invariant.py",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: _is_sourceless_name is production code with no production caller; the only importer is the node's own test at tests/standard_names/test_writers_carry_sources.py:10. It mirrors the Cypher predicate a second time, so the rule that a live non-derived name needs a producer now has two implementations which can drift silently, and its docstring scopes it to small fixtures, which is a test concern living in a source module."
+    },
+    {
+      "file": "imas_codex/standard_names/attachment_audit.py",
+      "line": "2838",
+      "severity": "follow-on",
+      "text": "follow-on: _find_orphaned_names already answers the same question with WHERE NOT (:StandardNameSource)-[:PRODUCED_NAME]->(sn) over an explicit id list, and the new owner module re-implements that predicate instead of the helper being folded onto it; two sourceless-name queries now coexist in the same package, so a future change to what counts as sourced must be made in both."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read all nine commits from 24b8638c through 976d53790 against base 5f79e844 commit by commit: one new module, one shared guard called from five production sites, two new in-transaction wrappers, seven writer/transaction tests, a query-text test, and the evidence page; the last two commits repair only the null-origin predicate the prior review flagged and add its test.",
+    "done_when": "The source brief.md gate asks for one failing test per writer at EXIT=, the four invariant cases, zero added covering failures, and an evidence page naming each writer with call site and red/green runs; red-all-writers.log ends 5 failed/EXIT=1, red-rename-transaction.log ends 1 failed/EXIT=1, covering-base-origin-fixed.log and covering-head-origin-fixed.log each end 243 passed/EXIT=0, final-head-origin.log ends 251 passed/EXIT=0, and sib-writers-carry-sources.html tabulates each writer with call site and both runs.",
+    "goal": "The source brief.md requires four writers to refuse a live non-derived name left with no producer, checked in-transaction; the head adds imas_codex/standard_names/source_invariant.py:27 and calls it at edit.py:3368, graph_ops.py:5928 and :19338, attachment_audit.py:1201 and signed_manifest.py:4086, and the prior review's null-origin escape at source_integrity is closed by coalesce(sn.origin, '') at source_invariant.py:12.",
+    "manifest": "Read the source manifest.md at run r-20261018T205400851812-sib-writers-carry-sources; it reports status complete, nine commits ending 976d53790, the 251-test head gate at EXIT= once, but does not claim to re-run the covering arms after the final two commits, whose diff touches only source_invariant.py's predicate, the test file and the evidence page.",
+    "write_paths": "The source manifest.md declares the seven changed files plus the graph_ops.py call-site lines accepted at promotion, and git diff --stat 5f79e844..976d53790 names exactly those seven paths, with no path outside the declared scope."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_writers_carry_sources.py:20-34 computes the expected classification inside its own Query double, so the derived-parent and superseded clauses of source_invariant.py:44-49 are never evaluated and the test stays green if they are deleted; only the origin clause is pinned, by the string assertion at :54-57.",
+    "evidence": "covering-base-origin-fixed.log and covering-head-origin-fixed.log each end 243 passed/EXIT=0, and red-all-writers.log ends 5 failed/EXIT=1 with the writer calls replaced by pass, so the done_when's removal control is recorded rather than asserted.",
+    "fit": "imas_codex/standard_names/source_invariant.py:27 follows the repository's named-refusal and query-handle pattern, but source_invariant.py:20 exports a predicate mirror whose docstring scopes it to small fixtures and which no production path calls.",
+    "goal_fidelity": "imas_codex/standard_names/source_invariant.py:12 now compares coalesce(sn.origin, '') so an absent origin no longer drops a sourceless live name at the WHERE clause, closing the escape the prior review recorded, and all five writer call sites are present.",
+    "reuse": "imas_codex/standard_names/attachment_audit.py:2838 already tests NOT (:StandardNameSource)-[:PRODUCED_NAME]->(sn) for the same question, and the new module re-implements that predicate rather than folding the helper onto the new owner.",
+    "scope_discipline": "git diff --name-status 5f79e844..976d53790 lists exactly the seven files named in the source manifest.md write path set, and the graph_ops.py additions stay at the writer's entry point and its rename transaction."
+  },
+  "plan_slug": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "review_run_id": "r-20261018T220528697641-review-of-sib-writers-carry-sources-976d5379018d",
+  "reviewed_base_sha": "5f79e844a5b1df6df42e1c8698459249d5ba822c",
+  "reviewed_head_sha": "976d5379018d1692c10879f567abc8747c8c01ef",
+  "reviewed_revision": "976d5379018d",
+  "reviewed_run_id": "r-20261018T205400851812-sib-writers-carry-sources",
+  "scores": {
+    "durability": 12,
+    "evidence": 19,
+    "fit": 14,
+    "goal_fidelity": 16,
+    "reuse": 14,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T22:18:53.908095+00:00"
+}
