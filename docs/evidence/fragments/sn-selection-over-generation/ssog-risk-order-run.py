@@ -109,6 +109,52 @@ def _item_risk(failures: dict[str, float]) -> tuple[float, float]:
 
 
 # --------------------------------------------------------------------------
+# Coverage
+# --------------------------------------------------------------------------
+
+AXIS_STATUSES = ("reused", "judged", "failed", "unscored")
+
+
+def _axis_coverage(ids, reused, attempted, errors, counted_by: str) -> dict:
+    """Coverage for one axis, derived from one status assigned to every id.
+
+    The four counts are never accumulated as separate tallies. Each id is given
+    exactly one status here, so `reused + judged + failed + unscored` is the
+    number of ids by construction and cannot close over a name that was asked
+    for and then dropped without a record: a dropped name has no status to take,
+    and `_axis_coverage` would see the total fall short of the axis.
+
+    `ids` carries repeats on the name axis, where the unit counted is a golden
+    row, and holds each id once on the documentation axis, where the unit is a
+    documented name; `counted_by` records which, so the checker recomputes the
+    counts on the same unit the axis counted them on. `status` is keyed by id,
+    which is what the axis's items are keyed by.
+    """
+    from collections import Counter
+
+    status: dict[str, str] = {}
+    for name in ids:
+        if name in reused:
+            status[name] = "reused"
+        elif name in attempted:
+            status[name] = attempted[name]
+        else:
+            status[name] = "unscored"
+    counts = Counter(status[name] for name in ids)
+    return {
+        "total": len(ids),
+        "counted_by": counted_by,
+        **{key: counts[key] for key in AXIS_STATUSES},
+        "status": status,
+        "errors": {
+            name: reason
+            for name, reason in errors.items()
+            if status.get(name) == "failed"
+        },
+    }
+
+
+# --------------------------------------------------------------------------
 # Name axis
 # --------------------------------------------------------------------------
 
@@ -143,12 +189,16 @@ def _name_items(checks):
     uncovered = sorted(
         {r["name"] for r in rows if not (frozen.get(r["name"]) or {}).get("answers")}
     )
-    gap, gap_cost = _judge_name_gap(uncovered, name_checks) if uncovered else ({}, 0.0)
+    gap = (
+        _judge_name_gap(uncovered, name_checks)
+        if uncovered
+        else {"answers": {}, "cost": 0.0, "status": {}, "errors": {}}
+    )
 
     items = []
     for row in rows:
         record = frozen.get(row["name"])
-        answers = (record or {}).get("answers") or gap.get(row["name"]) or {}
+        answers = (record or {}).get("answers") or gap["answers"].get(row["name"]) or {}
         failures: dict[str, float] = {}
         excluded: list[str] = []
         for check in name_checks:
@@ -175,22 +225,28 @@ def _name_items(checks):
                 "excluded_checks": sorted(set(excluded)),
             }
         )
-    meta = {
-        "question_checks": len(question_checks),
-        "audit_checks": len(name_checks) - len(question_checks),
-        "rows": len(items),
-        "reused": sum(1 for i in items if i["reused"]),
-        "gap_judged": sum(1 for i in items if i["answered"] and not i["reused"]),
-        "unjudged": sum(1 for i in items if not i["answered"]),
-        "gap_spend_usd": gap_cost,
-        "excluded_audit_checks": sorted(
-            {
-                c.id
-                for c in name_checks
-                if c.id not in question_checks and c.id != "redundant_repeated_segment"
-            }
-        ),
-    }
+    meta = _axis_coverage(
+        [row["name"] for row in rows],
+        {r["name"] for r in rows if (frozen.get(r["name"]) or {}).get("answers")},
+        gap["status"],
+        gap["errors"],
+        counted_by="row",
+    )
+    meta.update(
+        {
+            "question_checks": len(question_checks),
+            "audit_checks": len(name_checks) - len(question_checks),
+            "gap_spend_usd": gap["cost"],
+            "excluded_audit_checks": sorted(
+                {
+                    c.id
+                    for c in name_checks
+                    if c.id not in question_checks
+                    and c.id != "redundant_repeated_segment"
+                }
+            ),
+        }
+    )
     return items, meta
 
 
@@ -218,11 +274,15 @@ def _graph_name_props(names: list[str]) -> dict[str, dict]:
     return out
 
 
-def _name_siblings(name: str, query: str) -> list[str]:
+def _name_siblings(name: str, query: str) -> list[dict]:
     """The candidate's nearest catalog names, from the owner's own comparator search.
 
-    Siblings are context, not a gate: an unavailable search returns none and the
-    candidate is still judged.
+    The rows are carried whole rather than reduced to their ids: the review
+    owner reranks the pool by judged relevance and reads each comparator's
+    ``description``, so an id would reach it as a bare string and the rerank
+    would fall back to the retrieval order for every name. Siblings are
+    context, not a gate: an unavailable search returns none and the candidate
+    is still judged.
     """
     from imas_codex.standard_names.workers import _search_nearby_names
 
@@ -230,16 +290,21 @@ def _name_siblings(name: str, query: str) -> list[str]:
         found = _search_nearby_names(query or name, k=5)
     except Exception:  # noqa: BLE001 - sibling context is not a gate
         return []
-    return [row["id"] for row in found if row.get("id") and row["id"] != name][:5]
+    return [row for row in found if row.get("id") and row["id"] != name][:5]
 
 
-def _judge_name_gap(names: list[str], name_checks) -> tuple[dict[str, dict], float]:
+def _judge_name_gap(names: list[str], name_checks) -> dict:
     """Ask the name-review owner for the rows no frozen judgment covers.
 
     The owner builds each candidate's state, reranks its siblings and asks every
     check question in one batch, so a gap row is judged exactly as an accepted
     candidate is. A name with no catalog node is judged from its own text and
     grammar, which is how the review reads a candidate it has not yet accepted.
+
+    Every requested name leaves with a status. One that comes back without a
+    single answer is recorded as failed with the reason, never silently dropped:
+    a dropped name is indistinguishable from a judged one in the counts, and the
+    coverage arithmetic then closes over the hole.
     """
     from imas_codex.standard_names.review.jev_review import review_names
 
@@ -267,7 +332,20 @@ def _judge_name_gap(names: list[str], name_checks) -> tuple[dict[str, dict], flo
             for check_id, entry in record["checks"].items()
             if entry.get("answer") is not None
         }
-    return answers, review.cost
+    status: dict[str, str] = {}
+    errors: dict[str, str] = {}
+    for name in names:
+        if answers.get(name):
+            status[name] = "judged"
+        else:
+            status[name] = "failed"
+            errors[name] = "review_names returned no answer for this name"
+    return {
+        "answers": answers,
+        "cost": review.cost,
+        "status": status,
+        "errors": errors,
+    }
 
 
 # --------------------------------------------------------------------------
@@ -385,7 +463,7 @@ def _docs_items(checks):
         )
 
     spend = 0.0
-    failed: list[str] = []
+    errors: dict[str, str] = {}
     pending = [e for e in entries if e["answers"] is None]
     if pending:
         from imas_codex.discovery.base.judgment import decide_batch
@@ -393,7 +471,7 @@ def _docs_items(checks):
 
         judge_model = get_model("sn-judge")
 
-        async def judge(entry, semaphore):
+        async def judge(entry, semaphore) -> float:
             async with semaphore:
                 state = build_docs_state(entry["item"], checks=docs_checks)
                 questions = docs_question_table(
@@ -407,34 +485,49 @@ def _docs_items(checks):
                         service=SERVICE,
                         concurrency=1,
                     )
-                except Exception:  # noqa: BLE001 - one bad call must not sink the batch
-                    failed.append(entry["name"])
+                except Exception as exc:  # noqa: BLE001 - one bad call must not sink the batch
+                    errors[entry["name"]] = f"{type(exc).__name__}: {exc}"
                     return 0.0
                 if not results or results[0] is None:
-                    failed.append(entry["name"])
+                    errors[entry["name"]] = "decide_batch returned no result"
                     return cost
                 entry["answers"] = results[0][0]
                 return cost
 
-        async def run_pending():
+        async def run_pending() -> float:
+            """Judge every pending name, and wait for all of them.
+
+            A budget that expires cancels whatever is still in flight, and a
+            cancelled judgement is indistinguishable from one that was never
+            asked for — the name keeps no answer and no error, so it leaves the
+            axis through neither the judged nor the failed count. The batch is
+            therefore run to completion: every name either answers or is
+            recorded as failed with the reason its call gave.
+            """
             semaphore = asyncio.Semaphore(CONCURRENCY)
-            tasks = [asyncio.ensure_future(judge(e, semaphore)) for e in pending]
-            done, _ = await asyncio.wait(tasks, timeout=JUDGE_BUDGET_S)
+            outcomes = await asyncio.gather(
+                *(judge(entry, semaphore) for entry in pending),
+                return_exceptions=True,
+            )
             spent = 0.0
-            for task in done:
-                try:
-                    spent += task.result()
-                except Exception:  # noqa: BLE001
-                    pass
-            for task in tasks:
-                if not task.done():
-                    task.cancel()
+            for entry, outcome in zip(pending, outcomes, strict=True):
+                if isinstance(outcome, BaseException):
+                    errors[entry["name"]] = f"{type(outcome).__name__}: {outcome}"
+                    continue
+                spent += outcome
             return spent
 
         spend = asyncio.run(run_pending())
-        new_calls = sum(1 for e in pending if e["answers"] is not None)
-    else:
-        new_calls = 0
+
+    attempted: dict[str, str] = {}
+    for entry in entries:
+        if entry["reused"]:
+            continue
+        if entry["answers"]:
+            attempted[entry["name"]] = "judged"
+        else:
+            attempted[entry["name"]] = "failed"
+            errors.setdefault(entry["name"], "no answer returned")
 
     out = []
     excluded: list[str] = []
@@ -472,15 +565,21 @@ def _docs_items(checks):
                 "answered": bool(answers),
             }
         )
-    meta = {
-        "names": len(names),
-        "reused": sum(1 for e in entries if e["reused"]),
-        "new_calls": new_calls,
-        "failed_calls": len(failed),
-        "unscored": unscored,
-        "excluded_checks": sorted(set(excluded)),
-        "spend_usd": spend,
-    }
+    meta = _axis_coverage(
+        names,
+        {e["name"] for e in entries if e["reused"]},
+        attempted,
+        errors,
+        counted_by="name",
+    )
+    meta.update(
+        {
+            "names": len(names),
+            "no_documentation": sorted(unscored),
+            "excluded_checks": sorted(set(excluded)),
+            "spend_usd": spend,
+        }
+    )
     return out, meta
 
 
@@ -666,11 +765,12 @@ def measure() -> dict:
         "docs_axis": docs_meta,
         "spend": {
             "reused_name": name_meta["reused"],
-            "name_gap_judged": name_meta["gap_judged"],
-            "name_unjudged": name_meta["unjudged"],
+            "name_judged": name_meta["judged"],
+            "name_failed": name_meta["failed"],
             "name_gap_usd": name_meta["gap_spend_usd"],
             "reused_docs": docs_meta["reused"],
-            "new_calls": docs_meta["new_calls"],
+            "docs_judged": docs_meta["judged"],
+            "docs_failed": docs_meta["failed"],
             "new_usd": docs_meta["spend_usd"],
             "total_new_usd": name_meta["gap_spend_usd"] + docs_meta["spend_usd"],
             "ceiling_usd": CEILING_USD,
@@ -679,6 +779,7 @@ def measure() -> dict:
         "items": {
             "name": [
                 {
+                    "name": i["name"],
                     "unit": i["unit"],
                     "label": i["label"],
                     "split": i["split"],
@@ -693,12 +794,15 @@ def measure() -> dict:
             ],
             "docs": [
                 {
+                    "name": i["name"],
                     "unit": i["unit"],
                     "label": i["label"],
                     "split": i["split"],
                     "risk": i["risk"],
                     "mean": i["mean"],
                     "checks": i["checks"],
+                    "reused": i["reused"],
+                    "answered": i["answered"],
                 }
                 for i in docs_indexed
             ],
@@ -875,12 +979,18 @@ incumbent order reads each item's stored review score lowest-first from the grap
 (<code>reviewer_score</code> for names, <code>reviewer_score_docs</code> for documentation).</p>
 <p id="ssog-risk-order-counts">Name axis: {nm["question_checks"]} Jev checks and
 {nm["audit_checks"]} audit checks; the audit checks not decidable without a full catalog audit
-were excluded: {", ".join(nm["excluded_audit_checks"]) or "none"}. Of {nm["rows"]} name rows,
-{nm["reused"]} carry a frozen judgment and {nm["gap_judged"]} were judged here to fill the gap,
-so {nm["unjudged"]} rows carry no Jev answer (each then scores only on its audit checks).
-Documentation axis: {dm["names"]} names, {dm["reused"]} reused from the frozen documentation
-score arm, {dm["new_calls"]} judged here, {dm["failed_calls"]} calls failed,
-{len(dm["unscored"])} names had no documentation and are unscored. The documentation composite
+were excluded: {", ".join(nm["excluded_audit_checks"]) or "none"}. The axis carries {nm["total"]}
+name rows and the run assigns every one of them exactly one status: {nm["reused"]} reuse a frozen
+judgment, {nm["judged"]} were judged here to fill the gap, {nm["failed"]} were asked for here and
+returned no answer, and {nm["unscored"]} carry no judgment at all. The four sum to {nm["total"]}
+by construction, and the run does not stop judging until every pending name holds one of them, so
+a name cannot be asked for and then left out of the record.
+Documentation axis: {dm["names"]} names, of which {dm["reused"]} reuse a frozen judgment,
+{dm["judged"]} were judged here, {dm["failed"]} were asked for here and returned no answer, and
+{dm["unscored"]} carry no documentation in the graph; the four sum to {dm["names"]} by the same
+construction. Each axis stores that status per id under <code>status</code> in the results JSON
+and the reason for each failure under <code>errors</code>; <code>verify</code> recomputes the four
+counts from those rows and fails if they do not sum to the axis total. The documentation composite
 omits the checks whose answer is a flag rather than a scored probability, so they contribute no
 defect probability: {", ".join(dm.get("excluded_checks") or []) or "none"}. Spend:
 USD {spend["name_gap_usd"]:.6f} for the name gap and USD {spend["new_usd"]:.6f} for documentation,
@@ -950,37 +1060,92 @@ def controls(path: Path | None = None) -> int:
     return 0 if ok else 1
 
 
-def verify(path: Path | None = None) -> int:
-    """Check the coverage claim and both label-reading controls."""
-    checks = _load_checks()
-    question_ids = {c.id for c in checks if c.axis == "name" and c.question is not None}
-    report = json.loads((path or RESULTS).read_text())
-    rows = report["items"]["name"]
-    # A row is judged when at least one question check decided it. A row whose
-    # only decided checks are audit bits carries no Jev answer, which is the
-    # coverage gap the field alone would hide.
-    unjudged = [
-        r
-        for r in rows
-        if not any(check_id in question_ids for check_id in r.get("checks", {}))
-    ]
-    print(f"name rows: {len(rows)}; unjudged: {len(unjudged)}", flush=True)
-    if unjudged:
-        print("unjudged sample:", [r["unit"] for r in unjudged[:5]], flush=True)
+def _coverage_failures(axis: str, meta: dict, items: list[dict]) -> list[str]:
+    """Recompute one axis's coverage from its own rows and compare.
 
-    failed = []
+    Three things are checked against the stored rows rather than against the
+    tallies: every row names an id the axis gave a status to, every row's status
+    agrees with the reuse flag the row carries, and the four counts recomputed
+    on the unit the axis counted them on sum to the axis total. A name that was
+    asked for and never recorded therefore fails here whether it was dropped
+    from the status map, left outside the four, or recorded against a reuse flag
+    that contradicts it.
+    """
+    from collections import Counter
+
+    status = meta.get("status") or {}
+    rows = [item["name"] for item in items]
+    unscored_ids = set(meta.get("no_documentation") or [])
+    bad: list[str] = []
+
+    unknown = {n: s for n, s in status.items() if s not in AXIS_STATUSES}
+    if unknown:
+        bad.append(f"{axis}: status outside the four: {sorted(unknown.items())[:5]}")
+    missing = sorted({n for n in rows if n not in status})
+    if missing:
+        bad.append(f"{axis}: {len(missing)} rows carry no status: {missing[:5]}")
+    stray = sorted(set(status) - set(rows) - unscored_ids)
+    if stray:
+        bad.append(
+            f"{axis}: {len(stray)} ids carry a status but are neither a row nor "
+            f"unscored: {stray[:5]}"
+        )
+    for item in items:
+        recorded = status.get(item["name"])
+        if item["reused"] and recorded != "reused":
+            bad.append(f"{axis}: {item['name']} reuses a judgment, recorded {recorded}")
+        elif not item["reused"] and recorded not in ("judged", "failed"):
+            bad.append(f"{axis}: {item['name']} was judged now, recorded {recorded}")
+
+    if meta.get("counted_by") == "row":
+        unit = rows
+    else:
+        unit = sorted(set(rows) | unscored_ids)
+    counts = Counter(status[n] for n in unit if n in status)
+    total = sum(counts[key] for key in AXIS_STATUSES)
+    for key in AXIS_STATUSES:
+        if counts[key] != meta.get(key):
+            bad.append(
+                f"{axis}: {key} recorded {meta.get(key)}, rows give {counts[key]}"
+            )
+    if total != meta.get("total"):
+        bad.append(
+            f"{axis}: four counts sum to {total}, axis total is {meta.get('total')}"
+            f" over {len(unit)} units"
+        )
+    if total != len(unit):
+        bad.append(f"{axis}: four counts sum to {total}, unit numbers {len(unit)}")
+    return bad
+
+
+def verify(path: Path | None = None) -> int:
+    """Check the coverage arithmetic of both axes and the label-reading controls."""
+    report = json.loads((path or RESULTS).read_text())
+
+    bad: list[str] = []
+    for axis, meta_key in (("name", "name_axis"), ("docs", "docs_axis")):
+        meta = report[meta_key]
+        print(
+            f"{axis} axis: total {meta.get('total')} = reused {meta.get('reused')}"
+            f" + judged {meta.get('judged')} + failed {meta.get('failed')}"
+            f" + unscored {meta.get('unscored')}",
+            flush=True,
+        )
+        if meta.get("errors"):
+            print(f"  {axis} failures: {meta['errors']}", flush=True)
+        bad += _coverage_failures(axis, meta, report["items"][axis])
+
     for key in ("name", "docs"):
         for split in ("calibration", "validation"):
             labels = [i["label"] for i in report["items"][key] if i["split"] == split]
             for arm, cells in _label_reading_controls(labels).items():
                 for fraction, cell in cells.items():
                     if not cell["ok"]:
-                        failed.append(f"{key}:{split}:{arm}@{fraction}")
-    print(f"label-reading controls failed: {failed}", flush=True)
+                        bad.append(f"{key}:{split}:{arm}@{fraction}")
+    print(f"verification failures: {bad}", flush=True)
 
-    ok = not unjudged and not failed
-    print("VERIFY_PASS" if ok else "VERIFY_FAIL", flush=True)
-    return 0 if ok else 1
+    print("VERIFY_PASS" if not bad else "VERIFY_FAIL", flush=True)
+    return 0 if not bad else 1
 
 
 def main() -> int:
