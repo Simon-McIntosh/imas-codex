@@ -3363,6 +3363,10 @@ def _apply_rename(
     # observation from which the expectation can be established.
     producing_source_ids = _producing_source_ids(root_row)
 
+    from imas_codex.standard_names.source_invariant import require_producing_sources
+
+    require_producing_sources(gc, [refine_root_old])
+
     if dry_run:
         actions.append(
             f"[dry-run] would carry {len(producing_source_ids)} producing "
