@@ -380,5 +380,69 @@ def analyze() -> None:
     print(f"total_spend_usd={spent:.6f}")
 
 
+def render_figure() -> None:
+    import matplotlib.pyplot as plt
+    from matplotlib.text import Text
+
+    results = json.loads(RESULTS.read_text())
+    analysis = results["analysis"]
+    ordered = ["refine", "docs", "breaker-names", "breaker-docs", "classifier"]
+    labels = ["Refine", "Docs", "Names breaker", "Docs breaker", "Classifier"]
+    plt.style.use("data-ink")
+    fig, axis = plt.subplots(figsize=(14, 6), dpi=100)
+    for index, role in enumerate(ordered):
+        y = len(ordered) - 1 - index
+        if role not in analysis:
+            axis.text(0.06, y, "pending", va="center", color="#777777", fontsize=14)
+            continue
+        row = analysis[role]
+        point = row["luna_minus_sol"]
+        lower, upper = row["paired_interval_95"]
+        axis.errorbar(
+            point,
+            y,
+            xerr=[[point - lower], [upper - point]],
+            fmt="o",
+            color="#3d7392",
+            ecolor="#3d7392",
+            linewidth=2.6,
+            markersize=9,
+            capsize=5,
+            zorder=3,
+        )
+    axis.axvline(-0.05, color="#777777", linestyle=":", linewidth=1.2, zorder=1)
+    axis.text(-0.05, 4.35, "−0.05 limit", color="#666666", ha="center", fontsize=14)
+    axis.set_yticks(list(reversed(range(len(ordered)))), labels)
+    axis.set_ylim(-0.5, len(ordered) - 0.35)
+    axis.set_xlim(-0.65, 0.85)
+    axis.set_xticks([-0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8])
+    axis.set_xlabel("Luna − Sol primary metric")
+    fig.tight_layout()
+    fig.canvas.draw()
+    canvas = fig.bbox
+    for artist in fig.findobj(Text):
+        if not artist.get_visible() or not artist.get_text():
+            continue
+        box = artist.get_window_extent(fig.canvas.get_renderer())
+        if (
+            box.x0 < canvas.x0
+            or box.y0 < canvas.y0
+            or box.x1 > canvas.x1
+            or box.y1 > canvas.y1
+        ):
+            raise RuntimeError(f"Figure text outside canvas: {artist.get_text()!r}")
+    destination = ROOT / "docs/figures/llm-seats/llm-gpt6-seat-bench"
+    destination.mkdir(parents=True, exist_ok=True)
+    fig.savefig(destination / "paired-differences.svg")
+    fig.savefig(RUN / "figure-preview.png", dpi=100)
+    plt.close(fig)
+    print(destination / "paired-differences.svg")
+
+
 if __name__ == "__main__":
-    analyze() if sys.argv[1] == "analyze" else main(sys.argv[1])
+    if sys.argv[1] == "analyze":
+        analyze()
+    elif sys.argv[1] == "figure":
+        render_figure()
+    else:
+        main(sys.argv[1])
