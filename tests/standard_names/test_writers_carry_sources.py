@@ -54,11 +54,11 @@ def test_real_invariant_refuses_missing_origin(source_graph: GraphClient) -> Non
         })-[:HAS_PARENT]->(parent)
         """
     )
+    with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
+        require_producing_sources(source_graph, ["electron_temperature"])
     assert _find_orphaned_names(source_graph, ["electron_temperature"]) == [
         "electron_temperature"
     ]
-    with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
-        require_producing_sources(source_graph, ["electron_temperature"])
 
 
 @pytest.mark.graph
@@ -73,8 +73,8 @@ def test_real_invariant_allows_derived_parent(source_graph: GraphClient) -> None
         })-[:HAS_PARENT]->(parent)
         """
     )
-    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
     require_producing_sources(source_graph, ["electron_temperature"])
+    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
 
 
 @pytest.mark.graph
@@ -82,8 +82,8 @@ def test_real_invariant_allows_retired_name(source_graph: GraphClient) -> None:
     source_graph.query(
         "CREATE (:StandardName {id: 'electron_temperature', name_stage: 'superseded'})"
     )
-    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
     require_producing_sources(source_graph, ["electron_temperature"])
+    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
     with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
         require_producing_sources(
             source_graph, ["electron_temperature"], retired_is_exempt=False
@@ -102,8 +102,8 @@ def test_real_invariant_allows_one_source(source_graph: GraphClient) -> None:
         })-[:PRODUCED_NAME]->(name)
         """
     )
-    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
     require_producing_sources(source_graph, ["electron_temperature"])
+    assert _find_orphaned_names(source_graph, ["electron_temperature"]) == []
 
 
 @pytest.mark.graph
