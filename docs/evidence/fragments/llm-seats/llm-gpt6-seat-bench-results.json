@@ -223,6 +223,76 @@
         ],
         "n_items": 12
       }
+    },
+    "classifier": {
+      "role": "classifier",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-5.5",
+          "n": 24,
+          "cost": 0.130415,
+          "metrics": {
+            "accuracy": 0.6667,
+            "correct": 16.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 24,
+          "cost": 0.045111,
+          "metrics": {
+            "accuracy": 0.6667,
+            "correct": 16.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 24,
+          "cost": 0.00245655,
+          "metrics": {
+            "accuracy": 0.6667,
+            "correct": 16.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/openai/gpt-5.5",
+      "judge_model": null,
+      "sample_ids": [
+        "summary/boundary/elongation",
+        "summary/boundary/geometric_axis_r",
+        "summary/boundary/geometric_axis_z",
+        "summary/boundary/magnetic_axis_r",
+        "summary/boundary/magnetic_axis_z",
+        "summary/boundary/minor_radius",
+        "summary/boundary/distance_inner_outer_separatrices",
+        "summary/boundary/gap_limiter_wall",
+        "summary/global_quantities/ip",
+        "summary/global_quantities/beta_pol",
+        "summary/global_quantities/beta_tor",
+        "summary/global_quantities/beta_tor_norm",
+        "summary/global_quantities/li_3",
+        "summary/global_quantities/q_95",
+        "summary/global_quantities/v_loop",
+        "summary/global_quantities/volume",
+        "summary/global_quantities/r0",
+        "summary/global_quantities/psi_external_average",
+        "summary/global_quantities/energy_thermal",
+        "summary/global_quantities/tau_energy",
+        "summary/global_quantities/tau_energy_98",
+        "summary/global_quantities/h_98",
+        "summary/global_quantities/energy_electrons_thermal",
+        "summary/global_quantities/energy_ion_total_thermal"
+      ],
+      "seed": 0,
+      "axis": null,
+      "timestamp": "2026-10-18T18:48:14.530786+00:00",
+      "provenance": {
+        "gold_set": "domain_gold_set.json",
+        "n_paths": 24
+      }
     }
   },
   "item_outcomes": {
@@ -453,10 +523,190 @@
           "propane_prefill_count": 0.8125
         }
       }
+    },
+    "classifier": {
+      "fixture": [
+        {
+          "id": "summary/boundary/elongation",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/geometric_axis_r",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/geometric_axis_z",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/magnetic_axis_r",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/magnetic_axis_z",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/minor_radius",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/distance_inner_outer_separatrices",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/gap_limiter_wall",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/ip",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/beta_pol",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/beta_tor",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/beta_tor_norm",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/li_3",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/q_95",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/v_loop",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/volume",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/r0",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/psi_external_average",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/energy_thermal",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/tau_energy",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/tau_energy_98",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/h_98",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/energy_electrons_thermal",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/energy_ion_total_thermal",
+          "expected": "transport"
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-5.5": {
+          "summary/boundary/elongation": "equilibrium",
+          "summary/boundary/geometric_axis_r": "equilibrium",
+          "summary/boundary/geometric_axis_z": "equilibrium",
+          "summary/boundary/magnetic_axis_r": "equilibrium",
+          "summary/boundary/magnetic_axis_z": "equilibrium",
+          "summary/boundary/minor_radius": "equilibrium",
+          "summary/boundary/distance_inner_outer_separatrices": "equilibrium",
+          "summary/boundary/gap_limiter_wall": "equilibrium",
+          "summary/global_quantities/ip": "core_plasma_physics",
+          "summary/global_quantities/beta_pol": "core_plasma_physics",
+          "summary/global_quantities/beta_tor": "core_plasma_physics",
+          "summary/global_quantities/beta_tor_norm": "core_plasma_physics",
+          "summary/global_quantities/li_3": "equilibrium",
+          "summary/global_quantities/q_95": "equilibrium",
+          "summary/global_quantities/v_loop": "core_plasma_physics",
+          "summary/global_quantities/volume": "equilibrium",
+          "summary/global_quantities/r0": "equilibrium",
+          "summary/global_quantities/psi_external_average": "equilibrium",
+          "summary/global_quantities/energy_thermal": "core_plasma_physics",
+          "summary/global_quantities/tau_energy": "transport",
+          "summary/global_quantities/tau_energy_98": "transport",
+          "summary/global_quantities/h_98": "transport",
+          "summary/global_quantities/energy_electrons_thermal": "core_plasma_physics",
+          "summary/global_quantities/energy_ion_total_thermal": "core_plasma_physics"
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "summary/boundary/elongation": "equilibrium",
+          "summary/boundary/geometric_axis_r": "equilibrium",
+          "summary/boundary/geometric_axis_z": "equilibrium",
+          "summary/boundary/magnetic_axis_r": "equilibrium",
+          "summary/boundary/magnetic_axis_z": "equilibrium",
+          "summary/boundary/minor_radius": "equilibrium",
+          "summary/boundary/distance_inner_outer_separatrices": "equilibrium",
+          "summary/boundary/gap_limiter_wall": "equilibrium",
+          "summary/global_quantities/ip": "core_plasma_physics",
+          "summary/global_quantities/beta_pol": "core_plasma_physics",
+          "summary/global_quantities/beta_tor": "core_plasma_physics",
+          "summary/global_quantities/beta_tor_norm": "core_plasma_physics",
+          "summary/global_quantities/li_3": "equilibrium",
+          "summary/global_quantities/q_95": "equilibrium",
+          "summary/global_quantities/v_loop": "magnetic_field_systems",
+          "summary/global_quantities/volume": "equilibrium",
+          "summary/global_quantities/r0": "equilibrium",
+          "summary/global_quantities/psi_external_average": "equilibrium",
+          "summary/global_quantities/energy_thermal": "core_plasma_physics",
+          "summary/global_quantities/tau_energy": "transport",
+          "summary/global_quantities/tau_energy_98": "transport",
+          "summary/global_quantities/h_98": "transport",
+          "summary/global_quantities/energy_electrons_thermal": "core_plasma_physics",
+          "summary/global_quantities/energy_ion_total_thermal": "core_plasma_physics"
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "summary/boundary/elongation": "equilibrium",
+          "summary/boundary/geometric_axis_r": "equilibrium",
+          "summary/boundary/geometric_axis_z": "equilibrium",
+          "summary/boundary/magnetic_axis_r": "equilibrium",
+          "summary/boundary/magnetic_axis_z": "equilibrium",
+          "summary/boundary/minor_radius": "equilibrium",
+          "summary/boundary/distance_inner_outer_separatrices": "equilibrium",
+          "summary/boundary/gap_limiter_wall": "equilibrium",
+          "summary/global_quantities/ip": "core_plasma_physics",
+          "summary/global_quantities/beta_pol": "core_plasma_physics",
+          "summary/global_quantities/beta_tor": "core_plasma_physics",
+          "summary/global_quantities/beta_tor_norm": "core_plasma_physics",
+          "summary/global_quantities/li_3": "equilibrium",
+          "summary/global_quantities/q_95": "equilibrium",
+          "summary/global_quantities/v_loop": "core_plasma_physics",
+          "summary/global_quantities/volume": "equilibrium",
+          "summary/global_quantities/r0": "equilibrium",
+          "summary/global_quantities/psi_external_average": "equilibrium",
+          "summary/global_quantities/energy_thermal": "core_plasma_physics",
+          "summary/global_quantities/tau_energy": "transport",
+          "summary/global_quantities/tau_energy_98": "transport",
+          "summary/global_quantities/h_98": "transport",
+          "summary/global_quantities/energy_electrons_thermal": "core_plasma_physics",
+          "summary/global_quantities/energy_ion_total_thermal": "core_plasma_physics"
+        }
+      }
     }
   },
   "analysis": {},
-  "total_spend_usd": 7.824536,
+  "total_spend_usd": 8.002518,
   "superseded_runs": [
     {
       "role": "refine",
