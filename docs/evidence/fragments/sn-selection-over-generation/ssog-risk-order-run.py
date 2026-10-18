@@ -3,20 +3,23 @@
 The composite is fixed before anything is measured. For each golden item the
 named checks of its axis are read from the review taxonomy; a check's failure
 probability is its defect probability — a Noul's true-case probability, one
-minus a Choice's acceptable-form probability, one minus a dimension rubric's
-acceptable level, or one when an audit finding class is present. An item's risk
-is the maximum failure probability over its checks, ties broken by the mean;
-the mean is reported too, as a sensitivity order.
+minus a Choice's acceptable-form probability, or one when an audit finding
+class is present. An item's risk is the maximum failure probability over its
+checks, ties broken by the mean; the mean is carried too, as a sensitivity
+order.
 
 Answers are reused wherever a frozen judgment already exists: the name axis
 from the name-review receipts (``evidence-decisions.jsonl``), the documentation
 axis from the documentation score arm's frozen package. Anything the frozen
-records do not cover is judged here through the same question builders, under a
-hard spend ceiling and a wall-time bound.
+records do not cover is judged here through the owner's own review entry point,
+under a hard spend ceiling and a wall-time bound.
 
 Subcommands:
     measure   build every item's risk, the recall table, the figure and JSON
-    shuffle   re-run the scorer with labels shuffled within each split
+    controls  read the labels through two synthetic orders whose recall is
+              known in closed form, so a broken recall computation shows red
+    render    rebuild the figure and fragment from a stored results file
+    verify    assert the coverage and control claims against a stored result
 """
 
 from __future__ import annotations
@@ -52,11 +55,6 @@ FIGURE = (
 FRACTIONS = (0.10, 0.25, 0.50)
 N_SHUFFLES = 1000
 SHUFFLE_SEED = 20261017
-# The control's own permutation is drawn from a seed outside the band's draw
-# range, so the reported point is an independent sample of the null rather than
-# the band's first draw. Two seeds that shared a draw range made the control
-# tautological: the point was a member of the sample it was compared against.
-CONTROL_SEED = 20261018
 BOOTSTRAP_RESAMPLES = 1000
 BOOTSTRAP_SEED = 123
 CEILING_USD = 0.50
@@ -84,20 +82,12 @@ def _load_checks():
     return load_review_checks()[0]
 
 
-def _defect_probability(check, answer, *, dimension=None) -> float | None:
-    from imas_codex.standard_names.review.jev_review import (
-        _DOCS_DIMENSION_CRITERIA,
-        choice_acceptable_form,
-    )
+def _defect_probability(check, answer) -> float | None:
+    from imas_codex.standard_names.review.jev_review import choice_acceptable_form
 
     if answer is None:
         return None
     probabilities = answer.get("probabilities") or {}
-    if dimension is not None:
-        acceptable = next(iter(_DOCS_DIMENSION_CRITERIA[dimension]))
-        if acceptable not in probabilities:
-            return None
-        return 1.0 - float(probabilities[acceptable])
     if check.question is None:
         return None
     if check.question.kind.value == "noul":
@@ -228,39 +218,56 @@ def _graph_name_props(names: list[str]) -> dict[str, dict]:
     return out
 
 
-def _judge_name_gap(names: list[str], name_checks) -> tuple[dict[str, dict], float]:
-    """Ask Jev for the name rows no frozen judgment covers.
+def _name_siblings(name: str, query: str) -> list[str]:
+    """The candidate's nearest catalog names, from the owner's own comparator search.
 
-    A name with no catalog node is judged from its own text and grammar, which
-    is how the review reads a candidate it has not yet accepted.
+    Siblings are context, not a gate: an unavailable search returns none and the
+    candidate is still judged.
     """
-    from imas_codex.discovery.base.judgment import decide_batch
-    from imas_codex.settings import get_model
-    from imas_codex.standard_names.review.jev_review import (
-        SERVICE,
-        build_name_state,
-        name_question_table,
-    )
+    from imas_codex.standard_names.workers import _search_nearby_names
+
+    try:
+        found = _search_nearby_names(query or name, k=5)
+    except Exception:  # noqa: BLE001 - sibling context is not a gate
+        return []
+    return [row["id"] for row in found if row.get("id") and row["id"] != name][:5]
+
+
+def _judge_name_gap(names: list[str], name_checks) -> tuple[dict[str, dict], float]:
+    """Ask the name-review owner for the rows no frozen judgment covers.
+
+    The owner builds each candidate's state, reranks its siblings and asks every
+    check question in one batch, so a gap row is judged exactly as an accepted
+    candidate is. A name with no catalog node is judged from its own text and
+    grammar, which is how the review reads a candidate it has not yet accepted.
+    """
+    from imas_codex.standard_names.review.jev_review import review_names
 
     props = _graph_name_props(names)
-    states = [build_name_state({"id": name, **props.get(name, {})}) for name in names]
-    questions = name_question_table(name_checks)
-    judge_model = get_model("sn-judge")
+    items = []
+    for name in names:
+        item = {"id": name, "standard_name": name, **props.get(name, {})}
+        query = item.get("description") or item.get("documentation") or name
+        item["sibling_names"] = _name_siblings(name, query)
+        items.append(item)
 
     async def run():
-        return await decide_batch(
-            states,
-            questions,
-            model=judge_model,
-            service=SERVICE,
+        return await review_names(
+            items,
+            checks=name_checks,
             concurrency=CONCURRENCY,
+            budget_seconds=JUDGE_BUDGET_S,
         )
 
-    results, cost = asyncio.run(run())
+    review = asyncio.run(run())
     answers: dict[str, dict] = {}
-    for name, result in zip(names, results, strict=True):
-        answers[name] = result[0] if result is not None else {}
-    return answers, cost
+    for record in review.items:
+        answers[record["name_id"]] = {
+            f"check:{check_id}": entry["answer"]
+            for check_id, entry in record["checks"].items()
+            if entry.get("answer") is not None
+        }
+    return answers, review.cost
 
 
 # --------------------------------------------------------------------------
@@ -430,6 +437,7 @@ def _docs_items(checks):
         new_calls = 0
 
     out = []
+    excluded: list[str] = []
     for entry in entries:
         name = entry["name"]
         answers = entry["answers"] or {}
@@ -438,6 +446,8 @@ def _docs_items(checks):
         for check in docs_checks:
             if check.question is not None:
                 if check.id == "claim_contradicts_source":
+                    if check.id not in excluded:
+                        excluded.append(check.id)
                     continue
                 probability = _defect_probability(
                     check, answers.get(check_question_name(check.id))
@@ -468,6 +478,7 @@ def _docs_items(checks):
         "new_calls": new_calls,
         "failed_calls": len(failed),
         "unscored": unscored,
+        "excluded_checks": sorted(set(excluded)),
         "spend_usd": spend,
     }
     return out, meta
@@ -517,22 +528,31 @@ def _random_band(labels, fractions) -> dict:
     return {f"{f:.2f}": _band(draws[f]) for f in fractions}
 
 
-def _shuffled_draws(risk, labels, fraction):
-    draws = []
-    order = _order_by(risk, reverse=True)
-    for draw in range(N_SHUFFLES):
-        rng = random.Random(SHUFFLE_SEED + draw)
-        perm = labels[:]
-        rng.shuffle(perm)
-        draws.append(_recall_at(order, perm, fraction))
-    return draws
+def _defects_first(labels) -> list[int]:
+    """The oracle order: every defect ahead of every non-defect."""
+    return sorted(range(len(labels)), key=lambda i: (labels[i] != 0, i))
 
 
-def _control_permutation(labels: list[int]) -> list[int]:
-    """The control's own shuffled labelling, seeded outside the band draws."""
-    perm = labels[:]
-    random.Random(CONTROL_SEED).shuffle(perm)
-    return perm
+def _defects_last(labels) -> list[int]:
+    """The worst order: every defect behind every non-defect."""
+    return sorted(range(len(labels)), key=lambda i: (labels[i] == 0, i))
+
+
+def _analytic_recall(labels, fraction: float, *, defects_first: bool) -> float:
+    """Recall a perfect (or perfectly bad) order must reach at fraction ``f``.
+
+    Reading the first ``count`` of ``N`` items reaches ``min(count, D)`` defects
+    when every defect leads the order, and ``max(0, count - (N - D))`` when every
+    defect trails it. Dividing by ``D`` gives the recall at that point.
+    """
+    n = len(labels)
+    d = sum(1 for label in labels if label == 0)
+    if d == 0:
+        return float("nan")
+    count = max(1, int(round(n * fraction)))
+    if defects_first:
+        return min(count, d) / d
+    return max(0, count - (n - d)) / d
 
 
 def _copy_group_bootstrap(labels, values, groups, fraction) -> dict:
@@ -759,6 +779,24 @@ def _figure(report: dict) -> None:
     plt.close(fig)
 
 
+def _jsonable(value):
+    """Replace non-finite floats with null so the stored file is strict JSON.
+
+    An order that no row can supply — the incumbent score on a golden whose rows
+    carry none — has an undefined recall, and `json.dumps` would otherwise write
+    the bare token `NaN`, which no strict JSON reader accepts.
+    """
+    import math
+
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {k: _jsonable(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(v) for v in value]
+    return value
+
+
 def _fmt(value) -> str:
     import math
 
@@ -807,6 +845,15 @@ def _fragment(report: dict) -> None:
                 f"<tr><td>{title}</td><td>{split}</td><td>{block['n']}</td>"
                 f'<td>random 95% band</td><td colspan="3">{band}</td></tr>'
             )
+            interval = " / ".join(
+                f"{_fmt(block['composite_interval'][f'{f:.2f}']['lower'])}–"
+                f"{_fmt(block['composite_interval'][f'{f:.2f}']['upper'])}"
+                for f in FRACTIONS
+            )
+            rows.append(
+                f"<tr><td>{title}</td><td>{split}</td><td>{block['n']}</td>"
+                f'<td>risk composite 95% interval</td><td colspan="3">{interval}</td></tr>'
+            )
             if block["incumbent_missing"]:
                 rows.append(
                     f"<tr><td>{title}</td><td>{split}</td><td>{block['n']}</td>"
@@ -821,8 +868,8 @@ def _fragment(report: dict) -> None:
 <h2 id="ssog-risk-order-title">Recall of known defects in a Jev risk order</h2>
 <p id="ssog-risk-order-method">For each golden item the named checks of its axis are read from the
 review taxonomy. A check's failure probability is its defect probability: a Noul's true-case
-probability, one minus a Choice's acceptable-form probability, one minus a dimension rubric's
-acceptable level, or one when an audit finding class is present. The item's risk is the maximum
+probability, one minus a Choice's acceptable-form probability, or one when an audit finding
+class is present. The item's risk is the maximum
 over its checks, ties broken by the mean; the mean is carried as a sensitivity order. The
 incumbent order reads each item's stored review score lowest-first from the graph
 (<code>reviewer_score</code> for names, <code>reviewer_score_docs</code> for documentation).</p>
@@ -833,55 +880,78 @@ were excluded: {", ".join(nm["excluded_audit_checks"]) or "none"}. Of {nm["rows"
 so {nm["unjudged"]} rows carry no Jev answer (each then scores only on its audit checks).
 Documentation axis: {dm["names"]} names, {dm["reused"]} reused from the frozen documentation
 score arm, {dm["new_calls"]} judged here, {dm["failed_calls"]} calls failed,
-{len(dm["unscored"])} names had no documentation and are unscored. Spend:
+{len(dm["unscored"])} names had no documentation and are unscored. The documentation composite
+omits the checks whose answer is a flag rather than a scored probability, so they contribute no
+defect probability: {", ".join(dm.get("excluded_checks") or []) or "none"}. Spend:
 USD {spend["name_gap_usd"]:.6f} for the name gap and USD {spend["new_usd"]:.6f} for documentation,
 {spend["total_new_usd"]:.6f} in total, of a USD {spend["ceiling_usd"]:.2f} ceiling.</p>
 <figure id="ssog-risk-order-figure"><img src="/imas-codex/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg" alt="Recall of known defects against the fraction of items read for the risk composite, the mean sensitivity order and the random band, on each golden's calibration split."><figcaption>Recall of known defects against the fraction of items read, calibration split. Each order is one line; the dotted grey pair bounds the random order's 95% interval over {N_SHUFFLES} seeded shuffles.</figcaption></figure>
 <table id="ssog-risk-order-table"><thead><tr><th>Golden</th><th>Split</th><th>Items</th><th>Order</th><th>Recall@10%</th><th>Recall@25%</th><th>Recall@50%</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
-<p id="ssog-risk-order-interval">Copy-group bootstrap 95% interval for the composite order's
-recall, per golden and split, is recorded in the results JSON under
-<code>composite_interval</code>.</p>
+<p id="ssog-risk-order-interval">The <code>risk composite 95% interval</code> rows are copy-group
+bootstrap intervals for the composite order's recall, resampled by copy group so that near-duplicate
+spellings do not count as independent evidence; the same numbers are stored in the results JSON
+under <code>composite_interval</code>.</p>
 </section>"""
     )
 
 
-def shuffle() -> int:
-    report = json.loads(RESULTS.read_text())
+def _label_reading_controls(labels) -> dict:
+    """Recall is read through two orders whose recall is known in closed form.
+
+    An order that puts every defect first must reach the analytic maximum at
+    every fraction, and one that puts every defect last must reach the analytic
+    minimum. Both are computed from the same labels the scorer reads, so a
+    recall computation that lost or mis-indexed the labels moves one of them off
+    its analytic value and the control reddens.
+    """
+    out = {}
+    for name, order, first in (
+        ("oracle_defects_first", _defects_first(labels), True),
+        ("reverse_defects_last", _defects_last(labels), False),
+    ):
+        cells = {}
+        for fraction in FRACTIONS:
+            expected = _analytic_recall(labels, fraction, defects_first=first)
+            actual = _recall_at(order, labels, fraction)
+            cells[f"{fraction:.2f}"] = {
+                "expected": expected,
+                "actual": actual,
+                "ok": bool(abs(actual - expected) < 1e-12),
+            }
+        out[name] = cells
+    return out
+
+
+def controls(path: Path | None = None) -> int:
+    report = json.loads((path or RESULTS).read_text())
     out = {}
     ok = True
-    for split in ("calibration", "validation"):
-        items = [i for i in report["items"]["name"] if i["split"] == split]
-        labels = [i["label"] for i in items]
-        risk = [i["risk"] for i in items]
-        order = _order_by(risk, reverse=True)
-        shuffled = _control_permutation(labels)
-        recall = _recall_at(order, shuffled, 0.25)
-        draws = _shuffled_draws(risk, labels, 0.25)
-        band = _band(draws)
-        inside = bool(band["p2_5"] <= recall <= band["p97_5"])
-        # The control only means something when its own shuffled labelling is
-        # not one of the labellings the band was built from.
-        independent = recall != draws[0]
-        ok = ok and inside and independent
-        out[split] = {
-            "recall_25": recall,
-            "band": band,
-            "inside": inside,
-            "independent_of_band_sample": independent,
-        }
+    for key in ("name", "docs"):
+        for split in ("calibration", "validation"):
+            items = [i for i in report["items"][key] if i["split"] == split]
+            labels = [i["label"] for i in items]
+            cells = _label_reading_controls(labels)
+            passed = all(c["ok"] for arm in cells.values() for c in arm.values())
+            ok = ok and passed
+            out[f"{key}:{split}"] = {
+                "n": len(items),
+                "n_defects": sum(1 for label in labels if label == 0),
+                "controls": cells,
+                "ok": passed,
+            }
     print(json.dumps(out, indent=1))
     return 0 if ok else 1
 
 
 def verify(path: Path | None = None) -> int:
-    """Check the two claims the repair rests on, against the stored results."""
+    """Check the coverage claim and both label-reading controls."""
     checks = _load_checks()
     question_ids = {c.id for c in checks if c.axis == "name" and c.question is not None}
     report = json.loads((path or RESULTS).read_text())
     rows = report["items"]["name"]
     # A row is judged when at least one question check decided it. A row whose
     # only decided checks are audit bits carries no Jev answer, which is the
-    # coverage gap the field alone would hide in a pre-repair results file.
+    # coverage gap the field alone would hide.
     unjudged = [
         r
         for r in rows
@@ -891,42 +961,39 @@ def verify(path: Path | None = None) -> int:
     if unjudged:
         print("unjudged sample:", [r["unit"] for r in unjudged[:5]], flush=True)
 
-    labels = [r["label"] for r in rows]
-    risk = [r["risk"] for r in rows]
-    order = _order_by(risk, reverse=True)
-    shuffled = _control_permutation(labels)
-    draws = _shuffled_draws(risk, labels, 0.25)
-    tautological = _recall_at(order, shuffled, 0.25) == draws[0]
-    print(f"control recall equals band draw 0: {tautological}", flush=True)
+    failed = []
+    for key in ("name", "docs"):
+        for split in ("calibration", "validation"):
+            labels = [i["label"] for i in report["items"][key] if i["split"] == split]
+            for arm, cells in _label_reading_controls(labels).items():
+                for fraction, cell in cells.items():
+                    if not cell["ok"]:
+                        failed.append(f"{key}:{split}:{arm}@{fraction}")
+    print(f"label-reading controls failed: {failed}", flush=True)
 
-    ok = not unjudged and not tautological
+    ok = not unjudged and not failed
     print("VERIFY_PASS" if ok else "VERIFY_FAIL", flush=True)
     return 0 if ok else 1
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("measure", "shuffle", "render", "verify"))
+    parser.add_argument("mode", choices=("measure", "controls", "render", "verify"))
     parser.add_argument("--results", type=Path, default=None)
     args = parser.parse_args()
     if args.mode == "verify":
         return verify(args.results)
+    if args.mode == "controls":
+        return controls(args.results)
     if args.mode == "render":
         report = json.loads(RESULTS.read_text())
-        for key in ("name", "docs"):
-            for split in ("calibration", "validation"):
-                block = report["goldens"][key][split]
-                if block["incumbent_missing"] == block["n"]:
-                    block["recall"]["incumbent"] = {
-                        f"{f:.2f}": float("nan") for f in FRACTIONS
-                    }
         _figure(report)
         _fragment(report)
         print("rendered", flush=True)
         return 0
     if args.mode == "measure":
         report = measure()
-        RESULTS.write_text(json.dumps(report, separators=(",", ":")))
+        RESULTS.write_text(json.dumps(_jsonable(report), separators=(",", ":")))
         _figure(report)
         _fragment(report)
         print(
@@ -935,7 +1002,7 @@ def main() -> int:
             )
         )
         return 0
-    return shuffle()
+    return controls(args.results)
 
 
 if __name__ == "__main__":
