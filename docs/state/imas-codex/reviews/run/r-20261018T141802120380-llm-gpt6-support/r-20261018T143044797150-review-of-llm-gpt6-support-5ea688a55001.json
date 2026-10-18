@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141802120380-llm-gpt6-support/head-gate.log",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141802120380-llm-gpt6-support/baseline-gate.log",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/discovery/base/llm.py:416",
+    "imas_codex/discovery/base/llm.py:2454",
+    "imas_codex/standard_names/budget.py:273",
+    "imas_codex/cli/sn.py:3249",
+    "imas_codex/cli/sn.py:3632"
+  ],
+  "completed_at": "2026-10-18T14:38:49Z",
+  "dispatched_at": "2026-10-18T14:31:27Z",
+  "findings": [
+    {
+      "file": "tests/core/test_gpt6_model_support.py",
+      "line": "27",
+      "severity": "blocking",
+      "text": "blocking: the price-removal control stops with KeyError 'prompt' at this assertion, so its red result does not demonstrate that the call layer refuses an unpriced model as the source brief requires."
+    },
+    {
+      "file": "tests/core/test_gpt6_model_support.py",
+      "line": "36",
+      "severity": "follow-on",
+      "text": "follow-on: the long-context cache assertions only require values above base rates, so wrong elevated cache-read or cache-write prices would still pass instead of protecting the endpoint's exact prices."
+    },
+    {
+      "file": "tests/core/test_gpt6_model_support.py",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "follow-on: request['model'] is compared with the same model parameter passed into _build_kwargs, so this echo assertion remains true if the test input itself is changed to an older model and cannot independently prove GPT-6 family routing."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "commit a6f26bbb322d0269c4f8cb7fe77f408aa9d96d74 changes pricing, family handling, defaults, and tests; commit 5ea688a55001f8e8578c5bfc6f6ad13abb372d1c adds only docs/evidence/fragments/llm-seats/llm-gpt6-support.html.",
+    "done_when": "the source brief requires the evidence fragment to record prices, family handling, two costs, red control, and zero added failures; docs/evidence/fragments/llm-seats/llm-gpt6-support.html:1-33 records those claims, though negative-control.log never reaches the pricing refusal.",
+    "goal": "the source brief requires priced structured GPT-6 calls without seat rotation; pyproject.toml:918-939 and imas_codex/discovery/base/llm.py:2153-2157 add rates and temperature handling, while probe.log records both calls.",
+    "manifest": "the source manifest records commits a6f26bbb322d0269c4f8cb7fe77f408aa9d96d74 and 5ea688a55001f8e8578c5bfc6f6ad13abb372d1c, two probe costs, and baseline-gate.log/head-gate.log results of 213/218 passed.",
+    "write_paths": "the source manifest declares six paths, and git diff 078b20ea335c73a9e3649cf8f728eea908666b06..5ea688a55001f8e8578c5bfc6f6ad13abb372d1c changes only five of them."
+  },
+  "justifications": {
+    "durability": "tests/core/test_gpt6_model_support.py:27-43 would fail on missing base prices or wrong long completion, while lines 36-37 cannot detect incorrect elevated long-context cache rates and line 27 prevents the red control from reaching the refusal guard.",
+    "evidence": "head-gate.log records 218 passed and probe.log records two costs, but negative-control.log fails at tests/core/test_gpt6_model_support.py:27 before the call-layer refusal is exercised.",
+    "fit": "imas_codex/settings.py:87-133 extends its existing pricing parser and imas_codex/discovery/base/llm.py:2153-2157 extends its existing family rule using the surrounding style.",
+    "goal_fidelity": "pyproject.toml:918-939 supplies both model prices and imas_codex/discovery/base/llm.py:2153-2157 extends the GPT temperature rule, with two successful production calls recorded in probe.log.",
+    "reuse": "capability searches for pricing, structured requests, and benchmark defaults found the existing owners at imas_codex/settings.py:87, imas_codex/discovery/base/llm.py:2008, and imas_codex/settings.py:1949, which the change extends.",
+    "scope_discipline": "the five changed paths in git diff 078b20ea335c73a9e3649cf8f728eea908666b06..5ea688a55001f8e8578c5bfc6f6ad13abb372d1c all occur in the source manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief requires priced structured GPT-6 calls without seat rotation; pyproject.toml:918-939 and imas_codex/discovery/base/llm.py:2153-2157 add rates and temperature handling, while probe.log records both calls.\nVERDICT done_when: the source brief requires the evidence fragment to record prices, family handling, two costs, red control, and zero added failures; docs/evidence/fragments/llm-seats/llm-gpt6-support.html:1-33 records those claims, though negative-control.log never reaches the pricing refusal.\nVERDICT write_paths: the source manifest declares six paths, and git diff 078b20ea335c73a9e3649cf8f728eea908666b06..5ea688a55001f8e8578c5bfc6f6ad13abb372d1c changes only five of them.\nVERDICT manifest: the source manifest records commits a6f26bbb322d0269c4f8cb7fe77f408aa9d96d74 and 5ea688a55001f8e8578c5bfc6f6ad13abb372d1c, two probe costs, and baseline-gate.log/head-gate.log results of 213/218 passed.\nVERDICT diff: commit a6f26bbb322d0269c4f8cb7fe77f408aa9d96d74 changes pricing, family handling, defaults, and tests; commit 5ea688a55001f8e8578c5bfc6f6ad13abb372d1c adds only docs/evidence/fragments/llm-seats/llm-gpt6-support.html.\nCALL_SITES: imas_codex/discovery/base/llm.py:416, imas_codex/discovery/base/llm.py:2454, imas_codex/standard_names/budget.py:273, imas_codex/cli/sn.py:3249, imas_codex/cli/sn.py:3632\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: pyproject.toml:918-939 supplies both model prices and imas_codex/discovery/base/llm.py:2153-2157 extends the GPT temperature rule, with two successful production calls recorded in probe.log.\nSCORE evidence: 14\nJUSTIFICATION evidence: head-gate.log records 218 passed and probe.log records two costs, but negative-control.log fails at tests/core/test_gpt6_model_support.py:27 before the call-layer refusal is exercised.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the five changed paths in git diff 078b20ea335c73a9e3649cf8f728eea908666b06..5ea688a55001f8e8578c5bfc6f6ad13abb372d1c all occur in the source manifest's declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: tests/core/test_gpt6_model_support.py:27-43 would fail on missing base prices or wrong long completion, while lines 36-37 cannot detect incorrect elevated long-context cache rates and line 27 prevents the red control from reaching the refusal guard.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/settings.py:87-133 extends its existing pricing parser and imas_codex/discovery/base/llm.py:2153-2157 extends its existing family rule using the surrounding style.\nSCORE reuse: 20\nJUSTIFICATION reuse: capability searches for pricing, structured requests, and benchmark defaults found the existing owners at imas_codex/settings.py:87, imas_codex/discovery/base/llm.py:2008, and imas_codex/settings.py:1949, which the change extends.\nFINDING tests/core/test_gpt6_model_support.py:27 blocking: the price-removal control stops with KeyError 'prompt' at this assertion, so its red result does not demonstrate that the call layer refuses an unpriced model as the source brief requires.\nFINDING tests/core/test_gpt6_model_support.py:36 follow-on: the long-context cache assertions only require values above base rates, so wrong elevated cache-read or cache-write prices would still pass instead of protecting the endpoint's exact prices.\nFINDING tests/core/test_gpt6_model_support.py:65 follow-on: request['model'] is compared with the same model parameter passed into _build_kwargs, so this echo assertion remains true if the test input itself is changed to an older model and cannot independently prove GPT-6 family routing.\n",
+  "review_run_id": "r-20261018T143044797150-review-of-llm-gpt6-support-5ea688a55001",
+  "reviewed_base_sha": "078b20ea335c73a9e3649cf8f728eea908666b06",
+  "reviewed_commits": [
+    "a6f26bbb322d0269c4f8cb7fe77f408aa9d96d74",
+    "5ea688a55001f8e8578c5bfc6f6ad13abb372d1c"
+  ],
+  "reviewed_head_sha": "5ea688a55001f8e8578c5bfc6f6ad13abb372d1c",
+  "reviewed_run_id": "r-20261018T141802120380-llm-gpt6-support",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T14:36:37.188208+00:00",
+  "total": 103
+}
