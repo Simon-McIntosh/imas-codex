@@ -293,6 +293,72 @@
         "gold_set": "domain_gold_set.json",
         "n_paths": 24
       }
+    },
+    "breaker-names": {
+      "role": "breaker-names",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 8,
+          "cost": 0.152496,
+          "metrics": {
+            "independence_rho": 0.2637,
+            "rho_qwen": 0.0368,
+            "rho_minimax": 0.4906,
+            "verdict_flip_quality": 0.6667,
+            "n_flips": 3.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 8,
+          "cost": 0.0081288,
+          "metrics": {
+            "independence_rho": 0.0922,
+            "rho_qwen": -0.3314,
+            "rho_minimax": 0.5157,
+            "verdict_flip_quality": 0.5,
+            "n_flips": 4.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/anthropic/claude-sonnet-5",
+          "n": 8,
+          "cost": 0.302091,
+          "metrics": {
+            "independence_rho": 0.4608,
+            "rho_qwen": 0.4431,
+            "rho_minimax": 0.4786,
+            "verdict_flip_quality": 1.0,
+            "n_flips": 1.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/anthropic/claude-sonnet-5",
+      "judge_model": null,
+      "sample_ids": [
+        "neutral_mass",
+        "radial_scrape_off_layer_heat_decay_length_at_midplane",
+        "ion_average_decay_length_over_scrape_off_layer",
+        "spun_period_of_fiber_optic_current_sensor",
+        "radial_derivative_of_flux_surface_coefficient",
+        "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density",
+        "plasma_pulse_confinement_time",
+        "length_of_magnetic_field_probe"
+      ],
+      "seed": 0,
+      "axis": "names",
+      "timestamp": "2026-10-18T19:00:54.323020+00:00",
+      "provenance": {
+        "blind_pair": [
+          "openrouter/qwen/qwen3.7-max",
+          "openrouter/minimax/minimax-m3"
+        ],
+        "n_items": 8
+      }
     }
   },
   "item_outcomes": {
@@ -703,6 +769,82 @@
           "summary/global_quantities/energy_ion_total_thermal": "core_plasma_physics"
         }
       }
+    },
+    "breaker-names": {
+      "fixture": [
+        {
+          "id": "neutral_mass",
+          "pair_mean": 0.60625,
+          "final_accepted": false
+        },
+        {
+          "id": "radial_scrape_off_layer_heat_decay_length_at_midplane",
+          "pair_mean": 0.8125,
+          "final_accepted": false
+        },
+        {
+          "id": "ion_average_decay_length_over_scrape_off_layer",
+          "pair_mean": 0.65625,
+          "final_accepted": false
+        },
+        {
+          "id": "spun_period_of_fiber_optic_current_sensor",
+          "pair_mean": 0.8187500000000001,
+          "final_accepted": false
+        },
+        {
+          "id": "radial_derivative_of_flux_surface_coefficient",
+          "pair_mean": 0.7,
+          "final_accepted": false
+        },
+        {
+          "id": "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density",
+          "pair_mean": 0.8375,
+          "final_accepted": false
+        },
+        {
+          "id": "plasma_pulse_confinement_time",
+          "pair_mean": 0.6875,
+          "final_accepted": false
+        },
+        {
+          "id": "length_of_magnetic_field_probe",
+          "pair_mean": 0.8374999999999999,
+          "final_accepted": false
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-6.1-sol": {
+          "neutral_mass": 1.0,
+          "radial_scrape_off_layer_heat_decay_length_at_midplane": 0.6875,
+          "ion_average_decay_length_over_scrape_off_layer": 0.6,
+          "spun_period_of_fiber_optic_current_sensor": 0.725,
+          "radial_derivative_of_flux_surface_coefficient": 0.375,
+          "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density": 1.0,
+          "plasma_pulse_confinement_time": 0.725,
+          "length_of_magnetic_field_probe": 1.0
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "neutral_mass": 0.875,
+          "radial_scrape_off_layer_heat_decay_length_at_midplane": 0.3125,
+          "ion_average_decay_length_over_scrape_off_layer": 0.625,
+          "spun_period_of_fiber_optic_current_sensor": 0.625,
+          "radial_derivative_of_flux_surface_coefficient": 0.4125,
+          "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density": 1.0,
+          "plasma_pulse_confinement_time": 1.0,
+          "length_of_magnetic_field_probe": 1.0
+        },
+        "openrouter/anthropic/claude-sonnet-5": {
+          "neutral_mass": 0.575,
+          "radial_scrape_off_layer_heat_decay_length_at_midplane": 0.5625,
+          "ion_average_decay_length_over_scrape_off_layer": 0.6,
+          "spun_period_of_fiber_optic_current_sensor": 0.8375,
+          "radial_derivative_of_flux_surface_coefficient": 0.3375,
+          "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density": 0.8375,
+          "plasma_pulse_confinement_time": 0.4875,
+          "length_of_magnetic_field_probe": 0.9375
+        }
+      }
     }
   },
   "analysis": {
@@ -905,9 +1047,59 @@
         0.5416666666666667
       ],
       "shuffled_control_contains_zero": true
+    },
+    "breaker-names": {
+      "sample_size": 8,
+      "primary_metric": "verdict_flip_quality",
+      "models": {
+        "openrouter/openai/gpt-6.1-sol": {
+          "primary": 0.6667,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.152496,
+          "candidate_latency_per_call_seconds": 213.83434783481061,
+          "effective_cost_per_item_usd": 0.019062
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "primary": 0.5,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.0081288,
+          "candidate_latency_per_call_seconds": 127.14983115065843,
+          "effective_cost_per_item_usd": 0.0010161
+        },
+        "openrouter/anthropic/claude-sonnet-5": {
+          "primary": 1.0,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.302091,
+          "candidate_latency_per_call_seconds": 234.92280659731477,
+          "effective_cost_per_item_usd": 0.037761375
+        }
+      },
+      "luna_minus_sol": -0.16669999999999996,
+      "paired_interval_95": [
+        -0.6667000000000001,
+        0.0
+      ],
+      "capable_under_rule": false,
+      "shuffled_control_interval_95": [
+        -0.8,
+        0.75
+      ],
+      "shuffled_control_contains_zero": true
     }
   },
-  "total_spend_usd": 8.002518,
+  "total_spend_usd": 8.465234,
   "superseded_runs": [
     {
       "role": "refine",

@@ -415,8 +415,8 @@ def render_figure() -> None:
     axis.text(-0.05, 4.35, "−0.05 limit", color="#666666", ha="center", fontsize=14)
     axis.set_yticks(list(reversed(range(len(ordered)))), labels)
     axis.set_ylim(-0.5, len(ordered) - 0.35)
-    axis.set_xlim(-0.65, 0.85)
-    axis.set_xticks([-0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8])
+    axis.set_xlim(-0.8, 0.85)
+    axis.set_xticks([-0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8])
     axis.set_xlabel("Luna − Sol primary metric")
     fig.tight_layout()
     fig.canvas.draw()
@@ -520,7 +520,7 @@ def render_fragment() -> None:
             )
     samples = results["pre_registration"]["samples"]
     sample_text = "; ".join(
-        f"{labels[role]} {results.get('execution_controls', {}).get('sample_overrides', {}).get(role, spec['n'])}: {spec['reason']}"
+        f"{labels[role]} {results.get('execution_controls', {}).get('sample_overrides', {}).get(role, spec['n'])}: {spec['reason'].rstrip('.')}"
         for role, spec in samples.items()
     )
     control_failures = [
@@ -535,11 +535,16 @@ def render_fragment() -> None:
         if control_failures
         else "Every shuffled-output interval contained zero."
     )
+    figure_scope = (
+        "All five roles have measured paired intervals."
+        if len(analysis) == len(labels)
+        else "An unmeasured role is shown as pending."
+    )
     body = f"""<section id="gpt6-seat-benchmark">
   <h3>GPT seat comparison: Luna against Sol and the live incumbent</h3>
   <p>The decision rule was registered at <code>{results["pre_registration"]["timestamp_utc"]}</code> before paid calls: Luna is capable when the 95% lower bound of its paired primary-metric difference from Sol is at least −0.05. Matched items were resampled 10,000 times with seed 1729. No production seat or graph state changed.</p>
-  <p><strong>Sample sizes.</strong> {html.escape(sample_text)} The names-breaker sample was reduced from its registered 12 after the incumbent reviewer timed out on the first batch; the retry uses eight common seeded cases. The classifier fixture's first 24 paths cover two domains.</p>
-  <figure><img src="/imas-codex/figures/llm-seats/llm-gpt6-seat-bench/paired-differences.svg" alt="Paired Luna minus Sol primary metric for five seats, with confidence intervals and the minus 0.05 decision limit"><figcaption>Points are paired primary-metric differences, bars are 95% bootstrap intervals, and the dotted line is the registered −0.05 limit. An unmeasured role is shown as pending.</figcaption></figure>
+  <p><strong>Sample sizes.</strong> {html.escape(sample_text)}. The names-breaker sample was reduced from its registered 12 after the incumbent reviewer timed out on the first batch; the retry uses eight common seeded cases. The classifier fixture's first 24 paths cover two domains.</p>
+  <figure><img src="/imas-codex/figures/llm-seats/llm-gpt6-seat-bench/paired-differences.svg" alt="Paired Luna minus Sol primary metric for five seats, with confidence intervals and the minus 0.05 decision limit"><figcaption>Points are paired primary-metric differences, bars are 95% bootstrap intervals, and the dotted line is the registered −0.05 limit. {figure_scope}</figcaption></figure>
   <table><thead><tr><th>Role</th><th>Model</th><th>Primary metric [95% interval]</th><th>Luna − Sol [95% interval], rule</th><th>Model cost/call</th><th>Latency/call</th><th>Effective cost/item</th><th>Recommendation</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
   <p>Model cost and latency are means of successful direct candidate calls. Effective cost per item includes the held-out <code>claude-opus-4.8</code> judge for refine and docs. The raw per-role reports, item outcomes, intervals and receipts are in <code>llm-gpt6-seat-bench-results.json</code>; call-level receipts are in the run record. <strong>Total measured spend: USD {results["total_spend_usd"]:.4f} of the USD 10 ceiling</strong>, including superseded instrument runs and the interrupted names-breaker call.</p>
   <p><strong>Control and limits.</strong> {html.escape(control_text)} Breaker quality conditions on verdict flips, which are sparse in the docs sample. The classifier's equal scores are supported by 24 returned predictions per model and 16 exact matches each; the sampled gold paths cover only two domains. These bounds describe the sampled fixtures, not all pipeline traffic.</p>
