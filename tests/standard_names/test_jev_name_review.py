@@ -48,7 +48,12 @@ def _choice(
         dimension=dimension,
         evidence_fields=fields,
         retrieval=False,
-        question=JevQuestion(kind=JevQuestionKind.CHOICE, text=text, options=options),
+        question=JevQuestion(
+            kind=JevQuestionKind.CHOICE,
+            text=text,
+            options=options,
+            conforming=[options[0]],
+        ),
     )
 
 
@@ -66,8 +71,7 @@ def _audit(check_id: str, dimension: str, fields: list[str], cls: str) -> Review
 def _small_checks() -> list[ReviewCheck]:
     """A census spanning the taxonomy's shapes: Noul, Choice, and audit-decided.
 
-    The Choice lists the acceptable form first, which is the convention the
-    taxonomy authors and the rule the code derives its defect from.
+    The Choice declares its conforming form in the taxonomy.
     """
     return [
         _noul(
@@ -270,30 +274,35 @@ def test_choice_question_options_propagate_from_the_taxonomy():
     assert set(choice["criteria"]) == {"the bound source object", "a different object"}
 
 
-def test_choice_without_an_identifiable_acceptable_form_is_refused():
-    # A Choice authors its acceptable form first, so a blank first option names
-    # no acceptable form and the check cannot be split into acceptable against
-    # defect. Table construction refuses it rather than reading a blank
-    # acceptable form and mis-deciding the check.
-    check = _choice(
-        "unsplittable",
-        "semantic",
-        ["source_paths"],
-        "Which form is it?",
-        ["", "a defective form"],
-    )
-    with pytest.raises(ValueError, match="acceptable form"):
-        jev_review.name_question_table([check])
+def test_choice_without_an_identifiable_conforming_form_is_refused():
+    with pytest.raises(ValueError, match="conforming"):
+        _choice(
+            "unsplittable",
+            "semantic",
+            ["source_paths"],
+            "Which form is it?",
+            ["", "a defective form"],
+        )
 
 
-def test_choice_acceptable_form_reads_the_authored_first_option():
+def test_choice_failure_reads_conforming_form_independent_of_option_order():
     question = JevQuestion(
-        kind=JevQuestionKind.CHOICE, text="q?", options=["ok", "defect"]
+        kind=JevQuestionKind.CHOICE,
+        text="q?",
+        options=["defect", "ok"],
+        conforming=["ok"],
     )
-    assert jev_review.choice_acceptable_form(question) == "ok"
-    question.options = ["only one"]
-    with pytest.raises(ValueError, match="acceptable form"):
-        jev_review.choice_acceptable_form(question)
+    check = ReviewCheck(
+        id="choice_form",
+        axis="name",
+        dimension="semantic",
+        evidence_fields=["source_paths"],
+        retrieval=False,
+        question=question,
+    )
+    assert jev_review.check_failure_probability(
+        check, {"probabilities": {"defect": 0.2, "ok": 0.8}}
+    ) == pytest.approx(0.2)
 
 
 # ---------------------------------------------------------------------------

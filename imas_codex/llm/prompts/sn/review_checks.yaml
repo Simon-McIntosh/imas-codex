@@ -178,6 +178,8 @@ checks:
     - the bound source object
     - a different object
     - one of several bound objects
+    conforming:
+    - the bound source object
 - id: collapsed_two_quantities
   axis: name
   dimension: semantic
@@ -193,6 +195,8 @@ checks:
     options:
     - one quantity
     - two or more distinct quantities
+    conforming:
+    - one quantity
 - id: over_specialised_parent
   axis: name
   dimension: semantic
@@ -439,6 +443,8 @@ checks:
     - true of all
     - narrower than the bindings
     - false of at least one binding
+    conforming:
+    - true of all
 - id: units_in_prose
   axis: docs
   dimension: documentation_quality
@@ -610,6 +616,8 @@ checks:
     - supports
     - contradicts
     - says nothing
+    conforming:
+    - supports
 - id: false_equivalence_with_related
   axis: docs
   dimension: physics_accuracy

@@ -561,6 +561,7 @@ def build_refine_prompt_context(
     compose_context: dict,
     rules: list,
     scored_examples: list | None = None,
+    instruction_source: str = "comments",
 ) -> dict:
     """Build the refine prompt context for one case, mirroring production.
 
@@ -579,6 +580,10 @@ def build_refine_prompt_context(
     it to a semantic guess (e.g. ``standard_name``), failing RefinedName
     validation on every case, so the examples must be fed like production.
     """
+    if instruction_source not in {"comments", "checks"}:
+        raise ValueError(f"unknown refine instruction source: {instruction_source}")
+    if instruction_source == "checks" and not case.get("failed_checks"):
+        raise ValueError("a checks case requires failed checks")
     chain_history = [
         {
             "name": case["prior_name"],
@@ -586,7 +591,7 @@ def build_refine_prompt_context(
             "reviewer_comments_per_dim": case["critique"],
         }
     ]
-    return {
+    context = {
         **compose_context,
         "item": {
             "path": case["path"],
@@ -603,6 +608,9 @@ def build_refine_prompt_context(
         "composition_rules": rules,
         "compose_scored_examples": scored_examples or [],
     }
+    if instruction_source == "checks":
+        context["failed_checks"] = case["failed_checks"]
+    return context
 
 
 async def run_refine_bench(

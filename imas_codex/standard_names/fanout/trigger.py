@@ -28,13 +28,34 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping, Sequence
 from typing import Any
+
+from imas_codex.standard_names.review.checks import ReviewCheck
 
 __all__ = [
     "assign_arm",
     "extract_reviewer_excerpt",
     "should_trigger_fanout",
+    "should_trigger_fanout_from_checks",
 ]
+
+
+def should_trigger_fanout_from_checks(
+    checks: Sequence[ReviewCheck],
+    check_results: Mapping[str, Mapping[str, Any]],
+    *,
+    threshold: float,
+) -> bool:
+    """Fire when a retrieval check's measured failure probability reaches the threshold."""
+    probabilities = [
+        float(check_results[check.id].get("failure_probability", 0.0))
+        for check in checks
+        if check.retrieval
+        and check.id in check_results
+        and check_results[check.id].get("answered", False)
+    ]
+    return bool(probabilities) and max(probabilities) >= threshold
 
 
 def _parse_comments(raw: object) -> dict[str, str]:
@@ -110,6 +131,10 @@ def should_trigger_fanout(
     keywords: tuple[str, ...] | list[str],
     dims: tuple[str, ...] | list[str],
     char_cap: int,
+    trigger_source: str = "comments",
+    checks: Sequence[ReviewCheck] = (),
+    check_results: Mapping[str, Mapping[str, Any]] | None = None,
+    check_threshold: float = 0.5,
 ) -> tuple[bool, str]:
     """Return ``(fire, excerpt)`` for the fan-out trigger predicate.
 
@@ -128,6 +153,15 @@ def should_trigger_fanout(
     When ``fire`` is ``False`` the excerpt is still returned so
     callers can log it — but they must not pass it to ``run_fanout``.
     """
+    if trigger_source == "checks":
+        return (
+            should_trigger_fanout_from_checks(
+                checks, check_results or {}, threshold=check_threshold
+            ),
+            "",
+        )
+    if trigger_source != "comments":
+        raise ValueError(f"unknown refine trigger source: {trigger_source}")
     if chain_length <= 0:
         return False, ""
     if not chain_history:
