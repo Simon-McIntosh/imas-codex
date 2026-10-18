@@ -48,9 +48,10 @@ KEY_PATH = RUN_DIR / "srtj-refine-ab-key.json"
 RECEIPTS = RUN_DIR / "srtj-refine-receipts.jsonl"
 
 SEED = 20261018
-COHORT_SIZE = 90
+SHEET_SEED = 20261019
+COHORT_SIZE = 120
 JUDGE_POOL = 160
-CEILING_USD = 12.0
+CEILING_USD = 33.0
 HEADROOM_USD = 1.2
 CONCURRENCY = 6
 ARMS = ("comments", "checks")
@@ -369,7 +370,9 @@ async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
 
     async def one(case: dict, arm: str) -> None:
         key = (case["sn_id"], arm)
-        if key in receipts:
+        done = receipts.get(key)
+        # A call that failed is retried once; only a produced output ends the work.
+        if done is not None and done.get("outcome") == "ok":
             return
         async with sem:
             if state["spent"] >= ceiling:
@@ -509,13 +512,14 @@ def build_sheet(cohort: list[dict], receipts: dict) -> tuple[list[dict], dict]:
                 "arms": {arm: [case["sn_id"]] for arm in ARMS},
             }
 
-    random.Random(SEED).shuffle(rows)
+    random.Random(SHEET_SEED).shuffle(rows)
     return rows, {
         "rows": key,
         "identical_output_pairs": identical_pairs,
         "cases_in_sheet": complete,
         "cases_incomplete": incomplete,
-        "seed": SEED,
+        "sheet_seed": SHEET_SEED,
+        "cohort_seed": SEED,
     }
 
 
