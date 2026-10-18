@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest's baseline_suite and after_suite are empty, so it names no base or after gate log to derive added failures from",
+  "assertion_audit": {
+    "limitation": "No added test injects these regressions, and the final artifact gate compared counts and a few html substrings rather than every published number; the classifier factual-claim check is a one-off inline command, not a committed test.",
+    "runtime_guards": {
+      "run.py:112-115": "An ambiguous prior-name match in the captured refine corpus would raise.",
+      "run.py:233-247": "Omitting captured refine or docs items, or all items for a breaker or classifier model, would raise against the independent benchmark report or fixture.",
+      "run.py:280-281": "A receipt sum at or above the preregistered USD 10 ceiling would raise.",
+      "run.py:290-291": "Removing any fixture ID from a model's captured outcomes would raise.",
+      "run.py:424-434": "Moving rendered text beyond the canvas would raise.",
+      "run.py:56-60": "Repeating a measured role or reaching its spend stop would raise before the role starts.",
+      "run.py:73-74": "A charge raising the ledger to the configured stop before another call would be refused."
+    },
+    "same_input_as_expected_assertions": [],
+    "tests_added": 0
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-18T18:07:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py",
+      "line": "268",
+      "severity": "follow-on",
+      "text": "_interval computes the interval by ad-hoc index truncation (ordered[int(0.025*(n-1))]) instead of np.percentile, and imas_codex/discovery/base/evaluation.py:145 owns bootstrap_interval for the same percentile construction, specialized to AUC pairing; a generic percentile-draws helper should be extracted and shared rather than duplicated."
+    },
+    {
+      "file": "manifest.md",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "the recorded gate command 'uv run --no-sync python -c final_artifact_checks' is a label, not the literal command that ran (the real check was an inline script visible only in stream.jsonl), so the gate cannot be re-run from the record alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the 16 commits from b7b0daaeba35b77ad23f23580bf21d9099497603 to 6571f7e3d034ab8cf886b0e1e688643c2e0341aa; the four added files carry a parameterised bench runner, and the final commit 6571f7e3d03 recomputes the classifier counts from the saved item outcomes instead of a hardcoded claim.",
+    "done_when": "source brief.md:42-52 requires a per-role table, rule verdicts, recommendations, spend, a paired-difference figure and raw JSON beside the fragment; docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench.html:6 carries the table with per-model cost and latency, line 7 the USD 8.4652 spend, docs/figures/llm-seats/llm-gpt6-seat-bench/paired-differences.svg the figure with the -0.05 line, and llm-gpt6-seat-bench-results.json embeds the raw per-role reports beside the fragment.",
+    "goal": "source brief.md:1-6 asks whether gpt-6-luna is capable for each GPT seat before any move; docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench.html:1-9 delivers the five-role Luna/Sol/incumbent comparison with a per-seat recommendation, and the diff touches only docs so no seat or graph state changed.",
+    "manifest": "source manifest.md:1-20 reports status complete, names 16 commits, five successful role attempts and final-gate.log with EXIT=0; its baseline_suite and after_suite are empty, so no base gate log exists to derive an added-failure count from.",
+    "write_paths": "source brief.md:54-59 grants the fragment, results JSON, run script and figure directory; git diff --name-status b7b0daaeba35b77ad23f23580bf21d9099497603..6571f7e3d034ab8cf886b0e1e688643c2e0341aa lists only those four paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py:455-470 now derives the classifier counts from the saved item outcomes rather than a literal, but the diff adds no test that fails if that derivation or the published numbers regress.",
+    "evidence": "final-gate.log records five roles, fifteen model rows and USD 8.465234 with EXIT=0, and classifier-repair-gate.log records a check that passes at docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench.html:6 while classifier-repair-negative-control.log fails it at the parent revision.",
+    "fit": "docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py:265 reuses imas_codex/standard_names/benchmark_roles.py:206 verdict_flip_quality and :387 applies the data-ink style, and no plan, stage or ticket label appears in the changed paths.",
+    "goal_fidelity": "docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench.html:6-9 answers the seat question for all five roles with a recommendation each, and the only changed paths are docs.",
+    "reuse": "the runner extends imas_codex/standard_names/benchmark_roles.py:206 and imas_codex/cli/sn.py sn_bench, but docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py:268 _interval re-implements a percentile bootstrap interval that imas_codex/discovery/base/evaluation.py:145 already owns for AUC pairing without extending it.",
+    "scope_discipline": "git diff --name-status b7b0daaeba35b77ad23f23580bf21d9099497603..6571f7e3d034ab8cf886b0e1e688643c2e0341aa lists only the four paths granted by source brief.md:54-59."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: source brief.md:1-6 asks whether gpt-6-luna is capable for each GPT seat before any move; docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench.html:1-9 delivers the five-role Luna/Sol/incumbent comparison with a per-seat recommendation, and the diff touches only docs so no seat or graph state changed.\nVERDICT done_when: source brief.md:42-52 requires a per-role table, rule verdicts, recommendations, spend, a paired-difference figure and raw JSON beside the fragment; docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench.html:6 carries the table with per-model cost and latency, line 7 the USD 8.4652 spend, docs/figures/llm-seats/llm-gpt6-seat-bench/paired-differences.svg the figure with the -0.05 line, and llm-gpt6-seat-bench-results.json embeds the raw per-role reports beside the fragment.\nVERDICT write_paths: source brief.md:54-59 grants the fragment, results JSON, run script and figure directory; git diff --name-status b7b0daaeba35b77ad23f23580bf21d9099497603..6571f7e3d034ab8cf886b0e1e688643c2e0341aa lists only those four paths.\nVERDICT manifest: source manifest.md:1-20 reports status complete, names 16 commits, five successful role attempts and final-gate.log with EXIT=0; its baseline_suite and after_suite are empty, so no base gate log exists to derive an added-failure count from.\nVERDICT diff: read the 16 commits from b7b0daaeba35b77ad23f23580bf21d9099497603 to 6571f7e3d034ab8cf886b0e1e688643c2e0341aa; the four added files carry a parameterised bench runner, and the final commit 6571f7e3d03 recomputes the classifier counts from the saved item outcomes instead of a hardcoded claim.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench.html:6-9 answers the seat question for all five roles with a recommendation each, and the only changed paths are docs.\nSCORE evidence: 16\nJUSTIFICATION evidence: final-gate.log records five roles, fifteen model rows and USD 8.465234 with EXIT=0, and classifier-repair-gate.log records a check that passes at docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench.html:6 while classifier-repair-negative-control.log fails it at the parent revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status b7b0daaeba35b77ad23f23580bf21d9099497603..6571f7e3d034ab8cf886b0e1e688643c2e0341aa lists only the four paths granted by source brief.md:54-59.\nSCORE durability: 5\nJUSTIFICATION durability: docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py:455-470 now derives the classifier counts from the saved item outcomes rather than a literal, but the diff adds no test that fails if that derivation or the published numbers regress.\nSCORE fit: 19\nJUSTIFICATION fit: docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py:265 reuses imas_codex/standard_names/benchmark_roles.py:206 verdict_flip_quality and :387 applies the data-ink style, and no plan, stage or ticket label appears in the changed paths.\nSCORE reuse: 14\nJUSTIFICATION reuse: the runner extends imas_codex/standard_names/benchmark_roles.py:206 and imas_codex/cli/sn.py sn_bench, but docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py:268 _interval re-implements a percentile bootstrap interval that imas_codex/discovery/base/evaluation.py:145 already owns for AUC pairing without extending it.\nFINDING docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py:268 follow-on: _interval computes the interval by ad-hoc index truncation (ordered[int(0.025*(n-1))]) instead of np.percentile, and imas_codex/discovery/base/evaluation.py:145 owns bootstrap_interval for the same percentile construction, specialized to AUC pairing; a generic percentile-draws helper should be extracted and shared rather than duplicated.\nFINDING manifest.md:17 follow-on: the recorded gate command 'uv run --no-sync python -c final_artifact_checks' is a label, not the literal command that ran (the real check was an inline script visible only in stream.jsonl), so the gate cannot be re-run from the record alone.\n",
+  "review_run_id": "legacy-d07a185374f8",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "b7b0daaeba35b77ad23f23580bf21d9099497603",
+  "reviewed_head_sha": "6571f7e3d034ab8cf886b0e1e688643c2e0341aa",
+  "reviewed_run_id": "r-20261018T180610585160-llm-gpt6-seat-bench",
+  "reviewer_node": "review-of-llm-gpt6-seat-bench-6571f7e3d034",
+  "reviewer_run_id": "r-20261018T192043447508-review-of-llm-gpt6-seat-bench-6571f7e3d034",
+  "scores": {
+    "durability": 5,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T19:34:37.086900+00:00",
+  "total": 94
+}
