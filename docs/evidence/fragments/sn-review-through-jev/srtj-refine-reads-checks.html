@@ -1,0 +1,88 @@
+<section id="srtj-refine-reads-checks-section">
+  <h2 id="srtj-refine-reads-checks-title">Refine instructions from failed checks</h2>
+  <p>
+    The check-driven path is available beside the unchanged comment control.
+    <code>FanoutSettings.refine_trigger_source</code> defaults to
+    <code>comments</code>; <code>checks</code> reads only answered checks whose
+    <code>retrieval</code> flag is set. The threshold defaults to 0.5 pending the
+    cohort calibration. Choice failure probability sums the probabilities of
+    every non-conforming option, a Noul uses its true-case probability, and an
+    audit finding contributes 1.0 when present or 0.0 when absent.
+  </p>
+
+  <h3 id="srtj-refine-reads-checks-conforming">Conforming Choice outcomes</h3>
+  <table>
+    <thead><tr><th>Check</th><th>Conforming</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td><code>bound_to_wrong_object</code></td><td><code>the bound source object</code></td><td>One of several bound objects leaves the referent ambiguous; the name must denote the object at its binding.</td></tr>
+      <tr><td><code>collapsed_two_quantities</code></td><td><code>one quantity</code></td><td>A single name must preserve one physical quantity across its bindings.</td></tr>
+      <tr><td><code>description_false_of_some_binding</code></td><td><code>true of all</code></td><td>A description has to hold for every source path the name binds.</td></tr>
+      <tr><td><code>claim_contradicts_source</code></td><td><code>supports</code></td><td>A claim the source says nothing about remains unverifiable and calls for retrieval, as does a contradiction.</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The loader refuses an empty conforming list, any option outside the Choice
+    options, and a Noul carrying a conforming list. Documentation claims now
+    contribute their failure probability to the named check record while the
+    existing contradiction veto remains independent.
+  </p>
+
+  <h3 id="srtj-refine-reads-checks-gate">Tests and refusal controls</h3>
+  <p>
+    The base gate at <code>fc9308564a7656edc9c0122ce7c517a9e31f078a</code>
+    completed with <strong>265 passed, 1 failed, EXIT=1</strong>. The final
+    head gate at <code>3771eb024e74c014bb91e4276f8068d84b50bf01</code>
+    completed with <strong>279 passed, 1 failed, EXIT=1</strong>: 14 added
+    passes and <strong>zero added failures</strong>. Both failed only
+    <code>test_every_house_style_finding_has_a_named_check_and_is_read_from_audit</code>,
+    which reports <code>template_note</code> missing from the taxonomy. The
+    unchanged failure was reproduced before editing in the
+    <code>base-gate.log</code> receipt.
+  </p>
+  <p>
+    <code>test_refine_failed_checks.py</code> checks the loader refusals, all
+    three failure-probability kinds, the documentation claim's unverifiable
+    case, retrieval-only triggering, the default comment switch, both prompt
+    templates, and refusal of a checks bench case with no checks. The declared
+    negative control removed the retrieval filter and made the current comments
+    render alongside failed checks. Its receipt is <strong>11 passed, 2 failed,
+    EXIT=1</strong> in <code>negative-control.log</code>. The added failures were
+    <code>test_check_trigger_reads_only_retrieval_failures</code> and the name
+    parameter of <code>test_failed_check_instruction_replaces_current_comments</code>.
+    The mutations were removed; <code>git diff --exit-code</code> then confirmed
+    the committed source was restored.
+  </p>
+
+  <h3 id="srtj-refine-reads-checks-prompt">Rendered instruction comparison</h3>
+  <p>
+    The archived Jev smoke in
+    <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-name-review-build.html">the name-review build record</a>
+    recorded <code>diamagnetic_momentum_diffusivity</code> failing
+    <code>bound_to_wrong_object</code> with <code>a different object</code> at
+    probability 0.73. The source path was not retained in that smoke record;
+    the control comment below expresses the same concern for prompt comparison
+    and is not claimed as a historical reviewer comment. Both complete rendered
+    prompts are in <code>rendered-refine-prompts.log</code> in this run's receipt
+    directory.
+  </p>
+  <table>
+    <thead><tr><th>Check-driven instruction block</th><th>Comment control block</th></tr></thead>
+    <tbody><tr>
+      <td><pre>### Current node review (name: `diamagnetic_momentum_diffusivity`)
+- Reviewer score: 0.40
+- Failed checks:
+  - bound_to_wrong_object — Which object does the name denote, read against its bound source path?
+    - Evidence: Archived Jev smoke: a different object (probability 0.73)
+    - Segment or sentence: whole name: diamagnetic_momentum_diffusivity</pre></td>
+      <td><pre>### Current node review (name: `diamagnetic_momentum_diffusivity`)
+- Reviewer score: 0.40
+- Per-dimension comments:
+  - semantic: The name denotes a different object from its bound source.</pre></td>
+    </tr></tbody>
+  </table>
+  <p>
+    The check arm omits the current item's per-dimension comments. Prior
+    ancestors' comments still render from chain history when they exist; the
+    prompt test asserts that distinction.
+  </p>
+</section>
