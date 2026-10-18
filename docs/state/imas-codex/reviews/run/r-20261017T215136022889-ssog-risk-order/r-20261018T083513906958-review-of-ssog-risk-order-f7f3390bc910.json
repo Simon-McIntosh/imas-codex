@@ -1,0 +1,109 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": null,
+  "assertion_analysis": [
+    {
+      "failure_condition": "Reinstating the defect (CONTROL_SEED set back to SHUFFLE_SEED + 1, i.e. 20261018, which is the landed state) leaves the assertion true: measured, the control recall equals draws[1] and differs from draws[0], so the guard does not redden on the regression it was written for.",
+      "lines": "864-865"
+    },
+    {
+      "failure_condition": "Reverting the gap judging leaves name rows whose checks carry no question id, so the assertion reddens; demonstrated in negative-control.log as VERIFY_FAIL with EXIT=1 and 19 unjudged of 737.",
+      "lines": "885-889"
+    }
+  ],
+  "base_log_revision": null,
+  "baseline_suite_log": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T08:52:15.340Z",
+  "dispatched_at": "2026-10-18T08:35:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "59",
+      "severity": "blocking",
+      "text": "blocking: CONTROL_SEED = 20261018 equals SHUFFLE_SEED + 1, so _control_permutation (ssog-risk-order-run.py:531-535, random.Random(CONTROL_SEED)) reproduces band draw index 1 of the seed set _shuffled_draws builds at ssog-risk-order-run.py:520-528, random.Random(SHUFFLE_SEED + draw); measured on the committed results.json the control recall equals draws[1] on both splits (calibration 0.2576419213973799, validation 0.22580645161290322), so the control point remains a member of the band sample it is tested against, the inside-band assertion at ssog-risk-order-run.py:863 is true for any input, and the comment at ssog-risk-order-run.py:55-58 that the seed lies outside the band's draw range is false. This is the defect the prior review recorded at run.py:700, moved from band draw 0 to band draw 1 rather than removed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "864",
+      "severity": "blocking",
+      "text": "blocking: the guard independent = recall != draws[0] (and the identical predicate at ssog-risk-order-run.py:899 used by verify) excludes only band draw 0, so it verifies non-identity with one member rather than non-membership in the sample and passes on the landed state; it does not fail on the regression it was added to catch, while the manifest and the commit body both claim the control is now independent."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "231",
+      "severity": "follow-on",
+      "text": "follow-on: _judge_name_gap re-implements the name-axis judgement imas_codex/standard_names/review/jev_review.py:920 review_names owns, and calls build_name_state without sibling_names, so the 19 gap rows are judged without the reranked sibling neighbourhood (jev_review.py:209-222) that the 718 reused rows and the owner's protocol carry, making the pooled composite mix two judgement protocols."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "87",
+      "severity": "follow-on",
+      "text": "follow-on: _defect_probability's dimension branch and the _DOCS_DIMENSION_CRITERIA import at ssog-risk-order-run.py:96-97 are dead (neither call site at :166 or :442 passes dimension), yet ssog-risk-order.html:5 documents the method as including one minus a dimension rubric's acceptable level, so the stated method differs from the one executed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "442",
+      "severity": "follow-on",
+      "text": "follow-on: the documentation axis still skips claim_contradicts_source (ssog-risk-order-run.py:441-442), the contradiction veto imas_codex/standard_names/review/jev_review.py:763 treats as overriding, and no counts line in ssog-risk-order.html reports the omission."
+    },
+    {
+      "file": "imas_codex/discovery/base/evaluation.py",
+      "line": "143",
+      "severity": "follow-on",
+      "text": "follow-on: bootstrap_interval and _group_indices own copy-group-aware resampling and ssog-risk-order-run.py:538-560 _copy_group_bootstrap duplicates that loop for a recall statistic instead of extending the owner with a pluggable statistic."
+    }
+  ],
+  "head_log_revision": "f7f3390bc910f1225feed724a6519492a936faf5",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site; the evidence script is standalone and nothing outside the four stored artifacts imports or reaches it.",
+    "diff": "Read commit-by-commit against base f8a85ca9; 64c6b7f57 brings in the four artefacts and f7f3390bc brings gap judging, the verify mode and a re-drawn control across the same four paths, every path inside the declared write paths.",
+    "done_when": "The brief's done-when requires the HTML recall table, counts and spend, one recall-versus-fraction figure, a results JSON, and a label-shuffled scorer run recorded with EXIT=; ssog-risk-order.html:12-23 carries the table and counts, the figure is committed, results.json holds all 737 items, and shuffle.log ends EXIT=0, but the label-shuffled control at ssog-risk-order-run.py:848-871 cannot fail because its permutation is band draw index 1.",
+    "goal": "The source brief asks the node to measure how well a Jev risk composite finds known defects first; ssog-risk-order-run.py:495-560 builds each item's risk from its axis's named checks and reports recall for both goldens on both splits, and the repair judges all 737 name rows, so the delivered object is the measurement the goal names.",
+    "manifest": "Read; it declares status complete, commits 64c6b7f57 and f7f3390bc, the four changed paths, and measure/shuffle/verify/render logs ending EXIT=0, and its negative_control_note shows the pre-repair coverage check failing at 19 unjudged rows, but its second control claim (the repaired control reports control recall equals band draw 0: False) rests on the weak predicate the landed control passes while still being band draw 1.",
+    "write_paths": "The brief grants the two evidence files under docs/evidence/fragments/sn-selection-over-generation/, results.json, and the figure directory docs/figures/sn-selection-over-generation/ssog-risk-order; both commits' diffs touch only those four paths."
+  },
+  "justifications": {
+    "durability": "the coverage guard at ssog-risk-order-run.py:885-889 reddens on the reverted state (negative-control.log: VERIFY_FAIL, EXIT=1, 19 unjudged), but the control guard at ssog-risk-order-run.py:864-865 stays green on the landed defect.",
+    "evidence": "measure.log, shuffle.log and verify.log each end EXIT=0 and verify.log records VERIFY_PASS, but the control assertion at ssog-risk-order-run.py:863-865 is satisfied by a permutation that is band draw 1 of the sample it is compared against.",
+    "fit": "helpers are named by mechanism and the commit carries no AI trailer, but the comment at ssog-risk-order-run.py:55-58 asserts a seed lies outside the band's draw range when 20261018 is inside the 20261017..20261116 range the band draws from, and ssog-risk-order-run.py is a plan-slug filename the brief mandates.",
+    "goal_fidelity": "ssog-risk-order-run.py:144-186 judges the 19 previously uncovered name rows so results.json name_axis.unjudged reads 0, but ssog-risk-order.html:5 still states a dimension-rubric rule the code at ssog-risk-order-run.py:87-97 never executes.",
+    "reuse": "imas_codex/discovery/base/evaluation.py:143-190 owns copy-group-aware resampling and ssog-risk-order-run.py:538-560 _copy_group_bootstrap re-implements it, while ssog-risk-order-run.py:231-266 _judge_name_gap re-implements the name-axis judgement imas_codex/standard_names/review/jev_review.py:920 review_names owns.",
+    "scope_discipline": "the f8a85ca9..f7f3390 diff touches only the four declared write paths, the two evidence files, results.json and docs/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief asks the node to measure how well a Jev risk composite finds known defects first; docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:495-560 builds each item's risk from its axis's named checks and reports recall for both goldens on both splits, and the repair now judges every one of the 737 name rows (results.json name_axis.unjudged 0), so the delivered object is the measurement the goal names.\nVERDICT done_when: the brief's done-when names the HTML recall table, counts, one figure, a results JSON, and a label-shuffled scorer run recorded with EXIT=; ssog-risk-order.html:12-23 carries the table and counts, the figure is committed, results.json holds all 737 items, and shuffle.log ends EXIT=0, but the label-shuffled control at ssog-risk-order-run.py:848-871 cannot fail because its permutation is band draw index 1.\nVERDICT write_paths: the brief grants the two evidence files under docs/evidence/fragments/sn-selection-over-generation/, results.json, and the figure directory docs/figures/sn-selection-over-generation/ssog-risk-order; both commits' diffs touch only those four paths.\nVERDICT manifest: read; it declares status complete, commits 64c6b7f57 and f7f3390bc, the four changed paths, and measure/shuffle/verify/review logs ending EXIT=0, and its negative_control_note shows the pre-repair coverage check failing at 19 unjudged rows, but its second control claim rests on the weak predicate the landed control passes while still being band draw 1.\nVERDICT diff: read commit-by-commit against base f8a85ca9; 64c6b7f57 brings in the four artefacts and f7f3390bc brings gap judging, the verify mode and a re-drawn control across the same four paths, every path inside the declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: ssog-risk-order-run.py:144-186 judges the 19 previously uncovered name rows so results.json name_axis.unjudged reads 0, but ssog-risk-order.html:5 still states a dimension-rubric rule the code at ssog-risk-order-run.py:87-97 never executes.\nSCORE evidence: 14\nJUSTIFICATION evidence: measure.log, shuffle.log and verify.log each end EXIT=0 and verify.log records VERIFY_PASS, but the control assertion at ssog-risk-order-run.py:863-865 is satisfied by a permutation that is band draw 1 of the sample it is compared against.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the f8a85ca9..f7f3390 diff touches only the four declared write paths, the two evidence files, results.json and docs/figures/sn-selection-over-generation/ssog-risk-order/recall-curve.svg.\nSCORE durability: 8\nJUSTIFICATION durability: the coverage guard at ssog-risk-order-run.py:885-889 reddens on the reverted state (negative-control.log: VERIFY_FAIL, EXIT=1, 19 unjudged), but the control guard at ssog-risk-order-run.py:864-865 stays green on the landed defect.\nSCORE fit: 14\nJUSTIFICATION fit: helpers are named by mechanism and the commit carries no AI trailer, but the comment at ssog-risk-order-run.py:55-58 asserts a seed lies outside the band's draw range when 20261018 is inside the 20261017..20261116 range the band draws from, and ssog-risk-order-run.py is a plan-slug filename the brief mandates.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/discovery/base/evaluation.py:143-190 owns copy-group-aware resampling and ssog-risk-order-run.py:538-560 _copy_group_bootstrap re-implements it, while ssog-risk-order-run.py:231-266 _judge_name_gap re-implements the name-axis judgement imas_codex/standard_names/review/jev_review.py:920 review_names owns.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:59 blocking: CONTROL_SEED = 20261018 equals SHUFFLE_SEED + 1, so _control_permutation (ssog-risk-order-run.py:531-535, random.Random(CONTROL_SEED)) reproduces band draw index 1 of the seed set _shuffled_draws builds at ssog-risk-order-run.py:520-528, random.Random(SHUFFLE_SEED + draw); measured on the committed results.json the control recall equals draws[1] on both splits (calibration 0.2576419213973799, validation 0.22580645161290322), so the control point remains a member of the band sample it is tested against and the inside-band assertion at ssog-risk-order-run.py:863 is true for any input.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:864 blocking: the guard independent = recall != draws[0] (and the identical predicate at ssog-risk-order-run.py:899 used by verify) excludes only band draw 0, so it verifies non-identity with one member rather than non-membership in the sample and passes on the landed state; it does not fail on the regression it was added to catch, while the manifest and the commit body both claim the control is now independent.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:231 follow-on: _judge_name_gap re-implements the name-axis judgement imas_codex/standard_names/review/jev_review.py:920 review_names owns, and calls build_name_state without sibling_names, so the 19 gap rows are judged without the reranked sibling neighbourhood (jev_review.py:209-222) that the 718 reused rows and the owner's protocol carry, making the pooled composite mix two judgement protocols.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:87 follow-on: _defect_probability's dimension branch and the _DOCS_DIMENSION_CRITERIA import at ssog-risk-order-run.py:96-97 are dead (neither call site at :166 or :442 passes dimension), yet ssog-risk-order.html:5 documents the method as including one minus a dimension rubric's acceptable level, so the stated method differs from the one executed.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py:442 follow-on: the documentation axis still skips claim_contradicts_source (ssog-risk-order-run.py:441-442), the contradiction veto imas_codex/standard_names/review/jev_review.py:763 treats as overriding, and no counts line in ssog-risk-order.html reports the omission.\nFINDING imas_codex/discovery/base/evaluation.py:143 follow-on: bootstrap_interval and _group_indices own copy-group-aware resampling and ssog-risk-order-run.py:538-560 _copy_group_bootstrap duplicates that loop for a recall statistic instead of extending the owner with a pluggable statistic.",
+  "review_run_id": "r-20261018T083513906958-review-of-ssog-risk-order-f7f3390bc910",
+  "reviewed_base_sha": "f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710",
+  "reviewed_commits": [
+    "64c6b7f57a034e9fc813e1275405653dd7ef610d",
+    "f7f3390bc910f1225feed724a6519492a936faf5"
+  ],
+  "reviewed_head_sha": "f7f3390bc910f1225feed724a6519492a936faf5",
+  "reviewed_run_id": "r-20261017T215136022889-ssog-risk-order",
+  "schema": "crew-review-record",
+  "scores": {
+    "durability": 8,
+    "evidence": 14,
+    "fit": 14,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [
+    {
+      "detail": "the control value and the band it is compared against are both permutations of the same label multiset under one seed family, and the landed control is a member of that sample (draw 1), so the two sides move together and the assertion holds whatever the scorer does.",
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py",
+      "line": "864"
+    }
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T08:53:27.366757+00:00",
+  "total": 76
+}
