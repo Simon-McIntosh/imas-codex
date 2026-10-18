@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-writers-carry-sources">
+<title>Identity writers preserve producing sources</title>
+</head>
+<body>
+<main>
+<h1 id="sib-writers-carry-sources-title">Identity writers preserve producing sources</h1>
+<p>The source-loss census found 264 live sourceless names: 2 derived parents,
+2 orphans awaiting retirement, 31 with an unchained holder, 199 with a dropped
+edge, and 30 never bound. A shared check reads each touched identity through
+the writer's graph handle and raises <code>MissingStandardNameSource</code>
+when a live non-derived name has no incoming <code>PRODUCED_NAME</code>. It
+permits a superseded name, a derived parent with a live child, and a name with
+one producer. A rename that revives a superseded spelling still requires a
+producer on its predecessor.</p>
+
+<h2 id="sib-writers-carry-sources-writers">Writer checks</h2>
+<p>All red and green logs are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T205400851812-sib-writers-carry-sources/</code>.
+The final removal control applied four edits to an extracted scratch copy of
+commit <code>7e210992c63bc1fc2b413b8f24ddf4ca2bc7844d</code>, replacing
+each writer's invariant call with <code>pass</code>. Its log prints the module
+paths and resolved working directory; the assigned tree remained intact.</p>
+<table id="sib-writers-carry-sources-table">
+<thead><tr><th>Writer</th><th>Call site</th><th>Red removal control</th><th>Green head</th></tr></thead>
+<tbody>
+<tr><td>Human rename</td><td><code>imas_codex/standard_names/edit.py:3368</code></td><td><code>red-all-writers.log</code>: <code>test_rename_refuses_a_sourceless_predecessor[drafted]</code> and <code>[superseded]</code> fail</td><td><code>final-head.log</code>: both pass</td></tr>
+<tr><td>Name creation</td><td><code>imas_codex/standard_names/graph_ops.py:5928</code></td><td><code>red-all-writers.log</code>: <code>test_name_creation_refuses_an_unbound_identity</code> fails</td><td><code>final-head.log</code>: passes</td></tr>
+<tr><td>Consistency reconciliation</td><td><code>imas_codex/standard_names/attachment_audit.py:1201</code></td><td><code>red-all-writers.log</code>: <code>test_consistency_reconciliation_refuses_last_source_removal</code> fails</td><td><code>final-head.log</code>: passes</td></tr>
+<tr><td>Signed stale-source detachment</td><td><code>imas_codex/standard_names/signed_manifest.py:4086</code></td><td><code>red-all-writers.log</code>: <code>test_signed_detachment_refuses_nonderived_parent_without_source</code> fails</td><td><code>final-head.log</code>: passes</td></tr>
+</tbody>
+</table>
+<p><code>red-all-writers.log</code> ends <code>5 failed, 1 passed; EXIT=1</code>.
+The passing test covers the invariant itself: derived parent, retired identity,
+one remaining source, and no source. The signed case plants a non-derived name
+with a child: the existing child-count check admits it, while the shared source
+check refuses it. The head gate ends <code>249 passed, 38 deselected; EXIT=0</code>.
+No live graph write or LLM call was made.</p>
+
+<h2 id="sib-writers-carry-sources-delta">Covering-test delta</h2>
+<p>The same six covering test files ran from extracted base revision
+<code>5f79e844a5b1df6df42e1c8698459249d5ba822c</code> and committed head
+<code>24b8638cc61f70a177f740dd35d8c32cfbf9af43</code>, with the shared
+project environment and each extracted tree on <code>PYTHONPATH</code>.
+<code>covering-base.log</code> and <code>covering-committed-head.log</code>
+each end <code>243 passed, 38 deselected; EXIT=0</code>, so the covering
+selection added zero failures. The later committed head adds the retired-rename
+case; its seven-file gate is <code>final-head.log</code> above.</p>
+</main>
+</body>
+</html>
