@@ -7,6 +7,7 @@ import pytest
 
 from imas_codex.standard_names.source_invariant import (
     MissingStandardNameSource,
+    _is_sourceless_name,
     require_producing_sources,
 )
 
@@ -43,6 +44,26 @@ def test_source_invariant_classifies_touched_names() -> None:
     require_producing_sources(Query(sources=1), ["electron_temperature"])
     with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
         require_producing_sources(Query(), ["electron_temperature"])
+
+
+def test_invariant_query_keeps_names_with_missing_origin() -> None:
+    class CaptureQuery:
+        statement = ""
+
+        def query(self, cypher, **params):
+            self.statement = cypher
+            assert params["ids"] == ["electron_temperature"]
+            return []
+
+    capture = CaptureQuery()
+    require_producing_sources(capture, ["electron_temperature"])
+    assert "coalesce(sn.origin, '') = 'derived'" in capture.statement
+    assert "sn.origin = 'derived'" not in capture.statement
+    assert _is_sourceless_name(None, has_live_child=False, producers=0)
+    assert _is_sourceless_name(None, has_live_child=True, producers=0)
+    assert _is_sourceless_name("derived", has_live_child=False, producers=0)
+    assert not _is_sourceless_name("derived", has_live_child=True, producers=0)
+    assert not _is_sourceless_name(None, has_live_child=False, producers=1)
 
 
 @pytest.mark.parametrize("stage", ["drafted", "superseded"])
