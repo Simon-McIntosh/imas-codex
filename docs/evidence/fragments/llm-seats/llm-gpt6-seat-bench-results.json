@@ -1,0 +1,25 @@
+{
+  "pre_registration": {
+    "timestamp_utc": "2026-10-18T18:09:59Z",
+    "decision_rule": "gpt-6-luna is capable for a seat if the 95% lower bound of its paired primary-metric difference from gpt-6.1-sol is at least -0.05",
+    "confidence_method": "percentile bootstrap of matched fixture items, 10000 draws, seed 1729; recompute each role's primary metric within each draw",
+    "negative_control": "pairing each low-cost output with a shuffled full-model output of the same role must give a paired-difference interval containing zero",
+    "seed": 1729,
+    "models": ["live incumbent", "openrouter/openai/gpt-6.1-sol", "openrouter/openai/gpt-6-luna"],
+    "samples": {
+      "refine": {"n": 8, "reason": "One generation and one held-out judge call per model and item; cap their combined cost while covering multiple domains."},
+      "docs": {"n": 8, "reason": "One generation and one held-out rubric call per model and item; cap the expensive judge."},
+      "breaker-names": {"n": 12, "reason": "Retain opportunities for verdict flips while bounding production review prompts."},
+      "breaker-docs": {"n": 12, "reason": "Retain opportunities for verdict flips while bounding one docs review call per item."},
+      "classifier": {"n": 24, "reason": "Cover more gold paths because classification runs in batches and has no held-out judge."}
+    },
+    "judge": "openrouter/anthropic/claude-opus-4.8",
+    "judge_price_usd_per_million_tokens": {"prompt": 5.0, "completion": 25.0},
+    "budget_ceiling_usd": 10.0,
+    "budget_stop_before_next_call_usd": 8.0
+  },
+  "raw_reports": {},
+  "item_outcomes": {},
+  "analysis": {},
+  "total_spend_usd": 0.0
+}
