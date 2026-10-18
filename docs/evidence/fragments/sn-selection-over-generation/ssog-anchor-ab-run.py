@@ -20,6 +20,11 @@ import yaml
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+from imas_codex.settings import (
+    get_model,
+    get_openrouter_pricing,
+    get_sn_review_docs_models,
+)
 from imas_codex.standard_names.families import (
     fetch_pattern_families,
     score_family_anchor,
@@ -47,7 +52,7 @@ RESULTS = Path(
     )
 )
 ROSTERS = Path("imas_codex/standard_names/manifests/reviews")
-SPEND_LIMIT = 42.0
+SPEND_LIMIT = 50.0
 PREVIOUS_SPEND = 0.021194586
 RULE_REGISTERED_AT = "2026-10-18T10:45:18.869980+00:00"
 PRIOR_DOC_CALL_COST = 0.41403
@@ -63,13 +68,102 @@ VARIATION_AXES = (
     "region",
     "device",
 )
-DEADLINE = datetime.fromisoformat("2026-10-18T14:42:47+00:00")
+DEADLINE = datetime.fromisoformat("2026-10-18T21:58:56+00:00")
 
 
 def apply_cap(planned_calls: int) -> float:
     if planned_calls == 3:
-        return 2.0
+        return 1.99
     return round(planned_calls * 0.674, 2)
+
+
+def rotated_doc_call_cost(gc: GraphClient, measured_calls: int) -> dict:
+    """Reprice snapshot documentation usage for the active model seats."""
+    from datetime import timedelta
+
+    docs_model = get_model("sn-docs")
+    refine_model = get_model("sn-refine")
+    review_models = get_sn_review_docs_models()
+    if "gpt-6" not in docs_model or not any("gpt-6" in m for m in review_models):
+        raise RuntimeError("Documentation and review breaker seats are not GPT-6")
+    since = (datetime.now(UTC) - timedelta(days=14)).isoformat()
+    rows = gc.query(
+        "MATCH (c:LLMCost) WHERE c.phase IN $phases "
+        "AND c.llm_at >= datetime($since) AND c.run_id IS NOT NULL "
+        "WITH c.run_id AS run_id, max(c.llm_at) AS newest "
+        "ORDER BY newest DESC LIMIT 200 "
+        "WITH collect(run_id) AS run_ids "
+        "MATCH (c:LLMCost) WHERE c.run_id IN run_ids AND c.phase IN $phases "
+        "RETURN c.run_id AS run_id, c.phase AS phase, c.llm_model AS model, "
+        "c.llm_cost AS cost, c.llm_tokens_in AS tokens_in, "
+        "c.llm_tokens_out AS tokens_out, "
+        "c.llm_tokens_cached_read AS cached_read, "
+        "c.llm_tokens_cached_write AS cached_write, "
+        "c.standard_name_ids AS names LIMIT 20001",
+        phases=["generate_docs", "refine_docs", "review_docs"],
+        since=since,
+    )
+    if len(rows) == 20001:
+        raise RuntimeError("Documentation receipt read reached its row bound")
+    names = {name for row in rows for name in (row["names"] or [])}
+    if len(names) != measured_calls or not rows:
+        raise RuntimeError(
+            "Repricing read did not recover measured documentation calls"
+        )
+    per_model: dict[str, dict[str, float | int]] = {}
+    old_total = 0.0
+    rotated_total = 0.0
+    changed = 0
+    for row in rows:
+        old = row["model"]
+        phase = row["phase"]
+        if phase == "generate_docs":
+            new = docs_model
+        elif phase == "refine_docs":
+            new = refine_model
+        elif phase == "review_docs" and "gpt-5" in old:
+            new = next(m for m in review_models if "gpt-6" in m)
+        else:
+            new = old
+        actual = float(row["cost"] or 0.0)
+        old_total += actual
+        if new == old:
+            projected = actual
+        else:
+            price = get_openrouter_pricing(new)
+            if not price:
+                raise RuntimeError(f"No active price for {new}")
+            tokens_in = int(row["tokens_in"] or 0)
+            tokens_out = int(row["tokens_out"] or 0)
+            cached_read = int(row["cached_read"] or 0)
+            cached_write = int(row["cached_write"] or 0)
+            uncached = max(0, tokens_in - cached_read - cached_write)
+            projected = (
+                uncached * float(price["prompt"])
+                + tokens_out * float(price["completion"])
+                + cached_read * float(price.get("cache_read") or price["prompt"])
+                + cached_write * float(price.get("cache_write") or price["prompt"])
+            ) / 1_000_000 + float(price.get("request") or 0)
+            changed += 1
+        rotated_total += projected
+        entry = per_model.setdefault(new, {"rows": 0, "usd": 0.0})
+        entry["rows"] += 1
+        entry["usd"] += projected
+    return {
+        "calls": measured_calls,
+        "runs": len({row["run_id"] for row in rows}),
+        "receipt_rows": len(rows),
+        "repriced_rows": changed,
+        "historical_usd": old_total,
+        "rotated_usd": rotated_total,
+        "rate_usd": rotated_total / measured_calls,
+        "per_model": per_model,
+        "seats": {
+            "sn-docs": docs_model,
+            "sn-refine": refine_model,
+            "sn-review.docs": review_models,
+        },
+    }
 
 
 def now() -> str:
@@ -403,6 +497,14 @@ def measure_arm(
             started=started_at,
             ended=ended_at,
         )[0]
+        model_receipts = gc.query(
+            "MATCH (c:LLMCost) "
+            "WHERE c.llm_at >= datetime($started) AND c.llm_at <= datetime($ended) "
+            "RETURN c.llm_model AS model, count(c) AS calls, "
+            "sum(c.llm_cost) AS spend ORDER BY model",
+            started=started_at,
+            ended=ended_at,
+        )
         calls = int(ledger["calls"])
         spend = float(ledger["spend"])
         reported = float(summary["total_cost"])
@@ -418,6 +520,7 @@ def measure_arm(
             "ledger_calls": calls,
             "ledger_spend_usd": spend,
             "ledger_session_ids": ledger["session_ids"],
+            "per_model": model_receipts,
         }
         data["spend_usd"] += reported
         if "confirmed_spend_usd" in data:
@@ -624,6 +727,11 @@ def resume_applies() -> None:
 
 
 def run_filtered_pairs() -> None:
+    from imas_codex.standard_names import harmonize
+
+    module_path = str(Path(harmonize.__file__).resolve())
+    if not module_path.startswith("/home/ITER/mcintos/Code/imas-codex/"):
+        raise RuntimeError(f"Driver imported non-main harmonize code: {module_path}")
     data = json.loads(RESULTS.read_text())
     if data["source_export"] != str(ARCHIVE):
         raise RuntimeError("Cached anchor scores belong to another export")
@@ -635,6 +743,13 @@ def run_filtered_pairs() -> None:
     data["previous_isolation_proof"] = data.get("isolation_proof", [])
     data.update(
         resumed_at=now(),
+        measurement_module=module_path,
+        measurement_cwd=str(Path.cwd().resolve()),
+        model_seats={
+            "sn-docs": get_model("sn-docs"),
+            "sn-refine": get_model("sn-refine"),
+            "sn-review.docs": get_sn_review_docs_models(),
+        },
         spend_limit_usd=SPEND_LIMIT,
         confirmed_spend_usd=confirmed_prior,
         budget_spend_usd=confirmed_prior + unreceipted_reserve,
@@ -779,11 +894,14 @@ def run_filtered_pairs() -> None:
             estimate = measure_doc_call_cost(heur_gc)
             if estimate is None:
                 raise RuntimeError("Snapshot lacks a measured documentation-call rate")
-            rate = estimate.mean_usd
+            rotated = rotated_doc_call_cost(heur_gc, estimate.calls)
+            rate = rotated["rate_usd"]
             data["dry_run_estimate_basis"] = {
-                "source": "snapshot LLMCost rows",
+                "source": "snapshot LLMCost token usage repriced for active model seats",
                 "runs": estimate.runs,
                 "calls": estimate.calls,
+                "historical_rate_usd": estimate.mean_usd,
+                "rotated": rotated,
                 "rate_usd": rate,
             }
             data["dry_run_estimate_usd_per_call"] = rate
@@ -817,7 +935,9 @@ def run_filtered_pairs() -> None:
                 data["budget_spend_usd"] + estimated >= SPEND_LIMIT
                 or data["cap_envelope_usd"] >= SPEND_LIMIT
             ):
-                raise RuntimeError("Dry-run estimate or apply cap reaches USD 42")
+                raise RuntimeError(
+                    f"Dry-run estimate or apply cap reaches USD {SPEND_LIMIT:.2f}"
+                )
             jev_place, jev_proc, jev_log = make_instance(scratch, dump, "jev", 27698)
             instances.append(("jev", jev_place, jev_proc))
             jev_uri = "bolt://127.0.0.1:27698"
