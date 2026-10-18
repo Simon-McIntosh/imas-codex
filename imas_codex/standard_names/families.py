@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -537,6 +538,270 @@ def select_anchor(
         return min(non_placeholder, key=lambda m: m.get("id") or "").get("id")
 
     return None
+
+
+# ---------------------------------------------------------------------------
+# Judged anchor: the member whose documentation best templates the family
+# ---------------------------------------------------------------------------
+
+#: Score question name the judge answers with an expected score and a per-level
+#: distribution. A name, not sent to the model — code reads the answer under it.
+TEMPLATE_FITNESS_QUESTION = "template_fitness"
+
+#: Score levels, low first, each a concrete situation. The level numbers scale
+#: a member's documentation by how well it would template the family; the judge
+#: supplies only the position, as its expectation over the levels.
+TEMPLATE_FITNESS_LEVELS: tuple[str, ...] = (
+    "Names or describes a quantity other than the family's, or contradicts the "
+    "family's pattern — templating from it would mislead every other member.",
+    "Specific to this member alone: no opening or structure that could carry "
+    "over to the family's other members.",
+    "Reusable in parts: states the family's shared quantity but departs from "
+    "the house style in terminology or structure, so a member templated from "
+    "it would need rewriting.",
+    "A good template: states the family's quantity and follows the house style, "
+    "with only minor member-specific detail a sibling would carry harmlessly.",
+    "An ideal template: states the family's quantity, follows the house style "
+    "and its fill-in slots exactly, and carries no member-specific detail that "
+    "would mislead a sibling.",
+)
+
+#: Judgements in flight at once within one family's scoring.
+_ANCHOR_SCORE_CONCURRENCY = 8
+
+#: Wall-time ceiling for one family's scoring; ``None`` waits for every call.
+_ANCHOR_SCORE_BUDGET_SECONDS = 60.0
+
+#: Decisions service tag, shared with the other standard-names stages.
+_ANCHOR_SCORE_SERVICE = "standard-names"
+
+#: Pipeline-cost step these calls are booked to.
+_ANCHOR_SCORE_COST_STEP = "sn_anchor_score"
+
+
+@dataclass
+class AnchorScore:
+    """One family's members scored as the family's documentation template.
+
+    ``expected`` and ``distribution`` hold only the members a call scored
+    successfully, keyed by member id; a member whose call failed or was
+    unscored is absent from both rather than read as a zero. ``choice`` is the
+    highest expected score, or ``None`` when no member was scored — an empty
+    outcome is never replaced by a default anchor. ``asked`` names the members
+    one call was made for; ``cost`` is their summed reported spend.
+    """
+
+    pattern: str
+    expected: dict[str, float] = field(default_factory=dict)
+    distribution: dict[str, dict[str, float]] = field(default_factory=dict)
+    choice: str | None = None
+    asked: tuple[str, ...] = ()
+    cost: float = 0.0
+
+
+def template_fitness_question() -> dict[str, dict[str, Any]]:
+    """The Score question every eligible member of a family is asked.
+
+    Code builds the question; the model supplies only the judgement. One
+    question, asked once per eligible member, so the scores are comparable
+    across the family.
+    """
+    return {
+        TEMPLATE_FITNESS_QUESTION: {
+            "type": "score",
+            "instructions": (
+                "How well would this member's documentation serve as the "
+                "template for the whole family? Judge the opening and the "
+                "structure a sibling's documentation would inherit from it, "
+                "against the family's pattern and the house-style template."
+            ),
+            "criteria": list(TEMPLATE_FITNESS_LEVELS),
+        }
+    }
+
+
+def _house_style_template(pattern_name: str) -> str:
+    """The house-style openings the grammar renders for this family's pattern.
+
+    Reuses the accessor the docs prompt renders its conventions block through,
+    so the template the judge is shown is the one the family is written to —
+    never a copy that could drift from the registry.
+    """
+    from imas_codex.standard_names.context import conventions_context_for
+
+    selected = conventions_context_for(pattern_name) or {}
+    lines: list[str] = []
+    for entry in selected.get("templates") or []:
+        documentation = str(entry.get("documentation") or "").strip()
+        note = str(entry.get("note") or "").strip()
+        if documentation:
+            lines.append(documentation)
+        if note and note not in lines:
+            lines.append(note)
+    return "\n".join(lines)
+
+
+def _eligible_anchor_candidate(row: Mapping[str, Any]) -> bool:
+    """Whether a member is one :func:`select_anchor` would consider.
+
+    The same rule ``select_anchor`` applies to a member — a real
+    (non-placeholder) description — plus the documentation a template needs: a
+    member with no documentation has nothing to template from.
+    """
+    return not is_placeholder_description(row.get("description")) and bool(
+        str(row.get("documentation") or "").strip()
+    )
+
+
+def _anchor_score_candidates(
+    parent_id: str | None,
+    parent_description: str | None,
+    parent_documentation: str | None,
+    parent_docs_stage: str | None,
+    members: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """The family's eligible members as uniform rows, parent first.
+
+    The parent, when it names a distinct node, is folded into the same row
+    shape as the members, so one eligibility rule and one ``select_anchor``
+    ranking serve the whole family. A parent already present in ``members`` is
+    not duplicated.
+    """
+    member_ids = {m.get("id") for m in members}
+    rows: list[dict[str, Any]] = []
+    if parent_id and parent_id not in member_ids:
+        rows.append(
+            {
+                "id": parent_id,
+                "description": parent_description,
+                "documentation": parent_documentation,
+                "docs_stage": parent_docs_stage,
+                "reviewer_score_docs": None,
+            }
+        )
+    rows.extend(dict(m) for m in members)
+    return [row for row in rows if _eligible_anchor_candidate(row)]
+
+
+async def score_family_anchor(
+    parent_id: str | None,
+    parent_docs_stage: str | None,
+    parent_description: str | None,
+    members: Sequence[Mapping[str, Any]],
+    *,
+    parent_documentation: str | None = None,
+    pattern: str = "",
+    model: str | None = None,
+    concurrency: int = _ANCHOR_SCORE_CONCURRENCY,
+    budget_seconds: float | None = _ANCHOR_SCORE_BUDGET_SECONDS,
+    cost: Any | None = None,
+) -> AnchorScore:
+    """Score each eligible family member as the family's documentation template.
+
+    For one family, one Jev Score per eligible member answers how well that
+    member's documentation would serve as the template for the whole family,
+    given the member's name, description and documentation, the family's
+    pattern, and the house-style template the grammar renders for that pattern.
+    The member with the highest expected score is the candidate anchor; a tie
+    falls to :func:`select_anchor`'s own ranking over the candidate rows, so
+    the judged choice never contradicts the heuristic on equal evidence.
+
+    This is a scorer, not a caller of the member rows' anchor: nothing here
+    changes a recorded anchor or a caller's behaviour. A failed or unscored
+    call leaves its member unscored, and a family with no scored member returns
+    no choice rather than a default.
+
+    Args:
+        parent_id: The family's base-quantity node, or ``None`` when the family
+            is grouped by pattern with no parent node.
+        parent_docs_stage: The parent's ``docs_stage``, read by the tie-break.
+        parent_description: The parent's description, read by the tie-break.
+        members: The family's member rows. Each carries ``id``, ``description``
+            and ``documentation``; ``docs_stage`` and ``reviewer_score_docs``
+            feed the tie-break where present.
+        parent_documentation: The parent's documentation, so a parent not in
+            ``members`` can still be offered as a template.
+        pattern: The family's pattern — its invariant segment signature — shown
+            to the template accessor and carried in the state for the judge.
+        model: Decisions model id; defaults to the ``sn-judge`` seat.
+        concurrency: Maximum judgements in flight at once.
+        budget_seconds: Wall-time ceiling for the family; ``None`` waits.
+        cost: Optional run cost tracker; the batch's summed cost is booked to
+            it under the scorer's step.
+
+    Returns:
+        An :class:`AnchorScore` naming the scored members, their expected
+        scores and distributions, the chosen member (or ``None``), the members
+        one call was made for, and the summed reported spend.
+    """
+    candidates = _anchor_score_candidates(
+        parent_id, parent_description, parent_documentation, parent_docs_stage, members
+    )
+    asked = tuple(str(row["id"]) for row in candidates if row.get("id"))
+    if not candidates:
+        return AnchorScore(pattern=pattern)
+
+    if model is None:
+        from imas_codex.settings import get_model
+
+        model = get_model("sn-judge")
+
+    template = _house_style_template(str(parent_id or candidates[0]["id"]))
+    states = [
+        {
+            "member": {
+                "name": row["id"],
+                "description": str(row.get("description") or ""),
+                "documentation": str(row.get("documentation") or ""),
+            },
+            "family_pattern": pattern,
+            "house_style_template": template,
+        }
+        for row in candidates
+    ]
+
+    from imas_codex.discovery.base.judgment import decide_batch
+
+    results, batch_cost = await decide_batch(
+        states,
+        template_fitness_question(),
+        model=model,
+        service=_ANCHOR_SCORE_SERVICE,
+        concurrency=concurrency,
+        budget_seconds=budget_seconds,
+        cost=cost,
+        step=_ANCHOR_SCORE_COST_STEP,
+    )
+
+    expected: dict[str, float] = {}
+    distribution: dict[str, dict[str, float]] = {}
+    for row, result in zip(candidates, results, strict=True):
+        if result is None:
+            continue
+        answer = result[0].get(TEMPLATE_FITNESS_QUESTION) or {}
+        score = answer.get("score")
+        if score is None:
+            continue
+        member_id = str(row["id"])
+        expected[member_id] = float(score)
+        distribution[member_id] = dict(answer.get("probabilities") or {})
+
+    choice: str | None = None
+    if expected:
+        top = max(expected.values())
+        tied = [row for row in candidates if expected.get(str(row["id"])) == top]
+        # Ties fall to select_anchor's own ranking over the tied rows, so the
+        # judged choice never contradicts the heuristic on equal evidence.
+        choice = select_anchor(None, None, None, tied)
+
+    return AnchorScore(
+        pattern=pattern,
+        expected=expected,
+        distribution=distribution,
+        choice=choice,
+        asked=asked,
+        cost=batch_cost,
+    )
 
 
 # Rows for the seed's live pattern family: the seed fixes the invariant segment
