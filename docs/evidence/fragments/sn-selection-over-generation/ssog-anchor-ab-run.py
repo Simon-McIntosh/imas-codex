@@ -6,10 +6,13 @@ import asyncio
 import json
 import os
 import shutil
+import signal
 import subprocess
+import sys
 import tarfile
 import tempfile
 import time
+import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -32,14 +35,21 @@ from imas_codex.standard_names.harmonize import (
 
 ARCHIVE = (
     Path.home()
-    / ".local/share/imas-codex/exports/imas-codex-graph-dev-ff4d0f1-20261012T035511Z.tar.gz"
+    / ".local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 RUN_DIR = Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab"
 )
-RESULTS = Path(__file__).with_name("ssog-anchor-ab-results.json")
+RESULTS = Path(
+    os.environ.get(
+        "ANCHOR_RESULTS_PATH",
+        str(Path(__file__).with_name("ssog-anchor-ab-results.json")),
+    )
+)
 ROSTERS = Path("imas_codex/standard_names/manifests/reviews")
 SPEND_LIMIT = 30.0
+PREVIOUS_SPEND = 0.021194586
+RULE_REGISTERED_AT = "2026-10-18T10:45:18.869980+00:00"
 PRIOR_DOC_CALL_COST = 0.41403
 PRIOR_COST_EVIDENCE = (
     "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html"
@@ -53,7 +63,7 @@ VARIATION_AXES = (
     "region",
     "device",
 )
-DEADLINE = datetime.fromisoformat("2026-10-18T11:22:36+00:00")
+DEADLINE = datetime.fromisoformat("2026-10-18T12:58:04+00:00")
 
 
 def now() -> str:
@@ -72,6 +82,53 @@ def require_time() -> None:
 def graph_count(gc: GraphClient) -> int:
     rows = gc.query("MATCH (n) RETURN count(n) AS total")
     return int(rows[0]["total"])
+
+
+def prove_isolation(
+    gc: GraphClient, live_uri: str, scratch_uri: str, arm: str, data: dict, log: Path
+) -> None:
+    """Show a scratch-only node and remove it before measuring a family."""
+    scratch_count = graph_count(gc)
+    with GraphClient(uri=live_uri) as live:
+        live_count = graph_count(live)
+        token = str(uuid.uuid4())
+        gc.query("CREATE (p:ScratchProbe {id: $token}) RETURN p.id AS id", token=token)
+        marked_count = graph_count(gc)
+        scratch_probe = gc.query(
+            "MATCH (p:ScratchProbe {id: $token}) RETURN count(p) AS n", token=token
+        )[0]["n"]
+        live_probe = live.query(
+            "MATCH (p:ScratchProbe {id: $token}) RETURN count(p) AS n", token=token
+        )[0]["n"]
+        gc.query("MATCH (p:ScratchProbe {id: $token}) DELETE p", token=token)
+        restored_count = graph_count(gc)
+    proof = {
+        "arm": arm,
+        "scratch_uri": scratch_uri,
+        "scratch_nodes": scratch_count,
+        "live_uri": live_uri,
+        "live_nodes": live_count,
+        "marked_scratch_nodes": marked_count,
+        "scratch_probe": scratch_probe,
+        "live_probe": live_probe,
+        "restored_scratch_nodes": restored_count,
+        "at": now(),
+        "neo4j_log": str(log),
+    }
+    data.setdefault("isolation_proof", []).append(proof)
+    save(data)
+    print(
+        f"isolation {arm}: scratch {scratch_uri} {scratch_count}->{marked_count}->{restored_count}; live {live_uri} {live_count}; marker scratch={scratch_probe} live={live_probe}",
+        flush=True,
+    )
+    if (
+        scratch_count <= 0
+        or marked_count != scratch_count + 1
+        or scratch_probe != 1
+        or live_probe != 0
+        or restored_count != scratch_count
+    ):
+        raise RuntimeError("Scratch-only marker contrast failed")
 
 
 def west_roster() -> tuple[set[str], list[dict]]:
@@ -171,7 +228,7 @@ def make_instance(root: Path, dump: Path, label: str, port: int):
     return place, proc, log
 
 
-def cli(seed: str, uri: str, *flags: str) -> None:
+def cli(seed: str, uri: str, *flags: str) -> list[dict] | None:
     command = [
         "uv",
         "run",
@@ -191,11 +248,68 @@ def cli(seed: str, uri: str, *flags: str) -> None:
     )
     print("command: " + " ".join(command), flush=True)
     remaining = (DEADLINE - datetime.now(UTC)).total_seconds()
-    completed = subprocess.run(command, env=env, check=False, timeout=max(1, remaining))
+    if "--json" not in flags:
+        completed = subprocess.run(
+            command, env=env, check=False, timeout=max(1, remaining)
+        )
+        if completed.returncode:
+            raise RuntimeError(
+                f"Harmonize command failed for {seed}: {completed.returncode}"
+            )
+        return None
+    from imas_codex.standard_names import harmonize
+
+    arm = os.environ.get("ANCHOR_ARM", "unknown")
+    log_path = RUN_DIR / f"apply-{arm}-{seed}.log"
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    with log_path.open("w") as stream:
+        stream.write(
+            f"revision={revision} tree={Path.cwd()} command={' '.join(command)}\n"
+        )
+        stream.write(
+            f"module.__file__={harmonize.__file__}\nresolved_cwd={Path.cwd().resolve()}\n"
+        )
+        stream.flush()
+        try:
+            completed = subprocess.run(
+                command,
+                env=env,
+                check=False,
+                timeout=max(1, remaining),
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+            )
+        except subprocess.TimeoutExpired:
+            stream.write("EXIT=124\n")
+            raise
+        stream.write(f"EXIT={completed.returncode}\n")
+    print(f"apply log: {log_path} EXIT={completed.returncode}", flush=True)
     if completed.returncode:
         raise RuntimeError(
-            f"Harmonize command failed for {seed}: {completed.returncode}"
+            f"Harmonize command failed for {seed}: {completed.returncode}; {log_path}"
         )
+    lines = log_path.read_text().splitlines()
+    for line in reversed(lines):
+        try:
+            parsed = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if (
+            isinstance(parsed, list)
+            and parsed
+            and isinstance(parsed[0], dict)
+            and "result" in parsed[0]
+        ):
+            return parsed
+    for index in range(len(lines) - 1, -1, -1):
+        if lines[index].lstrip().startswith("[{"):
+            try:
+                parsed = json.loads("\n".join(lines[index:-1]))
+            except json.JSONDecodeError:
+                continue
+            if isinstance(parsed, list) and parsed and "result" in parsed[0]:
+                return parsed
+    raise RuntimeError(f"Harmonize returned no JSON receipt for {seed}: {log_path}")
 
 
 def scores(gc: GraphClient, seed: str) -> dict[str, float | None]:
@@ -225,19 +339,30 @@ def measure_arm(
         if ceiling <= 0:
             raise RuntimeError("No budget remains before next apply")
         started = time.monotonic()
-        cli(seed, uri, "--apply", "--cost-limit", f"{ceiling:.2f}", "--json")
+        outcome = cli(seed, uri, "--apply", "--cost-limit", f"{ceiling:.2f}", "--json")
         elapsed = time.monotonic() - started
         after = report_family_rows(gc, seeds=[seed])[0]
         after_scores = scores(gc, seed)
+        run_ids = outcome[0]["result"]["run_ids"]
+        if not run_ids:
+            raise RuntimeError(f"Apply for {seed} returned no run IDs")
         receipt = gc.query(
-            "MATCH (r:SNRun) WHERE r.started_at IS NOT NULL "
-            "OPTIONAL MATCH (c:LLMCost {for_run: r.id}) "
+            "UNWIND $ids AS rid MATCH (r:SNRun {id: rid}) "
+            "OPTIONAL MATCH (c:LLMCost {for_run: rid}) "
             "RETURN r.id AS id, r.cost_spent AS spend, r.started_at AS started, "
-            "count(c) AS calls, sum(c.llm_cost) AS llm_spend "
-            "ORDER BY r.started_at DESC LIMIT 1"
+            "count(c) AS calls, sum(c.llm_cost) AS llm_spend",
+            ids=run_ids,
         )
+        if len(receipt) != len(run_ids):
+            raise RuntimeError(f"Receipt missing for {seed}: {run_ids}")
         receipt = [{**item, "started": str(item["started"])} for item in receipt]
-        spend = float(receipt[0].get("spend") or 0) if receipt else 0.0
+        spend = sum(float(item.get("llm_spend") or 0) for item in receipt)
+        calls = sum(int(item.get("calls") or 0) for item in receipt)
+        reported = float(outcome[0]["result"]["total_cost"])
+        if reported > 0 and (calls == 0 or abs(spend - reported) > 0.02):
+            raise RuntimeError(
+                f"Apply receipt mismatch for {seed}: {receipt}, reported={reported}"
+            )
         data["spend_usd"] += spend
         data.setdefault("arms", {}).setdefault(arm, []).append(
             {
@@ -251,6 +376,7 @@ def measure_arm(
                 "scores_before": before_scores,
                 "scores_after": after_scores,
                 "planned_calls": plan[0]["planned_calls"],
+                "calls": calls,
                 "receipt": receipt,
                 "spend_usd": spend,
                 "wall_seconds": elapsed,
@@ -265,14 +391,54 @@ def measure_arm(
         )
 
 
+def arm_worker(arm: str) -> None:
+    selected = json.loads((RUN_DIR / "arm-input.json").read_text())
+    data = {"arm": arm, "spend_usd": 0.0, "arms": {arm: []}}
+    save(data)
+    with GraphClient() as gc:
+        measure_arm(gc, os.environ["NEO4J_URI"], selected, arm, data)
+
+
+def start_arm_worker(uri: str) -> tuple[subprocess.Popen, Path, object]:
+    log_path = RUN_DIR / "arm-jev.log"
+    stream = log_path.open("w")
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    stream.write(
+        f"revision={revision} tree={Path.cwd()} command=uv run python {Path(__file__).resolve()} --arm-worker jev\n"
+    )
+    stream.write(
+        f"module.__file__={Path(__file__).resolve()}\nresolved_cwd={Path.cwd().resolve()}\n"
+    )
+    stream.flush()
+    env = dict(
+        os.environ,
+        UV_NO_SYNC="1",
+        NEO4J_URI=uri,
+        ANCHOR_ARM="jev",
+        ANCHOR_RESULTS_PATH=str(RUN_DIR / "arm-jev-results.json"),
+        UV_PROJECT_ENVIRONMENT="/home/ITER/mcintos/Code/imas-codex/.venv",
+        PYTHONPATH=str(Path.cwd()),
+    )
+    proc = subprocess.Popen(
+        ["uv", "run", "python", str(Path(__file__).resolve()), "--arm-worker", "jev"],
+        env=env,
+        stdout=stream,
+        stderr=subprocess.STDOUT,
+        start_new_session=True,
+    )
+    print(f"Jev arm launched pid={proc.pid}, log={log_path}", flush=True)
+    return proc, log_path, stream
+
+
 def main() -> None:
     data: dict = {
         "source_export": str(ARCHIVE),
         "started_at": now(),
         "spend_limit_usd": SPEND_LIMIT,
-        "spend_usd": 0.0,
+        "previous_spend_usd": PREVIOUS_SPEND,
+        "spend_usd": PREVIOUS_SPEND,
         "adoption_rule": {
-            "registered_at": now(),
+            "registered_at": RULE_REGISTERED_AT,
             "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm.",
         },
     }
@@ -289,7 +455,9 @@ def main() -> None:
         "bolt://localhost"
     ):
         raise RuntimeError("Live URI unexpectedly resolves to loopback")
-    active_proc = None
+    active_procs = []
+    child_proc = None
+    child_stream = None
     try:
         with tarfile.open(ARCHIVE, "r:gz") as archive:
             member = next(item for item in archive if item.name.endswith("/graph.dump"))
@@ -297,33 +465,14 @@ def main() -> None:
             with archive.extractfile(member) as source, dump.open("wb") as target:
                 shutil.copyfileobj(source, target)
         print(f"extracted dump: {dump.stat().st_size} bytes", flush=True)
-        for arm, port in (("heuristic", 27697), ("jev", 27698)):
+        for arm, port in (("heuristic", 27697),):
             require_time()
             place, active_proc, log = make_instance(scratch, dump, arm, port)
+            active_procs.append(active_proc)
             uri = f"bolt://127.0.0.1:{port}"
             os.environ["NEO4J_URI"] = uri
             with GraphClient() as gc:
-                scratch_count = graph_count(gc)
-                with GraphClient(uri=live_uri) as live:
-                    live_count = graph_count(live)
-                data.setdefault("isolation_proof", []).append(
-                    {
-                        "arm": arm,
-                        "scratch_uri": uri,
-                        "scratch_nodes": scratch_count,
-                        "live_uri": live_uri,
-                        "live_nodes": live_count,
-                        "at": now(),
-                        "neo4j_log": str(log),
-                    }
-                )
-                save(data)
-                print(
-                    f"isolation {arm}: scratch {uri} {scratch_count}; live {live_uri} {live_count}",
-                    flush=True,
-                )
-                if scratch_count == live_count or scratch_count <= 0:
-                    raise RuntimeError("Scratch/live count contrast failed")
+                prove_isolation(gc, live_uri, uri, arm, data, log)
                 if arm == "heuristic":
                     families = fetch_pattern_families(gc, min_size=1)
                     eligible = []
@@ -391,7 +540,7 @@ def main() -> None:
                     data["scorer_spend_usd"] = sum(
                         row["jev_cost"] for row in candidates
                     )
-                    data["spend_usd"] = data["scorer_spend_usd"]
+                    data["spend_usd"] = PREVIOUS_SPEND + data["scorer_spend_usd"]
                     selected = select(candidates)
                     data["selected"] = selected
                     if len(selected) < 10:
@@ -431,24 +580,62 @@ def main() -> None:
                         item["estimate_per_arm_usd"] for item in data["dry_runs"]
                     )
                     data["dry_run_estimate_total_usd"] = estimated
-                    cap_envelope = data["scorer_spend_usd"] + 2 * len(selected) * 1.49
+                    cap_envelope = (
+                        PREVIOUS_SPEND
+                        + data["scorer_spend_usd"]
+                        + 2 * len(selected) * 1.49
+                    )
                     data["cap_envelope_usd"] = cap_envelope
                     save(data)
                     if (
-                        estimated + data["scorer_spend_usd"] >= SPEND_LIMIT
+                        estimated + PREVIOUS_SPEND + data["scorer_spend_usd"]
+                        >= SPEND_LIMIT
                         or cap_envelope >= SPEND_LIMIT
                     ):
                         raise RuntimeError(
                             f"Dry-run estimate ${estimated:.2f} or cap ${cap_envelope:.2f} reaches budget"
                         )
-                else:
-                    selected = data["selected"]
-                measure_arm(gc, uri, selected, arm, data)
-            stop_temp_neo4j(active_proc)
-            active_proc = None
-            data.setdefault("stopped_instances", []).append(
-                {"arm": arm, "tree": str(place), "at": now()}
-            )
+                    jev_place, jev_proc, jev_log = make_instance(
+                        scratch, dump, "jev", 27698
+                    )
+                    active_procs.append(jev_proc)
+                    jev_uri = "bolt://127.0.0.1:27698"
+                    with GraphClient(uri=jev_uri) as jev_gc:
+                        prove_isolation(jev_gc, live_uri, jev_uri, "jev", data, jev_log)
+                    (RUN_DIR / "arm-input.json").write_text(
+                        json.dumps(selected, indent=2) + "\n"
+                    )
+                    child_proc, child_log, child_stream = start_arm_worker(jev_uri)
+                    os.environ["NEO4J_URI"] = uri
+                    os.environ["ANCHOR_ARM"] = "heuristic"
+                    measure_arm(gc, uri, selected, arm, data)
+                    remaining = (DEADLINE - datetime.now(UTC)).total_seconds()
+                    child_proc.wait(timeout=max(1, remaining))
+                    child_stream.write(f"EXIT={child_proc.returncode}\n")
+                    child_stream.close()
+                    child_stream = None
+                    if child_proc.returncode:
+                        raise RuntimeError(f"Jev arm failed: {child_log}")
+                    jev_data = json.loads(
+                        (RUN_DIR / "arm-jev-results.json").read_text()
+                    )
+                    jev_rows = jev_data.get("arms", {}).get("jev", [])
+                    if len(jev_rows) != len(selected):
+                        raise RuntimeError(
+                            f"Jev arm recorded {len(jev_rows)} of {len(selected)} families"
+                        )
+                    data.setdefault("arms", {})["jev"] = jev_rows
+                    data["spend_usd"] += jev_data["spend_usd"]
+                    data["arm_worker_log"] = str(child_log)
+                    save(data)
+            for finished_arm, finished_place, finished_proc in (
+                ("heuristic", place, active_proc),
+                ("jev", jev_place, jev_proc),
+            ):
+                stop_temp_neo4j(finished_proc)
+                data.setdefault("stopped_instances", []).append(
+                    {"arm": finished_arm, "tree": str(finished_place), "at": now()}
+                )
             save(data)
         heur = {row["seed"]: row for row in data["arms"]["heuristic"]}
         jev = {row["seed"]: row for row in data["arms"]["jev"]}
@@ -480,12 +667,34 @@ def main() -> None:
         }
         save(data)
     finally:
-        if active_proc is not None:
-            stop_temp_neo4j(active_proc)
+        if child_proc is not None and child_proc.poll() is None:
+            print(
+                f"stopping own Jev arm process group pid={child_proc.pid}", flush=True
+            )
+            os.killpg(os.getpgid(child_proc.pid), signal.SIGTERM)
+            try:
+                child_proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                print(
+                    f"Jev arm pid={child_proc.pid} survived SIGTERM; escalating",
+                    flush=True,
+                )
+                os.killpg(os.getpgid(child_proc.pid), signal.SIGKILL)
+                child_proc.wait(timeout=10)
+        if child_stream is not None:
+            child_stream.write(
+                f"EXIT={child_proc.returncode if child_proc else 'unknown'}\n"
+            )
+            child_stream.close()
+        for process in active_procs:
+            stop_temp_neo4j(process)
         shutil.rmtree(scratch)
         data["scratch_removed"] = {"tree": str(scratch), "at": now()}
         save(data)
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 3 and sys.argv[1] == "--arm-worker":
+        arm_worker(sys.argv[2])
+    else:
+        main()
