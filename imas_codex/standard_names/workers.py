@@ -7272,6 +7272,13 @@ async def process_refine_name_batch(
                 "vocab_gap_detail": vocab_gap_detail,
                 "validation_issues": validation_issues,
             }
+            from imas_codex.standard_names.review.cascade import (
+                failed_check_instructions,
+            )
+
+            failed_checks = failed_check_instructions(item, "name")
+            if failed_checks:
+                prompt_context["failed_checks"] = failed_checks
 
             # Attempt hybrid neighbour search (best-effort).  Uses the
             # cycle-scoped ``gc`` — no fresh client.
@@ -7296,11 +7303,26 @@ async def process_refine_name_batch(
                     )
 
             # ── Fan-out trigger gate ─────────────────────────────────
-            # Plumb reviewer_comments_per_dim_name from the claim batch
-            # through the trigger predicate.  Gate on ALL of:
-            # chain_length > 0, chain_history present (retry enrichment),
-            # at least one allow-listed dim contains a trigger keyword.
+            # A routed refine uses its named failures; the incumbent path
+            # retains the reviewer-comment trigger.
             reviewer_comments = item.get("reviewer_comments_per_dim_name")
+            check_trigger = {}
+            if failed_checks:
+                from imas_codex.standard_names.review.checks import load_review_checks
+
+                check_trigger = {
+                    "trigger_source": "checks",
+                    "checks": [
+                        check
+                        for check in load_review_checks()[0]
+                        if check.axis == "name"
+                    ],
+                    "check_results": {
+                        check["id"]: {"answered": True, "failure_probability": 1.0}
+                        for check in failed_checks
+                    },
+                    "check_threshold": fanout_settings.refine_trigger_check_threshold,
+                }
             fanout_eligible, reviewer_excerpt = should_trigger_fanout(
                 reviewer_comments_per_dim=reviewer_comments,
                 chain_length=chain_length,
@@ -7308,6 +7330,7 @@ async def process_refine_name_batch(
                 keywords=fanout_settings.refine_trigger_keywords,
                 dims=fanout_settings.refine_trigger_comment_dims,
                 char_cap=fanout_settings.refine_trigger_comment_chars,
+                **check_trigger,
             )
 
             # ── Optional fan-out ─────────────────────────────────────
@@ -8940,23 +8963,33 @@ async def process_review_name_batch(
         # ── RD-quorum cycles ──────────────────────────────────────────
         lease = None
         try:
-            quorum = await _run_rd_quorum_cycles(
-                sn_id=sn_id,
-                review_axis="name",
-                response_model=StandardNameQualityReviewNameOnlyBatch,
-                user_prompt=user_prompt,
-                system_prompt=system_prompt,
-                models=review_models,
-                disagreement_threshold=disagreement_threshold,
-                rubric_dims=("grammar", "semantic", "convention", "completeness"),
-                lease=lease,
-                budget_manager=mgr,
-                phase="review_name",
-                acall_llm_structured=acall_llm_structured,
-                reasoning_effort=get_sn_review_reasoning_effort(),
-                escalation_reasoning_effort=get_sn_review_escalation_reasoning_effort(),
-                run_id=mgr.run_id,
-                escalation_prompt_factory=_render_escalation_prompt,
+            from functools import partial
+
+            from imas_codex.standard_names.review.cascade import adjudicate_review
+
+            quorum = await adjudicate_review(
+                "name",
+                item,
+                review_models,
+                partial(
+                    _run_rd_quorum_cycles,
+                    sn_id=sn_id,
+                    review_axis="name",
+                    response_model=StandardNameQualityReviewNameOnlyBatch,
+                    user_prompt=user_prompt,
+                    system_prompt=system_prompt,
+                    disagreement_threshold=disagreement_threshold,
+                    rubric_dims=("grammar", "semantic", "convention", "completeness"),
+                    lease=lease,
+                    budget_manager=mgr,
+                    phase="review_name",
+                    acall_llm_structured=acall_llm_structured,
+                    reasoning_effort=get_sn_review_reasoning_effort(),
+                    escalation_reasoning_effort=get_sn_review_escalation_reasoning_effort(),
+                    run_id=mgr.run_id,
+                    escalation_prompt_factory=_render_escalation_prompt,
+                ),
+                mgr=mgr,
             )
 
             if quorum is None:
@@ -10925,16 +10958,9 @@ async def _documentation_contradiction_note(
                 state, jev_review._default_checks(), answers
             )
             if verdict["contradiction_veto"]:
-                contradicted = [
-                    claim
-                    for claim, answer in zip(
-                        claims, verdict["claim_answers"], strict=True
-                    )
-                    if answer is not None and answer.get("choice") == "contradicts"
-                ]
                 dd_text = source.get("documentation") or source.get("description") or ""
                 contradictions.append(
-                    f"{source_path}: {'; '.join(contradicted)}; DD: {dd_text}"
+                    f"{source_path}: {verdict['contradiction_reason']}; DD: {dd_text}"
                 )
             elif any(
                 answer is None
@@ -11006,24 +11032,34 @@ async def process_review_docs_batch(
         try:
             request = await prepare_docs_review_request(item)
 
-            quorum = await _run_rd_quorum_cycles(
-                sn_id=sn_id,
-                review_axis="docs",
-                response_model=request["response_model"],
-                user_prompt=request["user_prompt"],
-                system_prompt=request["system_prompt"],
-                models=request["models"],
-                disagreement_threshold=request["disagreement_threshold"],
-                rubric_dims=tuple(request["rubric_dims"]),
-                lease=lease,
-                budget_manager=mgr,
-                phase="review_docs",
-                acall_llm_structured=acall_llm_structured,
-                reasoning_effort=request["reasoning_effort"],
-                escalation_reasoning_effort=request["escalation_reasoning_effort"],
-                run_id=mgr.run_id,
-                escalation_prompt_factory=request.get("escalation_prompt_factory"),
-                review_group_id=None,
+            from functools import partial
+
+            from imas_codex.standard_names.review.cascade import adjudicate_review
+
+            quorum = await adjudicate_review(
+                "docs",
+                request.get("veto_item", item),
+                request["models"],
+                partial(
+                    _run_rd_quorum_cycles,
+                    sn_id=sn_id,
+                    review_axis="docs",
+                    response_model=request["response_model"],
+                    user_prompt=request["user_prompt"],
+                    system_prompt=request["system_prompt"],
+                    disagreement_threshold=request["disagreement_threshold"],
+                    rubric_dims=tuple(request["rubric_dims"]),
+                    lease=lease,
+                    budget_manager=mgr,
+                    phase="review_docs",
+                    acall_llm_structured=acall_llm_structured,
+                    reasoning_effort=request["reasoning_effort"],
+                    escalation_reasoning_effort=request["escalation_reasoning_effort"],
+                    run_id=mgr.run_id,
+                    escalation_prompt_factory=request.get("escalation_prompt_factory"),
+                    review_group_id=None,
+                ),
+                mgr=mgr,
             )
 
             if quorum is None:
@@ -11243,6 +11279,11 @@ async def process_refine_docs_batch(
             "edit_reason": item.get("edit_reason"),
             "edit_origin": item.get("edit_origin"),
         }
+        from imas_codex.standard_names.review.cascade import failed_check_instructions
+
+        failed_checks = failed_check_instructions(item, "docs")
+        if failed_checks:
+            prompt_context["failed_checks"] = failed_checks
         prompt_context["conventions"] = conventions_context_for(sn_id)
 
         # Best-effort DD path enrichment

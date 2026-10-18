@@ -6298,8 +6298,9 @@ def update_review_aggregates(
     """Recompute per-StandardName aggregates from attached StandardNameReview nodes.
 
     Sets ``review_count``, ``review_mean_score``, and ``review_disagreement``
-    across all attached StandardNameReview nodes. Axis-specific score and
-    resolution-method mirrors are owned by their dedicated write paths.
+    across attached reviews except non-canonical Jev shadow judgments.
+    Axis-specific score and resolution-method mirrors are owned by their
+    dedicated write paths.
 
     Returns the number of StandardName nodes updated.
     """
@@ -6312,6 +6313,8 @@ def update_review_aggregates(
             MATCH (sn:StandardName {id: sid})
             WHERE NOT (coalesce(sn.name_stage, '') IN $frozen_name_stages)
             OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
+            WHERE NOT (coalesce(r.judge_kind, '') = 'jev'
+                       AND coalesce(r.is_canonical, false) = false)
             WITH sn, count(r) AS n, avg(r.score) AS mean,
                  CASE WHEN count(r) > 1 THEN max(r.score) - min(r.score) ELSE 0.0 END AS spread
             SET sn.updated_at = datetime(), sn.review_count = n,
@@ -16962,13 +16965,19 @@ def claim_review_name_batch(
 # -- persist_reviewed_name (write the review + the stage transition) ----------
 
 
-#: Resolution methods under which the blind seats actually reached a verdict.
-#: ``quorum_consensus`` means both blind cycles scored and agreed;
-#: ``authoritative_escalation`` means the context-aware seat resolved their
-#: dispute.  Anything else scored the name with fewer seats than the chain
-#: defines, so the score carries less authority than the profile promises.
+#: Resolution methods that authorize a stage decision. The quorum methods
+#: represent completed reviewer chains; the cascade methods represent a
+#: calibrated Jev decision or its explicit single-reviewer route. Other methods
+#: scored with fewer seats than the configured chain requires.
 QUORATE_RESOLUTION_METHODS: frozenset[str] = frozenset(
-    {"quorum_consensus", "authoritative_escalation"}
+    {
+        "quorum_consensus",
+        "authoritative_escalation",
+        "jev_cascade_accept",
+        "jev_cascade_refine",
+        "jev_cascade_chat_review",
+        "jev_cascade_chat_below_reject",
+    }
 )
 
 #: ``max_cycles_reached`` merges two blind seats that never agreed.  On a
