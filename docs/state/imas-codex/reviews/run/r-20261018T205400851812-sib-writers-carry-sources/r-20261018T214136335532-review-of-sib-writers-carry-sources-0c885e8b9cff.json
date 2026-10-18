@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "absent_note": "",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's completed baseline_suite is revision 5f79e844 with 243 passed, zero failures and EXIT=0 in covering-base-resumed.log; its completed after_suite is revision a3b384e5 with the same 243 passed, zero failures and EXIT=0 in covering-head-resumed.log. The final commit 0c885e8b changes only the evidence HTML.",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/edit.py:3368",
+    "imas_codex/standard_names/graph_ops.py:5928",
+    "imas_codex/standard_names/graph_ops.py:19338",
+    "imas_codex/standard_names/attachment_audit.py:1201",
+    "imas_codex/standard_names/signed_manifest.py:4086"
+  ],
+  "commits_read": [
+    "24b8638cc61f70a177f740dd35d8c32cfbf9af43",
+    "b0d60a50ed63e6c7e70ea667fa3e3beb5c92cd7c",
+    "7e210992c63bc1fc2b413b8f24ddf4ca2bc7844d",
+    "febccd64cd97c95ef07f3982a9e074133ca2e9a3",
+    "02b674e8cbddc90547590ee36800f05f50e25ef3",
+    "a3b384e5a3bebfa5ee781374dc068761b8dc1fe5",
+    "0c885e8b9cff06a4b29a262cec4d8f2d684aaf3a"
+  ],
+  "completed_at": "2026-10-18T21:49:31Z",
+  "dispatched_at": "2026-10-18T21:42:05Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/source_invariant.py",
+      "line": "32-36",
+      "severity": "blocking",
+      "text": "blocking: For a live parent with a live child and no origin property, Cypher evaluates sn.origin = 'derived' to null and NOT(null AND true) to null; WHERE drops the row despite producers = 0, so every writer can leave that non-derived parent sourceless. The direct test at tests/standard_names/test_writers_carry_sources.py:22-31 supplies a mock result instead of executing this predicate and therefore cannot catch the escape; make the origin comparison null-safe and test the actual query result for this case."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified five production guard calls at edit.py:3368, graph_ops.py:5928 and :19338, attachment_audit.py:1201, and signed_manifest.py:4086.",
+    "diff": "Read all seven commits from 24b8638c through 0c885e8b against base 5f79e844; the code adds one shared guard, five production calls and seven writer test cases, while the remaining commits update the evidence fragment.",
+    "done_when": "The brief.md gate asks for writer removal controls, invariant cases, and zero added covering failures; red-all-writers.log records five failing writer cases, red-rename-transaction.log records one, final-head-resumed.log records 250 passing tests, and covering-base-resumed.log and covering-head-resumed.log each record 243 passed and EXIT=0.",
+    "goal": "The source brief.md requires four writers to refuse sourceless live names; the guard is called from edit.py:3368, graph_ops.py:5928 and :19338, attachment_audit.py:1201, and signed_manifest.py:4086, but source_invariant.py:32 can miss a live parent with absent origin.",
+    "manifest": "The source manifest.md reports status complete, seven commits, the two completed covering arms, six red removal cases, and a final seven-file gate with 250 passed.",
+    "write_paths": "The source manifest.md declares the seven changed files including graph_ops.py, and git diff --name-status 5f79e844..0c885e8b lists only those seven paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_writers_carry_sources.py:48-201 reddens when writer calls are removed, but its Query mock at :22-31 computes the expected classification itself and would remain green if source_invariant.py:32 retained the null-sensitive Cypher predicate.",
+    "evidence": "red-all-writers.log and red-rename-transaction.log end EXIT=1 for six removed-call cases, and covering-base-resumed.log and covering-head-resumed.log each end 243 passed with EXIT=0, but tests/standard_names/test_writers_carry_sources.py:22 substitutes a Python answer for the guard's Cypher result.",
+    "fit": "imas_codex/standard_names/source_invariant.py:7-46 follows the repository's named-refusal and query-handle pattern, and its added symbols contain no forbidden plan or release identifiers.",
+    "goal_fidelity": "imas_codex/standard_names/source_invariant.py:32 omits source-free live parents whose origin property is null and who have a live child, so the shared rule does not cover every identity the goal names.",
+    "reuse": "A capability search found attachment_audit.py:2834 only reports all sourceless names and provenance_lifecycle.py:1383 checks source-to-target mirrors; source_invariant.py:11 owns the distinct pre-commit, lifecycle-aware refusal and does not duplicate either owner.",
+    "scope_discipline": "The seven files in git diff --name-status 5f79e844..0c885e8b match the source manifest.md write paths, and graph_ops.py changes stay at the allowed writer call sites."
+  },
+  "plan_slug": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "review_run_id": "r-20261018T214136335532-review-of-sib-writers-carry-sources-0c885e8b9cff",
+  "reviewed_base_sha": "5f79e844a5b1df6df42e1c8698459249d5ba822c",
+  "reviewed_head_sha": "0c885e8b9cff06a4b29a262cec4d8f2d684aaf3a",
+  "reviewed_revision": "0c885e8b9cff",
+  "reviewed_run_id": "r-20261018T205400851812-sib-writers-carry-sources",
+  "scores": {
+    "durability": 10,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T21:50:45.765493+00:00"
+}
