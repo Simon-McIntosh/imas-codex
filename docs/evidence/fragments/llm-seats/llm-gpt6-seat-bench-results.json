@@ -153,6 +153,76 @@
       "provenance": {
         "n_docs": 8
       }
+    },
+    "breaker-docs": {
+      "role": "breaker-docs",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-5.5",
+          "n": 12,
+          "cost": 1.20218,
+          "metrics": {
+            "independence_rho": -0.222,
+            "rho_qwen": -0.1759,
+            "rho_minimax": -0.2681,
+            "verdict_flip_quality": 0.3333,
+            "n_flips": 3.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 12,
+          "cost": 0.38120500000000007,
+          "metrics": {
+            "independence_rho": -0.1348,
+            "rho_qwen": -0.2172,
+            "rho_minimax": -0.0523,
+            "verdict_flip_quality": 0.3333,
+            "n_flips": 3.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 12,
+          "cost": 0.024678525,
+          "metrics": {
+            "independence_rho": -0.3266,
+            "rho_qwen": -0.3447,
+            "rho_minimax": -0.3084,
+            "verdict_flip_quality": 0.5,
+            "n_flips": 2.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/openai/gpt-5.5",
+      "judge_model": null,
+      "sample_ids": [
+        "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive",
+        "helium_3_density_at_divertor_target",
+        "deuterium_density_at_plasma_boundary",
+        "tilt_angle_of_beam_tracing_beam",
+        "vertical_velocity_at_current_center",
+        "oxygen_density_at_plasma_boundary",
+        "area_of_flux_loop",
+        "voltage_of_correction_coil",
+        "radial_perturbed_vacuum_magnetic_field_real_part",
+        "y_first_measurement_direction_unit_vector_of_strain_gauge",
+        "helium_4_density",
+        "propane_prefill_count"
+      ],
+      "seed": 0,
+      "axis": "docs",
+      "timestamp": "2026-10-18T18:44:31.676716+00:00",
+      "provenance": {
+        "blind_pair": [
+          "openrouter/qwen/qwen3.7-max",
+          "openrouter/minimax/minimax-m3"
+        ],
+        "n_items": 12
+      }
     }
   },
   "item_outcomes": {
@@ -275,10 +345,118 @@
           "pulse_duration": 0.975
         }
       }
+    },
+    "breaker-docs": {
+      "fixture": [
+        {
+          "id": "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive",
+          "pair_mean": 0.8479166666666667,
+          "final_accepted": false
+        },
+        {
+          "id": "helium_3_density_at_divertor_target",
+          "pair_mean": 0.8875,
+          "final_accepted": true
+        },
+        {
+          "id": "deuterium_density_at_plasma_boundary",
+          "pair_mean": 0.7062499999999999,
+          "final_accepted": true
+        },
+        {
+          "id": "tilt_angle_of_beam_tracing_beam",
+          "pair_mean": 0.8500000000000001,
+          "final_accepted": true
+        },
+        {
+          "id": "vertical_velocity_at_current_center",
+          "pair_mean": 0.83125,
+          "final_accepted": true
+        },
+        {
+          "id": "oxygen_density_at_plasma_boundary",
+          "pair_mean": 0.8555555555555556,
+          "final_accepted": true
+        },
+        {
+          "id": "area_of_flux_loop",
+          "pair_mean": 0.853125,
+          "final_accepted": true
+        },
+        {
+          "id": "voltage_of_correction_coil",
+          "pair_mean": 0.84375,
+          "final_accepted": true
+        },
+        {
+          "id": "radial_perturbed_vacuum_magnetic_field_real_part",
+          "pair_mean": 0.79375,
+          "final_accepted": true
+        },
+        {
+          "id": "y_first_measurement_direction_unit_vector_of_strain_gauge",
+          "pair_mean": 0.796875,
+          "final_accepted": true
+        },
+        {
+          "id": "helium_4_density",
+          "pair_mean": 0.7640625,
+          "final_accepted": true
+        },
+        {
+          "id": "propane_prefill_count",
+          "pair_mean": 0.925,
+          "final_accepted": true
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-5.5": {
+          "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive": 1.0,
+          "helium_3_density_at_divertor_target": 1.0,
+          "deuterium_density_at_plasma_boundary": 1.0,
+          "tilt_angle_of_beam_tracing_beam": 0.9375,
+          "vertical_velocity_at_current_center": 1.0,
+          "oxygen_density_at_plasma_boundary": 0.9375,
+          "area_of_flux_loop": 0.875,
+          "voltage_of_correction_coil": 1.0,
+          "radial_perturbed_vacuum_magnetic_field_real_part": 1.0,
+          "y_first_measurement_direction_unit_vector_of_strain_gauge": 0.9375,
+          "helium_4_density": 0.5625,
+          "propane_prefill_count": 0.5625
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive": 0.9375,
+          "helium_3_density_at_divertor_target": 0.75,
+          "deuterium_density_at_plasma_boundary": 0.75,
+          "tilt_angle_of_beam_tracing_beam": 0.75,
+          "vertical_velocity_at_current_center": 1.0,
+          "oxygen_density_at_plasma_boundary": 0.75,
+          "area_of_flux_loop": 0.6875,
+          "voltage_of_correction_coil": 0.875,
+          "radial_perturbed_vacuum_magnetic_field_real_part": 0.8125,
+          "y_first_measurement_direction_unit_vector_of_strain_gauge": 0.75,
+          "helium_4_density": 0.5625,
+          "propane_prefill_count": 0.75
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive": 0.875,
+          "helium_3_density_at_divertor_target": 0.75,
+          "deuterium_density_at_plasma_boundary": 1.0,
+          "tilt_angle_of_beam_tracing_beam": 0.75,
+          "vertical_velocity_at_current_center": 1.0,
+          "oxygen_density_at_plasma_boundary": 0.8125,
+          "area_of_flux_loop": 0.75,
+          "voltage_of_correction_coil": 0.8125,
+          "radial_perturbed_vacuum_magnetic_field_real_part": 0.875,
+          "y_first_measurement_direction_unit_vector_of_strain_gauge": 0.9375,
+          "helium_4_density": 0.5,
+          "propane_prefill_count": 0.8125
+        }
+      }
     }
   },
   "analysis": {},
-  "total_spend_usd": 5.965632,
+  "total_spend_usd": 7.824536,
   "superseded_runs": [
     {
       "role": "refine",
