@@ -642,6 +642,8 @@ def run_filtered_pairs() -> None:
             "reason": "one unreceipted Jev call at the snapshot dry-run rate",
             "usd": unreceipted_reserve,
         },
+        selected=[],
+        dry_runs=[],
         arms={},
         isolation_proof=[],
         stopped_instances=[],
@@ -768,10 +770,10 @@ def run_filtered_pairs() -> None:
             data["unscored_count"] = sum(
                 row["jev_anchor"] is None for row in candidates
             )
-            selected = select([row for row in candidates if len(row["members"]) == 3])
+            selected = select(candidates)
             if len(selected) != 10:
                 raise RuntimeError(
-                    f"Only {len(selected)} three-member differing-anchor families fit"
+                    f"Only {len(selected)} differing-anchor families remain"
                 )
             data["selected"] = selected
             estimate = measure_doc_call_cost(heur_gc)
@@ -789,15 +791,17 @@ def run_filtered_pairs() -> None:
             for row in selected:
                 cli(row["seed"], heur_uri, "--apply", "--dry-run")
                 planned = plan_family_applies(heur_gc, seeds=[row["seed"]])[0]
-                if planned["decision"] != "apply" or planned["planned_calls"] != 3:
+                if planned["decision"] != "apply" or planned["planned_calls"] != len(
+                    row["members"]
+                ):
                     raise RuntimeError(
                         f"Unexpected dry-run plan for {row['seed']}: {planned}"
                     )
                 data["dry_runs"].append(
                     {
                         "seed": row["seed"],
-                        "calls_per_arm": 3,
-                        "estimate_per_arm_usd": 3 * rate,
+                        "calls_per_arm": planned["planned_calls"],
+                        "estimate_per_arm_usd": planned["planned_calls"] * rate,
                     }
                 )
                 save(data)
