@@ -391,6 +391,43 @@ async def build_cohort(gc) -> dict:
     }
 
 
+def rescore_arms(already_spent: float) -> dict:
+    """Rebuild the arm results from the receipts without buying a call.
+
+    Every call the run made is recorded line by line, so the results can be
+    recomputed at any time from the receipts alone.  Nothing here reaches the
+    provider: a key whose last receipt did not produce a name stays a failure,
+    which is what it is, rather than being bought again.  The ceiling counters
+    are read from the stored results because they record what the run did, not
+    what the receipts contain.
+    """
+    from imas_codex.discovery.base.llm import ensure_model_prefix
+    from imas_codex.settings import get_model
+
+    effort = None
+    try:
+        from imas_codex.settings import get_reasoning_effort
+
+        effort = get_reasoning_effort("sn-refine")
+    except Exception:
+        effort = None
+    lines = receipt_lines()
+    costs = [float(row.get("cost_usd") or 0.0) for row in lines]
+    arm_costs = {
+        arm: [float(r.get("cost_usd") or 0.0) for r in lines if r.get("arm") == arm]
+        for arm in ARMS
+    }
+    return {
+        "model": ensure_model_prefix(get_model("sn-refine")),
+        "reasoning_effort": effort,
+        "spent_usd": already_spent + sum(costs),
+        "arm_calls": len(lines),
+        "costs": costs,
+        "arm_costs": arm_costs,
+        "receipts": load_receipts(),
+    }
+
+
 def receipt_lines() -> list[dict]:
     """Every receipt line, one per call made — a retried call has two.
 
@@ -559,7 +596,10 @@ async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
                     parses = False
                 row.update(
                     {
-                        "outcome": "ok",
+                        # A response that carries no name is not an output, so it
+                        # is recorded as a failure at the moment it is written and
+                        # retried like any other.
+                        "outcome": "ok" if name else "empty_name",
                         "refined_name": name,
                         "refined_description": refined.description or "",
                         "parses": parses,
@@ -609,6 +649,97 @@ async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
     }
 
 
+def sheet_key_findings(
+    key: dict, rows: list[dict], produced: dict[tuple[str, str], tuple[str, str]]
+) -> list[str]:
+    """Check the key against the outputs it claims to map.
+
+    Three facts have to hold. Every output the run produced is credited to
+    exactly one row. Every credit names a case and arm whose output is that
+    row's output. Together those give the third: a row carries both arms only
+    when the two arms produced the same output for that case, because otherwise
+    the two outputs would be credited to one row while only one of them is that
+    row's output.
+    """
+    findings: list[str] = []
+    row_outputs = {
+        row["sheet_id"]: (row["refined_name"], row["refined_description"])
+        for row in rows
+    }
+    claims: dict[tuple[str, str], list[str]] = {}
+    for sheet_id, entry in key.items():
+        if sheet_id not in row_outputs:
+            findings.append(f"{sheet_id}: named in the key but not on the sheet")
+            continue
+        for arm, case_ids in (entry.get("arms") or {}).items():
+            for case_id in case_ids:
+                claims.setdefault((case_id, arm), []).append(sheet_id)
+
+    for pair, sheet_ids in sorted(claims.items()):
+        if len(sheet_ids) > 1:
+            findings.append(
+                f"{pair[0]} {pair[1]}: credited to {len(sheet_ids)} rows "
+                f"({', '.join(sorted(sheet_ids))}); each output belongs to one"
+            )
+    for pair in sorted(produced):
+        if pair not in claims:
+            findings.append(f"{pair[0]} {pair[1]}: produced an output no row credits")
+    for pair, sheet_ids in sorted(claims.items()):
+        if pair not in produced:
+            findings.append(f"{pair[0]} {pair[1]}: credited by a row but not produced")
+            continue
+        for sheet_id in sheet_ids:
+            if produced[pair] != row_outputs[sheet_id]:
+                findings.append(
+                    f"{sheet_id}: credits {pair[0]} {pair[1]}, whose output is not "
+                    "that row's output"
+                )
+    return findings
+
+
+def rows_crediting_both_arms(key: dict) -> int:
+    """Rows that name every arm, which only an identical pair can produce."""
+    return sum(1 for entry in key.values() if set(entry.get("arms") or {}) >= set(ARMS))
+
+
+def sheet_population(
+    cohort: list[dict], receipts: dict, dd_sources: dict[str, dict]
+) -> tuple[
+    list[tuple[dict, dict[str, tuple[str, str]]]], list[str], dict, list[str], int
+]:
+    """Which cases reach the sheet, and what each arm produced for them.
+
+    A case contributes only when both arms returned a name and the case
+    resolves a DD source; anything else is counted and dropped.  The sheet and
+    the key are both built from this, and the key check re-derives it from the
+    receipts so that the check cannot inherit the builder's mistakes.
+    """
+    contributing: list[tuple[dict, dict[str, tuple[str, str]]]] = []
+    complete: list[str] = []
+    incomplete: dict[str, str] = {}
+    no_dd_source: list[str] = []
+    identical_pairs = 0
+    for case in cohort:
+        outputs: dict[str, tuple[str, str]] = {}
+        for arm in ARMS:
+            row = receipts.get((case["sn_id"], arm))
+            if not row or not row.get("refined_name"):
+                incomplete[case["sn_id"]] = (row or {}).get("outcome", "not called")
+                break
+            outputs[arm] = (row["refined_name"], row["refined_description"] or "")
+        if len(outputs) != len(ARMS):
+            continue
+        complete.append(case["sn_id"])
+        source = case_dd_source(case, dd_sources)
+        if not source or not source.get("source_path"):
+            no_dd_source.append(case["sn_id"])
+            continue
+        if outputs["comments"] == outputs["checks"]:
+            identical_pairs += 1
+        contributing.append((case, outputs))
+    return contributing, complete, incomplete, no_dd_source, identical_pairs
+
+
 def build_sheet(
     cohort: list[dict], receipts: dict, dd_sources: dict[str, dict]
 ) -> tuple[list[dict], dict]:
@@ -619,56 +750,65 @@ def build_sheet(
     refined name's bound DD source. A case with no resolvable DD source
     contributes no row: it is counted in ``cases_without_dd_source`` rather than
     shipped with a blank path.
+
+    The key is built from the outputs, never from the arm loop: a row credits an
+    arm only for the cases whose output for that arm is the row's output, so a
+    row carries both arms exactly when the two arms produced the same output.
     """
     rows = []
-    key = {}
+    claimed: dict[str, dict[str, list[str]]] = {}
+    produced: dict[tuple[str, str], tuple[str, str]] = {}
     by_output = {}
-    identical_pairs = 0
-    complete = []
-    incomplete = {}
-    no_dd_source = []
 
-    for case in cohort:
-        outputs = {}
-        for arm in ARMS:
-            row = receipts.get((case["sn_id"], arm))
-            if not row or row.get("outcome") != "ok" or not row.get("refined_name"):
-                incomplete[case["sn_id"]] = (row or {}).get("outcome", "not called")
-                break
-            outputs[arm] = (row["refined_name"], row["refined_description"])
-        if len(outputs) != len(ARMS):
-            continue
-        complete.append(case["sn_id"])
+    contributing, complete, incomplete, no_dd_source, identical_pairs = (
+        sheet_population(cohort, receipts, dd_sources)
+    )
+    prior_names = {case["sn_id"]: case["prior_name"] for case, _ in contributing}
+
+    for case, outputs in contributing:
         source = case_dd_source(case, dd_sources)
-        if not source or not source.get("source_path"):
-            no_dd_source.append(case["sn_id"])
-            continue
-        if outputs["comments"] == outputs["checks"]:
-            identical_pairs += 1
         for arm in ARMS:
             name, description = outputs[arm]
+            produced[(case["sn_id"], arm)] = outputs[arm]
             found = by_output.get((name, description))
-            if found is not None:
-                key[found]["arms"][arm].append(case["sn_id"])
-                continue
-            sheet_id = f"row-{len(rows) + 1:03d}"
-            by_output[(name, description)] = sheet_id
-            rows.append(
-                {
-                    "sheet_id": sheet_id,
-                    "source_path": source["source_path"],
-                    "source_description": source["source_description"],
-                    "source_unit": source["source_unit"],
-                    "ancestor_name": case["prior_name"],
-                    "refined_name": name,
-                    "refined_description": description,
-                }
-            )
-            key[sheet_id] = {
-                "case": case["sn_id"],
-                "prior_name": case["prior_name"],
-                "arms": {arm: [case["sn_id"]] for arm in ARMS},
-            }
+            if found is None:
+                found = f"row-{len(rows) + 1:03d}"
+                by_output[(name, description)] = found
+                claimed[found] = {}
+                rows.append(
+                    {
+                        "sheet_id": found,
+                        "source_path": source["source_path"],
+                        "source_description": source["source_description"],
+                        "source_unit": source["source_unit"],
+                        "ancestor_name": case["prior_name"],
+                        "refined_name": name,
+                        "refined_description": description,
+                    }
+                )
+            claimed[found].setdefault(arm, []).append(case["sn_id"])
+
+    key = {
+        sheet_id: {
+            "cases": sorted({c for ids in arms.values() for c in ids}),
+            "prior_names": sorted(
+                {prior_names[c] for ids in arms.values() for c in ids}
+            ),
+            "arms": {arm: sorted(ids) for arm, ids in sorted(arms.items())},
+        }
+        for sheet_id, arms in claimed.items()
+    }
+    disagreements = sheet_key_findings(key, rows, produced)
+    both_arms = rows_crediting_both_arms(key)
+    if both_arms != identical_pairs:
+        disagreements.append(
+            f"{both_arms} rows carry both arms against {identical_pairs} "
+            "identical output pairs"
+        )
+    if disagreements:
+        raise RuntimeError(
+            "the sheet key disagrees with the outputs: " + "; ".join(disagreements)
+        )
 
     random.Random(SHEET_SEED).shuffle(rows)
     return rows, {
@@ -703,10 +843,24 @@ def sheet_blank_paths(rows: list[dict]) -> list[str]:
     ]
 
 
+def sheet_blank_names(rows: list[dict]) -> list[str]:
+    """Rows shipped without a refined name, which must never happen.
+
+    An answer that carries no name is recorded as a failure at the moment the
+    call returns, so a nameless answer can never reach the sheet.  A row without
+    a name would be a labeller asked to judge nothing.
+    """
+    return [
+        f"{row.get('sheet_id')}: blank refined_name"
+        for row in rows
+        if not str(row.get("refined_name") or "").strip()
+    ]
+
+
 def check_sheet() -> int:
-    """Fail on a hidden field or a blank DD path, and prove both can fail."""
+    """Fail on a hidden field, a blank DD path or a blank name, and prove all three."""
     rows = json.loads(SHEET.read_text(encoding="utf-8"))
-    findings = sheet_leaks(rows) + sheet_blank_paths(rows)
+    findings = sheet_leaks(rows) + sheet_blank_paths(rows) + sheet_blank_names(rows)
     if findings:
         log("FAIL: committed label sheet carries hidden fields or blank DD paths")
         for finding in findings:
@@ -717,17 +871,112 @@ def check_sheet() -> int:
         return 1
     planted_arm = sheet_leaks([{**rows[0], "arm": "checks"}])
     planted_blank = sheet_blank_paths([{**rows[0], "source_path": ""}])
+    planted_name = sheet_blank_names([{**rows[0], "refined_name": ""}])
     if not planted_arm:
         log("FAIL: the planted leaking row was not caught")
         return 1
     if not planted_blank:
         log("FAIL: the planted blank-path row was not caught")
         return 1
+    if not planted_name:
+        log("FAIL: the planted blank-name row was not caught")
+        return 1
     log(
         f"OK: {len(rows)} rows clean; planted arm row refused: {planted_arm[0]}; "
-        f"planted blank-path row refused: {planted_blank[0]}"
+        f"planted blank-path row refused: {planted_blank[0]}; "
+        f"planted blank-name row refused: {planted_name[0]}"
     )
     return 0
+
+
+def check_key() -> int:
+    """Re-derive the key's claims from the receipts and refuse a wrong key.
+
+    The key lives only in the run directory, so this check is the one that has
+    to hold: the sheet and the key are both written by the run, and a key that
+    credits an arm for a case whose output the row does not carry would let a
+    later reader attribute an output to the arm that did not produce it.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    gc = GraphClient()
+    cohort, _cohort_info = resume_cohort()
+    names = sorted({c["prior_name"] for c in cohort} | {c["sn_id"] for c in cohort})
+    dd_sources, _projections = resolve_dd_sources(gc, names)
+    receipts = load_receipts()
+    rows = json.loads(SHEET.read_text(encoding="utf-8"))
+    bundle = json.loads(KEY_PATH.read_text(encoding="utf-8"))
+    key = bundle.get("rows", bundle)
+    contributing, _complete, _incomplete, _no_source, identical = sheet_population(
+        cohort, receipts, dd_sources
+    )
+    produced = {
+        (case["sn_id"], arm): output
+        for case, outputs in contributing
+        for arm, output in outputs.items()
+    }
+    findings = sheet_key_findings(key, rows, produced)
+    both_arms = rows_crediting_both_arms(key)
+    if bundle.get("identical_output_pairs") not in (None, identical):
+        findings.append(
+            f"the key file records {bundle['identical_output_pairs']} identical "
+            f"pairs against {identical} recomputed from the receipts"
+        )
+    if both_arms != identical:
+        findings.append(
+            f"{both_arms} rows carry both arms against {identical} identical "
+            "output pairs"
+        )
+    if findings:
+        log("FAIL: the committed key disagrees with the receipts")
+        for finding in findings:
+            log(f"  {finding}")
+        return 1
+    planted = _both_arms_key_with_differing_outputs(key, produced)
+    if planted is None:
+        log(
+            "FAIL: no case has two different outputs, so the planted key proves nothing"
+        )
+        return 1
+    planted_key, case_id = planted
+    planted_findings = sheet_key_findings(planted_key, rows, produced)
+    if not planted_findings:
+        log("FAIL: the planted both-arms key was not caught")
+        return 1
+    log(
+        f"OK: {len(key)} rows, {len(produced)} produced outputs, "
+        f"{identical} identical pairs, both-arms rows {both_arms}; planted key "
+        f"crediting both arms for {case_id} refused: {planted_findings[0]}"
+    )
+    return 0
+
+
+def _both_arms_key_with_differing_outputs(
+    key: dict, produced: dict[tuple[str, str], tuple[str, str]]
+) -> tuple[dict, str] | None:
+    """Take a real key and credit both arms to a row whose outputs differ.
+
+    The planted defect is the one the brief names: a row that names both arms
+    when the two arms produced different outputs.  It is built on the committed
+    key rather than on a fresh stub so the assertion is exercised by the shape
+    the run actually writes.
+    """
+    for sheet_id, entry in sorted(key.items()):
+        case_id = (entry.get("arms") or {}).get("comments", [None])[0]
+        if not case_id:
+            continue
+        other = produced.get((case_id, "checks"))
+        if other is None or other != produced.get((case_id, "comments")):
+            planted = dict(key)
+            planted[sheet_id] = {
+                **entry,
+                "arms": {
+                    **entry["arms"],
+                    "checks": sorted({*entry["arms"].get("checks", []), case_id}),
+                },
+            }
+            return planted, case_id
+    return None
 
 
 def resume_cohort() -> tuple[list[dict], dict]:
@@ -762,11 +1011,11 @@ def resume_cohort() -> tuple[list[dict], dict]:
     return cohort, dict(stored["cohort"])
 
 
-async def main(resume: bool = False) -> int:
+async def main(resume: bool = False, rescore: bool = False) -> int:
     from imas_codex.graph.client import GraphClient
 
     gc = GraphClient()
-    if resume:
+    if resume or rescore:
         cohort, cohort_info = resume_cohort()
     else:
         cohort_info = await build_cohort(gc)
@@ -780,7 +1029,17 @@ async def main(resume: bool = False) -> int:
     )
     log(f"cohort {len(cohort)} cases -> {len(cohort) * len(ARMS)} refine calls")
 
-    arms = await run_arms(cohort, gc, cohort_info["review_cost_usd"])
+    if rescore:
+        stored = json.loads(RESULTS.read_text(encoding="utf-8"))
+        arms = rescore_arms(cohort_info["review_cost_usd"])
+        arms["skipped_for_ceiling"] = stored.get("skipped_for_ceiling", 0)
+        arms["exhausted_attempts"] = stored.get("exhausted_attempts", 0)
+        log(
+            f"rescore: {len(receipt_lines())} receipt lines over "
+            f"{len(arms['receipts'])} calls, no call bought"
+        )
+    else:
+        arms = await run_arms(cohort, gc, cohort_info["review_cost_usd"])
     names = sorted({c["prior_name"] for c in cohort} | {c["sn_id"] for c in cohort})
     dd_sources, projections = resolve_dd_sources(gc, names)
     log(f"DD sources bound through PRODUCED_NAME: {len(dd_sources)} of {len(names)}")
@@ -801,30 +1060,42 @@ async def main(resume: bool = False) -> int:
     per_arm = {}
     for arm in ARMS:
         arm_rows = [r for r in arms["receipts"].values() if r["arm"] == arm]
-        ok = [r for r in arm_rows if r["outcome"] == "ok"]
+        outputs = [r for r in arm_rows if r.get("refined_name")]
+        empty = [r for r in arm_rows if r["outcome"] == "empty_name"]
+        errored = [r for r in arm_rows if r["outcome"] not in ("ok", "empty_name")]
         arm_costs = arms["arm_costs"][arm]
         per_arm[arm] = {
             "calls": len(arm_rows),
             "calls_made": len(arm_costs),
             "retry_calls": len(arm_costs) - len(arm_rows),
-            "errors": len(arm_rows) - len(ok),
             "spend_usd": round(sum(arm_costs), 6),
             "spend_note": (
                 "every call made in this arm, cohort calls and retries alike"
             ),
-            "outputs": len(ok),
-            "parsed": sum(1 for r in ok if r["parses"]),
-            "parse_rate": round(sum(1 for r in ok if r["parses"]) / len(ok), 4)
-            if ok
+            "outputs": len(outputs),
+            "outputs_note": (
+                "an answer counts as an output only when it carries a refined "
+                "name; an ok status on a nameless answer is the transport's "
+                "verdict on the call, not evidence of a name"
+            ),
+            "failures": {
+                "empty_name": len(empty),
+                "model_error": len(errored),
+                "total": len(empty) + len(errored),
+                "model_error_kinds": {
+                    kind: sum(1 for r in errored if r["outcome"] == kind)
+                    for kind in sorted({r["outcome"] for r in errored})
+                },
+            },
+            "parsed": sum(1 for r in outputs if r["parses"]),
+            "parse_rate": round(
+                sum(1 for r in outputs if r["parses"]) / len(outputs), 4
+            )
+            if outputs
             else 0.0,
             "mean_cost_usd": round(sum(arm_costs) / len(arm_costs), 6)
             if arm_costs
             else 0.0,
-            "failures": {
-                kind: sum(1 for r in arm_rows if r["outcome"] == kind)
-                for kind in sorted({r["outcome"] for r in arm_rows} - {"ok"})
-            },
-            "retried": sum(1 for r in arm_rows if int(r.get("attempt") or 1) > 1),
             "with_tokens": sum(1 for r in arm_rows if r.get("prompt_tokens")),
         }
 
@@ -832,6 +1103,24 @@ async def main(resume: bool = False) -> int:
     counts = Counter((row["case"], row["arm"]) for row in lines)
     retried_keys = {key for key, n in counts.items() if n > 1}
     retry_calls = len(lines) - len(arms["receipts"])
+    # A retry line is a line whose case-and-arm has an earlier line. The
+    # receipt's attempt field cannot identify one: the retry receipts were
+    # written by a launch that predates the counter, so every line reads
+    # attempt 1.
+    retry_lines = []
+    preceding: set[tuple[str, str]] = set()
+    for row in lines:
+        pair = (row.get("case"), row.get("arm"))
+        if pair in preceding:
+            retry_lines.append(row)
+        else:
+            preceding.add(pair)
+    if len(retry_lines) != retry_calls:
+        raise RuntimeError(
+            f"{len(retry_lines)} lines repeat a case-and-arm against "
+            f"{retry_calls} lines beyond the {len(arms['receipts'])} calls"
+        )
+    retry_calls = len(retry_lines)
 
     results = {
         "cohort": {k: v for k, v in cohort_info.items() if k != "accepted"},
@@ -861,14 +1150,14 @@ async def main(resume: bool = False) -> int:
                 "refuses a receipt whose outcome is ok and whose token counts "
                 "are null."
             ),
+            "retry_pass_calls": len(retry_lines),
             "retry_pass_without_tokens": sum(
-                1
-                for r in receipt_lines()
-                if r.get("prompt_tokens") is None
-                and (r.get("case"), r.get("arm")) in retried_keys
+                1 for r in retry_lines if r.get("prompt_tokens") is None
             ),
             "retry_pass_without_tokens_note": (
-                "model-side errors that raised without exposing usage"
+                "retry-pass calls that raised model-side and so exposed no "
+                "usage; the 240 cohort calls are not counted here, because "
+                "their keys being retried does not give them tokens"
             ),
         },
         "retried_calls": retry_calls,
@@ -918,8 +1207,12 @@ async def main(resume: bool = False) -> int:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--check-sheet", action="store_true")
+    parser.add_argument("--check-key", action="store_true")
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--rescore", action="store_true")
     args = parser.parse_args()
     if args.check_sheet:
         sys.exit(check_sheet())
-    sys.exit(asyncio.run(main(resume=args.resume)))
+    if args.check_key:
+        sys.exit(check_key())
+    sys.exit(asyncio.run(main(resume=args.resume, rescore=args.rescore)))

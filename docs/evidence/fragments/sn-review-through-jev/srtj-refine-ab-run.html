@@ -38,11 +38,11 @@ axis and carries a non-empty critique.</p>
 
 <table>
   <thead>
-    <tr><th>Arm</th><th>Calls made</th><th>Spend</th><th>Mean/call</th><th>Outputs</th><th>Names</th><th>Name rate</th></tr>
+    <tr><th>Arm</th><th>Calls made</th><th>Spend</th><th>Mean/call</th><th>Outputs</th><th>Empty answers</th><th>Model errors</th></tr>
   </thead>
   <tbody>
-    <tr><td>comments</td><td>133</td><td>$16.2837</td><td>$0.1224</td><td>118</td><td>108</td><td>0.900</td></tr>
-    <tr><td>checks</td><td>138</td><td>$16.3774</td><td>$0.1187</td><td>116</td><td>106</td><td>0.883</td></tr>
+    <tr><td>comments</td><td>133</td><td>$16.2837</td><td>$0.1224</td><td>108</td><td>10</td><td>2</td></tr>
+    <tr><td>checks</td><td>138</td><td>$16.3774</td><td>$0.1187</td><td>106</td><td>10</td><td>4</td></tr>
     <tr><td><strong>total incl. Jev</strong></td><td>271</td><td><strong>$32.6969</strong></td><td></td><td></td><td></td><td></td></tr>
   </tbody>
 </table>
@@ -53,12 +53,17 @@ reviewer score would be an input the labeller must not see.</p>
 
 <p><strong>An answer is only an output when it carries a name.</strong> Over the 240 cohort
 calls, 214 returned a refined name and 26 did not: 20 came back marked ok with an
-<em>empty</em> refined name, and 6 raised model-side. The 20 empty answers are counted
-as failures throughout — an ok status is the transport's verdict on the call, not
-evidence of a name — so they are retried like a failure, they never reach the
-sheet, and the parse rate above is the share of outputs that carry a name. The
-spend column is every call made in the arm, the retries included: a retry does not
-unpay for the attempt that failed before it.</p>
+<em>empty</em> refined name, and 6 raised model-side. The outputs column counts the
+214; the failures are named beside it in their two kinds, 20 empty answers and 6
+model errors. Outputs and failures are counted per case and arm — the last call
+made for that pair — so an arm's calls made exceeds its outputs plus its failures
+by exactly the calls it retried. The 20 empty answers are counted as failures
+throughout — an ok status is the transport's verdict on the call, not evidence of
+a name — so they are retried like a model error and they never reach the sheet.
+Every name that was returned parses against the grammar: 108 of 108 on the
+comments arm and 106 of 106 on the checks arm, so nothing reaches the sheet that
+the grammar rejects. The spend column is every call made in the arm, the retries
+included: a retry does not unpay for the attempt that failed before it.</p>
 
 <h3>Retry pass</h3>
 
@@ -70,6 +75,13 @@ split is 13 calls on the comments arm and 18 on the checks arm. It cost
 <strong>USD 4.0787</strong>, no call was skipped for the ceiling and none exhausted its
 attempts. After the pass, 20 calls still answer with an empty name and 6 still
 raise; together they are the 26 calls that contribute no output.</p>
+
+<p>A retry call is identified as a receipt line whose case and arm already have an
+earlier line, which is the only instrument that works here: the receipt's own
+<code>attempt</code> field cannot separate the passes, because the retry receipts were
+written by a launch that predates the counter and every line in the file reads
+<code>attempt: 1</code>. The two counts agree — 31 lines repeat a case and arm, and 271 lines
+stand 31 above the 240 calls — and the script raises if they ever part.</p>
 
 <p>Retrying is only honest if the retried call is the call that was asked the first
 time. The pass therefore rebuilds every case from the corpus loader at the same
@@ -150,23 +162,69 @@ empty name; they contribute nothing to the sheet.</p>
 reproducible. The sheet-to-case-and-arm key is written to
 <code>srtj-refine-ab-key.json</code> in the run directory only, and is never committed here.</p>
 
-<h3>Sheet check, and its negative control</h3>
+<h3>The arm key, and how it is held</h3>
 
-<p>The check reads the committed sheet and fails on any row carrying an unexpected
-field, any field that would disclose the arm or the sheet-to-case mapping, and any
-row with a blank DD source path. It then plants two rows — one carrying
-<code>arm</code>, one with a blank <code>source_path</code> — and requires the detector to refuse both,
-because an empty or over-permissive check would otherwise report a safety it does
-not provide.</p>
+<p>The key records, for each row, which case and which arm produced the output that
+row carries. It is built from the outputs, never from the arm loop: a row credits
+an arm only for the cases whose output for that arm is that row's output. A row
+therefore names both arms exactly when the two arms produced the same output for
+the case in question, which is 2 rows here, and a row that names one arm is
+evidence about that arm alone. Building the key from the loop instead — marking
+every row with both arms — would credit each arm for outputs it did not produce,
+which is the defect this shape removes.</p>
+
+<p>Three assertions hold the key to the outputs, and the build refuses to write
+either file when any of them fails:</p>
+
+<ul>
+  <li>every output the run produced for a case and arm appears in exactly one row;</li>
+  <li>every credit names a case and arm whose output is that row's output;</li>
+  <li>the number of rows listing both arms equals the number of identical output pairs.</li>
+</ul>
+
+<p><code>--check-key</code> re-derives the population from the receipts and the graph and
+re-runs those three against the delivered key, so the check does not inherit the
+builder's mistakes. It then plants the defect the assertions exist to catch — a
+copy of the delivered key with one row crediting both arms for a case whose two
+outputs differ — and requires the check to refuse it.</p>
 
 <table>
   <tbody>
-    <tr><th>Committed sheet</th><td>82 rows clean; both planted rows refused · <code>EXIT=0</code></td></tr>
-    <tr><th>One row's <code>source_path</code> blanked</th><td>refused, naming <code>row-075</code> and the field · <code>EXIT=1</code></td></tr>
+    <tr><th>Delivered key</th><td>82 rows, 84 produced outputs, 2 identical pairs, 2 both-arms rows · <code>EXIT=0</code></td></tr>
+    <tr><th>Planted: one row credits both arms where the outputs differ</th><td>refused, naming the case and <em>credited to 2 rows (row-001, row-002)</em> · <code>EXIT=1</code></td></tr>
   </tbody>
 </table>
 
-<p>Both logs are in the run directory as <code>sheet-check.log</code> and
-<code>sheet-check-mutated.log</code>, each carrying its command and its exit status. The
-committed sheet is the clean one, restored from a backup taken before the mutation
-and re-checked clean at <code>EXIT=0</code>.</p>
+<h3>Sheet check, and its negative control</h3>
+
+<p>The check reads the committed sheet and fails on any row carrying an unexpected
+field, any field that would disclose the arm or the sheet-to-case mapping, any row
+with a blank DD source path, and any row with a blank refined name. It then plants
+three rows — one carrying <code>arm</code>, one with a blank <code>source_path</code>, one with a blank
+<code>refined_name</code> — and requires the detector to refuse all three, because an
+over-permissive check would otherwise report a safety it does not provide.</p>
+
+<table>
+  <tbody>
+    <tr><th>Committed sheet</th><td>82 rows clean; all three planted rows refused · <code>EXIT=0</code></td></tr>
+    <tr><th>One row's <code>source_path</code> blanked</th><td>refused as <code>row-019: blank source_path</code> · <code>EXIT=1</code></td></tr>
+    <tr><th>One row's <code>refined_name</code> blanked</th><td>refused as <code>row-031: blank refined_name</code> · <code>EXIT=1</code></td></tr>
+  </tbody>
+</table>
+
+<p>The logs are in the run directory as <code>sheet-check.log</code>,
+<code>sheet-check-mutated.log</code> and <code>sheet-check-mutated-name.log</code>, each carrying
+its command and its exit status. The committed sheet is the clean one, restored
+from a backup taken before each mutation and re-checked clean at <code>EXIT=0</code>.</p>
+
+<h3>How the delivered files were produced</h3>
+
+<p>The results JSON, the label sheet and the key reported here were regenerated from
+the receipts by the committed script in its rescore mode, which buys no call: it
+reads the receipt lines, sums the spend over every one of them, and rebuilds the
+three files. Nothing in that pass reaches the provider, so a file reported here is
+what the committed code makes of the committed receipts. The regeneration is
+<code>rescore.log</code> in the run directory and ends <code>EXIT=0</code>; the label sheet it wrote
+is byte-identical to the committed one, so the sheet the labeller gets is the
+sheet the code produces. The two checks above were then run against that
+regenerated state.</p>
