@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed run's manifest has empty baseline_suite and after_suite fields, and no completed paired gate logs; the failure-id set difference is unmeasured, so count is null rather than zero.",
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T18:11:45Z",
+  "dispatched_at": "2026-10-18T18:05:01Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "242",
+      "severity": "blocking",
+      "text": "blocking: writer_for chooses attachment_audit.py whenever that operation appears, but vertical_coordinate_of_active_limiter_point has both detach_inconsistent_attachment and detach_stale_source_binding, and the changes query omits timestamps; the selected responsible writer is not established by the recorded evidence."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "27",
+      "severity": "follow-on",
+      "text": "follow-on: an exhausted derived name without children and with a source-holding successor is classified as an orphan although the plan restricts that population to non-derived names, so a future rerun can count a name the retirement selector excludes."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py",
+      "line": "471",
+      "severity": "follow-on",
+      "text": "follow-on: population_counts is constructed from rows immediately above, making its summed count equal len(rows) for every classification or omission; this assertion cannot detect a missing sourceless name and should not count as independent completeness coverage."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "the single commit 04585599c776eeb46389a9e89e175bccbe37ce66 adds a 623-line read-only census script, 264-name results JSON and 362-line HTML report; its classification, writer attribution, controls and aggregate assertions were read against base 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f.",
+    "done_when": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:34-48 and :470-488 assert four planted controls, four live witnesses, a 264-name cohort and a 222-name exhausted dropped-edge count; census-uniqueness.log records these checks and EXIT=0.",
+    "goal": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census.html:5-23 reports all 264 sourceless live names in four populations and the results JSON lists every name, but one named writer attribution is unsupported.",
+    "manifest": "the source run manifest.md:11-25 names its commit, three changed paths and census-uniqueness.log, whose 5137-node control, 264-name result and EXIT=0 agree; baseline_suite and after_suite are empty, so added failures are unmeasured.",
+    "write_paths": "the source brief grants three census artifacts and an unused figure directory; git diff 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f..04585599c776eeb46389a9e89e175bccbe37ce66 adds exactly the three granted artifacts."
+  },
+  "justifications": {
+    "durability": "sib-source-loss-census-run.py:47 would fail if classify mislabels a planted population and :487 would fail if a named live witness moves class, but :471 compares a Counter made from rows with the same rows and cannot detect an omitted row.",
+    "evidence": "census-uniqueness.log records the property-positive control, four fixture outcomes, four live witnesses and EXIT=0, while the source manifest.md:21-22 supplies no completed baseline or after suite arm.",
+    "fit": "sib-source-loss-census-run.py:51 uses the repository GraphClient, read-only bounded Cypher and escaped HTML output, but :27 omits the non-derived condition from the orphan population rule.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-results.json:1 carries all 264 names and 62 comparison cases, but sib-source-loss-census-run.py:242 assigns one of two recorded detachment writers without evidence of which caused the final absence.",
+    "reuse": "imas_codex/standard_names/ledger.py:96 owns a narrower active-orphan query and provenance_rebuild.py:294 owns repair-time predecessor recovery; the standalone four-population census in sib-source-loss-census-run.py:24 extends neither runtime capability and duplicates neither owner.",
+    "scope_discipline": "the sole commit adds only docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py, sib-source-loss-census-results.json and sib-source-loss-census.html, all declared in the source brief."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census.html:5-23 reports all 264 sourceless live names in four populations and the results JSON lists every name, but one named writer attribution is unsupported.\nVERDICT done_when: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:34-48 and :470-488 assert four planted controls, four live witnesses, a 264-name cohort and a 222-name exhausted dropped-edge count; census-uniqueness.log records these checks and EXIT=0.\nVERDICT write_paths: the source brief grants three census artifacts and an unused figure directory; git diff 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f..04585599c776eeb46389a9e89e175bccbe37ce66 adds exactly the three granted artifacts.\nVERDICT manifest: the source run manifest.md:11-25 names its commit, three changed paths and census-uniqueness.log, whose 5137-node control, 264-name result and EXIT=0 agree; baseline_suite and after_suite are empty, so added failures are unmeasured.\nVERDICT diff: the single commit 04585599c776eeb46389a9e89e175bccbe37ce66 adds a 623-line read-only census script, 264-name results JSON and 362-line HTML report; its classification, writer attribution, controls and aggregate assertions were read against base 993ddf413d290b09d1c8ea7518e2fdc4a0209b2f.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-results.json:1 carries all 264 names and 62 comparison cases, but sib-source-loss-census-run.py:242 assigns one of two recorded detachment writers without evidence of which caused the final absence.\nSCORE evidence: 17\nJUSTIFICATION evidence: census-uniqueness.log records the property-positive control, four fixture outcomes, four live witnesses and EXIT=0, while the source manifest.md:21-22 supplies no completed baseline or after suite arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the sole commit adds only docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py, sib-source-loss-census-results.json and sib-source-loss-census.html, all declared in the source brief.\nSCORE durability: 14\nJUSTIFICATION durability: sib-source-loss-census-run.py:47 would fail if classify mislabels a planted population and :487 would fail if a named live witness moves class, but :471 compares a Counter made from rows with the same rows and cannot detect an omitted row.\nSCORE fit: 18\nJUSTIFICATION fit: sib-source-loss-census-run.py:51 uses the repository GraphClient, read-only bounded Cypher and escaped HTML output, but :27 omits the non-derived condition from the orphan population rule.\nSCORE reuse: 20\nJUSTIFICATION reuse: imas_codex/standard_names/ledger.py:96 owns a narrower active-orphan query and provenance_rebuild.py:294 owns repair-time predecessor recovery; the standalone four-population census in sib-source-loss-census-run.py:24 extends neither runtime capability and duplicates neither owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:242 blocking: writer_for chooses attachment_audit.py whenever that operation appears, but vertical_coordinate_of_active_limiter_point has both detach_inconsistent_attachment and detach_stale_source_binding, and the changes query omits timestamps; the selected responsible writer is not established by the recorded evidence.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:27 follow-on: an exhausted derived name without children and with a source-holding successor is classified as an orphan although the plan restricts that population to non-derived names, so a future rerun can count a name the retirement selector excludes.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-loss-census-run.py:471 follow-on: population_counts is constructed from rows immediately above, making its summed count equal len(rows) for every classification or omission; this assertion cannot detect a missing sourceless name and should not count as independent completeness coverage.\n",
+  "review_run_id": "r-20261018T180425017237-review-of-sib-source-loss-census-04585599c776",
+  "reviewed_base_sha": "993ddf413d290b09d1c8ea7518e2fdc4a0209b2f",
+  "reviewed_head_sha": "04585599c776eeb46389a9e89e175bccbe37ce66",
+  "reviewed_run_id": "r-20261018T174214503390-sib-source-loss-census",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T18:10:09.747715+00:00",
+  "total": 106
+}
