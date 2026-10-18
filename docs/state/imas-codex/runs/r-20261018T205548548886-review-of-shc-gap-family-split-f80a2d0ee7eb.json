@@ -901,16 +901,11 @@
     "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
     "process_signalled": false,
     "process_withheld": "process is not alive",
-    "scratch_bytes": 235870,
+    "scratch_bytes": null,
     "scratch_path": "/tmp/reckon-crew-scratch/r-20261018T205548548886-review-of-shc-gap-family-split-f80a2d0ee7eb",
-    "scratch_removed": true,
-    "scratch_removed_paths": [
-      {
-        "bytes": 235870,
-        "path": "/tmp/reckon-crew-scratch/r-20261018T205548548886-review-of-shc-gap-family-split-f80a2d0ee7eb"
-      }
-    ],
-    "scratch_withheld": "",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
     "worktree_audit": {
       "counts": {
         "dirty": 0,
@@ -929,7 +924,8 @@
         }
       ]
     },
-    "worktree_released": true
+    "worktree_released": false,
+    "worktree_withheld": "tree is no longer available"
   },
   "resume_waiver": null,
   "review": {
