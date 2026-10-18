@@ -18,12 +18,14 @@ Usage::
     imas-codex tunnel start [HOST] --embed   # Just embed port
     imas-codex tunnel start [HOST] --llm     # Just LLM proxy port
     imas-codex tunnel start [HOST] --docs    # Just docs-server port
+    imas-codex tunnel start [HOST] --clive   # Just the local model lane
     imas-codex tunnel stop [HOST]
     imas-codex tunnel status
     imas-codex tunnel reclaim                 # On a login node: free a dropped session's ports
     imas-codex tunnel service install [HOST]  # Persistent autossh via systemd
 """
 
+import json
 import os
 import shutil
 import signal
@@ -95,6 +97,75 @@ def _discover_vllm_node(host: str) -> str | None:
     except (subprocess.TimeoutExpired, OSError):
         pass
     return None
+
+
+# The local model lane publishes its serving topology in an endpoint document
+# on the login host. A client reaches the lane through the tunnel, so it reads
+# a copy of that document rewritten to the tunnel's local ports; a launcher
+# (clive) pointed at the copy then behaves exactly as on the cluster.
+CLIVE_REMOTE_DOCUMENT = "~/public/imas-ambix/endpoints.json"
+CLIVE_TUNNEL_DOCUMENT = Path.home() / ".config" / "imas-ambix" / "endpoints.tunnel.json"
+
+
+def _clive_ports(host: str) -> list[tuple[int, int, str, str, str]]:
+    """Forward the local model lane's router and engines, and publish the copy.
+
+    Reads the endpoint document on *host*, returns one forward per routing
+    origin and engine endpoint at the tunnel offset, and atomically writes the
+    document rewritten to those local ports to :data:`CLIVE_TUNNEL_DOCUMENT`.
+    Returns no forwards when the document cannot be read, so the remaining
+    services still start.
+    """
+    from imas_codex.remote.tunnel import TUNNEL_OFFSET
+
+    try:
+        result = subprocess.run(
+            ["ssh", host, "-o", "ConnectTimeout=10", f"cat {CLIVE_REMOTE_DOCUMENT}"],
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        document = json.loads(result.stdout) if result.returncode == 0 else None
+    except (subprocess.TimeoutExpired, OSError, json.JSONDecodeError):
+        document = None
+    if not isinstance(document, dict):
+        return []
+
+    ports: list[tuple[int, int, str, str, str]] = []
+    for key, label in (
+        ("routing_origins", "clive-router"),
+        ("endpoints", "clive-engine"),
+    ):
+        for entry in document.get(key) or []:
+            remote_host, remote_port = entry.get("host"), entry.get("port")
+            if not isinstance(remote_host, str) or not isinstance(remote_port, int):
+                continue
+            local_port = remote_port + TUNNEL_OFFSET
+            ports.append((remote_port, local_port, label, remote_host, "L"))
+            entry["host"], entry["port"] = "127.0.0.1", local_port
+
+    CLIVE_TUNNEL_DOCUMENT.parent.mkdir(parents=True, exist_ok=True)
+    staged = CLIVE_TUNNEL_DOCUMENT.with_suffix(".json.tmp")
+    staged.write_text(json.dumps(document, indent=1) + "\n")
+    os.replace(staged, CLIVE_TUNNEL_DOCUMENT)
+    return ports
+
+
+def _clive_local_ports() -> dict[int, str]:
+    """Return the local model lane's forwarded ports from the published copy."""
+    try:
+        document = json.loads(CLIVE_TUNNEL_DOCUMENT.read_text())
+    except (OSError, json.JSONDecodeError):
+        return {}
+    labels: dict[int, str] = {}
+    for key, label in (
+        ("routing_origins", "clive-router"),
+        ("endpoints", "clive-engine"),
+    ):
+        for entry in document.get(key) or []:
+            if isinstance(entry.get("port"), int):
+                labels[entry["port"]] = label
+    return labels
 
 
 def _resolve_host(host: str | None) -> str:
@@ -207,6 +278,7 @@ def _get_tunnel_ports(
     docs: bool = False,
     ink: bool = False,
     clipboard: bool = False,
+    clive: bool = False,
     *,
     emit_status: bool = True,
 ) -> list[tuple[int, int, str, str, str]]:
@@ -231,6 +303,7 @@ def _get_tunnel_ports(
         and not docs
         and not ink
         and not clipboard
+        and not clive
     )
 
     # Discover SLURM compute node if any service uses a compute location.
@@ -342,6 +415,18 @@ def _get_tunnel_ports(
         # ink display server runs on the login node (uv run efit-ink)
         ports.append((ink_port, ink_port, "ink", "127.0.0.1", "L"))
 
+    if clive or all_services:
+        # The local model lane's router and engines run on GPU nodes reached
+        # through the login host; their addresses come from its endpoint
+        # document, re-read on every supervisor pass so a moved serve follows.
+        clive_ports = _clive_ports(host)
+        ports.extend(clive_ports)
+        if clive and not all_services and not clive_ports and emit_status:
+            click.echo(
+                f"⚠ No local model lane endpoints readable from "
+                f"{host}:{CLIVE_REMOTE_DOCUMENT}"
+            )
+
     if clipboard or all_services:
         from imas_codex.settings import get_wsl_clip_port
 
@@ -388,6 +473,7 @@ def _requested_services(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    clive_only: bool = False,
 ) -> set[str]:
     if (
         not neo4j_only
@@ -397,8 +483,19 @@ def _requested_services(
         and not docs_only
         and not ink_only
         and not clipboard_only
+        and not clive_only
     ):
-        return {"neo4j", "embed", "llm", "vllm", "docs", "ink", "wsl-clip", "wsl-ssh"}
+        return {
+            "neo4j",
+            "embed",
+            "llm",
+            "vllm",
+            "docs",
+            "ink",
+            "clive",
+            "wsl-clip",
+            "wsl-ssh",
+        }
     selected: set[str] = set()
     if neo4j_only:
         selected.add("neo4j")
@@ -414,6 +511,8 @@ def _requested_services(
         selected.add("ink")
     if clipboard_only:
         selected.add("wsl-clip")
+    if clive_only:
+        selected.add("clive")
     return selected
 
 
@@ -466,6 +565,7 @@ def _installed_service_supports_request(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    clive_only: bool = False,
 ) -> bool:
     service_file = _service_file(host)
     if not service_file.exists():
@@ -475,7 +575,14 @@ def _installed_service_supports_request(
     except OSError:
         return False
     requested = _requested_services(
-        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, clipboard_only
+        neo4j_only,
+        embed_only,
+        llm_only,
+        vllm_only,
+        docs_only,
+        ink_only,
+        clipboard_only,
+        clive_only,
     )
     installed = _service_selected_services(service_text)
     return requested.issubset(installed)
@@ -861,6 +968,7 @@ def _run_service_supervisor(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    clive_only: bool = False,
     reverse_nodes: Sequence[str] = (),
 ) -> None:
     from imas_codex.remote.tunnel import is_tunnel_active
@@ -894,6 +1002,7 @@ def _run_service_supervisor(
             docs_only,
             ink_only,
             clipboard_only,
+            clive_only,
             emit_status=False,
         )
 
@@ -1007,6 +1116,7 @@ def _build_systemd_service_content(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    clive_only: bool = False,
     reverse_nodes: Sequence[str] = (),
 ) -> str:
     uv = shutil.which("uv")
@@ -1028,12 +1138,21 @@ def _build_systemd_service_content(
         flag_args.append("--ink")
     if clipboard_only:
         flag_args.append("--clipboard")
+    if clive_only:
+        flag_args.append("--clive")
     for node in reverse_nodes:
         flag_args.extend(["--reverse-node", node])
     flags = " ".join(flag_args)
 
     services = _requested_services(
-        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, clipboard_only
+        neo4j_only,
+        embed_only,
+        llm_only,
+        vllm_only,
+        docs_only,
+        ink_only,
+        clipboard_only,
+        clive_only,
     )
     manifest_line = SERVICE_MANIFEST_PREFIX + " ".join(sorted(services))
     clipboard_dependencies = (
@@ -1281,6 +1400,7 @@ def tunnel() -> None:
       imas-codex tunnel start HOST --vllm      Just vLLM inference port
       imas-codex tunnel start HOST --docs      Just docs-server port
       imas-codex tunnel start HOST --ink       Just ink display port
+      imas-codex tunnel start HOST --clive     Just the local model lane (router + engines)
       imas-codex tunnel start HOST --clipboard  Reverse clipboard tunnel (WSL→Windows)
       imas-codex tunnel start HOST --keyring   D-Bus socket for keyring
       imas-codex tunnel stop [HOST]            Stop tunnels
@@ -1309,6 +1429,12 @@ def tunnel() -> None:
     help="Reverse-tunnel clipboard port (wsl-clip-server on WSL → Windows)",
 )
 @click.option(
+    "--clive",
+    "clive_only",
+    is_flag=True,
+    help="Tunnel the local model lane (ambix router and engine) only",
+)
+@click.option(
     "--keyring",
     "keyring_only",
     is_flag=True,
@@ -1323,6 +1449,7 @@ def tunnel_start(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    clive_only: bool = False,
     keyring_only: bool = False,
 ) -> None:
     """Start SSH tunnels to remote services.
@@ -1349,6 +1476,7 @@ def tunnel_start(
       imas-codex tunnel start iter --vllm      # Just vLLM inference
       imas-codex tunnel start iter --docs      # Just docs-server
       imas-codex tunnel start iter --ink       # Just ink display
+      imas-codex tunnel start iter --clive     # Just the local model lane
       imas-codex tunnel start iter --clipboard # Clipboard reverse tunnel
       imas-codex tunnel start iter --keyring   # D-Bus for keyring
     """
@@ -1364,6 +1492,7 @@ def tunnel_start(
             docs_only,
             ink_only,
             clipboard_only,
+            clive_only,
         )
         and not keyring_only
     ):
@@ -1406,6 +1535,7 @@ def tunnel_start(
         docs_only,
         ink_only,
         clipboard_only,
+        clive_only,
     )
     ok = _start_tunnels(target, ports, use_autossh)
 
@@ -1535,6 +1665,8 @@ def tunnel_status() -> None:
     # wsl-clip-server is a reverse tunnel — bound on the remote (iter) side.
     known_ports[wsl_clip_port] = "wsl-clip (reverse)"
     known_ports[wsl_ssh_port] = "wsl-ssh (reverse)"
+    clive_ports = _clive_local_ports()
+    known_ports.update(clive_ports)
 
     # Build port→location map for SSH-forwarded ports so we can show
     # "iter" (or whichever host) instead of a generic "(ssh)" marker.
@@ -1674,6 +1806,12 @@ def tunnel_reclaim(dry_run: bool) -> None:
     help="Reverse-tunnel clipboard port (wsl-clip-server on WSL → Windows)",
 )
 @click.option(
+    "--clive",
+    "clive_only",
+    is_flag=True,
+    help="Tunnel the local model lane (ambix router and engine) only",
+)
+@click.option(
     "--reverse-node",
     "reverse_nodes",
     multiple=True,
@@ -1693,6 +1831,7 @@ def tunnel_service(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    clive_only: bool = False,
     reverse_nodes: tuple[str, ...] = (),
 ) -> None:
     """Manage persistent SSH tunnels via systemd + autossh.
@@ -1749,6 +1888,7 @@ def tunnel_service(
             docs_only,
             ink_only,
             clipboard_only,
+            clive_only,
         )
         if not ports:
             raise click.ClickException("No services selected for tunneling.")
@@ -1763,6 +1903,7 @@ def tunnel_service(
             docs_only,
             ink_only,
             clipboard_only,
+            clive_only,
             reverse_nodes,
         )
         service_dir.mkdir(parents=True, exist_ok=True)
@@ -1868,6 +2009,12 @@ def tunnel_service(
     help="Reverse-tunnel clipboard port",
 )
 @click.option(
+    "--clive",
+    "clive_only",
+    is_flag=True,
+    help="Tunnel the local model lane (ambix router and engine) only",
+)
+@click.option(
     "--reverse-node",
     "reverse_nodes",
     multiple=True,
@@ -1886,6 +2033,7 @@ def tunnel_service_run(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    clive_only: bool = False,
     reverse_nodes: tuple[str, ...] = (),
 ) -> None:
     """Run the persistent systemd tunnel supervisor in the foreground."""
@@ -1899,5 +2047,6 @@ def tunnel_service_run(
         docs_only,
         ink_only,
         clipboard_only,
+        clive_only,
         reverse_nodes,
     )
