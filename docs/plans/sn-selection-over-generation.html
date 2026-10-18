@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -351,6 +351,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-anchor-score" data-who="reckon-build" data-when="2026-10-18T10:25:00Z">
     <div class="r-comment-body"><p>The Jev anchor scorer is on main, unwired (merge <code>c68cd3a45</code>, reviews 116 and 115). The ten-family A/B in a scratch copy of the 2026-10-12 export follows, under USD 30, on families outside every WEST roster where the two anchors differ. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#ssog-jev-anchor-score">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-s7-fresh-export" data-who="Simon McIntosh" data-when="2026-10-18T11:12:00Z">
+    <div class="r-comment-body"><p>The anchor A/B stopped on its first apply: the 2026-10-12 export raises Neo4j's <em>NOT PART OF CHAIN</em>, so it was dumped from a damaged store. Before it stopped, the run found 119 eligible non-WEST families, 40 with differing anchors, and dry-ran ten; scorer spend USD 0.02. Lead ruling, 2026-10-18: take a fresh export once no node is reading or writing the graph, check it offline for consistency, and rerun the A/B on the checked archive.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
