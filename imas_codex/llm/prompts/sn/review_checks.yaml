@@ -537,6 +537,13 @@ checks:
   - documentation
   retrieval: false
   audit_finding_class: locus_definition
+- id: template_note
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: template_note
 - id: non_canonical_equation
   axis: docs
   dimension: documentation_quality
