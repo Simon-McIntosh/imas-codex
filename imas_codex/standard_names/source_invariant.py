@@ -14,7 +14,8 @@ def _live_child_cypher() -> str:
               MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
               WHERE NOT coalesce(child.name_stage, '') IN
                 ['superseded', 'exhausted', 'contested']
-                AND coalesce(child.status, '') <> 'superseded'
+                AND NOT coalesce(child.status, '') IN
+                  ['deprecated', 'superseded']
           }"""
 
 

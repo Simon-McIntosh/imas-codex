@@ -104,6 +104,26 @@ def test_planted_names_follow_one_source_audit(planted_graph: GraphClient) -> No
 
 
 @pytest.mark.graph
+def test_derived_parent_requires_live_child_evidence(
+    planted_graph: GraphClient,
+) -> None:
+    from imas_codex.standard_names.export import _fetch_export_population
+
+    planted_graph.query(
+        "MATCH (child:StandardName {id:'audit_child'}) SET child.status = 'deprecated'"
+    )
+    rows = classify_sourceless_standard_names(planted_graph)
+    parent = next(row for row in rows if row["id"] == "audit_parent")
+    assert parent["population"] == "never_bound"
+    with patch(
+        "imas_codex.graph.client.GraphClient", return_value=nullcontext(planted_graph)
+    ):
+        population = _fetch_export_population(require_docs_review=False)
+    exported_parent = next(row for row in population if row["id"] == "audit_parent")
+    assert exported_parent["_has_live_child"] is False
+
+
+@pytest.mark.graph
 @pytest.mark.parametrize(
     "operation",
     [
