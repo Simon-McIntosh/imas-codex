@@ -19330,6 +19330,12 @@ def persist_refined_name(
                         "semantic source set changed during atomic rename: "
                         f"guarded {len(candidate_source_ids)}, moved {moved}"
                     )
+                if edit_mode:
+                    from imas_codex.standard_names.source_invariant import (
+                        require_producing_sources,
+                    )
+
+                    require_producing_sources(query_handle, [new_name])
                 record_standard_name_change(
                     query_handle,
                     old_name,

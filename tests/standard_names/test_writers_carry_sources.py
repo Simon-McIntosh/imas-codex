@@ -69,6 +69,33 @@ def test_rename_refuses_a_sourceless_predecessor(stage: str) -> None:
     assert "toroidal_plasma_current" not in graph.nodes
 
 
+def test_rename_transaction_rolls_back_an_unbound_successor() -> None:
+    from imas_codex.standard_names.graph_ops import persist_refined_name
+    from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
+
+    class SourcelessGraph(FakeGraph):
+        def query(self, cypher, **params):
+            if "SOURCE_INVARIANT" in cypher:
+                assert params["ids"] == ["toroidal_plasma_current"]
+                return [{"id": "toroidal_plasma_current"}]
+            return super().query(cypher, **params)
+
+    graph = SourcelessGraph()
+    graph.add_node("plasma_current", name_stage="drafted")
+    with _patched_graph(graph), pytest.raises(MissingStandardNameSource):
+        persist_refined_name(
+            old_name="plasma_current",
+            new_name="toroidal_plasma_current",
+            description="plasma current",
+            model="sn-edit",
+            reason="clarify component",
+            edit_mode="rename",
+            expected_old_stage="drafted",
+        )
+    assert graph.nodes["plasma_current"]["name_stage"] == "drafted"
+    assert "toroidal_plasma_current" not in graph.nodes
+
+
 def test_name_creation_refuses_an_unbound_identity() -> None:
     from imas_codex.standard_names import graph_ops
 
