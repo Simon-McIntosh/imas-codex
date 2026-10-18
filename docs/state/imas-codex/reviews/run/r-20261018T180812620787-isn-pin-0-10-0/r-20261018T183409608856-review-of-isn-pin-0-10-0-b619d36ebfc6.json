@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/core/physics_domain.py:8",
+    "imas_codex/standard_names/docs_gates.py:12"
+  ],
+  "completed_at": "2026-10-18T18:40:02Z",
+  "dispatched_at": "2026-10-18T18:34:38Z",
+  "findings": [
+    {
+      "file": "uv.lock",
+      "line": "1374",
+      "severity": "blocking",
+      "text": "blocking: brief.md:31 requires uv.lock in the diff, but its blob is identical at base and head; the exact done_when is unmet even though regeneration under the editable source override has no legitimate lock delta."
+    },
+    {
+      "file": "pyproject.toml",
+      "line": "186",
+      "severity": "follow-on",
+      "text": "follow-on: no durable assertion fails if either pin returns to 0.9.3, and the recorded uv lock --check passes that negative control, so a later regression can pass the named lock gate."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "b7b0daaeba35b77ad23f23580bf21d9099497603..b619d36ebfc61baedf26f04c4113a3f0977036bd changes only pyproject.toml:18 and pyproject.toml:186 from 0.9.3 to 0.10.0, with no assertions added.",
+    "done_when": "brief.md:31 requires pyproject.toml and uv.lock in the diff, but the commit changes only pyproject.toml; check.log records uv lock --check EXIT=0 while negative_control.log shows the old pin also passes.",
+    "goal": "brief.md:1-20 requires both imas-standard-names pins at 0.10.0; pyproject.toml:18 and pyproject.toml:186 contain that version at the reviewed head.",
+    "manifest": "manifest.md records b619d36ebfc61baedf26f04c4113a3f0977036bd, one changed path, and check.log EXIT=0; it records no baseline_suite or after_suite.",
+    "write_paths": "brief.md:39-42 permits pyproject.toml and uv.lock, and the only changed path is pyproject.toml."
+  },
+  "justifications": {
+    "durability": "pyproject.toml:18 and pyproject.toml:186 have no added test assertion, and negative_control.log shows the recorded uv lock --check does not fail when the old pin returns.",
+    "evidence": "pyproject.toml:18 and pyproject.toml:186 prove the two pins, and check.log records EXIT=0, but negative_control.log shows uv lock --check also passes after reverting the pin.",
+    "fit": "pyproject.toml:18 and pyproject.toml:186 retain the existing dependency declaration style and introduce no source names.",
+    "goal_fidelity": "pyproject.toml:18 and pyproject.toml:186 carry both requested pins, while pyproject.toml:1183 keeps the editable source override described in the brief.",
+    "reuse": "the diff at pyproject.toml:18 and pyproject.toml:186 adds no function, class, or module and forks no capability.",
+    "scope_discipline": "the diff contains only pyproject.toml:18 and pyproject.toml:186, both inside brief.md:39-42."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: brief.md:1-20 requires both imas-standard-names pins at 0.10.0; pyproject.toml:18 and pyproject.toml:186 contain that version at the reviewed head.\nVERDICT done_when: brief.md:31 requires pyproject.toml and uv.lock in the diff, but the commit changes only pyproject.toml; check.log records uv lock --check EXIT=0 while negative_control.log shows the old pin also passes.\nVERDICT write_paths: brief.md:39-42 permits pyproject.toml and uv.lock, and the only changed path is pyproject.toml.\nVERDICT manifest: manifest.md records b619d36ebfc61baedf26f04c4113a3f0977036bd, one changed path, and check.log EXIT=0; it records no baseline_suite or after_suite.\nVERDICT diff: b7b0daaeba35b77ad23f23580bf21d9099497603..b619d36ebfc61baedf26f04c4113a3f0977036bd changes only pyproject.toml:18 and pyproject.toml:186 from 0.9.3 to 0.10.0, with no assertions added.\nCALL_SITES: imas_codex/core/physics_domain.py:8, imas_codex/standard_names/docs_gates.py:12\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: pyproject.toml:18 and pyproject.toml:186 carry both requested pins, while pyproject.toml:1183 keeps the editable source override described in the brief.\nSCORE evidence: 12\nJUSTIFICATION evidence: pyproject.toml:18 and pyproject.toml:186 prove the two pins, and check.log records EXIT=0, but negative_control.log shows uv lock --check also passes after reverting the pin.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff contains only pyproject.toml:18 and pyproject.toml:186, both inside brief.md:39-42.\nSCORE durability: 3\nJUSTIFICATION durability: pyproject.toml:18 and pyproject.toml:186 have no added test assertion, and negative_control.log shows the recorded uv lock --check does not fail when the old pin returns.\nSCORE fit: 20\nJUSTIFICATION fit: pyproject.toml:18 and pyproject.toml:186 retain the existing dependency declaration style and introduce no source names.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff at pyproject.toml:18 and pyproject.toml:186 adds no function, class, or module and forks no capability.\nFINDING uv.lock:1374 blocking: brief.md:31 requires uv.lock in the diff, but its blob is identical at base and head; the exact done_when is unmet even though regeneration under the editable source override has no legitimate lock delta.\nFINDING pyproject.toml:186 follow-on: no durable assertion fails if either pin returns to 0.9.3, and the recorded uv lock --check passes that negative control, so a later regression can pass the named lock gate.",
+  "review_run_id": "r-20261018T183409608856-review-of-isn-pin-0-10-0-b619d36ebfc6",
+  "reviewed_base_sha": "b7b0daaeba35b77ad23f23580bf21d9099497603",
+  "reviewed_head_sha": "b619d36ebfc61baedf26f04c4113a3f0977036bd",
+  "reviewed_run_id": "r-20261018T180812620787-isn-pin-0-10-0",
+  "scores": {
+    "durability": 3,
+    "evidence": 12,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T18:42:07.820470+00:00",
+  "total": 93
+}
