@@ -1,4 +1,5 @@
 import itertools
+import json
 import os
 import signal
 import subprocess
@@ -9,6 +10,8 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.tunnel import (
+    _clive_local_ports,
+    _clive_ports,
     _LISTENER_GRACE_SECONDS,
     SERVICE_MANIFEST_PREFIX,
     _build_foreground_tunnel_command,
@@ -227,6 +230,7 @@ class TestTunnelServiceHelpers:
         with (
             patch("imas_codex.cli.tunnel._discover_compute_node", return_value=None),
             patch("imas_codex.cli.tunnel._discover_vllm_node", return_value=None),
+            patch("imas_codex.cli.tunnel._clive_ports", return_value=[]),
         ):
             ports = _get_tunnel_ports(
                 "iter",
@@ -278,7 +282,7 @@ class TestTunnelServiceHelpers:
             )
 
         assert (
-            SERVICE_MANIFEST_PREFIX + "docs embed ink llm neo4j vllm wsl-clip"
+            SERVICE_MANIFEST_PREFIX + "clive docs embed ink llm neo4j vllm wsl-clip"
             in all_content
         )
         assert SERVICE_MANIFEST_PREFIX + "docs neo4j" in subset_content
@@ -751,3 +755,70 @@ class TestListenerGraceWindow:
 
         assert starts >= 2
         assert any("listeners missing" in message for message in messages)
+
+
+_ENDPOINTS = (
+    '{"endpoints": [{"host": "gpu-0003.iter.org", "port": 18810, '
+    '"model_id": "flash"}], "routing_origins": [{"host": "gpu-0003", "port": 18802}]}'
+)
+
+
+class TestLocalModelLane:
+    """The clive route forwards the published lane and rewrites its document."""
+
+    def test_forwards_router_and_engine_and_publishes_the_copy(self, tmp_path):
+        document = tmp_path / "endpoints.tunnel.json"
+        reply = subprocess.CompletedProcess([], 0, stdout=_ENDPOINTS, stderr="")
+        with (
+            patch("imas_codex.cli.tunnel.CLIVE_TUNNEL_DOCUMENT", document),
+            patch("imas_codex.cli.tunnel.subprocess.run", return_value=reply),
+        ):
+            ports = _clive_ports("iter")
+            labels = _clive_local_ports()
+
+        assert ports == [
+            (18802, 28802, "clive-router", "gpu-0003", "L"),
+            (18810, 28810, "clive-engine", "gpu-0003.iter.org", "L"),
+        ]
+        published = json.loads(document.read_text())
+        assert published["routing_origins"] == [{"host": "127.0.0.1", "port": 28802}]
+        assert published["endpoints"][0]["host"] == "127.0.0.1"
+        assert published["endpoints"][0]["port"] == 28810
+        assert published["endpoints"][0]["model_id"] == "flash"
+        assert labels == {28802: "clive-router", 28810: "clive-engine"}
+
+    def test_unreadable_document_forwards_nothing_and_keeps_the_copy(self, tmp_path):
+        document = tmp_path / "endpoints.tunnel.json"
+        document.write_text("previous")
+        reply = subprocess.CompletedProcess([], 1, stdout="", stderr="no such file")
+        with (
+            patch("imas_codex.cli.tunnel.CLIVE_TUNNEL_DOCUMENT", document),
+            patch("imas_codex.cli.tunnel.subprocess.run", return_value=reply),
+        ):
+            assert _clive_ports("iter") == []
+        assert document.read_text() == "previous"
+
+    def test_clive_only_selects_just_the_lane(self):
+        lane = [(18802, 28802, "clive-router", "gpu-0003", "L")]
+        with patch("imas_codex.cli.tunnel._clive_ports", return_value=lane):
+            ports = _get_tunnel_ports(
+                "iter", neo4j=False, embed=False, clive=True, emit_status=False
+            )
+        assert ports == lane
+
+    def test_service_unit_carries_the_clive_flag_and_manifest(self):
+        with patch(
+            "imas_codex.cli.tunnel.shutil.which",
+            side_effect=lambda cmd: (
+                "/usr/bin/uv" if cmd == "uv" else "/usr/bin/autossh"
+            ),
+        ):
+            content = _build_systemd_service_content(
+                "iter",
+                neo4j_only=False,
+                embed_only=False,
+                llm_only=False,
+                clive_only=True,
+            )
+        assert "--clive" in content
+        assert SERVICE_MANIFEST_PREFIX + "clive\n" in content
