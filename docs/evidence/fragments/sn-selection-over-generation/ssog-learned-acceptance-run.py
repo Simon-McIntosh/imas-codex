@@ -260,6 +260,7 @@ def _write_figure(y_val, learned, composite) -> None:
     from sklearn.metrics import roc_curve
 
     plt.style.use("data-ink")
+    plt.rcParams["svg.hashsalt"] = "ssog-learned-acceptance"
     fig, ax = plt.subplots(figsize=(14, 6.0))
 
     fpr, tpr, _ = roc_curve(y_val, composite)
