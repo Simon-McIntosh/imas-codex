@@ -120,7 +120,8 @@ def main(role: str) -> None:
         reviews, cost = await original_review(
             candidates, reviewer_model, *args, **kwargs
         )
-        outcomes[reviewer_model] = {
+        measured_model = models[len(outcomes)] if role == "docs" else reviewer_model
+        outcomes[measured_model] = {
             r["name"]: float(r.get("score") or 0.0) for r in reviews
         }
         return reviews, cost
@@ -216,6 +217,16 @@ def main(role: str) -> None:
                 raise RuntimeError(
                     f"Refine outcomes for {row['model']} do not match judged count"
                 )
+    if role == "docs":
+        for row in report["results"]:
+            if len(outcomes.get(row["model"], {})) != len(fixture):
+                raise RuntimeError(
+                    f"Docs outcomes for {row['model']} do not match fixture count"
+                )
+    if role.startswith("breaker") or role == "classifier":
+        for row in report["results"]:
+            if not outcomes.get(row["model"]):
+                raise RuntimeError(f"No item outcomes captured for {row['model']}")
     results["total_spend_usd"] = round(measured_spend(), 6)
     RESULTS.write_text(json.dumps(results, indent=2) + "\n")
     print(
