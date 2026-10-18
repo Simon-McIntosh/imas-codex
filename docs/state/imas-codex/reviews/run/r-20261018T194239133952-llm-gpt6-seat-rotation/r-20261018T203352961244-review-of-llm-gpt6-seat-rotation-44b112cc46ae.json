@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": null,
+  "baseline_suite_log": null,
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/pools.py:106",
+    "imas_codex/standard_names/loop.py:71",
+    "imas_codex/standard_names/review/pipeline.py:987",
+    "imas_codex/standard_names/promote.py:694",
+    "imas_codex/cli/sn.py:6530",
+    "imas_codex/standard_names/advisory_panel.py:93",
+    "imas_codex/settings.py:502"
+  ],
+  "completed_at": "2026-10-18T20:43:32.713Z",
+  "dispatched_at": "2026-10-18T20:34:30Z",
+  "findings": [
+    {
+      "file": "tests/core/test_gpt6_seat_rotation.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: the three chain seats are asserted through get_sn_review_docs_models, get_sn_review_profile_models and get_model_source_models rather than get_model as the evidence fence states, so the literal resolving of all eight seats through get_model is unmet, though the substitute accessors are the correct ones because get_model cannot resolve a list position."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "read commit by commit from 3347cfb8 to 44b112cc4; five files changed, eight seats and five fallbacks rotated, three comments updated, one pin repaired, one test module and one fragment added, all inside the declared scope.",
+    "done_when": "the done_when requires the eight seats to resolve through the project's accessors, a recorded grep free of live gpt-5 seats, no added settings-test failures, and a fragment; each is present in gate-head.log, negative-control-base.log, seat-grep.log, settings-suite-head.log, settings-suite-base.log and the fragment.",
+    "goal": "the node's goal is to move every live GPT seat in pyproject.toml to the GPT-6 model the lead ruled for it; the diff rotates all eight seats in pyproject.toml to exactly the ruled ids.",
+    "manifest": "read; it states tests/core/test_gpt6_seat_rotation.py gave 9 passed EXIT=0 at head against 9 failed EXIT=1 at base, the model-settings gate gave 218 passed at both arms, and cites the five logs by absolute path.",
+    "write_paths": "the manifest declares pyproject.toml, tests/core/test_gpt6_seat_rotation.py, docs/evidence/fragments/llm-seats/llm-gpt6-seat-rotation.html plus the two paths granted in resume-1-advice.txt, imas_codex/settings.py and tests/core/test_settings.py, and every changed path is inside them."
+  },
+  "justifications": {
+    "durability": "tests/core/test_gpt6_seat_rotation.py:54 and its eight siblings redden at base for all nine ids, so reverting any rotated seat or fallback fails the suite.",
+    "evidence": "gate-head.log and negative-control-base.log record 9 passed EXIT=0 against 9 failed EXIT=1 and settings-suite-base.log and settings-suite-head.log each record 218 passed.",
+    "fit": "pyproject.toml:682 updates the escalator comment to the new model in the file's own voice and the diff adds no name the naming rules forbid.",
+    "goal_fidelity": "pyproject.toml rotates all eight seats to the ruled ids and each matches the brief's mapping table exactly.",
+    "reuse": "the diff adds no production definition, and tests/core/test_gpt6_seat_rotation.py extends the single-seat pin at tests/core/test_settings.py:472 rather than duplicating an owned seat-resolution mechanism.",
+    "scope_discipline": "all five changed files sit inside the declared write paths, with imas_codex/settings.py and tests/core/test_settings.py granted in resume-1-advice.txt."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to move every live GPT seat in pyproject.toml to the GPT-6 model the lead ruled for it; the diff rotates all eight seats in pyproject.toml to exactly the ruled ids.\nVERDICT done_when: the done_when requires the eight seats to resolve through the project's accessors, a recorded grep free of live gpt-5 seats, no added settings-test failures, and a fragment; each is present in gate-head.log, negative-control-base.log, seat-grep.log, settings-suite-head.log, settings-suite-base.log and the fragment.\nVERDICT write_paths: the manifest declares pyproject.toml, tests/core/test_gpt6_seat_rotation.py, docs/evidence/fragments/llm-seats/llm-gpt6-seat-rotation.html plus the two paths granted in resume-1-advice.txt, imas_codex/settings.py and tests/core/test_settings.py, and every changed path is inside them.\nVERDICT manifest: read; it states tests/core/test_gpt6_seat_rotation.py gave 9 passed EXIT=0 at head against 9 failed EXIT=1 at base, the model-settings gate gave 218 passed at both arms, and cites the five logs by absolute path.\nVERDICT diff: read commit by commit from 3347cfb8 to 44b112cc4; five files changed, eight seats and five fallbacks rotated, three comments updated, one pin repaired, one test module and one fragment added, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/pools.py:106, imas_codex/standard_names/loop.py:71, imas_codex/standard_names/review/pipeline.py:987, imas_codex/standard_names/promote.py:694, imas_codex/cli/sn.py:6530, imas_codex/standard_names/advisory_panel.py:93, imas_codex/settings.py:502\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: pyproject.toml rotates all eight seats to the ruled ids and each matches the brief's mapping table exactly.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-head.log and negative-control-base.log record 9 passed EXIT=0 against 9 failed EXIT=1 and settings-suite-base.log and settings-suite-head.log each record 218 passed.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: all five changed files sit inside the declared write paths, with imas_codex/settings.py and tests/core/test_settings.py granted in resume-1-advice.txt.\nSCORE durability: 19\nJUSTIFICATION durability: tests/core/test_gpt6_seat_rotation.py:54 and its eight siblings redden at base for all nine ids, so reverting any rotated seat or fallback fails the suite.\nSCORE fit: 18\nJUSTIFICATION fit: pyproject.toml:682 updates the escalator comment to the new model in the file's own voice and the diff adds no name the naming rules forbid.\nSCORE reuse: 18\nJUSTIFICATION reuse: the diff adds no production definition, and tests/core/test_gpt6_seat_rotation.py extends the single-seat pin at tests/core/test_settings.py:472 rather than duplicating an owned seat-resolution mechanism.\nFINDING tests/core/test_gpt6_seat_rotation.py:57 follow-on: the three chain seats are asserted through get_sn_review_docs_models, get_sn_review_profile_models and get_model_source_models rather than get_model as the evidence fence states, so the literal resolving of all eight seats through get_model is unmet, though the substitute accessors are the correct ones because get_model cannot resolve a list position.",
+  "review_run_id": "r-20261018T203352961244-review-of-llm-gpt6-seat-rotation-44b112cc46ae",
+  "reviewed_base_sha": "3347cfb8e2ec5eb379f44cc1ae40b609c0fce3b5",
+  "reviewed_commits": [
+    "ab4af6700bf02961eb5907fee1b24925ef1b992a",
+    "02d34bc3068375c2877393e1fc369fd8bc3e0250",
+    "88228d98ccd1b55575332676aaf5d0cad593a271",
+    "a21abac115cc55f55715d0602b9abeee58fe1419",
+    "44b112cc46ae704534a32e8433f4dd971a7403db"
+  ],
+  "reviewed_head_sha": "44b112cc46ae704534a32e8433f4dd971a7403db",
+  "reviewed_run_id": "r-20261018T194239133952-llm-gpt6-seat-rotation",
+  "schema": "crew-review-record",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T20:50:12.867460+00:00",
+  "total": 109
+}
