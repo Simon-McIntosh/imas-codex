@@ -19,12 +19,12 @@
   <meta name="plan-sprint" content="S18">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;,&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="83">
 <meta name="plan-modified" content="2026-10-18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -211,17 +211,22 @@
         also goes to the one chat reviewer, under its own route label, with its share reported
         apart from the band.</li>
       <li>An item Jev could not judge, because the call failed or the lease was refused, takes no
-        route. It is recorded as unjudged, left out of every route share, and stays with the
-        incumbent.</li>
+        route. It is recorded in the shadow store as a non-canonical <code>judge_kind = jev</code>
+        review row with route <code>unjudged</code> and the failure reason. It is left out of the
+        route shares, and its count is reported beside them. It goes to the incumbent quorum
+        while that path remains, and to the one chat reviewer once §7 deletes the quorum.</li>
     </ul>
     <p>
       Thresholds come from the calibration split. The cascade runs in shadow first, through the
-      store of <code>sn-judgment-evaluation</code> §6, and decides only after shadow agreement and
-      the §3 and §4 verdicts pass the deployment rule.
+      store of <code>sn-judgment-evaluation</code> §6, and decides only after shadow agreement. The
+      §3 and §4 verdicts are settled. §4 passed the deployment rule. §3 missed it by 0.009,
+      and the lead promoted it into the cascade with that shortfall waived on 2026-10-17. The
+      waiver is §3's verdict for this gate.
     </p>
     <p>
       <strong>Done when:</strong> on a fixed cohort run both ways, the fragment reports the share
-      of items that reached the chat reviewer, spend per accepted name before and after, and
+      of items that reached the chat reviewer, the count and share of items left unjudged, both
+      over the whole cohort, spend per accepted name before and after, and
       non-inferior AUC on the golden validation split. The incumbent quorum path remains callable
       for comparison until §7.
     </p>
