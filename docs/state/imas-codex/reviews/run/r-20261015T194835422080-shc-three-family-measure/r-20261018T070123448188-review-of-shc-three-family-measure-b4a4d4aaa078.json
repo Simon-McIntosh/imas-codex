@@ -1,0 +1,110 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest has empty baseline_suite and after_suite fields and no such gate logs; an empty failure list is not a measured zero",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "A named family or boundary family is absent from the graph, leaving one of the three required reads empty.",
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py",
+      "line": 44
+    },
+    {
+      "condition_to_fail": "A target family shares at least one member with the concurrent boundary family.",
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py",
+      "line": 49
+    },
+    {
+      "condition_to_fail": "The status query omits or adds a family member relative to the plan's member set.",
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py",
+      "line": 67
+    },
+    {
+      "condition_to_fail": "The comparator omits the supplied below-threshold member or returns another id; changing the fixture id in both input and expectation does not fail it.",
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py",
+      "line": 124
+    }
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T07:06:46Z",
+  "dispatched_at": "2026-10-18T07:01:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure.html",
+      "line": "10",
+      "severity": "blocking",
+      "text": "blocking: Neither locus attempt stamped and the replacement appears in WEST rosters, so the plan's three eligible non-WEST family convergence gate is unmet."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py",
+      "line": "124",
+      "severity": "follow-on",
+      "text": "follow-on: The expected fixture id is the same name variable placed in the input maps, so changing the supplied name leaves this assertion green rather than independently fixing the identity it promises to report."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: The snapshot duplicates family planning, lint, scores and cost capture owned by docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py:64-113 instead of extending that recorder, risking divergent measurements."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite contain no completed gate records, so added test failures cannot be computed from the source run."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "The ten commits from 3afd0f655005236a94ad01f46931b2ed6ba0514b through b4a4d4aaa078a498f6ab0bcfe33d83514ea4dc6b add one 155-line recorder, one 1141-line results JSON and one 150-line evidence fragment; the final fragment at html:3-11 explicitly holds WEST.",
+    "done_when": "The source brief.md:48-58 requires three applied families, before/after measures, a named below-threshold fixture and a WEST limit; the receipt logs and evidence fragment report the measures and fixture, but html:10-11 records that the three-family convergence condition failed.",
+    "goal": "The source brief.md:1-34 and plan \u00a74 ask for a three-kind convergence and cost measure; docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure.html:3-11 records two converged families and a failed locus gate.",
+    "manifest": "The source manifest.md:7-29 names ten commits, the three changed paths, USD 7.232408 spent of USD 8.00, a failed locus gate and gate logs, while baseline_suite and after_suite are blank at lines 20-21.",
+    "write_paths": "The source brief.md:61-66 grants one evidence fragment, its recorder and results JSON plus a figure directory; the base-to-head diff changes only those three granted files."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:118-125 asserts a below-threshold member is reported, which would fail if docs_score_regressions omitted such members, but the expected name moves with the supplied name and no committed test checks the measured live-family outcome.",
+    "evidence": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-results.json records exact batch costs and member scores reconciled by receipt-reconciliation.log, and gap-apply-main.slurm.log:2246 directly reports the 0.750 score and halt.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:13-14 calls the existing defaults and regression comparator, and its function names describe their behavior.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure.html:3-11 accurately records the experiment and hold, but the required eligible non-WEST locus family did not converge.",
+    "reuse": "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:30-115 repeats family planning, lint, scores and cost capture already owned by docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py:64-113 rather than extending that recorder.",
+    "scope_discipline": "The diff from f491d1209fc8841eec3f6cfd611f990be52837b3 to b4a4d4aaa078a498f6ab0bcfe33d83514ea4dc6b changes only the three paths granted by source brief.md:61-66."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md:1-34 and plan \u00a74 ask for a three-kind convergence and cost measure; docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure.html:3-11 records two converged families and a failed locus gate.\nVERDICT done_when: The source brief.md:48-58 requires three applied families, before/after measures, a named below-threshold fixture and a WEST limit; the receipt logs and evidence fragment report the measures and fixture, but html:10-11 records that the three-family convergence condition failed.\nVERDICT write_paths: The source brief.md:61-66 grants one evidence fragment, its recorder and results JSON plus a figure directory; the base-to-head diff changes only those three granted files.\nVERDICT manifest: The source manifest.md:7-29 names ten commits, the three changed paths, USD 7.232408 spent of USD 8.00, a failed locus gate and gate logs, while baseline_suite and after_suite are blank at lines 20-21.\nVERDICT diff: The ten commits from 3afd0f655005236a94ad01f46931b2ed6ba0514b through b4a4d4aaa078a498f6ab0bcfe33d83514ea4dc6b add one 155-line recorder, one 1141-line results JSON and one 150-line evidence fragment; the final fragment at html:3-11 explicitly holds WEST.\nCALL_SITES: none\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure.html:3-11 accurately records the experiment and hold, but the required eligible non-WEST locus family did not converge.\nSCORE evidence: 17\nJUSTIFICATION evidence: docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-results.json records exact batch costs and member scores reconciled by receipt-reconciliation.log, and gap-apply-main.slurm.log:2246 directly reports the 0.750 score and halt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff from f491d1209fc8841eec3f6cfd611f990be52837b3 to b4a4d4aaa078a498f6ab0bcfe33d83514ea4dc6b changes only the three paths granted by source brief.md:61-66.\nSCORE durability: 9\nJUSTIFICATION durability: docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:118-125 asserts a below-threshold member is reported, which would fail if docs_score_regressions omitted such members, but the expected name moves with the supplied name and no committed test checks the measured live-family outcome.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:13-14 calls the existing defaults and regression comparator, and its function names describe their behavior.\nSCORE reuse: 5\nJUSTIFICATION reuse: docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:30-115 repeats family planning, lint, scores and cost capture already owned by docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py:64-113 rather than extending that recorder.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure.html:10 blocking: Neither locus attempt stamped and the replacement appears in WEST rosters, so the plan's three eligible non-WEST family convergence gate is unmet.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:124 follow-on: The expected fixture id is the same name variable placed in the input maps, so changing the supplied name leaves this assertion green rather than independently fixing the identity it promises to report.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:30 follow-on: The snapshot duplicates family planning, lint, scores and cost capture owned by docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py:64-113 instead of extending that recorder, risking divergent measurements.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T194835422080-shc-three-family-measure/manifest.md:20 follow-on: baseline_suite and after_suite contain no completed gate records, so added test failures cannot be computed from the source run.\n",
+  "review_run_id": "r-20261018T070123448188-review-of-shc-three-family-measure-b4a4d4aaa078",
+  "reviewed_base_sha": "f491d1209fc8841eec3f6cfd611f990be52837b3",
+  "reviewed_commits": [
+    "3afd0f655005236a94ad01f46931b2ed6ba0514b",
+    "6dcd5fc618b3cb152a5e7bf44361f6cb364c9e46",
+    "6bdbe16ab7aec183260155f44cce08f24acf2272",
+    "009c4cc945d506a42b10f0e924ebf90b9224f263",
+    "4fc71852cd2b4c04135b0c159215ac767089770c",
+    "f906061b75ee0580bc3904c76a0ca2e5dbfb8cbb",
+    "28f15aedc4145b7dd377733105f3b8b204d361ba",
+    "34116f7842e2582dd70e460347287a17d6c19906",
+    "c00e7a5f14873b92e5a4e21d85fa75372047339b",
+    "b4a4d4aaa078a498f6ab0bcfe33d83514ea4dc6b"
+  ],
+  "reviewed_head_sha": "b4a4d4aaa078a498f6ab0bcfe33d83514ea4dc6b",
+  "reviewed_run_id": "r-20261015T194835422080-shc-three-family-measure",
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 10,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    "docs/evidence/fragments/sn-harmonize-command/shc-three-family-measure-run.py:124 compares the returned id with the same name variable supplied at lines 119-121."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T07:04:08Z",
+  "total": 79
+}
