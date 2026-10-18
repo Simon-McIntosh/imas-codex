@@ -1,0 +1,160 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T192309591921-srtj-cascade-router/unjudged-head-suite.log",
+    "passed": 271,
+    "revision": "6dd547f036fe2a97879c7e708f14c9f3126f5c1e"
+  },
+  "assertion_analysis": [
+    {
+      "fails_if": "Fails if the pinned artifact digest, split label, zero unjudged count or route-count total changes independently; route counts and n can move together, so that sum alone does not prove calibration provenance.",
+      "test": "test_calibration_artifact_digest_recomputes_from_committed_content"
+    },
+    {
+      "fails_if": "Fails if the pinned digest check ceases to reject a planted cutoff or weight edit.",
+      "test": "test_calibration_digest_rejects_unrederived_edit"
+    },
+    {
+      "fails_if": "Fails if a noncanonical Jev row changes count, mean or disagreement in the query-shaped aggregate model.",
+      "test": "test_shadow_jev_row_does_not_change_review_aggregates"
+    },
+    {
+      "fails_if": "Fails if route storage omits the row, gives it canonical status or a scalar score, or loses the route answer.",
+      "test": "test_shadow_review_record_is_noncanonical"
+    },
+    {
+      "fails_if": "Fails if direct results drop the named failure or the existing check trigger rejects the supplied positive check; its expected check ID is also the injected one.",
+      "test": "test_failed_checks_feed_existing_refine_trigger"
+    },
+    {
+      "fails_if": "Fails if the production veto substitutes the generic claim for the independently planted named sentence.",
+      "test": "test_contradiction_note_uses_named_reason"
+    },
+    {
+      "fails_if": "Fails if the audit builder bypasses the patched owner when explicit conventions are present.",
+      "test": "test_docs_audit_calls_house_style_owner"
+    },
+    {
+      "fails_if": "Fails if either axis changes the independently planted 0.8 accept comparison or its strict lower edge.",
+      "test": "test_accept_at_threshold"
+    },
+    {
+      "fails_if": "Fails if either axis misses the independently planted 0.6 failure comparison or drops the injected check ID.",
+      "test": "test_refine_at_check_threshold"
+    },
+    {
+      "fails_if": "Fails if either axis changes the planted 0.2 lower boundary; it guards the implemented low-tail label, which is a blocking plan mismatch.",
+      "test": "test_reject_boundary_has_separate_chat_label"
+    },
+    {
+      "fails_if": "Fails if shadow mode omits the route, narrows the two-seat incumbent call or changes the independent mocked incumbent score.",
+      "test": "test_shadow_records_route_and_keeps_incumbent_result"
+    },
+    {
+      "fails_if": "Fails if accept or refine invokes the incumbent, or if chat uses more than the first model; its line 383 method suffix is derived from the injected route and does not independently test classifier selection.",
+      "test": "test_deciding_routes_use_one_chat_seat"
+    },
+    {
+      "fails_if": "Fails if restored stage authority rejects direct accept or refine or records a quorum shortfall.",
+      "test": "test_deciding_result_reaches_name_stage"
+    },
+    {
+      "fails_if": "Fails if a refused lease or raised judgment omits unjudged storage or narrows the full incumbent seat list.",
+      "test": "test_unjudged_review_keeps_full_incumbent"
+    },
+    {
+      "fails_if": "Fails if four planted failure combinations omit the noncanonical unjudged row, lose its reason, change the incumbent result or change aggregates; the static route-share assertion alone does not prove dynamic exclusion.",
+      "test": "test_unjudged_shadow_row_preserves_incumbent_and_aggregate"
+    },
+    {
+      "fails_if": "Fails if an empty documentation decision stops raising ValueError.",
+      "test": "test_empty_docs_judgment_is_unjudged"
+    },
+    {
+      "fails_if": "Fails if an unanswered name result stops raising ValueError.",
+      "test": "test_empty_name_judgment_is_unjudged"
+    },
+    {
+      "fails_if": "Fails if the worker loses failed-check prompt context or stops choosing the existing check trigger.",
+      "test": "test_refine_worker_receives_named_checks"
+    }
+  ],
+  "baseline_gate": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T192309591921-srtj-cascade-router/unjudged-base-suite.log",
+    "passed": 267,
+    "revision": "c0146c5a952fc68fe5e728d8c07c45aafde13947"
+  },
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8970 process_review_name_batch",
+    "imas_codex/standard_names/workers.py:11039 process_review_docs_batch",
+    "imas_codex/standard_names/workers.py:7279 process_refine_name_batch",
+    "imas_codex/standard_names/workers.py:11284 process_refine_docs_batch",
+    "imas_codex/standard_names/graph_ops.py:6263 update_review_aggregates",
+    "imas_codex/standard_names/graph_ops.py:17016 persist_reviewed_name",
+    "imas_codex/standard_names/graph_ops.py:17788 persist_reviewed_docs"
+  ],
+  "completed_at": "2026-10-18T21:52:40Z",
+  "dispatched_at": "2026-10-18T21:44:33Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": 70,
+      "severity": "blocking",
+      "text": "A check-clear score below reject_threshold becomes chat_below_reject and adjudicate_review sends it to a chat reviewer; plan \u00a76 permits chat only inside the uncertain band, so the zero calibration count does not make this fourth runtime route safe."
+    },
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": 332,
+      "severity": "follow-on",
+      "text": "A fixed USD 0.001 reservation precedes an unbounded Jev call and no provider-exposure check; BudgetLease.charge_event records any excess only after billing, so this new production call can overrun the reserved budget."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": 383,
+      "severity": "follow-on",
+      "text": "The expected resolution-method suffix is built from the same route string injected into the mocked judgment, so this assertion cannot detect a classifier that selects the wrong route; the independent threshold tests cover classification separately."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the seven commits 0c0bc4e6 through 93b2736a commit by commit against b8b973a5; the final change records unjudged controls, while cascade.py:70 retains the fourth low-tail chat route and cascade.py:332 uses a fixed Jev reservation.",
+    "done_when": "The source brief names planted threshold edges, shadow and deciding modes, folded-defect refusals and a covering delta; negative-control.log has four red edge IDs, defect-reproduction.log has two red defects, and unjudged-base-suite.log and unjudged-head-suite.log record 267 and 271 passes with zero failure IDs.",
+    "goal": "The source brief requests a calibrated shadow router and an off-by-default deciding path; imas_codex/standard_names/review/cascade.py:47-72 implements them but line 70 still sends a check-clear score below the reject threshold to chat outside the plan's uncertain band.",
+    "manifest": "The source manifest.md names seven commits, seven changed paths and complete status; its paired suite log paths exist and end EXIT=0, and its unjudged write-removal log ends EXIT=1 with eight IDs that pass at head.",
+    "write_paths": "The source brief names six paths while manifest.md declares seven including imas_codex/standard_names/graph_ops.py; the seven-file base-to-head diff matches the manifest's later-grant list, although followon-manifest-audit.log still refuses graph_ops.py against the original dispatch scope."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_cascade.py:248-272 independently plant accept, failure and reject cutoffs and their stub-router control is red, while lines 428-523 make lease and call failures produce an unjudged row or redden.",
+    "evidence": "unjudged-base-suite.log and unjudged-head-suite.log record 267 and 271 passes at EXIT=0, negative-control.log records four failing route-edge IDs, and the frozen calibration replay logs name 363 and 216 known-present items.",
+    "fit": "imas_codex/standard_names/review/cascade.py:159 uses the existing review-record builder and graph_ops.py:16942 extends the established stage-authority set with explicit cascade methods.",
+    "goal_fidelity": "imas_codex/standard_names/review/cascade.py:70 routes check-clear low-tail items to one chat reviewer, whereas the plan's chat route is confined to the uncertain band.",
+    "reuse": "Capability search over imas_codex/standard_names/review and fanout found no existing cascade router; cascade.py:156-157 uses the owned review store and workers.py:7321 feeds the owned check trigger.",
+    "scope_discipline": "The seven paths changed by b8b973a5..93b2736a match manifest.md's later declared list, but imas_codex/standard_names/graph_ops.py:6286 remains outside the original dispatch grant according to followon-manifest-audit.log."
+  },
+  "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T192309591921-srtj-cascade-router/unjudged-write-removal.log",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief requests a calibrated shadow router and an off-by-default deciding path; imas_codex/standard_names/review/cascade.py:47-72 implements them but line 70 still sends a check-clear score below the reject threshold to chat outside the plan's uncertain band.\nVERDICT done_when: The source brief names planted threshold edges, shadow and deciding modes, folded-defect refusals and a covering delta; negative-control.log has four red edge IDs, defect-reproduction.log has two red defects, and unjudged-base-suite.log and unjudged-head-suite.log record 267 and 271 passes with zero failure IDs.\nVERDICT write_paths: The source brief names six paths while manifest.md declares seven including imas_codex/standard_names/graph_ops.py; the seven-file base-to-head diff matches the manifest's later-grant list, although followon-manifest-audit.log still refuses graph_ops.py against the original dispatch scope.\nVERDICT manifest: The source manifest.md names seven commits, seven changed paths and complete status; its paired suite log paths exist and end EXIT=0, and its unjudged write-removal log ends EXIT=1 with eight IDs that pass at head.\nVERDICT diff: Read the seven commits 0c0bc4e6 through 93b2736a commit by commit against b8b973a5; the final change records unjudged controls, while cascade.py:70 retains the fourth low-tail chat route and cascade.py:332 uses a fixed Jev reservation.\nCALL_SITES: imas_codex/standard_names/workers.py:8970 process_review_name_batch, imas_codex/standard_names/workers.py:11039 process_review_docs_batch, imas_codex/standard_names/workers.py:7279 process_refine_name_batch, imas_codex/standard_names/workers.py:11284 process_refine_docs_batch, imas_codex/standard_names/graph_ops.py:6263 update_review_aggregates, imas_codex/standard_names/graph_ops.py:17016 persist_reviewed_name, imas_codex/standard_names/graph_ops.py:17788 persist_reviewed_docs\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/cascade.py:70 routes check-clear low-tail items to one chat reviewer, whereas the plan's chat route is confined to the uncertain band.\nSCORE evidence: 18\nJUSTIFICATION evidence: unjudged-base-suite.log and unjudged-head-suite.log record 267 and 271 passes at EXIT=0, negative-control.log records four failing route-edge IDs, and the frozen calibration replay logs name 363 and 216 known-present items.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: The seven paths changed by b8b973a5..93b2736a match manifest.md's later declared list, but imas_codex/standard_names/graph_ops.py:6286 remains outside the original dispatch grant according to followon-manifest-audit.log.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_review_cascade.py:248-272 independently plant accept, failure and reject cutoffs and their stub-router control is red, while lines 428-523 make lease and call failures produce an unjudged row or redden.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/review/cascade.py:159 uses the existing review-record builder and graph_ops.py:16942 extends the established stage-authority set with explicit cascade methods.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability search over imas_codex/standard_names/review and fanout found no existing cascade router; cascade.py:156-157 uses the owned review store and workers.py:7321 feeds the owned check trigger.\nFINDING imas_codex/standard_names/review/cascade.py:70 blocking: A check-clear score below reject_threshold becomes chat_below_reject and adjudicate_review sends it to a chat reviewer; plan \u00a76 permits chat only inside the uncertain band, so the zero calibration count does not make this fourth runtime route safe.\nFINDING imas_codex/standard_names/review/cascade.py:332 follow-on: A fixed USD 0.001 reservation precedes an unbounded Jev call and no provider-exposure check; BudgetLease.charge_event records any excess only after billing, so this new production call can overrun the reserved budget.\nFINDING tests/standard_names/test_review_cascade.py:383 follow-on: The expected resolution-method suffix is built from the same route string injected into the mocked judgment, so this assertion cannot detect a classifier that selects the wrong route; the independent threshold tests cover classification separately.\n",
+  "review_run_id": "r-20261018T214346829605-review-of-srtj-cascade-router-93b2736a6a19",
+  "reviewed_base_sha": "b8b973a5e017782546a4ccf307cf04dcb12b2f9b",
+  "reviewed_head_sha": "93b2736a6a196159573bd6c23589df3fde024955",
+  "reviewed_run_id": "r-20261018T192309591921-srtj-cascade-router",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T21:50:03.909139+00:00",
+  "total": 103
+}
