@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "fc9308564a7656edc9c0122ce7c517a9e31f078a",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:7304",
+    "imas_codex/standard_names/workers.py:10924",
+    "imas_codex/standard_names/benchmark_roles.py:689",
+    "imas_codex/standard_names/fanout/__init__.py:51"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-18T06:58:17Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/fanout/config.py",
+      "line": "130",
+      "severity": "follow-on",
+      "text": "follow-on: refine_trigger_source and refine_trigger_check_threshold have no production reader, because the sole production call site imas_codex/standard_names/workers.py:7304 does not pass trigger_source, so flipping the switch changes nothing and the check path is reachable only from tests and the bench."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-reads-checks.html",
+      "line": "34",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment cites the head gate at 3771eb024e74c014bb91e4276f8068d84b50bf01 while the reviewed head is 0bf7ef5c68f32fe05675992a59c49605d9fa83be, so the cited receipt measures one commit before the reviewed head; the intervening commit is docs-only, so the code arm is unaffected."
+    },
+    {
+      "file": "tests/standard_names/test_refine_failed_checks.py",
+      "line": "292",
+      "severity": "follow-on",
+      "text": "follow-on: assert context[\"failed_checks\"] == case[\"failed_checks\"] compares the returned value against the same list the test passed in, so it holds whatever the context builder assigns and would survive a regression that stored an unrelated list under that key; the independent guard is the next line's default-path check."
+    }
+  ],
+  "head_log_revision": "3771eb024e74c014bb91e4276f8068d84b50bf01",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base fc9308564a7656edc9c0122ce7c517a9e31f078a; f80e451 adds the conforming lists, check_failure_probability, the retrieval predicate, the prompt instruction block and the bench instruction_source switch plus the new test, 3771eb0 routes audit-finding and documentation-claim failures through the same threshold while keeping the contradiction veto independent, and 0bf7ef5 adds only the evidence fragment, all inside the declared scope.",
+    "done_when": "the done_when names docs/evidence/fragments/sn-review-through-jev/srtj-refine-reads-checks.html; the fragment records each Choice's conforming list with a stated reason, both gate counts with zero added failures, both negative controls ending EXIT=1, and a rendered check block beside a comment block for diamagnetic_momentum_diffusivity, so the measure is asserted.",
+    "goal": "the node goal is to build a check-driven refine path beside the brief's comment control (conforming Choice outcomes, one failure-probability reader, a retrieval-only fanout trigger, prompts rendering failed checks, and a bench arm); imas_codex/standard_names/review/jev_review.py:341 adds check_failure_probability and imas_codex/standard_names/fanout/trigger.py:44 adds should_trigger_fanout_from_checks, so every named deliverable is present.",
+    "manifest": "read at .../runs/r-20261018T065748161945-srtj-refine-reads-checks/manifest.md; it states status complete, records the gate as 279 passed / 1 pre-existing failed / EXIT=1 with zero added failures against base 265 passed / 1 failed / EXIT=1, names base-gate.log, final-head-gate.log and negative-control.log, and leaves baseline_suite and after_suite empty so the added-failure count is derived here from the two gate logs its test_logs names.",
+    "write_paths": "the declared write paths are the 16 files listed in the manifest; the diff touches 12 of them (imas_codex/llm/prompts/sn/review_checks.yaml, imas_codex/llm/prompts/sn/refine_name_user.md, imas_codex/llm/prompts/sn/refine_docs_user.md, imas_codex/standard_names/review/checks.py, imas_codex/standard_names/review/jev_review.py, imas_codex/standard_names/fanout/trigger.py, imas_codex/standard_names/fanout/config.py, imas_codex/standard_names/benchmark_roles.py, tests/standard_names/test_refine_failed_checks.py, tests/standard_names/test_jev_name_review.py, tests/standard_names/test_jev_docs_review.py and the evidence fragment) and no path outside them."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_refine_failed_checks.py:110 asserts the shipped conforming lists against independent literals and :171 asserts retrieval-only firing, and negative-control.log shows the mutated source reddening both the trigger test and the name-prompt test at EXIT=1.",
+    "evidence": "the gate recorded at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065748161945-srtj-refine-reads-checks/final-head-gate.log reports 279 passed / 1 failed / EXIT=1 and derives zero added failures against base-gate.log's 265 passed / 1 failed, the same single failure id, though the head log's own header names 3771eb0 and not the reviewed head 0bf7ef5.",
+    "fit": "imas_codex/standard_names/fanout/config.py:130 follows the module's pydantic Field idiom and the new names (check_failure_probability, should_trigger_fanout_from_checks) carry no plan or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/review/jev_review.py:341 (check_failure_probability) and imas_codex/standard_names/fanout/trigger.py:44 (should_trigger_fanout_from_checks) implement the brief's items, with the caveat that imas_codex/standard_names/fanout/config.py:130's switch has no production reader.",
+    "reuse": "check_failure_probability becomes the single owner of the failure reading, replacing the former first-option convention and the inline read at imas_codex/standard_names/review/jev_review.py:711, so the change consolidates rather than forks the capability.",
+    "scope_discipline": "every path in the diff (12 files) is inside the 16 declared write paths and no file outside them changed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to build a check-driven refine path beside the brief's comment control (conforming Choice outcomes, one failure-probability reader, a retrieval-only fanout trigger, prompts rendering failed checks, and a bench arm); imas_codex/standard_names/review/jev_review.py:341 adds check_failure_probability and imas_codex/standard_names/fanout/trigger.py:44 adds should_trigger_fanout_from_checks, so every named deliverable is present.\nVERDICT done_when: the done_when names docs/evidence/fragments/sn-review-through-jev/srtj-refine-reads-checks.html; the fragment records each Choice's conforming list with a stated reason, both gate counts with zero added failures, both negative controls ending EXIT=1, and a rendered check block beside a comment block for diamagnetic_momentum_diffusivity, so the measure is asserted.\nVERDICT write_paths: the declared write paths are the 16 files listed in the manifest; the diff touches 12 of them (imas_codex/llm/prompts/sn/review_checks.yaml, imas_codex/llm/prompts/sn/refine_name_user.md, imas_codex/llm/prompts/sn/refine_docs_user.md, imas_codex/standard_names/review/checks.py, imas_codex/standard_names/review/jev_review.py, imas_codex/standard_names/fanout/trigger.py, imas_codex/standard_names/fanout/config.py, imas_codex/standard_names/benchmark_roles.py, tests/standard_names/test_refine_failed_checks.py, tests/standard_names/test_jev_name_review.py, tests/standard_names/test_jev_docs_review.py and the evidence fragment) and no path outside them.\nVERDICT manifest: read at .../runs/r-20261018T065748161945-srtj-refine-reads-checks/manifest.md; it states status complete, records the gate as 279 passed / 1 pre-existing failed / EXIT=1 with zero added failures against base 265 passed / 1 failed / EXIT=1, names base-gate.log, final-head-gate.log and negative-control.log, and leaves baseline_suite and after_suite empty so the added-failure count is derived here from the two gate logs its test_logs names.\nVERDICT diff: read commit by commit against base fc9308564a7656edc9c0122ce7c517a9e31f078a; f80e451 adds the conforming lists, check_failure_probability, the retrieval predicate, the prompt instruction block and the bench instruction_source switch plus the new test, 3771eb0 routes audit-finding and documentation-claim failures through the same threshold while keeping the contradiction veto independent, and 0bf7ef5 adds only the evidence fragment, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/workers.py:7304, imas_codex/standard_names/workers.py:10924, imas_codex/standard_names/benchmark_roles.py:689, imas_codex/standard_names/fanout/__init__.py:51\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/jev_review.py:341 (check_failure_probability) and imas_codex/standard_names/fanout/trigger.py:44 (should_trigger_fanout_from_checks) implement the brief's items, with the caveat that imas_codex/standard_names/fanout/config.py:130's switch has no production reader.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate recorded at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T065748161945-srtj-refine-reads-checks/final-head-gate.log reports 279 passed / 1 failed / EXIT=1 and derives zero added failures against base-gate.log's 265 passed / 1 failed, the same single failure id, though the head log's own header names 3771eb0 and not the reviewed head 0bf7ef5.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (12 files) is inside the 16 declared write paths and no file outside them changed.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_refine_failed_checks.py:110 asserts the shipped conforming lists against independent literals and :171 asserts retrieval-only firing, and negative-control.log shows the mutated source reddening both the trigger test and the name-prompt test at EXIT=1.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/fanout/config.py:130 follows the module's pydantic Field idiom and the new names (check_failure_probability, should_trigger_fanout_from_checks) carry no plan or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: check_failure_probability becomes the single owner of the failure reading, replacing the former first-option convention and the inline read at imas_codex/standard_names/review/jev_review.py:711, so the change consolidates rather than forks the capability.\nFINDING imas_codex/standard_names/fanout/config.py:130 follow-on: refine_trigger_source and refine_trigger_check_threshold have no production reader, because the sole production call site imas_codex/standard_names/workers.py:7304 does not pass trigger_source, so flipping the switch changes nothing and the check path is reachable only from tests and the bench.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-reads-checks.html:34 follow-on: the fragment cites the head gate at 3771eb024e74c014bb91e4276f8068d84b50bf01 while the reviewed head is 0bf7ef5c68f32fe05675992a59c49605d9fa83be, so the cited receipt measures one commit before the reviewed head; the intervening commit is docs-only, so the code arm is unaffected.\nFINDING tests/standard_names/test_refine_failed_checks.py:292 follow-on: assert context[\"failed_checks\"] == case[\"failed_checks\"] compares the returned value against the same list the test passed in, so it holds whatever the context builder assigns and would survive a regression that stored an unrelated list under that key; the independent guard is the next line's default-path check.",
+  "review_run_id": "legacy-e42fdf8e2192",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "fc9308564a7656edc9c0122ce7c517a9e31f078a",
+  "reviewed_head_sha": "0bf7ef5c68f32fe05675992a59c49605d9fa83be",
+  "reviewed_run_id": "r-20261018T065748161945-srtj-refine-reads-checks",
+  "reviewer": "review-of-srtj-refine-reads-checks-0bf7ef5c68f3",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T08:53:39.573705+00:00",
+  "total": 109
+}
