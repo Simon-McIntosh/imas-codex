@@ -19,19 +19,39 @@ SHEET = (
     / "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-run-results.json"
 )
 TERMINAL = {"deprecated", "superseded"}
+POPULATIONS = (
+    "derived_parent",
+    "orphan_awaiting_retirement",
+    "unchained_holder",
+    "dropped_edge",
+    "never_bound",
+)
 
 
 def classify(item: dict) -> str:
     if item.get("origin") == "derived" and item.get("children"):
         return "derived_parent"
+    own_sources = set(item.get("own_recorded_source_ids") or [])
     if (
         item.get("origin") != "derived"
         and item.get("stage") == "exhausted"
-        and item.get("source_holding_successors")
+        and own_sources
+        and any(
+            own_sources.intersection(source_ids)
+            for source_ids in (item.get("successor_source_ids") or {}).values()
+        )
     ):
         return "orphan_awaiting_retirement"
+    if item.get("unchained_live_holders"):
+        return "unchained_holder"
     if item.get("history_sources"):
-        return "dropped_edge"
+        if not item.get("recorded_source_live_holders"):
+            return "dropped_edge"
+        if not own_sources and item.get("chained_live_holders"):
+            return "never_bound"
+        raise ValueError(
+            "recorded source has a chained live holder without an eligible orphan"
+        )
     return "never_bound"
 
 
@@ -40,7 +60,14 @@ def fixture_control() -> None:
         "derived_parent": {"origin": "derived", "children": ["child"]},
         "orphan_awaiting_retirement": {
             "stage": "exhausted",
-            "source_holding_successors": ["successor"],
+            "origin": "pipeline",
+            "own_recorded_source_ids": ["dd:path"],
+            "successor_source_ids": {"successor": ["dd:path"]},
+            "history_sources": ["dd:path"],
+        },
+        "unchained_holder": {
+            "history_sources": ["dd:path"],
+            "unchained_live_holders": ["other_name"],
         },
         "dropped_edge": {"history_sources": ["dd:path"]},
         "never_bound": {},
@@ -52,12 +79,22 @@ def fixture_control() -> None:
     derived_without_children = {
         "origin": "derived",
         "stage": "exhausted",
-        "source_holding_successors": ["successor"],
+        "own_recorded_source_ids": ["dd:path"],
+        "successor_source_ids": {"successor": ["dd:path"]},
     }
     assert classify(derived_without_children) == "never_bound"
     derived_without_children["history_sources"] = ["dd:path"]
     assert classify(derived_without_children) == "dropped_edge"
     print("fixture derived without children: never_bound or dropped_edge by evidence")
+    wrong_successor_source = {
+        "origin": "pipeline",
+        "stage": "exhausted",
+        "own_recorded_source_ids": ["dd:predecessor"],
+        "successor_source_ids": {"successor": ["dd:other"]},
+        "history_sources": ["dd:predecessor"],
+    }
+    assert classify(wrong_successor_source) == "dropped_edge"
+    print("fixture successor with different source: dropped_edge")
     print("EXIT=0")
 
 
@@ -110,6 +147,20 @@ def main() -> None:
             """
             MATCH (n:StandardName)
             WHERE NOT n.status IN $terminal
+              AND NOT EXISTS {
+                MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(n)
+              }
+            RETURN count(n) AS total
+        """,
+            terminal=sorted(TERMINAL),
+        )[0]["total"]
+        exhausted_sourceless_count = query(
+            gc,
+            "exhausted_sourceless_count",
+            """
+            MATCH (n:StandardName)
+            WHERE n.name_stage = 'exhausted'
+              AND NOT n.status IN $terminal
               AND NOT EXISTS {
                 MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(n)
               }
@@ -283,7 +334,9 @@ def main() -> None:
             )
         if "detach_stale_source_binding" in operations:
             return "signed_manifest.py:4904", "recorded stale-source detachment"
-        if item["source_receipts"]:
+        if item["own_source_receipts"] or (
+            item["population"] == "dropped_edge" and item["source_receipts"]
+        ):
             return (
                 "unknown after prior binding",
                 "binding receipt proves an edge existed; no later deletion receipt identifies its remover",
@@ -382,6 +435,16 @@ def main() -> None:
             | set(source_receipts[name])
             | lineage_receipts
         )
+        own_recorded_source_ids = set(source_locations(source_hints))
+        recorded_locations = source_locations(
+            source_hints | lineage_paths | set(historical_edges)
+        )
+        recorded_live_holders = {
+            holder
+            for source in recorded_locations.values()
+            for holder in source["live_holders"]
+        }
+        unchained_live_holders = recorded_live_holders - descendants - {name}
         item = {
             "name": name,
             "stage": n["stage"],
@@ -390,12 +453,20 @@ def main() -> None:
             "children": sorted(child_map[name]),
             "successors": sorted(descendants),
             "source_holding_successors": live_holders,
+            "successor_source_ids": {
+                successor: sorted(holdings[successor]) for successor in live_holders
+            },
+            "own_recorded_source_ids": sorted(own_recorded_source_ids),
+            "recorded_source_live_holders": sorted(recorded_live_holders),
+            "unchained_live_holders": sorted(unchained_live_holders),
+            "chained_live_holders": sorted(recorded_live_holders & descendants),
             "history_sources": history_sources,
             "recorded_paths": sorted(source_hints),
             "recorded_resolution_ids": sorted(resolution_ids),
             "lineage_paths": sorted(lineage_paths),
             "historical_edges": historical_edges,
             "source_receipts": sorted(set(source_receipts[name]) | lineage_receipts),
+            "own_source_receipts": sorted(set(source_receipts[name])),
             "source_locations": source_locations(
                 source_hints | lineage_paths | set(historical_edges)
             ),
@@ -405,28 +476,15 @@ def main() -> None:
             "edit_origin": n["edit_origin"],
         }
         item["population"] = classify(item)
-        if item["stage"] == "exhausted" and item["population"] == "dropped_edge":
-            path_locations = source_locations(source_hints | lineage_paths)
-            path_holders = (
-                {
-                    holder
-                    for source in path_locations.values()
-                    for holder in source["live_holders"]
-                }
-                - descendants
-                - {name}
-            )
-            item["recorded_path_live_holders"] = sorted(path_holders)
-            item["exhausted_source_location"] = (
-                "held_elsewhere_without_successor_chain"
-                if path_holders
-                else "no_live_holder"
-            )
         if item["population"] in {"dropped_edge", "never_bound"}:
             item["responsible_writer"], item["writer_evidence"] = writer_for(item)
         item["repair_source"] = (
             "successor_edge"
-            if live_holders
+            if item["population"] == "orphan_awaiting_retirement"
+            else "unchained_live_holder"
+            if item["population"] == "unchained_holder"
+            else "none"
+            if item["population"] == "never_bound"
             else "recorded_path"
             if source_hints or lineage_paths
             else "recorded_resolution_id"
@@ -507,62 +565,82 @@ def main() -> None:
     output = {
         "property_counts": counts,
         "independent_live_sourceless_count": live_sourceless_count,
+        "independent_exhausted_sourceless_count": exhausted_sourceless_count,
         "source_property_counts": source_properties,
         "total_live": sum(n["status"] not in TERMINAL for n in names),
-        "population_counts": dict(Counter(r["population"] for r in rows)),
+        "population_counts": {
+            population: Counter(r["population"] for r in rows)[population]
+            for population in POPULATIONS
+        },
         "stage_counts": {
             stage: dict(Counter(r["population"] for r in rows if r["stage"] == stage))
             for stage in sorted({r["stage"] for r in rows})
         },
-        "exhausted_dropped_edges": sum(
-            r["stage"] == "exhausted" and r["population"] == "dropped_edge"
-            for r in rows
-        ),
-        "exhausted_source_location_counts": dict(
-            Counter(
-                r["exhausted_source_location"]
-                for r in rows
-                if r["stage"] == "exhausted" and r["population"] == "dropped_edge"
-            )
-        ),
+        "exhausted_population_counts": {
+            population: Counter(
+                r["population"] for r in rows if r["stage"] == "exhausted"
+            )[population]
+            for population in POPULATIONS
+        },
         "names": rows,
         "refine_cases": sheet_rows,
     }
     assert len(rows) == live_sourceless_count
     assert len(row_map) == live_sourceless_count
     assert (
-        sum(output["exhausted_source_location_counts"].values())
-        == output["exhausted_dropped_edges"]
+        sum(output["exhausted_population_counts"].values())
+        == exhausted_sourceless_count
     )
     assert all(
         output["population_counts"].get(population, 0) > 0
         for population in (
             "derived_parent",
-            "orphan_awaiting_retirement",
+            "unchained_holder",
             "dropped_edge",
             "never_bound",
         )
     )
+    assert all(
+        not r["recorded_source_live_holders"]
+        for r in rows
+        if r["population"] == "dropped_edge"
+    )
+    assert all(
+        not any(source["live_holders"] for source in r["source_locations"].values())
+        for r in rows
+        if r["population"] == "dropped_edge"
+    )
+    assert all(
+        r["unchained_live_holders"]
+        for r in rows
+        if r["population"] == "unchained_holder"
+    )
     for name, population in {
         "beta": "derived_parent",
-        "normalized_toroidal_thermal_plasma_beta": "orphan_awaiting_retirement",
+        "accumulated_total_coolant_absorbed_energy_of_calorimetry_component": "unchained_holder",
         "line_averaged_neon_density": "dropped_edge",
         "electron_energy_flux_limiter_coefficient": "never_bound",
     }.items():
         assert row_map[name]["population"] == population
         print(f"witness {population}: {name}")
+    orphan_witness = next(
+        (r["name"] for r in rows if r["population"] == "orphan_awaiting_retirement"),
+        None,
+    )
+    print(
+        f"witness orphan_awaiting_retirement: {orphan_witness or 'none in live graph'}"
+    )
     write_report(output)
     for row in rows:
-        row["unrelated_live_holders"] = sorted(
-            {
-                holder
-                for source in row["source_locations"].values()
-                for holder in source["live_holders"]
-            }
-            - set(row["source_holding_successors"])
-        )
         row.pop("source_locations")
         row.pop("history_sources")
+        row.pop("own_recorded_source_ids")
+        row.pop("successor_source_ids")
+        row.pop("recorded_source_live_holders")
+        row.pop("chained_live_holders")
+        row.pop("own_source_receipts")
+        if not row["unchained_live_holders"]:
+            row.pop("unchained_live_holders")
     serialized = json.dumps(output, separators=(",", ":"), sort_keys=True) + "\n"
     assert len(serialized.encode()) <= 300_000
     OUTPUT.write_text(serialized)
@@ -585,30 +663,15 @@ def write_report(output: dict) -> None:
         if r["population"] in {"dropped_edge", "never_bound"}
     )
     cases_by_location = Counter(r["repair_source"] for r in cases)
-    exhausted_locations = output["exhausted_source_location_counts"]
-    unrelated_holders = sum(
-        bool(
-            {
-                holder
-                for source in r["source_locations"].values()
-                for holder in source["live_holders"]
-            }
-            - set(r["source_holding_successors"])
-        )
-        for r in names
-        if r["population"] == "dropped_edge"
+    exhausted_counts = output["exhausted_population_counts"]
+    live_case_counts = Counter(
+        r["population"]
+        for r in cases
+        if r["population"] != "outside_live_sourceless_cohort"
     )
     stage_rows = "\n".join(
         f"<tr><th>{escape(stage)}</th>"
-        + "".join(
-            f"<td>{by_pop.get(population, 0)}</td>"
-            for population in (
-                "derived_parent",
-                "orphan_awaiting_retirement",
-                "dropped_edge",
-                "never_bound",
-            )
-        )
+        + "".join(f"<td>{by_pop.get(population, 0)}</td>" for population in POPULATIONS)
         + "</tr>"
         for stage, by_pop in output["stage_counts"].items()
     )
@@ -627,6 +690,7 @@ def write_report(output: dict) -> None:
                 r["stage"],
                 r["population"],
                 ", ".join(r["source_holding_successors"]) or "—",
+                ", ".join(r.get("unchained_live_holders", [])) or "—",
                 r.get("responsible_writer", "—"),
                 r["repair_source"],
                 ", ".join(r["recorded_paths"][:3]) or "—",
@@ -657,11 +721,11 @@ def write_report(output: dict) -> None:
 <article id="sib-source-loss-census-record"><h1>Where the DD sources went</h1>
 <p>Read-only graph census at revision <code>993ddf413d290b09d1c8ea7518e2fdc4a0209b2f</code>. The control query found {output["property_counts"]["total"]} StandardName nodes, with {output["property_counts"]["status"]} statuses and {output["property_counts"]["stage"]} stages. There are {output["total_live"]} live names; an independent graph query counts {output["independent_live_sourceless_count"]} with no incoming <code>PRODUCED_NAME</code> from a <code>StandardNameSource</code>, equal to the classified rows. The source label has {output["source_property_counts"]["total"]} nodes and {output["source_property_counts"]["mirror"]} populated produced-name mirrors. Every result query returned fewer than its caller limit and took under ten seconds; the run log records each duration and ends <code>EXIT=0</code>.</p>
 <h2 id="sib-source-loss-census-populations">Populations and controls</h2>
-<p>Exactly one population is assigned per name: {counts["derived_parent"]} derived parents, {counts["orphan_awaiting_retirement"]} orphan awaiting retirement, {counts["dropped_edge"]} dropped edges, and {counts["never_bound"]} never bound. The exhausted dropped-edge count is <strong>{output["exhausted_dropped_edges"]}</strong>; the current source-only orphan selector would retire those names without checking that a successor holds their quantity.</p>
-<div class="scroll"><table><thead><tr><th>Stage</th><th>Derived parent</th><th>Orphan</th><th>Dropped edge</th><th>Never bound</th></tr></thead><tbody>{stage_rows}</tbody></table></div>
-<p>Among the {output["exhausted_dropped_edges"]} exhausted dropped-edge names, <strong>{exhausted_locations.get("held_elsewhere_without_successor_chain", 0)}</strong> have an own or lineage-recorded source path currently produced by another live name without a recorded successor chain. The other <strong>{exhausted_locations.get("no_live_holder", 0)}</strong> have no live holder for such a path. The JSON names each row's class and any live holders; source paths without a current source node fall in the latter class.</p>
-<p>Observed witnesses: <code>beta</code> (derived parent), <code>normalized_toroidal_thermal_plasma_beta</code> (orphan; live source-holding successor <code>normalized_toroidal_beta</code>), <code>line_averaged_neon_density</code> (dropped edge; DD path remains recorded), and <code>electron_energy_flux_limiter_coefficient</code> (never bound; no edge, path, mirror, projection or binding receipt). Four planted in-memory fixtures, one for each population, each classified to its own expected population; two additional controls require an exhausted derived name without children to fall in dropped edge or never bound according to source evidence. The run log records the controls and <code>EXIT=0</code>.</p>
-<p>For a dropped-edge row, a recorded DD projection, path, source mirror, relative's edge or source-migration receipt establishes historical source evidence. A live holder without a <code>REFINED_FROM</code>, <code>HAS_SUCCESSOR</code> or recorded change-chain successor is not treated as an authorized successor. {unrelated_holders} dropped-edge names have a source node currently bound to another live name without that successor chain; those mappings need semantic review before any repair. A binding receipt without a retained path proves earlier binding but does not identify the lost DD path.</p>
+<p>Exactly one of five populations is assigned per name: {counts["derived_parent"]} derived parents, {counts["orphan_awaiting_retirement"]} orphans awaiting retirement, {counts["unchained_holder"]} held by an unchained live name, {counts["dropped_edge"]} dropped edges, and {counts["never_bound"]} never bound. Dropped edge requires that no live name produces a source recorded in the name's history.</p>
+<div class="scroll"><table><thead><tr><th>Stage</th><th>Derived parent</th><th>Orphan</th><th>Unchained holder</th><th>Dropped edge</th><th>Never bound</th></tr></thead><tbody>{stage_rows}</tbody></table></div>
+<p>For exhausted names, the five counts are {exhausted_counts["derived_parent"]} derived, {exhausted_counts["orphan_awaiting_retirement"]} orphan, <strong>{exhausted_counts["unchained_holder"]} unchained holder</strong>, <strong>{exhausted_counts["dropped_edge"]} dropped edge</strong>, and {exhausted_counts["never_bound"]} never bound. Their sum matches an independent graph query of {output["independent_exhausted_sourceless_count"]} exhausted sourceless names. The source-only orphan lifecycle would also match the unchained and dropped-edge names; the former require a semantic comparison with their holders, while the latter require source repair before retirement.</p>
+<p>Observed witnesses: <code>beta</code> (derived parent), <code>accumulated_total_coolant_absorbed_energy_of_calorimetry_component</code> (unchained holder <code>total_energy_of_calorimetry_component</code>), <code>line_averaged_neon_density</code> (dropped edge), and <code>electron_energy_flux_limiter_coefficient</code> (never bound). No live name meets the tightened orphan rule: <code>normalized_toroidal_thermal_plasma_beta</code> has a sourced successor but no source identity recorded on itself, so the successor's edge cannot establish an orphan. The positive orphan fixture and four other planted fixtures exercise all five branches; another fixture gives a successor a different source and requires a non-orphan result. Derived childless controls require dropped edge or never bound by evidence. The run log records these controls and <code>EXIT=0</code>.</p>
+<p>Source identity, rather than the mere presence of a successor edge, decides an orphan. An unchained holder has an actual <code>PRODUCED_NAME</code> edge from a source recorded in the name's history, but no qualifying successor chain from the sourceless name to that holder; a reverse predecessor link does not authorize retirement. Whether the holder carries the same quantity needs semantic review. A binding receipt without a retained path proves earlier binding but does not identify the lost DD path.</p>
 <h2 id="sib-source-loss-census-writers">Identity-changing writers</h2>
 <div class="scroll"><table><thead><tr><th>Writer and line</th><th>Edge verdict</th></tr></thead><tbody>
 <tr><td><code>edit.py:891, 3393-3449</code>; <code>graph_ops.py:19026-19055, 19276-19307</code></td><td>Field edits keep identity. Rename delegates to refined-name persistence, which moves the expected producer set transactionally and verifies the count. The human-edit branch permits an empty source cohort, so a rename of an already sourceless predecessor can create a never-bound successor.</td></tr>
@@ -676,10 +740,10 @@ def write_report(output: dict) -> None:
 <p>Per-name attribution is in the results JSON. Where only a historical path or source-migration receipt survives, the remover is recorded as <code>unknown</code>: the census searched source mirrors, DD projections, lineage and change operations, and found no later deletion receipt. The earlier move is proved, but blaming that move for the later absence would exceed the evidence.</p>
 <div class="scroll"><table><thead><tr><th>Attribution</th><th>Names</th></tr></thead><tbody>{writer_rows}</tbody></table></div>
 <h2 id="sib-source-loss-census-names">All sourceless live names</h2>
-<p>The JSON contains every name, its stage, population, source evidence, unrelated live source holders, repair source, writer attribution and uncertainty. <code>recorded_path</code> and <code>ancestor_or_successor_edge</code> can support deterministic history repair; <code>binding_receipt_without_path</code> and <code>none</code> need DD search.</p>
-<div class="scroll"><table><thead><tr><th>Name</th><th>Stage</th><th>Population</th><th>Live successor</th><th>Writer</th><th>Repair source</th><th>Recorded path sample</th></tr></thead><tbody>{name_rows}</tbody></table></div>
+<p>The JSON contains every name, its stage, population, source evidence, unchained live holder where present, repair source, writer attribution and uncertainty. <code>recorded_path</code> and <code>ancestor_or_successor_edge</code> can support deterministic history repair; <code>binding_receipt_without_path</code> and <code>none</code> need DD search.</p>
+<div class="scroll"><table><thead><tr><th>Name</th><th>Stage</th><th>Population</th><th>Live successor</th><th>Unchained holder</th><th>Writer</th><th>Repair source</th><th>Recorded path sample</th></tr></thead><tbody>{name_rows}</tbody></table></div>
 <h2 id="sib-source-loss-census-refine-cases">Refine comparison cases</h2>
-<p>The sheet lists {len(cases)} cases. Current location counts: {escape(", ".join(f"{count} {kind}" for kind, count in sorted(cases_by_location.items())))}. Fifty-one are now superseded predecessors, one is directly sourced and live, and ten remain live dropped-edge names. The <code>outside_reason</code>, <code>source_holding_successors</code> and <code>successor_sources</code> fields in JSON identify their current status, holders and source IDs.</p>
+<p>The sheet lists {len(cases)} cases. Current source-location counts: {escape(", ".join(f"{count} {kind}" for kind, count in sorted(cases_by_location.items())))}. Fifty-one are now superseded predecessors and one is directly sourced and live; among the ten still live and sourceless, the populations are {escape(", ".join(f"{count} {kind}" for kind, count in sorted(live_case_counts.items())))}. The <code>outside_reason</code>, <code>source_holding_successors</code> and <code>source_locations</code> fields in JSON identify current status and holders.</p>
 <div class="scroll"><table><thead><tr><th>Sheet case</th><th>Current population</th><th>Status</th><th>Live source holder</th><th>Source location</th><th>Recorded path sample</th></tr></thead><tbody>{case_rows}</tbody></table></div>
 </article></body></html>
 """
