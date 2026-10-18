@@ -130,6 +130,10 @@ def main(role: str) -> None:
         outcomes[measured_model] = {
             r["name"]: float(r.get("score") or 0.0) for r in reviews
         }
+        if role == "breaker-names":
+            (RUN / "partial-breaker-names-outcomes.json").write_text(
+                json.dumps(dict(outcomes), indent=2) + "\n"
+            )
         return reviews, cost
 
     async def traced_classify(batch, *args, **kwargs):
@@ -174,6 +178,8 @@ def main(role: str) -> None:
         "classifier": lambda: get_model("sn-classifier"),
     }[role]()
     models = list(dict.fromkeys([incumbent, MODEL_SOL, MODEL_LUNA]))
+    if role == "breaker-names":
+        models = list(dict.fromkeys([MODEL_SOL, MODEL_LUNA, incumbent]))
     command = [
         "sn",
         "bench",
