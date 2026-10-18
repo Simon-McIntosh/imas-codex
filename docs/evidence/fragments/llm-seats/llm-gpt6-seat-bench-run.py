@@ -450,6 +450,21 @@ def render_fragment() -> None:
         "breaker-docs": "Docs breaker",
         "classifier": "Classifier",
     }
+    classifier_outcomes = results["item_outcomes"]["classifier"]
+    classifier_fixture = classifier_outcomes["fixture"]
+    classifier_predictions = classifier_outcomes["by_model"]
+    classifier_luna = classifier_predictions[MODEL_LUNA]
+    classifier_sol = classifier_predictions[MODEL_SOL]
+    classifier_luna_correct = sum(
+        classifier_luna[row["id"]] == row["expected"] for row in classifier_fixture
+    )
+    classifier_sol_correct = sum(
+        classifier_sol[row["id"]] == row["expected"] for row in classifier_fixture
+    )
+    classifier_agreement = sum(
+        classifier_luna[row["id"]] == classifier_sol[row["id"]]
+        for row in classifier_fixture
+    )
     recommendations = {
         "refine": (
             "Luna",
@@ -465,7 +480,7 @@ def render_fragment() -> None:
         ),
         "classifier": (
             "Luna",
-            "Luna and Sol gave identical predictions on all 24 sampled paths, with lower direct cost. Broaden the gold cohort beyond its two domains before changing production.",
+            f"Luna matched {classifier_luna_correct} and Sol matched {classifier_sol_correct} of {len(classifier_fixture)} gold labels; their predictions agreed on {classifier_agreement} paths. Luna has lower direct cost. Broaden the gold cohort beyond its two domains before changing production.",
         ),
     }
     rows: list[str] = []
