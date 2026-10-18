@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-18T21:18:51.334Z",
+  "dispatched_at": "2026-10-18T21:07:19Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-review-through-jev.html:220",
+      "id": "wiring-1",
+      "reason": "a node implementing \u00a76 either waits on a condition the plan's own record says will not hold, or must guess that the lead's waiver stands in for the missing verdict.",
+      "text": "\u00a76 decides \"only after shadow agreement and the \u00a73 and \u00a74 verdicts pass the deployment rule\", but \u00a76 declares no dependency on \u00a73 or \u00a74, and no verdict can satisfy the \u00a73 half: \u00a73's Jev arm missed the rule's \u22120.02 bar by 0.009 and the lead waived it on 2026-10-17, recorded in the section's own comment, so the stated gate can never open",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-review-through-jev.html:223",
+      "id": "done_when-1",
+      "reason": "with unjudged items dropped from the shares, the gate's headline number is computed over the items Jev did reach and hides the fraction it never judged, which is exactly the failure the shadow run exists to expose.",
+      "text": "the measure reports \"the share of items that reached the chat reviewer\" while \u00a76 (line 214) excludes unjudged items from every route share and requires no count of them, so a shadow run in which most Jev calls failed reports a small chat share and reads as a cascade that is routing well",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-review-through-jev.html:213",
+      "id": "reasoning-1",
+      "reason": "a node cannot implement an unjudged record the plan does not locate, and the shadow report cannot count unjudged items back out of the review records.",
+      "text": "\u00a76 asserts an unjudged item \"is recorded as unjudged\", but names no field, store or reader, and the built router records nothing for it: on a refused lease or a failed call `adjudicate_review` returns the incumbent's result with the route omitted (imas_codex/standard_names/review/cascade.py, commit 35ba203f5), which writes the ordinary quorum resolution, so nothing in the record distinguishes an unjudged item from a judged one",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-review-through-jev.html:215",
+      "id": "reasoning-2",
+      "reason": "\u00a76 keeps a route that \u00a77 removes, and the node implementing either section must be told which reviewer remains for an item Jev could not judge.",
+      "text": "the unjudged item \"stays with the incumbent\", which is the full quorum, yet \u00a77 deletes the quorum for every decision that passed the rule and \u00a76's own done-when (line 225) keeps the quorum path callable only \"until \u00a77\", so after \u00a77 an unjudged item has no reviewer",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "217f5902207a999d8541e87e0766a41c8acb02cc5dc98c189f27b46f967d9136",
+  "plan_slug": "sn-review-through-jev",
+  "plan_version": 81,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261018T210650202049-plan-review-of-sn-review-through-jev",
+  "reviewed_blob_sha": "30680bd6d71a35cb05d7aed29c7a5c4184b6d2f1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the one citation, \"the store of `sn-judgment-evaluation` \u00a76\", resolves to that plan's \"A shadow store, read by no gate\"; nothing else in \u00a76 points at a file or section.",
+    "done_when": "a finding \u2014 \u00a76's measure reports the share of items reaching the chat reviewer while its own unjudged route is excluded from every route share and never counted (docs/plans/sn-review-through-jev.html:223).",
+    "evidence_paths": "pass \u2014 \u00a76 names no session scratchpad or node-local path; its fragment lands under the plan's evidence tree as the other sections' fragments do.",
+    "naming": "pass \u2014 no plan label, ticket number, stage name or changelog prose appears in \u00a76's text or in the route labels it introduces.",
+    "reasoning": "a finding \u2014 \u00a76's unjudged route names a record no code path writes, and sends the item to a quorum that \u00a77 deletes.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, the cascade's routing of each candidate to accept, refine or one chat reviewer.",
+    "wiring": "a finding \u2014 \u00a76 gates its deciding step on \"the \u00a73 and \u00a74 verdicts pass the deployment rule\" (docs/plans/sn-review-through-jev.html:220) while its depends-on lists only `sn-judgment-evaluation#s6`, and the \u00a73 half of that gate cannot be satisfied by the plan's own record."
+  },
+  "section_digests": {
+    "_document": "543d4a9b36d0ffd3b6d48ae55e20ad33ac58257be049be48bded4d4bde22d77e",
+    "s1": "b8cee26002f21b31c1a5f020a11fedfa75c8e98c039fce1165802727fd21109c",
+    "s2": "b0d251917e3803e82c6003cfad44e327e0dbf0a7c36f72f34588a4dcb7e50352",
+    "s3": "82d51a77c26ae07933f012ccecb84e177e87b43c91b5cc909713ed332088bbf2",
+    "s4": "e78806378f26a26e205e71908b31a7cc50522c0f562ceab8c62c76181e212f2e",
+    "s5": "fb66bee47af8735f6b3deb61469965ea2f6b98d9719a2c3c60275c4806b99782",
+    "s6": "f5385397af56372208eee4527171e0db889a38ce755d2378a1b1c04c13e84092",
+    "s7": "fb477768b44f7ce245281c7986ffdfcf74871a6c841ca83d809682f1ebc062f2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T21:24:42.719406+00:00"
+}
