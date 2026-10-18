@@ -45,12 +45,12 @@ No live graph write or LLM call was made.</p>
 <h2 id="sib-writers-carry-sources-delta">Covering-test delta</h2>
 <p>The same six covering test files ran from extracted base revision
 <code>5f79e844a5b1df6df42e1c8698459249d5ba822c</code> and committed head
-<code>24b8638cc61f70a177f740dd35d8c32cfbf9af43</code>, with the shared
-project environment and each extracted tree on <code>PYTHONPATH</code>.
-<code>covering-base.log</code> and <code>covering-committed-head.log</code>
+<code>7e210992c63bc1fc2b413b8f24ddf4ca2bc7844d</code>, with the shared
+project environment and each measured tree on <code>PYTHONPATH</code>.
+<code>covering-base.log</code> and <code>covering-final-head.log</code>
 each end <code>243 passed, 38 deselected; EXIT=0</code>, so the covering
-selection added zero failures. The later committed head adds the retired-rename
-case; its seven-file gate is <code>final-head.log</code> above.</p>
+selection added zero failures. The seven-file gate including the new writer
+tests is <code>final-head.log</code> above.</p>
 </main>
 </body>
 </html>
