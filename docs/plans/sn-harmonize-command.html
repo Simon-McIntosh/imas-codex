@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="150">
+<meta name="plan-version" content="151">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -534,6 +534,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-three-family-measure" data-who="reckon-build" data-when="2026-10-18T07:15:00Z">
     <div class="r-comment-body"><p>The three-family measure failed its gate (merge <code>7c01e781d</code>, USD 7.23 of 8.00, review 79). Species and component converged; no non-WEST locus family has. The replacement locus family, gap, is in WEST rosters, and its <code>gap_at_outboard_midplane</code> fell to 0.750 because the name binds two quantities and the locus registry text carries DD field names. §4 stays open; the WEST run is held. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#shc-three-family-measure">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-lead-ruling-gap-split" data-who="Simon McIntosh" data-when="2026-10-18T19:50:00Z">
+    <div class="r-comment-body"><p>Lead ruling on the gap family, 2026-10-18.</p><ul><li><strong>One quantity per name.</strong> <code>gap_at_outboard_midplane</code> keeps the separatrix separation, <code>summary/boundary/distance_inner_outer_separatrices/value</code>. The three mapped measurement distances (<code>distance_separatrix_midplane</code> under the reciprocating and embedded Langmuir probes and the Thomson channel) move to <code>radial_separatrix_distance_at_outboard_midplane</code>, revived on ISN's new <code>separatrix_distance</code> base.</li><li><strong>Locus text in physics terms.</strong> Locus definitions name no DD field, IDS path or option value.</li><li><strong>Order:</strong> fix first, then a USD 4 locus re-measure on a verified non-WEST family.</li></ul><p>The ISN half is shipped. v0.10.0 carries the base and the rewritten locus text, imas-codex pins it (<code>21fe644a5</code>), and the graph serves it as the active grammar with 983 tokens (<code>a198333f4</code>). The name split on the graph is the next node.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
