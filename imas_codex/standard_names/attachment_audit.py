@@ -1078,13 +1078,36 @@ def reconcile_attachment_consistency(
     Returns the :class:`AttachmentAuditResult`, whose ``by_rule()`` breaks the
     rejections down by which guard rule fired.
     """
-    own = gc is None
-    if own:
-        from imas_codex.graph.client import GraphClient
+    from imas_codex.graph.client import GraphClient
 
-        client: Any = GraphClient()
-    else:
-        client = gc
+    if gc is None:
+        with GraphClient() as client:
+            return reconcile_attachment_consistency(
+                client,
+                include_accepted=include_accepted,
+                dry_run=dry_run,
+                sn_id=sn_id,
+                run_id=run_id,
+            )
+    if type(gc) is GraphClient and not dry_run:
+        from imas_codex.standard_names.signed_manifest import _TransactionQuery
+
+        with gc.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                result = reconcile_attachment_consistency(
+                    _TransactionQuery(transaction),
+                    include_accepted=include_accepted,
+                    sn_id=sn_id,
+                    run_id=run_id,
+                )
+                transaction.commit()
+                return result
+            except BaseException:
+                transaction.rollback()
+                raise
+    own = gc is None
+    client = gc
     try:
         result = audit_attachments(client, sn_id=sn_id)
         if not dry_run and result.dd_gap_evidence:
@@ -1173,6 +1196,9 @@ def reconcile_attachment_consistency(
         rows = client.query(
             _DETACH_QUERY, items=items, historical=sorted(_HISTORICAL_NAME_STAGES)
         )
+        from imas_codex.standard_names.source_invariant import require_producing_sources
+
+        require_producing_sources(client, {v.sn_id for v in actionable})
         result.detached = int(rows[0]["detached"]) if rows else 0
         result.sources_rerouted = len(
             {v.source_node_id for v in actionable if v.reroute}
@@ -2807,15 +2833,6 @@ def count_unattributed_detachments(gc: Any | None = None) -> int:
 
 def _find_orphaned_names(gc: Any, sn_ids: list[str]) -> list[str]:
     """Names among *sn_ids* left with no producing source after detachment."""
-    if not sn_ids:
-        return []
-    rows = gc.query(
-        """
-        UNWIND $ids AS sn_id
-        MATCH (sn:StandardName {id: sn_id})
-        WHERE NOT (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-        RETURN sn.id AS id
-        """,
-        ids=sn_ids,
-    )
-    return sorted(r["id"] for r in rows)
+    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+
+    return find_sourceless_live_names(gc, sn_ids)

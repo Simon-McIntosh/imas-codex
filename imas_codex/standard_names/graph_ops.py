@@ -5505,6 +5505,32 @@ def write_standard_names(
                 n["cocos_transformation_type"],
             )
 
+    if gc is None and isinstance(GraphClient, type):
+        with GraphClient() as client:
+            return write_standard_names(
+                names,
+                override=override,
+                gc=client,
+                return_written_ids=return_written_ids,
+            )
+    if gc is not None and type(gc) is GraphClient:
+        from imas_codex.standard_names.signed_manifest import _TransactionQuery
+
+        with gc.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                result = write_standard_names(
+                    names,
+                    override=override,
+                    gc=_TransactionQuery(transaction),
+                    return_written_ids=return_written_ids,
+                )
+                transaction.commit()
+                return result
+            except BaseException:
+                transaction.rollback()
+                raise
+
     with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
         # Conflict-detect on unit — same name with different unit is a data
         # integrity error.  Filter out conflicting entries rather than raising
@@ -5896,6 +5922,10 @@ def write_standard_names(
         # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN.
         # Tail pass — all nodes in this batch exist before edges are written.
         skeleton_candidate_ids = _write_standard_name_edges(write_gc, names)
+
+        from imas_codex.standard_names.source_invariant import require_producing_sources
+
+        require_producing_sources(write_gc, [n["id"] for n in names])
 
     # Persist token-miss gaps through the same caller-owned graph handle when
     # one is supplied, so transactional callers keep every rich-write effect.
@@ -19300,6 +19330,12 @@ def persist_refined_name(
                         "semantic source set changed during atomic rename: "
                         f"guarded {len(candidate_source_ids)}, moved {moved}"
                     )
+                if edit_mode:
+                    from imas_codex.standard_names.source_invariant import (
+                        require_producing_sources,
+                    )
+
+                    require_producing_sources(query_handle, [new_name])
                 record_standard_name_change(
                     query_handle,
                     old_name,

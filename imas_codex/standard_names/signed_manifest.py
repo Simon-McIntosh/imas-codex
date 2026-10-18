@@ -4081,6 +4081,12 @@ def _verify_postconditions(
             raise StaleSourceDetachConflict(
                 "stale-source target authority was stripped"
             )
+        from imas_codex.standard_names.source_invariant import require_producing_sources
+
+        require_producing_sources(
+            query,
+            {target_id for action in actions for target_id in action["target_ids"]},
+        )
         out_count, out_hash = _out_of_allowlist_source_hash(
             query, [row["source_id"] for row in signed_rows]
         )
