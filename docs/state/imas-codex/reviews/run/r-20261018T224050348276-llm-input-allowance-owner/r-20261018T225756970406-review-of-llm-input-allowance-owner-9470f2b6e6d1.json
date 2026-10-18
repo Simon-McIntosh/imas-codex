@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:10697 workers.prepare_docs_review_request",
+    "imas_codex/standard_names/budget.py:355 budget._bound_request",
+    "imas_codex/discovery/base/llm.py:450 llm.get_openrouter_expected_price",
+    "imas_codex/standard_names/budget.py:273 budget._price_request",
+    "imas_codex/standard_names/budget.py:267 budget._price_request"
+  ],
+  "commits_read": [
+    "9470f2b6e6d172bbfb6ac63a9e52d640cd8b10da"
+  ],
+  "completed_at": "2026-10-18T23:07:26.871Z",
+  "dispatched_at": "2026-10-18T22:58:12Z",
+  "findings": [
+    {
+      "file": "tests/core/test_catalog_input_limits.py",
+      "line": "63",
+      "severity": "follow-on",
+      "text": "tests/core/test_catalog_input_limits.py:63 follow-on: the parametrized assertion `llm.get_catalog_model_info(route).get(\"max_input_tokens\") == expected` derives `expected` (line 59) from `llm._lookup_catalog`, the same helper `get_catalog_model_info` calls internally, so on every catalog-hit route the two sides are the same call and the assertion cannot fail on any regression in that path; only the catalog-miss branch, where `expected` comes from the independently-parsed `_PRICING_TABLE` (line 61), is a genuine oracle for the refactor. The claim 'unchanged for every table route' is therefore partly unfalsifiable."
+    },
+    {
+      "file": "docs/evidence/fragments/llm-seats/llm-gpt6-context-limits-fetch.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/llm-seats/llm-gpt6-context-limits-fetch.json:1 follow-on: the record carries no committed fetch record beyond itself \u2014 no script, command or digest \u2014 so its 15-row provenance cannot be regenerated or falsified by a later reader; the run's fetch.log holds only the line 'routes=15 differences=0'. The brief asked only for the record, so this does not hold the node, but 'reproducible provenance' is asserted rather than demonstrated."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: source brief.md:1-23 asks (1) for get_openrouter_pricing to own the table's max-input-tokens and _checked_in_input_allowance to call it with no direct _get_section read, and (2) for a fetch record of every route's endpoint; imas_codex/settings.py:126 returns max_input_tokens, imas_codex/discovery/base/llm.py:327-331 calls the owner for both spellings, and the fetch record lands 15 routes, so both goals are met.\nVERDICT done_when: source brief.md:28-33 names four measures; tests/core/test_catalog_input_limits.py:38-74 supplies them, the base arm at base_covering.log is 1 failed/152 passed EXIT=1, the head arm at head.log is 153 passed EXIT=0 (delta 0), grep -n _get_section imas_codex/discovery/base/llm.py returns no line, and the 15-route record exists.\nVERDICT write_paths: source manifest.md:3 declares the five paths; git show --stat 9470f2b6e changes exactly those five and nothing else.\nVERDICT manifest: source manifest.md records status complete, head 153 passed EXIT=0, base 1 failed/152 passed EXIT=1, delta 0, and the three gate logs on disk match those results.\nVERDICT diff: the single commit 9470f2b6e adds max_input_tokens to get_openrouter_pricing (imas_codex/settings.py:126), reroutes _checked_in_input_allowance through it (imas_codex/discovery/base/llm.py:327-331), adds four tests plus a 15-route parametrization, and writes the fetch record and one evidence bullet, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/workers.py:10697 workers.prepare_docs_review_request, imas_codex/standard_names/budget.py:355 budget._bound_request, imas_codex/discovery/base/llm.py:450 llm.get_openrouter_expected_price, imas_codex/standard_names/budget.py:273 budget._price_request\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/settings.py:126 now returns max_input_tokens beside the other fields and imas_codex/discovery/base/llm.py:327-331 reads it through the owner for both the prefixed and bare spellings, leaving no direct table read.\nSCORE evidence: 18\nJUSTIFICATION evidence: the head arm at head.log records 153 passed EXIT=0 against the base arm's 1 failed/152 passed EXIT=1, so the delta the done_when asserts is measured and logged, and the 15-route fetch record exists with urls equal to each route's table source.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 82fa6e6a8..9470f2b6e touches exactly the five declared paths in manifest.md:3, and the single commit carries no plan or ticket identifier.\nSCORE durability: 15\nJUSTIFICATION durability: tests/core/test_catalog_input_limits.py:38 fails (KeyError, base.log EXIT=1) if get_openrouter_pricing stops exposing max_input_tokens and the catalog-miss branch at lines 61-63 fails if the fallback stops filling the gap, but the catalog-hit expected at line 59 re-derives through the same helper the code uses, so that half cannot fail, and no test reddens if the direct _get_section read returns \u2014 only the done_when's grep guards that.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/discovery/base/llm.py:325 keeps the local import idiom already used at line 443 and the added tests follow tests/core/test_catalog_input_limits.py:77's param-metadata @pytest.mark.parametrize idiom at line 50.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing owner imas_codex/settings.py:87 get_openrouter_pricing rather than adding a second table accessor, which is exactly the follow-on the base review left at imas_codex/discovery/base/llm.py:317.\nFINDING tests/core/test_catalog_input_limits.py:63 follow-on: the parametrized assertion derives its expected side from llm._lookup_catalog (line 59), the same helper the code under test calls, so on catalog-hit routes both sides move together and the assertion cannot fail on a regression; only the catalog-miss branch via _PRICING_TABLE is a real oracle.\nFINDING docs/evidence/fragments/llm-seats/llm-gpt6-context-limits-fetch.json:1 follow-on: the fetch record stands alone with no committed fetcher, command or digest, so its 15-row provenance cannot be regenerated or falsified by a later reader.",
+  "review_run_id": "r-20261018T225756970406-review-of-llm-input-allowance-owner-9470f2b6e6d1",
+  "reviewed_base_sha": "82fa6e6a881324d172aca2149f847a76f5c9586e",
+  "reviewed_head_sha": "9470f2b6e6d172bbfb6ac63a9e52d640cd8b10da",
+  "reviewed_run_id": "r-20261018T224050348276-llm-input-allowance-owner",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T23:08:17.136678+00:00"
+}
