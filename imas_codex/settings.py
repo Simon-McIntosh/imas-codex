@@ -92,8 +92,11 @@ def get_openrouter_pricing(model: str) -> dict[str, Any]:
     declares neither charges neither, so both default to a numeric zero that
     the arithmetic consumers in :mod:`imas_codex.discovery.base.llm` and
     :mod:`imas_codex.standard_names.budget` can price directly. Optional
-    overrides apply at or above their ``min_input_tokens`` threshold. An empty
-    mapping means the project has no explicit checked-in pricing entry.
+    overrides apply at or above their ``min_input_tokens`` threshold.
+    ``max_input_tokens`` carries the route's verified input allowance, read
+    from the endpoint ``source`` names, for a route whose seat predates the
+    LiteLLM catalog. An empty mapping means the project has no explicit
+    checked-in pricing entry.
     """
     catalog = _get_section("llm").get("openrouter-pricing", {})
     raw = catalog.get(model)
@@ -120,6 +123,7 @@ def get_openrouter_pricing(model: str) -> dict[str, Any]:
         "cache_read": raw.get("cache-read"),
         "cache_write": raw.get("cache-write"),
         "cache_write_ttl": raw.get("cache-write-ttl"),
+        "max_input_tokens": raw.get("max-input-tokens"),
         "image_unit": raw.get("image-unit"),
         "canonical_slug": raw.get("canonical-slug"),
         "provider": raw.get("provider"),

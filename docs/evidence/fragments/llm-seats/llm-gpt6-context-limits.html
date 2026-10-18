@@ -49,6 +49,11 @@
 
   <h4>Evidence</h4>
   <ul>
+    <li><code>docs/evidence/fragments/llm-seats/llm-gpt6-context-limits-fetch.json</code>
+    &mdash; the reproducible provenance: each route's <code>source</code> endpoint was
+    fetched once and the response's <code>context_length</code> recorded with its URL and
+    fetch time. All 15 routes returned the value the table records (zero differences), so
+    no table entry changed.</li>
     <li><code>tests/core/test_catalog_input_limits.py</code> &mdash; each live
     GPT-6 seat resolves a positive <code>max_input_tokens</code>; a route with no
     catalog entry and no table value still returns none; the docs-review escalator

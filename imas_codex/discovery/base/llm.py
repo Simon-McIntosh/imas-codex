@@ -319,17 +319,15 @@ def _checked_in_input_allowance(model: str) -> int | None:
 
     The value is the OpenRouter model endpoint's context length, read from the
     source the table names and recorded beside it, so a route newer than the
-    catalog has one owner for its bound.  An entry that is absent, or records
-    no positive allowance, returns ``None``.
+    catalog has one owner for its bound.  Reading it through
+    :func:`imas_codex.settings.get_openrouter_pricing` keeps this module out of
+    the table's internals.  An entry that is absent, or records no positive
+    allowance, returns ``None``.
     """
-    from imas_codex.settings import _get_section
+    from imas_codex.settings import get_openrouter_pricing
 
-    catalog = _get_section("llm").get("openrouter-pricing", {})
     for key in (model, ensure_model_prefix(model)):
-        raw = catalog.get(key)
-        if not isinstance(raw, dict):
-            continue
-        value = raw.get("max-input-tokens")
+        value = get_openrouter_pricing(key).get("max_input_tokens")
         if isinstance(value, int) and value > 0:
             return value
     return None
