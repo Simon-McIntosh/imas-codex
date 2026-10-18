@@ -19,6 +19,11 @@
   "call_sites": [],
   "completed_at": "2026-10-18T11:54:13Z",
   "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "srtj-refine-ab-run",
+      "recorded_at": "2026-10-18T11:55:33.549712+00:00"
+    },
     "reuse": {
       "kind": "exempted",
       "reason": "the comparison script needs the refine call without the bench's own judge; giving run_refine_bench a no-judge mode is a product change outside a measurement node",
