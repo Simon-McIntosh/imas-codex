@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="153">
+<meta name="plan-version" content="154">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -542,7 +542,10 @@
     <div class="r-comment-body"><p>complete: independent review of r-20261018T194720843228-shc-gap-family-split attached as a parsed record at reviewed base 323721d9af38242e72bf7394fe009f1b375d37da and reviewed head f80a2d0ee7ebf69096e5f52be81c40b8bdc7b72e; 6/6 items verdicted, 6/6 dimensions scored (total 104/120), 3 follow-on findings, no blocking findings; no code change to the repository (a review writes no repo files)</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261018T194720843228-shc-gap-family-split" data-who="reckon-build" data-when="2026-10-18T20:45:01Z">
-    <div class="r-comment-body"><p>complete: gap_at_outboard_midplane keeps the separatrix separation; the three midplane measurement distances now sit on the revived radial_separatrix_distance_at_outboard_midplane; both names&#x27; documentation untouched; no LLM spend</p></div>
+    <div class="r-comment-body"><p>complete: gap_at_outboard_midplane keeps the separatrix separation; the three midplane measurement distances now sit on the revived radial_separatrix_distance_at_outboard_midplane; both names' documentation untouched; no LLM spend</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-gap-family-split" data-who="reckon-build" data-when="2026-10-18T21:20:00Z">
+    <div class="r-comment-body"><p>The gap family now carries one quantity per name on the graph (merge <code>f114daa47</code>, review 104, USD 0). Both names' documentation is still from before the split. Next, it is regenerated on the GPT-6 docs seat, then the USD 4 locus re-measure runs on a verified non-WEST family. §4 stays open. The fold-revival stage fallback that blocked the ordinary revive is a follow-on: <code>_fold_revival_stage</code> in <code>edit.py</code> returns a terminal recorded stage unchanged. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s4-gap-family-split">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
