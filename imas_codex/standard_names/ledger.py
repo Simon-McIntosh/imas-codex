@@ -60,6 +60,10 @@ def find_provenance_orphans(*, gc: GraphClient | None = None) -> list[dict[str, 
                 "name_stage": row.get("name_stage"),
                 "origin": row.get("origin"),
                 "population": row["population"],
+                "docs_stage": row.get("docs_stage"),
+                "status": row.get("status"),
+                "validation_status": row.get("validation_status"),
+                "model": row.get("model"),
             }
             for row in rows
             if row["population"] in {"dropped_edge", "never_bound", "unchained_holder"}

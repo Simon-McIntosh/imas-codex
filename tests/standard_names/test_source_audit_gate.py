@@ -6,7 +6,7 @@ import asyncio
 import os
 from collections.abc import Iterator
 from contextlib import nullcontext
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -18,6 +18,7 @@ from imas_codex.standard_names.graph_ops import (
 )
 from imas_codex.standard_names.ledger import find_provenance_orphans
 from imas_codex.standard_names.loop import _report_source_loss_probe
+from imas_codex.standard_names.source_invariant import find_sourceless_live_names
 
 
 @pytest.fixture()
@@ -121,6 +122,37 @@ def test_derived_parent_requires_live_child_evidence(
         population = _fetch_export_population(require_docs_review=False)
     exported_parent = next(row for row in population if row["id"] == "audit_parent")
     assert exported_parent["_has_live_child"] is False
+
+
+@pytest.mark.graph
+def test_stale_binding_does_not_satisfy_writer_invariant(
+    planted_graph: GraphClient,
+) -> None:
+    planted_graph.query(
+        """CREATE (name:StandardName {id:'audit_stale',
+          name_stage:'accepted', status:'draft', origin:'pipeline'})
+        CREATE (source:StandardNameSource {id:'dd:audit/stale',
+          source_id:'audit/stale', status:'stale'})
+        CREATE (source)-[:PRODUCED_NAME]->(name)"""
+    )
+    assert find_sourceless_live_names(planted_graph, ["audit_stale"]) == ["audit_stale"]
+    signed_count = """MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->
+                   (:StandardName {id:'audit_stale'})
+        WHERE source.status <> 'stale'
+        RETURN count(source) AS live_producers"""
+    assert planted_graph.query(signed_count) == [{"live_producers": 0}]
+    planted_graph.query(
+        "MATCH (source:StandardNameSource {id:'dd:audit/stale'}) "
+        "SET source.status = null"
+    )
+    assert find_sourceless_live_names(planted_graph, ["audit_stale"]) == ["audit_stale"]
+    assert planted_graph.query(signed_count) == [{"live_producers": 0}]
+    planted_graph.query(
+        "MATCH (source:StandardNameSource {id:'dd:audit/stale'}) "
+        "SET source.status = 'composed'"
+    )
+    assert find_sourceless_live_names(planted_graph, ["audit_stale"]) == []
+    assert planted_graph.query(signed_count) == [{"live_producers": 1}]
 
 
 @pytest.mark.graph
@@ -247,3 +279,68 @@ def test_failed_probe_is_reported_as_not_run(caplog) -> None:
         result = asyncio.run(_report_source_loss_probe(raise_read))
     assert result is None
     assert "source-loss probe did not run: source graph unavailable" in caplog.text
+
+
+def test_rebuild_excludes_exhausted_audit_findings_from_repair_and_retirement() -> None:
+    import imas_codex.standard_names.provenance_rebuild as rebuild
+
+    active = {"sn_id": "active_loss", "name_stage": "accepted", "origin": "pipeline"}
+    exhausted = [
+        {
+            "sn_id": f"exhausted_{population}",
+            "name_stage": "exhausted",
+            "origin": "pipeline",
+            "population": population,
+        }
+        for population in (
+            "dropped_edge",
+            "never_bound",
+            "unchained_holder",
+            "orphan_awaiting_retirement",
+        )
+    ]
+    excluded = [
+        {"sn_id": "scaffold", "name_stage": None, "origin": None},
+        {
+            "sn_id": "error_sibling",
+            "name_stage": "accepted",
+            "model": "deterministic:dd_error_modifier",
+        },
+    ]
+    rows = [active, *exhausted, *excluded]
+    gc = MagicMock()
+    with (
+        patch.object(
+            rebuild,
+            "find_provenance_orphans",
+            side_effect=[rows, rows, rows, exhausted],
+        ),
+        patch.object(rebuild, "find_edge_scalar_desyncs", return_value=[]),
+        patch.object(rebuild, "reattach_produced_name_edges", return_value=0),
+        patch.object(rebuild, "_run_deterministic_fixpoints"),
+        patch.object(rebuild, "find_orphan_parent_source_candidates", return_value=[]),
+        patch.object(rebuild, "reconcile_orphan_parent_sources", return_value=0),
+        patch.object(rebuild, "_fetch_dd_source_paths", return_value={}),
+        patch.object(rebuild, "_fetch_change_history_sources", return_value={}),
+        patch.object(rebuild, "_fetch_pending_source_names", return_value=set()),
+        patch.object(rebuild, "bind_recovery_sources") as bind,
+        patch.object(
+            rebuild,
+            "retire_unrecoverable_provenance_orphans",
+            return_value=["active_loss"],
+        ) as retire,
+    ):
+        summary = rebuild.rebuild_provenance(
+            gc=gc,
+            recovery_map={
+                "exhausted_dropped_edge": [
+                    {"id": "dd:example/path", "source_type": "dd"}
+                ]
+            },
+            retire_unresolved=True,
+        )
+    assert summary["orphans_before"] == 1
+    assert summary["retired_unresolved_names"] == ["active_loss"]
+    assert summary["orphans_after"] == 0
+    bind.assert_not_called()
+    retire.assert_called_once_with(gc, ["active_loss"], include_accepted=False)

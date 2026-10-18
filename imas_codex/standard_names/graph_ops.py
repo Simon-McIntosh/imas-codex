@@ -22594,8 +22594,9 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
           AND NOT EXISTS {{
             (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
           }}
-        RETURN sn.id AS id, sn.name_stage AS stage, sn.status AS status,
-               sn.origin AS origin, sn.source_paths AS paths,
+        RETURN sn.id AS id, sn.name_stage AS stage, sn.docs_stage AS docs_stage,
+               sn.validation_status AS validation_status, sn.model AS model,
+               sn.status AS status, sn.origin AS origin, sn.source_paths AS paths,
                sn.source_path AS path,
                sn.source_dd_resolution_converged_ids AS resolutions,
                ({_derived_parent_cypher()}) AS derived_parent
@@ -22758,6 +22759,9 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
             {
                 "id": identifier,
                 "name_stage": name["stage"],
+                "docs_stage": name["docs_stage"],
+                "validation_status": name["validation_status"],
+                "model": name["model"],
                 "status": name["status"],
                 "origin": name["origin"],
                 "population": population,

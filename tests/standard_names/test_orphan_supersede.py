@@ -44,6 +44,7 @@ def _seed_name(
     name_stage: str = "exhausted",
     origin: str = "pipeline",
     with_source: bool = False,
+    with_transferred_source: bool = False,
 ) -> None:
     client.query(
         "CREATE (name:StandardName {id: $name_id, name_stage: $name_stage, "
@@ -59,6 +60,22 @@ def _seed_name(
             "source_id: $path, status: 'composed', produced_sn_id: $name_id}) "
             "CREATE (source)-[:PRODUCED_NAME]->(name)",
             name_id=name_id,
+            source_id=f"dd:{name_id}/value",
+            path=f"{name_id}/value",
+        )
+    if with_transferred_source:
+        client.query(
+            """MATCH (name:StandardName {id: $name_id})
+            SET name.source_paths = [$source_id]
+            CREATE (successor:StandardName {id: $successor_id,
+              name_stage: 'accepted', status: 'draft', origin: 'pipeline'})
+            CREATE (successor)-[:REFINED_FROM]->(name)
+            CREATE (source:StandardNameSource {id: $source_id,
+              source_id: $path, status: 'composed',
+              produced_sn_id: $successor_id})
+            CREATE (source)-[:PRODUCED_NAME]->(successor)""",
+            name_id=name_id,
+            successor_id=f"{name_id}_successor",
             source_id=f"dd:{name_id}/value",
             path=f"{name_id}/value",
         )
@@ -103,7 +120,7 @@ def test_exhausted_orphan_is_superseded_with_ledger(
     prefix = "orphanretire"
     name_id = f"{prefix}_name"
     client = _client(disposable_neo4j, prefix)
-    _seed_name(client, name_id)
+    _seed_name(client, name_id, with_transferred_source=True)
     try:
         preview = supersede_exhausted_standard_name_orphans(
             [name_id], reason="source-less exhausted identities are terminal", gc=client
@@ -145,6 +162,13 @@ def test_exhausted_orphan_is_superseded_with_ledger(
         ("sourced", "exhausted", "pipeline", True, "live producing source"),
         ("accepted", "accepted", "pipeline", False, "name_stage is 'accepted'"),
         ("derived", "exhausted", "derived", False, "origin is derived"),
+        (
+            "neverbound",
+            "exhausted",
+            "pipeline",
+            False,
+            "not classify name as an orphan",
+        ),
     ],
 )
 def test_ineligible_orphan_is_refused(
@@ -189,7 +213,7 @@ def test_orphan_supersession_replay_is_write_free(
     prefix = "orphanreplay"
     name_id = f"{prefix}_name"
     client = _client(disposable_neo4j, prefix)
-    _seed_name(client, name_id)
+    _seed_name(client, name_id, with_transferred_source=True)
     try:
         preview = supersede_exhausted_standard_name_orphans(
             [name_id], reason="source-less exhausted identities are terminal", gc=client

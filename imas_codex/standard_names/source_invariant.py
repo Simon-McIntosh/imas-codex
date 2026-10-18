@@ -41,6 +41,7 @@ def find_sourceless_live_names(
         UNWIND $ids AS id
         MATCH (sn:StandardName {{id: id}})
         OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+        WHERE source.status <> 'stale'
         WITH sn, count(DISTINCT source) AS producers
         WHERE (NOT $retired_is_exempt OR (
             coalesce(sn.name_stage, '') <> 'superseded'

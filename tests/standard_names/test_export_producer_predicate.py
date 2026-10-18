@@ -85,6 +85,14 @@ def _run_fixture_export(staging_dir: Path, population: list[dict]):
                 return_value=population,
             )
         )
+        # This fixture isolates the per-candidate source predicate. The graph
+        # audit's pre-population refusal is exercised on a planted graph.
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_ops.classify_sourceless_standard_names",
+                return_value=[],
+            )
+        )
         stack.enter_context(
             patch(
                 "imas_codex.graph.client.GraphClient",
