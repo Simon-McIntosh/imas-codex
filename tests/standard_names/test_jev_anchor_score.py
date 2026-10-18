@@ -211,7 +211,10 @@ def test_state_carries_the_house_style_template(monkeypatch, _stub_template):
     }
 
 
-def test_question_is_a_score_over_the_house_style_levels(monkeypatch, _stub_template):
+def test_question_offers_distinct_rungs_of_an_ordinal_scale(
+    monkeypatch, _stub_template
+):
+    """The level text is the scale, so each rung must name its own situation."""
     calls: list = []
     _patch_decisions(monkeypatch, _stub(lambda state: 0.5, record=calls))
 
@@ -220,8 +223,100 @@ def test_question_is_a_score_over_the_house_style_levels(monkeypatch, _stub_temp
     _states, questions = calls[0]
     question = questions[QUESTION]
     assert question["type"] == "score"
-    assert question["criteria"] == list(families.TEMPLATE_FITNESS_LEVELS)
-    assert len(question["criteria"]) >= 2
+    criteria = question["criteria"]
+    assert len(criteria) >= 2
+    assert all(isinstance(rung, str) and rung.strip() for rung in criteria)
+    assert len(set(criteria)) == len(criteria)
+    assert "family" in question["instructions"]
+
+
+def test_a_higher_level_beats_a_lower_one(monkeypatch, _stub_template):
+    """The scale's top rung wins over its bottom, its extent set by the levels."""
+    top = len(families.TEMPLATE_FITNESS_LEVELS) - 1
+    members = [_member("alpha"), _member("beta")]
+
+    def score_for(state):
+        return 0.0 if state["member"]["name"] == "alpha" else float(top)
+
+    _patch_decisions(monkeypatch, _stub(score_for))
+
+    result = asyncio.run(score_family_anchor(None, None, None, members, pattern="p"))
+
+    assert result.expected == {"alpha": 0.0, "beta": float(top)}
+    assert result.choice == "beta"
+
+
+def test_template_resolved_from_a_member_when_the_parent_id_does_not_parse(
+    monkeypatch,
+):
+    """A parent id the grammar cannot parse must not empty the family's state.
+
+    The parent leads the candidate rows, so reading the template from that row
+    alone leaves it blank for a legacy or unresolvable parent id. The family's
+    pattern is shared, so a member that parses yields the family's template.
+    """
+    calls: list = []
+
+    def fake_template(member_id: str) -> str:
+        return "" if member_id == "legacy_parent" else TEMPLATE_MARKER
+
+    monkeypatch.setattr(families, "_house_style_template", fake_template)
+    _patch_decisions(monkeypatch, _stub(lambda state: 0.5, record=calls))
+
+    asyncio.run(
+        score_family_anchor(
+            "legacy_parent",
+            "accepted",
+            "the family's real base description",
+            [_member("scorable")],
+            parent_documentation="the parent's documentation",
+            pattern="p",
+        )
+    )
+
+    states, _questions = calls[0]
+    assert len(states) == 2
+    assert all(state["house_style_template"] == TEMPLATE_MARKER for state in states)
+
+
+def test_a_family_with_no_template_is_refused_without_asking(monkeypatch):
+    """No member yielding a template refuses the family rather than asking blind."""
+    calls: list = []
+    monkeypatch.setattr(families, "_house_style_template", lambda member_id: "")
+    _patch_decisions(monkeypatch, _stub(lambda state: 0.5, record=calls))
+
+    result = asyncio.run(
+        score_family_anchor(None, None, None, [_member("alpha")], pattern="p")
+    )
+
+    assert calls == []
+    assert result.choice is None
+    assert result.asked == ()
+    assert result.expected == {}
+    assert result.reason
+
+
+def test_an_accepted_parent_tied_at_the_top_wins_the_tie_break(
+    monkeypatch, _stub_template
+):
+    """The heuristic's accepted-parent rule must fire in the tie-break too."""
+    _patch_decisions(monkeypatch, _stub(lambda state: 0.7))
+
+    result = asyncio.run(
+        score_family_anchor(
+            "base_quantity",
+            "accepted",
+            "the base quantity's real description",
+            [_member("child", docs_stage="accepted", reviewer_score_docs=0.99)],
+            parent_documentation="the base quantity's documentation",
+            pattern="p",
+        )
+    )
+
+    assert result.expected == {"base_quantity": 0.7, "child": 0.7}
+    # select_anchor would rank the accepted parent above the child, so the tie
+    # falls to the parent rather than to the higher reviewer_score_docs.
+    assert result.choice == "base_quantity"
 
 
 def test_parent_node_is_offered_as_a_template(monkeypatch, _stub_template):

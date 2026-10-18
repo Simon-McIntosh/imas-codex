@@ -588,7 +588,11 @@ class AnchorScore:
     unscored is absent from both rather than read as a zero. ``choice`` is the
     highest expected score, or ``None`` when no member was scored — an empty
     outcome is never replaced by a default anchor. ``asked`` names the members
-    one call was made for; ``cost`` is their summed reported spend.
+    one call was made for; ``cost`` is their summed reported spend. ``reason``
+    is set only when the family was refused before any call — no eligible
+    member, or no member yields a house-style template — so an empty outcome
+    can say why rather than reading as a family the judge happened to score
+    nothing for.
     """
 
     pattern: str
@@ -597,6 +601,7 @@ class AnchorScore:
     choice: str | None = None
     asked: tuple[str, ...] = ()
     cost: float = 0.0
+    reason: str | None = None
 
 
 def template_fitness_question() -> dict[str, dict[str, Any]]:
@@ -683,6 +688,37 @@ def _anchor_score_candidates(
     return [row for row in rows if _eligible_anchor_candidate(row)]
 
 
+#: Reason recorded when the family has no member a call could be made for.
+_NO_ELIGIBLE_REASON = "no member is eligible as the family's template"
+
+#: Reason recorded when no family member yields a house-style template. The
+#: family is refused rather than asked, because a template-less state asks the
+#: judge to compare openings against nothing.
+_NO_TEMPLATE_REASON = (
+    "no family member yields a house-style template for the family's pattern"
+)
+
+
+def _resolve_house_style_template(
+    candidates: Sequence[Mapping[str, Any]],
+) -> str:
+    """The house-style template any member of the family yields, or ``""``.
+
+    Every member shares the family's pattern, so one member's conventions are
+    the family's. The rows are tried in order (the parent leads them) and the
+    first id the grammar can parse wins: an id it cannot parse — a legacy or
+    unresolvable name — returns no conventions, and reading the template from
+    that row alone would silently leave the family's state template empty.
+    """
+    for row in candidates:
+        member_id = str(row.get("id") or "")
+        if member_id:
+            template = _house_style_template(member_id)
+            if template:
+                return template
+    return ""
+
+
 async def score_family_anchor(
     parent_id: str | None,
     parent_docs_stage: str | None,
@@ -702,9 +738,15 @@ async def score_family_anchor(
     member's documentation would serve as the template for the whole family,
     given the member's name, description and documentation, the family's
     pattern, and the house-style template the grammar renders for that pattern.
-    The member with the highest expected score is the candidate anchor; a tie
-    falls to :func:`select_anchor`'s own ranking over the candidate rows, so
-    the judged choice never contradicts the heuristic on equal evidence.
+    The template is read from the family's own members — the first whose id the
+    grammar parses — because every member shares the family's pattern; a family
+    whose members all fail to parse yields no template and is refused with a
+    reason rather than asked without one. The member with the highest expected
+    score is the candidate anchor; a tie falls to :func:`select_anchor`'s own
+    ranking over the tied members, with the family's parent passed through when
+    it is tied too, so the accepted-parent rule the heuristic applies to the
+    whole family applies here as well and the judged choice never contradicts
+    the heuristic on equal evidence.
 
     This is a scorer, not a caller of the member rows' anchor: nothing here
     changes a recorded anchor or a caller's behaviour. A failed or unscored
@@ -720,9 +762,10 @@ async def score_family_anchor(
             and ``documentation``; ``docs_stage`` and ``reviewer_score_docs``
             feed the tie-break where present.
         parent_documentation: The parent's documentation, so a parent not in
-            ``members`` can still be offered as a template.
-        pattern: The family's pattern — its invariant segment signature — shown
-            to the template accessor and carried in the state for the judge.
+            ``members`` can still be scored as the family's template.
+        pattern: The family's pattern — its invariant segment signature —
+            carried in the state for the judge. The template accessor is called
+            with the family's member ids, not with the pattern.
         model: Decisions model id; defaults to the ``sn-judge`` seat.
         concurrency: Maximum judgements in flight at once.
         budget_seconds: Wall-time ceiling for the family; ``None`` waits.
@@ -732,21 +775,25 @@ async def score_family_anchor(
     Returns:
         An :class:`AnchorScore` naming the scored members, their expected
         scores and distributions, the chosen member (or ``None``), the members
-        one call was made for, and the summed reported spend.
+        one call was made for, and the summed reported spend. A family refused
+        before any call carries a ``reason`` and no choice.
     """
     candidates = _anchor_score_candidates(
         parent_id, parent_description, parent_documentation, parent_docs_stage, members
     )
     asked = tuple(str(row["id"]) for row in candidates if row.get("id"))
     if not candidates:
-        return AnchorScore(pattern=pattern)
+        return AnchorScore(pattern=pattern, reason=_NO_ELIGIBLE_REASON)
 
     if model is None:
         from imas_codex.settings import get_model
 
         model = get_model("sn-judge")
 
-    template = _house_style_template(str(parent_id or candidates[0]["id"]))
+    template = _resolve_house_style_template(candidates)
+    if not template:
+        return AnchorScore(pattern=pattern, reason=_NO_TEMPLATE_REASON)
+
     states = [
         {
             "member": {
@@ -790,9 +837,18 @@ async def score_family_anchor(
     if expected:
         top = max(expected.values())
         tied = [row for row in candidates if expected.get(str(row["id"])) == top]
-        # Ties fall to select_anchor's own ranking over the tied rows, so the
-        # judged choice never contradicts the heuristic on equal evidence.
-        choice = select_anchor(None, None, None, tied)
+        # Ties fall to select_anchor's own ranking over the tied members, so the
+        # judged choice never contradicts the heuristic on equal evidence. The
+        # family's parent is passed through when it is itself one of the tied
+        # members, so its accepted-parent rule fires exactly as it would over
+        # the whole family; when it is not tied, the ranking runs without it and
+        # can never name a member the judge did not score.
+        if parent_id and parent_id in {str(row["id"]) for row in tied}:
+            choice = select_anchor(
+                parent_id, parent_docs_stage, parent_description, tied
+            )
+        else:
+            choice = select_anchor(None, None, None, tied)
 
     return AnchorScore(
         pattern=pattern,
