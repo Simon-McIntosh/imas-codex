@@ -21,7 +21,99 @@
     "stamped": false
   },
   "arm_comparison_complete": false,
-  "arms": {},
+  "arms": {
+    "heuristic": [
+      {
+        "anchor": "x_coordinate_of_diagnostic_aperture",
+        "calls": 24,
+        "lint_after": 0,
+        "lint_after_classes": {},
+        "lint_before": 2,
+        "lint_before_classes": {
+          "convention_violation": 1,
+          "link_missing_reverse": 1
+        },
+        "members": [
+          "vertical_coordinate_of_diagnostic_aperture",
+          "x_coordinate_of_diagnostic_aperture",
+          "y_coordinate_of_diagnostic_aperture"
+        ],
+        "planned_calls": 3,
+        "receipt": {
+          "harmonize_summary": {
+            "batches_run": 2,
+            "batches_total": 2,
+            "halt_reasons": [],
+            "halted": false,
+            "resume_from": null,
+            "run_ids": [
+              "8cf5cc46-3392-46a9-8bf5-c484a23a328e",
+              "d3ae61e3-5383-451e-ae63-58f2ffde6fac"
+            ],
+            "spec": "harmonize-pattern-family",
+            "total_accepted": 3,
+            "total_audit_cleared": 0,
+            "total_audit_requarantined": 0,
+            "total_cost": 0.632,
+            "total_quarantined": 0,
+            "total_selected": 3,
+            "total_touched": 3
+          },
+          "ledger_baseline_rows": 40085,
+          "ledger_calls": 24,
+          "ledger_session_ids": [
+            "8d4adb31-7e1f-4322-bab3-3afb7f0084c1",
+            "76e3b6d1-02e3-46ce-a198-538b25b46d4b"
+          ],
+          "ledger_spend_usd": 0.6319500000000003,
+          "ledger_window": {
+            "ended": "2026-10-18T23:14:48.303636+00:00",
+            "started": "2026-10-18T22:50:20.730569+00:00"
+          },
+          "per_model": [
+            {
+              "calls": 3,
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "spend": 0.335128
+            },
+            {
+              "calls": 4,
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "spend": 0.173566
+            },
+            {
+              "calls": 3,
+              "model": "openrouter/x-ai/grok-4.5",
+              "spend": 0.121028
+            },
+            {
+              "calls": 14,
+              "model": "typesafe/jev-1.13",
+              "spend": 0.002228
+            }
+          ],
+          "scope_run_ids": [
+            "8cf5cc46-3392-46a9-8bf5-c484a23a328e",
+            "d3ae61e3-5383-451e-ae63-58f2ffde6fac"
+          ]
+        },
+        "scores_after": {
+          "vertical_coordinate_of_diagnostic_aperture": 0.91875,
+          "x_coordinate_of_diagnostic_aperture": 1.0,
+          "y_coordinate_of_diagnostic_aperture": 1.0
+        },
+        "scores_before": {
+          "vertical_coordinate_of_diagnostic_aperture": 0.875,
+          "x_coordinate_of_diagnostic_aperture": 0.91875,
+          "y_coordinate_of_diagnostic_aperture": 0.89375
+        },
+        "seed": "vertical_coordinate_of_diagnostic_aperture",
+        "spend_usd": 0.632,
+        "stamped": true,
+        "wall_seconds": 1467.5730310743675
+      }
+    ]
+  },
   "attempt_history": [
     {
       "at": "2026-10-18T21:05:52.254241+00:00",
@@ -50,7 +142,7 @@
     "reason": "one unreceipted Jev call at the snapshot dry-run rate",
     "usd": 0.6556937222222222
   },
-  "budget_spend_usd": 1.9683126722222224,
+  "budget_spend_usd": 2.6003126722222225,
   "candidate_pool": {
     "all_families": 849,
     "before_validation": 118,
@@ -68,7 +160,7 @@
     "validation_removed": 54
   },
   "cap_envelope_usd": 49.90831267222222,
-  "confirmed_spend_usd": 1.31261895,
+  "confirmed_spend_usd": 1.9446189500000002,
   "dry_run_estimate_basis": {
     "calls": 36,
     "historical_rate_usd": 0.6556937222222222,
@@ -201,6 +293,32 @@
       "scratch_nodes": 1770101,
       "scratch_probe": 1,
       "scratch_uri": "bolt://127.0.0.1:27697"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T22:50:17.587229+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50/jev/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27698"
+    },
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T22:50:18.008634+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50/heuristic/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27697"
     }
   ],
   "measurement_cwd": "/home/ITER/mcintos/Code/imas-codex",
@@ -221,7 +339,7 @@
   "new_model_spend_by_model_usd": {
     "openrouter/openai/gpt-6.1-sol": 0.086856
   },
-  "outcome_status": "selecting",
+  "outcome_status": "applying",
   "paired_family_count": 0,
   "partial_receipts": [
     {
@@ -4127,7 +4245,7 @@
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
   "spend_completeness": "confirmed lower bound; final Jev pool session has no receipt",
   "spend_limit_usd": 50.0,
-  "spend_usd": 1.31261895,
+  "spend_usd": 1.9446189500000002,
   "started_at": "2026-10-18T12:05:51.572895+00:00",
   "stopped_instances": [],
   "unscored_count": 38,
