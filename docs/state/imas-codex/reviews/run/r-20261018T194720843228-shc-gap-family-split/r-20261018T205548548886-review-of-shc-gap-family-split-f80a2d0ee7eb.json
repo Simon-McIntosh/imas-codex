@@ -1,0 +1,97 @@
+{
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured, not zero: the reviewed run's manifest declares tests: [] and test_logs: [], and names no baseline_suite or after_suite gate log anywhere in the run directory. added_failures_from_gate_logs returns (None, []) when either arm's log is absent, so the honest value is null rather than a fabricated 0. No suite arm is owed for this node: the changed surface is docs/evidence plus a figure, and no test path was touched.",
+  "after_suite": null,
+  "assertions": [
+    {
+      "independent": true,
+      "name": "after_state_assertion",
+      "note": "Independent: it compares graph observations against a literal expectation supplied by the test, not against the same variable it passed in. The scalar_matches_live_holder clause is a genuine cross-check of two derived projections (the edge traversal and the scalar mirror).",
+      "what_would_make_it_fail": "It fails if any family source's set of live holders is not exactly the one expected name (observed_live_holders != [expected]), or if the produced_sn_id scalar mirror disagrees with the PRODUCED_NAME edge (scalar_matches_live_holder is not True), or if the revived name is not live, or if the holder is not live. The expected map is built from hardcoded constants (the three MEASUREMENT_SOURCES keys and the SEPARATRIX source key, each mapped to TARGET or HOLDER at run.py:264), not from the node's own observed-vs-expected confusion.",
+      "where": "docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-run.py:258"
+    }
+  ],
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T21:08:43.054Z",
+  "dispatched_at": "2026-10-18T20:56:09Z",
+  "evidence_inputs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T194720843228-shc-gap-family-split/manifest.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T194720843228-shc-gap-family-split/gap-read-pre.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T194720843228-shc-gap-family-split/gap-preview.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T194720843228-shc-gap-family-split/gap-apply.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T194720843228-shc-gap-family-split/gap-move.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T194720843228-shc-gap-family-split/gap-after.log",
+    "git diff 323721d9af38242e72bf7394fe009f1b375d37da f80a2d0ee7ebf69096e5f52be81c40b8bdc7b72e (read in the review worktree; the reviewed worktree still resolves at f80a2d0ee)"
+  ],
+  "figure_review": "source-binding-before-after.svg rendered to PNG at 1400 px width and inspected: labels legible, no clipping and no collision, the three moved sources in one feature hue and the retained source in grey, direct labels 'moves'/'stays', footer naming the PRODUCED_NAME edge and the one-live-holder claim. The node's own check-figure-layout.py reported 0 findings across 29 labels, and its selftest directory holds four broken inputs plus a clean control -- I re-ran the checker and read the 0-finding result. No blocking figure finding.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-manifest.json",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "This fourth changed path lands outside the node's declared write paths. It is authorised (coordinator, 2026-10-18T20:20Z) and disclosed in write_scope_exceptions, and the declaration was intentionally left narrow rather than widened to silence the check -- so reckon crew check-manifest exits 1 with this one finding. No content risk: the artifact is a signed authority file committed under docs/evidence. Follow-on because a coordinator promoting this run must accept the authorised path explicitly, and the recorded exit-1 result should not read as an unexplained failure."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split.html",
+      "line": 274,
+      "severity": "follow-on",
+      "text": "The change-id table lists two sn-change source-migration ids (source_migration_manifest at :274 and :275) whose provenance is not durably logged. gap-move.log records only the mover's return value ({moved:3, expected:3, quiescence quiet}) and names neither id, so a later reader opening the run directory cannot resolve where the table's two lower rows came from; only the apply's own sn-change id appears in gap-apply.log. Evidence-provenance gap, not a correctness defect: the move itself is corroborated by gap-after.log."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T194720843228-shc-gap-family-split/manifest.md",
+      "line": 73,
+      "severity": "follow-on",
+      "text": "The manifest's negative_control_log line carries a description ('... mode=read at base 323721d9a, EXIT=0, log in the run directory as gap-read-pre.log') rather than the bare path the manifest contract requires on that line, so a reader cannot open the field directly. Mitigating: this node's write paths reach no test file, so promotion reads no red log for it and no log was required; the negative-control arm the field describes is real and is carried by gap-read-pre.log, which the evidence_inputs block does name. Recorded because the shape refuses field-level consumers independently of whether the field was owed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the whole changed surface is docs/evidence fragments plus one figure; no production module or symbol was added or altered, so there is no production call site to test.",
+    "diff": "reviewed at 323721d9a..f80a2d0ee across four paths: the fragment html (534 changed lines, 503 at head) and run.py (mode-driven rewrite) and the new manifest.json and figure svg; two commits with conventional subjects and substantive bodies, no AI attribution, no plan/sprint identifiers in the shipped paths or symbols; every fragment element id is node-id-prefixed (30 ids, all unique) after f80a2d0ee repaired a duplicate-id defect in 327c869bd; the figure is 1400x660 and the node's own layout checker reports 0 findings across 29 labels.",
+    "done_when": "met on every clause: before/after readback of both names with an existence+absence control per property (control_present true, control_absent false for all four names in both logs); holder keeps exactly the separatrix source; the revived name holds exactly the three; each of the four sources has exactly one live holder and scalar_matches_live_holder true in both states; owners cited with file:line all resolve; the 0.10.0 round-trip parses (target base separatrix_distance, projection radial/component, locus at/outboard_midplane); the preview (would_apply would_change=1 refusals=[]) and the apply receipt (applied changed=1 mutations=1 persistent_writes=2, change_id sn-change:signed-manifest:e70e4ceb...:c8d275cd) are both recorded. The reviewed run declares no test gate, so no suite arm is owed.",
+    "goal": "met: the three dd:*distance_separatrix_midplane sources now bind to radial_separatrix_distance_at_outboard_midplane and gap_at_outboard_midplane keeps only dd:summary/boundary/distance_inner_outer_separatrices/value; confirmed by gap-read-pre.log vs gap-after.log, both read from bolt://98dci4-gpu-0002:7687.",
+    "manifest": "complete and honest: status complete, landing/checkpoint/what_changed/owners_used/receipts/quiescence/after_state/commits/changed_paths/evidence_inputs/follow_ons all populated; tests and test_logs empty and correctly so (no test path was touched); the one manifest shape defect is negative_control_log (see finding).",
+    "write_paths": "one deviation: docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-manifest.json lands outside the four declared write paths, authorised by the coordinator at 2026-10-18T20:20Z and recorded in the node's write_scope_exceptions; the other three changed paths sit inside the declaration. The declaration was deliberately left narrow, so reckon crew check-manifest exits 1 with the one finding the node itself reports."
+  },
+  "justifications": {
+    "durability": "The change is a persistent graph mutation with a StandardNameChange readback (sn-change:signed-manifest:e70e4ceb...:c8d275cd / operation revive_superseded_identity / run_id r-20261018T194720843228-shc-gap-family-split), and the evidence fragment is a mode-driven script (read|build|preview|apply <digest>|move|after) that reproduces every table from the graph, so the fragment does not decay into a stale write-up. Deductions: the two source-migration change ids printed on the fragment table have no durable log in the run directory, so a later reader cannot open their provenance; and the two reviewed commits are local-only by the worker non-push rule, which is expected but leaves the record unlanded until a merge.",
+    "evidence": "The evidence is primary and separates the two states: gap-read-pre.log carries the negative arm of the split's own assertion (negative_control.ok=false with the three measurement sources reported on gap_at_outboard_midplane and revived_name_is_live false), and gap-after.log carries the positive arm (after_state_assertion.ok=true). A readback that could not separate the states would pass both, so this one is discriminating. Preview and apply receipts carry a sha256 chain (manifest_sha256=e70e4ceb..., authority_file_sha256 eda4cad7...). Deductions: the change-id table's two source-migration ids are not durably logged in the run directory, and the manifest's negative_control_log is description-shaped.",
+    "fit": "The node followed the repository's own conventions throughout: it reused the signed-repair envelope (build_repair_authority + apply_signed_manifest) instead of hand-writing the revive, reused the deterministic source mover (retarget_standard_name_sources) instead of editing PRODUCED_NAME by hand, followed the evidence-fragment layout with node-id-prefixed element ids and a project-absolute figure src, and drew the figure to the repository's data-ink rules (direct labels, one feature hue for the moved sources, grey for the kept one, no gridlines).",
+    "goal_fidelity": "The dispatched goal -- move the three midplane measurement distances off gap_at_outboard_midplane onto a revived radial_separatrix_distance_at_outboard_midplane -- is achieved exactly and in the direction asked. gap-after.log shows the three sources on the revived name and the separatrix source alone on the holder, and the revived name at name_stage drafted / status draft / superseded_from_stage removed, which is live. The first pass was blocked and the node took the coordinator-authorised signed route rather than forcing the fold owner, which the fragment route section records honestly (the two revive_previews in gap-read-pre.log both return ok=false with the reason stated).",
+    "reuse": "Searched imas_codex/standard_names and imas_codex/graph for an existing owner of the family-state readback before scoring this. Every writer definition delegates to an owner (retarget_standard_name_sources provenance_lifecycle.py:505; apply_signed_manifest signed_manifest.py:7582; build_repair_authority repair_authority.py:135; supersede_into edit.py:2886 for the refused preview) and re-implements nothing. The bespoke readback helpers (read_names, read_source_bindings, writer_quiescence, after_state_assertion) have no library owner: the nearest, edit.py:1875 _bound_source_ids, returns source ids bound to one name and projects neither name_stage nor the produced_sn_id scalar mirror, and the graph_ops/attachment_audit PRODUCED_NAME readers likewise do not. No owner exists, so no score penalty is owed; the deduction reflects that the readback lives only in the one-shot fragment rather than extending a shared reader.",
+    "scope_discipline": "Three of four changed paths are inside the dispatched write paths, and the graph mutations are confined to the four-family names the node was chartered to touch with the writer owners used as sentinels. The single out-of-scope path (shc-gap-family-split-manifest.json) is the one the coordinator authorised after the dispatch was cut, and the node disclosed it rather than widening its own declaration to silence the check -- which is the correct handling of a scope change, but it is still a path written outside the original fence and check-manifest consequently exits 1."
+  },
+  "max_total": 120,
+  "node": "shc-gap-family-split",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: met -- the three dd:*distance_separatrix_midplane sources now bind to radial_separatrix_distance_at_outboard_midplane and gap_at_outboard_midplane keeps only dd:summary/boundary/distance_inner_outer_separatrices/value; confirmed by gap-read-pre.log (negative_control.ok=false) vs gap-after.log (after_state_assertion.ok=true).\nVERDICT done_when: met on every clause, including the per-property existence+absence control, the four one-live-holder bindings with scalar agreement, the 0.10.0 parse, and the preview+apply receipts; no test gate was owed because no test path was touched.\nVERDICT write_paths: one authorised deviation -- shc-gap-family-split-manifest.json lands outside the four declared write paths, recorded in write_scope_exceptions, and check-manifest accordingly exits 1 with that single finding.\nVERDICT manifest: complete and honest, with one field-shape defect on the negative_control_log line; tests and test_logs are correctly empty.\nVERDICT diff: four paths over two commits, conventional subjects with substantive bodies, no AI attribution, no plan identifiers; element ids all node-prefixed after f80a2d0ee repaired a duplicate id from 327c869bd; figure checked and clean.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: fully met and verified before/after; the blocked first pass was replaced by the coordinator-authorised signed route, which the fragment records rather than hides.\nSCORE evidence: 17\nJUSTIFICATION evidence: the before/after readback discriminates the two states and the receipts carry a sha chain; deductions for the unlogged source-migration change ids and the description-shaped negative_control_log.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: three of four changed paths inside the fence; the fourth is coordinator-authorised and disclosed, not smuggled, but is still outside the dispatched write paths and stands as a check-manifest finding.\nSCORE durability: 17\nJUSTIFICATION durability: persistent graph mutation with a change record, and a mode-driven fragment that reproduces every table; deductions for the two unlogged migration ids and the local-only commits.\nSCORE fit: 18\nJUSTIFICATION fit: reuses the repo's signed-repair envelope, deterministic source mover and evidence-fragment conventions, and draws the figure to the repository's data-ink rules.\nSCORE reuse: 17\nJUSTIFICATION reuse: every writer definition delegates to an owner and re-implements nothing; the bespoke readback helpers have no library owner (searched imas_codex/standard_names and imas_codex/graph; nearest is edit.py:1875 _bound_source_ids, which projects neither name_stage nor the scalar mirror), so no penalty is owed for re-implementation, only for the readback living in a one-shot fragment.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-manifest.json:1 follow-on: the signed authority file is written outside the node's declared write paths; authorised and disclosed, but it makes check-manifest exit 1 and needs explicit acceptance at promotion.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split.html:274 follow-on: the two source-migration sn-change ids on the change-id table are not durably logged in the run directory, so a reader cannot resolve their provenance.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T194720843228-shc-gap-family-split/manifest.md:73 follow-on: negative_control_log carries a description rather than the bare path alone, so field-level consumers cannot open it; the described arm itself is real and is carried by gap-read-pre.log.\n",
+  "review_item_count": 6,
+  "review_run_id": "r-20261018T205548548886-review-of-shc-gap-family-split-f80a2d0ee7eb",
+  "reviewed_artifacts": [
+    "docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split.html",
+    "docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-run.py",
+    "docs/evidence/fragments/sn-harmonize-command/shc-gap-family-split-manifest.json",
+    "docs/figures/sn-harmonize-command/shc-gap-family-split/source-binding-before-after.svg"
+  ],
+  "reviewed_at": "2026-10-18T21:20:00Z",
+  "reviewed_base_sha": "323721d9af38242e72bf7394fe009f1b375d37da",
+  "reviewed_head_sha": "f80a2d0ee7ebf69096e5f52be81c40b8bdc7b72e",
+  "reviewed_run_id": "r-20261018T194720843228-shc-gap-family-split",
+  "reviewer": "review-of-shc-gap-family-split-f80a2d0ee7eb",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 17,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T21:13:38.920131+00:00",
+  "total": 104
+}
