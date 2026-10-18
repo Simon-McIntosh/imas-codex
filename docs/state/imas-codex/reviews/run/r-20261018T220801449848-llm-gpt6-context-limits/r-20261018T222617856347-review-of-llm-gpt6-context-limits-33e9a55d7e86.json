@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:10664 workers.prepare_docs_review_request",
+    "imas_codex/standard_names/budget.py:355 budget._bound_request"
+  ],
+  "commits_read": [
+    "33e9a55d7e86d22ab5087df8a4ad3ad8274a1a67"
+  ],
+  "completed_at": "2026-10-18T22:36:35.943Z",
+  "dispatched_at": "2026-10-18T22:26:34Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/base/llm.py",
+      "line": "317",
+      "severity": "follow-on",
+      "text": "imas_codex/discovery/base/llm.py:317 follow-on: _checked_in_input_allowance reads the [tool.imas-codex.llm.openrouter-pricing] table directly through the private settings._get_section, duplicating the table access owned by get_openrouter_pricing (imas_codex/settings.py:87) that the same module already uses in get_openrouter_expected_price; extending that owner to expose max-input-tokens would keep one owner. Recorded follow-on because settings.py is outside this node's declared write scope."
+    },
+    {
+      "file": "docs/evidence/fragments/llm-seats/llm-gpt6-context-limits.html",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/llm-seats/llm-gpt6-context-limits.html:45 follow-on: the page records every allowance as read from the route's own endpoint on 2026-10-18 but stores no fetch log, so the brief's never-guess-a-figure provenance is asserted rather than reproducible from the artefact."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: source brief.md:1-26 asks for a verified max-input-tokens on every pricing-table route and a get_catalog_model_info fallback to that table; imas_codex/discovery/base/llm.py:305-315 lands exactly that fallback and pyproject.toml gives all 15 routes a value, so both live GPT-6 seats resolve a positive bound.\nVERDICT done_when: source brief.md:28-40 names tests/core/test_catalog_input_limits.py; the manifest records head 4 passed EXIT=0 and the base arm 3 failed/1 passed EXIT=1, and head-test.log and negative-control-base-arm.log record those results.\nVERDICT write_paths: source manifest.md:3 declares pyproject.toml, imas_codex/discovery/base/llm.py, tests/core/test_catalog_input_limits.py and the evidence html; git show --stat 33e9a55d7 changes exactly those four paths.\nVERDICT manifest: source manifest.md records tests 4 passed EXIT=0, base arm 3 failed/1 passed EXIT=1, covering set 84/84 both arms delta 0, and follows_ons naming the settings accessor; its gate logs on disk match those claims.\nVERDICT diff: the single commit 33e9a55d7 adds the fallback helper and two call paths in imas_codex/discovery/base/llm.py:305-336, 15 max-input-tokens lines in pyproject.toml, a four-test file and one evidence html, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/workers.py:10664 workers.prepare_docs_review_request, imas_codex/standard_names/budget.py:355 budget._bound_request\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/base/llm.py:305-315 returns the table allowance for a route LiteLLM does not bound and leaves an unrecorded route unbounded, matching source brief.md:14-26; the endpoint read behind each value stays asserted rather than logged.\nSCORE evidence: 18\nJUSTIFICATION evidence: negative-control-base-arm.log:1-40 reproduces the production refusal (escalator catalog input allowance is not bounded at imas_codex/standard_names/workers.py:10666) at base and head-test.log records 4 passed EXIT=0, so the done_when's three cases are measured, not claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 33e9a55d7 changes only the four paths source manifest.md:3 declares and carries nothing beyond source brief.md:14-26.\nSCORE durability: 18\nJUSTIFICATION durability: tests/core/test_catalog_input_limits.py:22-28 reads the resolved bound from the code under test and reddens in negative-control-base-arm.log when the fallback is reverted, but the ensure_model_prefix key fallback at imas_codex/discovery/base/llm.py:330-333 and the non-positive-value rejection at :334-335 have no test.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/discovery/base/llm.py:317-335 matches the module's private-helper idiom and uses no banned name, but reaches the private settings._get_section at :327 where the module elsewhere calls the public get_openrouter_pricing.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/discovery/base/llm.py:327 duplicates the pricing-table access owned by get_openrouter_pricing at imas_codex/settings.py:87 rather than extending it, so the finding at imas_codex/discovery/base/llm.py:317 records the duplication.\nFINDING imas_codex/discovery/base/llm.py:317 follow-on: _checked_in_input_allowance reads the [tool.imas-codex.llm.openrouter-pricing] table directly through the private settings._get_section, duplicating the table access owned by get_openrouter_pricing (imas_codex/settings.py:87) that the same module already uses in get_openrouter_expected_price; extending that owner to expose max-input-tokens would keep one owner. Recorded follow-on because settings.py is outside this node's declared write scope.\nFINDING docs/evidence/fragments/llm-seats/llm-gpt6-context-limits.html:45 follow-on: the page records every allowance as read from the route's own endpoint on 2026-10-18 but stores no fetch log, so the brief's never-guess-a-figure provenance is asserted rather than reproducible from the artefact.\n",
+  "review_run_id": "r-20261018T222617856347-review-of-llm-gpt6-context-limits-33e9a55d7e86",
+  "reviewed_base_sha": "8cf27bb0846851415ae511043ca470a2e72c7f24",
+  "reviewed_head_sha": "33e9a55d7e86d22ab5087df8a4ad3ad8274a1a67",
+  "reviewed_run_id": "r-20261018T220801449848-llm-gpt6-context-limits",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T22:37:30.152005+00:00"
+}
