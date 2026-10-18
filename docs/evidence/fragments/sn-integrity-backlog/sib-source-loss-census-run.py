@@ -24,7 +24,11 @@ TERMINAL = {"deprecated", "superseded"}
 def classify(item: dict) -> str:
     if item.get("origin") == "derived" and item.get("children"):
         return "derived_parent"
-    if item.get("stage") == "exhausted" and item.get("source_holding_successors"):
+    if (
+        item.get("origin") != "derived"
+        and item.get("stage") == "exhausted"
+        and item.get("source_holding_successors")
+    ):
         return "orphan_awaiting_retirement"
     if item.get("history_sources"):
         return "dropped_edge"
@@ -45,6 +49,15 @@ def fixture_control() -> None:
         got = classify(item)
         print(f"fixture {expected}: {got}")
         assert got == expected
+    derived_without_children = {
+        "origin": "derived",
+        "stage": "exhausted",
+        "source_holding_successors": ["successor"],
+    }
+    assert classify(derived_without_children) == "never_bound"
+    derived_without_children["history_sources"] = ["dd:path"]
+    assert classify(derived_without_children) == "dropped_edge"
+    print("fixture derived without children: never_bound or dropped_edge by evidence")
     print("EXIT=0")
 
 
@@ -91,6 +104,19 @@ def main() -> None:
         """,
         )
         assert len(names) == counts["total"]
+        live_sourceless_count = query(
+            gc,
+            "live_sourceless_count",
+            """
+            MATCH (n:StandardName)
+            WHERE NOT n.status IN $terminal
+              AND NOT EXISTS {
+                MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(n)
+              }
+            RETURN count(n) AS total
+        """,
+            terminal=sorted(TERMINAL),
+        )[0]["total"]
         edges = query(
             gc,
             "source_edges",
@@ -379,6 +405,23 @@ def main() -> None:
             "edit_origin": n["edit_origin"],
         }
         item["population"] = classify(item)
+        if item["stage"] == "exhausted" and item["population"] == "dropped_edge":
+            path_locations = source_locations(source_hints | lineage_paths)
+            path_holders = (
+                {
+                    holder
+                    for source in path_locations.values()
+                    for holder in source["live_holders"]
+                }
+                - descendants
+                - {name}
+            )
+            item["recorded_path_live_holders"] = sorted(path_holders)
+            item["exhausted_source_location"] = (
+                "held_elsewhere_without_successor_chain"
+                if path_holders
+                else "no_live_holder"
+            )
         if item["population"] in {"dropped_edge", "never_bound"}:
             item["responsible_writer"], item["writer_evidence"] = writer_for(item)
         item["repair_source"] = (
@@ -463,6 +506,7 @@ def main() -> None:
         )
     output = {
         "property_counts": counts,
+        "independent_live_sourceless_count": live_sourceless_count,
         "source_property_counts": source_properties,
         "total_live": sum(n["status"] not in TERMINAL for n in names),
         "population_counts": dict(Counter(r["population"] for r in rows)),
@@ -474,11 +518,22 @@ def main() -> None:
             r["stage"] == "exhausted" and r["population"] == "dropped_edge"
             for r in rows
         ),
+        "exhausted_source_location_counts": dict(
+            Counter(
+                r["exhausted_source_location"]
+                for r in rows
+                if r["stage"] == "exhausted" and r["population"] == "dropped_edge"
+            )
+        ),
         "names": rows,
         "refine_cases": sheet_rows,
     }
-    assert len(rows) == 264
-    assert sum(output["population_counts"].values()) == len(rows)
+    assert len(rows) == live_sourceless_count
+    assert len(row_map) == live_sourceless_count
+    assert (
+        sum(output["exhausted_source_location_counts"].values())
+        == output["exhausted_dropped_edges"]
+    )
     assert all(
         output["population_counts"].get(population, 0) > 0
         for population in (
@@ -530,6 +585,7 @@ def write_report(output: dict) -> None:
         if r["population"] in {"dropped_edge", "never_bound"}
     )
     cases_by_location = Counter(r["repair_source"] for r in cases)
+    exhausted_locations = output["exhausted_source_location_counts"]
     unrelated_holders = sum(
         bool(
             {
@@ -599,11 +655,12 @@ def write_report(output: dict) -> None:
 <html lang="en"><head><meta charset="utf-8"><title>Source loss census</title>
 <style>body{{max-width:1000px;margin:2rem auto;font:16px/1.5 sans-serif;padding:0 1rem}}table{{border-collapse:collapse;width:100%;font-size:.85rem}}th,td{{border-bottom:1px solid #ccc;padding:.35rem;text-align:left;vertical-align:top;overflow-wrap:anywhere}}code{{font-size:.9em}}.scroll{{overflow-x:auto}}</style></head><body>
 <article id="sib-source-loss-census-record"><h1>Where the DD sources went</h1>
-<p>Read-only graph census at revision <code>993ddf413d290b09d1c8ea7518e2fdc4a0209b2f</code>. The control query found {output["property_counts"]["total"]} StandardName nodes, with {output["property_counts"]["status"]} statuses and {output["property_counts"]["stage"]} stages. There are {output["total_live"]} live names; {len(names)} have no incoming <code>PRODUCED_NAME</code> from a <code>StandardNameSource</code>. The source label has {output["source_property_counts"]["total"]} nodes and {output["source_property_counts"]["mirror"]} populated produced-name mirrors. Every result query returned fewer than its caller limit and took under ten seconds; the run log records each duration and ends <code>EXIT=0</code>.</p>
+<p>Read-only graph census at revision <code>993ddf413d290b09d1c8ea7518e2fdc4a0209b2f</code>. The control query found {output["property_counts"]["total"]} StandardName nodes, with {output["property_counts"]["status"]} statuses and {output["property_counts"]["stage"]} stages. There are {output["total_live"]} live names; an independent graph query counts {output["independent_live_sourceless_count"]} with no incoming <code>PRODUCED_NAME</code> from a <code>StandardNameSource</code>, equal to the classified rows. The source label has {output["source_property_counts"]["total"]} nodes and {output["source_property_counts"]["mirror"]} populated produced-name mirrors. Every result query returned fewer than its caller limit and took under ten seconds; the run log records each duration and ends <code>EXIT=0</code>.</p>
 <h2 id="sib-source-loss-census-populations">Populations and controls</h2>
 <p>Exactly one population is assigned per name: {counts["derived_parent"]} derived parents, {counts["orphan_awaiting_retirement"]} orphan awaiting retirement, {counts["dropped_edge"]} dropped edges, and {counts["never_bound"]} never bound. The exhausted dropped-edge count is <strong>{output["exhausted_dropped_edges"]}</strong>; the current source-only orphan selector would retire those names without checking that a successor holds their quantity.</p>
 <div class="scroll"><table><thead><tr><th>Stage</th><th>Derived parent</th><th>Orphan</th><th>Dropped edge</th><th>Never bound</th></tr></thead><tbody>{stage_rows}</tbody></table></div>
-<p>Observed witnesses: <code>beta</code> (derived parent), <code>normalized_toroidal_thermal_plasma_beta</code> (orphan; live source-holding successor <code>normalized_toroidal_beta</code>), <code>line_averaged_neon_density</code> (dropped edge; DD path remains recorded), and <code>electron_energy_flux_limiter_coefficient</code> (never bound; no edge, path, mirror, projection or binding receipt). Four planted in-memory fixtures, one for each population, each classified to its own expected population; the run log records all four and <code>EXIT=0</code>.</p>
+<p>Among the {output["exhausted_dropped_edges"]} exhausted dropped-edge names, <strong>{exhausted_locations.get("held_elsewhere_without_successor_chain", 0)}</strong> have an own or lineage-recorded source path currently produced by another live name without a recorded successor chain. The other <strong>{exhausted_locations.get("no_live_holder", 0)}</strong> have no live holder for such a path. The JSON names each row's class and any live holders; source paths without a current source node fall in the latter class.</p>
+<p>Observed witnesses: <code>beta</code> (derived parent), <code>normalized_toroidal_thermal_plasma_beta</code> (orphan; live source-holding successor <code>normalized_toroidal_beta</code>), <code>line_averaged_neon_density</code> (dropped edge; DD path remains recorded), and <code>electron_energy_flux_limiter_coefficient</code> (never bound; no edge, path, mirror, projection or binding receipt). Four planted in-memory fixtures, one for each population, each classified to its own expected population; two additional controls require an exhausted derived name without children to fall in dropped edge or never bound according to source evidence. The run log records the controls and <code>EXIT=0</code>.</p>
 <p>For a dropped-edge row, a recorded DD projection, path, source mirror, relative's edge or source-migration receipt establishes historical source evidence. A live holder without a <code>REFINED_FROM</code>, <code>HAS_SUCCESSOR</code> or recorded change-chain successor is not treated as an authorized successor. {unrelated_holders} dropped-edge names have a source node currently bound to another live name without that successor chain; those mappings need semantic review before any repair. A binding receipt without a retained path proves earlier binding but does not identify the lost DD path.</p>
 <h2 id="sib-source-loss-census-writers">Identity-changing writers</h2>
 <div class="scroll"><table><thead><tr><th>Writer and line</th><th>Edge verdict</th></tr></thead><tbody>
