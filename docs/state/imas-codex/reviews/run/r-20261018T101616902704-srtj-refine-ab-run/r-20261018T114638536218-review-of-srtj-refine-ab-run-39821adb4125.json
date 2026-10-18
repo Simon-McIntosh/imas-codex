@@ -19,6 +19,11 @@
   "call_sites": [],
   "completed_at": "2026-10-18T11:54:13Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "srtj-refine-ab-run",
+      "recorded_at": "2026-10-18T11:55:36.547893+00:00"
+    },
     "goal_fidelity": {
       "kind": "folded",
       "node": "srtj-refine-ab-run",
