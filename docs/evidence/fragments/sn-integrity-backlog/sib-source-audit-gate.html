@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-source-audit-gate">
+<title>One source audit for export, retirement and the catalog probe</title>
+</head>
+<body>
+<main>
+<h1 id="sib-source-audit-gate-title">One source audit for three consumers</h1>
+<p>The live prechange read reproduced the gap: <code>sourceless_live=264</code>,
+<code>sourceless_exhausted=240</code>, and only <code>export_stage=10</code>
+were accepted or approved. The export selected its stage-limited population
+before checking source evidence, the lifecycle selected exhausted names by
+absence of an edge alone, and the probe excluded exhausted names.</p>
+
+<h2 id="sib-source-audit-gate-classifier">Ordered classification</h2>
+<p><code>classify_sourceless_standard_names</code> in
+<code>imas_codex/standard_names/graph_ops.py:22563</code> reads the full live
+sourceless set, source nodes, holders, lineage, change records and DD projections.
+It resolves the name's own source tokens and mirrors, then tests derived parent,
+never bound, dropped edge, unchained holder, and held in chain in order.
+An exhausted non-derived held-in-chain name is marked
+<code>orphan_awaiting_retirement</code>. The graph's recorded change endpoints
+establish identity and source-transfer chains regardless of operation spelling;
+the six operations omitted from the earlier fixed list are exercised by the
+fixture. The derived-parent query shares the live-child predicate with the
+writer invariant and export.</p>
+<table id="sib-source-audit-gate-populations">
+<thead><tr><th>Population</th><th>Earlier census</th><th>Current read</th></tr></thead>
+<tbody>
+<tr><td>Dropped edge</td><td>199</td><td>199</td></tr>
+<tr><td>Never bound</td><td>30</td><td>30</td></tr>
+<tr><td>Derived parent</td><td>2</td><td>2</td></tr>
+<tr><td>Unchained holder</td><td>31</td><td>30</td></tr>
+<tr><td>Orphan awaiting retirement</td><td>2</td><td>3</td></tr>
+<tr><th>Total</th><th>264</th><th>264</th></tr>
+</tbody>
+</table>
+<p>The only moved name is <code>gap_of_antenna_strap</code>. Its source is held
+by <code>back_surface_distance_of_antenna_strap</code>; the recorded
+<code>repair_semantic_source_binding</code> connects it to
+<code>wall_gap_of_antenna_strap</code>, followed by three
+<code>REFINED_FROM</code> links to the holder. The earlier fixed operation list
+did not follow that recorded source movement. The read-only live log records
+an independent sourceless count of 264 and a positive control of 2,795 names
+with a producer. It lists every query duration, 0.009–0.446 seconds, each below
+the ten-second bound.</p>
+
+<h2 id="sib-source-audit-gate-consumers">Consumer calls and refusal controls</h2>
+<p>Logs are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T225858350310-sib-source-audit-gate/</code>.
+Each red control temporarily replaced its consumer call with an empty
+classification, ran the named real-graph test, and restored the call. The
+three logs each end <code>EXIT=1</code>; the fixture's graph tests pass
+with all calls present.</p>
+<table id="sib-source-audit-gate-consumer-table">
+<thead><tr><th>Consumer</th><th>Call site</th><th>Red call removal</th></tr></thead>
+<tbody>
+<tr><td>Export</td><td><code>imas_codex/standard_names/export.py:3027</code>, before <code>_fetch_export_population</code></td><td><code>negative-export-final.log</code>: both <code>test_export_refuses_losses_before_population</code> variants</td></tr>
+<tr><td>Orphan lifecycle</td><td><code>imas_codex/standard_names/graph_ops.py:22862</code>, inside the transaction</td><td><code>negative-lifecycle.log</code>: <code>test_lifecycle_retires_only_recorded_chain_orphan</code></td></tr>
+<tr><td>Catalog probe</td><td><code>imas_codex/standard_names/ledger.py:103</code>; <code>loop.py:2005</code> reports a failed read as not run</td><td><code>negative-ledger.log</code>: <code>test_probe_reports_exhausted_dropped_edge</code></td></tr>
+</tbody>
+</table>
+<p>The fixture plants the dropped-edge and never-bound exhausted names, a
+derived parent with a sourced child, an exhausted predecessor whose successor
+holds its source, an unchained source holder, and a sourced name. The export
+report names both blocking identities before population fetch and reaches the
+fetch after they are removed. Retirement applies only to the source-transferred
+predecessor. The probe returns the exhausted dropped-edge name, and its raised
+read is logged as <code>source-loss probe did not run</code>, with a distinct
+<code>None</code> result rather than an empty finding.</p>
+
+<h2 id="sib-source-audit-gate-verification">Verification record</h2>
+<p><code>fixture-final.log</code> ends <code>12 passed; EXIT=0</code>.
+<code>live-read-final.log</code> ends <code>EXIT=0</code> and records the independent
+total and census comparison. The real-graph tests used a disposable Neo4j
+instance on node-local scratch, refused the project graph URI, and removed
+their planted nodes after each test.</p>
+<p>The existing covering tests need updates for the new contract.
+<code>base-focused-archive.log</code> has 14 passed and <code>EXIT=0</code>;
+<code>head-focused-final.log</code> has 10 failures and <code>EXIT=1</code>
+because export fixtures provide a graph client with no source-audit query
+answers and ledger tests assert the stage filter and old query shape.
+The real-graph orphan lifecycle tests move from five passed on base
+(<code>orphan-base.log</code>) to two failures on head
+(<code>orphan-head.log</code>): their nominal orphan has no recorded source,
+so the new rule correctly marks it never bound. Those three existing test
+files are outside this node's write grant. The loop covering selection has
+17 passed on both base and head (<code>loop-base.log</code> and
+<code>loop-head.log</code>).</p>
+</main>
+</body>
+</html>

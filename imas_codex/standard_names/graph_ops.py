@@ -19,7 +19,7 @@ import os
 import re
 import time
 import uuid
-from collections import Counter
+from collections import Counter, defaultdict, deque
 from contextlib import nullcontext, suppress
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -22560,10 +22560,220 @@ class ExhaustedOrphanSupersessionConflict(RuntimeError):
     """The signed exhausted-orphan cohort no longer matches graph authority."""
 
 
+def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
+    """Classify every live name without a producer using its own source record.
+
+    Recorded paths, resolution identities, source mirrors and detachment
+    receipts belong to the name itself. Related names supply chain topology,
+    but their source records do not establish that this name was ever bound.
+    The independent count protects against an incomplete population read.
+    """
+    from imas_codex.standard_names.source_invariant import _derived_parent_cypher
+
+    terminal = ["deprecated", "superseded"]
+
+    def read(cypher: str, **params: Any) -> list[dict[str, Any]]:
+        started = time.monotonic()
+        rows = gc.query(cypher, **params)
+        if time.monotonic() - started >= 10:
+            raise RuntimeError("source audit query exceeded ten seconds")
+        return rows
+
+    count = read(
+        """MATCH (sn:StandardName)
+        WHERE NOT sn.status IN $terminal
+          AND NOT EXISTS {
+            (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+          }
+        RETURN count(sn) AS total""",
+        terminal=terminal,
+    )[0]["total"]
+    names = read(
+        f"""MATCH (sn:StandardName)
+        WHERE NOT sn.status IN $terminal
+          AND NOT EXISTS {{
+            (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+          }}
+        RETURN sn.id AS id, sn.name_stage AS stage, sn.status AS status,
+               sn.origin AS origin, sn.source_paths AS paths,
+               sn.source_path AS path,
+               sn.source_dd_resolution_converged_ids AS resolutions,
+               ({_derived_parent_cypher()}) AS derived_parent
+        ORDER BY id LIMIT 6000""",
+        terminal=terminal,
+    )
+    if len(names) != count or len({row["id"] for row in names}) != count:
+        raise RuntimeError(f"source audit population incomplete: {len(names)}/{count}")
+    sources = read(
+        """MATCH (source:StandardNameSource)
+        RETURN source.id AS id, source.source_id AS source_id,
+               source.produced_sn_id AS mirror,
+               [(source)-[:PRODUCED_NAME]->(holder:StandardName)
+                WHERE NOT holder.status IN $terminal | holder.id] AS holders
+        ORDER BY id LIMIT 12000""",
+        terminal=terminal,
+    )
+    source_total = read(
+        "MATCH (source:StandardNameSource) RETURN count(source) AS total"
+    )[0]["total"]
+    if len(sources) != source_total:
+        raise RuntimeError(
+            f"source audit source read incomplete: {len(sources)}/{source_total}"
+        )
+    relations = read(
+        """MATCH (a:StandardName)-[rel:REFINED_FROM|HAS_SUCCESSOR]->(b:StandardName)
+        RETURN a.id AS a, type(rel) AS kind, b.id AS b LIMIT 12000"""
+    )
+    changes = read(
+        """MATCH (change:StandardNameChange)
+        RETURN change.from_name AS predecessor, change.to_name AS successor,
+               change.operation AS operation LIMIT 20000"""
+    )
+    projections = read(
+        """MATCH (dd:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
+        RETURN dd.id AS path, sn.id AS name LIMIT 12000"""
+    )
+    all_name_ids = {
+        row["id"]
+        for row in read("MATCH (sn:StandardName) RETURN sn.id AS id LIMIT 6000")
+    }
+    inventory = read(
+        """CALL { MATCH (sn:StandardName) RETURN count(sn) AS names }
+        CALL { MATCH (:StandardName)-[rel:REFINED_FROM|HAS_SUCCESSOR]->(:StandardName)
+               RETURN count(rel) AS relations }
+        CALL { MATCH (change:StandardNameChange) RETURN count(change) AS changes }
+        CALL { MATCH (:IMASNode)-[projection:HAS_STANDARD_NAME]->(:StandardName)
+               RETURN count(projection) AS projections }
+        RETURN names, relations, changes, projections"""
+    )[0]
+    if (
+        len(all_name_ids) != inventory["names"]
+        or len(relations) != inventory["relations"]
+        or len(changes) != inventory["changes"]
+        or len(projections) != inventory["projections"]
+    ):
+        raise RuntimeError("source audit supporting read incomplete")
+    aliases: dict[str, set[str]] = defaultdict(set)
+    mirrors: dict[str, set[str]] = defaultdict(set)
+    holders: dict[str, set[str]] = {}
+    for source in sources:
+        source_id = source["id"]
+        aliases[str(source_id)].add(source_id)
+        if source["source_id"] is not None:
+            aliases[str(source["source_id"])].add(source_id)
+        if source["mirror"]:
+            mirrors[source["mirror"]].add(source_id)
+        holders[source_id] = set(source["holders"] or [])
+    links: dict[str, set[str]] = defaultdict(set)
+    for relation in relations:
+        old, new = (
+            (relation["b"], relation["a"])
+            if relation["kind"] == "REFINED_FROM"
+            else (relation["a"], relation["b"])
+        )
+        links[old].add(new)
+        links[new].add(old)
+    receipts: dict[str, set[str]] = defaultdict(set)
+    detachment_paths: dict[str, set[str]] = defaultdict(set)
+    for change in changes:
+        old, new, operation = (
+            change["predecessor"],
+            change["successor"],
+            change["operation"] or "",
+        )
+        # The graph supplies the operation vocabulary. An event connecting two
+        # actual names records their identity chain, including future writers.
+        if old in all_name_ids and new in all_name_ids and old != new:
+            links[old].add(new)
+            links[new].add(old)
+        if operation.startswith("detach_") and isinstance(old, str) and "/" in old:
+            detachment_paths[new].add("dd:" + old.removeprefix("dd:"))
+        if operation in {
+            "source_migration_manifest",
+            "reattach_lapsed_detachment",
+            "repair_semantic_source_binding",
+            "recover_terminal_source_binding",
+            "move_source_snapshot",
+            "rebind_sources",
+        }:
+            receipts[new].add(operation)
+    projection_paths: dict[str, set[str]] = defaultdict(set)
+    for projection in projections:
+        if projection["path"]:
+            projection_paths[projection["name"]].add("dd:" + projection["path"])
+
+    def chain(start: str) -> set[str]:
+        seen: set[str] = set()
+        pending = deque(links[start])
+        while pending:
+            target = pending.popleft()
+            if target in seen:
+                continue
+            seen.add(target)
+            pending.extend(links[target] - seen)
+        return seen | {start}
+
+    classified = []
+    for name in names:
+        identifier = name["id"]
+        tokens = set(name["paths"] or []) | set(name["resolutions"] or [])
+        if name["path"]:
+            tokens.add(name["path"])
+        tokens.update(projection_paths[identifier])
+        tokens.update(detachment_paths[identifier])
+        own_sources = set(mirrors[identifier])
+        unresolved = set()
+        for token in tokens:
+            matches = set(aliases[str(token)])
+            if not str(token).startswith(("dd:", "derived:")):
+                matches.update(aliases["dd:" + str(token)])
+            own_sources.update(matches)
+            if not matches:
+                unresolved.add(str(token))
+        linked = chain(identifier)
+        unheld = {source for source in own_sources if not holders[source]}
+        unchained = {
+            holder
+            for source in own_sources
+            for holder in holders[source]
+            if holder not in linked
+        }
+        if name["derived_parent"]:
+            population = "derived_parent"
+        elif not tokens and not own_sources and not receipts[identifier]:
+            population = "never_bound"
+        elif unresolved or unheld or not own_sources:
+            population = "dropped_edge"
+        elif unchained:
+            population = "unchained_holder"
+        elif all(holders[source] & linked for source in own_sources):
+            population = (
+                "orphan_awaiting_retirement"
+                if name["stage"] == "exhausted" and name["origin"] != "derived"
+                else "held_in_chain"
+            )
+        else:
+            population = "dropped_edge"
+        classified.append(
+            {
+                "id": identifier,
+                "name_stage": name["stage"],
+                "status": name["status"],
+                "origin": name["origin"],
+                "population": population,
+                "recorded_source_ids": sorted(own_sources),
+                "unresolved_tokens": sorted(unresolved),
+                "unchained_holders": sorted(unchained),
+            }
+        )
+    return classified
+
+
 def _exhausted_orphan_supersession_authority(
     query_handle: _TransactionQuery,
     name_ids: list[str],
     reason: str,
+    eligible_ids: set[str],
 ) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
     rows = query_handle.query(
         """
@@ -22608,6 +22818,10 @@ def _exhausted_orphan_supersession_authority(
             refusal = "origin is derived"
         elif participant["producers"]:
             refusal = "name has a live producing source"
+        elif raw["requested_id"] not in eligible_ids:
+            refusal = (
+                "source audit does not classify name as an orphan awaiting retirement"
+            )
         if refusal is not None:
             refusals.append({"name_id": raw["requested_id"], "reason": refusal})
             continue
@@ -22668,23 +22882,13 @@ def supersede_exhausted_standard_name_orphans(
             transaction = session.begin_transaction()
             query_handle = _TransactionQuery(transaction)
             try:
+                eligible_ids = {
+                    row["id"]
+                    for row in classify_sourceless_standard_names(query_handle)
+                    if row["population"] == "orphan_awaiting_retirement"
+                }
                 requested = (
-                    sorted(name_ids)
-                    if name_ids is not None
-                    else [
-                        row["id"]
-                        for row in query_handle.query(
-                            """
-                            MATCH (name:StandardName)
-                            WHERE name.name_stage = 'exhausted'
-                              AND coalesce(name.origin, '') <> 'derived'
-                              AND NOT EXISTS {
-                                (:StandardNameSource)-[:PRODUCED_NAME]->(name)
-                              }
-                            RETURN name.id AS id ORDER BY id
-                            """
-                        )
-                    ]
+                    sorted(name_ids) if name_ids is not None else sorted(eligible_ids)
                 )
                 if apply and requested:
                     expected_event_ids = [
@@ -22742,7 +22946,7 @@ def supersede_exhausted_standard_name_orphans(
                         }
 
                 manifest, actions, refusals = _exhausted_orphan_supersession_authority(
-                    query_handle, requested, reason
+                    query_handle, requested, reason, eligible_ids
                 )
                 computed_hash = _authority_payload_hash(manifest)
                 counts = {
@@ -22797,7 +23001,7 @@ def supersede_exhausted_standard_name_orphans(
                     )
                 locked_manifest, locked_actions, locked_refusals = (
                     _exhausted_orphan_supersession_authority(
-                        query_handle, requested, reason
+                        query_handle, requested, reason, eligible_ids
                     )
                 )
                 if (

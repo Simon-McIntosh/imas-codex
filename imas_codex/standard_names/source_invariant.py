@@ -8,13 +8,19 @@ class MissingStandardNameSource(ValueError):
     """A live name would have no producing source after a write."""
 
 
-def _derived_parent_cypher() -> str:
-    """Return a two-valued derived-parent test for the graph predicate."""
-    return """coalesce(sn.origin, '') = 'derived' AND EXISTS {
-              (child:StandardName)-[:HAS_PARENT]->(sn)
-              WHERE coalesce(child.name_stage, '') <> 'superseded'
+def _live_child_cypher() -> str:
+    """Return the evidence-bearing child test shared by writers and export."""
+    return """EXISTS {
+              MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
+              WHERE NOT coalesce(child.name_stage, '') IN
+                ['superseded', 'exhausted', 'contested']
                 AND coalesce(child.status, '') <> 'superseded'
           }"""
+
+
+def _derived_parent_cypher() -> str:
+    """Return a two-valued derived-parent test for the graph predicate."""
+    return f"coalesce(sn.origin, '') = 'derived' AND {_live_child_cypher()}"
 
 
 def find_sourceless_live_names(

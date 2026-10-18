@@ -1310,6 +1310,23 @@ async def _run_attachment_audit_for_pool_run(
     return result
 
 
+async def _report_source_loss_probe(reader: Any) -> list[dict[str, Any]] | None:
+    """Report a source-loss read; None means the probe did not run."""
+    try:
+        orphans = await asyncio.to_thread(reader)
+    except Exception as exc:  # noqa: BLE001 - diagnostic must not abort the run
+        logger.warning("run_sn_pools: source-loss probe did not run: %s", exc)
+        return None
+    if orphans:
+        logger.warning(
+            "run_sn_pools: source-loss probe found %d live name(s) "
+            "without a source; first few: %s",
+            len(orphans),
+            ", ".join(o["sn_id"] for o in orphans[:5]),
+        )
+    return orphans
+
+
 async def run_sn_pools(
     cost_limit: float,
     *,
@@ -1985,20 +2002,7 @@ async def run_sn_pools(
                 sp_result["names_reconciled"],
             )
 
-        # Read-only ledger-health probe — a diagnostic, never fatal to the run.
-        try:
-            orphans = await asyncio.to_thread(find_provenance_orphans)
-        except Exception as exc:  # noqa: BLE001 - diagnostic must not abort the run
-            logger.debug("run_sn_pools: orphan-count probe skipped: %s", exc)
-            orphans = []
-        if orphans:
-            logger.warning(
-                "run_sn_pools: ledger invariant VIOLATED — %d live name(s) have NO "
-                "source. Reattach ran this cycle, so these lack any recoverable "
-                "producing source; investigate the origin. First few: %s",
-                len(orphans),
-                ", ".join(o["sn_id"] for o in orphans[:5]),
-            )
+        await _report_source_loss_probe(find_provenance_orphans)
 
         # Read-only grammar-gate probe — live names carrying a flux-surface
         # reduction operator on a flux-function base (constant_on_flux_surface)

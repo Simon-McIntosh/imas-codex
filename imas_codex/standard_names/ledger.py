@@ -94,26 +94,22 @@ _REATTACH_DESYNCS = f"""
 
 
 def find_provenance_orphans(*, gc: GraphClient | None = None) -> list[dict[str, Any]]:
-    """Return materialized live names without a ``PRODUCED_NAME`` source.
+    """Return live source-loss names, including exhausted names. Read-only."""
+    from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
 
-    Id-only relationship endpoints have no lifecycle state and are excluded as
-    structural scaffolds. Partially materialized names remain in scope as soon
-    as any lifecycle axis or origin is populated. An empty list means the
-    ledger invariant holds. Read-only.
-    """
     owns = gc is None
     gc = gc or GraphClient()
     try:
-        rows = gc.query(_FIND_ORPHANS)
+        rows = classify_sourceless_standard_names(gc)
         return [
             {
-                "sn_id": row["sn_id"],
+                "sn_id": row["id"],
                 "name_stage": row.get("name_stage"),
                 "origin": row.get("origin"),
+                "population": row["population"],
             }
-            for row in rows or []
-            if any(row.get(field) is not None for field in _LIFECYCLE_FIELDS)
-            and row.get("name_stage") not in {"superseded", "exhausted"}
+            for row in rows
+            if row["population"] in {"dropped_edge", "never_bound", "unchained_holder"}
         ]
     finally:
         if owns:
