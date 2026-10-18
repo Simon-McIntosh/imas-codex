@@ -72,3 +72,19 @@ def test_names_escalator_is_rotated():
     names_source = settings.get_model_source_models("sn-review:names")
     assert "openrouter/openai/gpt-6.1-sol" in names_source
     assert _RETIRED_NAMES_ESCALATOR not in names_source
+
+
+def test_model_defaults_name_no_gpt5_model():
+    """Every fallback names a post-rotation model.
+
+    A seat's pyproject entry shadows its default, so a stale default is
+    invisible until a seat key is removed or a section is absent - and then it
+    silently returns the pipeline to a superseded model. The fallbacks are
+    rotated with the seats so that path stays on the current generation.
+    """
+    stale = {
+        section: model
+        for section, model in settings._MODEL_DEFAULTS.items()
+        if "gpt-5" in model
+    }
+    assert stale == {}
