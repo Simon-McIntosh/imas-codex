@@ -11,6 +11,13 @@
     "docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance-run.py:576"
   ],
   "completed_at": "2026-10-18T19:27:49Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "ssog-learned-acceptance",
+      "recorded_at": "2026-10-18T19:29:49.510359+00:00"
+    }
+  },
   "dispatched_at": "2026-10-18T19:17:58Z",
   "findings": [
     {
