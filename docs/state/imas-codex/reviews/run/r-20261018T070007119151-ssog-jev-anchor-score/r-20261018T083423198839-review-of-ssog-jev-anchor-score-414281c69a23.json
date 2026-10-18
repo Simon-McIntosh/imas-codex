@@ -1,0 +1,129 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T070007119151-ssog-jev-anchor-score/gate_head.log",
+  "assertion_analysis": [
+    {
+      "assertion": "result.choice == \"beta\" and result.expected == {\"alpha\": 0.4, \"beta\": 0.9}",
+      "failure_condition": "Becomes red if the choice were the minimum expected score, if the max selection were inverted, or if expected were keyed by candidate index rather than member id; the scores are authored in the test, not read back.",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "96-100"
+    },
+    {
+      "assertion": "on an all-equal judged score of 0.7, choice == \"beta\"",
+      "failure_condition": "Becomes red if the tie-break drops select_anchor and falls to bare id order, which would return \"alpha\" (the minimum id).",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "110-116"
+    },
+    {
+      "assertion": "asked == (\"good\",) and set(expected) == {\"good\"}",
+      "failure_condition": "Becomes red if the placeholder-description member or the missing-documentation member is offered to the judge.",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "129-134"
+    },
+    {
+      "assertion": "calls == [] and choice is None for a family of ineligible members",
+      "failure_condition": "Becomes red if a call is made for a family with no eligible member, or if an empty family fabricates a default choice.",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "142-148"
+    },
+    {
+      "assertion": "choice is None and expected == {} when every call fails",
+      "failure_condition": "Becomes red if a failed call is read as a zero score or replaced by a default anchor.",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "162-169"
+    },
+    {
+      "assertion": "expected == {\"beta\": 0.6} and choice == \"beta\" with \"alpha\" failed",
+      "failure_condition": "Becomes red if one failed member discards the whole family's scored result.",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "179-186"
+    },
+    {
+      "assertion": "state[\"house_style_template\"] == TEMPLATE_MARKER recorded in the state",
+      "failure_condition": "Becomes red when the template key is dropped from the state; this is the declared negative control (negative_control.log, EXIT=1).",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "200-207"
+    },
+    {
+      "assertion": "asked == (\"base_quantity\", \"child\") with the parent folded in",
+      "failure_condition": "Becomes red if a parent not already present in members is not offered as a candidate.",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "228-238"
+    },
+    {
+      "assertion": "the real accessor returns \"Opening.\\nA shared note.\\nSecond opening.\"",
+      "failure_condition": "Becomes red if the helper reads a different registry key, drops the note, or reorders; it exercises the real _house_style_template, not the stub.",
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "lines": "255-268"
+    }
+  ],
+  "base_log_revision": "da2bc81dcccdd109aebcdf37a69a1c515d4a8a7d",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T070007119151-ssog-jev-anchor-score/gate_base.log",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T08:50:14.616Z",
+  "dispatched_at": "2026-10-18T08:34:45Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/families.py",
+      "line": "749",
+      "severity": "follow-on",
+      "text": "follow-on: the house-style template is looked up by name through conventions_context_for(pattern_name), but the argument is str(parent_id or candidates[0][\"id\"]); when a real parent node id is present and is not itself a parseable standard name the accessor returns None on ParseError and the state's house_style_template is silently empty for a family whose members would parse, so the judge is asked without the house-style template the question cites, and no test covers that empty path."
+    },
+    {
+      "file": "imas_codex/standard_names/families.py",
+      "line": "795",
+      "severity": "follow-on",
+      "text": "follow-on: the tie-break calls select_anchor(None, None, None, tied), passing None for the parent so the heuristic's rule 1 cannot fire; the docstring two lines below claims the judged choice never contradicts the heuristic on equal evidence, which does not hold when an accepted parent ties at the top, where select_anchor would return the parent outright and this does not."
+    },
+    {
+      "file": "tests/standard_names/test_jev_anchor_score.py",
+      "line": "223",
+      "severity": "follow-on",
+      "text": "follow-on: assert question[\"criteria\"] == list(families.TEMPLATE_FITNESS_LEVELS) compares the returned criteria against the same module constant the function builds them from, so the two sides move together and the assertion only restates the implementation; it constrains no behaviour the level text depends on, and the adjacent length check at line 224 is the only independent half."
+    }
+  ],
+  "head_log_revision": "414281c69a236bc10c4f0c0bbf66be9d638d298c",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: a whole-tree git grep at 414281c69 for score_family_anchor, AnchorScore, template_fitness_question and TEMPLATE_FITNESS finds only the test file, so the scorer is unconsumed and the A/B that would call it is the next node.",
+    "diff": "Commit 414281c69 against da2bc81d adds only families.py +265 lines (AnchorScore, TEMPLATE_FITNESS_LEVELS, template_fitness_question, _house_style_template, _eligible_anchor_candidate, _anchor_score_candidates, score_family_anchor), the new test file, and the evidence fragment; select_anchor and its callers are untouched.",
+    "done_when": "The source brief.md requires the fragment to record the question and levels, the tests and negative control with EXIT=, base/head counts with a zero added-failure delta, and one live dry call; the fragment records all four, gate_base.log reads 222 passed / EXIT=0 against gate_head.log 232 passed / EXIT=0, negative_control.log reads 1 failed / EXIT=1, and dry_run.log carries the per-member scores for the momentum family.",
+    "goal": "The source brief.md asks for an async scorer that asks one Jev Score per eligible family member; imas_codex/standard_names/families.py:686 score_family_anchor builds one state per eligible member (lines 752-763) and returns AnchorScore with expected, distribution, choice, asked and cost.",
+    "manifest": "The source run's manifest.md names commit 414281c69, the three changed paths, the negative_control_log path, gate_head.log and gate_base.log, and a landing line; the base/head counts there (232/222) match the two gate logs.",
+    "write_paths": "The source brief.md grants imas_codex/standard_names/families.py, tests/standard_names/test_jev_anchor_score.py and docs/evidence/fragments/sn-selection-over-generation/ssog-jev-anchor-score.html; the da2bc81d..414281c69 diff changes exactly those three and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_jev_anchor_score.py:110-116 reddens if the tie-break falls to bare id order, and the declared negative control at lines 200-207 reddens with EXIT=1 when the template key is dropped, while the level assertion at line 223 is self-referential and adds no independent guard.",
+    "evidence": "gate_base.log reads 222 passed / EXIT=0 and gate_head.log reads 232 passed / EXIT=0 for the 22 existing families-importing files plus the new one, giving 10 added tests and zero added failures; dry_run.log carries jev_choice momentum_flux against heuristic_choice total_momentum_convection_velocity for USD 0.00785.",
+    "fit": "imas_codex/standard_names/families.py:590-627 follows the module's lazy-import idiom and section-header style, and the Score question at lines 630-643 matches the shape at imas_codex/discovery/base/judgment.py:406 with type, instructions and criteria.",
+    "goal_fidelity": "imas_codex/standard_names/families.py:686-806 scores each eligible member and returns the highest-expected member with select_anchor as the tie-break, leaving select_anchor and its callers unmodified as the brief requires.",
+    "reuse": "Capability search over imas_codex found decide_batch (imas_codex/discovery/base/judgment.py:230), conventions_context_for (imas_codex/standard_names/context.py:30), select_anchor (families.py:482) and is_placeholder_description (families.py:472) all reused rather than re-implemented; registry_template_texts (imas_codex/standard_names/docs_gates.py:574) matches registry text inside a member's own documentation and is a different capability, so no owner is forked.",
+    "scope_discipline": "The da2bc81d..414281c69 diff changes only families.py, the new test file and the fragment, all inside the three declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md asks for an async scorer that asks one Jev Score per eligible family member; imas_codex/standard_names/families.py:686 score_family_anchor builds one state per eligible member (lines 752-763) and returns AnchorScore with expected, distribution, choice, asked and cost.\nVERDICT done_when: The source brief.md requires the fragment to record the question and levels, the tests and negative control with EXIT=, base/head counts with a zero added-failure delta, and one live dry call; the fragment records all four, gate_base.log reads 222 passed / EXIT=0 against gate_head.log 232 passed / EXIT=0, negative_control.log reads 1 failed / EXIT=1, and dry_run.log carries the per-member scores for the momentum family.\nVERDICT write_paths: The source brief.md grants imas_codex/standard_names/families.py, tests/standard_names/test_jev_anchor_score.py and docs/evidence/fragments/sn-selection-over-generation/ssog-jev-anchor-score.html; the da2bc81d..414281c69 diff changes exactly those three and nothing else.\nVERDICT manifest: The source run's manifest.md names commit 414281c69, the three changed paths, the negative_control_log path, gate_head.log and gate_base.log, and a landing line; the base/head counts there (232/222) match the two gate logs.\nVERDICT diff: Commit 414281c69 against da2bc81d adds only families.py +265 lines (AnchorScore, TEMPLATE_FITNESS_LEVELS, template_fitness_question, _house_style_template, _eligible_anchor_candidate, _anchor_score_candidates, score_family_anchor), the new test file, and the evidence fragment; select_anchor and its callers are untouched.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/families.py:686-806 scores each eligible member and returns the highest-expected member with select_anchor as the tie-break, leaving select_anchor and its callers unmodified as the brief requires.\nSCORE evidence: 19\nJUSTIFICATION evidence: gate_base.log reads 222 passed / EXIT=0 and gate_head.log reads 232 passed / EXIT=0 for the 22 existing families-importing files plus the new one, giving 10 added tests and zero added failures; dry_run.log carries jev_choice momentum_flux against heuristic_choice total_momentum_convection_velocity for USD 0.00785.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The da2bc81d..414281c69 diff changes only families.py, the new test file and the fragment, all inside the three declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_jev_anchor_score.py:110-116 reddens if the tie-break falls to bare id order, and the declared negative control at lines 200-207 reddens with EXIT=1 when the template key is dropped, while the level assertion at line 223 is self-referential and adds no independent guard.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/families.py:590-627 follows the module's lazy-import idiom and section-header style, and the Score question at lines 630-643 matches the shape at imas_codex/discovery/base/judgment.py:406 with type, instructions and criteria.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability search over imas_codex found decide_batch (imas_codex/discovery/base/judgment.py:230), conventions_context_for (imas_codex/standard_names/context.py:30), select_anchor (families.py:482) and is_placeholder_description (families.py:472) all reused rather than re-implemented; registry_template_texts (imas_codex/standard_names/docs_gates.py:574) matches registry text inside a member's own documentation and is a different capability, so no owner is forked.\nFINDING imas_codex/standard_names/families.py:749 follow-on: follow-on: the house-style template is looked up by name through conventions_context_for(pattern_name), but the argument is str(parent_id or candidates[0][\"id\"]); when a real parent node id is present and is not itself a parseable standard name the accessor returns None on ParseError and the state's house_style_template is silently empty for a family whose members would parse, so the judge is asked without the house-style template the question cites, and no test covers that empty path.\nFINDING imas_codex/standard_names/families.py:795 follow-on: follow-on: the tie-break calls select_anchor(None, None, None, tied), passing None for the parent so the heuristic's rule 1 cannot fire; the docstring two lines below claims the judged choice never contradicts the heuristic on equal evidence, which does not hold when an accepted parent ties at the top, where select_anchor would return the parent outright and this does not.\nFINDING tests/standard_names/test_jev_anchor_score.py:223 follow-on: follow-on: assert question[\"criteria\"] == list(families.TEMPLATE_FITNESS_LEVELS) compares the returned criteria against the same module constant the function builds them from, so the two sides move together and the assertion only restates the implementation; it constrains no behaviour the level text depends on, and the adjacent length check at line 224 is the only independent half.\n",
+  "review_run_id": "r-20261018T083423198839-review-of-ssog-jev-anchor-score-414281c69a23",
+  "reviewed_base_sha": "da2bc81dcccdd109aebcdf37a69a1c515d4a8a7d",
+  "reviewed_commits": [
+    "414281c69a236bc10c4f0c0bbf66be9d638d298c"
+  ],
+  "reviewed_head_sha": "414281c69a236bc10c4f0c0bbf66be9d638d298c",
+  "reviewed_run_id": "r-20261018T070007119151-ssog-jev-anchor-score",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T08:52:15.720030+00:00",
+  "total": 116
+}

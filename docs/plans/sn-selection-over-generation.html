@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="61">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -339,6 +339,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling" data-who="Simon McIntosh" data-when="2026-10-18T07:10:00Z">
     <div class="r-comment-body"><p>Lead ruling, 2026-10-18: run §7's full A/B now, ten families at most USD 30. Order: first the Jev anchor scorer, built beside <code>select_anchor</code> without changing either of its callers. Then the A/B in a scratch copy of the graph, never the live one. Each family is harmonized once from the heuristic anchor and once from the Jev anchor pinned through the existing <code>harmonized_anchor</code> record.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261018T083423198839-review-of-ssog-jev-anchor-score-414281c69a23" data-who="reckon-build" data-when="2026-10-18T08:50:14.616Z">
+    <div class="r-comment-body"><p>review of run r-20261018T070007119151-ssog-jev-anchor-score at head 414281c69 against base da2bc81d — total 116/120 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 18, fit 19, reuse 20), zero added failures, three follow-on findings and no blocking finding, CALL_SITES none.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
