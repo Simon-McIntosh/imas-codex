@@ -68,7 +68,7 @@ VARIATION_AXES = (
     "region",
     "device",
 )
-DEADLINE = datetime.fromisoformat("2026-10-18T21:58:56+00:00")
+DEADLINE = datetime.fromisoformat("2026-10-18T22:30:48+00:00")
 
 
 def apply_cap(planned_calls: int) -> float:
