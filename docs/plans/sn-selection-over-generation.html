@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-modified" content="2026-10-18">
 </head>
 <body>
@@ -134,7 +134,7 @@
     </p>
 
     <h2 id="s5">§5 — Read the riskiest entries first</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s5" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       A person's reading time is the scarcest resource in the release: the WEST polish pass, then
       the physicist's review. Order both by a Jev risk composite of the named checks most likely
@@ -378,6 +378,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261017T215136022889-ssog-risk-order" data-who="reckon-build" data-when="2026-10-18T14:07:48Z">
     <div class="r-comment-body"><p>committed locally across 670cc4d6e, e0a60e02e, 890d80349, 3b1d84d1e and 7ee81c366, worktree clean at HEAD; not merged or pushed (the coordinator owns integration)</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-18T18:05:00Z">
+    <div class="r-comment-body"><p>§5 closed with a negative result. A Jev risk order recalls known defects barely above random on golden A: 0.30 at 25% read, against 0.25 random and a band of 0.22 to 0.29. On golden C it is at random. The incumbent score order is unavailable on names and at random on descriptions. Reading time is not yet better spent by this order than by any other. The order stays a measured prototype and is not wired into the polish or review pass (merge <code>cf60d1f63</code>, review 99/120, USD 0.02). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s5-risk-order">evidence</a></p></div>
 </div>
 </section>
 </main>
