@@ -345,32 +345,47 @@ def measure_arm(
         )
         if ceiling <= 0:
             raise RuntimeError("No budget remains before next apply")
+        ledger_baseline_rows = int(
+            gc.query("MATCH (c:LLMCost) RETURN count(c) AS n")[0]["n"]
+        )
+        if ledger_baseline_rows == 0:
+            raise RuntimeError("LLMCost receipt query missed known snapshot rows")
+        started_at = now()
         started = time.monotonic()
         outcome = cli(seed, uri, "--apply", "--cost-limit", f"{ceiling:.2f}", "--json")
         elapsed = time.monotonic() - started
+        ended_at = now()
         after = report_family_rows(gc, seeds=[seed])[0]
         after_scores = scores(gc, seed)
-        run_ids = outcome[0]["result"]["run_ids"]
+        summary = outcome[0]["result"]
+        run_ids = summary["run_ids"]
         if not run_ids:
-            raise RuntimeError(f"Apply for {seed} returned no run IDs")
-        receipt = gc.query(
-            "UNWIND $ids AS rid MATCH (r:SNRun {id: rid}) "
-            "OPTIONAL MATCH (c:LLMCost {for_run: rid}) "
-            "RETURN r.id AS id, r.cost_spent AS spend, r.started_at AS started, "
-            "count(c) AS calls, sum(c.llm_cost) AS llm_spend",
-            ids=run_ids,
-        )
-        if len(receipt) != len(run_ids):
-            raise RuntimeError(f"Receipt missing for {seed}: {run_ids}")
-        receipt = [{**item, "started": str(item["started"])} for item in receipt]
-        spend = sum(float(item.get("llm_spend") or 0) for item in receipt)
-        calls = sum(int(item.get("calls") or 0) for item in receipt)
-        reported = float(outcome[0]["result"]["total_cost"])
+            raise RuntimeError(f"Apply for {seed} returned no scope run IDs")
+        ledger = gc.query(
+            "MATCH (c:LLMCost) "
+            "WHERE c.llm_at >= datetime($started) AND c.llm_at <= datetime($ended) "
+            "RETURN count(c) AS calls, coalesce(sum(c.llm_cost), 0.0) AS spend, "
+            "collect(DISTINCT c.run_id) AS session_ids",
+            started=started_at,
+            ended=ended_at,
+        )[0]
+        calls = int(ledger["calls"])
+        spend = float(ledger["spend"])
+        reported = float(summary["total_cost"])
         if reported > 0 and (calls == 0 or abs(spend - reported) > 0.02):
             raise RuntimeError(
-                f"Apply receipt mismatch for {seed}: {receipt}, reported={reported}"
+                f"Apply receipt mismatch for {seed}: ledger={ledger}, reported={reported}"
             )
-        data["spend_usd"] += spend
+        receipt = {
+            "harmonize_summary": summary,
+            "scope_run_ids": run_ids,
+            "ledger_window": {"started": started_at, "ended": ended_at},
+            "ledger_baseline_rows": ledger_baseline_rows,
+            "ledger_calls": calls,
+            "ledger_spend_usd": spend,
+            "ledger_session_ids": ledger["session_ids"],
+        }
+        data["spend_usd"] += reported
         data.setdefault("arms", {}).setdefault(arm, []).append(
             {
                 "seed": seed,
@@ -385,7 +400,7 @@ def measure_arm(
                 "planned_calls": plan[0]["planned_calls"],
                 "calls": calls,
                 "receipt": receipt,
-                "spend_usd": spend,
+                "spend_usd": reported,
                 "wall_seconds": elapsed,
                 "stamped": plan_family_applies(gc, seeds=[seed])[0]["decision"]
                 == "harmonized",
@@ -393,7 +408,7 @@ def measure_arm(
         )
         save(data)
         print(
-            f"{arm} {seed}: lint {before['lint_total']}->{after['lint_total']}, receipt ${spend:.4f}, {elapsed:.1f}s",
+            f"{arm} {seed}: lint {before['lint_total']}->{after['lint_total']}, receipt ${reported:.4f}, {elapsed:.1f}s",
             flush=True,
         )
 
