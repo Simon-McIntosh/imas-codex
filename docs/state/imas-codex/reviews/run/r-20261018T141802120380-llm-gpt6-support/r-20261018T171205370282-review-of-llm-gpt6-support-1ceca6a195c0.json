@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141802120380-llm-gpt6-support/final-gate.log",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T141802120380-llm-gpt6-support/baseline-gate.log",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/discovery/base/llm.py:416",
+    "imas_codex/discovery/base/llm.py:2263",
+    "imas_codex/discovery/base/llm.py:2454",
+    "imas_codex/standard_names/budget.py:273",
+    "imas_codex/standard_names/budget.py:366",
+    "imas_codex/cli/sn.py:3249",
+    "imas_codex/cli/sn.py:3632"
+  ],
+  "completed_at": "2026-10-18T17:27:45.199Z",
+  "dispatched_at": "2026-10-18T17:13:07Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/budget.py",
+      "line": "261",
+      "severity": "follow-on",
+      "text": "follow-on: the docstring at budget.py:261-263 states only the base rate tier carries cache rates in the project catalog, but imas_codex/settings.py:107-108 now copies cache-read/cache-write onto override tiers and pyproject.toml declares them for both GPT-6 entries, so a future consumer reading override cache rates through budget.blended_input_rate's base-tier-only blend (lines 288-289) would misprice; no request reaches the 272000-token threshold today, so the inconsistency is latent."
+    },
+    {
+      "file": "tests/core/test_gpt6_model_support.py",
+      "line": "91",
+      "severity": "follow-on",
+      "text": "follow-on: request['model'] is asserted equal to the same model parameter handed to _build_kwargs (line 81), the f(x)==x shape, so it holds whatever the code does and cannot independently prove GPT-6 routing; the sibling line 95 compares max_tokens against llm.MODEL_TOKEN_LIMITS['default'], a constant the production code itself reads, so it moves with the code rather than pinning it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "commit a6f26bbb322d0269c4f8cb7fe77f408aa9d96d74 changes pyproject.toml pricing, imas_codex/settings.py, imas_codex/discovery/base/llm.py and adds tests/core/test_gpt6_model_support.py; 5ea688a55001f8e8578c5bfc6f6ad13abb372d1c and 1ceca6a195c0730518bc75af621fd78c7c23ae00 touch only docs/evidence/fragments/llm-seats/llm-gpt6-support.html and 7ff8c09ced00af348080f507f5ca47a2ccea9bf9 repairs the test file.",
+    "done_when": "docs/evidence/fragments/llm-seats/llm-gpt6-support.html records the priced entries with source, the family-handling change, the two probe costs (probe.log), the red control (repair-negative-control.log, refusal-check.log) and the base-to-head gate counts, satisfying every item the source brief's done-when names.",
+    "goal": "the source brief requires the call layer to price and call gpt-6.1-sol and gpt-6-luna without changing any seat; pyproject.toml declares both rates with source and verified-at, imas_codex/discovery/base/llm.py:2155 extends the temperature rule, and probe.log records one non-null-cost call per model with no seat model changed.",
+    "manifest": "the reviewed manifest records the two live costs, the repaired gate totals (baseline 213 / head 220 passed, zero added failures), and the negative-control log; the earlier KeyError control was replaced, so its blocking finding no longer stands.",
+    "write_paths": "the reviewed manifest declares six paths and git diff 078b20ea335c73a9e3649cf8f728eea908666b06..1ceca6a195c0730518bc75af621fd78c7c23ae00 changes five of them, all inside the declared scope."
+  },
+  "justifications": {
+    "durability": "tests/core/test_gpt6_model_support.py:42 fails with ProviderPricingUnbounded when the pyproject entries are removed (repair-negative-control.log, EXIT=1), lines 60-70 pin the fail-closed refusal, and line 94 fails if the temperature clamp is reverted to a GPT-5-only regex; lines 91 and 95 are the weaker echo and constant-tied assertions.",
+    "evidence": "final-gate.log records 220 passed at committed head 1ceca6a195c0730518bc75af621fd78c7c23ae00 against a 213-passed baseline-gate.log, zero added failures, and probe.log records both live costs; the red control now reaches the call-layer refusal rather than stopping at a KeyError.",
+    "fit": "imas_codex/settings.py:107-108 extends the existing override parser and imas_codex/discovery/base/llm.py:2155 extends the existing temperature rule in the surrounding style, with conventional commit subjects.",
+    "goal_fidelity": "pyproject.toml supplies both models' verified rates and imas_codex/settings.py:1949-1980 adds them to the benchmark slates, no seat model changed, and probe.log records both production calls at non-null cost.",
+    "reuse": "capability searches for pricing resolution, request construction and benchmark defaults found the existing owners at imas_codex/settings.py:87, imas_codex/discovery/base/llm.py:2008 and imas_codex/settings.py:1949, which the change extends rather than duplicates.",
+    "scope_discipline": "every path in git diff 078b20ea335c73a9e3649cf8f728eea908666b06..1ceca6a195c0730518bc75af621fd78c7c23ae00 lies inside the manifest's declared write paths, though imas_codex/settings.py:107-108 adds override cache rates beyond the shape of the named gpt-5.6-luna entry."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief requires the call layer to price and call gpt-6.1-sol and gpt-6-luna without changing any seat; pyproject.toml declares both rates with source and verified-at, imas_codex/discovery/base/llm.py:2155 extends the temperature rule, and probe.log records one non-null-cost call per model with no seat model changed.\nVERDICT done_when: docs/evidence/fragments/llm-seats/llm-gpt6-support.html records the priced entries with source, the family-handling change, the two probe costs (probe.log), the red control (repair-negative-control.log, refusal-check.log) and the base-to-head gate counts, satisfying every item the source brief's done-when names.\nVERDICT write_paths: the reviewed manifest declares six paths and git diff 078b20ea335c73a9e3649cf8f728eea908666b06..1ceca6a195c0730518bc75af621fd78c7c23ae00 changes five of them, all inside the declared scope.\nVERDICT manifest: the reviewed manifest records the two live costs, the repaired gate totals (baseline 213 / head 220 passed, zero added failures), and the negative-control log; the earlier KeyError control was replaced, so its blocking finding no longer stands.\nVERDICT diff: commit a6f26bbb322d0269c4f8cb7fe77f408aa9d96d74 changes pyproject.toml pricing, imas_codex/settings.py, imas_codex/discovery/base/llm.py and adds tests/core/test_gpt6_model_support.py; 5ea688a55001f8e8578c5bfc6f6ad13abb372d1c and 1ceca6a195c0730518bc75af621fd78c7c23ae00 touch only docs/evidence/fragments/llm-seats/llm-gpt6-support.html and 7ff8c09ced00af348080f507f5ca47a2ccea9bf9 repairs the test file.\nCALL_SITES: imas_codex/discovery/base/llm.py:416, imas_codex/discovery/base/llm.py:2263, imas_codex/discovery/base/llm.py:2454, imas_codex/standard_names/budget.py:273, imas_codex/standard_names/budget.py:366, imas_codex/cli/sn.py:3249, imas_codex/cli/sn.py:3632\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: pyproject.toml supplies both models' verified rates and imas_codex/settings.py:1949-1980 adds them to the benchmark slates, no seat model changed, and probe.log records both production calls at non-null cost.\nSCORE evidence: 19\nJUSTIFICATION evidence: final-gate.log records 220 passed at committed head 1ceca6a195c0730518bc75af621fd78c7c23ae00 against a 213-passed baseline-gate.log, zero added failures, and probe.log records both live costs; the red control now reaches the call-layer refusal rather than stopping at a KeyError.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 078b20ea335c73a9e3649cf8f728eea908666b06..1ceca6a195c0730518bc75af621fd78c7c23ae00 lies inside the manifest's declared write paths, though imas_codex/settings.py:107-108 adds override cache rates beyond the shape of the named gpt-5.6-luna entry.\nSCORE durability: 16\nJUSTIFICATION durability: tests/core/test_gpt6_model_support.py:42 fails with ProviderPricingUnbounded when the pyproject entries are removed (repair-negative-control.log, EXIT=1), lines 60-70 pin the fail-closed refusal, and line 94 fails if the temperature clamp is reverted to a GPT-5-only regex; lines 91 and 95 are the weaker echo and constant-tied assertions.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/settings.py:107-108 extends the existing override parser and imas_codex/discovery/base/llm.py:2155 extends the existing temperature rule in the surrounding style, with conventional commit subjects.\nSCORE reuse: 20\nJUSTIFICATION reuse: capability searches for pricing resolution, request construction and benchmark defaults found the existing owners at imas_codex/settings.py:87, imas_codex/discovery/base/llm.py:2008 and imas_codex/settings.py:1949, which the change extends rather than duplicates.\nFINDING imas_codex/standard_names/budget.py:261 follow-on: the docstring at budget.py:261-263 states only the base rate tier carries cache rates in the project catalog, but imas_codex/settings.py:107-108 now copies cache-read/cache-write onto override tiers and pyproject.toml declares them for both GPT-6 entries, so a future consumer reading override cache rates through budget.blended_input_rate's base-tier-only blend (lines 288-289) would misprice; no request reaches the 272000-token threshold today, so the inconsistency is latent.\nFINDING tests/core/test_gpt6_model_support.py:91 follow-on: request['model'] is asserted equal to the same model parameter handed to _build_kwargs (line 81), the f(x)==x shape, so it holds whatever the code does and cannot independently prove GPT-6 routing; the sibling line 95 compares max_tokens against llm.MODEL_TOKEN_LIMITS['default'], a constant the production code itself reads, so it moves with the code rather than pinning it.\n",
+  "review_run_id": "r-20261018T171205370282-review-of-llm-gpt6-support-1ceca6a195c0",
+  "reviewed_base_sha": "078b20ea335c73a9e3649cf8f728eea908666b06",
+  "reviewed_commits": [
+    "a6f26bbb322d0269c4f8cb7fe77f408aa9d96d74",
+    "5ea688a55001f8e8578c5bfc6f6ad13abb372d1c",
+    "7ff8c09ced00af348080f507f5ca47a2ccea9bf9",
+    "1ceca6a195c0730518bc75af621fd78c7c23ae00"
+  ],
+  "reviewed_head_sha": "1ceca6a195c0730518bc75af621fd78c7c23ae00",
+  "reviewed_run_id": "r-20261018T141802120380-llm-gpt6-support",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T17:22:00.000000+00:00",
+  "total": 111
+}
