@@ -324,7 +324,18 @@ def make_instance(root: Path, dump: Path, label: str, port: int):
     for subdir in ("data", "dumps", "logs", "run", "tmp"):
         (place / subdir).mkdir(parents=True, exist_ok=True)
     os.link(dump, place / "dumps/neo4j.dump")
-    proc, log = start_temp_neo4j(place, port, port + 1000)
+    previous_bind = os.environ.get("APPTAINER_BIND")
+    tmp_bind = f"{place / 'tmp'}:/tmp"
+    os.environ["APPTAINER_BIND"] = (
+        f"{previous_bind},{tmp_bind}" if previous_bind else tmp_bind
+    )
+    try:
+        proc, log = start_temp_neo4j(place, port, port + 1000)
+    finally:
+        if previous_bind is None:
+            os.environ.pop("APPTAINER_BIND", None)
+        else:
+            os.environ["APPTAINER_BIND"] = previous_bind
     return place, proc, log
 
 
