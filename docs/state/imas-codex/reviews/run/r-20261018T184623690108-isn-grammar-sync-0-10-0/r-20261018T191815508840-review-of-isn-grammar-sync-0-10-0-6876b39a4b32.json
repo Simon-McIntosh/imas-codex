@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Fails when fewer than two ISN declarations are found in pyproject.toml, so the walker cannot pass vacuously by finding nothing.",
+      "lines": "tests/core/test_isn_pin_agreement.py:37"
+    },
+    {
+      "failure_condition": "Fails when an ISN declaration carries a URL or not exactly one version specifier.",
+      "lines": "tests/core/test_isn_pin_agreement.py:41"
+    },
+    {
+      "failure_condition": "Fails when a specifier is not == or is a wildcard such as ==0.10.*.",
+      "lines": "tests/core/test_isn_pin_agreement.py:43"
+    },
+    {
+      "failure_condition": "Fails when the ISN declarations name different versions; pin-negative-control.log shows this assertion red at EXIT=1.",
+      "lines": "tests/core/test_isn_pin_agreement.py:45"
+    }
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-18T19:39:03.280Z",
+  "dispatched_at": "2026-10-18T19:18:37Z",
+  "findings": [
+    {
+      "file": "tests/core/test_isn_pin_agreement.py",
+      "line": "41",
+      "severity": "follow-on",
+      "text": "follow-on: the added test asserts only that the two pyproject.toml ISN pins agree with each other, while the defect this node repaired was a divergence between the pyproject pin (0.10.0) and the installed package metadata (0.9.3) that grammar_sync.py:288 reads via imas_standard_names.__version__; no assertion imports the package, so a recurrence of the version-drift class leaves the suite green."
+    }
+  ],
+  "head_log_revision": "6876b39a4b3229a12c337efc783c459059c3096b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read both commits against base 21fe644a5845c48528d112d92e239a8234da92cb; 99d9541a9 adds the 45-line pin test and 6876b39a4 adds the 66-line evidence fragment, 111 insertions and no other file.",
+    "done_when": "The source brief.md names docs/evidence/fragments/standard-names-grammar/isn-grammar-sync-0-10-0.html, and the committed fragment records the before/after __version__, the sync report (0.10.0, 22 segments, 7 templates, 983 token rows), the readbacks with 123/123 and 983/983 property controls, the separatrix_distance token, and the red EXIT=1 and green EXIT=0 runs.",
+    "goal": "The source brief.md (isn-grammar-sync-0-10-0) requires the graph to serve the ISN 0.10.0 grammar; graph-readback.log records exactly one active ISNGrammarVersion, 0.10.0, with 983 GrammarToken nodes, so the goal state holds.",
+    "manifest": "The source manifest.md records status complete, commits 99d9541a95ee8ae32ed81c648d75f314acdb7c9a and 6876b39a4b3229a12c337efc783c459059c3096b, the pin gate (1 passed, EXIT=0) at 6876b39a4, the changed-pin control (1 failed, EXIT=1), and four durable log paths.",
+    "write_paths": "The source brief.md grants two paths; git diff 21fe644a5845c48528d112d92e239a8234da92cb..6876b39a4b3229a12c337efc783c459059c3096b adds exactly tests/core/test_isn_pin_agreement.py and docs/evidence/fragments/standard-names-grammar/isn-grammar-sync-0-10-0.html and no other path."
+  },
+  "justifications": {
+    "durability": "tests/core/test_isn_pin_agreement.py:41-45 genuinely reddens on a changed pin (pin-negative-control.log records 1 failed, EXIT=1), but no assertion in the change observes the installed-version drift this node repaired.",
+    "evidence": "each done_when item is receipted at graph-readback.log (983 tokens, one active version, separatrix_distance, 123/123 and 983/983 controls) and pin-negative-control.log, though the reviewed manifest's empty baseline_suite leaves the added-failure count unmeasured.",
+    "fit": "tests/core/test_isn_pin_agreement.py:3 uses stdlib tomllib and packaging, and locates the repo root with Path(__file__).resolve().parents[2] as tests/graph/test_dd_build_classify_tree.py:200 does, with no name the naming rules forbid.",
+    "goal_fidelity": "docs/evidence/fragments/standard-names-grammar/isn-grammar-sync-0-10-0.html records the single active 0.10.0 version with 983 tokens, matching the goal state the sync produced at graph-sync.log.",
+    "reuse": "a search over tests/ for an existing pin-agreement or requirement-consistency mechanism (grep for Requirement( and canonicalize_name) found no owner; imas_codex/settings.py:42 reads only [tool.imas-codex], so the test is the first to own this capability.",
+    "scope_discipline": "git diff 21fe644a5845c48528d112d92e239a8234da92cb..6876b39a4b3229a12c337efc783c459059c3096b adds only the two paths the source brief.md grants, 111 insertions and no deletion."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief.md (isn-grammar-sync-0-10-0) requires the graph to serve the ISN 0.10.0 grammar; graph-readback.log records exactly one active ISNGrammarVersion, 0.10.0, with 983 GrammarToken nodes, so the goal state holds.\nVERDICT done_when: The source brief.md names docs/evidence/fragments/standard-names-grammar/isn-grammar-sync-0-10-0.html, and the committed fragment records the before/after __version__, the sync report (0.10.0, 22 segments, 7 templates, 983 token rows), the readbacks with 123/123 and 983/983 property controls, the separatrix_distance token, and the red EXIT=1 and green EXIT=0 runs.\nVERDICT write_paths: The source brief.md grants two paths; git diff 21fe644a5845c48528d112d92e239a8234da92cb..6876b39a4b3229a12c337efc783c459059c3096b adds exactly tests/core/test_isn_pin_agreement.py and docs/evidence/fragments/standard-names-grammar/isn-grammar-sync-0-10-0.html and no other path.\nVERDICT manifest: The source manifest.md records status complete, commits 99d9541a95ee8ae32ed81c648d75f314acdb7c9a and 6876b39a4b3229a12c337efc783c459059c3096b, the pin gate (1 passed, EXIT=0) at 6876b39a4, the changed-pin control (1 failed, EXIT=1), and four durable log paths.\nVERDICT diff: Read both commits against base 21fe644a5845c48528d112d92e239a8234da92cb; 99d9541a9 adds the 45-line pin test and 6876b39a4 adds the 66-line evidence fragment, 111 insertions and no other file.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/standard-names-grammar/isn-grammar-sync-0-10-0.html records the single active 0.10.0 version with 983 tokens, matching the goal state the sync produced at graph-sync.log.\nSCORE evidence: 17\nJUSTIFICATION evidence: each done_when item is receipted at graph-readback.log (983 tokens, one active version, separatrix_distance, 123/123 and 983/983 controls) and pin-negative-control.log, though the reviewed manifest's empty baseline_suite leaves the added-failure count unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 21fe644a5845c48528d112d92e239a8234da92cb..6876b39a4b3229a12c337efc783c459059c3096b adds only the two paths the source brief.md grants, 111 insertions and no deletion.\nSCORE durability: 15\nJUSTIFICATION durability: tests/core/test_isn_pin_agreement.py:41-45 genuinely reddens on a changed pin (pin-negative-control.log records 1 failed, EXIT=1), but no assertion in the change observes the installed-version drift this node repaired.\nSCORE fit: 17\nJUSTIFICATION fit: tests/core/test_isn_pin_agreement.py:3 uses stdlib tomllib and packaging, and locates the repo root with Path(__file__).resolve().parents[2] as tests/graph/test_dd_build_classify_tree.py:200 does, with no name the naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search over tests/ for an existing pin-agreement or requirement-consistency mechanism (grep for Requirement( and canonicalize_name) found no owner; imas_codex/settings.py:42 reads only [tool.imas-codex], so the test is the first to own this capability.\nFINDING tests/core/test_isn_pin_agreement.py:41 follow-on: the added test asserts only that the two pyproject.toml ISN pins agree with each other, while the defect this node repaired was a divergence between the pyproject pin (0.10.0) and the installed package metadata (0.9.3) that grammar_sync.py:288 reads via imas_standard_names.__version__; no assertion imports the package, so a recurrence of the version-drift class leaves the suite green.",
+  "review_run_id": "r-20261018T191815508840-review-of-isn-grammar-sync-0-10-0-6876b39a4b32",
+  "reviewed_base_sha": "21fe644a5845c48528d112d92e239a8234da92cb",
+  "reviewed_commits": [
+    "99d9541a95ee8ae32ed81c648d75f314acdb7c9a",
+    "6876b39a4b3229a12c337efc783c459059c3096b"
+  ],
+  "reviewed_head_sha": "6876b39a4b3229a12c337efc783c459059c3096b",
+  "reviewed_run_id": "r-20261018T184623690108-isn-grammar-sync-0-10-0",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-18T19:34:17.032778+00:00",
+  "total": 107
+}
