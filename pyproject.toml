@@ -886,6 +886,7 @@ completion = 0.28
 cache-read = 0.028
 source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-flash"
 verified-at = "2026-08-11"
+max-input-tokens = 1048576
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4.1-flash"]
 prompt = 0.30
@@ -893,6 +894,7 @@ completion = 1.20
 cache-read = 0.006
 source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4.1-flash"
 verified-at = "2026-10-09"
+max-input-tokens = 1048576
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.5"]
 prompt = 2.0
@@ -900,6 +902,7 @@ completion = 6.0
 cache-read = 0.30
 source = "https://openrouter.ai/api/v1/model/x-ai/grok-4.5"
 verified-at = "2026-08-11"
+max-input-tokens = 500000
 overrides = [
   { min-input-tokens = 200000, prompt = 4.0, completion = 12.0 },
 ]
@@ -911,6 +914,7 @@ cache-read = 0.01
 cache-write = 0.125
 source = "https://openrouter.ai/api/v1/model/openai/gpt-5.6-luna"
 verified-at = "2026-08-11"
+max-input-tokens = 1050000
 overrides = [
   { min-input-tokens = 272000, prompt = 0.20, completion = 0.90 },
 ]
@@ -922,6 +926,7 @@ cache-read = 0.10
 cache-write = 2.50
 source = "https://openrouter.ai/api/v1/model/openai/gpt-6.1-sol"
 verified-at = "2026-10-18"
+max-input-tokens = 1050000
 overrides = [
   { min-input-tokens = 272000, prompt = 4.0, completion = 15.0, cache-read = 0.20, cache-write = 5.0 },
 ]
@@ -933,6 +938,7 @@ cache-read = 0.01
 cache-write = 0.125
 source = "https://openrouter.ai/api/v1/model/openai/gpt-6-luna"
 verified-at = "2026-10-18"
+max-input-tokens = 1050000
 overrides = [
   { min-input-tokens = 272000, prompt = 0.20, completion = 0.75, cache-read = 0.02, cache-write = 0.25 },
 ]
@@ -943,6 +949,7 @@ completion = 30.0
 cache-read = 0.50
 source = "https://openrouter.ai/api/v1/model/openai/gpt-5.5"
 verified-at = "2026-08-11"
+max-input-tokens = 1050000
 overrides = [
   { min-input-tokens = 272000, prompt = 10.0, completion = 45.0 },
 ]
@@ -953,6 +960,7 @@ completion = 15.0
 cache-read = 0.25
 source = "https://openrouter.ai/api/v1/model/openai/gpt-5.4"
 verified-at = "2026-08-11"
+max-input-tokens = 1050000
 overrides = [
   { min-input-tokens = 272000, prompt = 5.0, completion = 22.50 },
 ]
@@ -964,6 +972,7 @@ cache-read = 0.20
 cache-write = 2.50
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5"
 verified-at = "2026-08-11"
+max-input-tokens = 1000000
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-4.6"]
 prompt = 3.0
@@ -972,6 +981,7 @@ cache-read = 0.30
 cache-write = 3.75
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-4.6"
 verified-at = "2026-08-11"
+max-input-tokens = 1000000
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-haiku-4.5"]
 prompt = 1.0
@@ -980,6 +990,7 @@ cache-read = 0.10
 cache-write = 1.25
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-haiku-4.5"
 verified-at = "2026-08-11"
+max-input-tokens = 200000
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-opus-4.8"]
 prompt = 5.0
@@ -988,6 +999,7 @@ cache-read = 0.50
 cache-write = 6.25
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-opus-4.8"
 verified-at = "2026-08-11"
+max-input-tokens = 1000000
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-fable-5"]
 prompt = 10.0
@@ -996,6 +1008,7 @@ cache-read = 1.0
 cache-write = 12.50
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-fable-5"
 verified-at = "2026-08-11"
+max-input-tokens = 1000000
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.1-pro-preview"]
 prompt = 2.0
@@ -1004,6 +1017,7 @@ cache-read = 0.20
 cache-write = 0.375
 source = "https://openrouter.ai/api/v1/model/google/gemini-3.1-pro-preview"
 verified-at = "2026-08-11"
+max-input-tokens = 1048576
 overrides = [
   { min-input-tokens = 200000, prompt = 4.0, completion = 18.0 },
 ]
@@ -1015,6 +1029,7 @@ cache-read = 0.025
 cache-write = 0.0833
 source = "https://openrouter.ai/api/v1/model/google/gemini-3.1-flash-lite-preview"
 verified-at = "2026-08-11"
+max-input-tokens = 1048576
 
 [tool.imas-codex.docs-server]
 # Host-wide HTML docs server (~/Code/dotfiles/docs-server/serve.py): fronts every

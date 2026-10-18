@@ -1,0 +1,67 @@
+<section id="gpt6-context-limits">
+  <h3>A verified input allowance for every pricing-table route</h3>
+  <p>The GPT-6 seat rotation put <code>openrouter/openai/gpt-6.1-sol</code> and
+  <code>openrouter/openai/gpt-6-luna</code> on live seats. Both are newer than the
+  bundled LiteLLM catalog, so <code>get_catalog_model_info</code> returned no
+  <code>max_input_tokens</code> for them, and two production guards refused on the
+  absent bound: the docs-review escalator in
+  <code>imas_codex/standard_names/workers.py</code>
+  (<code>escalator catalog input allowance is not bounded</code>) and the budget
+  exposure bound in <code>imas_codex/standard_names/budget.py</code>. The harmonize
+  A/B's first apply failed on the <code>gpt-6.1-sol</code> breaker and processed
+  nothing (2026-10-18).</p>
+
+  <h4>Owner of the allowance</h4>
+  <p>Each <code>[tool.imas-codex.llm.openrouter-pricing."&lt;route&gt;"]</code> table
+  in <code>pyproject.toml</code> already recorded a verified price with its
+  <code>source</code> URL. Each now also records
+  <code>max-input-tokens</code>, read from the OpenRouter model endpoint the
+  <code>source</code> names (its <code>context_length</code>). The value is one
+  owner: <code>get_catalog_model_info</code> in
+  <code>imas_codex/discovery/base/llm.py</code> now falls back to that table when
+  LiteLLM has no <code>max_input_tokens</code> for the route, so no call site
+  needs a second lookup. A route recorded by neither still returns no bound, and
+  the guards keep refusing an unbounded model; no guard was widened.</p>
+
+  <h4>Allowances recorded (source read 2026-10-18)</h4>
+  <table><thead><tr><th>Route</th><th><code>max-input-tokens</code></th><th>Source endpoint</th><th>Catalogued at base</th></tr></thead><tbody>
+    <tr><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>1050000</td><td><code>openrouter.ai/api/v1/model/openai/gpt-6.1-sol</code></td><td>no &mdash; this node's live seat</td></tr>
+    <tr><td><code>openrouter/openai/gpt-6-luna</code></td><td>1050000</td><td><code>openrouter.ai/api/v1/model/openai/gpt-6-luna</code></td><td>no &mdash; this node's live seat</td></tr>
+    <tr><td><code>openrouter/openai/gpt-5.6-luna</code></td><td>1050000</td><td><code>openrouter.ai/api/v1/model/openai/gpt-5.6-luna</code></td><td>no</td>
+    </tr>
+    <tr><td><code>openrouter/openai/gpt-5.5</code></td><td>1050000</td><td><code>openrouter.ai/api/v1/model/openai/gpt-5.5</code></td><td>yes (1050000)</td></tr>
+    <tr><td><code>openrouter/openai/gpt-5.4</code></td><td>1050000</td><td><code>openrouter.ai/api/v1/model/openai/gpt-5.4</code></td><td>yes (1050000)</td></tr>
+    <tr><td><code>openrouter/anthropic/claude-sonnet-5</code></td><td>1000000</td><td><code>openrouter.ai/api/v1/model/anthropic/claude-sonnet-5</code></td><td>no</td></tr>
+    <tr><td><code>openrouter/anthropic/claude-sonnet-4.6</code></td><td>1000000</td><td><code>openrouter.ai/api/v1/model/anthropic/claude-sonnet-4.6</code></td><td>yes (1000000)</td></tr>
+    <tr><td><code>openrouter/anthropic/claude-haiku-4.5</code></td><td>200000</td><td><code>openrouter.ai/api/v1/model/anthropic/claude-haiku-4.5</code></td><td>yes (200000)</td></tr>
+    <tr><td><code>openrouter/anthropic/claude-opus-4.8</code></td><td>1000000</td><td><code>openrouter.ai/api/v1/model/anthropic/claude-opus-4.8</code></td><td>no</td></tr>
+    <tr><td><code>openrouter/anthropic/claude-fable-5</code></td><td>1000000</td><td><code>openrouter.ai/api/v1/model/anthropic/claude-fable-5</code></td><td>no</td></tr>
+    <tr><td><code>openrouter/x-ai/grok-4.5</code></td><td>500000</td><td><code>openrouter.ai/api/v1/model/x-ai/grok-4.5</code></td><td>no</td></tr>
+    <tr><td><code>openrouter/deepseek/deepseek-v4-flash</code></td><td>1048576</td><td><code>openrouter.ai/api/v1/model/deepseek/deepseek-v4-flash</code></td><td>no</td></tr>
+    <tr><td><code>openrouter/deepseek/deepseek-v4.1-flash</code></td><td>1048576</td><td><code>openrouter.ai/api/v1/model/deepseek/deepseek-v4.1-flash</code></td><td>no</td></tr>
+    <tr><td><code>openrouter/google/gemini-3.1-pro-preview</code></td><td>1048576</td><td><code>openrouter.ai/api/v1/model/google/gemini-3.1-pro-preview</code></td><td>yes (1048576)</td></tr>
+    <tr><td><code>openrouter/google/gemini-3.1-flash-lite-preview</code></td><td>1048576</td><td><code>openrouter.ai/api/v1/model/google/gemini-3.1-flash-lite-preview</code></td><td>yes (1048576)</td></tr>
+  </tbody></table>
+  <p>Every value was read from the route's own endpoint on 2026-10-18; no figure
+  was guessed. Routes already catalogued keep the catalog value (the fallback
+  applies only where LiteLLM has none), so their table entry documents the same
+  owner for the bound the catalog already supplied.</p>
+
+  <h4>Evidence</h4>
+  <ul>
+    <li><code>tests/core/test_catalog_input_limits.py</code> &mdash; each live
+    GPT-6 seat resolves a positive <code>max_input_tokens</code>; a route with no
+    catalog entry and no table value still returns none; the docs-review escalator
+    bound in <code>workers.py</code> accepts the rotated
+    <code>gpt-6.1-sol</code> breaker and reports a positive
+    <code>escalation_input_token_bound</code>. Head: 4 passed,
+    <code>EXIT=0</code>. Base arm (base <code>llm.py</code> and
+    <code>pyproject.toml</code>, same tests): 3 failed / 1 passed,
+    <code>EXIT=1</code> &mdash; both GPT-6 seats and the escalator accept-test are
+    red at base.</li>
+    <li>Covering set (<code>test_settings.py</code>,
+    <code>test_gpt6_model_support.py</code>, <code>test_gpt6_seat_rotation.py</code>,
+    <code>test_seat_exposure_calibration.py</code>): 84 passed at base and 84
+    passed at head &mdash; delta zero.</li>
+  </ul>
+</section>
