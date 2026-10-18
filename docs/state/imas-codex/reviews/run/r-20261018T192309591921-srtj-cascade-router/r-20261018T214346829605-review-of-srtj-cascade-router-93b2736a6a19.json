@@ -103,6 +103,13 @@
   ],
   "completed_at": "2026-10-18T21:52:40Z",
   "dispatched_at": "2026-10-18T21:44:33Z",
+  "finding_dispositions": {
+    "1": {
+      "kind": "exempted",
+      "reason": "plan sn-review-through-jev \u00a76 on main (fbc67fca8) states the below-reject chat route, by coordinator ruling; the reviewer read the plan at the worktree's base revision",
+      "recorded_at": "2026-10-18T21:55:18.741093+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/review/cascade.py",
