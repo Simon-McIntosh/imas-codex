@@ -24,7 +24,7 @@ def test_source_invariant_classifies_touched_names() -> None:
             assert "HAS_PARENT" in cypher
             assert params["ids"] == ["electron_temperature"]
             missing = (
-                self.stage != "superseded"
+                (self.stage != "superseded" or not params["retired_is_exempt"])
                 and self.sources == 0
                 and not (self.origin == "derived" and self.children)
             )
@@ -34,23 +34,31 @@ def test_source_invariant_classifies_touched_names() -> None:
         Query(origin="derived", children=1), ["electron_temperature"]
     )
     require_producing_sources(Query(stage="superseded"), ["electron_temperature"])
+    with pytest.raises(MissingStandardNameSource):
+        require_producing_sources(
+            Query(stage="superseded"),
+            ["electron_temperature"],
+            retired_is_exempt=False,
+        )
     require_producing_sources(Query(sources=1), ["electron_temperature"])
     with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
         require_producing_sources(Query(), ["electron_temperature"])
 
 
-def test_rename_refuses_a_sourceless_predecessor() -> None:
+@pytest.mark.parametrize("stage", ["drafted", "superseded"])
+def test_rename_refuses_a_sourceless_predecessor(stage: str) -> None:
     from imas_codex.standard_names.edit import apply_edit
     from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
 
     class SourcelessGraph(FakeGraph):
         def query(self, cypher, **params):
             if "SOURCE_INVARIANT" in cypher:
+                assert params["retired_is_exempt"] is False
                 return [{"id": "plasma_current"}]
             return super().query(cypher, **params)
 
     graph = SourcelessGraph()
-    graph.add_node("plasma_current", name_stage="drafted")
+    graph.add_node("plasma_current", name_stage=stage)
     with _patched_graph(graph), pytest.raises(MissingStandardNameSource):
         apply_edit(
             target="plasma_current",

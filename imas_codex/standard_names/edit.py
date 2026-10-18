@@ -3365,7 +3365,7 @@ def _apply_rename(
 
     from imas_codex.standard_names.source_invariant import require_producing_sources
 
-    require_producing_sources(gc, [refine_root_old])
+    require_producing_sources(gc, [refine_root_old], retired_is_exempt=False)
 
     if dry_run:
         actions.append(
