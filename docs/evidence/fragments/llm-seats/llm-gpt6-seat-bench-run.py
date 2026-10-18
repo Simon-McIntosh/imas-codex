@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import html
 import json
 import random
 import sys
@@ -439,10 +440,123 @@ def render_figure() -> None:
     print(destination / "paired-differences.svg")
 
 
+def render_fragment() -> None:
+    results = json.loads(RESULTS.read_text())
+    analysis = results["analysis"]
+    labels = {
+        "refine": "Refine",
+        "docs": "Docs",
+        "breaker-names": "Names breaker",
+        "breaker-docs": "Docs breaker",
+        "classifier": "Classifier",
+    }
+    recommendations = {
+        "refine": (
+            "Luna",
+            "Its paired lower bound clears the rule; the sampled defect-resolution score is higher at much lower direct call cost.",
+        ),
+        "docs": (
+            "Sol",
+            "Luna misses the bound and Sol has the highest sampled rubric score. Confirm on a larger set before moving the production seat.",
+        ),
+        "breaker-docs": (
+            "Keep incumbent",
+            "Only two Luna and three Sol verdict flips inform the conditional quality metric; its passing bound is too fragile for a seat move.",
+        ),
+        "classifier": (
+            "Luna",
+            "Luna and Sol gave identical predictions on all 24 sampled paths, with lower direct cost. Broaden the gold cohort beyond its two domains before changing production.",
+        ),
+    }
+    rows: list[str] = []
+    for role, label in labels.items():
+        if role not in analysis:
+            rows.append(
+                f'<tr><th>{label}</th><td>—</td><td colspan="5">Pending: the production reviewer batch has not returned a complete report.</td><td>Keep incumbent while unmeasured.</td></tr>'
+            )
+            continue
+        item = analysis[role]
+        report = results["raw_reports"][role]
+        if role == "breaker-names":
+            recommendation = (
+                "Luna"
+                if item["capable_under_rule"]
+                and next(r for r in report["results"] if r["model"] == MODEL_LUNA)[
+                    "metrics"
+                ].get("n_flips", 0)
+                >= 2
+                else "Keep incumbent",
+                "Use the paired bound with the observed flip count; a sparse flip set warrants retaining the current reviewer.",
+            )
+        else:
+            recommendation = recommendations[role]
+        difference = item["luna_minus_sol"]
+        low, high = item["paired_interval_95"]
+        verdict = "capable" if item["capable_under_rule"] else "not established"
+        for number, model_row in enumerate(report["results"]):
+            model = model_row["model"]
+            stats = item["models"][model]
+            metric_low, metric_high = stats["interval_95"]
+            role_cell = (
+                f'<th rowspan="3">{label}<br><small>n={item["sample_size"]}</small></th>'
+                if number == 0
+                else ""
+            )
+            comparison = (
+                f'<td rowspan="3">{difference:+.3f} [{low:+.3f}, {high:+.3f}]<br>{verdict}</td>'
+                if number == 0
+                else ""
+            )
+            decision = (
+                f'<td rowspan="3"><strong>{recommendation[0]}</strong>. {html.escape(recommendation[1])}</td>'
+                if number == 0
+                else ""
+            )
+            rows.append(
+                f"<tr>{role_cell}<td><code>{html.escape(model.split('/')[-1])}</code>{' (incumbent)' if model == report['incumbent'] else ''}</td>"
+                f"<td>{stats['primary']:.3f} [{metric_low:.3f}, {metric_high:.3f}]</td>{comparison}"
+                f"<td>${stats['candidate_cost_per_call_usd']:.4f}</td><td>{stats['candidate_latency_per_call_seconds']:.1f} s</td>"
+                f"<td>${stats['effective_cost_per_item_usd']:.4f}</td>{decision}</tr>"
+            )
+    samples = results["pre_registration"]["samples"]
+    sample_text = "; ".join(
+        f"{labels[role]} {results.get('execution_controls', {}).get('sample_overrides', {}).get(role, spec['n'])}: {spec['reason']}"
+        for role, spec in samples.items()
+    )
+    control_failures = [
+        labels[role]
+        for role, item in analysis.items()
+        if not item["shuffled_control_contains_zero"]
+    ]
+    control_text = (
+        "The shuffled-output interval excludes zero for "
+        + ", ".join(control_failures)
+        + "; that control does not remove a marginal score shift, so its failure limits the pairing check rather than overturning the measured paired interval."
+        if control_failures
+        else "Every shuffled-output interval contained zero."
+    )
+    body = f"""<section id="gpt6-seat-benchmark">
+  <h3>GPT seat comparison: Luna against Sol and the live incumbent</h3>
+  <p>The decision rule was registered at <code>{results["pre_registration"]["timestamp_utc"]}</code> before paid calls: Luna is capable when the 95% lower bound of its paired primary-metric difference from Sol is at least −0.05. Matched items were resampled 10,000 times with seed 1729. No production seat or graph state changed.</p>
+  <p><strong>Sample sizes.</strong> {html.escape(sample_text)} The names-breaker sample was reduced from its registered 12 after the incumbent reviewer timed out on the first batch; the retry uses eight common seeded cases. The classifier fixture's first 24 paths cover two domains.</p>
+  <figure><img src="/imas-codex/figures/llm-seats/llm-gpt6-seat-bench/paired-differences.svg" alt="Paired Luna minus Sol primary metric for five seats, with confidence intervals and the minus 0.05 decision limit"><figcaption>Points are paired primary-metric differences, bars are 95% bootstrap intervals, and the dotted line is the registered −0.05 limit. An unmeasured role is shown as pending.</figcaption></figure>
+  <table><thead><tr><th>Role</th><th>Model</th><th>Primary metric [95% interval]</th><th>Luna − Sol [95% interval], rule</th><th>Model cost/call</th><th>Latency/call</th><th>Effective cost/item</th><th>Recommendation</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
+  <p>Model cost and latency are means of successful direct candidate calls. Effective cost per item includes the held-out <code>claude-opus-4.8</code> judge for refine and docs. The raw per-role reports, item outcomes, intervals and receipts are in <code>llm-gpt6-seat-bench-results.json</code>; call-level receipts are in the run record. <strong>Total measured spend: USD {results["total_spend_usd"]:.4f} of the USD 10 ceiling</strong>, including superseded instrument runs and the interrupted names-breaker call.</p>
+  <p><strong>Control and limits.</strong> {html.escape(control_text)} Breaker quality conditions on verdict flips, which are sparse in the docs sample. The classifier's equal scores are supported by 24 returned predictions per model and 16 exact matches each; the sampled gold paths cover only two domains. These bounds describe the sampled fixtures, not all pipeline traffic.</p>
+  <p><code>sn-prose-adjudicator</code> and <code>cluster-labels</code> have no <code>sn bench --role</code> mode. Assess prose adjudication on a blinded, human-labeled set of true and false banned-prose flags, and assess cluster labels on held-out expert-labeled clusters with label fidelity and repeatability checks before considering a model change.</p>
+</section>
+"""
+    destination = RESULTS.with_name("llm-gpt6-seat-bench.html")
+    destination.write_text(body)
+    print(destination)
+
+
 if __name__ == "__main__":
     if sys.argv[1] == "analyze":
         analyze()
     elif sys.argv[1] == "figure":
         render_figure()
+    elif sys.argv[1] == "fragment":
+        render_fragment()
     else:
         main(sys.argv[1])
