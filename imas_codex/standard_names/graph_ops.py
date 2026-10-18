@@ -16932,13 +16932,19 @@ def claim_review_name_batch(
 # -- persist_reviewed_name (write the review + the stage transition) ----------
 
 
-#: Resolution methods under which the blind seats actually reached a verdict.
-#: ``quorum_consensus`` means both blind cycles scored and agreed;
-#: ``authoritative_escalation`` means the context-aware seat resolved their
-#: dispute.  Anything else scored the name with fewer seats than the chain
-#: defines, so the score carries less authority than the profile promises.
+#: Resolution methods that authorize a stage decision. The quorum methods
+#: represent completed reviewer chains; the cascade methods represent a
+#: calibrated Jev decision or its explicit single-reviewer route. Other methods
+#: scored with fewer seats than the configured chain requires.
 QUORATE_RESOLUTION_METHODS: frozenset[str] = frozenset(
-    {"quorum_consensus", "authoritative_escalation"}
+    {
+        "quorum_consensus",
+        "authoritative_escalation",
+        "jev_cascade_accept",
+        "jev_cascade_refine",
+        "jev_cascade_chat_review",
+        "jev_cascade_chat_below_reject",
+    }
 )
 
 #: ``max_cycles_reached`` merges two blind seats that never agreed.  On a

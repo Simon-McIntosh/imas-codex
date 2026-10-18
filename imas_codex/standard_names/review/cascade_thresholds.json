@@ -183,11 +183,13 @@
     "reject_threshold": 0.005567,
     "route_counts": {
       "accept": 25,
+      "chat_below_reject": 0,
       "chat_review": 40,
       "refine": 151
     },
     "route_shares": {
       "accept": 0.11574074074074074,
+      "chat_below_reject": 0.0,
       "chat_review": 0.18518518518518517,
       "refine": 0.6990740740740741
     },
@@ -392,11 +394,13 @@
     "reject_threshold": 0.102035,
     "route_counts": {
       "accept": 22,
+      "chat_below_reject": 0,
       "chat_review": 67,
       "refine": 274
     },
     "route_shares": {
       "accept": 0.06060606060606061,
+      "chat_below_reject": 0.0,
       "chat_review": 0.18457300275482094,
       "refine": 0.7548209366391184
     },
@@ -440,7 +444,8 @@
   "policy": {
     "accept_selection": "Name: lowest check-clear calibration score with at least five items and empirical precision at least 0.90. Docs: calibrated score bin at 0.55 with 20/25 accepted; no threshold with at least five items reached 0.90.",
     "check_selection": "maximize defect recall minus accepted false positive rate with accepted false positive rate at most 0.10, at least two defects caught, and separation at least 0.02",
-    "reject_selection": "calibration score tenth percentile; check-clear low-tail falls back to chat review"
+    "reject_selection": "calibration score tenth percentile; a check-clear low-tail case uses chat_below_reject, distinct from the uncertain band",
+    "unjudged_selection": "A refused lease or unusable Jev judgment has no route and is excluded from route shares"
   },
   "schema": "review-cascade-thresholds",
   "source_split": "calibration"

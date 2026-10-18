@@ -63,10 +63,12 @@ def _route(
         failed = tuple(sorted({*failed, "claim_contradicts_source"}))
     if failed:
         return CascadeRoute("refine", probability, failed)
-    if probability is not None and probability >= thresholds["accept_threshold"]:
+    if probability is None:
+        raise ValueError("no usable judgment score")
+    if probability >= thresholds["accept_threshold"]:
         return CascadeRoute("accept", probability)
-    # A low score with no identified failure goes to a reviewer as well:
-    # refinement needs a named check to tell the writer what to change.
+    if probability < thresholds["reject_threshold"]:
+        return CascadeRoute("chat_below_reject", probability)
     return CascadeRoute("chat_review", probability)
 
 
@@ -254,6 +256,8 @@ async def _name_judgment(
     from imas_codex.standard_names.review.jev_review import review_names
 
     result = await review_names([item], model=model)
+    if not result.items or not result.items[0].get("answered"):
+        raise ValueError("no usable judgment for name review")
     judgment = result.items[0]
     route = route_name(judgment)
     answers = {
@@ -278,7 +282,7 @@ async def _docs_judgment(
         [state], questions, model=model, service=jev_review.SERVICE
     )
     if not results or results[0] is None:
-        return CascadeRoute("chat_review", None), {}, batch_cost
+        raise ValueError("no usable judgment for documentation review")
     answers, _ = results[0]
     related = item.get("sibling_names") or []
     audit = jev_review.build_docs_audit_report(
@@ -303,41 +307,46 @@ async def adjudicate_review(
     from imas_codex.settings import get_model
     from imas_codex.standard_names.budget import LLMCostEvent
 
-    model = get_model("sn-judge")
-    lease = mgr.reserve(0.001, phase="review_" + axis)
-    route = CascadeRoute("chat_review", None)
-    answers: dict[str, Any] = {}
-    spent = 0.0
-    if lease is not None:
-        try:
-            if axis == "name":
-                route, answers, spent = await _name_judgment(item, model)
-            elif axis == "docs":
-                route, answers, spent = await _docs_judgment(item, model)
-            else:
-                raise ValueError(f"unknown review axis {axis!r}")
-            lease.charge_event(
-                spent,
-                LLMCostEvent(
-                    model=model,
-                    tokens_in=0,
-                    tokens_out=0,
-                    sn_ids=(str(item["id"]),),
-                    phase="review_" + axis,
-                ),
-            )
-        except Exception:
-            logger.exception("Jev cascade judgment unavailable for %s", item.get("id"))
-        finally:
-            lease.release_unused()
+    try:
+        model = get_model("sn-judge")
+        lease = mgr.reserve(0.001, phase="review_" + axis)
+    except Exception:
+        logger.exception("Jev cascade reservation unavailable for %s", item.get("id"))
+        return await incumbent(models=models)
+    if lease is None:
+        return await incumbent(models=models)
+    try:
+        if axis == "name":
+            route, answers, spent = await _name_judgment(item, model)
+        elif axis == "docs":
+            route, answers, spent = await _docs_judgment(item, model)
+        else:
+            raise ValueError(f"unknown review axis {axis!r}")
+        lease.charge_event(
+            spent,
+            LLMCostEvent(
+                model=model,
+                tokens_in=0,
+                tokens_out=0,
+                sn_ids=(str(item["id"]),),
+                phase="review_" + axis,
+            ),
+        )
+    except Exception:
+        logger.exception("Jev cascade judgment unavailable for %s", item.get("id"))
+        return await incumbent(models=models)
+    finally:
+        lease.release_unused()
     try:
         await _store_route(item, axis, model, route, answers, spent)
     except Exception:
         logger.exception("Jev cascade route could not be stored for %s", item.get("id"))
-        if deciding_enabled():
-            return await incumbent(models=models[:1])
+        return await incumbent(models=models)
     if deciding_enabled():
         if route.route in {"accept", "refine"}:
             return _direct_result(route, model, spent, item, axis)
-        return await incumbent(models=models[:1])
+        result = await incumbent(models=models[:1])
+        if result is not None:
+            result["resolution_method"] = "jev_cascade_" + route.route
+        return result
     return await incumbent(models=models)

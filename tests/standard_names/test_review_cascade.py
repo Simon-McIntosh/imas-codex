@@ -1,5 +1,9 @@
 """The review cascade's threshold boundaries and execution modes."""
 
+import asyncio
+import json
+from unittest.mock import MagicMock
+
 import pytest
 
 from imas_codex.standard_names.review import cascade
@@ -139,19 +143,30 @@ def test_docs_audit_calls_house_style_owner(monkeypatch):
     assert marker in report.lint_findings
 
 
-@pytest.mark.parametrize("route,axis", [(route_name, "name"), (route_docs, "docs")])
-def test_accept_at_threshold(route, axis):
-    judgment = {"checks": {"clean": {"answered": True, "failure_probability": 0.1}}}
-    threshold = cascade._calibration()[axis]["accept_threshold"]
-    assert route(judgment, probability=threshold).route == "accept"
-    assert route(judgment, probability=threshold - 0.000001).route == "chat_review"
+@pytest.fixture
+def planted_thresholds(monkeypatch):
+    thresholds = {
+        axis: {
+            "accept_threshold": 0.8,
+            "reject_threshold": 0.2,
+            "check_thresholds": {"named_failure": 0.6},
+        }
+        for axis in ("name", "docs")
+    }
+    monkeypatch.setattr(cascade, "_calibration", lambda: thresholds)
+    return thresholds
 
 
-@pytest.mark.parametrize("route,axis", [(route_name, "name"), (route_docs, "docs")])
-def test_refine_at_check_threshold(route, axis):
-    check_id, threshold = next(
-        iter(cascade._calibration()[axis]["check_thresholds"].items())
-    )
+@pytest.mark.parametrize("route", [route_name, route_docs])
+def test_accept_at_threshold(route, planted_thresholds):
+    judgment = {"checks": {}}
+    assert route(judgment, probability=0.8).route == "accept"
+    assert route(judgment, probability=0.8 - 0.000001).route == "chat_review"
+
+
+@pytest.mark.parametrize("route", [route_name, route_docs])
+def test_refine_at_check_threshold(route, planted_thresholds):
+    check_id, threshold = "named_failure", 0.6
     judgment = {
         "checks": {check_id: {"answered": True, "failure_probability": threshold}}
     }
@@ -162,11 +177,12 @@ def test_refine_at_check_threshold(route, axis):
     assert route(judgment, probability=0.9).route == "accept"
 
 
-@pytest.mark.parametrize("route,axis", [(route_name, "name"), (route_docs, "docs")])
-def test_uncertain_without_failed_check_calls_chat(route, axis):
-    judgment = {"checks": {"clean": {"answered": True, "failure_probability": 0.1}}}
-    threshold = cascade._calibration()[axis]["accept_threshold"]
-    assert route(judgment, probability=threshold - 0.01).route == "chat_review"
+@pytest.mark.parametrize("route", [route_name, route_docs])
+def test_reject_boundary_has_separate_chat_label(route, planted_thresholds):
+    judgment = {"checks": {}}
+    assert route(judgment, probability=0.2).route == "chat_review"
+    assert route(judgment, probability=0.2 - 0.000001).route == "chat_below_reject"
+    assert route(judgment, probability=0.79).route == "chat_review"
 
 
 @pytest.mark.asyncio
@@ -220,6 +236,7 @@ async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
         ("accept", [], 1.0),
         ("refine", [], 0.0),
         ("chat_review", [["primary"]], 0.3),
+        ("chat_below_reject", [["primary"]], 0.3),
     ],
 )
 @pytest.mark.parametrize("axis", ["name", "docs"])
@@ -275,3 +292,190 @@ async def test_deciding_routes_use_one_chat_seat(
     assert result["winning_score"] == expected_score
     if route == "refine":
         assert result["winning_comments_per_dim"]["failed_checks"][0]["id"] == check_id
+    if route.startswith("chat"):
+        assert result["resolution_method"] == "jev_cascade_" + route
+
+
+@pytest.mark.parametrize(
+    "route,expected_stage", [("accept", "accepted"), ("refine", "reviewed")]
+)
+def test_deciding_result_reaches_name_stage(monkeypatch, route, expected_stage):
+    from imas_codex.standard_names import graph_ops
+
+    gc = MagicMock()
+    gc.__enter__.return_value = gc
+    gc.query.side_effect = [[{"chain_length": 0}], [{"id": "temperature"}]]
+    monkeypatch.setattr(graph_ops, "GraphClient", lambda: gc)
+    monkeypatch.setattr(graph_ops, "write_reviews", lambda _rows: None)
+    decision = cascade._direct_result(
+        CascadeRoute(
+            route, 0.9, ("advisory_alias_collapsed",) if route == "refine" else ()
+        ),
+        "judge-model",
+        0.0,
+        {"id": "temperature"},
+        "name",
+    )
+    stage = graph_ops.persist_reviewed_name(
+        sn_id="temperature",
+        claim_token="token",
+        score=decision["winning_score"],
+        comments_per_dim=decision["winning_comments_per_dim"],
+        model="judge-model",
+        min_score=0.75,
+        resolution_method=decision["resolution_method"],
+        reviewer_chain_size=3,
+    )
+    assert stage == expected_stage
+    assert gc.query.call_args_list[1].kwargs["quorum_shortfall"] is None
+    if route == "refine":
+        assert (
+            "sn.review_quorum_shortfall IS NULL"
+            in graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
+        )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("failure", ["lease", "judgment"])
+@pytest.mark.parametrize("deciding", [False, True])
+async def test_unjudged_review_has_no_route_and_keeps_full_incumbent(
+    monkeypatch, failure, deciding
+):
+    from imas_codex import settings
+
+    stored = []
+    calls = []
+
+    async def fail_judgment(_item, _model):
+        raise RuntimeError("Jev unavailable")
+
+    async def store(*args):
+        stored.append(args)
+
+    async def incumbent(*, models):
+        calls.append(list(models))
+        return {"winning_score": 0.3}
+
+    class Manager:
+        def reserve(self, *_args, **_kwargs):
+            return None if failure == "lease" else MagicMock()
+
+    monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
+    monkeypatch.setattr(cascade, "_name_judgment", fail_judgment)
+    monkeypatch.setattr(cascade, "_store_route", store)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda: deciding)
+    await cascade.adjudicate_review(
+        "name",
+        {"id": "temperature"},
+        ["primary", "secondary"],
+        incumbent,
+        mgr=Manager(),
+    )
+    assert stored == []
+    assert calls == [["primary", "secondary"]]
+
+
+@pytest.mark.asyncio
+async def test_empty_docs_judgment_is_unjudged(monkeypatch):
+    from imas_codex.standard_names.review import jev_review
+
+    monkeypatch.setattr(jev_review, "_default_checks", lambda: [])
+    monkeypatch.setattr(
+        jev_review,
+        "build_docs_state",
+        lambda *_args, **_kwargs: {"documentation_claims": []},
+    )
+    monkeypatch.setattr(jev_review, "docs_question_table", lambda *_args: {})
+
+    async def empty(*_args, **_kwargs):
+        return [], 0.0
+
+    monkeypatch.setattr(jev_review, "decide_batch", empty)
+    with pytest.raises(ValueError, match="no usable judgment"):
+        await cascade._docs_judgment({"id": "temperature"}, "judge-model")
+
+
+@pytest.mark.asyncio
+async def test_empty_name_judgment_is_unjudged(monkeypatch):
+    from types import SimpleNamespace
+
+    from imas_codex.standard_names.review import jev_review
+
+    async def unanswered(*_args, **_kwargs):
+        return SimpleNamespace(items=[{"answered": False}], cost=0.0)
+
+    monkeypatch.setattr(jev_review, "review_names", unanswered)
+    with pytest.raises(ValueError, match="no usable judgment"):
+        await cascade._name_judgment({"id": "temperature"}, "judge-model")
+
+
+@pytest.mark.asyncio
+async def test_refine_worker_receives_named_checks(monkeypatch):
+    from imas_codex.standard_names import fanout, workers
+    from imas_codex.standard_names.models import RefinedName
+
+    route = CascadeRoute("refine", 0.1, ("source_fidelity_unsupported_qualifier",))
+    result = cascade._direct_result(
+        route, "judge-model", 0.0, {"id": "test_name"}, "name"
+    )
+    item = {
+        "id": "test_name",
+        "description": "A test quantity",
+        "kind": "scalar",
+        "unit": "eV",
+        "physics_domain": ["core_profiles"],
+        "source_paths": ["core_profiles/profiles_1d/electrons/temperature"],
+        "claim_token": "token",
+        "name_stage": "refining",
+        "chain_length": 0,
+        "chain_history": [],
+        "reviewer_comments_per_dim_name": json.dumps(
+            result["winning_comments_per_dim"]
+        ),
+    }
+    context = {}
+    trigger_calls = []
+
+    def capture_trigger(**kwargs):
+        trigger_calls.append(kwargs)
+        return False, ""
+
+    def capture_prompt(_template, values):
+        context.update(values)
+        return "rendered prompt"
+
+    gc = MagicMock()
+    gc.__enter__.return_value = gc
+    gc.query.return_value = []
+    manager = MagicMock()
+    manager.reserve.return_value = MagicMock(reserved=1.0)
+    refined = RefinedName(
+        base_token="temperature",
+        base_kind="quantity",
+        description="d",
+        kind="scalar",
+        reason="better",
+    )
+
+    async def llm(*_args, **_kwargs):
+        return refined, 0.0, {}
+
+    monkeypatch.setattr(fanout, "should_trigger_fanout", capture_trigger)
+    monkeypatch.setattr("imas_codex.llm.prompt_loader.render_prompt", capture_prompt)
+    monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", llm)
+    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: gc)
+    monkeypatch.setattr("imas_codex.settings.get_model", lambda _seat: "mock")
+    monkeypatch.setattr(workers, "_hybrid_search_neighbours", lambda *_args: [])
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.persist_refined_name",
+        lambda **_kwargs: {"new_name": "new_name", "old_name": "test_name"},
+    )
+    await workers.process_refine_name_batch([item], manager, asyncio.Event())
+    assert context["failed_checks"][0]["id"] == "source_fidelity_unsupported_qualifier"
+    assert trigger_calls[0]["trigger_source"] == "checks"
+    assert (
+        trigger_calls[0]["check_results"]["source_fidelity_unsupported_qualifier"][
+            "failure_probability"
+        ]
+        == 1.0
+    )
