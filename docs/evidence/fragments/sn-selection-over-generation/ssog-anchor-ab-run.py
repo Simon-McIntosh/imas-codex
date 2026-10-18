@@ -47,7 +47,7 @@ RESULTS = Path(
     )
 )
 ROSTERS = Path("imas_codex/standard_names/manifests/reviews")
-SPEND_LIMIT = 30.0
+SPEND_LIMIT = 42.0
 PREVIOUS_SPEND = 0.021194586
 RULE_REGISTERED_AT = "2026-10-18T10:45:18.869980+00:00"
 PRIOR_DOC_CALL_COST = 0.41403
@@ -63,7 +63,11 @@ VARIATION_AXES = (
     "region",
     "device",
 )
-DEADLINE = datetime.fromisoformat("2026-10-18T12:58:04+00:00")
+DEADLINE = datetime.fromisoformat("2026-10-18T13:54:30+00:00")
+
+
+def apply_cap(planned_calls: int) -> float:
+    return round(planned_calls * 0.674, 2)
 
 
 def now() -> str:
@@ -335,7 +339,10 @@ def measure_arm(
                 raise RuntimeError(f"Anchor pin did not resolve for {seed}")
         before = report_family_rows(gc, seeds=[seed])[0]
         before_scores = scores(gc, seed)
-        ceiling = min(1.49, SPEND_LIMIT - data["spend_usd"] - 0.02)
+        ceiling = min(
+            apply_cap(int(plan[0]["planned_calls"])),
+            SPEND_LIMIT - data["spend_usd"] - 0.02,
+        )
         if ceiling <= 0:
             raise RuntimeError("No budget remains before next apply")
         started = time.monotonic()
@@ -428,6 +435,139 @@ def start_arm_worker(uri: str) -> tuple[subprocess.Popen, Path, object]:
     )
     print(f"Jev arm launched pid={proc.pid}, log={log_path}", flush=True)
     return proc, log_path, stream
+
+
+def resume_applies() -> None:
+    data = json.loads(RESULTS.read_text())
+    if data["source_export"] != str(ARCHIVE):
+        raise RuntimeError("Cached selection belongs to another graph export")
+    selected = data["selected"]
+    if len(selected) != 10 or len(data["dry_runs"]) != 10:
+        raise RuntimeError("Ten selected families and dry runs are required")
+    if data["adoption_rule"]["registered_at"] != RULE_REGISTERED_AT:
+        raise RuntimeError("Pre-registered adoption rule changed")
+    initial_spend = float(data["spend_usd"])
+    cap_envelope = initial_spend + 2 * sum(
+        apply_cap(item["calls_per_arm"]) for item in data["dry_runs"]
+    )
+    if cap_envelope >= SPEND_LIMIT:
+        raise RuntimeError(f"Apply caps ${cap_envelope:.4f} reach ${SPEND_LIMIT:.2f}")
+    data.update(
+        spend_limit_usd=SPEND_LIMIT,
+        cap_envelope_usd=cap_envelope,
+        resumed_at=now(),
+        ruling="2026-10-18 lead: USD 42.00 total including prior spend; all ten paired families",
+        arms={},
+        isolation_proof=[],
+        stopped_instances=[],
+        scratch_removed=None,
+        verdict=None,
+        outcome_status="applying",
+    )
+    data.pop("failure", None)
+    save(data)
+    scratch = Path(tempfile.mkdtemp(prefix="anchor-compare-", dir=os.environ["TMPDIR"]))
+    data["scratch_tree"] = str(scratch)
+    save(data)
+    live_uri = GraphClient().uri
+    if live_uri.startswith(("bolt://127.0.0.1", "bolt://localhost")):
+        raise RuntimeError("Live URI unexpectedly resolves to loopback")
+    instances = []
+    child_proc = None
+    child_stream = None
+    try:
+        with tarfile.open(ARCHIVE, "r:gz") as archive:
+            member = next(item for item in archive if item.name.endswith("/graph.dump"))
+            dump = scratch / "neo4j.dump"
+            with archive.extractfile(member) as source, dump.open("wb") as target:
+                shutil.copyfileobj(source, target)
+        print(f"extracted dump: {dump.stat().st_size} bytes", flush=True)
+        for arm, port in (("heuristic", 27697), ("jev", 27698)):
+            require_time()
+            place, proc, log = make_instance(scratch, dump, arm, port)
+            instances.append((arm, place, proc))
+            uri = f"bolt://127.0.0.1:{port}"
+            with GraphClient(uri=uri) as gc:
+                prove_isolation(gc, live_uri, uri, arm, data, log)
+        (RUN_DIR / "arm-input.json").write_text(json.dumps(selected, indent=2) + "\n")
+        child_proc, child_log, child_stream = start_arm_worker("bolt://127.0.0.1:27698")
+        heuristic_uri = "bolt://127.0.0.1:27697"
+        os.environ["NEO4J_URI"] = heuristic_uri
+        os.environ["ANCHOR_ARM"] = "heuristic"
+        with GraphClient(uri=heuristic_uri) as gc:
+            measure_arm(gc, heuristic_uri, selected, "heuristic", data)
+        remaining = (DEADLINE - datetime.now(UTC)).total_seconds()
+        child_proc.wait(timeout=max(1, remaining))
+        child_stream.write(f"EXIT={child_proc.returncode}\n")
+        child_stream.close()
+        child_stream = None
+        if child_proc.returncode:
+            raise RuntimeError(f"Jev arm failed: {child_log}")
+        jev_data = json.loads((RUN_DIR / "arm-jev-results.json").read_text())
+        jev_rows = jev_data.get("arms", {}).get("jev", [])
+        if len(jev_rows) != 10:
+            raise RuntimeError(f"Jev arm recorded {len(jev_rows)} families")
+        data["arms"]["jev"] = jev_rows
+        data["spend_usd"] += jev_data["spend_usd"]
+        data["arm_worker_log"] = str(child_log)
+        if data["spend_usd"] >= SPEND_LIMIT:
+            raise RuntimeError("Combined spend reached the authorized ceiling")
+        heur = {row["seed"]: row for row in data["arms"]["heuristic"]}
+        jev = {row["seed"]: row for row in jev_rows}
+        lower = []
+        missing = []
+        for seed, row in jev.items():
+            for member, value in row["scores_after"].items():
+                baseline = heur[seed]["scores_after"].get(member)
+                if value is None or baseline is None:
+                    missing.append({"seed": seed, "member": member})
+                elif value < baseline:
+                    lower.append(
+                        {
+                            "seed": seed,
+                            "member": member,
+                            "heuristic": baseline,
+                            "jev": value,
+                        }
+                    )
+        heur_lint = sum(row["lint_after"] for row in heur.values())
+        jev_lint = sum(row["lint_after"] for row in jev.values())
+        data["verdict"] = {
+            "adopt_jev": jev_lint < heur_lint and not lower and not missing,
+            "heuristic_lint_after": heur_lint,
+            "jev_lint_after": jev_lint,
+            "lower_scores": lower,
+            "missing_comparisons": missing,
+            "decided_at": now(),
+        }
+        data["outcome_status"] = "complete"
+        save(data)
+    except Exception as exc:
+        data["failure"] = {"at": now(), "type": type(exc).__name__, "message": str(exc)}
+        data["outcome_status"] = "blocked"
+        save(data)
+        raise
+    finally:
+        if child_proc is not None and child_proc.poll() is None:
+            os.killpg(os.getpgid(child_proc.pid), signal.SIGTERM)
+            try:
+                child_proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                os.killpg(os.getpgid(child_proc.pid), signal.SIGKILL)
+                child_proc.wait(timeout=10)
+        if child_stream is not None:
+            child_stream.write(
+                f"EXIT={child_proc.returncode if child_proc else 'unknown'}\n"
+            )
+            child_stream.close()
+        for arm, place, proc in instances:
+            stop_temp_neo4j(proc)
+            data["stopped_instances"].append(
+                {"arm": arm, "tree": str(place), "at": now()}
+            )
+        shutil.rmtree(scratch)
+        data["scratch_removed"] = {"tree": str(scratch), "at": now()}
+        save(data)
 
 
 def main() -> None:
@@ -583,7 +723,11 @@ def main() -> None:
                     cap_envelope = (
                         PREVIOUS_SPEND
                         + data["scorer_spend_usd"]
-                        + 2 * len(selected) * 1.49
+                        + 2
+                        * sum(
+                            apply_cap(item["calls_per_arm"])
+                            for item in data["dry_runs"]
+                        )
                     )
                     data["cap_envelope_usd"] = cap_envelope
                     save(data)
@@ -696,5 +840,7 @@ def main() -> None:
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "--arm-worker":
         arm_worker(sys.argv[2])
+    elif len(sys.argv) == 2 and sys.argv[1] == "--resume-applies":
+        resume_applies()
     else:
         main()
