@@ -47,26 +47,28 @@ def measured_spend() -> float:
 
 def main(role: str) -> None:
     results = json.loads(RESULTS.read_text())
+    stop_before_call = results.get("execution_controls", {}).get(
+        "budget_stop_before_next_call_usd",
+        results["pre_registration"]["budget_stop_before_next_call_usd"],
+    )
     if role in results["raw_reports"]:
         raise RuntimeError(f"Role already measured: {role}")
     if role not in results["pre_registration"]["samples"]:
         raise ValueError(role)
-    if (
-        measured_spend()
-        >= results["pre_registration"]["budget_stop_before_next_call_usd"]
-    ):
+    if measured_spend() >= stop_before_call:
         raise RuntimeError("Spend stop reached before role start")
 
     outcomes: dict[str, dict] = defaultdict(dict)
     corpus: list[dict] = []
     candidate_by_task: dict[asyncio.Task, str] = {}
+    budget_sem = asyncio.Semaphore(1)
     original_call = llm.acall_llm_structured
     original_review = benchmark.score_with_reviewer
     original_classify = dd_domain_classifier._classify_batch
 
-    async def metered_call(*args, **kwargs):
+    async def _metered_call_inner(*args, **kwargs):
         before = measured_spend()
-        if before >= results["pre_registration"]["budget_stop_before_next_call_usd"]:
+        if before >= stop_before_call:
             raise RuntimeError(f"Spend stop reached at USD {before:.4f}")
         model = kwargs.get("model", "")
         response_type = kwargs.get("response_model")
@@ -115,6 +117,10 @@ def main(role: str) -> None:
                         response.defect_resolution
                     )
         return response, cost, usage
+
+    async def metered_call(*args, **kwargs):
+        async with budget_sem:
+            return await _metered_call_inner(*args, **kwargs)
 
     async def traced_review(candidates, reviewer_model, *args, **kwargs):
         reviews, cost = await original_review(
