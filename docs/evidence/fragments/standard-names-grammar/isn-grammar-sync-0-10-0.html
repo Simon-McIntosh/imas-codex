@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="node-id" content="isn-grammar-sync-0-10-0">
+<title>ISN grammar snapshot and pin agreement</title>
+</head>
+<body>
+<main>
+<h1>ISN 0.10.0 grammar is active in the graph</h1>
+
+<p>The two <code>pyproject.toml</code> requirements already named <code>0.10.0</code>,
+but the shared editable install reported <code>imas_standard_names.__version__ ==
+"0.9.3"</code> before the rebuild. At 18:58Z on 2026-10-18, the coordinator ran
+<code>uv sync --inexact --extra gpu --reinstall-package imas-standard-names</code>
+from the main checkout, outside the worker fence. It rebuilt only
+<code>imas-codex</code> and <code>imas-standard-names</code>. The worker read the
+shared interpreter afterwards and confirmed <code>__version__ == "0.10.0"</code>.
+The GPU extra was preserved; the worker ran no further environment sync.</p>
+
+<h2>Sync and graph readback</h2>
+<p><code>sync_isn_grammar_to_graph()</code> returned <code>EXIT=0</code>, applied
+version <code>0.10.0</code>, and reported 22 segments, 7 templates, and 983 public
+context token rows. Its internal grammar-spec pass reported 803
+<code>tokens_written</code>; the public-context merge completed the version's token
+set at 983. The stored content digest is
+<code>sha256:39a54c92cd0adec53bc63d87603db741260a75d75571686cd60e4074cd5f4009</code>.</p>
+
+<table>
+<thead><tr><th>Readback</th><th>Measured result</th><th>Property control</th></tr></thead>
+<tbody>
+<tr><td>ISNGrammarVersion</td><td>123 versions; exactly one active, <code>0.10.0</code></td><td>123/123 have <code>version</code>, <code>active</code> and <code>id</code></td></tr>
+<tr><td>Previous by PEP 440: <code>0.9.3</code></td><td>982 GrammarToken nodes</td><td>982/982 have <code>version</code>, <code>segment</code>, <code>value</code> and <code>id</code></td></tr>
+<tr><td>Active <code>0.10.0</code></td><td>983 GrammarToken nodes; 22 GrammarSegment nodes; 7 GrammarTemplate nodes</td><td>983/983 tokens have <code>version</code>, <code>segment</code>, <code>value</code> and <code>id</code>; 22/22 segments and 7/7 templates have names and IDs</td></tr>
+</tbody>
+</table>
+
+<p>The token count increased by one from the prior active version and is 27 above
+the 956-token physical-base merge reference. It did not fall toward the earlier
+781-token population. The exact token query found one
+<code>GrammarToken</code> with <code>version="0.10.0"</code>,
+<code>segment="physical_base"</code>, <code>value="separatrix_distance"</code>,
+and <code>id="0.10.0:physical_base:separatrix_distance"</code>.
+The graph readback assertions ended at <code>EXIT=0</code>.</p>
+
+<h2>Pin-agreement check</h2>
+<p><code>tests/core/test_isn_pin_agreement.py</code> parses every requirement string
+in <code>pyproject.toml</code>, requires at least two ISN declarations, requires
+each to use one exact version, and requires all declared versions to agree. The
+test contains no literal release version. A scratch copy changed only the first
+pin from <code>0.10.0</code> to <code>0.10.1</code>; the second stayed
+<code>0.10.0</code>. That arm failed
+<code>test_isn_requirements_agree_on_one_exact_version</code> at
+<code>EXIT=1</code>. At committed head <code>99d9541a9</code>, the unchanged
+pins passed: <code>1 passed</code>, <code>EXIT=0</code>.</p>
+
+<p>Durable logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T184623690108-isn-grammar-sync-0-10-0/graph-sync.log</code>,
+<code>graph-readback.log</code>, <code>pin-negative-control.log</code>, and
+<code>pin-green.log</code> in the same run directory. The negative-control log
+records both mutated pin lines, the failing test ID, and its final
+<code>EXIT=1</code>.</p>
+</main>
+</body>
+</html>
