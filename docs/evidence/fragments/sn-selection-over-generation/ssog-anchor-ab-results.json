@@ -15,17 +15,29 @@
   },
   "arm_comparison_complete": false,
   "arms": {},
+  "budget_reservation": {
+    "reason": "one unreceipted Jev call at the snapshot dry-run rate",
+    "usd": 0.6556937222222222
+  },
+  "budget_spend_usd": 1.8814566722222223,
   "candidate_pool": {
     "all_families": 849,
-    "eligible": 118,
+    "before_validation": 118,
+    "eligible": 64,
     "exclusions": {
       "harmonized": 3,
       "too_small": 669,
       "west_roster": 59
-    }
+    },
+    "validation_exclusions": {
+      "docs_exhausted": 1,
+      "name_exhausted": 45,
+      "quarantined": 53
+    },
+    "validation_removed": 54
   },
   "cap_envelope_usd": 41.802292949999995,
-  "confirmed_spend_usd": 0.04229295,
+  "confirmed_spend_usd": 1.22576295,
   "dry_run_estimate_basis": {
     "calls": 36,
     "rate_usd": 0.6556937222222222,
@@ -86,42 +98,31 @@
       "seed": "length_of_passive_loop_element"
     }
   ],
+  "failed_applies": [],
   "failure": {
-    "at": "2026-10-18T13:27:27.694825+00:00",
-    "message": "Harmonize command failed for toroidal_angle_of_along_pellet_path: 1; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+    "at": "2026-10-18T13:50:23.162341+00:00",
+    "message": "Only 7 three-member differing-anchor families fit",
     "type": "RuntimeError"
   },
   "isolation_proof": [
     {
       "arm": "heuristic",
-      "at": "2026-10-18T13:04:05.200712+00:00",
+      "at": "2026-10-18T13:50:21.380814+00:00",
       "live_nodes": 1770101,
       "live_probe": 0,
       "live_uri": "bolt://98dci4-gpu-0002:7687",
       "marked_scratch_nodes": 1770102,
-      "neo4j_log": "/tmp/anchor-compare-vmye_96m/heuristic/logs/neo4j-temp.log",
+      "neo4j_log": "/tmp/anchor-compare-k0kqudec/heuristic/logs/neo4j-temp.log",
       "restored_scratch_nodes": 1770101,
       "scratch_nodes": 1770101,
       "scratch_probe": 1,
       "scratch_uri": "bolt://127.0.0.1:27697"
-    },
-    {
-      "arm": "jev",
-      "at": "2026-10-18T13:06:34.431501+00:00",
-      "live_nodes": 1770101,
-      "live_probe": 0,
-      "live_uri": "bolt://98dci4-gpu-0002:7687",
-      "marked_scratch_nodes": 1770102,
-      "neo4j_log": "/tmp/anchor-compare-vmye_96m/jev/logs/neo4j-temp.log",
-      "restored_scratch_nodes": 1770101,
-      "scratch_nodes": 1770101,
-      "scratch_probe": 1,
-      "scratch_uri": "bolt://127.0.0.1:27698"
     }
   ],
   "minimum_ten_family_calls": 60,
   "minimum_ten_family_estimate_usd": 39.34162333333333,
-  "outcome_status": "blocked_guard",
+  "outcome_status": "blocked",
+  "paired_family_count": 0,
   "partial_receipts": [
     {
       "arm": "heuristic",
@@ -161,11 +162,238 @@
       "status": "terminated during paired cleanup before a pool receipt"
     }
   ],
+  "previous_isolation_proof": [
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T13:04:05.200712+00:00",
+      "live_nodes": 1770101,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/anchor-compare-vmye_96m/heuristic/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27697"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T13:06:34.431501+00:00",
+      "live_nodes": 1770101,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/anchor-compare-vmye_96m/jev/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27698"
+    }
+  ],
+  "previous_selected": [
+    {
+      "heuristic_anchor": "toroidal_angle_of_launching_position",
+      "jev_anchor": "toroidal_angle_of_control_surface",
+      "jev_asked": [
+        "toroidal_angle_of_launching_position",
+        "toroidal_angle_of_control_surface"
+      ],
+      "jev_cost": 7.6062e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "position+geometry",
+      "members": [
+        "toroidal_angle_of_along_pellet_path",
+        "toroidal_angle_of_control_surface",
+        "toroidal_angle_of_launching_position"
+      ],
+      "physical_base": "",
+      "seed": "toroidal_angle_of_along_pellet_path"
+    },
+    {
+      "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+      "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+      "jev_asked": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "jev_cost": 0.000103068,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "coordinate",
+      "members": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "physical_base": "",
+      "seed": "vertical_coordinate_of_diagnostic_aperture"
+    },
+    {
+      "heuristic_anchor": "toroidal_angular_width_of_camera",
+      "jev_anchor": "vertical_angular_width_of_camera",
+      "jev_asked": [
+        "vertical_angular_width_of_camera",
+        "toroidal_angular_width_of_camera"
+      ],
+      "jev_cost": 7.072799999999999e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "component",
+      "members": [
+        "angular_width_of_camera",
+        "toroidal_angular_width_of_camera",
+        "vertical_angular_width_of_camera"
+      ],
+      "physical_base": "angular_width",
+      "seed": "angular_width_of_camera"
+    },
+    {
+      "heuristic_anchor": "wetted_area_of_langmuir_probe",
+      "jev_anchor": "effective_area_of_langmuir_probe",
+      "jev_asked": [
+        "effective_area_of_langmuir_probe",
+        "wetted_area_of_langmuir_probe"
+      ],
+      "jev_cost": 6.732600000000001e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "unclassified",
+      "members": [
+        "effective_area_of_langmuir_probe",
+        "front_surface_area_of_langmuir_probe",
+        "wetted_area_of_langmuir_probe"
+      ],
+      "physical_base": "area",
+      "seed": "effective_area_of_langmuir_probe"
+    },
+    {
+      "heuristic_anchor": "incident_energy_flux_at_wall_due_to_eddy_current",
+      "jev_anchor": "energy_flux_at_wall_due_to_eddy_current",
+      "jev_asked": [
+        "energy_flux_at_wall_due_to_eddy_current",
+        "incident_energy_flux_at_wall_due_to_eddy_current"
+      ],
+      "jev_cost": 8.358000000000001e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "position",
+      "members": [
+        "energy_flux_at_wall_due_to_eddy_current",
+        "energy_flux_due_to_eddy_current",
+        "incident_energy_flux_at_wall_due_to_eddy_current"
+      ],
+      "physical_base": "energy",
+      "seed": "energy_flux_at_wall_due_to_eddy_current"
+    },
+    {
+      "heuristic_anchor": "power_of_divertor_due_to_recombination",
+      "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
+      "jev_asked": [
+        "power_of_divertor_due_to_recombination",
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination"
+      ],
+      "jev_cost": 0.00012205199999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "subject",
+      "members": [
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination",
+        "power_of_divertor_due_to_recombination"
+      ],
+      "physical_base": "power",
+      "seed": "neutral_power_of_divertor_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "neutral_particle_flux_at_wall_due_to_pumping",
+      "jev_anchor": "flux_at_wall_due_to_pumping",
+      "jev_asked": [
+        "flux_due_to_pumping",
+        "flux_at_wall_due_to_pumping",
+        "electron_particle_flux_at_wall_due_to_pumping",
+        "neutral_particle_flux_at_wall_due_to_pumping"
+      ],
+      "jev_cost": 0.000146454,
+      "jev_reason": null,
+      "jev_scored": 4,
+      "kind": "subject+position",
+      "members": [
+        "electron_particle_flux_at_wall_due_to_pumping",
+        "flux_at_wall_due_to_pumping",
+        "flux_due_to_pumping",
+        "neutral_particle_flux_at_wall_due_to_pumping"
+      ],
+      "physical_base": "flux",
+      "seed": "electron_particle_flux_at_wall_due_to_pumping"
+    },
+    {
+      "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+      "jev_anchor": "current_density_due_to_wave_driven_current_drive",
+      "jev_asked": [
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_due_to_wave_driven_current_drive"
+      ],
+      "jev_cost": 0.00013385399999999998,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_wave_driven_current_drive"
+    },
+    {
+      "heuristic_anchor": "length_of_antenna_strap",
+      "jev_anchor": "major_length_of_antenna_strap",
+      "jev_asked": [
+        "length_of_antenna_strap",
+        "major_length_of_antenna_strap"
+      ],
+      "jev_cost": 6.946799999999999e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "unclassified",
+      "members": [
+        "length_of_antenna_strap",
+        "major_length_of_antenna_strap",
+        "minor_length_of_antenna_strap"
+      ],
+      "physical_base": "length",
+      "seed": "length_of_antenna_strap"
+    },
+    {
+      "heuristic_anchor": "major_length_of_passive_loop_element",
+      "jev_anchor": "length_of_passive_loop_element",
+      "jev_asked": [
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element",
+        "length_of_passive_loop_element"
+      ],
+      "jev_cost": 0.000107772,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "length_of_passive_loop_element",
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element"
+      ],
+      "physical_base": "length",
+      "seed": "length_of_passive_loop_element"
+    }
+  ],
   "previous_spend_usd": 0.021194586,
   "receipt_scan_positive_control": "The same parser found 4, 4, and 8 completed model response lines and three cost_spent summaries in the earlier sessions; the terminated Jev second session has no finalized summary, so no zero-spend claim is made.",
-  "resumed_at": "2026-10-18T13:01:25.973859+00:00",
+  "resumed_at": "2026-10-18T13:47:59.192331+00:00",
   "ruling": "2026-10-18 lead: USD 42.00 total including prior spend; all ten paired families",
-  "same_anchor_count": 12,
+  "same_anchor_count": 5,
   "scored_candidates": [
     {
       "heuristic_anchor": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
@@ -3519,10 +3747,10 @@
     "verified_at": "2026-10-18T12:23:51.597891+00:00"
   },
   "scratch_removed": {
-    "at": "2026-10-18T13:27:59.762812+00:00",
-    "tree": "/tmp/anchor-compare-vmye_96m"
+    "at": "2026-10-18T13:50:39.407831+00:00",
+    "tree": "/tmp/anchor-compare-k0kqudec"
   },
-  "scratch_tree": "/tmp/anchor-compare-vmye_96m",
+  "scratch_tree": "/tmp/anchor-compare-k0kqudec",
   "selected": [
     {
       "heuristic_anchor": "toroidal_angle_of_launching_position",
@@ -3730,16 +3958,392 @@
   "stopped_instances": [
     {
       "arm": "heuristic",
-      "at": "2026-10-18T13:27:42.752444+00:00",
-      "tree": "/tmp/anchor-compare-vmye_96m/heuristic"
-    },
-    {
-      "arm": "jev",
-      "at": "2026-10-18T13:27:57.758624+00:00",
-      "tree": "/tmp/anchor-compare-vmye_96m/jev"
+      "at": "2026-10-18T13:50:38.173822+00:00",
+      "tree": "/tmp/anchor-compare-k0kqudec/heuristic"
     }
   ],
-  "unscored_count": 64,
+  "unscored_count": 38,
+  "validation_search": {
+    "at": "2026-10-18T13:50:23.137411+00:00",
+    "member_rows": 1228,
+    "properties": [
+      "validation_status",
+      "docs_stage",
+      "name_stage"
+    ],
+    "read_from": "bolt://127.0.0.1:27697",
+    "removed_families": [
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "toroidal_angle_of_along_pellet_path"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "effective_area_of_langmuir_probe"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "average_charge_number"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "electron_convection_velocity"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "accumulated_carbon_count_due_to_gas_injection"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_fast_current_density"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "decay_length_over_scrape_off_layer"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "electron_diffusion_coefficient"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "effective_electron_diffusivity"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "binormal_wave_electric_field"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "effective_thermal_ion_charge_state_energy_velocity_due_to_convection"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "energy_flux_at_wall_due_to_eddy_current"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "electron_kinetic_energy_flux_at_wall_due_to_surface_emission"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "calibration_factor_of_spectrometer_channel"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "back_surface_neutron_flux"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "electron_particle_flux_at_wall_due_to_pumping"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "flux_at_wall_due_to_recombination"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "force_of_poloidal_field_coil"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "alfven_frequency"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "plasma_internal_energy"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "length_of_antenna_strap"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "mass_density"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "mhd_mode_number"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "diamagnetic_momentum_convection_velocity"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "flux_surface_normal_ion_momentum_flux_due_to_diamagnetic_drift"
+      },
+      {
+        "reasons": [
+          "name_exhausted"
+        ],
+        "seed": "momentum_flux_due_to_perturbed_parallel_magnetic_field"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "momentum_flux_due_to_perturbed_parallel_vector_potential"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "ion_cyclotron_heating_antenna_phase"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "absorbed_power_of_beam_tracing_beam"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "absorbed_radiated_power_of_divertor"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "neutral_power_at_divertor_target_due_to_recombination"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_power_density"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_fast_electron_kinetic_power_density_due_to_collisions"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "perturbed_plasma_pressure_imaginary_part"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "inner_radius_of_plasma_filament"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "inner_radius_of_poloidal_field_coil"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "ammonia_deuterated_source_rate"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "deuterium_source_rate_due_to_injection"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "lower_thickness_of_breeder_blanket_module"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "cumulative_inside_flux_surface_torque"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "electron_torque_due_to_collisions"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_torque_density"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_fast_ion_charge_state_torque_density_due_to_collisions"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "fast_particle_torque_density_due_to_coulomb_collisions_with_electrons"
+      },
+      {
+        "reasons": [
+          "docs_exhausted",
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "perturbed_vector_potential"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "bulk_neutral_internal_state_velocity"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "binormal_ion_velocity_due_to_diamagnetic_drift"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "measured_voltage_of_spectrometer_channel"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "ratio_of_diamagnetic_vorticity_to_major_radius"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "normalized_toroidal_hard_xray_peak_lower_bound_width"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "first_local_tangential_width_of_aperture"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "first_local_tangential_width_of_diagnostic_aperture"
+      }
+    ]
+  },
   "variation_kind_counts": {
     "component": 37,
     "component+device": 1,
