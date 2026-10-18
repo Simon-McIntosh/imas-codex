@@ -1,0 +1,1255 @@
+{
+  "pre_registration": {
+    "timestamp_utc": "2026-10-18T18:09:59Z",
+    "decision_rule": "gpt-6-luna is capable for a seat if the 95% lower bound of its paired primary-metric difference from gpt-6.1-sol is at least -0.05",
+    "confidence_method": "percentile bootstrap of matched fixture items, 10000 draws, seed 1729; recompute each role's primary metric within each draw",
+    "negative_control": "pairing each low-cost output with a shuffled full-model output of the same role must give a paired-difference interval containing zero",
+    "seed": 1729,
+    "models": [
+      "live incumbent",
+      "openrouter/openai/gpt-6.1-sol",
+      "openrouter/openai/gpt-6-luna"
+    ],
+    "samples": {
+      "refine": {
+        "n": 8,
+        "reason": "One generation and one held-out judge call per model and item; cap their combined cost while covering multiple domains."
+      },
+      "docs": {
+        "n": 8,
+        "reason": "One generation and one held-out rubric call per model and item; cap the expensive judge."
+      },
+      "breaker-names": {
+        "n": 12,
+        "reason": "Retain opportunities for verdict flips while bounding production review prompts."
+      },
+      "breaker-docs": {
+        "n": 12,
+        "reason": "Retain opportunities for verdict flips while bounding one docs review call per item."
+      },
+      "classifier": {
+        "n": 24,
+        "reason": "Cover more gold paths because classification runs in batches and has no held-out judge."
+      }
+    },
+    "judge": "openrouter/anthropic/claude-opus-4.8",
+    "judge_price_usd_per_million_tokens": {
+      "prompt": 5.0,
+      "completion": 25.0
+    },
+    "budget_ceiling_usd": 10.0,
+    "budget_stop_before_next_call_usd": 8.0
+  },
+  "raw_reports": {
+    "refine": {
+      "role": "refine",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-5.5",
+          "n": 8,
+          "cost": 0.6535679999999999,
+          "metrics": {
+            "defect_resolution": 0.7812,
+            "collateral_change": 0.2312,
+            "valid_refine_rate": 1.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 8,
+          "cost": 0.16558280000000003,
+          "metrics": {
+            "defect_resolution": 0.6562,
+            "collateral_change": 0.25,
+            "valid_refine_rate": 1.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 8,
+          "cost": 0.07778088,
+          "metrics": {
+            "defect_resolution": 0.7937,
+            "collateral_change": 0.2,
+            "valid_refine_rate": 1.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/openai/gpt-5.5",
+      "judge_model": "openrouter/anthropic/claude-opus-4.8",
+      "sample_ids": [
+        "volume_averaged_linear_electron_decay_time_due_to_disruption",
+        "ion_mass",
+        "power_of_divertor_due_to_ohmic_dissipation",
+        "effective_charge_at_separatrix",
+        "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency",
+        "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux",
+        "magnetic_field_magnitude_at_pedestal_top_low_field_side",
+        "breakdown_initial_time"
+      ],
+      "seed": 0,
+      "axis": "names",
+      "timestamp": "2026-10-18T18:20:57.899504+00:00",
+      "provenance": {
+        "corpus": "REFINED_FROM history",
+        "n_cases": 8
+      }
+    },
+    "docs": {
+      "role": "docs",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-5.6-luna",
+          "n": 8,
+          "cost": 0.5212092400000001,
+          "metrics": {
+            "rubric_score": 0.9422,
+            "banned_prose_rate": 0.125,
+            "banned_prose_findings": 1.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 8,
+          "cost": 0.5917422,
+          "metrics": {
+            "rubric_score": 0.9844,
+            "banned_prose_rate": 0.0,
+            "banned_prose_findings": 0.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 8,
+          "cost": 0.47975492000000003,
+          "metrics": {
+            "rubric_score": 0.9516,
+            "banned_prose_rate": 0.0,
+            "banned_prose_findings": 0.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/openai/gpt-5.6-luna",
+      "judge_model": "openrouter/anthropic/claude-opus-4.8",
+      "sample_ids": [
+        "radiative_extraordinary_mode_temperature_at_ece_channel",
+        "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+        "beryllium_density_at_divertor_target",
+        "thermal_plasma_pressure",
+        "toroidal_coordinate_at_beam_tracing_point",
+        "inverse_of_square_of_major_radius",
+        "normalized_toroidal_flux_coordinate_at_internal_transport_barrier",
+        "pulse_duration"
+      ],
+      "seed": 0,
+      "axis": null,
+      "timestamp": "2026-10-18T18:31:23.217180+00:00",
+      "provenance": {
+        "n_docs": 8
+      }
+    },
+    "breaker-docs": {
+      "role": "breaker-docs",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-5.5",
+          "n": 12,
+          "cost": 1.20218,
+          "metrics": {
+            "independence_rho": -0.222,
+            "rho_qwen": -0.1759,
+            "rho_minimax": -0.2681,
+            "verdict_flip_quality": 0.3333,
+            "n_flips": 3.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 12,
+          "cost": 0.38120500000000007,
+          "metrics": {
+            "independence_rho": -0.1348,
+            "rho_qwen": -0.2172,
+            "rho_minimax": -0.0523,
+            "verdict_flip_quality": 0.3333,
+            "n_flips": 3.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 12,
+          "cost": 0.024678525,
+          "metrics": {
+            "independence_rho": -0.3266,
+            "rho_qwen": -0.3447,
+            "rho_minimax": -0.3084,
+            "verdict_flip_quality": 0.5,
+            "n_flips": 2.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/openai/gpt-5.5",
+      "judge_model": null,
+      "sample_ids": [
+        "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive",
+        "helium_3_density_at_divertor_target",
+        "deuterium_density_at_plasma_boundary",
+        "tilt_angle_of_beam_tracing_beam",
+        "vertical_velocity_at_current_center",
+        "oxygen_density_at_plasma_boundary",
+        "area_of_flux_loop",
+        "voltage_of_correction_coil",
+        "radial_perturbed_vacuum_magnetic_field_real_part",
+        "y_first_measurement_direction_unit_vector_of_strain_gauge",
+        "helium_4_density",
+        "propane_prefill_count"
+      ],
+      "seed": 0,
+      "axis": "docs",
+      "timestamp": "2026-10-18T18:44:31.676716+00:00",
+      "provenance": {
+        "blind_pair": [
+          "openrouter/qwen/qwen3.7-max",
+          "openrouter/minimax/minimax-m3"
+        ],
+        "n_items": 12
+      }
+    },
+    "classifier": {
+      "role": "classifier",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-5.5",
+          "n": 24,
+          "cost": 0.130415,
+          "metrics": {
+            "accuracy": 0.6667,
+            "correct": 16.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 24,
+          "cost": 0.045111,
+          "metrics": {
+            "accuracy": 0.6667,
+            "correct": 16.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 24,
+          "cost": 0.00245655,
+          "metrics": {
+            "accuracy": 0.6667,
+            "correct": 16.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/openai/gpt-5.5",
+      "judge_model": null,
+      "sample_ids": [
+        "summary/boundary/elongation",
+        "summary/boundary/geometric_axis_r",
+        "summary/boundary/geometric_axis_z",
+        "summary/boundary/magnetic_axis_r",
+        "summary/boundary/magnetic_axis_z",
+        "summary/boundary/minor_radius",
+        "summary/boundary/distance_inner_outer_separatrices",
+        "summary/boundary/gap_limiter_wall",
+        "summary/global_quantities/ip",
+        "summary/global_quantities/beta_pol",
+        "summary/global_quantities/beta_tor",
+        "summary/global_quantities/beta_tor_norm",
+        "summary/global_quantities/li_3",
+        "summary/global_quantities/q_95",
+        "summary/global_quantities/v_loop",
+        "summary/global_quantities/volume",
+        "summary/global_quantities/r0",
+        "summary/global_quantities/psi_external_average",
+        "summary/global_quantities/energy_thermal",
+        "summary/global_quantities/tau_energy",
+        "summary/global_quantities/tau_energy_98",
+        "summary/global_quantities/h_98",
+        "summary/global_quantities/energy_electrons_thermal",
+        "summary/global_quantities/energy_ion_total_thermal"
+      ],
+      "seed": 0,
+      "axis": null,
+      "timestamp": "2026-10-18T18:48:14.530786+00:00",
+      "provenance": {
+        "gold_set": "domain_gold_set.json",
+        "n_paths": 24
+      }
+    },
+    "breaker-names": {
+      "role": "breaker-names",
+      "results": [
+        {
+          "model": "openrouter/openai/gpt-6.1-sol",
+          "n": 8,
+          "cost": 0.152496,
+          "metrics": {
+            "independence_rho": 0.2637,
+            "rho_qwen": 0.0368,
+            "rho_minimax": 0.4906,
+            "verdict_flip_quality": 0.6667,
+            "n_flips": 3.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/openai/gpt-6-luna",
+          "n": 8,
+          "cost": 0.0081288,
+          "metrics": {
+            "independence_rho": 0.0922,
+            "rho_qwen": -0.3314,
+            "rho_minimax": 0.5157,
+            "verdict_flip_quality": 0.5,
+            "n_flips": 4.0
+          },
+          "error": null
+        },
+        {
+          "model": "openrouter/anthropic/claude-sonnet-5",
+          "n": 8,
+          "cost": 0.302091,
+          "metrics": {
+            "independence_rho": 0.4608,
+            "rho_qwen": 0.4431,
+            "rho_minimax": 0.4786,
+            "verdict_flip_quality": 1.0,
+            "n_flips": 1.0
+          },
+          "error": null
+        }
+      ],
+      "incumbent": "openrouter/anthropic/claude-sonnet-5",
+      "judge_model": null,
+      "sample_ids": [
+        "neutral_mass",
+        "radial_scrape_off_layer_heat_decay_length_at_midplane",
+        "ion_average_decay_length_over_scrape_off_layer",
+        "spun_period_of_fiber_optic_current_sensor",
+        "radial_derivative_of_flux_surface_coefficient",
+        "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density",
+        "plasma_pulse_confinement_time",
+        "length_of_magnetic_field_probe"
+      ],
+      "seed": 0,
+      "axis": "names",
+      "timestamp": "2026-10-18T19:00:54.323020+00:00",
+      "provenance": {
+        "blind_pair": [
+          "openrouter/qwen/qwen3.7-max",
+          "openrouter/minimax/minimax-m3"
+        ],
+        "n_items": 8
+      }
+    }
+  },
+  "item_outcomes": {
+    "refine": {
+      "fixture": [
+        {
+          "id": "volume_averaged_linear_electron_decay_time_due_to_disruption"
+        },
+        {
+          "id": "ion_mass"
+        },
+        {
+          "id": "power_of_divertor_due_to_ohmic_dissipation"
+        },
+        {
+          "id": "effective_charge_at_separatrix"
+        },
+        {
+          "id": "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency"
+        },
+        {
+          "id": "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux"
+        },
+        {
+          "id": "magnetic_field_magnitude_at_pedestal_top_low_field_side"
+        },
+        {
+          "id": "breakdown_initial_time"
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-5.5": {
+          "effective_charge_at_separatrix": 1.0,
+          "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux": 0.75,
+          "power_of_divertor_due_to_ohmic_dissipation": 1.0,
+          "volume_averaged_linear_electron_decay_time_due_to_disruption": 0.9,
+          "magnetic_field_magnitude_at_pedestal_top_low_field_side": 0.7,
+          "breakdown_initial_time": 0.2,
+          "ion_mass": 0.85,
+          "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency": 0.85
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "effective_charge_at_separatrix": 1.0,
+          "power_of_divertor_due_to_ohmic_dissipation": 1.0,
+          "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux": 0.0,
+          "magnetic_field_magnitude_at_pedestal_top_low_field_side": 0.7,
+          "breakdown_initial_time": 0.1,
+          "ion_mass": 0.8,
+          "volume_averaged_linear_electron_decay_time_due_to_disruption": 0.95,
+          "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency": 0.7
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "effective_charge_at_separatrix": 1.0,
+          "power_of_divertor_due_to_ohmic_dissipation": 1.0,
+          "ion_mass": 0.85,
+          "magnetic_field_magnitude_at_pedestal_top_low_field_side": 0.8,
+          "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency": 0.85,
+          "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux": 0.75,
+          "volume_averaged_linear_electron_decay_time_due_to_disruption": 1.0,
+          "breakdown_initial_time": 0.1
+        }
+      }
+    },
+    "docs": {
+      "fixture": [
+        {
+          "id": "radiative_extraordinary_mode_temperature_at_ece_channel"
+        },
+        {
+          "id": "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror"
+        },
+        {
+          "id": "beryllium_density_at_divertor_target"
+        },
+        {
+          "id": "thermal_plasma_pressure"
+        },
+        {
+          "id": "toroidal_coordinate_at_beam_tracing_point"
+        },
+        {
+          "id": "inverse_of_square_of_major_radius"
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate_at_internal_transport_barrier"
+        },
+        {
+          "id": "pulse_duration"
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-5.6-luna": {
+          "radiative_extraordinary_mode_temperature_at_ece_channel": 0.975,
+          "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror": 0.875,
+          "beryllium_density_at_divertor_target": 0.975,
+          "thermal_plasma_pressure": 1.0,
+          "toroidal_coordinate_at_beam_tracing_point": 0.75,
+          "inverse_of_square_of_major_radius": 1.0,
+          "normalized_toroidal_flux_coordinate_at_internal_transport_barrier": 0.9875,
+          "pulse_duration": 0.975
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "radiative_extraordinary_mode_temperature_at_ece_channel": 0.975,
+          "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror": 0.975,
+          "beryllium_density_at_divertor_target": 0.975,
+          "thermal_plasma_pressure": 0.9875,
+          "toroidal_coordinate_at_beam_tracing_point": 0.9875,
+          "inverse_of_square_of_major_radius": 1.0,
+          "normalized_toroidal_flux_coordinate_at_internal_transport_barrier": 0.9875,
+          "pulse_duration": 0.9875
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "radiative_extraordinary_mode_temperature_at_ece_channel": 0.85,
+          "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror": 0.9875,
+          "beryllium_density_at_divertor_target": 0.9,
+          "thermal_plasma_pressure": 0.9875,
+          "toroidal_coordinate_at_beam_tracing_point": 0.975,
+          "inverse_of_square_of_major_radius": 0.9625,
+          "normalized_toroidal_flux_coordinate_at_internal_transport_barrier": 0.975,
+          "pulse_duration": 0.975
+        }
+      }
+    },
+    "breaker-docs": {
+      "fixture": [
+        {
+          "id": "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive",
+          "pair_mean": 0.8479166666666667,
+          "final_accepted": false
+        },
+        {
+          "id": "helium_3_density_at_divertor_target",
+          "pair_mean": 0.8875,
+          "final_accepted": true
+        },
+        {
+          "id": "deuterium_density_at_plasma_boundary",
+          "pair_mean": 0.7062499999999999,
+          "final_accepted": true
+        },
+        {
+          "id": "tilt_angle_of_beam_tracing_beam",
+          "pair_mean": 0.8500000000000001,
+          "final_accepted": true
+        },
+        {
+          "id": "vertical_velocity_at_current_center",
+          "pair_mean": 0.83125,
+          "final_accepted": true
+        },
+        {
+          "id": "oxygen_density_at_plasma_boundary",
+          "pair_mean": 0.8555555555555556,
+          "final_accepted": true
+        },
+        {
+          "id": "area_of_flux_loop",
+          "pair_mean": 0.853125,
+          "final_accepted": true
+        },
+        {
+          "id": "voltage_of_correction_coil",
+          "pair_mean": 0.84375,
+          "final_accepted": true
+        },
+        {
+          "id": "radial_perturbed_vacuum_magnetic_field_real_part",
+          "pair_mean": 0.79375,
+          "final_accepted": true
+        },
+        {
+          "id": "y_first_measurement_direction_unit_vector_of_strain_gauge",
+          "pair_mean": 0.796875,
+          "final_accepted": true
+        },
+        {
+          "id": "helium_4_density",
+          "pair_mean": 0.7640625,
+          "final_accepted": true
+        },
+        {
+          "id": "propane_prefill_count",
+          "pair_mean": 0.925,
+          "final_accepted": true
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-5.5": {
+          "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive": 1.0,
+          "helium_3_density_at_divertor_target": 1.0,
+          "deuterium_density_at_plasma_boundary": 1.0,
+          "tilt_angle_of_beam_tracing_beam": 0.9375,
+          "vertical_velocity_at_current_center": 1.0,
+          "oxygen_density_at_plasma_boundary": 0.9375,
+          "area_of_flux_loop": 0.875,
+          "voltage_of_correction_coil": 1.0,
+          "radial_perturbed_vacuum_magnetic_field_real_part": 1.0,
+          "y_first_measurement_direction_unit_vector_of_strain_gauge": 0.9375,
+          "helium_4_density": 0.5625,
+          "propane_prefill_count": 0.5625
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive": 0.9375,
+          "helium_3_density_at_divertor_target": 0.75,
+          "deuterium_density_at_plasma_boundary": 0.75,
+          "tilt_angle_of_beam_tracing_beam": 0.75,
+          "vertical_velocity_at_current_center": 1.0,
+          "oxygen_density_at_plasma_boundary": 0.75,
+          "area_of_flux_loop": 0.6875,
+          "voltage_of_correction_coil": 0.875,
+          "radial_perturbed_vacuum_magnetic_field_real_part": 0.8125,
+          "y_first_measurement_direction_unit_vector_of_strain_gauge": 0.75,
+          "helium_4_density": 0.5625,
+          "propane_prefill_count": 0.75
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "parallel_per_toroidal_mode_current_density_due_to_wave_driven_current_drive": 0.875,
+          "helium_3_density_at_divertor_target": 0.75,
+          "deuterium_density_at_plasma_boundary": 1.0,
+          "tilt_angle_of_beam_tracing_beam": 0.75,
+          "vertical_velocity_at_current_center": 1.0,
+          "oxygen_density_at_plasma_boundary": 0.8125,
+          "area_of_flux_loop": 0.75,
+          "voltage_of_correction_coil": 0.8125,
+          "radial_perturbed_vacuum_magnetic_field_real_part": 0.875,
+          "y_first_measurement_direction_unit_vector_of_strain_gauge": 0.9375,
+          "helium_4_density": 0.5,
+          "propane_prefill_count": 0.8125
+        }
+      }
+    },
+    "classifier": {
+      "fixture": [
+        {
+          "id": "summary/boundary/elongation",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/geometric_axis_r",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/geometric_axis_z",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/magnetic_axis_r",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/magnetic_axis_z",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/minor_radius",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/distance_inner_outer_separatrices",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/boundary/gap_limiter_wall",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/ip",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/beta_pol",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/beta_tor",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/beta_tor_norm",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/li_3",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/q_95",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/v_loop",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/volume",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/r0",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/psi_external_average",
+          "expected": "equilibrium"
+        },
+        {
+          "id": "summary/global_quantities/energy_thermal",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/tau_energy",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/tau_energy_98",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/h_98",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/energy_electrons_thermal",
+          "expected": "transport"
+        },
+        {
+          "id": "summary/global_quantities/energy_ion_total_thermal",
+          "expected": "transport"
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-5.5": {
+          "summary/boundary/elongation": "equilibrium",
+          "summary/boundary/geometric_axis_r": "equilibrium",
+          "summary/boundary/geometric_axis_z": "equilibrium",
+          "summary/boundary/magnetic_axis_r": "equilibrium",
+          "summary/boundary/magnetic_axis_z": "equilibrium",
+          "summary/boundary/minor_radius": "equilibrium",
+          "summary/boundary/distance_inner_outer_separatrices": "equilibrium",
+          "summary/boundary/gap_limiter_wall": "equilibrium",
+          "summary/global_quantities/ip": "core_plasma_physics",
+          "summary/global_quantities/beta_pol": "core_plasma_physics",
+          "summary/global_quantities/beta_tor": "core_plasma_physics",
+          "summary/global_quantities/beta_tor_norm": "core_plasma_physics",
+          "summary/global_quantities/li_3": "equilibrium",
+          "summary/global_quantities/q_95": "equilibrium",
+          "summary/global_quantities/v_loop": "core_plasma_physics",
+          "summary/global_quantities/volume": "equilibrium",
+          "summary/global_quantities/r0": "equilibrium",
+          "summary/global_quantities/psi_external_average": "equilibrium",
+          "summary/global_quantities/energy_thermal": "core_plasma_physics",
+          "summary/global_quantities/tau_energy": "transport",
+          "summary/global_quantities/tau_energy_98": "transport",
+          "summary/global_quantities/h_98": "transport",
+          "summary/global_quantities/energy_electrons_thermal": "core_plasma_physics",
+          "summary/global_quantities/energy_ion_total_thermal": "core_plasma_physics"
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "summary/boundary/elongation": "equilibrium",
+          "summary/boundary/geometric_axis_r": "equilibrium",
+          "summary/boundary/geometric_axis_z": "equilibrium",
+          "summary/boundary/magnetic_axis_r": "equilibrium",
+          "summary/boundary/magnetic_axis_z": "equilibrium",
+          "summary/boundary/minor_radius": "equilibrium",
+          "summary/boundary/distance_inner_outer_separatrices": "equilibrium",
+          "summary/boundary/gap_limiter_wall": "equilibrium",
+          "summary/global_quantities/ip": "core_plasma_physics",
+          "summary/global_quantities/beta_pol": "core_plasma_physics",
+          "summary/global_quantities/beta_tor": "core_plasma_physics",
+          "summary/global_quantities/beta_tor_norm": "core_plasma_physics",
+          "summary/global_quantities/li_3": "equilibrium",
+          "summary/global_quantities/q_95": "equilibrium",
+          "summary/global_quantities/v_loop": "magnetic_field_systems",
+          "summary/global_quantities/volume": "equilibrium",
+          "summary/global_quantities/r0": "equilibrium",
+          "summary/global_quantities/psi_external_average": "equilibrium",
+          "summary/global_quantities/energy_thermal": "core_plasma_physics",
+          "summary/global_quantities/tau_energy": "transport",
+          "summary/global_quantities/tau_energy_98": "transport",
+          "summary/global_quantities/h_98": "transport",
+          "summary/global_quantities/energy_electrons_thermal": "core_plasma_physics",
+          "summary/global_quantities/energy_ion_total_thermal": "core_plasma_physics"
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "summary/boundary/elongation": "equilibrium",
+          "summary/boundary/geometric_axis_r": "equilibrium",
+          "summary/boundary/geometric_axis_z": "equilibrium",
+          "summary/boundary/magnetic_axis_r": "equilibrium",
+          "summary/boundary/magnetic_axis_z": "equilibrium",
+          "summary/boundary/minor_radius": "equilibrium",
+          "summary/boundary/distance_inner_outer_separatrices": "equilibrium",
+          "summary/boundary/gap_limiter_wall": "equilibrium",
+          "summary/global_quantities/ip": "core_plasma_physics",
+          "summary/global_quantities/beta_pol": "core_plasma_physics",
+          "summary/global_quantities/beta_tor": "core_plasma_physics",
+          "summary/global_quantities/beta_tor_norm": "core_plasma_physics",
+          "summary/global_quantities/li_3": "equilibrium",
+          "summary/global_quantities/q_95": "equilibrium",
+          "summary/global_quantities/v_loop": "core_plasma_physics",
+          "summary/global_quantities/volume": "equilibrium",
+          "summary/global_quantities/r0": "equilibrium",
+          "summary/global_quantities/psi_external_average": "equilibrium",
+          "summary/global_quantities/energy_thermal": "core_plasma_physics",
+          "summary/global_quantities/tau_energy": "transport",
+          "summary/global_quantities/tau_energy_98": "transport",
+          "summary/global_quantities/h_98": "transport",
+          "summary/global_quantities/energy_electrons_thermal": "core_plasma_physics",
+          "summary/global_quantities/energy_ion_total_thermal": "core_plasma_physics"
+        }
+      }
+    },
+    "breaker-names": {
+      "fixture": [
+        {
+          "id": "neutral_mass",
+          "pair_mean": 0.60625,
+          "final_accepted": false
+        },
+        {
+          "id": "radial_scrape_off_layer_heat_decay_length_at_midplane",
+          "pair_mean": 0.8125,
+          "final_accepted": false
+        },
+        {
+          "id": "ion_average_decay_length_over_scrape_off_layer",
+          "pair_mean": 0.65625,
+          "final_accepted": false
+        },
+        {
+          "id": "spun_period_of_fiber_optic_current_sensor",
+          "pair_mean": 0.8187500000000001,
+          "final_accepted": false
+        },
+        {
+          "id": "radial_derivative_of_flux_surface_coefficient",
+          "pair_mean": 0.7,
+          "final_accepted": false
+        },
+        {
+          "id": "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density",
+          "pair_mean": 0.8375,
+          "final_accepted": false
+        },
+        {
+          "id": "plasma_pulse_confinement_time",
+          "pair_mean": 0.6875,
+          "final_accepted": false
+        },
+        {
+          "id": "length_of_magnetic_field_probe",
+          "pair_mean": 0.8374999999999999,
+          "final_accepted": false
+        }
+      ],
+      "by_model": {
+        "openrouter/openai/gpt-6.1-sol": {
+          "neutral_mass": 1.0,
+          "radial_scrape_off_layer_heat_decay_length_at_midplane": 0.6875,
+          "ion_average_decay_length_over_scrape_off_layer": 0.6,
+          "spun_period_of_fiber_optic_current_sensor": 0.725,
+          "radial_derivative_of_flux_surface_coefficient": 0.375,
+          "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density": 1.0,
+          "plasma_pulse_confinement_time": 0.725,
+          "length_of_magnetic_field_probe": 1.0
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "neutral_mass": 0.875,
+          "radial_scrape_off_layer_heat_decay_length_at_midplane": 0.3125,
+          "ion_average_decay_length_over_scrape_off_layer": 0.625,
+          "spun_period_of_fiber_optic_current_sensor": 0.625,
+          "radial_derivative_of_flux_surface_coefficient": 0.4125,
+          "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density": 1.0,
+          "plasma_pulse_confinement_time": 1.0,
+          "length_of_magnetic_field_probe": 1.0
+        },
+        "openrouter/anthropic/claude-sonnet-5": {
+          "neutral_mass": 0.575,
+          "radial_scrape_off_layer_heat_decay_length_at_midplane": 0.5625,
+          "ion_average_decay_length_over_scrape_off_layer": 0.6,
+          "spun_period_of_fiber_optic_current_sensor": 0.8375,
+          "radial_derivative_of_flux_surface_coefficient": 0.3375,
+          "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_electron_density": 0.8375,
+          "plasma_pulse_confinement_time": 0.4875,
+          "length_of_magnetic_field_probe": 0.9375
+        }
+      }
+    }
+  },
+  "analysis": {
+    "refine": {
+      "sample_size": 8,
+      "primary_metric": "defect_resolution",
+      "models": {
+        "openrouter/openai/gpt-5.5": {
+          "primary": 0.78125,
+          "interval_95": [
+            0.59375,
+            0.91875
+          ],
+          "candidate_call_count": 8,
+          "candidate_cost_per_call_usd": 0.07283225,
+          "candidate_latency_per_call_seconds": 22.124449776369147,
+          "effective_cost_per_item_usd": 0.08169599999999999
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "primary": 0.65625,
+          "interval_95": [
+            0.3875,
+            0.8937499999999999
+          ],
+          "candidate_call_count": 8,
+          "candidate_cost_per_call_usd": 0.011900975,
+          "candidate_latency_per_call_seconds": 29.252639517420903,
+          "effective_cost_per_item_usd": 0.020697850000000004
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "primary": 0.79375,
+          "interval_95": [
+            0.575,
+            0.94375
+          ],
+          "candidate_call_count": 8,
+          "candidate_cost_per_call_usd": 0.001018235,
+          "candidate_latency_per_call_seconds": 15.842020945623517,
+          "effective_cost_per_item_usd": 0.00972261
+        }
+      },
+      "luna_minus_sol": 0.13749999999999996,
+      "paired_interval_95": [
+        0.02499999999999991,
+        0.31875000000000003
+      ],
+      "capable_under_rule": true,
+      "shuffled_control_interval_95": [
+        -0.2437499999999999,
+        0.48750000000000004
+      ],
+      "shuffled_control_contains_zero": true
+    },
+    "docs": {
+      "sample_size": 8,
+      "primary_metric": "rubric_score",
+      "models": {
+        "openrouter/openai/gpt-5.6-luna": {
+          "primary": 0.9421875,
+          "interval_95": [
+            0.88125,
+            0.9875
+          ],
+          "candidate_call_count": 8,
+          "candidate_cost_per_call_usd": 0.00262128,
+          "candidate_latency_per_call_seconds": 15.5539229887072,
+          "effective_cost_per_item_usd": 0.06515115500000002
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "primary": 0.984375,
+          "interval_95": [
+            0.978125,
+            0.990625
+          ],
+          "candidate_call_count": 8,
+          "candidate_cost_per_call_usd": 0.0159029,
+          "candidate_latency_per_call_seconds": 35.049302602536045,
+          "effective_cost_per_item_usd": 0.073967775
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "primary": 0.9515625,
+          "interval_95": [
+            0.915625,
+            0.9796875
+          ],
+          "candidate_call_count": 8,
+          "candidate_cost_per_call_usd": 0.001083865,
+          "candidate_latency_per_call_seconds": 20.997880375012755,
+          "effective_cost_per_item_usd": 0.059969365000000004
+        }
+      },
+      "luna_minus_sol": -0.03281250000000002,
+      "paired_interval_95": [
+        -0.06562499999999993,
+        -0.006249999999999978
+      ],
+      "capable_under_rule": false,
+      "shuffled_control_interval_95": [
+        -0.06562500000000004,
+        -0.004687500000000067
+      ],
+      "shuffled_control_contains_zero": false
+    },
+    "breaker-docs": {
+      "sample_size": 12,
+      "primary_metric": "verdict_flip_quality",
+      "models": {
+        "openrouter/openai/gpt-5.5": {
+          "primary": 0.3333,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 12,
+          "candidate_cost_per_call_usd": 0.10018166666666667,
+          "candidate_latency_per_call_seconds": 26.51814595943627,
+          "effective_cost_per_item_usd": 0.10018166666666667
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "primary": 0.3333,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 12,
+          "candidate_cost_per_call_usd": 0.031767083333333335,
+          "candidate_latency_per_call_seconds": 41.25200298024962,
+          "effective_cost_per_item_usd": 0.03176708333333334
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "primary": 0.5,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 12,
+          "candidate_cost_per_call_usd": 0.00205654375,
+          "candidate_latency_per_call_seconds": 33.436930687710024,
+          "effective_cost_per_item_usd": 0.00205654375
+        }
+      },
+      "luna_minus_sol": 0.16670000000000001,
+      "paired_interval_95": [
+        0.0,
+        0.6667000000000001
+      ],
+      "capable_under_rule": true,
+      "shuffled_control_interval_95": [
+        -0.5,
+        0.75
+      ],
+      "shuffled_control_contains_zero": true
+    },
+    "classifier": {
+      "sample_size": 24,
+      "primary_metric": "accuracy",
+      "models": {
+        "openrouter/openai/gpt-5.5": {
+          "primary": 0.6666666666666666,
+          "interval_95": [
+            0.4583333333333333,
+            0.8333333333333334
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.130415,
+          "candidate_latency_per_call_seconds": 21.854263259097934,
+          "effective_cost_per_item_usd": 0.005433958333333333
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "primary": 0.6666666666666666,
+          "interval_95": [
+            0.4583333333333333,
+            0.8333333333333334
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.045111,
+          "candidate_latency_per_call_seconds": 33.25801535136998,
+          "effective_cost_per_item_usd": 0.001879625
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "primary": 0.6666666666666666,
+          "interval_95": [
+            0.4583333333333333,
+            0.8333333333333334
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.00245655,
+          "candidate_latency_per_call_seconds": 10.564672157168388,
+          "effective_cost_per_item_usd": 0.00010235625
+        }
+      },
+      "luna_minus_sol": 0.0,
+      "paired_interval_95": [
+        0.0,
+        0.0
+      ],
+      "capable_under_rule": true,
+      "shuffled_control_interval_95": [
+        0.0,
+        0.5416666666666667
+      ],
+      "shuffled_control_contains_zero": true
+    },
+    "breaker-names": {
+      "sample_size": 8,
+      "primary_metric": "verdict_flip_quality",
+      "models": {
+        "openrouter/openai/gpt-6.1-sol": {
+          "primary": 0.6667,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.152496,
+          "candidate_latency_per_call_seconds": 213.83434783481061,
+          "effective_cost_per_item_usd": 0.019062
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "primary": 0.5,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.0081288,
+          "candidate_latency_per_call_seconds": 127.14983115065843,
+          "effective_cost_per_item_usd": 0.0010161
+        },
+        "openrouter/anthropic/claude-sonnet-5": {
+          "primary": 1.0,
+          "interval_95": [
+            0.0,
+            1.0
+          ],
+          "candidate_call_count": 1,
+          "candidate_cost_per_call_usd": 0.302091,
+          "candidate_latency_per_call_seconds": 234.92280659731477,
+          "effective_cost_per_item_usd": 0.037761375
+        }
+      },
+      "luna_minus_sol": -0.16669999999999996,
+      "paired_interval_95": [
+        -0.6667000000000001,
+        0.0
+      ],
+      "capable_under_rule": false,
+      "shuffled_control_interval_95": [
+        -0.8,
+        0.75
+      ],
+      "shuffled_control_contains_zero": true
+    }
+  },
+  "total_spend_usd": 8.465234,
+  "superseded_runs": [
+    {
+      "role": "refine",
+      "reason": "The capture instrument used DD path as an item key; three fixtures have empty paths, so matched outcomes were incomplete.",
+      "report": {
+        "role": "refine",
+        "results": [
+          {
+            "model": "openrouter/openai/gpt-5.5",
+            "n": 8,
+            "cost": 1.18732,
+            "metrics": {
+              "defect_resolution": 0.6625,
+              "collateral_change": 0.2125,
+              "valid_refine_rate": 1.0
+            },
+            "error": null
+          },
+          {
+            "model": "openrouter/openai/gpt-6.1-sol",
+            "n": 8,
+            "cost": 0.25588320000000003,
+            "metrics": {
+              "defect_resolution": 0.6562,
+              "collateral_change": 0.225,
+              "valid_refine_rate": 1.0
+            },
+            "error": null
+          },
+          {
+            "model": "openrouter/openai/gpt-6-luna",
+            "n": 8,
+            "cost": 0.08416054500000002,
+            "metrics": {
+              "defect_resolution": 0.7438,
+              "collateral_change": 0.2375,
+              "valid_refine_rate": 1.0
+            },
+            "error": null
+          }
+        ],
+        "incumbent": "openrouter/openai/gpt-5.5",
+        "judge_model": "openrouter/anthropic/claude-opus-4.8",
+        "sample_ids": [
+          "volume_averaged_linear_electron_decay_time_due_to_disruption",
+          "ion_mass",
+          "power_of_divertor_due_to_ohmic_dissipation",
+          "effective_charge_at_separatrix",
+          "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency",
+          "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux",
+          "magnetic_field_magnitude_at_pedestal_top_low_field_side",
+          "breakdown_initial_time"
+        ],
+        "seed": 0,
+        "axis": "names",
+        "timestamp": "2026-10-18T18:15:55.880791+00:00",
+        "provenance": {
+          "corpus": "REFINED_FROM history",
+          "n_cases": 8
+        }
+      },
+      "captured_outcome_count": {
+        "openrouter/openai/gpt-5.5": 6,
+        "openrouter/openai/gpt-6.1-sol": 6,
+        "openrouter/openai/gpt-6-luna": 6
+      }
+    },
+    {
+      "role": "docs",
+      "reason": "The capture instrument keyed all three rubric outputs by the held-out judge model, losing candidate-level pairing.",
+      "report": {
+        "role": "docs",
+        "results": [
+          {
+            "model": "openrouter/openai/gpt-5.6-luna",
+            "n": 8,
+            "cost": 0.79893381,
+            "metrics": {
+              "rubric_score": 0.9641,
+              "banned_prose_rate": 0.0,
+              "banned_prose_findings": 0.0
+            },
+            "error": null
+          },
+          {
+            "model": "openrouter/openai/gpt-6.1-sol",
+            "n": 8,
+            "cost": 0.6715568000000001,
+            "metrics": {
+              "rubric_score": 0.9766,
+              "banned_prose_rate": 0.0,
+              "banned_prose_findings": 0.0
+            },
+            "error": null
+          },
+          {
+            "model": "openrouter/openai/gpt-6-luna",
+            "n": 8,
+            "cost": 0.478140005,
+            "metrics": {
+              "rubric_score": 0.9688,
+              "banned_prose_rate": 0.0,
+              "banned_prose_findings": 0.0
+            },
+            "error": null
+          }
+        ],
+        "incumbent": "openrouter/openai/gpt-5.6-luna",
+        "judge_model": "openrouter/anthropic/claude-opus-4.8",
+        "sample_ids": [
+          "radiative_extraordinary_mode_temperature_at_ece_channel",
+          "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+          "beryllium_density_at_divertor_target",
+          "thermal_plasma_pressure",
+          "toroidal_coordinate_at_beam_tracing_point",
+          "inverse_of_square_of_major_radius",
+          "normalized_toroidal_flux_coordinate_at_internal_transport_barrier",
+          "pulse_duration"
+        ],
+        "seed": 0,
+        "axis": null,
+        "timestamp": "2026-10-18T18:26:59.317250+00:00",
+        "provenance": {
+          "n_docs": 8
+        }
+      },
+      "captured_outcome_count": {
+        "openrouter/anthropic/claude-opus-4.8": 8
+      }
+    }
+  ],
+  "execution_controls": {
+    "timestamp_utc": "2026-10-18T18:45:39Z",
+    "budget_stop_before_next_call_usd": 9.0,
+    "max_concurrent_metered_calls": 1,
+    "reason": "With USD 7.824536 charged and the largest completed call USD 0.250840, serialize remaining calls and retain at least USD 1.00 headroom against the USD 10 ceiling.",
+    "sample_overrides": {
+      "breaker-names": 8
+    },
+    "sample_override_timestamp_utc": "2026-10-18T18:49:09Z",
+    "sample_override_reason": "The first 12-case names breaker run spent over six minutes on the incumbent first batch and timed out once; eight seeded cases avoid the second review batch and leave time for paired evidence under the fixed deadline."
+  },
+  "failed_attempts": [
+    {
+      "role": "breaker-names",
+      "sample": 12,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T180610585160-llm-gpt6-seat-bench/breaker-names.log",
+      "exit_status": 143,
+      "observed_call_cost_usd": 0.2508396,
+      "reason": "Incumbent Sonnet-5 first batch timed out then returned after 370 seconds; the run was stopped while entering the second batch."
+    }
+  ]
+}
