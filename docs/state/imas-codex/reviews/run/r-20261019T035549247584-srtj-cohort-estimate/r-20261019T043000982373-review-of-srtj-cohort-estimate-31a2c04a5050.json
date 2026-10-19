@@ -32,6 +32,11 @@
       "kind": "exempted",
       "reason": "Real defect: the incumbent's per-accepted-name figure borrows the cascade's accept share. The coordinator does not use per-accepted-name figures for the ceiling; the cohort run measures each arm's own accept share.",
       "recorded_at": "2026-10-19T04:49:47.762037+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "Default palette and a missing PNG render check; the figure has no clipped or overlapping labels, and it is superseded by the cohort run's figures, which carry the style rule in their brief.",
+      "recorded_at": "2026-10-19T04:49:52.845223+00:00"
     }
   },
   "findings": [
