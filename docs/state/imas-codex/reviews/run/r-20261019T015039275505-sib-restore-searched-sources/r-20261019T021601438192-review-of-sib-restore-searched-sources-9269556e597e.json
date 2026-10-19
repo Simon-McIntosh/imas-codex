@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The unconditional fall-through after the status=='stale' test drops any existing source with status != 'stale', so it fires whenever a hit's path already carries a source node whose status is extracted, skipped or failed (49 of 52 here); the same block also emits the fixed string 'existing source is stale', which is false for every one of them.",
+      "lines": "run.py:290-297"
+    },
+    {
+      "failure_condition": "filter_hits is the filter the brief specifies; the brief (brief.md:17-22) drops only on unit mismatch, a stale source or a live holder, so a non-stale unheld source must be kept - the test that would catch the fault is 'a unit-matching hit at an existing extracted source is retained as a candidate', which the run has no case for.",
+      "lines": "run.py:241-309"
+    },
+    {
+      "failure_condition": "population_delta is computed and dumped into the record but never asserted, so no coded check reddens if a restored name fails to leave its population; the delta is read by the worker rather than enforced, and the negative control at run.py:841-889 exercises only the unit branch, never the existing-source branch where the defect sits.",
+      "lines": "run.py:672-675"
+    }
+  ],
+  "call_sites": [],
+  "completed_at": "2026-10-19T02:29:02.134Z",
+  "dispatched_at": "2026-10-19T02:16:30Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py",
+      "line": "294",
+      "severity": "blocking",
+      "text": "blocking: the fall-through at run.py:290-297 drops every hit whose path already carries a StandardNameSource with any status other than 'stale' and records the reason 'existing source is stale'. A live graph read over the 49 distinct paths so labelled shows statuses extracted(41), skipped(6), failed(2) and zero stale, so every one of these 52 drops carries a false reason and the deliverable's required 'dropped with the reason' is wrong. The same branch contradicts the brief (brief.md:17-22), which drops only on unit mismatch, a stale source or a live holder: a non-stale unheld source is a candidate, not a drop, so 23 names (e.g. ion_power, size_of_camera, thermal_energy_confinement_time) whose only unit-matching route is such a path are filed under no_surviving_candidate instead of being offered to Jev, mis-splitting the lead_referral_total and understating the work the node actually had."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py",
+      "line": "86",
+      "severity": "follow-on",
+      "text": "follow-on: normalise_unit (run.py:86-88) and its _DIMENSIONLESS set (run.py:79) are a fourth local copy of the dimensionless-unit authority the repository already owns at imas_codex/units/__init__.py:114 (_DIMENSIONLESS_STRINGS) and :155 (normalize_unit_symbol); the local set also differs (it adds 'n/a', omits 'none' that imas_codex/standard_names/error_siblings.py:41 carries), so the fork can disagree with the owner. spec() (run.py:373-380) likewise re-inlines the dd-source dict that provenance_rebuild.py:423-430 builds inline with no exported helper."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py",
+      "line": "672",
+      "severity": "follow-on",
+      "text": "follow-on: the node's gate records the population delta but asserts it nowhere (run.py:672-675 computes and dumps it, no check raises on a mismatch), and the declared negative control (run.py:841-889) exercises only the unit branch of filter_hits; neither guard can redden on a regression of the existing-source branch that carries the blocking defect, so the recorded 'pass' does not cover the filter as a whole."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Two commits read against base 870fd7d4: ebff49e9b adds the run.py driver, the fragment html, the json record and the population SVG; 9269556e5 removes a duplicated quiet-graph block from html and one stray line from run.py; 4 files, 6337 insertions, all documentation/evidence.",
+    "done_when": "The source brief.md:41-56 done_when asks for the work list, per-name kept/dropped hits with reason, Jev answer and confidence, restored bindings, referrals with hits, preview and apply receipt, quiet-graph check, before/after classifier counts at EXIT= with the populations moving by exactly the restored count and others unchanged, spend and the running referral total; the fragment and record carry all of these (run.py:705-838, record stage=applied, readback_exit EXIT=0, delta dropped_edge -3 never_bound -2, others 0), but the per-hit drop reason is false: 49 of the 52 hits labelled 'existing source is stale' are status extracted(41)/skipped(6)/failed(2), never stale (live graph read over the 49 distinct paths).",
+    "goal": "The source node's goal (brief.md:1-13) is to re-derive the 30 DD-search-referred dropped-edge names plus the never-bound names and restore each by DD search confirmed by one Jev Choice; the diff restores 5 (sib-restore-searched-sources-run.py:611-702) but the filter at run.py:269-297 drops every unit-matching hit that has any existing StandardNameSource, so 23 names whose only unit-matching route is a non-stale existing source (graph: extracted/skipped/failed) are reported as no-candidate rather than offered to Jev.",
+    "manifest": "The source manifest.md records 5 restored, 14 referred with candidates, 41 no-candidate, spend USD 0.000751044, gate 'pass', readback EXIT=0 and negative_control passed; the counts and spend reconcile with the record, and the negative_control_result (unit mismatch dropped while a match is kept) reproduces in run.py:841-889.",
+    "write_paths": "The source prompt.txt:135-139 fences four write paths (the three evidence files plus docs/figures/sn-integrity-backlog/sib-restore-searched-sources); the diff changes exactly those four (git diff --stat 870fd7d4..9269556e) and touches no production file."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T021601438192-review-of-sib-restore-searched-sources-9269556e597e",
+  "reviewed_base_sha": "870fd7d4efac46a1d65d0baabfef9cad8c352a9e",
+  "reviewed_head_sha": "9269556e597e12dedf0a6d02eaac4bac70e4ce37",
+  "reviewed_run_id": "r-20261019T015039275505-sib-restore-searched-sources",
+  "scores": {
+    "durability": 10,
+    "evidence": 9,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T02:30:28.867769+00:00"
+}
