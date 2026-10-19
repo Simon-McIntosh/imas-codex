@@ -79,8 +79,12 @@ set of tests the change exists to make pass, so each is shown able to fail.</p>
 the live-name refusal is removed as well. Both logs are named in the manifest.</p>
 
 <h2 id="sib-export-live-source-gate-gate">Covering gate</h2>
-<p>The gate is every <code>tests/standard_names/test_export_*.py</code> file together with
-<code>tests/standard_names/test_source_audit_gate.py</code>, run at the base revision in a scratch
-extraction and at the head in this worktree. Its delta is recorded in the manifest as
-<code>baseline_suite</code> and <code>after_suite</code>.</p>
+<p>The gate is every test file that can reach the changed code — every <code>tests/</code> file
+importing <code>imas_codex.standard_names.export</code> or <code>classify_sourceless_standard_names</code>
+— which is 53 files, not only the <code>test_export_*.py</code> family. Both arms run that same file
+list: the base revision in a scratch extraction with <code>SOURCE_DATE_EPOCH</code> set (a
+<code>git archive</code> extraction carries no <code>.git</code>, so the export provenance guard cannot take
+its timestamp from there), and the head in this worktree. The delta is recorded in the manifest
+as <code>baseline_suite</code> and <code>after_suite</code>, each carrying the revision, the literal
+command, the exit status and the failing ids.</p>
 </main></body></html>
