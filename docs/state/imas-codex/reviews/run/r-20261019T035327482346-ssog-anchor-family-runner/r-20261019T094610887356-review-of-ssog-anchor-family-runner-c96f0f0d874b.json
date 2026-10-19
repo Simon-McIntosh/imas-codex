@@ -18,6 +18,11 @@
       "kind": "folded",
       "node": "ssog-anchor-arm",
       "recorded_at": "2026-10-19T12:23:49.634255+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "A one-shot evidence runner; its containment check is shown firing on a planted live row in each arm node, which is the guard that matters for these measurements.",
+      "recorded_at": "2026-10-19T12:23:55.804196+00:00"
     }
   },
   "findings": [
