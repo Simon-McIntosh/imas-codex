@@ -338,17 +338,19 @@ def run_arm(seed: str, arm: str) -> dict:
                 started=started_at,
                 ended=now(),
             )
-            # Containment is proved by this apply's own run ids: if the command
-            # had resolved the live graph, its LLMCost rows would be there. The
-            # live node count is NOT a containment signal, because the live
-            # graph is a shared service that other sessions write to while this
-            # arm runs; the delta is recorded as an observation, not a failure.
+            # Containment rests on two signals, one negative and one positive.
+            # Negative: this apply's campaign run ids are absent from the live
+            # graph, so the command did not write there. Positive: the apply's
+            # cost rows are present in the scratch graph, so the work really
+            # landed in the copy being measured -- a run that silently wrote
+            # nowhere would otherwise pass a leak test by writing nothing.
+            #
+            # The live node COUNT is not a containment signal: the live graph is
+            # a shared service other sessions write to while this arm runs. The
+            # delta is recorded as an observation, never as a failure, and the
+            # run-id rows are not asserted on the scratch side because the
+            # campaign run ids are not the identifier those cost rows carry.
             live_runs = live.query(
-                "UNWIND $ids AS rid MATCH (c:LLMCost {run_id: rid}) "
-                "RETURN count(c) AS n",
-                ids=run_ids,
-            )[0]["n"]
-            scratch_runs = gc.query(
                 "UNWIND $ids AS rid MATCH (c:LLMCost {run_id: rid}) "
                 "RETURN count(c) AS n",
                 ids=run_ids,
@@ -359,11 +361,15 @@ def run_arm(seed: str, arm: str) -> dict:
                 live_nodes_after - data["isolation"]["live_nodes"]
             )
             data["isolation"]["live_scope_run_rows"] = int(live_runs)
-            data["isolation"]["scratch_scope_run_rows"] = int(scratch_runs)
-            if live_runs != 0 or scratch_runs == 0:
+            data["isolation"]["scratch_ledger_rows"] = int(calls)
+            if live_runs != 0:
                 raise RuntimeError(
-                    "Apply resolved the live graph: "
-                    f"live_rows={live_runs} scratch_rows={scratch_runs}"
+                    f"Apply leaked into the live graph: live_rows={live_runs}"
+                )
+            if calls <= 0:
+                raise RuntimeError(
+                    "No scratch cost rows in the apply window: the apply wrote "
+                    "nothing to the scratch graph it was pointed at"
                 )
 
             calls = int(ledger["calls"])
