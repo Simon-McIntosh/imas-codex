@@ -59,12 +59,15 @@ CHAIN_CHANGE_OPERATIONS = {
     "supersede_legacy_spelling",
 }
 
-# The decisions owner books no confidence floor of its own; the standard-names
-# judge's own threshold is the point at or above which a judgement is acted on
-# (``CHECK_FAIL_PROBABILITY`` in review/jev_review.py). A candidate answer is
-# accepted only when its own probability reaches that floor, so a split
-# distribution is referred rather than bound.
-CONFIDENCE_FLOOR = 0.5
+# The decisions owner books no confidence floor of its own, so the floor is
+# this driver's: a binding is admitted only when the answer chose a candidate
+# with a decisive share of the mass AND the answer's own confidence clears the
+# point below which a judgement is not acted on. A probability alone is not
+# enough — a near-flat distribution can still land a hair above half on one
+# candidate while the judgement itself carries no confidence, which is a guess
+# wearing a number. Binding and referral both read this floor.
+MIN_CHOICE_PROBABILITY = 0.8
+MIN_SELF_CONFIDENCE = 0.5
 
 NONE_OF_THESE = "none of these"
 QUESTION_NAME = "measures"
@@ -442,21 +445,36 @@ def stage_control() -> None:
     )
 
 
-def _confident_choice(record: dict[str, Any]) -> str | None:
-    """The candidate a confident answer names, or ``None``.
+def _admittable(choice: Any, probability: Any, confidence: Any) -> bool:
+    """Whether an answer clears the binding floor.
 
-    Confident means the answer chose a candidate (not 'none of these') and its
-    own probability reaches the floor. A split distribution or a
-    'none of these' answer returns ``None`` and the name is referred.
+    Both halves are required: a decisive share of the answer's own mass on the
+    chosen candidate, and a self-reported confidence above the point below
+    which a judgement is not acted on. Either alone admits a guess.
     """
+    if not choice or choice == NONE_OF_THESE:
+        return False
+    if probability is None or float(probability) < MIN_CHOICE_PROBABILITY:
+        return False
+    return confidence is not None and float(confidence) >= MIN_SELF_CONFIDENCE
+
+
+def _answer_metrics(record: dict[str, Any]) -> tuple[Any, float, Any]:
+    """The chosen candidate, its probability and the answer's own confidence."""
     ans = record.get("answer") or {}
     choice = ans.get("choice")
-    if not choice or choice == NONE_OF_THESE:
-        return None
-    prob = float((ans.get("probabilities") or {}).get(choice, 0.0))
-    if prob < CONFIDENCE_FLOOR:
-        return None
-    return choice
+    prob = float((ans.get("probabilities") or {}).get(choice, 0.0)) if choice else 0.0
+    return choice, prob, ans.get("confidence")
+
+
+def _confident_choice(record: dict[str, Any]) -> str | None:
+    """The candidate an answer admits for binding, or ``None``.
+
+    ``None`` means the name is not bound: the answer named no candidate, or it
+    failed either half of the floor. The caller refers it instead.
+    """
+    choice, prob, confidence = _answer_metrics(record)
+    return choice if _admittable(choice, prob, confidence) else None
 
 
 def _spec(dd_path: str) -> dict[str, Any]:
@@ -562,7 +580,38 @@ def stage_apply(gc: GraphClient) -> None:
     print(f"applied: {doc['apply_receipt']}")
 
 
+def _sources_written_since(gc: GraphClient, since: str) -> list[dict[str, Any]]:
+    """Sources created after *since*, which this node did not write.
+
+    Read from the write's own timestamp rather than from wall clock, so a
+    re-check attributes movement to the peer that made it instead of reporting
+    an unexplained mismatch.
+    """
+    rows = gc.query(
+        """
+        MATCH (s:StandardNameSource)
+        WHERE s.created_at > datetime($since)
+        RETURN s.id AS source, toString(s.created_at) AS created_at
+        ORDER BY created_at
+        """,
+        since=since,
+        limit=500,
+    )
+    return rows
+
+
 def stage_readback(gc: GraphClient) -> None:
+    """Re-run the classifier and refuse to pass on anything but an exact match.
+
+    The read-back is the gate, so it must be able to fail: it exits non-zero
+    when the dropped-edge population did not fall by exactly the number this
+    node restored, or when any other population moved. The first passing run is
+    kept as ``readback_verified`` — the evidence of this node's write, taken on
+    the quiet graph it was applied to. A later run on a graph another writer has
+    since changed is recorded as a ``readback_recheck`` with the peer's sources
+    named, and still exits non-zero: movement the re-check cannot attribute is
+    the whole reason the gate exists.
+    """
     with open(RESULTS) as fh:
         doc = json.load(fh)
     after = classify_sourceless_standard_names(gc)
@@ -573,19 +622,52 @@ def stage_readback(gc: GraphClient) -> None:
         k: after_counts.get(k, 0) - before_counts.get(k, 0)
         for k in sorted(set(before_counts) | set(after_counts))
     }
-    doc["after_counts"] = after_counts
-    doc["population_delta"] = delta
-    doc["restored_count"] = restored_n
-    doc["dropped_fell_by_restored"] = delta.get("dropped_edge") == -restored_n
-    doc["others_unchanged"] = all(
-        v == 0 for k, v in delta.items() if k != "dropped_edge"
-    )
-    doc["stage"] = "readback"
-    with open(RESULTS, "w") as fh:
-        json.dump(doc, fh, indent=1, sort_keys=True)
+    dropped_ok = delta.get("dropped_edge") == -restored_n
+    moved = {k: v for k, v in delta.items() if k != "dropped_edge" and v != 0}
+    others_unchanged = not moved
+    passed = dropped_ok and others_unchanged
     print("before:", before_counts)
     print("after:", after_counts)
     print("delta:", delta)
+
+    if passed:
+        doc["after_counts"] = after_counts
+        doc["population_delta"] = delta
+        doc["restored_count"] = restored_n
+        doc["dropped_fell_by_restored"] = True
+        doc["others_unchanged"] = True
+        doc["readback_verified"] = {
+            "after_counts": after_counts,
+            "population_delta": delta,
+            "dropped_edge_expected": -restored_n,
+            "exit_status": 0,
+        }
+        doc["stage"] = "readback"
+        with open(RESULTS, "w") as fh:
+            json.dump(doc, fh, indent=1, sort_keys=True)
+        return
+
+    since = doc["apply_receipt"].get("applied_at")
+    foreign = _sources_written_since(gc, since) if since else []
+    mine = {r["source_id"] for r in doc.get("restored", [])}
+    foreign = [f for f in foreign if f["source"] not in mine]
+    doc["readback_recheck"] = {
+        "after_counts": after_counts,
+        "population_delta": delta,
+        "dropped_edge_expected": -restored_n,
+        "moved_populations": moved,
+        "sources_created_since_apply": foreign,
+        "exit_status": 1,
+    }
+    doc["stage"] = "readback-failed"
+    with open(RESULTS, "w") as fh:
+        json.dump(doc, fh, indent=1, sort_keys=True)
+    raise SystemExit(
+        "read-back failed: dropped_edge moved "
+        f"{delta.get('dropped_edge')}, not -{restored_n}"
+        + (f"; populations moved beyond it: {moved}" if moved else "")
+        + f"; {len(foreign)} sources created since the apply by another writer"
+    )
 
 
 #: The census populations a source repair works: every live name lacking a DD
@@ -658,11 +740,36 @@ def stage_fragment() -> None:
         count_rows,
     )
 
+    below_rows = [
+        [r["name"], r["candidate"], r["probability"], r["confidence"], r["reason"]]
+        for r in sorted(
+            doc.get("bound_below_confidence_floor", []),
+            key=lambda x: x["probability"] or 0.0,
+        )
+    ]
+    below_tbl = table(
+        ["standard name", "candidate", "P(choice)", "self-reported", "reason"],
+        below_rows,
+    )
+
     gu = doc["quiet_graph"]
     bound = doc["bound"]
     rcv = doc["apply_receipt"]
     ctrl = doc["negative_control"]
+    floor = doc["floor"]
+    exits = doc.get("stage_exit_status", {})
+    verified = doc.get("readback_verified", {})
+    recheck = doc.get("readback_recheck", {})
     spend = (doc.get("judge_spend_usd") or 0) + (ctrl.get("cost_usd") or 0)
+
+    def _elapsed_minutes(start: str | None, end: str | None) -> str:
+        if not start or not end:
+            return "an unknown interval"
+        from datetime import datetime
+
+        a = datetime.fromisoformat(start.replace("Z", "+00:00"))
+        b = datetime.fromisoformat(end.replace("Z", "+00:00"))
+        return f"{(b - a).total_seconds() / 60:.0f} minutes"
 
     html = f"""<article data-reckon="fragment" id="{node}">
 <h2 id="{node}-title">§38 — the lost sources restored from a relative's recorded path</h2>
@@ -687,19 +794,34 @@ have none.</p>
 <h3 id="{node}-restored">Restored bindings, route: Jev</h3>
 <p id="{node}-restored-note">Each was restored through
 <code>bind_recovery_sources</code> in <code>provenance_rebuild.py</code> after a Jev
-Choice named it and its own probability reached the {CONFIDENCE_FLOOR} floor — the
-standard-names judge's own threshold, which is the only confidence floor the decisions
-owner defines. <code>P(choice)</code> is the chosen candidate's probability;
-<em>self-reported</em> is the answer's own <code>confidence</code> field, recorded
-beside it and <em>not</em> used to gate, because a self-reported number is not the
-distribution it is derived from.</p>
+Choice named it. The floor is this driver's own, since the decisions owner defines
+none: a binding is admitted only when the chosen candidate's probability reaches
+<strong>{floor["min_choice_probability"]}</strong> <em>and</em> the answer's
+self-reported confidence reaches <strong>{floor["min_self_confidence"]}</strong>.
+Both halves are required. A probability alone admitted near-zero-confidence picks —
+a near-flat distribution can land a hair above half on one candidate while the
+judgement itself carries nothing, which is a guess wearing a number; the bindings
+below that floor are listed separately below rather than presented as settled.
+<code>P(choice)</code> is the chosen candidate's probability and
+<em>self-reported</em> is the answer's own <code>confidence</code> field.</p>
 {restored_tbl}
 
-<h3 id="{node}-referred">Sent to the lead</h3>
+<h3 id="{node}-below-floor">Bound below the confidence floor, awaiting lead confirmation</h3>
+<p id="{node}-below-floor-note">These <strong>{len(doc.get("bound_below_confidence_floor", []))}</strong>
+bindings were applied under a weaker floor — a chosen probability at or above 0.5
+alone — before the two-part floor was ruled.
+They are <strong>not detached</strong>: a live name left without a DD source is
+exactly what the source invariant refuses, so the write stands and the name is carried
+here for lead confirmation instead. They count toward the running lead-referral total.
+The first entries are the worst — a chosen probability at chance with a self-reported
+confidence of zero, which is indistinguishable from a coin toss on this evidence.</p>
+{below_tbl}
+
+<h3 id="{node}-referred">Sent to the lead, unbound</h3>
 <p id="{node}-referred-note">Jev answered <strong>none of these</strong> for these
-names, or answered below the floor, so their relative's recorded path measures a
-different quantity or cannot be settled. They are referred with their candidates,
-their answer and its probabilities — never restored.</p>
+names, or answered below the floor, and nothing was written: their relative's recorded
+path measures a different quantity or cannot be settled. They are referred with their
+candidates, their answer and its probabilities — never restored.</p>
 {referred_tbl}
 
 <h3 id="{node}-search">Passed to DD search</h3>
@@ -720,17 +842,39 @@ names at <code>{_esc(rcv["applied_at"])}</code>.</p>
 
 <h3 id="{node}-readback">Read-back: §37's classifier, before and after</h3>
 <img id="{node}-fig" src="/imas-codex/figures/sn-integrity-backlog/sib-restore-lineage-sources/populations-before-after.svg" alt="Classifier populations before and after the restore; only the dropped-edge population moves."/>
-<p id="{node}-readback-note">The dropped-edge count fell by exactly the number
-restored (<strong>{doc["restored_count"]}</strong>), and every other population is
-unchanged. The check is able to fail — it would report a mismatch had any other
-population moved or had the fall not matched the restore count.</p>
+<p id="{node}-readback-note">On the quiet graph the dropped-edge count fell by exactly the number restored
+(<strong>{doc["restored_count"]}</strong>), and every other population is
+unchanged. The read-back <em>raises</em> on anything else: a stage that finds the
+fall unmatched or another population moved exits non-zero and prints the mismatch,
+so the gate cannot pass by reporting a number a reader would have to check. Both
+blocks below are the driver's own recorded exit statuses, written after each stage
+ran rather than asserted in this document.</p>
 {counts_tbl}
-<pre id="{node}-exit">EXIT=0
+<pre id="{node}-exit">readback (verified, on the quiet graph) EXIT={verified.get("exit_status", "not recorded")}
 before {_esc(doc["before_counts"])}
 after  {_esc(doc["after_counts"])}
 delta  {_esc(doc["population_delta"])}
 dropped_fell_by_restored={doc["dropped_fell_by_restored"]}
-others_unchanged={doc["others_unchanged"]}</pre>
+others_unchanged={doc["others_unchanged"]}
+
+readback (re-check) EXIT={recheck.get("exit_status", "not recorded")}
+after  {_esc(recheck.get("after_counts", {}))}
+delta  {_esc(recheck.get("population_delta", {}))}
+sources created since this node's apply, by another writer:
+{_esc("\n".join("  " + f["source"] + "  " + f["created_at"] for f in recheck.get("sources_created_since_apply", [])))}
+
+stage_exit_status
+{_esc("\n".join("  " + k + " EXIT=" + str(v) for k, v in sorted(exits.items())))}</pre>
+<p id="{node}-recheck-note">The second block is the gate doing its job, not a failure of
+the write. The read-back was re-run after the coordinator's review, by which time a
+peer had bound <strong>{len(recheck.get("sources_created_since_apply", []))}</strong> more
+sources (all created at <code>{_esc((recheck.get("sources_created_since_apply") or [{}])[0].get("created_at", "unknown"))}</code>,
+{_esc(_elapsed_minutes(rcv.get("applied_at"), (recheck.get("sources_created_since_apply") or [{}])[0].get("created_at")))} after this node's apply). It therefore
+moved dropped_edge by {recheck.get("population_delta", {}).get("dropped_edge")} and never_bound by
+{recheck.get("population_delta", {}).get("never_bound")} — this node's 39 plus the peer's 3 on
+dropped-edge names, and 2 never-bound names the peer bound — and exited non-zero. The
+stage raises rather than overwriting the write's own read-back, so the before/after counts
+above remain the values the classifier returned on the quiet graph at the apply.</p>
 
 <h3 id="{node}-control">Negative control</h3>
 <p id="{node}-control-note">The declared control — <em>{_esc(ctrl["declared"])}</em> —
@@ -748,9 +892,13 @@ same way.</p>
 <p id="{node}-bound-note">§38 requires that the names sent to the lead number at most
 15% of the names §35 hands it. §35's census hands this section
 <strong>{bound["handed_to_section"]}</strong> live, non-derived, non-orphan sourceless
-names, so the bound is <strong>{bound["bound_count"]}</strong>. This node sends
-<strong>{bound["this_node_to_lead"]}</strong>, a running total of
-<strong>{bound["running_total_fraction"]:.1%}</strong> — under the bound. The
+names, so the bound is <strong>{bound["bound_count"]}</strong>. This node refers
+<strong>{bound["this_node_unbound_to_lead"]}</strong> unbound —
+{bound["this_node_unbound_to_lead"] / bound["handed_to_section"]:.1%} — plus
+<strong>{bound["this_node_bound_below_floor"]}</strong> bound below the confidence
+floor, which the coordinator ruled must be counted here, giving a running total of
+<strong>{bound["running_total_to_lead"]}</strong>, or
+<strong>{bound["running_total_fraction"]:.1%}</strong> — still under the bound. The
 <strong>{bound["this_node_to_dd_search"]}</strong> names passed to DD search are a
 repair route, not a referral, and are not counted; but they are the section's
 liability: if DD search binds none of them they become referrals and the running total
@@ -785,6 +933,7 @@ def stage_figure() -> None:
     with open(RESULTS) as fh:
         doc = json.load(fh)
     before, after = doc["before_counts"], doc["after_counts"]
+    restored_n = doc["restored_count"]
     keys = sorted(before, key=lambda k: -before[k])
     labels = [k.replace("_", " ") for k in keys]
     b = [before[k] for k in keys]
@@ -805,7 +954,7 @@ def stage_figure() -> None:
         ax.text(
             av + 1.5,
             i - h / 2,
-            f"after {av}" + (" (39 restored)" if changed else ""),
+            f"after {av}" + (f" ({restored_n} restored)" if changed else ""),
             va="center",
             fontsize=11,
             color=FEATURE if changed else GREY,
@@ -828,31 +977,64 @@ def stage_figure() -> None:
     print("wrote", out)
 
 
+def _reject_reason(record: dict[str, Any]) -> str:
+    choice, prob, confidence = _answer_metrics(record)
+    if choice == NONE_OF_THESE:
+        return "answered none-of-these"
+    if prob < MIN_CHOICE_PROBABILITY:
+        return f"chosen probability {prob:.2f} below {MIN_CHOICE_PROBABILITY}"
+    return f"self-reported confidence {confidence} below {MIN_SELF_CONFIDENCE}"
+
+
 def stage_referrals() -> None:
-    """Account the names this node sends to the lead against the referral bound."""
+    """Account every name this node cannot admit, against the referral bound.
+
+    Two populations are referred and counted together: names the floor refused
+    and left unbound, and names that were bound under a weaker floor and now
+    fall below this one. The second is bound below the floor rather than
+    detached — a live name left sourceless is what the source invariant
+    forbids — so it is carried for lead confirmation instead.
+    """
     with open(RESULTS) as fh:
         doc = json.load(fh)
 
-    to_lead: list[dict[str, Any]] = []
+    bound_names = {r["name"] for r in doc.get("restored", [])}
+    unbound_to_lead: list[dict[str, Any]] = []
     for w in doc["worklist"]:
         rec = doc.get("judged", {}).get(w["name"])
-        if rec is None:
+        if rec is None or w["name"] in bound_names:
             continue
         ans = rec.get("answer") or {}
-        chosen = _confident_choice(rec)
-        if chosen:
+        if _confident_choice(rec):
             continue
-        to_lead.append(
+        unbound_to_lead.append(
             {
                 "name": w["name"],
                 "candidates": w["candidate_paths"],
                 "answer": ans.get("choice"),
                 "probabilities": ans.get("probabilities"),
                 "confidence": ans.get("confidence"),
+                "reason": _reject_reason(rec),
+            }
+        )
+
+    below_floor: list[dict[str, Any]] = []
+    for r in doc.get("restored", []):
+        if _admittable(r["dd_path"], r["jev_probability"], r["jev_confidence"]):
+            continue
+        below_floor.append(
+            {
+                "name": r["name"],
+                "candidate": r["dd_path"],
+                "probability": r["jev_probability"],
+                "confidence": r["jev_confidence"],
+                "sources_bound": r["sources_bound"],
                 "reason": (
-                    "answered none-of-these"
-                    if ans.get("choice") == NONE_OF_THESE
-                    else "answer below the confidence floor"
+                    f"P(choice) {r['jev_probability']:.2f} below "
+                    f"{MIN_CHOICE_PROBABILITY}"
+                    if (r["jev_probability"] or 0) < MIN_CHOICE_PROBABILITY
+                    else f"self-reported confidence {r['jev_confidence']} below "
+                    f"{MIN_SELF_CONFIDENCE}"
                 ),
             }
         )
@@ -865,22 +1047,38 @@ def stage_referrals() -> None:
             1 for n in census["names"] if n.get("population") in HANDED_POPULATIONS
         )
 
-    doc["referred_to_lead"] = to_lead
+    running = len(unbound_to_lead) + len(below_floor)
+    doc["referred_to_lead"] = unbound_to_lead
+    doc["bound_below_confidence_floor"] = below_floor
+    doc["floor"] = {
+        "min_choice_probability": MIN_CHOICE_PROBABILITY,
+        "min_self_confidence": MIN_SELF_CONFIDENCE,
+    }
     doc["bound"] = {
         "handed_to_section": handed,
         "bound_fraction": 0.15,
         "bound_count": int(handed * 0.15) if handed else None,
-        "this_node_to_lead": len(to_lead),
+        "this_node_unbound_to_lead": len(unbound_to_lead),
+        "this_node_bound_below_floor": len(below_floor),
         "this_node_to_dd_search": len(doc["referred_to_dd_search"]),
-        "running_total_to_lead": len(to_lead),
-        "running_total_fraction": (len(to_lead) / handed) if handed else None,
-        "liability_if_dd_search_yields_nothing": len(to_lead)
+        "running_total_to_lead": running,
+        "running_total_fraction": (running / handed) if handed else None,
+        "liability_if_dd_search_yields_nothing": running
         + len(doc["referred_to_dd_search"]),
     }
     doc["stage"] = "accounted"
     with open(RESULTS, "w") as fh:
         json.dump(doc, fh, indent=1, sort_keys=True)
-    print("to lead:", len(to_lead), "handed:", handed, "bound:", doc["bound"])
+    print(
+        "unbound to lead:",
+        len(unbound_to_lead),
+        "bound below floor:",
+        len(below_floor),
+        "handed:",
+        handed,
+        "bound:",
+        doc["bound"],
+    )
 
 
 def stage_derive() -> None:
@@ -899,39 +1097,50 @@ def stage_derive() -> None:
     print("to DD search:", len(doc["referred_to_dd_search"]))
 
 
+def _record_exit(stage: str, status: int) -> None:
+    """Record the stage's real exit status beside the evidence it produced.
+
+    Recorded after the stage returns or raises, never before, so the number
+    the fragment prints is the process's own outcome rather than a literal a
+    reader has to trust.
+    """
+    try:
+        with open(RESULTS) as fh:
+            doc = json.load(fh)
+    except (OSError, ValueError):
+        return
+    doc.setdefault("stage_exit_status", {})[stage] = status
+    with open(RESULTS, "w") as fh:
+        json.dump(doc, fh, indent=1, sort_keys=True)
+
+
 def main() -> None:
     stage = sys.argv[1] if len(sys.argv) > 1 else "derive"
-    if stage == "derive":
-        stage_derive()
-        return
-    if stage == "judge":
-        stage_judge()
-        return
-    if stage == "control":
-        stage_control()
-        return
-    if stage == "preview":
-        with GraphClient() as gc:
-            stage_preview(gc)
-        return
-    if stage == "apply":
-        with GraphClient() as gc:
-            stage_apply(gc)
-        return
-    if stage == "readback":
-        with GraphClient() as gc:
-            stage_readback(gc)
-        return
-    if stage == "referrals":
-        stage_referrals()
-        return
-    if stage == "figure":
-        stage_figure()
-        return
-    if stage == "fragment":
-        stage_fragment()
-        return
-    raise SystemExit(f"unknown stage {stage!r}")
+    runners = {
+        "derive": stage_derive,
+        "judge": stage_judge,
+        "control": stage_control,
+        "referrals": stage_referrals,
+        "figure": stage_figure,
+        "fragment": stage_fragment,
+    }
+    graph_runners = {
+        "preview": stage_preview,
+        "apply": stage_apply,
+        "readback": stage_readback,
+    }
+    try:
+        if stage in runners:
+            runners[stage]()
+        elif stage in graph_runners:
+            with GraphClient() as gc:
+                graph_runners[stage](gc)
+        else:
+            raise SystemExit(f"unknown stage {stage!r}")
+    except BaseException:
+        _record_exit(stage, 1)
+        raise
+    _record_exit(stage, 0)
 
 
 if __name__ == "__main__":

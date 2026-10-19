@@ -23,12 +23,143 @@
   "bound_count": 39,
   "bound_fraction": 0.15,
   "handed_to_section": 260,
-  "liability_if_dd_search_yields_nothing": 47,
-  "running_total_fraction": 0.06538461538461539,
-  "running_total_to_lead": 17,
+  "liability_if_dd_search_yields_nothing": 63,
+  "running_total_fraction": 0.12692307692307692,
+  "running_total_to_lead": 33,
+  "this_node_bound_below_floor": 16,
   "this_node_to_dd_search": 30,
-  "this_node_to_lead": 17
+  "this_node_unbound_to_lead": 17
  },
+ "bound_below_confidence_floor": [
+  {
+   "candidate": "plasma_transport/model/ggd/electrons/particles/d/values",
+   "confidence": 0.54,
+   "name": "electron_particle_diffusion_coefficient",
+   "probability": 0.77,
+   "reason": "P(choice) 0.77 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+   "confidence": 0.12,
+   "name": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+   "probability": 0.56,
+   "reason": "P(choice) 0.56 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "balance_of_plant/power_plant/heat_load_divertor",
+   "confidence": 0.26,
+   "name": "heat_power_of_divertor",
+   "probability": 0.63,
+   "reason": "P(choice) 0.63 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "langmuir_probes/reciprocating/plunge/collector/t_i",
+   "confidence": 0.08,
+   "name": "ion_temperature_at_outboard_midplane_separatrix",
+   "probability": 0.54,
+   "reason": "P(choice) 0.54 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+   "confidence": 0.52,
+   "name": "parallel_thermal_neutral_energy_diffusivity",
+   "probability": 0.76,
+   "reason": "P(choice) 0.76 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+   "confidence": 0.55,
+   "name": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+   "probability": 0.7,
+   "reason": "P(choice) 0.70 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "distribution_sources/source/markers/orbit_integrals/m_pol",
+   "confidence": 0.02,
+   "name": "perturbed_linear_mhd_mode_number",
+   "probability": 0.51,
+   "reason": "P(choice) 0.51 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "edge_transport/model/ggd/ion/particles/d_pol/values",
+   "confidence": 0.52,
+   "name": "poloidal_effective_ion_diffusion_coefficient",
+   "probability": 0.76,
+   "reason": "P(choice) 0.76 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+   "confidence": 0.34,
+   "name": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+   "probability": 0.67,
+   "reason": "P(choice) 0.67 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "neutron_diagnostic/detector/aperture/x2_width",
+   "confidence": 0.28,
+   "name": "second_local_tangential_width_of_diagnostic_aperture",
+   "probability": 0.64,
+   "reason": "P(choice) 0.64 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+   "confidence": 0.24,
+   "name": "tendency_of_runaway_electron_density",
+   "probability": 0.62,
+   "reason": "P(choice) 0.62 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+   "confidence": 0.52,
+   "name": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+   "probability": 0.76,
+   "reason": "P(choice) 0.76 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+   "confidence": 0.56,
+   "name": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+   "probability": 0.78,
+   "reason": "P(choice) 0.78 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+   "confidence": 0,
+   "name": "vertical_position_of_grating",
+   "probability": 0.5,
+   "reason": "P(choice) 0.50 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "plasma_transport/model/ggd/ion/momentum/d/z",
+   "confidence": 0.56,
+   "name": "vertical_total_ion_momentum_diffusivity",
+   "probability": 0.78,
+   "reason": "P(choice) 0.78 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "waves/coherent_wave/full_wave/b_field/normal/values",
+   "confidence": 0.36,
+   "name": "wave_magnetic_field_amplitude",
+   "probability": 0.68,
+   "reason": "P(choice) 0.68 below 0.8",
+   "sources_bound": 1
+  }
+ ],
  "classified_counts": {
   "derived_parent": 2,
   "dropped_edge": 87,
@@ -39,6 +170,10 @@
  "classified_total": 152,
  "driver_revision": "95985b6c88be740c4885f3de95121904af032779",
  "dropped_fell_by_restored": true,
+ "floor": {
+  "min_choice_probability": 0.8,
+  "min_self_confidence": 0.5
+ },
  "generated_at": "2026-10-19T01:34:01.145400+00:00",
  "judge_model": "typesafe/jev-1.13",
  "judge_spend_usd": 0.0012992280000000001,
@@ -1194,6 +1329,68 @@
    "unchained_holder": 30
   }
  },
+ "readback_recheck": {
+  "after_counts": {
+   "derived_parent": 2,
+   "dropped_edge": 45,
+   "never_bound": 28,
+   "orphan_awaiting_retirement": 3,
+   "unchained_holder": 30
+  },
+  "dropped_edge_expected": -39,
+  "exit_status": 1,
+  "moved_populations": {
+   "never_bound": -2
+  },
+  "population_delta": {
+   "derived_parent": 0,
+   "dropped_edge": -42,
+   "never_bound": -2,
+   "orphan_awaiting_retirement": 0,
+   "unchained_holder": 0
+  },
+  "sources_created_since_apply": [
+   {
+    "created_at": "2026-10-19T02:06:14.275Z",
+    "source": "dd:plasma_transport/model/ggd/ion/state/energy/v_parallel"
+   },
+   {
+    "created_at": "2026-10-19T02:06:14.359Z",
+    "source": "dd:plasma_transport/model/ggd/ion/state/momentum/d_pol"
+   },
+   {
+    "created_at": "2026-10-19T02:06:14.362Z",
+    "source": "dd:wall/description_ggd/ggd/energy_fluxes/radiation/incident"
+   },
+   {
+    "created_at": "2026-10-19T02:06:14.365Z",
+    "source": "dd:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/emitted"
+   },
+   {
+    "created_at": "2026-10-19T02:06:14.368Z",
+    "source": "dd:pulse_schedule/ic/power"
+   }
+  ]
+ },
+ "readback_verified": {
+  "after_counts": {
+   "derived_parent": 2,
+   "dropped_edge": 48,
+   "never_bound": 30,
+   "orphan_awaiting_retirement": 3,
+   "unchained_holder": 30
+  },
+  "dropped_edge_expected": -39,
+  "exit_status": 0,
+  "note": "the classifier read taken on the quiet graph immediately after the apply; this is the write's own evidence",
+  "population_delta": {
+   "derived_parent": 0,
+   "dropped_edge": -39,
+   "never_bound": 0,
+   "orphan_awaiting_retirement": 0,
+   "unchained_holder": 0
+  }
+ },
  "referred_to_dd_search": [
   {
    "name": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
@@ -1486,7 +1683,7 @@
     "edge_sources/source/ggd/electrons/energy/values": 0.16,
     "none of these": 0.41
    },
-   "reason": "answer below the confidence floor"
+   "reason": "chosen probability 0.43 below 0.8"
   },
   {
    "answer": "none of these",
@@ -1895,7 +2092,17 @@
   }
  ],
  "restored_count": 39,
- "stage": "accounted",
+ "stage": "readback-failed",
+ "stage_exit_status": {
+  "apply": 0,
+  "control": 0,
+  "figure": 0,
+  "fragment": 0,
+  "judge": 0,
+  "preview": 0,
+  "readback": 1,
+  "referrals": 0
+ },
  "worklist": [
   {
    "candidate_meta": {
