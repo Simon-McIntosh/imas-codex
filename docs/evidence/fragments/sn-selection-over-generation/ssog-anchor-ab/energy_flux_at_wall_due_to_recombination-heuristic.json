@@ -5,6 +5,7 @@
   },
   "anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
   "arm": "heuristic",
+  "attempt_outcome": "failed: harmonize apply exited non-zero with stop_reason=budget_exhausted (cost_spent=1.50578 vs internal cost_limit=1.491638); no completed arm was produced. The runner's own outcome_status stays 'running' because it raised before writing the terminal fields; this key records that the detached invocation ended with EXIT=1.",
   "budget_limit_usd": 2.0,
   "code": {
     "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wall-recomb-heuristic",
@@ -45,7 +46,12 @@
   "planned_calls": 5,
   "port": 28004,
   "port_lock": "/dev/shm/ssog-scratch-port-28004.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T22:19:38.237149+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28004.lock"
+  },
   "recorded_anchor_before": "incident_ion_energy_flux_at_wall_due_to_recombination",
+  "runner_exit_code": 1,
   "scores_before": {
     "energy_flux_at_wall_due_to_recombination": 0.95625,
     "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
@@ -53,9 +59,19 @@
     "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
     "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
   },
-  "scratch_removed": null,
+  "scratch_removed": {
+    "at": "2026-10-19T22:19:38.237055+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/mcintos-1281970-2xmxul7e"
+  },
   "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/mcintos-1281970-2xmxul7e",
   "scratch_uri": "bolt://127.0.0.1:28004",
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
-  "started_at": "2026-10-19T21:08:12.185438+00:00"
+  "started_at": "2026-10-19T21:08:12.185438+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T22:19:37.135619+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/mcintos-1281970-2xmxul7e/instance"
+  }
 }

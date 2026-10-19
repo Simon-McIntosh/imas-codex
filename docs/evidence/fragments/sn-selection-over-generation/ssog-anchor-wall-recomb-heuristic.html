@@ -1,0 +1,52 @@
+<section id="ssog-anchor-wall-recomb-heuristic">
+  <h2>Wall-recombination anchor family — heuristic arm did not complete</h2>
+
+  <p id="ssog-anchor-wall-recomb-heuristic-outcome">
+    The heuristic arm of the <code>energy_flux_at_wall_due_to_recombination</code>
+    family (five members; heuristic anchor
+    <code>incident_ion_energy_flux_at_wall_due_to_recombination</code>) ran in a
+    fresh scratch copy of the archived export through the fixed per-family runner,
+    but its harmonize apply stopped with <em>budget exhausted</em>. No complete arm
+    record was produced, so this family cannot yet be counted in the ten-family
+    comparison.
+  </p>
+
+  <h3 id="ssog-anchor-wall-recomb-heuristic-what-ran">What ran</h3>
+  <ul>
+    <li id="ssog-anchor-wall-recomb-heuristic-scratch">
+      Scratch copy loaded from
+      <code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code>; dump
+      2,643,183,686 bytes; isolation proved at 21:32:51Z — scratch 1,770,101 nodes,
+      a planted marker took it to 1,770,102, the marker was absent from the live
+      graph (0) and the count was restored exactly.
+    </li>
+    <li id="ssog-anchor-wall-recomb-heuristic-isolation">
+      Code digest <code>d1e4f1e5…bf2bdd</code> over <code>imas_codex</code> at
+      <code>5cf53a7b6</code>, identical to the first arm's — the product code is
+      unchanged; only the port reservation differs.
+    </li>
+    <li id="ssog-anchor-wall-recomb-heuristic-cleanup">
+      The scratch instance was stopped, its tree removed, and its reserved port
+      pair (28004) released at 22:19:38Z.
+    </li>
+  </ul>
+
+  <h3 id="ssog-anchor-wall-recomb-heuristic-failure">Why it stopped</h3>
+  <p id="ssog-anchor-wall-recomb-heuristic-budget">
+    The apply reported <code>stop_reason=budget_exhausted</code>,
+    <code>cost_spent=1.50578</code> against the CLI's own
+    <code>cost_limit=1.491638</code>, with <code>names_regenerated=5</code> and
+    <code>names_reviewed=8</code> after 1,158.7 s. The runner was given
+    <code>--cost-limit 2.00</code> (<code>apply_cap(5)</code> floored by the
+    USD 2.00 arm budget), so the internal limit the CLI enforced was the binding
+    one. The five-member family's harmonize costs more than this cap permits,
+    unlike the three-member family that completed in the first arm for USD 0.71.
+    The apply exited non-zero, so the runner raised and wrote no completed record.
+  </p>
+  <p id="ssog-anchor-wall-recomb-heuristic-scope">
+    Raising the per-apply cap or changing the runner are both outside this node's
+    write scope, and a re-run cannot be a different outcome under the same fixed
+    cap. The decision — raise the cap for the heavier families, or accept a
+    partial arm — belongs to the coordinator.
+  </p>
+</section>
