@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-19T08:03:20.012Z",
+  "dispatched_at": "2026-10-19T07:33:03Z",
+  "emission": "VERDICT goal: the goal is to settle each still-sourceless name whose unit-matching DD hit a live holder holds, retiring a name only above the declared floors; the record's 44-row per_name table (7 superseded, 37 referred) under docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits.json is that work.\nVERDICT done_when: each bullet of the brief's done-when is present in the committed fragment and its JSON -- work list with per-source counts, per-name holders/answer/action, signed authority/preview/receipt, referrals, quiet-graph check, classifier read-back at a real EXIT= with the sourceless total falling 86 to 79 over the 13 cumulative retired names, spend, and the section 38 running total.\nVERDICT write_paths: read the manifest's declared scope against the commits; all five paths the four commits touch are inside it (the four fragment files plus docs/figures/sn-integrity-backlog/sib-settle-held-search-hits/sib-settle-held-search-hits.svg).\nVERDICT manifest: read; it reports complete with the four commits and the guard results, but its referral and per-source figures contradict the record it points at (findings below).\nVERDICT diff: read commit by commit at 4482b241a against base 50459cc3f; 0f1bdd73a adds the settling driver, fd04bb5cd the figure, e4ecc3d7a repairs the two defects the prior review named, and 4482b241a splits the population movement into this node's own retirements and foreign moves.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: sib-settle-held-search-hits-run.py:191 re-derives the brief's work list through classify_sourceless_standard_names and the per-name choice admits only the brief's floors, landing the 7 retirements the record reports.\nSCORE evidence: 14\nJUSTIFICATION evidence: the record embeds each mode's payload with a final exit_line (verification, falsification, cohort_check and quiet_graph_refusal all EXIT=0) but the read and judge modes still write no EXIT= line and the submitted manifest's own figures disagree with the record it points at.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the four commits' stat is inside the declared write paths, and the figure directory is renamed into the declared scope rather than left at round 1's typo.\nSCORE durability: 13\nJUSTIFICATION durability: cohort_check at sib-settle-held-search-hits-run.py:406 recomputes its expectation with the same _held_hits parser the derivation uses (line 163) over the same lineage record, so a parser regression moves both sides together; the falsify mode (which does redden on an incremented baseline) and the planted-mismatch control are the two added assertions that can actually fail.\nSCORE fit: 17\nJUSTIFICATION fit: the driver follows the sibling sib-settle-unchained-holders-run.py mode and EXIT= idiom and adds no forbidden name, though run.py:787 labels the current counts as a reconstructed baseline.\nSCORE reuse: 20\nJUSTIFICATION reuse: every added definition delegates to the owner the brief names -- decide_batch (sib-settle-held-search-hits-run.py:517), build_repair_authority (line 679), apply_signed_manifest (line 718) and live_graph_activity (line 700) -- and nothing forks one.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits.json:1 blocking: the run manifest's manifest.md:124 referral figures are stale round-1 numbers -- referred_to_lead 44 against the record's referral_count 37, its follow_ons line 225 section-38 running total 130 and \"36 exhausted\" against the record's 123 and 29, and its landing line 108 \"forty-four stay with the lead\" against the 37 the fragment states -- so a promotion copying that landing line and that total into the section-38 record writes a number the node's own durable evidence contradicts.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035129214124-sib-settle-held-search-hits/manifest.md:117 follow-on: not_sourceless is reported as 10 and source_counts as {44,21,15,27,27,0} where the record's work list carries 16 not-sourceless names and {44,17,13,22,22,0}; only 60 = 44 + 16 answers the candidate count, and the whole difference sits in the four per-step referral counts.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035129214124-sib-settle-held-search-hits/manifest.md:201 follow-on: negative_control_log carries prose where the sprint contract asks for one bare path to one log, and its claim that the pre-fix cohort control is embedded in the committed JSON record is false -- that record holds only the passing cohort_check payload (every_lineage_holder_recorded true); the failing pre-fix run lived in the node-local scratch directory and is not committed, so the control the manifest leans on is not durable evidence.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py:406 follow-on: the cohort check's expected map is rebuilt with the same _held_hits parser and the same lineage record the derivation used, so a parser regression empties both sides and the assertion cannot fail on the defect it was added to catch; its demonstrated failure rested on an uncommitted, round-1 cohort file.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py:787 follow-on: readback() stores the current population counts under reconstructed_baseline_counts, so a reader checking the movement arithmetic against that field reads 34/21 where the reconstructed baseline is 45/23 -- the committed record's before field and its own reconstructed_baseline_total disagree with it.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py:1506 follow-on: the read and judge modes still emit no final EXIT= line, which the sprint contract refuses at promotion; the manifest's own caveat records the gap and the prior review already named it, and it stands unrepaired.",
+  "findings": [
+    {
+      "detail": "Promotion copies the landing line and the running total into the section-38 record, so the plan would carry a number the node's own durable evidence contradicts. Landed HTML and JSON both state 37 and 123.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035129214124-sib-settle-held-search-hits/manifest.md",
+      "line": 124,
+      "severity": "blocking",
+      "summary": "The run manifest reports stale round-1 referral figures: manifest.md:124 referred_to_lead 44 and manifest.md:225 section-38 total 130 / 36 exhausted, against the record's referral_count 37, running_total 123 and 29 exhausted; manifest.md:108 landing says forty-four stay with the lead where 37 do."
+    },
+    {
+      "detail": "60 candidates = 44 work list + 16 not sourceless; the difference sits in the four per-step referral counts.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035129214124-sib-settle-held-search-hits/manifest.md",
+      "line": 117,
+      "severity": "follow-on",
+      "summary": "not_sourceless is reported as 10 and source_counts as {44,21,15,27,27,0}; the record carries 16 not-sourceless names and {44,17,13,22,22,0}."
+    },
+    {
+      "detail": "The committed record holds only the passing cohort_check payload; the failing pre-fix run lived in the node-local scratch directory, so the control is not durable.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T035129214124-sib-settle-held-search-hits/manifest.md",
+      "line": 201,
+      "severity": "follow-on",
+      "summary": "negative_control_log carries prose rather than one bare log path, and its claim that the pre-fix cohort control is embedded in the committed JSON is false."
+    },
+    {
+      "detail": "Its demonstrated failure rested on an uncommitted, ephemeral round-1 cohort file; it is not reproducible from the committed artifact.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": 406,
+      "severity": "follow-on",
+      "summary": "cohort_check rebuilds its expected map with the same _held_hits parser (line 163) and the same lineage record the derivation uses, so a parser regression empties both sides of the assertion."
+    },
+    {
+      "detail": "The committed record shows 34/21 there while before is 45/23 and reconstructed_baseline_total is 92.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": 787,
+      "severity": "follow-on",
+      "summary": "readback() stores the current population counts under the name reconstructed_baseline_counts."
+    },
+    {
+      "detail": "Self-declared in the manifest's caveats and named by the prior review; it stands unrepaired.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": 1506,
+      "severity": "follow-on",
+      "summary": "The read and judge modes still emit no final EXIT= line, which the sprint contract refuses at promotion."
+    }
+  ],
+  "notes": "The reviewed node declares no pytest suite: its gate is the fourteen-mode driver under docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py, whose logs the manifest records. No baseline_suite or after_suite is declared for the reviewed run, so added_failure_count is 0 and added_failure_ids is empty as the honest reading rather than an unrun suite. The trace is declared fenced at runtime and lints clean, so no routing comment is carried in it.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T073242021386-review-of-sib-settle-held-search-hits-4482b241a1b3",
+  "reviewed_base_sha": "50459cc3f9d91f0069687103ce14358acc127da6",
+  "reviewed_head_sha": "4482b241a1b3c7b3beffb1557156802d76f114a8",
+  "reviewed_run_id": "r-20261019T035129214124-sib-settle-held-search-hits",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T09:38:45.303719+00:00"
+}

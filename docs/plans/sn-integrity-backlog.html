@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="221">
+<meta name="plan-version" content="222">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -804,6 +804,23 @@ follow-on findings. No plan edit was made.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-s38-recovery-unbind-writer" data-who="reckon-build" data-when="2026-10-19T07:40:00Z">
     <div class="r-comment-body"><p>The signed unbind writer has landed (merge <code>d14d8dd6b</code>, review 100, no live write). It removes a recovery binding from an exhausted name and refuses any live name. The source invariant exempts only its own signed exhausted rows, and a live read-only check confirms the exemption never excuses a live name. Next, it is applied to the 16 sub-floor bindings on a quiet graph. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s38-recovery-unbind-writer">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-run-r-20261019T073242021386-review-of-sib-settle-held-search-hits-4482b241a1b3" data-who="reckon-build" data-when="2026-10-19T08:03:20.012Z">
+    <div class="r-comment-body"><p>Independent review of r-20261019T035129214124-sib-settle-held-search-hits at head
+4482b241a (base 50459cc3f), stored as a parsed record under its review-records/
+directory. Scores: goal_fidelity 19, evidence 14, scope_discipline 20, durability 13,
+fit 17, reuse 20. CALL_SITES is none: the landed change is evidence and figure files
+under docs/evidence and docs/figures, which no production runtime reaches. Both prior
+blocking findings are repaired and independently confirmed — every lineage-named holder
+is attached to its name, all 114 holder entries carry a held path and a resolved DD unit,
+and the suspect predicate fires on a planted mismatch. Six findings, one blocking: the
+run manifest&#x27;s own referral figures (44 / section-38 total 130 / 36 exhausted, landing
+&quot;forty-four stay with the lead&quot;) are stale round-1 numbers contradicting the record&#x27;s
+37 / 123 / 29, and promotion copies that landing line and total into the section-38
+record. Five follow-ons: the manifest&#x27;s not_sourceless and per-step source counts,
+negative_control_log as prose plus a false embedding claim, the self-comparing cohort
+expectation at run.py:406, the mislabelled reconstructed_baseline_counts at run.py:787,
+and the still-missing EXIT= line on the read and judge modes.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
