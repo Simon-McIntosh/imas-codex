@@ -17,7 +17,7 @@
   "after": {
     "dropped_edge": 45,
     "derived_parent": 2,
-    "never_bound": 28,
+    "never_bound": 23,
     "unchained_holder": 19,
     "orphan_awaiting_retirement": 3
   },
@@ -35,18 +35,24 @@
   },
   "preview": {
     "schema": "imas-codex.signed-repair-receipt.v1",
-    "outcome": "would_apply",
+    "outcome": "already_applied",
     "changed": 0,
-    "would_change": 11,
-    "counts": {
-      "authority_rows": 11,
-      "admitted": 11,
-      "refused": 0
-    },
-    "refusals": [],
-    "manifest_sha256": "391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350",
-    "authority_file_sha256": "1debe8924b55ce52eee6fdd39a7a4649fee4522fa968afd5376e765541e8ba57",
-    "authority_payload_sha256": "f96de475985f0303623a835da97527187f0fd838c107ea08f64b0b21e47ab69c"
+    "persistent_writes": 0,
+    "receipt_rows": 11,
+    "manifest_sha256": null,
+    "admitted_row_ids": [
+      "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "electron_average_temperature_at_midplane=>electron_field_line_average_temperature_over_scrape_off_layer",
+      "neutron_rate=>total_neutron_rate",
+      "outer_hard_xray_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
+      "poloidal_ion_state_momentum_diffusion_coefficient=>poloidal_ion_charge_state_momentum_diffusion_coefficient",
+      "poloidal_neutral_momentum_diffusivity=>poloidal_neutral_momentum_diffusion_coefficient",
+      "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position=>opacity_at_ece_channel_emission_position",
+      "toroidal_angle_of_along_pellet_path=>toroidal_coordinate_at_pellet_path_point",
+      "total_power_of_neutral_beam_injector=>launched_power_due_to_neutral_beam_injection",
+      "voltage_amplitude=>voltage_amplitude_of_ion_cyclotron_heating_antenna",
+      "width_of_antenna_strap=>toroidal_width_of_antenna_strap"
+    ]
   },
   "receipt": {
     "schema": "imas-codex.signed-repair-receipt.v1",
@@ -79,6 +85,80 @@
     ]
   },
   "quiet_graph": {
+    "live_crew_runs": [
+      "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+      "r-20261009T015811146619-cocos-determination-core",
+      "r-20261009T033905549459-plan-review-of-jt60sa-machine-map",
+      "r-20261017T193125631298-integrated-run-assembly",
+      "r-20261018T102210638794-ssog-anchor-ab",
+      "r-20261018T145435653862-plan-review-of-the-fleet-node-stays-in-service",
+      "r-20261018T150822949393-a-stopped-worker-ends-inside-its-step",
+      "r-20261018T151304298883-a-producer-sweeps-only-on-change",
+      "r-20261018T203817697724-vs1-switched-pulse",
+      "r-20261018T204951664681-stray-edge-rate",
+      "r-20261018T214318686755-text-responses-are-compressed",
+      "r-20261018T221255178004-cbl-merged-unit-gate",
+      "r-20261018T221808668605-cbl-tcv-liuqe-sign-rca",
+      "r-20261018T222222954695-review-of-text-responses-are-compressed-f4737074616d",
+      "r-20261018T225708053988-review-of-cbl-tcv-liuqe-sign-rca-37131b826a5b",
+      "r-20261018T225754567394-cbl-tcv-liuqe-probe-sign",
+      "r-20261019T000654917566-review-of-reload-carries-skills-population-at-merge-b6558f0d1cab",
+      "r-20261019T003009581037-exact-integrator-performance",
+      "r-20261019T004351278047-reload-shim-interpreter-population-at-merge",
+      "r-20261019T010646193471-review-of-reload-shim-interpreter-population-at-merge-461f3b8256ed",
+      "r-20261019T012006559216-plan-review-of-the-monitor-shows-the-work-it-watches",
+      "r-20261019T012701997576-arc-assembly",
+      "r-20261019T013447800511-jt60sa-composed-plant",
+      "r-20261019T013810288111-plant-tests-independence",
+      "r-20261019T014150673041-carrier-axis-orientation",
+      "r-20261019T021901634768-sib-settle-unchained-holders",
+      "r-20261019T031833410177-review-of-arc-assembly-ef691c7b0f18",
+      "r-20261019T032255046652-plan-review-of-a-review-promotes-only-its-own-verdict"
+    ],
+    "live_crew_run_count": 28,
+    "runs_touched_within_1800s": [
+      {
+        "run": "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+        "age_seconds": 82
+      },
+      {
+        "run": "r-20261009T015811146619-cocos-determination-core",
+        "age_seconds": 5
+      },
+      {
+        "run": "r-20261019T012701997576-arc-assembly",
+        "age_seconds": 146
+      },
+      {
+        "run": "r-20261019T013447800511-jt60sa-composed-plant",
+        "age_seconds": 1152
+      },
+      {
+        "run": "r-20261019T014150673041-carrier-axis-orientation",
+        "age_seconds": 1095
+      },
+      {
+        "run": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "age_seconds": 1767
+      },
+      {
+        "run": "r-20261019T031833410177-review-of-arc-assembly-ef691c7b0f18",
+        "age_seconds": 267
+      },
+      {
+        "run": "r-20261019T032255046652-plan-review-of-a-review-promotes-only-its-own-verdict",
+        "age_seconds": 28
+      }
+    ],
+    "neo4j_jobs": [
+      "1288978 codex-neo4j RUNNING 15:33:44"
+    ],
+    "activity_window_seconds": 6.0,
+    "foreign_transactions_started": 0,
+    "foreign_open_queries": [],
+    "quiet": true
+  },
+  "quiet_graph_before_apply": {
     "live_crew_runs": [
       "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
       "r-20261009T015811146619-cocos-determination-core",
@@ -191,6 +271,148 @@
     ],
     "foreign_running_transactions": [],
     "quiet": true
+  },
+  "foreign_population_moves": {
+    "never_bound": [
+      28,
+      23
+    ]
+  },
+  "apply_overlap": {
+    "window": {
+      "from": "2026-10-19T02:26:38.397000000+00:00",
+      "to": "2026-10-19T02:32:38.397000000+00:00"
+    },
+    "own_receipts": {
+      "lo": "2026-10-19T02:29:38.397000000+00:00",
+      "hi": "2026-10-19T02:29:38.397000000+00:00",
+      "n": 11,
+      "digests": [
+        "391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350"
+      ]
+    },
+    "changes_in_window": [
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "frm": "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "to": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "electron_average_temperature_at_midplane=>electron_field_line_average_temperature_over_scrape_off_layer",
+        "frm": "electron_average_temperature_at_midplane",
+        "to": "electron_field_line_average_temperature_over_scrape_off_layer",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "neutron_rate=>total_neutron_rate",
+        "frm": "neutron_rate",
+        "to": "total_neutron_rate",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "outer_hard_xray_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
+        "frm": "outer_hard_xray_half_width",
+        "to": "outer_hard_xray_half_width_at_emissivity_peak",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "poloidal_ion_state_momentum_diffusion_coefficient=>poloidal_ion_charge_state_momentum_diffusion_coefficient",
+        "frm": "poloidal_ion_state_momentum_diffusion_coefficient",
+        "to": "poloidal_ion_charge_state_momentum_diffusion_coefficient",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "poloidal_neutral_momentum_diffusivity=>poloidal_neutral_momentum_diffusion_coefficient",
+        "frm": "poloidal_neutral_momentum_diffusivity",
+        "to": "poloidal_neutral_momentum_diffusion_coefficient",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position=>opacity_at_ece_channel_emission_position",
+        "frm": "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "to": "opacity_at_ece_channel_emission_position",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "toroidal_angle_of_along_pellet_path=>toroidal_coordinate_at_pellet_path_point",
+        "frm": "toroidal_angle_of_along_pellet_path",
+        "to": "toroidal_coordinate_at_pellet_path_point",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "total_power_of_neutral_beam_injector=>launched_power_due_to_neutral_beam_injection",
+        "frm": "total_power_of_neutral_beam_injector",
+        "to": "launched_power_due_to_neutral_beam_injection",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "voltage_amplitude=>voltage_amplitude_of_ion_cyclotron_heating_antenna",
+        "frm": "voltage_amplitude",
+        "to": "voltage_amplitude_of_ion_cyclotron_heating_antenna",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "width_of_antenna_strap=>toroidal_width_of_antenna_strap",
+        "frm": "width_of_antenna_strap",
+        "to": "toroidal_width_of_antenna_strap",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      }
+    ],
+    "foreign_changes": [],
+    "foreign_changes_touching_settled_names": [],
+    "sources_in_window": [],
+    "foreign_sources_touching_settled_names": [],
+    "settled_name_updates": [],
+    "sources_rebound_after_last_receipt": [
+      {
+        "source": "dd:gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+        "name": "elongation_radial_derivative_of_flux_surface",
+        "created": null,
+        "at": "2026-10-19T02:38:13.377000000+00:00"
+      },
+      {
+        "source": "dd:waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+        "name": "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "created": null,
+        "at": "2026-10-19T02:38:13.380000000+00:00"
+      },
+      {
+        "source": "dd:camera_x_rays/camera/camera_dimensions",
+        "name": "size_of_camera",
+        "created": null,
+        "at": "2026-10-19T02:38:13.383000000+00:00"
+      },
+      {
+        "source": "dd:distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+        "name": "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions",
+        "created": null,
+        "at": "2026-10-19T02:38:13.386000000+00:00"
+      }
+    ],
+    "overlap": false
   },
   "source_held_guard": {
     "admitted": 11,
@@ -335,7 +557,7 @@
     "counts": {
       "dropped_edge": 45,
       "derived_parent": 2,
-      "never_bound": 28,
+      "never_bound": 23,
       "unchained_holder": 19,
       "orphan_awaiting_retirement": 3
     },
@@ -388,26 +610,164 @@
       "orphan_awaiting_retirement": 3
     },
     "expected_unchained_holder": 19,
-    "moved_other_populations": {},
+    "moved_other_populations": {
+      "never_bound": [
+        28,
+        23
+      ]
+    },
+    "unchained_holder_entered": [],
+    "unchained_holder_left": [
+      "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+      "electron_average_temperature_at_midplane",
+      "neutron_rate",
+      "outer_hard_xray_half_width",
+      "poloidal_ion_state_momentum_diffusion_coefficient",
+      "poloidal_neutral_momentum_diffusivity",
+      "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+      "toroidal_angle_of_along_pellet_path",
+      "total_power_of_neutral_beam_injector",
+      "voltage_amplitude",
+      "width_of_antenna_strap"
+    ],
     "shortfall": [],
     "checks": {
       "unchained_holder_fell_by_retired": true,
+      "unchained_holder_set_is_baseline_minus_retired": true,
       "every_target_has_receipt": true,
-      "no_other_population_moved": true,
+      "no_receipt_outside_targets": true,
       "all_targets_superseded": true
+    },
+    "foreign_population_moves": {
+      "never_bound": [
+        28,
+        23
+      ]
+    }
+  },
+  "verification_log": {
+    "header": [
+      "# command: uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders python /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders/docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py verify --run-dir /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders --run-id r-20261019T021901634768-sib-settle-unchained-holders",
+      "# revision: e4def604bbabcf2fa6551640c99113360658f61e"
+    ],
+    "exit_line": "EXIT=0",
+    "exit_code": 0,
+    "payload": {
+      "counts": {
+        "dropped_edge": 45,
+        "derived_parent": 2,
+        "never_bound": 23,
+        "unchained_holder": 19,
+        "orphan_awaiting_retirement": 3
+      },
+      "unchained_holder_count": 19,
+      "targets": [
+        "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "electron_average_temperature_at_midplane",
+        "neutron_rate",
+        "outer_hard_xray_half_width",
+        "poloidal_ion_state_momentum_diffusion_coefficient",
+        "poloidal_neutral_momentum_diffusivity",
+        "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "toroidal_angle_of_along_pellet_path",
+        "total_power_of_neutral_beam_injector",
+        "voltage_amplitude",
+        "width_of_antenna_strap"
+      ],
+      "receipt_names": 11,
+      "receipt_targets": [
+        "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "electron_average_temperature_at_midplane",
+        "neutron_rate",
+        "outer_hard_xray_half_width",
+        "poloidal_ion_state_momentum_diffusion_coefficient",
+        "poloidal_neutral_momentum_diffusivity",
+        "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "toroidal_angle_of_along_pellet_path",
+        "total_power_of_neutral_beam_injector",
+        "voltage_amplitude",
+        "width_of_antenna_strap"
+      ],
+      "targets_without_receipt": [],
+      "receipt_operations": [
+        "link_signed_successor"
+      ],
+      "digests": [
+        "391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350"
+      ],
+      "retired_stages": [
+        [
+          "superseded",
+          "superseded"
+        ]
+      ],
+      "before": {
+        "dropped_edge": 45,
+        "derived_parent": 2,
+        "never_bound": 28,
+        "unchained_holder": 30,
+        "orphan_awaiting_retirement": 3
+      },
+      "expected_unchained_holder": 19,
+      "moved_other_populations": {
+        "never_bound": [
+          28,
+          23
+        ]
+      },
+      "unchained_holder_entered": [],
+      "unchained_holder_left": [
+        "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "electron_average_temperature_at_midplane",
+        "neutron_rate",
+        "outer_hard_xray_half_width",
+        "poloidal_ion_state_momentum_diffusion_coefficient",
+        "poloidal_neutral_momentum_diffusivity",
+        "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "toroidal_angle_of_along_pellet_path",
+        "total_power_of_neutral_beam_injector",
+        "voltage_amplitude",
+        "width_of_antenna_strap"
+      ],
+      "shortfall": [],
+      "checks": {
+        "unchained_holder_fell_by_retired": true,
+        "unchained_holder_set_is_baseline_minus_retired": true,
+        "every_target_has_receipt": true,
+        "no_receipt_outside_targets": true,
+        "all_targets_superseded": true
+      },
+      "foreign_population_moves": {
+        "never_bound": [
+          28,
+          23
+        ]
+      }
     }
   },
   "falsification": {
     "check_failed_as_expected": true,
-    "detail": "read-back mismatch: {'unchained_holder_fell_by_retired': False, 'every_target_has_receipt': True, 'no_other_population_moved': True, 'all_targets_superseded': True} :: {'counts': {'dropped_edge': 45, 'derived_parent': 2, 'never_bound': 28, 'unchained_holder': 19, 'orphan_awaiting_retirement': 3}, 'u"
+    "detail": "read-back mismatch: {'unchained_holder_fell_by_retired': False, 'unchained_holder_set_is_baseline_minus_retired': True, 'every_target_has_receipt': True, 'no_receipt_outside_targets': True, 'all_targets_superseded': True} :: {'counts': {'dropped_edge': 45, 'derived_parent': 2, 'never_bound': 23, 'un"
+  },
+  "falsification_log": {
+    "header": [
+      "# command: uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders python /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders/docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py falsify --run-dir /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders --run-id r-20261019T021901634768-sib-settle-unchained-holders",
+      "# revision: e4def604bbabcf2fa6551640c99113360658f61e"
+    ],
+    "exit_line": "EXIT=0",
+    "exit_code": 0,
+    "payload": {
+      "check_failed_as_expected": true,
+      "detail": "read-back mismatch: {'unchained_holder_fell_by_retired': False, 'unchained_holder_set_is_baseline_minus_retired': True, 'every_target_has_receipt': True, 'no_receipt_outside_targets': True, 'all_targets_superseded': True} :: {'counts': {'dropped_edge': 45, 'derived_parent': 2, 'never_bound': 23, 'un"
+    }
   },
   "negative_control": {
     "planted": {
       "id": "PLANTED-neutron_rate",
       "holder": "PLANTED-voltage_amplitude",
       "choice": "different quantity",
-      "probability": 0.98,
-      "confidence": 0.97,
+      "probability": 0.99,
+      "confidence": 0.98,
       "answered": true
     },
     "admitted_by_floors": [],
