@@ -94,6 +94,15 @@ passed</strong> (<code>test1.log</code>, <code>EXIT=0</code>).
 </p>
 
 <p>
+The decision-flow figure is checked as an artifact: it parses as XML
+(<code>xml.dom.minidom.parse</code>, <code>EXIT=0</code>), so every character
+reference it carries is one XML defines, and it renders through
+<code>convert -density 140</code> to a PNG that was inspected
+(<code>render.log</code>, <code>EXIT=0</code>): every label sits inside its box
+with no overlap and no clipping.
+</p>
+
+<p>
 The program's own tests emulate the graph, so they exercise the program's
 decisions rather than a database: an exhausted row's edge is removed and its
 change node recorded; the name, stage, sibling edges and source node are
