@@ -1,0 +1,72 @@
+<section id="ssog-anchor-camera-width-heuristic">
+  <h2 id="ssog-anchor-camera-width-heuristic-heading">Heuristic arm, angular_width_of_camera: blocked by a scratch-port collision</h2>
+
+  <p id="ssog-anchor-camera-width-heuristic-outcome">
+    The heuristic arm for the angular_width_of_camera family (<code>toroidal_angular_width_of_camera</code>,
+    members <code>angular_width_of_camera</code>, <code>toroidal_angular_width_of_camera</code>,
+    <code>vertical_angular_width_of_camera</code>) ran once and aborted in the per-arm runner's isolation proof.
+    No arm record exists, no harmonize apply ran, and no spend was incurred. The runner and the fixed selection
+    were not changed.
+  </p>
+
+  <h3 id="ssog-anchor-camera-width-heuristic-failure">What happened</h3>
+  <p id="ssog-anchor-camera-width-heuristic-failure-text">
+    The runner extracted the 2,643,183,686-byte archived dump, loaded it into a scratch Neo4j instance on port
+    28002, connected, and then failed its own scratch-only marker contrast check:
+  </p>
+  <pre id="ssog-anchor-camera-width-heuristic-trace">RuntimeError: Scratch-only marker contrast failed: {'scratch_uri': 'bolt://127.0.0.1:28002',
+ 'live_uri': 'bolt://98dci4-gpu-0002:7687', 'scratch_nodes': 1770101, 'live_nodes': 1771162,
+ 'marked_scratch_nodes': 1770102, 'scratch_probe': 1, 'live_probe': 0,
+ 'restored_scratch_nodes': 1770103}</pre>
+  <p id="ssog-anchor-camera-width-heuristic-failure-meaning">
+    The check creates one probe node, confirms it is visible in the scratch instance and absent from the live
+    graph, deletes it, and requires the scratch node count to return to its starting value. It read
+    1770103 instead of 1770101: two nodes appeared in the graph between the marker and the restore. Some other
+    client was writing into the instance this run was measuring, so the instance was not private and the
+    isolation proof correctly refused to proceed.
+  </p>
+
+  <h3 id="ssog-anchor-camera-width-heuristic-cause">Cause: the scratch port reservation is racy</h3>
+  <p id="ssog-anchor-camera-width-heuristic-cause-text">
+    <code>free_port_pair()</code> probes for a free bolt port and returns it; it reserves nothing, and the
+    instance binds the port only after the multi-gigabyte dump load finishes, roughly twenty minutes later.
+    Three arms dispatched concurrently on this node all probed while port 28002 was still unbound and all three
+    were handed it. Two of the three failed the same isolation proof:
+  </p>
+  <table id="ssog-anchor-camera-width-heuristic-collision-table">
+    <thead>
+      <tr><th>node</th><th>arm</th><th>started (UTC)</th><th>scratch port</th><th>outcome</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ssog-anchor-camera-width-jev</td><td>jev</td><td>12:32:39</td><td>28002</td><td>running at the time of writing</td></tr>
+      <tr><td>ssog-anchor-camera-width-heuristic</td><td>heuristic</td><td>12:33:52</td><td>28002</td><td>failed-isolation</td></tr>
+      <tr><td>ssog-anchor-passive-loop-jev</td><td>jev</td><td>12:36:26</td><td>28002</td><td>failed-isolation</td></tr>
+    </tbody>
+  </table>
+  <p id="ssog-anchor-camera-width-heuristic-cause-note">
+    The two nodes that failed isolation are the two whose clients reached an instance that was already serving
+    that port; the node that bound it first kept running. The defect is in the arm runner, not in this node's
+    subject, and the runner is outside this node's write scope.
+  </p>
+
+  <h3 id="ssog-anchor-camera-width-heuristic-cleanup">State left behind</h3>
+  <p id="ssog-anchor-camera-width-heuristic-cleanup-text">
+    The runner's teardown ran on the failed attempt: the scratch instance was stopped at 13:10:27 and its tree
+    removed at 13:10:36, no scratch tree remains under this run's <code>TMPDIR</code>, port 28002 is free, and
+    the runner process is gone. Spend for the node is zero: the failure preceded the harmonize apply, so no
+    call was made and no LLM cost row exists.
+  </p>
+
+  <h3 id="ssog-anchor-camera-width-heuristic-check">Container check exercised before launch</h3>
+  <p id="ssog-anchor-camera-width-heuristic-check-text">
+    The containment verdict function was exercised on four planted inputs seeded from the earlier arm's saved
+    record before the arm was launched: a planted live family row, a planted live run-id row and a fabricated
+    empty measurement each refused containment, and a scratch-only measurement held. All four matched
+    expectation. That is the check firing, not merely passing.
+  </p>
+
+  <p id="ssog-anchor-camera-width-heuristic-next">
+    Next: run this arm once the node's peers are no longer holding scratch ports, or reserve the port
+    exclusively before the dump load so concurrent arms cannot be handed the same one.
+  </p>
+</section>
