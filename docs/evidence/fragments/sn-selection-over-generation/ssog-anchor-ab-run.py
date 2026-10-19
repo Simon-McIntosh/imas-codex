@@ -82,6 +82,136 @@ def graph_count(gc: GraphClient) -> int:
     return int(gc.query("MATCH (n) RETURN count(n) AS total")[0]["total"])
 
 
+def family_window_rows(
+    gc: GraphClient, member_ids: list[str], started: str, ended: str
+) -> int:
+    """Cost rows in one window that name any of this family's members.
+
+    ``standard_name_ids`` make a row attributable to this apply rather than to
+    whatever else shares the graph, which is what a leak test needs. On the
+    scratch copy every such row is ours; on the live graph a row naming our
+    members could only have come from this apply writing there.
+    """
+    return int(
+        gc.query(
+            "MATCH (c:LLMCost) WHERE c.llm_at >= datetime($started) "
+            "AND c.llm_at <= datetime($ended) "
+            "AND any(sid IN coalesce(c.standard_name_ids, []) "
+            "        WHERE sid IN $members) "
+            "RETURN count(c) AS n",
+            members=list(member_ids),
+            started=started,
+            ended=ended,
+        )[0]["n"]
+    )
+
+
+def evaluate_containment(measured: dict) -> dict:
+    """Decide whether this apply's writes stayed inside the scratch copy.
+
+    Two controls, and a check that measures neither is not a check:
+
+    * positive -- the apply's own cost rows are present in the scratch
+      instance, either as rows naming this family's members or as rows in the
+      apply window on a graph only this run writes to. Without it an apply
+      that wrote nowhere would pass a leak test by writing nothing.
+    * negative -- none of those rows are present in the live graph, so the
+      command did not write there.
+
+    The live graph is shared and other sessions write to it while this arm
+    runs, so its total node count and its bare window row count are recorded
+    as observations and never judged. Only rows attributable to this apply
+    can indict it.
+    """
+    scratch_signal = (
+        int(measured.get("scratch_family_rows") or 0)
+        + int(measured.get("scratch_ledger_rows") or 0)
+        + int(measured.get("scratch_scope_run_rows") or 0)
+    )
+    live_signal = int(measured.get("live_family_rows") or 0) + int(
+        int(measured.get("live_scope_run_rows") or 0)
+    )
+    reasons: list[str] = []
+    if scratch_signal <= 0:
+        reasons.append(
+            "no scratch cost row names this family or falls in the apply "
+            "window: the apply wrote nothing to the copy being measured"
+        )
+    if live_signal != 0:
+        reasons.append(
+            f"{live_signal} cost rows attributable to this apply are present "
+            "in the live graph"
+        )
+    return {
+        "holds": not reasons,
+        "reasons": reasons,
+        "scratch_signal": scratch_signal,
+        "live_signal": live_signal,
+        "evidence": dict(measured),
+    }
+
+
+def self_check_containment(receipt_path: Path) -> dict:
+    """Exercise the containment check on planted inputs from a saved record.
+
+    No apply is run and no graph is touched: the measurement numbers are
+    planted, seeded from an earlier invocation's saved record. The point is to
+    see the negative control fire on a fabricated live row rather than to
+    assert that a passing means anything on its own.
+    """
+    receipt = json.loads(receipt_path.read_text())
+    isolation = receipt.get("isolation", {})
+    base = {
+        "scratch_family_rows": int(receipt.get("calls") or 3),
+        "scratch_ledger_rows": int(receipt.get("calls") or 3),
+        "scratch_scope_run_rows": int(isolation.get("scratch_scope_run_rows") or 0),
+        "live_family_rows": 0,
+        "live_scope_run_rows": 0,
+    }
+    cases = {
+        "scratch-only": ({}, True),
+        "planted-live-family-row": ({"live_family_rows": 1}, False),
+        "planted-live-run-id-row": ({"live_scope_run_rows": 1}, False),
+        "wrote-nothing": (
+            {
+                "scratch": None,
+                "scratch_family_rows": 0,
+                "scratch_ledger_rows": 0,
+                "scratch_scope_run_rows": 0,
+            },
+            False,
+        ),
+    }
+    results = {}
+    for name, (overrides, expected) in cases.items():
+        measured = {**base, **{k: v for k, v in overrides.items() if k != "scratch"}}
+        verdict = evaluate_containment(measured)
+        results[name] = {
+            "expected_holds": expected,
+            "holds": verdict["holds"],
+            "reasons": verdict["reasons"],
+            "scratch_signal": verdict["scratch_signal"],
+            "live_signal": verdict["live_signal"],
+        }
+        if verdict["holds"] is not expected:
+            raise RuntimeError(
+                f"Containment self-check disagreed with expectation for "
+                f"{name}: {results[name]}"
+            )
+    report = {
+        "receipt": str(receipt_path),
+        "at": now(),
+        "cases": results,
+        "summary": {
+            "cases": len(results),
+            "failed_as_planted": sum(1 for r in results.values() if not r["holds"]),
+            "passed_as_expected": sum(1 for r in results.values() if r["holds"]),
+            "all_match": True,
+        },
+    }
+    return report
+
+
 def code_identity() -> dict[str, str]:
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     listing = subprocess.check_output(
@@ -323,12 +453,14 @@ def run_arm(seed: str, arm: str) -> dict:
             after_scores = family_scores(gc, seed)
             summary = outcome[0]["result"]
             run_ids = list(summary["run_ids"])
+            member_ids = list(row["members"])
+            window_end = now()
             ledger = gc.query(
                 "MATCH (c:LLMCost) WHERE c.llm_at >= datetime($started) "
                 "AND c.llm_at <= datetime($ended) "
                 "RETURN count(c) AS calls, coalesce(sum(c.llm_cost), 0.0) AS spend",
                 started=started_at,
-                ended=now(),
+                ended=window_end,
             )[0]
             per_model = gc.query(
                 "MATCH (c:LLMCost) WHERE c.llm_at >= datetime($started) "
@@ -336,47 +468,43 @@ def run_arm(seed: str, arm: str) -> dict:
                 "RETURN c.llm_model AS model, count(c) AS calls, "
                 "sum(c.llm_cost) AS spend ORDER BY model",
                 started=started_at,
-                ended=now(),
+                ended=window_end,
             )
-            # Containment rests on two signals, one negative and one positive.
-            # Negative: this apply's campaign run ids are absent from the live
-            # graph, so the command did not write there. Positive: the apply's
-            # cost rows are present in the scratch graph, so the work really
-            # landed in the copy being measured -- a run that silently wrote
-            # nowhere would otherwise pass a leak test by writing nothing.
-            #
-            # The live node COUNT is not a containment signal: the live graph is
-            # a shared service other sessions write to while this arm runs. The
-            # delta is recorded as an observation, never as a failure, and the
-            # run-id rows are not asserted on the scratch side because the
-            # campaign run ids are not the identifier those cost rows carry.
-            live_runs = live.query(
+            scratch_family_rows = family_window_rows(
+                gc, member_ids, started_at, window_end
+            )
+            scratch_scope_run_rows = gc.query(
                 "UNWIND $ids AS rid MATCH (c:LLMCost {run_id: rid}) "
                 "RETURN count(c) AS n",
                 ids=run_ids,
             )[0]["n"]
-            live_nodes_after = graph_count(live)
-            data["isolation"]["live_nodes_after"] = live_nodes_after
-            data["isolation"]["live_nodes_delta_observed"] = (
-                live_nodes_after - data["isolation"]["live_nodes"]
+            live_family_rows = family_window_rows(
+                live, member_ids, started_at, window_end
             )
-            data["isolation"]["live_scope_run_rows"] = int(live_runs)
-            data["isolation"]["scratch_ledger_rows"] = int(ledger["calls"])
-            if live_runs != 0:
-                raise RuntimeError(
-                    f"Apply leaked into the live graph: live_rows={live_runs}"
-                )
-            if int(ledger["calls"]) <= 0:
-                raise RuntimeError(
-                    "No scratch cost rows in the apply window: the apply wrote "
-                    "nothing to the scratch graph it was pointed at"
-                )
+            live_scope_run_rows = live.query(
+                "UNWIND $ids AS rid MATCH (c:LLMCost {run_id: rid}) "
+                "RETURN count(c) AS n",
+                ids=run_ids,
+            )[0]["n"]
+            live_window_rows = live.query(
+                "MATCH (c:LLMCost) WHERE c.llm_at >= datetime($started) "
+                "AND c.llm_at <= datetime($ended) RETURN count(c) AS n",
+                started=started_at,
+                ended=window_end,
+            )[0]["n"]
+            live_nodes_after = graph_count(live)
 
             calls = int(ledger["calls"])
             spend = float(ledger["spend"])
+
+            # The complete arm record is written BEFORE any check that could
+            # reject it. A check is a statement about a measurement, and a
+            # defective one must not be able to destroy a paid measurement:
+            # every field the arm exists to produce lands on disk first, and
+            # only then is containment judged and its verdict recorded.
             data.update(
                 ended_at=ended_at,
-                ledger_window={"started": started_at, "ended": ended_at},
+                ledger_window={"started": started_at, "ended": window_end},
                 harmonize_summary=summary,
                 run_ids=run_ids,
                 calls=calls,
@@ -386,7 +514,7 @@ def run_arm(seed: str, arm: str) -> dict:
                     {
                         "model": r["model"],
                         "calls": int(r["calls"]),
-                        "spend_usd": float(r["spend"]),
+                        "spend_usd": None if r["spend"] is None else float(r["spend"]),
                     }
                     for r in per_model
                 ],
@@ -401,17 +529,58 @@ def run_arm(seed: str, arm: str) -> dict:
                 decision=outcome[0].get("decision"),
                 harmonize_receipts=outcome,
             )
-            if spend >= ARM_BUDGET_USD:
-                data["outcome_status"] = "failed"
-                raise RuntimeError(f"Arm spend ${spend:.4f} reached its ceiling")
-            data["outcome_status"] = "complete"
+            # The live node COUNT is not a containment signal: the live graph
+            # is a shared service other sessions write to while this arm runs.
+            # The delta and the bare window row count are recorded as
+            # observations, never judged; only rows attributable to this apply
+            # can indict it.
+            data["isolation"].update(
+                live_nodes_after=live_nodes_after,
+                live_nodes_delta_observed=(
+                    live_nodes_after - data["isolation"]["live_nodes"]
+                ),
+                scratch_family_rows=int(scratch_family_rows),
+                scratch_scope_run_rows=int(scratch_scope_run_rows),
+                scratch_ledger_rows=calls,
+                live_family_rows=int(live_family_rows),
+                live_scope_run_rows=int(live_scope_run_rows),
+                live_window_rows_observed=int(live_window_rows),
+            )
+            data["containment"] = evaluate_containment(
+                {
+                    "scratch_family_rows": int(scratch_family_rows),
+                    "scratch_scope_run_rows": int(scratch_scope_run_rows),
+                    "scratch_ledger_rows": calls,
+                    "live_family_rows": int(live_family_rows),
+                    "live_scope_run_rows": int(live_scope_run_rows),
+                }
+            )
+            data["containment"]["at"] = now()
+            data["outcome_status"] = (
+                "complete" if data["containment"]["holds"] else "containment"
+            )
             out_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+
             print(
                 f"{arm} {seed}: lint {data['lint_before']}->{data['lint_after']}, "
                 f"{calls} calls, ${spend:.4f}, {elapsed:.1f}s, "
-                f"stamped={data['stamped']}",
+                f"stamped={data['stamped']}, "
+                f"containment={data['containment']['holds']}",
                 flush=True,
             )
+            if spend >= ARM_BUDGET_USD:
+                data["outcome_status"] = "over-budget"
+                out_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+                raise RuntimeError(
+                    f"Arm spend ${spend:.4f} reached its ceiling; the arm record "
+                    f"is on disk at {out_path}"
+                )
+            if not data["containment"]["holds"]:
+                raise RuntimeError(
+                    f"Containment failed for {arm} {seed}: "
+                    f"{'; '.join(data['containment']['reasons'])}. The arm "
+                    f"record is on disk at {out_path}"
+                )
         return data
     finally:
         if instance is not None:
@@ -432,9 +601,24 @@ def run_arm(seed: str, arm: str) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--family", required=True)
-    parser.add_argument("--arm", required=True, choices=["heuristic", "jev"])
+    parser.add_argument("--family")
+    parser.add_argument("--arm", choices=["heuristic", "jev"])
+    parser.add_argument(
+        "--self-check-containment",
+        metavar="SAVED_RECORD",
+        help="Exercise the containment check on planted inputs seeded from a "
+        "saved arm record. Runs no apply and touches no graph.",
+    )
     args = parser.parse_args()
+    if args.self_check_containment:
+        report = self_check_containment(Path(args.self_check_containment))
+        log_path = LOG_DIR / "containment-self-check.log"
+        log_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+        print(json.dumps(report["summary"], sort_keys=True))
+        print(f"self-check log: {log_path}")
+        return
+    if not args.family or not args.arm:
+        raise SystemExit("--family and --arm are required unless self-checking")
     if not SELECTION.exists():
         raise SystemExit(f"Missing fixed selection: {SELECTION}")
     result = run_arm(args.family, args.arm)
