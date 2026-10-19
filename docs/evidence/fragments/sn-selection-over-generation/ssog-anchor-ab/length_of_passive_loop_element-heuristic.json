@@ -4,41 +4,173 @@
     "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
   },
   "anchor": "major_length_of_passive_loop_element",
+  "applied": true,
   "arm": "heuristic",
   "budget_limit_usd": 2.0,
+  "calls": 27,
   "code": {
-    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-heuristic",
-    "git_head": "c96f0f0d874b01c4b623a395637fc17018e66831",
-    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-heuristic/imas_codex/standard_names/harmonize.py",
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-heuristic-r2",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-heuristic-r2/imas_codex/standard_names/harmonize.py",
     "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
   },
-  "cost_limit_passed_usd": 1.98,
-  "dump_bytes": 2643183686,
-  "failure": {
-    "apply_exit": 1,
-    "apply_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T122714050261-ssog-anchor-passive-loop-heuristic/apply-heuristic-length_of_passive_loop_element.log",
-    "cause": "Scratch Bolt endpoint refused connection during DD resolution graph authority read",
-    "recorded_at": "2026-10-19T13:12:31.286701+00:00",
-    "runner_exit": 1,
-    "runner_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T122714050261-ssog-anchor-passive-loop-heuristic/runner-heuristic-retry.log",
-    "spend_measurement": "unavailable; apply produced no completed harmonize receipt before scratch instance stopped",
-    "stage": "harmonize_apply"
+  "containment": {
+    "at": "2026-10-19T15:43:28.727668+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 27,
+      "scratch_ledger_rows": 27,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 54
   },
+  "cost_limit_passed_usd": 1.98,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T15:43:26.728276+00:00",
   "family": "length_of_passive_loop_element",
+  "harmonize_receipts": [
+    {
+      "anchor": "major_length_of_passive_loop_element",
+      "applied": true,
+      "batches": [
+        [
+          "major_length_of_passive_loop_element"
+        ],
+        [
+          "length_of_passive_loop_element",
+          "minor_length_of_passive_loop_element"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "87a992f675a532ebb66dc16d8d497db4a78956b503ec775c3799a759d23faa1b",
+      "harmonized": false,
+      "invariant": [
+        "length",
+        "",
+        "",
+        "",
+        "passive_loop_element"
+      ],
+      "member_scores": {
+        "length_of_passive_loop_element": 0.99375,
+        "major_length_of_passive_loop_element": 1.0,
+        "minor_length_of_passive_loop_element": 0.9375
+      },
+      "members": [
+        "length_of_passive_loop_element",
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element"
+      ],
+      "n": 3,
+      "physical_base": "length",
+      "planned_calls": 3,
+      "result": {
+        "batches_run": 2,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 50.00% < 90.00% (1/2 touched)"
+        ],
+        "halted": true,
+        "resume_from": 2,
+        "run_ids": [
+          "2707bb7a-a265-491b-b6fd-16e4b4e61140",
+          "d5a27149-decc-49dd-9cf7-cb2309030437"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 2,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.5792,
+        "total_quarantined": 0,
+        "total_selected": 3,
+        "total_touched": 3
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.99375,
+            "id": "length_of_passive_loop_element"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 0.99375,
+            "id": "length_of_passive_loop_element"
+          },
+          {
+            "after": 0.9375,
+            "before": 1.0,
+            "id": "major_length_of_passive_loop_element"
+          }
+        ]
+      },
+      "scores_after": {
+        "length_of_passive_loop_element": 0.849,
+        "major_length_of_passive_loop_element": 0.9375,
+        "minor_length_of_passive_loop_element": 1.0
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 2,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 50.00% < 90.00% (1/2 touched)"
+    ],
+    "halted": true,
+    "resume_from": 2,
+    "run_ids": [
+      "2707bb7a-a265-491b-b6fd-16e4b4e61140",
+      "d5a27149-decc-49dd-9cf7-cb2309030437"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 2,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.5792,
+    "total_quarantined": 0,
+    "total_selected": 3,
+    "total_touched": 3
+  },
   "heuristic_anchor": "major_length_of_passive_loop_element",
   "isolation": {
-    "at": "2026-10-19T13:01:05.917560+00:00",
+    "at": "2026-10-19T15:12:33.029792+00:00",
+    "live_family_rows": 0,
     "live_nodes": 1771162,
+    "live_nodes_after": 1771162,
+    "live_nodes_delta_observed": 0,
     "live_probe": 0,
+    "live_scope_run_rows": 0,
     "live_uri": "bolt://98dci4-gpu-0002:7687",
-    "marked_scratch_nodes": 1770156,
-    "restored_scratch_nodes": 1770155,
-    "scratch_nodes": 1770155,
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 27,
+    "scratch_ledger_rows": 27,
+    "scratch_nodes": 1770101,
     "scratch_probe": 1,
-    "scratch_uri": "bolt://127.0.0.1:28000"
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28008"
   },
   "jev_anchor": "length_of_passive_loop_element",
   "kind": "unclassified",
+  "ledger_calls": 27,
+  "ledger_spend_usd": 0.579152,
+  "ledger_window": {
+    "ended": "2026-10-19T15:43:28.060170+00:00",
+    "started": "2026-10-19T15:12:37.897110+00:00"
+  },
+  "lint_after": 0,
+  "lint_after_classes": {},
   "lint_before": 3,
   "lint_before_classes": {
     "convention_violation": 3
@@ -48,29 +180,79 @@
     "major_length_of_passive_loop_element",
     "minor_length_of_passive_loop_element"
   ],
-  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T122714050261-ssog-anchor-passive-loop-heuristic/tmp71qf7hj_/mcintos-1281970-u1ew1_zb/instance/logs/neo4j-temp.log",
-  "outcome_status": "failed",
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/mcintos-1281970-ftjlwn3v/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.088018
+    },
+    {
+      "calls": 6,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.22332
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.003106
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.101968
+    },
+    {
+      "calls": 6,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.161614
+    },
+    {
+      "calls": 8,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.001126
+    }
+  ],
   "planned_calls": 3,
-  "port": 28000,
+  "port": 28008,
+  "port_lock": "/dev/shm/ssog-scratch-port-28008.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T15:43:44.071158+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28008.lock"
+  },
   "recorded_anchor_before": "major_length_of_passive_loop_element",
+  "run_ids": [
+    "2707bb7a-a265-491b-b6fd-16e4b4e61140",
+    "d5a27149-decc-49dd-9cf7-cb2309030437"
+  ],
+  "scores_after": {
+    "length_of_passive_loop_element": 0.849,
+    "major_length_of_passive_loop_element": 0.9375,
+    "minor_length_of_passive_loop_element": 1.0
+  },
   "scores_before": {
     "length_of_passive_loop_element": 0.99375,
     "major_length_of_passive_loop_element": 1.0,
     "minor_length_of_passive_loop_element": 0.9375
   },
   "scratch_removed": {
-    "at": "2026-10-19T13:10:21.270587+00:00",
+    "at": "2026-10-19T15:43:44.071093+00:00",
     "removed_entries": [
       "instance"
     ],
-    "tree": "/tmp/reckon-crew-scratch/r-20261019T122714050261-ssog-anchor-passive-loop-heuristic/tmp71qf7hj_/mcintos-1281970-u1ew1_zb"
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/mcintos-1281970-ftjlwn3v"
   },
-  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T122714050261-ssog-anchor-passive-loop-heuristic/tmp71qf7hj_/mcintos-1281970-u1ew1_zb",
-  "scratch_uri": "bolt://127.0.0.1:28000",
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/mcintos-1281970-ftjlwn3v",
+  "scratch_uri": "bolt://127.0.0.1:28008",
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
-  "started_at": "2026-10-19T12:31:40.717723+00:00",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.579152,
+  "stamped": false,
+  "started_at": "2026-10-19T15:07:56.396786+00:00",
   "stopped_instance": {
-    "at": "2026-10-19T13:10:20.582430+00:00",
-    "tree": "/tmp/reckon-crew-scratch/r-20261019T122714050261-ssog-anchor-passive-loop-heuristic/tmp71qf7hj_/mcintos-1281970-u1ew1_zb/instance"
-  }
+    "at": "2026-10-19T15:43:43.736980+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/mcintos-1281970-ftjlwn3v/instance"
+  },
+  "wall_seconds": 1848.831122755073
 }
