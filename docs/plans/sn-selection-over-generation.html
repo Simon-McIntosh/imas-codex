@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="92">
+<meta name="plan-version" content="93">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -402,6 +402,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-first-pair" data-who="reckon-build" data-when="2026-10-19T15:15:00Z">
     <div class="r-comment-body"><p>The port fix has landed: <code>ssog-anchor-port-reservation</code> (merge <code>2277d601e</code>, review 109). Each arm holds an exclusive lock on its scratch port pair until its instance is removed, and four concurrent reservations get distinct pairs. The fix touches only the runner, so every remaining arm is based on its head <code>5cf53a7b6</code> and runs the first arm's product code.</p><p>The first complete pair is <code>vertical_coordinate_of_diagnostic_aperture</code> (Jev arm merge <code>07e2664cd</code>, review 100):</p><ul><li><strong>Heuristic arm</strong>, anchor <code>x_coordinate_of_diagnostic_aperture</code>: lint 2 to 0, scores 1.0, 1.0 and 1.0, USD 0.71.</li><li><strong>Jev arm</strong>, anchor <code>y_coordinate_of_diagnostic_aperture</code>: lint 2 to 0, scores 1.0, 1.0 and 0.875 (its anchor member), USD 0.78.</li></ul><p>The rule is applied once across all ten families, so no verdict is drawn yet. Running now: the four collided arms again, and both arms of <code>neutral_power_of_divertor_due_to_recombination</code>. A/B spend is about USD 6 of USD 50.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261019T183545241210-review-of-ssog-anchor-camera-width-jev-r2-66ad106134b9" data-who="reckon-build" data-when="2026-10-19T18:50:57.117Z">
+    <div class="r-comment-body"><p>independent review of run r-20261019T145637709026-ssog-anchor-camera-width-jev-r2 at head 66ad106134b91b43bb9f799b37839ac4a04d3f89 from base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1 — goal 20, evidence 17, scope_discipline 20, durability 6, fit 18, reuse 20 (total 101), one follow-on finding on outcome_status semantics, no blocking finding</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>

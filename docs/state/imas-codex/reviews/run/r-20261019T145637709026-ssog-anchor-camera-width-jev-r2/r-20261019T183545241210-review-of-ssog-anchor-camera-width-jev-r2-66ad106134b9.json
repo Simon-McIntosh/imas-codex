@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run recorded baseline_suite null and after_suite null (it is an evidence node, not a test-role node), so the derivation over its own gate logs yields no added failure ids",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T18:50:57.117Z",
+  "dispatched_at": "2026-10-19T18:37:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-jev.json",
+      "line": "168",
+      "severity": "follow-on",
+      "text": "follow-on: outcome_status reads \"complete\" because the runner sets that value whenever containment holds, independently of whether harmonization applied, while this arm halted with 1 of 3 members untouched and scores_after[\"angular_width_of_camera\"] null at :204; the halt, resume_from and the null score are recorded at :204-:225, so the record is not misleading on its own, but a reader comparing arms on outcome_status alone can read it as a full application."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": null,
+    "baseline_suite": null
+  },
+  "item_verdicts": {
+    "diff": "Read the single commit 66ad106134b91b43bb9f799b37839ac4a04d3f89 against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; it adds exactly two files, the arm record and the evidence fragment, changing no code and no test.",
+    "done_when": "The done_when asks for a record with outcome_status complete written by a log ending EXIT=0, carrying the anchor, lint before and after, every member's documentation score after, calls, spend, wall time, stamped, the containment verdict with its evidence and the code digest, with the scratch stopped and spend under USD 2.00; runner-jev.log ends with a bare EXIT=0 and angular_width_of_camera-jev.json carries each of those fields, so the gate asserts that measure.",
+    "goal": "The source goal is to run the jev arm of the angular_width_of_camera anchor family in a scratch graph through the per-arm runner; the landed diff adds docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-jev.json carrying arm jev, the scratch_uri bolt://127.0.0.1:28000 and outcome_status complete, so the arm it was dispatched to run is the arm recorded.",
+    "manifest": "Read the source manifest: it names commit 66ad10613, both changed paths, the run-jev.sh gate with three logs, and every headline it states (lint 2->0, calls 10, spend USD 0.3622, wall 1772 s, stamped false, containment holds, digest d1e4f1e5) reconciles with the record and the logs.",
+    "write_paths": "The source fence grants three paths; git diff 5cf53a7b6..66ad10613 changes angular_width_of_camera-jev.json and ssog-anchor-camera-width-jev-r2.html, both granted, and nothing outside them."
+  },
+  "justifications": {
+    "durability": "The diff adds an arm record and an evidence fragment and no test; the source manifest declares negative_control 'none' and containment-self-check.log exercises the containment guard once (3 planted negatives fail as planted, EXIT=0) but no committed assertion fails if the record's shape or values regress.",
+    "evidence": "runner-jev.log ends with a bare EXIT=0 and its summary 'lint 2->0, 10 calls, $0.3622, 1772.0s, stamped=False, containment=True' reconciles with angular_width_of_camera-jev.json:126-131, :122, :228 and :231; independent checks confirmed the digest at :15 equals the sibling arm's d1e4f1e5, the per-model spends at :150-165 sum to spend_usd, the scratch tree at :216 is absent on disk, and the /dev/shm lock at :195 is unheld, but one member's documentation score after reads null at :204.",
+    "fit": "angular_width_of_camera-jev.json has exactly the sibling arm's key set (vertical_coordinate_of_diagnostic_aperture-jev.json) plus only port_lock :190 and port_lock_released :194, the fields the runner's port reservation emits, and its file name is the one the dispatch fence assigned.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-jev.json:1-9 records arm jev for the angular_width_of_camera family from a scratch instance at bolt://127.0.0.1:28000, which is the arm the goal names.",
+    "reuse": "The diff adds no function, class or module; a capability search over docs/evidence/fragments/sn-selection-over-generation and imas_codex/standard_names found no other owner of an arm-record schema, so this record is its sibling arm's own shape produced by the same runner rather than a second implementation.",
+    "scope_discipline": "git diff 5cf53a7b6..66ad10613 changes only angular_width_of_camera-jev.json and ssog-anchor-camera-width-jev-r2.html, both of which the source fence grants."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal is to run the jev arm of the angular_width_of_camera anchor family in a scratch graph through the per-arm runner; the landed diff adds docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-jev.json carrying \"arm\": \"jev\", the scratch_uri bolt://127.0.0.1:28000 and outcome_status complete, so the arm it was dispatched to run is the arm recorded.\nVERDICT done_when: The done_when asks for a record with outcome_status complete written by a log ending EXIT=0, carrying the anchor, lint before and after, every member's documentation score after, calls, spend, wall time, stamped, the containment verdict with its evidence and the code digest, with the scratch stopped and spend under USD 2.00; runner-jev.log ends with a bare EXIT=0, and angular_width_of_camera-jev.json carries anchor :169, lint_before/lint_after :126/:127, scores_after :203, calls :122, spend_usd :228, wall_seconds :231, stamped :225, containment :17-31 and tree_digest_imas_codex :15, so the gate asserts that measure.\nVERDICT write_paths: The source fence grants docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-jev.json, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-camera-width-jev-r2.html and docs/figures/sn-selection-over-generation/ssog-anchor-camera-width-jev-r2; git diff 5cf53a7b6..66ad10613 changes the first two and nothing outside them.\nVERDICT manifest: Read the source manifest: it names commit 66ad10613, both changed paths, tests as 'bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145637709026-ssog-anchor-camera-width-jev-r2/run-jev.sh' with three logs, and every headline it states (lint 2->0, calls 10, spend USD 0.3622, wall 1772 s, stamped false, containment holds, digest d1e4f1e5) reconciles with the record and the logs.\nVERDICT diff: Read the single commit 66ad106134b91b43bb9f799b37839ac4a04d3f89 against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; it adds exactly two files, the 232-line arm record and a 53-line evidence fragment, and changes no code and no test.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-jev.json:1-9 records \"arm\": \"jev\" for the angular_width_of_camera family from a scratch instance at bolt://127.0.0.1:28000, which is the arm the goal names.\nSCORE evidence: 17\nJUSTIFICATION evidence: runner-jev.log ends with a bare EXIT=0 and its summary 'lint 2->0, 10 calls, $0.3622, 1772.0s, stamped=False, containment=True' reconciles with angular_width_of_camera-jev.json:126-131 lint_before/lint_after, :122 calls, :228 spend_usd and :231 wall_seconds; independent checks confirmed the digest at :15 equals the sibling arm's d1e4f1e5, the per-model spends at :150-165 sum to spend_usd, the scratch tree at :216 is absent on disk, and the /dev/shm lock at :195 is unheld, but one member's documentation score after reads null at :204.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 5cf53a7b6..66ad10613 changes only angular_width_of_camera-jev.json and ssog-anchor-camera-width-jev-r2.html, both of which the source fence grants, and adds nothing the goal does not imply.\nSCORE durability: 6\nJUSTIFICATION durability: The diff adds an arm record and an evidence fragment and no test; the source manifest declares negative_control 'none' and containment-self-check.log exercises the containment guard once (3 planted negatives fail as planted, 1 scratch-only case holds, EXIT=0) but no committed assertion fails if the record's shape or values regress.\nSCORE fit: 18\nJUSTIFICATION fit: angular_width_of_camera-jev.json has exactly the sibling arm's key set (vertical_coordinate_of_diagnostic_aperture-jev.json) plus only port_lock :190 and port_lock_released :194, the two fields the runner's port reservation emits, and its file name is the one the dispatch fence assigned.\nSCORE reuse: 20\nJUSTIFICATION reuse: The diff adds no function, class or module; a capability search over docs/evidence/fragments/sn-selection-over-generation and imas_codex/standard_names found no other owner of an arm-record schema, so this record is its sibling arm's own shape produced by the same runner rather than a second implementation.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-jev.json:168 follow-on: outcome_status reads \"complete\" because the runner sets that value whenever containment holds, independently of whether harmonization applied, while this arm halted with 1 of 3 members untouched and scores_after[\"angular_width_of_camera\"] null at :204; the halt, resume_from and the null score are recorded at :204-:225, so the record is not misleading on its own, but a reader comparing arms on outcome_status alone can read it as a full application.\n",
+  "review_run_id": "r-20261019T183545241210-review-of-ssog-anchor-camera-width-jev-r2-66ad106134b9",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "66ad106134b91b43bb9f799b37839ac4a04d3f89",
+  "reviewed_run_id": "r-20261019T145637709026-ssog-anchor-camera-width-jev-r2",
+  "scores": {
+    "durability": 6,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T18:49:23.999531+00:00",
+  "total": 101
+}
