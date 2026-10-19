@@ -14,6 +14,11 @@
       "kind": "exempted",
       "reason": "Corrected in the same manifest repair: not_sourceless 16 and source counts {44,17,13,22,22,0}, matching the record.",
       "recorded_at": "2026-10-19T09:45:14.758736+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The pre-fix control ran against the round-one cohort in node-local scratch, now gone; the review itself verified the round-one code's defect by md5 against the reviewed commit, which is the durable evidence.",
+      "recorded_at": "2026-10-19T09:45:23.678260+00:00"
     }
   },
   "findings": [
