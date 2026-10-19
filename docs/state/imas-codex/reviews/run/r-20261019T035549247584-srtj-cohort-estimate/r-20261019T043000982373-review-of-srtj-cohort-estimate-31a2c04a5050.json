@@ -4,6 +4,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-10-19T04:45:40.268Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "A one-shot, zero-spend estimate whose only consumer is the lead's ceiling decision. The fixed-cohort run that follows replaces every figure in it with measured spend from receipts, so nothing downstream reads this driver again.",
+      "recorded_at": "2026-10-19T04:49:27.820920+00:00"
+    }
+  },
   "dispatched_at": "2026-10-19T04:30:51Z",
   "findings": [
     {
