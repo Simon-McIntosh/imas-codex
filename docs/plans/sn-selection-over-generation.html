@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="104">
+<meta name="plan-version" content="105">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -438,6 +438,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2" data-who="reckon-build" data-when="2026-10-19T15:51:45.706Z">
     <div class="r-comment-body"><p>Recorded the length_of_passive_loop_element heuristic anchor arm (anchor major_length_of_passive_loop_element) run against a fresh scratch copy: lint 3-&gt;0, member doc scores {minor 1.0, major 0.9375, length 0.849}, 27 calls, USD 0.579152, 1848.8 s, containment holds, code digest d1e4f1e5.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-s7-four-families" data-who="reckon-build" data-when="2026-10-19T20:00:00Z">
+    <div class="r-comment-body"><p>Four of the ten families now have both arms on <code>main</code>. All arms ran on the same product code, every containment check held, and no review blocked. Scores are each member's documentation score after the apply.</p><ul><li><strong><code>angular_width_of_camera</code></strong> (merges <code>67cc9d23f</code> and <code>6c7afca42</code>). Heuristic arm, anchor <code>toroidal_angular_width_of_camera</code>: lint 2 to 0, scores 0.9375 and 1.0. Jev arm, anchor <code>vertical_angular_width_of_camera</code>: lint 2 to 0, scores 0.9875 and 0.869. The base member is unscored in both.</li><li><strong><code>length_of_passive_loop_element</code></strong> (merges <code>cac8b0905</code> and <code>8d0d15085</code>). Heuristic arm, anchor <code>major_length_of_passive_loop_element</code>: lint 3 to 0. Jev arm, anchor <code>length_of_passive_loop_element</code>: lint 3 to 2. Scores are 0.849, 0.9375 and 1.0 against 0.849, 1.0 and 0.9375.</li><li><strong><code>neutral_power_of_divertor_due_to_recombination</code></strong> (merges <code>87cd8a9ed</code> and <code>5eb4553bb</code>). Both arms start and end at lint 0. Heuristic anchor <code>power_of_divertor_due_to_recombination</code>: scores 0.906, 0.925 and 0.849. Jev anchor <code>plasma_power_of_divertor_due_to_recombination</code>: scores 0.9625, 0.894 and 0.849.</li></ul><p>Only <code>vertical_coordinate_of_diagnostic_aperture</code> stamped as harmonized; the other three families did not converge in either arm. The two passive-loop re-runs replaced their earlier collision records at the same arm paths, resolved in the merge to the complete record. The rule is applied once over all ten families. Running now: both arms of <code>current_density_due_to_wave_driven_current_drive</code>, <code>momentum_flux_due_to_e_cross_b_drift</code> and <code>lower_bound_wavelength_of_visible_camera</code>. Arm spend so far is about USD 4.5; including the earlier attempts, the comparison stands at about USD 9 of USD 50.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>

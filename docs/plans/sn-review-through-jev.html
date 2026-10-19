@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="106">
+<meta name="plan-version" content="107">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -543,6 +543,9 @@ Spend for this node: USD 0.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261019T184516856377-srtj-cohort-eligibility" data-who="reckon-build" data-when="2026-10-19T19:09:14.814Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-cohort-eligibility.html — excluded 13 docs-axis items the scratch pool cannot claim (total 14 of 23), predicate pass over 463 items and fresh claimability check both EXIT=0, scratch stopped and removed</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-name-parts-eligibility" data-who="reckon-build" data-when="2026-10-19T20:00:00Z">
+    <div class="r-comment-body"><p><strong>Landed:</strong></p><ul><li>Incumbent name part 1 of 4: 57 items, shadow routes accept 4, refine 43, band 10, USD 4.39 under a USD 4.50 cap (merge <code>ed545a2a9</code>, review 107).</li><li>Incumbent name part 2 of 4: 58 items, accept 3, refine 39, band 16, USD 3.53 (merge <code>6739b789c</code>, review 102).</li><li><code>srtj-cohort-eligibility</code> (merge <code>4e8c2be9c</code>, review 107). The runner's own claim predicate, run over all 463 items in the 2026-10-18 snapshot, refused 13 docs items whose state differs there. They are excluded from every piece: 14 exclusions in all, against the 23 the precision argument allows. 231 name and 219 docs items remain.</li></ul><p>The first cascade docs attempt failed on a read-only <code>/tmp</code> and then on those 13 items, and is recorded (merge <code>ff047cab0</code>). Every piece now puts its scratch tree under the node-local <code>/tmp/reckon-crew-scratch/&lt;run&gt;</code>. Running now on the eligibility head <code>c2cfedcd0</code>: cascade docs, incumbent name parts 3 and 4, and incumbent docs part 1. Incumbent docs parts 2 to 4 follow. Spend so far is USD 11.05 of USD 60.</p></div>
 </div>
 </section>
 </main>
