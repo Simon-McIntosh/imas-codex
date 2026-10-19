@@ -86,6 +86,11 @@
 <ul><li>an oracle rank and its inverse score 1.000 and 0.000;</li><li>the published risk equals the composite recomputed from each row's checks;</li><li>a null over 200 calibration-label shuffles gives 0.385 to 0.602, containing 0.5;</li><li>permuting the validation labels in place leaves the fitted weights unchanged, while the same permutation through a fit that reads every row moves them by 0.390.</li></ul></li></ul><p>The fitted weights are published by check id. No judgment was bought, so the spend was USD 0. Merge <code>1868e988f</code>; review 82, then 87 at head. <a href="/imas-codex/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html">fragment</a></p>
   </section>
 
+  <section id="ssog-anchor-family-runner">
+    <h2>§7 — the per-arm anchor runner and its first arm</h2>
+    <p>Run <code>r-20261019T035327482346-ssog-anchor-family-runner</code>, merged as <code>3d5b23a8b</code> (head <code>c96f0f0d8</code>). It brings the earlier ten-family driver onto <code>main</code> as a per-arm runner, <code>ssog-anchor-ab-run.py --family &lt;seed&gt; --arm heuristic|jev</code>. The ten families, both anchors and the adoption rule are fixed in <code>ssog-anchor-ab/selection.json</code>, with the rule keeping its 2026-10-18 10:45:18Z timestamp.</p><p>The first arm, <code>vertical_coordinate_of_diagnostic_aperture</code> heuristic, ran on a fresh scratch copy of the checked export with anchor <code>x_coordinate_of_diagnostic_aperture</code>. Lint fell from 2 to 0, the family stamped, and all three members' documentation scores were 1.0 afterwards (0.875, 0.919 and 0.894 before). It took 49 calls, USD 0.71 and 1,702 s. Containment is proved by scope rows: 49 in the scratch ledger and none in the live graph.</p><p>Three earlier applies were lost to the runner's own post-apply check before the runner was changed to write the record first; together with the ten-family attempt they cost about USD 2.4. Independent review scored 104/120, with no blocking findings. Its two operational follow-ons, a log directory pinned to this run and the budget comparison, are carried in every arm node's brief.</p><p><a href="/imas-codex/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json">arm record</a></p>
+  </section>
+
 </main>
 </body>
 </html>
