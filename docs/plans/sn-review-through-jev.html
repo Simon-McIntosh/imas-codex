@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -486,7 +486,18 @@
     <div class="r-comment-body"><p>The shadow router's regression is fixed (merge <code>e6bb54344</code>, review 108, USD 0). The quorum writes its own reviews first, the shadow route row follows, a failed cycle writes none, and a missing score no longer crashes the names path. The six quorum-pool failures are green, with zero added failures over a 614-test covering selection. §6 stays open for the fixed-cohort comparison, which still needs a spend ceiling from the lead. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#srtj-cascade-quorum-regression">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261019T043000982373-review-of-srtj-cohort-estimate-31a2c04a5050" data-who="reckon-build" data-when="2026-10-19T04:45:40.268Z">
-    <div class="r-comment-body"><p>Reviewed run r-20261019T035549247584-srtj-cohort-estimate (base 50459cc3f, head 31a2c04a5, four commits) and stored a parsed review record at review-records/r-20261019T035549247584-srtj-cohort-estimate.json and its .at-31a2c04a5050... sibling. Six scores 0..20: goal_fidelity 19, evidence 16, scope_discipline 16, durability 8, fit 15, reuse 19. added_failure_count 0 (the reviewed run declared no baseline_suite/after_suite: tests [], one driver gate log). Six follow-on findings, none blocking: the interval basis deviates from the brief&#x27;s per-call-cost spread; wilson_half_width implements the Wald estimator; the committed JSON carries a worktree-absolute figure_path; the per-accepted price reuses the cascade&#x27;s accept share for both arms; the figure skips the data-ink style and records no PNG render check; and commit b074eddf7 briefly created the figure outside its granted directory (disclosed in the run&#x27;s own manifest).</p></div>
+    <div class="r-comment-body"><p>Reviewed run r-20261019T035549247584-srtj-cohort-estimate (base 50459cc3f, head 31a2c04a5, four commits) and stored a parsed review record at review-records/r-20261019T035549247584-srtj-cohort-estimate.json and its .at-31a2c04a5050... sibling. Six scores 0..20: goal_fidelity 19, evidence 16, scope_discipline 16, durability 8, fit 15, reuse 19. added_failure_count 0 (the reviewed run declared no baseline_suite/after_suite: tests [], one driver gate log). Six follow-on findings, none blocking: the interval basis deviates from the brief's per-call-cost spread; wilson_half_width implements the Wald estimator; the committed JSON carries a worktree-absolute figure_path; the per-accepted price reuses the cascade's accept share for both arms; the figure skips the data-ink style and records no PNG render check; and commit b074eddf7 briefly created the figure outside its granted directory (disclosed in the run's own manifest).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261019T035549247584-srtj-cohort-estimate" data-who="reckon-build" data-when="2026-10-19T04:29:13.314Z">
+    <div class="r-comment-body"><p>The fixed-cohort cost estimate for plan imas-codex:sn-review-through-jev §6.
+Cohort: 464 identities drawn by seed 20261019 from the 1851-item eligible pool
+that remains after the 476-name WEST review roster union is removed; 232 per
+axis, sized to a +/-5 pt half-width at 95% on each axis as well as pooled.
+Incumbent quorum: USD 49.26 over the cohort, interval [34.44, 89.57]; per item
+USD 0.0705 on names and USD 0.1418 on docs; 192 min of wall time.
+Deciding cascade: USD 4.75, interval [3.56, 5.93]; per item USD 0.0082 on
+names and USD 0.0122 on docs; 34 min. Ratio 10.4x.
+Spend for this node: USD 0.</p></div>
 </div>
 </section>
 </main>
