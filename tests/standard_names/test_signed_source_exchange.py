@@ -120,8 +120,13 @@ class _Transaction(_BaseTransaction):
             return [
                 {
                     "name_id": name_id,
-                    "producers": sum(
-                        binding["name_id"] == name_id for binding in self.state.bindings
+                    "producers": (
+                        0
+                        if self.state.report_missing_name == name_id
+                        else sum(
+                            binding["name_id"] == name_id
+                            for binding in self.state.bindings
+                        )
                     ),
                 }
                 for name_id in params["name_ids"]
@@ -149,6 +154,7 @@ class Graph(_BaseGraph):
     def __init__(self) -> None:
         super().__init__()
         self.dd_paths: dict[str, str] = {}
+        self.report_missing_name: str | None = None
 
     def add_dd(self, path: str, lifecycle: str = "active") -> None:
         self.dd_paths[path] = lifecycle
@@ -321,27 +327,13 @@ def test_invalid_exchange_refuses_before_writing(
     assert graph.snapshot() == before
 
 
-def test_failed_name_postcondition_rolls_back_every_write(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_failed_name_postcondition_rolls_back_every_write(tmp_path: Path) -> None:
     graph = _graph(receiver="average_temperature")
     path = tmp_path / "authority.json"
     digests = _authority(path, receiver="average_temperature")
     preview = _run(graph, path, digests)
     before = graph.snapshot()
-    original = operator._verify_source_exchange_postcondition
-
-    def lose_receiver(query: Any, rows: Any) -> None:
-        graph.bindings = [
-            binding
-            for binding in graph.bindings
-            if binding["name_id"] != "average_temperature"
-        ]
-        original(query, rows)
-
-    monkeypatch.setattr(
-        operator, "_verify_source_exchange_postcondition", lose_receiver
-    )
+    graph.report_missing_name = "average_temperature"
     with pytest.raises(operator.SourceExchangeConflict, match="touched name lost"):
         _run(
             graph, path, digests, apply=True, manifest_sha256=preview["manifest_sha256"]
