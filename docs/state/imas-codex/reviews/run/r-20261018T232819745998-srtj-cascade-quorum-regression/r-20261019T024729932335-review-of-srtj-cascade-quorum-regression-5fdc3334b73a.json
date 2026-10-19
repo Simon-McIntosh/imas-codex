@@ -1,0 +1,108 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "682",
+      "text": "assert [len(call) for call in writes] == [2, 1] -- independent of the fixture's expectations: writes[0] is the two rows the fake incumbent appends (line 645) and writes[1] is the one row _store_unjudged persists through the monkeypatched write_reviews. Reinstating the pre-incumbent shadow write makes it [1, 2] and fails; logs/base-new-tests.log records exactly that at f69054241."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "683",
+      "text": "assert all(row['judge_kind'] == 'incumbent' for row in writes[0]) -- not independent: writes[0] is the fixture's own literal (line 647), so the assertion compares the test's input with itself and holds whatever the code under test does."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "686",
+      "text": "assert result['winning_score'] == 0.2 -- weak: 0.2 is the value the fixture's incumbent returns (line 651) and result is the same dict passed through, so the two sides move together; it reddens only if pass-through breaks, not if the cascade's ordering regresses."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "715",
+      "text": "assert result is None -- independent of any supplied value: it holds only when the router actually returns the incumbent's None rather than a routed or shadow result."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "716",
+      "text": "assert writes == [] -- independent and load-bearing: it reddens precisely when a shadow row is written for a cycle that produced no reviews, which logs/base-new-tests.log confirms at f69054241."
+    }
+  ],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8986",
+    "imas_codex/standard_names/workers.py:11050",
+    "imas_codex/standard_names/review/cascade.py:346"
+  ],
+  "completed_at": "2026-10-19T03:05:44.783Z",
+  "dispatched_at": "2026-10-19T02:48:09Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cascade-quorum-regression.html",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "follow-on: the gate paragraph states 'nine of them in test_review_release.py', but the arm failure id lists it cites (manifest baseline_suite/after_suite and logs/delta-head.txt) carry twelve head-arm ids in tests/standard_names/test_review_release.py and fourteen across the three test_review_release*.py modules, so the receipt's count does not reconcile with the log it cites; the manifest's own prose says seven for the same set."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cascade-quorum-regression.html",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "follow-on: the same paragraph states the base and head logs 'are recorded with their revision, command and EXIT= line', but logs/head-selection.log opens directly on 'test session starts' and carries no rev=/tree=/cmd= header, unlike logs/base-selection.log, so the head arm's revision cannot be established from the log itself."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "683",
+      "severity": "follow-on",
+      "text": "follow-on: assert all(row['judge_kind'] == 'incumbent' for row in writes[0]) reads writes[0], which the test's own fake incumbent appended at line 645, so it compares the fixture with itself and cannot fail on any change to cascade.adjudicate_review."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "686",
+      "severity": "follow-on",
+      "text": "follow-on: assert result['winning_score'] == 0.2 compares the returned dict against the 0.2 the fixture's incumbent supplied at line 651 rather than against an independent source, so it is not a guard on the ordering regression the node exists to fix."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from 1197a5b05975ae2ab2b5f4e34cb7d7398ccf1e48 to 5fdc3334b73aeab4ccc757e31ced4ccecd92cfe8. a7f2dbb83 changes cascade.py and workers.py: it replaces the defaulted-to-zero read of failure_probability with _failure_probability (cascade.py:47), adds _incumbent_then_unjudged (cascade.py:205), moves the route store to after the incumbent returns on the shadow path (cascade.py:412) and adds _persisting_quorum_cycles (workers.py:8518) which the two call sites now pass as the incumbent instead of persisting quorum['records'] themselves. 0b5211c88 and 5fdc3334b edit only the fragment's gate paragraph.",
+    "done_when": "The done_when (brief.md 'Done when') names tests/standard_names/test_review_quorum_pool.py passing at EXIT=, each of the six declared ids red at f69054241 and green at head, test_review_cascade.py still passing, a new ordering test red without the change, and a covering selection judged by delta. The manifest records quorum_pool 11 passed EXIT=0 and cascade 39 passed EXIT=0 together at logs/head-focus-postcommit.log; logs/base-quorum-pool.log is the declared negative control at f69054241 with 9 failed and 2 passed at EXIT=1; logs/base-new-tests.log shows the two new ordering tests red at f69054241; and the two arms are 25 failed/587 passed and 15 failed/599 passed, compared as id sets.",
+    "goal": "The node goal (brief.md 'What to change') is that shadow mode leave the incumbent review path's observable behaviour unchanged: the incumbent's write_reviews call comes first and holds exactly its own rows, a failed cycle writes no shadow row, and no missing score is compared against a threshold. imas_codex/standard_names/review/cascade.py:346 now routes every error and unjudged branch through _incumbent_then_unjudged (cascade.py:205), which runs the incumbent before _store_unjudged, and imas_codex/standard_names/workers.py:8518 persists the incumbent's own records through _persisting_quorum_cycles, so the first write_reviews call holds the quorum's rows and a None result writes nothing.",
+    "manifest": "Read; it records status complete, commits a7f2dbb83/0b5211c88/5fdc3334b, the four changed paths, logs/base-quorum-pool.log as the negative control, both arm failure id lists under baseline_suite and after_suite, the gate commands and their EXIT= lines, and zero LLM spend. Its failure_attribution prose says 'test_review_release.py accounts for seven of them' where the after_suite id list it carries holds twelve ids in that module.",
+    "write_paths": "The fence is imas_codex/standard_names/review/cascade.py, imas_codex/standard_names/workers.py, tests/standard_names/test_review_cascade.py and docs/evidence/fragments/sn-review-through-jev/srtj-cascade-quorum-regression.html (manifest orientation_write_paths and brief.md 'Write scope'). git diff --stat 1197a5b05975ae2ab2b5f4e34cb7d7398ccf1e48 5fdc3334b73aeab4ccc757e31ced4ccecd92cfe8 lists exactly those four paths and nothing else."
+  },
+  "item_verdicts_note": "Six checklist items: the five VERDICT lines above plus CALL_SITES.",
+  "justifications": {
+    "durability": "logs/base-new-tests.log records the two new tests overlaid on f69054241 failing with 'assert [1, 2] == [2, 1]' and 'assert [[...]] == []', so reinstating the pre-incumbent shadow write reddens them; the null-score fix is guarded by the restored test_names_batch_response_is_unwrapped, which logs/base-quorum-pool.log shows failing at f69054241 and logs/head-focus-postcommit.log shows passing at head. The assertions at test_review_cascade.py:683 and :686 do not carry durability themselves because they read values the test fixture supplied rather than an independent source, but the ordering guards at :682 and :716 do.",
+    "evidence": "The gate commands named in the manifest (tests/standard_names/test_review_quorum_pool.py and test_review_cascade.py, 50 passed EXIT=0) are recorded at logs/head-focus-postcommit.log and the red arm at logs/base-new-tests.log, but the landed fragment states the pre-existing failure count as nine where the recorded arm lists carry twelve in that module, and logs/head-selection.log carries no rev=/tree=/cmd= header.",
+    "fit": "The added names are mechanism-named and carry no plan labels -- _failure_probability (cascade.py:47), _incumbent_then_unjudged (cascade.py:205) and _persisting_quorum_cycles (workers.py:8518) -- and the docstrings follow the surrounding module idiom, with the quorum runner's own docstring updated at workers.py:8047 to name the new persisting wrapper.",
+    "goal_fidelity": "cascade.py:412 runs the incumbent and only then _store_route, and cascade.py:370/390/412 route the unjudged and error branches through _incumbent_then_unjudged, so the shadow row can only follow the incumbent's rows and a None incumbent writes nothing; workers.py:8518 makes the incumbent persist its own records so the first write_reviews call is the quorum's.",
+    "reuse": "_persisting_quorum_cycles (workers.py:8518) wraps the existing owner _run_rd_quorum_cycles (workers.py:8047) and writes through the existing graph_ops.write_reviews, replacing a duplicated caller-side write rather than forking it, and _incumbent_then_unjudged composes the existing _store_unjudged; a search over imas_codex/standard_names for an existing safe reader of failure_probability found only the inline idiom at imas_codex/standard_names/fanout/trigger.py:52 (float(row.get('failure_probability', 0.0))), which owns no such capability and is the same call-site idiom the base cascade.py used.",
+    "scope_discipline": "git diff --stat over 1197a5b05975ae2ab2b5f4e34cb7d7398ccf1e48..5fdc3334b73aeab4ccc757e31ced4ccecd92cfe8 lists exactly the four declared paths (cascade.py, workers.py, test_review_cascade.py, the fragment html), with no path outside the fence and no change the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that shadow mode leave the incumbent review path's observable behaviour unchanged; imas_codex/standard_names/review/cascade.py:346 runs the incumbent through _incumbent_then_unjudged (cascade.py:205) before _store_unjudged, and imas_codex/standard_names/workers.py:8518 persists the incumbent's own records, so the first write_reviews call holds the quorum's rows and a None result writes nothing.\nVERDICT done_when: the done_when (brief.md 'Done when') names tests/standard_names/test_review_quorum_pool.py at EXIT=, the six ids red at f69054241 and green at head, test_review_cascade.py still passing, a new ordering test red without the change, and a covering selection judged by delta; the manifest records quorum_pool 11 passed and cascade 39 passed at EXIT=0 (logs/head-focus-postcommit.log), the control at logs/base-quorum-pool.log at EXIT=1, and the two arms at 25 failed/587 passed and 15 failed/599 passed.\nVERDICT write_paths: the fence is cascade.py, workers.py, tests/standard_names/test_review_cascade.py and docs/evidence/fragments/sn-review-through-jev/srtj-cascade-quorum-regression.html; git diff --stat 1197a5b05975ae2ab2b5f4e34cb7d7398ccf1e48 5fdc3334b73aeab4ccc757e31ced4ccecd92cfe8 lists exactly those four paths and nothing else.\nVERDICT manifest: read; it records status complete, commits a7f2dbb83/0b5211c88/5fdc3334b, the four changed paths, the logs/base-quorum-pool.log negative control, both arm id lists under baseline_suite/after_suite, the gate commands with their EXIT= lines and zero LLM spend, though its failure_attribution prose says seven test_review_release.py ids where the after_suite list holds twelve.\nVERDICT diff: read commit by commit from 1197a5b05975ae2ab2b5f4e34cb7d7398ccf1e48 to 5fdc3334b73aeab4ccc757e31ced4ccecd92cfe8; a7f2dbb83 reorders the shadow write after the incumbent (cascade.py:412), adds _failure_probability (cascade.py:47), _incumbent_then_unjudged (cascade.py:205) and _persisting_quorum_cycles (workers.py:8518), and the two docs commits edit only the fragment's gate paragraph.\nCALL_SITES: imas_codex/standard_names/workers.py:8986, imas_codex/standard_names/workers.py:11050, imas_codex/standard_names/review/cascade.py:346\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: cascade.py:412 runs the incumbent and stores the route only after it returns, and workers.py:8518 makes the incumbent persist its own records, so the route row can no longer precede or displace the quorum's rows.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate commands in the manifest (quorum_pool and cascade, 50 passed EXIT=0) are recorded at logs/head-focus-postcommit.log, but the fragment misstates the pre-existing count as nine where the cited lists carry twelve and logs/head-selection.log carries no revision header.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --stat 1197a5b05975ae2ab2b5f4e34cb7d7398ccf1e48..5fdc3334b73aeab4ccc757e31ced4ccecd92cfe8 is one of the four declared write paths and no other file is touched.\nSCORE durability: 17\nJUSTIFICATION durability: logs/base-new-tests.log records test_shadow_row_is_written_after_the_incumbents_rows and test_failed_incumbent_cycle_writes_no_shadow_row failing at f69054241 with 'assert [1, 2] == [2, 1]' and a shadow row where none belongs, so reinstating the pre-incumbent write reddens them.\nSCORE fit: 19\nJUSTIFICATION fit: the added symbols are mechanism-named with no plan labels (_failure_probability cascade.py:47, _incumbent_then_unjudged cascade.py:205, _persisting_quorum_cycles workers.py:8518) and follow the surrounding module idiom, with the quorum runner's docstring updated at workers.py:8047.\nSCORE reuse: 18\nJUSTIFICATION reuse: _persisting_quorum_cycles (workers.py:8518) wraps the existing owner _run_rd_quorum_cycles (workers.py:8047) and writes through the existing graph_ops.write_reviews, and a search over imas_codex/standard_names for a safe failure_probability reader found only the inline idiom at fanout/trigger.py:52, which owns no such capability.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-cascade-quorum-regression.html:5 follow-on: the gate paragraph states nine of the fifteen pre-existing head-arm failures are in test_review_release.py, but the id lists it cites carry twelve in that module, so the receipt's count does not reconcile with the log it cites.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-cascade-quorum-regression.html:5 follow-on: the same paragraph states the base and head logs are recorded with their revision and command, but logs/head-selection.log has no rev=/tree=/cmd= header, so the head arm's revision cannot be established from its own log.\nFINDING tests/standard_names/test_review_cascade.py:683 follow-on: the assertion reads writes[0], which the test's own fake incumbent appended, so it compares the fixture with itself and cannot fail on any change to cascade.adjudicate_review.\nFINDING tests/standard_names/test_review_cascade.py:686 follow-on: the assertion compares the returned dict against the 0.2 the fixture's incumbent supplied rather than an independent source, so it is not a guard on the ordering regression this node fixes.\n",
+  "review_run_id": "r-20261019T024729932335-review-of-srtj-cascade-quorum-regression-5fdc3334b73a",
+  "reviewed_base_sha": "1197a5b05975ae2ab2b5f4e34cb7d7398ccf1e48",
+  "reviewed_commits": [
+    "a7f2dbb832fad2696befa01ad2c1494ed045fac7",
+    "0b5211c884323eb179f62ddbf48e7176671a04e6",
+    "5fdc3334b73aeab4ccc757e31ced4ccecd92cfe8"
+  ],
+  "reviewed_head_sha": "5fdc3334b73aeab4ccc757e31ced4ccecd92cfe8",
+  "reviewed_run_id": "r-20261018T232819745998-srtj-cascade-quorum-regression",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    "tests/standard_names/test_review_cascade.py:683",
+    "tests/standard_names/test_review_cascade.py:686"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T02:58:00Z",
+  "total": 108
+}
