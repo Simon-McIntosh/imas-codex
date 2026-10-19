@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-10-19T10:08:19.858Z",
   "dispatched_at": "2026-10-19T09:46:42Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ssog-anchor-arm",
+      "recorded_at": "2026-10-19T12:23:44.281810+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
