@@ -1,0 +1,5 @@
+<section id="srtj-cohort-incumbent-name-part1of4">
+  <h2 id="srtj-cohort-incumbent-name-part1of4-summary">Incumbent name piece blocked before review calls</h2>
+  <p>The selected first slice contains 57 names. The detached invocation ended <code>EXIT=1</code> before it could create a scratch graph: <code>tempfile.mkdtemp</code> raised <code>OSError: [Errno 30] Read-only file system</code> for <code>/tmp/review-cohort-4erzbv1g</code>. The runner wrote a partial piece record with no <code>piece_spend_total_usd</code> and no scratch tree. The retry ended <code>EXIT=1</code> at the comparison ceiling guard, which reported <code>piece has no spend total</code> for that same file. It made no new piece record.</p>
+  <p>The partial record is uncommitted and untouched after the refusal. It has no completed decisions, receipt total, containment verdict, or cleanup evidence, so this piece supplies no comparison measurement. The coordinator must arrange a writable scratch directory and handle the partial record under the runner's interrupted-piece rule before redispatch.</p>
+</section>
