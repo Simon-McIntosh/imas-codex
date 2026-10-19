@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-signed-source-exchange">
+<title>Signed exchange of a live standard name's DD source</title>
+</head>
+<body>
+<main>
+<h1 id="sib-signed-source-exchange-title">Signed DD source exchange</h1>
+<p id="sib-signed-source-exchange-contract">The <code>dd-source-exchange</code>
+adapter in <code>signed_manifest.py</code> accepts a canonical authority built by
+<code>build_repair_authority</code>. Every signed row names a live giving name,
+its current DD producer, a DD producer to take, and optionally a live name to
+receive the given source. The caller supplies both trusted authority digests and
+the exact guard set. Preview derives a transaction-local graph closure and a
+manifest digest; apply re-derives and compares that closure before writing.</p>
+
+<h2 id="sib-signed-source-exchange-refusals">Refusals and postconditions</h2>
+<p id="sib-signed-source-exchange-admission">A row is refused before any write
+when the giving name is absent, exhausted or superseded; its given source does
+not produce exactly that name; the taken DD path is absent or removed from the
+current DD; a live name already holds the taken source; the receiving name is
+absent, exhausted or superseded; or the given DD path is absent or removed when
+there is a receiver. A taken source with any existing producing edge is also
+refused, since it cannot meet the exact ownership postcondition. Overlapping
+signed rows and an authority digest mismatch refuse before graph mutation.</p>
+<p id="sib-signed-source-exchange-transaction">The single transaction binds
+the taken source to the giving name, detaches the given binding, optionally
+binds the given source to its receiving name, records one
+<code>StandardNameChange</code> per row, then checks every touched name has a
+producer, the resulting source ownership is exact, and the shared
+<code>require_producing_sources</code> invariant holds. Without a receiver, the
+given source is left unbound and extracted. Any failed check rolls back the
+bindings, source state and receipt together. An applied row's deterministic
+change id makes replay a write-free refusal.</p>
+
+<h2 id="sib-signed-source-exchange-preview">Read-only separatrix preview</h2>
+<p id="sib-signed-source-exchange-preview-receipt">The live graph read-back
+found the incumbent name (<code>known_name_count=1</code>) before interpreting
+the exchange's absence checks. Against current DD <code>4.1.1</code>, a signed
+one-row preview returned <code>outcome=would_apply</code>,
+<code>would_change=1</code>, <code>changed=0</code> and zero refusals. Its
+manifest digest was
+<code>17c1df2247f0b48503bd4f1fff131bbd201a8e1e1efe48ce689f5aa5f350a1b8</code>.
+The full receipt is in this run's <code>live-preview.json</code>. No live graph
+write or LLM call occurred.</p>
+<table id="sib-signed-source-exchange-ownership">
+<caption>Ownership read from the live closure, and the signed target state</caption>
+<thead><tr><th>DD source</th><th>Before</th><th>After apply</th></tr></thead>
+<tbody>
+<tr><td><code>dd:summary/local/separatrix_average/t_e/value</code></td>
+<td><code>electron_temperature_at_separatrix</code></td>
+<td><code>bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface</code></td></tr>
+<tr><td><code>dd:summary/local/separatrix/t_e/value</code></td>
+<td>Unheld, existing source</td>
+<td><code>electron_temperature_at_separatrix</code></td></tr>
+</tbody>
+</table>
+<p id="sib-signed-source-exchange-snapshot">The taken source already has an
+immutable DD snapshot pinned to <code>4.1.0</code>. Apply preserves that
+snapshot while validating the path against the current DD. The giving name is
+accepted and the receiving name is reviewed; neither DD path is marked
+removed.</p>
+
+<h2 id="sib-signed-source-exchange-measure">Gate and negative control</h2>
+<p id="sib-signed-source-exchange-gate">The baseline signed-manifest import
+gate completed with <strong>254 passed, 46 deselected, zero failures</strong>
+(<code>baseline-suite.log</code>, <code>EXIT=0</code>). The head gate includes
+the new test file and completed with <strong>269 passed, 46 deselected, zero
+failures</strong> (<code>head-suite.log</code>, <code>EXIT=0</code>): zero
+added failures. The focused source-exchange file has 15 passing cases. The
+Cypher property checker completed with 4 passed (<code>cypher-property.log</code>,
+<code>EXIT=0</code>). A read-only <code>EXPLAIN</code> against Neo4j parsed
+all seven source-exchange statements (<code>cypher-explain.log</code>,
+<code>EXIT=0</code>); its first pass exposed an invalid infix membership
+predicate, which was corrected before this record.</p>
+<p id="sib-signed-source-exchange-negative">The declared negative control
+removed the in-transaction check that every touched name retains a producing
+source. The rollback test then failed, with
+<code>test_failed_name_postcondition_rolls_back_every_write</code> in the
+short summary and <code>EXIT=1</code> (<code>negative-control.log</code>).
+The guard was restored to the committed source. The in-memory graph tests also
+exercise the exchange with and without a receiver, every admission refusal,
+source postcondition rollback, authority tampering, and replay.</p>
+</main>
+</body>
+</html>
