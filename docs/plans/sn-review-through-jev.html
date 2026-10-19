@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="88">
+<meta name="plan-version" content="89">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -481,6 +481,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261018T232819745998-srtj-cascade-quorum-regression" data-who="reckon-build" data-when="2026-10-19T02:46:21Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-cascade-quorum-regression.html (committed in a7f2dbb83, one landing, element ids prefixed srtj-cascade-quorum-regression)</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-quorum-regression" data-who="reckon-build" data-when="2026-10-19T03:27:00Z">
+    <div class="r-comment-body"><p>The shadow router's regression is fixed (merge <code>e6bb54344</code>, review 108, USD 0). The quorum writes its own reviews first, the shadow route row follows, a failed cycle writes none, and a missing score no longer crashes the names path. The six quorum-pool failures are green, with zero added failures over a 614-test covering selection. §6 stays open for the fixed-cohort comparison, which still needs a spend ceiling from the lead. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#srtj-cascade-quorum-regression">evidence</a></p></div>
 </div>
 </section>
 </main>
