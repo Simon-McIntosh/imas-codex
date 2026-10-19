@@ -10,8 +10,9 @@
 name whose recorded Data Dictionary source is missing. The gate in
 <code>imas_codex/standard_names/export.py</code> partitions the classifier's dropped-edge and
 never-bound rows: an <code>exhausted</code> row is recorded on the report as dormant with its
-count and left out of the gate, and any other stage still blocks the export. Six live names the
-lead held from release are added to <code>_RELEASE_IDENTITY_HOLDS</code> with the reason
+count and left out of the gate, and any other stage still blocks the export. Six live names
+whose quantity no Data Dictionary path measures are added to
+<code>_RELEASE_IDENTITY_HOLDS</code> with the reason
 <code>release_hold_no_dd_source</code>; they leave through the existing release-hold path and the
 gate does not count them. No live graph write and no LLM call were made.</p>
 

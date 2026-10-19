@@ -3062,9 +3062,10 @@ def run_export(
         source_audit = classify_sourceless_standard_names(gc)
     # The gate counts live names only. An exhausted name never reaches the
     # export population and is never released, so its missing source is
-    # dormant: it is listed on the report and left out of the gate. A name the
-    # lead has held from release leaves through the release-hold path instead,
-    # so the gate does not count it either. Every other stage still blocks.
+    # dormant: it is listed on the report and left out of the gate. A name
+    # listed in _RELEASE_IDENTITY_HOLDS leaves through the release-hold path
+    # instead, so the gate does not count it either. Every other stage still
+    # blocks.
     sourceless = [
         row
         for row in source_audit
