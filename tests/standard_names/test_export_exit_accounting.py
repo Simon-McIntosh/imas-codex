@@ -30,6 +30,7 @@ from unittest.mock import patch
 import yaml
 
 from imas_codex.standard_names.export import run_export
+from tests.standard_names.conftest import clean_source_audit_graph
 
 # A null link_status was the strongest surviving signal on the six
 # accepted-and-valid drops from the recorded cut (9 of 18 versus 2 of the
@@ -38,6 +39,7 @@ from imas_codex.standard_names.export import run_export
 # not isolated; the arithmetic refusal is what catches a future recurrence.
 
 
+@clean_source_audit_graph
 class _ReadOnlyGraphClient:
     def __enter__(self):
         return self

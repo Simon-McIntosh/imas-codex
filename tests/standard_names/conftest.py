@@ -32,6 +32,28 @@ _LIVE_GRAPH_MARKERS = frozenset(
 _SYNTHETIC_ROUTE_PREFIXES = ("test/", "openrouter/test/", "some/")
 
 
+def clean_source_audit_graph(cls):
+    """Give an export graph double an empty, internally consistent audit."""
+    original_query = cls.query
+
+    def query(self, cypher: str, **params):
+        if (
+            "WHERE NOT sn.status IN $terminal" in cypher
+            and "RETURN count(sn) AS total" in cypher
+        ):
+            return [{"total": 0}]
+        if cypher.strip() == (
+            "MATCH (source:StandardNameSource) RETURN count(source) AS total"
+        ):
+            return [{"total": 0}]
+        if "RETURN names, relations, changes, projections" in cypher:
+            return [{"names": 0, "relations": 0, "changes": 0, "projections": 0}]
+        return original_query(self, cypher, **params)
+
+    cls.query = query
+    return cls
+
+
 def _is_synthetic_route(model: str) -> bool:
     """True when *model* names a test double rather than a real route."""
     return "/" not in model or model.startswith(_SYNTHETIC_ROUTE_PREFIXES)

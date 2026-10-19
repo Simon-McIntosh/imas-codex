@@ -14,6 +14,7 @@ from imas_codex.standard_names.export import (
     _graph_node_to_entry_dict,
     run_export,
 )
+from tests.standard_names.conftest import clean_source_audit_graph
 
 
 def _candidate(name: str, **overrides) -> dict:
@@ -62,6 +63,7 @@ class _RecordingValidate:
         return entry
 
 
+@clean_source_audit_graph
 class _SourceDomainGraph:
     """Read-only graph double returning one source-domain row per name."""
 

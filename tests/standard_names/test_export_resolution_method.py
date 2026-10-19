@@ -9,6 +9,7 @@ from unittest.mock import patch
 import yaml
 
 from imas_codex.standard_names.export import run_export
+from tests.standard_names.conftest import clean_source_audit_graph
 
 
 def _candidate(name: str, **overrides) -> dict:
@@ -38,6 +39,7 @@ def _candidate(name: str, **overrides) -> dict:
     return candidate
 
 
+@clean_source_audit_graph
 class _PopulationGraph:
     def __init__(self, population: list[dict]) -> None:
         self.population = population

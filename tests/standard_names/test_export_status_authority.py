@@ -9,8 +9,10 @@ from unittest.mock import patch
 import yaml
 
 from imas_codex.standard_names.export import GATE_CATALOG_STATUS, run_export
+from tests.standard_names.conftest import clean_source_audit_graph
 
 
+@clean_source_audit_graph
 class _ReadOnlyGraphClient:
     def __enter__(self):
         return self
