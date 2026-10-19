@@ -41,6 +41,13 @@
   "call_sites": [],
   "completed_at": "2026-10-19T03:41:13.867Z",
   "dispatched_at": "2026-10-19T03:31:37Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-settle-held-search-hits",
+      "recorded_at": "2026-10-19T03:49:16.754420+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
