@@ -1,0 +1,58 @@
+<section id="srtj-cohort-incumbent-name-part4of4">
+  <h2 id="srtj-cohort-incumbent-name-part4of4-summary">Cohort piece incumbent/name 4 of 4 hit a spend wall before it could finish</h2>
+  <p>
+    The piece selected its 58 items and ran, but its USD 4.50 ceiling was reached long
+    before the item list was done. The pool then spent its whole cap early:
+  </p>
+  <pre>budget: charge $0.115776 on lease b0c8e3b9-bd82-4b84-ad31-ea604a45a3a8
+(phase 'review_name') exceeded both its reservation and the pool by $0.001859
+— recorded as overspend (spend $4.2165 of cap $4.5000)</pre>
+  <p>
+    After that charge the pool could not reserve the pre-launch exposure for any further
+    reviewer call, so it deferred every remaining item on each cycle and the piece ended
+    with selected identities still pending:
+  </p>
+  <pre>rd_quorum name cycle 0 unfunded for height_of_iron_core_segment
+  (model=openrouter/x-ai/grok-4.5): the run budget could not reserve $0.0715 of
+  pre-launch exposure — the reviewer was never called
+rd_quorum name incomplete: 0/3 reviews succeeded for height_of_iron_core_segment
+  — deferring, NOT accepting on a single review
+  (budget refused 1 seat(s): c0 openrouter/x-ai/grok-4.5 $0.0715)
+rd_quorum name cycle 2 unfunded for normal_coordinate_of_toroidal_field_coil
+  (model=openrouter/anthropic/claude-sonnet-5): the run budget could not reserve
+  $0.0867 of pre-launch exposure — the reviewer was never called</pre>
+  <p>
+    The runner's own <code>verify_completion</code> refuses a piece whose selected
+    identities are still pending, and refuses a stop reason other than
+    <code>completed</code> or <code>no_eligible_work</code>, so
+    <code>measurement_complete</code> could not be set and no valid piece record was
+    produced. The piece file written at selection time names all 58 items with their
+    arm, axis, part and ceiling; the per-item route, decision, score, calls and spend
+    cannot be completed at this ceiling.
+  </p>
+  <h3 id="srtj-cohort-incumbent-name-part4of4-peers">The same wall took the sibling pieces, and concurrency took another</h3>
+  <p>
+    Three of the four pieces of this wave ended <code>EXIT=1</code>. The incumbent name
+    piece 3 of 4 failed earlier, in the scratch database start-up, under four-way
+    concurrency on one node:
+  </p>
+  <pre>click.exceptions.ClickException: Temp Neo4j did not reach Bolt readiness
+within 180 seconds</pre>
+  <p>
+    The load average on the node was 57.7 with 25 running tasks when this piece's dump
+    finished loading, so four simultaneous multi-gigabyte graph-dump loads contended for
+    the same disk. The other two siblings, the cascade documentation piece and the
+    incumbent documentation piece 1 of 4, also ended <code>EXIT=1</code>.
+  </p>
+  <h3 id="srtj-cohort-incumbent-name-part4of4-reading">What this measures</h3>
+  <p>
+    The ceiling was sized from the estimate's per-item price, USD 0.0705 per name item.
+    The pool reserves pre-launch exposure per reviewer seat — about USD 0.07 for each of
+    three seats, per item — and the observed spend reached USD 4.2165, or about
+    USD 0.0727 per selected item, before the item list was complete. A ceiling of
+    USD 4.50 for 58 name items is therefore below what the incumbent quorum costs to
+    finish them. The remedy is a ceiling and a wave-sizing decision for the coordinator:
+    raise the piece ceiling above the observed per-item price times the item count, and
+    run at most one scratch database per node, or place the pieces on separate nodes.
+  </p>
+</section>
