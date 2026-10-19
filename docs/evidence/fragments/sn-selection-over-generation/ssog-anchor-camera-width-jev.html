@@ -1,0 +1,63 @@
+<h2 id="ssog-anchor-camera-width-jev">Angular-width-of-camera family: jev arm (aborted at the isolation proof)</h2>
+
+<p>The jev arm of the <code>angular_width_of_camera</code> family was launched against a fresh
+scratch copy of the fixed archived export, on the runner revision <code>c96f0f0d8</code> with the
+unmodified per-family selection. The arm did <strong>not</strong> reach harmonization. It aborted in the
+scratch-only isolation proof before any apply was issued, so no spend was incurred and no live
+write occurred.</p>
+
+<h3 id="ssog-anchor-camera-width-jev-failure">The failure</h3>
+
+<p>Isolation proof failure, from the runner log's traceback:</p>
+
+<pre>
+RuntimeError: Scratch-only marker contrast failed:
+{'scratch_uri': 'bolt://127.0.0.1:28002', 'live_uri': 'bolt://98dci4-gpu-0002:7687',
+ 'scratch_nodes': 1770101, 'live_nodes': 1771162,
+ 'marked_scratch_nodes': 1770104, 'scratch_probe': 1, 'live_probe': 0,
+ 'restored_scratch_nodes': 1770101, 'at': '2026-10-19T13:10:27Z'}
+</pre>
+
+<p>The check requires the node count to rise by exactly one when its single probe node is
+created. Here <code>marked_scratch_nodes - scratch_nodes = +3</code>, while the probe query
+itself returned exactly <code>1</code> matching node, and <code>restored_scratch_nodes</code>
+returned to the baseline <code>1770101</code> after a delete that removed only that one probe.
+A one-node create/delete therefore moved the instance's total node count by three. The live
+graph was not touched (<code>live_probe = 0</code>).</p>
+
+<h3 id="ssog-anchor-camera-width-jev-reading">Reading of the evidence</h3>
+
+<p>No APOC triggers are installed on this graph (the live instance rejects both
+<code>SHOW TRIGGERS</code> and <code>apoc.trigger.list</code>), so a create-cascade does not
+explain it. The pattern — a count that moves by &plusmn;3 around a one-node create/delete, on a
+private scratch instance — is what a <em>second connected writer</em> produces. The runner picks
+its bolt port from <code>free_port_pair()</code>, which test-binds and closes before the instance
+binds; with five arms launched inside three minutes that test-then-bind window is a race, and two
+arms can select the same pair. A peer arm sharing port <code>28002</code> would write and delete
+its own probe into this instance, and every count in this proof would see the churn.</p>
+
+<p>This is not a defect in the harmonize path, which was never reached. It is a concurrency
+hazard in the arm runner's scratch-port allocation, exercised by running arms in parallel where
+the plan's node re-cut assumed they would be serialized per family.</p>
+
+<h3 id="ssog-anchor-camera-width-jev-cost">Cost and state</h3>
+
+<ul>
+<li>Spend: <strong>USD 0.00</strong> — the apply was never issued; the runner stopped before
+    <code>run_apply</code>.</li>
+<li>Wall time to the abort: 2,268 s, of which roughly 2,160 s was the dump extract and Neo4j
+    load under four concurrent loads on the shared allocation.</li>
+<li>The partial arm record (<code>outcome_status: running</code>) was written by the runner at
+    <code>ssog-anchor-ab/angular_width_of_camera-jev.json</code>; it holds the family row, the
+    target anchor <code>vertical_angular_width_of_camera</code>, the code digest and the
+    scratch-tree bookkeeping, and is left uncommitted as an incomplete intermediate.</li>
+<li>The scratch instance was stopped and its tree removed by the runner's teardown
+    (<code>stopped_instance</code> / <code>scratch_removed</code> in the partial record).</li>
+</ul>
+
+<h3 id="ssog-anchor-camera-width-jev-next">What is needed</h3>
+
+<p>A rerun with the arm runners serialized — one scratch instance loading at a time — removes
+both the load contention and the port race. The completed record must carry
+<code>outcome_status: complete</code>, its lint before/after, every member's documentation score
+after, calls, spend, wall time, the containment verdict and the code digest.</p>
