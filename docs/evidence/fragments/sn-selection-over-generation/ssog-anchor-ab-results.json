@@ -1,0 +1,4772 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "apply_failure": {
+    "anchor": "x_coordinate_of_diagnostic_aperture",
+    "arm": "heuristic",
+    "bound_probe_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/review-breaker-bound-probe.log",
+    "breaker_model": "openrouter/openai/gpt-6.1-sol",
+    "catalog_max_input_tokens": null,
+    "command_exit": 1,
+    "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-vertical_coordinate_of_diagnostic_aperture.log",
+    "docs_pool_processed": 1,
+    "exception": "ValueError: escalator catalog input allowance is not bounded",
+    "guard": "prepare_docs_review_request requires a bounded escalator catalog input allowance",
+    "ledger_calls": 1,
+    "ledger_spend_usd": 0.086856,
+    "review_pool_processed": 0,
+    "seed": "vertical_coordinate_of_diagnostic_aperture",
+    "stamped": false
+  },
+  "arm_comparison_complete": false,
+  "arms": {
+    "heuristic": [
+      {
+        "anchor": "x_coordinate_of_diagnostic_aperture",
+        "calls": 24,
+        "lint_after": 0,
+        "lint_after_classes": {},
+        "lint_before": 2,
+        "lint_before_classes": {
+          "convention_violation": 1,
+          "link_missing_reverse": 1
+        },
+        "members": [
+          "vertical_coordinate_of_diagnostic_aperture",
+          "x_coordinate_of_diagnostic_aperture",
+          "y_coordinate_of_diagnostic_aperture"
+        ],
+        "planned_calls": 3,
+        "receipt": {
+          "harmonize_summary": {
+            "batches_run": 2,
+            "batches_total": 2,
+            "halt_reasons": [],
+            "halted": false,
+            "resume_from": null,
+            "run_ids": [
+              "8cf5cc46-3392-46a9-8bf5-c484a23a328e",
+              "d3ae61e3-5383-451e-ae63-58f2ffde6fac"
+            ],
+            "spec": "harmonize-pattern-family",
+            "total_accepted": 3,
+            "total_audit_cleared": 0,
+            "total_audit_requarantined": 0,
+            "total_cost": 0.632,
+            "total_quarantined": 0,
+            "total_selected": 3,
+            "total_touched": 3
+          },
+          "ledger_baseline_rows": 40085,
+          "ledger_calls": 24,
+          "ledger_session_ids": [
+            "8d4adb31-7e1f-4322-bab3-3afb7f0084c1",
+            "76e3b6d1-02e3-46ce-a198-538b25b46d4b"
+          ],
+          "ledger_spend_usd": 0.6319500000000003,
+          "ledger_window": {
+            "ended": "2026-10-18T23:14:48.303636+00:00",
+            "started": "2026-10-18T22:50:20.730569+00:00"
+          },
+          "per_model": [
+            {
+              "calls": 3,
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "spend": 0.335128
+            },
+            {
+              "calls": 4,
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "spend": 0.173566
+            },
+            {
+              "calls": 3,
+              "model": "openrouter/x-ai/grok-4.5",
+              "spend": 0.121028
+            },
+            {
+              "calls": 14,
+              "model": "typesafe/jev-1.13",
+              "spend": 0.002228
+            }
+          ],
+          "scope_run_ids": [
+            "8cf5cc46-3392-46a9-8bf5-c484a23a328e",
+            "d3ae61e3-5383-451e-ae63-58f2ffde6fac"
+          ]
+        },
+        "scores_after": {
+          "vertical_coordinate_of_diagnostic_aperture": 0.91875,
+          "x_coordinate_of_diagnostic_aperture": 1.0,
+          "y_coordinate_of_diagnostic_aperture": 1.0
+        },
+        "scores_before": {
+          "vertical_coordinate_of_diagnostic_aperture": 0.875,
+          "x_coordinate_of_diagnostic_aperture": 0.91875,
+          "y_coordinate_of_diagnostic_aperture": 0.89375
+        },
+        "seed": "vertical_coordinate_of_diagnostic_aperture",
+        "spend_usd": 0.632,
+        "stamped": true,
+        "wall_seconds": 1467.5730310743675
+      }
+    ]
+  },
+  "attempt_history": [
+    {
+      "at": "2026-10-18T21:05:52.254241+00:00",
+      "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/measurement-rotated.log",
+      "error": "OSError: [Errno 30] Read-only file system: '/tmp/anchor-compare-epkb2_1w'",
+      "new_applies": 0,
+      "new_dry_runs": 0,
+      "new_model_spend_usd": 0.0,
+      "new_scratch_tree_created": false,
+      "probe_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/tmp-write-probe.log",
+      "status": "blocked_before_scratch_load"
+    }
+  ],
+  "budget_gate_this_attempt": {
+    "cap_envelope_usd": 49.96145667222222,
+    "ceiling_usd": 50.0,
+    "confirmed_prior_usd": 1.22576295,
+    "paired_estimate_usd": 41.70208410000002,
+    "paired_planned_calls": 72,
+    "passed": true,
+    "projected_total_usd": 43.58354077222224,
+    "rotated_call_rate_usd": 0.5791956125000003,
+    "unreceipted_jev_reserve_usd": 0.6556937222222222
+  },
+  "budget_reservation": {
+    "reason": "one unreceipted Jev call at the snapshot dry-run rate",
+    "usd": 0.6556937222222222
+  },
+  "budget_spend_usd": 3.0321796722222225,
+  "candidate_pool": {
+    "all_families": 849,
+    "before_validation": 118,
+    "eligible": 64,
+    "exclusions": {
+      "harmonized": 3,
+      "too_small": 669,
+      "west_roster": 59
+    },
+    "validation_exclusions": {
+      "docs_exhausted": 1,
+      "name_exhausted": 45,
+      "quarantined": 53
+    },
+    "validation_removed": 54
+  },
+  "cap_envelope_usd": 49.90831267222222,
+  "confirmed_spend_usd": 2.37648595,
+  "dry_run_estimate_basis": {
+    "calls": 36,
+    "historical_rate_usd": 0.6556937222222222,
+    "rate_usd": 0.5791956125000003,
+    "rotated": {
+      "calls": 36,
+      "historical_usd": 23.604973999999988,
+      "per_model": {
+        "openrouter/anthropic/claude-sonnet-5": {
+          "rows": 96,
+          "usd": 9.342413999999998
+        },
+        "openrouter/openai/gpt-6-luna": {
+          "rows": 15,
+          "usd": 0.038734050000000006
+        },
+        "openrouter/openai/gpt-6.1-sol": {
+          "rows": 128,
+          "usd": 6.757656999999999
+        },
+        "openrouter/x-ai/grok-4.5": {
+          "rows": 94,
+          "usd": 4.705246
+        },
+        "typesafe/jev-1.13": {
+          "rows": 42,
+          "usd": 0.006991000000000001
+        }
+      },
+      "rate_usd": 0.5791956125000003,
+      "receipt_rows": 375,
+      "repriced_rows": 143,
+      "rotated_usd": 20.85104205000001,
+      "runs": 21,
+      "seats": {
+        "sn-docs": "openrouter/openai/gpt-6.1-sol",
+        "sn-refine": "openrouter/openai/gpt-6-luna",
+        "sn-review.docs": [
+          "openrouter/anthropic/claude-sonnet-5",
+          "openrouter/x-ai/grok-4.5",
+          "openrouter/openai/gpt-6.1-sol"
+        ]
+      }
+    },
+    "runs": 21,
+    "source": "snapshot LLMCost token usage repriced for active model seats"
+  },
+  "dry_run_estimate_total_usd": 41.70208410000002,
+  "dry_run_estimate_usd_per_call": 0.5791956125000003,
+  "dry_run_seat_basis": "main checkout GPT-6 seats; snapshot LLMCost token usage repriced at active model rates",
+  "dry_runs": [
+    {
+      "calls_per_arm": 3,
+      "estimate_per_arm_usd": 1.7375868375000008,
+      "seed": "vertical_coordinate_of_diagnostic_aperture"
+    },
+    {
+      "calls_per_arm": 3,
+      "estimate_per_arm_usd": 1.7375868375000008,
+      "seed": "angular_width_of_camera"
+    },
+    {
+      "calls_per_arm": 3,
+      "estimate_per_arm_usd": 1.7375868375000008,
+      "seed": "length_of_passive_loop_element"
+    },
+    {
+      "calls_per_arm": 3,
+      "estimate_per_arm_usd": 1.7375868375000008,
+      "seed": "neutral_power_of_divertor_due_to_recombination"
+    },
+    {
+      "calls_per_arm": 3,
+      "estimate_per_arm_usd": 1.7375868375000008,
+      "seed": "current_density_due_to_wave_driven_current_drive"
+    },
+    {
+      "calls_per_arm": 3,
+      "estimate_per_arm_usd": 1.7375868375000008,
+      "seed": "momentum_flux_due_to_e_cross_b_drift"
+    },
+    {
+      "calls_per_arm": 3,
+      "estimate_per_arm_usd": 1.7375868375000008,
+      "seed": "lower_bound_wavelength_of_visible_camera"
+    },
+    {
+      "calls_per_arm": 4,
+      "estimate_per_arm_usd": 2.316782450000001,
+      "seed": "neutron_source_rate_due_to_thermal_fusion"
+    },
+    {
+      "calls_per_arm": 5,
+      "estimate_per_arm_usd": 2.8959780625000016,
+      "seed": "energy_flux_at_wall_due_to_recombination"
+    },
+    {
+      "calls_per_arm": 6,
+      "estimate_per_arm_usd": 3.4751736750000015,
+      "seed": "current_density_due_to_anomalous_transport"
+    }
+  ],
+  "eligible_differing_anchor_count": 21,
+  "eligible_differing_size_counts": {
+    "3": 7,
+    "4": 1,
+    "5": 1,
+    "6": 7,
+    "7": 4,
+    "9": 1
+  },
+  "failed_applies": [
+    {
+      "anchor": "y_coordinate_of_diagnostic_aperture",
+      "arm": "jev",
+      "ended_at": "2026-10-18T23:35:24.214138+00:00",
+      "error": "RuntimeError: Harmonize command failed for vertical_coordinate_of_diagnostic_aperture: 137; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-jev-vertical_coordinate_of_diagnostic_aperture.log",
+      "ledger_calls": 15,
+      "ledger_spend_usd": 0.431867,
+      "seed": "vertical_coordinate_of_diagnostic_aperture",
+      "started_at": "2026-10-18T23:14:53.244226+00:00",
+      "per_model_partial_receipt": {
+        "at": "2026-10-18T23:33:39+00:00",
+        "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/jev-partial-model-ledger.log",
+        "covered_calls": 14,
+        "covered_usd": 0.383621,
+        "rows": [
+          {
+            "model": "openrouter/anthropic/claude-sonnet-5",
+            "calls": 3,
+            "usd": 0.211167
+          },
+          {
+            "model": "openrouter/openai/gpt-6.1-sol",
+            "calls": 4,
+            "usd": 0.109616
+          },
+          {
+            "model": "openrouter/x-ai/grok-4.5",
+            "calls": 2,
+            "usd": 0.06192
+          },
+          {
+            "model": "typesafe/jev-1.13",
+            "calls": 5,
+            "usd": 0.000918
+          }
+        ],
+        "unattributed_final_call_usd": 0.048246
+      }
+    }
+  ],
+  "failure": {
+    "at": "2026-10-18T23:35:24.409655+00:00",
+    "message": "Harmonize command failed for vertical_coordinate_of_diagnostic_aperture: 137; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-jev-vertical_coordinate_of_diagnostic_aperture.log",
+    "type": "RuntimeError"
+  },
+  "historical_budget_gate": {
+    "ceiling_usd": 42.0,
+    "estimate_usd": 47.209948,
+    "seat_basis": "snapshot receipts before GPT-6 seat rotation",
+    "shortfall_usd": 7.091404672222218
+  },
+  "historical_snapshot_dry_run_estimate_usd": 47.209948,
+  "isolation_proof": [
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T22:44:57.582554+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50/heuristic/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27697"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T22:50:17.587229+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50/jev/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27698"
+    },
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T22:50:18.008634+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50/heuristic/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27697"
+    }
+  ],
+  "measurement_cwd": "/home/ITER/mcintos/Code/imas-codex",
+  "measurement_module": "/home/ITER/mcintos/Code/imas-codex/imas_codex/standard_names/harmonize.py",
+  "minimum_ten_family_calls": 72,
+  "minimum_ten_family_estimate_usd": 47.209948,
+  "minimum_total_with_reserved_spend_usd": 49.09140467222222,
+  "model_seats": {
+    "sn-docs": "openrouter/openai/gpt-6.1-sol",
+    "sn-refine": "openrouter/openai/gpt-6-luna",
+    "sn-review.docs": [
+      "openrouter/anthropic/claude-sonnet-5",
+      "openrouter/x-ai/grok-4.5",
+      "openrouter/openai/gpt-6.1-sol"
+    ]
+  },
+  "new_attempt_apply_count": 0,
+  "new_model_spend_by_model_usd": {
+    "openrouter/openai/gpt-6.1-sol": 0.086856
+  },
+  "outcome_status": "blocked",
+  "paired_family_count": 0,
+  "partial_receipts": [
+    {
+      "arm": "heuristic",
+      "batch": "anchor",
+      "completed_model_responses_logged": 4,
+      "family_seed": "toroidal_angle_of_along_pellet_path",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+      "pool_cost_spent_usd": 0.260063,
+      "pool_elapsed_seconds": 624.833674
+    },
+    {
+      "arm": "heuristic",
+      "batch": "remaining members",
+      "completed_model_responses_logged": 4,
+      "family_seed": "toroidal_angle_of_along_pellet_path",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+      "pool_cost_spent_usd": 0.224477,
+      "pool_elapsed_seconds": 430.922582
+    },
+    {
+      "arm": "jev",
+      "batch": "anchor",
+      "completed_model_responses_logged": 8,
+      "family_seed": "toroidal_angle_of_along_pellet_path",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-jev-toroidal_angle_of_along_pellet_path.log",
+      "pool_cost_spent_usd": 0.69893,
+      "pool_elapsed_seconds": 934.554378
+    },
+    {
+      "arm": "jev",
+      "batch": "remaining members",
+      "completed_model_responses_logged": null,
+      "family_seed": "toroidal_angle_of_along_pellet_path",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-jev-toroidal_angle_of_along_pellet_path.log",
+      "pool_cost_spent_usd": null,
+      "pool_elapsed_seconds": null,
+      "status": "terminated during paired cleanup before a pool receipt"
+    }
+  ],
+  "previous_isolation_proof": [
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T21:38:02.402307+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz/heuristic/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27697"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T21:43:01.113553+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz/jev/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27698"
+    },
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T21:43:01.401886+00:00",
+      "live_nodes": 1771117,
+      "live_probe": 0,
+      "live_uri": "bolt://98dci4-gpu-0002:7687",
+      "marked_scratch_nodes": 1770102,
+      "neo4j_log": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz/heuristic/logs/neo4j-temp.log",
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1,
+      "scratch_uri": "bolt://127.0.0.1:27697"
+    }
+  ],
+  "previous_selected": [
+    {
+      "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+      "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+      "jev_asked": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "jev_cost": 0.000103068,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "coordinate",
+      "members": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "physical_base": "",
+      "seed": "vertical_coordinate_of_diagnostic_aperture"
+    },
+    {
+      "heuristic_anchor": "toroidal_angular_width_of_camera",
+      "jev_anchor": "vertical_angular_width_of_camera",
+      "jev_asked": [
+        "vertical_angular_width_of_camera",
+        "toroidal_angular_width_of_camera"
+      ],
+      "jev_cost": 7.072799999999999e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "component",
+      "members": [
+        "angular_width_of_camera",
+        "toroidal_angular_width_of_camera",
+        "vertical_angular_width_of_camera"
+      ],
+      "physical_base": "angular_width",
+      "seed": "angular_width_of_camera"
+    },
+    {
+      "heuristic_anchor": "major_length_of_passive_loop_element",
+      "jev_anchor": "length_of_passive_loop_element",
+      "jev_asked": [
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element",
+        "length_of_passive_loop_element"
+      ],
+      "jev_cost": 0.000107772,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "length_of_passive_loop_element",
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element"
+      ],
+      "physical_base": "length",
+      "seed": "length_of_passive_loop_element"
+    },
+    {
+      "heuristic_anchor": "power_of_divertor_due_to_recombination",
+      "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
+      "jev_asked": [
+        "power_of_divertor_due_to_recombination",
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination"
+      ],
+      "jev_cost": 0.00012205199999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "subject",
+      "members": [
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination",
+        "power_of_divertor_due_to_recombination"
+      ],
+      "physical_base": "power",
+      "seed": "neutral_power_of_divertor_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+      "jev_anchor": "current_density_due_to_wave_driven_current_drive",
+      "jev_asked": [
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_due_to_wave_driven_current_drive"
+      ],
+      "jev_cost": 0.00013385399999999998,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_wave_driven_current_drive"
+    },
+    {
+      "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_asked": [
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_due_to_e_cross_b_drift"
+      ],
+      "jev_cost": 0.00015141000000000002,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "momentum_flux_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
+      ],
+      "physical_base": "momentum",
+      "seed": "momentum_flux_due_to_e_cross_b_drift"
+    },
+    {
+      "heuristic_anchor": "wavelength_of_visible_camera",
+      "jev_anchor": "lower_bound_wavelength_of_visible_camera",
+      "jev_asked": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "jev_cost": 0.00010281599999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "physical_base": "wavelength",
+      "seed": "lower_bound_wavelength_of_visible_camera"
+    },
+    {
+      "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
+      "jev_anchor": "source_rate_due_to_thermal_fusion",
+      "jev_asked": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "jev_cost": 0.00017077199999999997,
+      "jev_reason": null,
+      "jev_scored": 4,
+      "kind": "subject",
+      "members": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "physical_base": "source_rate",
+      "seed": "neutron_source_rate_due_to_thermal_fusion"
+    },
+    {
+      "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+      "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+      "jev_asked": [
+        "energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination"
+      ],
+      "jev_cost": 0.00023553600000000003,
+      "jev_reason": null,
+      "jev_scored": 5,
+      "kind": "subject",
+      "members": [
+        "energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination"
+      ],
+      "physical_base": "energy",
+      "seed": "energy_flux_at_wall_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+      "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+      "jev_asked": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport"
+      ],
+      "jev_cost": 0.000220332,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_anomalous_transport"
+    }
+  ],
+  "previous_spend_usd": 0.021194586,
+  "prior_quarantine_refusal": {
+    "arm": "heuristic",
+    "command_exit": 1,
+    "command_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261018T102210638794-ssog-anchor-ab/apply-heuristic-toroidal_angle_of_along_pellet_path.log",
+    "error": "ValueError: cannot confirm quarantined standard-name identities as valid: toroidal_angle_of_along_pellet_path",
+    "family_seed": "toroidal_angle_of_along_pellet_path",
+    "investigation": "The guard refused to overwrite a quarantined identity with valid; the available log does not establish why that identity was quarantined.",
+    "paired_results_valid": false,
+    "source": "default_revalidate in imas_codex/standard_names/campaign.py"
+  },
+  "receipt_scan_positive_control": "The same parser found 4, 4, and 8 completed model response lines and three cost_spent summaries in the earlier sessions; the terminated Jev second session has no finalized summary, so no zero-spend claim is made.",
+  "resumed_at": "2026-10-18T22:42:15.502057+00:00",
+  "rotated_attempt": {
+    "new_applies_completed": 0,
+    "new_dry_runs": 10,
+    "new_model_spend_usd": 0.086856,
+    "paired_family_count": 0,
+    "paired_planned_calls": 72,
+    "per_model_spend_usd": {
+      "openrouter/openai/gpt-6.1-sol": 0.086856
+    },
+    "scratch_graph_tree_removed": {
+      "at": "2026-10-18T21:55:07.694922+00:00",
+      "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq/anchor-compare-ux3nwihz"
+    },
+    "scratch_outer_removed": {
+      "at": "2026-10-18T21:56:17.880272+00:00",
+      "removed_entries": [
+        "anchor-compare-ux3nwihz",
+        "container-tmp",
+        "uv-0eddeb8af90d716e.lock"
+      ],
+      "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-iQAGRq"
+    },
+    "status": "blocked_after_first_heuristic_apply"
+  },
+  "ruling": "2026-10-18 lead: USD 50 total including USD 1.22576295 confirmed prior spend and reserved unreceipted Jev call; use GPT-6 seats from main",
+  "same_anchor_count": 5,
+  "scored_candidates": [
+    {
+      "heuristic_anchor": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "unclassified",
+      "members": [
+        "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+        "flux_surface_average_magnetic_field_magnitude",
+        "inertial_current_density_due_to_diamagnetic_drift",
+        "parallel_current_density_flux_surface_averaged_due_to_wave_driven_current_drive",
+        "peak_incident_heat_flux_at_limiter",
+        "per_toroidal_mode_flux_surface_average_total_absorbed_power_density",
+        "poloidal_momentum_neutral_internal_state_flux_limiter_coefficient",
+        "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "total_particle_count_accumulated_due_to_gas_injection"
+      ],
+      "physical_base": "",
+      "seed": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary"
+    },
+    {
+      "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+      "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+      "jev_asked": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "jev_cost": 0.000103068,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "coordinate",
+      "members": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "physical_base": "",
+      "seed": "vertical_coordinate_of_diagnostic_aperture"
+    },
+    {
+      "heuristic_anchor": "toroidal_angle_of_launching_position",
+      "jev_anchor": "toroidal_angle_of_control_surface",
+      "jev_asked": [
+        "toroidal_angle_of_launching_position",
+        "toroidal_angle_of_control_surface"
+      ],
+      "jev_cost": 7.6062e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "position+geometry",
+      "members": [
+        "toroidal_angle_of_along_pellet_path",
+        "toroidal_angle_of_control_surface",
+        "toroidal_angle_of_launching_position"
+      ],
+      "physical_base": "",
+      "seed": "toroidal_angle_of_along_pellet_path"
+    },
+    {
+      "heuristic_anchor": "toroidal_angular_width_of_camera",
+      "jev_anchor": "vertical_angular_width_of_camera",
+      "jev_asked": [
+        "vertical_angular_width_of_camera",
+        "toroidal_angular_width_of_camera"
+      ],
+      "jev_cost": 7.072799999999999e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "component",
+      "members": [
+        "angular_width_of_camera",
+        "toroidal_angular_width_of_camera",
+        "vertical_angular_width_of_camera"
+      ],
+      "physical_base": "angular_width",
+      "seed": "angular_width_of_camera"
+    },
+    {
+      "heuristic_anchor": "wetted_area_of_langmuir_probe",
+      "jev_anchor": "effective_area_of_langmuir_probe",
+      "jev_asked": [
+        "effective_area_of_langmuir_probe",
+        "wetted_area_of_langmuir_probe"
+      ],
+      "jev_cost": 6.732600000000001e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "unclassified",
+      "members": [
+        "effective_area_of_langmuir_probe",
+        "front_surface_area_of_langmuir_probe",
+        "wetted_area_of_langmuir_probe"
+      ],
+      "physical_base": "area",
+      "seed": "effective_area_of_langmuir_probe"
+    },
+    {
+      "heuristic_anchor": "poloidal_bulk_center_of_mass_velocity",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "bulk_center_of_mass_velocity",
+        "center_of_mass_velocity",
+        "neutral_species_center_of_mass_velocity",
+        "parallel_center_of_mass_velocity",
+        "poloidal_bulk_center_of_mass_velocity",
+        "radial_center_of_mass_velocity",
+        "toroidal_center_of_mass_velocity",
+        "vertical_neutral_species_center_of_mass_velocity"
+      ],
+      "physical_base": "center_of_mass_velocity",
+      "seed": "bulk_center_of_mass_velocity"
+    },
+    {
+      "heuristic_anchor": "ion_charge_state_average_charge_number",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject",
+      "members": [
+        "average_charge_number",
+        "ion_charge_number",
+        "ion_charge_state_average_charge_number",
+        "ion_charge_state_charge_number",
+        "ion_state_average_charge_number",
+        "ion_state_maximum_charge_number",
+        "neutral_beam_charge_number"
+      ],
+      "physical_base": "charge_number",
+      "seed": "average_charge_number"
+    },
+    {
+      "heuristic_anchor": "normalized_electron_collisionality",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+position",
+      "members": [
+        "electron_collisionality_normalized_at_pedestal_top",
+        "normalized_collisionality",
+        "normalized_electron_collisionality"
+      ],
+      "physical_base": "collisionality",
+      "seed": "electron_collisionality_normalized_at_pedestal_top"
+    },
+    {
+      "heuristic_anchor": "runaway_electron_convection_velocity",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "electron_convection_velocity",
+        "electron_particle_convection_velocity",
+        "heat_convection_velocity",
+        "ion_charge_state_convection_velocity",
+        "ion_charge_state_particle_convection_velocity",
+        "ion_convection_velocity",
+        "ion_heat_convection_velocity",
+        "ion_particle_convection_velocity",
+        "neutral_convection_velocity",
+        "neutral_internal_state_convection_velocity",
+        "neutral_particle_convection_velocity",
+        "neutral_state_convection_velocity",
+        "neutral_state_particle_convection_velocity",
+        "parallel_electron_particle_convection_velocity",
+        "parallel_ion_charge_state_convection_velocity",
+        "parallel_ion_heat_convection_velocity",
+        "parallel_neutral_particle_convection_velocity",
+        "perpendicular_runaway_electron_convection_velocity",
+        "poloidal_convection_velocity",
+        "poloidal_electron_convection_velocity",
+        "poloidal_ion_charge_state_convection_velocity",
+        "poloidal_ion_state_particle_convection_velocity",
+        "poloidal_neutral_internal_state_convection_velocity",
+        "poloidal_neutral_state_particle_convection_velocity",
+        "radial_electron_convection_velocity",
+        "radial_ion_charge_state_convection_velocity",
+        "radial_ion_particle_convection_velocity",
+        "radial_ion_state_particle_convection_velocity",
+        "radial_neutral_particle_convection_velocity",
+        "radial_particle_convection_velocity",
+        "runaway_electron_convection_velocity"
+      ],
+      "physical_base": "convection_velocity",
+      "seed": "electron_convection_velocity"
+    },
+    {
+      "heuristic_anchor": "accumulated_silane_count_due_to_gas_injection",
+      "jev_anchor": "accumulated_deuterium_count_due_to_gas_injection",
+      "jev_asked": [
+        "accumulated_carbon_count_due_to_gas_injection",
+        "accumulated_helium_4_count_due_to_gas_injection",
+        "accumulated_hydrogen_count_due_to_gas_injection",
+        "accumulated_methane_carbon_13_count_due_to_gas_injection",
+        "accumulated_oxygen_prefill_count_due_to_gas_injection",
+        "accumulated_tritium_count_due_to_gas_injection",
+        "accumulated_helium_3_prefill_count_due_to_gas_injection",
+        "accumulated_helium_3_count_due_to_gas_injection",
+        "accumulated_lithium_prefill_count_due_to_gas_injection",
+        "accumulated_deuterated_methane_count_due_to_gas_injection",
+        "carbon_prefill_count_due_to_gas_injection",
+        "accumulated_total_gas_count_at_midplane_due_to_gas_injection",
+        "oxygen_count_accumulated_due_to_gas_injection",
+        "accumulated_silane_count_due_to_gas_injection",
+        "accumulated_lithium_count_due_to_gas_injection",
+        "accumulated_nitrogen_count_due_to_gas_injection",
+        "accumulated_propane_count_due_to_gas_injection",
+        "accumulated_deuterium_count_due_to_gas_injection",
+        "accumulated_xenon_count_due_to_gas_injection"
+      ],
+      "jev_cost": 0.0007118999999999998,
+      "jev_reason": null,
+      "jev_scored": 19,
+      "kind": "subject+position",
+      "members": [
+        "accumulated_carbon_count_due_to_gas_injection",
+        "accumulated_deuterated_methane_count_due_to_gas_injection",
+        "accumulated_deuterium_count_due_to_gas_injection",
+        "accumulated_helium_3_count_due_to_gas_injection",
+        "accumulated_helium_3_prefill_count_due_to_gas_injection",
+        "accumulated_helium_4_count_due_to_gas_injection",
+        "accumulated_hydrogen_count_due_to_gas_injection",
+        "accumulated_lithium_count_due_to_gas_injection",
+        "accumulated_lithium_prefill_count_due_to_gas_injection",
+        "accumulated_methane_carbon_13_count_due_to_gas_injection",
+        "accumulated_nitrogen_count_due_to_gas_injection",
+        "accumulated_oxygen_prefill_count_due_to_gas_injection",
+        "accumulated_propane_count_due_to_gas_injection",
+        "accumulated_silane_count_due_to_gas_injection",
+        "accumulated_total_gas_count_at_midplane_due_to_gas_injection",
+        "accumulated_tritium_count_due_to_gas_injection",
+        "accumulated_xenon_count_due_to_gas_injection",
+        "carbon_prefill_count_due_to_gas_injection",
+        "cumulative_ethylene_count_due_to_gas_injection",
+        "oxygen_count_accumulated_due_to_gas_injection"
+      ],
+      "physical_base": "count",
+      "seed": "accumulated_carbon_count_due_to_gas_injection"
+    },
+    {
+      "heuristic_anchor": "toroidal_current_due_to_wave_driven_current_drive",
+      "jev_anchor": "toroidal_current_due_to_wave_driven_current_drive",
+      "jev_asked": [
+        "current_due_to_wave_driven_current_drive",
+        "toroidal_current_due_to_wave_driven_current_drive",
+        "current_per_toroidal_mode_due_to_wave_driven_current_drive"
+      ],
+      "jev_cost": 0.000124656,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "current_due_to_wave_driven_current_drive",
+        "current_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "toroidal_current_due_to_wave_driven_current_drive"
+      ],
+      "physical_base": "current",
+      "seed": "current_due_to_wave_driven_current_drive"
+    },
+    {
+      "heuristic_anchor": "toroidal_co_passing_fast_current_density",
+      "jev_anchor": "parallel_ion_current_density",
+      "jev_asked": [
+        "current_density",
+        "pfirsch_schlueter_current_density",
+        "parallel_diamagnetic_current_density",
+        "poloidal_total_current_density",
+        "radial_total_current_density",
+        "vertical_total_current_density",
+        "toroidal_current_density",
+        "toroidal_total_current_density",
+        "parallel_fluctuating_ion_current_density",
+        "parallel_ion_current_density",
+        "radial_total_current_density_at_wall",
+        "parallel_runaway_electron_current_density",
+        "toroidal_co_passing_fast_current_density",
+        "toroidal_counter_passing_current_density",
+        "toroidal_counter_passing_fast_current_density",
+        "toroidal_trapped_current_density",
+        "toroidal_trapped_fast_current_density",
+        "diamagnetic_current_density",
+        "radial_diamagnetic_current_density",
+        "vertical_diamagnetic_current_density",
+        "parallel_pfirsch_schlueter_current_density",
+        "poloidal_pfirsch_schlueter_current_density",
+        "radial_pfirsch_schlueter_current_density",
+        "toroidal_pfirsch_schlueter_current_density",
+        "vertical_pfirsch_schlueter_current_density",
+        "total_current_density",
+        "parallel_total_current_density",
+        "vertical_current_density",
+        "parallel_normalized_gyrocenter_perturbed_current_density",
+        "parallel_normalized_particle_perturbed_current_density",
+        "ion_current_density",
+        "saturated_ion_current_density",
+        "fluctuating_saturated_ion_current_density",
+        "normalized_particle_perturbed_current_density",
+        "normalized_gyrocenter_perturbed_current_density",
+        "trapped_fast_current_density",
+        "fast_current_density",
+        "trapped_current_density",
+        "counter_passing_fast_current_density",
+        "counter_passing_current_density",
+        "co_passing_fast_current_density",
+        "runaway_electron_current_density",
+        "fluctuating_ion_current_density",
+        "toroidal_current_density_flux_surface_averaged_at_constraint_position",
+        "parallel_current_density_at_constraint_position"
+      ],
+      "jev_cost": 0.0018086040000000003,
+      "jev_reason": null,
+      "jev_scored": 45,
+      "kind": "subject+component+position",
+      "members": [
+        "co_passing_fast_current_density",
+        "counter_passing_current_density",
+        "counter_passing_fast_current_density",
+        "current_density",
+        "diamagnetic_current_density",
+        "fast_current_density",
+        "fluctuating_ion_current_density",
+        "fluctuating_saturated_ion_current_density",
+        "ion_current_density",
+        "normalized_gyrocenter_perturbed_current_density",
+        "normalized_particle_perturbed_current_density",
+        "parallel_current_density_at_constraint_position",
+        "parallel_diamagnetic_current_density",
+        "parallel_fluctuating_ion_current_density",
+        "parallel_ion_current_density",
+        "parallel_normalized_gyrocenter_perturbed_current_density",
+        "parallel_normalized_particle_perturbed_current_density",
+        "parallel_pfirsch_schlueter_current_density",
+        "parallel_runaway_electron_current_density",
+        "parallel_total_current_density",
+        "pfirsch_schlueter_current_density",
+        "poloidal_pfirsch_schlueter_current_density",
+        "poloidal_total_current_density",
+        "radial_current_density",
+        "radial_diamagnetic_current_density",
+        "radial_pfirsch_schlueter_current_density",
+        "radial_total_current_density",
+        "radial_total_current_density_at_wall",
+        "runaway_electron_current_density",
+        "saturated_ion_current_density",
+        "toroidal_co_passing_fast_current_density",
+        "toroidal_counter_passing_current_density",
+        "toroidal_counter_passing_fast_current_density",
+        "toroidal_current_density",
+        "toroidal_current_density_flux_surface_averaged_at_constraint_position",
+        "toroidal_pfirsch_schlueter_current_density",
+        "toroidal_total_current_density",
+        "toroidal_trapped_current_density",
+        "toroidal_trapped_fast_current_density",
+        "total_current_density",
+        "total_diamagnetic_current_density",
+        "trapped_current_density",
+        "trapped_fast_current_density",
+        "vertical_current_density",
+        "vertical_diamagnetic_current_density",
+        "vertical_pfirsch_schlueter_current_density",
+        "vertical_total_current_density"
+      ],
+      "physical_base": "current_density",
+      "seed": "co_passing_fast_current_density"
+    },
+    {
+      "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+      "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+      "jev_asked": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport"
+      ],
+      "jev_cost": 0.000220332,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_anomalous_transport"
+    },
+    {
+      "heuristic_anchor": "poloidal_current_density_due_to_diamagnetic_drift",
+      "jev_anchor": "parallel_current_density_due_to_diamagnetic_drift",
+      "jev_asked": [
+        "current_density_due_to_diamagnetic_drift",
+        "parallel_current_density_due_to_diamagnetic_drift",
+        "toroidal_current_density_due_to_diamagnetic_drift",
+        "pfirsch_schlueter_current_density_due_to_diamagnetic_drift",
+        "parallel_pfirsch_schlueter_current_density_due_to_diamagnetic_drift",
+        "poloidal_current_density_due_to_diamagnetic_drift"
+      ],
+      "jev_cost": 0.000243348,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "subject+component",
+      "members": [
+        "current_density_due_to_diamagnetic_drift",
+        "parallel_current_density_due_to_diamagnetic_drift",
+        "parallel_pfirsch_schlueter_current_density_due_to_diamagnetic_drift",
+        "pfirsch_schlueter_current_density_due_to_diamagnetic_drift",
+        "poloidal_current_density_due_to_diamagnetic_drift",
+        "toroidal_current_density_due_to_diamagnetic_drift"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_diamagnetic_drift"
+    },
+    {
+      "heuristic_anchor": "current_density_due_to_heat_viscosity",
+      "jev_anchor": "toroidal_current_density_due_to_heat_viscosity",
+      "jev_asked": [
+        "current_density_due_to_heat_viscosity",
+        "diamagnetic_current_density_due_to_heat_viscosity",
+        "parallel_current_density_due_to_heat_viscosity",
+        "poloidal_current_density_due_to_heat_viscosity",
+        "radial_current_density_due_to_heat_viscosity",
+        "toroidal_current_density_due_to_heat_viscosity",
+        "vertical_current_density_due_to_heat_viscosity"
+      ],
+      "jev_cost": 0.000293832,
+      "jev_reason": null,
+      "jev_scored": 7,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_heat_viscosity",
+        "diamagnetic_current_density_due_to_heat_viscosity",
+        "parallel_current_density_due_to_heat_viscosity",
+        "poloidal_current_density_due_to_heat_viscosity",
+        "radial_current_density_due_to_heat_viscosity",
+        "toroidal_current_density_due_to_heat_viscosity",
+        "vertical_current_density_due_to_heat_viscosity"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_heat_viscosity"
+    },
+    {
+      "heuristic_anchor": "toroidal_current_density_due_to_ion_inertia",
+      "jev_anchor": "vertical_current_density_due_to_ion_inertia",
+      "jev_asked": [
+        "current_density_due_to_ion_inertia",
+        "parallel_current_density_due_to_ion_inertia",
+        "radial_current_density_due_to_ion_inertia",
+        "toroidal_current_density_due_to_ion_inertia",
+        "vertical_current_density_due_to_ion_inertia",
+        "poloidal_current_density_due_to_ion_inertia"
+      ],
+      "jev_cost": 0.000255948,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_ion_inertia",
+        "parallel_current_density_due_to_ion_inertia",
+        "poloidal_current_density_due_to_ion_inertia",
+        "radial_current_density_due_to_ion_inertia",
+        "toroidal_current_density_due_to_ion_inertia",
+        "vertical_current_density_due_to_ion_inertia"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_ion_inertia"
+    },
+    {
+      "heuristic_anchor": "radial_current_density_due_to_ion_neutral_friction",
+      "jev_anchor": "vertical_current_density_due_to_ion_neutral_friction",
+      "jev_asked": [
+        "current_density_due_to_ion_neutral_friction",
+        "diamagnetic_current_density_due_to_ion_neutral_friction",
+        "poloidal_current_density_due_to_ion_neutral_friction",
+        "vertical_current_density_due_to_ion_neutral_friction",
+        "parallel_current_density_due_to_ion_neutral_friction",
+        "radial_current_density_due_to_ion_neutral_friction",
+        "toroidal_current_density_due_to_ion_neutral_friction"
+      ],
+      "jev_cost": 0.000273336,
+      "jev_reason": null,
+      "jev_scored": 7,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_ion_neutral_friction",
+        "diamagnetic_current_density_due_to_ion_neutral_friction",
+        "parallel_current_density_due_to_ion_neutral_friction",
+        "poloidal_current_density_due_to_ion_neutral_friction",
+        "radial_current_density_due_to_ion_neutral_friction",
+        "toroidal_current_density_due_to_ion_neutral_friction",
+        "vertical_current_density_due_to_ion_neutral_friction"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_ion_neutral_friction"
+    },
+    {
+      "heuristic_anchor": "vertical_current_density_due_to_parallel_viscosity",
+      "jev_anchor": "toroidal_current_density_due_to_parallel_viscosity",
+      "jev_asked": [
+        "current_density_due_to_parallel_viscosity",
+        "toroidal_current_density_due_to_parallel_viscosity",
+        "diamagnetic_current_density_due_to_parallel_viscosity",
+        "parallel_current_density_due_to_parallel_viscosity",
+        "poloidal_current_density_due_to_parallel_viscosity",
+        "vertical_current_density_due_to_parallel_viscosity",
+        "radial_current_density_due_to_parallel_viscosity"
+      ],
+      "jev_cost": 0.000316848,
+      "jev_reason": null,
+      "jev_scored": 7,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_parallel_viscosity",
+        "diamagnetic_current_density_due_to_parallel_viscosity",
+        "parallel_current_density_due_to_parallel_viscosity",
+        "poloidal_current_density_due_to_parallel_viscosity",
+        "radial_current_density_due_to_parallel_viscosity",
+        "toroidal_current_density_due_to_parallel_viscosity",
+        "vertical_current_density_due_to_parallel_viscosity"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_parallel_viscosity"
+    },
+    {
+      "heuristic_anchor": "parallel_current_density_due_to_perpendicular_viscosity",
+      "jev_anchor": "toroidal_current_density_due_to_perpendicular_viscosity",
+      "jev_asked": [
+        "current_density_due_to_perpendicular_viscosity",
+        "poloidal_current_density_due_to_perpendicular_viscosity",
+        "diamagnetic_current_density_due_to_perpendicular_viscosity",
+        "radial_current_density_due_to_perpendicular_viscosity",
+        "toroidal_current_density_due_to_perpendicular_viscosity",
+        "vertical_current_density_due_to_perpendicular_viscosity",
+        "parallel_current_density_due_to_perpendicular_viscosity"
+      ],
+      "jev_cost": 0.000272034,
+      "jev_reason": null,
+      "jev_scored": 7,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_perpendicular_viscosity",
+        "diamagnetic_current_density_due_to_perpendicular_viscosity",
+        "parallel_current_density_due_to_perpendicular_viscosity",
+        "poloidal_current_density_due_to_perpendicular_viscosity",
+        "radial_current_density_due_to_perpendicular_viscosity",
+        "toroidal_current_density_due_to_perpendicular_viscosity",
+        "vertical_current_density_due_to_perpendicular_viscosity"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_perpendicular_viscosity"
+    },
+    {
+      "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+      "jev_anchor": "current_density_due_to_wave_driven_current_drive",
+      "jev_asked": [
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_due_to_wave_driven_current_drive"
+      ],
+      "jev_cost": 0.00013385399999999998,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_wave_driven_current_drive"
+    },
+    {
+      "heuristic_anchor": "total_ion_decay_length_over_scrape_off_layer",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject",
+      "members": [
+        "decay_length_over_scrape_off_layer",
+        "electron_decay_length_over_scrape_off_layer",
+        "electron_heat_decay_length_over_scrape_off_layer",
+        "heat_decay_length_over_scrape_off_layer",
+        "ion_heat_decay_length_over_scrape_off_layer",
+        "thermal_electron_decay_length_over_scrape_off_layer",
+        "total_ion_decay_length_over_scrape_off_layer"
+      ],
+      "physical_base": "decay_length",
+      "seed": "decay_length_over_scrape_off_layer"
+    },
+    {
+      "heuristic_anchor": "electron_decay_time_at_magnetic_axis_due_to_disruption",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+position",
+      "members": [
+        "electron_decay_time_at_magnetic_axis_due_to_disruption",
+        "linear_electron_decay_time_at_magnetic_axis_due_to_disruption",
+        "linear_thermal_electron_decay_time_volume_averaged_due_to_disruption",
+        "runaway_electron_decay_time_due_to_disruption"
+      ],
+      "physical_base": "decay_time",
+      "seed": "electron_decay_time_at_magnetic_axis_due_to_disruption"
+    },
+    {
+      "heuristic_anchor": "radial_ion_charge_state_diffusion_coefficient",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "electron_diffusion_coefficient",
+        "electron_particle_diffusion_coefficient",
+        "ion_charge_state_diffusion_coefficient",
+        "ion_diffusion_coefficient",
+        "neutral_diffusion_coefficient",
+        "poloidal_effective_ion_diffusion_coefficient",
+        "poloidal_electron_diffusion_coefficient",
+        "poloidal_ion_charge_state_diffusion_coefficient",
+        "poloidal_ion_diffusion_coefficient",
+        "poloidal_neutral_internal_state_diffusion_coefficient",
+        "radial_ion_charge_state_diffusion_coefficient",
+        "radial_ion_diffusion_coefficient",
+        "radial_neutral_diffusion_coefficient",
+        "radial_neutral_internal_state_diffusion_coefficient"
+      ],
+      "physical_base": "diffusion_coefficient",
+      "seed": "electron_diffusion_coefficient"
+    },
+    {
+      "heuristic_anchor": "parallel_neutral_particle_diffusivity",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "effective_electron_diffusivity",
+        "effective_ion_diffusivity",
+        "effective_neutral_diffusivity",
+        "electron_heat_diffusivity",
+        "electron_particle_diffusivity",
+        "ion_charge_state_diffusivity",
+        "ion_diffusivity",
+        "ion_particle_diffusivity",
+        "neutral_diffusivity",
+        "neutral_internal_state_diffusivity",
+        "neutral_particle_diffusivity",
+        "neutral_species_particle_diffusivity",
+        "neutral_state_particle_diffusivity",
+        "parallel_electron_diffusivity",
+        "parallel_ion_charge_state_diffusivity",
+        "parallel_ion_particle_diffusivity",
+        "parallel_neutral_internal_state_diffusivity",
+        "parallel_neutral_particle_diffusivity",
+        "parallel_neutral_species_particle_diffusivity",
+        "particle_diffusivity",
+        "perpendicular_runaway_electron_diffusivity",
+        "poloidal_electron_diffusivity",
+        "poloidal_neutral_particle_diffusivity",
+        "poloidal_neutral_state_particle_diffusivity",
+        "radial_effective_electron_diffusivity",
+        "radial_effective_ion_diffusivity",
+        "radial_effective_neutral_diffusivity",
+        "radial_ion_charge_state_diffusivity",
+        "radial_ion_particle_diffusivity",
+        "runaway_electron_diffusivity"
+      ],
+      "physical_base": "diffusivity",
+      "seed": "effective_electron_diffusivity"
+    },
+    {
+      "heuristic_anchor": "z_direction_unit_vector_of_electron_cyclotron_launcher_mirror",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "coordinate",
+      "members": [
+        "x_direction_unit_vector_of_electron_cyclotron_launcher_mirror",
+        "y_direction_unit_vector_of_electron_cyclotron_launcher_mirror",
+        "z_direction_unit_vector_of_electron_cyclotron_launcher_mirror"
+      ],
+      "physical_base": "direction_unit_vector",
+      "seed": "x_direction_unit_vector_of_electron_cyclotron_launcher_mirror"
+    },
+    {
+      "heuristic_anchor": "x_direction_unit_vector_of_neutron_detector",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "coordinate",
+      "members": [
+        "x_direction_unit_vector_of_neutron_detector",
+        "y_direction_unit_vector_of_neutron_detector",
+        "z_direction_unit_vector_of_neutron_detector"
+      ],
+      "physical_base": "direction_unit_vector",
+      "seed": "x_direction_unit_vector_of_neutron_detector"
+    },
+    {
+      "heuristic_anchor": "efficiency_of_plant_system",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "unclassified",
+      "members": [
+        "efficiency_of_plant_system",
+        "net_efficiency_of_plant_system",
+        "thermal_efficiency_of_plant_system"
+      ],
+      "physical_base": "efficiency",
+      "seed": "efficiency_of_plant_system"
+    },
+    {
+      "heuristic_anchor": "vertical_electric_field",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component+position",
+      "members": [
+        "binormal_wave_electric_field",
+        "electric_field",
+        "left_hand_circularly_polarized_electric_field",
+        "left_hand_circularly_polarized_wave_electric_field",
+        "normal_wave_electric_field",
+        "parallel_electric_field",
+        "parallel_electric_field_at_plasma_boundary",
+        "parallel_electric_field_at_separatrix",
+        "parallel_per_toroidal_mode_electric_field",
+        "parallel_wave_electric_field",
+        "per_toroidal_mode_left_hand_circularly_polarized_wave_electric_field",
+        "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field",
+        "poloidal_electric_field",
+        "radial_electric_field",
+        "radial_wave_electric_field",
+        "right_hand_circularly_polarized_wave_electric_field",
+        "runaway_electron_critical_electric_field",
+        "toroidal_electric_field",
+        "toroidal_wave_electric_field",
+        "vertical_electric_field",
+        "vertical_wave_electric_field",
+        "wave_electric_field"
+      ],
+      "physical_base": "electric_field",
+      "seed": "binormal_wave_electric_field"
+    },
+    {
+      "heuristic_anchor": "left_hand_circularly_polarized_wave_electric_field_imaginary_part",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "left_hand_circularly_polarized_wave_electric_field_imaginary_part",
+        "parallel_wave_electric_field_imaginary_part",
+        "right_hand_circularly_polarized_wave_electric_field_imaginary_part"
+      ],
+      "physical_base": "electric_field",
+      "seed": "left_hand_circularly_polarized_wave_electric_field_imaginary_part"
+    },
+    {
+      "heuristic_anchor": "parallel_wave_electric_field_real_part",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "left_hand_circularly_polarized_wave_electric_field_real_part",
+        "parallel_wave_electric_field_real_part",
+        "right_hand_circularly_polarized_wave_electric_field_real_part"
+      ],
+      "physical_base": "electric_field",
+      "seed": "left_hand_circularly_polarized_wave_electric_field_real_part"
+    },
+    {
+      "heuristic_anchor": "electrostatic_potential_at_langmuir_probe_position",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "position",
+      "members": [
+        "electrostatic_potential",
+        "electrostatic_potential_at_langmuir_probe_position",
+        "electrostatic_potential_at_outboard_midplane",
+        "electrostatic_potential_at_wall",
+        "floating_electrostatic_potential"
+      ],
+      "physical_base": "electrostatic_potential",
+      "seed": "electrostatic_potential"
+    },
+    {
+      "heuristic_anchor": "perturbed_electrostatic_potential_imaginary_part",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "unclassified",
+      "members": [
+        "perturbed_electrostatic_potential_amplitude",
+        "perturbed_electrostatic_potential_imaginary_part",
+        "perturbed_electrostatic_potential_real_part"
+      ],
+      "physical_base": "electrostatic_potential",
+      "seed": "perturbed_electrostatic_potential_amplitude"
+    },
+    {
+      "heuristic_anchor": "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+        "energy_velocity_due_to_convection",
+        "ion_charge_state_energy_velocity_due_to_convection",
+        "poloidal_ion_charge_state_energy_velocity_due_to_convection",
+        "radial_effective_thermal_energy_velocity_due_to_convection",
+        "radial_effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+        "thermal_ion_charge_state_energy_velocity_due_to_convection"
+      ],
+      "physical_base": "energy",
+      "seed": "effective_thermal_ion_charge_state_energy_velocity_due_to_convection"
+    },
+    {
+      "heuristic_anchor": "incident_energy_flux_at_wall_due_to_eddy_current",
+      "jev_anchor": "energy_flux_at_wall_due_to_eddy_current",
+      "jev_asked": [
+        "energy_flux_at_wall_due_to_eddy_current",
+        "incident_energy_flux_at_wall_due_to_eddy_current"
+      ],
+      "jev_cost": 8.358000000000001e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "position",
+      "members": [
+        "energy_flux_at_wall_due_to_eddy_current",
+        "energy_flux_due_to_eddy_current",
+        "incident_energy_flux_at_wall_due_to_eddy_current"
+      ],
+      "physical_base": "energy",
+      "seed": "energy_flux_at_wall_due_to_eddy_current"
+    },
+    {
+      "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+      "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+      "jev_asked": [
+        "energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination"
+      ],
+      "jev_cost": 0.00023553600000000003,
+      "jev_reason": null,
+      "jev_scored": 5,
+      "kind": "subject",
+      "members": [
+        "energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination"
+      ],
+      "physical_base": "energy",
+      "seed": "energy_flux_at_wall_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "energy_flux_at_wall_due_to_surface_emission",
+      "jev_anchor": "electron_kinetic_energy_flux_at_wall_due_to_surface_emission",
+      "jev_asked": [
+        "kinetic_energy_flux_at_wall_due_to_surface_emission",
+        "energy_flux_at_wall_due_to_surface_emission",
+        "ion_charge_state_kinetic_energy_flux_at_wall_due_to_surface_emission",
+        "ion_kinetic_energy_flux_at_wall_due_to_surface_emission",
+        "electron_kinetic_energy_flux_at_wall_due_to_surface_emission"
+      ],
+      "jev_cost": 0.00019782000000000003,
+      "jev_reason": null,
+      "jev_scored": 5,
+      "kind": "subject",
+      "members": [
+        "electron_kinetic_energy_flux_at_wall_due_to_surface_emission",
+        "energy_flux_at_wall_due_to_surface_emission",
+        "ion_charge_state_kinetic_energy_flux_at_wall_due_to_surface_emission",
+        "ion_kinetic_energy_flux_at_wall_due_to_surface_emission",
+        "kinetic_energy_flux_at_wall_due_to_surface_emission",
+        "neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission"
+      ],
+      "physical_base": "energy",
+      "seed": "electron_kinetic_energy_flux_at_wall_due_to_surface_emission"
+    },
+    {
+      "heuristic_anchor": "factor_of_spectrometer_channel",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "unclassified",
+      "members": [
+        "calibration_factor_of_spectrometer_channel",
+        "factor_of_spectrometer_channel",
+        "spectral_calibration_factor_of_spectrometer_channel"
+      ],
+      "physical_base": "factor",
+      "seed": "calibration_factor_of_spectrometer_channel"
+    },
+    {
+      "heuristic_anchor": "x_first_measurement_direction_unit_vector_of_strain_gauge",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "coordinate",
+      "members": [
+        "x_first_measurement_direction_unit_vector_of_strain_gauge",
+        "y_first_measurement_direction_unit_vector_of_strain_gauge",
+        "z_first_measurement_direction_unit_vector_of_strain_gauge"
+      ],
+      "physical_base": "first_measurement_direction_unit_vector",
+      "seed": "x_first_measurement_direction_unit_vector_of_strain_gauge"
+    },
+    {
+      "heuristic_anchor": "neutron_flux_at_first_wall",
+      "jev_anchor": "flux_at_limiter",
+      "jev_asked": [
+        "flux_at_divertor_target",
+        "ion_charge_state_particle_flux",
+        "ion_charge_state_particle_flux_at_wall",
+        "neutral_internal_state_particle_flux",
+        "neutral_internal_state_particle_flux_at_wall",
+        "parallel_neutral_internal_state_particle_flux",
+        "poloidal_neutral_internal_state_particle_flux",
+        "radial_neutral_internal_state_particle_flux",
+        "parallel_heat_flux",
+        "electron_particle_flux",
+        "ion_particle_flux",
+        "neutral_particle_flux",
+        "neutral_state_particle_flux",
+        "parallel_electron_particle_flux",
+        "parallel_ion_charge_state_particle_flux",
+        "parallel_ion_particle_flux",
+        "parallel_neutral_particle_flux",
+        "perpendicular_runaway_electron_particle_flux",
+        "poloidal_electron_particle_flux",
+        "poloidal_ion_charge_state_particle_flux",
+        "poloidal_ion_particle_flux",
+        "poloidal_neutral_particle_flux",
+        "radial_electron_particle_flux",
+        "radial_ion_particle_flux",
+        "radial_neutral_particle_flux",
+        "total_thermal_ion_heat_flux",
+        "flux_at_first_wall",
+        "heat_flux",
+        "runaway_electron_particle_flux",
+        "flux_surface_normal_ion_charge_state_particle_flux",
+        "incident_neutral_particle_flux_at_wall",
+        "incident_ion_particle_flux_at_wall",
+        "back_surface_neutron_flux",
+        "flux_at_limiter",
+        "neutron_flux_at_first_wall"
+      ],
+      "jev_cost": 0.001315734,
+      "jev_reason": null,
+      "jev_scored": 35,
+      "kind": "subject+component+position",
+      "members": [
+        "back_surface_neutron_flux",
+        "deuterium_tritium_flux",
+        "electron_particle_flux",
+        "flux_at_divertor_target",
+        "flux_at_first_wall",
+        "flux_at_limiter",
+        "flux_surface_normal_ion_charge_state_particle_flux",
+        "heat_flux",
+        "incident_ion_particle_flux_at_wall",
+        "incident_neutral_particle_flux_at_wall",
+        "ion_charge_state_particle_flux",
+        "ion_charge_state_particle_flux_at_wall",
+        "ion_particle_flux",
+        "neutral_internal_state_particle_flux",
+        "neutral_internal_state_particle_flux_at_wall",
+        "neutral_particle_flux",
+        "neutral_state_particle_flux",
+        "neutron_flux_at_first_wall",
+        "normalized_neutron_flux",
+        "parallel_electron_particle_flux",
+        "parallel_heat_flux",
+        "parallel_incident_heat_flux_at_divertor_target",
+        "parallel_ion_charge_state_particle_flux",
+        "parallel_ion_particle_flux",
+        "parallel_neutral_internal_state_particle_flux",
+        "parallel_neutral_particle_flux",
+        "perpendicular_runaway_electron_particle_flux",
+        "poloidal_electron_particle_flux",
+        "poloidal_ion_charge_state_particle_flux",
+        "poloidal_ion_particle_flux",
+        "poloidal_neutral_internal_state_particle_flux",
+        "poloidal_neutral_particle_flux",
+        "radial_electron_particle_flux",
+        "radial_ion_particle_flux",
+        "radial_neutral_internal_state_particle_flux",
+        "radial_neutral_particle_flux",
+        "runaway_electron_particle_flux",
+        "total_particle_flux",
+        "total_thermal_ion_heat_flux"
+      ],
+      "physical_base": "flux",
+      "seed": "back_surface_neutron_flux"
+    },
+    {
+      "heuristic_anchor": "neutral_particle_flux_at_wall_due_to_pumping",
+      "jev_anchor": "flux_at_wall_due_to_pumping",
+      "jev_asked": [
+        "flux_due_to_pumping",
+        "flux_at_wall_due_to_pumping",
+        "electron_particle_flux_at_wall_due_to_pumping",
+        "neutral_particle_flux_at_wall_due_to_pumping"
+      ],
+      "jev_cost": 0.000146454,
+      "jev_reason": null,
+      "jev_scored": 4,
+      "kind": "subject+position",
+      "members": [
+        "electron_particle_flux_at_wall_due_to_pumping",
+        "flux_at_wall_due_to_pumping",
+        "flux_due_to_pumping",
+        "neutral_particle_flux_at_wall_due_to_pumping"
+      ],
+      "physical_base": "flux",
+      "seed": "electron_particle_flux_at_wall_due_to_pumping"
+    },
+    {
+      "heuristic_anchor": "incident_neutral_particle_flux_at_wall_due_to_recombination",
+      "jev_anchor": "flux_at_wall_due_to_recombination",
+      "jev_asked": [
+        "incident_neutral_particle_flux_at_wall_due_to_recombination",
+        "flux_at_wall_due_to_recombination",
+        "incident_neutral_internal_state_particle_flux_at_wall_due_to_recombination",
+        "neutral_internal_state_particle_flux_at_wall_due_to_recombination",
+        "neutral_particle_flux_at_wall_due_to_recombination"
+      ],
+      "jev_cost": 0.000206388,
+      "jev_reason": null,
+      "jev_scored": 5,
+      "kind": "subject+component",
+      "members": [
+        "flux_at_wall_due_to_recombination",
+        "incident_neutral_internal_state_particle_flux_at_wall_due_to_recombination",
+        "incident_neutral_particle_flux_at_wall_due_to_recombination",
+        "neutral_internal_state_particle_flux_at_wall_due_to_recombination",
+        "neutral_particle_flux_at_wall_due_to_recombination",
+        "normal_particle_flux_at_wall_due_to_recombination"
+      ],
+      "physical_base": "flux",
+      "seed": "flux_at_wall_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "particle_flux_at_wall_due_to_surface_emission",
+      "jev_anchor": "flux_at_wall_due_to_surface_emission",
+      "jev_asked": [
+        "flux_at_wall_due_to_surface_emission",
+        "flux_due_to_surface_emission",
+        "electron_particle_flux_at_wall_due_to_surface_emission",
+        "ion_species_particle_flux_at_wall_due_to_surface_emission",
+        "neutral_particle_flux_at_wall_due_to_surface_emission",
+        "particle_flux_at_wall_due_to_surface_emission"
+      ],
+      "jev_cost": 0.00023507400000000005,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "subject+position",
+      "members": [
+        "electron_particle_flux_at_wall_due_to_surface_emission",
+        "flux_at_wall_due_to_surface_emission",
+        "flux_due_to_surface_emission",
+        "ion_species_particle_flux_at_wall_due_to_surface_emission",
+        "neutral_particle_flux_at_wall_due_to_surface_emission",
+        "particle_flux_at_wall_due_to_surface_emission"
+      ],
+      "physical_base": "flux",
+      "seed": "electron_particle_flux_at_wall_due_to_surface_emission"
+    },
+    {
+      "heuristic_anchor": "flux_limiter_coefficient",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "electron_particle_flux_limiter_coefficient",
+        "flux_limiter_coefficient",
+        "ion_charge_state_particle_flux_limiter_coefficient",
+        "ion_particle_flux_limiter_coefficient",
+        "ion_state_particle_flux_limiter_coefficient",
+        "neutral_internal_state_particle_flux_limiter_coefficient",
+        "neutral_particle_flux_limiter_coefficient",
+        "neutral_state_particle_flux_limiter_coefficient",
+        "particle_flux_limiter_coefficient",
+        "poloidal_flux_limiter_coefficient",
+        "radial_flux_limiter_coefficient",
+        "toroidal_flux_limiter_coefficient"
+      ],
+      "physical_base": "flux_limiter_coefficient",
+      "seed": "electron_particle_flux_limiter_coefficient"
+    },
+    {
+      "heuristic_anchor": "vertical_volumetric_force",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "radial_volumetric_force",
+        "toroidal_volumetric_force",
+        "vertical_volumetric_force",
+        "volumetric_force"
+      ],
+      "physical_base": "force",
+      "seed": "radial_volumetric_force"
+    },
+    {
+      "heuristic_anchor": "force_of_poloidal_field_coil",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "force_of_poloidal_field_coil",
+        "maximum_force_of_poloidal_field_coil",
+        "minimum_force_of_poloidal_field_coil",
+        "radial_force_of_poloidal_field_coil",
+        "vertical_force_of_poloidal_field_coil",
+        "vertical_total_force_of_poloidal_field_coil"
+      ],
+      "physical_base": "force",
+      "seed": "force_of_poloidal_field_coil"
+    },
+    {
+      "heuristic_anchor": "gyrocenter_frequency",
+      "jev_anchor": "toroidal_gyrocenter_frequency",
+      "jev_asked": [
+        "alfven_frequency",
+        "gyrocenter_frequency",
+        "wave_frequency",
+        "poloidal_gyrocenter_frequency",
+        "toroidal_gyrocenter_frequency",
+        "edge_localized_mode_frequency"
+      ],
+      "jev_cost": 0.00021739199999999998,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "subject+component",
+      "members": [
+        "alfven_frequency",
+        "edge_localized_mode_frequency",
+        "gyrocenter_frequency",
+        "poloidal_gyrocenter_frequency",
+        "toroidal_gyrocenter_frequency",
+        "wave_critical_ordinary_mode_frequency",
+        "wave_frequency"
+      ],
+      "physical_base": "frequency",
+      "seed": "alfven_frequency"
+    },
+    {
+      "heuristic_anchor": "thermal_plasma_internal_energy",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "unclassified",
+      "members": [
+        "plasma_internal_energy",
+        "thermal_plasma_internal_energy",
+        "total_thermal_plasma_internal_energy"
+      ],
+      "physical_base": "internal_energy",
+      "seed": "plasma_internal_energy"
+    },
+    {
+      "heuristic_anchor": "length_of_antenna_strap",
+      "jev_anchor": "major_length_of_antenna_strap",
+      "jev_asked": [
+        "length_of_antenna_strap",
+        "major_length_of_antenna_strap"
+      ],
+      "jev_cost": 6.946799999999999e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "unclassified",
+      "members": [
+        "length_of_antenna_strap",
+        "major_length_of_antenna_strap",
+        "minor_length_of_antenna_strap"
+      ],
+      "physical_base": "length",
+      "seed": "length_of_antenna_strap"
+    },
+    {
+      "heuristic_anchor": "major_length_of_passive_loop_element",
+      "jev_anchor": "length_of_passive_loop_element",
+      "jev_asked": [
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element",
+        "length_of_passive_loop_element"
+      ],
+      "jev_cost": 0.000107772,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "length_of_passive_loop_element",
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element"
+      ],
+      "physical_base": "length",
+      "seed": "length_of_passive_loop_element"
+    },
+    {
+      "heuristic_anchor": "radial_perturbed_plasma_magnetic_field_imaginary_part",
+      "jev_anchor": "radial_perturbed_vacuum_magnetic_field_imaginary_part",
+      "jev_asked": [
+        "poloidal_perturbed_vacuum_magnetic_field_imaginary_part",
+        "radial_perturbed_vacuum_magnetic_field_imaginary_part",
+        "toroidal_perturbed_vacuum_magnetic_field_imaginary_part",
+        "poloidal_perturbed_plasma_magnetic_field_imaginary_part",
+        "toroidal_perturbed_plasma_magnetic_field_imaginary_part",
+        "radial_perturbed_plasma_magnetic_field_imaginary_part"
+      ],
+      "jev_cost": 0.000293034,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component",
+      "members": [
+        "poloidal_perturbed_plasma_magnetic_field_imaginary_part",
+        "poloidal_perturbed_vacuum_magnetic_field_imaginary_part",
+        "radial_perturbed_plasma_magnetic_field_imaginary_part",
+        "radial_perturbed_vacuum_magnetic_field_imaginary_part",
+        "toroidal_perturbed_plasma_magnetic_field_imaginary_part",
+        "toroidal_perturbed_vacuum_magnetic_field_imaginary_part"
+      ],
+      "physical_base": "magnetic_field",
+      "seed": "poloidal_perturbed_plasma_magnetic_field_imaginary_part"
+    },
+    {
+      "heuristic_anchor": "toroidal_perturbed_plasma_magnetic_field_real_part",
+      "jev_anchor": "poloidal_perturbed_vacuum_magnetic_field_real_part",
+      "jev_asked": [
+        "poloidal_perturbed_vacuum_magnetic_field_real_part",
+        "radial_perturbed_vacuum_magnetic_field_real_part",
+        "toroidal_perturbed_vacuum_magnetic_field_real_part",
+        "poloidal_perturbed_plasma_magnetic_field_real_part",
+        "radial_perturbed_plasma_magnetic_field_real_part",
+        "toroidal_perturbed_plasma_magnetic_field_real_part"
+      ],
+      "jev_cost": 0.000286104,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component",
+      "members": [
+        "poloidal_perturbed_plasma_magnetic_field_real_part",
+        "poloidal_perturbed_vacuum_magnetic_field_real_part",
+        "radial_perturbed_plasma_magnetic_field_real_part",
+        "radial_perturbed_vacuum_magnetic_field_real_part",
+        "toroidal_perturbed_plasma_magnetic_field_real_part",
+        "toroidal_perturbed_vacuum_magnetic_field_real_part"
+      ],
+      "physical_base": "magnetic_field",
+      "seed": "poloidal_perturbed_plasma_magnetic_field_real_part"
+    },
+    {
+      "heuristic_anchor": "vertical_magnetic_vector_potential",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "magnetic_vector_potential",
+        "parallel_magnetic_vector_potential",
+        "perturbed_plasma_magnetic_vector_potential",
+        "perturbed_vacuum_magnetic_vector_potential",
+        "plasma_magnetic_vector_potential",
+        "poloidal_magnetic_vector_potential",
+        "poloidal_perturbed_plasma_magnetic_vector_potential",
+        "radial_magnetic_vector_potential",
+        "radial_perturbed_plasma_magnetic_vector_potential",
+        "radial_perturbed_vacuum_magnetic_vector_potential",
+        "radial_vacuum_magnetic_vector_potential",
+        "toroidal_perturbed_plasma_magnetic_vector_potential",
+        "toroidal_vacuum_magnetic_vector_potential",
+        "vacuum_magnetic_vector_potential",
+        "vertical_magnetic_vector_potential",
+        "vertical_vacuum_magnetic_vector_potential"
+      ],
+      "physical_base": "magnetic_vector_potential",
+      "seed": "magnetic_vector_potential"
+    },
+    {
+      "heuristic_anchor": "radial_perturbed_vacuum_magnetic_vector_potential_imaginary_part",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "radial_perturbed_plasma_magnetic_vector_potential_imaginary_part",
+        "radial_perturbed_vacuum_magnetic_vector_potential_imaginary_part",
+        "toroidal_perturbed_plasma_magnetic_vector_potential_imaginary_part"
+      ],
+      "physical_base": "magnetic_vector_potential",
+      "seed": "radial_perturbed_plasma_magnetic_vector_potential_imaginary_part"
+    },
+    {
+      "heuristic_anchor": "vertical_magnetization_of_ferritic_element",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "radial_magnetization_of_ferritic_element",
+        "toroidal_magnetization_of_ferritic_element",
+        "vertical_magnetization_of_ferritic_element"
+      ],
+      "physical_base": "magnetization",
+      "seed": "radial_magnetization_of_ferritic_element"
+    },
+    {
+      "heuristic_anchor": "z_major_axis_unit_vector_of_shatter_cone",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "coordinate",
+      "members": [
+        "x_major_axis_unit_vector_of_shatter_cone",
+        "y_major_axis_unit_vector_of_shatter_cone",
+        "z_major_axis_unit_vector_of_shatter_cone"
+      ],
+      "physical_base": "major_axis_unit_vector",
+      "seed": "x_major_axis_unit_vector_of_shatter_cone"
+    },
+    {
+      "heuristic_anchor": "plasma_mass_density",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "unclassified",
+      "members": [
+        "mass_density",
+        "plasma_mass_density",
+        "total_plasma_mass_density"
+      ],
+      "physical_base": "mass_density",
+      "seed": "mass_density"
+    },
+    {
+      "heuristic_anchor": "wave_mode_number",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "mhd_mode_number",
+        "perturbed_linear_mhd_mode_number",
+        "poloidal_mode_number",
+        "radial_mode_number",
+        "toroidal_mhd_mode_number",
+        "toroidal_wave_mode_number",
+        "wave_mode_number"
+      ],
+      "physical_base": "mode_number",
+      "seed": "mhd_mode_number"
+    },
+    {
+      "heuristic_anchor": "total_momentum_convection_velocity",
+      "jev_anchor": "momentum_flux",
+      "jev_asked": [
+        "neutral_species_momentum_convection_velocity",
+        "momentum_damping_rate",
+        "momentum_flux_limiter_coefficient",
+        "neutral_momentum_convection_velocity",
+        "ion_momentum_source",
+        "neutral_momentum_source",
+        "poloidal_ion_momentum_source",
+        "toroidal_ion_momentum_source",
+        "parallel_neutral_momentum_source",
+        "poloidal_neutral_momentum_source",
+        "toroidal_neutral_momentum_source",
+        "parallel_neutral_state_momentum_source",
+        "poloidal_neutral_state_momentum_source",
+        "toroidal_neutral_state_momentum_source",
+        "momentum_source",
+        "parallel_net_ion_momentum_source",
+        "poloidal_ion_momentum_flux_limiter_coefficient",
+        "parallel_ion_momentum_flux_limiter_coefficient",
+        "radial_ion_momentum_flux_limiter_coefficient",
+        "ion_momentum_flux_limiter_coefficient",
+        "radial_neutral_momentum_source",
+        "parallel_neutral_momentum_flux_limiter_coefficient",
+        "vertical_neutral_momentum_flux_limiter_coefficient",
+        "neutral_momentum_flux_limiter_coefficient",
+        "plasma_momentum_flux",
+        "parallel_momentum_convection_velocity",
+        "momentum_diffusivity",
+        "ion_momentum_convection_velocity",
+        "radial_momentum_flux",
+        "momentum_diffusion_coefficient",
+        "neutral_momentum_diffusivity",
+        "radial_neutral_momentum_flux",
+        "ion_momentum_flux",
+        "ion_charge_state_momentum_flux",
+        "neutral_momentum_flux",
+        "ion_momentum_diffusion_coefficient",
+        "neutral_momentum_diffusion_coefficient",
+        "ion_momentum_damping_rate",
+        "parallel_momentum_flux",
+        "momentum_flux",
+        "diamagnetic_momentum_diffusivity",
+        "ion_charge_state_momentum_diffusivity",
+        "ion_charge_state_diamagnetic_momentum_convection_velocity",
+        "ion_charge_state_momentum_convection_velocity",
+        "ion_diamagnetic_momentum_convection_velocity",
+        "ion_charge_state_momentum_damping_rate",
+        "toroidal_momentum_convection_velocity",
+        "ion_charge_state_momentum_flux_limiter_coefficient",
+        "ion_charge_state_momentum_source",
+        "parallel_ion_charge_state_momentum_convection_velocity",
+        "parallel_ion_charge_state_momentum_damping_rate",
+        "parallel_ion_charge_state_momentum_source",
+        "poloidal_ion_charge_state_momentum_convection_velocity",
+        "poloidal_ion_charge_state_momentum_damping_rate",
+        "poloidal_ion_charge_state_momentum_flux_limiter_coefficient",
+        "poloidal_ion_charge_state_momentum_source",
+        "radial_ion_charge_state_momentum_convection_velocity",
+        "radial_ion_charge_state_momentum_damping_rate",
+        "radial_ion_charge_state_momentum_diffusion_coefficient",
+        "toroidal_ion_charge_state_momentum_convection_velocity",
+        "toroidal_ion_charge_state_momentum_damping_rate",
+        "toroidal_ion_charge_state_momentum_flux",
+        "toroidal_ion_charge_state_momentum_flux_limiter_coefficient",
+        "toroidal_ion_charge_state_momentum_source",
+        "vertical_ion_charge_state_momentum_convection_velocity",
+        "vertical_ion_charge_state_momentum_diffusivity",
+        "vertical_ion_charge_state_momentum_flux",
+        "neutral_internal_state_momentum_diffusion_coefficient",
+        "neutral_internal_state_momentum_source",
+        "parallel_neutral_internal_state_momentum_convection_velocity",
+        "parallel_neutral_internal_state_momentum_diffusivity",
+        "parallel_neutral_internal_state_momentum_flux",
+        "parallel_neutral_internal_state_momentum_flux_limiter_coefficient",
+        "poloidal_neutral_internal_state_momentum_diffusion_coefficient",
+        "radial_neutral_internal_state_momentum_convection_velocity",
+        "radial_neutral_internal_state_momentum_diffusion_coefficient",
+        "radial_neutral_internal_state_momentum_flux",
+        "radial_neutral_internal_state_momentum_source",
+        "toroidal_neutral_internal_state_momentum_diffusion_coefficient",
+        "toroidal_neutral_internal_state_momentum_flux",
+        "toroidal_neutral_internal_state_momentum_flux_limiter_coefficient",
+        "vertical_neutral_internal_state_momentum_convection_velocity",
+        "vertical_neutral_internal_state_momentum_diffusivity",
+        "vertical_neutral_internal_state_momentum_flux",
+        "neutral_internal_state_momentum_flux_limiter_coefficient_over_edge_region",
+        "toroidal_plasma_momentum_at_pedestal_top",
+        "toroidal_total_momentum_flux",
+        "parallel_ion_state_momentum",
+        "parallel_neutral_state_momentum_flux_limiter_coefficient",
+        "parallel_plasma_momentum_flux",
+        "poloidal_ion_momentum_diffusivity",
+        "poloidal_neutral_momentum_diffusivity",
+        "toroidal_ion_momentum_diffusion_coefficient",
+        "vertical_ion_momentum_convection_velocity",
+        "diamagnetic_momentum_convection_velocity",
+        "ion_diamagnetic_momentum_diffusivity",
+        "ion_state_momentum_diffusivity",
+        "parallel_ion_charge_state_momentum_diffusivity",
+        "parallel_ion_charge_state_momentum_flux",
+        "parallel_ion_momentum_convection_velocity",
+        "parallel_ion_momentum_damping_rate",
+        "parallel_ion_momentum_diffusivity",
+        "parallel_ion_momentum_flux",
+        "parallel_neutral_momentum_diffusivity",
+        "parallel_neutral_momentum_flux",
+        "poloidal_ion_charge_state_momentum_diffusivity",
+        "poloidal_ion_charge_state_momentum_flux",
+        "poloidal_ion_momentum_damping_rate",
+        "poloidal_ion_momentum_flux",
+        "poloidal_ion_state_momentum_convection_velocity",
+        "poloidal_momentum_flux",
+        "poloidal_neutral_momentum_flux",
+        "poloidal_neutral_state_momentum_flux",
+        "radial_ion_charge_state_momentum_diffusivity",
+        "radial_ion_charge_state_momentum_flux",
+        "radial_ion_momentum_damping_rate",
+        "radial_ion_state_momentum_convection_velocity",
+        "radial_neutral_state_momentum_convection_velocity",
+        "radial_neutral_state_momentum_diffusion_coefficient",
+        "radial_neutral_state_momentum_flux",
+        "toroidal_ion_charge_state_momentum_diffusivity",
+        "toroidal_ion_momentum_convection_velocity",
+        "toroidal_ion_momentum_damping_rate",
+        "toroidal_ion_momentum_flux",
+        "toroidal_neutral_species_momentum_convection_velocity",
+        "toroidal_neutral_state_momentum_convection_velocity",
+        "toroidal_plasma_momentum_at_magnetic_axis",
+        "toroidal_total_plasma_momentum",
+        "vertical_ion_momentum_flux",
+        "vertical_neutral_momentum_diffusivity",
+        "vertical_neutral_species_momentum_convection_velocity",
+        "vertical_neutral_state_momentum_flux",
+        "poloidal_ion_state_momentum_flux_limiter_coefficient",
+        "poloidal_neutral_state_momentum_flux_limiter_coefficient",
+        "parallel_ion_momentum_diffusion_coefficient",
+        "parallel_momentum_diffusion_coefficient",
+        "poloidal_linear_neutral_internal_state_momentum_flux",
+        "radial_neutral_state_momentum_flux_limiter_coefficient",
+        "vertical_plasma_momentum_diffusivity",
+        "parallel_edge_plasma_momentum_diffusivity",
+        "radial_total_momentum_source",
+        "vertical_neutral_momentum_flux",
+        "parallel_ion_charge_state_momentum_flux_limiter_coefficient",
+        "radial_ion_momentum_source",
+        "toroidal_neutral_momentum_convection_velocity",
+        "parallel_total_momentum_convection_velocity",
+        "radial_ion_momentum_flux_over_edge_region",
+        "toroidal_neutral_momentum_diffusivity",
+        "toroidal_momentum_flux_limiter_coefficient",
+        "parallel_neutral_momentum_diffusion_coefficient",
+        "parallel_ion_charge_state_momentum_diffusion_coefficient",
+        "parallel_neutral_state_momentum_diffusion_coefficient",
+        "ion_charge_state_diamagnetic_momentum_diffusivity",
+        "poloidal_momentum_source",
+        "neutral_state_diamagnetic_momentum_flux_limiter_coefficient",
+        "diamagnetic_momentum_flux_limiter_coefficient",
+        "diamagnetic_momentum_flux",
+        "vertical_neutral_state_momentum_flux_limiter_coefficient",
+        "toroidal_neutral_momentum_flux",
+        "poloidal_neutral_momentum_flux_limiter_coefficient",
+        "vertical_ion_charge_state_momentum_flux_limiter_coefficient",
+        "total_momentum_convection_velocity",
+        "total_momentum_source",
+        "edge_plasma_momentum_diffusivity",
+        "plasma_momentum_diffusivity",
+        "linear_neutral_internal_state_momentum_flux",
+        "total_plasma_momentum",
+        "plasma_momentum",
+        "total_momentum_flux",
+        "net_ion_momentum_source",
+        "momentum",
+        "vertical_ion_charge_state_momentum_source",
+        "poloidal_neutral_internal_state_momentum_convection_velocity",
+        "flux_surface_normal_plasma_momentum_diffusivity",
+        "radial_ion_momentum_diffusivity",
+        "toroidal_total_momentum_diffusivity",
+        "total_momentum_diffusivity",
+        "ion_diamagnetic_momentum_flux_limiter_coefficient",
+        "neutral_diamagnetic_momentum_flux_limiter_coefficient",
+        "poloidal_ion_charge_state_momentum_diffusion_coefficient",
+        "poloidal_total_momentum_diffusion_coefficient",
+        "total_momentum_diffusion_coefficient",
+        "radial_total_momentum_convection_velocity",
+        "toroidal_implicit_ion_momentum_source_rate",
+        "implicit_ion_momentum_source_rate",
+        "ion_momentum_source_rate",
+        "momentum_source_rate",
+        "radial_total_momentum_flux",
+        "neutral_state_diamagnetic_momentum_flux",
+        "toroidal_total_plasma_momentum_flux_surface_averaged_at_plasma_boundary",
+        "effective_ion_state_momentum_diffusivity"
+      ],
+      "jev_cost": 0.007918260000000002,
+      "jev_reason": null,
+      "jev_scored": 191,
+      "kind": "subject+component+position+region",
+      "members": [
+        "diamagnetic_momentum_convection_velocity",
+        "diamagnetic_momentum_diffusivity",
+        "diamagnetic_momentum_flux",
+        "diamagnetic_momentum_flux_limiter_coefficient",
+        "edge_plasma_momentum_diffusivity",
+        "effective_ion_state_momentum_diffusivity",
+        "flux_surface_normal_momentum_convection_velocity",
+        "flux_surface_normal_momentum_diffusion_coefficient",
+        "flux_surface_normal_plasma_momentum_diffusivity",
+        "implicit_ion_momentum_source_rate",
+        "ion_charge_state_diamagnetic_momentum_convection_velocity",
+        "ion_charge_state_diamagnetic_momentum_damping_rate",
+        "ion_charge_state_diamagnetic_momentum_diffusivity",
+        "ion_charge_state_momentum_convection_velocity",
+        "ion_charge_state_momentum_damping_rate",
+        "ion_charge_state_momentum_diffusivity",
+        "ion_charge_state_momentum_flux",
+        "ion_charge_state_momentum_flux_limiter_coefficient",
+        "ion_charge_state_momentum_source",
+        "ion_diamagnetic_momentum_convection_velocity",
+        "ion_diamagnetic_momentum_damping_rate",
+        "ion_diamagnetic_momentum_diffusivity",
+        "ion_diamagnetic_momentum_flux_limiter_coefficient",
+        "ion_momentum_convection_velocity",
+        "ion_momentum_damping_rate",
+        "ion_momentum_diffusion_coefficient",
+        "ion_momentum_flux",
+        "ion_momentum_flux_limiter_coefficient",
+        "ion_momentum_source",
+        "ion_momentum_source_rate",
+        "ion_state_diamagnetic_momentum_diffusivity",
+        "ion_state_diamagnetic_momentum_flux_limiter_coefficient",
+        "ion_state_momentum_diffusivity",
+        "linear_neutral_internal_state_momentum_flux",
+        "momentum",
+        "momentum_damping_rate",
+        "momentum_diffusion_coefficient",
+        "momentum_diffusivity",
+        "momentum_flux",
+        "momentum_flux_limiter_coefficient",
+        "momentum_power",
+        "momentum_source",
+        "momentum_source_rate",
+        "net_ion_momentum_source",
+        "neutral_diamagnetic_momentum_diffusivity",
+        "neutral_diamagnetic_momentum_flux",
+        "neutral_diamagnetic_momentum_flux_limiter_coefficient",
+        "neutral_internal_state_momentum_diffusion_coefficient",
+        "neutral_internal_state_momentum_flux",
+        "neutral_internal_state_momentum_flux_limiter_coefficient_over_edge_region",
+        "neutral_internal_state_momentum_source",
+        "neutral_momentum_convection_velocity",
+        "neutral_momentum_diffusion_coefficient",
+        "neutral_momentum_diffusivity",
+        "neutral_momentum_flux",
+        "neutral_momentum_flux_limiter_coefficient",
+        "neutral_momentum_source",
+        "neutral_species_momentum_convection_velocity",
+        "neutral_state_diamagnetic_momentum_diffusivity",
+        "neutral_state_diamagnetic_momentum_flux",
+        "neutral_state_diamagnetic_momentum_flux_limiter_coefficient",
+        "neutral_state_diamagnetic_momentum_source",
+        "parallel_edge_plasma_momentum_diffusivity",
+        "parallel_ion_charge_state_momentum_convection_velocity",
+        "parallel_ion_charge_state_momentum_damping_rate",
+        "parallel_ion_charge_state_momentum_diffusion_coefficient",
+        "parallel_ion_charge_state_momentum_diffusivity",
+        "parallel_ion_charge_state_momentum_flux",
+        "parallel_ion_charge_state_momentum_flux_limiter_coefficient",
+        "parallel_ion_charge_state_momentum_source",
+        "parallel_ion_momentum_convection_velocity",
+        "parallel_ion_momentum_damping_rate",
+        "parallel_ion_momentum_diffusion_coefficient",
+        "parallel_ion_momentum_diffusivity",
+        "parallel_ion_momentum_flux",
+        "parallel_ion_momentum_flux_limiter_coefficient",
+        "parallel_ion_state_momentum",
+        "parallel_momentum_convection_velocity",
+        "parallel_momentum_diffusion_coefficient",
+        "parallel_momentum_flux",
+        "parallel_momentum_flux_limiter_coefficient",
+        "parallel_net_ion_momentum_source",
+        "parallel_neutral_internal_state_momentum_convection_velocity",
+        "parallel_neutral_internal_state_momentum_diffusivity",
+        "parallel_neutral_internal_state_momentum_flux",
+        "parallel_neutral_internal_state_momentum_flux_limiter_coefficient",
+        "parallel_neutral_momentum_diffusion_coefficient",
+        "parallel_neutral_momentum_diffusivity",
+        "parallel_neutral_momentum_flux",
+        "parallel_neutral_momentum_flux_limiter_coefficient",
+        "parallel_neutral_momentum_source",
+        "parallel_neutral_state_momentum_diffusion_coefficient",
+        "parallel_neutral_state_momentum_flux_limiter_coefficient",
+        "parallel_neutral_state_momentum_source",
+        "parallel_plasma_momentum_flux",
+        "parallel_total_momentum_convection_velocity",
+        "plasma_momentum",
+        "plasma_momentum_diffusivity",
+        "plasma_momentum_flux",
+        "poloidal_effective_ion_state_momentum_diffusivity",
+        "poloidal_ion_charge_state_momentum_convection_velocity",
+        "poloidal_ion_charge_state_momentum_damping_rate",
+        "poloidal_ion_charge_state_momentum_diffusion_coefficient",
+        "poloidal_ion_charge_state_momentum_diffusivity",
+        "poloidal_ion_charge_state_momentum_flux",
+        "poloidal_ion_charge_state_momentum_flux_limiter_coefficient",
+        "poloidal_ion_charge_state_momentum_source",
+        "poloidal_ion_momentum_damping_rate",
+        "poloidal_ion_momentum_diffusion_coefficient",
+        "poloidal_ion_momentum_diffusivity",
+        "poloidal_ion_momentum_flux",
+        "poloidal_ion_momentum_flux_limiter_coefficient",
+        "poloidal_ion_momentum_source",
+        "poloidal_ion_state_momentum_convection_velocity",
+        "poloidal_ion_state_momentum_diffusion_coefficient",
+        "poloidal_ion_state_momentum_flux_limiter_coefficient",
+        "poloidal_linear_neutral_internal_state_momentum_flux",
+        "poloidal_momentum_flux",
+        "poloidal_momentum_source",
+        "poloidal_neutral_internal_state_momentum_convection_velocity",
+        "poloidal_neutral_internal_state_momentum_diffusion_coefficient",
+        "poloidal_neutral_momentum_diffusion_coefficient",
+        "poloidal_neutral_momentum_diffusivity",
+        "poloidal_neutral_momentum_flux",
+        "poloidal_neutral_momentum_flux_limiter_coefficient",
+        "poloidal_neutral_momentum_source",
+        "poloidal_neutral_state_momentum_convection_velocity",
+        "poloidal_neutral_state_momentum_diffusivity",
+        "poloidal_neutral_state_momentum_flux",
+        "poloidal_neutral_state_momentum_flux_limiter_coefficient",
+        "poloidal_neutral_state_momentum_source",
+        "poloidal_total_momentum_diffusion_coefficient",
+        "radial_ion_charge_state_momentum_convection_velocity",
+        "radial_ion_charge_state_momentum_damping_rate",
+        "radial_ion_charge_state_momentum_diffusion_coefficient",
+        "radial_ion_charge_state_momentum_diffusivity",
+        "radial_ion_charge_state_momentum_flux",
+        "radial_ion_momentum",
+        "radial_ion_momentum_damping_rate",
+        "radial_ion_momentum_diffusion_coefficient",
+        "radial_ion_momentum_diffusivity",
+        "radial_ion_momentum_flux_limiter_coefficient",
+        "radial_ion_momentum_flux_over_edge_region",
+        "radial_ion_momentum_source",
+        "radial_ion_state_momentum_convection_velocity",
+        "radial_ion_state_momentum_flux_limiter_coefficient",
+        "radial_momentum",
+        "radial_momentum_diffusion_coefficient",
+        "radial_momentum_flux",
+        "radial_momentum_source",
+        "radial_neutral_internal_state_momentum_convection_velocity",
+        "radial_neutral_internal_state_momentum_diffusion_coefficient",
+        "radial_neutral_internal_state_momentum_flux",
+        "radial_neutral_internal_state_momentum_source",
+        "radial_neutral_momentum",
+        "radial_neutral_momentum_flux",
+        "radial_neutral_momentum_flux_limiter_coefficient",
+        "radial_neutral_momentum_source",
+        "radial_neutral_state_momentum_convection_velocity",
+        "radial_neutral_state_momentum_diffusion_coefficient",
+        "radial_neutral_state_momentum_flux",
+        "radial_neutral_state_momentum_flux_limiter_coefficient",
+        "radial_total_momentum_convection_velocity",
+        "radial_total_momentum_flux",
+        "radial_total_momentum_source",
+        "radial_total_neutral_momentum_diffusivity",
+        "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+        "toroidal_implicit_ion_momentum_source_rate",
+        "toroidal_ion_charge_state_momentum_convection_velocity",
+        "toroidal_ion_charge_state_momentum_damping_rate",
+        "toroidal_ion_charge_state_momentum_diffusivity",
+        "toroidal_ion_charge_state_momentum_flux",
+        "toroidal_ion_charge_state_momentum_flux_limiter_coefficient",
+        "toroidal_ion_charge_state_momentum_source",
+        "toroidal_ion_momentum_convection_velocity",
+        "toroidal_ion_momentum_damping_rate",
+        "toroidal_ion_momentum_diffusion_coefficient",
+        "toroidal_ion_momentum_flux",
+        "toroidal_ion_momentum_source",
+        "toroidal_momentum_convection_velocity",
+        "toroidal_momentum_flux",
+        "toroidal_momentum_flux_limiter_coefficient",
+        "toroidal_neutral_internal_state_momentum_diffusion_coefficient",
+        "toroidal_neutral_internal_state_momentum_flux",
+        "toroidal_neutral_internal_state_momentum_flux_limiter_coefficient",
+        "toroidal_neutral_momentum_convection_velocity",
+        "toroidal_neutral_momentum_diffusivity",
+        "toroidal_neutral_momentum_flux",
+        "toroidal_neutral_momentum_source",
+        "toroidal_neutral_species_momentum_convection_velocity",
+        "toroidal_neutral_state_momentum_convection_velocity",
+        "toroidal_neutral_state_momentum_source",
+        "toroidal_plasma_momentum_at_magnetic_axis",
+        "toroidal_plasma_momentum_at_pedestal_top",
+        "toroidal_total_momentum_diffusivity",
+        "toroidal_total_momentum_flux",
+        "toroidal_total_plasma_momentum",
+        "toroidal_total_plasma_momentum_flux_surface_averaged_at_plasma_boundary",
+        "total_ion_momentum_diffusivity",
+        "total_momentum_convection_velocity",
+        "total_momentum_diffusion_coefficient",
+        "total_momentum_diffusivity",
+        "total_momentum_flux",
+        "total_momentum_source",
+        "total_plasma_momentum",
+        "total_plasma_momentum_field_aligned_convection_velocity",
+        "vertical_ion_charge_state_momentum_convection_velocity",
+        "vertical_ion_charge_state_momentum_diffusivity",
+        "vertical_ion_charge_state_momentum_flux",
+        "vertical_ion_charge_state_momentum_flux_limiter_coefficient",
+        "vertical_ion_charge_state_momentum_source",
+        "vertical_ion_momentum_convection_velocity",
+        "vertical_ion_momentum_flux",
+        "vertical_momentum_convection_velocity",
+        "vertical_neutral_internal_state_momentum_convection_velocity",
+        "vertical_neutral_internal_state_momentum_diffusivity",
+        "vertical_neutral_internal_state_momentum_flux",
+        "vertical_neutral_momentum_diffusivity",
+        "vertical_neutral_momentum_flux",
+        "vertical_neutral_momentum_flux_limiter_coefficient",
+        "vertical_neutral_species_momentum_convection_velocity",
+        "vertical_neutral_state_momentum_flux",
+        "vertical_neutral_state_momentum_flux_limiter_coefficient",
+        "vertical_plasma_momentum_diffusivity",
+        "vertical_total_ion_momentum_diffusivity"
+      ],
+      "physical_base": "momentum",
+      "seed": "diamagnetic_momentum_convection_velocity"
+    },
+    {
+      "heuristic_anchor": "effective_neutral_internal_state_momentum_velocity_due_to_convection",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "effective_neutral_internal_state_momentum_velocity_due_to_convection",
+        "neutral_internal_state_momentum_velocity_due_to_convection",
+        "parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection"
+      ],
+      "physical_base": "momentum",
+      "seed": "effective_neutral_internal_state_momentum_velocity_due_to_convection"
+    },
+    {
+      "heuristic_anchor": "ion_momentum_flux_due_to_diamagnetic_drift",
+      "jev_anchor": "momentum_flux_due_to_diamagnetic_drift",
+      "jev_asked": [
+        "neutral_momentum_flux_due_to_diamagnetic_drift",
+        "momentum_source_due_to_diamagnetic_drift",
+        "ion_momentum_source_due_to_diamagnetic_drift",
+        "momentum_flux_due_to_diamagnetic_drift",
+        "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+        "ion_momentum_diffusivity_due_to_diamagnetic_drift",
+        "neutral_state_momentum_flux_due_to_diamagnetic_drift",
+        "ion_momentum_flux_due_to_diamagnetic_drift"
+      ],
+      "jev_cost": 0.00032793599999999997,
+      "jev_reason": null,
+      "jev_scored": 8,
+      "kind": "subject+component",
+      "members": [
+        "flux_surface_normal_ion_momentum_flux_due_to_diamagnetic_drift",
+        "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+        "ion_momentum_diffusivity_due_to_diamagnetic_drift",
+        "ion_momentum_flux_due_to_diamagnetic_drift",
+        "ion_momentum_source_due_to_diamagnetic_drift",
+        "momentum_coefficient_due_to_diamagnetic_drift",
+        "momentum_flux_due_to_diamagnetic_drift",
+        "momentum_source_due_to_diamagnetic_drift",
+        "neutral_momentum_flux_due_to_diamagnetic_drift",
+        "neutral_state_momentum_flux_due_to_diamagnetic_drift"
+      ],
+      "physical_base": "momentum",
+      "seed": "flux_surface_normal_ion_momentum_flux_due_to_diamagnetic_drift"
+    },
+    {
+      "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_asked": [
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_due_to_e_cross_b_drift"
+      ],
+      "jev_cost": 0.00015141000000000002,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "momentum_flux_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
+      ],
+      "physical_base": "momentum",
+      "seed": "momentum_flux_due_to_e_cross_b_drift"
+    },
+    {
+      "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+      "jev_anchor": "perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+      "jev_asked": [
+        "momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+        "parallel_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+        "perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field"
+      ],
+      "jev_cost": 0.000138558,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "momentum_flux_due_to_perturbed_parallel_magnetic_field",
+        "momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+        "parallel_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+        "perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field"
+      ],
+      "physical_base": "momentum",
+      "seed": "momentum_flux_due_to_perturbed_parallel_magnetic_field"
+    },
+    {
+      "heuristic_anchor": "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+      "jev_anchor": "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+      "jev_asked": [
+        "total_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "parallel_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "momentum_flux_due_to_perturbed_parallel_vector_potential"
+      ],
+      "jev_cost": 0.00023877,
+      "jev_reason": null,
+      "jev_scored": 5,
+      "kind": "component",
+      "members": [
+        "momentum_flux_due_to_perturbed_parallel_vector_potential",
+        "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "parallel_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+        "total_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential"
+      ],
+      "physical_base": "momentum",
+      "seed": "momentum_flux_due_to_perturbed_parallel_vector_potential"
+    },
+    {
+      "heuristic_anchor": "mode_reference_phase",
+      "jev_anchor": "mode_reference_phase",
+      "jev_asked": [
+        "neoclassical_tearing_mode_phase",
+        "toroidal_linear_mhd_mode_reference_phase",
+        "linear_mhd_mode_reference_phase",
+        "mhd_mode_reference_phase",
+        "mode_reference_phase",
+        "reference_phase"
+      ],
+      "jev_cost": 0.00021025200000000002,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component+device",
+      "members": [
+        "ion_cyclotron_heating_antenna_phase",
+        "linear_mhd_mode_reference_phase",
+        "mhd_mode_reference_phase",
+        "mode_reference_phase",
+        "neoclassical_tearing_mode_phase",
+        "reference_phase",
+        "toroidal_linear_mhd_mode_reference_phase"
+      ],
+      "physical_base": "phase",
+      "seed": "ion_cyclotron_heating_antenna_phase"
+    },
+    {
+      "heuristic_anchor": "electron_absorbed_power_of_beam_tracing_beam",
+      "jev_anchor": "power_of_beam_tracing_beam",
+      "jev_asked": [
+        "ion_absorbed_power_of_beam_tracing_beam",
+        "absorbed_power_of_beam_tracing_beam",
+        "ion_charge_state_absorbed_power_of_beam_tracing_beam",
+        "power_of_beam_tracing_beam",
+        "electron_absorbed_power_of_beam_tracing_beam",
+        "initial_power_of_beam_tracing_beam",
+        "parallel_power_normalized_of_beam_tracing_beam",
+        "perpendicular_power_normalized_of_beam_tracing_beam"
+      ],
+      "jev_cost": 0.00030072,
+      "jev_reason": null,
+      "jev_scored": 8,
+      "kind": "subject+component",
+      "members": [
+        "absorbed_power_of_beam_tracing_beam",
+        "electron_absorbed_power_of_beam_tracing_beam",
+        "initial_power_of_beam_tracing_beam",
+        "ion_absorbed_power_of_beam_tracing_beam",
+        "ion_charge_state_absorbed_power_of_beam_tracing_beam",
+        "parallel_power_normalized_of_beam_tracing_beam",
+        "perpendicular_power_normalized_of_beam_tracing_beam",
+        "power_of_beam_tracing_beam"
+      ],
+      "physical_base": "power",
+      "seed": "absorbed_power_of_beam_tracing_beam"
+    },
+    {
+      "heuristic_anchor": "incident_radiated_power_of_breeder_blanket_module",
+      "jev_anchor": "incident_neutron_power_of_breeder_blanket_module",
+      "jev_asked": [
+        "radiated_power_of_breeder_blanket_module",
+        "power_of_breeder_blanket_module",
+        "net_thermal_power_of_breeder_blanket_module",
+        "absorbed_radiated_power_of_breeder_blanket_module",
+        "incident_radiated_power_of_breeder_blanket_module",
+        "incident_neutron_power_of_breeder_blanket_module"
+      ],
+      "jev_cost": 0.000243894,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "subject",
+      "members": [
+        "absorbed_radiated_power_of_breeder_blanket_module",
+        "incident_neutron_power_of_breeder_blanket_module",
+        "incident_radiated_power_of_breeder_blanket_module",
+        "net_thermal_power_of_breeder_blanket_module",
+        "power_of_breeder_blanket_module",
+        "radiated_power_of_breeder_blanket_module"
+      ],
+      "physical_base": "power",
+      "seed": "absorbed_radiated_power_of_breeder_blanket_module"
+    },
+    {
+      "heuristic_anchor": "total_incident_power_of_divertor",
+      "jev_anchor": "neutral_power_of_divertor",
+      "jev_asked": [
+        "neutral_power_of_divertor",
+        "total_incident_power_of_divertor",
+        "thermal_radiative_power_of_divertor",
+        "absorbed_radiated_power_of_divertor"
+      ],
+      "jev_cost": 0.00015334200000000002,
+      "jev_reason": null,
+      "jev_scored": 4,
+      "kind": "subject",
+      "members": [
+        "absorbed_radiated_power_of_divertor",
+        "heat_power_of_divertor",
+        "neutral_power_of_divertor",
+        "thermal_radiative_power_of_divertor",
+        "total_incident_power_of_divertor"
+      ],
+      "physical_base": "power",
+      "seed": "absorbed_radiated_power_of_divertor"
+    },
+    {
+      "heuristic_anchor": "power_due_to_collisions",
+      "jev_anchor": "fast_particle_power_due_to_collisions",
+      "jev_asked": [
+        "power_due_to_collisions",
+        "ion_power_due_to_collisions",
+        "fast_ion_charge_state_power_due_to_collisions",
+        "thermal_ion_charge_state_power_due_to_collisions",
+        "total_ion_charge_state_power_due_to_collisions",
+        "fast_particle_power_due_to_collisions",
+        "fast_ion_power_due_to_collisions",
+        "thermal_electron_power_due_to_collisions",
+        "thermal_ion_power_due_to_collisions"
+      ],
+      "jev_cost": 0.00034570200000000003,
+      "jev_reason": null,
+      "jev_scored": 9,
+      "kind": "subject",
+      "members": [
+        "fast_ion_charge_state_power_due_to_collisions",
+        "fast_ion_power_due_to_collisions",
+        "fast_particle_power_due_to_collisions",
+        "ion_power_due_to_collisions",
+        "power_due_to_collisions",
+        "thermal_electron_power_due_to_collisions",
+        "thermal_ion_charge_state_power_due_to_collisions",
+        "thermal_ion_power_due_to_collisions",
+        "total_ion_charge_state_power_due_to_collisions"
+      ],
+      "physical_base": "power",
+      "seed": "fast_ion_charge_state_power_due_to_collisions"
+    },
+    {
+      "heuristic_anchor": "power_at_wall_due_to_conduction",
+      "jev_anchor": "power_at_wall_due_to_conduction",
+      "jev_asked": [
+        "power_at_divertor_target_due_to_conduction",
+        "power_at_wall_due_to_conduction",
+        "power_due_to_conduction"
+      ],
+      "jev_cost": 0.00011709599999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "position",
+      "members": [
+        "power_at_divertor_target_due_to_conduction",
+        "power_at_wall_due_to_conduction",
+        "power_due_to_conduction"
+      ],
+      "physical_base": "power",
+      "seed": "power_at_divertor_target_due_to_conduction"
+    },
+    {
+      "heuristic_anchor": "power_due_to_convection",
+      "jev_anchor": "power_due_to_convection",
+      "jev_asked": [
+        "power_due_to_convection",
+        "power_at_divertor_target_due_to_convection",
+        "power_at_wall_due_to_convection"
+      ],
+      "jev_cost": 0.000117306,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "position",
+      "members": [
+        "power_at_divertor_target_due_to_convection",
+        "power_at_wall_due_to_convection",
+        "power_due_to_convection"
+      ],
+      "physical_base": "power",
+      "seed": "power_at_divertor_target_due_to_convection"
+    },
+    {
+      "heuristic_anchor": "power_due_to_recombination",
+      "jev_anchor": "power_due_to_recombination",
+      "jev_asked": [
+        "power_due_to_recombination",
+        "power_at_divertor_target_due_to_recombination",
+        "plasma_power_at_divertor_target_due_to_recombination",
+        "neutral_power_at_divertor_target_due_to_recombination",
+        "neutral_power_at_wall_due_to_recombination",
+        "plasma_power_at_wall_due_to_recombination"
+      ],
+      "jev_cost": 0.00022827,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "subject+position",
+      "members": [
+        "neutral_power_at_divertor_target_due_to_recombination",
+        "neutral_power_at_wall_due_to_recombination",
+        "plasma_power_at_divertor_target_due_to_recombination",
+        "plasma_power_at_wall_due_to_recombination",
+        "power_at_divertor_target_due_to_recombination",
+        "power_due_to_recombination"
+      ],
+      "physical_base": "power",
+      "seed": "neutral_power_at_divertor_target_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "power_of_divertor_due_to_recombination",
+      "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
+      "jev_asked": [
+        "power_of_divertor_due_to_recombination",
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination"
+      ],
+      "jev_cost": 0.00012205199999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "subject",
+      "members": [
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination",
+        "power_of_divertor_due_to_recombination"
+      ],
+      "physical_base": "power",
+      "seed": "neutral_power_of_divertor_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "trapped_power_density",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+position",
+      "members": [
+        "co_passing_power_density",
+        "counter_passing_power_density",
+        "fast_electron_absorbed_wave_power_density",
+        "fast_ion_charge_state_power_density",
+        "fast_ion_power_density",
+        "ion_charge_state_power_density",
+        "ion_power_density",
+        "net_plasma_power_density",
+        "neutral_power_density",
+        "neutral_state_power_density",
+        "nuclear_power_density_at_midplane",
+        "per_toroidal_mode_fast_electron_power_density",
+        "per_toroidal_mode_fast_ion_charge_state_power_density",
+        "per_toroidal_mode_fast_ion_power_density",
+        "per_toroidal_mode_thermal_electron_power_density",
+        "per_toroidal_mode_thermal_ion_charge_state_power_density",
+        "per_toroidal_mode_thermal_ion_power_density",
+        "radiated_power_density",
+        "thermal_electron_power_density",
+        "thermal_ion_absorbed_wave_power_density",
+        "thermal_ion_charge_state_power_density",
+        "total_electron_power_density",
+        "total_ion_power_density",
+        "trapped_power_density",
+        "volume_integrated_net_plasma_particle_power_density"
+      ],
+      "physical_base": "power_density",
+      "seed": "co_passing_power_density"
+    },
+    {
+      "heuristic_anchor": "fast_ion_charge_state_power_density_due_to_collisions",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject",
+      "members": [
+        "co_passing_fast_electron_kinetic_power_density_due_to_collisions",
+        "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+        "co_passing_fast_ion_power_density_due_to_collisions",
+        "co_passing_fast_particle_power_density_due_to_collisions",
+        "co_passing_thermal_electron_power_density_due_to_collisions",
+        "co_passing_thermal_ion_charge_state_power_density_due_to_collisions",
+        "co_passing_thermal_ion_power_density_due_to_collisions",
+        "counter_passing_fast_electron_power_density_due_to_collisions",
+        "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+        "counter_passing_fast_ion_power_density_due_to_collisions",
+        "counter_passing_fast_particle_power_density_due_to_collisions",
+        "counter_passing_thermal_electron_power_density_due_to_collisions",
+        "counter_passing_thermal_ion_charge_state_power_density_due_to_collisions",
+        "counter_passing_thermal_ion_power_density_due_to_collisions",
+        "electron_power_density_due_to_collisions",
+        "fast_ion_charge_state_power_density_due_to_collisions",
+        "fast_ion_power_density_due_to_collisions",
+        "fast_particle_power_density_due_to_collisions",
+        "ion_charge_state_power_density_due_to_collisions",
+        "ion_power_density_due_to_collisions",
+        "power_density_due_to_collisions",
+        "thermal_electron_power_density_due_to_collisions",
+        "thermal_ion_charge_state_power_density_due_to_collisions",
+        "thermal_ion_power_density_due_to_collisions",
+        "total_suprathermal_electron_power_density_due_to_collisions",
+        "trapped_fast_electron_power_density_due_to_collisions",
+        "trapped_fast_ion_charge_state_power_density_due_to_collisions",
+        "trapped_fast_ion_power_density_due_to_collisions",
+        "trapped_fast_particle_power_density_due_to_collisions",
+        "trapped_thermal_electron_power_density_due_to_collisions",
+        "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+        "trapped_thermal_ion_power_density_due_to_collisions"
+      ],
+      "physical_base": "power_density",
+      "seed": "co_passing_fast_electron_kinetic_power_density_due_to_collisions"
+    },
+    {
+      "heuristic_anchor": "deuterium_tritium_power_density_due_to_fusion",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject",
+      "members": [
+        "deuterium_deuterium_power_density_due_to_fusion",
+        "deuterium_tritium_power_density_due_to_fusion",
+        "power_density_due_to_fusion"
+      ],
+      "physical_base": "power_density",
+      "seed": "deuterium_deuterium_power_density_due_to_fusion"
+    },
+    {
+      "heuristic_anchor": "perturbed_plasma_pressure_real_part",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "unclassified",
+      "members": [
+        "perturbed_plasma_pressure_imaginary_part",
+        "perturbed_plasma_pressure_real_part",
+        "perturbed_pressure_bessel_1"
+      ],
+      "physical_base": "pressure",
+      "seed": "perturbed_plasma_pressure_imaginary_part"
+    },
+    {
+      "heuristic_anchor": "outer_radius_of_antenna_strap",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "geometry",
+      "members": [
+        "inner_radius_of_antenna_strap",
+        "outer_radius_of_antenna_strap",
+        "radius_of_antenna_strap"
+      ],
+      "physical_base": "radius",
+      "seed": "inner_radius_of_antenna_strap"
+    },
+    {
+      "heuristic_anchor": "second_local_tangential_radius_of_filter_window",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "first_local_tangential_radius_of_filter_window",
+        "radius_of_filter_window",
+        "second_local_tangential_radius_of_filter_window"
+      ],
+      "physical_base": "radius",
+      "seed": "first_local_tangential_radius_of_filter_window"
+    },
+    {
+      "heuristic_anchor": "second_local_tangential_back_surface_radius_of_optical_element",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "first_local_tangential_back_surface_radius_of_optical_element",
+        "first_local_tangential_front_surface_radius_of_optical_element",
+        "radius_of_optical_element",
+        "second_local_tangential_back_surface_radius_of_optical_element",
+        "second_local_tangential_front_surface_radius_of_optical_element",
+        "vertical_front_surface_radius_of_optical_element"
+      ],
+      "physical_base": "radius",
+      "seed": "first_local_tangential_back_surface_radius_of_optical_element"
+    },
+    {
+      "heuristic_anchor": "inner_radius_of_passive_loop",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "geometry",
+      "members": [
+        "inner_radius_of_passive_loop",
+        "outer_radius_of_passive_loop",
+        "radius_of_passive_loop"
+      ],
+      "physical_base": "radius",
+      "seed": "inner_radius_of_passive_loop"
+    },
+    {
+      "heuristic_anchor": "inner_radius_of_plasma_filament",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "geometry",
+      "members": [
+        "inner_radius_of_plasma_filament",
+        "outer_radius_of_plasma_filament",
+        "radius_of_plasma_filament"
+      ],
+      "physical_base": "radius",
+      "seed": "inner_radius_of_plasma_filament"
+    },
+    {
+      "heuristic_anchor": "inner_radius_of_poloidal_field_coil",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "geometry",
+      "members": [
+        "inner_radius_of_poloidal_field_coil",
+        "outer_radius_of_poloidal_field_coil",
+        "radius_of_poloidal_field_coil"
+      ],
+      "physical_base": "radius",
+      "seed": "inner_radius_of_poloidal_field_coil"
+    },
+    {
+      "heuristic_anchor": "rate_at_wall_due_to_pumping",
+      "jev_anchor": "rate_at_wall_due_to_pumping",
+      "jev_asked": [
+        "rate_at_wall_due_to_pumping",
+        "particle_rate_at_wall_due_to_pumping"
+      ],
+      "jev_cost": 6.804e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "position",
+      "members": [
+        "particle_rate_at_wall_due_to_pumping",
+        "rate_at_wall_due_to_pumping",
+        "rate_due_to_pumping"
+      ],
+      "physical_base": "rate",
+      "seed": "particle_rate_at_wall_due_to_pumping"
+    },
+    {
+      "heuristic_anchor": "perpendicular_refractive_index",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "parallel_refractive_index",
+        "perpendicular_refractive_index",
+        "refractive_index"
+      ],
+      "physical_base": "refractive_index",
+      "seed": "parallel_refractive_index"
+    },
+    {
+      "heuristic_anchor": "toroidal_ion_charge_state_rotation_frequency",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "ion_charge_state_rotation_frequency",
+        "ion_rotation_frequency",
+        "toroidal_ion_charge_state_rotation_frequency",
+        "toroidal_ion_rotation_frequency"
+      ],
+      "physical_base": "rotation_frequency",
+      "seed": "ion_charge_state_rotation_frequency"
+    },
+    {
+      "heuristic_anchor": "x_second_measurement_direction_unit_vector_of_strain_gauge",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "coordinate",
+      "members": [
+        "x_second_measurement_direction_unit_vector_of_strain_gauge",
+        "y_second_measurement_direction_unit_vector_of_strain_gauge",
+        "z_second_measurement_direction_unit_vector_of_strain_gauge"
+      ],
+      "physical_base": "second_measurement_direction_unit_vector",
+      "seed": "x_second_measurement_direction_unit_vector_of_strain_gauge"
+    },
+    {
+      "heuristic_anchor": "trapped_thermal_particle_source_rate",
+      "jev_anchor": "neon_source_rate",
+      "jev_asked": [
+        "neutral_internal_state_source_rate",
+        "volume_averaged_runaway_electron_source_rate",
+        "ammonia_deuterated_source_rate",
+        "ethane_source_rate",
+        "ethylene_source_rate",
+        "methane_carbon_13_source_rate",
+        "methane_source_rate",
+        "neon_source_rate",
+        "nitrogen_source_rate",
+        "propane_source_rate",
+        "silane_source_rate",
+        "fast_electron_source_rate",
+        "ion_state_source_rate",
+        "neutral_source_rate",
+        "thermal_particle_source_rate",
+        "co_passing_thermal_particle_source_rate",
+        "counter_passing_thermal_particle_source_rate",
+        "total_electron_source_rate",
+        "trapped_thermal_particle_source_rate",
+        "total_ion_particle_volumetric_source_rate",
+        "ammonia_source_rate",
+        "total_ion_particle_source_rate",
+        "ion_particle_source_rate",
+        "deuterated_methane_source_rate",
+        "cumulative_inside_flux_surface_electron_particle_source_rate",
+        "electron_volumetric_source_rate",
+        "total_implicit_ion_particle_source_rate",
+        "implicit_electron_particle_source_rate"
+      ],
+      "jev_cost": 0.00102522,
+      "jev_reason": null,
+      "jev_scored": 28,
+      "kind": "subject",
+      "members": [
+        "ammonia_deuterated_source_rate",
+        "ammonia_source_rate",
+        "co_passing_thermal_particle_source_rate",
+        "counter_passing_thermal_particle_source_rate",
+        "cumulative_inside_flux_surface_electron_particle_source_rate",
+        "deuterated_methane_source_rate",
+        "electron_volumetric_source_rate",
+        "ethane_source_rate",
+        "ethylene_source_rate",
+        "fast_electron_source_rate",
+        "implicit_electron_particle_source_rate",
+        "ion_particle_source_rate",
+        "ion_state_source_rate",
+        "methane_carbon_13_source_rate",
+        "methane_source_rate",
+        "neon_source_rate",
+        "neutral_internal_state_source_rate",
+        "neutral_source_rate",
+        "nitrogen_source_rate",
+        "propane_source_rate",
+        "silane_source_rate",
+        "thermal_particle_source_rate",
+        "total_electron_source_rate",
+        "total_implicit_ion_particle_source_rate",
+        "total_ion_particle_source_rate",
+        "total_ion_particle_volumetric_source_rate",
+        "trapped_thermal_particle_source_rate",
+        "volume_averaged_runaway_electron_source_rate"
+      ],
+      "physical_base": "source_rate",
+      "seed": "ammonia_deuterated_source_rate"
+    },
+    {
+      "heuristic_anchor": "source_rate_due_to_beam_beam_fusion",
+      "jev_anchor": "source_rate_due_to_beam_beam_fusion",
+      "jev_asked": [
+        "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+        "neutron_source_rate_due_to_beam_beam_fusion",
+        "source_rate_due_to_beam_beam_fusion"
+      ],
+      "jev_cost": 0.000125916,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "subject",
+      "members": [
+        "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+        "neutron_source_rate_due_to_beam_beam_fusion",
+        "source_rate_due_to_beam_beam_fusion",
+        "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion"
+      ],
+      "physical_base": "source_rate",
+      "seed": "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion"
+    },
+    {
+      "heuristic_anchor": "source_rate_due_to_injection",
+      "jev_anchor": "deuterium_source_rate_due_to_injection",
+      "jev_asked": [
+        "source_rate_due_to_injection",
+        "deuterium_source_rate_due_to_injection",
+        "electron_source_rate_due_to_injection"
+      ],
+      "jev_cost": 0.000111594,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "subject",
+      "members": [
+        "deuterium_source_rate_due_to_injection",
+        "electron_source_rate_due_to_injection",
+        "source_rate_due_to_injection"
+      ],
+      "physical_base": "source_rate",
+      "seed": "deuterium_source_rate_due_to_injection"
+    },
+    {
+      "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
+      "jev_anchor": "source_rate_due_to_thermal_fusion",
+      "jev_asked": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "jev_cost": 0.00017077199999999997,
+      "jev_reason": null,
+      "jev_scored": 4,
+      "kind": "subject",
+      "members": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "physical_base": "source_rate",
+      "seed": "neutron_source_rate_due_to_thermal_fusion"
+    },
+    {
+      "heuristic_anchor": "outer_squareness_of_plasma_boundary",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "position+geometry",
+      "members": [
+        "inner_squareness_of_flux_surface",
+        "inner_squareness_of_plasma_boundary",
+        "lower_inner_squareness_of_flux_surface",
+        "lower_inner_squareness_of_plasma_boundary",
+        "lower_outer_squareness_of_flux_surface",
+        "lower_outer_squareness_of_plasma_boundary",
+        "outer_squareness_of_flux_surface",
+        "outer_squareness_of_plasma_boundary",
+        "squareness_of_flux_surface",
+        "squareness_of_plasma_boundary",
+        "upper_inner_squareness_of_flux_surface",
+        "upper_inner_squareness_of_plasma_boundary",
+        "upper_outer_squareness_of_flux_surface",
+        "upper_outer_squareness_of_plasma_boundary"
+      ],
+      "physical_base": "squareness",
+      "seed": "inner_squareness_of_flux_surface"
+    },
+    {
+      "heuristic_anchor": "upper_thickness_of_breeder_blanket_module",
+      "jev_anchor": "lower_thickness_of_breeder_blanket_module",
+      "jev_asked": [
+        "lower_thickness_of_breeder_blanket_module",
+        "upper_thickness_of_breeder_blanket_module"
+      ],
+      "jev_cost": 7.5768e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "unclassified",
+      "members": [
+        "lower_thickness_of_breeder_blanket_module",
+        "surface_thickness_of_breeder_blanket_module",
+        "upper_thickness_of_breeder_blanket_module"
+      ],
+      "physical_base": "thickness",
+      "seed": "lower_thickness_of_breeder_blanket_module"
+    },
+    {
+      "heuristic_anchor": "cumulative_inside_flux_surface_torque",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "cumulative_inside_flux_surface_torque",
+        "explicit_ion_torque",
+        "ion_torque",
+        "toroidal_cumulative_inside_flux_surface_torque",
+        "toroidal_explicit_ion_torque"
+      ],
+      "physical_base": "torque",
+      "seed": "cumulative_inside_flux_surface_torque"
+    },
+    {
+      "heuristic_anchor": "thermal_ion_torque_due_to_collisions",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "electron_torque_due_to_collisions",
+        "fast_ion_charge_state_torque_due_to_collisions",
+        "fast_torque_due_to_collisions",
+        "ion_torque_due_to_collisions",
+        "thermal_electron_torque_due_to_collisions",
+        "thermal_ion_charge_state_torque_due_to_collisions",
+        "thermal_ion_torque_due_to_collisions",
+        "toroidal_fast_ion_charge_state_torque_due_to_collisions",
+        "toroidal_fast_torque_due_to_collisions",
+        "toroidal_thermal_electron_torque_due_to_collisions",
+        "toroidal_thermal_ion_charge_state_torque_due_to_collisions",
+        "toroidal_thermal_ion_torque_due_to_collisions",
+        "torque_due_to_collisions",
+        "total_ion_charge_state_torque_due_to_collisions"
+      ],
+      "physical_base": "torque",
+      "seed": "electron_torque_due_to_collisions"
+    },
+    {
+      "heuristic_anchor": "toroidal_fast_particle_torque_due_to_j_cross_b_force",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "fast_particle_torque_due_to_j_cross_b_force",
+        "particle_torque_due_to_j_cross_b_force",
+        "toroidal_fast_particle_torque_due_to_j_cross_b_force",
+        "torque_due_to_j_cross_b_force"
+      ],
+      "physical_base": "torque",
+      "seed": "fast_particle_torque_due_to_j_cross_b_force"
+    },
+    {
+      "heuristic_anchor": "counter_passing_torque_density",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "co_passing_torque_density",
+        "counter_passing_torque_density",
+        "ion_charge_state_torque_density",
+        "ion_torque_density",
+        "neutral_internal_state_torque_density",
+        "neutral_torque_density",
+        "toroidal_co_passing_torque_density",
+        "toroidal_counter_passing_torque_density",
+        "toroidal_ion_charge_state_torque_density",
+        "toroidal_ion_torque_density",
+        "toroidal_neutral_internal_state_torque_density",
+        "toroidal_neutral_torque_density",
+        "toroidal_torque_density",
+        "toroidal_trapped_torque_density",
+        "torque_density",
+        "trapped_torque_density"
+      ],
+      "physical_base": "torque_density",
+      "seed": "co_passing_torque_density"
+    },
+    {
+      "heuristic_anchor": "trapped_thermal_ion_torque_density_due_to_collisions",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+        "co_passing_fast_ion_torque_density_due_to_collisions",
+        "co_passing_thermal_electron_torque_density_due_to_collisions",
+        "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+        "co_passing_thermal_ion_torque_density_due_to_collisions",
+        "counter_passing_fast_electron_torque_density_due_to_collisions",
+        "counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+        "counter_passing_fast_ion_torque_density_due_to_collisions",
+        "counter_passing_thermal_electron_torque_density_due_to_collisions",
+        "counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+        "counter_passing_thermal_ion_torque_density_due_to_collisions",
+        "electron_torque_density_due_to_collisions",
+        "fast_electron_torque_density_due_to_collisions",
+        "fast_ion_charge_state_torque_density_due_to_collisions",
+        "fast_ion_torque_density_due_to_collisions",
+        "ion_charge_state_torque_density_due_to_collisions",
+        "ion_torque_density_due_to_collisions",
+        "thermal_electron_torque_density_due_to_collisions",
+        "thermal_ion_charge_state_torque_density_due_to_collisions",
+        "thermal_ion_torque_density_due_to_collisions",
+        "toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+        "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions",
+        "toroidal_co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions",
+        "toroidal_counter_passing_fast_electron_torque_density_due_to_collisions",
+        "toroidal_counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions",
+        "toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions",
+        "toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_counter_passing_thermal_ion_torque_density_due_to_collisions",
+        "toroidal_fast_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_fast_ion_torque_density_due_to_collisions",
+        "toroidal_thermal_electron_torque_density_due_to_collisions",
+        "toroidal_thermal_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_thermal_ion_torque_density_due_to_collisions",
+        "toroidal_trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_trapped_fast_ion_torque_density_due_to_collisions",
+        "toroidal_trapped_thermal_electron_torque_density_due_to_collisions",
+        "toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_trapped_thermal_ion_torque_density_due_to_collisions",
+        "torque_density_due_to_collisions",
+        "trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+        "trapped_fast_ion_torque_density_due_to_collisions",
+        "trapped_thermal_electron_torque_density_due_to_collisions",
+        "trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+        "trapped_thermal_ion_torque_density_due_to_collisions"
+      ],
+      "physical_base": "torque_density",
+      "seed": "co_passing_fast_ion_charge_state_torque_density_due_to_collisions"
+    },
+    {
+      "heuristic_anchor": "torque_density_due_to_coulomb_collisions_with_electrons",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+        "particle_torque_density_due_to_coulomb_collisions_with_electrons",
+        "toroidal_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+        "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+        "torque_density_due_to_coulomb_collisions_with_electrons"
+      ],
+      "physical_base": "torque_density",
+      "seed": "fast_particle_torque_density_due_to_coulomb_collisions_with_electrons"
+    },
+    {
+      "heuristic_anchor": "trapped_torque_density_due_to_j_cross_b_force",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "co_passing_torque_density_due_to_j_cross_b_force",
+        "counter_passing_torque_density_due_to_j_cross_b_force",
+        "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+        "toroidal_counter_passing_torque_density_due_to_j_cross_b_force",
+        "toroidal_torque_density_due_to_j_cross_b_force",
+        "toroidal_trapped_torque_density_due_to_j_cross_b_force",
+        "torque_density_due_to_j_cross_b_force",
+        "trapped_torque_density_due_to_j_cross_b_force"
+      ],
+      "physical_base": "torque_density",
+      "seed": "co_passing_torque_density_due_to_j_cross_b_force"
+    },
+    {
+      "heuristic_anchor": "thermal_ion_torque_density_due_to_thermalization",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "ion_torque_density_due_to_thermalization",
+        "thermal_ion_torque_density_due_to_thermalization",
+        "toroidal_thermal_ion_torque_density_due_to_thermalization",
+        "torque_density_due_to_thermalization"
+      ],
+      "physical_base": "torque_density",
+      "seed": "ion_torque_density_due_to_thermalization"
+    },
+    {
+      "heuristic_anchor": "radial_vector_potential",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "perturbed_vector_potential",
+        "poloidal_vector_potential",
+        "radial_vector_potential",
+        "vector_potential"
+      ],
+      "physical_base": "vector_potential",
+      "seed": "perturbed_vector_potential"
+    },
+    {
+      "heuristic_anchor": "toroidal_perturbed_plasma_velocity",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component+position",
+      "members": [
+        "bulk_neutral_internal_state_velocity",
+        "cold_neutral_velocity",
+        "electron_velocity",
+        "flux_surface_averaged_velocity",
+        "hot_neutral_velocity",
+        "ion_charge_state_velocity",
+        "ion_velocity",
+        "neutral_internal_state_velocity",
+        "neutral_velocity",
+        "parallel_bulk_ion_velocity",
+        "parallel_electron_velocity",
+        "parallel_ion_charge_state_velocity",
+        "parallel_neutral_velocity",
+        "parallel_plasma_velocity",
+        "perturbed_plasma_velocity",
+        "plasma_velocity",
+        "poloidal_electron_velocity",
+        "poloidal_ion_charge_state_velocity",
+        "poloidal_ion_velocity",
+        "poloidal_ion_velocity_at_charge_exchange_channel",
+        "poloidal_neutral_internal_state_velocity",
+        "poloidal_neutral_velocity",
+        "poloidal_perturbed_plasma_velocity",
+        "radial_electron_velocity",
+        "radial_ion_charge_state_velocity",
+        "radial_ion_velocity",
+        "radial_neutral_internal_state_velocity",
+        "radial_neutral_velocity",
+        "radial_perturbed_plasma_velocity",
+        "radial_plasma_velocity",
+        "toroidal_argon_velocity_at_internal_transport_barrier",
+        "toroidal_argon_velocity_at_magnetic_axis",
+        "toroidal_argon_velocity_at_pedestal_top",
+        "toroidal_argon_velocity_at_plasma_boundary",
+        "toroidal_beryllium_velocity_at_internal_transport_barrier",
+        "toroidal_beryllium_velocity_at_magnetic_axis",
+        "toroidal_beryllium_velocity_at_pedestal_top",
+        "toroidal_carbon_velocity_at_internal_transport_barrier",
+        "toroidal_carbon_velocity_at_magnetic_axis",
+        "toroidal_carbon_velocity_at_pedestal_top",
+        "toroidal_carbon_velocity_at_plasma_boundary",
+        "toroidal_deuterium_tritium_velocity_at_internal_transport_barrier",
+        "toroidal_deuterium_tritium_velocity_at_magnetic_axis",
+        "toroidal_deuterium_tritium_velocity_at_pedestal_top",
+        "toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+        "toroidal_deuterium_velocity_at_internal_transport_barrier",
+        "toroidal_deuterium_velocity_at_magnetic_axis",
+        "toroidal_deuterium_velocity_at_pedestal_top",
+        "toroidal_deuterium_velocity_at_plasma_boundary",
+        "toroidal_electron_velocity",
+        "toroidal_helium_3_velocity_at_internal_transport_barrier",
+        "toroidal_helium_3_velocity_at_magnetic_axis",
+        "toroidal_helium_3_velocity_at_pedestal_top",
+        "toroidal_helium_3_velocity_at_plasma_boundary",
+        "toroidal_helium_4_velocity_at_internal_transport_barrier",
+        "toroidal_helium_4_velocity_at_magnetic_axis",
+        "toroidal_helium_4_velocity_at_pedestal_top",
+        "toroidal_helium_4_velocity_at_plasma_boundary",
+        "toroidal_hydrogen_velocity_at_internal_transport_barrier",
+        "toroidal_hydrogen_velocity_at_magnetic_axis",
+        "toroidal_hydrogen_velocity_at_pedestal_top",
+        "toroidal_hydrogen_velocity_at_plasma_boundary",
+        "toroidal_impurity_ion_velocity_at_measurement_position",
+        "toroidal_ion_velocity",
+        "toroidal_ion_velocity_at_plasma_boundary",
+        "toroidal_iron_velocity_at_internal_transport_barrier",
+        "toroidal_iron_velocity_at_magnetic_axis",
+        "toroidal_iron_velocity_at_pedestal_top",
+        "toroidal_iron_velocity_at_plasma_boundary",
+        "toroidal_krypton_velocity_at_internal_transport_barrier",
+        "toroidal_krypton_velocity_at_magnetic_axis",
+        "toroidal_krypton_velocity_at_pedestal_top",
+        "toroidal_krypton_velocity_at_plasma_boundary",
+        "toroidal_lithium_velocity_at_internal_transport_barrier",
+        "toroidal_lithium_velocity_at_magnetic_axis",
+        "toroidal_lithium_velocity_at_pedestal_top",
+        "toroidal_lithium_velocity_at_separatrix",
+        "toroidal_neon_velocity_at_internal_transport_barrier",
+        "toroidal_neon_velocity_at_magnetic_axis",
+        "toroidal_neon_velocity_at_pedestal_top",
+        "toroidal_neon_velocity_at_plasma_boundary",
+        "toroidal_neutral_velocity",
+        "toroidal_nitrogen_velocity_at_internal_transport_barrier",
+        "toroidal_nitrogen_velocity_at_magnetic_axis",
+        "toroidal_nitrogen_velocity_at_pedestal_top",
+        "toroidal_nitrogen_velocity_at_plasma_boundary",
+        "toroidal_oxygen_velocity_at_internal_transport_barrier",
+        "toroidal_oxygen_velocity_at_magnetic_axis",
+        "toroidal_oxygen_velocity_at_pedestal_top",
+        "toroidal_oxygen_velocity_at_plasma_boundary",
+        "toroidal_perturbed_plasma_velocity",
+        "toroidal_tritium_velocity",
+        "toroidal_tritium_velocity_at_internal_transport_barrier",
+        "toroidal_tritium_velocity_at_magnetic_axis",
+        "toroidal_tungsten_velocity_at_internal_transport_barrier",
+        "toroidal_tungsten_velocity_at_magnetic_axis",
+        "toroidal_tungsten_velocity_at_pedestal_top",
+        "toroidal_tungsten_velocity_at_plasma_boundary",
+        "toroidal_xenon_velocity_at_internal_transport_barrier",
+        "toroidal_xenon_velocity_at_magnetic_axis",
+        "toroidal_xenon_velocity_at_pedestal_top",
+        "toroidal_xenon_velocity_at_plasma_boundary",
+        "tritium_velocity",
+        "vertical_bulk_neutral_internal_state_velocity",
+        "vertical_electron_velocity",
+        "vertical_ion_charge_state_velocity",
+        "vertical_ion_velocity",
+        "vertical_neutral_velocity",
+        "vertical_plasma_velocity",
+        "vertical_velocity_at_current_center"
+      ],
+      "physical_base": "velocity",
+      "seed": "bulk_neutral_internal_state_velocity"
+    },
+    {
+      "heuristic_anchor": "radial_velocity_of_pellet",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "radial_velocity_of_pellet",
+        "toroidal_velocity_of_pellet",
+        "vertical_velocity_of_pellet"
+      ],
+      "physical_base": "velocity",
+      "seed": "radial_velocity_of_pellet"
+    },
+    {
+      "heuristic_anchor": "velocity_due_to_convection",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "effective_neutral_internal_state_velocity_due_to_convection",
+        "neutral_internal_state_velocity_due_to_convection",
+        "particle_velocity_due_to_convection",
+        "radial_effective_neutral_internal_state_velocity_due_to_convection",
+        "velocity_due_to_convection"
+      ],
+      "physical_base": "velocity",
+      "seed": "effective_neutral_internal_state_velocity_due_to_convection"
+    },
+    {
+      "heuristic_anchor": "parallel_neutral_state_velocity_due_to_diamagnetic_drift",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "binormal_ion_velocity_due_to_diamagnetic_drift",
+        "ion_charge_state_diamagnetic_velocity_due_to_diamagnetic_drift",
+        "ion_velocity_due_to_diamagnetic_drift",
+        "neutral_velocity_due_to_diamagnetic_drift",
+        "parallel_ion_charge_state_velocity_due_to_diamagnetic_drift",
+        "parallel_neutral_state_velocity_due_to_diamagnetic_drift",
+        "perpendicular_ion_charge_state_velocity_due_to_diamagnetic_drift",
+        "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+        "perpendicular_neutral_state_velocity_due_to_diamagnetic_drift",
+        "plasma_velocity_due_to_diamagnetic_drift",
+        "poloidal_ion_charge_state_velocity_due_to_diamagnetic_drift",
+        "poloidal_neutral_state_velocity_due_to_diamagnetic_drift",
+        "radial_ion_charge_state_velocity_due_to_diamagnetic_drift",
+        "radial_neutral_internal_state_velocity_due_to_diamagnetic_drift",
+        "radial_neutral_state_velocity_due_to_diamagnetic_drift",
+        "toroidal_ion_charge_state_velocity_due_to_diamagnetic_drift",
+        "toroidal_ion_velocity_due_to_diamagnetic_drift",
+        "toroidal_neutral_internal_state_velocity_due_to_diamagnetic_drift",
+        "toroidal_neutral_state_velocity_due_to_diamagnetic_drift",
+        "vertical_ion_charge_state_velocity_due_to_diamagnetic_drift",
+        "vertical_neutral_state_velocity_due_to_diamagnetic_drift"
+      ],
+      "physical_base": "velocity",
+      "seed": "binormal_ion_velocity_due_to_diamagnetic_drift"
+    },
+    {
+      "heuristic_anchor": "radial_ion_charge_state_velocity_due_to_e_cross_b_drift",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject+component",
+      "members": [
+        "effective_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+        "ion_charge_state_velocity_due_to_e_cross_b_drift",
+        "neutral_species_internal_state_velocity_due_to_e_cross_b_drift",
+        "parallel_ion_charge_state_velocity_due_to_e_cross_b_drift",
+        "parallel_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+        "poloidal_ion_charge_state_velocity_due_to_e_cross_b_drift",
+        "poloidal_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+        "radial_ion_charge_state_velocity_due_to_e_cross_b_drift",
+        "radial_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+        "toroidal_ion_charge_state_velocity_due_to_e_cross_b_drift",
+        "toroidal_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+        "velocity_due_to_e_cross_b_drift",
+        "vertical_ion_charge_state_velocity_due_to_e_cross_b_drift",
+        "vertical_neutral_species_internal_state_velocity_due_to_e_cross_b_drift"
+      ],
+      "physical_base": "velocity",
+      "seed": "effective_neutral_internal_state_velocity_due_to_e_cross_b_drift"
+    },
+    {
+      "heuristic_anchor": "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "subject",
+      "members": [
+        "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_beryllium_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_deuterium_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_helium_3_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_ion_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_lithium_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_oxygen_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_tungsten_velocity_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary"
+      ],
+      "physical_base": "velocity",
+      "seed": "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary"
+    },
+    {
+      "heuristic_anchor": "radial_perturbed_plasma_velocity_imaginary_part",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "poloidal_perturbed_plasma_velocity_imaginary_part",
+        "radial_perturbed_plasma_velocity_imaginary_part",
+        "toroidal_perturbed_plasma_velocity_imaginary_part"
+      ],
+      "physical_base": "velocity",
+      "seed": "poloidal_perturbed_plasma_velocity_imaginary_part"
+    },
+    {
+      "heuristic_anchor": "ratio_of_parallel_plasma_velocity_to_magnetic_field_magnitude",
+      "jev_anchor": "ratio_of_parallel_plasma_velocity_to_magnetic_field_magnitude",
+      "jev_asked": [
+        "ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude",
+        "ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude",
+        "ratio_of_parallel_plasma_velocity_to_magnetic_field_magnitude"
+      ],
+      "jev_cost": 0.000123312,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "subject+component",
+      "members": [
+        "ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude",
+        "ratio_of_parallel_plasma_velocity_to_magnetic_field_magnitude",
+        "ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude"
+      ],
+      "physical_base": "velocity",
+      "seed": "ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude"
+    },
+    {
+      "heuristic_anchor": "poloidal_perturbed_plasma_velocity_real_part",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "poloidal_perturbed_plasma_velocity_real_part",
+        "radial_perturbed_plasma_velocity_real_part",
+        "toroidal_perturbed_plasma_velocity_real_part"
+      ],
+      "physical_base": "velocity",
+      "seed": "poloidal_perturbed_plasma_velocity_real_part"
+    },
+    {
+      "heuristic_anchor": "requested_voltage_of_spectrometer_channel",
+      "jev_anchor": "voltage_of_spectrometer_channel",
+      "jev_asked": [
+        "voltage_of_spectrometer_channel",
+        "requested_voltage_of_spectrometer_channel"
+      ],
+      "jev_cost": 6.720000000000001e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "unclassified",
+      "members": [
+        "measured_voltage_of_spectrometer_channel",
+        "requested_voltage_of_spectrometer_channel",
+        "voltage_of_spectrometer_channel"
+      ],
+      "physical_base": "voltage",
+      "seed": "measured_voltage_of_spectrometer_channel"
+    },
+    {
+      "heuristic_anchor": "vorticity",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "parallel_vorticity",
+        "poloidal_vorticity",
+        "radial_vorticity",
+        "toroidal_vorticity",
+        "vertical_vorticity",
+        "vorticity"
+      ],
+      "physical_base": "vorticity",
+      "seed": "parallel_vorticity"
+    },
+    {
+      "heuristic_anchor": "ratio_of_vertical_vorticity_to_major_radius",
+      "jev_anchor": "ratio_of_vertical_vorticity_to_major_radius",
+      "jev_asked": [
+        "ratio_of_vertical_vorticity_to_major_radius"
+      ],
+      "jev_cost": 3.5028e-05,
+      "jev_reason": null,
+      "jev_scored": 1,
+      "kind": "component",
+      "members": [
+        "ratio_of_diamagnetic_vorticity_to_major_radius",
+        "ratio_of_plasma_vorticity_to_major_radius",
+        "ratio_of_vertical_vorticity_to_major_radius",
+        "ratio_of_vorticity_to_major_radius"
+      ],
+      "physical_base": "vorticity",
+      "seed": "ratio_of_diamagnetic_vorticity_to_major_radius"
+    },
+    {
+      "heuristic_anchor": "radial_wave_vector_of_beam_tracing_beam",
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no family member yields a house-style template for the family's pattern",
+      "jev_scored": 0,
+      "kind": "component",
+      "members": [
+        "normalized_toroidal_wave_vector_of_beam_tracing_beam",
+        "radial_wave_vector_normalized_of_beam_tracing_beam",
+        "radial_wave_vector_of_beam_tracing_beam",
+        "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+        "toroidal_wave_vector_of_beam_tracing_beam",
+        "vertical_wave_vector_normalized_of_beam_tracing_beam",
+        "vertical_wave_vector_of_beam_tracing_beam"
+      ],
+      "physical_base": "wave_vector",
+      "seed": "normalized_toroidal_wave_vector_of_beam_tracing_beam"
+    },
+    {
+      "heuristic_anchor": "wavelength_of_visible_camera",
+      "jev_anchor": "lower_bound_wavelength_of_visible_camera",
+      "jev_asked": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "jev_cost": 0.00010281599999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "physical_base": "wavelength",
+      "seed": "lower_bound_wavelength_of_visible_camera"
+    },
+    {
+      "heuristic_anchor": "plasma_filament_width",
+      "jev_anchor": "plasma_filament_width",
+      "jev_asked": [
+        "plasma_filament_width"
+      ],
+      "jev_cost": 3.4818e-05,
+      "jev_reason": null,
+      "jev_scored": 1,
+      "kind": "subject+component+device",
+      "members": [
+        "normalized_toroidal_hard_xray_peak_lower_bound_width",
+        "normalized_toroidal_hard_xray_peak_upper_bound_width",
+        "plasma_filament_width"
+      ],
+      "physical_base": "width",
+      "seed": "normalized_toroidal_hard_xray_peak_lower_bound_width"
+    },
+    {
+      "heuristic_anchor": "first_local_tangential_width_of_aperture",
+      "jev_anchor": "second_local_tangential_width_of_aperture",
+      "jev_asked": [
+        "width_of_aperture",
+        "first_local_tangential_width_of_aperture",
+        "second_local_tangential_width_of_aperture"
+      ],
+      "jev_cost": 0.0001092,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "first_local_tangential_width_of_aperture",
+        "second_local_tangential_width_of_aperture",
+        "width_of_aperture"
+      ],
+      "physical_base": "width",
+      "seed": "first_local_tangential_width_of_aperture"
+    },
+    {
+      "heuristic_anchor": "width_of_diagnostic_aperture",
+      "jev_anchor": "first_local_tangential_width_of_diagnostic_aperture",
+      "jev_asked": [
+        "width_of_diagnostic_aperture",
+        "first_local_tangential_width_of_diagnostic_aperture"
+      ],
+      "jev_cost": 6.888e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "component",
+      "members": [
+        "first_local_tangential_width_of_diagnostic_aperture",
+        "second_local_tangential_width_of_diagnostic_aperture",
+        "width_of_diagnostic_aperture"
+      ],
+      "physical_base": "width",
+      "seed": "first_local_tangential_width_of_diagnostic_aperture"
+    }
+  ],
+  "scorer_spend_usd": 0.021098364,
+  "scratch_cleanup_verified": {
+    "closed_bolt_ports": [
+      27697,
+      27698,
+      28697,
+      28698
+    ],
+    "positive_control": "ss -ltn displayed other local listeners before the scratch-port absence was recorded",
+    "tree_absent": true
+  },
+  "scratch_removed": {
+    "at": "2026-10-18T23:35:56.450534+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50",
+  "selected": [
+    {
+      "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+      "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+      "jev_asked": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "jev_cost": 0.000103068,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "coordinate",
+      "members": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "physical_base": "",
+      "seed": "vertical_coordinate_of_diagnostic_aperture"
+    },
+    {
+      "heuristic_anchor": "toroidal_angular_width_of_camera",
+      "jev_anchor": "vertical_angular_width_of_camera",
+      "jev_asked": [
+        "vertical_angular_width_of_camera",
+        "toroidal_angular_width_of_camera"
+      ],
+      "jev_cost": 7.072799999999999e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "component",
+      "members": [
+        "angular_width_of_camera",
+        "toroidal_angular_width_of_camera",
+        "vertical_angular_width_of_camera"
+      ],
+      "physical_base": "angular_width",
+      "seed": "angular_width_of_camera"
+    },
+    {
+      "heuristic_anchor": "major_length_of_passive_loop_element",
+      "jev_anchor": "length_of_passive_loop_element",
+      "jev_asked": [
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element",
+        "length_of_passive_loop_element"
+      ],
+      "jev_cost": 0.000107772,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "length_of_passive_loop_element",
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element"
+      ],
+      "physical_base": "length",
+      "seed": "length_of_passive_loop_element"
+    },
+    {
+      "heuristic_anchor": "power_of_divertor_due_to_recombination",
+      "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
+      "jev_asked": [
+        "power_of_divertor_due_to_recombination",
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination"
+      ],
+      "jev_cost": 0.00012205199999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "subject",
+      "members": [
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination",
+        "power_of_divertor_due_to_recombination"
+      ],
+      "physical_base": "power",
+      "seed": "neutral_power_of_divertor_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+      "jev_anchor": "current_density_due_to_wave_driven_current_drive",
+      "jev_asked": [
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_due_to_wave_driven_current_drive"
+      ],
+      "jev_cost": 0.00013385399999999998,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_wave_driven_current_drive"
+    },
+    {
+      "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_asked": [
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_due_to_e_cross_b_drift"
+      ],
+      "jev_cost": 0.00015141000000000002,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "momentum_flux_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
+      ],
+      "physical_base": "momentum",
+      "seed": "momentum_flux_due_to_e_cross_b_drift"
+    },
+    {
+      "heuristic_anchor": "wavelength_of_visible_camera",
+      "jev_anchor": "lower_bound_wavelength_of_visible_camera",
+      "jev_asked": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "jev_cost": 0.00010281599999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "physical_base": "wavelength",
+      "seed": "lower_bound_wavelength_of_visible_camera"
+    },
+    {
+      "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
+      "jev_anchor": "source_rate_due_to_thermal_fusion",
+      "jev_asked": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "jev_cost": 0.00017077199999999997,
+      "jev_reason": null,
+      "jev_scored": 4,
+      "kind": "subject",
+      "members": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "physical_base": "source_rate",
+      "seed": "neutron_source_rate_due_to_thermal_fusion"
+    },
+    {
+      "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+      "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+      "jev_asked": [
+        "energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination"
+      ],
+      "jev_cost": 0.00023553600000000003,
+      "jev_reason": null,
+      "jev_scored": 5,
+      "kind": "subject",
+      "members": [
+        "energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination"
+      ],
+      "physical_base": "energy",
+      "seed": "energy_flux_at_wall_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+      "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+      "jev_asked": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport"
+      ],
+      "jev_cost": 0.000220332,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_anomalous_transport"
+    }
+  ],
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_completeness": "confirmed lower bound; final Jev pool session has no receipt",
+  "spend_limit_usd": 50.0,
+  "spend_usd": 2.37648595,
+  "started_at": "2026-10-18T12:05:51.572895+00:00",
+  "stopped_instances": [
+    {
+      "arm": "heuristic",
+      "at": "2026-10-18T23:35:39.427786+00:00",
+      "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50/heuristic"
+    },
+    {
+      "arm": "jev",
+      "at": "2026-10-18T23:35:54.435722+00:00",
+      "tree": "/tmp/reckon-crew-scratch/r-20261018T102210638794-ssog-anchor-ab/anchor-run-EuPyYC/anchor-compare-89i4mp50/jev"
+    }
+  ],
+  "unscored_count": 38,
+  "validation_search": {
+    "at": "2026-10-18T22:44:59.090581+00:00",
+    "member_rows": 1228,
+    "properties": [
+      "validation_status",
+      "docs_stage",
+      "name_stage"
+    ],
+    "read_from": "bolt://127.0.0.1:27697",
+    "removed_families": [
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "toroidal_angle_of_along_pellet_path"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "effective_area_of_langmuir_probe"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "average_charge_number"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "electron_convection_velocity"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "accumulated_carbon_count_due_to_gas_injection"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_fast_current_density"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "decay_length_over_scrape_off_layer"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "electron_diffusion_coefficient"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "effective_electron_diffusivity"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "binormal_wave_electric_field"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "effective_thermal_ion_charge_state_energy_velocity_due_to_convection"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "energy_flux_at_wall_due_to_eddy_current"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "electron_kinetic_energy_flux_at_wall_due_to_surface_emission"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "calibration_factor_of_spectrometer_channel"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "back_surface_neutron_flux"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "electron_particle_flux_at_wall_due_to_pumping"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "flux_at_wall_due_to_recombination"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "force_of_poloidal_field_coil"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "alfven_frequency"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "plasma_internal_energy"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "length_of_antenna_strap"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "mass_density"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "mhd_mode_number"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "diamagnetic_momentum_convection_velocity"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "flux_surface_normal_ion_momentum_flux_due_to_diamagnetic_drift"
+      },
+      {
+        "reasons": [
+          "name_exhausted"
+        ],
+        "seed": "momentum_flux_due_to_perturbed_parallel_magnetic_field"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "momentum_flux_due_to_perturbed_parallel_vector_potential"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "ion_cyclotron_heating_antenna_phase"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "absorbed_power_of_beam_tracing_beam"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "absorbed_radiated_power_of_divertor"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "neutral_power_at_divertor_target_due_to_recombination"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_power_density"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_fast_electron_kinetic_power_density_due_to_collisions"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "perturbed_plasma_pressure_imaginary_part"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "inner_radius_of_plasma_filament"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "inner_radius_of_poloidal_field_coil"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "ammonia_deuterated_source_rate"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "deuterium_source_rate_due_to_injection"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "lower_thickness_of_breeder_blanket_module"
+      },
+      {
+        "reasons": [
+          "quarantined"
+        ],
+        "seed": "cumulative_inside_flux_surface_torque"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "electron_torque_due_to_collisions"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_torque_density"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "co_passing_fast_ion_charge_state_torque_density_due_to_collisions"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "fast_particle_torque_density_due_to_coulomb_collisions_with_electrons"
+      },
+      {
+        "reasons": [
+          "docs_exhausted",
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "perturbed_vector_potential"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "bulk_neutral_internal_state_velocity"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "binormal_ion_velocity_due_to_diamagnetic_drift"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "measured_voltage_of_spectrometer_channel"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "ratio_of_diamagnetic_vorticity_to_major_radius"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "normalized_toroidal_hard_xray_peak_lower_bound_width"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "first_local_tangential_width_of_aperture"
+      },
+      {
+        "reasons": [
+          "name_exhausted",
+          "quarantined"
+        ],
+        "seed": "first_local_tangential_width_of_diagnostic_aperture"
+      }
+    ]
+  },
+  "variation_kind_counts": {
+    "component": 37,
+    "component+device": 1,
+    "coordinate": 6,
+    "geometry": 4,
+    "position": 5,
+    "position+geometry": 2,
+    "subject": 15,
+    "subject+component": 22,
+    "subject+component+device": 1,
+    "subject+component+position": 4,
+    "subject+component+position+region": 1,
+    "subject+position": 7,
+    "unclassified": 13
+  },
+  "verdict": {
+    "adopt_jev": null,
+    "reason": "No family has both final arm receipts; rule unevaluated at worker deadline"
+  },
+  "west_search": {
+    "distinct_names": 476,
+    "files": [
+      {
+        "names": 214,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.10.0rc1+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 409,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.3.0rc1+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 368,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 368,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.3.0rc4+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 412,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.3.0rc5+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 411,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.3.0rc6+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 410,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.3.0rc7+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 407,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.4.0rc1+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 411,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.4.0rc2+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 409,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.4.0rc3+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 431,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.4.0rc4+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 214,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.4.0rc5+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 227,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.4.0rc6+west-task-2e.sn_names.yaml"
+      },
+      {
+        "names": 220,
+        "path": "imas_codex/standard_names/manifests/reviews/v0.4.0rc7+west-task-2e.sn_names.yaml"
+      }
+    ]
+  }
+}
