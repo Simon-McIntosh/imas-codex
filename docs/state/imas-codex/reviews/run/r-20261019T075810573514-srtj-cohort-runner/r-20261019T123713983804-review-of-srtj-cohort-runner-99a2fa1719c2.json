@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest declares no baseline_suite and no after_suite arm (grep found neither key), so no baseline/after gate-log pair exists to difference; its own gates are single-arm logs (cypher-property-resumed.log, result-validation.log, record-gates.log, each EXIT=0) plus two planted-input refusals (containment-recovery-negative.log EXIT=1, completion-negative.log EXIT=1).",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T12:53:58.398Z",
+  "dispatched_at": "2026-10-19T12:37:43Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-srtj-cohort-runner-99a2fa1719c2/../srtj-cohort-run/docs/evidence/fragments/sn-review-through-jev/srtj-cohort-runner.html",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "follow-on: the piece total is USD 3.128219 (cascade-name.json piece_spend_total_usd) but the brief's done-when requires spend under USD 3.00 (\"at most USD 3.00\" / \"Spend is under USD 3.00\"); the runner instead sets its own PIECE_CEILING_USD = 3.5 (srtj-cohort-run.py:41) and the landing record calls USD 3.50 'the authorized USD 3.50 ceiling', a cap the brief did not grant, so the record overstates its authorization by 50 cents while overshooting the stated bound by 12.8 cents."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-srtj-cohort-runner-99a2fa1719c2/../srtj-cohort-run/docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py",
+      "line": "148",
+      "severity": "follow-on",
+      "text": "follow-on: selected_items() drops the one cohort identity whose DD source is stale (x_direction_unit_vector_of_camera), so the piece measures 231 items while the brief's done-when names 232 and says of the cohort 'Never re-draw it'; the exclusion is disclosed in excluded.json and reduce the denominator of the eventual arm comparison, so the aggregating node must be told the arms share excluded.json."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-srtj-cohort-runner-99a2fa1719c2/../srtj-cohort-run/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/excluded.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the committed excluded.json records scratch_removed.preflight scratch_removed.path as an absolute path inside the now-deleted worktree (/home/ITER/.../srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6), so the retained clean-up evidence points at a path no reader can open."
+    }
+  ],
+  "findings_text": [
+    "FINDING docs/evidence/fragments/sn-review-through-jev/srtj-cohort-runner.html:4 follow-on: the piece total is USD 3.128219 (cascade-name.json piece_spend_total_usd) but the brief's done-when requires spend under USD 3.00 (\"at most USD 3.00\" / \"Spend is under USD 3.00\"); the runner instead sets its own PIECE_CEILING_USD = 3.5 (srtj-cohort-run.py:41) and the landing record calls USD 3.50 'the authorized USD 3.50 ceiling', a cap the brief did not grant, so the record overstates its authorization by 50 cents while overshooting the stated bound by 12.8 cents.",
+    "FINDING docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py:148 follow-on: selected_items() drops the one cohort identity whose DD source is stale (x_direction_unit_vector_of_camera), so the piece measures 231 items while the brief's done-when names 232 and says of the cohort 'Never re-draw it'; the exclusion is disclosed in excluded.json and reduces the denominator of the eventual arm comparison, so the aggregating node must be told the arms share excluded.json.",
+    "FINDING docs/evidence/fragments/sn-review-through-jev/srtj-cohort/excluded.json:1 follow-on: the committed excluded.json records scratch_removed.path as an absolute path inside the now-deleted worktree (/home/ITER/.../srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6), so the retained clean-up evidence points at a path no reader can open."
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none \u2014 the landed artefact is a standalone evidence script plus JSON/html outputs; no runtime module imports or invokes it, so no production call site reaches the change.",
+    "diff": "read the nine commits 6f7c2c23d..99a2fa17 against base 38efe92d; the runner (810 lines), the two result JSONs, excluded.json and the landing html are added, no product source is touched and no test file is added.",
+    "done_when": "the done-when names 232 items, an EXIT=0 invocation, containment evidence, a scratch teardown record, a planted-input refusal, and spend under USD 3.00; all but the item count and the spend bound are met, and the gate named in tests (--check-containment + --check-record + saved-record assertions) ran with EXIT=0 (result-validation.log).",
+    "goal": "the node goal is to build srtj-cohort-run.py and run the first piece (--arm cascade --axis name) in a scratch graph; the runner landed in 6f7c2c23d and its cascade-name.json holds 231 fully-decisioned items at docs/evidence/fragments/sn-review-through-jev/srtj-cohort/cascade-name.json.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T075810573514-srtj-cohort-runner/manifest.md; status complete, 9 commits, 231 decisions / 404 receipts / USD 3.128219, no baseline_suite or after_suite arm declared.",
+    "write_paths": "read the manifest's declared paths (srtj-cohort-run.py and srtj-cohort/**); git diff --stat 38efe92d..99a2fa17 lists five files, all under docs/evidence/fragments/sn-review-through-jev/, inside them."
+  },
+  "justifications": {
+    "durability": "no test file was added in the nine commits, so nothing imports srtj-cohort-run.py's verify_containment/verify_completion and a future regression of the guards would not redden any suite; the only negative evidence is two manual planted-input refusals (containment-recovery-negative.log, completion-negative.log), which demonstrate the guards once but pin nothing.",
+    "evidence": "the gate log result-validation.log records EXIT=0 for --check-containment + --check-record + saved-record assertions on the committed record, and both guards are shown refusing on planted inputs (EXIT=1), but the done-when's spend bound is unmet and the 232-item count is not the 231 delivered, so the measure is short of what done_when asserts.",
+    "fit": "srtj-cohort-run.py follows the anchor-runner idiom it was told to copy (dump placement under dumps/, APPTAINER_BIND /tmp, free_port, start_temp_neo4j) and introduces no plan, sprint or ticket label in its symbols or comments; only the plan-slug fragment directory carries the 'srtj' prefix, which is the repository's evidence-fragment convention.",
+    "goal_fidelity": "cascade-name.json holds all 231 selected items with the required per-item fields (route, failure_reason, chat_reviewer_called, decision, score, calls, spend_usd, wall_time_s) and a passing containment verdict, but it delivers 231 of the brief's 232 items and USD 3.128219 against the brief's USD 3.00 bound.",
+    "reuse": "the change reuses the repository's temp-neo4j owner imas_codex/graph/temp_neo4j.start_temp_neo4j rather than forking a lifecycle, and copies make_instance from the anchor runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py exactly as the brief directed ('copy the function and say which'); a capability search found no other owner of scratch-graph cohort review, and the copy is sanctioned.",
+    "scope_discipline": "every path in git diff 38efe92d..99a2fa17 sits under docs/evidence/fragments/sn-review-through-jev/, inside the fragment scope; the runner also grew a DD-source preflight, an exclusion record and a budget-recovery path the brief did not name, all inside that fragment."
+  },
+  "node": "review-of-srtj-cohort-runner-99a2fa1719c2",
+  "node:reviewed": "srtj-cohort-runner",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to build srtj-cohort-run.py and run the first piece (--arm cascade --axis name) in a scratch graph; the runner landed in 6f7c2c23d and its cascade-name.json holds 231 fully-decisioned items at docs/evidence/fragments/sn-review-through-jev/srtj-cohort/cascade-name.json.\nVERDICT done_when: the done-when names 232 items, an EXIT=0 invocation, containment evidence, a scratch teardown record, a planted-input refusal, and spend under USD 3.00; all but the item count and the spend bound are met, and the gate named in tests (--check-containment + --check-record + saved-record assertions) ran with EXIT=0 (result-validation.log).\nVERDICT write_paths: read the manifest's declared paths (srtj-cohort-run.py and srtj-cohort/**); git diff --stat 38efe92d..99a2fa17 lists five files, all under docs/evidence/fragments/sn-review-through-jev/, inside them.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T075810573514-srtj-cohort-runner/manifest.md; status complete, 9 commits, 231 decisions / 404 receipts / USD 3.128219, no baseline_suite or after_suite arm declared.\nVERDICT diff: read the nine commits 6f7c2c23d..99a2fa17 against base 38efe92d; the runner (810 lines), the two result JSONs, excluded.json and the landing html are added, no product source is touched and no test file is added.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: cascade-name.json holds all 231 selected items with the required per-item fields (route, failure_reason, chat_reviewer_called, decision, score, calls, spend_usd, wall_time_s) and a passing containment verdict, but it delivers 231 of the brief's 232 items and USD 3.128219 against the brief's USD 3.00 bound.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate log result-validation.log records EXIT=0 for --check-containment + --check-record + saved-record assertions on the committed record, and both guards are shown refusing on planted inputs (EXIT=1), but the done-when's spend bound is unmet and the 232-item count is not the 231 delivered, so the measure is short of what done_when asserts.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every path in git diff 38efe92d..99a2fa17 sits under docs/evidence/fragments/sn-review-through-jev/, inside the fragment scope; the runner also grew a DD-source preflight, an exclusion record and a budget-recovery path the brief did not name, all inside that fragment.\nSCORE durability: 8\nJUSTIFICATION durability: no test file was added in the nine commits, so nothing imports srtj-cohort-run.py's verify_containment/verify_completion and a future regression of the guards would not redden any suite; the only negative evidence is two manual planted-input refusals (containment-recovery-negative.log, completion-negative.log), which demonstrate the guards once but pin nothing.\nSCORE fit: 17\nJUSTIFICATION fit: srtj-cohort-run.py follows the anchor-runner idiom it was told to copy (dump placement under dumps/, APPTAINER_BIND /tmp, free_port, start_temp_neo4j) and introduces no plan, sprint or ticket label in its symbols or comments; only the plan-slug fragment directory carries the 'srtj' prefix, which is the repository's evidence-fragment convention.\nSCORE reuse: 18\nJUSTIFICATION reuse: the change reuses the repository's temp-neo4j owner imas_codex/graph/temp_neo4j.start_temp_neo4j rather than forking a lifecycle, and copies make_instance from the anchor runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py exactly as the brief directed ('copy the function and say which'); a capability search found no other owner of scratch-graph cohort review, and the copy is sanctioned.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-cohort-runner.html:4 follow-on: the piece total is USD 3.128219 (cascade-name.json piece_spend_total_usd) but the brief's done-when requires spend under USD 3.00 (\"at most USD 3.00\" / \"Spend is under USD 3.00\"); the runner instead sets its own PIECE_CEILING_USD = 3.5 (srtj-cohort-run.py:41) and the landing record calls USD 3.50 'the authorized USD 3.50 ceiling', a cap the brief did not grant, so the record overstates its authorization by 50 cents while overshooting the stated bound by 12.8 cents.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py:148 follow-on: selected_items() drops the one cohort identity whose DD source is stale (x_direction_unit_vector_of_camera), so the piece measures 231 items while the brief's done-when names 232 and says of the cohort 'Never re-draw it'; the exclusion is disclosed in excluded.json and reduces the denominator of the eventual arm comparison, so the aggregating node must be told the arms share excluded.json.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-cohort/excluded.json:1 follow-on: the committed excluded.json records scratch_removed.path as an absolute path inside the now-deleted worktree (/home/ITER/.../srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6), so the retained clean-up evidence points at a path no reader can open.",
+  "review_run_id": "r-20261019T123713983804-review-of-srtj-cohort-runner-99a2fa1719c2",
+  "reviewed_base_sha": "38efe92d84152a4b7a9dc048c91b6fa5ce573133",
+  "reviewed_head_sha": "99a2fa1719c2d3fcb0c84b9fe1defbf81c1b59cc",
+  "reviewed_run_id": "r-20261019T075810573514-srtj-cohort-runner",
+  "scores": {
+    "durability": 8,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 18,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T12:50:00+00:00",
+  "total": 88
+}
