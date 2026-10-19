@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "The symbol misnames a normal-approximation half-width; the fragment's prose names it correctly, and the driver is not reused.",
       "recorded_at": "2026-10-19T04:49:34.675869+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The intervals bound escalation incidence and chat share, which dominate the spread; the cohort run measures actual spend, which supersedes both intervals.",
+      "recorded_at": "2026-10-19T04:49:39.543489+00:00"
     }
   },
   "findings": [
