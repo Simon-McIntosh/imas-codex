@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -374,7 +374,10 @@
     <div class="r-comment-body"><p>The per-arm runner and its first arm have landed (merge <code>3d5b23a8b</code>, review 104). The heuristic arm of <code>vertical_coordinate_of_diagnostic_aperture</code> brought lint from 2 to 0, with all members at 1.0, for USD 0.71. The other 19 arms run as their own nodes, each based on the runner's reviewed head <code>c96f0f0d8</code> so the whole comparison runs one code revision. The first wave is that family's Jev arm plus both arms of <code>angular_width_of_camera</code> and <code>length_of_passive_loop_element</code>. Each arm is capped at USD 2.00, against the USD 50 ceiling. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#ssog-anchor-family-runner">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261019T122527261397-ssog-anchor-camera-width-heuristic" data-who="reckon-build" data-when="2026-10-19T13:20:07.430Z">
-    <div class="r-comment-body"><p>ssog-anchor-camera-width-heuristic: the heuristic arm of the angular_width_of_camera family aborted in the per-arm runner&#x27;s isolation proof because three concurrently dispatched arms were all handed scratch port 28002 by free_port_pair(), which reserves nothing and binds only after the dump load; no arm record and no spend, and the runner and selection are unchanged</p></div>
+    <div class="r-comment-body"><p>ssog-anchor-camera-width-heuristic: the heuristic arm of the angular_width_of_camera family aborted in the per-arm runner's isolation proof because three concurrently dispatched arms were all handed scratch port 28002 by free_port_pair(), which reserves nothing and binds only after the dump load; no arm record and no spend, and the runner and selection are unchanged</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261019T122616457253-ssog-anchor-camera-width-jev" data-who="reckon-build" data-when="2026-10-19T13:17:37.590Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-camera-width-jev.html — the jev arm of angular_width_of_camera was launched against a fresh scratch copy of the fixed export on runner revision c96f0f0d8 and aborted in the scratch-only isolation proof before any apply (marked_scratch_nodes 1770104 vs scratch_nodes 1770101, probe matched exactly 1, restored back to baseline after a one-node delete; no APOC triggers installed, so a second writer sharing the scratch bolt port is the cause); spend USD 0.00, no live write, scratch instance stopped and its tree removed.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
