@@ -6,6 +6,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import math
 import os
 import shutil
 import socket
@@ -16,6 +17,7 @@ import uuid
 from collections import defaultdict
 from dataclasses import asdict
 from datetime import UTC, datetime
+from decimal import Decimal
 from pathlib import Path
 
 from imas_codex.graph.client import GraphClient
@@ -39,6 +41,7 @@ ARCHIVE = (
 RESULTS = HERE / "srtj-cohort"
 EXCLUSIONS = RESULTS / "excluded.json"
 PIECE_CEILING_USD = 3.5
+COMPARISON_CEILING_USD = Decimal("60.00")
 PRIOR_SPEND_USD = 0.000288
 RUN_LIMIT_USD = 2.99
 RECOVERY_LIMIT_USD = 0.53
@@ -78,7 +81,7 @@ def verify_completion(record: dict) -> None:
     if record.get("recovery") and (
         len(record["items"]) != 231
         or {item["id"] for item in record["items"]}
-        != {item["id"] for item in selected_items("name", None)}
+        != {item["id"] for item in selected_items("name", 1, 1)}
     ):
         raise RuntimeError("combined review differs from the selected cohort")
     pending = [
@@ -141,10 +144,8 @@ def fixed_items() -> list[dict]:
     return items
 
 
-def selected_items(axis: str, half: int | None) -> list[dict]:
+def selected_items(axis: str, part: int, parts: int) -> list[dict]:
     items = [item for item in fixed_items() if item["axis"] == axis]
-    if half:
-        items = items[(half - 1) * 116 : half * 116]
     excluded = json.loads(EXCLUSIONS.read_text())
     if (
         excluded["status"] != "accepted"
@@ -155,7 +156,28 @@ def selected_items(axis: str, half: int | None) -> list[dict]:
     omitted = {row["id"] for row in excluded["excluded_items"]}
     if len(omitted) != excluded["excluded_count"]:
         raise RuntimeError("DD exclusion record contains duplicate identities")
-    return [item for item in items if item["id"] not in omitted]
+    items = [item for item in items if item["id"] not in omitted]
+    return items[(part - 1) * len(items) // parts : part * len(items) // parts]
+
+
+def check_comparison_budget(ceiling_usd: float) -> Decimal:
+    """Reserve this piece against completed and incomplete canonical pieces."""
+    if not math.isfinite(ceiling_usd) or ceiling_usd <= 0:
+        raise RuntimeError("piece spend ceiling must be positive and finite")
+    spent = Decimal("0")
+    for path in sorted(RESULTS.glob("*.json")):
+        if path.name == "excluded.json" or path.name.endswith("-recovery.json"):
+            continue
+        piece = json.loads(path.read_text())
+        if "piece_spend_total_usd" not in piece:
+            raise RuntimeError(f"piece has no spend total: {path}")
+        spent += Decimal(str(piece["piece_spend_total_usd"]))
+    if spent + Decimal(str(ceiling_usd)) > COMPARISON_CEILING_USD:
+        raise RuntimeError(
+            f"comparison ceiling USD {COMPARISON_CEILING_USD} exceeded: "
+            f"spent USD {spent} plus piece ceiling USD {ceiling_usd}"
+        )
+    return spent
 
 
 def _resolution_value(field: DDResolutionField, raw: object) -> DDResolutionValue:
@@ -433,7 +455,7 @@ def combine_recovery(base: dict, recovery: dict) -> dict:
     recovered = {item["id"]: item for item in recovery["items"]}
     if not pending or pending != set(recovered):
         raise RuntimeError("recovery identities differ from the saved pending set")
-    if len(base["items"]) != len(selected_items("name", None)):
+    if len(base["items"]) != len(selected_items("name", 1, 1)):
         raise RuntimeError("saved piece differs from the selected cohort")
     combined = dict(base)
     combined["initial_attempt"] = {
@@ -493,7 +515,7 @@ def combine_recovery(base: dict, recovery: dict) -> dict:
 
 
 async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
-    items = selected_items(args.axis, args.half)
+    items = selected_items(args.axis, args.part, args.parts)
     base = None
     combined_path = RESULTS / "cascade-name.json" if args.retry_pending else None
     combined_ready = False
@@ -503,7 +525,7 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
         if (
             args.arm != "cascade"
             or args.axis != "name"
-            or args.half is not None
+            or (args.part, args.parts) != (1, 1)
             or len(pending) != 3
             or pending
             != {item["id"] for item in base["items"] if item["decision"] == "drafted"}
@@ -562,15 +584,18 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
         started = stamp()
         start_time = time.monotonic()
         summary = await run_sn_pools(
-            cost_limit=(
-                RECOVERY_LIMIT_USD
-                if args.retry_pending
-                else RUN_LIMIT_USD
-                if args.axis == "name"
-                else 5.0
-            )
-            if args.arm == "cascade"
-            else 55.0,
+            cost_limit=min(
+                args.ceiling_usd,
+                (
+                    RECOVERY_LIMIT_USD
+                    if args.retry_pending
+                    else RUN_LIMIT_USD
+                    if args.axis == "name"
+                    else 5.0
+                )
+                if args.arm == "cascade"
+                else 55.0,
+            ),
             time_limit_s=2400,
             only_pool="review_name" if args.axis == "name" else "review_docs",
             names_only=args.axis == "name",
@@ -662,13 +687,13 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
                 model: round(value, 6) for model, value in sorted(by_model.items())
             }
             record["spend_usd"] = round(sum(by_model.values()), 6)
-            if args.arm == "cascade" and args.axis == "name":
+            if args.arm == "cascade" and args.axis == "name" and args.parts == 1:
                 record["prior_attempt_spend_usd"] = (
                     base["piece_spend_total_usd"] if base else PRIOR_SPEND_USD
                 )
-                record["piece_spend_total_usd"] = round(
-                    record["spend_usd"] + record["prior_attempt_spend_usd"], 6
-                )
+            record["piece_spend_total_usd"] = round(
+                record["spend_usd"] + record.get("prior_attempt_spend_usd", 0), 6
+            )
             record["route_counts"] = {
                 route: sum(item["route"] == route for item in record["items"])
                 for route in (
@@ -713,17 +738,16 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
             combined["recovery"]["containment_verdict"] = record["containment_verdict"]
             verify_containment(base)
             verify_completion(combined)
-            if combined["piece_spend_total_usd"] >= PIECE_CEILING_USD:
+            if combined["piece_spend_total_usd"] > args.ceiling_usd:
                 raise RuntimeError("combined piece exceeds its spend ceiling")
             combined["containment_verdict"] = "pass"
             combined["code_revision"] = record["code_revision"]
             combined["finished_at"] = stamp()
             save(combined_path, combined)
             combined_ready = True
-        if len(record["items"]) != len(ids) or (
-            args.arm == "cascade"
-            and args.axis == "name"
-            and record["piece_spend_total_usd"] >= PIECE_CEILING_USD
+        if (
+            len(record["items"]) != len(ids)
+            or record["piece_spend_total_usd"] > args.ceiling_usd
         ):
             raise RuntimeError("piece cardinality or spend ceiling failed")
         record["selected_count"] = len(ids)
@@ -757,7 +781,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm", choices=("incumbent", "cascade"))
     parser.add_argument("--axis", choices=("name", "docs"))
-    parser.add_argument("--half", type=int, choices=(1, 2))
+    parser.add_argument("--part", type=int, default=1)
+    parser.add_argument("--parts", type=int, default=1)
+    parser.add_argument("--ceiling-usd", type=float, default=PIECE_CEILING_USD)
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--retry-pending", action="store_true")
     parser.add_argument("--check-containment", type=Path)
@@ -774,12 +800,18 @@ def main() -> None:
         return
     if args.arm is None or args.axis is None:
         parser.error("--arm and --axis are required for a review piece")
+    if args.parts < 1 or not 1 <= args.part <= args.parts:
+        parser.error("--part must be between 1 and --parts")
+    spent_usd = check_comparison_budget(args.ceiling_usd)
     import subprocess
 
     record = {
         "arm": args.arm,
         "axis": args.axis,
-        "half": args.half,
+        "part": args.part,
+        "parts": args.parts,
+        "ceiling_usd": args.ceiling_usd,
+        "comparison_spent_before_usd": float(spent_usd),
         "code_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], text=True
         ).strip(),
@@ -788,7 +820,7 @@ def main() -> None:
         "created_at": stamp(),
         "status": "running",
     }
-    suffix = f"-{args.half}" if args.half else ""
+    suffix = f"-part{args.part}of{args.parts}" if args.parts > 1 else ""
     path = RESULTS / (
         "cascade-name-recovery.json"
         if args.retry_pending
