@@ -247,7 +247,10 @@ def run_arm(seed: str, arm: str) -> dict:
     data["port"] = port
     instance = None
     try:
-        dump = scratch / "neo4j.dump"
+        place = scratch / "instance"
+        for sub in ("data", "dumps", "logs", "run", "tmp"):
+            (place / sub).mkdir(parents=True, exist_ok=True)
+        dump = place / "dumps" / "neo4j.dump"
         with tarfile.open(selection["source_export"], "r:gz") as archive:
             member = next(m for m in archive if m.name.endswith("/graph.dump"))
             with archive.extractfile(member) as source, dump.open("wb") as target:
@@ -256,10 +259,23 @@ def run_arm(seed: str, arm: str) -> dict:
         out_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
         print(f"extracted dump: {data['dump_bytes']} bytes", flush=True)
 
-        place = scratch / "instance"
-        for sub in ("data", "dumps", "logs", "run", "tmp"):
-            (place / sub).mkdir(parents=True, exist_ok=True)
-        proc, neo4j_log = start_temp_neo4j(place, port, port + 1000)
+        # Apptainer's default bind of the host temp dir over the container's
+        # /tmp makes the image's /tmp read-only here (the host /tmp is mounted
+        # read-only in this sandbox), so the runtime cannot unpack its native
+        # libraries. Point the container's /tmp at the instance's own writable
+        # directory for the duration of the load and start commands.
+        previous_bind = os.environ.get("APPTAINER_BIND")
+        tmp_bind = f"{place / 'tmp'}:/tmp"
+        os.environ["APPTAINER_BIND"] = (
+            f"{previous_bind},{tmp_bind}" if previous_bind else tmp_bind
+        )
+        try:
+            proc, neo4j_log = start_temp_neo4j(place, port, port + 1000)
+        finally:
+            if previous_bind is None:
+                os.environ.pop("APPTAINER_BIND", None)
+            else:
+                os.environ["APPTAINER_BIND"] = previous_bind
         instance = (place, proc)
         scratch_uri = f"bolt://127.0.0.1:{port}"
         data["scratch_uri"] = scratch_uri
@@ -322,8 +338,11 @@ def run_arm(seed: str, arm: str) -> dict:
                 started=started_at,
                 ended=now(),
             )
-            # Live graph must carry none of this apply's scope runs and must
-            # not have grown: a command that resolved the live graph fails here.
+            # Containment is proved by this apply's own run ids: if the command
+            # had resolved the live graph, its LLMCost rows would be there. The
+            # live node count is NOT a containment signal, because the live
+            # graph is a shared service that other sessions write to while this
+            # arm runs; the delta is recorded as an observation, not a failure.
             live_runs = live.query(
                 "UNWIND $ids AS rid MATCH (c:LLMCost {run_id: rid}) "
                 "RETURN count(c) AS n",
@@ -336,13 +355,15 @@ def run_arm(seed: str, arm: str) -> dict:
             )[0]["n"]
             live_nodes_after = graph_count(live)
             data["isolation"]["live_nodes_after"] = live_nodes_after
+            data["isolation"]["live_nodes_delta_observed"] = (
+                live_nodes_after - data["isolation"]["live_nodes"]
+            )
             data["isolation"]["live_scope_run_rows"] = int(live_runs)
             data["isolation"]["scratch_scope_run_rows"] = int(scratch_runs)
-            if live_runs != 0 or live_nodes_after != data["isolation"]["live_nodes"]:
+            if live_runs != 0 or scratch_runs == 0:
                 raise RuntimeError(
                     "Apply resolved the live graph: "
-                    f"live_rows={live_runs} live_nodes="
-                    f"{data['isolation']['live_nodes']}->{live_nodes_after}"
+                    f"live_rows={live_runs} scratch_rows={scratch_runs}"
                 )
 
             calls = int(ledger["calls"])
