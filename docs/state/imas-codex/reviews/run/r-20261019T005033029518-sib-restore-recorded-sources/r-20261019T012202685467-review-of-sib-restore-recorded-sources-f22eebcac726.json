@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed run declares no baseline_suite or after_suite (its write paths contain no test file; its gate is the run script, apply.log EXIT=0). No suite arm exists to diff, so added_failure_count is 0 with no added ids, derived from the run's single recorded gate.",
+  "after_suite_log": null,
+  "assertion_analysis": [
+    {
+      "failure_condition": "a read-only reclassify pass changes the membership of the out-of-scope slices, which raises SystemExit before the JSON is rewritten; this is the one added condition that refuses.",
+      "lines": "sib-restore-recorded-sources-run.py:545-552"
+    },
+    {
+      "failure_condition": "the pre-apply read-back would report all_planned_still_dropped=false if the classifier no longer saw the planned names as dropped edges before the apply, which is how the check is shown able to fail; the value is recorded, not raised.",
+      "lines": "sib-restore-recorded-sources-run.py:440-446"
+    },
+    {
+      "failure_condition": "post_apply_readback.restored_names_still_dropped would be non-empty if the apply failed to bind a planned name; like the pre-apply check it is recorded, not asserted.",
+      "lines": "sib-restore-recorded-sources-run.py:466-472"
+    }
+  ],
+  "baseline_suite_log": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/provenance_rebuild.py:238",
+    "imas_codex/standard_names/graph_ops.py:22563"
+  ],
+  "completed_at": "2026-10-19T01:35:32.805Z",
+  "dispatched_at": "2026-10-19T01:22:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources.json",
+      "line": "355",
+      "severity": "follow-on",
+      "text": "follow-on: the planned_restorations entries carry name and source_ids but no route field, so the machine-readable record cannot be read for the route \u00a738's done-when and the node's own done-when require ('each name restored, with the source id and the route history'); the route appears only as prose in the HTML summary, which is uniform so the omission does not mislead."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources.json",
+      "line": "1885",
+      "severity": "follow-on",
+      "text": "follow-on: the quiet-graph check records 26 live-run pointers (8 touched within 1800 s) and one active-transaction snapshot, but carries no assertion that no other graph writer was live, so it documents the sampled state rather than establishing the quiet graph \u00a74 requires."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources-run.py",
+      "line": "195",
+      "severity": "follow-on",
+      "text": "follow-on: classify_repair_source re-implements the repair-source rule the plan already owns at sib-source-loss-census-run.py:779 (recorded_path / lineage_path / ancestor_or_successor_edge / binding_receipt_without_path) without extending that owner, so the two can drift; the rule is a candidate for one shared helper."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources-run.py",
+      "line": "143",
+      "severity": "follow-on",
+      "text": "follow-on: relative_evidence is annotated as returning a 2-tuple of dicts; it returns three values (paths, holdings, receipts) at line 192, so the annotation is wrong and will mislead a reader or a type checker."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "examined; the change is an evidence script reached only by hand, and it calls into two production owners (bind_recovery_sources, classify_sourceless_standard_names); no production module imports the script.",
+    "diff": "I read the one commit f22eebcac against base 95985b6c8; it adds 2735 lines across three files, all evidence-fragment artefacts, with no source, test or owner change.",
+    "done_when": "the node's done_when names the fragment html and JSON with the work list, the restored names, reasons, preview count, apply receipt, pre/post population counts, the pre-apply read-back and the quiet-graph check; the gate is the run script at apply.log with EXIT=0, and it produces all of those items.",
+    "goal": "the reviewed node's goal is to restore the DD sources the dropped-edge names recorded for themselves; sib-restore-recorded-sources.html:12 reports the work list of 114 and 112 restored names, taken from the names' own recorded_source_ids.",
+    "manifest": "manifest.md records the gate command and result (worklist=114 restored=112 skipped=2 dropped 199->87, EXIT=0), the three changed paths, the classifier read-back as the in-band negative control, and the reclassify correction note.",
+    "write_paths": "the brief grants four evidence paths and the orientation adds a figures path; the single-commit diff changes exactly three of them (run.py, json, html) and touches nothing outside."
+  },
+  "item_verdicts_order": [
+    "goal",
+    "done_when",
+    "write_paths",
+    "manifest",
+    "diff",
+    "call_sites"
+  ],
+  "justifications": {
+    "durability": "the only added condition that refuses on failure is the reclassify membership guard at sib-restore-recorded-sources-run.py:554; every other check (pre/post read-back, population delta) is recorded and printed but never reddens, so a regression in the classifier or writer would change the JSON's numbers without failing any test.",
+    "evidence": "apply.log records the gate command and 'worklist=114 restored=112 skipped=2 dropped 199->87' at EXIT=0, matching the manifest, and the JSON carries pre/post classifier counts; the quiet-graph check (json:1885) records facts but asserts no writer quiescence.",
+    "fit": "the fragment follows the sibling evidence-fragment idiom in docs/evidence/fragments/sn-integrity-backlog/ (same meta header, tables, node-id), and its added symbols (classify_repair_source, build_worklist, resolve_specs) carry no plan or stage label.",
+    "goal_fidelity": "sib-restore-recorded-sources-run.py:1-6 re-derives the dropped-edge slice from the live graph and restores 112 recorded-path names through bind_recovery_sources, matching the goal, but the restored binding is not registered with the route \u00a738 requires.",
+    "reuse": "sib-restore-recorded-sources-run.py:195 re-implements the repair-source rule the plan already owns at sib-source-loss-census-run.py:779, and :96 re-walks REFINED_FROM/HAS_SUCCESSOR chain topology the library classifier computes at graph_ops.py:3616, though it correctly reuses classify_sourceless_standard_names and bind_recovery_sources.",
+    "scope_discipline": "the single commit f22eebcac changes exactly the three declared write paths (run.py, json, html) and nothing else, all under docs/evidence/fragments/sn-integrity-backlog/."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to restore the DD sources the dropped-edge names recorded for themselves; sib-restore-recorded-sources.html:12 reports the work list of 114 and 112 restored names taken from the names' own recorded_source_ids.\nVERDICT done_when: the node's done_when names the fragment html and JSON with the work list, restored names, reasons, preview count, apply receipt, pre/post population counts, pre-apply read-back and quiet-graph check; the gate at apply.log produced all of these at EXIT=0.\nVERDICT write_paths: the brief grants four evidence paths; the single-commit diff changes exactly three of them (run.py, json, html) and touches nothing outside.\nVERDICT manifest: manifest.md records the gate command and result (worklist=114 restored=112 skipped=2 dropped 199->87, EXIT=0), the three changed paths, the classifier read-back as the in-band negative control, and the reclassify correction note.\nVERDICT diff: I read the one commit f22eebcac against base 95985b6c8; it adds 2735 lines across three evidence-fragment files, with no source, test or owner change.\nCALL_SITES: imas_codex/standard_names/provenance_rebuild.py:238, imas_codex/standard_names/graph_ops.py:22563\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: sib-restore-recorded-sources-run.py:1-6 re-derives the dropped-edge slice from the live graph and restores 112 recorded-path names through bind_recovery_sources, matching the goal, but the restored binding is not registered with the route \u00a738 requires.\nSCORE evidence: 16\nJUSTIFICATION evidence: apply.log records the gate command and 'worklist=114 restored=112 skipped=2 dropped 199->87' at EXIT=0, matching the manifest, and the JSON carries pre/post classifier counts; the quiet-graph check (json:1885) records facts but asserts no writer quiescence.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the single commit f22eebcac changes exactly the three declared write paths (run.py, json, html) and nothing else, all under docs/evidence/fragments/sn-integrity-backlog/.\nSCORE durability: 8\nJUSTIFICATION durability: the only added condition that refuses on failure is the reclassify membership guard at sib-restore-recorded-sources-run.py:554; every other check is recorded and printed but never reddens, so a regression would change the JSON's numbers without failing any test.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment follows the sibling evidence-fragment idiom in docs/evidence/fragments/sn-integrity-backlog/, and its added symbols carry no plan or stage label.\nSCORE reuse: 12\nJUSTIFICATION reuse: sib-restore-recorded-sources-run.py:195 re-implements the repair-source rule the plan already owns at sib-source-loss-census-run.py:779, and :96 re-walks REFINED_FROM/HAS_SUCCESSOR topology the library classifier computes at graph_ops.py:3616, though it correctly reuses classify_sourceless_standard_names and bind_recovery_sources.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources.json:355 follow-on: the planned_restorations entries carry name and source_ids but no route field, so the machine-readable record cannot be read for the route \u00a738's done-when and the node's own done-when require; the route appears only as prose in the HTML summary.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources.json:1885 follow-on: the quiet-graph check records 26 live-run pointers (8 touched within 1800 s) and one active-transaction snapshot, but carries no assertion that no other graph writer was live.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources-run.py:195 follow-on: classify_repair_source re-implements the repair-source rule the plan already owns at sib-source-loss-census-run.py:779 without extending that owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources-run.py:143 follow-on: relative_evidence is annotated as returning a 2-tuple but returns three values at line 192.\n",
+  "review_run_id": "r-20261019T012202685467-review-of-sib-restore-recorded-sources-f22eebcac726",
+  "reviewed_base_sha": "95985b6c88be740c4885f3de95121904af032779",
+  "reviewed_commits": [
+    "f22eebcac726f52cac4970bf6b1bbddf7733ac4d"
+  ],
+  "reviewed_head_sha": "f22eebcac726f52cac4970bf6b1bbddf7733ac4d",
+  "reviewed_run_id": "r-20261019T005033029518-sib-restore-recorded-sources",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T01:38:33.789725+00:00",
+  "total": 88
+}

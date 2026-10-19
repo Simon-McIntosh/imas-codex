@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="201">
+<meta name="plan-version" content="202">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -724,6 +724,9 @@
 </div>
 <div class="r-comment" data-section="s36" data-id="c-close-s36" data-who="reckon-build" data-when="2026-10-19T01:05:00Z">
     <div class="r-comment-body"><p>§36 closed. No identity writer can now leave a live, non-derived name bound to no DD source. One shared, null-safe invariant guards the rename, name creation, reconciliation and signed detachment inside their own transactions, tested against a real graph (merge <code>28e258690</code>). The final review's three follow-ons fold into §37, which shares these helpers:</p><ul><li>the invariant counts a stale source as a producer, where the signed-detachment flow does not;</li><li>the signed flow keeps its older producer check beside the invariant;</li><li>the transaction wrapper is written twice.</li></ul><p><a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s36-writers-carry-sources">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-run-r-20261019T012202685467-review-of-sib-restore-recorded-sources-f22eebcac726" data-who="reckon-build" data-when="2026-10-19T01:35:32.805Z">
+    <div class="r-comment-body"><p>the review record under the reviewed run&#x27;s review-records/ directory is the landing; it carries project, reviewed_run_id, review_run_id, reviewed_base_sha 95985b6c88be740c4885f3de95121904af032779, reviewed_head_sha f22eebcac726f52cac4970bf6b1bbddf7733ac4d, six scores, added_failure_count and findings; no plan edit was made.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
