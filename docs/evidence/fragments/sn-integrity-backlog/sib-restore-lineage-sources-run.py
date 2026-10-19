@@ -1,9 +1,9 @@
 """Restore a dropped-edge name's DD source from a relative's recorded path.
 
-Plan ``sn-integrity-backlog`` §38. The deterministic slice restored the names
-whose own recorded source identity survived. This driver takes the rest: the
-dropped-edge names whose only recoverable DD path is one a relative in their
-REFINED_FROM / supersede / fold chain recorded. A relative's path is evidence,
+The deterministic slice restored the names whose own recorded source identity
+survived. This driver takes the rest: the dropped-edge names whose only
+recoverable DD path is one a relative in their REFINED_FROM / supersede / fold
+chain recorded. A relative's path is evidence,
 not proof — a refine or fold may have moved to a different quantity — so every
 binding is confirmed by one Jev Choice before it is written, and a name whose
 answer is uncertain or names no candidate is referred rather than guessed.
@@ -588,9 +588,9 @@ def stage_readback(gc: GraphClient) -> None:
     print("delta:", delta)
 
 
-#: The §35 census populations §38 repairs: every live name lacking a DD source
-#: that is neither a derived parent nor an orphan §31 retires. The section's
-#: 15% bound is measured over this handed set.
+#: The census populations a source repair works: every live name lacking a DD
+#: source that is neither a derived parent nor an orphan awaiting retirement.
+#: The referral bound is measured over this handed set.
 HANDED_POPULATIONS = ("dropped_edge", "never_bound", "unchained_holder")
 
 
@@ -829,7 +829,7 @@ def stage_figure() -> None:
 
 
 def stage_referrals() -> None:
-    """Account the names this node sends to the lead against §38's bound."""
+    """Account the names this node sends to the lead against the referral bound."""
     with open(RESULTS) as fh:
         doc = json.load(fh)
 
