@@ -11,6 +11,7 @@ and removes its tree. Exactly one output file is written, under
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -22,6 +23,7 @@ import tarfile
 import tempfile
 import time
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -58,11 +60,73 @@ def apply_cap(planned_calls: int) -> float:
     return round(planned_calls * 0.674, 2)
 
 
-def free_port_pair() -> int:
-    """A bolt port whose http port (bolt + 1000) is also free."""
+# The ports are node-local, and each arm runs in its own run directory with its
+# own TMPDIR, so the lock must live in a directory that every concurrent arm on
+# the node shares and can write. /tmp is that directory on an ordinary host, but
+# a worker sandbox mounts it read-only, so the default is the node-local shared
+# memory filesystem; SSOG_PORT_LOCK_DIR overrides it for any other shared path.
+PORT_LOCK_DIR = Path(os.environ.get("SSOG_PORT_LOCK_DIR", "/dev/shm"))
+PORT_LOCK_PREFIX = "ssog-scratch-port-"
+
+
+def _lock_path(base: int) -> Path:
+    return PORT_LOCK_DIR / f"{PORT_LOCK_PREFIX}{base}.lock"
+
+
+@dataclass
+class PortReservation:
+    """An exclusive claim on a scratch port pair, held for the arm's life.
+
+    ``release`` is idempotent: the arm's cleanup runs on every exit path, and
+    a path that released twice must not close the descriptor twice.
+    """
+
+    base: int
+    lock_path: Path
+    _fd: int | None
+
+    def release(self) -> None:
+        if self._fd is None:
+            return
+        try:
+            fcntl.flock(self._fd, fcntl.LOCK_UN)
+        finally:
+            os.close(self._fd)
+            self._fd = None
+
+
+def reserve_port_pair(arm: str) -> PortReservation:
+    """Reserve an exclusive bolt/http pair for this arm's whole lifetime.
+
+    A scratch instance binds its bolt port only after its multi-gigabyte dump
+    has loaded, minutes after the port is chosen, so probing for a port that is
+    free right now cannot keep two concurrent arms apart: both see the same
+    ports free and later race for them. Each candidate pair carries a lock file
+    taken with an exclusive non-blocking ``flock``, held from reservation until
+    the instance is stopped and its tree removed. A pair whose lock another arm
+    holds, or whose ports are bound, is skipped. The lock file records the
+    holder's pid and arm so a reader can see who has it.
+    """
     for base in range(28000, 40000, 2):
-        if _free(base) and _free(base + 1000):
-            return base
+        if not (_free(base) and _free(base + 1000)):
+            continue
+        lock_path = _lock_path(base)
+        fd = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o644)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            os.close(fd)
+            continue
+        # Another arm may have bound the ports between the probe above and the
+        # lock; re-probe under the lock before committing to the pair.
+        if not (_free(base) and _free(base + 1000)):
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+            continue
+        os.ftruncate(fd, 0)
+        os.write(fd, f"pid={os.getpid()} arm={arm}\n".encode())
+        os.fsync(fd)
+        return PortReservation(base=base, lock_path=lock_path, _fd=fd)
     raise RuntimeError("No free Neo4j port pair in range")
 
 
@@ -372,11 +436,15 @@ def run_arm(seed: str, arm: str) -> dict:
         )
     )
     data["scratch_tree"] = str(scratch)
-    out_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
-    port = free_port_pair()
-    data["port"] = port
+    data["scratch_removed"] = None
     instance = None
+    reservation = None
     try:
+        reservation = reserve_port_pair(arm)
+        port = reservation.base
+        data["port"] = port
+        data["port_lock"] = str(reservation.lock_path)
+        out_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
         place = scratch / "instance"
         for sub in ("data", "dumps", "logs", "run", "tmp"):
             (place / sub).mkdir(parents=True, exist_ok=True)
@@ -596,6 +664,14 @@ def run_arm(seed: str, arm: str) -> dict:
             "removed_entries": removed,
             "at": now(),
         }
+        # The pair stays reserved until the instance is stopped and its tree
+        # removed, so no later arm can claim a port this arm is still using.
+        if reservation is not None:
+            reservation.release()
+            data["port_lock_released"] = {
+                "lock": str(reservation.lock_path),
+                "at": now(),
+            }
         out_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 
