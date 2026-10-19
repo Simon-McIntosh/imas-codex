@@ -40,6 +40,11 @@
       "kind": "exempted",
       "reason": "The apply is complete and its recorded facts show no other graph writer live at apply time, so a guard added now changes nothing. The fail-closed form is being built in sib-settle-unchained-holders through the quiet-graph probe owner in imas_codex/graph/offsite.py, which later repair drivers reuse.",
       "recorded_at": "2026-10-19T03:23:16.132520+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Only this one-shot evidence driver duplicates the DD source spec; no product caller does. If another repair driver needs the shape, it is exported from provenance_rebuild then, rather than in an evidence node.",
+      "recorded_at": "2026-10-19T03:23:28.514401+00:00"
     }
   },
   "findings": [
