@@ -1,0 +1,39 @@
+<section id="srtj-cohort-eligibility">
+  <h2 id="srtj-cohort-eligibility-summary">Cohort pieces exclude the items the scratch pool cannot claim</h2>
+  <p>
+    The cascade docs piece stopped because the scratch review pool refused to
+    claim 13 of its 232 items. Its traceback names the predicate at
+    <code>srtj-cohort-run.py:prepare_scope</code>, which restages a scope only
+    when every item satisfies the pool's claim conditions: a
+    <code>StandardName</code> whose <code>validation_status</code> is
+    <code>valid</code>, whose <code>origin</code> is not <code>derived</code> and
+    whose <code>description</code> is present on the name axis, and whose
+    <code>name_stage</code> is <code>accepted</code> with non-empty
+    <code>documentation</code> on the docs axis.
+  </p>
+  <p>
+    A driver loaded that predicate from the runner itself — it never
+    re-implements it — and ran it item by item over all 463 non-excluded cohort
+    items in a freshly loaded scratch copy of the checked 2026-10-18 export
+    (<code>imas-codex-graph-dev-af50a71-20261018T114748Z</code>, code revision
+    <code>33836e98c</code>). Thirteen items were refused, all on the docs axis,
+    and all because the snapshot carries their <code>name_stage</code> as
+    <code>reviewed</code> rather than <code>accepted</code>; eleven of the
+    thirteen also carry no <code>documentation</code>. The name axis left 231
+    items claimable and the docs axis 219. A field-derived verdict was asserted
+    equal to <code>prepare_scope</code>'s own accept/refuse decision for every
+    item, so a mismatch would have failed the run.
+  </p>
+  <p>
+    <code>srtj-cohort/excluded.json</code> now lists 14 exclusions — the existing
+    stale-DD-unit entry, <code>x_direction_unit_vector_of_camera</code>, plus the
+    13 docs-axis items — against the 23-item (5%) precision limit, so the
+    comparison still stands. A fresh check then re-ran the predicate over every
+    remaining docs item (219 claimable) and every remaining name item (231
+    claimable), both without refusal. No completed piece overlaps the new
+    exclusions: all three completed pieces (cascade name, 231 items; incumbent
+    name pieces 1 and 2, 57 and 58 items) are name-axis, and every new exclusion
+    is docs-axis, so the aggregating node can compare the arms on the whole
+    name-axis cohort.
+  </p>
+</section>

@@ -4,11 +4,23 @@
   "cohort_count": 464,
   "cohort_digest": "b4dd9195416ebfef0a5a08e14ba2a24e20b683c9f9a358d3d2f326811ade814a",
   "created_at": "2026-10-19T09:56:46.926020+00:00",
+  "eligibility_scan": {
+    "candidate_count": 463,
+    "existing_excluded_count": 1,
+    "fresh_check": {
+      "docs": "all 219 claimable",
+      "name": "all 231 claimable"
+    },
+    "max_exclusions": 23,
+    "new_unclaimable_count": 13,
+    "predicate": "srtj-cohort-run.py:prepare_scope",
+    "total_exclusions": 14
+  },
   "excluded_by_axis": {
-    "docs": 0,
+    "docs": 13,
     "name": 1
   },
-  "excluded_count": 1,
+  "excluded_count": 14,
   "excluded_items": [
     {
       "axis": "name",
@@ -22,6 +34,149 @@
         }
       ],
       "id": "x_direction_unit_vector_of_camera"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed"
+        }
+      ],
+      "id": "electron_temperature_at_pedestal_top",
+      "reason": "name_stage=reviewed"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "major_angle_of_shatter_cone",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "neutral_state_diamagnetic_momentum_diffusivity",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "normalized_beam_power",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "parallel_neutral_particle_convection_velocity",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed"
+        }
+      ],
+      "id": "poloidal_electron_beta_flux_surface_averaged_at_pedestal_top",
+      "reason": "name_stage=reviewed"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "poloidal_ion_charge_state_energy_velocity_due_to_convection",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "poloidal_ion_energy_diffusion_coefficient",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed"
+        }
+      ],
+      "id": "radial_ion_state_momentum_convection_velocity",
+      "reason": "name_stage=reviewed"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "radial_momentum",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "radial_momentum_diffusion_coefficient",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "radius_of_aperture",
+      "reason": "name_stage=reviewed; documentation empty"
+    },
+    {
+      "axis": "docs",
+      "errors": [
+        {
+          "error_type": "ScratchPoolIneligible",
+          "reason": "name_stage=reviewed; documentation empty"
+        }
+      ],
+      "id": "rate_due_to_beam_thermal_fusion",
+      "reason": "name_stage=reviewed; documentation empty"
     }
   ],
   "field_checks": 15640,
@@ -44,7 +199,7 @@
   "max_exclusions": 23,
   "module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py",
   "resolution_count": 51,
-  "scanned_at": "2026-10-19T09:58:14.072361+00:00",
+  "scanned_at": "2026-10-19T19:03:42.843579+00:00",
   "scratch_instance": {
     "log": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6/instance/logs/neo4j-temp.log",
     "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6/instance",
