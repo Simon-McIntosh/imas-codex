@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The negative control's `passed` is derived from filter_hits' own outputs over planted inputs; if filter_hits were to drop a unit-matching hit carrying an extracted/skipped/failed source held by no live name, extracted_kept would be empty and `passed` would be False, so the control does redden on the regression the corrected pass removed. It is independently sourced (planted facts vs code output), not a self-comparison.",
+      "lines": "sib-restore-searched-sources-run.py:1340-1350"
+    },
+    {
+      "failure_condition": "owned_population_gate compares the live post read-back against the recorded baseline and asserts owned_shrink == prior_restored + len(new_bindings); if a binding failed to move a name out of dropped_edge/never_bound, owned_shrink would be short of expected and readback_exit would be EXIT=3. The two sides are independent (live graph vs write count). The gate was observed failing on the unscoped variant, recorded in the resume stream as 'read-back gate failed: 10 restored but 21 left the sourceless populations'.",
+      "lines": "sib-restore-searched-sources-run.py:996-998"
+    },
+    {
+      "failure_condition": "The concurrent-writer attribution is reported, never asserted: run.py:1089 records the runs touched within 1800s and passes gate_ok regardless of which runs they are, so a movement of another population by this node's own writes would pass the gate exactly as an external one does.",
+      "lines": "sib-restore-searched-sources-run.py:1073-1090"
+    }
+  ],
+  "call_sites": [
+    "imas_codex/standard_names/graph_ops.py:classify_sourceless_standard_names",
+    "imas_codex/standard_names/provenance_rebuild.py:bind_recovery_sources",
+    "imas_codex/tools/graph_search.py:GraphSearchTool.search_dd_paths",
+    "imas_codex/discovery/base/judgment.py:decide_batch",
+    "imas_codex/units/__init__.py:normalize_unit_symbol",
+    "imas_codex/units/__init__.py:units_are_equivalent"
+  ],
+  "completed_at": "2026-10-19T03:08:23.743Z",
+  "dispatched_at": "2026-10-19T02:57:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py",
+      "line": "1152",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's tables are split from different stores. render() builds referred_rows from doc['referred_to_lead'] + doc['corrected_referred_to_lead'] (35 rows) and no_cand_rows from doc['corrected_no_surviving_candidate'] (15 rows), while stage_control derives lead_referral_total from the corrected filter (34 with candidates, 16 with none). The name fraction_of_neutron_detector_converter is a first-pass referral whose corrected-filter candidate set is empty, so it is rendered under 'Referred to the lead' with stale first-pass candidates instead of under 'No surviving candidate'; the html summary (line 13) then reads '35 referred to the lead; 15 with no surviving candidate' against the record's 34/16. Both reconcile to the same total of 50 and running total of 67, so the gate and the restored count are unaffected."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py",
+      "line": "133",
+      "severity": "follow-on",
+      "text": "follow-on: population_gate is dead code. It is defined at run.py:133-160 and called nowhere (owned_population_gate at run.py:91 replaced it after the unscoped form failed '10 restored but 21 left the sourceless populations'); the superseded guard is left in the driver and reads as a live check a reader may trust."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py",
+      "line": "182",
+      "severity": "follow-on",
+      "text": "follow-on: quiet_graph_check records facts and asserts nothing \u2014 no condition on its return value can fail, so the 'quiet-graph check' the done_when requires is a record rather than a guard. The same shape was a blocking finding on the sibling node r-20261019T021901634768."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py",
+      "line": "463",
+      "severity": "follow-on",
+      "text": "follow-on: spec() (run.py:463-471) re-inlines the DD source dict that imas_codex/standard_names/provenance_rebuild.py:423-430 builds inline inside _fetch_dd_source_paths; no exported owner for that shape exists, so the two can drift and a change to the source spec must be made in two places."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Call sites are the production functions the driver reaches at runtime: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names (readback), imas_codex.standard_names.provenance_rebuild.bind_recovery_sources (the write), imas_codex.tools.graph_search.GraphSearchTool.search_dd_paths (the search), imas_codex.discovery.base.judgment.decide_batch via imas_codex.settings.get_model('sn-judge') (the Jev check), and imas_codex.units.normalize_unit_symbol/units_are_equivalent (the unit filter); the driver also exercises graph_ops._TransactionQuery for the preview rollback. No production call site reaches the added code, because the added code is an evidence driver under docs/.",
+    "diff": "Read commit by commit: ebff49e9b adds the driver, fragment, JSON and figure; 9269556e5 removes a duplicated quiet-graph block and a stray line; d554595cb rewrites filter_hits to drop only on unit mismatch, path-absent, live holder or stale, adds units_match over the repository unit authority, adds owned_population_gate and the corrected pass, and extends the negative control to the existing-source branches; four files, all inside the declared scope.",
+    "done_when": "The source brief.md:41-56 done_when asks for the work list, per-name kept/dropped hits with reason, the Jev answer and confidence, the restored bindings, the referrals with hits, preview and apply receipt, the quiet-graph check, before/after classifier counts at EXIT= with the owned populations falling by exactly the restored count, the spend and the running referral total; the fragment and JSON carry each (record stage 'corrected', readback_exit EXIT=0), but the html summary/table split disagrees with the record's own counts (see finding on run.py:1152), and the done_when's 'other populations unchanged' clause is not met (unchained_holder -11, attributed to a concurrent sibling).",
+    "goal": "The source brief.md:1-13 asks the node to re-derive the 30 dropped-edge names the lineage step referred to DD search plus the never-bound names, restore each by DD search confirmed by one Jev Choice and refer the rest to the lead; the landed run.py restores 10 (5 first-pass bindings, 5 corrected-pass bindings; record corrected_receipt rows) from 60 work-list names, each through bind_recovery_sources with a Jev answer at P(choice)>=0.8 (record judged), and refers 50.",
+    "manifest": "The source manifest.md records 10 restored, 50 referred, 16 with no surviving candidate, spend USD 0.001713642 and read-back pass with negative control passed; the counts reconcile with the JSON record except that its landing block is a multi-line structure rather than the one-line landing the contract asks for.",
+    "write_paths": "The source prompt.txt:135-139 fences the three evidence files plus docs/figures/sn-integrity-backlog/sib-restore-searched-sources; git diff --stat 870fd7d4..d554595cb names exactly those four paths and no production file."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T025632205845-review-of-sib-restore-searched-sources-d554595cbce2",
+  "reviewed_base_sha": "870fd7d4efac46a1d65d0baabfef9cad8c352a9e",
+  "reviewed_head_sha": "d554595cbce239db042b7d1bd16a261adf481f81",
+  "reviewed_run_id": "r-20261019T015039275505-sib-restore-searched-sources",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T03:14:53.120893+00:00"
+}
