@@ -9,6 +9,13 @@
   "call_sites": [],
   "completed_at": "2026-10-19T05:37:31.641Z",
   "dispatched_at": "2026-10-19T05:29:38Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Figures are checked at render time by the producing node and by review, as the figure rule requires; a repository test for one evidence figure would be the only one of its kind. The fixed SVG parses and renders (render.log EXIT=0).",
+      "recorded_at": "2026-10-19T07:29:17.713837+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-signed-recovery-unbind.html",
