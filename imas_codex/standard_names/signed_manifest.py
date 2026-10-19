@@ -7287,7 +7287,7 @@ def _apply_source_exchange(
                         WITH name, given, binding, taken_dd, receiver
                         WHERE $receiving_name_id IS NULL OR
                               (receiver IS NOT NULL AND
-                               coalesce(receiver.name_stage, '') NOT IN ['exhausted', 'superseded'])
+                               NOT (coalesce(receiver.name_stage, '') IN ['exhausted', 'superseded']))
                         MERGE (taken:StandardNameSource {id: $taken_source_id})
                           ON CREATE SET taken.created_at = datetime(), taken.attempt_count = 0,
                                         taken.source_type = 'dd', taken.source_id = $taken_path,
