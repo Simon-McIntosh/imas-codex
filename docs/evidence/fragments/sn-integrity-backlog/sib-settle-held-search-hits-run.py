@@ -1164,6 +1164,17 @@ def compose() -> dict:
         "where a holder's unit differs from the unit its held DD path declares. Those pairs "
         "are flagged below and change nothing about the holder.</p>",
         f"<p id='{node}-foreign'>{escape(foreign_note)}</p>",
+        f"<figure id='{node}-fig'>"
+        f"<img src='/imas-codex/figures/sn-integrity-backlog/sib-settle-held-search-hmm/"
+        f"{node}.svg' alt='Sourceless population before and after this node&apos;s signed "
+        f"supersedes, and the work list split into settled, live and exhausted referrals.'>"
+        f"<figcaption>Sourceless names by population before and after this node's "
+        f"{len(retired)} signed supersedes (left), and the {cohort['worklist_count']}-name work "
+        f"list split into {len(retired)} settled, "
+        f"{totals['this_node_referrals_live']} still-live and "
+        f"{totals['this_node_referrals_exhausted']} exhausted referrals (right). "
+        f"Only the dropped-edge and never-bound populations moved; the other three are unchanged."
+        f"</figcaption></figure>",
         f"<h3 id='{node}-floors'>Floors</h3>",
         f"<p>Coordinator's ruling for every retirement: the chosen option's probability at "
         f"least <code>{PROBABILITY_FLOOR}</code> and Jev's self-reported confidence at least "
