@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "The coordinator raised this piece's ceiling from USD 3.00 to USD 3.50 by resume advice, within the lead's USD 60, after measuring a 28% band share against calibration's 18%; the plan record states it. The per-piece constant becomes a flag in srtj-cohort-piece-limits.",
       "recorded_at": "2026-10-19T14:29:56.761699+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The coordinator approved the exclusion by resume advice: one of 464 items carries a raw DD unit the live graph has since resolved, so excluded.json is shared by every piece and the aggregating node compares arms over the same 463 items.",
+      "recorded_at": "2026-10-19T14:30:02.146820+00:00"
     }
   },
   "findings": [
