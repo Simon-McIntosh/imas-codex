@@ -1037,6 +1037,9 @@ def main() -> None:
             json.dumps(payload, indent=2, default=str) + "\n"
         )
         print(json.dumps(payload, indent=2, default=str)[:6000])
+        if isinstance(payload, dict) and "checks" in payload:
+            print("checks:", json.dumps(payload["checks"]))
+            print("checks_pass:", all(payload["checks"].values()))
 
     if args.mode == "read":
         out = read()
