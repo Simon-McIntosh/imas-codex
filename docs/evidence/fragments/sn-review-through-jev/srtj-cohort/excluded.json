@@ -1,0 +1,62 @@
+{
+  "archive": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "code_revision": "ed8fb1093ed459025308fb85325ecad2ed4b7ad4",
+  "cohort_count": 464,
+  "cohort_digest": "b4dd9195416ebfef0a5a08e14ba2a24e20b683c9f9a358d3d2f326811ade814a",
+  "created_at": "2026-10-19T09:56:46.926020+00:00",
+  "excluded_by_axis": {
+    "docs": 0,
+    "name": 1
+  },
+  "excluded_count": 1,
+  "excluded_items": [
+    {
+      "axis": "name",
+      "errors": [
+        {
+          "error_type": "DDResolutionStale",
+          "field": "unit",
+          "path": "camera_ir/channel/camera/direction/x",
+          "reason": "graph value for ('camera_ir/channel/camera/direction/x', '4.1.1', 'unit') does not match the resolution's effective value",
+          "source_id": "dd:camera_ir/channel/camera/direction/x"
+        }
+      ],
+      "id": "x_direction_unit_vector_of_camera"
+    }
+  ],
+  "field_checks": 15640,
+  "items_without_dd_sources": [
+    "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+    "fast_particle_pressure",
+    "ion_charge_state_momentum_source",
+    "ion_charge_state_rotation_frequency",
+    "momentum_source_due_to_diamagnetic_drift",
+    "neutron_emissivity_due_to_fusion",
+    "plasma_energy",
+    "rate_due_to_beam_thermal_fusion",
+    "rate_due_to_pumping",
+    "thermal_electron_absorbed_wave_power",
+    "toroidal_neutral_internal_state_momentum_flux_limiter_coefficient",
+    "total_ion_charge_state_power_due_to_collisions"
+  ],
+  "manifest_digest": "sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d",
+  "max_exclusions": 23,
+  "module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py",
+  "resolution_count": 51,
+  "scanned_at": "2026-10-19T09:58:14.072361+00:00",
+  "scratch_instance": {
+    "log": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6/instance/logs/neo4j-temp.log",
+    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6/instance",
+    "uri": "bolt://127.0.0.1:53403"
+  },
+  "scratch_removed": {
+    "exists_after": false,
+    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6"
+  },
+  "scratch_stopped": true,
+  "scratch_tree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner/docs/evidence/fragments/sn-review-through-jev/srtj-cohort/.scratch/review-preflight-w4mjbh_6",
+  "source_rows": 783,
+  "status": "accepted",
+  "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-runner"
+}
