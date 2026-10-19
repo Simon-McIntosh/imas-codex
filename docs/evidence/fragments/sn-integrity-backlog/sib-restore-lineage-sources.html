@@ -1,0 +1,153 @@
+<article data-reckon="fragment" id="sib-restore-lineage-sources">
+<h2 id="sib-restore-lineage-sources-title">§38 — the lost sources restored from a relative's recorded path</h2>
+<p id="sib-restore-lineage-sources-lede">This node takes the dropped-edge names whose own recorded source
+identity did not survive, so their only recoverable DD path is one a relative in their
+refinement or supersede chain recorded. A relative's path is evidence, not proof — a
+refine or a fold may have moved to a different quantity — so every binding was
+confirmed by one Jev Choice before it was written. Nothing guessed was written.</p>
+
+<h3 id="sib-restore-lineage-sources-worklist">The work list</h3>
+<p id="sib-restore-lineage-sources-worklist-note">Re-derived from the live graph with §37's
+<code>classify_sourceless_standard_names</code>, not from §35's census, because the
+deterministic slice had already applied. The live classifier reports
+<strong>152</strong> sourceless live names, of which
+<strong>87</strong> are dropped-edge. Of those,
+1 carried their own recorded
+source identity (another node's slice); the remaining <strong>86</strong>
+have none, and are this node's work list. Of these, <strong>56</strong>
+have at least one free candidate DD path and <strong>30</strong>
+have none.</p>
+
+<h3 id="sib-restore-lineage-sources-restored">Restored bindings, route: Jev</h3>
+<p id="sib-restore-lineage-sources-restored-note">Each was restored through
+<code>bind_recovery_sources</code> in <code>provenance_rebuild.py</code> after a Jev
+Choice named it. The floor is this driver's own, since the decisions owner defines
+none: a binding is admitted only when the chosen candidate's probability reaches
+<strong>0.8</strong> <em>and</em> the answer's
+self-reported confidence reaches <strong>0.5</strong>.
+Both halves are required. A probability alone admitted near-zero-confidence picks —
+a near-flat distribution can land a hair above half on one candidate while the
+judgement itself carries nothing, which is a guess wearing a number; the bindings
+below that floor are listed separately below rather than presented as settled.
+<code>P(choice)</code> is the chosen candidate's probability and
+<em>self-reported</em> is the answer's own <code>confidence</code> field.</p>
+<table><thead><tr><th>standard name</th><th>restored DD path</th><th>P(choice)</th><th>self-reported</th><th>bound</th></tr></thead><tbody><tr><td>acceleration_of_passive_structure</td><td>operational_instrumentation/sensor/acceleration</td><td>0.94</td><td>0.88</td><td>1</td></tr><tr><td>co_passing_fast_electron_kinetic_power_density_due_to_collisions</td><td>distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast</td><td>0.87</td><td>0.74</td><td>1</td></tr><tr><td>diameter_of_fibre_bundle</td><td>charge_exchange/channel/image_diameter</td><td>0.97</td><td>0.94</td><td>1</td></tr><tr><td>distance_of_beam_tracing_ray</td><td>ece/channel/beam_tracing/beam/length</td><td>0.97</td><td>0.94</td><td>1</td></tr><tr><td>effective_incident_neutral_coefficient_of_wall_material_due_to_sputtering</td><td>wall/global_quantities/neutral/incident_species/sputtering_physical</td><td>0.98</td><td>0.96</td><td>1</td></tr><tr><td>electron_particle_diffusion_coefficient</td><td>plasma_transport/model/ggd/electrons/particles/d/values</td><td>0.77</td><td>0.54</td><td>1</td></tr><tr><td>flux_surface_normal_momentum_convection_velocity</td><td>plasma_transport/model/profiles_1d/momentum_phi/v</td><td>0.89</td><td>0.78</td><td>1</td></tr><tr><td>flux_surface_normal_momentum_diffusion_coefficient</td><td>core_transport/model/profiles_1d/ion/momentum/radial/d</td><td>0.89</td><td>0.78</td><td>1</td></tr><tr><td>flux_surface_normal_neutral_energy_diffusion_coefficient</td><td>plasma_transport/model/ggd/neutral/energy/d_radial/values</td><td>0.56</td><td>0.12</td><td>1</td></tr><tr><td>gas_atomic_count_of_pellet_injector</td><td>spi/injector/propellant_gas/atoms_n</td><td>0.99</td><td>0.98</td><td>1</td></tr><tr><td>heat_power_of_divertor</td><td>balance_of_plant/power_plant/heat_load_divertor</td><td>0.63</td><td>0.26</td><td>1</td></tr><tr><td>ion_species_atomic_number</td><td>plasma_transport/model/ggd/ion/element/z_n</td><td>0.97</td><td>0.94</td><td>1</td></tr><tr><td>ion_temperature_at_outboard_midplane_separatrix</td><td>langmuir_probes/reciprocating/plunge/collector/t_i</td><td>0.54</td><td>0.08</td><td>1</td></tr><tr><td>lithium_volume_of_breeder_blanket</td><td>breeding_blanket/pb_li_volume</td><td>0.96</td><td>0.92</td><td>1</td></tr><tr><td>net_power</td><td>balance_of_plant/power_electricity_net</td><td>0.99</td><td>0.98</td><td>1</td></tr><tr><td>neutron_rate_of_detector</td><td>neutron_diagnostic/detector/mode/counting</td><td>0.87</td><td>0.74</td><td>1</td></tr><tr><td>non_axisymmetric_current_of_conductor</td><td>coils_non_axisymmetric/coil/current</td><td>0.9</td><td>0.8</td><td>1</td></tr><tr><td>normal_width_of_plasma_filament</td><td>pf_plasma/element/geometry/thick_line/thickness</td><td>0.8</td><td>0.6</td><td>1</td></tr><tr><td>nuclear_power_density_at_midplane</td><td>breeding_blanket/module/time_slice/midplane_power_density_nuclear</td><td>0.99</td><td>0.98</td><td>1</td></tr><tr><td>parallel_thermal_neutral_energy_diffusivity</td><td>edge_transport/model/ggd/neutral/energy/d_parallel/values</td><td>0.76</td><td>0.52</td><td>1</td></tr><tr><td>perpendicular_ion_velocity_due_to_diamagnetic_drift</td><td>edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic</td><td>0.7</td><td>0.55</td><td>1</td></tr><tr><td>perturbed_linear_mhd_mode_number</td><td>distribution_sources/source/markers/orbit_integrals/m_pol</td><td>0.51</td><td>0.02</td><td>1</td></tr><tr><td>poloidal_effective_ion_diffusion_coefficient</td><td>edge_transport/model/ggd/ion/particles/d_pol/values</td><td>0.76</td><td>0.52</td><td>1</td></tr><tr><td>power_over_scrape_off_layer_due_to_radiation</td><td>summary/scrape_off_layer/power_radiated/value</td><td>0.88</td><td>0.76</td><td>1</td></tr><tr><td>radial_offset_of_lower_hybrid_antenna</td><td>lh_antennas/antenna/distance_to_antenna</td><td>0.97</td><td>0.94</td><td>1</td></tr><tr><td>ratio_of_field_line_count_to_total_field_line_count</td><td>plasma_initiation/b_field_lines/open_fraction</td><td>1.0</td><td>1</td><td>1</td></tr><tr><td>ratio_of_volume_of_wall_material_to_volume_of_passive_structure</td><td>cryostat/description_2d/cryostat/unit/material_volume_fraction</td><td>0.67</td><td>0.34</td><td>1</td></tr><tr><td>reference_wavelength_of_filter_window</td><td>camera_ir/channel/camera/frame/filter/wavelength_central</td><td>0.97</td><td>0.94</td><td>1</td></tr><tr><td>second_local_tangential_width_of_diagnostic_aperture</td><td>neutron_diagnostic/detector/aperture/x2_width</td><td>0.64</td><td>0.28</td><td>1</td></tr><tr><td>surface_thickness_of_breeder_blanket_module</td><td>breeding_blanket/module/side_wall_thickness</td><td>0.92</td><td>0.84</td><td>1</td></tr><tr><td>tendency_of_runaway_electron_density</td><td>runaway_electrons/ggd_fluid/ddensity_dt_tritium/values</td><td>0.62</td><td>0.24</td><td>1</td></tr><tr><td>tilt_angle_of_poloidal_field_coil</td><td>pf_active/coil/geometry/oblique/beta</td><td>0.88</td><td>0.76</td><td>1</td></tr><tr><td>toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport</td><td>distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi</td><td>0.76</td><td>0.52</td><td>1</td></tr><tr><td>toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport</td><td>distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi</td><td>0.78</td><td>0.56</td><td>1</td></tr><tr><td>vertical_coordinate_of_plasma_filament</td><td>pf_plasma/element/geometry/outline/z</td><td>0.92</td><td>0.84</td><td>1</td></tr><tr><td>vertical_position_of_grating</td><td>spectrometer_x_ray_crystal/channel/reflector/centre/z</td><td>0.5</td><td>0</td><td>1</td></tr><tr><td>vertical_total_ion_momentum_diffusivity</td><td>plasma_transport/model/ggd/ion/momentum/d/z</td><td>0.78</td><td>0.56</td><td>1</td></tr><tr><td>wave_critical_ordinary_mode_frequency</td><td>reflectometer_profile/channel/cut_off_frequency</td><td>0.84</td><td>0.68</td><td>1</td></tr><tr><td>wave_magnetic_field_amplitude</td><td>waves/coherent_wave/full_wave/b_field/normal/values</td><td>0.68</td><td>0.36</td><td>1</td></tr></tbody></table>
+
+<h3 id="sib-restore-lineage-sources-below-floor">Bound below the confidence floor, awaiting lead confirmation</h3>
+<p id="sib-restore-lineage-sources-below-floor-note">These <strong>16</strong>
+bindings were applied under a weaker floor — a chosen probability at or above 0.5
+alone — before the two-part floor was ruled.
+They are <strong>not detached</strong>: a live name left without a DD source is
+exactly what the source invariant refuses, so the write stands and the name is carried
+here for lead confirmation instead. They count toward the running lead-referral total.
+The first entries are the worst — a chosen probability at chance with a self-reported
+confidence of zero, which is indistinguishable from a coin toss on this evidence.</p>
+<table><thead><tr><th>standard name</th><th>candidate</th><th>P(choice)</th><th>self-reported</th><th>reason</th></tr></thead><tbody><tr><td>vertical_position_of_grating</td><td>spectrometer_x_ray_crystal/channel/reflector/centre/z</td><td>0.5</td><td>0</td><td>P(choice) 0.50 below 0.8</td></tr><tr><td>perturbed_linear_mhd_mode_number</td><td>distribution_sources/source/markers/orbit_integrals/m_pol</td><td>0.51</td><td>0.02</td><td>P(choice) 0.51 below 0.8</td></tr><tr><td>ion_temperature_at_outboard_midplane_separatrix</td><td>langmuir_probes/reciprocating/plunge/collector/t_i</td><td>0.54</td><td>0.08</td><td>P(choice) 0.54 below 0.8</td></tr><tr><td>flux_surface_normal_neutral_energy_diffusion_coefficient</td><td>plasma_transport/model/ggd/neutral/energy/d_radial/values</td><td>0.56</td><td>0.12</td><td>P(choice) 0.56 below 0.8</td></tr><tr><td>tendency_of_runaway_electron_density</td><td>runaway_electrons/ggd_fluid/ddensity_dt_tritium/values</td><td>0.62</td><td>0.24</td><td>P(choice) 0.62 below 0.8</td></tr><tr><td>heat_power_of_divertor</td><td>balance_of_plant/power_plant/heat_load_divertor</td><td>0.63</td><td>0.26</td><td>P(choice) 0.63 below 0.8</td></tr><tr><td>second_local_tangential_width_of_diagnostic_aperture</td><td>neutron_diagnostic/detector/aperture/x2_width</td><td>0.64</td><td>0.28</td><td>P(choice) 0.64 below 0.8</td></tr><tr><td>ratio_of_volume_of_wall_material_to_volume_of_passive_structure</td><td>cryostat/description_2d/cryostat/unit/material_volume_fraction</td><td>0.67</td><td>0.34</td><td>P(choice) 0.67 below 0.8</td></tr><tr><td>wave_magnetic_field_amplitude</td><td>waves/coherent_wave/full_wave/b_field/normal/values</td><td>0.68</td><td>0.36</td><td>P(choice) 0.68 below 0.8</td></tr><tr><td>perpendicular_ion_velocity_due_to_diamagnetic_drift</td><td>edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic</td><td>0.7</td><td>0.55</td><td>P(choice) 0.70 below 0.8</td></tr><tr><td>parallel_thermal_neutral_energy_diffusivity</td><td>edge_transport/model/ggd/neutral/energy/d_parallel/values</td><td>0.76</td><td>0.52</td><td>P(choice) 0.76 below 0.8</td></tr><tr><td>poloidal_effective_ion_diffusion_coefficient</td><td>edge_transport/model/ggd/ion/particles/d_pol/values</td><td>0.76</td><td>0.52</td><td>P(choice) 0.76 below 0.8</td></tr><tr><td>toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport</td><td>distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi</td><td>0.76</td><td>0.52</td><td>P(choice) 0.76 below 0.8</td></tr><tr><td>electron_particle_diffusion_coefficient</td><td>plasma_transport/model/ggd/electrons/particles/d/values</td><td>0.77</td><td>0.54</td><td>P(choice) 0.77 below 0.8</td></tr><tr><td>toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport</td><td>distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi</td><td>0.78</td><td>0.56</td><td>P(choice) 0.78 below 0.8</td></tr><tr><td>vertical_total_ion_momentum_diffusivity</td><td>plasma_transport/model/ggd/ion/momentum/d/z</td><td>0.78</td><td>0.56</td><td>P(choice) 0.78 below 0.8</td></tr></tbody></table>
+
+<h3 id="sib-restore-lineage-sources-referred">Sent to the lead, unbound</h3>
+<p id="sib-restore-lineage-sources-referred-note">Jev answered <strong>none of these</strong> for these
+names, or answered below the floor, and nothing was written: their relative's recorded
+path measures a different quantity or cannot be settled. They are referred with their
+candidates, their answer and its probabilities — never restored.</p>
+<table><thead><tr><th>standard name</th><th>answer</th><th>P(answer)</th><th>candidates</th><th>reason</th></tr></thead><tbody><tr><td>absorbed_coolant_power_of_plant_component_port</td><td>none of these</td><td>0.53</td><td>balance_of_plant/power_plant/system/component/port/power_thermal</td><td>answered none-of-these</td></tr><tr><td>beam_cross_sectional_area_of_aperture</td><td>none of these</td><td>0.58</td><td>nbi/unit/source/surface</td><td>answered none-of-these</td></tr><tr><td>cross_field_wave_vector_magnitude</td><td>none of these</td><td>0.78</td><td>reflectometer_fluctuation/channel/doppler/wavenumber</td><td>answered none-of-these</td></tr><tr><td>electron_heat_diffusivity</td><td>none of these</td><td>0.56</td><td>plasma_transport/model/ggd/electrons/energy/d/values</td><td>answered none-of-these</td></tr><tr><td>energy_flux_at_control_surface</td><td>none of these</td><td>0.53</td><td>plasma_transport/model/ggd/electrons/energy/flux/values</td><td>answered none-of-these</td></tr><tr><td>first_local_tangential_width_of_reflectometer_antenna</td><td>none of these</td><td>0.61</td><td>reflectometer_profile/channel/antenna_emission/x2_width</td><td>answered none-of-these</td></tr><tr><td>molecular_gas_count_due_to_pellet_injection</td><td>none of these</td><td>0.83</td><td>spi/injector/fragmentation_gas/atoms_n</td><td>answered none-of-these</td></tr><tr><td>parallel_bulk_ion_velocity</td><td>none of these</td><td>0.53</td><td>plasma_profiles/profiles_1d/ion/velocity/parallel</td><td>answered none-of-these</td></tr><tr><td>parallel_incident_heat_flux_at_divertor_target</td><td>none of these</td><td>0.57</td><td>camera_ir/frame_analysis/power_flux_parallel</td><td>answered none-of-these</td></tr><tr><td>power_over_core_region_due_to_impurity_radiation</td><td>none of these</td><td>0.99</td><td>disruption/global_quantities/power_radiated_electrons_impurities_halo</td><td>answered none-of-these</td></tr><tr><td>radial_effective_thermal_energy_velocity_due_to_convection</td><td>none of these</td><td>0.58</td><td>plasma_transport/model/ggd/neutral/energy/v_radial/values</td><td>answered none-of-these</td></tr><tr><td>toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix</td><td>none of these</td><td>0.56</td><td>summary/local/separatrix/momentum_phi/value</td><td>answered none-of-these</td></tr><tr><td>total_electron_power_density</td><td>edge_sources/source/ggd/electrons/energy</td><td>0.43</td><td>edge_sources/source/ggd/electrons/energy, edge_sources/source/ggd/electrons/energy/values</td><td>chosen probability 0.43 below 0.8</td></tr><tr><td>total_suprathermal_electron_power_density_due_to_collisions</td><td>none of these</td><td>0.57</td><td>distributions/distribution/profiles_1d/collisions/electrons/power_fast</td><td>answered none-of-these</td></tr><tr><td>vertical_coordinate_of_passive_loop</td><td>none of these</td><td>0.58</td><td>pf_passive/loop/element/geometry/arcs_of_circle/z</td><td>answered none-of-these</td></tr><tr><td>volume_averaged_electron_number_density_over_scrape_off_layer</td><td>none of these</td><td>0.96</td><td>summary/pedestal_fits/mtanh/n_e/offset/value</td><td>answered none-of-these</td></tr><tr><td>volume_integrated_net_plasma_particle_power_density</td><td>none of these</td><td>0.73</td><td>distributions/distribution/global_quantities/source/power</td><td>answered none-of-these</td></tr></tbody></table>
+
+<h3 id="sib-restore-lineage-sources-search">Passed to DD search</h3>
+<p id="sib-restore-lineage-sources-search-note">No candidate could bind: the lineage-recorded path's
+IMASNode is gone, its source is held by a live name, or no relative recorded one at
+all. These go to the DD-search node with the reason.</p>
+<table><thead><tr><th>standard name</th><th>reason passed to DD search</th></tr></thead><tbody><tr><td>accumulated_total_coolant_absorbed_energy_of_calorimetry_component</td><td>every lineage-recorded path is unboundable: calorimetry/group/component/energy_total/data: source held by live name total_energy_of_calorimetry_component</td></tr><tr><td>cumulative_ethylene_count_due_to_gas_injection</td><td>every lineage-recorded path is unboundable: summary/gas_injection_accumulated/ethylene/value: source held by live name accumulated_ethylene_count</td></tr><tr><td>cumulative_inside_flux_surface_total_electron_density</td><td>every lineage-recorded path is unboundable: interferometer/electrons_n: source held by live name total_electron_count</td></tr><tr><td>deposited_power_at_divertor_target</td><td>every lineage-recorded path is unboundable: divertors/divertor/power_incident: source held by live name total_incident_power_of_divertor</td></tr><tr><td>electron_particle_diffusivity</td><td>no lineage-recorded path at all</td></tr><tr><td>electron_temperature_at_first_wall</td><td>every lineage-recorded path is unboundable: langmuir_probes/embedded/multi_temperature_fits/t_e: source held by live name electron_temperature</td></tr><tr><td>electrostatic_potential_at_outboard_midplane</td><td>every lineage-recorded path is unboundable: langmuir_probes/reciprocating/plunge/v_plasma: source held by live name electrostatic_potential_at_langmuir_probe_position</td></tr><tr><td>energy_diffusion_coefficient_due_to_diffusion</td><td>no lineage-recorded path at all</td></tr><tr><td>front_surface_area_of_langmuir_probe</td><td>every lineage-recorded path is unboundable: langmuir_probes/embedded/surface_area: source held by live name wetted_area_of_langmuir_probe; langmuir_probes/reciprocating/surface_area: source held by live name wetted_area_of_langmuir_probe</td></tr><tr><td>incident_energy_flux_at_wall_due_to_radiation</td><td>every lineage-recorded path is unboundable: wall/description_ggd/ggd/energy_fluxes/radiation/emitted/values: source held by live name energy_flux_due_to_radiation</td></tr><tr><td>net_forward_power_of_wave_beam</td><td>every lineage-recorded path is unboundable: ec_launchers/beam/power_launched: source held by live name launched_power_of_electron_cyclotron_beam</td></tr><tr><td>net_plasma_current_due_to_ohmic_current_drive</td><td>no lineage-recorded path at all</td></tr><tr><td>net_plasma_power_density</td><td>no lineage-recorded path at all</td></tr><tr><td>neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission</td><td>every lineage-recorded path is unboundable: wall/description_ggd/ggd/particle_fluxes/neutral/emitted/values: source held by live name neutral_particle_flux_at_wall_due_to_surface_emission</td></tr><tr><td>normal_distance_of_antenna_strap</td><td>every lineage-recorded path is unboundable: ic_antennas/antenna/module/strap/distance_to_conductor: source held by live name back_surface_distance_of_antenna_strap</td></tr><tr><td>normal_particle_flux_at_wall_due_to_recombination</td><td>no lineage-recorded path at all</td></tr><tr><td>normalized_toroidal_hard_xray_peak_external_half_width</td><td>no lineage-recorded path at all</td></tr><tr><td>ratio_of_charge_of_conductor_to_voltage_of_conductor</td><td>every lineage-recorded path is unboundable: ic_antennas/antenna/module/matching_element/capacitance: source held by live name capacitance_of_ion_cyclotron_heating_antenna</td></tr><tr><td>surface_temperature_of_plasma_facing_component</td><td>every lineage-recorded path is unboundable: camera_ir/channel/camera/frame/apparent_temperature: source held by live name surface_temperature</td></tr><tr><td>surface_thickness_of_cryostat</td><td>every lineage-recorded path is unboundable: cryostat/description_2d/cryostat/unit/annular/thickness: source held by live name thickness_of_cryostat; cryostat/description_2d/cryostat/unit/element/midplane_thickness: source held by live name thickness_of_cryostat</td></tr><tr><td>thermal_energy_confinement_time</td><td>every lineage-recorded path is unboundable: summary/global_quantities/tau_energy/value: source held by live name energy_confinement_time</td></tr><tr><td>total_absorbed_power_of_plant_system</td><td>every lineage-recorded path is unboundable: balance_of_plant/power_electric_plant_operation/power_total: source held by live name total_power</td></tr><tr><td>total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion</td><td>no lineage-recorded path at all</td></tr><tr><td>total_incident_thermal_power</td><td>every lineage-recorded path is unboundable: balance_of_plant/power_plant/total_heat_supplied: source held by live name total_heating_power_due_to_fusion_reactions</td></tr><tr><td>total_ion_momentum_diffusivity</td><td>every lineage-recorded path is unboundable: plasma_transport/model/profiles_1d/ion/momentum/poloidal/d: source held by live name poloidal_ion_momentum_diffusivity</td></tr><tr><td>total_launched_power_due_to_ion_cyclotron_heating</td><td>every lineage-recorded path is unboundable: ic_antennas/power_launched: source held by live name total_power_due_to_ion_cyclotron_heating</td></tr><tr><td>total_particle_flux</td><td>no lineage-recorded path at all</td></tr><tr><td>total_particle_flux_at_divertor_target_due_to_recycling</td><td>every lineage-recorded path is unboundable: divertors/divertor/particle_flux_recycled_total: source held by live name total_particle_source_rate_of_divertor_due_to_recycling</td></tr><tr><td>total_thermal_radiative_power_of_divertor_target</td><td>every lineage-recorded path is unboundable: divertors/divertor/power_black_body: source held by live name thermal_radiative_power_of_divertor</td></tr><tr><td>vertical_outline_of_wall</td><td>every lineage-recorded path is unboundable: wall/description_2d/vessel/unit/annular/outline_inner/z: source held by live name vertical_outline_of_vacuum_vessel</td></tr></tbody></table>
+
+<h3 id="sib-restore-lineage-sources-preview">Preview and apply</h3>
+<p id="sib-restore-lineage-sources-preview-note">The graph was shown quiet by two classifier reads five
+seconds apart that agreed exactly
+(<code>quiet=True</code>; {'derived_parent': 2, 'dropped_edge': 87, 'never_bound': 30, 'orphan_awaiting_retirement': 3, 'unchained_holder': 30} then {'derived_parent': 2, 'dropped_edge': 87, 'never_bound': 30, 'orphan_awaiting_retirement': 3, 'unchained_holder': 30}).
+A trial bind of all 39 planned specs was then run
+inside a transaction and rolled back, so the write was measured before it happened:
+<strong>39</strong> would bind. The apply then bound
+<strong>39</strong> sources across <strong>39</strong>
+names at <code>2026-10-19T01:36:01.009076+00:00</code>.</p>
+
+<h3 id="sib-restore-lineage-sources-readback">Read-back: §37's classifier, before and after</h3>
+<img id="sib-restore-lineage-sources-fig" src="/imas-codex/figures/sn-integrity-backlog/sib-restore-lineage-sources/populations-before-after.svg" alt="Classifier populations before and after the restore; only the dropped-edge population moves."/>
+<p id="sib-restore-lineage-sources-readback-note">On the quiet graph the dropped-edge count fell by exactly the number restored
+(<strong>39</strong>), and every other population is
+unchanged. The read-back <em>raises</em> on anything else: a stage that finds the
+fall unmatched or another population moved exits non-zero and prints the mismatch,
+so the gate cannot pass by reporting a number a reader would have to check. Both
+blocks below are the driver's own recorded exit statuses, written after each stage
+ran rather than asserted in this document.</p>
+<table><thead><tr><th>population</th><th>before</th><th>after</th><th>delta</th></tr></thead><tbody><tr><td>dropped_edge</td><td>87</td><td>48</td><td>-39</td></tr><tr><td>never_bound</td><td>30</td><td>30</td><td>0</td></tr><tr><td>unchained_holder</td><td>30</td><td>30</td><td>0</td></tr><tr><td>orphan_awaiting_retirement</td><td>3</td><td>3</td><td>0</td></tr><tr><td>derived_parent</td><td>2</td><td>2</td><td>0</td></tr></tbody></table>
+<pre id="sib-restore-lineage-sources-exit">readback (verified, on the quiet graph) EXIT=0
+before {'derived_parent': 2, 'dropped_edge': 87, 'never_bound': 30, 'orphan_awaiting_retirement': 3, 'unchained_holder': 30}
+after  {'derived_parent': 2, 'dropped_edge': 48, 'never_bound': 30, 'orphan_awaiting_retirement': 3, 'unchained_holder': 30}
+delta  {'derived_parent': 0, 'dropped_edge': -39, 'never_bound': 0, 'orphan_awaiting_retirement': 0, 'unchained_holder': 0}
+dropped_fell_by_restored=True
+others_unchanged=True
+
+readback (re-check) EXIT=1
+after  {'derived_parent': 2, 'dropped_edge': 45, 'never_bound': 28, 'orphan_awaiting_retirement': 3, 'unchained_holder': 30}
+delta  {'derived_parent': 0, 'dropped_edge': -42, 'never_bound': -2, 'orphan_awaiting_retirement': 0, 'unchained_holder': 0}
+sources created since this node's apply, by another writer:
+  dd:plasma_transport/model/ggd/ion/state/energy/v_parallel  2026-10-19T02:06:14.275Z
+  dd:plasma_transport/model/ggd/ion/state/momentum/d_pol  2026-10-19T02:06:14.359Z
+  dd:wall/description_ggd/ggd/energy_fluxes/radiation/incident  2026-10-19T02:06:14.362Z
+  dd:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/emitted  2026-10-19T02:06:14.365Z
+  dd:pulse_schedule/ic/power  2026-10-19T02:06:14.368Z
+
+stage_exit_status
+  apply EXIT=0
+  control EXIT=0
+  figure EXIT=0
+  fragment EXIT=0
+  judge EXIT=0
+  preview EXIT=0
+  readback EXIT=1
+  referrals EXIT=0</pre>
+<p id="sib-restore-lineage-sources-recheck-note">The second block is the gate doing its job, not a failure of
+the write. The read-back was re-run after the coordinator's review, by which time a
+peer had bound <strong>5</strong> more
+sources (all created at <code>2026-10-19T02:06:14.275Z</code>,
+30 minutes after this node's apply). It therefore
+moved dropped_edge by -42 and never_bound by
+-2 — this node's 39 plus the peer's 3 on
+dropped-edge names, and 2 never-bound names the peer bound — and exited non-zero. The
+stage raises rather than overwriting the write's own read-back, so the before/after counts
+above remain the values the classifier returned on the quiet graph at the apply.</p>
+
+<h3 id="sib-restore-lineage-sources-control">Negative control</h3>
+<p id="sib-restore-lineage-sources-control-note">The declared control — <em>a planted name whose relative's path measures a different quantity must be answered none-of-these and not restored</em> —
+was run through the same call path as the work list: a plant whose only candidate
+measures a different quantity (name <code>plasma_current</code>, candidate
+<code>magnetics/flux_loop/flux</code>) must be answered none-of-these and left
+unrestored. Jev answered <strong>none of these</strong>;
+<code>passed=True</code>. The instrument can therefore reject, not only
+accept: on the real work list it rejected
+17 of
+56 candidate-bearing names the
+same way.</p>
+
+<h3 id="sib-restore-lineage-sources-bound">§38's referral bound</h3>
+<p id="sib-restore-lineage-sources-bound-note">§38 requires that the names sent to the lead number at most
+15% of the names §35 hands it. §35's census hands this section
+<strong>260</strong> live, non-derived, non-orphan sourceless
+names, so the bound is <strong>39</strong>. This node refers
+<strong>17</strong> unbound —
+6.5% — plus
+<strong>16</strong> bound below the confidence
+floor, which the coordinator ruled must be counted here, giving a running total of
+<strong>33</strong>, or
+<strong>12.7%</strong> — still under the bound. The
+<strong>30</strong> names passed to DD search are a
+repair route, not a referral, and are not counted; but they are the section's
+liability: if DD search binds none of them they become referrals and the running total
+reaches <strong>63</strong>
+(24.2%),
+above the bound. That is a flag for the section owner, not a defect of this node.</p>
+
+<h3 id="sib-restore-lineage-sources-spend">Spend</h3>
+<p id="sib-restore-lineage-sources-spend-note">56 judgement calls on the
+<code>typesafe/jev-1.13</code> seat cost
+<strong>USD 0.001299</strong>; the negative control cost
+USD 0.000020. Total <strong>USD 0.001319</strong> against the
+USD 1.00 ceiling — 0.13% of it.</p>
+</article>

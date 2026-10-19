@@ -1,0 +1,4247 @@
+{
+ "after_counts": {
+  "derived_parent": 2,
+  "dropped_edge": 48,
+  "never_bound": 30,
+  "orphan_awaiting_retirement": 3,
+  "unchained_holder": 30
+ },
+ "apply_receipt": {
+  "applied_at": "2026-10-19T01:36:01.009076+00:00",
+  "bound": 39,
+  "names_bound": 39,
+  "planned": 39
+ },
+ "before_counts": {
+  "derived_parent": 2,
+  "dropped_edge": 87,
+  "never_bound": 30,
+  "orphan_awaiting_retirement": 3,
+  "unchained_holder": 30
+ },
+ "bound": {
+  "bound_count": 39,
+  "bound_fraction": 0.15,
+  "handed_to_section": 260,
+  "liability_if_dd_search_yields_nothing": 63,
+  "running_total_fraction": 0.12692307692307692,
+  "running_total_to_lead": 33,
+  "this_node_bound_below_floor": 16,
+  "this_node_to_dd_search": 30,
+  "this_node_unbound_to_lead": 17
+ },
+ "bound_below_confidence_floor": [
+  {
+   "candidate": "plasma_transport/model/ggd/electrons/particles/d/values",
+   "confidence": 0.54,
+   "name": "electron_particle_diffusion_coefficient",
+   "probability": 0.77,
+   "reason": "P(choice) 0.77 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+   "confidence": 0.12,
+   "name": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+   "probability": 0.56,
+   "reason": "P(choice) 0.56 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "balance_of_plant/power_plant/heat_load_divertor",
+   "confidence": 0.26,
+   "name": "heat_power_of_divertor",
+   "probability": 0.63,
+   "reason": "P(choice) 0.63 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "langmuir_probes/reciprocating/plunge/collector/t_i",
+   "confidence": 0.08,
+   "name": "ion_temperature_at_outboard_midplane_separatrix",
+   "probability": 0.54,
+   "reason": "P(choice) 0.54 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+   "confidence": 0.52,
+   "name": "parallel_thermal_neutral_energy_diffusivity",
+   "probability": 0.76,
+   "reason": "P(choice) 0.76 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+   "confidence": 0.55,
+   "name": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+   "probability": 0.7,
+   "reason": "P(choice) 0.70 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "distribution_sources/source/markers/orbit_integrals/m_pol",
+   "confidence": 0.02,
+   "name": "perturbed_linear_mhd_mode_number",
+   "probability": 0.51,
+   "reason": "P(choice) 0.51 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "edge_transport/model/ggd/ion/particles/d_pol/values",
+   "confidence": 0.52,
+   "name": "poloidal_effective_ion_diffusion_coefficient",
+   "probability": 0.76,
+   "reason": "P(choice) 0.76 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+   "confidence": 0.34,
+   "name": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+   "probability": 0.67,
+   "reason": "P(choice) 0.67 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "neutron_diagnostic/detector/aperture/x2_width",
+   "confidence": 0.28,
+   "name": "second_local_tangential_width_of_diagnostic_aperture",
+   "probability": 0.64,
+   "reason": "P(choice) 0.64 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+   "confidence": 0.24,
+   "name": "tendency_of_runaway_electron_density",
+   "probability": 0.62,
+   "reason": "P(choice) 0.62 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+   "confidence": 0.52,
+   "name": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+   "probability": 0.76,
+   "reason": "P(choice) 0.76 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+   "confidence": 0.56,
+   "name": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+   "probability": 0.78,
+   "reason": "P(choice) 0.78 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+   "confidence": 0,
+   "name": "vertical_position_of_grating",
+   "probability": 0.5,
+   "reason": "P(choice) 0.50 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "plasma_transport/model/ggd/ion/momentum/d/z",
+   "confidence": 0.56,
+   "name": "vertical_total_ion_momentum_diffusivity",
+   "probability": 0.78,
+   "reason": "P(choice) 0.78 below 0.8",
+   "sources_bound": 1
+  },
+  {
+   "candidate": "waves/coherent_wave/full_wave/b_field/normal/values",
+   "confidence": 0.36,
+   "name": "wave_magnetic_field_amplitude",
+   "probability": 0.68,
+   "reason": "P(choice) 0.68 below 0.8",
+   "sources_bound": 1
+  }
+ ],
+ "classified_counts": {
+  "derived_parent": 2,
+  "dropped_edge": 87,
+  "never_bound": 30,
+  "orphan_awaiting_retirement": 3,
+  "unchained_holder": 30
+ },
+ "classified_total": 152,
+ "driver_revision": "95985b6c88be740c4885f3de95121904af032779",
+ "dropped_fell_by_restored": true,
+ "floor": {
+  "min_choice_probability": 0.8,
+  "min_self_confidence": 0.5
+ },
+ "generated_at": "2026-10-19T01:34:01.145400+00:00",
+ "judge_model": "typesafe/jev-1.13",
+ "judge_spend_usd": 0.0012992280000000001,
+ "judged": {
+  "absorbed_coolant_power_of_plant_component_port": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.06,
+    "probabilities": {
+     "balance_of_plant/power_plant/system/component/port/power_thermal": 0.47,
+     "none of these": 0.53
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3814e-05
+  },
+  "acceleration_of_passive_structure": {
+   "answer": {
+    "choice": "operational_instrumentation/sensor/acceleration",
+    "confidence": 0.88,
+    "probabilities": {
+     "none of these": 0.06,
+     "operational_instrumentation/sensor/acceleration": 0.94
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2722e-05
+  },
+  "beam_cross_sectional_area_of_aperture": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.16,
+    "probabilities": {
+     "nbi/unit/source/surface": 0.42,
+     "none of these": 0.58
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2092e-05
+  },
+  "co_passing_fast_electron_kinetic_power_density_due_to_collisions": {
+   "answer": {
+    "choice": "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast",
+    "confidence": 0.74,
+    "probabilities": {
+     "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast": 0.87,
+     "none of these": 0.13
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4486e-05
+  },
+  "cross_field_wave_vector_magnitude": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.56,
+    "probabilities": {
+     "none of these": 0.78,
+     "reflectometer_fluctuation/channel/doppler/wavenumber": 0.22
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2974e-05
+  },
+  "diameter_of_fibre_bundle": {
+   "answer": {
+    "choice": "charge_exchange/channel/image_diameter",
+    "confidence": 0.94,
+    "probabilities": {
+     "charge_exchange/channel/image_diameter": 0.97,
+     "none of these": 0.03
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.205e-05
+  },
+  "distance_of_beam_tracing_ray": {
+   "answer": {
+    "choice": "ece/channel/beam_tracing/beam/length",
+    "confidence": 0.94,
+    "probabilities": {
+     "ece/channel/beam_tracing/beam/length": 0.97,
+     "none of these": 0.03
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.205e-05
+  },
+  "effective_incident_neutral_coefficient_of_wall_material_due_to_sputtering": {
+   "answer": {
+    "choice": "wall/global_quantities/neutral/incident_species/sputtering_physical",
+    "confidence": 0.96,
+    "probabilities": {
+     "none of these": 0.02,
+     "wall/global_quantities/neutral/incident_species/sputtering_physical": 0.98
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.457e-05
+  },
+  "electron_heat_diffusivity": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.12,
+    "probabilities": {
+     "none of these": 0.56,
+     "plasma_transport/model/ggd/electrons/energy/d/values": 0.44
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.289e-05
+  },
+  "electron_particle_diffusion_coefficient": {
+   "answer": {
+    "choice": "plasma_transport/model/ggd/electrons/particles/d/values",
+    "confidence": 0.54,
+    "probabilities": {
+     "none of these": 0.23,
+     "plasma_transport/model/ggd/electrons/particles/d/values": 0.77
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3142e-05
+  },
+  "energy_flux_at_control_surface": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.06,
+    "probabilities": {
+     "none of these": 0.53,
+     "plasma_transport/model/ggd/electrons/energy/flux/values": 0.47
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3016e-05
+  },
+  "first_local_tangential_width_of_reflectometer_antenna": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.22,
+    "probabilities": {
+     "none of these": 0.61,
+     "reflectometer_profile/channel/antenna_emission/x2_width": 0.39
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.373e-05
+  },
+  "flux_surface_normal_momentum_convection_velocity": {
+   "answer": {
+    "choice": "plasma_transport/model/profiles_1d/momentum_phi/v",
+    "confidence": 0.78,
+    "probabilities": {
+     "none of these": 0.11,
+     "plasma_transport/model/profiles_1d/momentum_phi/v": 0.89
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2596e-05
+  },
+  "flux_surface_normal_momentum_diffusion_coefficient": {
+   "answer": {
+    "choice": "core_transport/model/profiles_1d/ion/momentum/radial/d",
+    "confidence": 0.78,
+    "probabilities": {
+     "core_transport/model/profiles_1d/ion/momentum/radial/d": 0.89,
+     "none of these": 0.11
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3142e-05
+  },
+  "flux_surface_normal_neutral_energy_diffusion_coefficient": {
+   "answer": {
+    "choice": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+    "confidence": 0.12,
+    "probabilities": {
+     "none of these": 0.44,
+     "plasma_transport/model/ggd/neutral/energy/d_radial/values": 0.56
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3646e-05
+  },
+  "gas_atomic_count_of_pellet_injector": {
+   "answer": {
+    "choice": "spi/injector/propellant_gas/atoms_n",
+    "confidence": 0.98,
+    "probabilities": {
+     "none of these": 0.01,
+     "spi/injector/propellant_gas/atoms_n": 0.99
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2428e-05
+  },
+  "heat_power_of_divertor": {
+   "answer": {
+    "choice": "balance_of_plant/power_plant/heat_load_divertor",
+    "confidence": 0.26,
+    "probabilities": {
+     "balance_of_plant/power_plant/heat_load_divertor": 0.63,
+     "none of these": 0.37
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.226e-05
+  },
+  "ion_species_atomic_number": {
+   "answer": {
+    "choice": "plasma_transport/model/ggd/ion/element/z_n",
+    "confidence": 0.94,
+    "probabilities": {
+     "none of these": 0.03,
+     "plasma_transport/model/ggd/ion/element/z_n": 0.97
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2092e-05
+  },
+  "ion_temperature_at_outboard_midplane_separatrix": {
+   "answer": {
+    "choice": "langmuir_probes/reciprocating/plunge/collector/t_i",
+    "confidence": 0.08,
+    "probabilities": {
+     "langmuir_probes/reciprocating/plunge/collector/t_i": 0.54,
+     "none of these": 0.46
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.352e-05
+  },
+  "lithium_volume_of_breeder_blanket": {
+   "answer": {
+    "choice": "breeding_blanket/pb_li_volume",
+    "confidence": 0.92,
+    "probabilities": {
+     "breeding_blanket/pb_li_volume": 0.96,
+     "none of these": 0.04
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2134e-05
+  },
+  "molecular_gas_count_due_to_pellet_injection": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.66,
+    "probabilities": {
+     "none of these": 0.83,
+     "spi/injector/fragmentation_gas/atoms_n": 0.17
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2638e-05
+  },
+  "net_power": {
+   "answer": {
+    "choice": "balance_of_plant/power_electricity_net",
+    "confidence": 0.98,
+    "probabilities": {
+     "balance_of_plant/power_electricity_net": 0.99,
+     "none of these": 0.01
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.1588e-05
+  },
+  "neutron_rate_of_detector": {
+   "answer": {
+    "choice": "neutron_diagnostic/detector/mode/counting",
+    "confidence": 0.74,
+    "probabilities": {
+     "neutron_diagnostic/detector/mode/counting": 0.87,
+     "none of these": 0.13
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2386e-05
+  },
+  "non_axisymmetric_current_of_conductor": {
+   "answer": {
+    "choice": "coils_non_axisymmetric/coil/current",
+    "confidence": 0.8,
+    "probabilities": {
+     "coils_non_axisymmetric/coil/current": 0.9,
+     "none of these": 0.1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2302e-05
+  },
+  "normal_width_of_plasma_filament": {
+   "answer": {
+    "choice": "pf_plasma/element/geometry/thick_line/thickness",
+    "confidence": 0.6,
+    "probabilities": {
+     "none of these": 0.2,
+     "pf_plasma/element/geometry/thick_line/thickness": 0.8
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2218e-05
+  },
+  "nuclear_power_density_at_midplane": {
+   "answer": {
+    "choice": "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+    "confidence": 0.98,
+    "probabilities": {
+     "breeding_blanket/module/time_slice/midplane_power_density_nuclear": 0.99,
+     "none of these": 0.01
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3142e-05
+  },
+  "parallel_bulk_ion_velocity": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.06,
+    "probabilities": {
+     "none of these": 0.53,
+     "plasma_profiles/profiles_1d/ion/velocity/parallel": 0.47
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2806e-05
+  },
+  "parallel_incident_heat_flux_at_divertor_target": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.14,
+    "probabilities": {
+     "camera_ir/frame_analysis/power_flux_parallel": 0.43,
+     "none of these": 0.57
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2806e-05
+  },
+  "parallel_thermal_neutral_energy_diffusivity": {
+   "answer": {
+    "choice": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+    "confidence": 0.52,
+    "probabilities": {
+     "edge_transport/model/ggd/neutral/energy/d_parallel/values": 0.76,
+     "none of these": 0.24
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3016e-05
+  },
+  "perpendicular_ion_velocity_due_to_diamagnetic_drift": {
+   "answer": {
+    "choice": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+    "confidence": 0.55,
+    "probabilities": {
+     "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic": 0.7,
+     "none of these": 0.22,
+     "plasma_transport/model/ggd/momentum/v/diamagnetic": 0.08
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.877e-05
+  },
+  "perturbed_linear_mhd_mode_number": {
+   "answer": {
+    "choice": "distribution_sources/source/markers/orbit_integrals/m_pol",
+    "confidence": 0.02,
+    "probabilities": {
+     "distribution_sources/source/markers/orbit_integrals/m_pol": 0.51,
+     "none of these": 0.49
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4024e-05
+  },
+  "poloidal_effective_ion_diffusion_coefficient": {
+   "answer": {
+    "choice": "edge_transport/model/ggd/ion/particles/d_pol/values",
+    "confidence": 0.52,
+    "probabilities": {
+     "edge_transport/model/ggd/ion/particles/d_pol/values": 0.76,
+     "none of these": 0.24
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3394e-05
+  },
+  "power_over_core_region_due_to_impurity_radiation": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.98,
+    "probabilities": {
+     "disruption/global_quantities/power_radiated_electrons_impurities_halo": 0.01,
+     "none of these": 0.99
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3646e-05
+  },
+  "power_over_scrape_off_layer_due_to_radiation": {
+   "answer": {
+    "choice": "summary/scrape_off_layer/power_radiated/value",
+    "confidence": 0.76,
+    "probabilities": {
+     "none of these": 0.12,
+     "summary/scrape_off_layer/power_radiated/value": 0.88
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2218e-05
+  },
+  "radial_effective_thermal_energy_velocity_due_to_convection": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.16,
+    "probabilities": {
+     "none of these": 0.58,
+     "plasma_transport/model/ggd/neutral/energy/v_radial/values": 0.42
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3478e-05
+  },
+  "radial_offset_of_lower_hybrid_antenna": {
+   "answer": {
+    "choice": "lh_antennas/antenna/distance_to_antenna",
+    "confidence": 0.94,
+    "probabilities": {
+     "lh_antennas/antenna/distance_to_antenna": 0.97,
+     "none of these": 0.03
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3814e-05
+  },
+  "ratio_of_field_line_count_to_total_field_line_count": {
+   "answer": {
+    "choice": "plasma_initiation/b_field_lines/open_fraction",
+    "confidence": 1,
+    "probabilities": {
+     "none of these": 0,
+     "plasma_initiation/b_field_lines/open_fraction": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2554e-05
+  },
+  "ratio_of_volume_of_wall_material_to_volume_of_passive_structure": {
+   "answer": {
+    "choice": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+    "confidence": 0.34,
+    "probabilities": {
+     "cryostat/description_2d/cryostat/unit/material_volume_fraction": 0.67,
+     "none of these": 0.33
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.289e-05
+  },
+  "reference_wavelength_of_filter_window": {
+   "answer": {
+    "choice": "camera_ir/channel/camera/frame/filter/wavelength_central",
+    "confidence": 0.94,
+    "probabilities": {
+     "camera_ir/channel/camera/frame/filter/wavelength_central": 0.97,
+     "none of these": 0.03
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.289e-05
+  },
+  "second_local_tangential_width_of_diagnostic_aperture": {
+   "answer": {
+    "choice": "neutron_diagnostic/detector/aperture/x2_width",
+    "confidence": 0.28,
+    "probabilities": {
+     "neutron_diagnostic/detector/aperture/x2_width": 0.64,
+     "none of these": 0.36
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3394e-05
+  },
+  "surface_thickness_of_breeder_blanket_module": {
+   "answer": {
+    "choice": "breeding_blanket/module/side_wall_thickness",
+    "confidence": 0.84,
+    "probabilities": {
+     "breeding_blanket/module/side_wall_thickness": 0.92,
+     "none of these": 0.08
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.226e-05
+  },
+  "tendency_of_runaway_electron_density": {
+   "answer": {
+    "choice": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+    "confidence": 0.24,
+    "probabilities": {
+     "none of these": 0.38,
+     "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values": 0.62
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3856e-05
+  },
+  "tilt_angle_of_poloidal_field_coil": {
+   "answer": {
+    "choice": "pf_active/coil/geometry/oblique/beta",
+    "confidence": 0.76,
+    "probabilities": {
+     "none of these": 0.12,
+     "pf_active/coil/geometry/oblique/beta": 0.88
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4696e-05
+  },
+  "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport": {
+   "answer": {
+    "choice": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+    "confidence": 0.52,
+    "probabilities": {
+     "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi": 0.76,
+     "none of these": 0.24
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4948e-05
+  },
+  "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.12,
+    "probabilities": {
+     "none of these": 0.56,
+     "summary/local/separatrix/momentum_phi/value": 0.44
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2386e-05
+  },
+  "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport": {
+   "answer": {
+    "choice": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+    "confidence": 0.56,
+    "probabilities": {
+     "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi": 0.78,
+     "none of these": 0.22
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4738e-05
+  },
+  "total_electron_power_density": {
+   "answer": {
+    "choice": "edge_sources/source/ggd/electrons/energy",
+    "confidence": 0.14,
+    "probabilities": {
+     "edge_sources/source/ggd/electrons/energy": 0.43,
+     "edge_sources/source/ggd/electrons/energy/values": 0.16,
+     "none of these": 0.41
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.6922e-05
+  },
+  "total_suprathermal_electron_power_density_due_to_collisions": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.14,
+    "probabilities": {
+     "distributions/distribution/profiles_1d/collisions/electrons/power_fast": 0.43,
+     "none of these": 0.57
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4276e-05
+  },
+  "vertical_coordinate_of_passive_loop": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.16,
+    "probabilities": {
+     "none of these": 0.58,
+     "pf_passive/loop/element/geometry/arcs_of_circle/z": 0.42
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.31e-05
+  },
+  "vertical_coordinate_of_plasma_filament": {
+   "answer": {
+    "choice": "pf_plasma/element/geometry/outline/z",
+    "confidence": 0.84,
+    "probabilities": {
+     "none of these": 0.08,
+     "pf_plasma/element/geometry/outline/z": 0.92
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2302e-05
+  },
+  "vertical_position_of_grating": {
+   "answer": {
+    "choice": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+    "confidence": 0,
+    "probabilities": {
+     "none of these": 0.5,
+     "spectrometer_x_ray_crystal/channel/reflector/centre/z": 0.5
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2596e-05
+  },
+  "vertical_total_ion_momentum_diffusivity": {
+   "answer": {
+    "choice": "plasma_transport/model/ggd/ion/momentum/d/z",
+    "confidence": 0.56,
+    "probabilities": {
+     "none of these": 0.22,
+     "plasma_transport/model/ggd/ion/momentum/d/z": 0.78
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.352e-05
+  },
+  "volume_averaged_electron_number_density_over_scrape_off_layer": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.92,
+    "probabilities": {
+     "none of these": 0.96,
+     "summary/pedestal_fits/mtanh/n_e/offset/value": 0.04
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2512e-05
+  },
+  "volume_integrated_net_plasma_particle_power_density": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.46,
+    "probabilities": {
+     "distributions/distribution/global_quantities/source/power": 0.27,
+     "none of these": 0.73
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.247e-05
+  },
+  "wave_critical_ordinary_mode_frequency": {
+   "answer": {
+    "choice": "reflectometer_profile/channel/cut_off_frequency",
+    "confidence": 0.68,
+    "probabilities": {
+     "none of these": 0.16,
+     "reflectometer_profile/channel/cut_off_frequency": 0.84
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2512e-05
+  },
+  "wave_magnetic_field_amplitude": {
+   "answer": {
+    "choice": "waves/coherent_wave/full_wave/b_field/normal/values",
+    "confidence": 0.36,
+    "probabilities": {
+     "none of these": 0.32,
+     "waves/coherent_wave/full_wave/b_field/normal/values": 0.68
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.2806e-05
+  }
+ },
+ "negative_control": {
+  "answer": {
+   "choice": "none of these",
+   "confidence": 1,
+   "probabilities": {
+    "magnetics/flux_loop/flux": 0,
+    "none of these": 1
+   },
+   "type": "choice"
+  },
+  "cost_usd": 2.0244e-05,
+  "declared": "a planted name whose relative's path measures a different quantity must be answered none-of-these and not restored",
+  "name": "plasma_current",
+  "passed": true,
+  "planted_candidate": "magnetics/flux_loop/flux"
+ },
+ "others_unchanged": true,
+ "population_delta": {
+  "derived_parent": 0,
+  "dropped_edge": -39,
+  "never_bound": 0,
+  "orphan_awaiting_retirement": 0,
+  "unchained_holder": 0
+ },
+ "preview": {
+  "plan": [
+   {
+    "dd_path": "operational_instrumentation/sensor/acceleration",
+    "name": "acceleration_of_passive_structure",
+    "spec": {
+     "dd_path": "operational_instrumentation/sensor/acceleration",
+     "id": "dd:operational_instrumentation/sensor/acceleration",
+     "source_id": "operational_instrumentation/sensor/acceleration",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast",
+    "name": "co_passing_fast_electron_kinetic_power_density_due_to_collisions",
+    "spec": {
+     "dd_path": "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast",
+     "id": "dd:distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast",
+     "source_id": "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "charge_exchange/channel/image_diameter",
+    "name": "diameter_of_fibre_bundle",
+    "spec": {
+     "dd_path": "charge_exchange/channel/image_diameter",
+     "id": "dd:charge_exchange/channel/image_diameter",
+     "source_id": "charge_exchange/channel/image_diameter",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "ece/channel/beam_tracing/beam/length",
+    "name": "distance_of_beam_tracing_ray",
+    "spec": {
+     "dd_path": "ece/channel/beam_tracing/beam/length",
+     "id": "dd:ece/channel/beam_tracing/beam/length",
+     "source_id": "ece/channel/beam_tracing/beam/length",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "wall/global_quantities/neutral/incident_species/sputtering_physical",
+    "name": "effective_incident_neutral_coefficient_of_wall_material_due_to_sputtering",
+    "spec": {
+     "dd_path": "wall/global_quantities/neutral/incident_species/sputtering_physical",
+     "id": "dd:wall/global_quantities/neutral/incident_species/sputtering_physical",
+     "source_id": "wall/global_quantities/neutral/incident_species/sputtering_physical",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "plasma_transport/model/ggd/electrons/particles/d/values",
+    "name": "electron_particle_diffusion_coefficient",
+    "spec": {
+     "dd_path": "plasma_transport/model/ggd/electrons/particles/d/values",
+     "id": "dd:plasma_transport/model/ggd/electrons/particles/d/values",
+     "source_id": "plasma_transport/model/ggd/electrons/particles/d/values",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "plasma_transport/model/profiles_1d/momentum_phi/v",
+    "name": "flux_surface_normal_momentum_convection_velocity",
+    "spec": {
+     "dd_path": "plasma_transport/model/profiles_1d/momentum_phi/v",
+     "id": "dd:plasma_transport/model/profiles_1d/momentum_phi/v",
+     "source_id": "plasma_transport/model/profiles_1d/momentum_phi/v",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "core_transport/model/profiles_1d/ion/momentum/radial/d",
+    "name": "flux_surface_normal_momentum_diffusion_coefficient",
+    "spec": {
+     "dd_path": "core_transport/model/profiles_1d/ion/momentum/radial/d",
+     "id": "dd:core_transport/model/profiles_1d/ion/momentum/radial/d",
+     "source_id": "core_transport/model/profiles_1d/ion/momentum/radial/d",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+    "name": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+    "spec": {
+     "dd_path": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+     "id": "dd:plasma_transport/model/ggd/neutral/energy/d_radial/values",
+     "source_id": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "spi/injector/propellant_gas/atoms_n",
+    "name": "gas_atomic_count_of_pellet_injector",
+    "spec": {
+     "dd_path": "spi/injector/propellant_gas/atoms_n",
+     "id": "dd:spi/injector/propellant_gas/atoms_n",
+     "source_id": "spi/injector/propellant_gas/atoms_n",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "balance_of_plant/power_plant/heat_load_divertor",
+    "name": "heat_power_of_divertor",
+    "spec": {
+     "dd_path": "balance_of_plant/power_plant/heat_load_divertor",
+     "id": "dd:balance_of_plant/power_plant/heat_load_divertor",
+     "source_id": "balance_of_plant/power_plant/heat_load_divertor",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "plasma_transport/model/ggd/ion/element/z_n",
+    "name": "ion_species_atomic_number",
+    "spec": {
+     "dd_path": "plasma_transport/model/ggd/ion/element/z_n",
+     "id": "dd:plasma_transport/model/ggd/ion/element/z_n",
+     "source_id": "plasma_transport/model/ggd/ion/element/z_n",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "langmuir_probes/reciprocating/plunge/collector/t_i",
+    "name": "ion_temperature_at_outboard_midplane_separatrix",
+    "spec": {
+     "dd_path": "langmuir_probes/reciprocating/plunge/collector/t_i",
+     "id": "dd:langmuir_probes/reciprocating/plunge/collector/t_i",
+     "source_id": "langmuir_probes/reciprocating/plunge/collector/t_i",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "breeding_blanket/pb_li_volume",
+    "name": "lithium_volume_of_breeder_blanket",
+    "spec": {
+     "dd_path": "breeding_blanket/pb_li_volume",
+     "id": "dd:breeding_blanket/pb_li_volume",
+     "source_id": "breeding_blanket/pb_li_volume",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "balance_of_plant/power_electricity_net",
+    "name": "net_power",
+    "spec": {
+     "dd_path": "balance_of_plant/power_electricity_net",
+     "id": "dd:balance_of_plant/power_electricity_net",
+     "source_id": "balance_of_plant/power_electricity_net",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "neutron_diagnostic/detector/mode/counting",
+    "name": "neutron_rate_of_detector",
+    "spec": {
+     "dd_path": "neutron_diagnostic/detector/mode/counting",
+     "id": "dd:neutron_diagnostic/detector/mode/counting",
+     "source_id": "neutron_diagnostic/detector/mode/counting",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "coils_non_axisymmetric/coil/current",
+    "name": "non_axisymmetric_current_of_conductor",
+    "spec": {
+     "dd_path": "coils_non_axisymmetric/coil/current",
+     "id": "dd:coils_non_axisymmetric/coil/current",
+     "source_id": "coils_non_axisymmetric/coil/current",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "pf_plasma/element/geometry/thick_line/thickness",
+    "name": "normal_width_of_plasma_filament",
+    "spec": {
+     "dd_path": "pf_plasma/element/geometry/thick_line/thickness",
+     "id": "dd:pf_plasma/element/geometry/thick_line/thickness",
+     "source_id": "pf_plasma/element/geometry/thick_line/thickness",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+    "name": "nuclear_power_density_at_midplane",
+    "spec": {
+     "dd_path": "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+     "id": "dd:breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+     "source_id": "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+    "name": "parallel_thermal_neutral_energy_diffusivity",
+    "spec": {
+     "dd_path": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+     "id": "dd:edge_transport/model/ggd/neutral/energy/d_parallel/values",
+     "source_id": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+    "name": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+    "spec": {
+     "dd_path": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+     "id": "dd:edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+     "source_id": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "distribution_sources/source/markers/orbit_integrals/m_pol",
+    "name": "perturbed_linear_mhd_mode_number",
+    "spec": {
+     "dd_path": "distribution_sources/source/markers/orbit_integrals/m_pol",
+     "id": "dd:distribution_sources/source/markers/orbit_integrals/m_pol",
+     "source_id": "distribution_sources/source/markers/orbit_integrals/m_pol",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "edge_transport/model/ggd/ion/particles/d_pol/values",
+    "name": "poloidal_effective_ion_diffusion_coefficient",
+    "spec": {
+     "dd_path": "edge_transport/model/ggd/ion/particles/d_pol/values",
+     "id": "dd:edge_transport/model/ggd/ion/particles/d_pol/values",
+     "source_id": "edge_transport/model/ggd/ion/particles/d_pol/values",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "summary/scrape_off_layer/power_radiated/value",
+    "name": "power_over_scrape_off_layer_due_to_radiation",
+    "spec": {
+     "dd_path": "summary/scrape_off_layer/power_radiated/value",
+     "id": "dd:summary/scrape_off_layer/power_radiated/value",
+     "source_id": "summary/scrape_off_layer/power_radiated/value",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "lh_antennas/antenna/distance_to_antenna",
+    "name": "radial_offset_of_lower_hybrid_antenna",
+    "spec": {
+     "dd_path": "lh_antennas/antenna/distance_to_antenna",
+     "id": "dd:lh_antennas/antenna/distance_to_antenna",
+     "source_id": "lh_antennas/antenna/distance_to_antenna",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "plasma_initiation/b_field_lines/open_fraction",
+    "name": "ratio_of_field_line_count_to_total_field_line_count",
+    "spec": {
+     "dd_path": "plasma_initiation/b_field_lines/open_fraction",
+     "id": "dd:plasma_initiation/b_field_lines/open_fraction",
+     "source_id": "plasma_initiation/b_field_lines/open_fraction",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+    "name": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+    "spec": {
+     "dd_path": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+     "id": "dd:cryostat/description_2d/cryostat/unit/material_volume_fraction",
+     "source_id": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "camera_ir/channel/camera/frame/filter/wavelength_central",
+    "name": "reference_wavelength_of_filter_window",
+    "spec": {
+     "dd_path": "camera_ir/channel/camera/frame/filter/wavelength_central",
+     "id": "dd:camera_ir/channel/camera/frame/filter/wavelength_central",
+     "source_id": "camera_ir/channel/camera/frame/filter/wavelength_central",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "neutron_diagnostic/detector/aperture/x2_width",
+    "name": "second_local_tangential_width_of_diagnostic_aperture",
+    "spec": {
+     "dd_path": "neutron_diagnostic/detector/aperture/x2_width",
+     "id": "dd:neutron_diagnostic/detector/aperture/x2_width",
+     "source_id": "neutron_diagnostic/detector/aperture/x2_width",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "breeding_blanket/module/side_wall_thickness",
+    "name": "surface_thickness_of_breeder_blanket_module",
+    "spec": {
+     "dd_path": "breeding_blanket/module/side_wall_thickness",
+     "id": "dd:breeding_blanket/module/side_wall_thickness",
+     "source_id": "breeding_blanket/module/side_wall_thickness",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+    "name": "tendency_of_runaway_electron_density",
+    "spec": {
+     "dd_path": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+     "id": "dd:runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+     "source_id": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "pf_active/coil/geometry/oblique/beta",
+    "name": "tilt_angle_of_poloidal_field_coil",
+    "spec": {
+     "dd_path": "pf_active/coil/geometry/oblique/beta",
+     "id": "dd:pf_active/coil/geometry/oblique/beta",
+     "source_id": "pf_active/coil/geometry/oblique/beta",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+    "name": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+    "spec": {
+     "dd_path": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+     "id": "dd:distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+     "source_id": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+    "name": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+    "spec": {
+     "dd_path": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+     "id": "dd:distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+     "source_id": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "pf_plasma/element/geometry/outline/z",
+    "name": "vertical_coordinate_of_plasma_filament",
+    "spec": {
+     "dd_path": "pf_plasma/element/geometry/outline/z",
+     "id": "dd:pf_plasma/element/geometry/outline/z",
+     "source_id": "pf_plasma/element/geometry/outline/z",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+    "name": "vertical_position_of_grating",
+    "spec": {
+     "dd_path": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+     "id": "dd:spectrometer_x_ray_crystal/channel/reflector/centre/z",
+     "source_id": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "plasma_transport/model/ggd/ion/momentum/d/z",
+    "name": "vertical_total_ion_momentum_diffusivity",
+    "spec": {
+     "dd_path": "plasma_transport/model/ggd/ion/momentum/d/z",
+     "id": "dd:plasma_transport/model/ggd/ion/momentum/d/z",
+     "source_id": "plasma_transport/model/ggd/ion/momentum/d/z",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "reflectometer_profile/channel/cut_off_frequency",
+    "name": "wave_critical_ordinary_mode_frequency",
+    "spec": {
+     "dd_path": "reflectometer_profile/channel/cut_off_frequency",
+     "id": "dd:reflectometer_profile/channel/cut_off_frequency",
+     "source_id": "reflectometer_profile/channel/cut_off_frequency",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   },
+   {
+    "dd_path": "waves/coherent_wave/full_wave/b_field/normal/values",
+    "name": "wave_magnetic_field_amplitude",
+    "spec": {
+     "dd_path": "waves/coherent_wave/full_wave/b_field/normal/values",
+     "id": "dd:waves/coherent_wave/full_wave/b_field/normal/values",
+     "source_id": "waves/coherent_wave/full_wave/b_field/normal/values",
+     "source_type": "dd",
+     "status": "attached"
+    }
+   }
+  ],
+  "planned_bindings": 39,
+  "trial_written": 39
+ },
+ "quiet_graph": {
+  "first": {
+   "derived_parent": 2,
+   "dropped_edge": 87,
+   "never_bound": 30,
+   "orphan_awaiting_retirement": 3,
+   "unchained_holder": 30
+  },
+  "quiet": true,
+  "second": {
+   "derived_parent": 2,
+   "dropped_edge": 87,
+   "never_bound": 30,
+   "orphan_awaiting_retirement": 3,
+   "unchained_holder": 30
+  }
+ },
+ "readback_recheck": {
+  "after_counts": {
+   "derived_parent": 2,
+   "dropped_edge": 45,
+   "never_bound": 28,
+   "orphan_awaiting_retirement": 3,
+   "unchained_holder": 30
+  },
+  "dropped_edge_expected": -39,
+  "exit_status": 1,
+  "moved_populations": {
+   "never_bound": -2
+  },
+  "population_delta": {
+   "derived_parent": 0,
+   "dropped_edge": -42,
+   "never_bound": -2,
+   "orphan_awaiting_retirement": 0,
+   "unchained_holder": 0
+  },
+  "sources_created_since_apply": [
+   {
+    "created_at": "2026-10-19T02:06:14.275Z",
+    "source": "dd:plasma_transport/model/ggd/ion/state/energy/v_parallel"
+   },
+   {
+    "created_at": "2026-10-19T02:06:14.359Z",
+    "source": "dd:plasma_transport/model/ggd/ion/state/momentum/d_pol"
+   },
+   {
+    "created_at": "2026-10-19T02:06:14.362Z",
+    "source": "dd:wall/description_ggd/ggd/energy_fluxes/radiation/incident"
+   },
+   {
+    "created_at": "2026-10-19T02:06:14.365Z",
+    "source": "dd:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/emitted"
+   },
+   {
+    "created_at": "2026-10-19T02:06:14.368Z",
+    "source": "dd:pulse_schedule/ic/power"
+   }
+  ]
+ },
+ "readback_verified": {
+  "after_counts": {
+   "derived_parent": 2,
+   "dropped_edge": 48,
+   "never_bound": 30,
+   "orphan_awaiting_retirement": 3,
+   "unchained_holder": 30
+  },
+  "dropped_edge_expected": -39,
+  "exit_status": 0,
+  "note": "the classifier read taken on the quiet graph immediately after the apply; this is the write's own evidence",
+  "population_delta": {
+   "derived_parent": 0,
+   "dropped_edge": -39,
+   "never_bound": 0,
+   "orphan_awaiting_retirement": 0,
+   "unchained_holder": 0
+  }
+ },
+ "referred_to_dd_search": [
+  {
+   "name": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+   "reason": "every lineage-recorded path is unboundable: calorimetry/group/component/energy_total/data: source held by live name total_energy_of_calorimetry_component"
+  },
+  {
+   "name": "cumulative_ethylene_count_due_to_gas_injection",
+   "reason": "every lineage-recorded path is unboundable: summary/gas_injection_accumulated/ethylene/value: source held by live name accumulated_ethylene_count"
+  },
+  {
+   "name": "cumulative_inside_flux_surface_total_electron_density",
+   "reason": "every lineage-recorded path is unboundable: interferometer/electrons_n: source held by live name total_electron_count"
+  },
+  {
+   "name": "deposited_power_at_divertor_target",
+   "reason": "every lineage-recorded path is unboundable: divertors/divertor/power_incident: source held by live name total_incident_power_of_divertor"
+  },
+  {
+   "name": "electron_particle_diffusivity",
+   "reason": "no lineage-recorded path at all"
+  },
+  {
+   "name": "electron_temperature_at_first_wall",
+   "reason": "every lineage-recorded path is unboundable: langmuir_probes/embedded/multi_temperature_fits/t_e: source held by live name electron_temperature"
+  },
+  {
+   "name": "electrostatic_potential_at_outboard_midplane",
+   "reason": "every lineage-recorded path is unboundable: langmuir_probes/reciprocating/plunge/v_plasma: source held by live name electrostatic_potential_at_langmuir_probe_position"
+  },
+  {
+   "name": "energy_diffusion_coefficient_due_to_diffusion",
+   "reason": "no lineage-recorded path at all"
+  },
+  {
+   "name": "front_surface_area_of_langmuir_probe",
+   "reason": "every lineage-recorded path is unboundable: langmuir_probes/embedded/surface_area: source held by live name wetted_area_of_langmuir_probe; langmuir_probes/reciprocating/surface_area: source held by live name wetted_area_of_langmuir_probe"
+  },
+  {
+   "name": "incident_energy_flux_at_wall_due_to_radiation",
+   "reason": "every lineage-recorded path is unboundable: wall/description_ggd/ggd/energy_fluxes/radiation/emitted/values: source held by live name energy_flux_due_to_radiation"
+  },
+  {
+   "name": "net_forward_power_of_wave_beam",
+   "reason": "every lineage-recorded path is unboundable: ec_launchers/beam/power_launched: source held by live name launched_power_of_electron_cyclotron_beam"
+  },
+  {
+   "name": "net_plasma_current_due_to_ohmic_current_drive",
+   "reason": "no lineage-recorded path at all"
+  },
+  {
+   "name": "net_plasma_power_density",
+   "reason": "no lineage-recorded path at all"
+  },
+  {
+   "name": "neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission",
+   "reason": "every lineage-recorded path is unboundable: wall/description_ggd/ggd/particle_fluxes/neutral/emitted/values: source held by live name neutral_particle_flux_at_wall_due_to_surface_emission"
+  },
+  {
+   "name": "normal_distance_of_antenna_strap",
+   "reason": "every lineage-recorded path is unboundable: ic_antennas/antenna/module/strap/distance_to_conductor: source held by live name back_surface_distance_of_antenna_strap"
+  },
+  {
+   "name": "normal_particle_flux_at_wall_due_to_recombination",
+   "reason": "no lineage-recorded path at all"
+  },
+  {
+   "name": "normalized_toroidal_hard_xray_peak_external_half_width",
+   "reason": "no lineage-recorded path at all"
+  },
+  {
+   "name": "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+   "reason": "every lineage-recorded path is unboundable: ic_antennas/antenna/module/matching_element/capacitance: source held by live name capacitance_of_ion_cyclotron_heating_antenna"
+  },
+  {
+   "name": "surface_temperature_of_plasma_facing_component",
+   "reason": "every lineage-recorded path is unboundable: camera_ir/channel/camera/frame/apparent_temperature: source held by live name surface_temperature"
+  },
+  {
+   "name": "surface_thickness_of_cryostat",
+   "reason": "every lineage-recorded path is unboundable: cryostat/description_2d/cryostat/unit/annular/thickness: source held by live name thickness_of_cryostat; cryostat/description_2d/cryostat/unit/element/midplane_thickness: source held by live name thickness_of_cryostat"
+  },
+  {
+   "name": "thermal_energy_confinement_time",
+   "reason": "every lineage-recorded path is unboundable: summary/global_quantities/tau_energy/value: source held by live name energy_confinement_time"
+  },
+  {
+   "name": "total_absorbed_power_of_plant_system",
+   "reason": "every lineage-recorded path is unboundable: balance_of_plant/power_electric_plant_operation/power_total: source held by live name total_power"
+  },
+  {
+   "name": "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+   "reason": "no lineage-recorded path at all"
+  },
+  {
+   "name": "total_incident_thermal_power",
+   "reason": "every lineage-recorded path is unboundable: balance_of_plant/power_plant/total_heat_supplied: source held by live name total_heating_power_due_to_fusion_reactions"
+  },
+  {
+   "name": "total_ion_momentum_diffusivity",
+   "reason": "every lineage-recorded path is unboundable: plasma_transport/model/profiles_1d/ion/momentum/poloidal/d: source held by live name poloidal_ion_momentum_diffusivity"
+  },
+  {
+   "name": "total_launched_power_due_to_ion_cyclotron_heating",
+   "reason": "every lineage-recorded path is unboundable: ic_antennas/power_launched: source held by live name total_power_due_to_ion_cyclotron_heating"
+  },
+  {
+   "name": "total_particle_flux",
+   "reason": "no lineage-recorded path at all"
+  },
+  {
+   "name": "total_particle_flux_at_divertor_target_due_to_recycling",
+   "reason": "every lineage-recorded path is unboundable: divertors/divertor/particle_flux_recycled_total: source held by live name total_particle_source_rate_of_divertor_due_to_recycling"
+  },
+  {
+   "name": "total_thermal_radiative_power_of_divertor_target",
+   "reason": "every lineage-recorded path is unboundable: divertors/divertor/power_black_body: source held by live name thermal_radiative_power_of_divertor"
+  },
+  {
+   "name": "vertical_outline_of_wall",
+   "reason": "every lineage-recorded path is unboundable: wall/description_2d/vessel/unit/annular/outline_inner/z: source held by live name vertical_outline_of_vacuum_vessel"
+  }
+ ],
+ "referred_to_lead": [
+  {
+   "answer": "none of these",
+   "candidates": [
+    "balance_of_plant/power_plant/system/component/port/power_thermal"
+   ],
+   "confidence": 0.06,
+   "name": "absorbed_coolant_power_of_plant_component_port",
+   "probabilities": {
+    "balance_of_plant/power_plant/system/component/port/power_thermal": 0.47,
+    "none of these": 0.53
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "nbi/unit/source/surface"
+   ],
+   "confidence": 0.16,
+   "name": "beam_cross_sectional_area_of_aperture",
+   "probabilities": {
+    "nbi/unit/source/surface": 0.42,
+    "none of these": 0.58
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "reflectometer_fluctuation/channel/doppler/wavenumber"
+   ],
+   "confidence": 0.56,
+   "name": "cross_field_wave_vector_magnitude",
+   "probabilities": {
+    "none of these": 0.78,
+    "reflectometer_fluctuation/channel/doppler/wavenumber": 0.22
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "plasma_transport/model/ggd/electrons/energy/d/values"
+   ],
+   "confidence": 0.12,
+   "name": "electron_heat_diffusivity",
+   "probabilities": {
+    "none of these": 0.56,
+    "plasma_transport/model/ggd/electrons/energy/d/values": 0.44
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "plasma_transport/model/ggd/electrons/energy/flux/values"
+   ],
+   "confidence": 0.06,
+   "name": "energy_flux_at_control_surface",
+   "probabilities": {
+    "none of these": 0.53,
+    "plasma_transport/model/ggd/electrons/energy/flux/values": 0.47
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "reflectometer_profile/channel/antenna_emission/x2_width"
+   ],
+   "confidence": 0.22,
+   "name": "first_local_tangential_width_of_reflectometer_antenna",
+   "probabilities": {
+    "none of these": 0.61,
+    "reflectometer_profile/channel/antenna_emission/x2_width": 0.39
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "spi/injector/fragmentation_gas/atoms_n"
+   ],
+   "confidence": 0.66,
+   "name": "molecular_gas_count_due_to_pellet_injection",
+   "probabilities": {
+    "none of these": 0.83,
+    "spi/injector/fragmentation_gas/atoms_n": 0.17
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "plasma_profiles/profiles_1d/ion/velocity/parallel"
+   ],
+   "confidence": 0.06,
+   "name": "parallel_bulk_ion_velocity",
+   "probabilities": {
+    "none of these": 0.53,
+    "plasma_profiles/profiles_1d/ion/velocity/parallel": 0.47
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "camera_ir/frame_analysis/power_flux_parallel"
+   ],
+   "confidence": 0.14,
+   "name": "parallel_incident_heat_flux_at_divertor_target",
+   "probabilities": {
+    "camera_ir/frame_analysis/power_flux_parallel": 0.43,
+    "none of these": 0.57
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "disruption/global_quantities/power_radiated_electrons_impurities_halo"
+   ],
+   "confidence": 0.98,
+   "name": "power_over_core_region_due_to_impurity_radiation",
+   "probabilities": {
+    "disruption/global_quantities/power_radiated_electrons_impurities_halo": 0.01,
+    "none of these": 0.99
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "plasma_transport/model/ggd/neutral/energy/v_radial/values"
+   ],
+   "confidence": 0.16,
+   "name": "radial_effective_thermal_energy_velocity_due_to_convection",
+   "probabilities": {
+    "none of these": 0.58,
+    "plasma_transport/model/ggd/neutral/energy/v_radial/values": 0.42
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "summary/local/separatrix/momentum_phi/value"
+   ],
+   "confidence": 0.12,
+   "name": "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+   "probabilities": {
+    "none of these": 0.56,
+    "summary/local/separatrix/momentum_phi/value": 0.44
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "edge_sources/source/ggd/electrons/energy",
+   "candidates": [
+    "edge_sources/source/ggd/electrons/energy",
+    "edge_sources/source/ggd/electrons/energy/values"
+   ],
+   "confidence": 0.14,
+   "name": "total_electron_power_density",
+   "probabilities": {
+    "edge_sources/source/ggd/electrons/energy": 0.43,
+    "edge_sources/source/ggd/electrons/energy/values": 0.16,
+    "none of these": 0.41
+   },
+   "reason": "chosen probability 0.43 below 0.8"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "distributions/distribution/profiles_1d/collisions/electrons/power_fast"
+   ],
+   "confidence": 0.14,
+   "name": "total_suprathermal_electron_power_density_due_to_collisions",
+   "probabilities": {
+    "distributions/distribution/profiles_1d/collisions/electrons/power_fast": 0.43,
+    "none of these": 0.57
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "pf_passive/loop/element/geometry/arcs_of_circle/z"
+   ],
+   "confidence": 0.16,
+   "name": "vertical_coordinate_of_passive_loop",
+   "probabilities": {
+    "none of these": 0.58,
+    "pf_passive/loop/element/geometry/arcs_of_circle/z": 0.42
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "summary/pedestal_fits/mtanh/n_e/offset/value"
+   ],
+   "confidence": 0.92,
+   "name": "volume_averaged_electron_number_density_over_scrape_off_layer",
+   "probabilities": {
+    "none of these": 0.96,
+    "summary/pedestal_fits/mtanh/n_e/offset/value": 0.04
+   },
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": "none of these",
+   "candidates": [
+    "distributions/distribution/global_quantities/source/power"
+   ],
+   "confidence": 0.46,
+   "name": "volume_integrated_net_plasma_particle_power_density",
+   "probabilities": {
+    "distributions/distribution/global_quantities/source/power": 0.27,
+    "none of these": 0.73
+   },
+   "reason": "answered none-of-these"
+  }
+ ],
+ "restored": [
+  {
+   "dd_path": "operational_instrumentation/sensor/acceleration",
+   "jev_choice": "operational_instrumentation/sensor/acceleration",
+   "jev_confidence": 0.88,
+   "jev_probability": 0.94,
+   "name": "acceleration_of_passive_structure",
+   "source_id": "dd:operational_instrumentation/sensor/acceleration",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast",
+   "jev_choice": "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast",
+   "jev_confidence": 0.74,
+   "jev_probability": 0.87,
+   "name": "co_passing_fast_electron_kinetic_power_density_due_to_collisions",
+   "source_id": "dd:distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "charge_exchange/channel/image_diameter",
+   "jev_choice": "charge_exchange/channel/image_diameter",
+   "jev_confidence": 0.94,
+   "jev_probability": 0.97,
+   "name": "diameter_of_fibre_bundle",
+   "source_id": "dd:charge_exchange/channel/image_diameter",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "ece/channel/beam_tracing/beam/length",
+   "jev_choice": "ece/channel/beam_tracing/beam/length",
+   "jev_confidence": 0.94,
+   "jev_probability": 0.97,
+   "name": "distance_of_beam_tracing_ray",
+   "source_id": "dd:ece/channel/beam_tracing/beam/length",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "wall/global_quantities/neutral/incident_species/sputtering_physical",
+   "jev_choice": "wall/global_quantities/neutral/incident_species/sputtering_physical",
+   "jev_confidence": 0.96,
+   "jev_probability": 0.98,
+   "name": "effective_incident_neutral_coefficient_of_wall_material_due_to_sputtering",
+   "source_id": "dd:wall/global_quantities/neutral/incident_species/sputtering_physical",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "plasma_transport/model/ggd/electrons/particles/d/values",
+   "jev_choice": "plasma_transport/model/ggd/electrons/particles/d/values",
+   "jev_confidence": 0.54,
+   "jev_probability": 0.77,
+   "name": "electron_particle_diffusion_coefficient",
+   "source_id": "dd:plasma_transport/model/ggd/electrons/particles/d/values",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "plasma_transport/model/profiles_1d/momentum_phi/v",
+   "jev_choice": "plasma_transport/model/profiles_1d/momentum_phi/v",
+   "jev_confidence": 0.78,
+   "jev_probability": 0.89,
+   "name": "flux_surface_normal_momentum_convection_velocity",
+   "source_id": "dd:plasma_transport/model/profiles_1d/momentum_phi/v",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "core_transport/model/profiles_1d/ion/momentum/radial/d",
+   "jev_choice": "core_transport/model/profiles_1d/ion/momentum/radial/d",
+   "jev_confidence": 0.78,
+   "jev_probability": 0.89,
+   "name": "flux_surface_normal_momentum_diffusion_coefficient",
+   "source_id": "dd:core_transport/model/profiles_1d/ion/momentum/radial/d",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+   "jev_choice": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+   "jev_confidence": 0.12,
+   "jev_probability": 0.56,
+   "name": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+   "source_id": "dd:plasma_transport/model/ggd/neutral/energy/d_radial/values",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "spi/injector/propellant_gas/atoms_n",
+   "jev_choice": "spi/injector/propellant_gas/atoms_n",
+   "jev_confidence": 0.98,
+   "jev_probability": 0.99,
+   "name": "gas_atomic_count_of_pellet_injector",
+   "source_id": "dd:spi/injector/propellant_gas/atoms_n",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "balance_of_plant/power_plant/heat_load_divertor",
+   "jev_choice": "balance_of_plant/power_plant/heat_load_divertor",
+   "jev_confidence": 0.26,
+   "jev_probability": 0.63,
+   "name": "heat_power_of_divertor",
+   "source_id": "dd:balance_of_plant/power_plant/heat_load_divertor",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "plasma_transport/model/ggd/ion/element/z_n",
+   "jev_choice": "plasma_transport/model/ggd/ion/element/z_n",
+   "jev_confidence": 0.94,
+   "jev_probability": 0.97,
+   "name": "ion_species_atomic_number",
+   "source_id": "dd:plasma_transport/model/ggd/ion/element/z_n",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "langmuir_probes/reciprocating/plunge/collector/t_i",
+   "jev_choice": "langmuir_probes/reciprocating/plunge/collector/t_i",
+   "jev_confidence": 0.08,
+   "jev_probability": 0.54,
+   "name": "ion_temperature_at_outboard_midplane_separatrix",
+   "source_id": "dd:langmuir_probes/reciprocating/plunge/collector/t_i",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "breeding_blanket/pb_li_volume",
+   "jev_choice": "breeding_blanket/pb_li_volume",
+   "jev_confidence": 0.92,
+   "jev_probability": 0.96,
+   "name": "lithium_volume_of_breeder_blanket",
+   "source_id": "dd:breeding_blanket/pb_li_volume",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "balance_of_plant/power_electricity_net",
+   "jev_choice": "balance_of_plant/power_electricity_net",
+   "jev_confidence": 0.98,
+   "jev_probability": 0.99,
+   "name": "net_power",
+   "source_id": "dd:balance_of_plant/power_electricity_net",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "neutron_diagnostic/detector/mode/counting",
+   "jev_choice": "neutron_diagnostic/detector/mode/counting",
+   "jev_confidence": 0.74,
+   "jev_probability": 0.87,
+   "name": "neutron_rate_of_detector",
+   "source_id": "dd:neutron_diagnostic/detector/mode/counting",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "coils_non_axisymmetric/coil/current",
+   "jev_choice": "coils_non_axisymmetric/coil/current",
+   "jev_confidence": 0.8,
+   "jev_probability": 0.9,
+   "name": "non_axisymmetric_current_of_conductor",
+   "source_id": "dd:coils_non_axisymmetric/coil/current",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "pf_plasma/element/geometry/thick_line/thickness",
+   "jev_choice": "pf_plasma/element/geometry/thick_line/thickness",
+   "jev_confidence": 0.6,
+   "jev_probability": 0.8,
+   "name": "normal_width_of_plasma_filament",
+   "source_id": "dd:pf_plasma/element/geometry/thick_line/thickness",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+   "jev_choice": "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+   "jev_confidence": 0.98,
+   "jev_probability": 0.99,
+   "name": "nuclear_power_density_at_midplane",
+   "source_id": "dd:breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+   "jev_choice": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+   "jev_confidence": 0.52,
+   "jev_probability": 0.76,
+   "name": "parallel_thermal_neutral_energy_diffusivity",
+   "source_id": "dd:edge_transport/model/ggd/neutral/energy/d_parallel/values",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+   "jev_choice": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+   "jev_confidence": 0.55,
+   "jev_probability": 0.7,
+   "name": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+   "source_id": "dd:edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "distribution_sources/source/markers/orbit_integrals/m_pol",
+   "jev_choice": "distribution_sources/source/markers/orbit_integrals/m_pol",
+   "jev_confidence": 0.02,
+   "jev_probability": 0.51,
+   "name": "perturbed_linear_mhd_mode_number",
+   "source_id": "dd:distribution_sources/source/markers/orbit_integrals/m_pol",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "edge_transport/model/ggd/ion/particles/d_pol/values",
+   "jev_choice": "edge_transport/model/ggd/ion/particles/d_pol/values",
+   "jev_confidence": 0.52,
+   "jev_probability": 0.76,
+   "name": "poloidal_effective_ion_diffusion_coefficient",
+   "source_id": "dd:edge_transport/model/ggd/ion/particles/d_pol/values",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "summary/scrape_off_layer/power_radiated/value",
+   "jev_choice": "summary/scrape_off_layer/power_radiated/value",
+   "jev_confidence": 0.76,
+   "jev_probability": 0.88,
+   "name": "power_over_scrape_off_layer_due_to_radiation",
+   "source_id": "dd:summary/scrape_off_layer/power_radiated/value",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "lh_antennas/antenna/distance_to_antenna",
+   "jev_choice": "lh_antennas/antenna/distance_to_antenna",
+   "jev_confidence": 0.94,
+   "jev_probability": 0.97,
+   "name": "radial_offset_of_lower_hybrid_antenna",
+   "source_id": "dd:lh_antennas/antenna/distance_to_antenna",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "plasma_initiation/b_field_lines/open_fraction",
+   "jev_choice": "plasma_initiation/b_field_lines/open_fraction",
+   "jev_confidence": 1,
+   "jev_probability": 1.0,
+   "name": "ratio_of_field_line_count_to_total_field_line_count",
+   "source_id": "dd:plasma_initiation/b_field_lines/open_fraction",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+   "jev_choice": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+   "jev_confidence": 0.34,
+   "jev_probability": 0.67,
+   "name": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+   "source_id": "dd:cryostat/description_2d/cryostat/unit/material_volume_fraction",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "camera_ir/channel/camera/frame/filter/wavelength_central",
+   "jev_choice": "camera_ir/channel/camera/frame/filter/wavelength_central",
+   "jev_confidence": 0.94,
+   "jev_probability": 0.97,
+   "name": "reference_wavelength_of_filter_window",
+   "source_id": "dd:camera_ir/channel/camera/frame/filter/wavelength_central",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "neutron_diagnostic/detector/aperture/x2_width",
+   "jev_choice": "neutron_diagnostic/detector/aperture/x2_width",
+   "jev_confidence": 0.28,
+   "jev_probability": 0.64,
+   "name": "second_local_tangential_width_of_diagnostic_aperture",
+   "source_id": "dd:neutron_diagnostic/detector/aperture/x2_width",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "breeding_blanket/module/side_wall_thickness",
+   "jev_choice": "breeding_blanket/module/side_wall_thickness",
+   "jev_confidence": 0.84,
+   "jev_probability": 0.92,
+   "name": "surface_thickness_of_breeder_blanket_module",
+   "source_id": "dd:breeding_blanket/module/side_wall_thickness",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+   "jev_choice": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+   "jev_confidence": 0.24,
+   "jev_probability": 0.62,
+   "name": "tendency_of_runaway_electron_density",
+   "source_id": "dd:runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "pf_active/coil/geometry/oblique/beta",
+   "jev_choice": "pf_active/coil/geometry/oblique/beta",
+   "jev_confidence": 0.76,
+   "jev_probability": 0.88,
+   "name": "tilt_angle_of_poloidal_field_coil",
+   "source_id": "dd:pf_active/coil/geometry/oblique/beta",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+   "jev_choice": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+   "jev_confidence": 0.52,
+   "jev_probability": 0.76,
+   "name": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+   "source_id": "dd:distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+   "jev_choice": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+   "jev_confidence": 0.56,
+   "jev_probability": 0.78,
+   "name": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+   "source_id": "dd:distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "pf_plasma/element/geometry/outline/z",
+   "jev_choice": "pf_plasma/element/geometry/outline/z",
+   "jev_confidence": 0.84,
+   "jev_probability": 0.92,
+   "name": "vertical_coordinate_of_plasma_filament",
+   "source_id": "dd:pf_plasma/element/geometry/outline/z",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+   "jev_choice": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+   "jev_confidence": 0,
+   "jev_probability": 0.5,
+   "name": "vertical_position_of_grating",
+   "source_id": "dd:spectrometer_x_ray_crystal/channel/reflector/centre/z",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "plasma_transport/model/ggd/ion/momentum/d/z",
+   "jev_choice": "plasma_transport/model/ggd/ion/momentum/d/z",
+   "jev_confidence": 0.56,
+   "jev_probability": 0.78,
+   "name": "vertical_total_ion_momentum_diffusivity",
+   "source_id": "dd:plasma_transport/model/ggd/ion/momentum/d/z",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "reflectometer_profile/channel/cut_off_frequency",
+   "jev_choice": "reflectometer_profile/channel/cut_off_frequency",
+   "jev_confidence": 0.68,
+   "jev_probability": 0.84,
+   "name": "wave_critical_ordinary_mode_frequency",
+   "source_id": "dd:reflectometer_profile/channel/cut_off_frequency",
+   "sources_bound": 1
+  },
+  {
+   "dd_path": "waves/coherent_wave/full_wave/b_field/normal/values",
+   "jev_choice": "waves/coherent_wave/full_wave/b_field/normal/values",
+   "jev_confidence": 0.36,
+   "jev_probability": 0.68,
+   "name": "wave_magnetic_field_amplitude",
+   "source_id": "dd:waves/coherent_wave/full_wave/b_field/normal/values",
+   "sources_bound": 1
+  }
+ ],
+ "restored_count": 39,
+ "stage": "readback-failed",
+ "stage_exit_status": {
+  "apply": 0,
+  "control": 0,
+  "figure": 0,
+  "fragment": 0,
+  "judge": 0,
+  "preview": 0,
+  "readback": 1,
+  "referrals": 0
+ },
+ "worklist": [
+  {
+   "candidate_meta": {
+    "balance_of_plant/power_plant/system/component/port/power_thermal": {
+     "documentation": "Heat transfer rate of the component, (+) = into the system, (-) = out of the system",
+     "physics_domain": "plant_systems",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "balance_of_plant/power_plant/system/component/port/power_thermal"
+   ],
+   "description": "Power transferred from a plant component into its coolant stream, given by the coolant enthalpy rise rate.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "absorbed_coolant_power_of_plant_component_port",
+   "origin": "pipeline",
+   "relatives": [
+    "absorbed_coolant_power_of_plant_component_port",
+    "coolant_absorbed_power_of_plant_component_port",
+    "coolant_heating_power_of_plant_component_port",
+    "thermal_power_of_plant_component_port"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "operational_instrumentation/sensor/acceleration": {
+     "documentation": "Acceleration measured by an accelerometer sensor",
+     "physics_domain": "mechanical_measurement_diagnostics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "operational_instrumentation/sensor/acceleration"
+   ],
+   "description": "Acceleration of a passive structural component measured by an attached accelerometer.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "acceleration_of_passive_structure",
+   "origin": "pipeline",
+   "relatives": [
+    "acceleration",
+    "acceleration_of_passive_structure"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m.s^-2",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Discharge-accumulated total energy absorbed by coolant from a calorimetry component.",
+   "documentation": null,
+   "dropped_candidates": [
+    "calorimetry/group/component/energy_total/data: source held by live name total_energy_of_calorimetry_component"
+   ],
+   "lineage_path_count": 1,
+   "name": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+   "origin": "pipeline",
+   "relatives": [
+    "accumulated_deposited_energy_of_plasma_facing_component",
+    "accumulated_deposited_thermal_energy_of_plasma_facing_component",
+    "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+    "deposited_energy_accumulated_of_plasma_facing_component",
+    "deposited_energy_of_plasma_facing_component",
+    "total_energy"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "J",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "nbi/unit/source/surface": {
+     "documentation": "Surface of the detector/aperture, derived from the above geometric data",
+     "physics_domain": "auxiliary_heating",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "nbi/unit/source/surface"
+   ],
+   "description": "Active ion-source aperture area forming the extracted beam before neutralization.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "beam_cross_sectional_area_of_aperture",
+   "origin": "pipeline",
+   "relatives": [
+    "area_of_neutral_beam_injector",
+    "beam_cross_sectional_area_of_aperture"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast": {
+     "documentation": "Collisional power density to the fast particle population",
+     "physics_domain": "fast_particles",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "distributions/distribution/profiles_2d/co_passing/collisions/electrons/power_fast"
+   ],
+   "description": "Power density of kinetic-energy change of co-passing fast electrons caused by Coulomb collisions.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "co_passing_fast_electron_kinetic_power_density_due_to_collisions",
+   "origin": "pipeline",
+   "relatives": [
+    "co_passing_fast_electron_kinetic_energy_power_density_due_to_collisions",
+    "co_passing_fast_electron_kinetic_power_density_due_to_collisions",
+    "co_passing_fast_electron_power_density_due_to_collisions"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W.m^-3",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "reflectometer_fluctuation/channel/doppler/wavenumber": {
+     "documentation": "Wavenumber probed by the diagnostic",
+     "physics_domain": "electromagnetic_wave_diagnostics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "reflectometer_fluctuation/channel/doppler/wavenumber"
+   ],
+   "description": "Magnitude of the wave vector perpendicular to the local equilibrium magnetic field.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "cross_field_wave_vector_magnitude",
+   "origin": "pipeline",
+   "relatives": [
+    "cross_field_wave_vector_magnitude",
+    "perpendicular_wave_vector_magnitude"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Cumulative post-breakdown count from ethylene gas injection, with 16 equivalent electrons per molecule.",
+   "documentation": null,
+   "dropped_candidates": [
+    "summary/gas_injection_accumulated/ethylene/value: source held by live name accumulated_ethylene_count"
+   ],
+   "lineage_path_count": 1,
+   "name": "cumulative_ethylene_count_due_to_gas_injection",
+   "origin": "pipeline",
+   "relatives": [
+    "accumulated_ethylene_count_due_to_gas_injection",
+    "cumulative_ethylene_count_due_to_gas_injection",
+    "ethylene_count",
+    "ethylene_count_cumulative_due_to_gas_injection"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Total count of free electrons in the specified integration volume, obtained by integrating the complete local free-electron density over that volume.",
+   "documentation": null,
+   "dropped_candidates": [
+    "interferometer/electrons_n: source held by live name total_electron_count"
+   ],
+   "lineage_path_count": 1,
+   "name": "cumulative_inside_flux_surface_total_electron_density",
+   "origin": "pipeline",
+   "relatives": [
+    "cumulative_inside_flux_surface_total_electron_density",
+    "electron_count",
+    "volume_integrated_total_electron_density"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Power deposited on the wetted plasma-facing surfaces of the divertor target, summed over the wetted area.",
+   "documentation": null,
+   "dropped_candidates": [
+    "divertors/divertor/power_incident: source held by live name total_incident_power_of_divertor"
+   ],
+   "lineage_path_count": 1,
+   "name": "deposited_power_at_divertor_target",
+   "origin": "pipeline",
+   "relatives": [
+    "deposited_power_at_divertor_target",
+    "power_of_divertor",
+    "total_deposited_power_at_divertor_target",
+    "total_deposited_power_of_divertor"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "charge_exchange/channel/image_diameter": {
+     "documentation": "Diameter at the image plane (typically the diameter of the optical fibre)",
+     "physics_domain": "spectroscopy",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "charge_exchange/channel/image_diameter"
+   ],
+   "description": "Diameter of the focused image spot at the image plane, typically equal to the optical fiber core diameter.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "diameter_of_fibre_bundle",
+   "origin": "pipeline",
+   "relatives": [
+    "diameter_of_fibre_bundle",
+    "diameter_of_line_of_sight",
+    "viewing_diameter_of_line_of_sight",
+    "viewing_width_of_line_of_sight"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "ece/channel/beam_tracing/beam/length": {
+     "documentation": "Ray/beam curvilinear length",
+     "physics_domain": "waves",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "ece/channel/beam_tracing/beam/length"
+   ],
+   "description": "Arc length along a beam-tracing ray from its launch point to the evaluated point.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "distance_of_beam_tracing_ray",
+   "origin": "pipeline",
+   "relatives": [
+    "distance_of_beam_tracing_ray",
+    "length_of_electron_cyclotron_beam"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "wall/global_quantities/neutral/incident_species/sputtering_physical": {
+     "documentation": "Effective coefficient of physical sputtering due to this incident species. It is assumed that all sputtered neutrals from the wall have the wall temperature (cold neutrals)",
+     "physics_domain": "plasma_wall_interactions",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "wall/global_quantities/neutral/incident_species/sputtering_physical"
+   ],
+   "description": "Effective physical sputtering coefficient of wall material for incident neutral species.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "effective_incident_neutral_coefficient_of_wall_material_due_to_sputtering",
+   "origin": "pipeline",
+   "relatives": [
+    "effective_coefficient_of_wall_material_due_to_sputtering",
+    "effective_incident_neutral_coefficient_of_wall_material_due_to_sputtering"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_transport/model/ggd/electrons/energy/d/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_transport/model/ggd/electrons/energy/d/values"
+   ],
+   "description": "Fickian diffusivity multiplying the gradient of electron thermal energy density.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "electron_heat_diffusivity",
+   "origin": "pipeline",
+   "relatives": [
+    "electron_energy_diffusivity",
+    "electron_heat_diffusivity",
+    "thermal_electron_energy_diffusivity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_transport/model/ggd/electrons/particles/d/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_transport/model/ggd/electrons/particles/d/values"
+   ],
+   "description": "Electron particle diffusion coefficient linking particle flux to the electron density gradient.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "electron_particle_diffusion_coefficient",
+   "origin": "pipeline",
+   "relatives": [
+    "electron_particle_diffusion_coefficient",
+    "radial_electron_diffusion_coefficient",
+    "radial_electron_particle_diffusion_coefficient"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Diffusivity relating electron particle flux to the electron density gradient.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 0,
+   "name": "electron_particle_diffusivity",
+   "origin": "pipeline",
+   "relatives": [
+    "electron_diffusivity",
+    "electron_particle_diffusion_coefficient_due_to_diffusion",
+    "electron_particle_diffusivity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Electron kinetic temperature evaluated on the plasma side of the first wall.",
+   "documentation": null,
+   "dropped_candidates": [
+    "langmuir_probes/embedded/multi_temperature_fits/t_e: source held by live name electron_temperature"
+   ],
+   "lineage_path_count": 1,
+   "name": "electron_temperature_at_first_wall",
+   "origin": "pipeline",
+   "relatives": [
+    "electron_temperature_at_first_wall",
+    "electron_temperature_at_wall"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "eV",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Quasineutral plasma electrostatic potential at the outboard equatorial midplane, relative to an electrical reference.",
+   "documentation": null,
+   "dropped_candidates": [
+    "langmuir_probes/reciprocating/plunge/v_plasma: source held by live name electrostatic_potential_at_langmuir_probe_position"
+   ],
+   "lineage_path_count": 1,
+   "name": "electrostatic_potential_at_outboard_midplane",
+   "origin": "pipeline",
+   "relatives": [
+    "electrostatic_potential_at_midplane",
+    "electrostatic_potential_at_outboard_midplane",
+    "plasma_electrostatic_potential_at_midplane",
+    "plasma_electrostatic_potential_at_outboard_midplane"
+   ],
+   "stage": "reviewed",
+   "status": "draft",
+   "unit": "V",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Fickian diffusion coefficient for transport of thermal-energy density by diffusive energy flux.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 0,
+   "name": "energy_diffusion_coefficient_due_to_diffusion",
+   "origin": "pipeline",
+   "relatives": [
+    "energy_diffusion_coefficient_due_to_diffusion",
+    "energy_diffusivity",
+    "thermal_energy_diffusivity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_transport/model/ggd/electrons/energy/flux/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_transport/model/ggd/electrons/energy/flux/values"
+   ],
+   "description": "Signed energy flux per unit area crossing an oriented control surface, positive along the surface normal.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "energy_flux_at_control_surface",
+   "origin": "pipeline",
+   "relatives": [
+    "energy_flux",
+    "energy_flux_at_control_surface",
+    "normal_energy_flux",
+    "normal_energy_flux_at_control_surface"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W.m^-2",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "reflectometer_profile/channel/antenna_emission/x2_width": {
+     "documentation": "Full width of the aperture in the X2 direction, used only if geometry_type = 3",
+     "physics_domain": "electromagnetic_wave_diagnostics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "reflectometer_profile/channel/antenna_emission/x2_width"
+   ],
+   "description": "Full aperture extent of a reflectometer antenna along its first local tangential direction.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "first_local_tangential_width_of_reflectometer_antenna",
+   "origin": "pipeline",
+   "relatives": [
+    "first_local_tangential_width_of_reflectometer_antenna",
+    "width_of_reflectometer_antenna"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_transport/model/profiles_1d/momentum_phi/v": {
+     "documentation": "Effective convection",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_transport/model/profiles_1d/momentum_phi/v"
+   ],
+   "description": "Effective flux-surface-normal advective velocity coefficient for the momentum transport channel, not bulk flow.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "flux_surface_normal_momentum_convection_velocity",
+   "origin": "pipeline",
+   "relatives": [
+    "effective_momentum_convection_velocity",
+    "effective_momentum_velocity_due_to_convection",
+    "flux_surface_normal_momentum_convection_velocity",
+    "momentum_convection_velocity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "core_transport/model/profiles_1d/ion/momentum/radial/d": {
+     "documentation": "Effective diffusivity",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "core_transport/model/profiles_1d/ion/momentum/radial/d"
+   ],
+   "description": "Fick's-law coefficient for momentum transport along the outward normal to magnetic flux surfaces.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "flux_surface_normal_momentum_diffusion_coefficient",
+   "origin": "pipeline",
+   "relatives": [
+    "flux_surface_normal_momentum_diffusion_coefficient",
+    "flux_surface_normal_momentum_diffusivity",
+    "radial_momentum_diffusivity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_transport/model/ggd/neutral/energy/d_radial/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_transport/model/ggd/neutral/energy/d_radial/values"
+   ],
+   "description": "Fickian diffusion coefficient for cross-surface transport of neutral-particle energy, normal to flux surfaces.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+   "origin": "pipeline",
+   "relatives": [
+    "flux_surface_normal_neutral_energy_diffusion_coefficient",
+    "radial_neutral_energy_diffusion_coefficient",
+    "radial_neutral_energy_diffusivity",
+    "radial_total_neutral_heat_diffusivity_over_edge_region"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Geometric area of the plasma-facing collecting surface of a Langmuir probe.",
+   "documentation": null,
+   "dropped_candidates": [
+    "langmuir_probes/embedded/surface_area: source held by live name wetted_area_of_langmuir_probe",
+    "langmuir_probes/reciprocating/surface_area: source held by live name wetted_area_of_langmuir_probe"
+   ],
+   "lineage_path_count": 2,
+   "name": "front_surface_area_of_langmuir_probe",
+   "origin": "pipeline",
+   "relatives": [
+    "area_of_langmuir_probe",
+    "front_surface_area_of_langmuir_probe",
+    "surface_area_of_langmuir_probe",
+    "total_surface_area_of_langmuir_probe"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "spi/injector/propellant_gas/atoms_n": {
+     "documentation": "Total number of atoms of the gas",
+     "physics_domain": "fueling",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "spi/injector/propellant_gas/atoms_n"
+   ],
+   "description": "Total number of atoms in the propellant gas associated with a pellet injector.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "gas_atomic_count_of_pellet_injector",
+   "origin": "pipeline",
+   "relatives": [
+    "atomic_count_of_pellet_injector",
+    "gas_atomic_count_of_pellet_injector"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "balance_of_plant/power_plant/heat_load_divertor": {
+     "documentation": "Heat flow towards the divertor",
+     "physics_domain": "plant_systems",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "balance_of_plant/power_plant/heat_load_divertor"
+   ],
+   "description": "Heat power deposited on wetted divertor targets and components.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "heat_power_of_divertor",
+   "origin": "pipeline",
+   "relatives": [
+    "heat_power_of_divertor",
+    "thermal_power_of_divertor"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Incident radiative energy flux crossing onto a plasma-facing wall surface before interaction.",
+   "documentation": null,
+   "dropped_candidates": [
+    "wall/description_ggd/ggd/energy_fluxes/radiation/emitted/values: source held by live name energy_flux_due_to_radiation"
+   ],
+   "lineage_path_count": 1,
+   "name": "incident_energy_flux_at_wall_due_to_radiation",
+   "origin": "pipeline",
+   "relatives": [
+    "energy_flux_at_wall_due_to_radiation",
+    "incident_energy_flux_at_wall_due_to_radiation"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W.m^-2",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_transport/model/ggd/ion/element/z_n": {
+     "documentation": "Nuclear charge",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_transport/model/ggd/ion/element/z_n"
+   ],
+   "description": "Number of protons in the nucleus of an ion species, independent of its ionization state.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "ion_species_atomic_number",
+   "origin": "pipeline",
+   "relatives": [
+    "ion_atomic_number",
+    "ion_species_atomic_number"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "langmuir_probes/reciprocating/plunge/collector/t_i": {
+     "documentation": "Ion temperature",
+     "physics_domain": "particle_measurement_diagnostics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "langmuir_probes/reciprocating/plunge/collector/t_i"
+   ],
+   "description": "Ion kinetic temperature evaluated at the outboard midplane separatrix, the entrance to the scrape-off layer.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "ion_temperature_at_outboard_midplane_separatrix",
+   "origin": "pipeline",
+   "relatives": [
+    "ion_temperature_at_midplane",
+    "ion_temperature_at_outboard_midplane",
+    "ion_temperature_at_outboard_midplane_separatrix",
+    "scrape_off_layer_ion_temperature_at_outboard_midplane"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "eV",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "breeding_blanket/pb_li_volume": {
+     "documentation": "Volume of PbLi contained in the blanket",
+     "physics_domain": "structural_components",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "breeding_blanket/pb_li_volume"
+   ],
+   "description": "Volume of the lead-lithium breeder material contained within a breeder blanket.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "lithium_volume_of_breeder_blanket",
+   "origin": "pipeline",
+   "relatives": [
+    "coolant_volume_of_breeder_blanket",
+    "lithium_volume_of_breeder_blanket",
+    "total_coolant_volume_of_breeder_blanket",
+    "volume_of_breeder_blanket"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^3",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "spi/injector/fragmentation_gas/atoms_n": {
+     "documentation": "Total number of atoms of the gas",
+     "physics_domain": "fueling",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "spi/injector/fragmentation_gas/atoms_n"
+   ],
+   "description": "Number of propellant-gas molecules used to launch a pellet during pellet injection.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "molecular_gas_count_due_to_pellet_injection",
+   "origin": "pipeline",
+   "relatives": [
+    "molecular_gas_count_due_to_pellet_injection",
+    "normalized_atomic_count_of_pellet",
+    "normalized_molecular_gas_count",
+    "normalized_molecular_gas_count_due_to_gas_injection"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Forward power of a wave beam minus its reflected power, i.e. the net power entering the vacuum vessel.",
+   "documentation": null,
+   "dropped_candidates": [
+    "ec_launchers/beam/power_launched: source held by live name launched_power_of_electron_cyclotron_beam"
+   ],
+   "lineage_path_count": 1,
+   "name": "net_forward_power_of_wave_beam",
+   "origin": "pipeline",
+   "relatives": [
+    "difference_of_forward_power_of_wave_beam_and_reflected_power_of_wave_beam",
+    "launched_power_of_wave_beam",
+    "net_forward_power_of_wave_beam",
+    "net_launched_power_of_wave_beam"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Net plasma current generated by collisional Ohmic response to inductive electric-field drive.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 0,
+   "name": "net_plasma_current_due_to_ohmic_current_drive",
+   "origin": "pipeline",
+   "relatives": [
+    "current_due_to_ohmic_induction",
+    "net_current_due_to_ohmic_induction",
+    "net_plasma_current_due_to_ohmic_current_drive"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "A",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Net signed power per unit volume transferred to the plasma, positive for net energy gain by the plasma.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 0,
+   "name": "net_plasma_power_density",
+   "origin": "pipeline",
+   "relatives": [
+    "net_energy_power_density",
+    "net_plasma_power_density",
+    "net_power_density",
+    "power_density"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W.m^-3",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "balance_of_plant/power_electricity_net": {
+     "documentation": "Net electric power",
+     "physics_domain": "plant_systems",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "balance_of_plant/power_electricity_net"
+   ],
+   "description": "Net plant electrical output: generation minus internal consumption; positive is export.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "net_power",
+   "origin": "pipeline",
+   "relatives": [
+    "net_power",
+    "net_power_of_plant_system"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Kinetic energy flux carried by neutral particles emitted from the wall surface.",
+   "documentation": null,
+   "dropped_candidates": [
+    "wall/description_ggd/ggd/particle_fluxes/neutral/emitted/values: source held by live name neutral_particle_flux_at_wall_due_to_surface_emission"
+   ],
+   "lineage_path_count": 1,
+   "name": "neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission",
+   "origin": "pipeline",
+   "relatives": [
+    "neutral_energy_flux_at_wall_due_to_surface_emission",
+    "neutral_kinetic_energy_flux_at_wall_due_to_surface_emission",
+    "neutral_particle_flux_at_wall",
+    "neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^-2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "neutron_diagnostic/detector/mode/counting": {
+     "documentation": "Detected counts per second as a function of time",
+     "physics_domain": "neutronics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "neutron_diagnostic/detector/mode/counting"
+   ],
+   "description": "Rate of accepted neutron-induced detection events registered by the detector.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "neutron_rate_of_detector",
+   "origin": "pipeline",
+   "relatives": [
+    "neutron_rate_of_detector",
+    "neutron_rate_of_neutron_detector"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "coils_non_axisymmetric/coil/current": {
+     "documentation": "Current in the coil",
+     "physics_domain": "magnetic_field_systems",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "coils_non_axisymmetric/coil/current"
+   ],
+   "description": "Signed conventional electric current carried by the conductor of a non-axisymmetric coil.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "non_axisymmetric_current_of_conductor",
+   "origin": "pipeline",
+   "relatives": [
+    "current_of_coil_conductor",
+    "current_of_correction_coil",
+    "non_axisymmetric_current_of_coil_conductor",
+    "non_axisymmetric_current_of_conductor"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "A",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Normal clearance from the rear surface of an antenna strap to the conducting wall behind it.",
+   "documentation": null,
+   "dropped_candidates": [
+    "ic_antennas/antenna/module/strap/distance_to_conductor: source held by live name back_surface_distance_of_antenna_strap"
+   ],
+   "lineage_path_count": 1,
+   "name": "normal_distance_of_antenna_strap",
+   "origin": "pipeline",
+   "relatives": [
+    "gap_of_antenna_strap",
+    "normal_distance_of_antenna_strap",
+    "normal_gap_at_wall",
+    "normal_gap_of_antenna_strap"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Surface-normal particle number flux at the wall due to recombination.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 0,
+   "name": "normal_particle_flux_at_wall_due_to_recombination",
+   "origin": "pipeline",
+   "relatives": [
+    "flux_due_to_recombination",
+    "normal_particle_flux_at_wall_due_to_recombination",
+    "normal_particle_flux_due_to_recombination"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^-2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "pf_plasma/element/geometry/thick_line/thickness": {
+     "documentation": "Thickness",
+     "physics_domain": "equilibrium",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "pf_plasma/element/geometry/thick_line/thickness"
+   ],
+   "description": "Full transverse extent of a plasma filament measured perpendicular to its central line segment.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "normal_width_of_plasma_filament",
+   "origin": "pipeline",
+   "relatives": [
+    "normal_thickness_of_plasma_filament",
+    "normal_width_of_plasma_filament",
+    "thickness_of_plasma_filament",
+    "width_of_plasma_filament"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "External half-width of the hard X-ray emissivity peak in normalized toroidal flux coordinate.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 0,
+   "name": "normalized_toroidal_hard_xray_peak_external_half_width",
+   "origin": "pipeline",
+   "relatives": [
+    "hard_xray_peak_upper_bound_width",
+    "normalized_toroidal_hard_xray_peak_external_half_width"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "breeding_blanket/module/time_slice/midplane_power_density_nuclear": {
+     "documentation": "Nuclear heating power density in the module, evaluated at midplane",
+     "physics_domain": "neutronics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "breeding_blanket/module/time_slice/midplane_power_density_nuclear"
+   ],
+   "description": "Local nuclear heating power density in breeder blanket module material at the midplane.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "nuclear_power_density_at_midplane",
+   "origin": "pipeline",
+   "relatives": [
+    "nuclear_power_density_at_midplane",
+    "nuclear_power_density_of_breeder_blanket_module"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W.m^-3",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_profiles/profiles_1d/ion/velocity/parallel": {
+     "documentation": "Parallel component",
+     "physics_domain": "core_plasma_physics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_profiles/profiles_1d/ion/velocity/parallel"
+   ],
+   "description": "Density-weighted charge-state-averaged bulk ion velocity parallel to the local magnetic field.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "parallel_bulk_ion_velocity",
+   "origin": "pipeline",
+   "relatives": [
+    "parallel_bulk_ion_velocity",
+    "parallel_ion_velocity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "camera_ir/frame_analysis/power_flux_parallel": {
+     "documentation": "Parallel heat flux received by the element monitored by the camera, along the distance_separatrix_midplane coordinate",
+     "physics_domain": "edge_plasma_physics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "camera_ir/frame_analysis/power_flux_parallel"
+   ],
+   "description": "Field-aligned heat flux incident on the divertor target per area normal to the local magnetic field.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "parallel_incident_heat_flux_at_divertor_target",
+   "origin": "pipeline",
+   "relatives": [
+    "parallel_heat_flux_at_divertor_target",
+    "parallel_incident_heat_flux_at_divertor_target"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W.m^-2",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "edge_transport/model/ggd/neutral/energy/d_parallel/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "edge_transport/model/ggd/neutral/energy/d_parallel/values"
+   ],
+   "description": "Parallel Fickian diffusivity for thermal energy transport of neutral species.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "parallel_thermal_neutral_energy_diffusivity",
+   "origin": "pipeline",
+   "relatives": [
+    "parallel_energy_diffusivity",
+    "parallel_neutral_energy_diffusivity",
+    "parallel_thermal_neutral_energy_diffusivity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic": {
+     "documentation": "Diamagnetic component, one scalar value is provided per element in the grid subset.",
+     "physics_domain": "edge_plasma_physics",
+     "unit": null
+    },
+    "plasma_transport/model/ggd/momentum/v/diamagnetic": {
+     "documentation": "Diamagnetic component, one scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+    "plasma_transport/model/ggd/momentum/v/diamagnetic"
+   ],
+   "description": "Signed component of ion fluid velocity perpendicular to the magnetic field arising from the pressure-gradient diamagnetic drift.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 2,
+   "name": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+   "origin": "pipeline",
+   "relatives": [
+    "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+    "perpendicular_plasma_velocity_due_to_diamagnetic_drift",
+    "velocity_due_to_diamagnetic_drift"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "distribution_sources/source/markers/orbit_integrals/m_pol": {
+     "documentation": "Array of poloidal mode numbers, where quantities vary as exp(-i.m_pol.theta) and theta is the angle defined by the choice of ../../coordinate_identifier, with its centre at the magnetic axis recalled at the root of this IDS",
+     "physics_domain": "fast_particles",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "distribution_sources/source/markers/orbit_integrals/m_pol"
+   ],
+   "description": "Mode-number labels of a linear magnetohydrodynamic perturbation.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "perturbed_linear_mhd_mode_number",
+   "origin": "pipeline",
+   "relatives": [
+    "linear_mhd_mode_number",
+    "mode_number",
+    "perturbed_linear_mhd_mode_number"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "edge_transport/model/ggd/ion/particles/d_pol/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "edge_transport/model/ggd/ion/particles/d_pol/values"
+   ],
+   "description": "Effective poloidal diffusion coefficient for charge-state-summed ion particle transport.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "poloidal_effective_ion_diffusion_coefficient",
+   "origin": "pipeline",
+   "relatives": [
+    "poloidal_effective_ion_diffusion_coefficient",
+    "poloidal_ion_diffusivity",
+    "poloidal_total_ion_particle_diffusivity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "disruption/global_quantities/power_radiated_electrons_impurities_halo": {
+     "documentation": "Power radiated by electrons on impurities in the halo region",
+     "physics_domain": "magnetohydrodynamics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "disruption/global_quantities/power_radiated_electrons_impurities_halo"
+   ],
+   "description": "Power emitted by electron-impurity radiation integrated over the core plasma region.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "power_over_core_region_due_to_impurity_radiation",
+   "origin": "pipeline",
+   "relatives": [
+    "power_due_to_impurity_radiation",
+    "power_over_core_region_due_to_impurity_radiation",
+    "radiated_power_over_core_region_due_to_impurity_radiation"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "summary/scrape_off_layer/power_radiated/value": {
+     "documentation": "Value",
+     "physics_domain": "edge_plasma_physics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "summary/scrape_off_layer/power_radiated/value"
+   ],
+   "description": "Total electromagnetic power radiated by the plasma, integrated over the scrape-off layer region.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "power_over_scrape_off_layer_due_to_radiation",
+   "origin": "pipeline",
+   "relatives": [
+    "power_over_scrape_off_layer_due_to_radiation",
+    "radiated_power_over_scrape_off_layer",
+    "total_plasma_radiated_power_over_scrape_off_layer",
+    "total_radiated_power_over_scrape_off_layer"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_transport/model/ggd/neutral/energy/v_radial/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_transport/model/ggd/neutral/energy/v_radial/values"
+   ],
+   "description": "Effective radial velocity coefficient for non-diffusive thermal-energy transport, excluding bulk flow speed.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "radial_effective_thermal_energy_velocity_due_to_convection",
+   "origin": "pipeline",
+   "relatives": [
+    "radial_effective_thermal_energy_velocity_due_to_convection",
+    "radial_energy_convection_velocity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "lh_antennas/antenna/distance_to_antenna": {
+     "documentation": "Radial distance to the antenna mouth (grid for the electron density profile). 0 at antenna mouth, increasing towards the plasma",
+     "physics_domain": "auxiliary_heating",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "lh_antennas/antenna/distance_to_antenna"
+   ],
+   "description": "Radial distance measured from the lower-hybrid antenna mouth, zero at the mouth and increasing toward the plasma.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "radial_offset_of_lower_hybrid_antenna",
+   "origin": "pipeline",
+   "relatives": [
+    "normal_distance_of_lower_hybrid_antenna",
+    "radial_coordinate_of_lower_hybrid_antenna_row",
+    "radial_distance_of_lower_hybrid_antenna",
+    "radial_offset_of_lower_hybrid_antenna"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Charge divided by the voltage of the same conductor, equivalent to its capacitance.",
+   "documentation": null,
+   "dropped_candidates": [
+    "ic_antennas/antenna/module/matching_element/capacitance: source held by live name capacitance_of_ion_cyclotron_heating_antenna"
+   ],
+   "lineage_path_count": 1,
+   "name": "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+   "origin": "pipeline",
+   "relatives": [
+    "capacitance",
+    "capacitance_of_conductor",
+    "ratio_of_charge_of_conductor_to_voltage_of_conductor"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "F",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_initiation/b_field_lines/open_fraction": {
+     "documentation": "Fraction of open field lines : ratio open fields lines / (open+closed field lines)",
+     "physics_domain": "plasma_initiation",
+     "unit": "1"
+    }
+   },
+   "candidate_paths": [
+    "plasma_initiation/b_field_lines/open_fraction"
+   ],
+   "description": "Open-field-line count divided by total open and closed field-line count.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "ratio_of_field_line_count_to_total_field_line_count",
+   "origin": "pipeline",
+   "relatives": [
+    "field_line_breakdown_fraction",
+    "field_line_fraction",
+    "ratio_of_field_line_count_to_total_field_line_count"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "cryostat/description_2d/cryostat/unit/material_volume_fraction": {
+     "documentation": "Fraction of the volume of each material in this unit",
+     "physics_domain": "structural_components",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "cryostat/description_2d/cryostat/unit/material_volume_fraction"
+   ],
+   "description": "Volume of a constituent wall material divided by the passive-structure volume.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+   "origin": "pipeline",
+   "relatives": [
+    "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+    "volumetric_fraction_of_passive_structure"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "camera_ir/channel/camera/frame/filter/wavelength_central": {
+     "documentation": "Central wavelength of the filter",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "camera_ir/channel/camera/frame/filter/wavelength_central"
+   ],
+   "description": "Optical distance between wave crests at the nominal center or peak of a diagnostic filter-window passband.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "reference_wavelength_of_filter_window",
+   "origin": "pipeline",
+   "relatives": [
+    "reference_wavelength_of_filter",
+    "reference_wavelength_of_filter_window"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "neutron_diagnostic/detector/aperture/x2_width": {
+     "documentation": "Full width of the aperture in the X2 direction, used only if geometry_type = 3",
+     "physics_domain": "neutronics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "neutron_diagnostic/detector/aperture/x2_width"
+   ],
+   "description": "Full width of the neutron detector collimating aperture along its second local tangential direction.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "second_local_tangential_width_of_diagnostic_aperture",
+   "origin": "pipeline",
+   "relatives": [
+    "second_local_tangential_width_of_diagnostic_aperture",
+    "second_local_tangential_width_of_neutron_detector"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Thermodynamic temperature of the exposed material surface of a plasma-facing component.",
+   "documentation": null,
+   "dropped_candidates": [
+    "camera_ir/channel/camera/frame/apparent_temperature: source held by live name surface_temperature"
+   ],
+   "lineage_path_count": 1,
+   "name": "surface_temperature_of_plasma_facing_component",
+   "origin": "pipeline",
+   "relatives": [
+    "surface_temperature",
+    "surface_temperature_of_plasma_facing_component"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "K",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "breeding_blanket/module/side_wall_thickness": {
+     "documentation": "Side wall thickness",
+     "physics_domain": "structural_components",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "breeding_blanket/module/side_wall_thickness"
+   ],
+   "description": "Thickness of a breeder blanket module side wall, measured normal to the wall surface.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "surface_thickness_of_breeder_blanket_module",
+   "origin": "pipeline",
+   "relatives": [
+    "surface_thickness_of_breeder_blanket_module",
+    "thickness_of_breeder_blanket",
+    "thickness_of_breeder_blanket_module"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Local thickness of the cryostat shell, measured normal to its surface between inner and outer material faces.",
+   "documentation": null,
+   "dropped_candidates": [
+    "cryostat/description_2d/cryostat/unit/annular/thickness: source held by live name thickness_of_cryostat",
+    "cryostat/description_2d/cryostat/unit/element/midplane_thickness: source held by live name thickness_of_cryostat"
+   ],
+   "lineage_path_count": 2,
+   "name": "surface_thickness_of_cryostat",
+   "origin": "pipeline",
+   "relatives": [
+    "normal_distance_of_cryostat",
+    "normal_thickness_of_cryostat",
+    "surface_thickness_of_cryostat",
+    "thickness_of_cryostat"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "runaway_electrons",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values"
+   ],
+   "description": "Net rate of change of runaway electron number density from all active source and loss mechanisms combined.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "tendency_of_runaway_electron_density",
+   "origin": "pipeline",
+   "relatives": [
+    "net_runaway_electron_source_rate",
+    "runaway_electron_source_rate",
+    "tendency_of_runaway_electron_density",
+    "total_runaway_electron_source_rate"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^-3.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Confinement time for thermal energy, equal to stored thermal energy divided by net power loss.",
+   "documentation": null,
+   "dropped_candidates": [
+    "summary/global_quantities/tau_energy/value: source held by live name energy_confinement_time"
+   ],
+   "lineage_path_count": 1,
+   "name": "thermal_energy_confinement_time",
+   "origin": "pipeline",
+   "relatives": [
+    "energy_confinement_time",
+    "thermal_energy_confinement_time"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "s",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "pf_active/coil/geometry/oblique/beta": {
+     "documentation": "Inclination of second angle measured counter-clockwise from vertically upwards directed vector (grad Z). If both alpha and beta are zero (rectangle) then the simpler rectangular elements description should be used.",
+     "physics_domain": "magnetic_field_systems",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "pf_active/coil/geometry/oblique/beta"
+   ],
+   "description": "Signed tilt of a poloidal-field-coil oblique side, counterclockwise from +Z in right-handed cylindrical (R, \u03c6, Z).",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "tilt_angle_of_poloidal_field_coil",
+   "origin": "pipeline",
+   "relatives": [
+    "tilt_angle_of_poloidal_field_coil",
+    "vertical_angle_of_poloidal_field_coil"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "rad",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi": {
+     "documentation": "Collisional toroidal torque density to the fast particle population",
+     "physics_domain": "fast_particles",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi"
+   ],
+   "description": "Toroidal torque density transferred to co-passing fast electrons by collisional transport.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+   "origin": "pipeline",
+   "relatives": [
+    "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+    "toroidal_co_passing_fast_electron_torque_density_due_to_collisions"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "N.m^-2",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "summary/local/separatrix/momentum_phi/value": {
+     "documentation": "Value",
+     "physics_domain": "edge_plasma_physics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "summary/local/separatrix/momentum_phi/value"
+   ],
+   "description": "Signed toroidal momentum of total plasma integrated inside the separatrix.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+   "origin": "pipeline",
+   "relatives": [
+    "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+    "toroidal_total_plasma_momentum_at_plasma_boundary",
+    "toroidal_total_plasma_momentum_cumulative_inside_flux_surface_at_separatrix"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "kg.m.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi": {
+     "documentation": "Collisional toroidal torque density to the fast particle population",
+     "physics_domain": "fast_particles",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi"
+   ],
+   "description": "Toroidal torque density transferred to trapped fast electrons by Coulomb collisional transport.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+   "origin": "pipeline",
+   "relatives": [
+    "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+    "toroidal_trapped_fast_electron_torque_density_due_to_collisions"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "N.m^-2",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Total real electrical load consumed by included plant systems at their electrical boundaries.",
+   "documentation": null,
+   "dropped_candidates": [
+    "balance_of_plant/power_electric_plant_operation/power_total: source held by live name total_power"
+   ],
+   "lineage_path_count": 1,
+   "name": "total_absorbed_power_of_plant_system",
+   "origin": "pipeline",
+   "relatives": [
+    "total_absorbed_power_of_plant_system",
+    "total_power_of_plant_system"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Total neutron source rate from deuterium-tritium beam-beam fusion of neutral-beam fast ions.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 0,
+   "name": "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+   "origin": "pipeline",
+   "relatives": [
+    "deuterium_tritium_neutron_flux_due_to_beam_beam_fusion",
+    "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "Hz",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "edge_sources/source/ggd/electrons/energy": {
+     "documentation": "Source term for the electron energy equation, given on various grid subsets",
+     "physics_domain": "edge_plasma_physics",
+     "unit": null
+    },
+    "edge_sources/source/ggd/electrons/energy/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "edge_plasma_physics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "edge_sources/source/ggd/electrons/energy",
+    "edge_sources/source/ggd/electrons/energy/values"
+   ],
+   "description": "Net volumetric power transferred to electrons summed over all source and sink mechanisms; positive for gain.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 2,
+   "name": "total_electron_power_density",
+   "origin": "pipeline",
+   "relatives": [
+    "electron_power_density",
+    "net_electron_energy_source_rate",
+    "net_electron_power_density",
+    "total_electron_power_density"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W.m^-3",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Total thermal power incident on the plant conversion cycle, recoverable from all entering streams.",
+   "documentation": null,
+   "dropped_candidates": [
+    "balance_of_plant/power_plant/total_heat_supplied: source held by live name total_heating_power_due_to_fusion_reactions"
+   ],
+   "lineage_path_count": 1,
+   "name": "total_incident_thermal_power",
+   "origin": "pipeline",
+   "relatives": [
+    "total_heat_power_at_inlet",
+    "total_incident_thermal_power",
+    "total_incident_thermal_power_at_inlet",
+    "total_thermal_power_at_inlet"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Diffusivity of total ion momentum from diffusive transport, summed over ion charge states.",
+   "documentation": null,
+   "dropped_candidates": [
+    "plasma_transport/model/profiles_1d/ion/momentum/poloidal/d: source held by live name poloidal_ion_momentum_diffusivity"
+   ],
+   "lineage_path_count": 1,
+   "name": "total_ion_momentum_diffusivity",
+   "origin": "pipeline",
+   "relatives": [
+    "ion_momentum_diffusivity",
+    "total_ion_momentum_diffusivity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Total wave power launched into the vacuum vessel by the whole ion-cyclotron heating system, summed over antennas.",
+   "documentation": null,
+   "dropped_candidates": [
+    "ic_antennas/power_launched: source held by live name total_power_due_to_ion_cyclotron_heating"
+   ],
+   "lineage_path_count": 1,
+   "name": "total_launched_power_due_to_ion_cyclotron_heating",
+   "origin": "pipeline",
+   "relatives": [
+    "total_launched_power_due_to_ion_cyclotron_heating",
+    "total_launched_power_of_ion_cyclotron_heating_antenna",
+    "total_power_of_ion_cyclotron_heating_antenna",
+    "total_wave_launched_power_of_ion_cyclotron_heating_antenna"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Signed particle number flux through an oriented surface, summed over all species and states.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 0,
+   "name": "total_particle_flux",
+   "origin": "pipeline",
+   "relatives": [
+    "particle_flux",
+    "total_particle_flux"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^-2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Total recycled particle flux emitted from all divertor target surfaces into the edge plasma.",
+   "documentation": null,
+   "dropped_candidates": [
+    "divertors/divertor/particle_flux_recycled_total: source held by live name total_particle_source_rate_of_divertor_due_to_recycling"
+   ],
+   "lineage_path_count": 1,
+   "name": "total_particle_flux_at_divertor_target_due_to_recycling",
+   "origin": "pipeline",
+   "relatives": [
+    "surface_integrated_total_particle_flux_at_divertor_target_due_to_recycling",
+    "total_particle_flux_at_divertor_target_due_to_recycling",
+    "total_particle_flux_of_divertor_due_to_recycling",
+    "total_particle_source_rate_at_divertor_target_due_to_recycling"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "distributions/distribution/profiles_1d/collisions/electrons/power_fast": {
+     "documentation": "Collisional power density to the fast particle population",
+     "physics_domain": "fast_particles",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "distributions/distribution/profiles_1d/collisions/electrons/power_fast"
+   ],
+   "description": "Signed Coulomb-collisional energy-exchange power density of suprathermal electrons, summed over orbit classes.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "total_suprathermal_electron_power_density_due_to_collisions",
+   "origin": "pipeline",
+   "relatives": [
+    "fast_electron_power_density_due_to_collisions",
+    "total_suprathermal_electron_power_density_due_to_collisions"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W.m^-3",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Total black-body thermal photon power emitted by divertor target surfaces, including emissivity.",
+   "documentation": null,
+   "dropped_candidates": [
+    "divertors/divertor/power_black_body: source held by live name thermal_radiative_power_of_divertor"
+   ],
+   "lineage_path_count": 1,
+   "name": "total_thermal_radiative_power_of_divertor_target",
+   "origin": "pipeline",
+   "relatives": [
+    "power_of_divertor_due_to_radiation",
+    "total_thermal_radiative_power_of_divertor_target"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "pf_passive/loop/element/geometry/arcs_of_circle/z": {
+     "documentation": "Height of the start point of each arc of circle",
+     "physics_domain": "magnetic_field_systems",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "pf_passive/loop/element/geometry/arcs_of_circle/z"
+   ],
+   "description": "Signed vertical coordinate of a passive loop element contour point in the right-handed cylindrical (R, \u03c6, Z) frame.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "vertical_coordinate_of_passive_loop",
+   "origin": "pipeline",
+   "relatives": [
+    "vertical_coordinate_of_passive_loop",
+    "vertical_coordinate_of_passive_structure",
+    "vertical_outline_of_passive_loop"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "pf_plasma/element/geometry/outline/z": {
+     "documentation": "Height",
+     "physics_domain": "equilibrium",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "pf_plasma/element/geometry/outline/z"
+   ],
+   "description": "Signed vertical coordinate of points on a plasma filament contour in the right-handed cylindrical (R, \u03c6, Z) frame.",
+   "documentation": null,
+   "dropped_candidates": [
+    "equilibrium/time_slice/boundary/outline/z: source held by live name vertical_outline_of_plasma_boundary"
+   ],
+   "lineage_path_count": 2,
+   "name": "vertical_coordinate_of_plasma_filament",
+   "origin": "pipeline",
+   "relatives": [
+    "vertical_coordinate_of_plasma_boundary",
+    "vertical_coordinate_of_plasma_filament",
+    "vertical_outline_of_plasma_boundary",
+    "vertical_outline_of_plasma_filament"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {},
+   "candidate_paths": [],
+   "description": "Signed Z coordinate of a vacuum-vessel wall outline point in the right-handed cylindrical (R, \u03c6, Z) frame.",
+   "documentation": null,
+   "dropped_candidates": [
+    "wall/description_2d/vessel/unit/annular/outline_inner/z: source held by live name vertical_outline_of_vacuum_vessel"
+   ],
+   "lineage_path_count": 1,
+   "name": "vertical_outline_of_wall",
+   "origin": "pipeline",
+   "relatives": [
+    "vertical_outline_of_vacuum_vessel",
+    "vertical_outline_of_wall"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "spectrometer_x_ray_crystal/channel/reflector/centre/z": {
+     "documentation": "Height",
+     "physics_domain": "spectroscopy",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "spectrometer_x_ray_crystal/channel/reflector/centre/z"
+   ],
+   "description": "Vertical Z position of the grating summit in the right-handed cylindrical (R, \u03c6, Z) frame.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "vertical_position_of_grating",
+   "origin": "pipeline",
+   "relatives": [
+    "vertical_coordinate_of_bragg_crystal",
+    "vertical_coordinate_of_grating",
+    "vertical_position_of_grating"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "plasma_transport/model/ggd/ion/momentum/d/z": {
+     "documentation": "Component along the height axis, one scalar value is provided per element in the grid subset.",
+     "physics_domain": "transport",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "plasma_transport/model/ggd/ion/momentum/d/z"
+   ],
+   "description": "Diffusivity of total ion vertical momentum along Z in the right-handed cylindrical (R, \u03c6, Z) frame.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "vertical_total_ion_momentum_diffusivity",
+   "origin": "pipeline",
+   "relatives": [
+    "vertical_ion_momentum_diffusivity",
+    "vertical_total_ion_momentum_diffusivity"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "m^2.s^-1",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "summary/pedestal_fits/mtanh/n_e/offset/value": {
+     "documentation": "Value",
+     "physics_domain": "edge_plasma_physics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "summary/pedestal_fits/mtanh/n_e/offset/value"
+   ],
+   "description": "Volume-averaged electron number density over the scrape-off layer plasma region.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "volume_averaged_electron_number_density_over_scrape_off_layer",
+   "origin": "pipeline",
+   "relatives": [
+    "electron_density_over_scrape_off_layer",
+    "volume_averaged_electron_density_over_scrape_off_layer",
+    "volume_averaged_electron_number_density_over_scrape_off_layer"
+   ],
+   "stage": "accepted",
+   "status": "draft",
+   "unit": "m^-3",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "distributions/distribution/global_quantities/source/power": {
+     "documentation": "Total power of the source",
+     "physics_domain": "fast_particles",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "distributions/distribution/global_quantities/source/power"
+   ],
+   "description": "Net power density transferred to a plasma particle population, integrated over volume; positive values add energy.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "volume_integrated_net_plasma_particle_power_density",
+   "origin": "pipeline",
+   "relatives": [
+    "deposited_power",
+    "volume_integrated_net_plasma_particle_power_density"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "W",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "reflectometer_profile/channel/cut_off_frequency": {
+     "documentation": "Cut-off frequency as a function of measurement position and time",
+     "physics_domain": "electromagnetic_wave_diagnostics",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "reflectometer_profile/channel/cut_off_frequency"
+   ],
+   "description": "Critical frequency below which an ordinary-mode electromagnetic wave cannot propagate and is reflected at the cutoff layer.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "wave_critical_ordinary_mode_frequency",
+   "origin": "pipeline",
+   "relatives": [
+    "critical_ordinary_mode_frequency",
+    "electron_plasma_frequency_at_measurement_position",
+    "plasma_frequency_at_measurement_position",
+    "wave_critical_ordinary_mode_frequency"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "Hz",
+   "unresolved_tokens": []
+  },
+  {
+   "candidate_meta": {
+    "waves/coherent_wave/full_wave/b_field/normal/values": {
+     "documentation": "One scalar value is provided per element in the grid subset.",
+     "physics_domain": "waves",
+     "unit": null
+    }
+   },
+   "candidate_paths": [
+    "waves/coherent_wave/full_wave/b_field/normal/values"
+   ],
+   "description": "Amplitude of the oscillating magnetic field carried by a coherent electromagnetic wave beam.",
+   "documentation": null,
+   "dropped_candidates": [],
+   "lineage_path_count": 1,
+   "name": "wave_magnetic_field_amplitude",
+   "origin": "pipeline",
+   "relatives": [
+    "perturbed_magnetic_field_of_wave_beam",
+    "perturbed_wave_magnetic_field",
+    "wave_magnetic_field",
+    "wave_magnetic_field_amplitude"
+   ],
+   "stage": "exhausted",
+   "status": "draft",
+   "unit": "T",
+   "unresolved_tokens": []
+  }
+ ]
+}
