@@ -1,0 +1,252 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "length_of_passive_loop_element",
+  "applied": true,
+  "arm": "jev",
+  "budget_limit_usd": 2.0,
+  "calls": 16,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-jev-r2",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-jev-r2/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-19T15:21:13.379495+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 16,
+      "scratch_ledger_rows": 16,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 32
+  },
+  "cost_limit_passed_usd": 1.98,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T15:21:11.409561+00:00",
+  "family": "length_of_passive_loop_element",
+  "harmonize_receipts": [
+    {
+      "anchor": "length_of_passive_loop_element",
+      "applied": true,
+      "batches": [
+        [
+          "length_of_passive_loop_element"
+        ],
+        [
+          "major_length_of_passive_loop_element",
+          "minor_length_of_passive_loop_element"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "87a992f675a532ebb66dc16d8d497db4a78956b503ec775c3799a759d23faa1b",
+      "harmonized": false,
+      "invariant": [
+        "length",
+        "",
+        "",
+        "",
+        "passive_loop_element"
+      ],
+      "member_scores": {
+        "length_of_passive_loop_element": 0.99375,
+        "major_length_of_passive_loop_element": 1.0,
+        "minor_length_of_passive_loop_element": 0.9375
+      },
+      "members": [
+        "length_of_passive_loop_element",
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element"
+      ],
+      "n": 3,
+      "physical_base": "length",
+      "planned_calls": 3,
+      "result": {
+        "batches_run": 1,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 0.00% < 90.00% (0/1 touched)"
+        ],
+        "halted": true,
+        "resume_from": 1,
+        "run_ids": [
+          "29ceef86-ae78-4c1d-be89-ad239230bf1f"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 0,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.4811,
+        "total_quarantined": 0,
+        "total_selected": 3,
+        "total_touched": 1
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.99375,
+            "id": "length_of_passive_loop_element"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 0.99375,
+            "id": "length_of_passive_loop_element"
+          }
+        ]
+      },
+      "scores_after": {
+        "length_of_passive_loop_element": 0.849,
+        "major_length_of_passive_loop_element": 1.0,
+        "minor_length_of_passive_loop_element": 0.9375
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 1,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 0.00% < 90.00% (0/1 touched)"
+    ],
+    "halted": true,
+    "resume_from": 1,
+    "run_ids": [
+      "29ceef86-ae78-4c1d-be89-ad239230bf1f"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 0,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.4811,
+    "total_quarantined": 0,
+    "total_selected": 3,
+    "total_touched": 1
+  },
+  "heuristic_anchor": "major_length_of_passive_loop_element",
+  "isolation": {
+    "at": "2026-10-19T15:04:10.922600+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771162,
+    "live_nodes_after": 1771162,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 16,
+    "scratch_ledger_rows": 16,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28004"
+  },
+  "jev_anchor": "length_of_passive_loop_element",
+  "kind": "unclassified",
+  "ledger_calls": 16,
+  "ledger_spend_usd": 0.4810929999999999,
+  "ledger_window": {
+    "ended": "2026-10-19T15:21:12.945874+00:00",
+    "started": "2026-10-19T15:04:16.031458+00:00"
+  },
+  "lint_after": 2,
+  "lint_after_classes": {
+    "convention_violation": 2
+  },
+  "lint_before": 3,
+  "lint_before_classes": {
+    "convention_violation": 3
+  },
+  "members": [
+    "length_of_passive_loop_element",
+    "major_length_of_passive_loop_element",
+    "minor_length_of_passive_loop_element"
+  ],
+  "neo4j_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/scratch/mcintos-1281970-3p0kmunr/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.203395
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.114737
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.003288
+    },
+    {
+      "calls": 1,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.077846
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.081378
+    },
+    {
+      "calls": 4,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.000449
+    }
+  ],
+  "planned_calls": 3,
+  "port": 28004,
+  "port_lock": "/dev/shm/ssog-scratch-port-28004.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T15:21:31.339740+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28004.lock"
+  },
+  "recorded_anchor_before": "length_of_passive_loop_element",
+  "run_ids": [
+    "29ceef86-ae78-4c1d-be89-ad239230bf1f"
+  ],
+  "scores_after": {
+    "length_of_passive_loop_element": 0.849,
+    "major_length_of_passive_loop_element": 1.0,
+    "minor_length_of_passive_loop_element": 0.9375
+  },
+  "scores_before": {
+    "length_of_passive_loop_element": 0.99375,
+    "major_length_of_passive_loop_element": 1.0,
+    "minor_length_of_passive_loop_element": 0.9375
+  },
+  "scratch_removed": {
+    "at": "2026-10-19T15:21:31.339659+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/scratch/mcintos-1281970-3p0kmunr"
+  },
+  "scratch_tree": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/scratch/mcintos-1281970-3p0kmunr",
+  "scratch_uri": "bolt://127.0.0.1:28004",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.4810929999999999,
+  "stamped": false,
+  "started_at": "2026-10-19T15:02:50.353677+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T15:21:28.392807+00:00",
+    "tree": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/scratch/mcintos-1281970-3p0kmunr/instance"
+  },
+  "wall_seconds": 1015.3780685998499
+}
