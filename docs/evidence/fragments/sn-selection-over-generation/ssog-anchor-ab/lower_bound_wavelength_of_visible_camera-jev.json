@@ -1,0 +1,263 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "lower_bound_wavelength_of_visible_camera",
+  "applied": true,
+  "arm": "jev",
+  "budget_limit_usd": 2.0,
+  "calls": 30,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-visible-wavelength-jev",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-visible-wavelength-jev/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-19T20:31:55.602399+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 30,
+      "scratch_ledger_rows": 30,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 60
+  },
+  "cost_limit_passed_usd": 1.98,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T20:31:53.674258+00:00",
+  "family": "lower_bound_wavelength_of_visible_camera",
+  "harmonize_receipts": [
+    {
+      "anchor": "lower_bound_wavelength_of_visible_camera",
+      "applied": true,
+      "batches": [
+        [
+          "lower_bound_wavelength_of_visible_camera"
+        ],
+        [
+          "upper_bound_wavelength_of_visible_camera",
+          "wavelength_of_visible_camera"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "1dd6f055fbcb250c4b873df7460e0129a464dc88f02d421f720c26c06d77a245",
+      "harmonized": false,
+      "invariant": [
+        "wavelength",
+        "",
+        "",
+        "",
+        "visible_camera"
+      ],
+      "member_scores": {
+        "lower_bound_wavelength_of_visible_camera": 0.91875,
+        "upper_bound_wavelength_of_visible_camera": 0.95625,
+        "wavelength_of_visible_camera": 0.96875
+      },
+      "members": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "n": 3,
+      "physical_base": "wavelength",
+      "planned_calls": 3,
+      "result": {
+        "batches_run": 2,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 50.00% < 90.00% (1/2 touched)"
+        ],
+        "halted": true,
+        "resume_from": 2,
+        "run_ids": [
+          "ca7b229f-764f-481c-8df0-2b88c82ea532",
+          "52f60a2a-ddb9-4ec0-b9d5-17bceec3fc6e"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 2,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 1.0162,
+        "total_quarantined": 0,
+        "total_selected": 3,
+        "total_touched": 3
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.96875,
+            "id": "wavelength_of_visible_camera"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.9375,
+            "before": 0.95625,
+            "id": "upper_bound_wavelength_of_visible_camera"
+          },
+          {
+            "after": 0.849,
+            "before": 0.96875,
+            "id": "wavelength_of_visible_camera"
+          }
+        ]
+      },
+      "scores_after": {
+        "lower_bound_wavelength_of_visible_camera": 0.9375,
+        "upper_bound_wavelength_of_visible_camera": 0.9375,
+        "wavelength_of_visible_camera": 0.849
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 2,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 50.00% < 90.00% (1/2 touched)"
+    ],
+    "halted": true,
+    "resume_from": 2,
+    "run_ids": [
+      "ca7b229f-764f-481c-8df0-2b88c82ea532",
+      "52f60a2a-ddb9-4ec0-b9d5-17bceec3fc6e"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 2,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 1.0162,
+    "total_quarantined": 0,
+    "total_selected": 3,
+    "total_touched": 3
+  },
+  "heuristic_anchor": "wavelength_of_visible_camera",
+  "isolation": {
+    "at": "2026-10-19T20:03:35.632704+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771164,
+    "live_nodes_after": 1771164,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 30,
+    "scratch_ledger_rows": 30,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28004"
+  },
+  "jev_anchor": "lower_bound_wavelength_of_visible_camera",
+  "kind": "unclassified",
+  "ledger_calls": 30,
+  "ledger_spend_usd": 0.841339,
+  "ledger_window": {
+    "ended": "2026-10-19T20:31:55.018577+00:00",
+    "started": "2026-10-19T20:03:39.613631+00:00"
+  },
+  "lint_after": 2,
+  "lint_after_classes": {
+    "link_hygiene": 2
+  },
+  "lint_before": 7,
+  "lint_before_classes": {
+    "convention_violation": 1,
+    "defining_equation": 2,
+    "link_missing_reverse": 3,
+    "relationship_link": 1
+  },
+  "members": [
+    "lower_bound_wavelength_of_visible_camera",
+    "upper_bound_wavelength_of_visible_camera",
+    "wavelength_of_visible_camera"
+  ],
+  "neo4j_log": "/dev/shm/mcintos-1281970-w7s_w4k8/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.228035
+    },
+    {
+      "calls": 7,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.312731
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.0024720000000000002
+    },
+    {
+      "calls": 5,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.138656
+    },
+    {
+      "calls": 6,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.158343
+    },
+    {
+      "calls": 9,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.001102
+    }
+  ],
+  "planned_calls": 3,
+  "port": 28004,
+  "port_lock": "/dev/shm/ssog-scratch-port-28004.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T20:32:07.799046+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28004.lock"
+  },
+  "recorded_anchor_before": "lower_bound_wavelength_of_visible_camera",
+  "run_ids": [
+    "ca7b229f-764f-481c-8df0-2b88c82ea532",
+    "52f60a2a-ddb9-4ec0-b9d5-17bceec3fc6e"
+  ],
+  "scores_after": {
+    "lower_bound_wavelength_of_visible_camera": 0.9375,
+    "upper_bound_wavelength_of_visible_camera": 0.9375,
+    "wavelength_of_visible_camera": 0.849
+  },
+  "scores_before": {
+    "lower_bound_wavelength_of_visible_camera": 0.91875,
+    "upper_bound_wavelength_of_visible_camera": 0.95625,
+    "wavelength_of_visible_camera": 0.96875
+  },
+  "scratch_removed": {
+    "at": "2026-10-19T20:32:07.798957+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/dev/shm/mcintos-1281970-w7s_w4k8"
+  },
+  "scratch_tree": "/dev/shm/mcintos-1281970-w7s_w4k8",
+  "scratch_uri": "bolt://127.0.0.1:28004",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.841339,
+  "stamped": false,
+  "started_at": "2026-10-19T20:01:42.423442+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T20:32:06.496366+00:00",
+    "tree": "/dev/shm/mcintos-1281970-w7s_w4k8/instance"
+  },
+  "wall_seconds": 1694.0605901582167
+}
