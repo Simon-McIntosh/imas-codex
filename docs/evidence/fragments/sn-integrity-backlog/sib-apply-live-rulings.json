@@ -455,52 +455,60 @@
       "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1667869",
       "status": "attached",
       "scalar": "electron_temperature_at_separatrix",
-      "name_stage": "accepted",
-      "validation": "valid"
+      "holder_id": "electron_temperature_at_separatrix"
+    },
+    "local_source": {
+      "status": "extracted",
+      "scalar": null,
+      "bindings": 0,
+      "holders": []
     },
     "receiving_name": {
-      "name_stage": "reviewed",
+      "name_stage": "accepted",
       "validation": "valid",
       "status": "draft"
     },
-    "probes": [
-      {
-        "tag": "migration",
-        "rows": [
-          "dd:summary/local/separatrix_average/t_e/value"
-        ],
-        "refusals": [
-          {
-            "row_id": "dd:summary/local/separatrix_average/t_e/value",
-            "reason": "signed ordinary source lifecycle does not match migration authority"
-          }
-        ],
-        "manifest_sha256": "530347f0015e7359255a5b7c219bed2dd8e962d341ebd1aeee34783074c0227f"
-      },
-      {
-        "tag": "attachment",
-        "rows": [
-          "dd:summary/local/separatrix/t_e/value"
-        ],
-        "refusals": [],
-        "manifest_sha256": "96568412ece599928cd34e4af621a640168c9dc8a6911c17c0ddd52510dcf3ce"
-      },
-      {
-        "tag": "combined",
-        "rows": [
-          "dd:summary/local/separatrix/t_e/value",
-          "dd:summary/local/separatrix_average/t_e/value"
-        ],
-        "refusals": [
-          {
-            "row_id": "dd:summary/local/separatrix_average/t_e/value",
-            "reason": "signed ordinary source lifecycle does not match migration authority"
-          }
-        ],
-        "manifest_sha256": "097295f833d9fa9c8beabf41321c9c0d7424a3604f6b12b62f6a4d7b0b5cd71c"
-      }
-    ],
-    "receiving_name_stage": "reviewed",
+    "holder_migration": {
+      "row": "dd:summary/local/separatrix/t_e/value",
+      "migrating_source": "dd:summary/local/separatrix/t_e/value",
+      "receiving_name": "electron_temperature_at_separatrix",
+      "receiving_name_stage": "accepted",
+      "probes": [
+        {
+          "tag": "holder-migration",
+          "rows": [
+            "dd:summary/local/separatrix/t_e/value"
+          ],
+          "refusals": [
+            {
+              "row_id": "dd:summary/local/separatrix/t_e/value",
+              "reason": "signed ordinary source lifecycle does not match migration authority"
+            }
+          ],
+          "manifest_sha256": "9ee4200219b1922751579f4bec201c95cef6a3074ec3442f15b4d852a93b5e50"
+        },
+        {
+          "tag": "incumbent-binding-readmitted",
+          "rows": [
+            "dd:summary/local/separatrix_average/t_e/value"
+          ],
+          "refusals": [
+            {
+              "row_id": "dd:summary/local/separatrix_average/t_e/value",
+              "reason": "target would lose its last producing source"
+            }
+          ],
+          "manifest_sha256": "3baabb03cd86a5b40a0338f761db2676e420f630c508b4a4053bed98e7ec6b52"
+        }
+      ]
+    },
+    "averaged_path_binding": {
+      "writer": "bind_recovery_sources",
+      "receiving_name": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+      "precondition": "the averaged path's source holds no other name",
+      "averaged_path_holder": "electron_temperature_at_separatrix",
+      "precondition_met": false
+    },
     "refused_program": "signed ordinary-source migration",
     "refusal_reason": "signed ordinary source lifecycle does not match migration authority"
   },
