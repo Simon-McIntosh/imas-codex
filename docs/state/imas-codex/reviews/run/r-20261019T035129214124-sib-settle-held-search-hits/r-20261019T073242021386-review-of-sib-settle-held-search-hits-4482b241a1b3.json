@@ -29,6 +29,11 @@
       "kind": "exempted",
       "reason": "A field name in a one-shot driver's record; the before and after counts it sits beside are correct and are what the plan cites.",
       "recorded_at": "2026-10-19T09:45:41.074430+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "The read and judge modes' payloads are corroborated by verify and falsify, which end with EXIT=0; promotion accepted the record.",
+      "recorded_at": "2026-10-19T09:45:49.077257+00:00"
     }
   },
   "findings": [
