@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-10-19T14:49:52.229Z",
   "dispatched_at": "2026-10-19T14:32:07Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "A field name in the shared runner's record: cost_limit_passed_usd is the ceiling handed to the apply. Every arm carries the same field, so the aggregating node reads it as the cap, and the spend is recorded beside it.",
+      "recorded_at": "2026-10-19T14:55:01.252565+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json",
