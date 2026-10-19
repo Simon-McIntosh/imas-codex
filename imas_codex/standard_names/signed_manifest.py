@@ -7077,6 +7077,8 @@ def _source_exchange_refusal(record: dict[str, Any]) -> str | None:
         or record.get("taken_dd_lifecycle_status") == "removed"
     ):
         return "taken DD path is absent or removed from the current DD"
+    if record.get("taken_element_id") is None:
+        return "taken DD source does not exist"
     if record.get("taken_holders"):
         if any(
             holder.get("stage") not in {"exhausted", "superseded"}
@@ -7084,10 +7086,7 @@ def _source_exchange_refusal(record: dict[str, Any]) -> str | None:
         ):
             return "taken source already has a live owner"
         return "taken source already has a producing edge"
-    if (
-        record.get("taken_element_id") is not None
-        and record.get("taken_properties", {}).get("source_type") != "dd"
-    ):
+    if record.get("taken_properties", {}).get("source_type") != "dd":
         return "taken source is not a DD source"
     if record.get("receiving_name_id") is not None:
         if record.get("receiving_element_id") is None or record.get(
@@ -7278,30 +7277,23 @@ def _apply_source_exchange(
                         MATCH (name:StandardName {id: $name_id})
                         MATCH (given:StandardNameSource {id: $given_source_id})
                               -[binding:PRODUCED_NAME]->(name)
+                        MATCH (taken:StandardNameSource {id: $taken_source_id})
                         MATCH (taken_dd:IMASNode {id: $taken_path})
                         WHERE elementId(name) = $name_element_id
                           AND elementId(given) = $given_element_id
                           AND elementId(binding) = $binding_element_id
+                          AND elementId(taken) = $taken_element_id
                           AND elementId(taken_dd) = $taken_dd_element_id
                           AND NOT (coalesce(name.name_stage, '') IN ['exhausted', 'superseded'])
                           AND coalesce(taken_dd.lifecycle_status, '') <> 'removed'
                         OPTIONAL MATCH (receiver:StandardName {id: $receiving_name_id})
                         OPTIONAL MATCH (given_dd:IMASNode {id: $given_path})
-                        WITH name, given, binding, taken_dd, receiver, given_dd
+                        WITH name, given, binding, taken, taken_dd, receiver, given_dd
                         WHERE $receiving_name_id IS NULL OR
                               (receiver IS NOT NULL AND
                                NOT (coalesce(receiver.name_stage, '') IN ['exhausted', 'superseded']) AND
                                elementId(given_dd) = $given_dd_element_id AND
                                coalesce(given_dd.lifecycle_status, '') <> 'removed')
-                        MERGE (taken:StandardNameSource {id: $taken_source_id})
-                          ON CREATE SET taken.created_at = datetime(), taken.attempt_count = 0,
-                                        taken.source_type = 'dd', taken.source_id = $taken_path,
-                                        taken.dd_path = $taken_path, taken.dd_version = $dd_version,
-                                        taken.dd_documentation = taken_dd.documentation,
-                                        taken.dd_data_type = taken_dd.data_type,
-                                        taken.dd_unit = taken_dd.unit,
-                                        taken.dd_lifecycle_status = taken_dd.lifecycle_status,
-                                        taken.dd_lifecycle_version = taken_dd.lifecycle_version
                         SET taken.status = 'attached', taken.produced_sn_id = name.id,
                             taken.composed_at = coalesce(taken.composed_at, datetime()),
                             taken.claimed_at = null, taken.claim_token = null
@@ -7325,6 +7317,7 @@ def _apply_source_exchange(
                         name_element_id=state["name_element_id"],
                         given_element_id=state["given_element_id"],
                         binding_element_id=state["given_holders"][0]["binding_id"],
+                        taken_element_id=state["taken_element_id"],
                         taken_dd_element_id=state["taken_dd_element_id"],
                         given_dd_element_id=state["given_dd_element_id"],
                     )

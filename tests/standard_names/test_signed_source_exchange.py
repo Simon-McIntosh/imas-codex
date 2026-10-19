@@ -98,9 +98,11 @@ class _Transaction(_BaseTransaction):
             if not binding or binding["element_id"] != params["binding_element_id"]:
                 return [{"changed": 0}]
             new_id = params["taken_source_id"]
-            self.state.sources.setdefault(
-                new_id, {"element_id": f"src:{new_id}", "properties": {"id": new_id}}
-            )["properties"].update({"status": "attached", "produced_sn_id": name_id})
+            if new_id not in self.state.sources:
+                return [{"changed": 0}]
+            self.state.sources[new_id]["properties"].update(
+                {"status": "attached", "produced_sn_id": name_id}
+            )
             self.state.bindings.remove(binding)
             self.state.bind(new_id, name_id)
             receiver_id = params["receiving_name_id"]
@@ -214,6 +216,8 @@ def _graph(*, receiver: str | None = None) -> Graph:
     graph.add_dd("summary/average/value")
     graph.add_dd("summary/local/value")
     graph.add_source("dd:summary/average/value")
+    graph.add_source("dd:summary/local/value", status="extracted")
+    graph.sources["dd:summary/local/value"]["properties"]["dd_version"] = "4.0.0"
     graph.bind("dd:summary/average/value", "local_temperature")
     return graph
 
@@ -237,8 +241,6 @@ def test_signed_exchange_is_atomic_and_records_receipt(
     tmp_path: Path, receiver: str | None
 ) -> None:
     graph = _graph(receiver=receiver)
-    graph.add_source("dd:summary/local/value", status="extracted")
-    graph.sources["dd:summary/local/value"]["properties"]["dd_version"] = "4.0.0"
     path = tmp_path / "authority.json"
     digests = _authority(path, receiver=receiver)
     before = graph.snapshot()
@@ -278,6 +280,7 @@ def test_signed_exchange_is_atomic_and_records_receipt(
         ("missing_given", "given source does not produce exactly the giving name"),
         ("missing_taken_dd", "taken DD path is absent or removed from the current DD"),
         ("removed_taken_dd", "taken DD path is absent or removed from the current DD"),
+        ("missing_taken_source", "taken DD source does not exist"),
         ("live_taken_owner", "taken source already has a live owner"),
         ("exhausted_receiver", "receiving name is absent or not live"),
         ("removed_given_dd", "given DD path is removed from the current DD"),
@@ -305,9 +308,10 @@ def test_invalid_exchange_refuses_before_writing(
         del graph.dd_paths["summary/local/value"]
     elif defect == "removed_taken_dd":
         graph.dd_paths["summary/local/value"] = "removed"
+    elif defect == "missing_taken_source":
+        del graph.sources["dd:summary/local/value"]
     elif defect == "live_taken_owner":
         graph.add_name("other", "accepted")
-        graph.add_source("dd:summary/local/value")
         graph.bind("dd:summary/local/value", "other")
     elif defect == "exhausted_receiver":
         graph.names["average_temperature"]["properties"]["name_stage"] = "exhausted"
