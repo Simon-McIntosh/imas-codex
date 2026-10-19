@@ -17,6 +17,13 @@
   ],
   "call_sites": [],
   "completed_at": "2026-10-19T02:29:02.134Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "sib-restore-searched-sources",
+      "recorded_at": "2026-10-19T02:32:42.364990+00:00"
+    }
+  },
   "dispatched_at": "2026-10-19T02:16:30Z",
   "findings": [
     {
