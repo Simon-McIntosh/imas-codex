@@ -25,6 +25,11 @@
       "kind": "folded",
       "node": "srtj-cohort-piece",
       "recorded_at": "2026-10-19T15:07:06.497089+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The landing fragment is required by the sprint's working rules, which take precedence over the brief's narrower scope sentence; the unused figures path wrote nothing.",
+      "recorded_at": "2026-10-19T15:07:15.573494+00:00"
     }
   },
   "findings": [
