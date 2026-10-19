@@ -1,0 +1,102 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run is an evidence node whose write paths reach no test file and whose manifest declares no baseline_suite or after_suite, so there is no base or head suite log and no failure ids to derive; the run's own gates (verify/falsify/overlap/guard/quiet/negcontrol/readback) each reported EXIT=0, and I independently reproduced verify to EXIT=0 with all five checks true.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "A supersede fails to lower the live unchained_holder count, so it stays above before-minus-targets; falsify.log:2 shows exactly this check reddening when the baseline count is incremented.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 455
+    },
+    {
+      "condition_to_fail": "The unchained-holder set is not exactly the stored baseline minus the retired targets, e.g. a name enters the population; the live set and the stored baseline are independent sides.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 457
+    },
+    {
+      "condition_to_fail": "A retired target carries no StandardNameChange with the authority's file digest, so targets minus receipt_targets is non-empty.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 462
+    },
+    {
+      "condition_to_fail": "A target survives with a name_stage/status pair other than superseded/superseded.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 464
+    },
+    {
+      "condition_to_fail": "A foreign change, source write or name update lands inside the apply window; the window is positive-controlled by the 11 own receipts in changes_in_window. The settled_name_updates disjunct cannot fire for supersede-class writes (see finding) so it contributes no signal either way.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 604
+    },
+    {
+      "condition_to_fail": "The planted different-quantity pair is admitted by the floors, so negcontrol mode exits non-zero; negative_control.refused is true at head.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 714
+    }
+  ],
+  "base_log_revision": "e4def604bbabcf2fa6551640c99113360658f61e",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T03:41:13.867Z",
+  "dispatched_at": "2026-10-19T03:31:37Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": "563",
+      "severity": "follow-on",
+      "text": "follow-on: the overlap read's name-update disjunct (StandardName.updated_at within the window) is empty for this node's own supersede writes \u2014 a direct read of the 11 retired targets shows their updated_at is from September 2026 (9/7-9/10), not the 02:29:38Z apply \u2014 so that component of the `overlap` boolean cannot fire for supersede-class writers; the read stands on foreign_changes (positive-controlled by the 11 own receipts) and foreign_sources, but the empty column must not be read as an independent clean check."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": "952",
+      "severity": "follow-on",
+      "text": "follow-on: the apply path (mode apply -> _signed_call(True, digest)) never calls quiet_graph_check, so the brief's guard 'apply only on a quiet graph' remains a procedure the operator must remember; a replayed apply would proceed on a busy graph, and the corrected owner probe is not bound to the write it is meant to protect. The pre-apply quiet probe was vacuous at apply time and is only replaced retrospectively by the overlap read."
+    }
+  ],
+  "head_log_revision": "e4def604bbabcf2fa6551640c99113360658f61e",
+  "item_aggregate": 5,
+  "item_verdict_note": "verdicts below cover the commits this run gained since it was reviewed at f2dfdf83",
+  "item_verdicts": {
+    "diff": "f2dfdf83..793c923 is three commits (992 insertions, 154 deletions): f8fe918 replaces the literal exit-code table with captured $? statuses, delegates quiet to live_graph_activity, adds an apply-window overlap read and membership-exact footprint checks, and moves the run dir/id out of source defaults; e4def60 windows the overlap read on the authority receipts; 793c923 regenerates the fragment and JSON. No production code changes.",
+    "done_when": "The done_when (brief.md:74-85) requires per name the holder, Jev answer with probability and confidence against the 0.8/0.5 floors, the action, each supersede's authority/preview/receipt, each referral with both descriptions, the quiet-graph check, a classifier read-back at a real EXIT=, and spend under USD 1; the head JSON carries all of these (floors {0.8,0.5}, spend_usd 0.001584576) and I independently re-ran the verify gate to EXIT=0.",
+    "goal": "The source goal (brief.md:30) is to retire each unchained-holder name Jev confirms duplicates its holder through the signed supersede; the gained commits keep that outcome (11 retired in the holder's favour with a successor link, 19 referred) and repair the evidence integrity behind it, recorded at docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.json (retired_count 11, referral_count 19).",
+    "manifest": "The source manifest.md records commits f2dfdf83..793c923, the gates re-run at e4def60 with real captured exit statuses, the classifier read-back 30->19, and the vacuous pre-apply quiet probe kept as the record of what it measured; it declares no baseline_suite or after_suite because the node's write paths reach no test file.",
+    "write_paths": "The source brief.md:87-92 grants four fragment files plus a figure directory; the three gained commits touch only sib-settle-unchained-holders-run.py, .html and .json, every path inside that grant."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:454-466 names five checks that redden on a stalled retirement (falsify.log demonstrates one), but the apply path at run.py:952-954 does not call quiet_graph_check, so the quiet guard is not bound to the write.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:474-518 delegates the quiet check to imas_codex/graph/offsite.py:128-163 which raises when its own probe is absent, and the gate logs' EXIT= lines are now captured `$?` values (resume-1.jsonl shows the gate() shell function printing `EXIT=%s` from `$?`), which I reproduced by re-running verify to EXIT=0.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:48-71 now takes the run directory and run id as arguments or environment rather than embedding a run envelope in committed source, and every fragment element id is prefixed with the node id.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:448-469 asserts the retired set is the baseline minus the 11 targets with nothing entering, holding the goal's retire branch at head 793c923.",
+    "reuse": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:474-518 wraps imas_codex/graph/offsite.py:128 live_graph_activity instead of re-implementing the probe; a search of imas_codex/ for a changed_at-window reader over StandardNameChange found no owner for the new overlap read.",
+    "scope_discipline": "the gained diff touches only docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-{run.py,html,json}, all inside the grant at brief.md:87-92."
+  },
+  "prior_review": "r-20261019T023816235954-review-of-sib-settle-unchained-holders-f2dfdf83a5c3",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal (brief.md:30) is to retire each unchained-holder name Jev confirms duplicates its holder through the signed supersede; the gained commits keep that outcome at head 793c923 (docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.json retired_count 11, referral_count 19).\nVERDICT done_when: brief.md:74-85 requires per name the holder, the Jev answer with probability and confidence against the 0.8/0.5 floors, the action, each supersede's authority/preview/receipt, each referral with both descriptions, the quiet check, a read-back at a real EXIT= and spend under USD 1; the head JSON carries all of these (floors {0.8,0.5}, spend_usd 0.001584576, verification.checks all true) and I re-ran the verify gate to EXIT=0.\nVERDICT write_paths: brief.md:87-92 grants four fragment files; the three gained commits touch only sib-settle-unchained-holders-run.py, .html and .json, every path inside the grant.\nVERDICT manifest: the source manifest.md records the gained commits f2dfdf83..793c923, the gates re-run at e4def60 with real captured exit statuses, the read-back 30->19 and the vacuous pre-apply quiet probe kept as the record of what it measured.\nVERDICT diff: f2dfdf83..793c923 is three commits (992 insertions, 154 deletions) \u2014 run.py gains captured exit statuses, the owner-probe quiet check, membership-exact footprint assertions, an apply-window overlap read and argument-driven run dir/id; then the fragment and JSON are regenerated. No production code changes.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:448-469 asserts the retired set is the baseline minus the 11 targets with nothing entering, holding the goal's retire branch at head 793c923.\nSCORE evidence: 16\nJUSTIFICATION evidence: run.py:474-518 delegates the quiet check to imas_codex/graph/offsite.py:128-163 which raises when its own probe is absent, and the gate logs' EXIT= lines are captured `$?` values (resume-1.jsonl shows the gate() function printing `EXIT=%s` from `$?`), which I reproduced by re-running verify to EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the gained diff touches only docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-{run.py,html,json}, all inside the grant at brief.md:87-92.\nSCORE durability: 14\nJUSTIFICATION durability: run.py:454-466 names five checks that redden on a stalled retirement (falsify.log demonstrates one), but the apply path at run.py:952-954 does not call quiet_graph_check, so the quiet guard is not bound to the write.\nSCORE fit: 17\nJUSTIFICATION fit: run.py:48-71 takes the run directory and run id as arguments rather than embedding a run envelope in committed source, and every fragment element id is prefixed with the node id.\nSCORE reuse: 18\nJUSTIFICATION reuse: run.py:474-518 wraps imas_codex/graph/offsite.py:128 live_graph_activity instead of re-implementing the probe; a search of imas_codex/ for a changed_at-window reader over StandardNameChange found no owner for the new overlap read.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:563 follow-on: the overlap read's name-update disjunct is empty for this node's own supersede writes (the 11 targets' updated_at is from September 2026, not the 02:29:38Z apply), so that component cannot fire for supersede-class writers and must not be read as an independent clean check.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:952 follow-on: the apply path never calls quiet_graph_check, so the 'apply only on a quiet graph' guard is unenforced by the driver and a replayed apply would proceed on a busy graph.",
+  "review_run_id": "r-20261019T033101258350-review-of-sib-settle-unchained-holders-793c923264e2",
+  "reviewed_base_sha": "f2dfdf83a5c3fe067806224527674c3bbc2ffa10",
+  "reviewed_commits": [
+    "f8fe91839ca94fbfdab467edb8cb89d488438325",
+    "e4def604bbabcf2fa6551640c99113360658f61e",
+    "793c923264e2be79362a7712ec7f75124003b7d3"
+  ],
+  "reviewed_head_sha": "793c923264e2be79362a7712ec7f75124003b7d3",
+  "reviewed_range": "f2dfdf83a5c3fe067806224527674c3bbc2ffa10..793c923264e2be79362a7712ec7f75124003b7d3",
+  "reviewed_run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T03:44:00Z",
+  "total": 103
+}

@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="212">
+<meta name="plan-version" content="213">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -769,6 +769,9 @@ spend_usd: 0.001713642</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-s38-restore-searched" data-who="reckon-build" data-when="2026-10-19T03:25:00Z">
     <div class="r-comment-body"><p>The DD-search restore step has landed. Ten lost DD sources were rediscovered by search and confirmed by Jev above the floor (merge <code>af8adae4a</code>, review 97, USD 0.003). Fifty names go to the lead: 34 with a candidate below the floor and 16 with none. The unchained-holder settling is finishing its evidence fixes. §38 stays open until that lands and the referral bound is decided. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s38-restore-searched">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-run-r-20261019T033101258350-review-of-sib-settle-unchained-holders-793c923264e2" data-who="reckon-build" data-when="2026-10-19T03:41:13.867Z">
+    <div class="r-comment-body"><p>reviewed the three commits r-20261019T021901634768-sib-settle-unchained-holders gained since its f2dfdf83 review (f8fe918, e4def60, 793c923); parsed record at reviewed_base_sha f2dfdf83a5c3fe067806224527674c3bbc2ffa10, reviewed_head_sha 793c923264e2be79362a7712ec7f75124003b7d3, scores {goal_fidelity 18, evidence 16, scope_discipline 20, durability 14, fit 17, reuse 18}, 2 follow-on findings (overlap name-update disjunct vacuous for supersede writes; apply path does not call quiet_graph_check), added_failure_count 0.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
