@@ -203,8 +203,4816 @@
    }
   }
  ],
- "classifier_rows_after": 108,
+ "classifier_rows_after": 92,
  "classifier_rows_before": 113,
+ "corrected_bindings": [
+  {
+   "answer": {
+    "choice": "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+    "confidence": 0.82,
+    "probabilities": {
+     "camera_ir/optical_element/back_surface/x2_curvature": 0,
+     "camera_x_rays/filter_window/x1_curvature": 0,
+     "none of these": 0.11,
+     "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii": 0.86,
+     "pf_plasma/element/geometry/arcs_of_circle/curvature_radii": 0.03
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "camera_ir/optical_element/back_surface/x2_curvature",
+    "camera_x_rays/filter_window/x1_curvature",
+    "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+    "pf_plasma/element/geometry/arcs_of_circle/curvature_radii"
+   ],
+   "name": "curvature_inverse_of_arc_of_circle_center",
+   "path": "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+   "spec": {
+    "dd_path": "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+    "id": "dd:pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+    "source_id": "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+    "source_type": "dd",
+    "status": "attached"
+   }
+  },
+  {
+   "answer": {
+    "choice": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+    "confidence": 0.99,
+    "probabilities": {
+     "gyrokinetics_local/flux_surface/dc_dr_minor_norm": 0,
+     "gyrokinetics_local/flux_surface/delongation_dr_minor_norm": 0.99,
+     "gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor": 0,
+     "gyrokinetics_local/flux_surface/dgeometric_axis_z_dr_minor": 0,
+     "gyrokinetics_local/flux_surface/ds_dr_minor_norm": 0,
+     "none of these": 0.01
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "gyrokinetics_local/flux_surface/dc_dr_minor_norm",
+    "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+    "gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor",
+    "gyrokinetics_local/flux_surface/dgeometric_axis_z_dr_minor",
+    "gyrokinetics_local/flux_surface/ds_dr_minor_norm"
+   ],
+   "name": "elongation_radial_derivative_of_flux_surface",
+   "path": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+   "spec": {
+    "dd_path": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+    "id": "dd:gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+    "source_id": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+    "source_type": "dd",
+    "status": "attached"
+   }
+  },
+  {
+   "answer": {
+    "choice": "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+    "confidence": 0.87,
+    "probabilities": {
+     "distributions/distribution/profiles_1d/current_phi": 0,
+     "distributions/distribution/profiles_2d/current_phi": 0,
+     "none of these": 0.09,
+     "waves/coherent_wave/profiles_1d/current_parallel_density": 0.01,
+     "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi": 0.9
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "distributions/distribution/profiles_1d/current_phi",
+    "distributions/distribution/profiles_2d/current_phi",
+    "waves/coherent_wave/profiles_1d/current_parallel_density",
+    "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi"
+   ],
+   "name": "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+   "path": "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+   "spec": {
+    "dd_path": "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+    "id": "dd:waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+    "source_id": "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+    "source_type": "dd",
+    "status": "attached"
+   }
+  },
+  {
+   "answer": {
+    "choice": "camera_x_rays/camera/camera_dimensions",
+    "confidence": 0.97,
+    "probabilities": {
+     "bolometer/camera/channel/detector/outline/x1": 0,
+     "camera_ir/channel/camera/pixel_size": 0,
+     "camera_visible/channel/aperture/x2_width": 0,
+     "camera_x_rays/aperture/x1_width": 0,
+     "camera_x_rays/camera/camera_dimensions": 0.97,
+     "camera_x_rays/camera/pixel_dimensions": 0,
+     "none of these": 0.03,
+     "spectrometer_visible/channel/detector/x1_width": 0,
+     "spectrometer_visible/channel/detector/x2_width": 0
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "bolometer/camera/channel/detector/outline/x1",
+    "camera_ir/channel/camera/pixel_size",
+    "camera_visible/channel/aperture/x2_width",
+    "camera_x_rays/aperture/x1_width",
+    "camera_x_rays/camera/camera_dimensions",
+    "camera_x_rays/camera/pixel_dimensions",
+    "spectrometer_visible/channel/detector/x1_width",
+    "spectrometer_visible/channel/detector/x2_width"
+   ],
+   "name": "size_of_camera",
+   "path": "camera_x_rays/camera/camera_dimensions",
+   "spec": {
+    "dd_path": "camera_x_rays/camera/camera_dimensions",
+    "id": "dd:camera_x_rays/camera/camera_dimensions",
+    "source_id": "camera_x_rays/camera/camera_dimensions",
+    "source_type": "dd",
+    "status": "attached"
+   }
+  },
+  {
+   "answer": {
+    "choice": "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+    "confidence": 0.88,
+    "probabilities": {
+     "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi": 0.94,
+     "none of these": 0.06
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi"
+   ],
+   "name": "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions",
+   "path": "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+   "spec": {
+    "dd_path": "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+    "id": "dd:distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+    "source_id": "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+    "source_type": "dd",
+    "status": "attached"
+   }
+  }
+ ],
+ "corrected_filter": {
+  "accumulated_total_coolant_absorbed_energy_of_calorimetry_component": {
+   "candidates": [
+    {
+     "documentation": "Energy extracted from the component on the whole plasma discharge, including the return to thermal equilibrium of the component in the post-pulse phase",
+     "ids_name": "calorimetry",
+     "path": "calorimetry/group/component/energy_total",
+     "physics_domain": "mechanical_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "J"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "calorimetry/cooling_loop/mass_flow",
+     "reason": "unit differs: hit 'kg.s^-1' vs name 'J'",
+     "unit": "kg.s^-1"
+    },
+    {
+     "path": "calorimetry/group/component/energy_cumulated",
+     "reason": "source held by a live name: accumulated_coolant_absorbed_energy_of_calorimetry_component",
+     "unit": "J"
+    },
+    {
+     "path": "calorimetry/group/component/mass_flow",
+     "reason": "unit differs: hit 'kg.s^-1' vs name 'J'",
+     "unit": "kg.s^-1"
+    },
+    {
+     "path": "calorimetry/group/component/power",
+     "reason": "unit differs: hit 'W' vs name 'J'",
+     "unit": "W"
+    },
+    {
+     "path": "calorimetry/group/component/temperature_in",
+     "reason": "unit differs: hit 'K' vs name 'J'",
+     "unit": "K"
+    },
+    {
+     "path": "calorimetry/group/component/temperature_out",
+     "reason": "unit differs: hit 'K' vs name 'J'",
+     "unit": "K"
+    },
+    {
+     "path": "calorimetry/group/component/transit_time",
+     "reason": "unit differs: hit 's' vs name 'J'",
+     "unit": "s"
+    },
+    {
+     "path": "edge_sources/source/ggd/total_ion_energy/values",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'J'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "plasma_sources/source/ggd/total_ion_energy/values",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'J'",
+     "unit": "W.m^-3"
+    }
+   ]
+  },
+  "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface": {
+   "candidates": [
+    {
+     "documentation": "Temperature, given on various grid subsets",
+     "ids_name": "plasma_profiles",
+     "path": "plasma_profiles/ggd/electrons/temperature",
+     "physics_domain": "core_plasma_physics",
+     "score": 0.0,
+     "unit": "eV"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_profiles/profiles_1d/electrons/temperature",
+     "reason": "source held by a live name: electron_temperature",
+     "unit": "eV"
+    },
+    {
+     "path": "core_profiles/global_quantities/t_e_volume_average",
+     "reason": "source held by a live name: volume_averaged_electron_temperature",
+     "unit": "eV"
+    },
+    {
+     "path": "plasma_profiles/profiles_1d/electrons/temperature",
+     "reason": "source held by a live name: electron_temperature",
+     "unit": "eV"
+    },
+    {
+     "path": "edge_profiles/profiles_1d/electrons/temperature",
+     "reason": "source held by a live name: electron_temperature",
+     "unit": "eV"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/electrons/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'eV'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/electrons/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'eV'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/electrons/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'eV'",
+     "unit": "W.m^-2"
+    }
+   ]
+  },
+  "calibration_factor_of_spectrometer_channel": {
+   "candidates": [
+    {
+     "documentation": "Radiance calibration",
+     "ids_name": "spectrometer_visible",
+     "path": "spectrometer_visible/channel/filter_spectrometer/radiance_calibration",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m^-3.sr^-1"
+    },
+    {
+     "documentation": "Radiance calibration",
+     "ids_name": "spectrometer_visible",
+     "path": "spectrometer_visible/channel/grating_spectrometer/radiance_calibration",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m^-3.sr^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "camera_visible/channel/detector/counts_to_radiance",
+     "reason": "unit differs: hit 'm^-2.s^-1.sr^-1' vs name 'm^-3.sr^-1'",
+     "unit": "m^-2.s^-1.sr^-1"
+    },
+    {
+     "path": "charge_exchange/channel/spectrum/radiance_calibration",
+     "reason": "source held by a live name: spectral_calibration_factor_of_spectrometer",
+     "unit": "m^-3.sr^-1"
+    },
+    {
+     "path": "ece/channel/calibration_factor",
+     "reason": "unit differs: hit 'V^-1.eV' vs name 'm^-3.sr^-1'",
+     "unit": "V^-1.eV"
+    },
+    {
+     "path": "spectrometer_uv/channel/processed_line/radiance",
+     "reason": "unit differs: hit 'm^-2.s^-1.sr^-1' vs name 'm^-3.sr^-1'",
+     "unit": "m^-2.s^-1.sr^-1"
+    },
+    {
+     "path": "spectrometer_uv/channel/radiance_calibration",
+     "reason": "source held by a live name: spectral_calibration_factor_of_spectrometer",
+     "unit": "m^-3.sr^-1"
+    },
+    {
+     "path": "spectrometer_uv/channel/radiance_spectral",
+     "reason": "unit differs: hit 'm^-3.s^-1.sr^-1' vs name 'm^-3.sr^-1'",
+     "unit": "m^-3.s^-1.sr^-1"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/instrument_function/intensity",
+     "reason": "unit differs: hit 'm' vs name 'm^-3.sr^-1'",
+     "unit": "m"
+    },
+    {
+     "path": "thomson_scattering/polychromator/calibration_absolute",
+     "reason": "unit differs: hit '1' vs name 'm^-3.sr^-1'",
+     "unit": "1"
+    },
+    {
+     "path": "thomson_scattering/polychromator/calibration_spectral",
+     "reason": "unit differs: hit '1' vs name 'm^-3.sr^-1'",
+     "unit": "1"
+    }
+   ]
+  },
+  "coolant_absorbed_energy_accumulated_of_plasma_facing_component": {
+   "candidates": [
+    {
+     "documentation": "Energy extracted from the component on the whole plasma discharge, including the return to thermal equilibrium of the component in the post-pulse phase",
+     "ids_name": "calorimetry",
+     "path": "calorimetry/group/component/energy_total",
+     "physics_domain": "mechanical_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "J"
+    },
+    {
+     "documentation": "Total ohmic cumulated energy (integral of the power over the disruption duration)",
+     "ids_name": "disruption",
+     "path": "disruption/global_quantities/energy_ohm",
+     "physics_domain": "magnetohydrodynamics",
+     "score": 0.0,
+     "unit": "J"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "calorimetry/group/component/energy_cumulated",
+     "reason": "source held by a live name: accumulated_coolant_absorbed_energy_of_calorimetry_component",
+     "unit": "J"
+    },
+    {
+     "path": "calorimetry/group/component/temperature_in",
+     "reason": "unit differs: hit 'K' vs name 'J'",
+     "unit": "K"
+    },
+    {
+     "path": "core_sources/source/global_quantities/power",
+     "reason": "unit differs: hit 'W' vs name 'J'",
+     "unit": "W"
+    },
+    {
+     "path": "distributions/distribution/global_quantities/energy_fast",
+     "reason": "source held by a live name: fast_particle_energy",
+     "unit": "J"
+    },
+    {
+     "path": "plasma_sources/source/profiles_1d/ion/state/energy",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'J'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/ion/state/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'J'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/electrons/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'J'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'J'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'J'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'J'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/global_quantities/power_to_cooling",
+     "reason": "unit differs: hit 'W' vs name 'J'",
+     "unit": "W"
+    }
+   ]
+  },
+  "count_normalized_at_detector_pixel": {
+   "candidates": [
+    {
+     "documentation": "Number of counts detected on each pixel/bin of the binned frame during one exposure time",
+     "ids_name": "spectrometer_x_ray_crystal",
+     "path": "spectrometer_x_ray_crystal/channel/frame/counts_bin_n",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "camera_visible/channel/detector/counts_to_radiance",
+     "reason": "unit differs: hit 'm^-2.s^-1.sr^-1' vs name '1'",
+     "unit": "m^-2.s^-1.sr^-1"
+    },
+    {
+     "path": "gyrokinetics_local/species/density_norm",
+     "reason": "source held by a live name: normalized_ion_species_number_density",
+     "unit": "1"
+    },
+    {
+     "path": "neutron_diagnostic/detector/green_functions/response_function",
+     "reason": "source held by a live name: neutron_response_function_of_neutron_detector",
+     "unit": "1"
+    },
+    {
+     "path": "neutron_diagnostic/detector/nuclei_n",
+     "reason": "unit differs: hit None vs name '1'",
+     "unit": null
+    },
+    {
+     "path": "reflectometer_profile/psi_normalization/psi_magnetic_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "spectrometer_visible/channel/filter_spectrometer/photon_count",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/bin/instrument_function/intensity",
+     "reason": "unit differs: hit 'm' vs name '1'",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/camera/pixel_dimensions",
+     "reason": "unit differs: hit 'm' vs name '1'",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/instrument_function/intensity",
+     "reason": "unit differs: hit 'm' vs name '1'",
+     "unit": "m"
+    }
+   ]
+  },
+  "cumulative_ethylene_count_due_to_gas_injection": {
+   "candidates": [
+    {
+     "documentation": "Relative fraction of this species (in molecules) in the gas mixture",
+     "ids_name": "gas_injection",
+     "path": "gas_injection/pipe/species/fraction",
+     "physics_domain": "fueling",
+     "score": 0.0,
+     "unit": "1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_instant_changes/change/profiles_1d/electrons/pressure",
+     "reason": "unit differs: hit 'Pa' vs name '1'",
+     "unit": "Pa"
+    },
+    {
+     "path": "gas_injection/latency",
+     "reason": "unit differs: hit 's' vs name '1'",
+     "unit": "s"
+    },
+    {
+     "path": "gas_injection/pipe/species/element/a",
+     "reason": "unit differs: hit 'u' vs name '1'",
+     "unit": "u"
+    },
+    {
+     "path": "gas_injection/valve/electron_rate",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "gas_injection/valve/flow_rate",
+     "reason": "unit differs: hit 'Pa.m^3.s^-1' vs name '1'",
+     "unit": "Pa.m^3.s^-1"
+    },
+    {
+     "path": "gas_injection/valve/flow_rate_max",
+     "reason": "unit differs: hit 'Pa.m^3.s^-1' vs name '1'",
+     "unit": "Pa.m^3.s^-1"
+    },
+    {
+     "path": "gas_injection/valve/flow_rate_min",
+     "reason": "unit differs: hit 'Pa.m^3.s^-1' vs name '1'",
+     "unit": "Pa.m^3.s^-1"
+    },
+    {
+     "path": "gas_injection/valve/species/element/a",
+     "reason": "unit differs: hit 'u' vs name '1'",
+     "unit": "u"
+    },
+    {
+     "path": "plasma_initiation/b_field_lines/pressure",
+     "reason": "unit differs: hit 'Pa' vs name '1'",
+     "unit": "Pa"
+    },
+    {
+     "path": "plasma_sources/source/profiles_1d/electrons/particles",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name '1'",
+     "unit": "m^-3.s^-1"
+    },
+    {
+     "path": "plasma_sources/source/profiles_1d/electrons/particles_inside",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "plasma_sources/source/profiles_1d/ion/state/particles_inside",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/electrons/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/global_quantities/electrons/particle_flux_from_plasma",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    }
+   ]
+  },
+  "cumulative_inside_flux_surface_total_electron_density": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "bolometer/power_radiated_inside_lcfs",
+     "reason": "unit differs: hit 'W' vs name '1'",
+     "unit": "W"
+    },
+    {
+     "path": "core_profiles/global_quantities/t_e_volume_average",
+     "reason": "unit differs: hit 'eV' vs name '1'",
+     "unit": "eV"
+    },
+    {
+     "path": "core_profiles/profiles_1d/electrons/temperature",
+     "reason": "unit differs: hit 'eV' vs name '1'",
+     "unit": "eV"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/electrons/particles_inside",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/electrons/power_inside",
+     "reason": "unit differs: hit 'W' vs name '1'",
+     "unit": "W"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/ion/state/particles_inside",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "plasma_profiles/ggd/electrons/density_fast",
+     "reason": "unit differs: hit 'm^-3' vs name '1'",
+     "unit": "m^-3"
+    },
+    {
+     "path": "plasma_sources/source/profiles_1d/total_ion_particles_inside",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/electrons/particles/flux_parallel",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name '1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/electrons/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name '1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "pulse_schedule/density_control/n_e_line",
+     "reason": "unit differs: hit 'm^-2' vs name '1'",
+     "unit": "m^-2"
+    },
+    {
+     "path": "radiation/process/ggd/electrons/emissivity",
+     "reason": "unit differs: hit 'W.m^-3' vs name '1'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "radiation/process/profiles_1d/electrons/power_inside",
+     "reason": "unit differs: hit 'W' vs name '1'",
+     "unit": "W"
+    },
+    {
+     "path": "runaway_electrons/global_quantities/volume_average/energy_density_kinetic",
+     "reason": "unit differs: hit 'J.m^-3' vs name '1'",
+     "unit": "J.m^-3"
+    },
+    {
+     "path": "runaway_electrons/profiles_1d/energy_density_kinetic",
+     "reason": "unit differs: hit 'J.m^-3' vs name '1'",
+     "unit": "J.m^-3"
+    },
+    {
+     "path": "turbulence/profiles_2d/electrons/density",
+     "reason": "unit differs: hit 'm^-3' vs name '1'",
+     "unit": "m^-3"
+    }
+   ]
+  },
+  "curvature_inverse_of_arc_of_circle_center": {
+   "candidates": [
+    {
+     "documentation": "Radius of curvature in the X2 direction, to be filled only for curvature_type/index = 3 or 5",
+     "ids_name": "camera_ir",
+     "path": "camera_ir/optical_element/back_surface/x2_curvature",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Radius of curvature in the X1 direction, to be filled only for curvature_type/index = 2, 4 or 5",
+     "ids_name": "camera_x_rays",
+     "path": "camera_x_rays/filter_window/x1_curvature",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Curvature radius of each arc of circle",
+     "ids_name": "pf_passive",
+     "path": "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+     "physics_domain": "magnetic_field_systems",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Curvature radius of each arc of circle",
+     "ids_name": "pf_plasma",
+     "path": "pf_plasma/element/geometry/arcs_of_circle/curvature_radii",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "camera_visible/channel/optical_element/back_surface/x2_curvature",
+     "reason": "source held by a live name: second_local_tangential_back_surface_radius_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "coils_non_axisymmetric/coil/conductor/cross_section/radius_inner",
+     "reason": "source held by a live name: inner_radius_of_correction_coil",
+     "unit": "m"
+    },
+    {
+     "path": "ec_launchers/mirror/geometry/x1_curvature",
+     "reason": "source held by a live name: curvature_of_electron_cyclotron_launcher_mirror",
+     "unit": "m"
+    },
+    {
+     "path": "ec_launchers/mirror/geometry/x2_curvature",
+     "reason": "source held by a live name: curvature_of_electron_cyclotron_launcher_mirror",
+     "unit": "m"
+    },
+    {
+     "path": "ferritic/object/axisymmetric/arcs_of_circle/curvature_radii",
+     "reason": "source held by a live name: radial_coordinate_of_ferritic_element_centroid",
+     "unit": "m"
+    },
+    {
+     "path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/curvature_radii",
+     "reason": "source held by a live name: radius_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "iron_core/segment/geometry/arcs_of_circle/curvature_radii",
+     "reason": "source held by a live name: radius",
+     "unit": "m"
+    },
+    {
+     "path": "pf_active/coil/element/geometry/arcs_of_circle/curvature_radii",
+     "reason": "source held by a live name: radius_of_coil_conductor_element",
+     "unit": "m"
+    },
+    {
+     "path": "pf_active/coil/geometry/arcs_of_circle/curvature_radii",
+     "reason": "source held by a live name: radius_of_coil_conductor_element",
+     "unit": "m"
+    }
+   ]
+  },
+  "deposited_power_at_divertor_target": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "balance_of_plant/power_plant/heat_load_divertor",
+     "reason": "source held by a live name: heat_power_of_divertor",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/power_black_body",
+     "reason": "source held by a live name: thermal_radiative_power_of_divertor",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/power_convected",
+     "reason": "source held by a live name: power_of_divertor_due_to_convection",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/power_currents",
+     "reason": "source held by a live name: power_of_divertor_due_to_ohmic_dissipation",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/power_incident",
+     "reason": "source held by a live name: total_incident_power_of_divertor",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/power_radiated",
+     "reason": "source held by a live name: absorbed_radiated_power_of_divertor",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/power_neutrals",
+     "reason": "source held by a live name: neutral_power_at_divertor_target",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/power_radiated",
+     "reason": "source held by a live name: absorbed_radiated_power_at_divertor_target",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/power_recombination_plasma",
+     "reason": "source held by a live name: plasma_power_at_divertor_target_due_to_recombination",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/wetted_area",
+     "reason": "unit differs: hit 'm^2' vs name 'W'",
+     "unit": "m^2"
+    },
+    {
+     "path": "divertors/divertor/wetted_area",
+     "reason": "unit differs: hit 'm^2' vs name 'W'",
+     "unit": "m^2"
+    },
+    {
+     "path": "wall/global_quantities/electrons/power_outer_target",
+     "reason": "source held by a live name: electron_power_at_outer_divertor_target",
+     "unit": "W"
+    }
+   ]
+  },
+  "electron_energy_flux_limiter_coefficient": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "edge_transport/model/ggd/electrons/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "edge_transport/model/ggd/electrons/energy/flux_radial",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_ion_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "edge_transport/model/ggd/neutral/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_neutral_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "edge_transport/model/ggd/neutral/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_neutral_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/electrons/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/electrons/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name '1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/electrons/particles/flux_parallel",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name '1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/electrons/particles/flux_radial",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name '1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/energy/flux_radial",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/energy/flux_radial",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/neutral/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_neutral_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/electrons/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_neutral_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/electrons/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    }
+   ]
+  },
+  "electron_particle_diffusivity": {
+   "candidates": [
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/electrons/particles/d_pol",
+     "physics_domain": "edge_plasma_physics",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Particle effective diffusivity (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/electrons/particles/d_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/electrons/particles/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/electrons/particles/d_radial",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Energy effective diffusivity (in the parallel direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/electrons/energy/d_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "edge_transport/model/ggd/electrons/particles/d_parallel",
+     "reason": "source held by a live name: parallel_electron_diffusivity",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "path": "edge_transport/model/ggd/electrons/particles/d_radial",
+     "reason": "source held by a live name: radial_effective_electron_diffusivity",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "path": "core_transport/model/profiles_1d/electrons/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'm^2.s^-1'",
+     "unit": "m^-2.s^-1"
+    }
+   ]
+  },
+  "electron_temperature_at_first_wall": {
+   "candidates": [
+    {
+     "documentation": "Temperature",
+     "ids_name": "core_instant_changes",
+     "path": "core_instant_changes/change/profiles_1d/electrons/temperature",
+     "physics_domain": "core_plasma_physics",
+     "score": 0.0,
+     "unit": "eV"
+    },
+    {
+     "documentation": "Temperature, given on various grid subsets",
+     "ids_name": "plasma_profiles",
+     "path": "plasma_profiles/ggd/electrons/temperature",
+     "physics_domain": "core_plasma_physics",
+     "score": 0.0,
+     "unit": "eV"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_profiles/profiles_1d/electrons/temperature",
+     "reason": "source held by a live name: electron_temperature",
+     "unit": "eV"
+    },
+    {
+     "path": "plasma_profiles/profiles_1d/electrons/temperature",
+     "reason": "source held by a live name: electron_temperature",
+     "unit": "eV"
+    },
+    {
+     "path": "edge_profiles/profiles_1d/electrons/temperature",
+     "reason": "source held by a live name: electron_temperature",
+     "unit": "eV"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/electrons/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'eV'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/global_quantities/temperature",
+     "reason": "unit differs: hit 'K' vs name 'eV'",
+     "unit": "K"
+    },
+    {
+     "path": "langmuir_probes/embedded/multi_temperature_fits/t_e",
+     "reason": "source held by a live name: electron_temperature",
+     "unit": "eV"
+    }
+   ]
+  },
+  "electrostatic_potential_at_outboard_midplane": {
+   "candidates": [
+    {
+     "documentation": "Electrostatic potential, averaged on the magnetic flux surface",
+     "ids_name": "core_instant_changes",
+     "path": "core_instant_changes/change/profiles_1d/phi_potential",
+     "physics_domain": "core_plasma_physics",
+     "score": 0.0,
+     "unit": "V"
+    },
+    {
+     "documentation": "Perturbed electrostatic potential for given toroidal mode number",
+     "ids_name": "mhd_linear",
+     "path": "mhd_linear/time_slice/toroidal_mode/plasma/phi_potential_perturbed",
+     "physics_domain": "magnetohydrodynamics",
+     "score": 0.0,
+     "unit": "V"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "edge_profiles/profiles_1d/phi_potential",
+     "reason": "source held by a live name: electrostatic_potential",
+     "unit": "V"
+    },
+    {
+     "path": "core_profiles/profiles_1d/phi_potential",
+     "reason": "source held by a live name: electrostatic_potential",
+     "unit": "V"
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/r_outboard",
+     "reason": "unit differs: hit 'm' vs name 'V'",
+     "unit": "m"
+    },
+    {
+     "path": "plasma_profiles/profiles_1d/phi_potential",
+     "reason": "source held by a live name: electrostatic_potential",
+     "unit": "V"
+    },
+    {
+     "path": "plasma_initiation/global_quantities/b_field_perpendicular",
+     "reason": "unit differs: hit 'T' vs name 'V'",
+     "unit": "T"
+    },
+    {
+     "path": "langmuir_probes/embedded/v_plasma",
+     "reason": "source held by a live name: electrostatic_potential_at_langmuir_probe_position",
+     "unit": "V"
+    }
+   ]
+  },
+  "elongation_radial_derivative_of_flux_surface": {
+   "candidates": [
+    {
+     "documentation": "Derivative of the 'c' shape coefficients with respect to r_minor_norm",
+     "ids_name": "gyrokinetics_local",
+     "path": "gyrokinetics_local/flux_surface/dc_dr_minor_norm",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "1"
+    },
+    {
+     "documentation": "Derivative of the elongation with respect to r_minor_norm",
+     "ids_name": "gyrokinetics_local",
+     "path": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "1"
+    },
+    {
+     "documentation": "Derivative of the major radius of the surface geometric axis with respect to r_minor",
+     "ids_name": "gyrokinetics_local",
+     "path": "gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "1"
+    },
+    {
+     "documentation": "Derivative of the height of the surface geometric axis with respect to r_minor",
+     "ids_name": "gyrokinetics_local",
+     "path": "gyrokinetics_local/flux_surface/dgeometric_axis_z_dr_minor",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "1"
+    },
+    {
+     "documentation": "Derivative of the 's' shape coefficients with respect to r_minor_norm",
+     "ids_name": "gyrokinetics_local",
+     "path": "gyrokinetics_local/flux_surface/ds_dr_minor_norm",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_transport/model/profiles_1d/ion/state/momentum/radial/flux",
+     "reason": "unit differs: hit 'kg.m^-1.s^-2' vs name '1'",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/state/momentum/flux_radial",
+     "reason": "unit differs: hit 'kg.m^-1.s^-2' vs name '1'",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/elongation",
+     "reason": "source held by a live name: elongation_of_flux_surface",
+     "unit": "1"
+    },
+    {
+     "path": "gyrokinetics_local/flux_surface/elongation",
+     "reason": "source held by a live name: elongation_of_flux_surface",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/electrons/particles/flux_radial",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name '1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/momentum/flux_radial",
+     "reason": "unit differs: hit 'kg.m^-1.s^-2' vs name '1'",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/total_ion_energy/flux_radial",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/ion/state/momentum/radial/flux",
+     "reason": "unit differs: hit 'kg.m^-1.s^-2' vs name '1'",
+     "unit": "kg.m^-1.s^-2"
+    }
+   ]
+  },
+  "energy_diffusion_coefficient_due_to_diffusion": {
+   "candidates": [
+    {
+     "documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/state/energy/d_radial",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/neutral/state/energy/d_radial",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/neutral/energy/d_radial",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/electrons/energy/d_radial",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Energy effective diffusivity (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/total_ion_energy/d_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/energy/d_radial",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Energy effective diffusivity (in the parallel direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/total_ion_energy/d_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Energy effective diffusivity (in the parallel direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/state/energy/d_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    }
+   ],
+   "dropped_hits": []
+  },
+  "flux_surface_averaged_parallel_electric_field_at_separatrix": {
+   "candidates": [
+    {
+     "documentation": "Electric field, averaged on the magnetic surface. E.g for the parallel component, average(E.B) / B0, using core_profiles/vacuum_toroidal_field/b0",
+     "ids_name": "core_instant_changes",
+     "path": "core_instant_changes/change/profiles_1d/e_field",
+     "physics_domain": "core_plasma_physics",
+     "score": 0.0,
+     "unit": "V.m^-1"
+    },
+    {
+     "documentation": "Electric field, averaged on the magnetic surface. E.g for the parallel component, average(E.B) / B0, using plasma_profiles/vacuum_toroidal_field/b0",
+     "ids_name": "plasma_profiles",
+     "path": "plasma_profiles/profiles_1d/e_field",
+     "physics_domain": "core_plasma_physics",
+     "score": 0.0,
+     "unit": "V.m^-1"
+    },
+    {
+     "documentation": "Electric field, averaged on the magnetic surface. E.g for the parallel component, average(E.B) / B0, using core_profiles/vacuum_toroidal_field/b0",
+     "ids_name": "edge_profiles",
+     "path": "edge_profiles/profiles_1d/e_field",
+     "physics_domain": "edge_plasma_physics",
+     "score": 0.0,
+     "unit": "V.m^-1"
+    },
+    {
+     "documentation": "Electric field, averaged on the magnetic surface. E.g for the parallel component, average(E.B) / B0, using core_profiles/vacuum_toroidal_field/b0",
+     "ids_name": "core_profiles",
+     "path": "core_profiles/profiles_1d/e_field",
+     "physics_domain": "core_plasma_physics",
+     "score": 0.0,
+     "unit": "V.m^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "camera_ir/frame_analysis/power_flux_parallel",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'V.m^-1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/state/energy/flux_parallel",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'V.m^-1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_a_field_parallel",
+     "reason": "unit differs: hit '1' vs name 'V.m^-1'",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/electrons/particles/flux_parallel",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'V.m^-1'",
+     "unit": "m^-2.s^-1"
+    }
+   ]
+  },
+  "fraction_of_neutron_detector_converter": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "neutron_diagnostic/detector/green_functions/response_function",
+     "reason": "source held by a live name: neutron_response_function_of_neutron_detector",
+     "unit": "1"
+    },
+    {
+     "path": "neutron_diagnostic/reconstructed_emissivity/fuel_ratio",
+     "reason": "source held by a live name: ratio_of_tritium_density_to_deuterium_density",
+     "unit": "1"
+    },
+    {
+     "path": "neutron_diagnostic/detector/energy_band/energies",
+     "reason": "unit differs: hit 'eV' vs name '1'",
+     "unit": "eV"
+    },
+    {
+     "path": "neutron_diagnostic/detector/energy_band/detection_efficiency",
+     "reason": "source held by a live name: spectral_efficiency_of_neutron_detector",
+     "unit": "1"
+    },
+    {
+     "path": "neutron_diagnostic/detector/material",
+     "reason": "unit differs: hit None vs name '1'",
+     "unit": null
+    },
+    {
+     "path": "neutron_diagnostic/detector/mode/spectrum",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "neutron_diagnostic/detector/mode/counting",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "neutron_diagnostic/detector/energy_band/upper_bound",
+     "reason": "unit differs: hit 'eV' vs name '1'",
+     "unit": "eV"
+    }
+   ]
+  },
+  "front_surface_area_of_langmuir_probe": {
+   "candidates": [
+    {
+     "documentation": "Area of the region of interest",
+     "ids_name": "camera_ir",
+     "path": "camera_ir/channel/camera/frame/region_of_interest/surface_area",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m^2"
+    },
+    {
+     "documentation": "Cross-sectional area of the flux surface",
+     "ids_name": "core_instant_changes",
+     "path": "core_instant_changes/change/profiles_1d/grid/area",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "m^2"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_profiles/profiles_1d/grid/area",
+     "reason": "source held by a live name: poloidal_plane_cross_sectional_area_of_flux_surface",
+     "unit": "m^2"
+    },
+    {
+     "path": "core_transport/model/profiles_1d/grid_v/area",
+     "reason": "source held by a live name: poloidal_plane_cross_sectional_area_of_flux_surface",
+     "unit": "m^2"
+    },
+    {
+     "path": "langmuir_probes/reciprocating/surface_area",
+     "reason": "source held by a live name: wetted_area_of_langmuir_probe",
+     "unit": "m^2"
+    },
+    {
+     "path": "langmuir_probes/embedded/surface_area",
+     "reason": "source held by a live name: wetted_area_of_langmuir_probe",
+     "unit": "m^2"
+    },
+    {
+     "path": "langmuir_probes/embedded/surface_area_effective",
+     "reason": "source held by a live name: effective_area_of_langmuir_probe",
+     "unit": "m^2"
+    },
+    {
+     "path": "langmuir_probes/embedded/b_field_angle",
+     "reason": "unit differs: hit 'rad' vs name 'm^2'",
+     "unit": "rad"
+    }
+   ]
+  },
+  "incident_energy_flux_at_wall_due_to_radiation": {
+   "candidates": [
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/radiation/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "W.m^-2"
+    },
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "W.m^-2"
+    },
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/electrons/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "W.m^-2"
+    },
+    {
+     "documentation": "Emitted fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/radiation/emitted",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "W.m^-2"
+    },
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "W.m^-2"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'W.m^-2'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/current/incident",
+     "reason": "source held by a live name: incident_energy_flux_at_wall_due_to_eddy_current",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'W.m^-2'",
+     "unit": "m^-2.s^-1"
+    }
+   ]
+  },
+  "ion_charge_state_energy_flux_limiter_coefficient": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "edge_transport/model/ggd/ion/state/energy/flux_radial",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_ion_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/energy/flux_radial",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/energy/flux_pol",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/energy/flux_radial",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_ion_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/momentum/flux_radial",
+     "reason": "unit differs: hit 'kg.m^-1.s^-2' vs name '1'",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name '1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/ion/state/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/state/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/state/z_min",
+     "reason": "unit differs: hit 'e' vs name '1'",
+     "unit": "e"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/z_min",
+     "reason": "unit differs: hit 'e' vs name '1'",
+     "unit": "e"
+    }
+   ]
+  },
+  "ion_power": {
+   "candidates": [
+    {
+     "documentation": "Power coupled to the ion species inside the flux surface. Cumulative volume integral of the source term for the electron energy equation",
+     "ids_name": "core_sources",
+     "path": "core_sources/source/profiles_1d/ion/power_inside",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "W"
+    },
+    {
+     "documentation": "Power coupled to the state inside the flux surface. Cumulative volume integral of the source term for the electron energy equation",
+     "ids_name": "core_sources",
+     "path": "core_sources/source/profiles_1d/ion/state/power_inside",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "W"
+    },
+    {
+     "documentation": "Power coupled to the ion species inside the flux surface. Cumulative volume integral of the source term for the electron energy equation",
+     "ids_name": "plasma_sources",
+     "path": "plasma_sources/source/profiles_1d/ion/power_inside",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "W"
+    },
+    {
+     "documentation": "Power coupled to the state inside the flux surface. Cumulative volume integral of the source term for the electron energy equation",
+     "ids_name": "plasma_sources",
+     "path": "plasma_sources/source/profiles_1d/ion/state/power_inside",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "W"
+    },
+    {
+     "documentation": "Radiated power from inside the flux surface (volume integral of the emissivity inside the flux surface)",
+     "ids_name": "radiation",
+     "path": "radiation/process/profiles_1d/ion/state/power_inside",
+     "physics_domain": "core_plasma_physics",
+     "score": 0.0,
+     "unit": "W"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_sources/source/global_quantities/total_ion_power",
+     "reason": "source held by a live name: total_ion_power",
+     "unit": "W"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/total_ion_power_inside",
+     "reason": "source held by a live name: total_ion_heating_power",
+     "unit": "W"
+    },
+    {
+     "path": "plasma_sources/source/global_quantities/total_ion_power",
+     "reason": "source held by a live name: total_ion_power",
+     "unit": "W"
+    },
+    {
+     "path": "plasma_sources/source/profiles_1d/ion/energy",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'W'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "plasma_sources/source/profiles_1d/total_ion_power_inside",
+     "reason": "source held by a live name: total_ion_heating_power",
+     "unit": "W"
+    },
+    {
+     "path": "wall/global_quantities/power_inner_target_ion_total",
+     "reason": "source held by a live name: total_ion_power_at_inner_divertor_target",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/global_quantities/ion/z_ion",
+     "reason": "unit differs: hit 'e' vs name 'W'",
+     "unit": "e"
+    }
+   ]
+  },
+  "ion_state_energy_flux_limiter_coefficient": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "core_sources/source/profiles_1d/ion/state/energy",
+     "reason": "unit differs: hit 'W.m^-3' vs name '1'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/ion/state/energy_decomposed/implicit_part",
+     "reason": "unit differs: hit 's^-1' vs name '1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "core_transport/model/profiles_1d/ion/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_ion_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_ion_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "edge_transport/model/ggd/neutral/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_neutral_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_sources/source/profiles_1d/ion/state/energy",
+     "reason": "unit differs: hit 'W.m^-3' vs name '1'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_ion_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/energy/flux_pol",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/ggd/ion/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_ion_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/ion/state/energy/flux",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/radial",
+     "reason": "source held by a live name: radial_neutral_state_momentum_flux_limiter_coefficient",
+     "unit": "1"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/state/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name '1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/state/z_min",
+     "reason": "unit differs: hit 'e' vs name '1'",
+     "unit": "e"
+    }
+   ]
+  },
+  "magnetic_shear_at_pedestal_top": {
+   "candidates": [
+    {
+     "documentation": "Magnetic shear, defined as rho_tor/q . dq/drho_tor",
+     "ids_name": "core_instant_changes",
+     "path": "core_instant_changes/change/profiles_1d/magnetic_shear",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "plasma_profiles/profiles_1d/magnetic_shear",
+     "reason": "source held by a live name: magnetic_shear_at_flux_surface",
+     "unit": "1"
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/magnetic_shear",
+     "reason": "source held by a live name: magnetic_shear_at_flux_surface",
+     "unit": "1"
+    },
+    {
+     "path": "core_profiles/profiles_1d/magnetic_shear",
+     "reason": "source held by a live name: magnetic_shear_at_flux_surface",
+     "unit": "1"
+    },
+    {
+     "path": "edge_profiles/profiles_1d/magnetic_shear",
+     "reason": "source held by a live name: magnetic_shear_at_flux_surface",
+     "unit": "1"
+    },
+    {
+     "path": "sawteeth/profiles_1d/magnetic_shear",
+     "reason": "source held by a live name: magnetic_shear_at_flux_surface",
+     "unit": "1"
+    },
+    {
+     "path": "sawteeth/diagnostics/magnetic_shear_q1",
+     "reason": "source held by a live name: magnetic_shear_at_sawtooth_inversion_radius",
+     "unit": "1"
+    },
+    {
+     "path": "gyrokinetics_local/flux_surface/magnetic_shear_r_minor",
+     "reason": "source held by a live name: magnetic_shear_at_flux_surface",
+     "unit": "1"
+    }
+   ]
+  },
+  "momentum_due_to_hot_tail": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "core_instant_changes/change/profiles_1d/electrons/density_thermal",
+     "reason": "unit differs: hit 'm^-3' vs name 'kg.m^-1.s^-1'",
+     "unit": "m^-3"
+    },
+    {
+     "path": "gyrokinetics_local/linear/wavevector/eigenmode/linear_weights/momentum_phi_parallel_a_field_parallel",
+     "reason": "unit differs: hit '1' vs name 'kg.m^-1.s^-1'",
+     "unit": "1"
+    },
+    {
+     "path": "gyrokinetics_local/linear/wavevector/eigenmode/linear_weights/momentum_phi_perpendicular_b_field_parallel",
+     "reason": "unit differs: hit '1' vs name 'kg.m^-1.s^-1'",
+     "unit": "1"
+    },
+    {
+     "path": "gyrokinetics_local/linear/wavevector/eigenmode/linear_weights_rotating_frame/momentum_phi_parallel_a_field_parallel",
+     "reason": "unit differs: hit '1' vs name 'kg.m^-1.s^-1'",
+     "unit": "1"
+    },
+    {
+     "path": "gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/heat_flux_parallel",
+     "reason": "unit differs: hit '1' vs name 'kg.m^-1.s^-1'",
+     "unit": "1"
+    },
+    {
+     "path": "gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure_parallel",
+     "reason": "unit differs: hit '1' vs name 'kg.m^-1.s^-1'",
+     "unit": "1"
+    },
+    {
+     "path": "gyrokinetics_local/non_linear/fluxes_4d/momentum_phi_parallel_a_field_parallel",
+     "reason": "unit differs: hit '1' vs name 'kg.m^-1.s^-1'",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/momentum/flux",
+     "reason": "unit differs: hit 'kg.m^-1.s^-2' vs name 'kg.m^-1.s^-1'",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "path": "runaway_electrons/global_quantities/volume_average/ddensity_dt_hot_tail",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name 'kg.m^-1.s^-1'",
+     "unit": "m^-3.s^-1"
+    },
+    {
+     "path": "runaway_electrons/global_quantities/volume_average/momentum_critical_hot_tail",
+     "reason": "source held by a live name: runaway_electron_critical_momentum_due_to_hot_tail",
+     "unit": "kg.m^-1.s^-1"
+    },
+    {
+     "path": "runaway_electrons/momentum_critical_hot_tail_definition",
+     "reason": "unit differs: hit None vs name 'kg.m^-1.s^-1'",
+     "unit": null
+    },
+    {
+     "path": "runaway_electrons/profiles_1d/ddensity_dt_hot_tail",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name 'kg.m^-1.s^-1'",
+     "unit": "m^-3.s^-1"
+    },
+    {
+     "path": "sawteeth/profiles_1d/n_e_fast",
+     "reason": "unit differs: hit 'm^-3' vs name 'kg.m^-1.s^-1'",
+     "unit": "m^-3"
+    },
+    {
+     "path": "sawteeth/profiles_1d/p_e",
+     "reason": "unit differs: hit 'Pa' vs name 'kg.m^-1.s^-1'",
+     "unit": "Pa"
+    },
+    {
+     "path": "sawteeth/profiles_1d/p_e_fast_parallel",
+     "reason": "unit differs: hit 'Pa' vs name 'kg.m^-1.s^-1'",
+     "unit": "Pa"
+    }
+   ]
+  },
+  "net_forward_power_of_wave_beam": {
+   "candidates": [
+    {
+     "documentation": "Total absorbed wave power (electrons + ion + fast populations) inside a flux surface (cumulative volume integral of the absorbed power density), per toroidal mode number",
+     "ids_name": "waves",
+     "path": "waves/coherent_wave/profiles_1d/power_inside_n_phi",
+     "physics_domain": "waves",
+     "score": 0.0,
+     "unit": "W"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "lh_antennas/antenna/module/power_launched",
+     "reason": "source held by a live name: launched_power_of_lower_hybrid_antenna",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/electrons/power",
+     "reason": "source held by a live name: electron_absorbed_power_of_beam_tracing_beam",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/ion/power",
+     "reason": "source held by a live name: ion_absorbed_power_of_beam_tracing_beam",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/power_flow_norm/perpendicular",
+     "reason": "unit differs: hit '1' vs name 'W'",
+     "unit": "1"
+    },
+    {
+     "path": "waves/coherent_wave/global_quantities/power",
+     "reason": "source held by a live name: total_absorbed_wave_power",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_1d/ion/state/power_density_fast_n_phi",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'W'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_1d/power_density",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'W'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_1d/power_inside",
+     "reason": "source held by a live name: total_absorbed_wave_power_at_inside_flux_surface",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_2d/ion/power_density_fast",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'W'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_2d/ion/power_density_fast_n_phi",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'W'",
+     "unit": "W.m^-3"
+    }
+   ]
+  },
+  "net_plasma_current_due_to_ohmic_current_drive": {
+   "candidates": [
+    {
+     "documentation": "Bootstrap current",
+     "ids_name": "core_profiles",
+     "path": "core_profiles/global_quantities/current_bootstrap",
+     "physics_domain": "current_drive",
+     "score": 0.0,
+     "unit": "A"
+    },
+    {
+     "documentation": "Parallel current driven",
+     "ids_name": "core_sources",
+     "path": "core_sources/source/global_quantities/current_parallel",
+     "physics_domain": "current_drive",
+     "score": 0.0,
+     "unit": "A"
+    },
+    {
+     "documentation": "Parallel current driven",
+     "ids_name": "plasma_sources",
+     "path": "plasma_sources/source/global_quantities/current_parallel",
+     "physics_domain": "current_drive",
+     "score": 0.0,
+     "unit": "A"
+    },
+    {
+     "documentation": "Parallel current driven inside the flux surface. Cumulative surface integral of j_parallel",
+     "ids_name": "plasma_sources",
+     "path": "plasma_sources/source/profiles_1d/current_parallel_inside",
+     "physics_domain": "current_drive",
+     "score": 0.0,
+     "unit": "A"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_profiles/profiles_1d/j_ohmic",
+     "reason": "unit differs: hit 'A.m^-2' vs name 'A'",
+     "unit": "A.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_1d/co_passing/current_phi",
+     "reason": "unit differs: hit 'A.m^-2' vs name 'A'",
+     "unit": "A.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_2d/current_phi",
+     "reason": "unit differs: hit 'A.m^-2' vs name 'A'",
+     "unit": "A.m^-2"
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/ip",
+     "reason": "source held by a live name: plasma_current",
+     "unit": "A"
+    },
+    {
+     "path": "plasma_profiles/global_quantities/current_non_inductive",
+     "reason": "source held by a live name: current_due_to_non_inductive_current_drive",
+     "unit": "A"
+    },
+    {
+     "path": "plasma_profiles/global_quantities/v_loop",
+     "reason": "unit differs: hit 'V' vs name 'A'",
+     "unit": "V"
+    }
+   ]
+  },
+  "net_plasma_power_density": {
+   "candidates": [
+    {
+     "documentation": "Source term for the electron energy equation",
+     "ids_name": "core_sources",
+     "path": "core_sources/source/profiles_1d/electrons/energy",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "W.m^-3"
+    },
+    {
+     "documentation": "Source term for the ion energy transport equation.",
+     "ids_name": "plasma_sources",
+     "path": "plasma_sources/source/profiles_1d/ion/energy",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "W.m^-3"
+    },
+    {
+     "documentation": "Source terms for the charge state energy transport equation",
+     "ids_name": "plasma_sources",
+     "path": "plasma_sources/source/profiles_1d/ion/state/energy",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "W.m^-3"
+    },
+    {
+     "documentation": "Total absorbed wave power density (electrons + ion + fast populations)",
+     "ids_name": "waves",
+     "path": "waves/coherent_wave/profiles_2d/power_density",
+     "physics_domain": "waves",
+     "score": 0.0,
+     "unit": "W.m^-3"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_profiles/global_quantities/ip",
+     "reason": "unit differs: hit 'A' vs name 'W.m^-3'",
+     "unit": "A"
+    },
+    {
+     "path": "core_sources/source/global_quantities/power",
+     "reason": "unit differs: hit 'W' vs name 'W.m^-3'",
+     "unit": "W"
+    },
+    {
+     "path": "core_sources/source/global_quantities/total_ion_power",
+     "reason": "unit differs: hit 'W' vs name 'W.m^-3'",
+     "unit": "W"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/total_ion_power_inside",
+     "reason": "unit differs: hit 'W' vs name 'W.m^-3'",
+     "unit": "W"
+    },
+    {
+     "path": "distribution_sources/source/global_quantities/power",
+     "reason": "unit differs: hit 'W' vs name 'W.m^-3'",
+     "unit": "W"
+    },
+    {
+     "path": "plasma_sources/source/global_quantities/power",
+     "reason": "unit differs: hit 'W' vs name 'W.m^-3'",
+     "unit": "W"
+    },
+    {
+     "path": "plasma_sources/source/global_quantities/total_ion_power",
+     "reason": "unit differs: hit 'W' vs name 'W.m^-3'",
+     "unit": "W"
+    }
+   ]
+  },
+  "neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission": {
+   "candidates": [
+    {
+     "documentation": "Emitted fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/emitted",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Emitted fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/emitted",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Emitted fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/particle_fluxes/neutral/state/emitted",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Emitted fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/particle_fluxes/neutral/emitted",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/particle_fluxes/neutral/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/state/emitted",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'm^-2.s^-1'",
+     "unit": "W.m^-2"
+    }
+   ]
+  },
+  "neutron_flux_due_to_fusion": {
+   "candidates": [
+    {
+     "documentation": "Total ion particle source (summed over ion  species)",
+     "ids_name": "core_sources",
+     "path": "core_sources/source/global_quantities/total_ion_particles",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "s^-1"
+    },
+    {
+     "documentation": "Total ion particle source (summed over ion  species) inside the flux surface. Cumulative volume integral of the source term for the total ion density equation",
+     "ids_name": "plasma_sources",
+     "path": "plasma_sources/source/profiles_1d/total_ion_particles_inside",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "s^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "coils_non_axisymmetric/coil/neutron_fast_flux_inboard",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'Hz'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "core_sources/source/global_quantities/electrons/particles",
+     "reason": "source held by a live name: total_electron_source_rate",
+     "unit": "s^-1"
+    },
+    {
+     "path": "core_transport/model/profiles_1d/ion/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'Hz'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "distribution_sources/source/global_quantities/power",
+     "reason": "unit differs: hit 'W' vs name 'Hz'",
+     "unit": "W"
+    },
+    {
+     "path": "neutron_diagnostic/fusion_power",
+     "reason": "unit differs: hit 'W' vs name 'Hz'",
+     "unit": "W"
+    },
+    {
+     "path": "neutron_diagnostic/neutron_flux_total",
+     "reason": "source held by a live name: power_due_to_fusion_reactions",
+     "unit": "s^-1"
+    },
+    {
+     "path": "neutron_diagnostic/reconstructed_emissivity/emissivity_dd",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name 'Hz'",
+     "unit": "m^-3.s^-1"
+    },
+    {
+     "path": "neutron_diagnostic/reconstructed_emissivity/fusion_power_dd",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'Hz'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "neutron_diagnostic/reconstructed_emissivity/fusion_power_dt",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'Hz'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "plasma_sources/source/global_quantities/electrons/particles",
+     "reason": "source held by a live name: total_electron_source_rate",
+     "unit": "s^-1"
+    },
+    {
+     "path": "plasma_sources/source/global_quantities/total_ion_particles",
+     "reason": "source held by a live name: total_ion_particle_source_rate",
+     "unit": "s^-1"
+    },
+    {
+     "path": "tf/coil/neutron_fast_flux_inboard",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'Hz'",
+     "unit": "m^-2.s^-1"
+    }
+   ]
+  },
+  "normal_distance_of_antenna_strap": {
+   "candidates": [
+    {
+     "documentation": "Horizontal full width",
+     "ids_name": "ic_antennas",
+     "path": "ic_antennas/antenna/module/strap/geometry/rectangle/width",
+     "physics_domain": "auxiliary_heating",
+     "score": 0.0,
+     "unit": "m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "ic_antennas/antenna/module/strap/distance_to_conductor",
+     "reason": "source held by a live name: back_surface_distance_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "ic_antennas/antenna/module/strap/geometry/annulus/radius_inner",
+     "reason": "source held by a live name: inner_radius_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "ic_antennas/antenna/module/strap/geometry/annulus/radius_outer",
+     "reason": "source held by a live name: outer_radius_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/curvature_radii",
+     "reason": "source held by a live name: radius_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "ic_antennas/antenna/module/strap/geometry/oblique/length_alpha",
+     "reason": "source held by a live name: major_length_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "ic_antennas/antenna/module/strap/geometry/rectangle/height",
+     "reason": "source held by a live name: height_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "ic_antennas/antenna/module/strap/geometry/thick_line/thickness",
+     "reason": "source held by a live name: thickness_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "ic_antennas/antenna/module/strap/width_phi",
+     "reason": "source held by a live name: toroidal_width_of_antenna_strap",
+     "unit": "m"
+    },
+    {
+     "path": "lh_antennas/antenna/distance_to_antenna",
+     "reason": "source held by a live name: radial_offset_of_lower_hybrid_antenna",
+     "unit": "m"
+    },
+    {
+     "path": "reflectometer_fluctuation/channel/antenna_detection_static/surface",
+     "reason": "unit differs: hit 'm^2' vs name 'm'",
+     "unit": "m^2"
+    },
+    {
+     "path": "reflectometer_fluctuation/channel/antenna_emission_static/surface",
+     "reason": "unit differs: hit 'm^2' vs name 'm'",
+     "unit": "m^2"
+    }
+   ]
+  },
+  "normal_particle_flux_at_wall_due_to_recombination": {
+   "candidates": [
+    {
+     "documentation": "Emitted fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/emitted",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Emitted fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/particle_fluxes/neutral/state/emitted",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Emitted fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/state/emitted",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_sources/source/profiles_1d/ion/state/particles_inside",
+     "reason": "unit differs: hit 's^-1' vs name 'm^-2.s^-1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/ion/emitted",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'm^-2.s^-1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/ion/incident",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'm^-2.s^-1'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/emitted",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'm^-2.s^-1'",
+     "unit": "W.m^-2"
+    }
+   ]
+  },
+  "normalized_poloidal_magnetic_flux_at_pedestal_top": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "core_instant_changes/change/profiles_1d/e_field/poloidal",
+     "reason": "unit differs: hit 'V.m^-1' vs name '1'",
+     "unit": "V.m^-1"
+    },
+    {
+     "path": "core_profiles/profiles_1d/e_field/poloidal",
+     "reason": "unit differs: hit 'V.m^-1' vs name '1'",
+     "unit": "V.m^-1"
+    },
+    {
+     "path": "core_transport/model/profiles_1d/grid_flux/psi_boundary",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "core_transport/model/profiles_1d/grid_flux/psi_magnetic_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "disruption/profiles_1d/grid/psi_magnetic_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "ece/psi_normalization/psi_magnetic_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "edge_profiles/profiles_1d/grid/psi_magnetic_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/psi_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "magnetics/flux_loop/position/phi",
+     "reason": "source held by a live name: toroidal_angle_of_measurement_position",
+     "unit": "rad"
+    },
+    {
+     "path": "magnetics/flux_loop/position/r",
+     "reason": "unit differs: hit 'm' vs name '1'",
+     "unit": "m"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/grid_flux/psi_boundary",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "radiation/process/profiles_1d/grid/psi_magnetic_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "reflectometer_fluctuation/psi_normalization/psi_magnetic_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    },
+    {
+     "path": "reflectometer_profile/psi_normalization/psi_magnetic_axis",
+     "reason": "unit differs: hit 'Wb' vs name '1'",
+     "unit": "Wb"
+    }
+   ]
+  },
+  "normalized_toroidal_hard_xray_peak_external_half_width": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "core_instant_changes/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "core_profiles/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "disruption/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "ece/channel/position/rho_tor_norm",
+     "reason": "source held by a live name: normalized_toroidal_flux_coordinate_at_measurement_position",
+     "unit": "1"
+    },
+    {
+     "path": "edge_profiles/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/half_width_external",
+     "reason": "source held by a live name: outer_hard_xray_half_width_at_emissivity_peak",
+     "unit": "1"
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/half_width_internal",
+     "reason": "source held by a live name: inner_hard_xray_half_width_at_emissivity_peak, normalized_toroidal_hard_xray_peak_lower_bound_width",
+     "unit": "1"
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/lower_bound",
+     "reason": "unit differs: hit 'eV' vs name '1'",
+     "unit": "eV"
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/peak_position",
+     "reason": "source held by a live name: normalized_toroidal_flux_coordinate_at_measurement_position",
+     "unit": "1"
+    },
+    {
+     "path": "neutron_diagnostic/reconstructed_emissivity/rho_tor_norm",
+     "reason": "source held by a live name: normalized_toroidal_flux_coordinate",
+     "unit": "1"
+    },
+    {
+     "path": "radiation/process/profiles_1d/grid/rho_tor",
+     "reason": "unit differs: hit 'm' vs name '1'",
+     "unit": "m"
+    },
+    {
+     "path": "radiation/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    }
+   ]
+  },
+  "normalized_toroidal_hard_xray_peak_upper_bound_width": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "distributions/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "ece/channel/position/rho_tor_norm",
+     "reason": "source held by a live name: normalized_toroidal_flux_coordinate_at_measurement_position",
+     "unit": "1"
+    },
+    {
+     "path": "hard_x_rays/channel/detector/outline/x1",
+     "reason": "unit differs: hit 'm' vs name '1'",
+     "unit": "m"
+    },
+    {
+     "path": "hard_x_rays/channel/detector/x2_width",
+     "reason": "unit differs: hit 'm' vs name '1'",
+     "unit": "m"
+    },
+    {
+     "path": "hard_x_rays/channel/energy_band/upper_bound",
+     "reason": "unit differs: hit 'eV' vs name '1'",
+     "unit": "eV"
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/half_width_external",
+     "reason": "source held by a live name: outer_hard_xray_half_width_at_emissivity_peak",
+     "unit": "1"
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/half_width_internal",
+     "reason": "source held by a live name: inner_hard_xray_half_width_at_emissivity_peak, normalized_toroidal_hard_xray_peak_lower_bound_width",
+     "unit": "1"
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/peak_position",
+     "reason": "source held by a live name: normalized_toroidal_flux_coordinate_at_measurement_position",
+     "unit": "1"
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/upper_bound",
+     "reason": "unit differs: hit 'eV' vs name '1'",
+     "unit": "eV"
+    },
+    {
+     "path": "neutron_diagnostic/reconstructed_emissivity/rho_tor_norm",
+     "reason": "source held by a live name: normalized_toroidal_flux_coordinate",
+     "unit": "1"
+    },
+    {
+     "path": "radiation/process/profiles_1d/grid/rho_tor",
+     "reason": "unit differs: hit 'm' vs name '1'",
+     "unit": "m"
+    },
+    {
+     "path": "radiation/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    }
+   ]
+  },
+  "normalized_toroidal_thermal_plasma_beta": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "core_instant_changes/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "core_profiles/global_quantities/beta_pol",
+     "reason": "source held by a live name: poloidal_beta",
+     "unit": "1"
+    },
+    {
+     "path": "core_profiles/global_quantities/beta_tor",
+     "reason": "source held by a live name: toroidal_beta",
+     "unit": "1"
+    },
+    {
+     "path": "core_profiles/global_quantities/beta_tor_norm",
+     "reason": "source held by a live name: normalized_toroidal_beta",
+     "unit": "1"
+    },
+    {
+     "path": "core_profiles/profiles_1d/pressure_thermal",
+     "reason": "unit differs: hit 'Pa' vs name '1'",
+     "unit": "Pa"
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/beta_tor",
+     "reason": "source held by a live name: toroidal_beta",
+     "unit": "1"
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/beta_tor_norm",
+     "reason": "source held by a live name: normalized_toroidal_beta",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_profiles/global_quantities/beta_tor",
+     "reason": "source held by a live name: toroidal_beta",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_profiles/global_quantities/beta_tor_norm",
+     "reason": "source held by a live name: normalized_toroidal_beta",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_profiles/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "plasma_sources/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "plasma_transport/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "radiation/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    }
+   ]
+  },
+  "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive": {
+   "candidates": [
+    {
+     "documentation": "Total toroidal driven current density (including electron and thermal ion back-current, or drag-current)",
+     "ids_name": "distributions",
+     "path": "distributions/distribution/profiles_1d/current_phi",
+     "physics_domain": "fast_particles",
+     "score": 0.0,
+     "unit": "A.m^-2"
+    },
+    {
+     "documentation": "Total toroidal driven current density (including electron and thermal ion back-current, or drag-current)",
+     "ids_name": "distributions",
+     "path": "distributions/distribution/profiles_2d/current_phi",
+     "physics_domain": "fast_particles",
+     "score": 0.0,
+     "unit": "A.m^-2"
+    },
+    {
+     "documentation": "Flux surface averaged wave driven parallel current density = average(j.B) / B0, where B0 = vacuum_toroidal_field/b0.",
+     "ids_name": "waves",
+     "path": "waves/coherent_wave/profiles_1d/current_parallel_density",
+     "physics_domain": "current_drive",
+     "score": 0.0,
+     "unit": "A.m^-2"
+    },
+    {
+     "documentation": "Flux surface averaged wave driven parallel current density, per toroidal mode number",
+     "ids_name": "waves",
+     "path": "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+     "physics_domain": "current_drive",
+     "score": 0.0,
+     "unit": "A.m^-2"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_profiles/global_quantities/current_bootstrap",
+     "reason": "unit differs: hit 'A' vs name 'A.m^-2'",
+     "unit": "A"
+    },
+    {
+     "path": "distributions/distribution/profiles_1d/current_fast_phi",
+     "reason": "source held by a live name: toroidal_current_density_due_to_fast_ion",
+     "unit": "A.m^-2"
+    },
+    {
+     "path": "waves/coherent_wave/global_quantities/current_phi",
+     "reason": "unit differs: hit 'A' vs name 'A.m^-2'",
+     "unit": "A"
+    },
+    {
+     "path": "waves/coherent_wave/global_quantities/current_phi_n_phi",
+     "reason": "unit differs: hit 'A' vs name 'A.m^-2'",
+     "unit": "A"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_1d/current_phi_inside",
+     "reason": "unit differs: hit 'A' vs name 'A.m^-2'",
+     "unit": "A"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_1d/current_phi_inside_n_phi",
+     "reason": "unit differs: hit 'A' vs name 'A.m^-2'",
+     "unit": "A"
+    }
+   ]
+  },
+  "parallel_ion_charge_state_energy_convection_velocity": {
+   "candidates": [
+    {
+     "documentation": "Energy effective convection (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/state/energy/v_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m.s^-1"
+    },
+    {
+     "documentation": "Energy effective convection (in the parallel direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/state/energy/v_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m.s^-1"
+    },
+    {
+     "documentation": "Energy effective convection (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/total_ion_energy/v_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m.s^-1"
+    },
+    {
+     "documentation": "Momentum effective convection (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/momentum/v_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m.s^-1"
+    },
+    {
+     "documentation": "Energy effective convection (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/energy/v_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m.s^-1"
+    },
+    {
+     "documentation": "Energy effective convection (in the parallel direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/energy/v_parallel",
+     "physics_domain": "edge_plasma_physics",
+     "score": 0.0,
+     "unit": "m.s^-1"
+    },
+    {
+     "documentation": "Energy effective convection (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/neutral/state/energy/v_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m.s^-1"
+    },
+    {
+     "documentation": "Energy effective convection (in the parallel direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/neutral/state/energy/v_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m.s^-1"
+    }
+   ],
+   "dropped_hits": []
+  },
+  "perturbed_vector_potential": {
+   "candidates": [
+    {
+     "documentation": "Normalised perturbed parallel vector potential",
+     "ids_name": "gyrokinetics_local",
+     "path": "gyrokinetics_local/non_linear/fields_4d/a_field_parallel_perturbed_norm",
+     "physics_domain": "gyrokinetics",
+     "score": 0.0,
+     "unit": "1"
+    },
+    {
+     "documentation": "Normalised perturbed parallel vector potential",
+     "ids_name": "gyrokinetics_local",
+     "path": "gyrokinetics_local/non_linear/fields_intensity_1d/a_field_parallel_perturbed_norm",
+     "physics_domain": "gyrokinetics",
+     "score": 0.0,
+     "unit": "1"
+    },
+    {
+     "documentation": "Normalised perturbed parallel vector potential",
+     "ids_name": "gyrokinetics_local",
+     "path": "gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/a_field_parallel_perturbed_norm",
+     "physics_domain": "gyrokinetics",
+     "score": 0.0,
+     "unit": "1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/plasma/a_field_perturbed",
+     "reason": "unit differs: hit 'T.m' vs name '1'",
+     "unit": "T.m"
+    },
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/plasma/a_field_perturbed/coordinate1/imaginary",
+     "reason": "unit differs: hit 'T.m' vs name '1'",
+     "unit": "T.m"
+    },
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/plasma/a_field_perturbed/coordinate2/imaginary",
+     "reason": "unit differs: hit 'T.m' vs name '1'",
+     "unit": "T.m"
+    },
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/plasma/a_field_perturbed/coordinate3",
+     "reason": "unit differs: hit 'T.m' vs name '1'",
+     "unit": "T.m"
+    },
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/plasma/psi_potential_perturbed",
+     "reason": "unit differs: hit 'V' vs name '1'",
+     "unit": "V"
+    },
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/plasma/psi_potential_perturbed/imaginary",
+     "reason": "unit differs: hit 'V' vs name '1'",
+     "unit": "V"
+    },
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/vacuum/a_field_perturbed",
+     "reason": "unit differs: hit 'T.m' vs name '1'",
+     "unit": "T.m"
+    },
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/vacuum/a_field_perturbed/coordinate2",
+     "reason": "unit differs: hit 'T.m' vs name '1'",
+     "unit": "T.m"
+    },
+    {
+     "path": "mhd_linear/time_slice/toroidal_mode/vacuum/a_field_perturbed/coordinate3",
+     "reason": "unit differs: hit 'T.m' vs name '1'",
+     "unit": "T.m"
+    }
+   ]
+  },
+  "poloidal_effective_ion_state_momentum_diffusivity": {
+   "candidates": [
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/state/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/state/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Momentum effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/profiles_1d/neutral/state/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/neutral/state/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/energy/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/neutral/state/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    }
+   ],
+   "dropped_hits": []
+  },
+  "radial_coordinate_of_vacuum_vessel": {
+   "candidates": [
+    {
+     "documentation": "Reference major radius where the vacuum toroidal magnetic field is given (usually a fixed position such as the middle of the vessel at the equatorial midplane)",
+     "ids_name": "core_instant_changes",
+     "path": "core_instant_changes/vacuum_toroidal_field/r0",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_transport/vacuum_toroidal_field/r0",
+     "reason": "source held by a live name: reference_major_radius",
+     "unit": "m"
+    },
+    {
+     "path": "disruption/vacuum_toroidal_field/r0",
+     "reason": "source held by a live name: reference_major_radius",
+     "unit": "m"
+    },
+    {
+     "path": "core_profiles/vacuum_toroidal_field/r0",
+     "reason": "source held by a live name: reference_major_radius",
+     "unit": "m"
+    },
+    {
+     "path": "core_instant_changes/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name 'm'",
+     "unit": "T"
+    },
+    {
+     "path": "core_sources/vacuum_toroidal_field/r0",
+     "reason": "source held by a live name: reference_major_radius",
+     "unit": "m"
+    },
+    {
+     "path": "radiation/vacuum_toroidal_field/r0",
+     "reason": "source held by a live name: reference_major_radius",
+     "unit": "m"
+    },
+    {
+     "path": "waves/vacuum_toroidal_field/r0",
+     "reason": "source held by a live name: reference_major_radius",
+     "unit": "m"
+    }
+   ]
+  },
+  "radial_surface_normal_of_control_surface": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "core_instant_changes/change/profiles_1d/ion/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "core_profiles/profiles_1d/ion/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "core_profiles/profiles_2d/ion/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "edge_profiles/ggd/neutral/state/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "edge_profiles/ggd/velocity_mass_centre/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "plasma_profiles/ggd/ion/state/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "plasma_profiles/ggd/neutral/state/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "plasma_profiles/ggd/velocity_mass_centre/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "plasma_profiles/profiles_1d/ion/state/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "plasma_profiles/profiles_1d/ion/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "plasma_profiles/profiles_2d/ion/velocity/radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/neutral/momentum/v_radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/neutral/particles/flux_radial",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 'm'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/neutral/state/momentum/v_radial",
+     "reason": "unit differs: hit 'm.s^-1' vs name 'm'",
+     "unit": "m.s^-1"
+    },
+    {
+     "path": "waves/coherent_wave/full_wave/e_field/normal",
+     "reason": "unit differs: hit 'V.m^-1' vs name 'm'",
+     "unit": "V.m^-1"
+    }
+   ]
+  },
+  "ratio_of_charge_of_conductor_to_voltage_of_conductor": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "core_instant_changes/change/profiles_1d/ion/z_ion_1d",
+     "reason": "unit differs: hit '1' vs name 'F'",
+     "unit": "1"
+    },
+    {
+     "path": "core_profiles/profiles_1d/zeff",
+     "reason": "unit differs: hit '1' vs name 'F'",
+     "unit": "1"
+    },
+    {
+     "path": "edge_transport/model/ggd/conductivity/parallel",
+     "reason": "unit differs: hit 'm^-1.ohm^-1' vs name 'F'",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "path": "edge_transport/model/ggd/conductivity/r",
+     "reason": "unit differs: hit 'm^-1.ohm^-1' vs name 'F'",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "path": "edge_transport/model/ggd/conductivity/radial",
+     "reason": "unit differs: hit 'm^-1.ohm^-1' vs name 'F'",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "path": "plasma_profiles/profiles_1d/conductivity_parallel",
+     "reason": "unit differs: hit 'm^-1.ohm^-1' vs name 'F'",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "path": "plasma_profiles/profiles_1d/ion/z_ion_square_1d",
+     "reason": "unit differs: hit '1' vs name 'F'",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/conductivity/parallel",
+     "reason": "unit differs: hit 'm^-1.ohm^-1' vs name 'F'",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/conductivity/r",
+     "reason": "unit differs: hit 'm^-1.ohm^-1' vs name 'F'",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "path": "plasma_transport/model/ggd/conductivity/radial",
+     "reason": "unit differs: hit 'm^-1.ohm^-1' vs name 'F'",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/conductivity_parallel",
+     "reason": "unit differs: hit 'm^-1.ohm^-1' vs name 'F'",
+     "unit": "m^-1.ohm^-1"
+    }
+   ]
+  },
+  "root_mean_square_spectral_width_of_spectrometer_channel": {
+   "candidates": [
+    {
+     "documentation": "Full width of the aperture in the X1 direction, used only if geometry_type = 3",
+     "ids_name": "spectrometer_uv",
+     "path": "spectrometer_uv/channel/detector/x1_width",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Full width of the aperture in the X2 direction, used only if geometry_type = 3",
+     "ids_name": "spectrometer_x_ray_crystal",
+     "path": "spectrometer_x_ray_crystal/channel/aperture/x2_width",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Scale of Lorentzian instrument function (full width at half height)",
+     "ids_name": "spectrometer_x_ray_crystal",
+     "path": "spectrometer_x_ray_crystal/channel/bin/instrument_function/scale",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Scale of Lorentzian instrument function (full width at half height)",
+     "ids_name": "spectrometer_x_ray_crystal",
+     "path": "spectrometer_x_ray_crystal/channel/instrument_function/scale",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "bremsstrahlung_visible/channel/filter/wavelength_lower",
+     "reason": "source held by a live name: lower_wavelength_of_filter",
+     "unit": "m"
+    },
+    {
+     "path": "bremsstrahlung_visible/channel/filter/wavelengths",
+     "reason": "source held by a live name: spectral_wavelength_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_uv/channel/radiance_spectral",
+     "reason": "unit differs: hit 'm^-3.s^-1.sr^-1' vs name 'm'",
+     "unit": "m^-3.s^-1.sr^-1"
+    },
+    {
+     "path": "spectrometer_visible/channel/grating_spectrometer/radiance_calibration",
+     "reason": "unit differs: hit 'm^-3.sr^-1' vs name 'm'",
+     "unit": "m^-3.sr^-1"
+    },
+    {
+     "path": "spectrometer_visible/channel/grating_spectrometer/wavelength_calibration/offset",
+     "reason": "source held by a live name: reference_calibration_wavelength_of_spectrometer_channel",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/crystal/wavelength_bragg",
+     "reason": "source held by a live name: wavelength_of_bragg_crystal",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/instrument_function/centre",
+     "reason": "source held by a live name: reference_wavelength_of_spectrometer_channel",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/instrument_function/intensity",
+     "reason": "source held by a live name: spectral_calibration_factor_of_spectrometer_channel",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/instrument_function/wavelengths",
+     "reason": "source held by a live name: spectral_wavelength_of_optical_element",
+     "unit": "m"
+    }
+   ]
+  },
+  "size_of_camera": {
+   "candidates": [
+    {
+     "documentation": "Positions along x1 axis",
+     "ids_name": "bolometer",
+     "path": "bolometer/camera/channel/detector/outline/x1",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Sensor pixel size (square pixel assumed)",
+     "ids_name": "camera_ir",
+     "path": "camera_ir/channel/camera/pixel_size",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Full width of the aperture in the X2 direction, used only if geometry_type = 3",
+     "ids_name": "camera_visible",
+     "path": "camera_visible/channel/aperture/x2_width",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Full width of the aperture in the X1 direction, used only if geometry_type = 3",
+     "ids_name": "camera_x_rays",
+     "path": "camera_x_rays/aperture/x1_width",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Total camera dimension in each direction (x1, x2)",
+     "ids_name": "camera_x_rays",
+     "path": "camera_x_rays/camera/camera_dimensions",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Pixel dimension in each direction (x1, x2)",
+     "ids_name": "camera_x_rays",
+     "path": "camera_x_rays/camera/pixel_dimensions",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Full width of the aperture in the X1 direction, used only if geometry_type = 3",
+     "ids_name": "spectrometer_visible",
+     "path": "spectrometer_visible/channel/detector/x1_width",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Full width of the aperture in the X2 direction, used only if geometry_type = 3",
+     "ids_name": "spectrometer_visible",
+     "path": "spectrometer_visible/channel/detector/x2_width",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "bolometer/camera/channel/detector/outline/x2",
+     "reason": "source held by a live name: second_local_tangential_coordinate_of_diagnostic_aperture",
+     "unit": "m"
+    },
+    {
+     "path": "camera_ir/channel/camera/field_of_view_vertical",
+     "reason": "unit differs: hit 'rad' vs name 'm'",
+     "unit": "rad"
+    },
+    {
+     "path": "camera_ir/channel/camera/pixels_n_vertical",
+     "reason": "unit differs: hit None vs name 'm'",
+     "unit": null
+    },
+    {
+     "path": "camera_ir/optical_element/geometry/radius",
+     "reason": "source held by a live name: radius_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/camera/camera_dimensions",
+     "reason": "source held by a live name: extent_of_soft_xray_detector, total_size_of_camera",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_x_ray_crystal/channel/camera/pixel_dimensions",
+     "reason": "source held by a live name: extent_of_detector_pixel",
+     "unit": "m"
+    }
+   ]
+  },
+  "surface_temperature_of_plasma_facing_component": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "balance_of_plant/power_plant/system/component/port/temperature",
+     "reason": "source held by a live name: coolant_temperature_of_plant_component_port",
+     "unit": "K"
+    },
+    {
+     "path": "camera_ir/channel/camera/frame/apparent_temperature",
+     "reason": "source held by a live name: surface_temperature",
+     "unit": "K"
+    },
+    {
+     "path": "camera_ir/channel/camera/frame/region_of_interest/temperature_max",
+     "reason": "source held by a live name: maximum_surface_temperature",
+     "unit": "K"
+    },
+    {
+     "path": "core_profiles/profiles_2d/pressure_thermal",
+     "reason": "unit differs: hit 'Pa' vs name 'K'",
+     "unit": "Pa"
+    },
+    {
+     "path": "divertors/divertor/target/power_flux_peak",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'K'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "edge_profiles/ggd/ion/state/pressure",
+     "reason": "unit differs: hit 'Pa' vs name 'K'",
+     "unit": "Pa"
+    },
+    {
+     "path": "edge_profiles/ggd/ion/state/temperature",
+     "reason": "unit differs: hit 'eV' vs name 'K'",
+     "unit": "eV"
+    },
+    {
+     "path": "edge_profiles/ggd/neutral/state/temperature",
+     "reason": "unit differs: hit 'eV' vs name 'K'",
+     "unit": "eV"
+    },
+    {
+     "path": "gyrokinetics_local/species/temperature_norm",
+     "reason": "unit differs: hit '1' vs name 'K'",
+     "unit": "1"
+    },
+    {
+     "path": "plasma_profiles/ggd/neutral/temperature",
+     "reason": "unit differs: hit 'eV' vs name 'K'",
+     "unit": "eV"
+    },
+    {
+     "path": "wall/first_wall_power_flux_peak",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'K'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/first_wall_surface_area",
+     "reason": "unit differs: hit 'm^2' vs name 'K'",
+     "unit": "m^2"
+    },
+    {
+     "path": "wall/global_quantities/temperature",
+     "reason": "source held by a live name: temperature_at_wall",
+     "unit": "K"
+    }
+   ]
+  },
+  "surface_thickness_of_cryostat": {
+   "candidates": [
+    {
+     "documentation": "Thickness of the vessel layer  in the perpendicular direction to the centreline. Thickness(i) is the thickness of the layer between centreline/r(i),z(i) and centreline/r(i+1),z(i+1)",
+     "ids_name": "cryostat",
+     "path": "cryostat/description_2d/thermal_shield/unit/annular/thickness",
+     "physics_domain": "structural_components",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Thickness of this element evaluated at the midplane (whenever relevant)",
+     "ids_name": "cryostat",
+     "path": "cryostat/description_2d/thermal_shield/unit/element/midplane_thickness",
+     "physics_domain": "structural_components",
+     "score": 0.0,
+     "unit": "m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "breeding_blanket/module/layer/midplane_thickness",
+     "reason": "source held by a live name: thickness_of_breeder_blanket_layer",
+     "unit": "m"
+    },
+    {
+     "path": "cryostat/description_2d/cryostat/unit/annular/resistivity",
+     "reason": "unit differs: hit 'm.ohm' vs name 'm'",
+     "unit": "m.ohm"
+    },
+    {
+     "path": "cryostat/description_2d/cryostat/unit/annular/thickness",
+     "reason": "source held by a live name: thickness_of_cryostat",
+     "unit": "m"
+    },
+    {
+     "path": "cryostat/description_2d/cryostat/unit/element/midplane_thickness",
+     "reason": "source held by a live name: thickness_of_cryostat",
+     "unit": "m"
+    },
+    {
+     "path": "cryostat/description_2d/cryostat/unit/material",
+     "reason": "unit differs: hit None vs name 'm'",
+     "unit": null
+    },
+    {
+     "path": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+     "reason": "unit differs: hit '1' vs name 'm'",
+     "unit": "1"
+    },
+    {
+     "path": "cryostat/description_2d/thermal_shield/unit/annular/resistivity",
+     "reason": "unit differs: hit 'm.ohm' vs name 'm'",
+     "unit": "m.ohm"
+    },
+    {
+     "path": "cryostat/description_2d/thermal_shield/unit/material",
+     "reason": "unit differs: hit None vs name 'm'",
+     "unit": null
+    },
+    {
+     "path": "cryostat/description_2d/thermal_shield/unit/material_volume_fraction",
+     "reason": "unit differs: hit '1' vs name 'm'",
+     "unit": "1"
+    },
+    {
+     "path": "wall/description_2d/vessel/unit/element/midplane_thickness",
+     "reason": "source held by a live name: thickness_of_vacuum_vessel",
+     "unit": "m"
+    }
+   ]
+  },
+  "tangential_curvature_inverse_of_optical_element": {
+   "candidates": [
+    {
+     "documentation": "Radius of curvature in the X2 direction, to be filled only for curvature_type/index = 3 or 5",
+     "ids_name": "camera_ir",
+     "path": "camera_ir/optical_element/back_surface/x2_curvature",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Radius of curvature in the X1 direction, to be filled only for curvature_type/index = 2, 4 or 5",
+     "ids_name": "camera_ir",
+     "path": "camera_ir/optical_element/front_surface/x1_curvature",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Radius of curvature in the X2 direction, to be filled only for curvature_type/index = 3 or 5",
+     "ids_name": "camera_ir",
+     "path": "camera_ir/optical_element/front_surface/x2_curvature",
+     "physics_domain": "radiation_measurement_diagnostics",
+     "score": 0.0,
+     "unit": "m"
+    },
+    {
+     "documentation": "Radius of curvature in the X1 direction, to be filled only for curvature_type/index = 2, 4 or 5",
+     "ids_name": "spectrometer_visible",
+     "path": "spectrometer_visible/channel/optical_element/front_surface/x1_curvature",
+     "physics_domain": "spectroscopy",
+     "score": 0.0,
+     "unit": "m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "camera_ir/optical_element/back_surface/curvature_type",
+     "reason": "unit differs: hit None vs name 'm'",
+     "unit": null
+    },
+    {
+     "path": "camera_ir/optical_element/back_surface/x1_curvature",
+     "reason": "source held by a live name: first_local_tangential_back_surface_radius_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "camera_visible/channel/optical_element/back_surface/x1_curvature",
+     "reason": "source held by a live name: first_local_tangential_back_surface_radius_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "camera_visible/channel/optical_element/back_surface/x2_curvature",
+     "reason": "source held by a live name: second_local_tangential_back_surface_radius_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "camera_visible/channel/optical_element/front_surface/curvature_type",
+     "reason": "unit differs: hit None vs name 'm'",
+     "unit": null
+    },
+    {
+     "path": "camera_visible/channel/optical_element/front_surface/x1_curvature",
+     "reason": "source held by a live name: first_local_tangential_front_surface_radius_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "camera_visible/channel/optical_element/front_surface/x2_curvature",
+     "reason": "source held by a live name: second_local_tangential_front_surface_radius_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "ec_launchers/mirror/geometry/x1_curvature",
+     "reason": "source held by a live name: curvature_of_electron_cyclotron_launcher_mirror",
+     "unit": "m"
+    },
+    {
+     "path": "ec_launchers/mirror/geometry/x2_curvature",
+     "reason": "source held by a live name: curvature_of_electron_cyclotron_launcher_mirror",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_visible/channel/optical_element/back_surface/x1_curvature",
+     "reason": "source held by a live name: first_local_tangential_back_surface_radius_of_optical_element",
+     "unit": "m"
+    },
+    {
+     "path": "spectrometer_visible/channel/optical_element/back_surface/x2_curvature",
+     "reason": "source held by a live name: vertical_back_surface_curvature_of_optical_element",
+     "unit": "m"
+    }
+   ]
+  },
+  "thermal_energy_confinement_time": {
+   "candidates": [
+    {
+     "documentation": "Exact time slice used from the time array of the measurement source data. If the time slice does not exist in the time array of the source data, it means linear interpolation has been used",
+     "ids_name": "equilibrium",
+     "path": "equilibrium/time_slice/constraints/flux_loop/time_measurement",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "s"
+    },
+    {
+     "documentation": "Exact time slice used from the time array of the measurement source data. If the time slice does not exist in the time array of the source data, it means linear interpolation has been used",
+     "ids_name": "equilibrium",
+     "path": "equilibrium/time_slice/constraints/ip/time_measurement",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "s"
+    },
+    {
+     "documentation": "Exact time slice used from the time array of the measurement source data. If the time slice does not exist in the time array of the source data, it means linear interpolation has been used",
+     "ids_name": "equilibrium",
+     "path": "equilibrium/time_slice/constraints/pf_current/time_measurement",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "s"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "b_field_non_axisymmetric/time_slice/field_map/b_field_phi",
+     "reason": "unit differs: hit 'T' vs name 's'",
+     "unit": "T"
+    },
+    {
+     "path": "calorimetry/group/component/energy_cumulated",
+     "reason": "unit differs: hit 'J' vs name 's'",
+     "unit": "J"
+    },
+    {
+     "path": "calorimetry/group/component/energy_total",
+     "reason": "unit differs: hit 'J' vs name 's'",
+     "unit": "J"
+    },
+    {
+     "path": "calorimetry/group/component/transit_time",
+     "reason": "source held by a live name: coolant_transit_time_of_plant_component_port",
+     "unit": "s"
+    },
+    {
+     "path": "disruption/global_quantities/energy_ohm",
+     "reason": "unit differs: hit 'J' vs name 's'",
+     "unit": "J"
+    },
+    {
+     "path": "distributions/distribution/global_quantities/energy",
+     "reason": "unit differs: hit 'J' vs name 's'",
+     "unit": "J"
+    },
+    {
+     "path": "distributions/distribution/global_quantities/energy_fast",
+     "reason": "unit differs: hit 'J' vs name 's'",
+     "unit": "J"
+    },
+    {
+     "path": "pellets/time_slice/pellet/path_geometry/second_point/r",
+     "reason": "unit differs: hit 'm' vs name 's'",
+     "unit": "m"
+    },
+    {
+     "path": "plasma_profiles/global_quantities/t_e_volume_average",
+     "reason": "unit differs: hit 'eV' vs name 's'",
+     "unit": "eV"
+    },
+    {
+     "path": "plasma_transport/model/ggd/total_ion_energy/flux_parallel",
+     "reason": "unit differs: hit 'W.m^-2' vs name 's'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "pulse_schedule/ic/power",
+     "reason": "unit differs: hit 'W' vs name 's'",
+     "unit": "W"
+    }
+   ]
+  },
+  "toroidal_wave_vector_normalized_of_beam_tracing_beam": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "core_instant_changes/vacuum_toroidal_field/b0",
+     "reason": "unit differs: hit 'T' vs name '1'",
+     "unit": "T"
+    },
+    {
+     "path": "ece/channel/beam_tracing/beam/wave_vector/k_phi",
+     "reason": "unit differs: hit 'm^-1' vs name '1'",
+     "unit": "m^-1"
+    },
+    {
+     "path": "ece/channel/beam_tracing/beam/wave_vector/k_phi_norm",
+     "reason": "source held by a live name: normalized_toroidal_wave_vector_of_beam_tracing_beam",
+     "unit": "1"
+    },
+    {
+     "path": "ece/channel/beam_tracing/beam/wave_vector/k_r_norm",
+     "reason": "source held by a live name: radial_wave_vector_normalized_of_beam_tracing_beam",
+     "unit": "1"
+    },
+    {
+     "path": "ece/channel/beam_tracing/beam/wave_vector/k_z_norm",
+     "reason": "source held by a live name: vertical_wave_vector_normalized_of_beam_tracing_beam",
+     "unit": "1"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/position/theta",
+     "reason": "source held by a live name: poloidal_angle_of_beam_tracing_beam",
+     "unit": "rad"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/wave_vector/k_phi",
+     "reason": "unit differs: hit 'm^-1' vs name '1'",
+     "unit": "m^-1"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/wave_vector/k_phi_norm",
+     "reason": "source held by a live name: normalized_toroidal_wave_vector_of_beam_tracing_beam",
+     "unit": "1"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/wave_vector/k_r",
+     "reason": "unit differs: hit 'm^-1' vs name '1'",
+     "unit": "m^-1"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/wave_vector/k_r_norm",
+     "reason": "source held by a live name: radial_wave_vector_normalized_of_beam_tracing_beam",
+     "unit": "1"
+    },
+    {
+     "path": "waves/coherent_wave/beam_tracing/beam/wave_vector/k_z_norm",
+     "reason": "source held by a live name: vertical_wave_vector_normalized_of_beam_tracing_beam",
+     "unit": "1"
+    }
+   ]
+  },
+  "total_absorbed_power_of_plant_system": {
+   "candidates": [
+    {
+     "documentation": "Shaft power associated with the component, (+) = into the system, (-) = out of the system",
+     "ids_name": "balance_of_plant",
+     "path": "balance_of_plant/power_plant/system/component/port/power_mechanical",
+     "physics_domain": "plant_systems",
+     "score": 0.0,
+     "unit": "W"
+    },
+    {
+     "documentation": "Heat transfer rate of the component, (+) = into the system, (-) = out of the system",
+     "ids_name": "balance_of_plant",
+     "path": "balance_of_plant/power_plant/system/component/port/power_thermal",
+     "physics_domain": "plant_systems",
+     "score": 0.0,
+     "unit": "W"
+    },
+    {
+     "documentation": "Total power of the source",
+     "ids_name": "distribution_sources",
+     "path": "distribution_sources/source/global_quantities/power",
+     "physics_domain": "fast_particles",
+     "score": 0.0,
+     "unit": "W"
+    },
+    {
+     "documentation": "Total power coupled to the plasma",
+     "ids_name": "plasma_sources",
+     "path": "plasma_sources/source/global_quantities/power",
+     "physics_domain": "auxiliary_heating",
+     "score": 0.0,
+     "unit": "W"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "balance_of_plant/power_electric_plant_operation/power_total",
+     "reason": "source held by a live name: total_power",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_electric_plant_operation/system/power",
+     "reason": "source held by a live name: power_of_plant_system",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_electric_plant_operation/system/subsystem/power",
+     "reason": "source held by a live name: power_of_plant_subsystem",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_electricity_net",
+     "reason": "source held by a live name: net_power",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_plant/system/component/port/mass_flow",
+     "reason": "unit differs: hit 'kg.s^-1' vs name 'W'",
+     "unit": "kg.s^-1"
+    },
+    {
+     "path": "balance_of_plant/power_plant/total_heat_supplied",
+     "reason": "source held by a live name: total_heating_power_due_to_fusion_reactions",
+     "unit": "W"
+    },
+    {
+     "path": "bolometer/power_radiated_total",
+     "reason": "source held by a live name: total_plasma_radiated_power",
+     "unit": "W"
+    },
+    {
+     "path": "core_sources/source/global_quantities/total_ion_power",
+     "reason": "source held by a live name: total_ion_power",
+     "unit": "W"
+    },
+    {
+     "path": "plasma_sources/source/global_quantities/total_ion_power",
+     "reason": "source held by a live name: total_ion_power",
+     "unit": "W"
+    }
+   ]
+  },
+  "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion": {
+   "candidates": [
+    {
+     "documentation": "Implicit part of the source term, i.e. to be multiplied by the equation's primary quantity",
+     "ids_name": "core_sources",
+     "path": "core_sources/source/profiles_1d/total_ion_particles_decomposed/implicit_part",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "s^-1"
+    },
+    {
+     "documentation": "Total ion particle source (summed over ion species) inside the flux surface. Cumulative volume integral of the source term for the total ion density equation",
+     "ids_name": "core_sources",
+     "path": "core_sources/source/profiles_1d/total_ion_particles_inside",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "s^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "balance_of_plant/power_plant/total_heat_rejected",
+     "reason": "unit differs: hit 'W' vs name 'Hz'",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_plant/total_heat_supplied",
+     "reason": "unit differs: hit 'W' vs name 'Hz'",
+     "unit": "W"
+    },
+    {
+     "path": "bolometer/power_radiated_total",
+     "reason": "unit differs: hit 'W' vs name 'Hz'",
+     "unit": "W"
+    },
+    {
+     "path": "breeding_blanket/module/time_slice/tritium_breeding_ratio",
+     "reason": "unit differs: hit '1' vs name 'Hz'",
+     "unit": "1"
+    },
+    {
+     "path": "core_instant_changes/change/profiles_1d/n_i_thermal_total",
+     "reason": "unit differs: hit 'm^-3' vs name 'Hz'",
+     "unit": "m^-3"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/total_ion_energy",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'Hz'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/total_ion_particles",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name 'Hz'",
+     "unit": "m^-3.s^-1"
+    },
+    {
+     "path": "neutron_diagnostic/detector/aperture/x1_unit_vector/z",
+     "reason": "unit differs: hit 'm' vs name 'Hz'",
+     "unit": "m"
+    },
+    {
+     "path": "neutron_diagnostic/detector/aperture/x2_width",
+     "reason": "unit differs: hit 'm' vs name 'Hz'",
+     "unit": "m"
+    },
+    {
+     "path": "neutron_diagnostic/detector/temperature_sensor/fall_time",
+     "reason": "unit differs: hit 's' vs name 'Hz'",
+     "unit": "s"
+    },
+    {
+     "path": "neutron_diagnostic/neutron_flux_total",
+     "reason": "source held by a live name: power_due_to_fusion_reactions",
+     "unit": "s^-1"
+    },
+    {
+     "path": "neutron_diagnostic/reconstructed_emissivity/fusion_power_dd",
+     "reason": "unit differs: hit 'W.m^-3' vs name 'Hz'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "neutron_diagnostic/reconstructed_emissivity/fusion_power_dd_accuracy",
+     "reason": "unit differs: hit '1' vs name 'Hz'",
+     "unit": "1"
+    },
+    {
+     "path": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name 'Hz'",
+     "unit": "m^-3.s^-1"
+    },
+    {
+     "path": "runaway_electrons/profiles_1d/ddensity_dt_tritium",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name 'Hz'",
+     "unit": "m^-3.s^-1"
+    }
+   ]
+  },
+  "total_incident_thermal_power": {
+   "candidates": [
+    {
+     "documentation": "Heat transfer rate of the component, (+) = into the system, (-) = out of the system",
+     "ids_name": "balance_of_plant",
+     "path": "balance_of_plant/power_plant/system/component/port/power_thermal",
+     "physics_domain": "plant_systems",
+     "score": 0.0,
+     "unit": "W"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "balance_of_plant/power_electric_plant_operation/power_total",
+     "reason": "source held by a live name: total_power",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_electric_plant_operation/system/subsystem/power",
+     "reason": "source held by a live name: power_of_plant_subsystem",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_plant/generator_conversion_efficiency",
+     "reason": "unit differs: hit '1' vs name 'W'",
+     "unit": "1"
+    },
+    {
+     "path": "balance_of_plant/power_plant/heat_load_wall",
+     "reason": "source held by a live name: incident_thermal_power_at_wall",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_plant/total_heat_rejected",
+     "reason": "source held by a live name: total_thermal_power_at_outlet",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/power_plant/total_heat_supplied",
+     "reason": "source held by a live name: total_heating_power_due_to_fusion_reactions",
+     "unit": "W"
+    },
+    {
+     "path": "balance_of_plant/thermal_efficiency_cycle",
+     "reason": "unit differs: hit '1' vs name 'W'",
+     "unit": "1"
+    },
+    {
+     "path": "breeding_blanket/module/time_slice/power_incident_radiated",
+     "reason": "source held by a live name: incident_radiated_power_of_breeder_blanket_module",
+     "unit": "W"
+    },
+    {
+     "path": "core_sources/source/global_quantities/total_ion_power",
+     "reason": "source held by a live name: total_ion_power",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/power_incident",
+     "reason": "source held by a live name: total_incident_power_of_divertor",
+     "unit": "W"
+    },
+    {
+     "path": "plasma_sources/source/global_quantities/total_ion_power",
+     "reason": "source held by a live name: total_ion_power",
+     "unit": "W"
+    },
+    {
+     "path": "wall/global_quantities/power_inner_target_ion_total",
+     "reason": "source held by a live name: total_ion_power_at_inner_divertor_target",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_1d/electrons/power_inside_thermal",
+     "reason": "source held by a live name: thermal_electron_power_at_inside_flux_surface",
+     "unit": "W"
+    }
+   ]
+  },
+  "total_ion_momentum_diffusivity": {
+   "candidates": [
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/state/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/state/momentum/d_radial",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the poloidal direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/momentum/d_pol",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/momentum/d_radial",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Momentum effective diffusivity (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/state/momentum/d_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    },
+    {
+     "documentation": "Momentum effective diffusivity (in the parallel direction), on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/momentum/d_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^2.s^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "plasma_transport/model/ggd/ion/state/momentum/d_pol",
+     "reason": "source held by a live name: poloidal_effective_ion_state_momentum_diffusivity",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "path": "plasma_transport/model/profiles_1d/ion/state/momentum/radial/flux",
+     "reason": "unit differs: hit 'kg.m^-1.s^-2' vs name 'm^2.s^-1'",
+     "unit": "kg.m^-1.s^-2"
+    }
+   ]
+  },
+  "total_launched_power_due_to_ion_cyclotron_heating": {
+   "candidates": [
+    {
+     "documentation": "Total IC power (sum over the antennas)",
+     "ids_name": "pulse_schedule",
+     "path": "pulse_schedule/ic/power",
+     "physics_domain": "auxiliary_heating",
+     "score": 0.0,
+     "unit": "W"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "lh_antennas/power_launched",
+     "reason": "source held by a live name: launched_power_of_lower_hybrid_antenna",
+     "unit": "W"
+    },
+    {
+     "path": "plasma_sources/source/global_quantities/total_ion_power",
+     "reason": "source held by a live name: total_ion_power",
+     "unit": "W"
+    },
+    {
+     "path": "ic_antennas/antenna/power_launched",
+     "reason": "source held by a live name: net_power_due_to_ion_cyclotron_heating",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/profiles_1d/ion/power_inside_thermal_n_phi",
+     "reason": "source held by a live name: per_toroidal_mode_thermal_ion_absorbed_wave_power",
+     "unit": "W"
+    },
+    {
+     "path": "waves/coherent_wave/global_quantities/ion/state/power_thermal",
+     "reason": "source held by a live name: thermal_ion_charge_state_power",
+     "unit": "W"
+    },
+    {
+     "path": "core_sources/source/global_quantities/total_ion_power",
+     "reason": "source held by a live name: total_ion_power",
+     "unit": "W"
+    },
+    {
+     "path": "wall/global_quantities/power_inner_target_ion_total",
+     "reason": "source held by a live name: total_ion_power_at_inner_divertor_target",
+     "unit": "W"
+    }
+   ]
+  },
+  "total_particle_flux": {
+   "candidates": [
+    {
+     "documentation": "Flux, on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/particles/flux",
+     "physics_domain": "edge_plasma_physics",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Flux, on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/ion/state/particles/flux",
+     "physics_domain": "edge_plasma_physics",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Flux, on various grid subsets",
+     "ids_name": "edge_transport",
+     "path": "edge_transport/model/ggd/neutral/particles/flux",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Incident fluxes for various wall components (grid subsets)",
+     "ids_name": "wall",
+     "path": "wall/description_ggd/ggd/particle_fluxes/neutral/state/incident",
+     "physics_domain": "plasma_wall_interactions",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "documentation": "Particle flux in the parallel direction, on various grid subsets",
+     "ids_name": "plasma_transport",
+     "path": "plasma_transport/model/ggd/ion/state/particles/flux_parallel",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "m^-2.s^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_sources/source/profiles_1d/ion/state/particles_inside",
+     "reason": "unit differs: hit 's^-1' vs name 'm^-2.s^-1'",
+     "unit": "s^-1"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/total_ion_particles",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name 'm^-2.s^-1'",
+     "unit": "m^-3.s^-1"
+    },
+    {
+     "path": "core_sources/source/profiles_1d/ion/particles_inside",
+     "reason": "unit differs: hit 's^-1' vs name 'm^-2.s^-1'",
+     "unit": "s^-1"
+    }
+   ]
+  },
+  "total_particle_flux_at_divertor_target_due_to_recycling": {
+   "candidates": [
+    {
+     "documentation": "State source inside the flux surface. Cumulative volume integral of the source term for the electron density equation.",
+     "ids_name": "core_sources",
+     "path": "core_sources/source/profiles_1d/ion/state/particles_inside",
+     "physics_domain": "transport",
+     "score": 0.0,
+     "unit": "s^-1"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "core_transport/model/profiles_1d/ion/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 's^-1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "divertors/divertor/particle_flux_recycled_total",
+     "reason": "source held by a live name: total_particle_source_rate_of_divertor_due_to_recycling",
+     "unit": "s^-1"
+    },
+    {
+     "path": "divertors/divertor/power_recombination_plasma",
+     "reason": "unit differs: hit 'W' vs name 's^-1'",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/power_recombination_plasma",
+     "reason": "unit differs: hit 'W' vs name 's^-1'",
+     "unit": "W"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 's^-1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/state/particles/flux",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 's^-1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "edge_transport/model/ggd/ion/state/particles/flux_radial",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 's^-1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "edge_transport/model/ggd/neutral/state/particles/flux_radial",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 's^-1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "wall/description_ggd/ggd/particle_fluxes/ion/state/emitted",
+     "reason": "unit differs: hit 'm^-2.s^-1' vs name 's^-1'",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "path": "wall/global_quantities/electrons/particle_flux_from_wall",
+     "reason": "source held by a live name: electron_source_rate_due_to_surface_emission",
+     "unit": "s^-1"
+    },
+    {
+     "path": "wall/global_quantities/neutral/particle_flux_from_plasma",
+     "reason": "source held by a live name: incident_neutral_particle_flux_at_wall",
+     "unit": "s^-1"
+    }
+   ]
+  },
+  "total_thermal_radiative_power_of_divertor_target": {
+   "candidates": [],
+   "dropped_hits": [
+    {
+     "path": "divertors/divertor/power_black_body",
+     "reason": "source held by a live name: thermal_radiative_power_of_divertor",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/power_radiated",
+     "reason": "source held by a live name: absorbed_radiated_power_of_divertor",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/power_black_body",
+     "reason": "source held by a live name: thermal_radiative_power_of_divertor_target",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/power_flux_peak",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'W'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "divertors/divertor/target/power_incident",
+     "reason": "source held by a live name: power_at_divertor_target",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/power_neutrals",
+     "reason": "source held by a live name: neutral_power_at_divertor_target",
+     "unit": "W"
+    },
+    {
+     "path": "divertors/divertor/target/power_radiated",
+     "reason": "source held by a live name: absorbed_radiated_power_at_divertor_target",
+     "unit": "W"
+    },
+    {
+     "path": "wall/global_quantities/power_density_inner_target_max",
+     "reason": "unit differs: hit 'W.m^-2' vs name 'W'",
+     "unit": "W.m^-2"
+    },
+    {
+     "path": "wall/global_quantities/power_inner_target_ion_total",
+     "reason": "source held by a live name: total_ion_power_at_inner_divertor_target",
+     "unit": "W"
+    }
+   ]
+  },
+  "vertical_outline_of_wall": {
+   "candidates": [
+    {
+     "documentation": "Height",
+     "ids_name": "pulse_schedule",
+     "path": "pulse_schedule/position_control/boundary_outline/z",
+     "physics_domain": "plasma_control",
+     "score": 0.0,
+     "unit": "m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "disruption/halo_currents/active_wall_point/z",
+     "reason": "source held by a live name: vertical_coordinate_of_active_wall_point",
+     "unit": "m"
+    },
+    {
+     "path": "wall/description_ggd/ggd/e_field/z",
+     "reason": "unit differs: hit 'V.m^-1' vs name 'm'",
+     "unit": "V.m^-1"
+    },
+    {
+     "path": "divertors/divertor/target/tile/surface_outline/z",
+     "reason": "source held by a live name: vertical_outline_of_divertor_tile",
+     "unit": "m"
+    },
+    {
+     "path": "equilibrium/time_slice/boundary/dr_dz_zero_point/z",
+     "reason": "source held by a live name: vertical_coordinate_of_dr_dz_zero_point",
+     "unit": "m"
+    },
+    {
+     "path": "wall/description_ggd/ggd/b_field/z",
+     "reason": "unit differs: hit 'T' vs name 'm'",
+     "unit": "T"
+    },
+    {
+     "path": "edge_profiles/ggd/e_field/z",
+     "reason": "unit differs: hit 'V.m^-1' vs name 'm'",
+     "unit": "V.m^-1"
+    },
+    {
+     "path": "plasma_profiles/ggd/e_field/z",
+     "reason": "unit differs: hit 'V.m^-1' vs name 'm'",
+     "unit": "V.m^-1"
+    }
+   ]
+  },
+  "volume_averaged_linear_electron_decay_time": {
+   "candidates": [
+    {
+     "documentation": "Exact time slice used from the time array of the measurement source data. If the time slice does not exist in the time array of the source data, it means linear interpolation has been used",
+     "ids_name": "equilibrium",
+     "path": "equilibrium/time_slice/constraints/n_e_line/time_measurement",
+     "physics_domain": "equilibrium",
+     "score": 0.0,
+     "unit": "s"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "b_field_non_axisymmetric/time_slice/control_surface/b_field_r",
+     "reason": "unit differs: hit 'T' vs name 's'",
+     "unit": "T"
+    },
+    {
+     "path": "b_field_non_axisymmetric/time_slice/field_map/b_field_phi",
+     "reason": "unit differs: hit 'T' vs name 's'",
+     "unit": "T"
+    },
+    {
+     "path": "breeding_blanket/pb_li_volume",
+     "reason": "unit differs: hit 'm^3' vs name 's'",
+     "unit": "m^3"
+    },
+    {
+     "path": "core_profiles/global_quantities/n_e_volume_average",
+     "reason": "unit differs: hit 'm^-3' vs name 's'",
+     "unit": "m^-3"
+    },
+    {
+     "path": "core_profiles/global_quantities/t_e_volume_average",
+     "reason": "unit differs: hit 'eV' vs name 's'",
+     "unit": "eV"
+    },
+    {
+     "path": "disruption/profiles_1d/power_density_radiative_losses",
+     "reason": "unit differs: hit 'W.m^-3' vs name 's'",
+     "unit": "W.m^-3"
+    },
+    {
+     "path": "gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/pressure",
+     "reason": "unit differs: hit '1' vs name 's'",
+     "unit": "1"
+    },
+    {
+     "path": "pellets/time_slice/pellet/path_geometry/second_point/phi",
+     "reason": "unit differs: hit 'rad' vs name 's'",
+     "unit": "rad"
+    },
+    {
+     "path": "pellets/time_slice/pellet/path_geometry/second_point/r",
+     "reason": "unit differs: hit 'm' vs name 's'",
+     "unit": "m"
+    },
+    {
+     "path": "pellets/time_slice/pellet/path_profiles/position/phi",
+     "reason": "unit differs: hit 'rad' vs name 's'",
+     "unit": "rad"
+    },
+    {
+     "path": "plasma_initiation/global_quantities/t_e_volume_average",
+     "reason": "unit differs: hit 'eV' vs name 's'",
+     "unit": "eV"
+    },
+    {
+     "path": "plasma_profiles/global_quantities/t_e_volume_average",
+     "reason": "unit differs: hit 'eV' vs name 's'",
+     "unit": "eV"
+    },
+    {
+     "path": "runaway_electrons/global_quantities/volume_average/ddensity_dt_total",
+     "reason": "unit differs: hit 'm^-3.s^-1' vs name 's'",
+     "unit": "m^-3.s^-1"
+    },
+    {
+     "path": "runaway_electrons/profiles_1d/energy_density_kinetic",
+     "reason": "unit differs: hit 'J.m^-3' vs name 's'",
+     "unit": "J.m^-3"
+    }
+   ]
+  },
+  "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions": {
+   "candidates": [
+    {
+     "documentation": "Collisional toroidal torque to the fast particle population",
+     "ids_name": "distributions",
+     "path": "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+     "physics_domain": "fast_particles",
+     "score": 0.0,
+     "unit": "N.m"
+    }
+   ],
+   "dropped_hits": [
+    {
+     "path": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+     "reason": "unit differs: hit 'N.m^-2' vs name 'N.m'",
+     "unit": "N.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_1d/collisions/electrons/torque_fast_phi",
+     "reason": "unit differs: hit 'N.m^-2' vs name 'N.m'",
+     "unit": "N.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_1d/counter_passing/collisions/electrons/torque_fast_phi",
+     "reason": "unit differs: hit 'N.m^-2' vs name 'N.m'",
+     "unit": "N.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+     "reason": "unit differs: hit 'N.m^-2' vs name 'N.m'",
+     "unit": "N.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_2d/co_passing/collisions/ion/torque_fast_phi",
+     "reason": "unit differs: hit 'N.m^-2' vs name 'N.m'",
+     "unit": "N.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_2d/collisions/electrons/torque_fast_phi",
+     "reason": "unit differs: hit 'N.m^-2' vs name 'N.m'",
+     "unit": "N.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_2d/counter_passing/collisions/electrons/torque_fast_phi",
+     "reason": "unit differs: hit 'N.m^-2' vs name 'N.m'",
+     "unit": "N.m^-2"
+    },
+    {
+     "path": "distributions/distribution/profiles_2d/trapped/collisions/electrons/torque_fast_phi",
+     "reason": "unit differs: hit 'N.m^-2' vs name 'N.m'",
+     "unit": "N.m^-2"
+    }
+   ]
+  }
+ },
+ "corrected_no_surviving_candidate": [
+  {
+   "name": "electron_energy_flux_limiter_coefficient",
+   "population": "never_bound"
+  },
+  {
+   "name": "ion_charge_state_energy_flux_limiter_coefficient",
+   "population": "never_bound"
+  },
+  {
+   "name": "ion_state_energy_flux_limiter_coefficient",
+   "population": "never_bound"
+  },
+  {
+   "name": "momentum_due_to_hot_tail",
+   "population": "never_bound"
+  },
+  {
+   "name": "normalized_poloidal_magnetic_flux_at_pedestal_top",
+   "population": "never_bound"
+  },
+  {
+   "name": "normalized_toroidal_hard_xray_peak_upper_bound_width",
+   "population": "never_bound"
+  },
+  {
+   "name": "normalized_toroidal_thermal_plasma_beta",
+   "population": "never_bound"
+  },
+  {
+   "name": "radial_surface_normal_of_control_surface",
+   "population": "never_bound"
+  },
+  {
+   "name": "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+   "population": "never_bound"
+  },
+  {
+   "name": "cumulative_inside_flux_surface_total_electron_density",
+   "population": "dropped_edge"
+  },
+  {
+   "name": "deposited_power_at_divertor_target",
+   "population": "dropped_edge"
+  },
+  {
+   "name": "normalized_toroidal_hard_xray_peak_external_half_width",
+   "population": "dropped_edge"
+  },
+  {
+   "name": "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+   "population": "dropped_edge"
+  },
+  {
+   "name": "surface_temperature_of_plasma_facing_component",
+   "population": "dropped_edge"
+  },
+  {
+   "name": "total_thermal_radiative_power_of_divertor_target",
+   "population": "dropped_edge"
+  }
+ ],
+ "corrected_post_apply_readback": {
+  "restored_still_sourceless": []
+ },
+ "corrected_pre_apply_readback": {
+  "all_planned_still_source_less": true,
+  "names_still_source_less": 5
+ },
+ "corrected_preview": {
+  "names": 5,
+  "would_bind": 5
+ },
+ "corrected_receipt": {
+  "bound_total": 5,
+  "rows": [
+   {
+    "bound": 1,
+    "name": "curvature_inverse_of_arc_of_circle_center",
+    "path": "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii"
+   },
+   {
+    "bound": 1,
+    "name": "elongation_radial_derivative_of_flux_surface",
+    "path": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm"
+   },
+   {
+    "bound": 1,
+    "name": "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+    "path": "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi"
+   },
+   {
+    "bound": 1,
+    "name": "size_of_camera",
+    "path": "camera_x_rays/camera/camera_dimensions"
+   },
+   {
+    "bound": 1,
+    "name": "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions",
+    "path": "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi"
+   }
+  ]
+ },
+ "corrected_referred_to_lead": [
+  {
+   "answer": {
+    "choice": "spectrometer_visible/channel/filter_spectrometer/radiance_calibration",
+    "confidence": 0.37,
+    "probabilities": {
+     "none of these": 0.31,
+     "spectrometer_visible/channel/filter_spectrometer/radiance_calibration": 0.58,
+     "spectrometer_visible/channel/grating_spectrometer/radiance_calibration": 0.11
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "spectrometer_visible/channel/filter_spectrometer/radiance_calibration",
+    "spectrometer_visible/channel/grating_spectrometer/radiance_calibration"
+   ],
+   "name": "calibration_factor_of_spectrometer_channel",
+   "population": "never_bound",
+   "reason": "answer below the confidence floor"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.73,
+    "probabilities": {
+     "calorimetry/group/component/energy_total": 0.18,
+     "disruption/global_quantities/energy_ohm": 0,
+     "none of these": 0.82
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "calorimetry/group/component/energy_total",
+    "disruption/global_quantities/energy_ohm"
+   ],
+   "name": "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+   "population": "never_bound",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.96,
+    "probabilities": {
+     "none of these": 0.98,
+     "spectrometer_x_ray_crystal/channel/frame/counts_bin_n": 0.02
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "spectrometer_x_ray_crystal/channel/frame/counts_bin_n"
+   ],
+   "name": "count_normalized_at_detector_pixel",
+   "population": "never_bound",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.89,
+    "probabilities": {
+     "core_sources/source/profiles_1d/ion/power_inside": 0.06,
+     "core_sources/source/profiles_1d/ion/state/power_inside": 0,
+     "none of these": 0.91,
+     "plasma_sources/source/profiles_1d/ion/power_inside": 0.03,
+     "plasma_sources/source/profiles_1d/ion/state/power_inside": 0,
+     "radiation/process/profiles_1d/ion/state/power_inside": 0
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "core_sources/source/profiles_1d/ion/power_inside",
+    "core_sources/source/profiles_1d/ion/state/power_inside",
+    "plasma_sources/source/profiles_1d/ion/power_inside",
+    "plasma_sources/source/profiles_1d/ion/state/power_inside",
+    "radiation/process/profiles_1d/ion/state/power_inside"
+   ],
+   "name": "ion_power",
+   "population": "never_bound",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "core_sources/source/global_quantities/total_ion_particles": 0,
+     "none of these": 1,
+     "plasma_sources/source/profiles_1d/total_ion_particles_inside": 0
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "core_sources/source/global_quantities/total_ion_particles",
+    "plasma_sources/source/profiles_1d/total_ion_particles_inside"
+   ],
+   "name": "neutron_flux_due_to_fusion",
+   "population": "never_bound",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.97,
+    "probabilities": {
+     "gyrokinetics_local/non_linear/fields_4d/a_field_parallel_perturbed_norm": 0.02,
+     "gyrokinetics_local/non_linear/fields_intensity_1d/a_field_parallel_perturbed_norm": 0,
+     "gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/a_field_parallel_perturbed_norm": 0,
+     "none of these": 0.98
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "gyrokinetics_local/non_linear/fields_4d/a_field_parallel_perturbed_norm",
+    "gyrokinetics_local/non_linear/fields_intensity_1d/a_field_parallel_perturbed_norm",
+    "gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/a_field_parallel_perturbed_norm"
+   ],
+   "name": "perturbed_vector_potential",
+   "population": "never_bound",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.94,
+    "probabilities": {
+     "none of these": 0.95,
+     "spectrometer_uv/channel/detector/x1_width": 0,
+     "spectrometer_x_ray_crystal/channel/aperture/x2_width": 0,
+     "spectrometer_x_ray_crystal/channel/bin/instrument_function/scale": 0.01,
+     "spectrometer_x_ray_crystal/channel/instrument_function/scale": 0.04
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "spectrometer_uv/channel/detector/x1_width",
+    "spectrometer_x_ray_crystal/channel/aperture/x2_width",
+    "spectrometer_x_ray_crystal/channel/bin/instrument_function/scale",
+    "spectrometer_x_ray_crystal/channel/instrument_function/scale"
+   ],
+   "name": "root_mean_square_spectral_width_of_spectrometer_channel",
+   "population": "never_bound",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.34,
+    "probabilities": {
+     "camera_ir/optical_element/back_surface/x2_curvature": 0.04,
+     "camera_ir/optical_element/front_surface/x1_curvature": 0.43,
+     "camera_ir/optical_element/front_surface/x2_curvature": 0.05,
+     "none of these": 0.47,
+     "spectrometer_visible/channel/optical_element/front_surface/x1_curvature": 0.01
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "camera_ir/optical_element/back_surface/x2_curvature",
+    "camera_ir/optical_element/front_surface/x1_curvature",
+    "camera_ir/optical_element/front_surface/x2_curvature",
+    "spectrometer_visible/channel/optical_element/front_surface/x1_curvature"
+   ],
+   "name": "tangential_curvature_inverse_of_optical_element",
+   "population": "never_bound",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.98,
+    "probabilities": {
+     "equilibrium/time_slice/constraints/n_e_line/time_measurement": 0.01,
+     "none of these": 0.99
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "equilibrium/time_slice/constraints/n_e_line/time_measurement"
+   ],
+   "name": "volume_averaged_linear_electron_decay_time",
+   "population": "never_bound",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "calorimetry/group/component/energy_total",
+    "confidence": 0.5,
+    "probabilities": {
+     "calorimetry/group/component/energy_total": 0.75,
+     "none of these": 0.25
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "calorimetry/group/component/energy_total"
+   ],
+   "name": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+   "population": "dropped_edge",
+   "reason": "answer below the confidence floor"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "gas_injection/pipe/species/fraction": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "gas_injection/pipe/species/fraction"
+   ],
+   "name": "cumulative_ethylene_count_due_to_gas_injection",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "none of these": 1,
+     "waves/coherent_wave/profiles_1d/power_inside_n_phi": 0
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "waves/coherent_wave/profiles_1d/power_inside_n_phi"
+   ],
+   "name": "net_forward_power_of_wave_beam",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.69,
+    "probabilities": {
+     "core_profiles/global_quantities/current_bootstrap": 0,
+     "core_sources/source/global_quantities/current_parallel": 0.06,
+     "none of these": 0.75,
+     "plasma_sources/source/global_quantities/current_parallel": 0.17,
+     "plasma_sources/source/profiles_1d/current_parallel_inside": 0.02
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "core_profiles/global_quantities/current_bootstrap",
+    "core_sources/source/global_quantities/current_parallel",
+    "plasma_sources/source/global_quantities/current_parallel",
+    "plasma_sources/source/profiles_1d/current_parallel_inside"
+   ],
+   "name": "net_plasma_current_due_to_ohmic_current_drive",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.89,
+    "probabilities": {
+     "core_sources/source/profiles_1d/electrons/energy": 0.02,
+     "none of these": 0.91,
+     "plasma_sources/source/profiles_1d/ion/energy": 0.01,
+     "plasma_sources/source/profiles_1d/ion/state/energy": 0,
+     "waves/coherent_wave/profiles_2d/power_density": 0.06
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "core_sources/source/profiles_1d/electrons/energy",
+    "plasma_sources/source/profiles_1d/ion/energy",
+    "plasma_sources/source/profiles_1d/ion/state/energy",
+    "waves/coherent_wave/profiles_2d/power_density"
+   ],
+   "name": "net_plasma_power_density",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "ic_antennas/antenna/module/strap/geometry/rectangle/width": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "ic_antennas/antenna/module/strap/geometry/rectangle/width"
+   ],
+   "name": "normal_distance_of_antenna_strap",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.19,
+    "probabilities": {
+     "cryostat/description_2d/thermal_shield/unit/annular/thickness": 0.46,
+     "cryostat/description_2d/thermal_shield/unit/element/midplane_thickness": 0.08,
+     "none of these": 0.45999999999999996
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "cryostat/description_2d/thermal_shield/unit/annular/thickness",
+    "cryostat/description_2d/thermal_shield/unit/element/midplane_thickness"
+   ],
+   "name": "surface_thickness_of_cryostat",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "equilibrium/time_slice/constraints/flux_loop/time_measurement": 0,
+     "equilibrium/time_slice/constraints/ip/time_measurement": 0,
+     "equilibrium/time_slice/constraints/pf_current/time_measurement": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "equilibrium/time_slice/constraints/flux_loop/time_measurement",
+    "equilibrium/time_slice/constraints/ip/time_measurement",
+    "equilibrium/time_slice/constraints/pf_current/time_measurement"
+   ],
+   "name": "thermal_energy_confinement_time",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.99,
+    "probabilities": {
+     "balance_of_plant/power_plant/system/component/port/power_mechanical": 0,
+     "balance_of_plant/power_plant/system/component/port/power_thermal": 0,
+     "distribution_sources/source/global_quantities/power": 0.01,
+     "none of these": 0.99,
+     "plasma_sources/source/global_quantities/power": 0
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "balance_of_plant/power_plant/system/component/port/power_mechanical",
+    "balance_of_plant/power_plant/system/component/port/power_thermal",
+    "distribution_sources/source/global_quantities/power",
+    "plasma_sources/source/global_quantities/power"
+   ],
+   "name": "total_absorbed_power_of_plant_system",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.95,
+    "probabilities": {
+     "core_sources/source/profiles_1d/total_ion_particles_decomposed/implicit_part": 0,
+     "core_sources/source/profiles_1d/total_ion_particles_inside": 0.03,
+     "none of these": 0.97
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "core_sources/source/profiles_1d/total_ion_particles_decomposed/implicit_part",
+    "core_sources/source/profiles_1d/total_ion_particles_inside"
+   ],
+   "name": "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.5,
+    "probabilities": {
+     "balance_of_plant/power_plant/system/component/port/power_thermal": 0.25,
+     "none of these": 0.75
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "balance_of_plant/power_plant/system/component/port/power_thermal"
+   ],
+   "name": "total_incident_thermal_power",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  },
+  {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "core_sources/source/profiles_1d/ion/state/particles_inside": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "candidates": [
+    "core_sources/source/profiles_1d/ion/state/particles_inside"
+   ],
+   "name": "total_particle_flux_at_divertor_target_due_to_recycling",
+   "population": "dropped_edge",
+   "reason": "answered none-of-these"
+  }
+ ],
  "dd_version": "4.1.1",
  "elapsed_seconds": 42.1,
  "excluded_referred_to_lead": [
@@ -227,8 +5035,20 @@
   "volume_integrated_net_plasma_particle_power_density"
  ],
  "judge_model": "typesafe/jev-1.13",
- "judge_spend_usd": 0.000751044,
+ "judge_spend_usd": 0.001713642,
  "judged": {
+  "accumulated_total_coolant_absorbed_energy_of_calorimetry_component": {
+   "answer": {
+    "choice": "calorimetry/group/component/energy_total",
+    "confidence": 0.5,
+    "probabilities": {
+     "calorimetry/group/component/energy_total": 0.75,
+     "none of these": 0.25
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4528e-05
+  },
   "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface": {
    "answer": {
     "choice": "none of these",
@@ -240,6 +5060,71 @@
     "type": "choice"
    },
    "cost_usd": 2.3604e-05
+  },
+  "calibration_factor_of_spectrometer_channel": {
+   "answer": {
+    "choice": "spectrometer_visible/channel/filter_spectrometer/radiance_calibration",
+    "confidence": 0.37,
+    "probabilities": {
+     "none of these": 0.31,
+     "spectrometer_visible/channel/filter_spectrometer/radiance_calibration": 0.58,
+     "spectrometer_visible/channel/grating_spectrometer/radiance_calibration": 0.11
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.8266e-05
+  },
+  "coolant_absorbed_energy_accumulated_of_plasma_facing_component": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.73,
+    "probabilities": {
+     "calorimetry/group/component/energy_total": 0.18,
+     "disruption/global_quantities/energy_ohm": 0,
+     "none of these": 0.82
+    },
+    "type": "choice"
+   },
+   "cost_usd": 4.2378e-05
+  },
+  "count_normalized_at_detector_pixel": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.96,
+    "probabilities": {
+     "none of these": 0.98,
+     "spectrometer_x_ray_crystal/channel/frame/counts_bin_n": 0.02
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.4986e-05
+  },
+  "cumulative_ethylene_count_due_to_gas_injection": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "gas_injection/pipe/species/fraction": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3772e-05
+  },
+  "curvature_inverse_of_arc_of_circle_center": {
+   "answer": {
+    "choice": "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+    "confidence": 0.82,
+    "probabilities": {
+     "camera_ir/optical_element/back_surface/x2_curvature": 0,
+     "camera_x_rays/filter_window/x1_curvature": 0,
+     "none of these": 0.11,
+     "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii": 0.86,
+     "pf_plasma/element/geometry/arcs_of_circle/curvature_radii": 0.03
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.8598e-05
   },
   "electron_particle_diffusivity": {
    "answer": {
@@ -282,6 +5167,22 @@
     "type": "choice"
    },
    "cost_usd": 2.9778e-05
+  },
+  "elongation_radial_derivative_of_flux_surface": {
+   "answer": {
+    "choice": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+    "confidence": 0.99,
+    "probabilities": {
+     "gyrokinetics_local/flux_surface/dc_dr_minor_norm": 0,
+     "gyrokinetics_local/flux_surface/delongation_dr_minor_norm": 0.99,
+     "gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor": 0,
+     "gyrokinetics_local/flux_surface/dgeometric_axis_z_dr_minor": 0,
+     "gyrokinetics_local/flux_surface/ds_dr_minor_norm": 0,
+     "none of these": 0.01
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.7708e-05
   },
   "energy_diffusion_coefficient_due_to_diffusion": {
    "answer": {
@@ -357,6 +5258,22 @@
    },
    "cost_usd": 4.725e-05
   },
+  "ion_power": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.89,
+    "probabilities": {
+     "core_sources/source/profiles_1d/ion/power_inside": 0.06,
+     "core_sources/source/profiles_1d/ion/state/power_inside": 0,
+     "none of these": 0.91,
+     "plasma_sources/source/profiles_1d/ion/power_inside": 0.03,
+     "plasma_sources/source/profiles_1d/ion/state/power_inside": 0,
+     "radiation/process/profiles_1d/ion/state/power_inside": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.733e-05
+  },
   "magnetic_shear_at_pedestal_top": {
    "answer": {
     "choice": "none of these",
@@ -368,6 +5285,48 @@
     "type": "choice"
    },
    "cost_usd": 3.591e-05
+  },
+  "net_forward_power_of_wave_beam": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "none of these": 1,
+     "waves/coherent_wave/profiles_1d/power_inside_n_phi": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4654e-05
+  },
+  "net_plasma_current_due_to_ohmic_current_drive": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.69,
+    "probabilities": {
+     "core_profiles/global_quantities/current_bootstrap": 0,
+     "core_sources/source/global_quantities/current_parallel": 0.06,
+     "none of these": 0.75,
+     "plasma_sources/source/global_quantities/current_parallel": 0.17,
+     "plasma_sources/source/profiles_1d/current_parallel_inside": 0.02
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.3222e-05
+  },
+  "net_plasma_power_density": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.89,
+    "probabilities": {
+     "core_sources/source/profiles_1d/electrons/energy": 0.02,
+     "none of these": 0.91,
+     "plasma_sources/source/profiles_1d/ion/energy": 0.01,
+     "plasma_sources/source/profiles_1d/ion/state/energy": 0,
+     "waves/coherent_wave/profiles_2d/power_density": 0.06
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.5616e-05
   },
   "neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission": {
    "answer": {
@@ -387,6 +5346,31 @@
    },
    "cost_usd": 5.901e-05
   },
+  "neutron_flux_due_to_fusion": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "core_sources/source/global_quantities/total_ion_particles": 0,
+     "none of these": 1,
+     "plasma_sources/source/profiles_1d/total_ion_particles_inside": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 4.5864e-05
+  },
+  "normal_distance_of_antenna_strap": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "ic_antennas/antenna/module/strap/geometry/rectangle/width": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3814e-05
+  },
   "normal_particle_flux_at_wall_due_to_recombination": {
    "answer": {
     "choice": "none of these",
@@ -401,6 +5385,21 @@
     "type": "choice"
    },
    "cost_usd": 4.2588e-05
+  },
+  "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive": {
+   "answer": {
+    "choice": "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+    "confidence": 0.87,
+    "probabilities": {
+     "distributions/distribution/profiles_1d/current_phi": 0,
+     "distributions/distribution/profiles_2d/current_phi": 0,
+     "none of these": 0.09,
+     "waves/coherent_wave/profiles_1d/current_parallel_density": 0.01,
+     "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi": 0.9
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.9052e-05
   },
   "parallel_ion_charge_state_energy_convection_velocity": {
    "answer": {
@@ -420,6 +5419,20 @@
     "type": "choice"
    },
    "cost_usd": 5.439e-05
+  },
+  "perturbed_vector_potential": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.97,
+    "probabilities": {
+     "gyrokinetics_local/non_linear/fields_4d/a_field_parallel_perturbed_norm": 0.02,
+     "gyrokinetics_local/non_linear/fields_intensity_1d/a_field_parallel_perturbed_norm": 0,
+     "gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/a_field_parallel_perturbed_norm": 0,
+     "none of these": 0.98
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.7498e-05
   },
   "poloidal_effective_ion_state_momentum_diffusivity": {
    "answer": {
@@ -451,6 +5464,122 @@
     "type": "choice"
    },
    "cost_usd": 2.394e-05
+  },
+  "root_mean_square_spectral_width_of_spectrometer_channel": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.94,
+    "probabilities": {
+     "none of these": 0.95,
+     "spectrometer_uv/channel/detector/x1_width": 0,
+     "spectrometer_x_ray_crystal/channel/aperture/x2_width": 0,
+     "spectrometer_x_ray_crystal/channel/bin/instrument_function/scale": 0.01,
+     "spectrometer_x_ray_crystal/channel/instrument_function/scale": 0.04
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.2038e-05
+  },
+  "size_of_camera": {
+   "answer": {
+    "choice": "camera_x_rays/camera/camera_dimensions",
+    "confidence": 0.97,
+    "probabilities": {
+     "bolometer/camera/channel/detector/outline/x1": 0,
+     "camera_ir/channel/camera/pixel_size": 0,
+     "camera_visible/channel/aperture/x2_width": 0,
+     "camera_x_rays/aperture/x1_width": 0,
+     "camera_x_rays/camera/camera_dimensions": 0.97,
+     "camera_x_rays/camera/pixel_dimensions": 0,
+     "none of these": 0.03,
+     "spectrometer_visible/channel/detector/x1_width": 0,
+     "spectrometer_visible/channel/detector/x2_width": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.2206e-05
+  },
+  "surface_thickness_of_cryostat": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.19,
+    "probabilities": {
+     "cryostat/description_2d/thermal_shield/unit/annular/thickness": 0.46,
+     "cryostat/description_2d/thermal_shield/unit/element/midplane_thickness": 0.08,
+     "none of these": 0.45999999999999996
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.1374e-05
+  },
+  "tangential_curvature_inverse_of_optical_element": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.34,
+    "probabilities": {
+     "camera_ir/optical_element/back_surface/x2_curvature": 0.04,
+     "camera_ir/optical_element/front_surface/x1_curvature": 0.43,
+     "camera_ir/optical_element/front_surface/x2_curvature": 0.05,
+     "none of these": 0.47,
+     "spectrometer_visible/channel/optical_element/front_surface/x1_curvature": 0.01
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.948e-05
+  },
+  "thermal_energy_confinement_time": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "equilibrium/time_slice/constraints/flux_loop/time_measurement": 0,
+     "equilibrium/time_slice/constraints/ip/time_measurement": 0,
+     "equilibrium/time_slice/constraints/pf_current/time_measurement": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.5658e-05
+  },
+  "total_absorbed_power_of_plant_system": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.99,
+    "probabilities": {
+     "balance_of_plant/power_plant/system/component/port/power_mechanical": 0,
+     "balance_of_plant/power_plant/system/component/port/power_thermal": 0,
+     "distribution_sources/source/global_quantities/power": 0.01,
+     "none of these": 0.99,
+     "plasma_sources/source/global_quantities/power": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.6036e-05
+  },
+  "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.95,
+    "probabilities": {
+     "core_sources/source/profiles_1d/total_ion_particles_decomposed/implicit_part": 0,
+     "core_sources/source/profiles_1d/total_ion_particles_inside": 0.03,
+     "none of these": 0.97
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.0198e-05
+  },
+  "total_incident_thermal_power": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.5,
+    "probabilities": {
+     "balance_of_plant/power_plant/system/component/port/power_thermal": 0.25,
+     "none of these": 0.75
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.415e-05
   },
   "total_ion_momentum_diffusivity": {
    "answer": {
@@ -498,6 +5627,18 @@
    },
    "cost_usd": 4.179e-05
   },
+  "total_particle_flux_at_divertor_target_due_to_recycling": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "core_sources/source/profiles_1d/ion/state/particles_inside": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4318e-05
+  },
   "vertical_outline_of_wall": {
    "answer": {
     "choice": "pulse_schedule/position_control/boundary_outline/z",
@@ -509,17 +5650,78 @@
     "type": "choice"
    },
    "cost_usd": 2.289e-05
+  },
+  "volume_averaged_linear_electron_decay_time": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.98,
+    "probabilities": {
+     "equilibrium/time_slice/constraints/n_e_line/time_measurement": 0.01,
+     "none of these": 0.99
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4948e-05
+  },
+  "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions": {
+   "answer": {
+    "choice": "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+    "confidence": 0.88,
+    "probabilities": {
+     "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi": 0.94,
+     "none of these": 0.06
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4906e-05
   }
  },
  "lead_referral_total": {
   "lineage_referred_to_lead": 17,
-  "running_total": 72,
-  "this_node_no_candidate": 41,
-  "this_node_total": 55,
-  "this_node_with_candidates": 14
+  "running_total": 67,
+  "this_node_no_candidate": 16,
+  "this_node_total": 50,
+  "this_node_with_candidates": 34
  },
  "lineage_record": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-restore-lineage-sources/docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources.json",
  "negative_control": {
+  "existing_source_extracted_unheld": {
+   "dropped": [],
+   "hit_unit": "W",
+   "holders": [],
+   "kept": [
+    "wall/description_ggd/ggd/energy_fluxes/radiation/incident"
+   ],
+   "source_status": "extracted"
+  },
+  "existing_source_live_held": {
+   "dropped": [
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/radiation/incident",
+     "reason": "source held by a live name: sib_control_other_live_name",
+     "unit": "W"
+    }
+   ],
+   "hit_unit": "W",
+   "holders": [
+    "sib_control_other_live_name"
+   ],
+   "kept": [],
+   "source_status": "extracted"
+  },
+  "existing_source_stale": {
+   "dropped": [
+    {
+     "path": "wall/description_ggd/ggd/energy_fluxes/radiation/incident",
+     "reason": "existing source is stale",
+     "unit": "W"
+    }
+   ],
+   "hit_unit": "W",
+   "holders": [],
+   "kept": [],
+   "source_status": "stale"
+  },
   "match_unit": {
    "hit_unit": "W",
    "kept": [
@@ -574,6 +5776,7 @@
   "volume_averaged_linear_electron_decay_time",
   "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions"
  ],
+ "new_restored_count": 5,
  "no_surviving_candidate": [
   {
    "name": "calibration_factor_of_spectrometer_channel",
@@ -744,9 +5947,38 @@
   "derived_parent": 0,
   "dropped_edge": -3,
   "held_in_chain": 0,
-  "never_bound": -2,
+  "never_bound": -7,
   "orphan_awaiting_retirement": 0,
-  "unchained_holder": 0
+  "unchained_holder": -11
+ },
+ "population_gate": {
+  "concurrent_writers": [
+   "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+   "r-20261009T015811146619-cocos-determination-core",
+   "r-20261019T003009581037-exact-integrator-performance",
+   "r-20261019T012701997576-arc-assembly",
+   "r-20261019T013447800511-jt60sa-composed-plant",
+   "r-20261019T013810288111-plant-tests-independence",
+   "r-20261019T014150673041-carrier-axis-orientation",
+   "r-20261019T020114916771-one-promotion-of-a-run-at-a-time",
+   "r-20261019T021901634768-sib-settle-unchained-holders",
+   "r-20261019T022541161236-review-of-plant-tests-independence-8fb37069191e",
+   "r-20261019T022935128569-review-of-arc-assembly-60a7f44fe2fa",
+   "r-20261019T022937158075-plan-review-of-a-review-promotes-only-its-own-verdict",
+   "r-20261019T023808401484-review-of-one-promotion-of-a-run-at-a-time-3d2f768adde1",
+   "r-20261019T023816235954-review-of-sib-settle-unchained-holders-f2dfdf83a5c3"
+  ],
+  "grew": {},
+  "message": "10 restored, 10 left ['dropped_edge', 'never_bound'], none grew; concurrent writers moved {'unchained_holder': -11}",
+  "ok": true,
+  "other_moved": {
+   "unchained_holder": -11
+  },
+  "owned": [
+   "dropped_edge",
+   "never_bound"
+  ],
+  "owned_shrink": 10
  },
  "post_apply_readback": {
   "restored_still_sourceless": []
@@ -755,9 +5987,9 @@
   "derived_parent": 2,
   "dropped_edge": 45,
   "held_in_chain": 0,
-  "never_bound": 28,
+  "never_bound": 23,
   "orphan_awaiting_retirement": 3,
-  "unchained_holder": 30
+  "unchained_holder": 19
  },
  "pre_apply_readback": {
   "all_planned_still_source_less": true,
@@ -767,6 +5999,7 @@
   "names": 5,
   "would_bind": 5
  },
+ "prior_restored_count": 5,
  "quiet_graph": {
   "active_transactions": [
    {
@@ -859,6 +6092,117 @@
    {
     "age_seconds": 18,
     "run": "r-20261019T020114916771-one-promotion-of-a-run-at-a-time"
+   }
+  ]
+ },
+ "quiet_graph_corrected": {
+  "active_transactions": [
+   {
+    "currentQuery": "SHOW TRANSACTIONS YIELD transactionId, currentQuery, status RETURN transactionId, status, currentQuery LIMIT 50",
+    "status": "Running",
+    "transactionId": "neo4j-transaction-5618"
+   }
+  ],
+  "live_crew_run_count": 34,
+  "live_crew_runs": [
+   "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+   "r-20261009T015811146619-cocos-determination-core",
+   "r-20261009T033905549459-plan-review-of-jt60sa-machine-map",
+   "r-20261017T193125631298-integrated-run-assembly",
+   "r-20261018T102210638794-ssog-anchor-ab",
+   "r-20261018T145435653862-plan-review-of-the-fleet-node-stays-in-service",
+   "r-20261018T150822949393-a-stopped-worker-ends-inside-its-step",
+   "r-20261018T151304298883-a-producer-sweeps-only-on-change",
+   "r-20261018T203817697724-vs1-switched-pulse",
+   "r-20261018T204951664681-stray-edge-rate",
+   "r-20261018T214318686755-text-responses-are-compressed",
+   "r-20261018T221255178004-cbl-merged-unit-gate",
+   "r-20261018T221808668605-cbl-tcv-liuqe-sign-rca",
+   "r-20261018T222222954695-review-of-text-responses-are-compressed-f4737074616d",
+   "r-20261018T225708053988-review-of-cbl-tcv-liuqe-sign-rca-37131b826a5b",
+   "r-20261018T225754567394-cbl-tcv-liuqe-probe-sign",
+   "r-20261018T232819745998-srtj-cascade-quorum-regression",
+   "r-20261019T000654917566-review-of-reload-carries-skills-population-at-merge-b6558f0d1cab",
+   "r-20261019T003009581037-exact-integrator-performance",
+   "r-20261019T004351278047-reload-shim-interpreter-population-at-merge",
+   "r-20261019T010646193471-review-of-reload-shim-interpreter-population-at-merge-461f3b8256ed",
+   "r-20261019T012006559216-plan-review-of-the-monitor-shows-the-work-it-watches",
+   "r-20261019T012701997576-arc-assembly",
+   "r-20261019T013447800511-jt60sa-composed-plant",
+   "r-20261019T013810288111-plant-tests-independence",
+   "r-20261019T014150673041-carrier-axis-orientation",
+   "r-20261019T015039275505-sib-restore-searched-sources",
+   "r-20261019T020114916771-one-promotion-of-a-run-at-a-time",
+   "r-20261019T021901634768-sib-settle-unchained-holders",
+   "r-20261019T022541161236-review-of-plant-tests-independence-8fb37069191e",
+   "r-20261019T022935128569-review-of-arc-assembly-60a7f44fe2fa",
+   "r-20261019T022937158075-plan-review-of-a-review-promotes-only-its-own-verdict",
+   "r-20261019T023808401484-review-of-one-promotion-of-a-run-at-a-time-3d2f768adde1",
+   "r-20261019T023816235954-review-of-sib-settle-unchained-holders-f2dfdf83a5c3"
+  ],
+  "neo4j_jobs": [
+   "1288978 codex-neo4j RUNNING 14:50:44"
+  ],
+  "runs_touched_within_1800s": [
+   {
+    "age_seconds": 82,
+    "run": "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot"
+   },
+   {
+    "age_seconds": 24,
+    "run": "r-20261009T015811146619-cocos-determination-core"
+   },
+   {
+    "age_seconds": 199,
+    "run": "r-20261019T003009581037-exact-integrator-performance"
+   },
+   {
+    "age_seconds": 624,
+    "run": "r-20261019T012701997576-arc-assembly"
+   },
+   {
+    "age_seconds": 589,
+    "run": "r-20261019T013447800511-jt60sa-composed-plant"
+   },
+   {
+    "age_seconds": 869,
+    "run": "r-20261019T013810288111-plant-tests-independence"
+   },
+   {
+    "age_seconds": 295,
+    "run": "r-20261019T014150673041-carrier-axis-orientation"
+   },
+   {
+    "age_seconds": 618,
+    "run": "r-20261019T015039275505-sib-restore-searched-sources"
+   },
+   {
+    "age_seconds": 49,
+    "run": "r-20261019T020114916771-one-promotion-of-a-run-at-a-time"
+   },
+   {
+    "age_seconds": 107,
+    "run": "r-20261019T021901634768-sib-settle-unchained-holders"
+   },
+   {
+    "age_seconds": 2,
+    "run": "r-20261019T022541161236-review-of-plant-tests-independence-8fb37069191e"
+   },
+   {
+    "age_seconds": 617,
+    "run": "r-20261019T022935128569-review-of-arc-assembly-60a7f44fe2fa"
+   },
+   {
+    "age_seconds": 594,
+    "run": "r-20261019T022937158075-plan-review-of-a-review-promotes-only-its-own-verdict"
+   },
+   {
+    "age_seconds": 35,
+    "run": "r-20261019T023808401484-review-of-one-promotion-of-a-run-at-a-time-3d2f768adde1"
+   },
+   {
+    "age_seconds": 98,
+    "run": "r-20261019T023816235954-review-of-sib-settle-unchained-holders-f2dfdf83a5c3"
    }
   ]
  },
@@ -1193,8 +6537,369 @@
    "reason": "answer below the confidence floor"
   }
  ],
- "restored_count": 5,
- "stage": "applied",
+ "rejudge_model": "typesafe/jev-1.13",
+ "rejudge_spend_usd": 0.0009625980000000002,
+ "rejudged": {
+  "accumulated_total_coolant_absorbed_energy_of_calorimetry_component": {
+   "answer": {
+    "choice": "calorimetry/group/component/energy_total",
+    "confidence": 0.5,
+    "probabilities": {
+     "calorimetry/group/component/energy_total": 0.75,
+     "none of these": 0.25
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4528e-05
+  },
+  "calibration_factor_of_spectrometer_channel": {
+   "answer": {
+    "choice": "spectrometer_visible/channel/filter_spectrometer/radiance_calibration",
+    "confidence": 0.37,
+    "probabilities": {
+     "none of these": 0.31,
+     "spectrometer_visible/channel/filter_spectrometer/radiance_calibration": 0.58,
+     "spectrometer_visible/channel/grating_spectrometer/radiance_calibration": 0.11
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.8266e-05
+  },
+  "coolant_absorbed_energy_accumulated_of_plasma_facing_component": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.73,
+    "probabilities": {
+     "calorimetry/group/component/energy_total": 0.18,
+     "disruption/global_quantities/energy_ohm": 0,
+     "none of these": 0.82
+    },
+    "type": "choice"
+   },
+   "cost_usd": 4.2378e-05
+  },
+  "count_normalized_at_detector_pixel": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.96,
+    "probabilities": {
+     "none of these": 0.98,
+     "spectrometer_x_ray_crystal/channel/frame/counts_bin_n": 0.02
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.4986e-05
+  },
+  "cumulative_ethylene_count_due_to_gas_injection": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "gas_injection/pipe/species/fraction": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3772e-05
+  },
+  "curvature_inverse_of_arc_of_circle_center": {
+   "answer": {
+    "choice": "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii",
+    "confidence": 0.82,
+    "probabilities": {
+     "camera_ir/optical_element/back_surface/x2_curvature": 0,
+     "camera_x_rays/filter_window/x1_curvature": 0,
+     "none of these": 0.11,
+     "pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii": 0.86,
+     "pf_plasma/element/geometry/arcs_of_circle/curvature_radii": 0.03
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.8598e-05
+  },
+  "elongation_radial_derivative_of_flux_surface": {
+   "answer": {
+    "choice": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+    "confidence": 0.99,
+    "probabilities": {
+     "gyrokinetics_local/flux_surface/dc_dr_minor_norm": 0,
+     "gyrokinetics_local/flux_surface/delongation_dr_minor_norm": 0.99,
+     "gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor": 0,
+     "gyrokinetics_local/flux_surface/dgeometric_axis_z_dr_minor": 0,
+     "gyrokinetics_local/flux_surface/ds_dr_minor_norm": 0,
+     "none of these": 0.01
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.7708e-05
+  },
+  "ion_power": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.89,
+    "probabilities": {
+     "core_sources/source/profiles_1d/ion/power_inside": 0.06,
+     "core_sources/source/profiles_1d/ion/state/power_inside": 0,
+     "none of these": 0.91,
+     "plasma_sources/source/profiles_1d/ion/power_inside": 0.03,
+     "plasma_sources/source/profiles_1d/ion/state/power_inside": 0,
+     "radiation/process/profiles_1d/ion/state/power_inside": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.733e-05
+  },
+  "net_forward_power_of_wave_beam": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "none of these": 1,
+     "waves/coherent_wave/profiles_1d/power_inside_n_phi": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4654e-05
+  },
+  "net_plasma_current_due_to_ohmic_current_drive": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.69,
+    "probabilities": {
+     "core_profiles/global_quantities/current_bootstrap": 0,
+     "core_sources/source/global_quantities/current_parallel": 0.06,
+     "none of these": 0.75,
+     "plasma_sources/source/global_quantities/current_parallel": 0.17,
+     "plasma_sources/source/profiles_1d/current_parallel_inside": 0.02
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.3222e-05
+  },
+  "net_plasma_power_density": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.89,
+    "probabilities": {
+     "core_sources/source/profiles_1d/electrons/energy": 0.02,
+     "none of these": 0.91,
+     "plasma_sources/source/profiles_1d/ion/energy": 0.01,
+     "plasma_sources/source/profiles_1d/ion/state/energy": 0,
+     "waves/coherent_wave/profiles_2d/power_density": 0.06
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.5616e-05
+  },
+  "neutron_flux_due_to_fusion": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "core_sources/source/global_quantities/total_ion_particles": 0,
+     "none of these": 1,
+     "plasma_sources/source/profiles_1d/total_ion_particles_inside": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 4.5864e-05
+  },
+  "normal_distance_of_antenna_strap": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "ic_antennas/antenna/module/strap/geometry/rectangle/width": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.3814e-05
+  },
+  "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive": {
+   "answer": {
+    "choice": "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+    "confidence": 0.87,
+    "probabilities": {
+     "distributions/distribution/profiles_1d/current_phi": 0,
+     "distributions/distribution/profiles_2d/current_phi": 0,
+     "none of these": 0.09,
+     "waves/coherent_wave/profiles_1d/current_parallel_density": 0.01,
+     "waves/coherent_wave/profiles_1d/current_parallel_density_n_phi": 0.9
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.9052e-05
+  },
+  "perturbed_vector_potential": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.97,
+    "probabilities": {
+     "gyrokinetics_local/non_linear/fields_4d/a_field_parallel_perturbed_norm": 0.02,
+     "gyrokinetics_local/non_linear/fields_intensity_1d/a_field_parallel_perturbed_norm": 0,
+     "gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/a_field_parallel_perturbed_norm": 0,
+     "none of these": 0.98
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.7498e-05
+  },
+  "root_mean_square_spectral_width_of_spectrometer_channel": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.94,
+    "probabilities": {
+     "none of these": 0.95,
+     "spectrometer_uv/channel/detector/x1_width": 0,
+     "spectrometer_x_ray_crystal/channel/aperture/x2_width": 0,
+     "spectrometer_x_ray_crystal/channel/bin/instrument_function/scale": 0.01,
+     "spectrometer_x_ray_crystal/channel/instrument_function/scale": 0.04
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.2038e-05
+  },
+  "size_of_camera": {
+   "answer": {
+    "choice": "camera_x_rays/camera/camera_dimensions",
+    "confidence": 0.97,
+    "probabilities": {
+     "bolometer/camera/channel/detector/outline/x1": 0,
+     "camera_ir/channel/camera/pixel_size": 0,
+     "camera_visible/channel/aperture/x2_width": 0,
+     "camera_x_rays/aperture/x1_width": 0,
+     "camera_x_rays/camera/camera_dimensions": 0.97,
+     "camera_x_rays/camera/pixel_dimensions": 0,
+     "none of these": 0.03,
+     "spectrometer_visible/channel/detector/x1_width": 0,
+     "spectrometer_visible/channel/detector/x2_width": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 5.2206e-05
+  },
+  "surface_thickness_of_cryostat": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.19,
+    "probabilities": {
+     "cryostat/description_2d/thermal_shield/unit/annular/thickness": 0.46,
+     "cryostat/description_2d/thermal_shield/unit/element/midplane_thickness": 0.08,
+     "none of these": 0.45999999999999996
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.1374e-05
+  },
+  "tangential_curvature_inverse_of_optical_element": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.34,
+    "probabilities": {
+     "camera_ir/optical_element/back_surface/x2_curvature": 0.04,
+     "camera_ir/optical_element/front_surface/x1_curvature": 0.43,
+     "camera_ir/optical_element/front_surface/x2_curvature": 0.05,
+     "none of these": 0.47,
+     "spectrometer_visible/channel/optical_element/front_surface/x1_curvature": 0.01
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.948e-05
+  },
+  "thermal_energy_confinement_time": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "equilibrium/time_slice/constraints/flux_loop/time_measurement": 0,
+     "equilibrium/time_slice/constraints/ip/time_measurement": 0,
+     "equilibrium/time_slice/constraints/pf_current/time_measurement": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.5658e-05
+  },
+  "total_absorbed_power_of_plant_system": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.99,
+    "probabilities": {
+     "balance_of_plant/power_plant/system/component/port/power_mechanical": 0,
+     "balance_of_plant/power_plant/system/component/port/power_thermal": 0,
+     "distribution_sources/source/global_quantities/power": 0.01,
+     "none of these": 0.99,
+     "plasma_sources/source/global_quantities/power": 0
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.6036e-05
+  },
+  "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.95,
+    "probabilities": {
+     "core_sources/source/profiles_1d/total_ion_particles_decomposed/implicit_part": 0,
+     "core_sources/source/profiles_1d/total_ion_particles_inside": 0.03,
+     "none of these": 0.97
+    },
+    "type": "choice"
+   },
+   "cost_usd": 3.0198e-05
+  },
+  "total_incident_thermal_power": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.5,
+    "probabilities": {
+     "balance_of_plant/power_plant/system/component/port/power_thermal": 0.25,
+     "none of these": 0.75
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.415e-05
+  },
+  "total_particle_flux_at_divertor_target_due_to_recycling": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 1,
+    "probabilities": {
+     "core_sources/source/profiles_1d/ion/state/particles_inside": 0,
+     "none of these": 1
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4318e-05
+  },
+  "volume_averaged_linear_electron_decay_time": {
+   "answer": {
+    "choice": "none of these",
+    "confidence": 0.98,
+    "probabilities": {
+     "equilibrium/time_slice/constraints/n_e_line/time_measurement": 0.01,
+     "none of these": 0.99
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4948e-05
+  },
+  "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions": {
+   "answer": {
+    "choice": "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+    "confidence": 0.88,
+    "probabilities": {
+     "distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi": 0.94,
+     "none of these": 0.06
+    },
+    "type": "choice"
+   },
+   "cost_usd": 2.4906e-05
+  }
+ },
+ "restored_count": 10,
+ "stage": "corrected",
  "worklist": [
   {
    "candidates": [

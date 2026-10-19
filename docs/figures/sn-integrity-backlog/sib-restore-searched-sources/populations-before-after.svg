@@ -1,46 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="640" viewBox="0 0 1400 640" font-family="sans-serif">
-  <g fill="none" stroke="#444444" stroke-width="1.2"><line x1="430" y1="70" x2="1340" y2="70"/></g>
-  <line x1="430" y1="66" x2="430" y2="74" stroke="#444444" stroke-width="1.2"/>
-  <text x="430" y="52" font-size="20" fill="#444444" text-anchor="middle">0</text>
-  <line x1="619" y1="66" x2="619" y2="74" stroke="#444444" stroke-width="1.2"/>
-  <text x="619" y="52" font-size="20" fill="#444444" text-anchor="middle">10</text>
-  <line x1="809" y1="66" x2="809" y2="74" stroke="#444444" stroke-width="1.2"/>
-  <text x="809" y="52" font-size="20" fill="#444444" text-anchor="middle">20</text>
-  <line x1="998" y1="66" x2="998" y2="74" stroke="#444444" stroke-width="1.2"/>
-  <text x="998" y="52" font-size="20" fill="#444444" text-anchor="middle">30</text>
-  <line x1="1188" y1="66" x2="1188" y2="74" stroke="#444444" stroke-width="1.2"/>
-  <text x="1188" y="52" font-size="20" fill="#444444" text-anchor="middle">40</text>
-  <text x="418" y="126" font-size="20" fill="#111111" text-anchor="end">dropped_edge</text>
-  <rect x="430" y="110" width="910" height="20" fill="#cbd2d9"/>
-  <text x="1346" y="126" font-size="18" fill="#5c6670">48</text>
-  <rect x="430" y="132" width="853" height="20" fill="#2b6cb0"/>
-  <text x="1289" y="148" font-size="18" fill="#2b6cb0">45</text>
-  <text x="418" y="192" font-size="20" fill="#111111" text-anchor="end">never_bound</text>
-  <rect x="430" y="176" width="568" height="20" fill="#cbd2d9"/>
-  <text x="1004" y="192" font-size="18" fill="#5c6670">30</text>
-  <rect x="430" y="198" width="530" height="20" fill="#2b6cb0"/>
-  <text x="966" y="214" font-size="18" fill="#2b6cb0">28</text>
-  <text x="418" y="258" font-size="20" fill="#111111" text-anchor="end">unchained_holder</text>
-  <rect x="430" y="242" width="568" height="20" fill="#cbd2d9"/>
-  <text x="1004" y="258" font-size="18" fill="#5c6670">30</text>
-  <rect x="430" y="264" width="568" height="20" fill="#9aa5b1"/>
-  <text x="1004" y="280" font-size="18" fill="#9aa5b1">30</text>
-  <text x="418" y="324" font-size="20" fill="#111111" text-anchor="end">derived_parent</text>
-  <rect x="430" y="308" width="37" height="20" fill="#cbd2d9"/>
-  <text x="473" y="324" font-size="18" fill="#5c6670">2</text>
-  <rect x="430" y="330" width="37" height="20" fill="#9aa5b1"/>
-  <text x="473" y="346" font-size="18" fill="#9aa5b1">2</text>
-  <text x="418" y="390" font-size="20" fill="#111111" text-anchor="end">orphan_awaiting_retirement</text>
-  <rect x="430" y="374" width="56" height="20" fill="#cbd2d9"/>
-  <text x="492" y="390" font-size="18" fill="#5c6670">3</text>
-  <rect x="430" y="396" width="56" height="20" fill="#9aa5b1"/>
-  <text x="492" y="412" font-size="18" fill="#9aa5b1">3</text>
-  <text x="418" y="456" font-size="20" fill="#111111" text-anchor="end">held_in_chain</text>
-  <rect x="430" y="440" width="0" height="20" fill="#cbd2d9"/>
-  <text x="436" y="456" font-size="18" fill="#5c6670">0</text>
-  <rect x="430" y="462" width="0" height="20" fill="#9aa5b1"/>
-  <text x="436" y="478" font-size="18" fill="#9aa5b1">0</text>
-  <rect x="430" y="506" width="24" height="12" fill="#cbd2d9"/><text x="462" y="518" font-size="20" fill="#5c6670">before (upper)</text>
-  <rect x="730" y="506" width="24" height="12" fill="#2b6cb0"/><text x="762" y="518" font-size="20" fill="#5c6670">after (lower); blue = population moved</text>
-  <text x="430" y="550" font-size="20" fill="#111111">live sourceless standard names</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="660" viewBox="0 0 1400 660" font-family="sans-serif">
+  <g font-size="18" fill="#5c6670">
+    <circle cx="476" cy="54" r="7" fill="#ffffff" stroke="#929292" stroke-width="2"/>
+    <text x="492" y="60">before</text>
+    <circle cx="581" cy="54" r="7" fill="#929292"/>
+    <text x="597" y="60">after, unchanged</text>
+    <circle cx="766" cy="54" r="7" fill="#2b6cb0"/>
+    <text x="782" y="60">after, this node</text>
+    <circle cx="951" cy="54" r="7" fill="#b7791f"/>
+    <text x="967" y="60">after, a peer node</text>
+  </g>
+  <line x1="470" y1="126" x2="1340" y2="126" stroke="#444444" stroke-width="1.2"/>
+  <g stroke="#444444" stroke-width="1.2">
+    <line x1="470" y1="122" x2="470" y2="132"/>
+    <line x1="644" y1="122" x2="644" y2="132"/>
+    <line x1="818" y1="122" x2="818" y2="132"/>
+    <line x1="992" y1="122" x2="992" y2="132"/>
+    <line x1="1166" y1="122" x2="1166" y2="132"/>
+    <line x1="1340" y1="122" x2="1340" y2="132"/>
+  </g>
+  <g font-size="18" fill="#444444" text-anchor="middle">
+    <text x="470" y="104">0</text>
+    <text x="644" y="104">10</text>
+    <text x="818" y="104">20</text>
+    <text x="992" y="104">30</text>
+    <text x="1166" y="104">40</text>
+    <text x="1340" y="104">50</text>
+  </g>
+  <g font-size="20" fill="#111111" text-anchor="end">
+    <text x="440" y="182">dropped_edge</text>
+    <text x="440" y="256">never_bound</text>
+    <text x="440" y="330">unchained_holder</text>
+    <text x="440" y="404">derived_parent</text>
+    <text x="440" y="478">orphan_awaiting_retirement</text>
+    <text x="440" y="552">held_in_chain</text>
+  </g>
+  <line x1="1305" y1="176" x2="1253" y2="176" stroke="#929292" stroke-width="2.2"/>
+  <circle cx="1305" cy="176" r="7" fill="#ffffff" stroke="#929292" stroke-width="2"/>
+  <circle cx="1253" cy="176" r="7" fill="#2b6cb0"/>
+  <text x="1305" y="160" font-size="18" fill="#5c6670" text-anchor="middle">48</text>
+  <text x="1253" y="208" font-size="18" fill="#2b6cb0" text-anchor="middle">45</text>
+  <line x1="992" y1="250" x2="870" y2="250" stroke="#929292" stroke-width="2.2"/>
+  <circle cx="992" cy="250" r="7" fill="#ffffff" stroke="#929292" stroke-width="2"/>
+  <circle cx="870" cy="250" r="7" fill="#2b6cb0"/>
+  <text x="992" y="234" font-size="18" fill="#5c6670" text-anchor="middle">30</text>
+  <text x="870" y="282" font-size="18" fill="#2b6cb0" text-anchor="middle">23</text>
+  <line x1="992" y1="324" x2="801" y2="324" stroke="#929292" stroke-width="2.2"/>
+  <circle cx="992" cy="324" r="7" fill="#ffffff" stroke="#929292" stroke-width="2"/>
+  <circle cx="801" cy="324" r="7" fill="#b7791f"/>
+  <text x="992" y="308" font-size="18" fill="#5c6670" text-anchor="middle">30</text>
+  <text x="801" y="356" font-size="18" fill="#b7791f" text-anchor="middle">19</text>
+  <circle cx="505" cy="398" r="12" fill="none" stroke="#929292" stroke-width="2"/>
+  <circle cx="505" cy="398" r="7" fill="#929292"/>
+  <text x="505" y="382" font-size="18" fill="#5c6670" text-anchor="middle">2</text>
+  <text x="505" y="430" font-size="18" fill="#5c6670" text-anchor="middle">2</text>
+  <circle cx="522" cy="472" r="12" fill="none" stroke="#929292" stroke-width="2"/>
+  <circle cx="522" cy="472" r="7" fill="#929292"/>
+  <text x="522" y="456" font-size="18" fill="#5c6670" text-anchor="middle">3</text>
+  <text x="522" y="504" font-size="18" fill="#5c6670" text-anchor="middle">3</text>
+  <circle cx="470" cy="546" r="12" fill="none" stroke="#929292" stroke-width="2"/>
+  <circle cx="470" cy="546" r="7" fill="#929292"/>
+  <text x="470" y="530" font-size="18" fill="#5c6670" text-anchor="middle">0</text>
+  <text x="470" y="578" font-size="18" fill="#5c6670" text-anchor="middle">0</text>
+  <text x="470" y="632" font-size="20" fill="#111111">live sourceless standard names</text>
 </svg>
