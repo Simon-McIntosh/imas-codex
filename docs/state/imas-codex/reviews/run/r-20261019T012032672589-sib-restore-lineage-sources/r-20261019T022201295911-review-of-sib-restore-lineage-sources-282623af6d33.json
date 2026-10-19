@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T02:35:10.300Z",
+  "dispatched_at": "2026-10-19T02:22:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources.json",
+      "line": "1385",
+      "severity": "follow-on",
+      "text": "follow-on: readback_verified carries a 'note' key ('the classifier read taken on the quiet graph immediately after the apply; this is the write's own evidence') that stage_readback (run.py:639-644) never writes and no other code path in the driver produces, so the committed evidence record cannot be regenerated from the committed driver and a reader cannot separate the driver's own output from a hand edit."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py",
+      "line": "795",
+      "severity": "follow-on",
+      "text": "follow-on: the 'Restored bindings route: Jev' note states the floor is 0.8 and that bindings below it are 'listed separately below', but the table the note heads still contains all 16 sub-floor rows (P 0.50-0.78) with no marker, so a reader taking that table alone reads sub-floor bindings as settled."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none: no module, test or CLI imports the driver (grep for its module name over imas_codex/ and tests/ returns nothing); it is a one-shot evidence script under docs/ and the change adds no runtime entry point.",
+    "diff": "read commit by commit against the previous review's head 24d527445; the only new commit is 282623af6, touching exactly the four declared paths (run.py +395/-..., html +96, json +219, and a regenerated populations-before-after.svg whose only changes are clip/marker ids and the dc:date stamp, the drawn data unchanged).",
+    "done_when": "the done_when (brief.md:40-54) names the fragment HTML and its JSON record carrying the work list, each restored name with source and Jev answer/confidence, each referred name with candidates, each DD-search name with reason, the preview and apply receipts, the quiet-graph check, the before/after classifier counts at EXIT= and the spend; all are present in sib-restore-lineage-sources.json and rendered in the fragment.",
+    "goal": "the source goal (prompt.txt:30) is to restore each dropped DD source a relative recorded once Jev confirms it measures the name's quantity; this commit adds no binding but corrects the record of the 39 already applied \u2014 the admission floor (run.py:75-83), the read-back gate (run.py:612-668) and the figure label (run.py:957) \u2014 and the fragment's tables match the JSON record.",
+    "manifest": "read; it records status complete, commit 282623af6 applied on top of d8bc4db7d/24d527445, the four changed paths, the section-37 classifier read-back as the gate, gate logs judge.log/preview.log/apply.log/readback.log/control.log, and states no test file is in scope.",
+    "write_paths": "the node's fence is the fragment html, its json, its run.py and docs/figures/sn-integrity-backlog/sib-restore-lineage-sources (manifest orientation_write_paths:3); commit 282623af6 touches exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "no test file is in scope and nothing automatic invokes the driver, so a regression in the admission floor (run.py:75) or in the read-back gate (run.py:649) is caught only when an operator re-runs the script by hand; the gate is now able to fail and demonstrably did, but that is a manual control, not a regression test.",
+    "evidence": "stage_readback (run.py:612-668) now raises SystemExit when the dropped-edge fall does not equal the write's own names_bound or another population moves, and stage_exit_status (run.py:1085) records each stage's real process outcome in place of the previous literal, and the recheck demonstrably fired with readback EXIT=1 \u2014 but the committed JSON carries a readback_verified.note (json:1385) the driver does not write, so the record is partly hand-authored.",
+    "fit": "the new symbols are mechanism-named and carry no plan labels (run.py:75 MIN_CHOICE_PROBABILITY, run.py:76 MIN_SELF_CONFIDENCE, run.py:445 _admittable, run.py:455 _answer_metrics, run.py:1085 _record_exit), matching the sibling evidence-driver idiom in the same directory.",
+    "goal_fidelity": "run.py:75-83 replaces the single 0.5 probability gate with a two-part floor (P(choice) >= 0.8 AND self-confidence >= 0.5) and run.py:1047 recomputes the running referral total to include the 16 sub-floor bindings, so the record now states the goal's outcome under the ruled floor.",
+    "reuse": "run.py:144 classifies with classify_sourceless_standard_names, run.py:536 binds through bind_recovery_sources and run.py:332 judges with decide_batch; only _sources_written_since (run.py:583) is a new small Cypher read, and a search of imas_codex/standard_names found no existing owner for a created-since source query.",
+    "scope_discipline": "every path in 282623af6 is inside the declared fence (manifest orientation_write_paths:3) and no file outside docs/ is touched by the commit."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal (prompt.txt:30) is to restore each dropped DD source a relative recorded once Jev confirms it measures the name's quantity; this commit adds no binding but corrects the record of the 39 already applied through the admission floor (run.py:75-83), the read-back gate (run.py:612-668) and the figure label (run.py:957).\nVERDICT done_when: the done_when (brief.md:40-54) names the fragment HTML and its JSON record carrying the work list, each restored name with source and Jev answer/confidence, each referred name with candidates, each DD-search name with reason, the preview and apply receipts, the quiet-graph check, the before/after counts at EXIT= and the spend; all are present and rendered.\nVERDICT write_paths: the node's fence (manifest orientation_write_paths:3) is the fragment html, its json, its run.py and docs/figures/sn-integrity-backlog/sib-restore-lineage-sources; commit 282623af6 touches exactly those four and nothing else.\nVERDICT manifest: read; it records status complete, commit 282623af6 on top of d8bc4db7d/24d527445, the four changed paths, the classifier read-back as the gate, its gate logs, and that no test file is in scope.\nVERDICT diff: read commit by commit against the previous review's head 24d527445; the only new commit is 282623af6 on base 24d527445, touching the four declared paths, with the regenerated figure differing only in clip/marker ids and its date stamp.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: run.py:75-83 replaces the single 0.5 gate with a two-part floor and run.py:1047 recomputes the running referral total to include the 16 sub-floor bindings, so the record states the outcome under the ruled floor.\nSCORE evidence: 16\nJUSTIFICATION evidence: stage_readback (run.py:612-668) now raises on a dropped-edge mismatch and stage_exit_status (run.py:1085) records real process outcomes, and the recheck demonstrably fired with EXIT=1, but the committed JSON carries a readback_verified.note (json:1385) the driver never writes.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in 282623af6 is inside the fence at manifest orientation_write_paths:3 and no file outside docs/ is touched.\nSCORE durability: 10\nJUSTIFICATION durability: no test is in scope and nothing automatic invokes the driver, so a regression in the floor (run.py:75) or gate (run.py:649) is caught only by an operator re-running it by hand; the negative control is a real instrument control, not a regression test.\nSCORE fit: 18\nJUSTIFICATION fit: the new symbols are mechanism-named with no plan labels (run.py:75 MIN_CHOICE_PROBABILITY, run.py:445 _admittable, run.py:1085 _record_exit) and follow the sibling evidence-driver idiom.\nSCORE reuse: 18\nJUSTIFICATION reuse: run.py:144 uses classify_sourceless_standard_names, run.py:536 bind_recovery_sources and run.py:332 decide_batch; only _sources_written_since (run.py:583) is new and no existing owner for a created-since source query was found.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources.json:1385 follow-on: readback_verified carries a 'note' key that stage_readback (run.py:639-644) never writes, so the committed evidence record cannot be regenerated from the committed driver.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py:795 follow-on: the 'Restored bindings' note says sub-floor bindings are listed separately below, but the table it heads still carries all 16 sub-floor rows unmarked.\n",
+  "review_run_id": "r-20261019T022201295911-review-of-sib-restore-lineage-sources-282623af6d33",
+  "reviewed_base_sha": "24d5274456536b723122b4ff042a679cf8574aab",
+  "reviewed_commits": [
+    "282623af6d33f334b4c3b3dc45afe62b713d3a33"
+  ],
+  "reviewed_head_sha": "282623af6d33f334b4c3b3dc45afe62b713d3a33",
+  "reviewed_run_id": "r-20261019T012032672589-sib-restore-lineage-sources",
+  "scores": {
+    "durability": 10,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "suite_delta_fields_note": "added_failure_count/added_failure_ids are 0/[] because the reviewed run's manifest (r-20261019T012032672589-sib-restore-lineage-sources/manifest.md) carries no baseline_suite or after_suite block: no test file is in its docs-only write scope. Its gate logs judge.log, preview.log, apply.log and control.log end EXIT=0 with no failing test id; readback.log ends EXIT=1 because the read-back re-run was taken after a peer bound five more sources, which the record attributes by id (json readback_recheck.sources_created_since_apply).",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T02:32:00Z",
+  "total": 99
+}
