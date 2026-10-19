@@ -1,0 +1,429 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "retire-held-source-name-in-favour-of-its-holder",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-superseded-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "link_signed_successor",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count",
+    "cumulative_inside_flux_surface_total_electron_density=>total_electron_count",
+    "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
+    "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak",
+    "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna",
+    "thermal_energy_confinement_time=>energy_confinement_time",
+    "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "cumulative_ethylene_count_due_to_gas_injection"
+          ]
+        },
+        {
+          "id": "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "cumulative_ethylene_count_due_to_gas_injection",
+            "accumulated_ethylene_count"
+          ]
+        }
+      ],
+      "id": "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count",
+      "identity": {
+        "id": "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count",
+        "kind": "standard_name",
+        "target_id": "cumulative_ethylene_count_due_to_gas_injection"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "accumulated_ethylene_count"
+          },
+          "id": "cumulative_ethylene_count_due_to_gas_injection:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "cumulative_ethylene_count_due_to_gas_injection"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "cumulative_ethylene_count_due_to_gas_injection",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "accumulated_ethylene_count",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "cumulative_inside_flux_surface_total_electron_density=>total_electron_count:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "cumulative_inside_flux_surface_total_electron_density"
+          ]
+        },
+        {
+          "id": "cumulative_inside_flux_surface_total_electron_density=>total_electron_count:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "cumulative_inside_flux_surface_total_electron_density",
+            "total_electron_count"
+          ]
+        }
+      ],
+      "id": "cumulative_inside_flux_surface_total_electron_density=>total_electron_count",
+      "identity": {
+        "id": "cumulative_inside_flux_surface_total_electron_density=>total_electron_count",
+        "kind": "standard_name",
+        "target_id": "cumulative_inside_flux_surface_total_electron_density"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "total_electron_count"
+          },
+          "id": "cumulative_inside_flux_surface_total_electron_density:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "cumulative_inside_flux_surface_total_electron_density"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "cumulative_inside_flux_surface_total_electron_density",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "total_electron_count",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "normalized_toroidal_hard_xray_peak_external_half_width"
+          ]
+        },
+        {
+          "id": "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "normalized_toroidal_hard_xray_peak_external_half_width",
+            "outer_hard_xray_half_width_at_emissivity_peak"
+          ]
+        }
+      ],
+      "id": "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
+      "identity": {
+        "id": "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
+        "kind": "standard_name",
+        "target_id": "normalized_toroidal_hard_xray_peak_external_half_width"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "outer_hard_xray_half_width_at_emissivity_peak"
+          },
+          "id": "normalized_toroidal_hard_xray_peak_external_half_width:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "normalized_toroidal_hard_xray_peak_external_half_width"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "normalized_toroidal_hard_xray_peak_external_half_width",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "outer_hard_xray_half_width_at_emissivity_peak",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "normalized_toroidal_hard_xray_peak_upper_bound_width"
+          ]
+        },
+        {
+          "id": "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "normalized_toroidal_hard_xray_peak_upper_bound_width",
+            "outer_hard_xray_half_width_at_emissivity_peak"
+          ]
+        }
+      ],
+      "id": "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak",
+      "identity": {
+        "id": "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak",
+        "kind": "standard_name",
+        "target_id": "normalized_toroidal_hard_xray_peak_upper_bound_width"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "outer_hard_xray_half_width_at_emissivity_peak"
+          },
+          "id": "normalized_toroidal_hard_xray_peak_upper_bound_width:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "normalized_toroidal_hard_xray_peak_upper_bound_width"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "normalized_toroidal_hard_xray_peak_upper_bound_width",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "outer_hard_xray_half_width_at_emissivity_peak",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "ratio_of_charge_of_conductor_to_voltage_of_conductor"
+          ]
+        },
+        {
+          "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+            "capacitance_of_ion_cyclotron_heating_antenna"
+          ]
+        }
+      ],
+      "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna",
+      "identity": {
+        "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna",
+        "kind": "standard_name",
+        "target_id": "ratio_of_charge_of_conductor_to_voltage_of_conductor"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "capacitance_of_ion_cyclotron_heating_antenna"
+          },
+          "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "ratio_of_charge_of_conductor_to_voltage_of_conductor"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "capacitance_of_ion_cyclotron_heating_antenna",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "thermal_energy_confinement_time=>energy_confinement_time:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "thermal_energy_confinement_time"
+          ]
+        },
+        {
+          "id": "thermal_energy_confinement_time=>energy_confinement_time:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "thermal_energy_confinement_time",
+            "energy_confinement_time"
+          ]
+        }
+      ],
+      "id": "thermal_energy_confinement_time=>energy_confinement_time",
+      "identity": {
+        "id": "thermal_energy_confinement_time=>energy_confinement_time",
+        "kind": "standard_name",
+        "target_id": "thermal_energy_confinement_time"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "energy_confinement_time"
+          },
+          "id": "thermal_energy_confinement_time:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "thermal_energy_confinement_time"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "thermal_energy_confinement_time",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "energy_confinement_time",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "vertical_outline_of_wall"
+          ]
+        },
+        {
+          "id": "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "vertical_outline_of_wall",
+            "vertical_outline_of_vacuum_vessel"
+          ]
+        }
+      ],
+      "id": "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel",
+      "identity": {
+        "id": "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel",
+        "kind": "standard_name",
+        "target_id": "vertical_outline_of_wall"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "vertical_outline_of_vacuum_vessel"
+          },
+          "id": "vertical_outline_of_wall:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "vertical_outline_of_wall"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "vertical_outline_of_wall",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "vertical_outline_of_vacuum_vessel",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "d41e1ae31900978fa4bc3d9b50b064df2541af4d4d2c30e2ba76cd3574cd65b6"
+  }
+}
