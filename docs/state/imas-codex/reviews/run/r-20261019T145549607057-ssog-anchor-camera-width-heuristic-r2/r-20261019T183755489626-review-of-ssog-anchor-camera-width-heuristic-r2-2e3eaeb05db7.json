@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite or after_suite (both blank in its manifest), so it carries no two-arm suite delta of its own. Its gate was the per-arm runner at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, whose log runner-heuristic.log ends EXIT=0, plus the record's containment verdict and the runner's own containment self-check that fires on planted inputs; the change touches only docs/evidence paths that no test module covers, so the added-failure set is empty rather than unmeasured by a suite that could have exercised it.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T18:55:33.602Z",
+  "dispatched_at": "2026-10-19T18:39:09Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: the field cost_limit_passed_usd holds the 1.98 ceiling, not a pass/fail, so a reader comparing spend (0.360652) against it compares a spend to a cap stored under a name that asserts a verdict; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508, which sets it to min(apply_cap(planned_calls), ARM_BUDGET_USD), and the landing fragment at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-camera-width-heuristic-r2.html:35 quotes the unrelated USD 2.00 arm ceiling rather than this effective cap."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; bf9ecaa75 commits the runner's mid-run record with outcome_status running and 2e3eaeb05 rewrites it as the complete arm plus the landing fragment, adding nothing else.",
+    "done_when": "the done_when asks for the arm record carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, written by an invocation whose log ends EXIT=0, with the scratch stopped and its tree removed and spend under USD 2.00; all of these are present (angular_width_of_camera-heuristic.json:6,10,26,155,157,168,203,224,225,231 and runner-heuristic.log's final EXIT=0), and the scratch tree the record names is absent from disk.",
+    "goal": "the node's goal is to run the heuristic arm of the angular_width_of_camera anchor family in a scratch graph through the per-arm runner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json:8 records arm heuristic with anchor toroidal_angular_width_of_camera and outcome_status complete at line 168.",
+    "manifest": "read in full; status complete, two commits (bf9ecaa75, 2e3eaeb05), changed_paths and test_logs present, negative_control_log declared as none with its reason, blockers none.",
+    "write_paths": "the brief's Write scope names the arm JSON, the landing HTML and a figures directory; the diff touches only the arm JSON and the landing HTML, both inside those declared paths."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced, and the only guard is the runner's post-apply containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:617.",
+    "evidence": "every done_when item is recorded and independently checkable -- ledger calls 11 (angular_width_of_camera-heuristic.json:10) reconcile with the four per-model call counts at lines 171,176,181,186 summing to 11, and spend_usd 0.360652 at line 224 with their sum -- but no pytest arm ran, so the added-failure delta is an empty set rather than a suite result.",
+    "fit": "the record follows the ab-record JSON idiom of its siblings in ssog-anchor-ab/ and the landing HTML follows the evidence-fragment idiom at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-aperture-jev.html:1, though angular_width_of_camera-heuristic.json:31 carries a field name that asserts a verdict its value does not hold.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json:8 records arm heuristic at anchor toroidal_angular_width_of_camera with outcome_status complete at line 168, the deliverable the goal names.",
+    "reuse": "the change adds no definition of its own and forks no capability -- the record is produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:399 run_arm, which delegates to harmonize.plan_family_applies and graph.temp_neo4j.",
+    "scope_discipline": "git diff 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1..2e3eaeb05db722174db8b743acd701b1caa103d2 lists only angular_width_of_camera-heuristic.json and ssog-anchor-camera-width-heuristic-r2.html, both inside the brief's declared write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to run the heuristic arm of the angular_width_of_camera anchor family in a scratch graph through the per-arm runner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json:8 records arm heuristic with anchor toroidal_angular_width_of_camera and outcome_status complete at line 168.\nVERDICT done_when: the done_when asks for the arm record carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, written by an invocation whose log ends EXIT=0, with the scratch stopped and its tree removed and spend under USD 2.00; all of these are present (angular_width_of_camera-heuristic.json:6,10,26,155,157,168,203,224,225,231 and runner-heuristic.log's final EXIT=0), and the scratch tree the record names is absent from disk.\nVERDICT write_paths: the brief's Write scope names the arm JSON, the landing HTML and a figures directory; the diff touches only the arm JSON and the landing HTML, both inside those declared paths.\nVERDICT manifest: read in full; status complete, two commits (bf9ecaa75, 2e3eaeb05), changed_paths and test_logs present, negative_control_log declared as none with its reason, blockers none.\nVERDICT diff: read commit by commit against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; bf9ecaa75 commits the runner's mid-run record with outcome_status running and 2e3eaeb05 rewrites it as the complete arm plus the landing fragment, adding nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json:8 records arm heuristic at anchor toroidal_angular_width_of_camera with outcome_status complete at line 168, the deliverable the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: every done_when item is recorded and independently checkable -- ledger calls 11 at angular_width_of_camera-heuristic.json:10 reconcile with the four per-model call counts at lines 171,176,181,186 and spend_usd 0.360652 at line 224 with their sum -- but no pytest arm ran, so the added-failure delta is an empty set rather than a suite result.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1..2e3eaeb05db722174db8b743acd701b1caa103d2 lists only angular_width_of_camera-heuristic.json and ssog-anchor-camera-width-heuristic-r2.html, both inside the brief's declared write scope.\nSCORE durability: 12\nJUSTIFICATION durability: the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced, and the only guard is the runner's post-apply containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:617.\nSCORE fit: 15\nJUSTIFICATION fit: the record follows the ab-record JSON idiom of its siblings in ssog-anchor-ab/ and the landing HTML follows the evidence-fragment idiom at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-aperture-jev.html:1, though angular_width_of_camera-heuristic.json:31 carries a field name that asserts a verdict its value does not hold.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition of its own and forks no capability -- the record is produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:399 run_arm, which delegates to harmonize.plan_family_applies and graph.temp_neo4j.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json:31 follow-on: the field cost_limit_passed_usd holds the 1.98 ceiling, not a pass/fail, so a reader comparing spend (0.360652) against it compares a spend to a cap stored under a name that asserts a verdict; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508, which sets it to min(apply_cap(planned_calls), ARM_BUDGET_USD), and the landing fragment at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-camera-width-heuristic-r2.html:35 quotes the unrelated USD 2.00 arm ceiling rather than this effective cap.",
+  "review_run_id": "r-20261019T183755489626-review-of-ssog-anchor-camera-width-heuristic-r2-2e3eaeb05db7",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "2e3eaeb05db722174db8b743acd701b1caa103d2",
+  "reviewed_run_id": "r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261019T183755489626-review-of-ssog-anchor-camera-width-heuristic-r2-2e3eaeb05db7"
+  },
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T18:55:00Z",
+  "total": 101
+}
