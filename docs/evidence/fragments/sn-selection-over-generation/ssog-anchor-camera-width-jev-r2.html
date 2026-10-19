@@ -1,0 +1,53 @@
+<h2 id="ssog-anchor-camera-width-jev-r2">Angular-width-of-camera family: jev arm completed in a scratch graph</h2>
+
+<p id="ssog-anchor-camera-width-jev-r2-run">
+The jev arm of the <code>angular_width_of_camera</code> family ran to completion through the
+per-arm runner on revision <code>5cf53a7b6</code>, against a fresh scratch copy of the fixed
+archived export (<code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code>), with the
+family selection kept exactly as fixed on 2026-10-18T10:45:18Z. The arm is recorded at
+<code>ssog-anchor-ab/angular_width_of_camera-jev.json</code> with
+<code>outcome_status: complete</code>, written by a detached invocation whose log ends
+<code>EXIT=0</code>.
+</p>
+
+<h3 id="ssog-anchor-camera-width-jev-r2-run-heading">The arm</h3>
+
+<ul id="ssog-anchor-camera-width-jev-r2-facts">
+<li>Anchor: jev <code>vertical_angular_width_of_camera</code> (heuristic anchor
+    <code>toroidal_angular_width_of_camera</code>).</li>
+<li>Members: <code>angular_width_of_camera</code>, <code>toroidal_angular_width_of_camera</code>,
+    <code>vertical_angular_width_of_camera</code> (kind <code>component</code>,
+    physical base <code>angular_width</code>).</li>
+<li>Lint findings after harmonization: <strong>2 &rarr; 0</strong>.</li>
+<li>Documentation review score after, per member: <code>angular_width_of_camera</code> null,
+    <code>toroidal_angular_width_of_camera</code> 0.9875 (from 0.9125),
+    <code>vertical_angular_width_of_camera</code> 0.86875 (unchanged).</li>
+<li>Calls 10, spend <strong>USD 0.3622</strong> against the apply cap USD 1.98 and the arm
+    ceiling USD 2.00, wall time 1,772 s.</li>
+<li>Containment holds: two scratch signals (10 member-named cost rows + 10 ledger rows) and zero
+    live-signal rows attributable to this apply.</li>
+<li>Code digest <code>tree_digest_imas_codex d1e4f1e54323&hellip;</code>, identical to the
+    reviewed first arm's product code.</li>
+</ul>
+
+<h3 id="ssog-anchor-camera-width-jev-r2-halt-heading">The halt this arm recorded</h3>
+
+<p id="ssog-anchor-camera-width-jev-r2-halt">
+The harmonize receipt is <code>applied: true</code> but <code>stamped: false</code>: batch 2 halted
+on <code>name-axis drift on 1 name(s) in a docs-only campaign: angular_width_of_camera</code>
+(<code>resume_from 2</code>, 2 of 2 batches run, 2 of 3 names touched). The runner records the
+receipt's stamped flag unchanged, so the field reads <code>false</code>; the apply still accepted
+both non-drifted members and cleared the family's lint findings to zero. This is a measured
+outcome of the arm, not a runner defect.
+</p>
+
+<h3 id="ssog-anchor-camera-width-jev-r2-cleanup-heading">Cleanup</h3>
+
+<p id="ssog-anchor-camera-width-jev-r2-cleanup">
+The scratch instance was stopped and its tree removed by the runner's teardown
+(<code>scratch_removed tree &hellip;/mcintos-1281970-z0v_7txm</code>, verified absent on disk), the
+exclusive port reservation on <code>/dev/shm/ssog-scratch-port-28000.lock</code> was released, and
+no Neo4j process remained bound to the reserved ports. The port-reservation fix let this arm and
+its concurrently dispatched peers claim distinct scratch pairs and instances, the failure the
+previous attempt hit.
+</p>
