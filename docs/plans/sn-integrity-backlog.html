@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="210">
+<meta name="plan-version" content="211">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -750,7 +750,22 @@
     <div class="r-comment-body"><p>review of r-20261019T021901634768-sib-settle-unchained-holders at base cc5c751c9377264c72d4e7f2777e5f44a9c722d2 / head f2dfdf83a5c3fe067806224527674c3bbc2ffa10 — parsed, 78/120, two blocking findings (the quiet-graph check cannot fail; the gate logs' EXIT= lines are synthesised) and four follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-run-r-20261019T025632205845-review-of-sib-restore-searched-sources-d554595cbce2" data-who="reckon-build" data-when="2026-10-19T03:08:23.743Z">
-    <div class="r-comment-body"><p>independent six-dimension review of run r-20261019T015039275505-sib-restore-searched-sources at base 870fd7d4efac46a1d65d0baabfef9cad8c352a9e / head d554595cbce239db042b7d1bd16a261adf481f81; scores goal_fidelity 17, evidence 14, scope_discipline 20, durability 13, fit 17, reuse 16; four follow-on findings, no blocker; stored as a parsed record under the reviewed run&#x27;s review-records/ directory</p></div>
+    <div class="r-comment-body"><p>independent six-dimension review of run r-20261019T015039275505-sib-restore-searched-sources at base 870fd7d4efac46a1d65d0baabfef9cad8c352a9e / head d554595cbce239db042b7d1bd16a261adf481f81; scores goal_fidelity 17, evidence 14, scope_discipline 20, durability 13, fit 17, reuse 16; four follow-on findings, no blocker; stored as a parsed record under the reviewed run's review-records/ directory</p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-run-r-20261019T015039275505-sib-restore-searched-sources" data-who="reckon-build" data-when="2026-10-19T02:55:09Z">
+    <div class="r-comment-body"><p>worklist_count: 60
+worklist: 30 never-bound names plus the 30 dropped-edge names the lineage step referred to DD search
+judged: 45 names in all (19 in the first pass, 26 re-judged in the corrected pass)
+restored_count: 10
+restored_first_pass: 5 (parallel_ion_charge_state_energy_convection_velocity -&gt; plasma_transport/model/ggd/ion/state/energy/v_parallel; poloidal_effective_ion_state_momentum_diffusivity -&gt; plasma_transport/model/ggd/ion/state/momentum/d_pol; incident_energy_flux_at_wall_due_to_radiation -&gt; wall/description_ggd/ggd/energy_fluxes/radiation/incident; neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission -&gt; wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/emitted; total_launched_power_due_to_ion_cyclotron_heating -&gt; pulse_schedule/ic/power)
+restored_corrected_pass: 5 (curvature_inverse_of_arc_of_circle_center -&gt; pf_passive/loop/element/geometry/arcs_of_circle/curvature_radii; elongation_radial_derivative_of_flux_surface -&gt; gyrokinetics_local/flux_surface/delongation_dr_minor_norm; parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive -&gt; waves/coherent_wave/profiles_1d/current_parallel_density_n_phi; size_of_camera -&gt; camera_x_rays/camera/camera_dimensions; volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions -&gt; distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi)
+corrected_drop_reasons: {unit_mismatch: 333, live_holder: 199, stale: 0, not_in_dd: 0} over 60 names by the corrected filter; the &quot;existing source is stale&quot; reason the old filter recorded for 49 extracted/skipped/failed paths is gone because those sources are kept when no live name holds them
+referred_to_lead: 50 names in all (34 with a surviving candidate below the floor, 16 with no surviving candidate), from this node
+no_surviving_candidate: 16 names left with no candidate after the corrected filter
+excluded_referred_to_lead: 17 names the lineage step referred to the lead (not re-judged here)
+rejudged: 26 names the old filter left with no candidate, re-searched and re-judged; 5 cleared the floor
+judge_model: typesafe/jev-1.13 (seat sn-judge)
+spend_usd: 0.001713642</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
