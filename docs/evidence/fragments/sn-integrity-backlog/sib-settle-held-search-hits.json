@@ -272,14 +272,14 @@
       "detail": "graph is not quiet; refusing the signed write: {'window_seconds': 6.0, 'foreign_transactions_started': 3, 'foreign_open_queries': ['MATCH (n) RETURN count(n)'], 'busy': True}"
     }
   },
-  "foreign_population_moves": {
-    "dropped_edge": [
-      45,
-      34
-    ],
+  "population_moves_from_baseline": {
     "never_bound": [
       23,
       21
+    ],
+    "dropped_edge": [
+      45,
+      34
     ]
   },
   "apply_overlap": {
@@ -540,13 +540,13 @@
       "orphan_awaiting_retirement": 3
     },
     "population_moves": {
-      "dropped_edge": [
-        45,
-        34
-      ],
       "never_bound": [
         23,
         21
+      ],
+      "dropped_edge": [
+        45,
+        34
       ]
     },
     "shortfall": [],
@@ -558,15 +558,23 @@
       "no_receipt_outside_targets": true,
       "all_targets_superseded": true
     },
-    "foreign_population_moves": {
-      "dropped_edge": [
-        45,
-        34
-      ],
+    "population_moves_from_baseline": {
       "never_bound": [
         23,
         21
+      ],
+      "dropped_edge": [
+        45,
+        34
       ]
+    },
+    "own_retirements_by_population": {
+      "dropped_edge": 11,
+      "never_bound": 2
+    },
+    "foreign_moves": {
+      "never_bound": 0,
+      "dropped_edge": 0
     }
   },
   "verification_log": {
@@ -647,13 +655,13 @@
         "orphan_awaiting_retirement": 3
       },
       "population_moves": {
-        "dropped_edge": [
-          45,
-          34
-        ],
         "never_bound": [
           23,
           21
+        ],
+        "dropped_edge": [
+          45,
+          34
         ]
       },
       "shortfall": [],
@@ -665,15 +673,23 @@
         "no_receipt_outside_targets": true,
         "all_targets_superseded": true
       },
-      "foreign_population_moves": {
-        "dropped_edge": [
-          45,
-          34
-        ],
+      "population_moves_from_baseline": {
         "never_bound": [
           23,
           21
+        ],
+        "dropped_edge": [
+          45,
+          34
         ]
+      },
+      "own_retirements_by_population": {
+        "dropped_edge": 11,
+        "never_bound": 2
+      },
+      "foreign_moves": {
+        "never_bound": 0,
+        "dropped_edge": 0
       }
     }
   },

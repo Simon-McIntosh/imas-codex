@@ -1,7 +1,7 @@
 <h2 id='sib-settle-held-search-hits'>Held search hits settled</h2>
 <p id='sib-settle-held-search-hits-summary'>The search and lineage steps referred 60 names; 44 are still sourceless on the live graph and form this node's work list ({'corrected_filter': 44, 'corrected_referred_to_lead': 17, 'corrected_no_surviving_candidate': 13, 'searched_referred_to_dd_search': 22, 'lineage_referred_to_dd_search': 22, 'lineage_referred_to_lead': 0}). Of those, 7 were retired in a holder's favour through the signed supersede and 37 remain referred to the lead. The classifier read-back holds 79 sourceless names now, against 86 before this round's apply; cumulatively the population has fallen from 92 to 79 across the 13 names this node has retired, with nothing entering it. Spend USD 0.003385.</p>
 <p id='sib-settle-held-search-hits-suspect'>0 name(s) carry a suspect holder binding, where a holder's unit differs from the unit its held DD path declares. Every holder in this cohort carries a held DD path and a resolved DD unit (114 of 114), so this count is a result the comparison reached rather than one an empty field made unfalsifiable; the derivation check below also runs the comparison on a planted mismatch. A flagged pair changes nothing about the holder.</p>
-<p id='sib-settle-held-search-hits-foreign'>A later writer moved dropped_edge 45 to 34, never_bound 23 to 21. That movement lands after this node&#x27;s last receipt and touches none of the settled names, and the overlap read below dates it.</p>
+<p id='sib-settle-held-search-hits-foreign'>Measured from the population counts this node recorded before its first round, never_bound 23 to 21, dropped_edge 45 to 34. This node&#x27;s own 13 receipts account for dropped_edge -11, never_bound -2, leaving nothing for another writer in either population.</p>
 <figure id='sib-settle-held-search-hits-fig'><img src='/imas-codex/figures/sn-integrity-backlog/sib-settle-held-search-hits/sib-settle-held-search-hits.svg' alt='Sourceless population before and after this node&apos;s signed supersedes, and the work list split into settled, live and exhausted referrals.'><figcaption>Sourceless names by population before and after this node's 7 signed supersedes (left), and the 44-name work list split into 7 settled, 8 still-live and 29 exhausted referrals (right). Only the dropped-edge and never-bound populations moved; the other three are unchanged.</figcaption></figure>
 <h3 id='sib-settle-held-search-hits-floors'>Floors</h3>
 <p>Coordinator's ruling for every retirement: the chosen option's probability at least <code>0.8</code> and Jev's self-reported confidence at least <code>0.5</code>.</p>
@@ -633,13 +633,13 @@
    &quot;orphan_awaiting_retirement&quot;: 3
   },
   &quot;population_moves&quot;: {
-   &quot;dropped_edge&quot;: [
-    45,
-    34
-   ],
    &quot;never_bound&quot;: [
     23,
     21
+   ],
+   &quot;dropped_edge&quot;: [
+    45,
+    34
    ]
   },
   &quot;shortfall&quot;: [],
@@ -651,15 +651,23 @@
    &quot;no_receipt_outside_targets&quot;: true,
    &quot;all_targets_superseded&quot;: true
   },
-  &quot;foreign_population_moves&quot;: {
-   &quot;dropped_edge&quot;: [
-    45,
-    34
-   ],
+  &quot;population_moves_from_baseline&quot;: {
    &quot;never_bound&quot;: [
     23,
     21
+   ],
+   &quot;dropped_edge&quot;: [
+    45,
+    34
    ]
+  },
+  &quot;own_retirements_by_population&quot;: {
+   &quot;dropped_edge&quot;: 11,
+   &quot;never_bound&quot;: 2
+  },
+  &quot;foreign_moves&quot;: {
+   &quot;never_bound&quot;: 0,
+   &quot;dropped_edge&quot;: 0
   }
  }
 }</pre>

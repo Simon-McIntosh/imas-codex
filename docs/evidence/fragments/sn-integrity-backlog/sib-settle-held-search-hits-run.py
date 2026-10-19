@@ -821,7 +821,21 @@ def readback(
         if not all(checks.values()):
             raise SystemExit(f"read-back mismatch: {checks} :: {out}")
         out["checks"] = checks
-        out["foreign_population_moves"] = moved
+        out["population_moves_from_baseline"] = moved
+        # The movement above is measured from the baseline this node recorded
+        # before its first round, so it carries this node's own retirements too.
+        # Split them out: only the remainder is another writer's.
+        own: dict[str, int] = {}
+        for name in targets:
+            population = recorded.get(name)
+            if population:
+                own[population] = own.get(population, 0) + 1
+        out["own_retirements_by_population"] = own
+        out["foreign_moves"] = {
+            population: counts.get(population, 0)
+            - (before["counts"].get(population, 0) - own.get(population, 0))
+            for population in moved
+        }
     return out
 
 
@@ -1314,7 +1328,8 @@ def compose() -> dict:
         "receipt": apply_receipt,
         "quiet_graph": quiet,
         "quiet_graph_refusal": quiet_refuse,
-        "foreign_population_moves": verify.get("foreign_population_moves") or {},
+        "population_moves_from_baseline": verify.get("population_moves_from_baseline")
+        or {},
         "apply_overlap": overlap,
         "source_held_guard": guard,
         "verification": verify,
@@ -1363,14 +1378,30 @@ def compose() -> dict:
             + "</td></tr>"
         )
 
-    foreign_moves = verify.get("foreign_population_moves") or {}
+    foreign_moves = verify.get("population_moves_from_baseline") or {}
+    own_moves = verify.get("own_retirements_by_population") or {}
+    residual = verify.get("foreign_moves") or {}
     foreign_note = (
-        "A later writer moved "
+        "Measured from the population counts this node recorded before its first "
+        "round, "
         + ", ".join(
             f"{name} {span[0]} to {span[1]}" for name, span in foreign_moves.items()
         )
-        + ". That movement lands after this node's last receipt and touches none of the settled "
-        "names, and the overlap read below dates it."
+        + ". This node's own "
+        + str(sum(own_moves.values()))
+        + " receipts account for "
+        + ", ".join(f"{name} -{count}" for name, count in sorted(own_moves.items()))
+        + (
+            ", and the remainder is another writer's ("
+            + ", ".join(
+                f"{name} {value:+d}"
+                for name, value in sorted(residual.items())
+                if value
+            )
+            + "), which the overlap read below dates."
+            if [v for v in residual.values() if v]
+            else ", leaving nothing for another writer in either population."
+        )
         if foreign_moves
         else "No other population moved."
     )
