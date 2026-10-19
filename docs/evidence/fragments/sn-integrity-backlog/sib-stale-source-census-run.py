@@ -418,6 +418,7 @@ def main() -> None:
         "observed_at": datetime.now(UTC).isoformat(),
         "population": len(cohort),
         "stale_dd_total": len(stale),
+        "recorded_name_count": sum(bool(row.get("recorded_name")) for row in cohort),
         "class_counts": dict(sorted(class_counts.items())),
         "stale_basis_counts": dict(sorted(stale_basis_counts.items())),
         "ineligible_reasons": dict(sorted(ineligible_reasons.items())),
@@ -475,7 +476,7 @@ def main() -> None:
         "<table><thead><tr><th>Class</th><th>Count</th><th>Recommendation</th></tr></thead><tbody>"
         f"<tr><td>Dropped</td><td>{class_counts['dropped']}</td><td>Re-extract and compose; audit why the source was left stale.</td></tr>"
         f"<tr><td>Covered</td><td>{class_counts['covered']}</td><td>Verify the recorded accepted holder and retire the stale duplicate source.</td></tr>"
-        f"<tr><td>Ineligible</td><td>{class_counts['ineligible']}</td><td>Keep out of compose; reconcile status to the selector or qualifier reason.</td></tr>"
+        f"<tr><td>Ineligible</td><td>{class_counts['ineligible']}</td><td>Keep the stale source as a DD retirement record; reconsider only if the current DD reintroduces the path.</td></tr>"
         f"<tr><td>Other</td><td>{class_counts['other']}</td><td>Review the row evidence before changing provenance.</td></tr>"
         "</tbody></table><p>The JSON gives one row per source and counts by IDS and node category. "
         "Covered means the DD path points to an accepted name with a live producer, "
