@@ -1,0 +1,58 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "toroidal_angular_width_of_camera",
+  "arm": "heuristic",
+  "budget_limit_usd": 2.0,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-heuristic-r2",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-heuristic-r2/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "cost_limit_passed_usd": 1.98,
+  "dump_bytes": 2643183686,
+  "family": "angular_width_of_camera",
+  "heuristic_anchor": "toroidal_angular_width_of_camera",
+  "isolation": {
+    "at": "2026-10-19T15:05:20.073179+00:00",
+    "live_nodes": 1771162,
+    "live_probe": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_uri": "bolt://127.0.0.1:28002"
+  },
+  "jev_anchor": "vertical_angular_width_of_camera",
+  "kind": "component",
+  "lint_before": 2,
+  "lint_before_classes": {
+    "convention_violation": 1,
+    "link_missing_reverse": 1
+  },
+  "members": [
+    "angular_width_of_camera",
+    "toroidal_angular_width_of_camera",
+    "vertical_angular_width_of_camera"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/mcintos-1281970-39wh3wyk/instance/logs/neo4j-temp.log",
+  "outcome_status": "running",
+  "planned_calls": 3,
+  "port": 28002,
+  "port_lock": "/dev/shm/ssog-scratch-port-28002.lock",
+  "recorded_anchor_before": "toroidal_angular_width_of_camera",
+  "scores_before": {
+    "angular_width_of_camera": null,
+    "toroidal_angular_width_of_camera": 0.9125,
+    "vertical_angular_width_of_camera": 0.86875
+  },
+  "scratch_removed": null,
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/mcintos-1281970-39wh3wyk",
+  "scratch_uri": "bolt://127.0.0.1:28002",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "started_at": "2026-10-19T15:01:37.259345+00:00"
+}
