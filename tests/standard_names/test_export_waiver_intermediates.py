@@ -26,6 +26,7 @@ from imas_codex.standard_names.export import (  # noqa: E402
     _source_disposition,
     run_export,
 )
+from tests.standard_names.conftest import clean_source_audit_graph
 
 # A declared path from the shipped declaration, restated so the test asserts
 # membership rather than reading the declaration back out of itself.
@@ -89,6 +90,7 @@ def test_a_waived_source_whose_chain_publishes_no_identity_stays_waived() -> Non
     assert (disposition, reason) == ("waived", "")
 
 
+@clean_source_audit_graph
 class _ChainGraphClient:
     """Answer the successor-chain lookup; every other query returns no rows.
 

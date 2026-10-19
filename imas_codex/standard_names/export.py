@@ -627,6 +627,7 @@ def _fetch_export_population(
         docs_review_eligibility_where,
         docs_review_property_coverage,
     )
+    from imas_codex.standard_names.source_invariant import _live_child_cypher
 
     params: dict[str, Any] = docs_review_eligibility_params()
     if batch is None:
@@ -664,11 +665,7 @@ def _fetch_export_population(
          EXISTS {{
              MATCH (:StandardName)-[:HAS_PARENT]->(sn)
          }} AS is_parent,
-         EXISTS {{
-             MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
-             WHERE NOT coalesce(child.name_stage, '') IN
-               ['superseded', 'exhausted', 'contested']
-         }} AS has_live_child,
+         {_live_child_cypher()} AS has_live_child,
          {docs_review_eligibility_where()} AS strict_docs_review_eligibility,
          COLLECT {{
              MATCH (sn)-[:HAS_REVIEW]->(accepting_review:StandardNameReview)
@@ -3020,6 +3017,39 @@ def run_export(
         [str(source["source_path"]) for source in manifest_sources or []],
         waived_paths,
     )
+
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import (
+        classify_sourceless_standard_names,
+    )
+
+    with GraphClient() as gc:
+        source_audit = classify_sourceless_standard_names(gc)
+    source_losses = [
+        row
+        for row in source_audit
+        if row["population"] in {"dropped_edge", "never_bound"}
+    ]
+    if source_losses:
+        report.gate_results.append(
+            GateResult(
+                gate="source_audit",
+                passed=False,
+                issues=[
+                    {
+                        "type": row["population"],
+                        "name": row["id"],
+                        "detail": "live standard name has no producing source",
+                    }
+                    for row in source_losses
+                ],
+            )
+        )
+        report.all_gates_passed = False
+        report.gate_failures = 1
+        staging_path.mkdir(parents=True, exist_ok=True)
+        _write_export_report(staging_path, report)
+        return report
 
     # ── 1. Fetch the upstream population and classify eligibility ──
     logger.info("Fetching accepted export population from graph...")

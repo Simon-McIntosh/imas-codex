@@ -15,6 +15,7 @@ from imas_codex.standard_names.export import (  # noqa: E402
     _graph_node_to_entry_dict,
     run_export,
 )
+from tests.standard_names.conftest import clean_source_audit_graph
 
 _GC_PATH = "imas_codex.graph.client.GraphClient"
 
@@ -52,6 +53,7 @@ def _candidate(name: str, **overrides) -> dict:
     return candidate
 
 
+@clean_source_audit_graph
 class _ReadOnlyGraphClient:
     def __init__(self) -> None:
         self.queries: list[str] = []

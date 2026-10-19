@@ -8,13 +8,20 @@ class MissingStandardNameSource(ValueError):
     """A live name would have no producing source after a write."""
 
 
+def _live_child_cypher() -> str:
+    """Return the evidence-bearing child test shared by writers and export."""
+    return """EXISTS {
+              MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
+              WHERE NOT coalesce(child.name_stage, '') IN
+                ['superseded', 'exhausted', 'contested']
+                AND NOT coalesce(child.status, '') IN
+                  ['deprecated', 'superseded']
+          }"""
+
+
 def _derived_parent_cypher() -> str:
     """Return a two-valued derived-parent test for the graph predicate."""
-    return """coalesce(sn.origin, '') = 'derived' AND EXISTS {
-              (child:StandardName)-[:HAS_PARENT]->(sn)
-              WHERE coalesce(child.name_stage, '') <> 'superseded'
-                AND coalesce(child.status, '') <> 'superseded'
-          }"""
+    return f"coalesce(sn.origin, '') = 'derived' AND {_live_child_cypher()}"
 
 
 def find_sourceless_live_names(
@@ -34,6 +41,7 @@ def find_sourceless_live_names(
         UNWIND $ids AS id
         MATCH (sn:StandardName {{id: id}})
         OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+        WHERE source.status <> 'stale'
         WITH sn, count(DISTINCT source) AS producers
         WHERE (NOT $retired_is_exempt OR (
             coalesce(sn.name_stage, '') <> 'superseded'

@@ -28,6 +28,7 @@ from imas_codex.standard_names.export import (
     run_export,
 )
 from imas_codex.standard_names.publish import run_publish
+from tests.standard_names.conftest import clean_source_audit_graph
 
 _COHORT: list[dict[str, Any]] = [
     {
@@ -76,6 +77,7 @@ _COHORT: list[dict[str, Any]] = [
 ]
 
 
+@clean_source_audit_graph
 class _EmptyGraphClient:
     """Graph double for the post-gate export path."""
 

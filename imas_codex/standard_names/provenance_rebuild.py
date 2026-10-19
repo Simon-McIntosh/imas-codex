@@ -564,6 +564,26 @@ def _reconcile_recovery_consistency(
     }
 
 
+def _active_rebuild_orphans(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the active materialized identities this repair workflow owns."""
+    return [
+        row
+        for row in rows
+        if row.get("name_stage") not in {"superseded", "exhausted"}
+        and row.get("model") != "deterministic:dd_error_modifier"
+        and any(
+            row.get(field) is not None
+            for field in (
+                "name_stage",
+                "docs_stage",
+                "status",
+                "validation_status",
+                "origin",
+            )
+        )
+    ]
+
+
 def rebuild_provenance(
     *,
     gc: GraphClient | None = None,
@@ -611,7 +631,7 @@ def rebuild_provenance(
         # derived StandardNameSource for every admissible derived parent, then
         # relink FROM_DD_PATH. Run before classification so parents drop out of
         # the orphan set with their real composed-from-children provenance.
-        initial_orphans = find_provenance_orphans(gc=gc)
+        initial_orphans = _active_rebuild_orphans(find_provenance_orphans(gc=gc))
         initial_orphan_ids = {row["sn_id"] for row in initial_orphans}
         desync_ids = {d["sn_id"] for d in find_edge_scalar_desyncs(gc=gc)}
         reattached = 0
@@ -640,7 +660,7 @@ def rebuild_provenance(
                 classification=parent_classification,
             )
 
-        orphans = find_provenance_orphans(gc=gc)
+        orphans = _active_rebuild_orphans(find_provenance_orphans(gc=gc))
         orphan_ids = [
             orphan["sn_id"]
             for orphan in orphans
@@ -708,7 +728,9 @@ def rebuild_provenance(
                 bind_recovery_sources(name_id, specs, gc=gc)
 
         if not dry_run:
-            summary["orphans_after"] = len(find_provenance_orphans(gc=gc))
+            summary["orphans_after"] = len(
+                _active_rebuild_orphans(find_provenance_orphans(gc=gc))
+            )
             if retire_unresolved and summary["unresolved_names"]:
                 retired = retire_unrecoverable_provenance_orphans(
                     gc,
@@ -717,7 +739,7 @@ def rebuild_provenance(
                 )
                 summary["retired_unresolved"] = len(retired)
                 summary["retired_unresolved_names"] = retired
-                remaining = find_provenance_orphans(gc=gc)
+                remaining = _active_rebuild_orphans(find_provenance_orphans(gc=gc))
                 summary["orphans_after"] = len(remaining)
                 summary["unresolved"] = len(remaining)
                 summary["unresolved_names"] = [row["sn_id"] for row in remaining]

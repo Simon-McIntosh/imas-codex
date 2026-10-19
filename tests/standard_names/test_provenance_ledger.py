@@ -1,18 +1,7 @@
-"""Ledger-invariant tests: every live StandardName traces to >=1 source.
+"""The source-loss probe consumes the shared graph classifier.
 
-The graph is the provenance ledger. Two read-only invariant queries back the
-gate and the rebuild:
-
-- :func:`find_provenance_orphans` — live names (not superseded/exhausted) with
-  no ``PRODUCED_NAME`` source, excluding deterministic error-siblings (which
-  carry provenance on ``source_paths``, never a ``StandardNameSource``).
-- :func:`find_edge_scalar_desyncs` — sources whose ``produced_sn_id`` scalar
-  names a live name but whose ``PRODUCED_NAME`` edge is missing (reattachable).
-
-The Cypher-shape tests are mock-based (no Neo4j). The ``graph``-marked tests
-run READ-ONLY against the live graph and assert the ledger holds (0 orphans,
-0 desyncs) — they are the acceptance proof for the one-time rebuild and must
-be run, not excluded.
+The scalar/edge desync query remains separate because it measures a source
+whose recorded target lacks an edge. Live graph checks are read-only.
 """
 
 from __future__ import annotations
@@ -32,97 +21,64 @@ def _captured_query(gc: MagicMock) -> str:
 # ---------------------------------------------------------------------------
 
 
-def test_find_provenance_orphans_query_excludes_dead_and_error_siblings():
-    """The orphan query must exclude superseded/exhausted names AND
-    deterministic error-siblings, and select names with no PRODUCED_NAME.
-    """
+def test_find_provenance_orphans_reports_three_source_loss_populations():
+    """The probe reports source loss at every stage and leaves orphans to retirement."""
     from imas_codex.standard_names.ledger import find_provenance_orphans
 
     gc = MagicMock()
-    gc.query.return_value = [
-        {"sn_id": "orphan_a", "name_stage": "accepted", "origin": "catalog_edit"}
+    rows = [
+        {"id": "dropped", "name_stage": "exhausted", "population": "dropped_edge"},
+        {"id": "never", "name_stage": "accepted", "population": "never_bound"},
+        {"id": "unchained", "name_stage": "pending", "population": "unchained_holder"},
+        {"id": "parent", "name_stage": "accepted", "population": "derived_parent"},
+        {
+            "id": "retireable",
+            "name_stage": "exhausted",
+            "population": "orphan_awaiting_retirement",
+        },
     ]
-    orphans = find_provenance_orphans(gc=gc)
+    with patch(
+        "imas_codex.standard_names.graph_ops.classify_sourceless_standard_names",
+        return_value=rows,
+    ) as audit:
+        orphans = find_provenance_orphans(gc=gc)
 
-    assert orphans == [
-        {"sn_id": "orphan_a", "name_stage": "accepted", "origin": "catalog_edit"}
-    ]
-    flat = " ".join(_captured_query(gc).split())
-    # live = not superseded and not exhausted
-    assert "'superseded'" in flat and "'exhausted'" in flat
-    # error-siblings carry no StandardNameSource by design → excluded
-    assert "deterministic:dd_error_modifier" in flat
-    # selects names with NO incoming PRODUCED_NAME source
-    assert "PRODUCED_NAME" in flat
-    assert "NOT" in flat
+    audit.assert_called_once_with(gc)
+    assert {
+        (row["sn_id"], row["name_stage"], row["population"]) for row in orphans
+    } == {
+        ("dropped", "exhausted", "dropped_edge"),
+        ("never", "accepted", "never_bound"),
+        ("unchained", "pending", "unchained_holder"),
+    }
 
 
 @pytest.mark.parametrize(
-    ("row", "expected_ids"),
+    ("population", "stage", "expected_ids"),
     [
-        (
-            {
-                "sn_id": "relationship_scaffold",
-                "name_stage": None,
-                "docs_stage": None,
-                "status": None,
-                "validation_status": None,
-                "origin": None,
-            },
-            [],
-        ),
-        (
-            {
-                "sn_id": "pending_materialized_name",
-                "name_stage": "pending",
-                "docs_stage": None,
-                "status": None,
-                "validation_status": None,
-                "origin": "derived",
-            },
-            ["pending_materialized_name"],
-        ),
-        (
-            {
-                "sn_id": "partial_catalog_name",
-                "name_stage": None,
-                "docs_stage": None,
-                "status": "draft",
-                "validation_status": None,
-                "origin": "catalog_edit",
-            },
-            ["partial_catalog_name"],
-        ),
-        (
-            {
-                "sn_id": "dead_name",
-                "name_stage": "superseded",
-                "docs_stage": "accepted",
-                "status": "draft",
-                "validation_status": "valid",
-                "origin": "pipeline",
-            },
-            [],
-        ),
+        ("dropped_edge", "exhausted", ["candidate"]),
+        ("never_bound", "exhausted", ["candidate"]),
+        ("unchained_holder", "exhausted", ["candidate"]),
+        ("held_in_chain", "reviewed", []),
+        ("orphan_awaiting_retirement", "exhausted", []),
+        ("derived_parent", "accepted", []),
     ],
 )
-def test_find_provenance_orphans_requires_live_lifecycle_materialization(
-    row, expected_ids
+def test_find_provenance_orphans_uses_population_not_stage(
+    population, stage, expected_ids
 ):
     from imas_codex.standard_names.ledger import find_provenance_orphans
 
     gc = MagicMock()
-    gc.query.return_value = [row]
-
-    orphans = find_provenance_orphans(gc=gc)
+    with patch(
+        "imas_codex.standard_names.graph_ops.classify_sourceless_standard_names",
+        return_value=[
+            {"id": "candidate", "name_stage": stage, "population": population}
+        ],
+    ):
+        orphans = find_provenance_orphans(gc=gc)
 
     assert [item["sn_id"] for item in orphans] == expected_ids
-    flat = " ".join(_captured_query(gc).split())
-    assert "sn.name_stage IS NOT NULL" in flat
-    assert "sn.docs_stage IS NOT NULL" in flat
-    assert "sn.status IS NOT NULL" in flat
-    assert "sn.validation_status IS NOT NULL" in flat
-    assert "sn.origin IS NOT NULL" in flat
 
 
 # ---------------------------------------------------------------------------
@@ -184,22 +140,38 @@ def test_reconcile_provenance_reports_edges_reattached():
 
 
 # ---------------------------------------------------------------------------
-# Live ledger invariants (read-only) — the acceptance proof for the rebuild.
-# These run against the live graph and MUST hold: 0 orphans, 0 desyncs.
-# They are read-only (no mutation) and so are safe on the shared graph.
+# Live ledger views are read-only. Source loss remains reportable until repair.
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.graph
-def test_live_ledger_has_no_provenance_orphans():
+def test_live_source_loss_probe_matches_independent_count():
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
     from imas_codex.standard_names.ledger import find_provenance_orphans
 
-    orphans = find_provenance_orphans()
-    assert orphans == [], (
-        f"{len(orphans)} live name(s) have no PRODUCED_NAME source — the ledger "
-        f"is incomplete. Run 'sn rebuild-provenance'. First: "
-        f"{[o['sn_id'] for o in orphans[:20]]}"
-    )
+    with GraphClient() as gc:
+        sourced = gc.query(
+            """MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(name:StandardName)
+            RETURN count(DISTINCT name) AS total"""
+        )[0]["total"]
+        count = gc.query(
+            """MATCH (name:StandardName)
+            WHERE NOT name.status IN ['deprecated', 'superseded']
+              AND NOT EXISTS {
+                (:StandardNameSource)-[:PRODUCED_NAME]->(name)
+              }
+            RETURN count(name) AS total"""
+        )[0]["total"]
+        classified = classify_sourceless_standard_names(gc)
+        reported = find_provenance_orphans(gc=gc)
+    assert sourced > 0
+    assert len(classified) == count
+    assert {row["sn_id"] for row in reported} == {
+        row["id"]
+        for row in classified
+        if row["population"] in {"dropped_edge", "never_bound", "unchained_holder"}
+    }
 
 
 @pytest.mark.graph
