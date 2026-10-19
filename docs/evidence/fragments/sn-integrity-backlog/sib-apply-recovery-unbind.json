@@ -283,7 +283,48 @@
     "schema": "imas-codex.signed-recovery-unbind-receipt.v1",
     "would_change": 16
   },
-  "recorded_at": "2026-10-19T07:59:48.210117+00:00",
+  "quiet_graph": {
+    "checked_at": "2026-10-19T08:03:16.685305+00:00",
+    "foreign_open_queries": [],
+    "foreign_transactions_started": 0,
+    "quiet": true,
+    "window_seconds": 6.0
+  },
+  "receipt": {
+    "authority_file_sha256": "f508bc37bb04b30da8a91b07614c56eff48e93519ae7211e8a6acce6621f44f0",
+    "authority_payload_sha256": "f37dcd819ba29abfe7817b1856bdfe2c94572753c6598061aed94b69ea33c105",
+    "change_ids": [
+      "sn-change:recovery-unbind:199936c179e03ee543eb82367c35e24bd76ff423c34844f1c1b5420d01b8cbf0",
+      "sn-change:recovery-unbind:4973fc776c71c15e9c6f72fa61d15fd056abef7b22a9523c1dbd07a5b3e2eaed",
+      "sn-change:recovery-unbind:4c3365d83f6acee18ef131e93dc42234cdd97c50a76f1b31c97397f3d9ff6c87",
+      "sn-change:recovery-unbind:57f8de743310dc99720083c403121ef2e2e41ab9b02a149af18ab43cd987f224",
+      "sn-change:recovery-unbind:64df6bf1cabb7e4941169a951a46223152dc48e47877d8455c375515decc9fc7",
+      "sn-change:recovery-unbind:751ab609ddc845777198af4b6d683e311c7ed7c2c046cf1260e47f3a5152dde0",
+      "sn-change:recovery-unbind:88ffc20f23205c40543870b374d639bbf46e02c6922370eb6aa6dc05c714e281",
+      "sn-change:recovery-unbind:9446fc1b4c6a702985ed57a97fee698e9f1f7a1d0df0729013b2998d98d299bc",
+      "sn-change:recovery-unbind:a659f656f12155655b5e24c5ca5f9de5a5924511c7ae4f2dc0c558cdc15342f5",
+      "sn-change:recovery-unbind:a8b72fcc680360847969ad5f18e158ca8332b29da87922e1d7a53cddda00fba8",
+      "sn-change:recovery-unbind:ac6b0d7af8ab0cf073661a40ef711384760f107c9eefc854ad19af458a57c764",
+      "sn-change:recovery-unbind:d30ca9a40e2b8356d6ad3b4524e6bac546ff1e970759d87c9af751359907deaf",
+      "sn-change:recovery-unbind:da9eeb41c67e6af336dac739c6e9ebf017c1856f169a2f4343a93edf43df5d25",
+      "sn-change:recovery-unbind:f5a211a3511b5276a8c00f40eb068cfeb29cf5fbce81c971b98dd21cdbc94241",
+      "sn-change:recovery-unbind:f8de88a6a9072201e64383e8956a688461ed999f1ae9a1ce3699356c363bb5c6",
+      "sn-change:recovery-unbind:fec32064330a7823f216547a926e91e47651c14557d1bcc49bba83212c343e14"
+    ],
+    "changed": 16,
+    "counts": {
+      "admitted": 16,
+      "authority_rows": 16,
+      "refused": 0
+    },
+    "manifest_sha256": "abf1e12052f0da09dd81016210baa09b8bcd5dfd814443517ca802b9433690f7",
+    "mutations": 16,
+    "outcome": "applied",
+    "persistent_writes": 32,
+    "receipt_rows": 16,
+    "schema": "imas-codex.signed-recovery-unbind-receipt.v1"
+  },
+  "recorded_at": "2026-10-19T08:03:17.084460+00:00",
   "rows": [
     {
       "action": "unbind",
