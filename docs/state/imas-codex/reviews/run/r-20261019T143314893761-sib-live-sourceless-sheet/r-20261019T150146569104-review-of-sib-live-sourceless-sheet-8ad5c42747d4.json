@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The second disjunct compares len(names) against data['live_non_derived_sourceless_count'], but collect() sets that field to len(rows) at run.py:368 over the very list names is drawn from, so the two sides move together and the clause can never fire; only the duplicate-name disjunct is a real check.",
+      "lines": "run.py:560-564"
+    },
+    {
+      "failure_condition": "graph_writes, llm_calls and spend_usd are literal zeros written into the payload and re-printed at run.py:636, so no assertion or measurement can redden them; a later edit adding a write call would leave the recorded 'graph_writes=0' unchanged.",
+      "lines": "run.py:372-374"
+    },
+    {
+      "failure_condition": "The bind guard fires when a bind target is absent from the candidates, its unit disagrees, it is STRUCTURE, or it has a live holder with no holder_wrong_reason; reinstating a bind to an inverse-length or STRUCTURE path reddens it, so this assertion is independent of the value it guards.",
+      "lines": "run.py:594-605"
+    },
+    {
+      "failure_condition": "The retire guard fires when no candidate hit carries a live holder whose name equals the target; pointing a retire target at a non-holder reddens it, and the target is graph-derived rather than supplied by the test, so it is independent.",
+      "lines": "run.py:600-605"
+    }
+  ],
+  "call_sites": [
+    "imas_codex/standard_names/graph_ops.py:classify_sourceless_standard_names",
+    "imas_codex/tools/graph_search.py:GraphSearchTool.search_dd_paths",
+    "imas_codex/units/__init__.py:units_are_equivalent",
+    "imas_codex/graph/client.py:GraphClient.query"
+  ],
+  "completed_at": "2026-10-19T15:22:25.562Z",
+  "dispatched_at": "2026-10-19T15:02:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-live-sourceless-sheet-run.py",
+      "line": "562",
+      "severity": "follow-on",
+      "text": "follow-on: validate()'s census guard at run.py:560-564 compares len(names) against data['live_non_derived_sourceless_count'], a value collect() computes as len(rows) at run.py:368 from the same rows list the names are taken from. The two sides move together, so that clause holds whatever the code does and survives the very regression ('sheet rows do not match the live sourceless census') it was added to catch; only the duplicate-name disjunct can fire. The count that would make the check meaningful is the live census size the classifier returned, which is available as census_total."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-live-sourceless-sheet-run.py",
+      "line": "636",
+      "severity": "follow-on",
+      "text": "follow-on: the record's zero-cost evidence - graph_writes=0, llm_calls=0, spend_usd=0 - is emitted from hardcoded literals at run.py:372-374 and re-printed at run.py:636, and audit.log repeats the same literals rather than re-measuring them. A claim that cannot fail is not a measurement, so the 'no graph write' half of the done-when rests on the reader inspecting the source for absence of writes rather than on any receipt; a guard that counts the write calls the driver issues would make the claim falsifiable."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read commit by commit at 8ad5c4274 against base 2b7bbc549: one commit, three new files (run.py 641 lines, html 49 lines, json 1 line), 691 insertions, 0 deletions; no edits to any existing module.",
+    "done_when": "The done_when names the HTML one-row-per-name sheet with a summary line and the JSON twin produced by a driver whose log ends EXIT=0; the manifest's tests line names that driver, build.log ends EXIT=0 and audit.log re-measures the artefacts (rows=10 retire=2 bind=2 hold=2..6) with EXIT=0.",
+    "goal": "The node goal is a per-name adjudication sheet for the ten live, non-derived sourceless names; sib-live-sourceless-sheet-run.py:283-376 re-derives the live set through classify_sourceless_standard_names and sib-live-sourceless-sheet.html:1-49 renders one row per name with record, prior answers, fresh DD candidates and a proposed ruling.",
+    "manifest": "Read; status complete, tests line carries the literal driver command, build.log and audit.log named, negative_control_log points at negative-control.log whose last line is EXIT=1, and the landing line states 2 retirements, 2 bindings, 6 holds at USD 0.",
+    "write_paths": "The node declared exactly docs/evidence/fragments/sn-integrity-backlog/{sib-live-sourceless-sheet.html,.json,-run.py}; git show --stat 8ad5c4274 lists those three files and no others, so every landed path is inside the declared scope."
+  },
+  "justifications": {
+    "durability": "sib-live-sourceless-sheet-run.py:558-605 validate() refuses an ununit-matched bind target and the recorded negative control (negative-control.log, last line EXIT=1) shows that refusal firing on a synthetic mismatched binding, so the driver's own guard reddens under the regression it names, but the census clause at run.py:562 is vacuous and the per-name reasoning text is pinned by no assertion, which is why the score is not higher.",
+    "evidence": "build.log ends EXIT=0 with rows=10 dd=4.1.1, and audit.log independently re-measures rows=10 json_bytes=213477 html_bytes=83105 EXIT=0, though the graph_writes/llm_calls/spend_usd figures the record quotes are the hardcoded literals at sib-live-sourceless-sheet-run.py:372-374 and :636 rather than a measurement.",
+    "fit": "The driver matches the sibling-driver idiom already in docs/evidence/fragments/sn-integrity-backlog/ (argparse collect flag, per-node -run.py, inline HTML), and no plan or gate label appears in its symbols or comments.",
+    "goal_fidelity": "sib-live-sourceless-sheet.html:1 summary line reads \"retire 2, bind 2, hold 6\" over 10 <th scope='row'> name cells, matching sib-live-sourceless-sheet.json recommendation_counts, so the sheet does what the goal states.",
+    "reuse": "It delegates to the owners of each capability it needs - classify_sourceless_standard_names (graph_ops.py:22563), GraphSearchTool.search_dd_paths (tools/graph_search.py:403) and units_are_equivalent (imas_codex/units/__init__.py:79); a repo-wide search for holder_unit_mismatch/live_holders found no owner of a holder-with-unit projection, so attach_holders (run.py:198-248) is the first.",
+    "scope_discipline": "git show --stat 8ad5c4274 lists exactly sib-live-sourceless-sheet-run.py, .html and .json, the three declared write paths, with no out-of-scope file."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T150146569104-review-of-sib-live-sourceless-sheet-8ad5c42747d4",
+  "reviewed_base_sha": "2b7bbc54918cb653bfaeb5b5aade0c40cb2f6cee",
+  "reviewed_head_sha": "8ad5c42747d4fa9b0e3fb0b1d07609f18a026838",
+  "reviewed_run_id": "r-20261019T143314893761-sib-live-sourceless-sheet",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T15:24:15.863831+00:00"
+}
