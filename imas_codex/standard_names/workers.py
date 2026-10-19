@@ -8043,10 +8043,9 @@ async def _run_rd_quorum_cycles(
     and 1 by more than *disagreement_threshold* (after normalising 0–20 scores
     to 0–1).
 
-    Persists no graph state directly — the caller is responsible for
-    writing the returned ``records`` list via
-    :func:`~imas_codex.standard_names.graph_ops.write_reviews` and for
-    the SN-side stage transition.
+    Persists no graph state directly — the returned ``records`` list is
+    written by :func:`_persisting_quorum_cycles`, and the SN-side stage
+    transition belongs to the caller.
 
     Each cycle's cost is charged to *lease* via a fresh
     :class:`~imas_codex.standard_names.budget.LLMCostEvent` tagged with
@@ -8059,7 +8058,8 @@ async def _run_rd_quorum_cycles(
         should release the claim). Otherwise a dict with keys:
 
         - ``records`` — list of Review record dicts (one per cycle) ready
-          for :func:`write_reviews`. Share a single ``review_group_id``.
+          for :func:`~imas_codex.standard_names.graph_ops.write_reviews`.
+          Share a single ``review_group_id``.
         - ``winning_score`` — float 0-1, the consensus score that should
           mirror onto the SN axis slot.
         - ``winning_scores`` — dict[str, float] of per-dim consensus.
@@ -8513,6 +8513,22 @@ async def _run_rd_quorum_cycles(
         "disagreement": disagreement,
         "dd_gaps": [gap for cycle in cycles for gap in cycle["dd_gaps"]],
     }
+
+
+async def _persisting_quorum_cycles(**kwargs: Any) -> dict[str, Any] | None:
+    """Run the quorum cycles and persist their records before returning.
+
+    The calibrated cascade records its shadow route after the incumbent's rows,
+    so the incumbent writes its own reviews here instead of handing them back to
+    the caller. A cycle chain that produced no reviews returns ``None`` and
+    writes nothing.
+    """
+    result = await _run_rd_quorum_cycles(**kwargs)
+    if result is not None:
+        from imas_codex.standard_names.graph_ops import write_reviews
+
+        await asyncio.to_thread(write_reviews, result["records"])
+    return result
 
 
 _closed_vocabulary_definitions = vocabulary_source.vocabulary_definitions
@@ -8972,7 +8988,7 @@ async def process_review_name_batch(
                 item,
                 review_models,
                 partial(
-                    _run_rd_quorum_cycles,
+                    _persisting_quorum_cycles,
                     sn_id=sn_id,
                     review_axis="name",
                     response_model=StandardNameQualityReviewNameOnlyBatch,
@@ -9009,11 +9025,6 @@ async def process_review_name_batch(
                             sn_id,
                         )
                 continue
-
-            # ── Persist all cycle Review records ──────────────────────
-            from imas_codex.standard_names.graph_ops import write_reviews
-
-            await _asyncio.to_thread(write_reviews, quorum["records"])
 
             # ── Stage transition with winning score ────────────────────
             new_stage = await _asyncio.to_thread(
@@ -11041,7 +11052,7 @@ async def process_review_docs_batch(
                 request.get("veto_item", item),
                 request["models"],
                 partial(
-                    _run_rd_quorum_cycles,
+                    _persisting_quorum_cycles,
                     sn_id=sn_id,
                     review_axis="docs",
                     response_model=request["response_model"],
@@ -11066,9 +11077,6 @@ async def process_review_docs_batch(
                 await _release_docs_review_claim(item)
                 continue
 
-            from imas_codex.standard_names.graph_ops import write_reviews
-
-            await _asyncio.to_thread(write_reviews, quorum["records"])
             score = quorum["winning_score"]
             comments = quorum["winning_comments"]
             comments_per_dim = quorum["winning_comments_per_dim"]
