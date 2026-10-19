@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="214">
+<meta name="plan-version" content="215">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -774,7 +774,10 @@ spend_usd: 0.001713642</p></div>
     <div class="r-comment-body"><p>reviewed the three commits r-20261019T021901634768-sib-settle-unchained-holders gained since its f2dfdf83 review (f8fe918, e4def60, 793c923); parsed record at reviewed_base_sha f2dfdf83a5c3fe067806224527674c3bbc2ffa10, reviewed_head_sha 793c923264e2be79362a7712ec7f75124003b7d3, scores {goal_fidelity 18, evidence 16, scope_discipline 20, durability 14, fit 17, reuse 18}, 2 follow-on findings (overlap name-update disjunct vacuous for supersede writes; apply path does not call quiet_graph_check), added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-run-r-20261019T021901634768-sib-settle-unchained-holders" data-who="reckon-build" data-when="2026-10-19T03:30:31Z">
-    <div class="r-comment-body"><p>§38 unchained holders settled: 30 live names whose recorded DD source is held by another live name were put to the sn-judge seat through decide_batch; 11 answered same-quantity above the 0.8/0.5 floors and were retired in the holder&#x27;s favour through the signed supersede with a successor link, 19 were referred to the lead; the classifier read-back falls from 30 unchained holders to 19, the retired set being exactly the baseline minus those 11 with nothing entering the population.</p></div>
+    <div class="r-comment-body"><p>§38 unchained holders settled: 30 live names whose recorded DD source is held by another live name were put to the sn-judge seat through decide_batch; 11 answered same-quantity above the 0.8/0.5 floors and were retired in the holder's favour through the signed supersede with a successor link, 19 were referred to the lead; the classifier read-back falls from 30 unchained holders to 19, the retired set being exactly the baseline minus those 11 with nothing entering the population.</p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-s38-settle-unchained" data-who="reckon-build" data-when="2026-10-19T03:50:00Z">
+    <div class="r-comment-body"><p>The unchained holders are settled (merge <code>40a467e5e</code>, review 103, USD 0.002). Eleven duplicates were retired in favour of their holder, and 19 go to the lead. After four steps, §38 has restored 161 sources and retired 11 names. 92 names are still sourceless, 10 of them live and non-derived. 86 have been referred. That is 33% of the 264 names §35 handed over, above the section's 15% bound. Of the search step's 50 referrals, 39 lost a unit-matching DD hit only because another live name holds it. The next node, <code>sib-settle-held-search-hits</code>, settles those against their holders before anything else goes to the lead. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s38-settle-unchained">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
