@@ -1,0 +1,78 @@
+<h2 id='sib-apply-live-rulings'>Ruled provenance changes applied</h2>
+<p id='sib-apply-live-rulings-summary'>Three of the four ruled graph changes are applied and one is reported unapplied. Two live names are retired through the signed supersede with a successor link and one lost DD binding is restored through <code>bind_recovery_sources</code>; the separatrix temperature swap is not expressible by any owner and stays unapplied. The classifier's live non-derived population reads 90 after, against 93 before.</p>
+<h3 id='sib-apply-live-rulings-retired'>Retired through the signed supersede</h3>
+<table><thead><tr><th>predecessor</th><th>successor (quantity holder)</th><th>stage after</th><th>status after</th></tr></thead><tbody><tr><td>neutron_flux_due_to_fusion</td><td>total_neutron_rate</td><td>superseded</td><td>superseded</td></tr><tr><td>toroidal_wave_vector_normalized_of_beam_tracing_beam</td><td>normalized_toroidal_wave_vector_of_beam_tracing_beam</td><td>superseded</td><td>superseded</td></tr></tbody></table>
+<h3 id='sib-apply-live-rulings-restored'>Restored bindings</h3>
+<table><thead><tr><th>name</th><th>source</th><th>sources linked</th><th>status</th></tr></thead><tbody><tr><td>flux_surface_averaged_parallel_electric_field_at_separatrix</td><td>dd:summary/local/separatrix_average/e_field_parallel/value</td><td>1</td><td>attached</td></tr></tbody></table>
+<h3 id='sib-apply-live-rulings-swap'>The separatrix temperature swap, unapplied</h3><p id='sib-apply-live-rulings-swap-why'>The swap's first half is a source migration: it removes the incumbent <code>PRODUCED_NAME</code> edge and adds its replacement, and the signed ordinary-source migration program is the owner that does both in one transaction. That program admits only a target whose <code>name_stage</code> is <code>accepted</code> and whose <code>validation_status</code> is <code>valid</code>; the receiving name here is <code>reviewed</code>, so the row is refused. The graph holds no other owner that removes a binding and adds its replacement atomically: the remaining closed envelope programs either add without removing, or require a stale source, a name realization, or an exhausted name. Applying the two halves as separate writes would leave the name sourceless between them or transiently bind one source to two live names, so the swap is left unapplied.</p>
+<table><thead><tr><th>probe</th><th>rows</th><th>refusal</th></tr></thead><tbody><tr><td>migration</td><td>dd:summary/local/separatrix_average/t_e/value</td><td>signed ordinary source lifecycle does not match migration authority</td></tr><tr><td>attachment</td><td>dd:summary/local/separatrix/t_e/value</td><td>admitted</td></tr><tr><td>combined</td><td>dd:summary/local/separatrix/t_e/value, dd:summary/local/separatrix_average/t_e/value</td><td>signed ordinary source lifecycle does not match migration authority</td></tr></tbody></table>
+<h3 id='sib-apply-live-rulings-authority'>Signed authority</h3>
+<pre id='sib-apply-live-rulings-authority-pre'>{
+ &quot;path&quot;: &quot;sib-apply-live-rulings-authority.json&quot;,
+ &quot;file_sha256&quot;: &quot;3d36b0db50396ba29bd9f00098bf454639ed2f93e838dc1931d8c46ccd936342&quot;,
+ &quot;payload_sha256&quot;: &quot;7cfdedfbd25e4b3342da112f78f07af6b5be90c5a5f04a866aac47b94068b5ca&quot;,
+ &quot;operation_id&quot;: &quot;retire-live-duplicate-in-favour-of-its-quantity-holder&quot;,
+ &quot;receipt_operation&quot;: &quot;link_signed_successor&quot;,
+ &quot;rows&quot;: [
+  &quot;neutron_flux_due_to_fusion=&gt;total_neutron_rate&quot;,
+  &quot;toroidal_wave_vector_normalized_of_beam_tracing_beam=&gt;normalized_toroidal_wave_vector_of_beam_tracing_beam&quot;
+ ]
+}</pre>
+<h3 id='sib-apply-live-rulings-quiet'>Quiet-graph probe</h3>
+<p id='sib-apply-live-rulings-quiet-p'>The repository's own activity probe reports <code>quiet=True</code> (busy=False). Recent live runs: r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot, r-20261009T015811146619-cocos-determination-core, r-20261019T081219211903-tie-state-current-gap, r-20261019T133038142897-vs1-companion-window, r-20261019T143620891438-review-of-istt-follow-ons-fb950092731b, r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2, r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic, r-20261019T150026994505-ssog-anchor-divertor-recomb-jev, r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2, r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4, r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4, r-20261019T164023450593-a-tracked-landing-write-restores-under-a-held-lock, r-20261019T170311227338-the-slow-routes-answer-from-stored-results, r-20261019T171240949016-epw-a-refused-write-names-the-next-step, r-20261019T172337901170-a-joined-path-list-is-refused, r-20261019T174340812576-analytic-moment-rows-on-gpu, r-20261019T174432437525-vertical-pin-free-height, r-20261019T181215792224-s23-population-at-merge, r-20261019T184414605045-review-of-ssog-anchor-passive-loop-heuristic-r2-e5bf582ad5d4, r-20261019T184516856377-srtj-cohort-eligibility, r-20261019T184617749909-review-of-srtj-cohort-incumbent-name-part1of4-0551289890c6, r-20261019T191430428894-quick-liuqe-rail-dd, r-20261019T192229206811-review-of-vertical-pin-free-height-3d435a138e15, r-20261019T192713433661-review-of-a-joined-path-list-is-refused-857c03fc611d, r-20261019T193420298271-review-of-epw-a-refused-write-names-the-next-step-2279eeb0e217, r-20261019T193438042175-plan-review-of-the-crew-surface-is-one-tool-and-a-few-verbs, r-20261019T193541643761-the-time-fence-reads-cleanly.</p>
+<h3 id='sib-apply-live-rulings-readback'>Classifier read-back</h3>
+<img id='sib-apply-live-rulings-fig' src='/imas-codex/figures/sn-integrity-backlog/sib-apply-live-rulings/populations-before-after.svg' alt='Classifier populations before and after the applied writes; only the never-bound population moves, by three names.'/>
+<p class='figure-caption' id='sib-apply-live-rulings-fig-cap'>Classifier sourceless populations before and after the two signed retirements and the one restored DD binding, on the live graph at the read-back. The never-bound population is the only one that moves, from 21 to 18. Three names leave the live set: the two retired ones, which the classifier drops entirely once they are terminal, and the electric-field name, which leaves the never-bound population by gaining a source.</p>
+<table><thead><tr><th>population</th><th>before</th><th>after</th></tr></thead><tbody><tr><td>derived_parent</td><td>2</td><td>2</td></tr><tr><td>dropped_edge</td><td>50</td><td>50</td></tr><tr><td>never_bound</td><td>21</td><td>18</td></tr><tr><td>orphan_awaiting_retirement</td><td>3</td><td>3</td></tr><tr><td>unchained_holder</td><td>19</td><td>19</td></tr></tbody></table>
+<p id='sib-apply-live-rulings-readback-p'>Targets that left the sourceless population: flux_surface_averaged_parallel_electric_field_at_separatrix, neutron_flux_due_to_fusion, toroidal_wave_vector_normalized_of_beam_tracing_beam. Entered: none. Before: neutron_flux_due_to_fusion, toroidal_wave_vector_normalized_of_beam_tracing_beam, flux_surface_averaged_parallel_electric_field_at_separatrix, bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface.</p>
+<h3 id='sib-apply-live-rulings-preview'>Preview and receipt</h3>
+<pre id='sib-apply-live-rulings-preview-pre'>{
+ &quot;preview&quot;: {
+  &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;,
+  &quot;outcome&quot;: &quot;would_apply&quot;,
+  &quot;changed&quot;: 0,
+  &quot;would_change&quot;: 2,
+  &quot;counts&quot;: {
+   &quot;authority_rows&quot;: 2,
+   &quot;admitted&quot;: 2,
+   &quot;refused&quot;: 0
+  },
+  &quot;refusals&quot;: [],
+  &quot;manifest_sha256&quot;: &quot;5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c&quot;,
+  &quot;authority_file_sha256&quot;: &quot;3d36b0db50396ba29bd9f00098bf454639ed2f93e838dc1931d8c46ccd936342&quot;,
+  &quot;authority_payload_sha256&quot;: &quot;7cfdedfbd25e4b3342da112f78f07af6b5be90c5a5f04a866aac47b94068b5ca&quot;
+ },
+ &quot;apply&quot;: {
+  &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;,
+  &quot;outcome&quot;: &quot;applied&quot;,
+  &quot;changed&quot;: 2,
+  &quot;mutations&quot;: 2,
+  &quot;receipt_rows&quot;: 2,
+  &quot;persistent_writes&quot;: 4,
+  &quot;counts&quot;: {
+   &quot;authority_rows&quot;: 2,
+   &quot;admitted&quot;: 2,
+   &quot;refused&quot;: 0
+  },
+  &quot;refusals&quot;: [],
+  &quot;manifest_sha256&quot;: &quot;5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c&quot;,
+  &quot;authority_file_sha256&quot;: &quot;3d36b0db50396ba29bd9f00098bf454639ed2f93e838dc1931d8c46ccd936342&quot;,
+  &quot;authority_payload_sha256&quot;: &quot;7cfdedfbd25e4b3342da112f78f07af6b5be90c5a5f04a866aac47b94068b5ca&quot;,
+  &quot;change_ids&quot;: [
+   &quot;sn-change:signed-manifest:5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c:8ab65ad57a556fdf13ef08d2&quot;,
+   &quot;sn-change:signed-manifest:5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c:edbea8f2859596d96813e189&quot;
+  ]
+ },
+ &quot;receipts&quot;: [
+  {
+   &quot;row_id&quot;: &quot;neutron_flux_due_to_fusion=&gt;total_neutron_rate&quot;,
+   &quot;operation&quot;: &quot;link_signed_successor&quot;,
+   &quot;digest&quot;: &quot;5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c&quot;
+  },
+  {
+   &quot;row_id&quot;: &quot;toroidal_wave_vector_normalized_of_beam_tracing_beam=&gt;normalized_toroidal_wave_vector_of_beam_tracing_beam&quot;,
+   &quot;operation&quot;: &quot;link_signed_successor&quot;,
+   &quot;digest&quot;: &quot;5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c&quot;
+  }
+ ]
+}</pre>

@@ -1,0 +1,777 @@
+{
+  "node": "sib-apply-live-rulings",
+  "run_id": "r-20261019T185427204526-sib-apply-live-rulings",
+  "authority": {
+    "path": "sib-apply-live-rulings-authority.json",
+    "file_sha256": "3d36b0db50396ba29bd9f00098bf454639ed2f93e838dc1931d8c46ccd936342",
+    "payload_sha256": "7cfdedfbd25e4b3342da112f78f07af6b5be90c5a5f04a866aac47b94068b5ca",
+    "operation_id": "retire-live-duplicate-in-favour-of-its-quantity-holder",
+    "receipt_operation": "link_signed_successor",
+    "rows": [
+      "neutron_flux_due_to_fusion=>total_neutron_rate",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam=>normalized_toroidal_wave_vector_of_beam_tracing_beam"
+    ]
+  },
+  "read": {
+    "names": [
+      {
+        "id": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+        "stage": "reviewed",
+        "status": "draft",
+        "validation": "valid",
+        "superseded_by": null,
+        "source_paths": null,
+        "source_ids": [],
+        "dd_paths": []
+      },
+      {
+        "id": "electron_temperature_at_separatrix",
+        "stage": "accepted",
+        "status": "draft",
+        "validation": "valid",
+        "superseded_by": null,
+        "source_paths": [
+          "dd:summary/local/separatrix_average/t_e/value"
+        ],
+        "source_ids": [
+          "dd:summary/local/separatrix_average/t_e/value"
+        ],
+        "dd_paths": [
+          "summary/local/separatrix_average/t_e/value"
+        ]
+      },
+      {
+        "id": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+        "stage": "accepted",
+        "status": "draft",
+        "validation": "valid",
+        "superseded_by": null,
+        "source_paths": null,
+        "source_ids": [],
+        "dd_paths": []
+      },
+      {
+        "id": "neutron_flux_due_to_fusion",
+        "stage": "accepted",
+        "status": "draft",
+        "validation": "valid",
+        "superseded_by": null,
+        "source_paths": null,
+        "source_ids": [],
+        "dd_paths": []
+      },
+      {
+        "id": "normalized_toroidal_wave_vector_of_beam_tracing_beam",
+        "stage": "accepted",
+        "status": "draft",
+        "validation": "valid",
+        "superseded_by": null,
+        "source_paths": [
+          "dd:ece/channel/beam_tracing/beam/wave_vector/k_phi_norm",
+          "dd:waves/coherent_wave/beam_tracing/beam/wave_vector/k_phi_norm"
+        ],
+        "source_ids": [
+          "dd:waves/coherent_wave/beam_tracing/beam/wave_vector/k_phi_norm",
+          "dd:ece/channel/beam_tracing/beam/wave_vector/k_phi_norm"
+        ],
+        "dd_paths": [
+          "waves/coherent_wave/beam_tracing/beam/wave_vector/k_phi_norm",
+          "ece/channel/beam_tracing/beam/wave_vector/k_phi_norm"
+        ]
+      },
+      {
+        "id": "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+        "stage": "accepted",
+        "status": "draft",
+        "validation": "valid",
+        "superseded_by": null,
+        "source_paths": null,
+        "source_ids": [],
+        "dd_paths": []
+      },
+      {
+        "id": "total_neutron_rate",
+        "stage": "accepted",
+        "status": "draft",
+        "validation": "valid",
+        "superseded_by": null,
+        "source_paths": [
+          "dd:summary/fusion/neutron_rates/total/value"
+        ],
+        "source_ids": [
+          "dd:summary/fusion/neutron_rates/total/value"
+        ],
+        "dd_paths": [
+          "summary/fusion/neutron_rates/total/value"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "dd_path": "summary/local/separatrix/t_e/value",
+        "source_id": "dd:summary/local/separatrix/t_e/value",
+        "status": "extracted",
+        "source_type": "dd",
+        "scalar": null,
+        "binding_element_id": null,
+        "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:730471",
+        "holders": []
+      },
+      {
+        "dd_path": "summary/local/separatrix_average/e_field_parallel/value",
+        "source_id": "dd:summary/local/separatrix_average/e_field_parallel/value",
+        "status": "extracted",
+        "source_type": "dd",
+        "scalar": null,
+        "binding_element_id": null,
+        "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:730470",
+        "holders": []
+      },
+      {
+        "dd_path": "summary/local/separatrix_average/t_e/value",
+        "source_id": "dd:summary/local/separatrix_average/t_e/value",
+        "status": "attached",
+        "source_type": "dd",
+        "scalar": "electron_temperature_at_separatrix",
+        "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1667869",
+        "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:731119",
+        "holders": [
+          "electron_temperature_at_separatrix"
+        ]
+      }
+    ],
+    "classifier_counts": {
+      "dropped_edge": 50,
+      "derived_parent": 2,
+      "never_bound": 21,
+      "unchained_holder": 19,
+      "orphan_awaiting_retirement": 3
+    },
+    "sourceless_ids": {
+      "local": false,
+      "average": true
+    },
+    "sourceless_targets": [
+      "neutron_flux_due_to_fusion",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+      "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface"
+    ],
+    "populations": {
+      "dropped_edge": [
+        "absorbed_coolant_power_of_plant_component_port",
+        "beam_cross_sectional_area_of_aperture",
+        "cross_field_wave_vector_magnitude",
+        "deposited_power_at_divertor_target",
+        "electron_heat_diffusivity",
+        "electron_particle_diffusion_coefficient",
+        "electron_particle_diffusivity",
+        "electron_temperature_at_first_wall",
+        "electrostatic_potential_at_outboard_midplane",
+        "energy_diffusion_coefficient_due_to_diffusion",
+        "energy_flux_at_control_surface",
+        "first_local_tangential_width_of_reflectometer_antenna",
+        "flux_surface_normal_neutral_energy_diffusion_coefficient",
+        "front_surface_area_of_langmuir_probe",
+        "heat_power_of_divertor",
+        "ion_temperature_at_outboard_midplane_separatrix",
+        "molecular_gas_count_due_to_pellet_injection",
+        "net_forward_power_of_wave_beam",
+        "net_plasma_current_due_to_ohmic_current_drive",
+        "net_plasma_power_density",
+        "normal_particle_flux_at_wall_due_to_recombination",
+        "parallel_bulk_ion_velocity",
+        "parallel_incident_heat_flux_at_divertor_target",
+        "parallel_thermal_neutral_energy_diffusivity",
+        "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+        "perturbed_linear_mhd_mode_number",
+        "poloidal_effective_ion_diffusion_coefficient",
+        "power_over_core_region_due_to_impurity_radiation",
+        "radial_effective_thermal_energy_velocity_due_to_convection",
+        "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+        "second_local_tangential_width_of_diagnostic_aperture",
+        "tendency_of_runaway_electron_density",
+        "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+        "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+        "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+        "total_absorbed_power_of_plant_system",
+        "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+        "total_electron_power_density",
+        "total_incident_thermal_power",
+        "total_ion_momentum_diffusivity",
+        "total_particle_flux",
+        "total_particle_flux_at_divertor_target_due_to_recycling",
+        "total_suprathermal_electron_power_density_due_to_collisions",
+        "vertical_coordinate_of_passive_loop",
+        "vertical_position_of_grating",
+        "vertical_total_ion_momentum_diffusivity",
+        "voltage_of_diagnostic_antenna",
+        "volume_averaged_electron_number_density_over_scrape_off_layer",
+        "volume_integrated_net_plasma_particle_power_density",
+        "wave_magnetic_field_amplitude"
+      ],
+      "derived_parent": [
+        "beta",
+        "ion_pressure"
+      ],
+      "never_bound": [
+        "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+        "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+        "count_normalized_at_detector_pixel",
+        "electron_energy_flux_limiter_coefficient",
+        "flux_surface_averaged_parallel_electric_field_at_separatrix",
+        "fraction_of_neutron_detector_converter",
+        "ion_charge_state_energy_flux_limiter_coefficient",
+        "ion_power",
+        "ion_state_energy_flux_limiter_coefficient",
+        "magnetic_shear_at_pedestal_top",
+        "momentum_due_to_hot_tail",
+        "neutron_flux_due_to_fusion",
+        "normalized_poloidal_magnetic_flux_at_pedestal_top",
+        "normalized_toroidal_thermal_plasma_beta",
+        "perturbed_vector_potential",
+        "radial_coordinate_of_vacuum_vessel",
+        "radial_surface_normal_of_control_surface",
+        "root_mean_square_spectral_width_of_spectrometer_channel",
+        "tangential_curvature_inverse_of_optical_element",
+        "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+        "volume_averaged_linear_electron_decay_time"
+      ],
+      "unchained_holder": [
+        "deposited_energy_accumulated_of_plasma_facing_component",
+        "electron_temperature_at_midplane",
+        "electrostatic_potential_at_wall",
+        "energy_flux_at_wall_due_to_eddy_current",
+        "fast_electron_source_rate",
+        "fast_electron_source_rate_due_to_compton_scattering",
+        "fast_electron_source_rate_due_to_hot_tail",
+        "length_of_passive_structure",
+        "maximum_power_at_inner_divertor_target",
+        "maximum_power_at_outer_divertor_target",
+        "neutral_beam_atomic_number",
+        "parallel_normalized_perturbed_magnetic_field",
+        "radiative_temperature",
+        "surface_temperature_at_sensor_attachment_point",
+        "thermal_energy_of_plant_component_port",
+        "thickness_of_passive_loop",
+        "trapped_fast_particle_power_density_due_to_collisions",
+        "vertical_coordinate_of_active_limiter_point",
+        "width_of_aperture"
+      ],
+      "orphan_awaiting_retirement": [
+        "gap_of_antenna_strap",
+        "hard_xray_rate",
+        "total_particle_count_accumulated_due_to_gas_injection"
+      ]
+    }
+  },
+  "preview": {
+    "schema": "imas-codex.signed-repair-receipt.v1",
+    "outcome": "would_apply",
+    "changed": 0,
+    "would_change": 2,
+    "counts": {
+      "authority_rows": 2,
+      "admitted": 2,
+      "refused": 0
+    },
+    "refusals": [],
+    "manifest_sha256": "5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c",
+    "authority_file_sha256": "3d36b0db50396ba29bd9f00098bf454639ed2f93e838dc1931d8c46ccd936342",
+    "authority_payload_sha256": "7cfdedfbd25e4b3342da112f78f07af6b5be90c5a5f04a866aac47b94068b5ca"
+  },
+  "quiet": {
+    "quiet": true,
+    "busy": false,
+    "activity": {
+      "window_seconds": 6.0,
+      "transactions_started": 0
+    },
+    "recent_live_runs": [
+      {
+        "run": "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+        "age_seconds": 58
+      },
+      {
+        "run": "r-20261009T015811146619-cocos-determination-core",
+        "age_seconds": 23
+      },
+      {
+        "run": "r-20261019T081219211903-tie-state-current-gap",
+        "age_seconds": 290
+      },
+      {
+        "run": "r-20261019T133038142897-vs1-companion-window",
+        "age_seconds": 779
+      },
+      {
+        "run": "r-20261019T143620891438-review-of-istt-follow-ons-fb950092731b",
+        "age_seconds": 196
+      },
+      {
+        "run": "r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2",
+        "age_seconds": 53
+      },
+      {
+        "run": "r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic",
+        "age_seconds": 53
+      },
+      {
+        "run": "r-20261019T150026994505-ssog-anchor-divertor-recomb-jev",
+        "age_seconds": 53
+      },
+      {
+        "run": "r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2",
+        "age_seconds": 52
+      },
+      {
+        "run": "r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4",
+        "age_seconds": 52
+      },
+      {
+        "run": "r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4",
+        "age_seconds": 52
+      },
+      {
+        "run": "r-20261019T164023450593-a-tracked-landing-write-restores-under-a-held-lock",
+        "age_seconds": 43
+      },
+      {
+        "run": "r-20261019T170311227338-the-slow-routes-answer-from-stored-results",
+        "age_seconds": 1775
+      },
+      {
+        "run": "r-20261019T171240949016-epw-a-refused-write-names-the-next-step",
+        "age_seconds": 91
+      },
+      {
+        "run": "r-20261019T172337901170-a-joined-path-list-is-refused",
+        "age_seconds": 374
+      },
+      {
+        "run": "r-20261019T174340812576-analytic-moment-rows-on-gpu",
+        "age_seconds": 222
+      },
+      {
+        "run": "r-20261019T174432437525-vertical-pin-free-height",
+        "age_seconds": 648
+      },
+      {
+        "run": "r-20261019T181215792224-s23-population-at-merge",
+        "age_seconds": 101
+      },
+      {
+        "run": "r-20261019T184414605045-review-of-ssog-anchor-passive-loop-heuristic-r2-e5bf582ad5d4",
+        "age_seconds": 728
+      },
+      {
+        "run": "r-20261019T184516856377-srtj-cohort-eligibility",
+        "age_seconds": 52
+      },
+      {
+        "run": "r-20261019T184617749909-review-of-srtj-cohort-incumbent-name-part1of4-0551289890c6",
+        "age_seconds": 720
+      },
+      {
+        "run": "r-20261019T191430428894-quick-liuqe-rail-dd",
+        "age_seconds": 1232
+      },
+      {
+        "run": "r-20261019T192229206811-review-of-vertical-pin-free-height-3d435a138e15",
+        "age_seconds": 627
+      },
+      {
+        "run": "r-20261019T192713433661-review-of-a-joined-path-list-is-refused-857c03fc611d",
+        "age_seconds": 352
+      },
+      {
+        "run": "r-20261019T193420298271-review-of-epw-a-refused-write-names-the-next-step-2279eeb0e217",
+        "age_seconds": 84
+      },
+      {
+        "run": "r-20261019T193438042175-plan-review-of-the-crew-surface-is-one-tool-and-a-few-verbs",
+        "age_seconds": 62
+      },
+      {
+        "run": "r-20261019T193541643761-the-time-fence-reads-cleanly",
+        "age_seconds": 19
+      }
+    ],
+    "squeue": [
+      "1290402 convergence_test_cuda.sbatch PENDING 0:00",
+      "1280470 deepseek-v4-1-flash RUNNING 17-00:32:22",
+      "1281014 ambix-router RUNNING 14-05:03:57",
+      "1290367 nova-lane RUNNING 1:42:11",
+      "1290401 four_rows_cuda.sbatch RUNNING 42:22",
+      "1281970 reckon-fleet RUNNING 11-19:34:07",
+      "1290369 ctree-suite RUNNING 1:40:54",
+      "1290395 tie-suite-arms RUNNING 51:50",
+      "1290413 quick-liuqe-dd RUNNING 7:33",
+      "1288978 codex-neo4j RUNNING 1-07:46:32",
+      "1287979 codex-embed RUNNING 2-09:21:49"
+    ]
+  },
+  "apply": {
+    "schema": "imas-codex.signed-repair-receipt.v1",
+    "outcome": "applied",
+    "changed": 2,
+    "mutations": 2,
+    "receipt_rows": 2,
+    "persistent_writes": 4,
+    "counts": {
+      "authority_rows": 2,
+      "admitted": 2,
+      "refused": 0
+    },
+    "refusals": [],
+    "manifest_sha256": "5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c",
+    "authority_file_sha256": "3d36b0db50396ba29bd9f00098bf454639ed2f93e838dc1931d8c46ccd936342",
+    "authority_payload_sha256": "7cfdedfbd25e4b3342da112f78f07af6b5be90c5a5f04a866aac47b94068b5ca",
+    "change_ids": [
+      "sn-change:signed-manifest:5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c:8ab65ad57a556fdf13ef08d2",
+      "sn-change:signed-manifest:5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c:edbea8f2859596d96813e189"
+    ]
+  },
+  "bindings": {
+    "bindings": [
+      {
+        "name": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+        "source_id": "dd:summary/local/separatrix_average/e_field_parallel/value",
+        "bound": 1,
+        "held": [
+          {
+            "status": "attached",
+            "scalar": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+            "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1406095",
+            "dd_path": "summary/local/separatrix_average/e_field_parallel/value"
+          }
+        ]
+      }
+    ]
+  },
+  "swap": {
+    "applied": false,
+    "incumbent": {
+      "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1667869",
+      "status": "attached",
+      "scalar": "electron_temperature_at_separatrix",
+      "name_stage": "accepted",
+      "validation": "valid"
+    },
+    "receiving_name": {
+      "name_stage": "reviewed",
+      "validation": "valid",
+      "status": "draft"
+    },
+    "probes": [
+      {
+        "tag": "migration",
+        "rows": [
+          "dd:summary/local/separatrix_average/t_e/value"
+        ],
+        "refusals": [
+          {
+            "row_id": "dd:summary/local/separatrix_average/t_e/value",
+            "reason": "signed ordinary source lifecycle does not match migration authority"
+          }
+        ],
+        "manifest_sha256": "530347f0015e7359255a5b7c219bed2dd8e962d341ebd1aeee34783074c0227f"
+      },
+      {
+        "tag": "attachment",
+        "rows": [
+          "dd:summary/local/separatrix/t_e/value"
+        ],
+        "refusals": [],
+        "manifest_sha256": "96568412ece599928cd34e4af621a640168c9dc8a6911c17c0ddd52510dcf3ce"
+      },
+      {
+        "tag": "combined",
+        "rows": [
+          "dd:summary/local/separatrix/t_e/value",
+          "dd:summary/local/separatrix_average/t_e/value"
+        ],
+        "refusals": [
+          {
+            "row_id": "dd:summary/local/separatrix_average/t_e/value",
+            "reason": "signed ordinary source lifecycle does not match migration authority"
+          }
+        ],
+        "manifest_sha256": "097295f833d9fa9c8beabf41321c9c0d7424a3604f6b12b62f6a4d7b0b5cd71c"
+      }
+    ],
+    "receiving_name_stage": "reviewed",
+    "refused_program": "signed ordinary-source migration",
+    "refusal_reason": "signed ordinary source lifecycle does not match migration authority"
+  },
+  "readback_before": {
+    "counts": {
+      "dropped_edge": 50,
+      "derived_parent": 2,
+      "never_bound": 21,
+      "unchained_holder": 19,
+      "orphan_awaiting_retirement": 3
+    },
+    "sourceless_targets": [
+      "neutron_flux_due_to_fusion",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+      "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface"
+    ]
+  },
+  "readback_after": {
+    "counts": {
+      "dropped_edge": 50,
+      "derived_parent": 2,
+      "never_bound": 18,
+      "unchained_holder": 19,
+      "orphan_awaiting_retirement": 3
+    },
+    "live_non_derived": 90,
+    "states": [
+      {
+        "id": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+        "stage": "reviewed",
+        "status": "draft",
+        "successor_ids": [],
+        "source_ids": [],
+        "dd_paths": []
+      },
+      {
+        "id": "electron_temperature_at_separatrix",
+        "stage": "accepted",
+        "status": "draft",
+        "successor_ids": [],
+        "source_ids": [
+          "dd:summary/local/separatrix_average/t_e/value"
+        ],
+        "dd_paths": [
+          "summary/local/separatrix_average/t_e/value"
+        ]
+      },
+      {
+        "id": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+        "stage": "accepted",
+        "status": "draft",
+        "successor_ids": [],
+        "source_ids": [
+          "dd:summary/local/separatrix_average/e_field_parallel/value"
+        ],
+        "dd_paths": [
+          "summary/local/separatrix_average/e_field_parallel/value"
+        ]
+      },
+      {
+        "id": "neutron_flux_due_to_fusion",
+        "stage": "superseded",
+        "status": "superseded",
+        "successor_ids": [
+          "total_neutron_rate"
+        ],
+        "source_ids": [],
+        "dd_paths": []
+      },
+      {
+        "id": "normalized_toroidal_wave_vector_of_beam_tracing_beam",
+        "stage": "accepted",
+        "status": "draft",
+        "successor_ids": [],
+        "source_ids": [
+          "dd:waves/coherent_wave/beam_tracing/beam/wave_vector/k_phi_norm",
+          "dd:ece/channel/beam_tracing/beam/wave_vector/k_phi_norm"
+        ],
+        "dd_paths": [
+          "waves/coherent_wave/beam_tracing/beam/wave_vector/k_phi_norm",
+          "ece/channel/beam_tracing/beam/wave_vector/k_phi_norm"
+        ]
+      },
+      {
+        "id": "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+        "stage": "superseded",
+        "status": "superseded",
+        "successor_ids": [
+          "normalized_toroidal_wave_vector_of_beam_tracing_beam"
+        ],
+        "source_ids": [],
+        "dd_paths": []
+      },
+      {
+        "id": "total_neutron_rate",
+        "stage": "accepted",
+        "status": "draft",
+        "successor_ids": [],
+        "source_ids": [
+          "dd:summary/fusion/neutron_rates/total/value"
+        ],
+        "dd_paths": [
+          "summary/fusion/neutron_rates/total/value"
+        ]
+      }
+    ],
+    "receipt_rows": [
+      "neutron_flux_due_to_fusion=>total_neutron_rate",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam=>normalized_toroidal_wave_vector_of_beam_tracing_beam"
+    ],
+    "receipts": [
+      {
+        "row_id": "neutron_flux_due_to_fusion=>total_neutron_rate",
+        "operation": "link_signed_successor",
+        "digest": "5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c"
+      },
+      {
+        "row_id": "toroidal_wave_vector_normalized_of_beam_tracing_beam=>normalized_toroidal_wave_vector_of_beam_tracing_beam",
+        "operation": "link_signed_successor",
+        "digest": "5d4a65880499efe07bca92a8298802de19e5bf7d82dc2b72ff4bd449ee7fba0c"
+      }
+    ],
+    "retired": [
+      "neutron_flux_due_to_fusion",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam"
+    ],
+    "bound": [
+      "flux_surface_averaged_parallel_electric_field_at_separatrix"
+    ],
+    "still_sourceless": [
+      "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface"
+    ],
+    "populations": {
+      "dropped_edge": [
+        "absorbed_coolant_power_of_plant_component_port",
+        "beam_cross_sectional_area_of_aperture",
+        "cross_field_wave_vector_magnitude",
+        "deposited_power_at_divertor_target",
+        "electron_heat_diffusivity",
+        "electron_particle_diffusion_coefficient",
+        "electron_particle_diffusivity",
+        "electron_temperature_at_first_wall",
+        "electrostatic_potential_at_outboard_midplane",
+        "energy_diffusion_coefficient_due_to_diffusion",
+        "energy_flux_at_control_surface",
+        "first_local_tangential_width_of_reflectometer_antenna",
+        "flux_surface_normal_neutral_energy_diffusion_coefficient",
+        "front_surface_area_of_langmuir_probe",
+        "heat_power_of_divertor",
+        "ion_temperature_at_outboard_midplane_separatrix",
+        "molecular_gas_count_due_to_pellet_injection",
+        "net_forward_power_of_wave_beam",
+        "net_plasma_current_due_to_ohmic_current_drive",
+        "net_plasma_power_density",
+        "normal_particle_flux_at_wall_due_to_recombination",
+        "parallel_bulk_ion_velocity",
+        "parallel_incident_heat_flux_at_divertor_target",
+        "parallel_thermal_neutral_energy_diffusivity",
+        "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+        "perturbed_linear_mhd_mode_number",
+        "poloidal_effective_ion_diffusion_coefficient",
+        "power_over_core_region_due_to_impurity_radiation",
+        "radial_effective_thermal_energy_velocity_due_to_convection",
+        "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+        "second_local_tangential_width_of_diagnostic_aperture",
+        "tendency_of_runaway_electron_density",
+        "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+        "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+        "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+        "total_absorbed_power_of_plant_system",
+        "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+        "total_electron_power_density",
+        "total_incident_thermal_power",
+        "total_ion_momentum_diffusivity",
+        "total_particle_flux",
+        "total_particle_flux_at_divertor_target_due_to_recycling",
+        "total_suprathermal_electron_power_density_due_to_collisions",
+        "vertical_coordinate_of_passive_loop",
+        "vertical_position_of_grating",
+        "vertical_total_ion_momentum_diffusivity",
+        "voltage_of_diagnostic_antenna",
+        "volume_averaged_electron_number_density_over_scrape_off_layer",
+        "volume_integrated_net_plasma_particle_power_density",
+        "wave_magnetic_field_amplitude"
+      ],
+      "derived_parent": [
+        "beta",
+        "ion_pressure"
+      ],
+      "never_bound": [
+        "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+        "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+        "count_normalized_at_detector_pixel",
+        "electron_energy_flux_limiter_coefficient",
+        "fraction_of_neutron_detector_converter",
+        "ion_charge_state_energy_flux_limiter_coefficient",
+        "ion_power",
+        "ion_state_energy_flux_limiter_coefficient",
+        "magnetic_shear_at_pedestal_top",
+        "momentum_due_to_hot_tail",
+        "normalized_poloidal_magnetic_flux_at_pedestal_top",
+        "normalized_toroidal_thermal_plasma_beta",
+        "perturbed_vector_potential",
+        "radial_coordinate_of_vacuum_vessel",
+        "radial_surface_normal_of_control_surface",
+        "root_mean_square_spectral_width_of_spectrometer_channel",
+        "tangential_curvature_inverse_of_optical_element",
+        "volume_averaged_linear_electron_decay_time"
+      ],
+      "unchained_holder": [
+        "deposited_energy_accumulated_of_plasma_facing_component",
+        "electron_temperature_at_midplane",
+        "electrostatic_potential_at_wall",
+        "energy_flux_at_wall_due_to_eddy_current",
+        "fast_electron_source_rate",
+        "fast_electron_source_rate_due_to_compton_scattering",
+        "fast_electron_source_rate_due_to_hot_tail",
+        "length_of_passive_structure",
+        "maximum_power_at_inner_divertor_target",
+        "maximum_power_at_outer_divertor_target",
+        "neutral_beam_atomic_number",
+        "parallel_normalized_perturbed_magnetic_field",
+        "radiative_temperature",
+        "surface_temperature_at_sensor_attachment_point",
+        "thermal_energy_of_plant_component_port",
+        "thickness_of_passive_loop",
+        "trapped_fast_particle_power_density_due_to_collisions",
+        "vertical_coordinate_of_active_limiter_point",
+        "width_of_aperture"
+      ],
+      "orphan_awaiting_retirement": [
+        "gap_of_antenna_strap",
+        "hard_xray_rate",
+        "total_particle_count_accumulated_due_to_gas_injection"
+      ]
+    },
+    "before_counts": {
+      "dropped_edge": 50,
+      "derived_parent": 2,
+      "never_bound": 21,
+      "unchained_holder": 19,
+      "orphan_awaiting_retirement": 3
+    },
+    "before_sourceless_targets": [
+      "neutron_flux_due_to_fusion",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+      "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface"
+    ],
+    "left_the_population": [
+      "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "neutron_flux_due_to_fusion",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam"
+    ],
+    "entered_the_population": [],
+    "targets_still_sourceless": [
+      "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface"
+    ],
+    "moved_populations": {
+      "never_bound": [
+        21,
+        18
+      ]
+    },
+    "checks": {
+      "every_retirement_has_receipt": true,
+      "no_receipt_outside_retirements": true,
+      "retirements_are_superseded": true,
+      "restored_binding_is_held": true,
+      "no_name_entered_the_population": true
+    }
+  }
+}
