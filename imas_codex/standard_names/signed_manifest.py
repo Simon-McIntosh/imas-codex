@@ -119,6 +119,16 @@ _RECOVERY_UNBIND_RECEIPT_SCHEMA = "imas-codex.signed-recovery-unbind-receipt.v1"
 _RECOVERY_UNBIND_MUTATION = "unbind_recorded_recovery_binding"
 _RECOVERY_UNBIND_ORIGIN = "recovery_binding_unbind"
 
+_SOURCE_EXCHANGE_ADAPTER = "dd-source-exchange"
+_SOURCE_EXCHANGE_OPERATION = "exchange_dd_producing_source"
+_SOURCE_EXCHANGE_RECEIPT_SCHEMA = "imas-codex.signed-source-exchange-receipt.v1"
+_SOURCE_EXCHANGE_GUARDS = (
+    "live-name",
+    "sole-given-source-owner",
+    "current-unheld-dd-source",
+    "producing-source-postcondition",
+)
+
 _ERROR_SIBLING_ADAPTER = "error-sibling-reconcile"
 _ERROR_SIBLING_MODEL = "deterministic:dd_error_modifier"
 _ERROR_SIBLING_REASON = "orphaned error sibling (parent name deleted)"
@@ -305,6 +315,10 @@ class StaleSourceDetachConflict(SignedManifestConflict):
 
 class RecoveryUnbindConflict(SignedManifestConflict):
     """A signed recovery-binding closure no longer matches live graph authority."""
+
+
+class SourceExchangeConflict(SignedManifestConflict):
+    """A signed DD source exchange no longer matches live graph authority."""
 
 
 class _Query(Protocol):
@@ -6615,9 +6629,12 @@ def _recovery_unbind_preview(
 def _recovery_unbind_event_id(
     authority_rows_sha256: str, name_id: str, source_id: str
 ) -> str:
-    return "sn-change:recovery-unbind:" + hashlib.sha256(
-        f"{authority_rows_sha256}\0{name_id}\0{source_id}".encode()
-    ).hexdigest()
+    return (
+        "sn-change:recovery-unbind:"
+        + hashlib.sha256(
+            f"{authority_rows_sha256}\0{name_id}\0{source_id}".encode()
+        ).hexdigest()
+    )
 
 
 def _recovery_unbind_replay(
@@ -6694,7 +6711,9 @@ def _apply_recovery_unbind(
     if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
         raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
 
-    file_sha256, rows_sha256, rows = _load_recovery_unbind_rows(authority_path, name_ids)
+    file_sha256, rows_sha256, rows = _load_recovery_unbind_rows(
+        authority_path, name_ids
+    )
     own_client = gc is None
     client: Any = GraphClient() if own_client else gc
     try:
@@ -6730,7 +6749,9 @@ def _apply_recovery_unbind(
                     transaction.rollback()
                     return {
                         "schema": _RECOVERY_UNBIND_RECEIPT_SCHEMA,
-                        "outcome": "would_apply" if admitted and not refusals else "refused",
+                        "outcome": "would_apply"
+                        if admitted and not refusals
+                        else "refused",
                         "changed": 0,
                         "would_change": len(admitted) if not refusals else 0,
                         "counts": counts,
@@ -6894,6 +6915,467 @@ def _verify_recovery_unbind_postcondition(
 
     name_ids = [str(action["row"]["name_id"]) for action in admitted]
     require_producing_sources(query, name_ids, exhausted_exempt_ids=name_ids)
+
+
+def _load_source_exchange_rows(
+    authority_path: str | Path,
+    *,
+    authority_file_sha256: str,
+    authority_payload_sha256: str,
+) -> tuple[list[dict[str, str | None]], str]:
+    """Read builder-owned canonical authority bytes for an exact DD exchange."""
+    from imas_codex.standard_names.repair_authority import REPAIR_AUTHORITY_SCHEMA
+
+    _require_sha256(authority_file_sha256, "authority_file_sha256")
+    _require_sha256(authority_payload_sha256, "authority_payload_sha256")
+    raw = Path(authority_path).expanduser().read_bytes()
+    if hashlib.sha256(raw).hexdigest() != authority_file_sha256:
+        raise SignedManifestAuthorityError(
+            "source-exchange authority file SHA-256 mismatch"
+        )
+    try:
+        authority = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SignedManifestAuthorityError(
+            "source-exchange authority is not JSON"
+        ) from exc
+    if (
+        not isinstance(authority, dict)
+        or authority.get("schema") != REPAIR_AUTHORITY_SCHEMA
+    ):
+        raise SignedManifestAuthorityError(
+            "source exchange requires canonical repair authority"
+        )
+    digest = signed_payload_sha256(authority)
+    if digest != authority_payload_sha256 or authority.get("signature") != {
+        "canonicalization": SIGNED_AUTHORITY_CANONICALIZATION,
+        "sha256": digest,
+    }:
+        raise SignedManifestAuthorityError(
+            "source-exchange authority signature mismatch"
+        )
+    if authority.get("operation_id") != _SOURCE_EXCHANGE_OPERATION:
+        raise SignedManifestAuthorityError(
+            "source-exchange authority operation mismatch"
+        )
+    selection = authority.get("selection")
+    if not isinstance(selection, dict) or selection.get("predicate") != "artifact-rows":
+        raise SignedManifestAuthorityError(
+            "source exchange requires exact artifact rows"
+        )
+    raw_rows = authority.get("rows")
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise SignedManifestAuthorityError("source exchange requires signed rows")
+    rows: list[dict[str, str | None]] = []
+    names: set[str] = set()
+    sources: set[str] = set()
+    for item in raw_rows:
+        if not isinstance(item, dict) or item.get("selection") != selection:
+            raise SignedManifestAuthorityError("source-exchange row selection mismatch")
+        name_id = item.get("name_id")
+        old_id = item.get("given_source_id")
+        new_id = item.get("taken_source_id")
+        receiver_id = item.get("receiving_name_id")
+        if (
+            not isinstance(name_id, str)
+            or not name_id
+            or item.get("id") != name_id
+            or not isinstance(old_id, str)
+            or not old_id.startswith("dd:")
+            or not isinstance(new_id, str)
+            or not new_id.startswith("dd:")
+            or old_id == new_id
+            or receiver_id is not None
+            and (
+                not isinstance(receiver_id, str)
+                or not receiver_id
+                or receiver_id == name_id
+            )
+            or name_id in names
+            or old_id in sources
+            or new_id in sources
+        ):
+            raise SignedManifestAuthorityError(
+                "invalid or overlapping source-exchange row"
+            )
+        names.add(name_id)
+        sources.update((old_id, new_id))
+        rows.append(
+            {
+                "name_id": name_id,
+                "given_source_id": old_id,
+                "taken_source_id": new_id,
+                "receiving_name_id": receiver_id,
+            }
+        )
+    if authority.get("repair_rows") != [row["name_id"] for row in rows]:
+        raise SignedManifestAuthorityError("source-exchange row projection mismatch")
+    if any(row["receiving_name_id"] in names for row in rows):
+        raise SignedManifestAuthorityError(
+            "source-exchange receiving name overlaps a sender"
+        )
+    return rows, digest
+
+
+def _source_exchange_closure(
+    query: _Query, rows: Sequence[dict[str, str | None]]
+) -> list[dict[str, Any]]:
+    return query.query(
+        """
+        // SOURCE_EXCHANGE_CLOSURE
+        UNWIND $rows AS expected
+        OPTIONAL MATCH (name:StandardName {id: expected.name_id})
+        OPTIONAL MATCH (given:StandardNameSource {id: expected.given_source_id})
+        OPTIONAL MATCH (taken:StandardNameSource {id: expected.taken_source_id})
+        OPTIONAL MATCH (receiver:StandardName {id: expected.receiving_name_id})
+        OPTIONAL MATCH (given_dd:IMASNode {id: substring(expected.given_source_id, 3)})
+        OPTIONAL MATCH (taken_dd:IMASNode {id: substring(expected.taken_source_id, 3)})
+        RETURN expected.name_id AS name_id,
+               elementId(name) AS name_element_id,
+               name.name_stage AS name_stage,
+               expected.given_source_id AS given_source_id,
+               elementId(given) AS given_element_id,
+               properties(given) AS given_properties,
+               [(given)-[binding:PRODUCED_NAME]->(holder:StandardName) |
+                   {name_id: holder.id, binding_id: elementId(binding)}] AS given_holders,
+               expected.taken_source_id AS taken_source_id,
+               elementId(taken) AS taken_element_id,
+               properties(taken) AS taken_properties,
+               [(taken)-[:PRODUCED_NAME]->(holder:StandardName) |
+                   {name_id: holder.id, stage: holder.name_stage}] AS taken_holders,
+               elementId(taken_dd) AS taken_dd_element_id,
+               taken_dd.lifecycle_status AS taken_dd_lifecycle_status,
+               elementId(given_dd) AS given_dd_element_id,
+               given_dd.lifecycle_status AS given_dd_lifecycle_status,
+               expected.receiving_name_id AS receiving_name_id,
+               elementId(receiver) AS receiving_element_id,
+               receiver.name_stage AS receiving_stage
+        ORDER BY name_id
+        """,
+        rows=list(rows),
+    )
+
+
+def _source_exchange_refusal(record: dict[str, Any]) -> str | None:
+    if record.get("name_element_id") is None or record.get("name_stage") in {
+        "exhausted",
+        "superseded",
+    }:
+        return "giving name is absent or not live"
+    if record.get("given_element_id") is None or record.get("given_holders") != [
+        {
+            "name_id": record["name_id"],
+            "binding_id": (record.get("given_holders") or [{}])[0].get("binding_id"),
+        }
+    ]:
+        return "given source does not produce exactly the giving name"
+    if record.get("given_properties", {}).get("source_type") != "dd":
+        return "given source is not a DD source"
+    if (
+        record.get("taken_dd_element_id") is None
+        or record.get("taken_dd_lifecycle_status") == "removed"
+    ):
+        return "taken DD path is absent or removed from the current DD"
+    if record.get("taken_holders"):
+        if any(
+            holder.get("stage") not in {"exhausted", "superseded"}
+            for holder in record["taken_holders"]
+        ):
+            return "taken source already has a live owner"
+        return "taken source already has a producing edge"
+    if (
+        record.get("taken_element_id") is not None
+        and record.get("taken_properties", {}).get("source_type") != "dd"
+    ):
+        return "taken source is not a DD source"
+    if record.get("receiving_name_id") is not None:
+        if record.get("receiving_element_id") is None or record.get(
+            "receiving_stage"
+        ) in {"exhausted", "superseded"}:
+            return "receiving name is absent or not live"
+        if (
+            record.get("given_dd_element_id") is None
+            or record.get("given_dd_lifecycle_status") == "removed"
+        ):
+            return "given DD path is removed from the current DD"
+    return None
+
+
+def _verify_source_exchange_postcondition(
+    query: _Query, rows: Sequence[dict[str, str | None]]
+) -> None:
+    """Prove the touched identities and sources still have their producers."""
+    names = sorted(
+        {
+            name_id
+            for row in rows
+            for name_id in (row["name_id"], row["receiving_name_id"])
+            if name_id is not None
+        }
+    )
+    name_states = query.query(
+        """
+        // SOURCE_EXCHANGE_NAME_POSTCONDITION
+        UNWIND $name_ids AS name_id
+        MATCH (name:StandardName {id: name_id})
+        OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(name)
+        RETURN name_id, count(source) AS producers
+        ORDER BY name_id
+        """,
+        name_ids=names,
+    )
+    if len(name_states) != len(names) or any(
+        int(row.get("producers") or 0) < 1 for row in name_states
+    ):
+        raise SourceExchangeConflict("touched name lost every producing source")
+    source_states = query.query(
+        """
+        // SOURCE_EXCHANGE_SOURCE_POSTCONDITION
+        UNWIND $source_ids AS source_id
+        MATCH (source:StandardNameSource {id: source_id})
+        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
+        RETURN source_id, count(name) AS producers, collect(name.id) AS names
+        ORDER BY source_id
+        """,
+        source_ids=sorted(
+            {
+                source_id
+                for row in rows
+                for source_id in (row["given_source_id"], row["taken_source_id"])
+            }
+        ),
+    )
+    expected = {str(row["taken_source_id"]): [str(row["name_id"])] for row in rows}
+    expected.update(
+        {
+            str(row["given_source_id"]): [str(row["receiving_name_id"])]
+            if row["receiving_name_id"] is not None
+            else []
+            for row in rows
+        }
+    )
+    if len(source_states) != len(expected) or any(
+        sorted(state.get("names") or []) != expected[str(state["source_id"])]
+        for state in source_states
+    ):
+        raise SourceExchangeConflict("touched source has the wrong producing name")
+    from imas_codex.standard_names.source_invariant import require_producing_sources
+
+    require_producing_sources(query, names)
+
+
+def _apply_source_exchange(
+    authority_path: str | Path,
+    *,
+    authority_file_sha256: str | None,
+    authority_payload_sha256: str | None,
+    guard_set: tuple[str, ...] | None,
+    reason: str,
+    apply: bool,
+    manifest_sha256: str | None,
+    run_id: str | None,
+    gc: Any | None,
+) -> dict[str, Any]:
+    if guard_set != _SOURCE_EXCHANGE_GUARDS:
+        raise SignedManifestAuthorityError(
+            "source exchange requires its exact guard set"
+        )
+    if not reason.strip():
+        raise ValueError("source exchange requires a reason")
+    if authority_file_sha256 is None or authority_payload_sha256 is None:
+        raise SignedManifestAuthorityError(
+            "source exchange requires both trusted digests"
+        )
+    if apply and manifest_sha256 is None:
+        raise ValueError("source exchange apply requires manifest_sha256")
+    rows, payload_digest = _load_source_exchange_rows(
+        authority_path,
+        authority_file_sha256=authority_file_sha256,
+        authority_payload_sha256=authority_payload_sha256,
+    )
+    own_client = gc is None
+    client: Any = GraphClient() if own_client else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query = _TransactionQuery(transaction)
+            try:
+                event_ids = [
+                    "sn-change:source-exchange:"
+                    + _digest([payload_digest, row["name_id"]])
+                    for row in rows
+                ]
+                replay = query.query(
+                    """
+                    // SOURCE_EXCHANGE_REPLAY
+                    UNWIND $event_ids AS event_id
+                    OPTIONAL MATCH (change:StandardNameChange {id: event_id})
+                    RETURN event_id, change IS NOT NULL AS recorded
+                    ORDER BY event_id
+                    """,
+                    event_ids=sorted(event_ids),
+                )
+                if any(item.get("recorded") for item in replay):
+                    transaction.rollback()
+                    return {
+                        "schema": _SOURCE_EXCHANGE_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "changed": 0,
+                        "refusals": [
+                            {
+                                "row_id": "*",
+                                "reason": "signed source exchange already applied",
+                            }
+                        ],
+                    }
+                current_versions = query.query(
+                    """
+                    // SOURCE_EXCHANGE_CURRENT_DD
+                    MATCH (version:DDVersion {is_current: true})
+                    RETURN version.id AS dd_version
+                    """
+                )
+                if len(current_versions) != 1:
+                    raise SourceExchangeConflict("current DD version is not unique")
+                closure = _source_exchange_closure(query, rows)
+                by_name = {str(item["name_id"]): item for item in closure}
+                refusals = [
+                    {"row_id": str(row["name_id"]), "reason": refusal}
+                    for row in rows
+                    if (refusal := _source_exchange_refusal(by_name[row["name_id"]]))
+                ]
+                manifest = {
+                    "operation_id": _SOURCE_EXCHANGE_OPERATION,
+                    "authority_payload_sha256": payload_digest,
+                    "dd_version": current_versions[0]["dd_version"],
+                    "reason": reason,
+                    "closure": closure,
+                    "refusals": refusals,
+                }
+                computed = _digest(manifest)
+                if not apply or refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": _SOURCE_EXCHANGE_RECEIPT_SCHEMA,
+                        "outcome": "refused" if refusals else "would_apply",
+                        "changed": 0,
+                        "would_change": 0 if refusals else len(rows),
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed,
+                    }
+                if computed != manifest_sha256:
+                    raise SourceExchangeConflict(
+                        "source-exchange closure changed after preview"
+                    )
+                for row in rows:
+                    state = by_name[str(row["name_id"])]
+                    changed = query.query(
+                        """
+                        // SOURCE_EXCHANGE_MUTATION
+                        MATCH (version:DDVersion {id: $dd_version, is_current: true})
+                        MATCH (name:StandardName {id: $name_id})
+                        MATCH (given:StandardNameSource {id: $given_source_id})
+                              -[binding:PRODUCED_NAME]->(name)
+                        MATCH (taken_dd:IMASNode {id: $taken_path})
+                        WHERE elementId(name) = $name_element_id
+                          AND elementId(given) = $given_element_id
+                          AND elementId(binding) = $binding_element_id
+                          AND elementId(taken_dd) = $taken_dd_element_id
+                          AND coalesce(taken_dd.lifecycle_status, '') <> 'removed'
+                        OPTIONAL MATCH (receiver:StandardName {id: $receiving_name_id})
+                        WITH name, given, binding, taken_dd, receiver
+                        WHERE $receiving_name_id IS NULL OR
+                              (receiver IS NOT NULL AND
+                               coalesce(receiver.name_stage, '') NOT IN ['exhausted', 'superseded'])
+                        MERGE (taken:StandardNameSource {id: $taken_source_id})
+                          ON CREATE SET taken.created_at = datetime(), taken.attempt_count = 0,
+                                        taken.source_type = 'dd', taken.source_id = $taken_path,
+                                        taken.dd_path = $taken_path, taken.dd_version = $dd_version,
+                                        taken.dd_documentation = taken_dd.documentation,
+                                        taken.dd_data_type = taken_dd.data_type,
+                                        taken.dd_unit = taken_dd.unit,
+                                        taken.dd_lifecycle_status = taken_dd.lifecycle_status,
+                                        taken.dd_lifecycle_version = taken_dd.lifecycle_version
+                        SET taken.status = 'attached', taken.produced_sn_id = name.id,
+                            taken.composed_at = coalesce(taken.composed_at, datetime()),
+                            taken.claimed_at = null, taken.claim_token = null
+                        MERGE (taken)-[:FROM_DD_PATH]->(taken_dd)
+                        MERGE (taken)-[:PRODUCED_NAME]->(name)
+                        DELETE binding
+                        SET given.produced_sn_id = $receiving_name_id,
+                            given.status = CASE WHEN receiver IS NULL THEN 'extracted'
+                                                ELSE 'attached' END
+                        FOREACH (_ IN CASE WHEN receiver IS NULL THEN [] ELSE [1] END |
+                            MERGE (given)-[:PRODUCED_NAME]->(receiver))
+                        RETURN count(DISTINCT name) AS changed
+                        """,
+                        dd_version=current_versions[0]["dd_version"],
+                        name_id=row["name_id"],
+                        given_source_id=row["given_source_id"],
+                        taken_source_id=row["taken_source_id"],
+                        taken_path=str(row["taken_source_id"])[3:],
+                        receiving_name_id=row["receiving_name_id"],
+                        name_element_id=state["name_element_id"],
+                        given_element_id=state["given_element_id"],
+                        binding_element_id=state["given_holders"][0]["binding_id"],
+                        taken_dd_element_id=state["taken_dd_element_id"],
+                    )
+                    if len(changed) != 1 or int(changed[0].get("changed") or 0) != 1:
+                        raise SourceExchangeConflict(
+                            "source-exchange compare-and-set changed"
+                        )
+                receipt_rows = query.query(
+                    """
+                    // SOURCE_EXCHANGE_RECEIPT
+                    UNWIND $rows AS row
+                    CREATE (change:StandardNameChange {id: row.event_id})
+                    SET change.from_name = row.given_source_id,
+                        change.to_name = row.name_id,
+                        change.operation = $operation,
+                        change.reason = $reason,
+                        change.origin = 'signed_source_exchange',
+                        change.run_id = $run_id,
+                        change.changed_at = datetime(),
+                        change.internal = true,
+                        change.manifest_sha256 = $manifest_sha256
+                    WITH row, change
+                    MATCH (name:StandardName {id: row.name_id})
+                    MERGE (name)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN change.id AS event_id
+                    ORDER BY event_id
+                    """,
+                    rows=[
+                        {**row, "event_id": event_id}
+                        for row, event_id in zip(rows, event_ids, strict=True)
+                    ],
+                    operation=_SOURCE_EXCHANGE_OPERATION,
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed,
+                )
+                if sorted(item.get("event_id") for item in receipt_rows) != sorted(
+                    event_ids
+                ):
+                    raise SourceExchangeConflict(
+                        "source-exchange receipt cardinality changed"
+                    )
+                _verify_source_exchange_postcondition(query, rows)
+                transaction.commit()
+                return {
+                    "schema": _SOURCE_EXCHANGE_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "changed": len(rows),
+                    "manifest_sha256": computed,
+                    "change_ids": sorted(event_ids),
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own_client:
+            client.close()
 
 
 def _apply_semantic_mirror_repair(
@@ -8057,6 +8539,22 @@ def apply_signed_manifest(
     authorizes only the hash: participant closure, collateral rows, and counter
     baselines are always read again inside this invocation.
     """
+    if authority_adapter == _SOURCE_EXCHANGE_ADAPTER:
+        if legacy_args or not isinstance(authority_path, str | Path):
+            raise SignedManifestAuthorityError(
+                "source exchange requires a signed authority file"
+            )
+        return _apply_source_exchange(
+            authority_path,
+            authority_file_sha256=authority_file_sha256,
+            authority_payload_sha256=authority_payload_sha256,
+            guard_set=guard_set,
+            reason=reason,
+            apply=apply,
+            manifest_sha256=manifest_sha256,
+            run_id=run_id,
+            gc=gc,
+        )
     if authority_adapter == _RECOVERY_UNBIND_ADAPTER:
         if legacy_args:
             raise SignedManifestAuthorityError(
