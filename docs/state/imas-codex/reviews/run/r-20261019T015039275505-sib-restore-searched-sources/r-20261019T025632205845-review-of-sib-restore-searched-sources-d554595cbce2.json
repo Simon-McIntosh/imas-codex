@@ -25,6 +25,13 @@
   ],
   "completed_at": "2026-10-19T03:08:23.743Z",
   "dispatched_at": "2026-10-19T02:57:06Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The JSON record's split, 34 referred with a below-floor candidate and 16 with none, is authoritative and is the figure the plan carries. The one name rendered under the wrong table (fraction_of_neutron_detector_converter) goes to the lead either way, so the total of 50 referrals is unchanged.",
+      "recorded_at": "2026-10-19T03:22:34.154996+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py",
