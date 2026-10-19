@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite or after_suite (both blank in its manifest), so it carries no two-arm suite delta of its own. Its gate was the per-arm runner at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, whose log runner-jev.log ends EXIT=0, plus the record's containment verdict and the runner's containment self-check that fires on planted inputs; the change touches only docs/evidence paths that no test module covers, so the added-failure set is empty rather than unmeasured by a suite that could have exercised it.",
+  "call_site_count": 1,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:self_check_containment"
+  ],
+  "completed_at": "2026-10-19T18:58:09.848Z",
+  "dispatched_at": "2026-10-19T18:43:29Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: cost_limit_passed_usd holds 1.98, which is the ceiling handed to the apply, not a pass/fail verdict, so a reader comparing spend (0.74159) against a field named for a verdict compares a spend to a cap; the value is set at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508 as min(apply_cap(planned_calls), ARM_BUDGET_USD), while the landing fragment at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-divertor-recomb-jev.html:35 names both the 1.98 effective cap and the 2.00 arm budget correctly."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: the containment evidence carries two attribution lanes and the run-id lane measured zero on both graphs -- scratch_scope_run_rows 0 at line 24 despite 26 scratch ledger rows naming this apply's members -- so for this arm the live-graph attribution rests on the member-name window lane alone and the run-id lane cannot fire on the live side; the planted case in containment-self-check.log proves the check would fire if a row did carry a run id, but no such row was observed in either graph."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; cae372164 adds the arm JSON and 039c58d41 adds the landing fragment, nothing else.",
+    "done_when": "the brief's done_when asks for the arm record carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, written by an invocation whose log ends EXIT=0, with the scratch stopped and its tree removed and spend under USD 2.00; all of these are present (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:182, 6, 172/174, 227, 10, 248, 255, 249, 26, 17, 249, 237 and 251) and the scratch tree the record names at line 244 is absent from disk.",
+    "goal": "the node's goal is to run the Jev arm of the neutral_power_of_divertor_due_to_recombination anchor family in a fresh scratch copy of the archived graph through the per-arm runner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:8 records arm jev with anchor plasma_power_of_divertor_due_to_recombination and outcome_status complete at line 182.",
+    "manifest": "read in full; status complete, two commits (cae372164, 039c58d41), changed_paths and test_logs present, negative_control_log declared none with its reason, blockers none.",
+    "write_paths": "the brief's Write scope names the arm JSON, and the manifest's orientation_write_paths also name the landing HTML and a figures directory; the diff touches only the arm JSON and the landing HTML, both inside the declared paths."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced; the only guard is the runner's post-apply containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:617, exercised separately in containment-self-check.log where three planted cases fail as expected and one passes.",
+    "evidence": "the gate is the runner invocation in runner-jev.log whose last line is EXIT=0, and the recorded numbers reconcile against independent sources -- calls 26 at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:10 sums from the six per-model counts at lines 185/190/196/201/206/210 and spend_usd 0.74159 from their per-model spend, while the anchors, members, source_export and adoption_rule match ssog-anchor-ab/selection.json -- but no pytest arm ran, so the added-failure delta is an empty set rather than a suite result.",
+    "fit": "the record follows the ab-record JSON idiom of its siblings in ssog-anchor-ab/ and the landing HTML follows the evidence-fragment idiom at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-aperture-jev.html:1, though docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:31 carries a field name that asserts a verdict its value does not hold.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:182 records outcome_status complete at anchor plasma_power_of_divertor_due_to_recombination for arm jev, the deliverable the goal names.",
+    "reuse": "the change adds no definition of its own and forks no capability -- the record is produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:399 run_arm, which delegates to harmonize.plan_family_applies and graph.temp_neo4j.",
+    "scope_discipline": "git diff 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1..039c58d4152a4b3a85cdc9bb472c477b8a730057 lists only the arm JSON and the landing HTML, both inside the brief's declared write scope, and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to run the Jev arm of the neutral_power_of_divertor_due_to_recombination anchor family in a fresh scratch copy of the archived graph through the per-arm runner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:8 records arm jev with anchor plasma_power_of_divertor_due_to_recombination and outcome_status complete at line 182.\nVERDICT done_when: the brief's done_when asks for the arm record carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, written by an invocation whose log ends EXIT=0, with the scratch stopped and its tree removed and spend under USD 2.00; all of these are present (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:182, 6, 172/174, 227, 10, 248, 255, 249, 26, 17, 249, 237 and 251) and the scratch tree the record names at line 244 is absent from disk.\nVERDICT write_paths: the brief's Write scope names the arm JSON, and the manifest's orientation_write_paths also name the landing HTML and a figures directory; the diff touches only the arm JSON and the landing HTML, both inside the declared paths.\nVERDICT manifest: read in full; status complete, two commits (cae372164, 039c58d41), changed_paths and test_logs present, negative_control_log declared none with its reason, blockers none.\nVERDICT diff: read commit by commit against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; cae372164 adds the arm JSON and 039c58d41 adds the landing fragment, nothing else.\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:self_check_containment\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:182 records outcome_status complete at anchor plasma_power_of_divertor_due_to_recombination for arm jev, the deliverable the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is the runner invocation in runner-jev.log whose last line is EXIT=0, and the recorded numbers reconcile against independent sources -- calls 26 at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:10 sums from the six per-model counts at lines 185/190/196/201/206/210 and spend_usd 0.74159 from their per-model spend, while the anchors, members, source_export and adoption_rule match ssog-anchor-ab/selection.json -- but no pytest arm ran, so the added-failure delta is an empty set rather than a suite result.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1..039c58d4152a4b3a85cdc9bb472c477b8a730057 lists only the arm JSON and the landing HTML, both inside the brief's declared write scope, and nothing else.\nSCORE durability: 12\nJUSTIFICATION durability: the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced; the only guard is the runner's post-apply containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:617, exercised separately in containment-self-check.log where three planted cases fail as expected and one passes.\nSCORE fit: 15\nJUSTIFICATION fit: the record follows the ab-record JSON idiom of its siblings in ssog-anchor-ab/ and the landing HTML follows the evidence-fragment idiom at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-aperture-jev.html:1, though docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:31 carries a field name that asserts a verdict its value does not hold.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition of its own and forks no capability -- the record is produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:399 run_arm, which delegates to harmonize.plan_family_applies and graph.temp_neo4j.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:31 follow-on: cost_limit_passed_usd holds 1.98, which is the ceiling handed to the apply, not a pass/fail verdict, so a reader comparing spend (0.74159) against a field named for a verdict compares a spend to a cap; the value is set at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508 as min(apply_cap(planned_calls), ARM_BUDGET_USD), while the landing fragment at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-divertor-recomb-jev.html:35 names both the 1.98 effective cap and the 2.00 arm budget correctly.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json:24 follow-on: the containment evidence carries two attribution lanes and the run-id lane measured zero on both graphs -- scratch_scope_run_rows 0 at line 24 despite 26 scratch ledger rows naming this apply's members -- so for this arm the live-graph attribution rests on the member-name window lane alone and the run-id lane cannot fire on the live side; the planted case in containment-self-check.log proves the check would fire if a row did carry a run id, but no such row was observed in either graph.\n",
+  "review_run_id": "r-20261019T184206194962-review-of-ssog-anchor-divertor-recomb-jev-039c58d4152a",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "039c58d4152a4b3a85cdc9bb472c477b8a730057",
+  "reviewed_run_id": "r-20261019T150026994505-ssog-anchor-divertor-recomb-jev",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261019T184206194962-review-of-ssog-anchor-divertor-recomb-jev-039c58d4152a"
+  },
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T19:05:00Z",
+  "total": 104
+}
