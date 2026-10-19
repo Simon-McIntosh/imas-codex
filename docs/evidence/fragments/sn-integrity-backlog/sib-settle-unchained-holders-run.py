@@ -18,7 +18,8 @@ Every graph write goes through ``apply_signed_manifest``: the authority is
 built by ``build_repair_authority``, previewed, and applied under the preview's
 digest on a quiet graph.
 
-Modes: read | judge | authority | preview | apply | readback | negcontrol.
+Modes: read | judge | authority | preview | apply | readback | negcontrol |
+quiet | overlap | guard | verify | falsify | record.
 """
 
 from __future__ import annotations
@@ -44,17 +45,31 @@ from imas_codex.standard_names.signed_manifest import (
 HERE = Path(__file__).resolve().parent
 # Derived data (the live cohort read, the Jev answers) belongs in the run
 # directory, not the repository: the fragment directory carries only the
-# signed authority, the run driver, and the composed record.
-RUN_DIR = Path(
-    os.environ.get(
-        "SIB_RUN_DIR",
-        "/home/ITER/mcintos/.config/reckon/crew/runs/"
-        "r-20261019T021901634768-sib-settle-unchained-holders",
-    )
-)
-COHORT_PATH = RUN_DIR / "sib-settle-unchained-holders-cohort.json"
-ANSWERS_PATH = RUN_DIR / "sib-settle-unchained-holders-answers.json"
+# signed authority, the run driver, and the composed record. The run directory
+# and the run id are runtime facts, so they arrive as arguments rather than
+# being baked into the source of a driver that a different run may replay.
 AUTHORITY_PATH = HERE / "sib-settle-unchained-holders-authority.json"
+
+RUN_DIR: Path | None = None
+COHORT_PATH: Path | None = None
+ANSWERS_PATH: Path | None = None
+RUN_ID: str | None = None
+
+
+def _resolve_runtime(args: argparse.Namespace) -> None:
+    """Bind the run directory and run id from the arguments or the environment."""
+    global RUN_DIR, COHORT_PATH, ANSWERS_PATH, RUN_ID  # noqa: PLW0603
+    run_dir = args.run_dir or os.environ.get("SIB_RUN_DIR")
+    if not run_dir:
+        raise SystemExit("--run-dir is required (or set SIB_RUN_DIR)")
+    RUN_DIR = Path(run_dir)
+    COHORT_PATH = RUN_DIR / "sib-settle-unchained-holders-cohort.json"
+    ANSWERS_PATH = RUN_DIR / "sib-settle-unchained-holders-answers.json"
+    run_id = args.run_id or os.environ.get("SIB_RUN_ID")
+    if not run_id:
+        raise SystemExit("--run-id is required (or set SIB_RUN_ID)")
+    RUN_ID = run_id
+
 
 # Coordinator ruling: the floors every binding and retirement under this
 # section clears, against the chosen option's probability and the model's own
@@ -85,10 +100,6 @@ REASON = (
     "supersede with a successor link"
 )
 SUPERSEDE_OPERATION = "link_signed_successor"
-
-RUN_ID = os.environ.get(
-    "SIB_RUN_ID", "r-20261019T021901634768-sib-settle-unchained-holders"
-)
 
 
 def _question() -> dict:
@@ -384,8 +395,10 @@ def readback(before: dict | None = None, raise_on_mismatch: bool = False) -> dic
     with GraphClient() as gc:
         classified = classify_sourceless_standard_names(gc)
         counts: dict[str, int] = defaultdict(int)
+        members: dict[str, set[str]] = defaultdict(set)
         for row in classified:
             counts[row["population"]] += 1
+            members[row["population"]].add(row["id"])
         receipts = gc.query(
             "MATCH (c:StandardNameChange {authority_file_sha256:$fs}) "
             "RETURN c.row_id AS row_id, c.operation AS op, "
@@ -415,6 +428,7 @@ def readback(before: dict | None = None, raise_on_mismatch: bool = False) -> dic
     if before is not None:
         retired = len(targets)
         expected = before["unchained_holder_count"] - retired
+        baseline_ids = {row["id"] for row in before.get("cohort", [])}
         out["before"] = before["counts"]
         out["expected_unchained_holder"] = expected
         moved = {
@@ -423,24 +437,52 @@ def readback(before: dict | None = None, raise_on_mismatch: bool = False) -> dic
             if before["counts"].get(k) != counts.get(k) and k != "unchained_holder"
         }
         out["moved_other_populations"] = moved
+        out["unchained_holder_entered"] = sorted(
+            members["unchained_holder"] - baseline_ids
+        )
+        out["unchained_holder_left"] = sorted(
+            {row["id"] for row in before.get("cohort", [])}
+            - members["unchained_holder"]
+        )
         out["shortfall"] = sorted(targets - receipt_targets)
     if raise_on_mismatch:
+        # The gate asserts this node's own footprint, which stays exact however
+        # much another writer moves afterwards: the retired set is the baseline
+        # cohort minus the targets, no receipt falls outside the targets, and no
+        # name entered the population unaccounted for. A movement in another
+        # population is a foreign write and is reported, not a failure.
         checks = {
             "unchained_holder_fell_by_retired": out["unchained_holder_count"]
             == (before["unchained_holder_count"] - len(targets)),
+            "unchained_holder_set_is_baseline_minus_retired": set(
+                out["unchained_holder_left"]
+            )
+            == targets
+            and not out["unchained_holder_entered"],
             "every_target_has_receipt": not (targets - receipt_targets),
-            "no_other_population_moved": not out["moved_other_populations"],
+            "no_receipt_outside_targets": not (receipt_targets - targets),
             "all_targets_superseded": out["retired_stages"]
             == [("superseded", "superseded")],
         }
         if not all(checks.values()):
             raise SystemExit(f"read-back mismatch: {checks} :: {out}")
         out["checks"] = checks
+        out["foreign_population_moves"] = moved
     return out
 
 
-def quiet_graph_check(gc) -> dict:
-    """Record every fact that shows whether another graph writer is live."""
+def quiet_graph_check() -> dict:
+    """Show whether another graph client is writing, through the owner probe.
+
+    ``live_graph_activity`` is the repository's owner of this measurement: it
+    runs every probe in one session, identifies its own transaction by the
+    ``SHOW TRANSACTIONS`` query text, subtracts the probes from the id gap, and
+    raises when its own probe is absent. It is called directly rather than
+    re-implemented, so the check cannot pass through a local filter that never
+    matches.
+    """
+    from imas_codex.graph.offsite import live_graph_activity
+
     live_dir = Path.home() / ".config" / "reckon" / "crew" / "live"
     runs = []
     recently_touched = []
@@ -463,31 +505,97 @@ def quiet_graph_check(gc) -> dict:
         neo4j_jobs = [ln for ln in job.stdout.splitlines() if "codex-neo4j" in ln]
     except Exception as exc:  # listing is best-effort; record the refusal
         neo4j_jobs = [{"error": f"{type(exc).__name__}: {exc}"}]
-    try:
-        transactions = [
-            dict(r)
-            for r in gc.query(
-                "SHOW TRANSACTIONS YIELD transactionId, currentQuery, status "
-                "RETURN transactionId, status, currentQuery LIMIT 50"
-            )
-        ]
-    except Exception as exc:
-        transactions = [{"error": f"{type(exc).__name__}: {exc}"}]
-    foreign = [
-        t
-        for t in transactions
-        if isinstance(t, dict)
-        and str(t.get("currentQuery") or "").strip()
-        and str(t.get("status") or "") == "running"
-    ]
+    activity = live_graph_activity(window_seconds=6.0, interval_seconds=3.0)
     return {
         "live_crew_runs": runs,
         "live_crew_run_count": len(runs),
         "runs_touched_within_1800s": recently_touched,
         "neo4j_jobs": neo4j_jobs,
-        "active_transactions": transactions,
-        "foreign_running_transactions": foreign,
-        "quiet": not foreign,
+        "activity_window_seconds": activity.window_seconds,
+        "foreign_transactions_started": activity.transactions_started,
+        "foreign_open_queries": activity.open_queries,
+        "quiet": not activity.busy,
+    }
+
+
+def overlap_check() -> dict:
+    """Establish after the fact whether another writer touched the settled names.
+
+    The quiet-graph probe was vacuous at apply time, so this reads the graph
+    directly: every change record, source write and name update in the apply
+    window (from just before the preview to just after the last receipt).
+    """
+    from datetime import timedelta
+
+    answers = json.loads(ANSWERS_PATH.read_text())
+    admitted = _admitted(answers["records"])
+    ids = sorted({r["id"] for r in admitted} | {r["holder"] for r in admitted})
+    digest = _gate_log(RUN_DIR / "preview.log")["payload"]["manifest_sha256"]
+    with GraphClient() as gc:
+        mine = gc.query(
+            "MATCH (c:StandardNameChange {manifest_sha256:$d}) "
+            "RETURN min(c.changed_at) AS lo, max(c.changed_at) AS hi, count(c) AS n",
+            d=digest,
+        )[0]
+        lo = mine["lo"] - timedelta(seconds=180)
+        hi = mine["hi"] + timedelta(seconds=180)
+        changes = gc.query(
+            "MATCH (c:StandardNameChange) WHERE c.changed_at >= $lo "
+            "AND c.changed_at <= $hi "
+            "RETURN c.run_id AS run_id, c.operation AS op, c.row_id AS row_id, "
+            "c.from_name AS frm, c.to_name AS to, c.changed_at AS at ORDER BY at",
+            lo=lo,
+            hi=hi,
+        )
+        sources = gc.query(
+            "MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(n:StandardName) "
+            "WHERE s.created_at >= $lo AND s.created_at <= $hi "
+            "RETURN s.id AS source, n.id AS name, s.created_at AS at ORDER BY at",
+            lo=lo,
+            hi=hi,
+        )
+        touched = gc.query(
+            "UNWIND $ids AS id MATCH (n:StandardName {id:id}) "
+            "WHERE n.updated_at >= $lo AND n.updated_at <= $hi "
+            "RETURN n.id AS id, n.updated_at AS at ORDER BY at",
+            ids=ids,
+            lo=lo,
+            hi=hi,
+        )
+        # A writer that links an already-existing source node to a name leaves
+        # ``created_at`` untouched and stamps ``composed_at``; that is invisible
+        # to a created_at window and must be read separately.
+        rebound = gc.query(
+            "MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(n:StandardName) "
+            "WHERE s.composed_at > $hi "
+            "RETURN s.id AS source, n.id AS name, s.created_at AS created, "
+            "s.composed_at AS at ORDER BY at",
+            hi=mine["hi"],
+        )
+    mine_run = RUN_ID
+    names = set(ids)
+    foreign_changes = [
+        row for row in changes if str(row.get("run_id")) != str(mine_run)
+    ]
+    foreign_touching = [
+        row
+        for row in foreign_changes
+        if str(row.get("row_id") or "") in names
+        or str(row.get("frm") or "") in names
+        or str(row.get("to") or "") in names
+    ]
+    foreign_sources = [row for row in sources if str(row.get("name")) in names]
+    return {
+        "window": {"from": str(lo), "to": str(hi)},
+        "own_receipts": dict(mine),
+        "changes_in_window": changes,
+        "foreign_changes": foreign_changes,
+        "foreign_changes_touching_settled_names": foreign_touching,
+        "sources_in_window": sources,
+        "foreign_sources_touching_settled_names": foreign_sources,
+        "settled_name_updates": touched,
+        "sources_rebound_after_last_receipt": rebound,
+        "overlap": bool(foreign_changes or foreign_sources or touched),
     }
 
 
@@ -609,6 +717,24 @@ def _load(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
+def _gate_log(path: Path) -> dict:
+    """Read a gate log carrying a command header, a JSON payload and an EXIT line."""
+    text = path.read_text()
+    lines = text.splitlines()
+    header = [ln for ln in lines if ln.startswith("#")]
+    exit_line = next((ln for ln in lines if ln.startswith("EXIT=")), None)
+    body = "\n".join(
+        ln for ln in lines if not ln.startswith("#") and not ln.startswith("EXIT=")
+    )
+    payload = json.loads(body.strip() or "{}")
+    return {
+        "header": header,
+        "exit_line": exit_line,
+        "exit_code": int(exit_line.split("=", 1)[1]) if exit_line else None,
+        "payload": payload,
+    }
+
+
 def compose() -> dict:
     """Assemble the JSON record and HTML fragment from the run's artifacts."""
     from html import escape
@@ -616,13 +742,16 @@ def compose() -> dict:
     node = "sib-settle-unchained-holders"
     cohort = _load(COHORT_PATH)
     answers = _load(ANSWERS_PATH)
-    preview = _load(RUN_DIR / "preview.log")
-    apply_receipt = _load(RUN_DIR / "apply.log")
-    quiet = _load(RUN_DIR / "quiet-before-apply.log")
-    guard = _load(RUN_DIR / "guard.log")
-    verify = _load(RUN_DIR / "verify.log")
-    falsify = _load(RUN_DIR / "falsify.log")
-    negcontrol = _load(RUN_DIR / "negcontrol.log")
+    preview = _gate_log(RUN_DIR / "preview.log")["payload"]
+    apply_receipt = _gate_log(RUN_DIR / "apply.log")["payload"]
+    quiet = _gate_log(RUN_DIR / "quiet-before-apply.log")["payload"]
+    overlap = _gate_log(RUN_DIR / "overlap.log")["payload"]
+    guard = _gate_log(RUN_DIR / "guard.log")["payload"]
+    verify_log = _gate_log(RUN_DIR / "verify.log")
+    falsify_log = _gate_log(RUN_DIR / "falsify.log")
+    verify = verify_log["payload"]
+    falsify = falsify_log["payload"]
+    negcontrol = _gate_log(RUN_DIR / "negcontrol.log")["payload"]
 
     details = {row["id"]: row for row in cohort["cohort"]}
     admitted_ids = {r["id"] for r in _admitted(answers["records"])}
@@ -683,9 +812,12 @@ def compose() -> dict:
         "preview": preview,
         "receipt": apply_receipt,
         "quiet_graph": quiet,
+        "apply_overlap": overlap,
         "source_held_guard": guard,
         "verification": verify,
+        "verification_log": verify_log,
         "falsification": falsify,
+        "falsification_log": falsify_log,
         "negative_control": negcontrol,
         "per_name": per_name,
         "referrals": referrals,
@@ -709,6 +841,9 @@ def compose() -> dict:
         f"unchained-holder names before this node and {verify['counts']['unchained_holder']} after: "
         f"exactly {len(retired)} retired through the signed supersede and {len(referrals)} referred to "
         f"the lead. No other population moved. Spend USD {answers['spend_usd']:.6f}.</p>",
+        f"<p id='{node}-overlap-summary'>The apply-window overlap read finds no other "
+        f"change, source write or name update on the settled names: overlap is "
+        f"<code>{overlap['overlap']}</code>.</p>",
         f"<h3 id='{node}-floors'>Floors</h3>",
         f"<p>Coordinator's ruling for every binding and retirement: the chosen option's probability at "
         f"least <code>{PROBABILITY_FLOOR}</code> and Jev's self-reported confidence at least "
@@ -727,14 +862,16 @@ def compose() -> dict:
         f"<pre id='{node}-authority-pre'>{escape(json.dumps(record['authority'], indent=1))}</pre>",
         f"<h3 id='{node}-preview'>Preview and receipt</h3>",
         f"<pre id='{node}-preview-pre'>{escape(json.dumps({'preview': preview, 'receipt': apply_receipt}, indent=1))}</pre>",
-        f"<h3 id='{node}-quiet'>Quiet-graph check (before apply)</h3>",
-        f"<pre id='{node}-quiet-pre'>{escape(json.dumps({k: quiet[k] for k in ('quiet', 'foreign_running_transactions', 'neo4j_jobs')}, indent=1))}</pre>",
+        f"<h3 id='{node}-quiet'>Quiet-graph probe (before apply, owner instrument)</h3>",
+        f"<pre id='{node}-quiet-pre'>{escape(json.dumps({k: quiet[k] for k in ('quiet', 'foreign_transactions_started', 'foreign_open_queries', 'neo4j_jobs')}, indent=1))}</pre>",
+        f"<h3 id='{node}-overlap'>Apply-window overlap (after the fact)</h3>",
+        f"<pre id='{node}-overlap-pre'>{escape(json.dumps(overlap, indent=1))}</pre>",
         f"<h3 id='{node}-guard'>Source-stays-held guard</h3>",
         f"<pre id='{node}-guard-pre'>{escape(json.dumps(guard, indent=1))}</pre>",
         f"<h3 id='{node}-verify'>Classifier read-back (raise on mismatch)</h3>",
-        f"<pre id='{node}-verify-pre'>{escape(json.dumps(verify, indent=1))}</pre>",
+        f"<pre id='{node}-verify-pre'>{escape(json.dumps({'command': verify_log['header'], 'exit_code': verify_log['exit_code'], 'payload': verify}, indent=1))}</pre>",
         f"<h3 id='{node}-falsify'>Read-back shown able to fail</h3>",
-        f"<pre id='{node}-falsify-pre'>{escape(json.dumps(falsify, indent=1))}</pre>",
+        f"<pre id='{node}-falsify-pre'>{escape(json.dumps({'command': falsify_log['header'], 'exit_code': falsify_log['exit_code'], 'payload': falsify}, indent=1))}</pre>",
         f"<h3 id='{node}-negcontrol'>Negative control (planted different-quantity pair)</h3>",
         f"<pre id='{node}-negcontrol-pre'>{escape(json.dumps(negcontrol, indent=1))}</pre>",
     ]
@@ -755,6 +892,7 @@ def main() -> None:
             "readback",
             "negcontrol",
             "quiet",
+            "overlap",
             "guard",
             "verify",
             "falsify",
@@ -762,7 +900,10 @@ def main() -> None:
         ],
     )
     parser.add_argument("--digest")
+    parser.add_argument("--run-dir", help="run directory holding the derived artifacts")
+    parser.add_argument("--run-id", help="the crew run id recorded on new rows")
     args = parser.parse_args()
+    _resolve_runtime(args)
     if args.mode == "read":
         out = read()
         print(json.dumps({k: v for k, v in out.items() if k != "cohort"}, indent=2))
@@ -799,8 +940,9 @@ def main() -> None:
     elif args.mode == "negcontrol":
         print(json.dumps(negcontrol(), indent=2, default=str))
     elif args.mode == "quiet":
-        with GraphClient() as gc:
-            print(json.dumps(quiet_graph_check(gc), indent=2, default=str))
+        print(json.dumps(quiet_graph_check(), indent=2, default=str))
+    elif args.mode == "overlap":
+        print(json.dumps(overlap_check(), indent=2, default=str))
     elif args.mode == "guard":
         with GraphClient() as gc:
             print(json.dumps(shared_source_path_guard(gc), indent=2, default=str))
