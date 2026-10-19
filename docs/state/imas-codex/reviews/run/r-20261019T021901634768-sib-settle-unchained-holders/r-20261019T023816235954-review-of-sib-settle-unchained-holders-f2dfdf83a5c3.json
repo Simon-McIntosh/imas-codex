@@ -45,6 +45,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-19T02:52:50.753Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sib-settle-unchained-holders",
+      "recorded_at": "2026-10-19T02:56:51.557581+00:00"
+    }
+  },
   "dispatched_at": "2026-10-19T02:38:56Z",
   "findings": [
     {
