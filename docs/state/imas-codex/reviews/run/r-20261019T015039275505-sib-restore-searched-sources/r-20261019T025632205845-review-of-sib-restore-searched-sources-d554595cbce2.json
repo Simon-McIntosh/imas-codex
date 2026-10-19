@@ -30,6 +30,11 @@
       "kind": "exempted",
       "reason": "The JSON record's split, 34 referred with a below-floor candidate and 16 with none, is authoritative and is the figure the plan carries. The one name rendered under the wrong table (fraction_of_neutron_detector_converter) goes to the lead either way, so the total of 50 referrals is unchanged.",
       "recorded_at": "2026-10-19T03:22:34.154996+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "A one-shot evidence driver: the superseded population_gate never runs, and owned_population_gate is the check recorded at EXIT=. No later node re-runs this driver.",
+      "recorded_at": "2026-10-19T03:23:01.426636+00:00"
     }
   },
   "findings": [
