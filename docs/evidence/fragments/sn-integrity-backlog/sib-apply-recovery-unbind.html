@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-apply-recovery-unbind">
+<title>Sixteen exhausted-name recovery bindings removed through signed authority</title></head>
+<body><main>
+<h1 id="sib-apply-recovery-unbind-title">Sixteen sub-floor recovery bindings removed</h1>
+<p id="sib-apply-recovery-unbind-summary">All 16 recorded bindings still existed on exhausted names with non-stale
+sources when re-derived from the live graph. The signed writer preview admitted all 16 with
+zero refusals. A quiet-graph probe immediately preceded the apply, and the writer removed
+16 edges and recorded 16 change receipts. The independent classifier rose from
+79 to 95, exactly 16, with each
+unbound name appearing in the new sourceless set. No LLM call was made; spend USD 0.</p>
+<h2 id="sib-apply-recovery-unbind-authority">Authority and preview</h2>
+<p>The authority uses this program's own <code>imas-codex.recovery-binding-unbind.v1</code>
+schema. Its loader requires a SHA-256 signature over canonical rows rather than the
+canonical repair-authority envelope, so this operation follows the program-specific
+contract. <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-authority.json">Signed authority</a>;
+<a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind.json">full machine record</a>.</p>
+<pre id="sib-apply-recovery-unbind-authority-data">{
+  &quot;authority_rows&quot;: 16,
+  &quot;signature&quot;: {
+    &quot;algorithm&quot;: &quot;sha256&quot;,
+    &quot;canonicalization&quot;: &quot;jq -cS &#x27;.rows&#x27;&quot;,
+    &quot;scope&quot;: &quot;rows&quot;,
+    &quot;digest&quot;: &quot;f37dcd819ba29abfe7817b1856bdfe2c94572753c6598061aed94b69ea33c105&quot;
+  },
+  &quot;authority_file_sha256&quot;: &quot;f508bc37bb04b30da8a91b07614c56eff48e93519ae7211e8a6acce6621f44f0&quot;,
+  &quot;preview_outcome&quot;: &quot;would_apply&quot;,
+  &quot;preview_would_change&quot;: 16,
+  &quot;preview_refusals&quot;: [],
+  &quot;preview_manifest_sha256&quot;: &quot;abf1e12052f0da09dd81016210baa09b8bcd5dfd814443517ca802b9433690f7&quot;
+}</pre>
+<h2 id="sib-apply-recovery-unbind-apply">Quiet graph and signed receipt</h2>
+<pre id="sib-apply-recovery-unbind-receipt">{
+  &quot;quiet_graph&quot;: {
+    &quot;checked_at&quot;: &quot;2026-10-19T08:03:16.685305+00:00&quot;,
+    &quot;foreign_open_queries&quot;: [],
+    &quot;foreign_transactions_started&quot;: 0,
+    &quot;quiet&quot;: true,
+    &quot;window_seconds&quot;: 6.0
+  },
+  &quot;receipt&quot;: {
+    &quot;outcome&quot;: &quot;applied&quot;,
+    &quot;changed&quot;: 16,
+    &quot;mutations&quot;: 16,
+    &quot;receipt_rows&quot;: 16,
+    &quot;manifest_sha256&quot;: &quot;abf1e12052f0da09dd81016210baa09b8bcd5dfd814443517ca802b9433690f7&quot;,
+    &quot;authority_payload_sha256&quot;: &quot;f37dcd819ba29abfe7817b1856bdfe2c94572753c6598061aed94b69ea33c105&quot;
+  }
+}</pre>
+<h2 id="sib-apply-recovery-unbind-rows">Every binding and freed DD path</h2>
+<p>The match column records the pre-apply edge, stage and source status. Each read-back
+compares full pre- and post-apply name and source properties and every other edge; the
+only new name edge is the writer's signed change receipt. All 16 DD paths have no
+remaining producer. A free path can be assigned to another live name only after its
+quantity is reviewed; none of these paths appears in another live name's
+<code>source_path</code> or <code>source_paths</code> record. The path-property
+query has a positive control across the live name population:
+3327 names have
+<code>source_path</code>, and 2481
+have nonempty <code>source_paths</code>. Each freed source's own <code>dd_path</code>
+still equals the listed path.</p>
+<table id="sib-apply-recovery-unbind-table"><thead><tr><th>Name</th><th>DD path freed</th><th>P(choice) / confidence</th><th>Live match</th><th>Action and read-back</th><th>Other live use</th></tr></thead>
+<tbody><tr id="sib-apply-recovery-unbind-row-1"><td><code>electron_particle_diffusion_coefficient</code></td><td><code>plasma_transport/model/ggd/electrons/particles/d/values</code></td><td>0.77 / 0.54</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-2"><td><code>flux_surface_normal_neutral_energy_diffusion_coefficient</code></td><td><code>plasma_transport/model/ggd/neutral/energy/d_radial/values</code></td><td>0.56 / 0.12</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-3"><td><code>heat_power_of_divertor</code></td><td><code>balance_of_plant/power_plant/heat_load_divertor</code></td><td>0.63 / 0.26</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-4"><td><code>ion_temperature_at_outboard_midplane_separatrix</code></td><td><code>langmuir_probes/reciprocating/plunge/collector/t_i</code></td><td>0.54 / 0.08</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-5"><td><code>parallel_thermal_neutral_energy_diffusivity</code></td><td><code>edge_transport/model/ggd/neutral/energy/d_parallel/values</code></td><td>0.76 / 0.52</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-6"><td><code>perpendicular_ion_velocity_due_to_diamagnetic_drift</code></td><td><code>edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic</code></td><td>0.70 / 0.55</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-7"><td><code>perturbed_linear_mhd_mode_number</code></td><td><code>distribution_sources/source/markers/orbit_integrals/m_pol</code></td><td>0.51 / 0.02</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-8"><td><code>poloidal_effective_ion_diffusion_coefficient</code></td><td><code>edge_transport/model/ggd/ion/particles/d_pol/values</code></td><td>0.76 / 0.52</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-9"><td><code>ratio_of_volume_of_wall_material_to_volume_of_passive_structure</code></td><td><code>cryostat/description_2d/cryostat/unit/material_volume_fraction</code></td><td>0.67 / 0.34</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-10"><td><code>second_local_tangential_width_of_diagnostic_aperture</code></td><td><code>neutron_diagnostic/detector/aperture/x2_width</code></td><td>0.64 / 0.28</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-11"><td><code>tendency_of_runaway_electron_density</code></td><td><code>runaway_electrons/ggd_fluid/ddensity_dt_tritium/values</code></td><td>0.62 / 0.24</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-12"><td><code>toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport</code></td><td><code>distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi</code></td><td>0.76 / 0.52</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-13"><td><code>toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport</code></td><td><code>distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi</code></td><td>0.78 / 0.56</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-14"><td><code>vertical_position_of_grating</code></td><td><code>spectrometer_x_ray_crystal/channel/reflector/centre/z</code></td><td>0.50 / 0.00</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-15"><td><code>vertical_total_ion_momentum_diffusivity</code></td><td><code>plasma_transport/model/ggd/ion/momentum/d/z</code></td><td>0.78 / 0.56</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr>
+<tr id="sib-apply-recovery-unbind-row-16"><td><code>wave_magnetic_field_amplitude</code></td><td><code>waves/coherent_wave/full_wave/b_field/normal/values</code></td><td>0.68 / 0.36</td><td>edge present; stage <code>exhausted</code>; source <code>attached</code>; no refusals</td><td>unbind; edge gone; name, stage, other edges and source including status unchanged (<code>attached</code>); sourceless</td><td>free; another live name may take it after semantic review; 0 other live path recorders</td></tr></tbody></table>
+<h2 id="sib-apply-recovery-unbind-classifier">Classifier check</h2>
+<p>The same <code>classify_sourceless_standard_names(gc)</code> ran before and after:
+79 + 16 = 95.
+The set difference equals the 16 signed names, with no other entrant. The
+<code>verify-final.log</code> run ended at <code>EXIT=0</code> after every assertion.
+The writer's post-apply preview then refused all 16 absent edges with
+<code>recovery binding does not exist</code> and <code>would_change: 0</code>
+(<code>refusal-control.log</code>, <code>EXIT=0</code>).</p>
+</main></body></html>

@@ -1,0 +1,187 @@
+{
+  "schema": "imas-codex.recovery-binding-unbind.v1",
+  "rows": [
+    {
+      "name_id": "electron_particle_diffusion_coefficient",
+      "source_id": "dd:plasma_transport/model/ggd/electrons/particles/d/values",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "plasma_transport/model/ggd/electrons/particles/d/values",
+        "choice_probability": 0.77,
+        "confidence": 0.54,
+        "original_reason": "P(choice) 0.77 below 0.8"
+      }
+    },
+    {
+      "name_id": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+      "source_id": "dd:plasma_transport/model/ggd/neutral/energy/d_radial/values",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+        "choice_probability": 0.56,
+        "confidence": 0.12,
+        "original_reason": "P(choice) 0.56 below 0.8"
+      }
+    },
+    {
+      "name_id": "heat_power_of_divertor",
+      "source_id": "dd:balance_of_plant/power_plant/heat_load_divertor",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "balance_of_plant/power_plant/heat_load_divertor",
+        "choice_probability": 0.63,
+        "confidence": 0.26,
+        "original_reason": "P(choice) 0.63 below 0.8"
+      }
+    },
+    {
+      "name_id": "ion_temperature_at_outboard_midplane_separatrix",
+      "source_id": "dd:langmuir_probes/reciprocating/plunge/collector/t_i",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "langmuir_probes/reciprocating/plunge/collector/t_i",
+        "choice_probability": 0.54,
+        "confidence": 0.08,
+        "original_reason": "P(choice) 0.54 below 0.8"
+      }
+    },
+    {
+      "name_id": "parallel_thermal_neutral_energy_diffusivity",
+      "source_id": "dd:edge_transport/model/ggd/neutral/energy/d_parallel/values",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+        "choice_probability": 0.76,
+        "confidence": 0.52,
+        "original_reason": "P(choice) 0.76 below 0.8"
+      }
+    },
+    {
+      "name_id": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+      "source_id": "dd:edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+        "choice_probability": 0.7,
+        "confidence": 0.55,
+        "original_reason": "P(choice) 0.70 below 0.8"
+      }
+    },
+    {
+      "name_id": "perturbed_linear_mhd_mode_number",
+      "source_id": "dd:distribution_sources/source/markers/orbit_integrals/m_pol",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "distribution_sources/source/markers/orbit_integrals/m_pol",
+        "choice_probability": 0.51,
+        "confidence": 0.02,
+        "original_reason": "P(choice) 0.51 below 0.8"
+      }
+    },
+    {
+      "name_id": "poloidal_effective_ion_diffusion_coefficient",
+      "source_id": "dd:edge_transport/model/ggd/ion/particles/d_pol/values",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "edge_transport/model/ggd/ion/particles/d_pol/values",
+        "choice_probability": 0.76,
+        "confidence": 0.52,
+        "original_reason": "P(choice) 0.76 below 0.8"
+      }
+    },
+    {
+      "name_id": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+      "source_id": "dd:cryostat/description_2d/cryostat/unit/material_volume_fraction",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+        "choice_probability": 0.67,
+        "confidence": 0.34,
+        "original_reason": "P(choice) 0.67 below 0.8"
+      }
+    },
+    {
+      "name_id": "second_local_tangential_width_of_diagnostic_aperture",
+      "source_id": "dd:neutron_diagnostic/detector/aperture/x2_width",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "neutron_diagnostic/detector/aperture/x2_width",
+        "choice_probability": 0.64,
+        "confidence": 0.28,
+        "original_reason": "P(choice) 0.64 below 0.8"
+      }
+    },
+    {
+      "name_id": "tendency_of_runaway_electron_density",
+      "source_id": "dd:runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+        "choice_probability": 0.62,
+        "confidence": 0.24,
+        "original_reason": "P(choice) 0.62 below 0.8"
+      }
+    },
+    {
+      "name_id": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+      "source_id": "dd:distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+        "choice_probability": 0.76,
+        "confidence": 0.52,
+        "original_reason": "P(choice) 0.76 below 0.8"
+      }
+    },
+    {
+      "name_id": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+      "source_id": "dd:distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+        "choice_probability": 0.78,
+        "confidence": 0.56,
+        "original_reason": "P(choice) 0.78 below 0.8"
+      }
+    },
+    {
+      "name_id": "vertical_position_of_grating",
+      "source_id": "dd:spectrometer_x_ray_crystal/channel/reflector/centre/z",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+        "choice_probability": 0.5,
+        "confidence": 0,
+        "original_reason": "P(choice) 0.50 below 0.8"
+      }
+    },
+    {
+      "name_id": "vertical_total_ion_momentum_diffusivity",
+      "source_id": "dd:plasma_transport/model/ggd/ion/momentum/d/z",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "plasma_transport/model/ggd/ion/momentum/d/z",
+        "choice_probability": 0.78,
+        "confidence": 0.56,
+        "original_reason": "P(choice) 0.78 below 0.8"
+      }
+    },
+    {
+      "name_id": "wave_magnetic_field_amplitude",
+      "source_id": "dd:waves/coherent_wave/full_wave/b_field/normal/values",
+      "reason": "A recovery binding was made below the later approval floor; the lead ruled to unbind it.",
+      "lineage_evidence": {
+        "bound_dd_path": "waves/coherent_wave/full_wave/b_field/normal/values",
+        "choice_probability": 0.68,
+        "confidence": 0.36,
+        "original_reason": "P(choice) 0.68 below 0.8"
+      }
+    }
+  ],
+  "signature": {
+    "algorithm": "sha256",
+    "canonicalization": "jq -cS '.rows'",
+    "scope": "rows",
+    "digest": "f37dcd819ba29abfe7817b1856bdfe2c94572753c6598061aed94b69ea33c105"
+  }
+}
