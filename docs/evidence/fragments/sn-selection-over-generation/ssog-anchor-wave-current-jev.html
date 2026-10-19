@@ -1,0 +1,51 @@
+<section id="ssog-anchor-wave-current-jev">
+  <h3 id="ssog-anchor-wave-current-jev-arm">Jev anchor arm for the wave-driven current drive family</h3>
+  <p id="ssog-anchor-wave-current-jev-scope">
+    One arm of one family of the anchor comparison: the family
+    <code>current_density_due_to_wave_driven_current_drive</code> harmonized in a fresh
+    scratch copy of the archived graph from the Jev anchor, run by
+    <code>ssog-anchor-ab-run.py --family current_density_due_to_wave_driven_current_drive --arm jev</code>
+    at revision <code>5cf53a7b6</code>. The family selection, anchors and adoption rule are
+    the fixed ones registered on 2026-10-18; this node changes neither the runner nor the
+    selection.
+  </p>
+
+  <h4 id="ssog-anchor-wave-current-jev-outcome">Outcome</h4>
+  <ul id="ssog-anchor-wave-current-jev-outcome-list">
+    <li id="ssog-anchor-wave-current-jev-status">Arm <code>outcome_status</code>: <strong>complete</strong>; invocation ended <code>EXIT=0</code>.</li>
+    <li id="ssog-anchor-wave-current-jev-anchor">Anchor recorded and planned: <code>current_density_due_to_wave_driven_current_drive</code> (the Jev anchor), against the heuristic anchor <code>current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code>.</li>
+    <li id="ssog-anchor-wave-current-jev-lint">Lint findings before harmonization <strong>1</strong> (<code>link_missing_reverse</code>), after <strong>1</strong> (<code>link_missing_reverse</code>). No lint change.</li>
+    <li id="ssog-anchor-wave-current-jev-docs-scores">Documentation review scores after: <code>current_density_due_to_wave_driven_current_drive</code> 0.849 (was 0.9625), <code>current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code> 0.9875 (unchanged), <code>parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code> null.</li>
+    <li id="ssog-anchor-wave-current-jev-cost">16 calls, USD 0.5345, 1631.6 s wall; ceiling passed to the apply 1.98 (the smaller of the family's planned-call cap and the USD 2.00 arm budget); the arm spent USD 0.5345, below both.</li>
+    <li id="ssog-anchor-wave-current-jev-stamp">The harmonize receipt's <code>stamped</code> is false and the apply halted after batch 1 of 2 with reason <em>docs acceptance 0.00% &lt; 90.00% (0/1 touched)</em>, <code>resume_from</code> 1, <code>total_accepted</code> 0 over 3 selected members and 1 touched.</li>
+  </ul>
+
+  <h4 id="ssog-anchor-wave-current-jev-containment">Scratch containment</h4>
+  <p id="ssog-anchor-wave-current-jev-containment-text">
+    The arm ran against a fresh scratch copy of the 2026-10-18 archive, proven distinct from
+    the live graph before the apply: scratch 1,770,101 nodes, live 1,771,164, and a marker
+    planted in the scratch instance was present there (1) and absent from the live graph (0),
+    with the scratch count restored afterwards. Containment then held on two controls: the
+    apply's own cost rows are present in the scratch instance (16 rows naming the family),
+    and none are present in the live graph (0 live family rows, 0 live rows carrying the
+    apply's run id). The scratch instance was stopped, its tree removed, and the scratch port
+    pair released.
+  </p>
+
+  <h4 id="ssog-anchor-wave-current-jev-code">Code identity</h4>
+  <p id="ssog-anchor-wave-current-jev-code-text">
+    <code>git_head</code> <code>5cf53a7b6</code>; digest of the <code>imas_codex</code> tree at
+    that head <code>d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd</code>;
+    module under test <code>imas_codex/standard_names/harmonize.py</code> resolved from this
+    worktree.
+  </p>
+
+  <h4 id="ssog-anchor-wave-current-jev-note">Reading this arm</h4>
+  <p id="ssog-anchor-wave-current-jev-note-text">
+    This is one arm of one family. The adoption rule compares a family's two arms, so no
+    verdict on the Jev anchor follows from this record alone; it supplies the Jev side of the
+    comparison for this family. The halt after batch 1 of 2 and the fall in the anchor
+    member's documentation score (0.9625 to 0.849) are observations the aggregating node
+    needs, and the sibling heuristic arm for the same family is a separate node's record.
+  </p>
+</section>
