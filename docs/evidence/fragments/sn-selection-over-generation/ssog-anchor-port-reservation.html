@@ -1,0 +1,49 @@
+<!-- Each concurrent anchor arm now reserves its scratch bolt/http port pair for
+     the arm's whole lifetime, so two arms dispatched together cannot pick the
+     same pair. Module: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py. -->
+<section id="ssog-anchor-port-reservation" data-reckon="evidence">
+  <h2 id="ssog-anchor-port-reservation-heading">Each arm reserves its scratch port pair for the arm's lifetime</h2>
+
+  <p id="ssog-anchor-port-reservation-defect">
+    <code>free_port_pair()</code> returned the first port pair free at the moment it
+    looked. A scratch instance binds its bolt port only after its 2.6 GB dump has
+    loaded, minutes later, so four arms dispatched together all chose the same
+    pair and two shared one instance. That is what the four failed runs recorded:
+    the camera-width heuristic and jev arms both report
+    <code>'scratch_uri': 'bolt://127.0.0.1:28002'</code>, and the isolation check
+    fires on a contrast the peer's own writes disturbed
+    (<code>marked_scratch_nodes 1770102 vs scratch_nodes 1770101</code> in one,
+    <code>1770104</code> in the other). The guard was right; the port choice was
+    wrong.
+  </p>
+
+  <p id="ssog-anchor-port-reservation-change">
+    <code>reserve_port_pair(arm)</code> replaces it. It walks the same range, and
+    for each pair whose ports are free it takes an exclusive, non-blocking
+    <code>fcntl.flock</code> on <code>ssog-scratch-port-<em>&lt;bolt&gt;</em>.lock</code>,
+    writing the holder's <code>pid</code> and <code>arm</code> into the file, then
+    re-probes the ports under the lock before committing. A pair whose lock another
+    arm holds is skipped. The lock is held from reservation until the scratch
+    instance is stopped and its tree removed, released in the arm's <code>finally</code>
+    on every exit path, and the release is idempotent.
+  </p>
+
+  <p id="ssog-anchor-port-reservation-lockdir">
+    The lock directory defaults to <code>/dev/shm</code>, the node-local store every
+    concurrent arm can write, overridable with <code>SSOG_PORT_LOCK_DIR</code>. The
+    brief's suggested <code>/tmp</code> is not usable here: a worker sandbox mounts
+    <code>/tmp</code> read-only, and each arm's own <code>TMPDIR</code> is private to
+    its run, so neither can coordinate two arms.
+  </p>
+
+  <p id="ssog-anchor-port-reservation-measure">
+    Four reservation processes started together, each holding its claim while the
+    others claim, get four distinct pairs: <code>pairs=[28006, 28002, 28004, 28000]
+    distinct=4</code>, <code>EXIT=0</code>. The same check against the unchanged
+    <code>free_port_pair()</code> collides:
+    <code>pairs=[28000, 28000, 28000, 28000] distinct=1</code>, <code>EXIT=1</code>.
+    A claim released in process and reclaimed returns the same pair
+    (<code>reacquired=[28000, 28000]</code>), so the release leaves the descriptor
+    closed. No arm was run and no LLM call was made.
+  </p>
+</section>
