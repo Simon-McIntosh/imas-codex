@@ -1,0 +1,61 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+  "arm": "heuristic",
+  "budget_limit_usd": 2.0,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wall-recomb-heuristic",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wall-recomb-heuristic/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "cost_limit_passed_usd": 2.0,
+  "dump_bytes": 2643183686,
+  "family": "energy_flux_at_wall_due_to_recombination",
+  "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+  "isolation": {
+    "at": "2026-10-19T21:32:51.877132+00:00",
+    "live_nodes": 1771164,
+    "live_probe": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_uri": "bolt://127.0.0.1:28004"
+  },
+  "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+  "kind": "subject",
+  "lint_before": 3,
+  "lint_before_classes": {
+    "link_missing_reverse": 3
+  },
+  "members": [
+    "energy_flux_at_wall_due_to_recombination",
+    "incident_ion_energy_flux_at_wall_due_to_recombination",
+    "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+    "ion_energy_flux_at_wall_due_to_recombination",
+    "neutral_energy_flux_at_wall_due_to_recombination"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/mcintos-1281970-2xmxul7e/instance/logs/neo4j-temp.log",
+  "outcome_status": "running",
+  "planned_calls": 5,
+  "port": 28004,
+  "port_lock": "/dev/shm/ssog-scratch-port-28004.lock",
+  "recorded_anchor_before": "incident_ion_energy_flux_at_wall_due_to_recombination",
+  "scores_before": {
+    "energy_flux_at_wall_due_to_recombination": 0.95625,
+    "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
+    "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
+    "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
+    "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+  },
+  "scratch_removed": null,
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/mcintos-1281970-2xmxul7e",
+  "scratch_uri": "bolt://127.0.0.1:28004",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "started_at": "2026-10-19T21:08:12.185438+00:00"
+}
