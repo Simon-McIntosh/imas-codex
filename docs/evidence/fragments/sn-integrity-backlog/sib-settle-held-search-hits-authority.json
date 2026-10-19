@@ -1,0 +1,372 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "retire-held-source-name-in-favour-of-its-holder",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-superseded-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "link_signed_successor",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component",
+    "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer",
+    "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap",
+    "surface_temperature_of_plasma_facing_component=>surface_temperature",
+    "surface_thickness_of_cryostat=>thickness_of_cryostat",
+    "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "accumulated_total_coolant_absorbed_energy_of_calorimetry_component"
+          ]
+        },
+        {
+          "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+            "accumulated_coolant_absorbed_energy_of_calorimetry_component"
+          ]
+        }
+      ],
+      "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component",
+      "identity": {
+        "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component",
+        "kind": "standard_name",
+        "target_id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "accumulated_coolant_absorbed_energy_of_calorimetry_component"
+          },
+          "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "calibration_factor_of_spectrometer_channel"
+          ]
+        },
+        {
+          "id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "calibration_factor_of_spectrometer_channel",
+            "spectral_calibration_factor_of_spectrometer"
+          ]
+        }
+      ],
+      "id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer",
+      "identity": {
+        "id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer",
+        "kind": "standard_name",
+        "target_id": "calibration_factor_of_spectrometer_channel"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "spectral_calibration_factor_of_spectrometer"
+          },
+          "id": "calibration_factor_of_spectrometer_channel:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "calibration_factor_of_spectrometer_channel"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "calibration_factor_of_spectrometer_channel",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "spectral_calibration_factor_of_spectrometer",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "normal_distance_of_antenna_strap"
+          ]
+        },
+        {
+          "id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "normal_distance_of_antenna_strap",
+            "back_surface_distance_of_antenna_strap"
+          ]
+        }
+      ],
+      "id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap",
+      "identity": {
+        "id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap",
+        "kind": "standard_name",
+        "target_id": "normal_distance_of_antenna_strap"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "back_surface_distance_of_antenna_strap"
+          },
+          "id": "normal_distance_of_antenna_strap:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "normal_distance_of_antenna_strap"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "normal_distance_of_antenna_strap",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "back_surface_distance_of_antenna_strap",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "surface_temperature_of_plasma_facing_component=>surface_temperature:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "surface_temperature_of_plasma_facing_component"
+          ]
+        },
+        {
+          "id": "surface_temperature_of_plasma_facing_component=>surface_temperature:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "surface_temperature_of_plasma_facing_component",
+            "surface_temperature"
+          ]
+        }
+      ],
+      "id": "surface_temperature_of_plasma_facing_component=>surface_temperature",
+      "identity": {
+        "id": "surface_temperature_of_plasma_facing_component=>surface_temperature",
+        "kind": "standard_name",
+        "target_id": "surface_temperature_of_plasma_facing_component"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "surface_temperature"
+          },
+          "id": "surface_temperature_of_plasma_facing_component:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "surface_temperature_of_plasma_facing_component"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "surface_temperature_of_plasma_facing_component",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "surface_temperature",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "surface_thickness_of_cryostat=>thickness_of_cryostat:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "surface_thickness_of_cryostat"
+          ]
+        },
+        {
+          "id": "surface_thickness_of_cryostat=>thickness_of_cryostat:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "surface_thickness_of_cryostat",
+            "thickness_of_cryostat"
+          ]
+        }
+      ],
+      "id": "surface_thickness_of_cryostat=>thickness_of_cryostat",
+      "identity": {
+        "id": "surface_thickness_of_cryostat=>thickness_of_cryostat",
+        "kind": "standard_name",
+        "target_id": "surface_thickness_of_cryostat"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "thickness_of_cryostat"
+          },
+          "id": "surface_thickness_of_cryostat:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "surface_thickness_of_cryostat"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "surface_thickness_of_cryostat",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "thickness_of_cryostat",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "total_thermal_radiative_power_of_divertor_target"
+          ]
+        },
+        {
+          "id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "total_thermal_radiative_power_of_divertor_target",
+            "thermal_radiative_power_of_divertor_target"
+          ]
+        }
+      ],
+      "id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target",
+      "identity": {
+        "id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target",
+        "kind": "standard_name",
+        "target_id": "total_thermal_radiative_power_of_divertor_target"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "thermal_radiative_power_of_divertor_target"
+          },
+          "id": "total_thermal_radiative_power_of_divertor_target:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "total_thermal_radiative_power_of_divertor_target"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "total_thermal_radiative_power_of_divertor_target",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "thermal_radiative_power_of_divertor_target",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "305dc04f33023a0c9abbbe051632b443d2715a544a725c7e490715be15d36772"
+  }
+}

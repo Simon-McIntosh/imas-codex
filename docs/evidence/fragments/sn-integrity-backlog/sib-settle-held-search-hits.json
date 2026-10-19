@@ -1,0 +1,4021 @@
+{
+  "node": "sib-settle-held-search-hits",
+  "plan": "sn-integrity-backlog",
+  "section": "\u00a738",
+  "population": "held_search_hits",
+  "floors": {
+    "probability": 0.8,
+    "confidence": 0.5
+  },
+  "before": {
+    "dropped_edge": 45,
+    "derived_parent": 2,
+    "never_bound": 23,
+    "unchained_holder": 19,
+    "orphan_awaiting_retirement": 3
+  },
+  "sourceless_before": 92,
+  "after": {
+    "dropped_edge": 40,
+    "derived_parent": 2,
+    "never_bound": 22,
+    "unchained_holder": 19,
+    "orphan_awaiting_retirement": 3
+  },
+  "sourceless_after": 86,
+  "candidate_count": 60,
+  "worklist_count": 50,
+  "not_sourceless": [
+    "curvature_inverse_of_arc_of_circle_center",
+    "elongation_radial_derivative_of_flux_surface",
+    "incident_energy_flux_at_wall_due_to_radiation",
+    "neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission",
+    "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+    "parallel_ion_charge_state_energy_convection_velocity",
+    "poloidal_effective_ion_state_momentum_diffusivity",
+    "size_of_camera",
+    "total_launched_power_due_to_ion_cyclotron_heating",
+    "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions"
+  ],
+  "no_holder": [
+    "cumulative_ethylene_count_due_to_gas_injection",
+    "cumulative_inside_flux_surface_total_electron_density",
+    "energy_diffusion_coefficient_due_to_diffusion",
+    "flux_surface_averaged_parallel_electric_field_at_separatrix",
+    "net_plasma_power_density",
+    "normal_particle_flux_at_wall_due_to_recombination",
+    "perturbed_vector_potential",
+    "radial_surface_normal_of_control_surface",
+    "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+    "total_particle_flux",
+    "volume_averaged_linear_electron_decay_time"
+  ],
+  "source_counts": {
+    "corrected_filter": 50,
+    "corrected_referred_to_lead": 21,
+    "corrected_no_surviving_candidate": 15,
+    "searched_referred_to_dd_search": 27,
+    "lineage_referred_to_dd_search": 27,
+    "lineage_referred_to_lead": 0
+  },
+  "retired_count": 6,
+  "referral_count": 44,
+  "suspect_holder_count": 0,
+  "spend_usd": 0.00360868,
+  "judge_model": "typesafe/jev-1.13",
+  "authority": {
+    "path": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-authority.json",
+    "file_sha256": "73f956c8fd129316a5db2acdec2050473e55dd508eac3e19632ca20ee5bb5ae6",
+    "payload_sha256": "305dc04f33023a0c9abbbe051632b443d2715a544a725c7e490715be15d36772",
+    "manifest_sha256": "edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c",
+    "operation_id": "retire-held-source-name-in-favour-of-its-holder",
+    "receipt_operation": "link_signed_successor"
+  },
+  "preview": {
+    "schema": "imas-codex.signed-repair-receipt.v1",
+    "outcome": "would_apply",
+    "changed": 0,
+    "would_change": 6,
+    "counts": {
+      "authority_rows": 6,
+      "admitted": 6,
+      "refused": 0
+    },
+    "refusals": [],
+    "manifest_sha256": "edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c",
+    "authority_file_sha256": "73f956c8fd129316a5db2acdec2050473e55dd508eac3e19632ca20ee5bb5ae6",
+    "authority_payload_sha256": "305dc04f33023a0c9abbbe051632b443d2715a544a725c7e490715be15d36772",
+    "quiet_gate": null
+  },
+  "receipt": {
+    "schema": "imas-codex.signed-repair-receipt.v1",
+    "outcome": "applied",
+    "changed": 6,
+    "mutations": 6,
+    "receipt_rows": 6,
+    "persistent_writes": 12,
+    "counts": {
+      "authority_rows": 6,
+      "admitted": 6,
+      "refused": 0
+    },
+    "refusals": [],
+    "manifest_sha256": "edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c",
+    "authority_file_sha256": "73f956c8fd129316a5db2acdec2050473e55dd508eac3e19632ca20ee5bb5ae6",
+    "authority_payload_sha256": "305dc04f33023a0c9abbbe051632b443d2715a544a725c7e490715be15d36772",
+    "change_ids": [
+      "sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:0ca09476ea9279e3f68594b9",
+      "sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:25538ae719c4c07bc365ca9d",
+      "sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:4edb7113215fd11c80331117",
+      "sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:53101970ded05a9f2ab61e74",
+      "sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:d3218a71525b4c10ead42011",
+      "sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:fc099e7078d1de0cb7796ecd"
+    ],
+    "quiet_gate": {
+      "window_seconds": 6.0,
+      "foreign_transactions_started": 0,
+      "foreign_open_queries": [],
+      "busy": false
+    }
+  },
+  "quiet_graph": {
+    "live_crew_runs": [
+      "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+      "r-20261009T015811146619-cocos-determination-core",
+      "r-20261009T033905549459-plan-review-of-jt60sa-machine-map",
+      "r-20261017T193125631298-integrated-run-assembly",
+      "r-20261018T150822949393-a-stopped-worker-ends-inside-its-step",
+      "r-20261018T151304298883-a-producer-sweeps-only-on-change",
+      "r-20261018T203817697724-vs1-switched-pulse",
+      "r-20261018T204951664681-stray-edge-rate",
+      "r-20261019T000654917566-review-of-reload-carries-skills-population-at-merge-b6558f0d1cab",
+      "r-20261019T004351278047-reload-shim-interpreter-population-at-merge",
+      "r-20261019T010646193471-review-of-reload-shim-interpreter-population-at-merge-461f3b8256ed",
+      "r-20261019T012701997576-arc-assembly",
+      "r-20261019T034147435864-supersede-a-misattributed-review-row",
+      "r-20261019T035129214124-sib-settle-held-search-hits",
+      "r-20261019T035155396564-validator-signed-psi",
+      "r-20261019T035327482346-ssog-anchor-family-runner",
+      "r-20261019T035401464003-tcv-liuqe-recurate",
+      "r-20261019T035447399952-curate-psi-consistency-gate",
+      "r-20261019T035549247584-srtj-cohort-estimate",
+      "r-20261019T035634203950-reference-sign-guard",
+      "r-20261019T035829094164-exact-integrator-convergence",
+      "r-20261019T040158952125-tf-supply-circuit",
+      "r-20261019T040333218543-plan-review-of-the-monitor-shows-the-work-it-watches",
+      "r-20261019T041502001216-review-of-a-producer-sweeps-only-on-change-d84d1d601931",
+      "r-20261019T041647056272-review-of-arc-assembly-b547f9219ebf",
+      "r-20261019T041947445167-review-of-tcv-liuqe-recurate-b979ae2ebc49",
+      "r-20261019T042001309375-review-of-a-stopped-worker-ends-inside-its-step-a6808040694c",
+      "r-20261019T042319449201-certificate-550-convergence",
+      "r-20261019T042343658619-plan-review-of-a-read-answers-inside-its-deadline",
+      "r-20261019T042350099511-sib-signed-recovery-unbind"
+    ],
+    "live_crew_run_count": 30,
+    "runs_touched_within_1800s": [
+      {
+        "run": "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+        "age_seconds": 106
+      },
+      {
+        "run": "r-20261009T015811146619-cocos-determination-core",
+        "age_seconds": 33
+      },
+      {
+        "run": "r-20261018T150822949393-a-stopped-worker-ends-inside-its-step",
+        "age_seconds": 324
+      },
+      {
+        "run": "r-20261018T151304298883-a-producer-sweeps-only-on-change",
+        "age_seconds": 441
+      },
+      {
+        "run": "r-20261018T203817697724-vs1-switched-pulse",
+        "age_seconds": 436
+      },
+      {
+        "run": "r-20261018T204951664681-stray-edge-rate",
+        "age_seconds": 440
+      },
+      {
+        "run": "r-20261019T012701997576-arc-assembly",
+        "age_seconds": 623
+      },
+      {
+        "run": "r-20261019T035401464003-tcv-liuqe-recurate",
+        "age_seconds": 453
+      },
+      {
+        "run": "r-20261019T035829094164-exact-integrator-convergence",
+        "age_seconds": 1606
+      },
+      {
+        "run": "r-20261019T040158952125-tf-supply-circuit",
+        "age_seconds": 1434
+      },
+      {
+        "run": "r-20261019T040333218543-plan-review-of-the-monitor-shows-the-work-it-watches",
+        "age_seconds": 344
+      },
+      {
+        "run": "r-20261019T041502001216-review-of-a-producer-sweeps-only-on-change-d84d1d601931",
+        "age_seconds": 584
+      },
+      {
+        "run": "r-20261019T041647056272-review-of-arc-assembly-b547f9219ebf",
+        "age_seconds": 610
+      },
+      {
+        "run": "r-20261019T041947445167-review-of-tcv-liuqe-recurate-b979ae2ebc49",
+        "age_seconds": 444
+      },
+      {
+        "run": "r-20261019T042001309375-review-of-a-stopped-worker-ends-inside-its-step-a6808040694c",
+        "age_seconds": 304
+      },
+      {
+        "run": "r-20261019T042319449201-certificate-550-convergence",
+        "age_seconds": 202
+      },
+      {
+        "run": "r-20261019T042343658619-plan-review-of-a-read-answers-inside-its-deadline",
+        "age_seconds": 177
+      },
+      {
+        "run": "r-20261019T042350099511-sib-signed-recovery-unbind",
+        "age_seconds": 186
+      }
+    ],
+    "neo4j_jobs": [
+      "1288978 codex-neo4j RUNNING 16:38:00"
+    ],
+    "activity_window_seconds": 6.0,
+    "foreign_transactions_started": 0,
+    "foreign_open_queries": [],
+    "quiet": true
+  },
+  "quiet_graph_refusal": {
+    "header": [
+      "# mode=quiet-refuse"
+    ],
+    "exit_line": "EXIT=0",
+    "exit_code": 0,
+    "payload": {
+      "refused_as_expected": true,
+      "detail": "graph is not quiet; refusing the signed write: {'window_seconds': 6.0, 'foreign_transactions_started': 3, 'foreign_open_queries': ['MATCH (n) RETURN count(n)'], 'busy': True}"
+    }
+  },
+  "foreign_population_moves": {
+    "dropped_edge": [
+      45,
+      40
+    ],
+    "never_bound": [
+      23,
+      22
+    ]
+  },
+  "apply_overlap": {
+    "window": {
+      "from": "2026-10-19T04:23:35.344000000+00:00",
+      "to": "2026-10-19T04:29:35.344000000+00:00"
+    },
+    "own_receipts": {
+      "lo": "2026-10-19T04:26:35.344000000+00:00",
+      "hi": "2026-10-19T04:26:35.344000000+00:00",
+      "n": 6,
+      "digests": [
+        "edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c"
+      ]
+    },
+    "changes_in_window": [
+      {
+        "run_id": "r-20261019T035129214124-sib-settle-held-search-hits",
+        "op": "link_signed_successor",
+        "row_id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component",
+        "frm": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+        "to": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+        "at": "2026-10-19T04:26:35.344000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T035129214124-sib-settle-held-search-hits",
+        "op": "link_signed_successor",
+        "row_id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer",
+        "frm": "calibration_factor_of_spectrometer_channel",
+        "to": "spectral_calibration_factor_of_spectrometer",
+        "at": "2026-10-19T04:26:35.344000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T035129214124-sib-settle-held-search-hits",
+        "op": "link_signed_successor",
+        "row_id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap",
+        "frm": "normal_distance_of_antenna_strap",
+        "to": "back_surface_distance_of_antenna_strap",
+        "at": "2026-10-19T04:26:35.344000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T035129214124-sib-settle-held-search-hits",
+        "op": "link_signed_successor",
+        "row_id": "surface_temperature_of_plasma_facing_component=>surface_temperature",
+        "frm": "surface_temperature_of_plasma_facing_component",
+        "to": "surface_temperature",
+        "at": "2026-10-19T04:26:35.344000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T035129214124-sib-settle-held-search-hits",
+        "op": "link_signed_successor",
+        "row_id": "surface_thickness_of_cryostat=>thickness_of_cryostat",
+        "frm": "surface_thickness_of_cryostat",
+        "to": "thickness_of_cryostat",
+        "at": "2026-10-19T04:26:35.344000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T035129214124-sib-settle-held-search-hits",
+        "op": "link_signed_successor",
+        "row_id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target",
+        "frm": "total_thermal_radiative_power_of_divertor_target",
+        "to": "thermal_radiative_power_of_divertor_target",
+        "at": "2026-10-19T04:26:35.344000000+00:00"
+      }
+    ],
+    "foreign_changes": [],
+    "foreign_changes_touching_settled_names": [],
+    "sources_in_window": [],
+    "foreign_sources_touching_settled_names": [],
+    "settled_name_updates": [],
+    "sources_rebound_after_last_receipt": [],
+    "updated_at_read_is_determinative": false,
+    "overlap": false
+  },
+  "source_held_guard": {
+    "admitted": 6,
+    "pairs": [
+      {
+        "predecessor": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+        "successor": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [],
+        "successor_holds_paths": [
+          "calorimetry/group/component/energy_cumulated"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "calibration_factor_of_spectrometer_channel",
+        "successor": "spectral_calibration_factor_of_spectrometer",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [],
+        "successor_holds_paths": [],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "normal_distance_of_antenna_strap",
+        "successor": "back_surface_distance_of_antenna_strap",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [],
+        "successor_holds_paths": [
+          "ic_antennas/antenna/module/strap/distance_to_conductor"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "surface_temperature_of_plasma_facing_component",
+        "successor": "surface_temperature",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [],
+        "successor_holds_paths": [
+          "camera_ir/channel/camera/frame/apparent_temperature"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "surface_thickness_of_cryostat",
+        "successor": "thickness_of_cryostat",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [],
+        "successor_holds_paths": [
+          "cryostat/description_2d/cryostat/unit/annular/thickness",
+          "cryostat/description_2d/cryostat/unit/element/midplane_thickness"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "total_thermal_radiative_power_of_divertor_target",
+        "successor": "thermal_radiative_power_of_divertor_target",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [],
+        "successor_holds_paths": [
+          "divertors/divertor/target/power_black_body"
+        ],
+        "paths_successor_does_not_hold": []
+      }
+    ]
+  },
+  "verification": {
+    "counts": {
+      "dropped_edge": 40,
+      "derived_parent": 2,
+      "never_bound": 22,
+      "unchained_holder": 19,
+      "orphan_awaiting_retirement": 3
+    },
+    "sourceless_total": 86,
+    "targets": [
+      "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+      "calibration_factor_of_spectrometer_channel",
+      "normal_distance_of_antenna_strap",
+      "surface_temperature_of_plasma_facing_component",
+      "surface_thickness_of_cryostat",
+      "total_thermal_radiative_power_of_divertor_target"
+    ],
+    "receipt_names": 6,
+    "receipt_targets": [
+      "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+      "calibration_factor_of_spectrometer_channel",
+      "normal_distance_of_antenna_strap",
+      "surface_temperature_of_plasma_facing_component",
+      "surface_thickness_of_cryostat",
+      "total_thermal_radiative_power_of_divertor_target"
+    ],
+    "targets_without_receipt": [],
+    "receipt_operations": [
+      "link_signed_successor"
+    ],
+    "digests": [
+      "edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c"
+    ],
+    "retired_stages": [
+      [
+        "superseded",
+        "superseded"
+      ]
+    ],
+    "before": {
+      "dropped_edge": 45,
+      "derived_parent": 2,
+      "never_bound": 23,
+      "unchained_holder": 19,
+      "orphan_awaiting_retirement": 3
+    },
+    "expected_sourceless_total": 86,
+    "retired_still_sourceless": [],
+    "reconstructed_baseline_total": 92,
+    "reconstructed_baseline_counts": {
+      "dropped_edge": 40,
+      "derived_parent": 2,
+      "never_bound": 22,
+      "unchained_holder": 19,
+      "orphan_awaiting_retirement": 3
+    },
+    "population_moves": {
+      "dropped_edge": [
+        45,
+        40
+      ],
+      "never_bound": [
+        23,
+        22
+      ]
+    },
+    "shortfall": [],
+    "checks": {
+      "sourceless_fell_by_retired": true,
+      "no_retired_name_still_sourceless": true,
+      "nothing_entered_the_population": true,
+      "every_target_has_receipt": true,
+      "no_receipt_outside_targets": true,
+      "all_targets_superseded": true
+    },
+    "foreign_population_moves": {
+      "dropped_edge": [
+        45,
+        40
+      ],
+      "never_bound": [
+        23,
+        22
+      ]
+    }
+  },
+  "verification_log": {
+    "header": [
+      "# mode=verify"
+    ],
+    "exit_line": "EXIT=0",
+    "exit_code": 0,
+    "payload": {
+      "counts": {
+        "dropped_edge": 40,
+        "derived_parent": 2,
+        "never_bound": 22,
+        "unchained_holder": 19,
+        "orphan_awaiting_retirement": 3
+      },
+      "sourceless_total": 86,
+      "targets": [
+        "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+        "calibration_factor_of_spectrometer_channel",
+        "normal_distance_of_antenna_strap",
+        "surface_temperature_of_plasma_facing_component",
+        "surface_thickness_of_cryostat",
+        "total_thermal_radiative_power_of_divertor_target"
+      ],
+      "receipt_names": 6,
+      "receipt_targets": [
+        "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+        "calibration_factor_of_spectrometer_channel",
+        "normal_distance_of_antenna_strap",
+        "surface_temperature_of_plasma_facing_component",
+        "surface_thickness_of_cryostat",
+        "total_thermal_radiative_power_of_divertor_target"
+      ],
+      "targets_without_receipt": [],
+      "receipt_operations": [
+        "link_signed_successor"
+      ],
+      "digests": [
+        "edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c"
+      ],
+      "retired_stages": [
+        [
+          "superseded",
+          "superseded"
+        ]
+      ],
+      "before": {
+        "dropped_edge": 45,
+        "derived_parent": 2,
+        "never_bound": 23,
+        "unchained_holder": 19,
+        "orphan_awaiting_retirement": 3
+      },
+      "expected_sourceless_total": 86,
+      "retired_still_sourceless": [],
+      "reconstructed_baseline_total": 92,
+      "reconstructed_baseline_counts": {
+        "dropped_edge": 40,
+        "derived_parent": 2,
+        "never_bound": 22,
+        "unchained_holder": 19,
+        "orphan_awaiting_retirement": 3
+      },
+      "population_moves": {
+        "dropped_edge": [
+          45,
+          40
+        ],
+        "never_bound": [
+          23,
+          22
+        ]
+      },
+      "shortfall": [],
+      "checks": {
+        "sourceless_fell_by_retired": true,
+        "no_retired_name_still_sourceless": true,
+        "nothing_entered_the_population": true,
+        "every_target_has_receipt": true,
+        "no_receipt_outside_targets": true,
+        "all_targets_superseded": true
+      },
+      "foreign_population_moves": {
+        "dropped_edge": [
+          45,
+          40
+        ],
+        "never_bound": [
+          23,
+          22
+        ]
+      }
+    }
+  },
+  "falsification": {
+    "check_failed_as_expected": true,
+    "detail": "read-back mismatch: {'sourceless_fell_by_retired': False, 'no_retired_name_still_sourceless': True, 'nothing_entered_the_population': True, 'every_target_has_receipt': True, 'no_receipt_outside_targets': True, 'all_targets_superseded': True} :: {'counts': {'dropped_edge': 40, 'derived_parent': 2, 'n"
+  },
+  "falsification_log": {
+    "header": [
+      "# mode=falsify"
+    ],
+    "exit_line": "EXIT=0",
+    "exit_code": 0,
+    "payload": {
+      "check_failed_as_expected": true,
+      "detail": "read-back mismatch: {'sourceless_fell_by_retired': False, 'no_retired_name_still_sourceless': True, 'nothing_entered_the_population': True, 'every_target_has_receipt': True, 'no_receipt_outside_targets': True, 'all_targets_superseded': True} :: {'counts': {'dropped_edge': 40, 'derived_parent': 2, 'n"
+    }
+  },
+  "negative_control": {
+    "planted": {
+      "id": "PLANTED-neutron_rate",
+      "holders": [
+        "PLANTED-voltage_amplitude"
+      ],
+      "holder": null,
+      "choice": "a different quantity from all of these",
+      "probability": 0.97,
+      "confidence": 0.95,
+      "answered": true
+    },
+    "admitted_by_floors": [],
+    "refused": true
+  },
+  "lead_referral_total": {
+    "search_and_lineage_running_total": 67,
+    "search_step_detail": {
+      "lineage_referred_to_lead": 17,
+      "running_total": 67,
+      "this_node_no_candidate": 16,
+      "this_node_total": 50,
+      "this_node_with_candidates": 34
+    },
+    "unchained_holder_referrals": 19,
+    "this_node_referrals": 44,
+    "this_node_referrals_by_stage": {
+      "reviewed": 3,
+      "accepted": 5,
+      "exhausted": 36
+    },
+    "this_node_referrals_live": 8,
+    "this_node_referrals_exhausted": 36,
+    "running_total": 130
+  },
+  "per_name": [
+    {
+      "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+          "unit": "J",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `accumulated_coolant_absorbed_energy_of_calorimetry_component`",
+      "holder": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+      "probability": 0.97,
+      "confidence": 0.95,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity as its holder, cleared both floors"
+    },
+    {
+      "id": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+      "population": "never_bound",
+      "name_stage": "reviewed",
+      "holders": [
+        {
+          "id": "electron_temperature",
+          "unit": "eV",
+          "physics_domain": "magnetohydrodynamics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "volume_averaged_electron_temperature",
+          "unit": "eV",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.93,
+      "confidence": 0.91,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "calibration_factor_of_spectrometer_channel",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "spectral_calibration_factor_of_spectrometer",
+          "unit": "m^-3.sr^-1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `spectral_calibration_factor_of_spectrometer`",
+      "holder": "spectral_calibration_factor_of_spectrometer",
+      "probability": 0.92,
+      "confidence": 0.88,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity as its holder, cleared both floors"
+    },
+    {
+      "id": "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [
+        {
+          "id": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+          "unit": "J",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "fast_particle_energy",
+          "unit": "J",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.75,
+      "confidence": 0.67,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "count_normalized_at_detector_pixel",
+      "population": "never_bound",
+      "name_stage": "reviewed",
+      "holders": [
+        {
+          "id": "neutron_response_function_of_neutron_detector",
+          "unit": "1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_ion_species_number_density",
+          "unit": "1",
+          "physics_domain": "turbulence",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.99,
+      "confidence": 0.99,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "cumulative_ethylene_count_due_to_gas_injection",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "cumulative_inside_flux_surface_total_electron_density",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "deposited_power_at_divertor_target",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "absorbed_radiated_power_at_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "absorbed_radiated_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "electron_power_at_outer_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "heat_power_of_divertor",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "neutral_power_at_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "plasma_power_at_divertor_target_due_to_recombination",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_divertor_due_to_convection",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_divertor_due_to_ohmic_dissipation",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thermal_radiative_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_incident_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.62,
+      "confidence": 0.59,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "electron_energy_flux_limiter_coefficient",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "radial_ion_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_neutral_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_neutral_state_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.99,
+      "confidence": 0.99,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "electron_particle_diffusivity",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "parallel_electron_diffusivity",
+          "unit": "m^2.s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_effective_electron_diffusivity",
+          "unit": "m^2.s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.68,
+      "confidence": 0.57,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "electron_temperature_at_first_wall",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "electron_temperature",
+          "unit": "eV",
+          "physics_domain": "magnetohydrodynamics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.56,
+      "confidence": 0.34,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "electrostatic_potential_at_outboard_midplane",
+      "population": "dropped_edge",
+      "name_stage": "reviewed",
+      "holders": [
+        {
+          "id": "electrostatic_potential",
+          "unit": "V",
+          "physics_domain": "magnetohydrodynamics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "electrostatic_potential_at_langmuir_probe_position",
+          "unit": "V",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.56,
+      "confidence": 0.41,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "energy_diffusion_coefficient_due_to_diffusion",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "fraction_of_neutron_detector_converter",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "neutron_response_function_of_neutron_detector",
+          "unit": "1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "ratio_of_tritium_density_to_deuterium_density",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "spectral_efficiency_of_neutron_detector",
+          "unit": "1",
+          "physics_domain": "particle_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "front_surface_area_of_langmuir_probe",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "effective_area_of_langmuir_probe",
+          "unit": "m^2",
+          "physics_domain": "particle_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "poloidal_plane_cross_sectional_area_of_flux_surface",
+          "unit": "m^2",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "wetted_area_of_langmuir_probe",
+          "unit": "m^2",
+          "physics_domain": "particle_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `wetted_area_of_langmuir_probe`",
+      "holder": "wetted_area_of_langmuir_probe",
+      "probability": 0.5,
+      "confidence": 0.37,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "ion_charge_state_energy_flux_limiter_coefficient",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "radial_ion_state_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.94,
+      "confidence": 0.91,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "ion_power",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "total_ion_heating_power",
+          "unit": "W",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power",
+          "unit": "W",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power_at_inner_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.61,
+      "confidence": 0.51,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "ion_state_energy_flux_limiter_coefficient",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "radial_ion_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_ion_state_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_neutral_state_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.94,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "magnetic_shear_at_pedestal_top",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "magnetic_shear_at_flux_surface",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "magnetic_shear_at_sawtooth_inversion_radius",
+          "unit": "1",
+          "physics_domain": "magnetohydrodynamics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.89,
+      "confidence": 0.85,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "momentum_due_to_hot_tail",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "runaway_electron_critical_momentum_due_to_hot_tail",
+          "unit": "kg.m^-1.s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "net_forward_power_of_wave_beam",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "electron_absorbed_power_of_beam_tracing_beam",
+          "unit": "W",
+          "physics_domain": "electromagnetic_wave_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "ion_absorbed_power_of_beam_tracing_beam",
+          "unit": "W",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "launched_power_of_lower_hybrid_antenna",
+          "unit": "W",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_absorbed_wave_power",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_absorbed_wave_power_at_inside_flux_surface",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `launched_power_of_lower_hybrid_antenna`",
+      "holder": "launched_power_of_lower_hybrid_antenna",
+      "probability": 0.58,
+      "confidence": 0.51,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "net_plasma_current_due_to_ohmic_current_drive",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "current_due_to_non_inductive_current_drive",
+          "unit": "A",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "plasma_current",
+          "unit": "A",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.98,
+      "confidence": 0.97,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "net_plasma_power_density",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "neutron_flux_due_to_fusion",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [
+        {
+          "id": "power_due_to_fusion_reactions",
+          "unit": "s^-1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_electron_source_rate",
+          "unit": "s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_particle_source_rate",
+          "unit": "s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.99,
+      "confidence": 0.99,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "normal_distance_of_antenna_strap",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "back_surface_distance_of_antenna_strap",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "height_of_antenna_strap",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "inner_radius_of_antenna_strap",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "major_length_of_antenna_strap",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "outer_radius_of_antenna_strap",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_offset_of_lower_hybrid_antenna",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radius_of_antenna_strap",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thickness_of_antenna_strap",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "toroidal_width_of_antenna_strap",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `back_surface_distance_of_antenna_strap`",
+      "holder": "back_surface_distance_of_antenna_strap",
+      "probability": 0.97,
+      "confidence": 0.97,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity as its holder, cleared both floors"
+    },
+    {
+      "id": "normal_particle_flux_at_wall_due_to_recombination",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "normalized_poloidal_magnetic_flux_at_pedestal_top",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "toroidal_angle_of_measurement_position",
+          "unit": "rad",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "normalized_toroidal_hard_xray_peak_external_half_width",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "inner_hard_xray_half_width_at_emissivity_peak",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate_at_measurement_position",
+          "unit": "1",
+          "physics_domain": "electromagnetic_wave_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_hard_xray_peak_lower_bound_width",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "outer_hard_xray_half_width_at_emissivity_peak",
+          "unit": "1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `outer_hard_xray_half_width_at_emissivity_peak`",
+      "holder": "outer_hard_xray_half_width_at_emissivity_peak",
+      "probability": 0.51,
+      "confidence": 0.43,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "normalized_toroidal_hard_xray_peak_upper_bound_width",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "inner_hard_xray_half_width_at_emissivity_peak",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate_at_measurement_position",
+          "unit": "1",
+          "physics_domain": "electromagnetic_wave_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_hard_xray_peak_lower_bound_width",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "outer_hard_xray_half_width_at_emissivity_peak",
+          "unit": "1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `outer_hard_xray_half_width_at_emissivity_peak`",
+      "holder": "outer_hard_xray_half_width_at_emissivity_peak",
+      "probability": 0.73,
+      "confidence": 0.69,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "normalized_toroidal_thermal_plasma_beta",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "normalized_toroidal_beta",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "poloidal_beta",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "toroidal_beta",
+          "unit": "1",
+          "physics_domain": "general",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.93,
+      "confidence": 0.91,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "perturbed_vector_potential",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "radial_coordinate_of_vacuum_vessel",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "reference_major_radius",
+          "unit": "m",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.43,
+      "confidence": 0.14,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "radial_surface_normal_of_control_surface",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "root_mean_square_spectral_width_of_spectrometer_channel",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [
+        {
+          "id": "lower_wavelength_of_filter",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "reference_calibration_wavelength_of_spectrometer_channel",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "reference_wavelength_of_spectrometer_channel",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "spectral_calibration_factor_of_spectrometer_channel",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "spectral_wavelength_of_optical_element",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "wavelength_of_bragg_crystal",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.98,
+      "confidence": 0.98,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "surface_temperature_of_plasma_facing_component",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "coolant_temperature_of_plant_component_port",
+          "unit": "K",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "maximum_surface_temperature",
+          "unit": "K",
+          "physics_domain": "plasma_wall_interactions",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "surface_temperature",
+          "unit": "K",
+          "physics_domain": "plasma_wall_interactions",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "temperature_at_wall",
+          "unit": "K",
+          "physics_domain": "plasma_wall_interactions",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `surface_temperature`",
+      "holder": "surface_temperature",
+      "probability": 0.85,
+      "confidence": 0.82,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity as its holder, cleared both floors"
+    },
+    {
+      "id": "surface_thickness_of_cryostat",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "thickness_of_breeder_blanket_layer",
+          "unit": "m",
+          "physics_domain": "structural_components",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thickness_of_cryostat",
+          "unit": "m",
+          "physics_domain": "structural_components",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thickness_of_vacuum_vessel",
+          "unit": "m",
+          "physics_domain": "structural_components",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `thickness_of_cryostat`",
+      "holder": "thickness_of_cryostat",
+      "probability": 0.97,
+      "confidence": 0.96,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity as its holder, cleared both floors"
+    },
+    {
+      "id": "tangential_curvature_inverse_of_optical_element",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "curvature_of_electron_cyclotron_launcher_mirror",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "first_local_tangential_back_surface_radius_of_optical_element",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "first_local_tangential_front_surface_radius_of_optical_element",
+          "unit": "m",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "second_local_tangential_back_surface_radius_of_optical_element",
+          "unit": "m",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "second_local_tangential_front_surface_radius_of_optical_element",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "vertical_back_surface_curvature_of_optical_element",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.45,
+      "confidence": 0.37,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "thermal_energy_confinement_time",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "coolant_transit_time_of_plant_component_port",
+          "unit": "s",
+          "physics_domain": "mechanical_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [
+        {
+          "id": "normalized_toroidal_wave_vector_of_beam_tracing_beam",
+          "unit": "1",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "poloidal_angle_of_beam_tracing_beam",
+          "unit": "rad",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_wave_vector_normalized_of_beam_tracing_beam",
+          "unit": "1",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "vertical_wave_vector_normalized_of_beam_tracing_beam",
+          "unit": "1",
+          "physics_domain": "electromagnetic_wave_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.51,
+      "confidence": 0.41,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "total_absorbed_power_of_plant_system",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "net_power",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_plant_subsystem",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_plant_system",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_heating_power_due_to_fusion_reactions",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power",
+          "unit": "W",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_plasma_radiated_power",
+          "unit": "W",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_power",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `total_power`",
+      "holder": "total_power",
+      "probability": 0.48,
+      "confidence": 0.42,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "power_due_to_fusion_reactions",
+          "unit": "s^-1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.93,
+      "confidence": 0.89,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "total_incident_thermal_power",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "incident_radiated_power_of_breeder_blanket_module",
+          "unit": "W",
+          "physics_domain": "structural_components",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "incident_thermal_power_at_wall",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_plant_subsystem",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thermal_electron_power_at_inside_flux_surface",
+          "unit": "W",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_heating_power_due_to_fusion_reactions",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_incident_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power",
+          "unit": "W",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power_at_inner_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_power",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_thermal_power_at_outlet",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.53,
+      "confidence": 0.49,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "total_ion_momentum_diffusivity",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "poloidal_effective_ion_state_momentum_diffusivity",
+          "unit": "m^2.s^-1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.63,
+      "confidence": 0.45,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "total_particle_flux",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "total_particle_flux_at_divertor_target_due_to_recycling",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "electron_source_rate_due_to_surface_emission",
+          "unit": "s^-1",
+          "physics_domain": "plasma_wall_interactions",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "incident_neutral_particle_flux_at_wall",
+          "unit": "s^-1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_particle_source_rate_of_divertor_due_to_recycling",
+          "unit": "s^-1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `total_particle_source_rate_of_divertor_due_to_recycling`",
+      "holder": "total_particle_source_rate_of_divertor_due_to_recycling",
+      "probability": 0.66,
+      "confidence": 0.57,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "total_thermal_radiative_power_of_divertor_target",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "absorbed_radiated_power_at_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "absorbed_radiated_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "neutral_power_at_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_at_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thermal_radiative_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thermal_radiative_power_of_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power_at_inner_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `thermal_radiative_power_of_divertor_target`",
+      "holder": "thermal_radiative_power_of_divertor_target",
+      "probability": 0.88,
+      "confidence": 0.87,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity as its holder, cleared both floors"
+    },
+    {
+      "id": "vertical_outline_of_wall",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "vertical_coordinate_of_active_wall_point",
+          "unit": "m",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "vertical_coordinate_of_dr_dz_zero_point",
+          "unit": "m",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "vertical_outline_of_divertor_tile",
+          "unit": "m",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.68,
+      "confidence": 0.6,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "volume_averaged_linear_electron_decay_time",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    }
+  ],
+  "referrals": [
+    {
+      "id": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+      "population": "never_bound",
+      "name_stage": "reviewed",
+      "holders": [
+        {
+          "id": "electron_temperature",
+          "unit": "eV",
+          "physics_domain": "magnetohydrodynamics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "volume_averaged_electron_temperature",
+          "unit": "eV",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.93,
+      "confidence": 0.91,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [
+        {
+          "id": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+          "unit": "J",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "fast_particle_energy",
+          "unit": "J",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.75,
+      "confidence": 0.67,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "count_normalized_at_detector_pixel",
+      "population": "never_bound",
+      "name_stage": "reviewed",
+      "holders": [
+        {
+          "id": "neutron_response_function_of_neutron_detector",
+          "unit": "1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_ion_species_number_density",
+          "unit": "1",
+          "physics_domain": "turbulence",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.99,
+      "confidence": 0.99,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "cumulative_ethylene_count_due_to_gas_injection",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "cumulative_inside_flux_surface_total_electron_density",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "deposited_power_at_divertor_target",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "absorbed_radiated_power_at_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "absorbed_radiated_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "electron_power_at_outer_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "heat_power_of_divertor",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "neutral_power_at_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "plasma_power_at_divertor_target_due_to_recombination",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_divertor_due_to_convection",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_divertor_due_to_ohmic_dissipation",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thermal_radiative_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_incident_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.62,
+      "confidence": 0.59,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "electron_energy_flux_limiter_coefficient",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "radial_ion_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_neutral_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_neutral_state_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.99,
+      "confidence": 0.99,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "electron_particle_diffusivity",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "parallel_electron_diffusivity",
+          "unit": "m^2.s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_effective_electron_diffusivity",
+          "unit": "m^2.s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.68,
+      "confidence": 0.57,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "electron_temperature_at_first_wall",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "electron_temperature",
+          "unit": "eV",
+          "physics_domain": "magnetohydrodynamics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.56,
+      "confidence": 0.34,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "electrostatic_potential_at_outboard_midplane",
+      "population": "dropped_edge",
+      "name_stage": "reviewed",
+      "holders": [
+        {
+          "id": "electrostatic_potential",
+          "unit": "V",
+          "physics_domain": "magnetohydrodynamics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "electrostatic_potential_at_langmuir_probe_position",
+          "unit": "V",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.56,
+      "confidence": 0.41,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "energy_diffusion_coefficient_due_to_diffusion",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "fraction_of_neutron_detector_converter",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "neutron_response_function_of_neutron_detector",
+          "unit": "1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "ratio_of_tritium_density_to_deuterium_density",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "spectral_efficiency_of_neutron_detector",
+          "unit": "1",
+          "physics_domain": "particle_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "front_surface_area_of_langmuir_probe",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "effective_area_of_langmuir_probe",
+          "unit": "m^2",
+          "physics_domain": "particle_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "poloidal_plane_cross_sectional_area_of_flux_surface",
+          "unit": "m^2",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "wetted_area_of_langmuir_probe",
+          "unit": "m^2",
+          "physics_domain": "particle_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `wetted_area_of_langmuir_probe`",
+      "holder": "wetted_area_of_langmuir_probe",
+      "probability": 0.5,
+      "confidence": 0.37,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "ion_charge_state_energy_flux_limiter_coefficient",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "radial_ion_state_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.94,
+      "confidence": 0.91,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "ion_power",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "total_ion_heating_power",
+          "unit": "W",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power",
+          "unit": "W",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power_at_inner_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.61,
+      "confidence": 0.51,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "ion_state_energy_flux_limiter_coefficient",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "radial_ion_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_ion_state_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_neutral_state_momentum_flux_limiter_coefficient",
+          "unit": "1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.94,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "magnetic_shear_at_pedestal_top",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "magnetic_shear_at_flux_surface",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "magnetic_shear_at_sawtooth_inversion_radius",
+          "unit": "1",
+          "physics_domain": "magnetohydrodynamics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.89,
+      "confidence": 0.85,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "momentum_due_to_hot_tail",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "runaway_electron_critical_momentum_due_to_hot_tail",
+          "unit": "kg.m^-1.s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "net_forward_power_of_wave_beam",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "electron_absorbed_power_of_beam_tracing_beam",
+          "unit": "W",
+          "physics_domain": "electromagnetic_wave_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "ion_absorbed_power_of_beam_tracing_beam",
+          "unit": "W",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "launched_power_of_lower_hybrid_antenna",
+          "unit": "W",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_absorbed_wave_power",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_absorbed_wave_power_at_inside_flux_surface",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `launched_power_of_lower_hybrid_antenna`",
+      "holder": "launched_power_of_lower_hybrid_antenna",
+      "probability": 0.58,
+      "confidence": 0.51,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "net_plasma_current_due_to_ohmic_current_drive",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "current_due_to_non_inductive_current_drive",
+          "unit": "A",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "plasma_current",
+          "unit": "A",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.98,
+      "confidence": 0.97,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "net_plasma_power_density",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "neutron_flux_due_to_fusion",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [
+        {
+          "id": "power_due_to_fusion_reactions",
+          "unit": "s^-1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_electron_source_rate",
+          "unit": "s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_particle_source_rate",
+          "unit": "s^-1",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.99,
+      "confidence": 0.99,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "normal_particle_flux_at_wall_due_to_recombination",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "normalized_poloidal_magnetic_flux_at_pedestal_top",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "toroidal_angle_of_measurement_position",
+          "unit": "rad",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "normalized_toroidal_hard_xray_peak_external_half_width",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "inner_hard_xray_half_width_at_emissivity_peak",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate_at_measurement_position",
+          "unit": "1",
+          "physics_domain": "electromagnetic_wave_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_hard_xray_peak_lower_bound_width",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "outer_hard_xray_half_width_at_emissivity_peak",
+          "unit": "1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `outer_hard_xray_half_width_at_emissivity_peak`",
+      "holder": "outer_hard_xray_half_width_at_emissivity_peak",
+      "probability": 0.51,
+      "confidence": 0.43,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "normalized_toroidal_hard_xray_peak_upper_bound_width",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "inner_hard_xray_half_width_at_emissivity_peak",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_flux_coordinate_at_measurement_position",
+          "unit": "1",
+          "physics_domain": "electromagnetic_wave_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "normalized_toroidal_hard_xray_peak_lower_bound_width",
+          "unit": "1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "outer_hard_xray_half_width_at_emissivity_peak",
+          "unit": "1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `outer_hard_xray_half_width_at_emissivity_peak`",
+      "holder": "outer_hard_xray_half_width_at_emissivity_peak",
+      "probability": 0.73,
+      "confidence": 0.69,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "normalized_toroidal_thermal_plasma_beta",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "normalized_toroidal_beta",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "poloidal_beta",
+          "unit": "1",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "toroidal_beta",
+          "unit": "1",
+          "physics_domain": "general",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.93,
+      "confidence": 0.91,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "perturbed_vector_potential",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "radial_coordinate_of_vacuum_vessel",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "reference_major_radius",
+          "unit": "m",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.43,
+      "confidence": 0.14,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "radial_surface_normal_of_control_surface",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "root_mean_square_spectral_width_of_spectrometer_channel",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [
+        {
+          "id": "lower_wavelength_of_filter",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "reference_calibration_wavelength_of_spectrometer_channel",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "reference_wavelength_of_spectrometer_channel",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "spectral_calibration_factor_of_spectrometer_channel",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "spectral_wavelength_of_optical_element",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "wavelength_of_bragg_crystal",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.98,
+      "confidence": 0.98,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "tangential_curvature_inverse_of_optical_element",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "curvature_of_electron_cyclotron_launcher_mirror",
+          "unit": "m",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "first_local_tangential_back_surface_radius_of_optical_element",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "first_local_tangential_front_surface_radius_of_optical_element",
+          "unit": "m",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "second_local_tangential_back_surface_radius_of_optical_element",
+          "unit": "m",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "second_local_tangential_front_surface_radius_of_optical_element",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "vertical_back_surface_curvature_of_optical_element",
+          "unit": "m",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.45,
+      "confidence": 0.37,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "thermal_energy_confinement_time",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "coolant_transit_time_of_plant_component_port",
+          "unit": "s",
+          "physics_domain": "mechanical_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+      "population": "never_bound",
+      "name_stage": "accepted",
+      "holders": [
+        {
+          "id": "normalized_toroidal_wave_vector_of_beam_tracing_beam",
+          "unit": "1",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "poloidal_angle_of_beam_tracing_beam",
+          "unit": "rad",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "radial_wave_vector_normalized_of_beam_tracing_beam",
+          "unit": "1",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "vertical_wave_vector_normalized_of_beam_tracing_beam",
+          "unit": "1",
+          "physics_domain": "electromagnetic_wave_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.51,
+      "confidence": 0.41,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "total_absorbed_power_of_plant_system",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "net_power",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_plant_subsystem",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_plant_system",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_heating_power_due_to_fusion_reactions",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power",
+          "unit": "W",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_plasma_radiated_power",
+          "unit": "W",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_power",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `total_power`",
+      "holder": "total_power",
+      "probability": 0.48,
+      "confidence": 0.42,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "power_due_to_fusion_reactions",
+          "unit": "s^-1",
+          "physics_domain": "radiation_measurement_diagnostics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.93,
+      "confidence": 0.89,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "total_incident_thermal_power",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "incident_radiated_power_of_breeder_blanket_module",
+          "unit": "W",
+          "physics_domain": "structural_components",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "incident_thermal_power_at_wall",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "power_of_plant_subsystem",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "thermal_electron_power_at_inside_flux_surface",
+          "unit": "W",
+          "physics_domain": "auxiliary_heating",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_heating_power_due_to_fusion_reactions",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_incident_power_of_divertor",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power",
+          "unit": "W",
+          "physics_domain": "transport",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_ion_power_at_inner_divertor_target",
+          "unit": "W",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_power",
+          "unit": "W",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_thermal_power_at_outlet",
+          "unit": "W",
+          "physics_domain": "plant_systems",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.53,
+      "confidence": 0.49,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "total_ion_momentum_diffusivity",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "poloidal_effective_ion_state_momentum_diffusivity",
+          "unit": "m^2.s^-1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.63,
+      "confidence": 0.45,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "total_particle_flux",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    },
+    {
+      "id": "total_particle_flux_at_divertor_target_due_to_recycling",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "electron_source_rate_due_to_surface_emission",
+          "unit": "s^-1",
+          "physics_domain": "plasma_wall_interactions",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "incident_neutral_particle_flux_at_wall",
+          "unit": "s^-1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "total_particle_source_rate_of_divertor_due_to_recycling",
+          "unit": "s^-1",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "same quantity as `total_particle_source_rate_of_divertor_due_to_recycling`",
+      "holder": "total_particle_source_rate_of_divertor_due_to_recycling",
+      "probability": 0.66,
+      "confidence": 0.57,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "vertical_outline_of_wall",
+      "population": "dropped_edge",
+      "name_stage": "exhausted",
+      "holders": [
+        {
+          "id": "vertical_coordinate_of_active_wall_point",
+          "unit": "m",
+          "physics_domain": null,
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "vertical_coordinate_of_dr_dz_zero_point",
+          "unit": "m",
+          "physics_domain": "equilibrium",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        },
+        {
+          "id": "vertical_outline_of_divertor_tile",
+          "unit": "m",
+          "physics_domain": "divertor_physics",
+          "held_path": "",
+          "held_path_unit": null,
+          "suspect_unit_binding": false
+        }
+      ],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": "a different quantity from all of these",
+      "holder": null,
+      "probability": 0.68,
+      "confidence": 0.6,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered a different quantity"
+    },
+    {
+      "id": "volume_averaged_linear_electron_decay_time",
+      "population": "never_bound",
+      "name_stage": "exhausted",
+      "holders": [],
+      "suspect_holders": [],
+      "shared_paths": [],
+      "choice": null,
+      "holder": null,
+      "probability": null,
+      "confidence": null,
+      "answered": false,
+      "action": "referred to lead",
+      "reason": "no holder named by either step's record"
+    }
+  ]
+}
