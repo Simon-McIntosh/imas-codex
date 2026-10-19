@@ -3151,5 +3151,5 @@
   },
   "split": "Serial, one worker: the incumbent arm is the long pole because its escalator adds a third call on roughly a quarter of items. Run the two axes as separate work items, and where the incumbent arm exceeds one hour, split it by axis and run the docs half as its own item -- the two axes share no seat and no cohort item."
  },
- "figure_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-estimate/docs/figures/sn-review-through-jev/srtj-cohort-estimate.svg"
+ "figure_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-estimate/docs/figures/sn-review-through-jev/srtj-cohort-estimate/srtj-cohort-estimate.svg"
 }

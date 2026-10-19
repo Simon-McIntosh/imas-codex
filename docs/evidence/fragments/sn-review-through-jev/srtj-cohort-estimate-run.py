@@ -406,7 +406,7 @@ def main() -> int:
     wall = wall_plan(incumbent, cascade, 2 * n_axis)
 
     figure_path = build_figure(
-        HERE.parents[2] / "figures" / "sn-review-through-jev", incumbent, cascade
+        HERE.parents[2] / "figures" / "sn-review-through-jev" / "srtj-cohort-estimate", incumbent, cascade
     )
 
     payload = {
