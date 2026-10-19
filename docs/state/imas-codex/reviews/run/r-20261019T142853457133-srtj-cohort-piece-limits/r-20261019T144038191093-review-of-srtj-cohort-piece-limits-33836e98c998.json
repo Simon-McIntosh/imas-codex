@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "The gate log is right and the fragment's prose miscounts: name 231 in 57, 58, 58, 58 and docs 232 in four parts of 58. The plan record and every piece brief use the log's figures.",
       "recorded_at": "2026-10-19T15:06:56.941946+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "srtj-cohort-piece",
+      "recorded_at": "2026-10-19T15:07:06.497089+00:00"
     }
   },
   "findings": [
