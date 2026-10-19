@@ -1,0 +1,126 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run is an evidence node and its manifest declares no baseline_suite or after_suite and no such gate logs, so no failure ids exist to derive; the reviewed run ran one driver gate (verify/falsify) which reported four true checks and one expected reddening.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "A supersede in the authority fails to retire its target, so the live unchained_holder count stays above before-minus-targets; falsify.log:3 demonstrates exactly this reddening.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 429
+    },
+    {
+      "condition_to_fail": "A mutation applies without leaving a StandardNameChange carrying the authority file sha, so a target has no receipt.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 431
+    },
+    {
+      "condition_to_fail": "The campaign moves any other population (dropped_edge, never_bound, derived_parent, orphan_awaiting_retirement) between the stored cohort read and the read-back.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 432
+    },
+    {
+      "condition_to_fail": "A target survives with a name_stage/status pair other than superseded/superseded.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 433
+    },
+    {
+      "condition_to_fail": "None can be named: the filter compares status to lower-case \"running\" while the graph returns \"Running\" (quiet-before-apply.log:110), so quiet is true whatever the graph holds.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 490
+    },
+    {
+      "condition_to_fail": "An admitted predecessor still binds a live StandardNameSource, or the successor lacks a path the predecessor's record names.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 535
+    },
+    {
+      "condition_to_fail": "The planted different-quantity pair is answered same-quantity above both floors, so the floor admits it and the mode exits non-zero.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": 598
+    }
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T02:52:50.753Z",
+  "dispatched_at": "2026-10-19T02:38:56Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": "481",
+      "severity": "blocking",
+      "text": "blocking: the quiet-graph filter compares the transaction status to \"running\" while Neo4j returns \"Running\" \u2014 the same log's own entry at quiet-before-apply.log:110 reads status \"Running\" \u2014 so foreign_running_transactions is always empty and quiet is always true; this required guard cannot fail and the fragment's quiet-graph evidence is vacuous."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": "466",
+      "severity": "follow-on",
+      "text": "follow-on: the quiet check never subtracts its own SHOW TRANSACTIONS probe, so even with the case corrected it would report itself as a foreign writer; imas_codex/graph/offsite.py:135-163 already owns this probe correctly, identifying its own transaction by currentQuery prefix and raising when it is absent."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders/verify.log",
+      "line": "69",
+      "severity": "blocking",
+      "text": "blocking: the EXIT= line of every gate log was appended at 02:36:04Z by an inline helper whose exit-code table is the literal {\"verify\":0,\"falsify\":0,...} rather than a captured $?, so the log asserts success by assumption; the done_when requires a real EXIT= from a check that raises on mismatch, and a failing run would still read EXIT=0."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders/verify.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the header asserts `# revision: f2dfdf83a5c3fe067806224527674c3bbc2ffa10` while the body was produced at 02:31:02Z, before the driver edits at 02:32:19Z-02:34:05Z that moved COHORT_PATH/ANSWERS_PATH out of the repository and added the record mode; the log names a revision that did not produce it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py",
+      "line": "50",
+      "severity": "follow-on",
+      "text": "follow-on: the driver embeds one run's absolute directory path and its run id as source defaults (lines 48-53 and 89-91); the run envelope belongs in the environment, not in a committed evidence file."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.html",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: 19 names are referred to the lead as different-quantity pairs, leaving the plan's other branch for an unchained holder (sn-integrity-backlog \u00a738: \"If not, restore the name's own source\") unaddressed; the brief redirects those to the lead, so the residue needs a lead decision rather than a node repair."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Base cc5c751c9377264c72d4e7f2777e5f44a9c722d2 to head f2dfdf83a5c3fe067806224527674c3bbc2ffa10 is one commit, four added evidence files, 3001 insertions, no production code.",
+    "done_when": "Source brief.md:44-56 requires the fragment and JSON to carry per-name answer, action, authority, receipt, referrals with both descriptions, the quiet check and a read-back at a real EXIT=; docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.json:1-1204 carries the first four and the read-back, but the quiet check at run.py:476-490 cannot fail and the EXIT= lines (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders/verify.log:69) were synthesised.",
+    "goal": "The source brief.md:4-15 asks each unchained holder be settled as same-quantity (retire) or different-quantity (refer); docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.html:1-4 and docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.json record 11 retired and 19 referred, so the goal is met.",
+    "manifest": "The source manifest.md records 30 unchained holders derived, 11 retired and 19 referred, read-back 30->19, spend USD 0.001585 and one commit; verify.log:1-69 and falsify.log:1-4 support it, though the log headers post-date the bodies they label.",
+    "write_paths": "The source brief.md:58-63 grants four files; git show --stat on f2dfdf83a5c3fe067806224527674c3bbc2ffa10 lists exactly those four, with no path outside them."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:429-434 reddens on a stalled retirement, but line 490 cannot redden on a busy graph.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:476-490 makes the quiet check unfailable and the run's own verify.log:69 carries a synthesised EXIT=0.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:50-53 embeds one run's absolute directory path in the driver source.",
+    "goal_fidelity": "docs/evidence/fragments/sib-settle-unchained-holders-run.py:296-361 builds one signed supersede row per admitted pair and the referral list carries both descriptions, so both brief branches are executed.",
+    "reuse": "imas_codex/graph/offsite.py:135-163 owns the writer-liveness probe that docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:457-491 duplicates incorrectly.",
+    "scope_discipline": "the diff at docs/evidence/fragments/sn-integrity-backlog/ contains only the four files granted by source brief.md:58-63."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to settle each unchained-holder name against the live holder of its recorded DD source (source brief.md:4-15); the landed fragment docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.html:1-4 and docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.json record 11 names retired in the holder's favour and 19 referred.\nVERDICT done_when: the done_when (brief.md:44-56) names the fragment plus JSON with per-name holder/answer/probability/confidence/action, the signed authority, preview and receipt, the referrals with both descriptions, the quiet-graph check, and a classifier read-back before/after at a real EXIT=; docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders.json carries all of those except that the quiet-graph check cannot fail (run.py:476-490) and the logs' EXIT= lines were synthesised, not observed (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders/verify.log:69).\nVERDICT write_paths: the source brief.md:58-63 grants three fragment files plus an authority JSON; the base-to-head diff changes exactly those four paths and nothing else.\nVERDICT manifest: the source manifest.md records status complete, one commit f2dfdf83a5c3fe067806224527674c3bbc2ffa10, four changed paths, spend USD 0.001585, and the verify/falsify results; its test_logs list names seven logs whose bodies are genuine but whose EXIT= and revision headers were written after the fact.\nVERDICT diff: the single commit f2dfdf83a5c3fe067806224527674c3bbc2ffa10 against base cc5c751c9377264c72d4e7f2777e5f44a9c722d2 adds 3001 lines across four evidence files (a 810-line driver, a 330-line fragment, a 1204-line JSON record, a 657-line authority) with no production code.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the driver retires 11 names through apply_signed_manifest with a successor link and refers 19 with both descriptions (docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py:296-361), matching the brief's two branches.\nSCORE evidence: 11\nJUSTIFICATION evidence: the four read-back checks at run.py:428-435 are real and the falsify log shows one reddens, but the required quiet-graph check at run.py:476-490 is vacuously always true and the logs' EXIT= lines were written by a helper hardcoding zero.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff touches only the four files granted by source brief.md:58-63; the granted figure directory was left empty, which is a gap in the user's figure expectation and nothing more.\nSCORE durability: 11\nJUSTIFICATION durability: run.py:429-434 names conditions under which each read-back check reddens and falsify.log demonstrates it, but run.py:490 (quiet) and the log-writing helper cannot fail at all, so two of the node's own guards carry no signal.\nSCORE fit: 15\nJUSTIFICATION fit: the driver follows the sibling fragment idiom of mode-per-invocation over the production owners, but hardcodes a run id and a run directory in source at run.py:48-53 and run.py:89-91.\nSCORE reuse: 5\nJUSTIFICATION reuse: run.py:442-491 re-implements the SHOW TRANSACTIONS writer-liveness probe that imas_codex/graph/offsite.py:135-163 already owns, including the own-probe subtraction that the driver omits.",
+  "review_run_id": "r-20261019T023816235954-review-of-sib-settle-unchained-holders-f2dfdf83a5c3",
+  "reviewed_base_sha": "cc5c751c9377264c72d4e7f2777e5f44a9c722d2",
+  "reviewed_commits": [
+    "f2dfdf83a5c3fe067806224527674c3bbc2ffa10"
+  ],
+  "reviewed_head_sha": "f2dfdf83a5c3fe067806224527674c3bbc2ffa10",
+  "reviewed_run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+  "scores": {
+    "durability": 11,
+    "evidence": 11,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T02:48:08Z",
+  "total": 78
+}
