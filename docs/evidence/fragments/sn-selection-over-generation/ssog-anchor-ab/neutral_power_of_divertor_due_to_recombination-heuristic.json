@@ -1,0 +1,248 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "power_of_divertor_due_to_recombination",
+  "applied": true,
+  "arm": "heuristic",
+  "budget_limit_usd": 2.0,
+  "calls": 16,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-divertor-recomb-heuristic",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-divertor-recomb-heuristic/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-19T15:40:59.121496+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 16,
+      "scratch_ledger_rows": 16,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 32
+  },
+  "cost_limit_passed_usd": 1.98,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T15:40:57.385459+00:00",
+  "family": "neutral_power_of_divertor_due_to_recombination",
+  "harmonize_receipts": [
+    {
+      "anchor": "power_of_divertor_due_to_recombination",
+      "applied": true,
+      "batches": [
+        [
+          "power_of_divertor_due_to_recombination"
+        ],
+        [
+          "neutral_power_of_divertor_due_to_recombination",
+          "plasma_power_of_divertor_due_to_recombination"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "d20e07d53ee4fccad2a71164b972fec6e12294b9ae87d3c198d382d915c06677",
+      "harmonized": false,
+      "invariant": [
+        "power",
+        "",
+        "",
+        "recombination",
+        "divertor"
+      ],
+      "member_scores": {
+        "neutral_power_of_divertor_due_to_recombination": 0.90625,
+        "plasma_power_of_divertor_due_to_recombination": 0.925,
+        "power_of_divertor_due_to_recombination": 1.0
+      },
+      "members": [
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination",
+        "power_of_divertor_due_to_recombination"
+      ],
+      "n": 3,
+      "physical_base": "power",
+      "planned_calls": 3,
+      "result": {
+        "batches_run": 1,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 0.00% < 90.00% (0/1 touched)"
+        ],
+        "halted": true,
+        "resume_from": 1,
+        "run_ids": [
+          "2eabfed9-1486-4691-b09f-e52ceda3acee"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 0,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.4934,
+        "total_quarantined": 0,
+        "total_selected": 3,
+        "total_touched": 1
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 1.0,
+            "id": "power_of_divertor_due_to_recombination"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 1.0,
+            "id": "power_of_divertor_due_to_recombination"
+          }
+        ]
+      },
+      "scores_after": {
+        "neutral_power_of_divertor_due_to_recombination": 0.90625,
+        "plasma_power_of_divertor_due_to_recombination": 0.925,
+        "power_of_divertor_due_to_recombination": 0.849
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 1,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 0.00% < 90.00% (0/1 touched)"
+    ],
+    "halted": true,
+    "resume_from": 1,
+    "run_ids": [
+      "2eabfed9-1486-4691-b09f-e52ceda3acee"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 0,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.4934,
+    "total_quarantined": 0,
+    "total_selected": 3,
+    "total_touched": 1
+  },
+  "heuristic_anchor": "power_of_divertor_due_to_recombination",
+  "isolation": {
+    "at": "2026-10-19T15:21:08.313523+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771162,
+    "live_nodes_after": 1771162,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 16,
+    "scratch_ledger_rows": 16,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28010"
+  },
+  "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
+  "kind": "subject",
+  "ledger_calls": 16,
+  "ledger_spend_usd": 0.493381,
+  "ledger_window": {
+    "ended": "2026-10-19T15:40:58.717564+00:00",
+    "started": "2026-10-19T15:21:12.546578+00:00"
+  },
+  "lint_after": 0,
+  "lint_after_classes": {},
+  "lint_before": 0,
+  "lint_before_classes": {},
+  "members": [
+    "neutral_power_of_divertor_due_to_recombination",
+    "plasma_power_of_divertor_due_to_recombination",
+    "power_of_divertor_due_to_recombination"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/mcintos-1281970-ljyfwoqw/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.256805
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.12048899999999999
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.004364
+    },
+    {
+      "calls": 1,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.027375
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.08387
+    },
+    {
+      "calls": 4,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.000478
+    }
+  ],
+  "planned_calls": 3,
+  "port": 28010,
+  "port_lock": "/dev/shm/ssog-scratch-port-28010.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T15:41:14.912661+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28010.lock"
+  },
+  "recorded_anchor_before": "power_of_divertor_due_to_recombination",
+  "run_ids": [
+    "2eabfed9-1486-4691-b09f-e52ceda3acee"
+  ],
+  "scores_after": {
+    "neutral_power_of_divertor_due_to_recombination": 0.90625,
+    "plasma_power_of_divertor_due_to_recombination": 0.925,
+    "power_of_divertor_due_to_recombination": 0.849
+  },
+  "scores_before": {
+    "neutral_power_of_divertor_due_to_recombination": 0.90625,
+    "plasma_power_of_divertor_due_to_recombination": 0.925,
+    "power_of_divertor_due_to_recombination": 1.0
+  },
+  "scratch_removed": {
+    "at": "2026-10-19T15:41:14.912577+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/mcintos-1281970-ljyfwoqw"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/mcintos-1281970-ljyfwoqw",
+  "scratch_uri": "bolt://127.0.0.1:28010",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.493381,
+  "stamped": false,
+  "started_at": "2026-10-19T15:14:03.147586+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T15:41:14.129351+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/mcintos-1281970-ljyfwoqw/instance"
+  },
+  "wall_seconds": 1184.8388414438814
+}
