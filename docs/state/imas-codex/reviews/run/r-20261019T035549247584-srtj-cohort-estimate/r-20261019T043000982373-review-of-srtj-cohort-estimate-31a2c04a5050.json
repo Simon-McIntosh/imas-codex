@@ -27,6 +27,11 @@
       "kind": "exempted",
       "reason": "The figure is committed at docs/figures/sn-review-through-jev/srtj-cohort-estimate/srtj-cohort-estimate.svg; the coordinator's landing record cites that repository path, not the JSON field.",
       "recorded_at": "2026-10-19T04:49:43.104568+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Real defect: the incumbent's per-accepted-name figure borrows the cascade's accept share. The coordinator does not use per-accepted-name figures for the ceiling; the cohort run measures each arm's own accept share.",
+      "recorded_at": "2026-10-19T04:49:47.762037+00:00"
     }
   },
   "findings": [
