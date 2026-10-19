@@ -1,0 +1,41 @@
+<section id="ssog-anchor-passive-loop-jev-r2" data-reckon="evidence">
+  <h2 id="ssog-anchor-passive-loop-jev-r2-heading">Passive-loop length: Jev anchor arm</h2>
+  <p id="ssog-anchor-passive-loop-jev-r2-outcome">
+    The fixed selection chose <code>length_of_passive_loop_element</code> as the Jev
+    anchor, against the heuristic anchor
+    <code>major_length_of_passive_loop_element</code>. The detached per-arm runner
+    exited <code>0</code> and wrote an <code>outcome_status: complete</code> receipt,
+    but harmonization halted after the first of two batches: documentation
+    acceptance was <strong>0/1</strong>, below its 90% threshold. The family was
+    <strong>not stamped</strong>. Here, “complete” describes the runner and its
+    measurement, not a completed family harmonization.
+  </p>
+  <table id="ssog-anchor-passive-loop-jev-r2-measure">
+    <thead><tr><th>Measure</th><th>Jev arm result</th></tr></thead>
+    <tbody>
+      <tr><th>Lint findings</th><td>3 before → 2 after</td></tr>
+      <tr><th>Calls and spend</th><td>16 LLMCost rows; USD 0.481093, below the USD 1.98 apply cap and USD 2.00 arm ceiling</td></tr>
+      <tr><th>Apply wall time</th><td>1,015.4 s</td></tr>
+      <tr><th>Anchor documentation score</th><td><code>length_of_passive_loop_element</code>: 0.99375 before → 0.849 after</td></tr>
+      <tr><th>Other member scores after</th><td><code>major_length_of_passive_loop_element</code>: 1.00000; <code>minor_length_of_passive_loop_element</code>: 0.93750</td></tr>
+      <tr><th>Stamped</th><td>No; one of two batches ran</td></tr>
+    </tbody>
+  </table>
+  <p id="ssog-anchor-passive-loop-jev-r2-containment">
+    The checked export loaded into a scratch graph with 1,770,101 nodes. A
+    scratch-only marker appeared there and not in the live graph. The apply
+    left 16 attributable cost rows in scratch and zero in live. A planted
+    containment self-check refused a live family row, a live run-ID row, and
+    an apply that wrote nothing; its scratch-only control passed (4/4 expected
+    verdicts, <code>EXIT=0</code>). The instance stopped, its scratch tree was
+    removed, and ports 28004 and 29004 had no listeners afterward.
+  </p>
+  <p id="ssog-anchor-passive-loop-jev-r2-record">
+    The arm receipt at
+    <code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-jev.json</code>
+    carries the three member scores, lint classes, cost ledger, containment
+    evidence, code digest and cleanup timestamps. The paired comparison must
+    account for the acceptance halt and the anchor score decline before any
+    adoption verdict.
+  </p>
+</section>
