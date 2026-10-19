@@ -63,6 +63,24 @@ def verify_containment(record: dict) -> None:
         raise RuntimeError(f"run receipt escaped scratch graph: {evidence}")
 
 
+def verify_completion(record: dict) -> None:
+    """Refuse a paid piece that stopped with selected identities still pending."""
+    pending = [
+        item["id"]
+        for item in record["items"]
+        if item.get("decision") == "drafted" or item.get("wall_time_s") is None
+    ]
+    if pending:
+        raise RuntimeError(
+            f"review piece left {len(pending)} selected items pending: {pending[:8]}"
+        )
+    reason = record.get("run_summary", {}).get("stop_reason")
+    if reason not in {"completed", "no_eligible_work"}:
+        raise RuntimeError(f"review piece stopped without completion: {reason}")
+    if record.get("receipt_count", 0) <= 0:
+        raise RuntimeError("review piece has no cost receipts")
+
+
 def free_port() -> int:
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -552,6 +570,9 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
                     "unjudged",
                 )
             }
+            record["incomplete_ids"] = [
+                item["id"] for item in record["items"] if item["decision"] == "drafted"
+            ]
             record["scratch_evidence"] = count_run(gc, summary.run_id)
         # Preserve every paid item and receipt total before checking containment.
         save(path, record)
@@ -574,12 +595,16 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
             raise
         finally:
             save(path, record)
+        verify_completion(record)
         if len(record["items"]) != len(ids) or (
             args.arm == "cascade"
             and args.axis == "name"
             and record["piece_spend_total_usd"] >= PIECE_CEILING_USD
         ):
             raise RuntimeError("piece cardinality or spend ceiling failed")
+        record["selected_count"] = len(ids)
+        record["measurement_complete"] = True
+        record["comparison_eligible"] = True
     finally:
         if prior_uri is None:
             os.environ.pop("NEO4J_URI", None)
@@ -600,9 +625,13 @@ def main() -> None:
     parser.add_argument("--half", type=int, choices=(1, 2))
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--check-containment", type=Path)
+    parser.add_argument("--check-record", type=Path)
     args = parser.parse_args()
     if args.check_containment:
         verify_containment(json.loads(args.check_containment.read_text()))
+        return
+    if args.check_record:
+        verify_completion(json.loads(args.check_record.read_text()))
         return
     if args.preflight:
         preflight()
