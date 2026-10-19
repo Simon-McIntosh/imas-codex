@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="220">
+<meta name="plan-version" content="221">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -800,7 +800,10 @@ follow-on findings. No plan edit was made.</p></div>
     <div class="r-comment-body"><p>The review for r-20261019T042350099511-sib-signed-recovery-unbind is stored parsed at the reviewed run's review-records path (and its .at-3578ef089 alias), scoring goal_fidelity 18, evidence 17, scope_discipline 20, durability 8, fit 17, reuse 20 over the pair ee506dfc3..3578ef089 (the single commit 3578ef089 that makes the decision-flow SVG well-formed XML); one follow-on finding (no test or repository check fails if the figure regresses to an undefined XML entity), no blocker; added_failure_count 0. No plan edit was made.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-run-r-20261019T042350099511-sib-signed-recovery-unbind" data-who="reckon-build" data-when="2026-10-19T05:26:34Z">
-    <div class="r-comment-body"><p>The signed-repair envelope carries one closed program (recovery-binding-unbind) that removes a recorded PRODUCED_NAME edge from an exhausted standard name, refusing any row whose edge is absent, whose source is stale or whose stage is not exhausted, and recording the removal as a StandardNameChange; the source invariant takes an optional exhausted_exempt_ids keyword so only this program&#x27;s signed exhausted rows are excused, and every other writer keeps refusing as before.</p></div>
+    <div class="r-comment-body"><p>The signed-repair envelope carries one closed program (recovery-binding-unbind) that removes a recorded PRODUCED_NAME edge from an exhausted standard name, refusing any row whose edge is absent, whose source is stale or whose stage is not exhausted, and recording the removal as a StandardNameChange; the source invariant takes an optional exhausted_exempt_ids keyword so only this program's signed exhausted rows are excused, and every other writer keeps refusing as before.</p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-s38-recovery-unbind-writer" data-who="reckon-build" data-when="2026-10-19T07:40:00Z">
+    <div class="r-comment-body"><p>The signed unbind writer has landed (merge <code>d14d8dd6b</code>, review 100, no live write). It removes a recovery binding from an exhausted name and refuses any live name. The source invariant exempts only its own signed exhausted rows, and a live read-only check confirms the exemption never excuses a live name. Next, it is applied to the 16 sub-floor bindings on a quiet graph. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s38-recovery-unbind-writer">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
