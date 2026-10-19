@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-10-19T20:52:35.314Z",
+  "derivation": {
+    "added_failure_count": "derived from the reviewed run's own baseline_suite and after_suite fields, which the manifest carries empty because this is an evidence-artifact node that ran the runner invocation (not a test-role suite) as its gate; with no baseline or after suite there are no failure ids to difference, so the count is 0.",
+    "notes": "the reviewed run's gate is the ssog-anchor-ab-run.py invocation, whose log runner-jev-retry.log ends EXIT=0; verified against .../r-20261019T195903034337-ssog-anchor-visible-wavelength-jev/runner-jev-retry.log and the committed record."
+  },
+  "dispatched_at": "2026-10-19T20:38:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-visible-wavelength-jev.html",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "the landing fragment's filename embeds the plan abbreviation `ssog`, which the repository forbids in a file name; the sibling arm receipt names family and arm alone, so the landing fragment is the inconsistent one."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the reviewed node's goal (run the Jev arm of the fixed lower_bound_wavelength_of_visible_camera comparison and produce its arm record); the landed docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-jev.json carries every field the node goal names.\nVERDICT done_when: read the done_when (record with outcome_status complete, the anchor, lint before/after, every member's documentation score after, calls/spend/wall, stamped, containment verdict with its evidence, the code digest; scratch instance stopped and tree removed; spend under USD 2.00); the record at lower_bound_wavelength_of_visible_camera-jev.json:189 satisfies each, and the runner log ends EXIT=0.\nVERDICT write_paths: read the manifest's declared write paths (the arm JSON, the landing HTML, a figures directory); the diff adds only the arm JSON and the landing HTML, both inside them.\nVERDICT manifest: read .../manifest.md; it records status complete, two commits, the runner-jev-retry.log gate ending EXIT=0, and the scaffolding attribution for the first /tmp attempt.\nVERDICT diff: read both commits against base 5cf53a7b6; 041af6e2 adds the 263-line arm JSON and 4cf5de5d adds the 46-line landing HTML, both inside the declared scope, with no production code changed.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-jev.json:189 records outcome_status complete with every field the node goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest's test_logs names runner-jev-retry.log, whose last line is EXIT=0 and whose recorded figures reconcile with the record at line 189.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the diff adds only the arm JSON and the landing HTML, both inside the manifest's declared write paths, and no production file.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no test, so nothing reddens if the arm record is deleted or corrupted, and no test under tests/ guards these evidence fragments.\nSCORE fit: 15\nJUSTIFICATION fit: the commit subjects and bodies follow the repo convention and the JSON matches its sibling arm record, but the landing filename at ssog-anchor-visible-wavelength-jev.html:1 embeds the plan abbreviation ssog.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, so nothing forks a repository capability; a search over the runner and the receipt-emitting code for a receipt-schema owner found none.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-visible-wavelength-jev.html:1 follow-on: the landing fragment's filename embeds the plan abbreviation `ssog`, which the repository forbids in a file name; the sibling arm receipt names family and arm alone, so the landing fragment is the inconsistent one.",
+  "review_run_id": "r-20261019T203802722225-review-of-ssog-anchor-visible-wavelength-jev-4cf5de5d11ce",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "4cf5de5d11cec14c3e8b29313fa2a787f6009208",
+  "reviewed_run_id": "r-20261019T195903034337-ssog-anchor-visible-wavelength-jev",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T20:55:25.488510+00:00",
+  "total": 98,
+  "verdicts": {
+    "diff": "read both commits against base 5cf53a7b6; 041af6e2 adds the 263-line arm JSON and 4cf5de5d adds the 46-line landing HTML, both inside the declared scope, with no production code changed.",
+    "done_when": "read the done_when (record with outcome_status complete, the anchor, lint before/after, every member's documentation score after, calls/spend/wall, stamped, containment verdict with its evidence, the code digest; scratch instance stopped and tree removed; spend under USD 2.00); the record at lower_bound_wavelength_of_visible_camera-jev.json:189 satisfies each, and the runner log named by the manifest ends in EXIT=0.",
+    "goal": "read the reviewed node's goal (run the Jev arm of the fixed lower_bound_wavelength_of_visible_camera comparison and produce its arm record); the landed docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-jev.json carries every field the node goal names.",
+    "manifest": "read .../r-20261019T195903034337-ssog-anchor-visible-wavelength-jev/manifest.md; it records status complete, two commits, the runner-jev-retry.log gate ending EXIT=0, and the scaffolding attribution for the first /tmp attempt.",
+    "write_paths": "read the manifest's declared write paths (the arm JSON, the landing HTML, a figures directory); the diff adds only the arm JSON and the landing HTML, both inside them."
+  }
+}
