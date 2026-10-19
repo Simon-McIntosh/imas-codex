@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [],
+  "call_sites": [],
+  "completed_at": "2026-10-19T18:55:41.912Z",
+  "dispatched_at": "2026-10-19T18:35:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-jev.json",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "follow-on: containment.evidence.scratch_ledger_rows reads 16, but the runner does not measure that number on the scratch graph \u2014 it assigns the ledger call count (scratch_ledger_rows=calls at ssog-anchor-ab-run.py:612 and :621), so the reported scratch_signal of 32 at line 29 counts 16 rows true by construction and 16 measured at scratch_family_rows (line 22). The containment verdict is not falsified: the load-bearing negative arm (live_family_rows 0, live_scope_run_rows 0) is independently measured, and the positive arm also has the measured scratch_family_rows, so this is a reader hazard rather than a wrong verdict. It does not hold the node because the construction lives in the unchanged per-arm runner (owned by the ssog-anchor-family-runner node), not in this node's diff."
+    }
+  ],
+  "item_verdicts": {
+    "done_when": "The done_when (brief.md:41-49 and the dispatch FENCE at prompt.txt:253) requires the receipt to carry outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend, wall time, stamped, the containment verdict with its evidence and the code digest, written by a detached invocation whose log ends EXIT=0, with the scratch instance stopped and its tree removed and spend under USD 2.00; all of these are present (lint 3 to 2, scores 0.849/1.0/0.9375, 16 calls, USD 0.481093, 1015.4 s, stamped false, containment holds true, code.tree_digest_imas_codex set) and the spend is below the cap.",
+    "goal": "The node goal is to run the Jev arm of length_of_passive_loop_element in a scratch graph through the per-arm runner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-jev.json is that arm's receipt and the runner invocation's log ends EXIT=0.",
+    "manifest": "Read the reviewed node's manifest.md: status complete, tests names the per-arm runner command, test_logs name runner-jev-retry.log (ends EXIT=0) and containment-guard.log (ends EXIT=0), measurement_module and measurement_cwd are recorded, baseline_suite and after_suite are empty because the gate is a measurement run and not a pytest suite, and retry_failures names the read-only-/tmp scaffolding failure.",
+    "write_paths": "The dispatch FENCE \u2014 SCOPE at prompt.txt:218-221 fences three paths: the receipt, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-passive-loop-jev-r2.html and the figures directory; the diff adds the first two and nothing else, and the brief's narrower '## Write scope' single-path list is superseded by the dispatch fence."
+  },
+  "justifications": {
+    "durability": "The diff adds no assertion at all (two data files), so nothing reddens if the receipt regresses; the node's declared control (containment-guard.log) re-exercises the runner's containment check with three planted refusals, and its scratch-only positive case seeds scratch_family_rows and scratch_ledger_rows from the receipt's own calls at ssog-anchor-ab-run.py:229-230, so it is not independent of the value it is meant to observe.",
+    "evidence": "Every receipt field reconciles with the apply log (docs/evidence/.../apply-jev-length_of_passive_loop_element.log EXIT=0, cost_spent 0.481093, the same harmonize receipt) and with runner-jev-retry.log's EXIT=0 summary, and per_model spend sums exactly to spend_usd.",
+    "fit": "The two artifacts follow the established evidence-fragment convention of docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-camera-width-heuristic.html, and both commit messages carry a conventional subject plus a body with no plan label, version suffix or AI attribution.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-jev.json is the arm the goal names, complete per its done_when, though the family harmonization halted with zero members accepted so the arm is a partial comparison input.",
+    "reuse": "The diff adds no function, class or module to extend or duplicate an owner; the per-arm runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py is reused byte-identical between base and head (git diff 5cf53a7b6 HEAD -- that path is empty).",
+    "scope_discipline": "Both added paths sit inside the three-path dispatch fence at prompt.txt:218-221 and the diff touches no module, runner, test or generated file."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T183344331250-review-of-ssog-anchor-passive-loop-jev-r2-eac710923b04",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "eac710923b047c8785b88de4313c29ea017e0f4a",
+  "reviewed_run_id": "r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T18:55:00Z"
+}
