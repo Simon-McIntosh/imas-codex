@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's manifest records no baseline_suite or after_suite: its gate was its own concurrency check (port_reservation_check.py), not pytest, and the change touches only docs/evidence paths that no test module covers, so the added-failure set is empty rather than unmeasured by a suite that could have exercised it.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T14:47:54.837Z",
+  "dispatched_at": "2026-10-19T14:32:27Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
+      "line": "114",
+      "severity": "follow-on",
+      "text": "follow-on: os.open on the lock path runs outside the try that catches OSError, so a lock directory the arm cannot write raises and aborts the arm rather than skipping the pair, and the shipped default /dev/shm has been shown writable only from the reviewer's own sandbox, not from inside an arm worker's fence (where the brief's /tmp example is already known read-only)."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
+      "line": "98",
+      "severity": "follow-on",
+      "text": "follow-on: the exclusivity control is kept only in the reviewed run's directory, so the property it proves has no committed guard and a later revert of reserve_port_pair reddens nothing in the repository."
+    }
+  ],
+  "justifications": {
+    "durability": "the regression control (port-reservation-probe-only.log) does redden when the locking is reverted, but it lives in the run directory, so no committed test reddens if reserve_port_pair is later reverted.",
+    "evidence": "the recorded logs port-reservation-new.log (EXIT=0, four distinct pairs) and port-reservation-probe-only.log (EXIT=1, four times 28000) each carry the command first and a bare EXIT= last, and I reproduced both, but the gate runs both arms inside one sandbox and so does not show the pair is claimable from inside the arm workers' own fence.",
+    "fit": "ssog-anchor-ab-run.py:76 uses a dataclass with an idempotent release and ssog-anchor-ab-run.py:114 an os.open/flock pair in the module's existing flat-function idiom, though ssog-anchor-ab-run.py:68-69 embed the plan-slug abbreviation in a runtime constant and an environment name.",
+    "goal_fidelity": "ssog-anchor-ab-run.py:98 reserve_port_pair takes an exclusive non-blocking flock held until ssog-anchor-ab-run.py:670 releases it in the finally after the instance is stopped and the tree removed, which is the goal in full.",
+    "reuse": "I searched the repository for a port-reservation or advisory-lock owner, imas_codex/graph/neo4j_ops.py:138 NEO4J_LOCK_FILE (a single-manager lock, a different capability) and imas_codex/graph/temp_neo4j.py, which takes bolt_port as an argument and owns no allocator, and the change extends the runner's own pre-existing free_port_pair in place rather than duplicating either.",
+    "scope_discipline": "the diff touches only ssog-anchor-ab-run.py and ssog-anchor-port-reservation.html, both listed in the reviewed manifest's changed_paths and inside its declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to give each concurrent arm its own scratch port pair; the diff adds reserve_port_pair at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:98, which takes an exclusive non-blocking flock per pair, records pid and arm, and skips a pair another arm holds, which is the goal exactly.\nVERDICT done_when: the done_when asks for a check that starts at least four reservations in separate processes and shows distinct pairs on the change and collision on the unchanged free_port_pair; the manifest's three logs record that (head four distinct EXIT=0, base four times 28000 EXIT=1) and I reproduced both arms myself.\nVERDICT write_paths: read the reviewed manifest and its orientation_write_paths; both files in the diff, ssog-anchor-ab-run.py and ssog-anchor-port-reservation.html, are inside the declared write paths.\nVERDICT manifest: read; it states status complete, records the three control logs with their results, records the two scaffolding retry_failures, and names the runner as the only changed source file.\nVERDICT diff: read commit by commit against c96f0f0d8; the single commit 5cf53a7b6 changes ssog-anchor-ab-run.py plus the landing fragment, removing free_port_pair entirely and moving the release into the finally after stop_temp_neo4j and rmtree.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: ssog-anchor-ab-run.py:98 reserve_port_pair takes an exclusive non-blocking flock held until ssog-anchor-ab-run.py:670 releases it in the finally after the instance is stopped and the tree removed, which is the goal in full.\nSCORE evidence: 17\nJUSTIFICATION evidence: the recorded logs port-reservation-new.log (EXIT=0, four distinct pairs) and port-reservation-probe-only.log (EXIT=1, four times 28000) each carry the command first and a bare EXIT= last, and I reproduced both, but the gate runs both arms inside one sandbox and so does not show the pair is claimable from inside the arm workers' own fence.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only ssog-anchor-ab-run.py and ssog-anchor-port-reservation.html, both inside the reviewed manifest's declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: the regression control port-reservation-probe-only.log reddens when the locking is reverted, but it lives in the run directory, so no committed test reddens if reserve_port_pair is later reverted.\nSCORE fit: 18\nJUSTIFICATION fit: ssog-anchor-ab-run.py:76-95 uses a dataclass with an idempotent release and ssog-anchor-ab-run.py:114 an os.open/flock pair in the module's existing flat-function idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: no port-reservation owner exists; imas_codex/graph/temp_neo4j.py takes ports as arguments and imas_codex/graph/neo4j_ops.py:138 locks one manager rather than allocating a pair, and the change extends the runner's own free_port_pair in place.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:114 follow-on: os.open runs outside the try that catches OSError, so a lock directory the arm cannot write aborts the arm instead of skipping, and the default /dev/shm is currently known writable only in the reviewer's sandbox.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:98 follow-on: the exclusivity control lives only in the run directory, so no committed test reddens on a revert of reserve_port_pair.\n",
+  "review_items": {
+    "call_sites": "no production runtime code reaches this evidence runner; it is invoked by an operator as a script, so the literal is named first, release is placed in the finally after the instance is stopped and the tree removed, and the file is a standalone script with no importer.",
+    "diff": "read commit by commit against c96f0f0d8; the single commit 5cf53a7b6 changes ssog-anchor-ab-run.py (+90/-7) and adds the landing fragment, removing free_port_pair entirely and moving the release into the finally after stop_temp_neo4j and rmtree.",
+    "done_when": "the done_when asks for a check that starts at least four reservations in separate processes and shows distinct pairs on the change and collision on the unchanged free_port_pair; the manifest's three logs record that, and I reproduced both arms myself (head four distinct EXIT=0, base four times 28000 EXIT=1).",
+    "goal": "the node's goal is to give each concurrent arm its own scratch port pair; the diff adds reserve_port_pair at ssog-anchor-ab-run.py:98, which takes an exclusive non-blocking flock per pair, records pid and arm, and skips a pair another arm holds, which is the goal exactly.",
+    "manifest": "read; it states status complete, records the three control logs with their results, records the two scaffolding retry_failures, and names the runner as the only changed source file.",
+    "write_paths": "read the reviewed manifest and its orientation_write_paths; both files in the diff, ssog-anchor-ab-run.py and ssog-anchor-port-reservation.html, are inside the declared write paths."
+  },
+  "review_run_id": "r-20261019T143204321141-review-of-ssog-anchor-port-reservation-5cf53a7b6dbc",
+  "reviewed_base_sha": "c96f0f0d874b01c4b623a395637fc17018e66831",
+  "reviewed_head_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_run_id": "r-20261019T141051788349-ssog-anchor-port-reservation",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T14:49:29.384862+00:00",
+  "total": 109
+}
