@@ -1,0 +1,56 @@
+<h2 id="srtj-cohort-incumbent-name-part3of4">srtj-cohort-incumbent-name-part3of4 — incumbent name arm, part 3 of 4</h2>
+
+<p id="srtj-cohort-incumbent-name-part3of4-outcome">
+  <strong>Outcome: blocked — the piece did not complete.</strong> The incumbent arm, name axis,
+  part 3 of 4 (58 selected identities of the 231 non-excluded name rows), was launched detached
+  against the fixed cohort <code>srtj-cohort-estimate</code> (seed 20261019) under a piece ceiling of
+  USD&nbsp;4.50. The scratch instance was created, the graph dump loaded, and the run failed before
+  any review call was made. Spend USD&nbsp;0.
+</p>
+
+<h3 id="srtj-cohort-incumbent-name-part3of4-failure">What failed</h3>
+<p id="srtj-cohort-incumbent-name-part3of4-failure-detail">
+  The runner failed inside <code>start_temp_neo4j</code> at Bolt readiness:
+  <code>ClickException: Temp Neo4j did not reach Bolt readiness within 180 seconds</code>.
+  The 2.6&nbsp;GB dump was extracted and loaded (the instance's <code>data</code> directory reached
+  7.3&nbsp;GB), Neo4j started at 20:44:55Z, and the 180-second readiness window expired before the
+  Bolt port opened. The node was carrying four concurrent <code>neo4j-admin database load</code>
+  processes (this piece, the part 4 of 4 name piece, and the cascade docs piece) so the load took
+  roughly 40 minutes and startup ran past the readiness window under the resulting I/O contention.
+  The invocation's log's last line is <code>EXIT=1</code>.
+</p>
+<ul id="srtj-cohort-incumbent-name-part3of4-cleanup">
+  <li>scratch instance stopped: yes — no process touching the scratch tree remained.</li>
+  <li>scratch tree removed: yes — <code>.../review-cohort-ce0_x8z8</code> no longer exists
+    (<code>scratch_removed.exists_after = false</code> in the record).</li>
+  <li>spend: USD 0 — the failure preceded the first review call, so the piece carries no cost receipts.</li>
+</ul>
+
+<h3 id="srtj-cohort-incumbent-name-part3of4-rerun">The single permitted re-run was refused</h3>
+<p id="srtj-cohort-incumbent-name-part3of4-rerun-detail">
+  Re-running the identical invocation is refused by the runner's own comparison-budget check, because
+  the failed artifact this invocation wrote carries no <code>piece_spend_total_usd</code> field:
+</p>
+<pre id="srtj-cohort-incumbent-name-part3of4-refusal">RuntimeError: piece has no spend total:
+docs/evidence/fragments/sn-review-through-jev/srtj-cohort/incumbent-name-part3of4.json
+EXIT=1</pre>
+<p id="srtj-cohort-incumbent-name-part3of4-rerun-note">
+  That file is <strong>not edited and not committed</strong>. It is left in the worktree for the
+  coordinator. <strong>It must be removed before any further piece run</strong> in a tree that
+  contains it, or <code>check_comparison_budget</code> will refuse every piece with the message above.
+</p>
+
+<h3 id="srtj-cohort-incumbent-name-part3of4-evidence">Evidence</h3>
+<ul id="srtj-cohort-incumbent-name-part3of4-evidence-list">
+  <li>run log (failed, <code>EXIT=1</code>): <code>runs/r-20261019T195218782492-srtj-cohort-incumbent-name-part3of4/piece.log</code></li>
+  <li>re-run refusal log: <code>runs/r-20261019T195218782492-srtj-cohort-incumbent-name-part3of4/piece-rerun.log</code></li>
+  <li>in-process budget probe: <code>runs/r-20261019T195218782492-srtj-cohort-incumbent-name-part3of4/budget-refusal-probe.log</code></li>
+  <li>failed record (uncommitted): <code>docs/evidence/fragments/sn-review-through-jev/srtj-cohort/incumbent-name-part3of4.json</code></li>
+</ul>
+
+<h3 id="srtj-cohort-incumbent-name-part3of4-next">Next action for the coordinator</h3>
+<p id="srtj-cohort-incumbent-name-part3of4-next-detail">
+  Remove the failed record named above, then re-dispatch this piece (or its remainder) at a time when
+  the node is not running several concurrent dump loads. The timeout is a fixed 180&nbsp;s on a load that
+  took ~40&nbsp;min here, so serialising the pieces, or raising that readiness window, is the durable fix.
+</p>
