@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Fails if the PRODUCED_NAME edge still exists for an applied row; reverting the writer's detach leaves binding_ids non-empty.",
+      "lines": "302"
+    },
+    {
+      "failure_condition": "Fails if the writer changed the name or source properties, including the source status the writer's own postcondition does not check.",
+      "lines": "306-308"
+    },
+    {
+      "failure_condition": "Fails if the post-apply sourceless entrants differ from the applied names; it compares two independent graph reads (before/after) against the prepare-time action rows.",
+      "lines": "293"
+    }
+  ],
+  "base_log_revision": "c6419361ac40cf95b41527404c1132368893f8e1",
+  "baseline_suite_log": "",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:_load_recovery_unbind_rows",
+    "imas_codex/standard_names/signed_manifest.py:apply_signed_manifest",
+    "imas_codex/standard_names/graph_ops.py:classify_sourceless_standard_names",
+    "imas_codex/graph/offsite.py:live_graph_activity"
+  ],
+  "completed_at": "2026-10-19T12:32:19Z",
+  "dispatched_at": "2026-10-19T08:21:37Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py",
+      "line": "29",
+      "severity": "follow-on",
+      "text": "follow-on: the REASON constant and the signed authority rows carry role attribution ('as ruled by the lead' at line 29, 'the lead ruled to unbind it' at line 101) where the mechanism ('below the 0.8 choice-probability or 0.5 confidence floor') already stands alone; the repository naming rules ban role attribution in source."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "follow-on: the recovery-binding authority is hand-rolled in the driver because build_repair_authority cannot emit it (authority-contract.log EXIT=1: 'canonical repair authority schema must be imas-codex.repair-authority.v1'), so the serializer duplicates the test helper _write_authority at tests/standard_names/test_signed_recovery_unbind.py:241 and no production builder for the program's schema exists."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py",
+      "line": "290",
+      "severity": "follow-on",
+      "text": "follow-on: assert len(after_names) == len(before_names) + changed measures the classifier rise against the writer's own receipt count rather than an independent source; line 293 compensates with an independent check, so this is a redundant weak assertion rather than a false guard."
+    }
+  ],
+  "head_log_revision": "5a04c220eb3e8670fd5342efd270e2dc16fd5bbd",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified 4 production call sites: signed_manifest._load_recovery_unbind_rows and apply_signed_manifest, graph_ops.classify_sourceless_standard_names, and offsite.live_graph_activity, all invoked by the driver.",
+    "diff": "Read commit by commit against c6419361a: 5f4311caa adds the driver (400 lines), the signed authority (187) and the record (577); 238c5dbef adds 42 receipt/quiet-probe lines; 5a04c220e adds the read-back to the driver, the html fragment (90) and the remaining record lines.",
+    "done_when": "The brief's done-when names html+JSON with the 16 rows, the signed authority/preview/receipt, the quiet-graph check, the read-back including the source-status check, the classifier counts at a real EXIT=, and the freed paths; sib-apply-recovery-unbind.html and the JSON carry all six, and verify-final.log ends EXIT=0.",
+    "goal": "The reviewed brief.md asks the node to remove the sixteen exhausted-name recovery bindings the lineage restore bound below the section's 0.8 choice-probability / 0.5 confidence floor through the signed recovery-unbind writer on a quiet graph with independent read-back; docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind.json records all 16 as action=unbind, the writer receipt changing 16, and the classifier rising 79 to 95.",
+    "manifest": "Read; it names commits 5f4311caa, 238c5dbef and 5a04c220e, the four changed paths, the verify command with EXIT=0, and declares no baseline_suite/after_suite, so this review records added_failure_count 0 with no ids.",
+    "write_paths": "The reviewed brief.md grants the four docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind* paths plus a docs/figures/.../sib-apply-recovery-unbind directory; the c6419361a..5a04c220e diff touches exactly those four files and nothing else."
+  },
+  "justifications": {
+    "durability": "The change is a graph-data mutation with no source edit; sib-apply-recovery-unbind-run.py:302 asserts the binding is gone but is a one-off driver assertion, not a test that runs on regression.",
+    "evidence": "verify-final.log ends EXIT=0 with {sourceless_before 79, sourceless_after 95, applied 16}, and refusal-control.log ends EXIT=0 refusing all 16 absent edges, against the run's declared done-when.",
+    "fit": "sib-apply-recovery-unbind.html follows the sibling evidence-fragment shape (node-id-prefixed element ids, reckon-type meta) but sib-apply-recovery-unbind-run.py:29 carries role attribution.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind.json:1 carries all 16 rows with action=unbind, receipt changed=16, and classifier 79 to 95, completing the brief's removal goal.",
+    "reuse": "sib-apply-recovery-unbind-run.py:207 calls apply_signed_manifest, the owner in imas_codex/standard_names/signed_manifest.py:5509, rather than re-implementing the writer; the authority serializer at line 168 has no production owner.",
+    "scope_discipline": "git diff c6419361a..5a04c220e touches only the four declared docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind* paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The reviewed brief.md asks the node to remove the sixteen exhausted-name recovery bindings the lineage restore bound below the section's 0.8 choice-probability / 0.5 confidence floor through the signed recovery-unbind writer on a quiet graph with independent read-back; docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind.json records all 16 as action=unbind, the writer receipt changing 16, and the classifier rising 79 to 95.\nVERDICT done_when: The brief's done-when names html+JSON with the 16 rows, the signed authority/preview/receipt, the quiet-graph check, the read-back including the source-status check, the classifier counts at a real EXIT=, and the freed paths; sib-apply-recovery-unbind.html and the JSON carry all six, and verify-final.log ends EXIT=0.\nVERDICT write_paths: The reviewed brief.md grants the four docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind* paths plus a docs/figures/.../sib-apply-recovery-unbind directory; the c6419361a..5a04c220e diff touches exactly those four files and nothing else.\nVERDICT manifest: Read; it names commits 5f4311caa, 238c5dbef and 5a04c220e, the four changed paths, the verify command with EXIT=0, and declares no baseline_suite/after_suite, so this review records added_failure_count 0 with no ids.\nVERDICT diff: Read commit by commit against c6419361a: 5f4311caa adds the driver (400 lines), the signed authority (187) and the record (577); 238c5dbef adds 42 receipt/quiet-probe lines; 5a04c220e adds the read-back to the driver, the html fragment (90) and the remaining record lines.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:_load_recovery_unbind_rows, imas_codex/standard_names/signed_manifest.py:apply_signed_manifest, imas_codex/standard_names/graph_ops.py:classify_sourceless_standard_names, imas_codex/graph/offsite.py:live_graph_activity\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind.json:1 carries all 16 rows with action=unbind, receipt changed=16, and classifier 79 to 95, completing the brief's removal goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: verify-final.log ends EXIT=0 with {sourceless_before 79, sourceless_after 95, applied 16}, and refusal-control.log ends EXIT=0 refusing all 16 absent edges, against the run's declared done-when.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff c6419361a..5a04c220e touches only the four declared docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind* paths.\nSCORE durability: 10\nJUSTIFICATION durability: The change is a graph-data mutation with no source edit; sib-apply-recovery-unbind-run.py:302 asserts the binding is gone but is a one-off driver assertion, not a test that runs on regression.\nSCORE fit: 15\nJUSTIFICATION fit: sib-apply-recovery-unbind.html follows the sibling evidence-fragment shape but sib-apply-recovery-unbind-run.py:29 carries role attribution.\nSCORE reuse: 16\nJUSTIFICATION reuse: sib-apply-recovery-unbind-run.py:207 calls apply_signed_manifest, the owner in imas_codex/standard_names/signed_manifest.py:5509, rather than re-implementing the writer; the authority serializer at line 168 has no production owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py:29 follow-on: role attribution ('as ruled by the lead', 'the lead ruled to unbind it') where the mechanism already stands alone.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py:96 follow-on: the recovery-binding authority is hand-rolled because build_repair_authority cannot emit the program's schema, duplicating the test helper and leaving no production builder.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py:290 follow-on: the classifier rise is measured against the writer's own receipt count.\n",
+  "review_run_id": "r-20261019T082041360023-review-of-sib-apply-recovery-unbind-5a04c220eb3e",
+  "reviewed_base_sha": "c6419361ac40cf95b41527404c1132368893f8e1",
+  "reviewed_commits": [
+    "5f4311caa49da23dfbbc13f87e8c8522a98e6c53",
+    "238c5dbeff3337067c3e8a780f300e62e8d48f41",
+    "5a04c220eb3e8670fd5342efd270e2dc16fd5bbd"
+  ],
+  "reviewed_head_sha": "5a04c220eb3e8670fd5342efd270e2dc16fd5bbd",
+  "reviewed_run_id": "r-20261019T073505098130-sib-apply-recovery-unbind",
+  "scores": {
+    "durability": 10,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py",
+      "line": "290",
+      "text": "assert len(after_names) == len(before_names) + changed takes 'changed' from the writer's own receipt, so the rise is measured against the writer's report rather than an independent source; line 293 asserts the same fact independently against the prepare-time action rows, so the weak form is redundant rather than load-bearing."
+    }
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T12:33:13.043348+00:00"
+}
