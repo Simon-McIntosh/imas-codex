@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite and no after_suite (both blank in its manifest), so it carries no two-arm suite delta of its own. Its gate was the per-arm runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py; the retry runner log .../runner-heuristic-retry.log header names revision 5cf53a7b6, the tree, module.__file__ and resolved_cwd, and its last line is EXIT=0, while the first attempt .../runner-heuristic.log ends EXIT=1 on a read-only /tmp (retry_failures id initial-runner-tmpdir-read-only, attributed scaffolding before reaching code under test). The change touches only docs/evidence data and doc paths that no pytest module covers, so the added-failure set is an empty measured set rather than unmeasured by a suite that could have exercised it.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T20:33:27.401Z",
+  "dispatched_at": "2026-10-19T20:21:52Z",
+  "findings": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:185 follow-on: outcome_status reads \"complete\" while the harmonization halted after 1 of 2 batches with stamped false (json lines 78, 123, 114, 251), because the unchanged runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:627-628 sets it on the containment gate alone (complete if containment holds else containment); an aggregator keying on the field alone reads a fully-harmonized family, though the node discloses the halt in docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-visible-wavelength-heuristic.html:16 and in its manifest follow_ons.",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:31 follow-on: cost_limit_passed_usd holds the 1.98 apply ceiling, not a pass/fail, so a reader comparing spend_usd (json line 250, 0.521024) against a value stored under a name that asserts a verdict compares a spend to a cap; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508-509 (ceiling = min(apply_cap(planned_calls), ARM_BUDGET_USD))."
+  ],
+  "findings_structured": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json",
+      "line": "185",
+      "severity": "follow-on",
+      "text": "outcome_status reads complete while the harmonization halted after 1 of 2 batches with stamped false; the unchanged runner sets it on the containment gate alone, so an aggregator keying on the field alone reads a fully-harmonized family, though the node discloses the halt in the landing fragment and its manifest follow_ons."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "cost_limit_passed_usd holds the 1.98 apply ceiling, not a pass/fail verdict; comparing spend_usd against it compares a spend to a cap. Copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508-509."
+    }
+  ],
+  "findings_text": "see findings",
+  "item_verdicts": {
+    "diff": "two commits, two added files, all inside scope.",
+    "done_when": "every field the brief's done_when asks for is present in the arm JSON and the gate log .../runner-heuristic-retry.log ends EXIT=0.",
+    "goal": "the node's goal is to run the heuristic anchor arm of the lower_bound_wavelength_of_visible_camera family in a scratch graph copy and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:6 records that arm, anchor wavelength_of_visible_camera.",
+    "manifest": "read in full; status complete with the partial-family limitation disclosed.",
+    "write_paths": "both changed paths are inside the brief's declared write scope."
+  },
+  "justifications": {
+    "durability": "no assertion added; the only guard is the runner's write-time containment gate.",
+    "evidence": "scores_after and score_regressions reconcile internally, containment evidence names its counts, planted negative control present.",
+    "fit": "key set matches the sibling arm record; one field name asserts a verdict its value does not hold.",
+    "goal_fidelity": "the arm JSON records the anchor and every named quantity, partial harmonization disclosed.",
+    "reuse": "no new definition; the existing runner produces both artifacts and no other owner exists.",
+    "scope_discipline": "git diff --stat 5cf53a7b6..74b6996f4 lists only the two declared paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to run the heuristic anchor arm of the lower_bound_wavelength_of_visible_camera family in a scratch graph copy and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:6 records that arm, anchor wavelength_of_visible_camera.\nVERDICT done_when: the brief's done_when asks for the arm JSON written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, the scratch stopped and removed, and spend under USD 2.00; every one is present in docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json (outcome_status line 185, anchor line 6, lint_before 172 and lint_after 165, scores_after line 229, calls line 106, spend_usd line 250, wall_seconds line 257, stamped line 251, containment line 17 with evidence line 19, code line 11) and .../runner-heuristic-retry.log ends EXIT=0.\nVERDICT write_paths: the reviewed manifest declares two changed paths and git diff touches exactly those two \u2014 docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json and docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-visible-wavelength-heuristic.html \u2014 both inside the brief's declared write scope plus its working-rules landing fragment.\nVERDICT manifest: read in full; status complete, two commits (69795fb04, 74b6996f4), changed_paths, test_logs, measurement_module and measurement_cwd present, retry_failures initial-runner-tmpdir-read-only attributed to scaffolding, baseline_suite and after_suite blank as an evidence node, blockers none, and the partial-family limitation disclosed in follow_ons and the checkpoint.\nVERDICT diff: read commit by commit against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; two commits \u2014 69795fb04 adds the 258-line arm JSON, 74b6996f4 adds the 30-line landing HTML \u2014 two files, all additions, nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:6 records the anchor and every quantity the goal names, in the JSON shape set by ssog-anchor-ab-run.py:424-509, and the family's partial harmonization (1 of 2 batches, stamped false, json lines 78, 251) is disclosed rather than concealed.\nSCORE evidence: 18\nJUSTIFICATION evidence: the record's scores_after at ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:229 (lower 0.91875, upper 0.95625, wavelength 0.849) reconcile with its score_regressions block (json line 93, wavelength fell 0.96875->0.849) and its containment.evidence at json line 19 names the counts the verdict rests on, but no pytest arm ran, so the added-failure delta is a measured empty set.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1..74b6996f43c3 lists only the arm JSON and ssog-anchor-visible-wavelength-heuristic.html, both inside the manifest's declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: the diff adds no assertion at all \u2014 it is a data record and a doc \u2014 so nothing committed reddens if the record's scores or containment verdict were later replaced; the only guard is the runner's write-time containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:600-628 and its planted self-check --self-check-containment.\nSCORE fit: 17\nJUSTIFICATION fit: the record's key set matches the sibling ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json exactly plus the port_lock keys from the port-reservation fix, and the landing HTML follows the reckon evidence-fragment idiom at ssog-anchor-visible-wavelength-heuristic.html:1, though json line 31 carries a field name (cost_limit_passed_usd) that asserts a verdict its value does not hold.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no new definition and forks no capability \u2014 the record and fragment are produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:399 run_arm, which delegates to imas_codex/standard_names/harmonize.py and the temp-instance helpers, and a capability search over docs/evidence and imas_codex found no other owner of an arm-record producer.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:185 follow-on: outcome_status reads complete while the harmonization halted after 1 of 2 batches with stamped false (json lines 78, 185, 251), because the unchanged runner at ssog-anchor-ab-run.py:627-628 sets it on the containment gate alone; an aggregator keying on the field reads a fully-harmonized family, though the node discloses the halt in ssog-anchor-visible-wavelength-heuristic.html:16 and its manifest follow_ons.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:31 follow-on: cost_limit_passed_usd holds the 1.98 apply ceiling, not a pass/fail, so comparing spend_usd (json line 250) against it compares a spend to a cap; the value is copied verbatim from ssog-anchor-ab-run.py:508-509.\n",
+  "review_run_id": "r-20261019T202133932437-review-of-ssog-anchor-visible-wavelength-heuristic-74b6996f43c3",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_commits": [
+    "69795fb0454f37eff7eb848259952a43756754f7",
+    "74b6996f43c32559513c5138433fbe06f23fc03d"
+  ],
+  "reviewed_head_sha": "74b6996f43c32559513c5138433fbe06f23fc03d",
+  "reviewed_run_id": "r-20261019T195818474423-ssog-anchor-visible-wavelength-heuristic",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261019T202133932437-review-of-ssog-anchor-visible-wavelength-heuristic-74b6996f43c3"
+  },
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T20:45:00Z",
+  "total": 105
+}
