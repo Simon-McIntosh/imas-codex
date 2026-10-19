@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run records neither a baseline_suite nor an after_suite arm (its manifest carries no such keys and no base log exists in the run directory), so the delta reduces to the after arm alone over the logs it does carry: gate.log records 337 passed, 0 failed, EXIT=0, and test1.log records 12 passed, 0 failed, EXIT=0 (11 in tests/standard_names/test_signed_recovery_unbind.py plus 1 in tests/graph/test_cypher_property_check.py). No failure is added by the gained commits; the gained commits change no test.",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T05:37:31.641Z",
+  "dispatched_at": "2026-10-19T05:29:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-signed-recovery-unbind.html",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "follow-on: the added gate paragraph records the figure's parse and render check as a one-off shell command, but no test anywhere in the repository references decision-flow.svg or this fragment (rg -l 'decision-flow|sib-signed-recovery-unbind|docs/figures' tests/ returns nothing), so an edit that reintroduces an HTML named entity such as '&middot;' - the exact defect the prior review blocked on - would pass every gate and ship unrenderable. The negative control negative_control_repair.log demonstrates the check can fail (EXIT=1 on the reverted figure) but nothing runs it automatically; the reviewed run's own manifest concedes this in its third follow_on ('No test in the suite covers a figure or an evidence fragment ... a repository-wide check would make it structural'). The figure is correct today, so this does not hold the node."
+    }
+  ],
+  "head_log_revision": null,
+  "item_verdicts": {
+    "call_sites": "none - the gained commit changes only a docs evidence fragment and its SVG; no runtime module is reached, so there is no production call site for these commits (the writer's call sites were assessed in the prior review at ee506dfc3).",
+    "diff": "read commit by commit against the base: ee506dfc3..3578ef089 is one commit, 3578ef089 'fix(docs): make the recovery-unbind decision-flow figure well-formed XML', changing the fragment (+9) and the SVG (reworked geometry, 18 pt labels, '&middot;' replaced by a plain comma, the one remaining '&#8594;' an XML-defined numeric reference); both paths are inside the declared scope.",
+    "done_when": "read the source node's done_when (tests/standard_names/test_signed_recovery_unbind.py behaviour plus a delta gate and a logged negative control); the gained commits add no test, so the measure they must satisfy is the figures-rule render check, which render.log and negative_control_repair.log record and which I reproduced: the head SVG parses EXIT=0 and the reverted pre-fix figure fails with 'undefined entity: line 29, column 33' EXIT=1.",
+    "goal": "read the source node's goal (add a signed writer that removes a recorded recovery binding from an exhausted standard name, node manifest goal field); the gained commits do not touch the writer - it landed at ee506dfc3 and was scored in the prior review - they repair the figure that documents it at docs/figures/sn-integrity-backlog/sib-signed-recovery-unbind/decision-flow.svg, which the node's declared write paths and the figures rule make part of its deliverable.",
+    "manifest": "read; it records the two gained commits (ee506dfc3, 3578ef089), 11 passed for test_signed_recovery_unbind.py and 337 passed for the gate, names negative_control_repair.log as its negative control, and its three follow_ons honestly record that the program has never run against a real database, that the removed source is carried in from_name, and that no suite test covers a figure or an evidence fragment.",
+    "write_paths": "read the source manifest's two declared write paths among its five (docs/evidence/fragments/sn-integrity-backlog/sib-signed-recovery-unbind.html and the figures directory docs/figures/sn-integrity-backlog/sib-signed-recovery-unbind); git diff --stat ee506dfc3..3578ef089 touches exactly those two files and nothing else."
+  },
+  "justifications": {
+    "durability": "no test in tests/ or anywhere under imas_codex/ references decision-flow.svg or the fragment (rg over tests/ finds none), so nothing fails if the figure regresses to an id XML does not define; the guard is a one-off shell parse in render.log.",
+    "evidence": "the added assertion at docs/evidence/fragments/sn-integrity-backlog/sib-signed-recovery-unbind.html:96-103 (parse EXIT=0, render EXIT=0, labels inside their boxes) is backed by render.log and reproduced here, and its negative control negative_control_repair.log shows the check can fail (EXIT=1), though no base arm was recorded.",
+    "fit": "docs/figures/sn-integrity-backlog/sib-signed-recovery-unbind/decision-flow.svg:22 follows the surrounding figure's own diagram idiom (plain boxes, no gridlines, one accent colour) and introduces no name the repository naming rules forbid.",
+    "goal_fidelity": "docs/figures/sn-integrity-backlog/sib-signed-recovery-unbind/decision-flow.svg:1 now opens in an XML-strict renderer (reproduced here: xml.dom.minidom.parse EXIT=0; convert renders 1400x420), completing the node's documentation deliverable.",
+    "reuse": "no owner for figure-artifact validation exists - rg over imas_codex/, tests/ and scripts/ for minidom/svg/well-formed/mplstyle found only plotting scripts under scripts/, none validating XML - so the manual check duplicates nothing; the gained commits add no definition.",
+    "scope_discipline": "git show --stat 3578ef089 lists exactly the fragment and the SVG, both inside the manifest's declared write paths, with no file outside them touched."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T052844132696-review-of-sib-signed-recovery-unbind-3578ef089f4f",
+  "reviewed_base_sha": "ee506dfc322418a5e8b1aaba4a840c66e530d032",
+  "reviewed_head_sha": "3578ef089f4fb45fd72299b8229e793294534fb1",
+  "reviewed_run_id": "r-20261019T042350099511-sib-signed-recovery-unbind",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T05:38:00+00:00",
+  "total": 100
+}
