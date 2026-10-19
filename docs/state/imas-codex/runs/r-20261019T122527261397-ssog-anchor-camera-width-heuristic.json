@@ -872,6 +872,78 @@
   "predecessor_run": "r-20261019T035327482346-ssog-anchor-family-runner",
   "promoted_by": null,
   "promoted_revision": "6bd8987e63a33a366443d273a72f39f2598c11c9",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5040,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261019T122527261397-ssog-anchor-camera-width-heuristic",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5040,
+        "path": "/tmp/reckon-crew-scratch/r-20261019T122527261397-ssog-anchor-camera-width-heuristic"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "dirty",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [
+            "?? docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json"
+          ],
+          "head": "6bd8987e63a33a366443d273a72f39f2598c11c9",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-heuristic",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-19T13:20:07.430Z",
+            "session_id": "dcb5501f-f75b-4d84-9d3c-1af563152ac3",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-heuristic"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:45e15bba7c189b8f75561e3bfdf953805cacd45f02a5555e8268d9cd267918db",
+          "status_entries": [
+            {
+              "code": "??",
+              "path": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json"
+            }
+          ],
+          "withheld": "this worktree is the working directory of recoverable session dcb5501f-f75b-4d84-9d3c-1af563152ac3"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-19T13:20:07.430Z",
+      "session_id": "dcb5501f-f75b-4d84-9d3c-1af563152ac3",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-heuristic"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session dcb5501f-f75b-4d84-9d3c-1af563152ac3"
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",
