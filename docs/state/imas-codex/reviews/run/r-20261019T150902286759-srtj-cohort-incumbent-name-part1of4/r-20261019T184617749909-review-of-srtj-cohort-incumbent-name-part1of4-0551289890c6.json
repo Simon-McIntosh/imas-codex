@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "No assertion is added by this diff: the change is data and prose, and no test file is in the declared write paths, so the reviewed run records baseline_suite: null and after_suite: null and added_failure_count is 0. The two guards that would refuse a corrupt piece are pre-existing write-time checks in the runner, not stored tests: verify_containment reddens (raises \"run receipt escaped scratch graph\") if live_run_rows is non-zero or scratch_cost_rows does not equal receipt_count, and verify_completion raises when an item is still pending, stop_reason is outside {completed, no_eligible_work}, or receipt_count is zero. Both ran inside the EXIT=0 invocation, and I rederived that their preconditions hold in the stored artefact (containment.live_run_rows 0, containment.live_cost_rows 0, containment.scratch_run_rows 1, containment.scratch_cost_rows 188 == receipt_count 188, run_summary.stop_reason no_eligible_work). These are not restored-and-reddened by the review, so durability rests on no stored assertion.",
+      "lines": "docs/evidence/fragments/../sn-review-through-jev/srtj-cohort-run.py:59 verify_containment, :79 verify_completion"
+    }
+  ],
+  "call_sites": [
+    "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py:168 check_comparison_budget"
+  ],
+  "completed_at": "2026-10-19T19:00:44.158Z",
+  "dispatched_at": "2026-10-19T18:47:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-incumbent-name-part1of4.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the landing fragment reports distributions a reader has to reconstruct from prose \u2014 route counts (accept 4, band 10, refine 43), decisions (accepted 46, reviewed 11), 188 calls and receipts, USD 4.392582 of a USD 4.50 ceiling \u2014 and carries no figure, while the graphics mandate in ~/.agents/AGENTS.md asks a doc to illustrate exactly this kind of per-run distribution (route/decision mix or per-model spend) with one SVG under the declared-but-unused figures write path docs/figures/sn-review-through-jev/. Presentation only; no metric in the fragment is affected."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 33836e98c9989bd8f372ee86f254b627456d1548: 654f0c5b3 adds the 6-line landing fragment recording the blocked invocation, b8f276b65 adds the 1147-line piece JSON, and 055128989 replaces the fragment's preflight text with the completed-piece metrics; no source, test or runner file is touched, and every commit carries a body and no attribution trailer.",
+    "done_when": "The brief's done-when requires the piece JSON, a log ending EXIT=0, measurement_complete true, a passing containment verdict, spend at most USD 4.50, and the scratch stopped and its tree removed; I rederived every one from the artefact rather than the manifest \u2014 piece_spend_total_usd 4.392582 <= ceiling_usd 4.5, measurement_complete true, containment_verdict \"pass\" with live_run_rows 0 and live_cost_rows 0, scratch_stopped true, and the named tree absent on disk \u2014 and piece-extra.log's header names revision 654f0c5b3 with its last line EXIT=0.",
+    "goal": "The node goal is to run part 1 of 4 of the incumbent arm on the name axis in a scratch graph and store its piece; the diff adds docs/evidence/fragments/sn-review-through-jev/srtj-cohort/incumbent-name-part1of4.json, a 57-item piece (part 1, parts 4, arm incumbent, axis name) carrying every item's route, chat-reviewer call, decision, score, calls, spend and wall time.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4/manifest.md; status complete, three commits, both counted failures recorded (attempt-1 read-only /tmp and attempt-2's budget-guide refusal) and attempt-1 attributed to the sandbox fence, and the authorized extra invocation documented in resume-1-advice.txt.",
+    "write_paths": "The manifest declares docs/evidence/fragments/sn-review-through-jev/srtj-cohort/incumbent-name-part1of4.json, docs/evidence/fragments/sn-review-through-jev/srtj-cohort-incumbent-name-part1of4.html and the figures directory docs/figures/sn-review-through-jev/srtj-cohort-incumbent-name-part1of4; git diff --name-status 33836e98c 055128989 names exactly the first two, both inside the list, and the third is unused."
+  },
+  "project": "imas-codex",
+  "review": "VERDICT goal: the node's goal is part 1 of 4 of the incumbent name arm in a scratch graph; docs/evidence/fragments/sn-review-through-jev/srtj-cohort/incumbent-name-part1of4.json holds 57 items with part 1, parts 4, arm incumbent, axis name, and every item carries route, chat_reviewer_called, decision, score, calls, spend_usd and wall_time_s (57/57 present, none null).\nVERDICT done_when: the brief's done-when names the piece JSON, an EXIT=0 log, measurement_complete true, a passing containment verdict, spend at most USD 4.50 and a stopped-and-removed scratch; I rederived each from the artefact \u2014 sum of item spend 4.392582 equals piece_spend_total_usd and is under ceiling_usd 4.5, sum of item calls 188 equals receipt_count 188, measurement_complete true, containment_verdict \"pass\" with containment.live_run_rows 0 and containment.live_cost_rows 0, scratch_stopped true, and the scratch tree /tmp/reckon-crew-scratch/r-20261019T150902286759-srtj-cohort-... does not exist on disk.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-review-through-jev/srtj-cohort/incumbent-name-part1of4.json, docs/evidence/fragments/sn-review-through-jev/srtj-cohort-incumbent-name-part1of4.html and a figures directory; git diff --name-status 33836e98c9989bd8f372ee86f254b627456d1548 0551289890c63b17bb6701919bbb2f16f73df02d lists exactly the JSON and the HTML as additions, both inside the declared scope.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4/manifest.md; status complete, three commits, retry_failures naming both failures with attempt-1 attributed to the sandbox's read-only /tmp, and the extra invocation authorized in resume-1-advice.txt, so the stop rule was honoured rather than circumvented.\nVERDICT diff: read commit by commit against base 33836e98c9989bd8f372ee86f254b627456d1548; 654f0c5b3 adds the landing fragment, b8f276b65 adds the piece JSON, 055128989 rewrites the fragment's outcome, and no source, test or runner file is touched.\nCALL_SITES: docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py:168 check_comparison_budget\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-cohort/incumbent-name-part1of4.json:1 is the piece the goal names, with 57 items, part 1 of 4, arm incumbent and axis name, each carrying the route, call, decision, score, calls, spend and wall time the goal requires.\nSCORE evidence: 19\nJUSTIFICATION evidence: the done-when's measures are recorded in the artefact and its log rather than claimed \u2014 piece_spend_total_usd 4.392582 <= ceiling_usd 4.5, measurement_complete true, containment_verdict \"pass\" with live rows 0, and piece-extra.log's header names revision 654f0c5b3 with EXIT=0 as its last line.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 33836e98c9989bd8f372ee86f254b627456d1548 0551289890c63b17bb6701919bbb2f16f73df02d adds only the declared piece JSON and landing fragment, and no runner, exclusion or cohort file is modified.\nSCORE durability: 9\nJUSTIFICATION durability: the diff adds no assertion and no test file is in the write paths (baseline_suite and after_suite are null), so nothing stored reddens if the piece regresses; the only guards are the pre-existing write-time checks at docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py:59 and :79, which ran inside the EXIT=0 invocation but are not restored-and-reddened here.\nSCORE fit: 19\nJUSTIFICATION fit: docs/evidence/fragments/sn-review-through-jev/srtj-cohort-incumbent-name-part1of4.html:1 uses the section/h2/p-with-id fragment idiom of its sibling docs/evidence/fragments/sn-review-through-jev/srtj-cohort-piece-limits.html, and the three commit subjects are conventional with bodies and no attribution trailer.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition and forks no capability; the search over docs/evidence/fragments/sn-review-through-jev/ and tests/ for a cohort-piece writer found only the shared srtj-cohort-run.py, which this node reuses rather than copies, and the pre-existing cascade-name.json belongs to the cascade arm, not this incumbent arm.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-cohort-incumbent-name-part1of4.html:1 follow-on: it reports route counts, decision counts and spend in prose and carries no figure, though the declared figures directory is unused and the graphics mandate asks a per-run data summary to be illustrated.",
+  "review_run_id": "r-20261019T184617749909-review-of-srtj-cohort-incumbent-name-part1of4-0551289890c6",
+  "reviewed_base_sha": "33836e98c9989bd8f372ee86f254b627456d1548",
+  "reviewed_head_sha": "0551289890c63b17bb6701919bbb2f16f73df02d",
+  "reviewed_run_id": "r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4",
+  "scores": {
+    "durability": 9,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T19:39:44.392669+00:00",
+  "total": 107
+}
