@@ -829,7 +829,6 @@ def render(doc: dict) -> str:
                 f"adding the lineage step's "
                 f"{doc.get('lead_referral_total', {}).get('lineage_referred_to_lead', '—')} gives a running total of "
                 f"{doc.get('lead_referral_total', {}).get('running_total', '—')}.</p>",
-                f'<pre id="{NODE}-quiet-body">{escape(json.dumps(doc.get("quiet_graph", {}), indent=1))}</pre>',
                 "</main>",
                 "</body>",
                 "</html>",
