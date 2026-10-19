@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="94">
+<meta name="plan-version" content="95">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -506,7 +506,10 @@ Spend for this node: USD 0.</p></div>
     <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-19, recorded by the coordinator.</strong> The fixed-cohort comparison runs under a ceiling of USD 60 in total, on the 464-item cohort fixed by <code>srtj-cohort-estimate</code> (seed 20261019). Both arms run in scratch copies of the graph, so the live catalog's review state is untouched and neither arm sees the other's writes. The deciding switch, <code>[sn-review].cascade-deciding</code>, is turned on for the cascade arm's scratch run only, and no configuration change is committed. The work is split so that each piece fits one worker's hour: one runner node that also runs the cascade name arm, then the remaining arm pieces, then an aggregating node that reports the route shares, the unjudged count, spend per accepted name in each arm, and AUC on the golden validation split.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261019T123713983804-review-of-srtj-cohort-runner-99a2fa1719c2" data-who="reckon-build" data-when="2026-10-19T12:53:58.398Z">
-    <div class="r-comment-body"><p>none — a review node lands no first-party change; its record is filed under the reviewed run&#x27;s review-records.</p></div>
+    <div class="r-comment-body"><p>none — a review node lands no first-party change; its record is filed under the reviewed run's review-records.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261019T075810573514-srtj-cohort-runner" data-who="reckon-build" data-when="2026-10-19T12:36:27Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-cohort-runner.html — deciding cascade name piece completed: 231 decisions, 404 receipts, USD 3.128219 of USD 3.50, band 64/231 (27.7%); both scratch runs contained and removed</p></div>
 </div>
 </section>
 </main>
