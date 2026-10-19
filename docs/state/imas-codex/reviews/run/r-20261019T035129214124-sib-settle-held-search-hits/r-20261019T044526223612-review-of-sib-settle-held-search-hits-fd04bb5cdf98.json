@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run is an evidence node whose write paths reach no test file and whose manifest declares no baseline_suite or after_suite (classification.json shows manifest.data.baseline_suite and after_suite both null), so there is no base or head suite log and no failure ids to derive; the run's own gates each reported EXIT=0 and the committed JSON's verification.checks are all true.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "A holder's declared unit differs from the unit its held DD path declares; but held_path is always \"\" (run.py:168 sets the path empty for every search reason and run.py:216 discards the lineage reason), so held_path_unit is always null and suspect_unit_binding can never be true.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": 295,
+      "self_comparison": true
+    },
+    {
+      "condition_to_fail": "paths_successor_does_not_hold is non-empty; but it is computed from rec[\"shared_paths\"], which is empty for every admitted row (guard.log records recorded_paths: [] for all six), so the successor-side condition is vacuous.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": 838
+    },
+    {
+      "condition_to_fail": "the sourceless total after the apply is not before minus retired, i.e. a supersede failed to move the population; falsify.log:2 shows exactly this check reddening when before[\"sourceless_total\"] is incremented by one.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": 660
+    },
+    {
+      "condition_to_fail": "the planted different-quantity pair is admitted by the 0.8/0.5 floors; negcontrol.log records refused: true with admitted_by_floors empty.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": 924
+    }
+  ],
+  "base_log_revision": "50459cc3f9d91f0069687103ce14358acc127da6",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T05:00:28.708Z",
+  "dispatched_at": "2026-10-19T04:46:27Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": "216",
+      "severity": "blocking",
+      "text": "blocking: `row = entry(row[\"name\"])` at run.py:216 rebinds the loop variable to the sources dict, so run.py:218 add_hits(row, row.get(\"reason\", \"\")) reads reason off a dict that has no such key and never adds a lineage holder or held path. Replicating that loop against the committed lineage record touches 30 names and records 0 holders where the record names 21 held pairs; three of the 11 names the JSON reports as no_holder (cumulative_ethylene_count_due_to_gas_injection, cumulative_inside_flux_surface_total_electron_density, ratio_of_charge_of_conductor_to_voltage_of_conductor) in fact have a lineage holder and a held path, so they were referred unjudged though the brief required that held lineage path to count as one more held hit."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits.json",
+      "line": "1063",
+      "severity": "blocking",
+      "text": "blocking: every one of the 132 holder entries in the committed JSON carries held_path \"\", so the suspect-binding check at run.py:295-299 had no held-path unit to compare and could not fire; suspect_holder_count 0 and the manifest's claim that zero is a deterministic finding rather than an unchecked path (manifest.md:104-107) are therefore false, and Jev's state (run.py:357-365) carried held_dd_paths with path null, so the seat was never shown the held DD path the brief requires."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": "64",
+      "severity": "follow-on",
+      "text": "follow-on: RECORDED_RECORD is assigned at run.py:64 and never referenced, a dead constant carrying another node's fragment path."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": "1259",
+      "severity": "follow-on",
+      "text": "follow-on: the read and judge gates write no final EXIT= line (read.log and judge.log hold a bare JSON payload), so two of the driver's gates do not record their exit status as the brief requires; the manifest caveats this at its lines 100-102."
+    }
+  ],
+  "head_log_revision": "fd04bb5cdf982c8c82e1fd3ce7f116b742fde63b",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read commit by commit: 0f1bdd73a adds docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py, its authority JSON and the figure SVG; fd04bb5cd renders the HTML fragment and the JSON record. No production code is touched; every path is inside the declared scope.",
+    "done_when": "The done_when (prompt FENCE-EVIDENCE) requires the fragment and JSON to record every work-list name with its holders, held paths, Jev answer, probability, confidence and action; docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits.json carries the answer, probability, confidence and action per name, but held_path is the empty string for all 132 holder entries, so the held-path evidence is absent.",
+    "goal": "The source goal (brief.md:1, prompt GOAL) is to settle each referred name whose unit-matching DD hit a live name holds against those holders; the landed driver does retire 6 such names through the signed supersede with receipts (run.py:456-472; the JSON's retired_count is 6) but it never judged the names whose only holder the lineage record names, so the goal is met only over the holders the search step happened to name.",
+    "manifest": "The source manifest.md records both commits (0f1bdd73a, fd04bb5cd), the gate list, the classifier read-back 92->86, the sourceless fall equal to the retired count, and a zero suspect-holder count asserted as deterministic; it declares no baseline_suite or after_suite and does not mention that the lineage half of the work list parsed to no holders at all.",
+    "write_paths": "brief.md:88-93 grants four fragment files plus the figure directory docs/figures/sn-integrity-backlog/sib-settle-held-search-hmm/sib-settle-held-search-hits; git diff --name-only 50459cc3f..fd04bb5cd lists exactly those five paths and nothing else."
+  },
+  "justifications": {
+    "durability": "the driver's own gates (falsify at run.py:660, negcontrol at run.py:924) exercise the floors and the read-back, but no test covers _held_hits, and the parse bug at run.py:216 is precisely the regression the node's emission shows and its own assertions never name.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits.json carries held_path \"\" for all 132 holder entries, so the per-name held-path evidence the done_when names is absent and the suspect-binding column is compared against nothing.",
+    "fit": "run.py follows the fragment-directory evidence idiom (derived reads in the run directory, signed authority in the fragment directory at run.py:57, and readable action/reason labels at run.py:1021-1032), and its helper names describe mechanisms rather than plan steps.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py:215-218 drops every lineage-named holder, so cumulative_ethylene_count_due_to_gas_injection, cumulative_inside_flux_surface_total_electron_density and ratio_of_charge_of_conductor_to_voltage_of_conductor are recorded as no_holder and referred unjudged though the lineage record names a live holder and a held path for each.",
+    "reuse": "run.py imports the repository's owners rather than forking them: build_repair_authority (run.py:533), apply_signed_manifest and signed_payload_sha256 (run.py:46-49), classify_sourceless_standard_names (run.py:235), live_graph_activity (run.py:554) and decide_batch (run.py:384).",
+    "scope_discipline": "the diff reaches only docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py, its authority JSON, .html, .json and the figure SVG, which are exactly the paths granted at brief.md:88-93; no production module is changed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to settle each referred name whose unit-matching DD hit another live name holds; the landed driver retires 6 through the signed supersede but never judged the names whose only holder the lineage record names, so the goal is met only over the search step's holders.\nVERDICT done_when: the done_when requires every work-list name with its holders and held paths; sib-settle-held-search-hits.json carries held_path \"\" for all 132 holder entries, so that evidence is absent.\nVERDICT write_paths: all five paths in the diff sit inside the four fragment files plus figure directory granted at brief.md:88-93.\nVERDICT manifest: read; it records both commits, the 92->86 read-back and ruff clean, and does not mention that the lineage half of the work list parsed to zero holders.\nVERDICT diff: read commit by commit; 0f1bdd73a lands the driver, authority and figure, fd04bb5cd renders the html and json, and no production file changes.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: run.py:215-218 drops every lineage-named holder, so three names with a named holder are recorded as no_holder in sib-settle-held-search-hits.json and referred unjudged.\nSCORE evidence: 8\nJUSTIFICATION evidence: sib-settle-held-search-hits.json has held_path empty for every holder, so the per-name held-path evidence is absent and the suspect-binding column compares nothing.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff reaches only the five granted fragment and figure paths and no production module.\nSCORE durability: 10\nJUSTIFICATION durability: the parse bug at run.py:216 is the regression the node's own falsify and negcontrol gates cannot catch, and no test covers _held_hits.\nSCORE fit: 16\nJUSTIFICATION fit: run.py:57 and run.py:1021-1032 follow the fragment-directory evidence idiom and label by mechanism rather than by plan step.\nSCORE reuse: 19\nJUSTIFICATION reuse: run.py:46-49, 235, 384, 533 and 554 import build_repair_authority, apply_signed_manifest, classify_sourceless_standard_names, decide_batch and live_graph_activity rather than reimplementing them.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py:216 blocking: the loop rebinds row so row.get(\"reason\") is always empty; replicated against the committed record it adds 0 of 21 lineage pairs and refers three names that do have a holder.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits.json:1063 blocking: every holder's held_path is empty, so the suspect-binding check is vacuous and suspect_holder_count 0 is not the deterministic finding the manifest claims.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py:64 follow-on: RECORDED_RECORD is assigned and never used.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py:1259 follow-on: the read and judge gates carry no EXIT= line.\n",
+  "review_run_id": "r-20261019T044526223612-review-of-sib-settle-held-search-hits-fd04bb5cdf98",
+  "reviewed_base_sha": "50459cc3f9d91f0069687103ce14358acc127da6",
+  "reviewed_commits": [
+    "0f1bdd73a99528ef6de629d9dd6f18ed231fa767",
+    "fd04bb5cdf982c8c82e1fd3ce7f116b742fde63b"
+  ],
+  "reviewed_head_sha": "fd04bb5cdf982c8c82e1fd3ce7f116b742fde63b",
+  "reviewed_range": "50459cc3f9d91f0069687103ce14358acc127da6..fd04bb5cdf982c8c82e1fd3ce7f116b742fde63b",
+  "reviewed_run_id": "r-20261019T035129214124-sib-settle-held-search-hits",
+  "scores": {
+    "durability": 10,
+    "evidence": 8,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py",
+      "line": 295,
+      "text": "self_comparison: suspect_unit_binding compares the holder's unit against held_path_unit, and both sides come from the same holder detail the driver built; with held_path empty the held side is null and the assertion holds whatever the code does."
+    }
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T05:05:00Z",
+  "total": 86
+}
