@@ -106,6 +106,7 @@ def population(gc: GraphClient, stale: list[dict]) -> list[dict]:
             OPTIONAL MATCH (n:IMASNode {id: s.source_id})
             RETURN s.id AS id, n.id AS dd_path,
                    n.lifecycle_status AS lifecycle_status,
+                   EXISTS { (s)-[:FROM_DD_PATH]->(:IMASNode) } AS linked_dd_path,
                    [(s)-[:PRODUCED_NAME]->(name:StandardName) | name.id]
                      AS produced_names
             """,
@@ -132,14 +133,32 @@ def population(gc: GraphClient, stale: list[dict]) -> list[dict]:
         for source in stale:
             if source["path"] in active:
                 source["other_live_sources"] = active[source["path"]]
+    partition: Counter[str] = Counter()
     for source in stale:
         if (
             source["dd_path"] is not None
-            and source["lifecycle_status"] != "removed"
             and not source["produced_names"]
             and not source.get("other_live_sources")
         ):
             records.append(source)
+            partition["cohort"] += 1
+        elif source["dd_path"] is None:
+            partition["no_dd_node"] += 1
+        elif source["produced_names"]:
+            partition["produces_name"] += 1
+        else:
+            partition["other_live_source"] += 1
+    print(
+        "population controls "
+        f"dd_node_present={sum(row['dd_path'] is not None for row in stale)} "
+        f"lifecycle_removed={sum(row['lifecycle_status'] == 'removed' for row in stale)} "
+        f"without_producer={sum(not row['produced_names'] for row in stale)} "
+        f"without_other_live={sum(not row.get('other_live_sources') for row in stale)}",
+        flush=True,
+    )
+    print(f"population partition={dict(partition)}", flush=True)
+    if sum(partition.values()) != len(stale):
+        raise RuntimeError("population partition does not sum to stale DD total")
     return records
 
 
@@ -270,6 +289,7 @@ def main() -> None:
             MATCH (source:StandardNameSource {source_type: 'dd', status: 'composed'})
                   -[:PRODUCED_NAME]->(name:StandardName {name_stage: 'accepted'})
             MATCH (node:IMASNode {id: source.source_id})
+                  -[:HAS_STANDARD_NAME]->(name)
             RETURN DISTINCT source.source_id AS path, name.id AS name
             ORDER BY path LIMIT 100
             """,
@@ -284,6 +304,11 @@ def main() -> None:
             and all(flags[path][f"flag_{index}"] for index in range(len(clauses)))
         ]
         details = extracted_rows(gc, selected, clauses)
+        missing_details = set(selected) - set(details)
+        if missing_details:
+            raise RuntimeError(
+                f"production extraction omitted selected paths: {sorted(missing_details)[:3]}"
+            )
         version = read(
             gc,
             "MATCH (version:DDVersion {is_current: true}) "
@@ -305,11 +330,28 @@ def main() -> None:
         ][:20]
         if len(positive) != 20:
             raise RuntimeError(f"only {len(positive)} positive controls passed")
-        accepted = accepted_holders(gc, paths)
+        positive = [{**row, "eligible": True, "reason": "eligible"} for row in positive]
+        accepted = accepted_holders(gc, all_paths)
+        for control in positive:
+            if not any(
+                row["name"] == control["name"]
+                for row in accepted.get(control["path"], [])
+            ):
+                raise RuntimeError(
+                    f"accepted-holder query missed known control {control['path']}"
+                )
         prior_names = sorted(
             {str(row["recorded_name"]) for row in cohort if row.get("recorded_name")}
         )
-        prior_holders = recorded_holders(gc, prior_names)
+        prior_holders = recorded_holders(
+            gc, sorted(set(prior_names + [row["name"] for row in positive]))
+        )
+        for control in positive:
+            if control["name"] not in prior_holders:
+                raise RuntimeError(
+                    f"recorded-holder query missed known control {control['name']}"
+                )
+        print("accepted-holder controls=20 recorded-holder controls=20", flush=True)
 
     rows: list[list] = []
     for source in sorted(cohort, key=lambda item: item["id"]):
@@ -346,9 +388,24 @@ def main() -> None:
         else:
             label = "dropped"
         evidence = basis or reason
-        rows.append([path, ids, category, label, eligible, evidence, holder])
+        stale_basis = (
+            "removed+unlinked"
+            if source["lifecycle_status"] == "removed" and not source["linked_dd_path"]
+            else "removed"
+            if source["lifecycle_status"] == "removed"
+            else "unlinked"
+            if not source["linked_dd_path"]
+            else "historical_status"
+        )
+        rows.append(
+            [path, ids, category, label, eligible, evidence, holder, stale_basis]
+        )
 
     class_counts = Counter(row[3] for row in rows)
+    for label in ("dropped", "covered", "ineligible", "other"):
+        class_counts.setdefault(label, 0)
+    stale_basis_counts = Counter(row[7] for row in rows)
+    ineligible_reasons = Counter(row[5] for row in rows if row[3] == "ineligible")
     by_ids: dict[str, Counter] = {}
     by_category: dict[str, Counter] = {}
     for row in rows:
@@ -362,10 +419,13 @@ def main() -> None:
         "population": len(cohort),
         "stale_dd_total": len(stale),
         "class_counts": dict(sorted(class_counts.items())),
+        "stale_basis_counts": dict(sorted(stale_basis_counts.items())),
+        "ineligible_reasons": dict(sorted(ineligible_reasons.items())),
         "by_ids": {key: dict(value) for key, value in sorted(by_ids.items())},
         "by_category": {key: dict(value) for key, value in sorted(by_category.items())},
         "positive_control": {
             "count": len(positive),
+            "candidate_count": len(controls),
             "mode": "production selector with force=True, followed by unit resolution and qualify_dd",
             "rows": positive,
         },
@@ -379,6 +439,7 @@ def main() -> None:
             "eligible",
             "evidence",
             "accepted_holder",
+            "stale_basis",
         ],
         "rows": rows,
     }
@@ -398,6 +459,13 @@ def main() -> None:
         f"<p>Live population: {len(cohort)} of {len(stale)} stale DD sources. "
         f"Classes: {escape(summary)}. The 20 composed accepted-source controls "
         "all passed the production selector and qualifier with force enabled.</p>"
+        f"<p>Observed at {escape(result['observed_at'])}. The earlier brief recorded "
+        f"1,439 rows; this re-read differs by {len(cohort) - 1439:+d}. "
+        f"{stale_basis_counts['removed']} rows have a DD node marked "
+        "<code>lifecycle_status=removed</code>, while retaining their "
+        "<code>FROM_DD_PATH</code> edge. The selector's first refusal reasons are "
+        f"{escape(str(dict(sorted(ineligible_reasons.items()))))}. "
+        "The accepted-holder queries also found the 20 known composed controls.</p>"
         f"<p>Dropped paths by IDS: {escape(spread or 'none')}.</p>"
         "<p>The selector clauses were read from extract_dd_candidates itself and run "
         "against each current DD path; unit resolution and qualify_dd were called "
