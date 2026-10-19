@@ -12,6 +12,13 @@
     }
   },
   "dispatched_at": "2026-10-19T04:30:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The symbol misnames a normal-approximation half-width; the fragment's prose names it correctly, and the driver is not reused.",
+      "recorded_at": "2026-10-19T04:49:34.675869+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-estimate-run.py",
