@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T19:01:47.898Z",
+  "dispatched_at": "2026-10-19T18:45:33Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-heuristic.json",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "follow-on: this path also exists on main holding the first attempt's failed record (outcome_status failed, commit 10258c510, both branched from c96f0f0d8), so merging e5bf582ad is an add/add conflict and a resolution that keeps the existing file silently discards the completed arm and leaves it reading as failed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-heuristic.json",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "follow-on: the record's harmonize_summary shows halted true (docs acceptance 50.00% < 90.00%) with stamped false and two members' scores falling (length 0.99375->0.849, major 1.0->0.9375) while outcome_status reads complete, so the aggregating node must read harmonize_summary rather than outcome_status when applying the adoption rule."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1\nreviewed_head_sha: e5bf582ad5d4c0fcc8a40fc53e3ca51b2b82482a\nVERDICT goal: the node goal is to run the heuristic arm of the length_of_passive_loop_element anchor comparison against a fresh scratch graph copy and record it; the landed change is that record at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-heuristic.json plus its landing fragment ssog-anchor-passive-loop-heuristic-r2.html, and both name the fixed selection's own anchors (heuristic major_length_of_passive_loop_element, Jev length_of_passive_loop_element) from ssog-anchor-ab/selection.json.\nVERDICT done_when: the done_when asks for the arm record written by an invocation whose log ends EXIT=0; runner-heuristic.log's last line is EXIT=0 and the record carries outcome_status complete, anchor, lint_before 3 / lint_after 0, scores_after for all three members, calls 27, spend_usd 0.579152, wall_seconds 1848.83, stamped, containment with evidence, the code digest, and scratch_removed plus stopped_instance; spend 0.579152 is under the USD 2.00 ceiling.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-heuristic.json, the landing fragment ssog-anchor-passive-loop-heuristic-r2.html and a docs/figures directory; the diff touches exactly the first two, both inside the set, and no runner or selection file was modified as the brief required.\nVERDICT manifest: read; status complete, commits e5bf582ad, and it states the detached invocation's runner log ends EXIT=0 with headline 'lint 3->0, 27 calls, $0.5792, 1848.8s, stamped=False, containment=True', matching the record field by field.\nVERDICT diff: read commit by commit against 5cf53a7b6 -- one commit, e5bf582ad, two new files, 312 insertions and no deletions; the JSON is the runner's own output and the HTML is the mandated landing fragment, with no code path changed.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: length_of_passive_loop_element-heuristic.json records the heuristic arm's own selection anchors and members, delivered as the goal states; docked because the arm's harmonization halted so the family is unstamped, which the record reports rather than conceals.\nSCORE evidence: 18\nJUSTIFICATION evidence: runner-heuristic.log's final EXIT=0 and its summary line reconcile with every headline field in length_of_passive_loop_element-heuristic.json, and containment was negatively controlled by containment-self-check.log (3 planted cases refused, 1 passed as expected); docked because outcome_status complete asserts containment only, so the same field reads as a finished harmonization to a casual reader.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff 5cf53a7b6..e5bf582ad touches only the two declared evidence paths, and ssog-anchor-ab-run.py and selection.json are byte-identical to the base.\nSCORE durability: 12\nJUSTIFICATION durability: no assertion in the diff fails if the record regresses -- a reverted or corrupted JSON breaks no test, since no arm-record validator exists outside docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, which writes rather than checks one, and the one falsifiable claim (containment) is guarded by the runner's own self-check rather than by anything this node added.\nSCORE fit: 19\nJUSTIFICATION fit: the record's key set and field spellings match the sibling arm record docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json, adding only port_lock and port_lock_released from the reserving runner at the module's base, and the fragment follows the docs/evidence/fragments convention with no plan or gate label in its symbols or text.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition -- docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py already owns arm-record production and this node invoked it unchanged, so there is no duplicated capability.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-heuristic.json:1 follow-on: this path also exists on main holding the first attempt's failed record (outcome_status failed, commit 10258c510, both branched from c96f0f0d8), so merging e5bf582ad is an add/add conflict and a resolution that keeps the existing file silently discards the completed arm and leaves it reading as failed.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-heuristic.json:1 follow-on: the record's harmonize_summary shows halted true (docs acceptance 50.00% < 90.00%) with stamped false and two members' scores falling (length 0.99375->0.849, major 1.0->0.9375) while outcome_status reads complete, so the aggregating node must read harmonize_summary rather than outcome_status when applying the adoption rule.",
+  "review_run_id": "r-20261019T184414605045-review-of-ssog-anchor-passive-loop-heuristic-r2-e5bf582ad5d4",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "e5bf582ad5d4c0fcc8a40fc53e3ca51b2b82482a",
+  "reviewed_run_id": "r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T19:46:35.445448+00:00",
+  "total": 108
+}
