@@ -9,6 +9,11 @@
       "kind": "exempted",
       "reason": "Corrected by the coordinator in the manifest before promotion: the landing line now says thirty-seven, referred_to_lead 37, not_sourceless 16, the source counts match the record, and the per-step running total is replaced by the classifier's distinct count; manifest.md.asdelivered keeps what was delivered.",
       "recorded_at": "2026-10-19T09:45:04.237589+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Corrected in the same manifest repair: not_sourceless 16 and source counts {44,17,13,22,22,0}, matching the record.",
+      "recorded_at": "2026-10-19T09:45:14.758736+00:00"
     }
   },
   "findings": [
