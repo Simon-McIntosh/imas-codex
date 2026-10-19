@@ -523,20 +523,26 @@ def overlap_check() -> dict:
 
     The quiet-graph probe was vacuous at apply time, so this reads the graph
     directly: every change record, source write and name update in the apply
-    window (from just before the preview to just after the last receipt).
+    window (from just before this authority's first receipt to just after its
+    last). The window comes from the receipts themselves, keyed by the
+    authority's file digest, so it is reproducible after the fact and does not
+    depend on a preview that now reports the manifest already applied.
     """
     from datetime import timedelta
 
     answers = json.loads(ANSWERS_PATH.read_text())
     admitted = _admitted(answers["records"])
     ids = sorted({r["id"] for r in admitted} | {r["holder"] for r in admitted})
-    digest = _gate_log(RUN_DIR / "preview.log")["payload"]["manifest_sha256"]
+    file_sha = hashlib.sha256(AUTHORITY_PATH.read_bytes()).hexdigest()
     with GraphClient() as gc:
         mine = gc.query(
-            "MATCH (c:StandardNameChange {manifest_sha256:$d}) "
-            "RETURN min(c.changed_at) AS lo, max(c.changed_at) AS hi, count(c) AS n",
-            d=digest,
+            "MATCH (c:StandardNameChange {authority_file_sha256:$fs}) "
+            "RETURN min(c.changed_at) AS lo, max(c.changed_at) AS hi, "
+            "count(c) AS n, collect(DISTINCT c.manifest_sha256) AS digests",
+            fs=file_sha,
         )[0]
+        if mine["lo"] is None:
+            raise SystemExit("no receipt carries this authority's file digest")
         lo = mine["lo"] - timedelta(seconds=180)
         hi = mine["hi"] + timedelta(seconds=180)
         changes = gc.query(
@@ -742,10 +748,16 @@ def compose() -> dict:
     node = "sib-settle-unchained-holders"
     cohort = _load(COHORT_PATH)
     answers = _load(ANSWERS_PATH)
+    auth_raw = AUTHORITY_PATH.read_bytes()
+    authority_sha = hashlib.sha256(auth_raw).hexdigest()
+    authority_payload_sha = signed_payload_sha256(json.loads(auth_raw))
     preview = _gate_log(RUN_DIR / "preview.log")["payload"]
     apply_receipt = _gate_log(RUN_DIR / "apply.log")["payload"]
-    quiet = _gate_log(RUN_DIR / "quiet-before-apply.log")["payload"]
+    quiet = _gate_log(RUN_DIR / "quiet.log")["payload"]
+    quiet_before_apply = _gate_log(RUN_DIR / "quiet-before-apply.log")["payload"]
     overlap = _gate_log(RUN_DIR / "overlap.log")["payload"]
+    receipts = overlap["own_receipts"]
+    manifest_sha = next((d for d in receipts.get("digests") or [] if d), None)
     guard = _gate_log(RUN_DIR / "guard.log")["payload"]
     verify_log = _gate_log(RUN_DIR / "verify.log")
     falsify_log = _gate_log(RUN_DIR / "falsify.log")
@@ -803,15 +815,17 @@ def compose() -> dict:
         "judge_model": answers["model"],
         "authority": {
             "path": f"docs/evidence/fragments/sn-integrity-backlog/{node}-authority.json",
-            "file_sha256": preview["authority_file_sha256"],
-            "payload_sha256": preview["authority_payload_sha256"],
-            "manifest_sha256": preview["manifest_sha256"],
+            "file_sha256": authority_sha,
+            "payload_sha256": authority_payload_sha,
+            "manifest_sha256": manifest_sha,
             "operation_id": RETIRE_OPERATION_ID,
             "receipt_operation": SUPERSEDE_OPERATION,
         },
         "preview": preview,
         "receipt": apply_receipt,
         "quiet_graph": quiet,
+        "quiet_graph_before_apply": quiet_before_apply,
+        "foreign_population_moves": verify.get("foreign_population_moves") or {},
         "apply_overlap": overlap,
         "source_held_guard": guard,
         "verification": verify,
@@ -835,12 +849,27 @@ def compose() -> dict:
             f"<td>{escape(','.join(r['shared_paths'] or []))}</td></tr>"
         )
 
+    foreign_moves = verify.get("foreign_population_moves") or {}
+    foreign_note = (
+        "A later writer moved "
+        + ", ".join(
+            f"{name} {span[0]} to {span[1]}" for name, span in foreign_moves.items()
+        )
+        + ". That movement lands after this node's last receipt and touches none of the settled "
+        "names, and the overlap read below dates it."
+        if foreign_moves
+        else "No other population moved."
+    )
+
     body = [
         f"<h2 id='{node}'>Unchained holders settled</h2>",
         f"<p id='{node}-summary'>The classifier read-back holds {cohort['counts']['unchained_holder']} "
         f"unchained-holder names before this node and {verify['counts']['unchained_holder']} after: "
         f"exactly {len(retired)} retired through the signed supersede and {len(referrals)} referred to "
-        f"the lead. No other population moved. Spend USD {answers['spend_usd']:.6f}.</p>",
+        f"the lead. This node's own footprint is exact, the retired set being the baseline minus "
+        f"those {len(retired)} with nothing entering the population. Spend USD "
+        f"{answers['spend_usd']:.6f}.</p>",
+        f"<p id='{node}-foreign'>{escape(foreign_note)}</p>",
         f"<p id='{node}-overlap-summary'>The apply-window overlap read finds no other "
         f"change, source write or name update on the settled names: overlap is "
         f"<code>{overlap['overlap']}</code>.</p>",
@@ -862,8 +891,14 @@ def compose() -> dict:
         f"<pre id='{node}-authority-pre'>{escape(json.dumps(record['authority'], indent=1))}</pre>",
         f"<h3 id='{node}-preview'>Preview and receipt</h3>",
         f"<pre id='{node}-preview-pre'>{escape(json.dumps({'preview': preview, 'receipt': apply_receipt}, indent=1))}</pre>",
-        f"<h3 id='{node}-quiet'>Quiet-graph probe (before apply, owner instrument)</h3>",
+        f"<h3 id='{node}-quiet'>Quiet-graph probe (owner instrument)</h3>",
+        f"<p id='{node}-quiet-note'>The reading below is the repository's own probe taken now. "
+        f"The probe taken before the apply was vacuous: it compared the transaction status to a "
+        f"spelling the server never returns and did not subtract its own probe, so it could not have "
+        f"reported a busy graph. The apply-window overlap read replaces it; the pre-apply payload is "
+        f"kept beneath as the record of what that instrument actually measured.</p>",
         f"<pre id='{node}-quiet-pre'>{escape(json.dumps({k: quiet[k] for k in ('quiet', 'foreign_transactions_started', 'foreign_open_queries', 'neo4j_jobs')}, indent=1))}</pre>",
+        f"<pre id='{node}-quiet-before-pre'>{escape(json.dumps(quiet_before_apply, indent=1))}</pre>",
         f"<h3 id='{node}-overlap'>Apply-window overlap (after the fact)</h3>",
         f"<pre id='{node}-overlap-pre'>{escape(json.dumps(overlap, indent=1))}</pre>",
         f"<h3 id='{node}-guard'>Source-stays-held guard</h3>",
