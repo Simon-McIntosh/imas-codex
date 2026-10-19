@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "A one-shot evidence driver; the cohort check is corroborated by the review's own replication against the committed lineage record, which found the 22 expected pairs.",
       "recorded_at": "2026-10-19T09:45:32.786343+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "A field name in a one-shot driver's record; the before and after counts it sits beside are correct and are what the plan cites.",
+      "recorded_at": "2026-10-19T09:45:41.074430+00:00"
     }
   },
   "findings": [
