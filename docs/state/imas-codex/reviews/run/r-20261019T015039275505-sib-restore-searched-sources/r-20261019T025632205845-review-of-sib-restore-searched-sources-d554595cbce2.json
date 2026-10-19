@@ -35,6 +35,11 @@
       "kind": "exempted",
       "reason": "A one-shot evidence driver: the superseded population_gate never runs, and owned_population_gate is the check recorded at EXIT=. No later node re-runs this driver.",
       "recorded_at": "2026-10-19T03:23:01.426636+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The apply is complete and its recorded facts show no other graph writer live at apply time, so a guard added now changes nothing. The fail-closed form is being built in sib-settle-unchained-holders through the quiet-graph probe owner in imas_codex/graph/offsite.py, which later repair drivers reuse.",
+      "recorded_at": "2026-10-19T03:23:16.132520+00:00"
     }
   },
   "findings": [
