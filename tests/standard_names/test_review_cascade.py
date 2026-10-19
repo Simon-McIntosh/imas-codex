@@ -627,3 +627,90 @@ async def test_refine_worker_receives_named_checks(monkeypatch):
         ]
         == 1.0
     )
+
+
+class _OrderingManager:
+    """Budget manager whose reservations always succeed."""
+
+    def reserve(self, *_args, **_kwargs):
+        return MagicMock()
+
+
+def _ordering_incumbent(writes, *, produces):
+    """An incumbent that persists its own rows, as the review pool does."""
+
+    async def incumbent(*, models):
+        if not produces:
+            return None
+        writes.append(
+            [
+                {"id": "temperature:incumbent-0", "judge_kind": "incumbent"},
+                {"id": "temperature:incumbent-1", "judge_kind": "incumbent"},
+            ]
+        )
+        return {"winning_score": 0.2, "resolution_method": "quorum_consensus"}
+
+    return incumbent
+
+
+@pytest.mark.asyncio
+async def test_shadow_row_is_written_after_the_incumbents_rows(monkeypatch):
+    from imas_codex import settings
+    from imas_codex.standard_names import graph_ops
+
+    writes = []
+
+    async def judgment(_item, _model):
+        return CascadeRoute("accept", 0.95), {}, 0.0
+
+    monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+    )
+    monkeypatch.setattr(cascade, "_name_judgment", judgment)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda: False)
+    monkeypatch.setattr(
+        graph_ops, "write_reviews", lambda rows, **_: writes.append(list(rows))
+    )
+    result = await cascade.adjudicate_review(
+        "name",
+        {"id": "temperature"},
+        ["primary", "secondary"],
+        _ordering_incumbent(writes, produces=True),
+        mgr=_OrderingManager(),
+    )
+    assert [len(call) for call in writes] == [2, 1]
+    assert all(row["judge_kind"] == "incumbent" for row in writes[0])
+    assert writes[1][0]["judge_kind"] == "jev"
+    assert writes[1][0]["resolution_role"] == "shadow"
+    assert result["winning_score"] == 0.2
+
+
+@pytest.mark.asyncio
+async def test_failed_incumbent_cycle_writes_no_shadow_row(monkeypatch):
+    from imas_codex import settings
+    from imas_codex.standard_names import graph_ops
+
+    writes = []
+
+    async def judgment(_item, _model):
+        return CascadeRoute("accept", 0.95), {}, 0.0
+
+    monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+    )
+    monkeypatch.setattr(cascade, "_name_judgment", judgment)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda: False)
+    monkeypatch.setattr(
+        graph_ops, "write_reviews", lambda rows, **_: writes.append(list(rows))
+    )
+    result = await cascade.adjudicate_review(
+        "name",
+        {"id": "temperature"},
+        ["primary", "secondary"],
+        _ordering_incumbent(writes, produces=False),
+        mgr=_OrderingManager(),
+    )
+    assert result is None
+    assert writes == []

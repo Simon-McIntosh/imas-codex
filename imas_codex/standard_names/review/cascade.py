@@ -44,21 +44,29 @@ def deciding_enabled() -> bool:
     return value
 
 
+def _failure_probability(record: Mapping[str, Any]) -> float | None:
+    """The check's failure probability, or ``None`` when the record carries none.
+
+    A missing or null probability is not a zero: the check was not scored, so it
+    names no failure and no threshold is compared against it.
+    """
+    value = record.get("failure_probability")
+    return None if value is None else float(value)
+
+
 def _route(
     axis: str, judgment: Mapping[str, Any], probability: float | None
 ) -> CascadeRoute:
     thresholds = _calibration()[axis]
-    failed = tuple(
-        sorted(
-            check_id
-            for check_id, cutoff in thresholds["check_thresholds"].items()
-            if (
-                (record := judgment.get("checks", {}).get(check_id))
-                and record.get("answered")
-                and float(record.get("failure_probability", 0.0)) >= cutoff
-            )
-        )
-    )
+    failed = []
+    for check_id, cutoff in thresholds["check_thresholds"].items():
+        record = judgment.get("checks", {}).get(check_id)
+        if not record or not record.get("answered"):
+            continue
+        score = _failure_probability(record)
+        if score is not None and score >= cutoff:
+            failed.append(check_id)
+    failed = tuple(sorted(failed))
     if axis == "docs" and judgment.get("contradiction_veto"):
         failed = tuple(sorted({*failed, "claim_contradicts_source"}))
     if failed:
@@ -194,6 +202,27 @@ async def _store_unjudged(
         )
 
 
+async def _incumbent_then_unjudged(
+    item: Mapping[str, Any],
+    axis: str,
+    models: Sequence[str],
+    incumbent: Callable[..., Awaitable[dict[str, Any] | None]],
+    model: str,
+    reason: str,
+) -> dict[str, Any] | None:
+    """Run the incumbent, then record the unjudged row beside what it wrote.
+
+    A shadow row describes a candidate the incumbent has reviewed, so it is
+    written only after the incumbent's own reviews are persisted; an incumbent
+    that produced no reviews reports that with ``None`` and takes no row.
+    """
+    result = await incumbent(models=models)
+    if result is None:
+        return None
+    await _store_unjudged(item, axis, model, reason)
+    return result
+
+
 def _failed_check_instructions(
     route: CascadeRoute, item: Mapping[str, Any], axis: str
 ) -> list[dict[str, str]]:
@@ -322,21 +351,45 @@ async def adjudicate_review(
     *,
     mgr: Any,
 ) -> dict[str, Any] | None:
-    """Record a Jev route, then use the incumbent unless deciding is enabled."""
+    """Record a Jev route, then use the incumbent unless deciding is enabled.
+
+    The incumbent is expected to persist its own review rows before it returns,
+    so the route row lands after them and the incumbent's stored rows are
+    unchanged. An incumbent that produced no reviews returns ``None`` and takes
+    no route row: there is no reviewed candidate to route.
+    """
+    from imas_codex.discovery.base.judgment import (
+        decisions_key_absent_reason,
+        decisions_key_present,
+    )
     from imas_codex.settings import get_model
     from imas_codex.standard_names.budget import LLMCostEvent
 
     model = "sn-judge:unavailable"
+    if not decisions_key_present():
+        return await _incumbent_then_unjudged(
+            item,
+            axis,
+            models,
+            incumbent,
+            model,
+            decisions_key_absent_reason() or "decisions key not set",
+        )
     try:
         model = get_model("sn-judge")
         lease = mgr.reserve(0.001, phase="review_" + axis)
     except Exception as exc:
         logger.exception("Jev cascade reservation unavailable for %s", item.get("id"))
-        await _store_unjudged(item, axis, model, f"{type(exc).__name__}: {exc}")
-        return await incumbent(models=models)
-    if lease is None:
-        await _store_unjudged(item, axis, model, "review lease refused")
-        return await incumbent(models=models)
+        reason = f"{type(exc).__name__}: {exc}"
+    else:
+        if lease is None:
+            reason = "review lease refused"
+        else:
+            reason = None
+    if reason is not None:
+        return await _incumbent_then_unjudged(
+            item, axis, models, incumbent, model, reason
+        )
     try:
         if axis == "name":
             route, answers, spent = await _name_judgment(item, model)
@@ -356,23 +409,39 @@ async def adjudicate_review(
         )
     except Exception as exc:
         logger.exception("Jev cascade judgment unavailable for %s", item.get("id"))
-        await _store_unjudged(item, axis, model, f"{type(exc).__name__}: {exc}")
-        return await incumbent(models=models)
+        return await _incumbent_then_unjudged(
+            item, axis, models, incumbent, model, f"{type(exc).__name__}: {exc}"
+        )
     finally:
         try:
             lease.release_unused()
         except Exception:
             logger.exception("Jev cascade lease release failed for %s", item.get("id"))
+    if deciding_enabled():
+        if route.route in {"accept", "refine"}:
+            try:
+                await _store_route(item, axis, model, route, answers, spent)
+            except Exception:
+                logger.exception(
+                    "Jev cascade route could not be stored for %s", item.get("id")
+                )
+            return _direct_result(route, model, spent, item, axis)
+        result = await incumbent(models=models[:1])
+        if result is None:
+            return None
+        try:
+            await _store_route(item, axis, model, route, answers, spent)
+        except Exception:
+            logger.exception(
+                "Jev cascade route could not be stored for %s", item.get("id")
+            )
+        result["resolution_method"] = "jev_cascade_" + route.route
+        return result
+    result = await incumbent(models=models)
+    if result is None:
+        return None
     try:
         await _store_route(item, axis, model, route, answers, spent)
     except Exception:
         logger.exception("Jev cascade route could not be stored for %s", item.get("id"))
-        return await incumbent(models=models)
-    if deciding_enabled():
-        if route.route in {"accept", "refine"}:
-            return _direct_result(route, model, spent, item, axis)
-        result = await incumbent(models=models[:1])
-        if result is not None:
-            result["resolution_method"] = "jev_cascade_" + route.route
-        return result
-    return await incumbent(models=models)
+    return result
