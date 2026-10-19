@@ -1,0 +1,46 @@
+<section id="ssog-anchor-visible-wavelength-jev" data-reckon="evidence">
+  <h2 id="ssog-anchor-visible-wavelength-jev-heading">Visible camera wavelength: Jev anchor arm</h2>
+  <p id="ssog-anchor-visible-wavelength-jev-run">
+    The detached per-arm runner exited <code>0</code> on code revision
+    <code>5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1</code>. It pinned
+    <code>lower_bound_wavelength_of_visible_camera</code> as the anchor for the
+    three-member family in a fresh scratch copy of the checked graph export.
+    The runner recorded <code>outcome_status=complete</code> after both batches.
+    Its inner harmonization receipt says <code>applied=true</code>,
+    <code>halted=true</code> and <code>stamped=false</code>: documentation
+    acceptance was 50% against the 90% requirement (one of two touched members).
+  </p>
+  <p id="ssog-anchor-visible-wavelength-jev-lint">
+    Lint findings fell from <strong>7 to 2</strong>. Before the apply, the
+    classes held one convention violation, two defining-equation findings,
+    three missing reverse links and one relationship-link finding. Afterward,
+    two link-hygiene findings remained. Member documentation scores were:
+  </p>
+  <table id="ssog-anchor-visible-wavelength-jev-scores">
+    <thead><tr><th>Member</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td><code>lower_bound_wavelength_of_visible_camera</code></td><td>0.91875</td><td>0.93750</td></tr>
+      <tr><td><code>upper_bound_wavelength_of_visible_camera</code></td><td>0.95625</td><td>0.93750</td></tr>
+      <tr><td><code>wavelength_of_visible_camera</code></td><td>0.96875</td><td>0.84900</td></tr>
+    </tbody>
+  </table>
+  <p id="ssog-anchor-visible-wavelength-jev-spend">
+    The scratch ledger contains <strong>30 calls and USD 0.841339</strong> in the
+    apply window; the harmonization receipt reports USD 1.0162. The receipts
+    differ by USD 0.174861, with neither receipt exceeding the stricter
+    USD 1.98 apply cap. Apply wall time was <strong>1,694.1 s</strong>.
+  </p>
+  <p id="ssog-anchor-visible-wavelength-jev-containment">
+    A scratch-only marker changed the copy's node count from 1,770,101 to
+    1,770,102 and back; the live graph saw no marker. The post-apply positive
+    control found 30 family cost rows in scratch. The attributable live family
+    and run-id counts were both zero, so the containment verdict holds. The
+    scratch instance was stopped, its tree removed, and its port pair had no
+    listeners after cleanup.
+  </p>
+  <p id="ssog-anchor-visible-wavelength-jev-scope">
+    This is one arm of the fixed comparison. The coordinator's paired
+    aggregation applies the adoption rule; this arm's unstamped result and two
+    lower member scores must remain visible in that comparison.
+  </p>
+</section>
