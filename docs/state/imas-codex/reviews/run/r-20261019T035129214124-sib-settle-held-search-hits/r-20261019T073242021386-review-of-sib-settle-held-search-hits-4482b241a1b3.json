@@ -19,6 +19,11 @@
       "kind": "exempted",
       "reason": "The pre-fix control ran against the round-one cohort in node-local scratch, now gone; the review itself verified the round-one code's defect by md5 against the reviewed commit, which is the durable evidence.",
       "recorded_at": "2026-10-19T09:45:23.678260+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "A one-shot evidence driver; the cohort check is corroborated by the review's own replication against the committed lineage record, which found the 22 expected pairs.",
+      "recorded_at": "2026-10-19T09:45:32.786343+00:00"
     }
   },
   "findings": [
