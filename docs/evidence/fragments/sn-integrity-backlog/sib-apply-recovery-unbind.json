@@ -1,0 +1,577 @@
+{
+  "authority_file_sha256": "f508bc37bb04b30da8a91b07614c56eff48e93519ae7211e8a6acce6621f44f0",
+  "authority_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-apply-recovery-unbind/docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-authority.json",
+  "authority_schema": "imas-codex.recovery-binding-unbind.v1",
+  "classifier_before": {
+    "count": 79,
+    "counts_by_kind": {
+      "derived_parent": 2,
+      "dropped_edge": 34,
+      "never_bound": 21,
+      "orphan_awaiting_retirement": 3,
+      "unchained_holder": 19
+    },
+    "names": [
+      "absorbed_coolant_power_of_plant_component_port",
+      "beam_cross_sectional_area_of_aperture",
+      "beta",
+      "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+      "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+      "count_normalized_at_detector_pixel",
+      "cross_field_wave_vector_magnitude",
+      "deposited_energy_accumulated_of_plasma_facing_component",
+      "deposited_power_at_divertor_target",
+      "electron_energy_flux_limiter_coefficient",
+      "electron_heat_diffusivity",
+      "electron_particle_diffusivity",
+      "electron_temperature_at_first_wall",
+      "electron_temperature_at_midplane",
+      "electrostatic_potential_at_outboard_midplane",
+      "electrostatic_potential_at_wall",
+      "energy_diffusion_coefficient_due_to_diffusion",
+      "energy_flux_at_control_surface",
+      "energy_flux_at_wall_due_to_eddy_current",
+      "fast_electron_source_rate",
+      "fast_electron_source_rate_due_to_compton_scattering",
+      "fast_electron_source_rate_due_to_hot_tail",
+      "first_local_tangential_width_of_reflectometer_antenna",
+      "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "fraction_of_neutron_detector_converter",
+      "front_surface_area_of_langmuir_probe",
+      "gap_of_antenna_strap",
+      "hard_xray_rate",
+      "ion_charge_state_energy_flux_limiter_coefficient",
+      "ion_power",
+      "ion_pressure",
+      "ion_state_energy_flux_limiter_coefficient",
+      "length_of_passive_structure",
+      "magnetic_shear_at_pedestal_top",
+      "maximum_power_at_inner_divertor_target",
+      "maximum_power_at_outer_divertor_target",
+      "molecular_gas_count_due_to_pellet_injection",
+      "momentum_due_to_hot_tail",
+      "net_forward_power_of_wave_beam",
+      "net_plasma_current_due_to_ohmic_current_drive",
+      "net_plasma_power_density",
+      "neutral_beam_atomic_number",
+      "neutron_flux_due_to_fusion",
+      "normal_particle_flux_at_wall_due_to_recombination",
+      "normalized_poloidal_magnetic_flux_at_pedestal_top",
+      "normalized_toroidal_thermal_plasma_beta",
+      "parallel_bulk_ion_velocity",
+      "parallel_incident_heat_flux_at_divertor_target",
+      "parallel_normalized_perturbed_magnetic_field",
+      "perturbed_vector_potential",
+      "power_over_core_region_due_to_impurity_radiation",
+      "radial_coordinate_of_vacuum_vessel",
+      "radial_effective_thermal_energy_velocity_due_to_convection",
+      "radial_surface_normal_of_control_surface",
+      "radiative_temperature",
+      "root_mean_square_spectral_width_of_spectrometer_channel",
+      "surface_temperature_at_sensor_attachment_point",
+      "tangential_curvature_inverse_of_optical_element",
+      "thermal_energy_of_plant_component_port",
+      "thickness_of_passive_loop",
+      "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+      "total_absorbed_power_of_plant_system",
+      "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+      "total_electron_power_density",
+      "total_incident_thermal_power",
+      "total_ion_momentum_diffusivity",
+      "total_particle_count_accumulated_due_to_gas_injection",
+      "total_particle_flux",
+      "total_particle_flux_at_divertor_target_due_to_recycling",
+      "total_suprathermal_electron_power_density_due_to_collisions",
+      "trapped_fast_particle_power_density_due_to_collisions",
+      "vertical_coordinate_of_active_limiter_point",
+      "vertical_coordinate_of_passive_loop",
+      "voltage_of_diagnostic_antenna",
+      "volume_averaged_electron_number_density_over_scrape_off_layer",
+      "volume_averaged_linear_electron_decay_time",
+      "volume_integrated_net_plasma_particle_power_density",
+      "width_of_aperture"
+    ]
+  },
+  "input": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-apply-recovery-unbind/docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources.json",
+  "left_alone_count": 0,
+  "matched_count": 16,
+  "preview": {
+    "authority_file_sha256": "f508bc37bb04b30da8a91b07614c56eff48e93519ae7211e8a6acce6621f44f0",
+    "authority_payload_sha256": "f37dcd819ba29abfe7817b1856bdfe2c94572753c6598061aed94b69ea33c105",
+    "changed": 0,
+    "counts": {
+      "admitted": 16,
+      "authority_rows": 16,
+      "refused": 0
+    },
+    "manifest": {
+      "admitted_row_ids": [
+        "electron_particle_diffusion_coefficient",
+        "flux_surface_normal_neutral_energy_diffusion_coefficient",
+        "heat_power_of_divertor",
+        "ion_temperature_at_outboard_midplane_separatrix",
+        "parallel_thermal_neutral_energy_diffusivity",
+        "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+        "perturbed_linear_mhd_mode_number",
+        "poloidal_effective_ion_diffusion_coefficient",
+        "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+        "second_local_tangential_width_of_diagnostic_aperture",
+        "tendency_of_runaway_electron_density",
+        "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+        "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+        "vertical_position_of_grating",
+        "vertical_total_ion_momentum_diffusivity",
+        "wave_magnetic_field_amplitude"
+      ],
+      "authority_file_sha256": "f508bc37bb04b30da8a91b07614c56eff48e93519ae7211e8a6acce6621f44f0",
+      "authority_rows_sha256": "f37dcd819ba29abfe7817b1856bdfe2c94572753c6598061aed94b69ea33c105",
+      "operation_id": "unbind_recorded_recovery_binding",
+      "reason": "Remove recovery bindings below the 0.8 choice-probability or 0.5 confidence floor, as ruled by the lead.",
+      "refusals": [],
+      "rows": [
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402276",
+          "closure_sha256": "a2bd3242fd39f60ca3137b536e6e50b96d127d60effb0309417ae384ee4f1f21",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1602050",
+          "name_id": "electron_particle_diffusion_coefficient",
+          "row_id": "electron_particle_diffusion_coefficient",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1500974",
+          "source_id": "dd:plasma_transport/model/ggd/electrons/particles/d/values"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402281",
+          "closure_sha256": "d44765aab36b29d046ffd1933bab948778b540f0fa8375157166b9a6dba5c9f8",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1602293",
+          "name_id": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+          "row_id": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1500427",
+          "source_id": "dd:plasma_transport/model/ggd/neutral/energy/d_radial/values"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402284",
+          "closure_sha256": "16b81fa5d3b7b39298afd0678371ace3c4e659704902794810d008b72ea3612d",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1601790",
+          "name_id": "heat_power_of_divertor",
+          "row_id": "heat_power_of_divertor",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:646319",
+          "source_id": "dd:balance_of_plant/power_plant/heat_load_divertor"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402288",
+          "closure_sha256": "517e5fd877596798684989c4a45a6b2ed0b66b645adaf443fbf805a525f6ee97",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1602562",
+          "name_id": "ion_temperature_at_outboard_midplane_separatrix",
+          "row_id": "ion_temperature_at_outboard_midplane_separatrix",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:736995",
+          "source_id": "dd:langmuir_probes/reciprocating/plunge/collector/t_i"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402303",
+          "closure_sha256": "a0ebe0dfac2de44aa45444f6491d5ce39868cf6573763147864af3e31e9f104b",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1603090",
+          "name_id": "parallel_thermal_neutral_energy_diffusivity",
+          "row_id": "parallel_thermal_neutral_energy_diffusivity",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:731207",
+          "source_id": "dd:edge_transport/model/ggd/neutral/energy/d_parallel/values"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402304",
+          "closure_sha256": "4018577f2317836450765dbb5591849bda56f8622aade07c98ced0b83597d6f4",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1618430",
+          "name_id": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+          "row_id": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:610737",
+          "source_id": "dd:edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402305",
+          "closure_sha256": "77a6e95fd6218b8c37b9f55ee717a41357154b07338e802b1f9d185cff9584dc",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1602279",
+          "name_id": "perturbed_linear_mhd_mode_number",
+          "row_id": "perturbed_linear_mhd_mode_number",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1501516",
+          "source_id": "dd:distribution_sources/source/markers/orbit_integrals/m_pol"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402306",
+          "closure_sha256": "c213a221a80eab6b9fc293b088d65c6755524d38551d9dc5dfbf008757312f76",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1602982",
+          "name_id": "poloidal_effective_ion_diffusion_coefficient",
+          "row_id": "poloidal_effective_ion_diffusion_coefficient",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:683194",
+          "source_id": "dd:edge_transport/model/ggd/ion/particles/d_pol/values"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402310",
+          "closure_sha256": "b9aee426e68c5ab51664e424765d593aa421d78435188003b54fd930bf926689",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1635254",
+          "name_id": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+          "row_id": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:736608",
+          "source_id": "dd:cryostat/description_2d/cryostat/unit/material_volume_fraction"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402312",
+          "closure_sha256": "39596f75a1095c5654c3689eacf6374b0ce527a9ed4c0c996d075541192fd018",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1634905",
+          "name_id": "second_local_tangential_width_of_diagnostic_aperture",
+          "row_id": "second_local_tangential_width_of_diagnostic_aperture",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:737378",
+          "source_id": "dd:neutron_diagnostic/detector/aperture/x2_width"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402314",
+          "closure_sha256": "fb804dea68b1b475ca58d9c60f6b639350f7441ca3b2a1cc46e291fd1eda462f",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1603354",
+          "name_id": "tendency_of_runaway_electron_density",
+          "row_id": "tendency_of_runaway_electron_density",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1501051",
+          "source_id": "dd:runaway_electrons/ggd_fluid/ddensity_dt_tritium/values"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402317",
+          "closure_sha256": "870f974916d5200d2c5d4b2ce70545cb4c8a5adedbee604c4b2e69775bca791d",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1601074",
+          "name_id": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+          "row_id": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1501542",
+          "source_id": "dd:distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402318",
+          "closure_sha256": "81897d186fef36ec6e3dc28fee8fa78908a9f71f680849aa8f5bcd01b66e0f90",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1601125",
+          "name_id": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+          "row_id": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1501606",
+          "source_id": "dd:distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402323",
+          "closure_sha256": "f3f7c27b8e541ec2ea5cbfaa16de356a544494978b2c148991d87ebf590638c9",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1602124",
+          "name_id": "vertical_position_of_grating",
+          "row_id": "vertical_position_of_grating",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:649726",
+          "source_id": "dd:spectrometer_x_ray_crystal/channel/reflector/centre/z"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1402325",
+          "closure_sha256": "0faa8e074ff5ea58da43949fca31428e164349ce872afeb39951049a1338e567",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1601178",
+          "name_id": "vertical_total_ion_momentum_diffusivity",
+          "row_id": "vertical_total_ion_momentum_diffusivity",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1502020",
+          "source_id": "dd:plasma_transport/model/ggd/ion/momentum/d/z"
+        },
+        {
+          "binding_element_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1404429",
+          "closure_sha256": "c616fcbf426785d6ae1c0044fc58b741ded559f2dbcb1e02c4f9c9543be38b56",
+          "name_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:1603462",
+          "name_id": "wave_magnetic_field_amplitude",
+          "row_id": "wave_magnetic_field_amplitude",
+          "source_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:732153",
+          "source_id": "dd:waves/coherent_wave/full_wave/b_field/normal/values"
+        }
+      ],
+      "schema": "imas-codex.recovery-binding-unbind.v1"
+    },
+    "manifest_sha256": "abf1e12052f0da09dd81016210baa09b8bcd5dfd814443517ca802b9433690f7",
+    "outcome": "would_apply",
+    "refusals": [],
+    "schema": "imas-codex.signed-recovery-unbind-receipt.v1",
+    "would_change": 16
+  },
+  "recorded_at": "2026-10-19T07:59:48.210117+00:00",
+  "rows": [
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "plasma_transport/model/ggd/electrons/particles/d/values",
+      "confidence": 0.54,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402276"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "electron_particle_diffusion_coefficient",
+      "original_reason": "P(choice) 0.77 below 0.8",
+      "probability": 0.77,
+      "source_id": "dd:plasma_transport/model/ggd/electrons/particles/d/values"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+      "confidence": 0.12,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402281"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "flux_surface_normal_neutral_energy_diffusion_coefficient",
+      "original_reason": "P(choice) 0.56 below 0.8",
+      "probability": 0.56,
+      "source_id": "dd:plasma_transport/model/ggd/neutral/energy/d_radial/values"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "balance_of_plant/power_plant/heat_load_divertor",
+      "confidence": 0.26,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402284"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "heat_power_of_divertor",
+      "original_reason": "P(choice) 0.63 below 0.8",
+      "probability": 0.63,
+      "source_id": "dd:balance_of_plant/power_plant/heat_load_divertor"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "langmuir_probes/reciprocating/plunge/collector/t_i",
+      "confidence": 0.08,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402288"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "ion_temperature_at_outboard_midplane_separatrix",
+      "original_reason": "P(choice) 0.54 below 0.8",
+      "probability": 0.54,
+      "source_id": "dd:langmuir_probes/reciprocating/plunge/collector/t_i"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+      "confidence": 0.52,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402303"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "parallel_thermal_neutral_energy_diffusivity",
+      "original_reason": "P(choice) 0.76 below 0.8",
+      "probability": 0.76,
+      "source_id": "dd:edge_transport/model/ggd/neutral/energy/d_parallel/values"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+      "confidence": 0.55,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402304"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+      "original_reason": "P(choice) 0.70 below 0.8",
+      "probability": 0.7,
+      "source_id": "dd:edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "distribution_sources/source/markers/orbit_integrals/m_pol",
+      "confidence": 0.02,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402305"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "perturbed_linear_mhd_mode_number",
+      "original_reason": "P(choice) 0.51 below 0.8",
+      "probability": 0.51,
+      "source_id": "dd:distribution_sources/source/markers/orbit_integrals/m_pol"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "edge_transport/model/ggd/ion/particles/d_pol/values",
+      "confidence": 0.52,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402306"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "poloidal_effective_ion_diffusion_coefficient",
+      "original_reason": "P(choice) 0.76 below 0.8",
+      "probability": 0.76,
+      "source_id": "dd:edge_transport/model/ggd/ion/particles/d_pol/values"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+      "confidence": 0.34,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402310"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+      "original_reason": "P(choice) 0.67 below 0.8",
+      "probability": 0.67,
+      "source_id": "dd:cryostat/description_2d/cryostat/unit/material_volume_fraction"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "neutron_diagnostic/detector/aperture/x2_width",
+      "confidence": 0.28,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402312"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "second_local_tangential_width_of_diagnostic_aperture",
+      "original_reason": "P(choice) 0.64 below 0.8",
+      "probability": 0.64,
+      "source_id": "dd:neutron_diagnostic/detector/aperture/x2_width"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+      "confidence": 0.24,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402314"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "tendency_of_runaway_electron_density",
+      "original_reason": "P(choice) 0.62 below 0.8",
+      "probability": 0.62,
+      "source_id": "dd:runaway_electrons/ggd_fluid/ddensity_dt_tritium/values"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+      "confidence": 0.52,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402317"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+      "original_reason": "P(choice) 0.76 below 0.8",
+      "probability": 0.76,
+      "source_id": "dd:distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+      "confidence": 0.56,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402318"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+      "original_reason": "P(choice) 0.78 below 0.8",
+      "probability": 0.78,
+      "source_id": "dd:distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+      "confidence": 0,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402323"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "vertical_position_of_grating",
+      "original_reason": "P(choice) 0.50 below 0.8",
+      "probability": 0.5,
+      "source_id": "dd:spectrometer_x_ray_crystal/channel/reflector/centre/z"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "plasma_transport/model/ggd/ion/momentum/d/z",
+      "confidence": 0.56,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1402325"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "vertical_total_ion_momentum_diffusivity",
+      "original_reason": "P(choice) 0.78 below 0.8",
+      "probability": 0.78,
+      "source_id": "dd:plasma_transport/model/ggd/ion/momentum/d/z"
+    },
+    {
+      "action": "unbind",
+      "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
+      "candidate": "waves/coherent_wave/full_wave/b_field/normal/values",
+      "confidence": 0.36,
+      "match": {
+        "binding_ids": [
+          "5:64c142ee-5782-46f9-a287-8df126a67943:1404429"
+        ],
+        "name_stage": "exhausted",
+        "reasons": [],
+        "source_status": "attached"
+      },
+      "name": "wave_magnetic_field_amplitude",
+      "original_reason": "P(choice) 0.68 below 0.8",
+      "probability": 0.68,
+      "source_id": "dd:waves/coherent_wave/full_wave/b_field/normal/values"
+    }
+  ]
+}
