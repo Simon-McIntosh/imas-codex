@@ -7062,12 +7062,13 @@ def _source_exchange_refusal(record: dict[str, Any]) -> str | None:
         "superseded",
     }:
         return "giving name is absent or not live"
-    if record.get("given_element_id") is None or record.get("given_holders") != [
-        {
-            "name_id": record["name_id"],
-            "binding_id": (record.get("given_holders") or [{}])[0].get("binding_id"),
-        }
-    ]:
+    given_holders = record.get("given_holders") or []
+    if (
+        record.get("given_element_id") is None
+        or len(given_holders) != 1
+        or given_holders[0].get("name_id") != record["name_id"]
+        or not given_holders[0].get("binding_id")
+    ):
         return "given source does not produce exactly the giving name"
     if record.get("given_properties", {}).get("source_type") != "dd":
         return "given source is not a DD source"
@@ -7282,12 +7283,16 @@ def _apply_source_exchange(
                           AND elementId(given) = $given_element_id
                           AND elementId(binding) = $binding_element_id
                           AND elementId(taken_dd) = $taken_dd_element_id
+                          AND NOT (coalesce(name.name_stage, '') IN ['exhausted', 'superseded'])
                           AND coalesce(taken_dd.lifecycle_status, '') <> 'removed'
                         OPTIONAL MATCH (receiver:StandardName {id: $receiving_name_id})
-                        WITH name, given, binding, taken_dd, receiver
+                        OPTIONAL MATCH (given_dd:IMASNode {id: $given_path})
+                        WITH name, given, binding, taken_dd, receiver, given_dd
                         WHERE $receiving_name_id IS NULL OR
                               (receiver IS NOT NULL AND
-                               NOT (coalesce(receiver.name_stage, '') IN ['exhausted', 'superseded']))
+                               NOT (coalesce(receiver.name_stage, '') IN ['exhausted', 'superseded']) AND
+                               elementId(given_dd) = $given_dd_element_id AND
+                               coalesce(given_dd.lifecycle_status, '') <> 'removed')
                         MERGE (taken:StandardNameSource {id: $taken_source_id})
                           ON CREATE SET taken.created_at = datetime(), taken.attempt_count = 0,
                                         taken.source_type = 'dd', taken.source_id = $taken_path,
@@ -7315,11 +7320,13 @@ def _apply_source_exchange(
                         given_source_id=row["given_source_id"],
                         taken_source_id=row["taken_source_id"],
                         taken_path=str(row["taken_source_id"])[3:],
+                        given_path=str(row["given_source_id"])[3:],
                         receiving_name_id=row["receiving_name_id"],
                         name_element_id=state["name_element_id"],
                         given_element_id=state["given_element_id"],
                         binding_element_id=state["given_holders"][0]["binding_id"],
                         taken_dd_element_id=state["taken_dd_element_id"],
+                        given_dd_element_id=state["given_dd_element_id"],
                     )
                     if len(changed) != 1 or int(changed[0].get("changed") or 0) != 1:
                         raise SourceExchangeConflict(
