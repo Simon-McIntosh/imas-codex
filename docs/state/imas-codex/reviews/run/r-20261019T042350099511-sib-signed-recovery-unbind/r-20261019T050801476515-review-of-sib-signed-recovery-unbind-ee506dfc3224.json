@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "no baseline arm was recorded for the reviewed run (its manifest carries no baseline_suite or after_suite keys and no base log exists in the run directory), so the delta reduces to the after arm alone: gate.log records 337 passed, 0 failed, EXIT=0, and test1.log records 12 passed, EXIT=0, so no failure is added.",
+  "base_log_revision": null,
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/cli/sn.py:9013",
+    "imas_codex/standard_names/graph_ops.py:15173",
+    "imas_codex/standard_names/provenance_lifecycle.py:1246",
+    "imas_codex/standard_names/attachment_audit.py:1201",
+    "imas_codex/standard_names/edit.py:3368",
+    "imas_codex/standard_names/graph_ops.py:5928"
+  ],
+  "completed_at": "2026-10-19T05:21:41.843Z",
+  "dispatched_at": "2026-10-19T05:08:24Z",
+  "findings": [
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-signed-recovery-unbind/decision-flow.svg",
+      "line": "29",
+      "severity": "blocking",
+      "text": "blocking: `&middot;` (and the same use at line 30) is an HTML named entity that XML does not define, so the SVG is not well-formed and no XML-strict renderer will open it. Confirmed here: `python3 -c 'xml.dom.minidom.parse(...)'` fails with 'undefined entity: line 29, column 33', and ImageMagick's librsvg delegate refuses with 'could not read or parse the SVG' -> the figure renders nowhere, including the reckon page that embeds it at docs/evidence/fragments/sn-integrity-backlog/sib-signed-recovery-unbind.html:32. No render check for this figure appears in gate.log, although the figures rule requires the producer to render each new SVG and look at it, which is why the defect shipped."
+    },
+    {
+      "file": "tests/standard_names/test_signed_recovery_unbind.py",
+      "line": "164",
+      "severity": "follow-on",
+      "text": "follow-on: the FakeGraph re-implements the SOURCE_INVARIANT predicate in Python (`if stage == \"exhausted\" and name_id in exempt: continue`), so the exemption clause the node added to the real Cypher at imas_codex/standard_names/source_invariant.py:59-60 (and the $exempt_ids parameter wiring at :65) is never executed by these tests: a misspelled parameter or a wrong property in that clause leaves all 11 tests green. The negative control bears this out - its third mutation removes the exhausted-name clause from the predicate and reddened neither test_source_invariant_still_refuses_a_sourceless_live_name nor test_exemption_is_confined_to_its_own_exhausted_rows."
+    },
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": "6467",
+      "severity": "follow-on",
+      "text": "follow-on: `_load_recovery_unbind_rows` duplicates the authority header owned by `_load_signed_stale_source_rows` at imas_codex/standard_names/signed_manifest.py:1601-1645 - read bytes, JSON parse, schema check, the same self-referential signature-contract comparison, the digest-length check and the canonical-rows SHA-256 - differing only in the schema string and the id field names. The addition extends the module's adapter registry but duplicates its loader rather than extracting a shared owner, so a fix to the header contract must now be made twice."
+    },
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": "6875",
+      "severity": "follow-on",
+      "text": "follow-on: the postcondition selects `source.status AS source_status` but never asserts it, so the brief's requirement that the write leave the StandardNameSource node unchanged has no check behind it; a mutation that altered the source's status while removing the edge would still satisfy every postcondition assertion (bindings == 0 and name_stage == exhausted)."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-signed-recovery-unbind.html",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: the Gate section and the manifest describe the gate as covering every test file that imports signed_manifest or source_invariant, but three such files were absent from the run (tests/standard_names/test_dd_residue_release.py, tests/standard_names/test_rewire_relocation_retire.py, tests/standard_names/test_supersede_successor_scalar.py). Re-run here: 5 collected / 5 deselected / 0 selected (EXIT=5), so the omission does not change the result - every test in them is graph-marked and deselected under the default marker set, and the three files all call apply_signed_manifest, but the record overstates the gate's reach."
+    }
+  ],
+  "head_log_revision": null,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s) reaching the changed entry point apply_signed_manifest or the changed source_invariant API: imas_codex/cli/sn.py:9013, imas_codex/standard_names/graph_ops.py:15173, imas_codex/standard_names/provenance_lifecycle.py:1246, imas_codex/standard_names/attachment_audit.py:1201, imas_codex/standard_names/edit.py:3368, imas_codex/standard_names/graph_ops.py:5928; none of them selects the recovery-binding-unbind adapter, so the new program is reached today only from its own test file.",
+    "diff": "read commit by commit against the base 8312b54ab; the single commit ee506dfc3 adds the adapter, loader, closure, refusal, preview, mutation, receipt and postcondition to signed_manifest.py, threads exhausted_exempt_ids through source_invariant.py, adds the 492-line test file, the evidence fragment and the decision-flow figure.",
+    "done_when": "the done-when names tests/standard_names/test_signed_recovery_unbind.py plus a gate over every test file importing signed_manifest or source_invariant and tests/graph/test_cypher_property_check.py, judged by delta against the base; the manifest records 11 passed (test1.log) and 337 passed / 63 deselected (gate.log, EXIT=0), but no base arm was recorded so the delta is not measured, and three importing files were absent from the run (immaterial: every test in them is graph-marked and deselected).",
+    "goal": "the node's goal is to give the signed-repair envelope one closed program that removes a recorded recovery binding from an exhausted name; imas_codex/standard_names/signed_manifest.py:6467-6895 lands it as the `recovery-binding-unbind` adapter, requiring the PRODUCED_NAME edge, a non-stale source and name_stage == exhausted, refusing every other stage, removing the edge, and recording a StandardNameChange; no production caller selects the adapter yet, which the brief intends (a later node applies it).",
+    "manifest": "read; it states test1.log 11 passed and gate.log 337 passed with EXIT=0, names negative_control.log, and its two follow_ons honestly record that the program has never run against a real database and that the removed source is recorded in from_name.",
+    "write_paths": "read the manifest's declared write paths (four source/test paths plus docs/figures/sn-integrity-backlog/sib-signed-recovery-unbind); every path in the diff is inside them, though the node brief's own 'Write scope' section lists only four and omits the figures directory."
+  },
+  "justifications": {
+    "durability": "the negative control reddens 7 of 11 tests on revert (negative_control.log, EXIT=1), but tests/standard_names/test_signed_recovery_unbind.py:137 re-implements the SOURCE_INVARIANT predicate in the fake, so the exemption clause added at imas_codex/standard_names/source_invariant.py:59-60 is never executed by any test.",
+    "evidence": "the manifest records gate.log at 337 passed with EXIT=0, but that log's first line is the pytest banner rather than the command and revision, and no base arm exists so the required delta against the base is not recorded.",
+    "fit": "imas_codex/standard_names/signed_manifest.py:6467 follows the closed-program idiom set by _load_signed_stale_source_rows and the other adapter branches in apply_signed_manifest, and introduces no name the naming rules forbid.",
+    "goal_fidelity": "imas_codex/standard_names/signed_manifest.py:6552 refuses any stage other than exhausted and :6836 deletes the edge inside the applying transaction, matching the brief's four required behaviours.",
+    "reuse": "imas_codex/standard_names/signed_manifest.py:6467 extends the adapter registry and reuses RepairMutationKind.detach, but duplicates the authority header of the loader it mirrors at signed_manifest.py:1601-1645.",
+    "scope_discipline": "every path in git show --stat ee506dfc3 is inside the write paths the manifest declares, and no file outside them is touched."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T050801476515-review-of-sib-signed-recovery-unbind-ee506dfc3224",
+  "reviewed_base_sha": "8312b54ab44628f0e1f78671518d24f22f450ade",
+  "reviewed_head_sha": "ee506dfc322418a5e8b1aaba4a840c66e530d032",
+  "reviewed_run_id": "r-20261019T042350099511-sib-signed-recovery-unbind",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T05:35:00+00:00",
+  "total": 89
+}
