@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
@@ -395,7 +395,10 @@
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-port-reservation.html — reserve_port_pair takes an exclusive per-pair flock held from reservation until the instance is stopped and its tree removed; four concurrent reservations in separate processes get distinct pairs [28006,28002,28004,28000] EXIT=0, while the unchanged free_port_pair() collides four ways on 28000 EXIT=1; no arm run and no LLM call</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261019T143148831294-review-of-ssog-anchor-aperture-jev-02014feb4cbc" data-who="reckon-build" data-when="2026-10-19T14:49:52.229Z">
-    <div class="r-comment-body"><p>review of run r-20261019T122440955153-ssog-anchor-aperture-jev at head 02014feb4cbc; verified the jev arm record against the brief&#x27;s done_when by reading the diff (base c96f0f0d874b01c4b623a395637fc17018e66831), the runner logs, and the sibling heuristic record; no blocking findings.</p></div>
+    <div class="r-comment-body"><p>review of run r-20261019T122440955153-ssog-anchor-aperture-jev at head 02014feb4cbc; verified the jev arm record against the brief's done_when by reading the diff (base c96f0f0d874b01c4b623a395637fc17018e66831), the runner logs, and the sibling heuristic record; no blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261019T122440955153-ssog-anchor-aperture-jev" data-who="reckon-build" data-when="2026-10-19T13:16:58Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-aperture-jev.html — Jev arm lint 2→0, 48 calls, USD 0.778013; y member score 0.875 versus heuristic 1.0, so the pair fails the no-lower-score condition.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
