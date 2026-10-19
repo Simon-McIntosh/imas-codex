@@ -12,7 +12,6 @@ from __future__ import annotations
 import json
 import math
 import random
-import statistics
 import sys
 from pathlib import Path
 
@@ -89,10 +88,18 @@ INCUMBENT_SEATS = {
 # The escalator fires only on a flagged disagreement between cycles 0 and 1.
 # Measured from StandardNameReview cycle coverage over 2026-07-21..2026-10-17.
 ESCALATION = {
-    "name": {"items": 2796, "cycle2_items": 835, "calls_per_item": 2.291,
-             "window": "2026-07-21..2026-10-17"},
-    "docs": {"items": 1689, "cycle2_items": 431, "calls_per_item": 2.245,
-             "window": "2026-07-21..2026-10-17"},
+    "name": {
+        "items": 2796,
+        "cycle2_items": 835,
+        "calls_per_item": 2.291,
+        "window": "2026-07-21..2026-10-17",
+    },
+    "docs": {
+        "items": 1689,
+        "cycle2_items": 431,
+        "calls_per_item": 2.245,
+        "window": "2026-07-21..2026-10-17",
+    },
 }
 for _axis, _rec in ESCALATION.items():
     _rec["cycle2_share"] = _rec["cycle2_items"] / _rec["items"]
@@ -100,16 +107,20 @@ for _axis, _rec in ESCALATION.items():
 # Jev judgment calls, read from the two crews' own decision receipts.
 JEV_RECEIPTS = {
     "name": {
-        "path": ("/home/ITER/mcintos/.config/reckon/crew/runs/"
-                 "r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl"),
+        "path": (
+            "/home/ITER/mcintos/.config/reckon/crew/runs/"
+            "r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl"
+        ),
         "n": 706,
         "mean_usd": 0.000234,
         "sd_usd": 0.000053,
         "mean_latency_s": 3.76,
     },
     "docs": {
-        "path": ("/home/ITER/mcintos/.config/reckon/crew/runs/"
-                 "r-20261017T200215613429-srtj-docs-score-arm/docs-decisions.jsonl"),
+        "path": (
+            "/home/ITER/mcintos/.config/reckon/crew/runs/"
+            "r-20261017T200215613429-srtj-docs-score-arm/docs-decisions.jsonl"
+        ),
         "n": 540,
         "mean_usd": 0.000127,
         "sd_usd": 0.000033,
@@ -120,18 +131,36 @@ JEV_RECEIPTS = {
 # Calibrated route shares on the frozen calibration splits, read from
 # imas_codex/standard_names/review/cascade_thresholds.json.
 ROUTE_SHARES = {
-    "name": {"n": 363, "accept": 0.0606, "refine": 0.7548, "chat_review": 0.1846,
-             "chat_below_reject": 0.0, "unjudged": 0.0},
-    "docs": {"n": 216, "accept": 0.1157, "refine": 0.6991, "chat_review": 0.1852,
-             "chat_below_reject": 0.0, "unjudged": 0.0},
+    "name": {
+        "n": 363,
+        "accept": 0.0606,
+        "refine": 0.7548,
+        "chat_review": 0.1846,
+        "chat_below_reject": 0.0,
+        "unjudged": 0.0,
+    },
+    "docs": {
+        "n": 216,
+        "accept": 0.1157,
+        "refine": 0.6991,
+        "chat_review": 0.1852,
+        "chat_below_reject": 0.0,
+        "unjudged": 0.0,
+    },
 }
 
 # A chat route uses only the first model of the configured review seat.
 CHAT_SEAT = {
-    "name": {"seat": "openrouter/x-ai/grok-4.5", "mean_usd": 0.04326880056355669,
-             "n": 3194},
-    "docs": {"seat": "openrouter/anthropic/claude-sonnet-5",
-             "mean_usd": 0.06537800998310529, "n": 6511},
+    "name": {
+        "seat": "openrouter/x-ai/grok-4.5",
+        "mean_usd": 0.04326880056355669,
+        "n": 3194,
+    },
+    "docs": {
+        "seat": "openrouter/anthropic/claude-sonnet-5",
+        "mean_usd": 0.06537800998310529,
+        "n": 6511,
+    },
 }
 
 # Wall time per seat call, amortised over a run: the median, across runs with at
@@ -148,10 +177,12 @@ SEAT_SUBSTITUTIONS = [
         "priced_as": "openrouter/openai/gpt-5.6-luna",
         "n": 2925,
         "mean_usd": 0.004914156581196569,
-        "bias": ("gpt-6-luna completes at 0.50 USD/Mtok against gpt-5.6-luna's 0.60 "
-                 "at the same prompt rate, so the substitute over-states this seat "
-                 "and the incumbent arm reads high by whatever the recorded token "
-                 "mix spends on output tokens."),
+        "bias": (
+            "gpt-6-luna completes at 0.50 USD/Mtok against gpt-5.6-luna's 0.60 "
+            "at the same prompt rate, so the substitute over-states this seat "
+            "and the incumbent arm reads high by whatever the recorded token "
+            "mix spends on output tokens."
+        ),
     },
     {
         "configured": "openrouter/openai/gpt-6.1-sol",
@@ -159,11 +190,13 @@ SEAT_SUBSTITUTIONS = [
         "priced_as": "openrouter/openai/gpt-6.1-sol",
         "n": 0,
         "mean_usd": None,
-        "bias": ("No gpt-6.1-sol review_receipt exists. The arm carries no cycle-2 "
-                 "cost for the docs axis and therefore under-states it; the "
-                 "substitute used for the headline figure is the gpt-5.5 escalator "
-                 "receipt, whose recorded mean is 2.8 times the cycle-1 seat. The "
-                 "headline therefore brackets rather than pins the docs escalator."),
+        "bias": (
+            "No gpt-6.1-sol review_receipt exists. The arm carries no cycle-2 "
+            "cost for the docs axis and therefore under-states it; the "
+            "substitute used for the headline figure is the gpt-5.5 escalator "
+            "receipt, whose recorded mean is 2.8 times the cycle-1 seat. The "
+            "headline therefore brackets rather than pins the docs escalator."
+        ),
     },
 ]
 
@@ -183,9 +216,15 @@ def draw_cohort(pool: list[dict]) -> list[dict]:
     drawn = rng.sample(ordered, 2 * PER_AXIS)
     axes = ["name"] * PER_AXIS + ["docs"] * PER_AXIS
     rng.shuffle(axes)
-    return [{"id": row["id"], "axis": axis, "name_stage_at_draw": row["ns"],
-             "docs_stage_at_draw": row["ds"]}
-            for row, axis in zip(drawn, axes, strict=True)]
+    return [
+        {
+            "id": row["id"],
+            "axis": axis,
+            "name_stage_at_draw": row["ns"],
+            "docs_stage_at_draw": row["ds"],
+        }
+        for row, axis in zip(drawn, axes, strict=True)
+    ]
 
 
 def price_incumbent(axis: str) -> dict:
@@ -239,8 +278,9 @@ def per_accepted(per_item: dict, shares: dict) -> dict:
     return {
         axis: {
             "accept_share": shares[axis]["accept"],
-            "per_accepted_name_usd": (per_item[axis]["per_item_usd"]
-                                      / shares[axis]["accept"]),
+            "per_accepted_name_usd": (
+                per_item[axis]["per_item_usd"] / shares[axis]["accept"]
+            ),
         }
         for axis in ("name", "docs")
     }
@@ -251,9 +291,11 @@ def wall_plan(incumbent: dict, cascade: dict, cohort_size: int) -> dict:
     for axis in ("name", "docs"):
         per_item_s[axis] = {
             "incumbent": incumbent[axis]["calls_per_item"] * CALL_WALL_S[axis],
-            "cascade": (JEV_RECEIPTS[axis]["mean_latency_s"]
-                        # a chat route runs one seat call, so it costs one call's wall
-                        + ROUTE_SHARES[axis]["chat_review"] * CALL_WALL_S[axis]),
+            "cascade": (
+                JEV_RECEIPTS[axis]["mean_latency_s"]
+                # a chat route runs one seat call, so it costs one call's wall
+                + ROUTE_SHARES[axis]["chat_review"] * CALL_WALL_S[axis]
+            ),
         }
     per_axis = cohort_size // 2
     total_s = {
@@ -265,9 +307,7 @@ def wall_plan(incumbent: dict, cascade: dict, cohort_size: int) -> dict:
         "per_item_seconds": per_item_s,
         "totals_seconds": total_s,
         "totals_minutes": {k: v / 60.0 for k, v in total_s.items()},
-        "fits_one_worker_hour": {
-            arm: total_s[arm] <= 3600.0 for arm in total_s
-        },
+        "fits_one_worker_hour": {arm: total_s[arm] <= 3600.0 for arm in total_s},
         "split": (
             "Serial, one worker: the incumbent arm is the long pole because its "
             "escalator adds a third call on roughly a quarter of items. Run the "
@@ -281,6 +321,7 @@ def wall_plan(incumbent: dict, cascade: dict, cohort_size: int) -> dict:
 def build_figure(out_dir: Path, incumbent: dict, cascade: dict) -> str | None:
     try:
         import matplotlib
+
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
     except Exception as exc:  # pragma: no cover - figure is optional evidence
@@ -292,12 +333,19 @@ def build_figure(out_dir: Path, incumbent: dict, cascade: dict) -> str | None:
     xs = range(len(axes_names))
     inc = [incumbent[a]["per_item_usd"] for a in axes_names]
     cas = [cascade[a]["per_item_usd"] for a in axes_names]
-    inc_err = [[incumbent[a]["per_item_usd"] - incumbent[a]["per_item_interval_usd"][0]
-                for a in axes_names],
-               [incumbent[a]["per_item_interval_usd"][1] - incumbent[a]["per_item_usd"]
-                for a in axes_names]
-               ]
-    ax.bar([x - width / 2 for x in xs], inc, width, yerr=inc_err, label="incumbent quorum")
+    inc_err = [
+        [
+            incumbent[a]["per_item_usd"] - incumbent[a]["per_item_interval_usd"][0]
+            for a in axes_names
+        ],
+        [
+            incumbent[a]["per_item_interval_usd"][1] - incumbent[a]["per_item_usd"]
+            for a in axes_names
+        ],
+    ]
+    ax.bar(
+        [x - width / 2 for x in xs], inc, width, yerr=inc_err, label="incumbent quorum"
+    )
     ax.bar([x + width / 2 for x in xs], cas, width, label="deciding cascade")
     ax.set_xticks(list(xs))
     ax.set_xticklabels(["name axis", "docs axis"])
@@ -312,8 +360,10 @@ def build_figure(out_dir: Path, incumbent: dict, cascade: dict) -> str | None:
 
 
 def main() -> int:
-    run_dir = Path("/home/ITER/mcintos/.config/reckon/crew/runs/"
-                   "r-20261019T035549247584-srtj-cohort-estimate")
+    run_dir = Path(
+        "/home/ITER/mcintos/.config/reckon/crew/runs/"
+        "r-20261019T035549247584-srtj-cohort-estimate"
+    )
     snapshot = json.loads((run_dir / "eligible-pool.json").read_text())
     pool = snapshot["pool"]
 
@@ -329,13 +379,22 @@ def main() -> int:
     n_axis = PER_AXIS
     totals = {
         arm: {
-            "total_usd": sum(arms[axis]["per_item_usd"] * n_axis for axis in ("name", "docs")),
+            "total_usd": sum(
+                arms[axis]["per_item_usd"] * n_axis for axis in ("name", "docs")
+            ),
             "total_interval_usd": [
-                sum(arms[axis]["per_item_interval_usd"][0] * n_axis for axis in ("name", "docs")),
-                sum(arms[axis]["per_item_interval_usd"][1] * n_axis for axis in ("name", "docs")),
+                sum(
+                    arms[axis]["per_item_interval_usd"][0] * n_axis
+                    for axis in ("name", "docs")
+                ),
+                sum(
+                    arms[axis]["per_item_interval_usd"][1] * n_axis
+                    for axis in ("name", "docs")
+                ),
             ],
-            "per_axis_usd": {axis: arms[axis]["per_item_usd"] * n_axis
-                             for axis in ("name", "docs")},
+            "per_axis_usd": {
+                axis: arms[axis]["per_item_usd"] * n_axis for axis in ("name", "docs")
+            },
         }
         for arm, arms in (("incumbent", incumbent), ("cascade", cascade))
     }
@@ -346,8 +405,9 @@ def main() -> int:
     }
     wall = wall_plan(incumbent, cascade, 2 * n_axis)
 
-    figure_path = build_figure(HERE.parents[2] / "figures" / "sn-review-through-jev",
-                               incumbent, cascade)
+    figure_path = build_figure(
+        HERE.parents[2] / "figures" / "sn-review-through-jev", incumbent, cascade
+    )
 
     payload = {
         "node": "srtj-cohort-estimate",
@@ -357,9 +417,11 @@ def main() -> int:
         "cohort": {
             "size": len(cohort),
             "per_axis": n_axis,
-            "axis_rule": ("Each drawn identity is assigned one axis; identities are "
-                          "drawn from the eligible pool in ascending id order and the "
-                          "axis sequence is shuffled by the same seeded generator."),
+            "axis_rule": (
+                "Each drawn identity is assigned one axis; identities are "
+                "drawn from the eligible pool in ascending id order and the "
+                "axis sequence is shuffled by the same seeded generator."
+            ),
             "pool_size_before_exclusion": snapshot["pool_rows"],
             "pool_size_after_exclusion": len(pool),
             "west_roster_names": snapshot["west_total"],
@@ -400,10 +462,14 @@ def main() -> int:
 
     print(f"pool {snapshot['pool_rows']} -> {len(pool)} after WEST exclusion")
     print(f"cohort {len(cohort)} items ({n_axis} per axis)")
-    print(f"incumbent ${totals['incumbent']['total_usd']:.3f} "
-          f"interval {totals['incumbent']['total_interval_usd']}")
-    print(f"cascade   ${totals['cascade']['total_usd']:.3f} "
-          f"interval {totals['cascade']['total_interval_usd']}")
+    print(
+        f"incumbent ${totals['incumbent']['total_usd']:.3f} "
+        f"interval {totals['incumbent']['total_interval_usd']}"
+    )
+    print(
+        f"cascade   ${totals['cascade']['total_usd']:.3f} "
+        f"interval {totals['cascade']['total_interval_usd']}"
+    )
     print(f"wall minutes {wall['totals_minutes']}")
     print(f"spend USD {USD_SPENT:.2f}")
     return 0
@@ -415,14 +481,14 @@ def write_html(payload: dict, target: Path) -> None:
     p = payload["precision"]
     w = payload["wall_plan"]
     rows = "\n".join(
-        f'<tr><td>srtj-cohort-estimate-item-{i + 1}</td><td>{it["id"]}</td>'
-        f'<td>{it["axis"]}</td></tr>'
+        f"<tr><td>srtj-cohort-estimate-item-{i + 1}</td><td>{it['id']}</td>"
+        f"<td>{it['axis']}</td></tr>"
         for i, it in enumerate(c["items"])
     )
     subs = "".join(
-        f'<li><strong>srtj-cohort-estimate-sub-{i}</strong>: configured '
-        f'<code>{s["configured"]}</code> ({s["role"]}) priced as '
-        f'<code>{s["priced_as"]}</code> on n={s["n"]}. {s["bias"]}</li>'
+        f"<li><strong>srtj-cohort-estimate-sub-{i}</strong>: configured "
+        f"<code>{s['configured']}</code> ({s['role']}) priced as "
+        f"<code>{s['priced_as']}</code> on n={s['n']}. {s['bias']}</li>"
         for i, s in enumerate(payload["receipts"]["seat_substitutions"])
     )
     html = f"""<section id="srtj-cohort-estimate">
