@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T02:02:56.542Z",
+  "dispatched_at": "2026-10-19T01:49:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py",
+      "line": "808",
+      "severity": "follow-on",
+      "text": "follow-on: the figure label hardcodes ' (39 restored)' rather than formatting doc['restored_count'], so a re-run that binds a different number would mislabel the before/after figure."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py",
+      "line": "728",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's 'EXIT=0' is a template literal and stage_readback (run.py:565-589) computes dropped_fell_by_restored/others_unchanged without raising, so no exit code can signal a failed read-back; a reader who trusts the EXIT= line is trusting a constant, not the measurement."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py",
+      "line": "457",
+      "severity": "follow-on",
+      "text": "follow-on: gating on P(choice) >= 0.5 alone admits bindings whose self-reported confidence is near zero (vertical_position_of_grating 0.50/0.00, perturbed_linear_mhd_mode_number 0.51/0.02, ion_temperature_at_outboard_midplane_separatrix 0.54/0.08, flux_surface_normal_neutral_energy_diffusion_coefficient 0.56/0.12, tendency_of_runaway_electron_density 0.62/0.24, heat_power_of_divertor 0.63/0.26); the fragment discloses both numbers, but these are the names to re-check against the brief's 'never write a guessed binding'."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none: nothing outside the fragment imports the driver (grep for its module name over imas_codex/ and tests/ returns nothing); the change is an evidence document plus a one-shot driver under docs/.",
+    "diff": "read commit by commit against base 95985b6c; d8bc4db7d adds the driver, fragment, JSON and figure, and 24d527445 is a comment/docstring-only naming scrub of the driver (8 insertions, 8 deletions, no behaviour change).",
+    "done_when": "the done_when (brief.md:40-54) names the fragment HTML and its JSON record; both carry the work list, each restored name with source and Jev answer/confidence, each referred name with candidates, each DD-search name with reason, the preview+apply receipt, the quiet-graph check, the before/after classifier counts at EXIT=, and the spend; the readback gate is recorded in readback.log and the JSON booleans dropped_fell_by_restored/others_unchanged.",
+    "goal": "the source goal (prompt.txt:30) is to restore each dropped DD source a relative recorded once Jev confirms it measures the name's quantity; the landed driver binds 39 such sources through bind_recovery_sources and refers the rest, and the fragment sib-restore-lineage-sources.html 'Restored bindings, route: Jev' table lists each with its path and P(choice).",
+    "manifest": "read; it records status complete, commits d8bc4db7d and 24d527445, the four changed paths, the classifier read-back as the gate, and its gate logs judge.log/preview.log/apply.log/readback.log/control.log; it states no test file is in scope.",
+    "write_paths": "the node's declared fence (prompt.txt:133-137) is the fragment html, its json, its run.py and docs/figures/sn-integrity-backlog/sib-restore-lineage-sources; the diff base..head touches exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "no test is added or reachable (the node is fenced to docs/, per manifest tests:), and the only guard is a one-shot non-enforcing read-back, so nothing fails if the 39 bindings regress; the negative control at run.py:432 is a real instrument control but not a regression test.",
+    "evidence": "run.py:565-589 re-runs classify_sourceless_standard_names and records delta dropped_edge -39 against apply_receipt names_bound 39 in readback.log (EXIT=0), but it never raises on mismatch and the fragment's EXIT=0 at run.py:728 is a template literal, so the read-back records rather than enforces.",
+    "fit": "the driver follows the sibling evidence-driver idiom in the same directory (sib-restore-recorded-sources-run.py) and names symbols by mechanism after the scrub; it imports the private _BIND_SOURCES (run.py:40) for the trial bind and leaves two literals, ('(39 restored)' at run.py:808 and EXIT=0 at run.py:728).",
+    "goal_fidelity": "sib-restore-lineage-sources-run.py:536 binds each Jev-confirmed candidate through bind_recovery_sources in provenance_rebuild.py, and the fragment's restored table records the DD path, P(choice) and self-reported confidence for each of the 39 names.",
+    "reuse": "run.py:332 uses the shared decisions owner decide_batch, run.py:144 the classifier classify_sourceless_standard_names, and run.py:536 the writer bind_recovery_sources; the per-domain Jev state builder is the established pattern across segment_selection.py, near_duplicates.py and jev_review.py, so no capability is forked.",
+    "scope_discipline": "every path in the diff is inside the fence at prompt.txt:133-137, including the figure under docs/figures/sn-integrity-backlog/sib-restore-lineage-sources; the second commit only edits the driver it added."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal (prompt.txt:30) is to restore each dropped DD source a relative recorded once Jev confirms it measures the name's quantity; the landed driver binds 39 such sources through bind_recovery_sources and refers the rest, and the fragment sib-restore-lineage-sources.html 'Restored bindings, route: Jev' table lists each with its path and P(choice).\nVERDICT done_when: the done_when (brief.md:40-54) names the fragment HTML and its JSON record; both carry the work list, each restored name with source and Jev answer/confidence, each referred name with candidates, each DD-search name with reason, the preview+apply receipt, the quiet-graph check, the before/after classifier counts at EXIT=, and the spend; the readback gate is recorded in readback.log and the JSON booleans dropped_fell_by_restored/others_unchanged.\nVERDICT write_paths: the node's declared fence (prompt.txt:133-137) is the fragment html, its json, its run.py and docs/figures/sn-integrity-backlog/sib-restore-lineage-sources; the diff base..head touches exactly those four paths and nothing else.\nVERDICT manifest: read; it records status complete, commits d8bc4db7d and 24d527445, the four changed paths, the classifier read-back as the gate, and its gate logs judge.log/preview.log/apply.log/readback.log/control.log; it states no test file is in scope.\nVERDICT diff: read commit by commit against base 95985b6c; d8bc4db7d adds the driver, fragment, JSON and figure, and 24d527445 is a comment/docstring-only naming scrub of the driver (8 insertions, 8 deletions, no behaviour change).\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: sib-restore-lineage-sources-run.py:536 binds each Jev-confirmed candidate through bind_recovery_sources in provenance_rebuild.py, and the fragment's restored table records the DD path, P(choice) and self-reported confidence for each of the 39 names.\nSCORE evidence: 16\nJUSTIFICATION evidence: run.py:565-589 re-runs classify_sourceless_standard_names and records delta dropped_edge -39 against apply_receipt names_bound 39 in readback.log (EXIT=0), but it never raises on mismatch and the fragment's EXIT=0 at run.py:728 is a template literal, so the read-back records rather than enforces.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff is inside the fence at prompt.txt:133-137, including the figure under docs/figures/sn-integrity-backlog/sib-restore-lineage-sources; the second commit only edits the driver it added.\nSCORE durability: 8\nJUSTIFICATION durability: no test is added or reachable (the node is fenced to docs/, per manifest tests:), and the only guard is a one-shot non-enforcing read-back, so nothing fails if the 39 bindings regress; the negative control at run.py:432 is a real instrument control but not a regression test.\nSCORE fit: 17\nJUSTIFICATION fit: the driver follows the sibling evidence-driver idiom in the same directory (sib-restore-recorded-sources-run.py) and names symbols by mechanism after the scrub; it imports the private _BIND_SOURCES (run.py:40) for the trial bind and leaves two literals, ('(39 restored)' at run.py:808 and EXIT=0 at run.py:728).\nSCORE reuse: 18\nJUSTIFICATION reuse: run.py:332 uses the shared decisions owner decide_batch, run.py:144 the classifier classify_sourceless_standard_names, and run.py:536 the writer bind_recovery_sources; the per-domain Jev state builder is the established pattern across segment_selection.py, near_duplicates.py and jev_review.py, so no capability is forked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py:808 follow-on: the figure label hardcodes ' (39 restored)' rather than formatting doc['restored_count'], so a re-run that binds a different number would mislabel the before/after figure.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py:728 follow-on: the fragment's 'EXIT=0' is a template literal and stage_readback (run.py:565-589) computes dropped_fell_by_restored/others_unchanged without raising, so no exit code can signal a failed read-back; a reader who trusts the EXIT= line is trusting a constant, not the measurement.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py:457 follow-on: gating on P(choice) >= 0.5 alone admits bindings whose self-reported confidence is near zero (vertical_position_of_grating 0.50/0.00, perturbed_linear_mhd_mode_number 0.51/0.02, ion_temperature_at_outboard_midplane_separatrix 0.54/0.08, flux_surface_normal_neutral_energy_diffusion_coefficient 0.56/0.12, tendency_of_runaway_electron_density 0.62/0.24, heat_power_of_divertor 0.63/0.26); the fragment discloses both numbers, but these are the names to re-check against the brief's 'never write a guessed binding'.",
+  "review_run_id": "r-20261019T014914134768-review-of-sib-restore-lineage-sources-24d527445653",
+  "reviewed_base_sha": "95985b6c88be740c4885f3de95121904af032779",
+  "reviewed_commits": [
+    "d8bc4db7d",
+    "24d5274456536b723122b4ff042a679cf8574aab"
+  ],
+  "reviewed_head_sha": "24d5274456536b723122b4ff042a679cf8574aab",
+  "reviewed_run_id": "r-20261019T012032672589-sib-restore-lineage-sources",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "suite_delta_fields_note": "added_failure_count/added_failure_ids are 0/[] derived from the reviewed run's gate logs judge.log, preview.log, apply.log, readback.log and control.log, all of which end EXIT=0 with no failing test id; the reviewed run ran no baseline_suite/after_suite because no test file is in its docs-only write scope.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T02:05:00Z",
+  "total": 96
+}
