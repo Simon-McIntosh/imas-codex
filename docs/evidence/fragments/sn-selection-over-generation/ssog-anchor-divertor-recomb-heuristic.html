@@ -1,0 +1,55 @@
+<!-- The heuristic arm of the neutral_power_of_divertor_due_to_recombination
+     anchor family, harmonized in a fresh scratch copy of the archived export by
+     the per-arm runner
+     (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py).
+     The arm record lands at ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json. -->
+<section id="ssog-anchor-divertor-recomb-heuristic" data-reckon="evidence">
+  <h2 id="ssog-anchor-divertor-recomb-heuristic-heading">Heuristic arm of the divertor-recombination power family</h2>
+
+  <p id="ssog-anchor-divertor-recomb-heuristic-run">
+    The family (<code>physical_base power</code>, kind <code>subject</code>) has three members:
+    <code>neutral_power_of_divertor_due_to_recombination</code>,
+    <code>plasma_power_of_divertor_due_to_recombination</code> and
+    <code>power_of_divertor_due_to_recombination</code>. Its heuristic anchor is
+    <code>power_of_divertor_due_to_recombination</code> and its Jev anchor is
+    <code>plasma_power_of_divertor_due_to_recombination</code>. One detached invocation
+    reserved scratch port 28010, loaded a fresh copy of the fixed export
+    (<code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code>, dump 2,643,183,686 bytes),
+    proved the copy distinct from the live graph
+    (scratch 1,770,101 nodes, live 1,771,162, marker contrast 1/0), ran the heuristic arm
+    and wrote the arm record. The invocation's runner log ends <code>EXIT=0</code>, and the
+    record carries <code>outcome_status complete</code>.
+  </p>
+
+  <p id="ssog-anchor-divertor-recomb-heuristic-measure">
+    <strong>Measure.</strong> Anchor <code>power_of_divertor_due_to_recombination</code>; lint
+    <code>0 -&gt; 0</code>; every member's documentation score after
+    (<code>neutral… 0.90625</code>, <code>plasma… 0.925</code>,
+    <code>power_of_divertor… 0.849</code>); 16 calls; USD 0.493381; wall 1,184.8 s;
+    <code>stamped false</code>; containment holds (scratch signal 32, live signal 0); code digest
+    <code>sha256:d1e4f1e5…5bf2bdd</code> at head <code>5cf53a7b6</code>. Spend is under both
+    ceilings (USD 0.4934 against an apply cap of USD 1.98 and the arm ceiling of USD 2.00).
+  </p>
+
+  <p id="ssog-anchor-divertor-recomb-heuristic-halt">
+    <strong>The apply halted after its first batch.</strong> The anchor's own batch ran
+    (one member touched); the review held its documentation from acceptance —
+    <code>review_docs: power_of_divertor_due_to_recombination held from acceptance — DD
+    source text unavailable; claim comparison could not run</code>.
+    Batch acceptance was <code>docs acceptance 0.00% &lt; 90.00% (0/1 touched)</code>, so the
+    run halted with <code>resume_from 1</code> and <code>stamped false</code>; the second batch
+    (the other two members) never ran and their scores are unchanged. Rewriting the anchor's
+    documentation without acceptance lowered its own score 1.0 -&gt; 0.849. The DD source text
+    the review needs is absent from the scratch copy, so this arm cannot carry a documentation
+    acceptance for any member; the same condition applies to the family's Jev arm, which runs
+    in its own scratch copy.
+  </p>
+
+  <p id="ssog-anchor-divertor-recomb-heuristic-contained">
+    <strong>Contained.</strong> The library's cost rows that name this family count 16 in the
+    scratch instance and 0 in the live graph, and rows carrying this arm's run id count 0 live.
+    The instance was stopped, its tree removed
+    (<code>…/mcintos-1281970-ljyfwoqw</code>, entry <code>instance</code> removed) and the port
+    lock at <code>/dev/shm/ssog-scratch-port-28010.lock</code> released.
+  </p>
+</section>
