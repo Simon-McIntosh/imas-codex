@@ -4,31 +4,156 @@
     "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
   },
   "anchor": "toroidal_angular_width_of_camera",
+  "applied": true,
   "arm": "heuristic",
   "budget_limit_usd": 2.0,
+  "calls": 11,
   "code": {
     "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-heuristic-r2",
     "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
     "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-heuristic-r2/imas_codex/standard_names/harmonize.py",
     "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
   },
+  "containment": {
+    "at": "2026-10-19T15:37:24.261634+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 11,
+      "scratch_ledger_rows": 11,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 22
+  },
   "cost_limit_passed_usd": 1.98,
+  "decision": "apply",
   "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T15:37:22.411961+00:00",
   "family": "angular_width_of_camera",
+  "harmonize_receipts": [
+    {
+      "anchor": "toroidal_angular_width_of_camera",
+      "applied": true,
+      "batches": [
+        [
+          "toroidal_angular_width_of_camera"
+        ],
+        [
+          "angular_width_of_camera",
+          "vertical_angular_width_of_camera"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "838b2ba48af79d4c10e09c797b0991c29cfc36fca70b43c1c64bc63c7a5daa4c",
+      "harmonized": false,
+      "invariant": [
+        "angular_width",
+        "",
+        "",
+        "",
+        "camera"
+      ],
+      "member_scores": {
+        "angular_width_of_camera": null,
+        "toroidal_angular_width_of_camera": 0.9125,
+        "vertical_angular_width_of_camera": 0.86875
+      },
+      "members": [
+        "angular_width_of_camera",
+        "toroidal_angular_width_of_camera",
+        "vertical_angular_width_of_camera"
+      ],
+      "n": 3,
+      "physical_base": "angular_width",
+      "planned_calls": 3,
+      "result": {
+        "batches_run": 2,
+        "batches_total": 2,
+        "halt_reasons": [
+          "name-axis drift on 1 name(s) in a docs-only campaign: angular_width_of_camera"
+        ],
+        "halted": true,
+        "resume_from": 2,
+        "run_ids": [
+          "468d4b88-49bd-4b09-869b-09641f77e413",
+          "8c71cb46-809b-47c8-bbe3-1b9d970ffb91"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 2,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.3607,
+        "total_quarantined": 0,
+        "total_selected": 3,
+        "total_touched": 2
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [],
+        "fell": []
+      },
+      "scores_after": {
+        "angular_width_of_camera": null,
+        "toroidal_angular_width_of_camera": 0.9375,
+        "vertical_angular_width_of_camera": 1.0
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 2,
+    "batches_total": 2,
+    "halt_reasons": [
+      "name-axis drift on 1 name(s) in a docs-only campaign: angular_width_of_camera"
+    ],
+    "halted": true,
+    "resume_from": 2,
+    "run_ids": [
+      "468d4b88-49bd-4b09-869b-09641f77e413",
+      "8c71cb46-809b-47c8-bbe3-1b9d970ffb91"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 2,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.3607,
+    "total_quarantined": 0,
+    "total_selected": 3,
+    "total_touched": 2
+  },
   "heuristic_anchor": "toroidal_angular_width_of_camera",
   "isolation": {
     "at": "2026-10-19T15:05:20.073179+00:00",
+    "live_family_rows": 0,
     "live_nodes": 1771162,
+    "live_nodes_after": 1771162,
+    "live_nodes_delta_observed": 0,
     "live_probe": 0,
+    "live_scope_run_rows": 0,
     "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
     "marked_scratch_nodes": 1770102,
     "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 11,
+    "scratch_ledger_rows": 11,
     "scratch_nodes": 1770101,
     "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
     "scratch_uri": "bolt://127.0.0.1:28002"
   },
   "jev_anchor": "vertical_angular_width_of_camera",
   "kind": "component",
+  "ledger_calls": 11,
+  "ledger_spend_usd": 0.3606520000000001,
+  "ledger_window": {
+    "ended": "2026-10-19T15:37:23.757264+00:00",
+    "started": "2026-10-19T15:05:24.509834+00:00"
+  },
+  "lint_after": 0,
+  "lint_after_classes": {},
   "lint_before": 2,
   "lint_before_classes": {
     "convention_violation": 1,
@@ -40,19 +165,68 @@
     "vertical_angular_width_of_camera"
   ],
   "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/mcintos-1281970-39wh3wyk/instance/logs/neo4j-temp.log",
-  "outcome_status": "running",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 2,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.180565
+    },
+    {
+      "calls": 3,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.093867
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.085652
+    },
+    {
+      "calls": 4,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.000568
+    }
+  ],
   "planned_calls": 3,
   "port": 28002,
   "port_lock": "/dev/shm/ssog-scratch-port-28002.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T15:37:39.434885+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28002.lock"
+  },
   "recorded_anchor_before": "toroidal_angular_width_of_camera",
+  "run_ids": [
+    "468d4b88-49bd-4b09-869b-09641f77e413",
+    "8c71cb46-809b-47c8-bbe3-1b9d970ffb91"
+  ],
+  "scores_after": {
+    "angular_width_of_camera": null,
+    "toroidal_angular_width_of_camera": 0.9375,
+    "vertical_angular_width_of_camera": 1.0
+  },
   "scores_before": {
     "angular_width_of_camera": null,
     "toroidal_angular_width_of_camera": 0.9125,
     "vertical_angular_width_of_camera": 0.86875
   },
-  "scratch_removed": null,
+  "scratch_removed": {
+    "at": "2026-10-19T15:37:39.434738+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/mcintos-1281970-39wh3wyk"
+  },
   "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/mcintos-1281970-39wh3wyk",
   "scratch_uri": "bolt://127.0.0.1:28002",
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
-  "started_at": "2026-10-19T15:01:37.259345+00:00"
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.3606520000000001,
+  "stamped": false,
+  "started_at": "2026-10-19T15:01:37.259345+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T15:37:39.271645+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/mcintos-1281970-39wh3wyk/instance"
+  },
+  "wall_seconds": 1917.9020863184705
 }
