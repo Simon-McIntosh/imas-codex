@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/export.py:3027",
+    "imas_codex/standard_names/graph_ops.py:22891",
+    "imas_codex/standard_names/ledger.py:56",
+    "imas_codex/standard_names/loop.py:2005",
+    "imas_codex/standard_names/provenance_rebuild.py:663"
+  ],
+  "completed_at": "2026-10-19T00:36:25.813Z",
+  "dispatched_at": "2026-10-19T00:24:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-source-audit-gate.html",
+      "line": "64",
+      "severity": "follow-on",
+      "text": "The evidence fragment records the orphan-lifecycle consumer call site as graph_ops.py:22862 and the catalog-probe call site as ledger.py:103, but the classifier call is at imas_codex/standard_names/graph_ops.py:22891 (22862 is the def line of supersede_exhausted_standard_name_orphans) and at imas_codex/standard_names/ledger.py:56 (103 is an unrelated gc.close()); two of the three file:line call-site citations the plan's done-when requires therefore land a reader on unrelated code."
+    },
+    {
+      "file": "tests/standard_names/test_provenance_ledger.py",
+      "line": "170",
+      "severity": "follow-on",
+      "text": "test_live_source_loss_probe_matches_independent_count compares find_provenance_orphans' output against a set built from a second call to the same classifier (classified = classify_sourceless_standard_names(gc) at line 166), so both sides move together under any classifier regression and this assertion cannot redden on one; it pins only ledger's three-population filter, while the independent guard is the len(classified) == count assertion one line above."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against f6905424: one new classifier in graph_ops.py, the supersede lifecycle's selector replaced by it, the export's pre-population refusal, find_provenance_orphans rewired to the classifier, loop.py's failed-read warning, the shared _live_child_cypher predicate (which also narrows export's has_live_child), the stale-source producer predicate, the rebuild's active-only filter, and the test surface, 22 files and 961 insertions against 213 deletions.",
+    "done_when": "The done_when names tests/standard_names/test_source_audit_gate.py's six-planted-name fixture, the export refusal that names the dropped-edge and never-bound names, the lifecycle retiring only the orphan, find_provenance_orphans returning the exhausted dropped-edge name, and a read that raises reported as not run; the manifest records fixture-final.log 13 passed EXIT=0, resume-graph-final-worktree.log 19 passed EXIT=0, and the per-consumer red controls negative-export-final/negative-lifecycle/negative-ledger each ending EXIT=1 with a distinct failing test id.",
+    "goal": "The node's goal is to gate the export, the orphan lifecycle and the live-catalog probe on one classifier of sourceless standard names; the diff adds exactly that owner, classify_sourceless_standard_names (imas_codex/standard_names/graph_ops.py:22563), returning one of five ordered populations, and wires three consumers to it.",
+    "manifest": "Read at the reviewed run's manifest.md; status complete, nine commits 5efabce2f..e98933bfe, baseline_suite f6905424 (114 passed, 0 failures, EXIT=0) and after_suite c83a35c4e (118 passed, 0 failures, EXIT=0), negative_control_log negative-export-final.log, and the three scaffolding failure_attribution entries for the extracted base tree.",
+    "write_paths": "The manifest's orientation_write_paths declare 22 paths (the brief's seven plus the resume-granted imas_codex/standard_names/provenance_rebuild.py, tests/standard_names/conftest.py and ten export fixture files); git diff --stat f6905424 e98933bf lists exactly those 22 paths and nothing else."
+  },
+  "justifications": {
+    "durability": "The guards fire rather than merely pass: removing each consumer call reddens a distinct named test (negative-export-final.log, negative-lifecycle.log, negative-ledger.log, each EXIT=1), removing the stale-source predicate reddens test_stale_binding_does_not_satisfy_writer_invariant (negative-stale-producer.log) and removing the rebuild filter reddens test_rebuild_excludes_exhausted_audit_findings_from_repair_and_retirement (negative-rebuild.log); the one weak assertion is the live comparison at tests/standard_names/test_provenance_ledger.py:170, whose two sides are built from the same classifier.",
+    "evidence": "The gate measures the done_when and its results are recorded rather than claimed (resume-covering-base.log 114 passed EXIT=0 against after_suite resume-covering-head-committed.log 118 passed EXIT=0, delta zero; live-read-final.log classifies 264 with a positive control of 2795 sourced names), but two of the three file:line call-site citations the fragment is required to record are wrong (docs/evidence/fragments/sn-integrity-backlog/sib-source-audit-gate.html:64).",
+    "fit": "The new function and its consumers follow the surrounding idiom, the export's early refusal mirrors the existing gate-failure branch at imas_codex/standard_names/export.py:3281, the loop probe takes the module's logger.warning diagnostic shape, ruff is clean over all six changed modules, and no added name, file or comment carries a plan, ticket or version label.",
+    "goal_fidelity": "imas_codex/standard_names/graph_ops.py:22563 adds the one rule the goal names and imas_codex/standard_names/export.py:3027, graph_ops.py:22891, ledger.py:56 and loop.py:2005 consume it, so the export, the orphan lifecycle and the live-catalog probe are gated on one classifier.",
+    "reuse": "No owner is forked: the population rule is the census port the brief names and has exactly one definition (imas_codex/standard_names/graph_ops.py:22563), ledger's duplicate _FIND_ORPHANS was deleted rather than kept beside it, the derived-parent and live-child predicate is genuinely shared from imas_codex/standard_names/source_invariant.py:11 and imported by imas_codex/standard_names/export.py:630, and a repository search for other population classifiers found no duplicate.",
+    "scope_discipline": "git diff --stat f6905424 e98933bf is 22 paths and every one is inside the manifest's declared write paths, including the resume-granted imas_codex/standard_names/provenance_rebuild.py, tests/standard_names/conftest.py and the ten export fixtures, with no plan meta line, index or figure, and the source_invariant.py change to find_sourceless_live_names sits in a path the original brief already granted."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to gate the export, the orphan lifecycle and the live-campaign probe on one classifier of sourceless names, and the diff adds exactly that owner, classify_sourceless_standard_names (imas_codex/standard_names/graph_ops.py:22563), returning one of five ordered populations with three consumers wired to it.\nVERDICT done_when: the done_when names tests/standard_names/test_source_audit_gate.py's six-planted-name fixture with the export refusal, the lifecycle's single retirement and the probe's exhausted dropped-edge report; the manifest records fixture-final.log 13 passed EXIT=0, resume-graph-final-worktree.log 19 passed EXIT=0, and the three per-consumer red controls at EXIT=1.\nVERDICT write_paths: the manifest's orientation_write_paths declare 22 paths (the brief's seven plus the resume-granted provenance_rebuild.py, conftest.py and ten export fixtures) and git diff --stat f6905424 e98933bf lists exactly those 22 paths.\nVERDICT manifest: read; status complete, nine commits, baseline_suite 114 passed / 0 failures / EXIT=0 and after_suite 118 passed / 0 failures / EXIT=0, negative_control_log negative-export-final.log, three scaffolding failure_attribution entries disclosed.\nVERDICT diff: read commit by commit against f6905424 -- one new classifier, the lifecycle selector replaced, the export's pre-population refusal, find_provenance_orphans rewired, the loop failed-read warning, the shared live-child predicate, the stale-source producer predicate and the rebuild's active-only filter, 22 files, 961 insertions against 213 deletions.\nCALL_SITES: imas_codex/standard_names/export.py:3027, imas_codex/standard_names/graph_ops.py:22891, imas_codex/standard_names/ledger.py:56, imas_codex/standard_names/loop.py:2005, imas_codex/standard_names/provenance_rebuild.py:663\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_ops.py:22563 adds the one rule the goal names and imas_codex/standard_names/export.py:3027, graph_ops.py:22891, ledger.py:56 and loop.py:2005 consume it.\nSCORE evidence: 17\nJUSTIFICATION evidence: the base/head delta and the live census are recorded in logs at EXIT=0, but two of the three file:line call-site citations the fragment must carry are wrong (docs/evidence/fragments/sn-integrity-backlog/sib-source-audit-gate.html:64).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --stat f6905424 e98933bf is inside the manifest's declared write paths, including the resume-granted provenance_rebuild.py, conftest.py and the ten export fixtures.\nSCORE durability: 18\nJUSTIFICATION durability: each consumer's call removal reddens a distinct named test at EXIT=1 (negative-export-final.log, negative-lifecycle.log, negative-ledger.log) while the live assertion at tests/standard_names/test_provenance_ledger.py:170 is non-independent of the classifier.\nSCORE fit: 18\nJUSTIFICATION fit: the export's early refusal mirrors the existing gate-failure branch at imas_codex/standard_names/export.py:3281, the loop probe takes the module's logger.warning shape, ruff is clean and no added name carries a plan or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the rule has one definition at imas_codex/standard_names/graph_ops.py:22563, ledger's duplicate _FIND_ORPHANS was deleted, and the derived-parent predicate is shared from imas_codex/standard_names/source_invariant.py:11.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-source-audit-gate.html:64 follow-on: the fragment records the orphan-lifecycle call site as graph_ops.py:22862 and the catalog-probe call site as ledger.py:103, but the classifier call is at imas_codex/standard_names/graph_ops.py:22891 and imas_codex/standard_names/ledger.py:56, so two of the three required file:line citations land a reader on unrelated code.\nFINDING tests/standard_names/test_provenance_ledger.py:170 follow-on: the live assertion compares find_provenance_orphans' output to a set built from a second call to the same classifier, so both sides move together under a classifier regression and it pins only ledger's population filter.\nREVIEWED_BASE_SHA: f6905424189b4379324408127c73b5de3ba0e8e6\nREVIEWED_HEAD_SHA: e98933bfef959b2e2070ee984cb6f2eb748d5fde",
+  "review_run_id": "r-20261019T002419958502-review-of-sib-source-audit-gate-e98933bfef95",
+  "reviewed_base_sha": "f6905424189b4379324408127c73b5de3ba0e8e6",
+  "reviewed_head_sha": "e98933bfef959b2e2070ee984cb6f2eb748d5fde",
+  "reviewed_run_id": "r-20261018T225858350310-sib-source-audit-gate",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T00:40:00+00:00",
+  "total": 110
+}
