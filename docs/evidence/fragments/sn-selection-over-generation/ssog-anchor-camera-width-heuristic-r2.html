@@ -1,0 +1,50 @@
+<!-- Ran the heuristic anchor arm of the angular_width_of_camera family against a
+     fresh scratch copy of the 2026-10-18T11:47:48Z export through the per-arm
+     runner (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py).
+     One arm only; the Jev arm and the adoption verdict belong to sibling nodes. -->
+<section id="ssog-anchor-camera-width-heuristic-r2" data-reckon="evidence">
+  <h2 id="ssog-anchor-camera-width-heuristic-r2-heading">angular_width_of_camera, heuristic arm: lint 2&rarr;0 for USD 0.36</h2>
+
+  <p id="ssog-anchor-camera-width-heuristic-r2-arm">
+    The family is <code>angular_width_of_camera</code> (members
+    <code>angular_width_of_camera</code>, <code>toroidal_angular_width_of_camera</code>,
+    <code>vertical_angular_width_of_camera</code>), and the fixed selection names
+    <code>toroidal_angular_width_of_camera</code> as its heuristic anchor and
+    <code>vertical_angular_width_of_camera</code> as its Jev anchor. This node ran
+    the heuristic arm alone, on the code revision it was dispatched at, against a
+    fresh scratch copy of the archived export.
+  </p>
+
+  <p id="ssog-anchor-camera-width-heuristic-r2-isolation">
+    The copy is provably distinct from the live graph before the apply: the scratch
+    instance reads 1,770,101 nodes, a marker node is present there and absent from
+    the live graph (<code>scratch_probe 1, live_probe 0</code>), and the marker is
+    deleted and the scratch count restored to the same 1,770,101. The apply ran
+    with <code>NEO4J_URI</code> pointed at <code>bolt://127.0.0.1:28002</code>, a
+    loopback port pair this arm reserved exclusively for its lifetime.
+  </p>
+
+  <p id="ssog-anchor-camera-width-heuristic-r2-measure">
+    After harmonization the family's lint total falls from 2 to 0
+    (<code>convention_violation</code> and <code>link_missing_reverse</code> both
+    clear). The documentation review scores of the two members that carry one
+    rise, neither falls: <code>toroidal_angular_width_of_camera 0.9125&rarr;0.9375</code>
+    and <code>vertical_angular_width_of_camera 0.86875&rarr;1.0</code>. The anchor
+    member <code>angular_width_of_camera</code> carries no documentation score
+    before or after. The run used 11 LLM calls and USD 0.3607, under the runner's
+    USD 2.00 arm ceiling, in 1,917.9 s wall time. The harmonize campaign halted by
+    design, on name-axis drift for <code>angular_width_of_camera</code> in a
+    docs-only campaign, after accepting 2 of 3 members.
+  </p>
+
+  <p id="ssog-anchor-camera-width-heuristic-r2-containment">
+    Containment holds with both controls satisfied: the apply's own cost rows are
+    present in the scratch copy (<code>scratch_family_rows 11, scratch_ledger_rows 11</code>)
+    so an apply that wrote nothing could not pass, and no cost row attributable to
+    this apply is present in the live graph (<code>live_family_rows 0,
+    live_scope_run_rows 0</code>). The scratch instance was stopped and its tree
+    removed, and the port reservation released. The full arm record, including the
+    code digest, is at
+    <code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/angular_width_of_camera-heuristic.json</code>.
+  </p>
+</section>
