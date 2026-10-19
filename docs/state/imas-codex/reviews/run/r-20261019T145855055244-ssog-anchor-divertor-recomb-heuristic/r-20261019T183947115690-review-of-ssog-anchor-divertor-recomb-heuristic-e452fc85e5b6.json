@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite or after_suite (both blank in its manifest), so it carries no two-arm suite delta of its own. Its gate was the per-arm runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, whose runner log ssog-run/runner-heuristic.log ends EXIT=0, plus the apply log ssog-run/apply-heuristic-neutral_power_of_divertor_due_to_recombination.log whose header names revision 5cf53a7b6, the tree, module.__file__ and resolved_cwd and whose last line is EXIT=0; the change touches only docs/evidence paths that no test module covers, so the added-failure set is an empty measured set rather than unmeasured by a suite that could have exercised it.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T18:55:45.494Z",
+  "dispatched_at": "2026-10-19T18:41:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: the field cost_limit_passed_usd holds the 1.98 apply ceiling, not a pass/fail, so a reader comparing spend (0.493381, json line 240) against a value stored under a name that asserts a verdict compares a spend to a cap; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:509, which sets ceiling = min(apply_cap(planned_calls), ARM_BUDGET_USD)."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-divertor-recomb-heuristic.html",
+      "line": "43",
+      "severity": "follow-on",
+      "text": "follow-on: the landing paragraph attributes the halt cause to the scratch copy \u2014 'The DD source text the review needs is absent from the scratch copy' \u2014 where the apply log shows the absence is a property of the graph content, not of the copy: ssog-run/apply-heuristic-neutral_power_of_divertor_due_to_recombination.log:55 records stamp_source_snapshots stamped 0 name(s) (unstamped baseline) and line 471 records review_docs: power_of_divertor_due_to_recombination held from acceptance \u2014 DD source text unavailable, i.e. per-name. The record's evidence_inputs repeats the same attribution ('a property of the scratch copy'). The practical consequence the paragraph draws (the Jev arm faces the condition too, since the run is dispatched against the same export) still holds, but the cause as stated could mislead the aggregator into reading the fix as supplying source text to the scratch copy rather than the export carrying it."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; the single commit e452fc85e adds two files \u2014 the arm JSON (248 lines) and the landing HTML (55 lines) \u2014 and nothing else.",
+    "done_when": "the done_when asks for the arm written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, the scratch stopped and removed, and spend under USD 2.00 \u2014 all present (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:175) and ssog-run/runner-heuristic.log ends EXIT=0.",
+    "goal": "the node's goal is to run the heuristic arm of the neutral_power_of_divertor_due_to_recombination family in a scratch graph copy and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:6 records that arm, anchored at power_of_divertor_due_to_recombination.",
+    "manifest": "read in full; status complete, one commit (e452fc85e), changed_paths, test_logs, measurement_module and measurement_cwd present, the initial scaffolding failure (mkdtemp on a read-only /tmp) attributed to scaffolding, baseline_suite and after_suite blank as an evidence node, blockers none.",
+    "write_paths": "the brief's Write scope names the arm JSON and the working rules add the landing HTML; the manifest declares both plus a figures directory, and git diff --numstat 5cf53a7b6 e452fc85e touches only the JSON and the landing HTML, both inside those declared paths."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion at all \u2014 it is a data record and a doc \u2014 so nothing committed reddens if the record's scores or containment verdict were later replaced, and the only guard is the runner's write-time containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:617-630.",
+    "evidence": "the record's scores_after at ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:219 (neutral 0.90625, plasma 0.925, power 0.849) reconcile with ssog-run/apply-heuristic-neutral_power_of_divertor_due_to_recombination.log:472 (persist_reviewed_docs score=0.849) and its containment.evidence at json line 17 names the four counts the verdict rests on, but no pytest arm ran so the added-failure delta is a measured empty set.",
+    "fit": "the record matches the sibling heuristic record's key set exactly (compare ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json) and the landing HTML follows the reckon evidence-fragment idiom at ssog-anchor-divertor-recomb-heuristic.html:1, though line 31 of the JSON carries a field name that asserts a verdict its value does not hold.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:6 records the arm's anchor and every quantity the goal names in the JSON shape set by ssog-anchor-ab-run.py:505-531, and the family's partial harmonization (1 of 3 members, stamped false, json line 241) is disclosed rather than concealed.",
+    "reuse": "the change adds no new definition and forks no capability \u2014 the record and the fragment are produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:399 run_arm, which delegates to harmonize and the temp-instance helpers, and a capability search over docs/evidence and imas_codex found no other owner of an arm-record producer.",
+    "scope_discipline": "git diff --numstat 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1 e452fc85e5b6df131e00453b264d910b8f0ba04e lists only the arm JSON and ssog-anchor-divertor-recomb-heuristic.html, both inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to run the heuristic arm of the neutral_power_of_divertor_due_to_recombination family in a scratch graph copy and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:6 records that arm, anchored at power_of_divertor_due_to_recombination.\nVERDICT done_when: the done_when asks for the arm written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, the scratch stopped and removed, and spend under USD 2.00; every one is present (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:175) and ssog-run/runner-heuristic.log ends EXIT=0.\nVERDICT write_paths: the brief's Write scope names the arm JSON and the working rules add the landing HTML; the manifest declares both plus a figures directory, and git diff --numstat 5cf53a7b6 e452fc85e touches only the JSON and the landing HTML, both inside those declared paths.\nVERDICT manifest: read in full; status complete, one commit (e452fc85e), changed_paths, test_logs, measurement_module and measurement_cwd present, the initial scaffolding failure (mkdtemp on a read-only /tmp) attributed to scaffolding, baseline_suite and after_suite blank as an evidence node, blockers none.\nVERDICT diff: read commit by commit against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; the single commit e452fc85e adds two files \u2014 the arm JSON (248 lines) and the landing HTML (55 lines) \u2014 and nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:6 records the arm's anchor and every quantity the goal names in the JSON shape set by ssog-anchor-ab-run.py:505-531, and the family's partial harmonization (1 of 3 members, stamped false, json line 241) is disclosed rather than concealed.\nSCORE evidence: 18\nJUSTIFICATION evidence: the record's scores_after at ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:219 reconcile with ssog-run/apply-heuristic-neutral_power_of_divertor_due_to_recombination.log:472 (persist_reviewed_docs score=0.849) and its containment.evidence at json line 17 names the four counts the verdict rests on, but no pytest arm ran so the added-failure delta is a measured empty set.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: git diff --numstat 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1 e452fc85e5b6df131e00453b264d910b8f0ba04e lists only the arm JSON and ssog-anchor-divertor-recomb-heuristic.html, both inside the manifest's declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: the diff adds no assertion at all \u2014 it is a data record and a doc \u2014 so nothing committed reddens if the record's scores or containment verdict were later replaced, and the only guard is the runner's write-time containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:617-630.\nSCORE fit: 16\nJUSTIFICATION fit: the record matches the sibling heuristic record's key set exactly (compare ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json) and the landing HTML follows the reckon evidence-fragment idiom at ssog-anchor-divertor-recomb-heuristic.html:1, though line 31 of the JSON carries a field name that asserts a verdict its value does not hold.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no new definition and forks no capability \u2014 the record and the fragment are produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:399 run_arm, which delegates to harmonize and the temp-instance helpers, and a capability search over docs/evidence and imas_codex found no other owner of an arm-record producer.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-heuristic.json:31 follow-on: the field cost_limit_passed_usd holds the 1.98 apply ceiling, not a pass/fail, so a reader comparing spend (0.493381, json line 240) against a value stored under a name that asserts a verdict compares a spend to a cap; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:509, which sets ceiling = min(apply_cap(planned_calls), ARM_BUDGET_USD).\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-divertor-recomb-heuristic.html:43 follow-on: the landing paragraph attributes the halt cause to the scratch copy \u2014 'The DD source text the review needs is absent from the scratch copy' \u2014 where the apply log shows the absence is a property of the graph content, not of the copy: ssog-run/apply-heuristic-neutral_power_of_divertor_due_to_recombination.log:55 records stamp_source_snapshots stamped 0 name(s) (unstamped baseline) and line 471 records review_docs: power_of_divertor_due_to_recombination held from acceptance \u2014 DD source text unavailable, i.e. per-name; the practical consequence the paragraph draws still holds, but the cause as stated could mislead the aggregator.\n",
+  "review_run_id": "r-20261019T183947115690-review-of-ssog-anchor-divertor-recomb-heuristic-e452fc85e5b6",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_commits": [
+    "e452fc85e5b6df131e00453b264d910b8f0ba04e"
+  ],
+  "reviewed_head_sha": "e452fc85e5b6df131e00453b264d910b8f0ba04e",
+  "reviewed_run_id": "r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261019T183947115690-review-of-ssog-anchor-divertor-recomb-heuristic-e452fc85e5b6"
+  },
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T18:55:00Z",
+  "total": 101
+}
