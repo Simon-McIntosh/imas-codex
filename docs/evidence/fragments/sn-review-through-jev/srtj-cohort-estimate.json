@@ -1,0 +1,3155 @@
+{
+ "node": "srtj-cohort-estimate",
+ "plan_section": "sn-review-through-jev s6",
+ "spend_usd": 0.0,
+ "seed": 20261019,
+ "cohort": {
+  "size": 464,
+  "per_axis": 232,
+  "axis_rule": "Each drawn identity is assigned one axis; identities are drawn from the eligible pool in ascending id order and the axis sequence is shuffled by the same seeded generator.",
+  "pool_size_before_exclusion": 2220,
+  "pool_size_after_exclusion": 1851,
+  "west_roster_names": 476,
+  "west_names_in_pool": 369,
+  "items": [
+   {
+    "id": "resistivity_of_plasma_facing_component",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normalized_particle_mass",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_neutral_internal_state_momentum_diffusion_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "etendue_of_spectrometer",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_neutral_internal_state_convection_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_neutral_particle_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_internal_state_particle_flux_at_wall",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "major_length_of_antenna_strap",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "reviewed"
+   },
+   {
+    "id": "toroidal_magnetic_field_at_flux_surface",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "argon_density_at_limiter",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_electron_diffusivity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "fast_particle_pressure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "accumulated_deuterium_count_due_to_gas_injection",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_outline_of_divertor_tile",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_internal_state_pressure",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_electron_convection_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "thickness_of_plasma_facing_component",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "methane_carbon_13_prefill_count",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_total_current_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normal_coordinate_of_correction_coil",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "deuterium_tritium_density_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "deuterium_tritium_emissivity_due_to_fusion",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_neutral_particle_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "y_direction_unit_vector_of_neutron_detector",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_toroidal_plasma_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_particle_flux_limiter_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_charge_state_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "diamagnetic_current_density_due_to_heat_viscosity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "hydrogen_density_at_pedestal_top",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "pedestal_thermal_ion_energy",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_neutral_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_center_of_mass_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "alpha_angle_of_passive_loop_element",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_total_current_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "volume_averaged_ion_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_coordinate_of_active_spatial_resolution_zone",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "outer_radius_of_plasma_filament",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "major_length_of_plasma_filament",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_coordinate_of_electron_cyclotron_launcher_mirror",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "hot_neutral_temperature_at_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "rate_due_to_pumping",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "electron_decay_time_at_magnetic_axis_due_to_disruption",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_heating_power_due_to_fusion_reactions",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_ion_energy_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "surface_current_per_toroidal_and_poloidal_mode_number_of_ion_cyclotron_heating_antenna",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "brightness_of_visible_camera",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "requested_voltage_of_spectrometer_channel",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_peak_launched_refractive_index_of_lower_hybrid_antenna",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "absorbed_power_due_to_neutral_beam_injection",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_counter_passing_particle_pressure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_magnetic_flux_at_halo_boundary_due_to_poloidal_current",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_fast_neutral_internal_state_pressure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "volume_averaged_lithium_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normalized_toroidal_flux_coordinate_of_reflectometer_cutoff_position",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_total_momentum_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ratio_of_vertical_vorticity_to_major_radius",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_impurity_ion_velocity_at_measurement_position",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "major_angle_of_shatter_cone",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "radial_outline_of_coil_conductor_element",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_source_rate",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normalized_poloidal_flux_coordinate_at_reflectometer_cutoff_position",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_helium_4_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "second_local_tangential_width_of_aperture",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "reviewed"
+   },
+   {
+    "id": "electron_particle_flux_at_wall_due_to_pumping",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_carbon_velocity_at_magnetic_axis",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_ion_charge_state_momentum_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "fast_particle_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "power_due_to_first_orbit_loss",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_neutral_energy_diffusivity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "deposited_power_at_divertor_target_due_to_halo_current",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "iron_density_at_pedestal_top",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_thermal_ion_torque_density_due_to_collisions",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_particle_flux_limiter_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_net_ion_momentum_source",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "co_passing_thermal_ion_power_density_due_to_collisions",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "volume_averaged_ion_charge_state_average_charge_number",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "y_unit_vector_of_pellet_injector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutron_emissivity_due_to_fusion",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "right_hand_circularly_polarized_wave_electric_field_imaginary_part",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "left_hand_circularly_polarized_wave_electric_field_real_part",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "carbon_prefill_count_due_to_gas_injection",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "right_hand_circularly_polarized_wave_electric_field",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_incident_neutral_energy_flux_at_wall",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "toroidal_krypton_velocity_at_pedestal_top",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "krypton_source_rate_due_to_gas_injection",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_neutral_state_momentum_flux_limiter_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "voltage_of_wall",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "toroidal_neutral_state_velocity_due_to_diamagnetic_drift",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_hydrogen_velocity_at_magnetic_axis",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_tungsten_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_larmor_radius_normalized_at_pedestal_top_low_field_side",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normal_wave_electric_field",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "x_direction_unit_vector_of_neutron_detector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_magnetic_field_at_ferritic_element_centroid",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "per_toroidal_mode_fast_ion_charge_state_power",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_angular_width_of_camera",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_coordinate_of_current_center",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "rotation_frequency_time_derivative_of_neoclassical_tearing_mode",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "rate_due_to_beam_thermal_fusion",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "maximum_angle_of_electron_cyclotron_launcher_mirror",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_ion_momentum_diffusivity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "current_due_to_non_inductive_current_drive",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_center_of_mass_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_particle_flux_limiter_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "incident_ion_energy_flux_at_wall_due_to_recombination",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "oxygen_count_accumulated_due_to_gas_injection",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "power_at_divertor_target_due_to_conduction",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "width_of_iron_core_segment",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normalized_fluctuating_electron_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "thermal_ion_charge_state_power_at_inside_flux_surface",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_power_of_divertor_due_to_recombination",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_ion_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "drafted"
+   },
+   {
+    "id": "vertical_neutral_species_center_of_mass_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_coordinate_of_filter_window",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "nuclear_heating_power_of_breeder_blanket_layer",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "inner_radius_of_ferritic_element",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "lower_outer_squareness_of_flux_surface",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_perturbed_plasma_velocity_real_part",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "second_local_tangential_width_of_neutral_beam_injector",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_neutral_internal_state_momentum_convection_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_nitrogen_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_torque_density_due_to_j_cross_b_force",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "center_of_mass_velocity_due_to_diamagnetic_drift",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_volumetric_force",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "thermal_ion_charge_state_power_density_due_to_collisions",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normalized_beam_power",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "radial_velocity_of_pellet",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_ion_charge_state_momentum_flux_limiter_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_charge_state_energy_diffusion_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "first_local_tangential_width_of_filter_window",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_ion_momentum_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_nitrogen_velocity_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_ion_momentum_flux_over_edge_region",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "effective_ion_diffusivity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "plasma_energy",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "power_due_to_neutral_beam_shinethrough",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_pressure_over_scrape_off_layer",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_energy_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_diamagnetic_momentum_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ratio_of_poloidal_magnetic_field_at_outboard_midplane_separatrix_to_poloidal_magnetic_field_at_strike_point",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "magnetic_shear_at_internal_transport_barrier",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_carbon_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_fast_neutral_pressure",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_momentum_source",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "current_of_rogowski_coil",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "angular_width_of_camera",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "parallel_fluctuating_ion_current_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "first_local_tangential_width_of_soft_xray_detector",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "etendue_of_bolometer",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "major_length_of_iron_core_segment",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "voltage_of_flux_loop",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_state_diamagnetic_momentum_source",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "trapped_fast_ion_power_density_due_to_collisions",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_krypton_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_energy_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_kinetic_energy_flux_at_wall_due_to_surface_emission",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "surface_emissivity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_current_density_due_to_heat_viscosity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_magnetic_field_at_ferritic_element_centroid",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_perturbed_plasma_magnetic_field_imaginary_part",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "height_of_passive_structure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "implicit_ion_energy_source_rate",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_velocity_at_charge_exchange_channel",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "upper_inner_squareness_of_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_electric_field",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "alfven_frequency_real_part",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_coordinate_of_iron_core_segment",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_density_at_pellet_path",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "thermal_ion_pressure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_back_surface_curvature_of_optical_element",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "height_of_neutron_detector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "spectral_refractive_index_of_optical_element",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "tilt_angle_of_passive_loop",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_non_axisymmetric_magnetic_field",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_ion_charge_state_momentum_flux",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_diffusion_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_trapped_current_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "core_atomic_count_of_pellet",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "alpha_angle_of_plasma_filament",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_electric_field_at_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "silane_source_rate",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ethylene_prefill_count",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "current_of_plasma_filament",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_carbon_velocity_at_pedestal_top",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "bandwidth_of_ece_channel",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_source_rate_at_pellet_path_due_to_pellet_injection",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_bulk_center_of_mass_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_neutral_state_momentum_source",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_coordinate_of_lower_hybrid_antenna_row",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_lithium_velocity_at_internal_transport_barrier",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_ion_density_at_divertor_target",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_displacement_of_beamlet_group",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "current_at_divertor_target",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_total_momentum_source",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_neutral_state_velocity_due_to_diamagnetic_drift",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "volume_integrated_particle_source_rate",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "perpendicular_power_normalized_of_beam_tracing_beam",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "second_local_tangential_coordinate_of_neutral_beam_injector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_absorbed_wave_power_at_inside_flux_surface",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "nuclear_power_density_of_limiter_tile",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_momentum_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "x_direction_unit_vector_of_camera",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_charge_state_energy_velocity_due_to_convection",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "maximum_of_back_surface_neutron_flux",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_electron_beta_flux_surface_averaged_at_pedestal_top",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_ion_charge_state_momentum_damping_rate",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "frequency_of_electron_cyclotron_beam",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "helium_4_density_at_limiter",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "outer_radius_of_poloidal_field_coil",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_particle_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_hydrogen_velocity_at_plasma_boundary",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ratio_of_particle_count_to_particle_simulated_count",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "reviewed"
+   },
+   {
+    "id": "parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "second_local_tangential_back_surface_radius_of_optical_element",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "thermal_power_of_breeder_blanket",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_absorbed_wave_power",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_energy_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "helium_4_density_at_pedestal_top",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "z_coordinate_of_divertor_target",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "second_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "launched_power_of_ion_cyclotron_heating_antenna",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "inner_radius_of_antenna_strap",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_counter_passing_fast_particle_pressure",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "outer_radius_of_iron_core_segment",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_boron_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "fast_ion_power_due_to_charge_exchange",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_diamagnetic_momentum_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_ion_momentum_source",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "krypton_density_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_coordinate_of_antenna_strap",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "tilt_angle_of_ferritic_element",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "counter_passing_thermal_electron_power_density_due_to_collisions",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_power_normalized_of_beam_tracing_beam",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_total_ion_energy_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "x_major_axis_unit_vector_of_shatter_cone",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "external_loop_voltage",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_co_passing_fast_current_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_conductivity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "current_of_divertor_tile",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_energy_diffusion_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "boron_density_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "beryllium_density_at_pedestal_top",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_deuterium_tritium_velocity_at_pedestal_top",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_temperature_at_pedestal_top",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "poloidal_electric_field",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_momentum",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_momentum_diffusivity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_particle_flux_at_wall_due_to_recombination",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "perpendicular_fast_ion_pressure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_ion_charge_state_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_ion_rotation_frequency",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "carbon_density_at_pedestal_top",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_lithium_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_conductivity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_ion_charge_state_velocity_due_to_diamagnetic_drift",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "second_local_tangential_coordinate_of_optical_element",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_explicit_ion_torque",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_diamagnetic_momentum_diffusivity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "volume_averaged_ion_temperature",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "thermal_electron_absorbed_wave_power",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "second_local_tangential_coordinate_of_hard_xray_detector",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_particle_flux",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "minimum_force_of_poloidal_field_coil",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_ion_momentum_diffusion_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_neutral_momentum_flux_limiter_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_electron_energy_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_state_diamagnetic_momentum_diffusivity",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "second_local_tangential_width_of_filter_window",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_ion_heat_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_iron_velocity_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_argon_velocity_at_internal_transport_barrier",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_state_particle_flux",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "poloidal_linear_neutral_internal_state_momentum_flux",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "resistance_of_shunt",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_tungsten_velocity_at_magnetic_axis",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_absorbed_power_of_beam_tracing_beam",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "co_passing_thermal_electron_power_density_due_to_collisions",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_counter_passing_fast_electron_torque_density_due_to_collisions",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_wave_vector_normalized_of_beam_tracing_beam",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normalized_collisionality",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_tritium_density_at_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_xenon_velocity_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_pressure_at_separatrix",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_ion_momentum_convection_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "y_coordinate_of_sensor_attachment_point",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "accumulated_deuterated_methane_prefill_count",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_neutral_internal_state_momentum_flux_limiter_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "trapped_thermal_electron_power_density_due_to_collisions",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_magnetic_flux_at_internal_transport_barrier",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_thermal_ion_heat_flux",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "wetted_area_of_divertor",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "reviewed"
+   },
+   {
+    "id": "radial_ion_momentum_diffusion_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "poloidal_angle_of_gyrokinetic_eigenmode",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_total_thermal_ion_energy_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "first_local_tangential_width_of_aperture",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_average_temperature_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_coordinate_of_neutron_detector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_helium_4_velocity_at_magnetic_axis",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "polarization_angle_at_constraint_position",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_co_passing_fast_particle_pressure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutron_maximum_energy_of_neutron_detector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "voltage_of_toroidal_magnetic_field_probe",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "inner_radius_of_plasma_filament",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_ion_charge_state_torque_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "diamagnetic_current_density_due_to_ion_neutral_friction",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_ion_charge_state_diffusivity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_electron_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_momentum_flux_limiter_coefficient",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_fast_particle_pressure",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "lithium_density_at_limiter",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "volume_averaged_oxygen_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_coordinate_of_reflectometer_antenna",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_vorticity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_ion_state_momentum_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "radius_of_coil_conductor_element",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_current_density_due_to_parallel_viscosity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_density_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "z_direction_unit_vector_of_pellet_injector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_current_density_due_to_heat_viscosity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_current_density",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "ion_average_temperature_at_post_sawtooth_crash",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_iron_velocity_at_magnetic_axis",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_plasma_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_electron_energy_flux",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ammonia_deuterated_prefill_count",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_current_due_to_wave_driven_current_drive",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_plasma_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_internal_state_particle_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "beryllium_source_rate_due_to_gas_injection",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_perturbed_plasma_magnetic_vector_potential_imaginary_part",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "resistance_of_correction_coil",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_current_density_due_to_ion_inertia",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_outline_of_iron_core_segment",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "deuterium_deuterium_emissivity_due_to_fusion",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "net_efficiency_of_plant_system",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_helium_3_velocity_at_plasma_boundary",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_neutral_internal_state_energy_diffusivity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_wave_electric_field",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_coordinate_of_soft_xray_detector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_coordinate_of_pellet",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "perpendicular_wave_vector_of_ion_cyclotron_heating_antenna",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radius_of_aperture",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "accumulated_silane_count_due_to_gas_injection",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "accumulated_ethane_count",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_coordinate_of_optical_element",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "oxygen_density_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "momentum_source_due_to_diamagnetic_drift",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "wave_curvature_of_electron_cyclotron_beam",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "perpendicular_counter_passing_fast_particle_pressure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ethane_prefill_count",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_bulk_neutral_internal_state_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_rotation_frequency",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_nitrogen_velocity_at_pedestal_top",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "lower_outer_squareness_of_plasma_boundary",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_ion_momentum_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_ion_charge_state_power_due_to_collisions",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_carbon_velocity_at_plasma_boundary",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "fast_ion_power_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_pfirsch_schlueter_current_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_deuterium_velocity_at_internal_transport_barrier",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "extent_of_soft_xray_detector",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "argon_density_at_internal_transport_barrier",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_fast_torque_due_to_collisions",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neon_density_at_limiter",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "runaway_electron_critical_momentum_due_to_hot_tail",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_fast_particle_count",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "coulomb_logarithm",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "force_of_poloidal_field_coil",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "line_averaged_beryllium_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_current_density_due_to_heat_viscosity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_ion_density_at_limiter",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_momentum_flux_limiter_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_ion_charge_state_diffusivity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_coordinate_of_active_wall_point",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "helium_confinement_time",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_charge_state_particle_flux",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "x_coordinate_of_divertor_target",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_coordinate_of_detector",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_absorbed_wave_power",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "second_local_tangential_coordinate_of_reflectometer_antenna",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "height_of_iron_core_segment",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ratio_of_parallel_plasma_velocity_to_magnetic_field_magnitude",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_particle_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "thermal_electron_energy",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_neutral_state_momentum_flux_limiter_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_current_density_due_to_ion_inertia",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "normal_coordinate_of_toroidal_field_coil",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_perturbed_vacuum_magnetic_field_imaginary_part",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_neutral_internal_state_momentum_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "width_of_passive_structure",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_energy_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "neutral_power_density",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "magnetic_field_magnitude_at_pedestal_top_high_field_side",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_temperature_at_pellet_path",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "volume_averaged_total_ion_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_current_density_due_to_diamagnetic_drift",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "diamagnetic_momentum_diffusivity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "z_major_axis_unit_vector_of_shatter_cone",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "calibration_factor_of_visible_camera",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_coordinate_of_aperture",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_outline_of_poloidal_field_coil",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "field_line_length",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_current_density_due_to_perpendicular_viscosity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_outline_of_plasma_filament",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "carbon_density_at_internal_transport_barrier",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_electron_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "total_implicit_ion_particle_source_rate",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "runaway_electron_kinetic_energy_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_charge_state_temperature",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "neutral_state_convection_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_current_density_due_to_anomalous_transport",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "electron_source_rate_due_to_surface_emission",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "volume_averaged_helium_4_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_ion_particle_convection_velocity",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_conductivity",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "argon_density_at_pedestal_top",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "major_length_of_poloidal_field_coil",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "incident_radiated_power_of_breeder_blanket_module",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_ion_charge_state_momentum_diffusion_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "thickness_of_vacuum_vessel",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "inner_radius_of_passive_loop",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "thermal_radiative_power_of_divertor",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_ion_state_momentum_convection_velocity",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "minor_length_of_antenna_strap",
+    "axis": "name",
+    "name_stage_at_draw": "reviewed",
+    "docs_stage_at_draw": "pending"
+   },
+   {
+    "id": "toroidal_ion_charge_state_rotation_frequency",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "fast_ion_power_at_inside_flux_surface",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "radial_ion_momentum_flux_limiter_coefficient",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "poloidal_perturbed_plasma_magnetic_field_real_part",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "vertical_pfirsch_schlueter_current_density",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "sawtooth_period",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_total_momentum_flux",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "toroidal_lithium_velocity_at_pedestal_top",
+    "axis": "name",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "parallel_electron_energy_flux",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "binormal_coordinate_of_toroidal_field_coil",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   },
+   {
+    "id": "ion_momentum_flux_due_to_diamagnetic_drift",
+    "axis": "docs",
+    "name_stage_at_draw": "accepted",
+    "docs_stage_at_draw": "accepted"
+   }
+  ]
+ },
+ "precision": {
+  "target_half_width": 0.05,
+  "confidence": 0.95,
+  "expected_share": 0.1846,
+  "n_required_at_expected_share": 232,
+  "n_required_worst_case": 385,
+  "per_axis_n": 232,
+  "per_axis_half_width": 0.04992444904743221,
+  "pooled_n": 464,
+  "pooled_half_width": 0.03530191646844159,
+  "pooled_half_width_worst_case": 0.0454953578533777
+ },
+ "receipts": {
+  "incumbent_seats": {
+   "name": {
+    "cycle0": {
+     "seat": "openrouter/x-ai/grok-4.5",
+     "cycle": 0,
+     "n": 3194,
+     "mean_usd": 0.04326880056355669,
+     "phase": "review_name",
+     "window": "2026-07-21..2026-10-16"
+    },
+    "cycle1": {
+     "seat": "openrouter/openai/gpt-5.6-luna",
+     "cycle": 1,
+     "n": 2925,
+     "mean_usd": 0.004914156581196569,
+     "phase": "review_name",
+     "window": "2026-07-22..2026-10-16"
+    },
+    "cycle2": {
+     "seat": "openrouter/anthropic/claude-sonnet-5",
+     "cycle": 2,
+     "n": 1268,
+     "mean_usd": 0.07466746529968442,
+     "phase": "review_name",
+     "window": "2026-07-21..2026-10-16"
+    }
+   },
+   "docs": {
+    "cycle0": {
+     "seat": "openrouter/anthropic/claude-sonnet-5",
+     "cycle": 0,
+     "n": 6511,
+     "mean_usd": 0.06537800998310529,
+     "phase": "review_docs",
+     "window": "2026-07-20..2026-10-17"
+    },
+    "cycle1": {
+     "seat": "openrouter/x-ai/grok-4.5",
+     "cycle": 1,
+     "n": 5981,
+     "mean_usd": 0.034869080922922624,
+     "phase": "review_docs",
+     "window": "2026-07-20..2026-10-17"
+    },
+    "cycle2": {
+     "seat": "openrouter/openai/gpt-5.5",
+     "cycle": 2,
+     "n": 1264,
+     "mean_usd": 0.16296273180379764,
+     "phase": "review_docs",
+     "window": "2026-07-04..2026-10-17"
+    }
+   }
+  },
+  "escalation": {
+   "name": {
+    "items": 2796,
+    "cycle2_items": 835,
+    "calls_per_item": 2.291,
+    "window": "2026-07-21..2026-10-17",
+    "cycle2_share": 0.2986409155937053
+   },
+   "docs": {
+    "items": 1689,
+    "cycle2_items": 431,
+    "calls_per_item": 2.245,
+    "window": "2026-07-21..2026-10-17",
+    "cycle2_share": 0.2551805802249852
+   }
+  },
+  "jev": {
+   "name": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl",
+    "n": 706,
+    "mean_usd": 0.000234,
+    "sd_usd": 5.3e-05,
+    "mean_latency_s": 3.76
+   },
+   "docs": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/docs-decisions.jsonl",
+    "n": 540,
+    "mean_usd": 0.000127,
+    "sd_usd": 3.3e-05,
+    "mean_latency_s": 0.87
+   }
+  },
+  "route_shares": {
+   "name": {
+    "n": 363,
+    "accept": 0.0606,
+    "refine": 0.7548,
+    "chat_review": 0.1846,
+    "chat_below_reject": 0.0,
+    "unjudged": 0.0
+   },
+   "docs": {
+    "n": 216,
+    "accept": 0.1157,
+    "refine": 0.6991,
+    "chat_review": 0.1852,
+    "chat_below_reject": 0.0,
+    "unjudged": 0.0
+   }
+  },
+  "chat_seat": {
+   "name": {
+    "seat": "openrouter/x-ai/grok-4.5",
+    "mean_usd": 0.04326880056355669,
+    "n": 3194
+   },
+   "docs": {
+    "seat": "openrouter/anthropic/claude-sonnet-5",
+    "mean_usd": 0.06537800998310529,
+    "n": 6511
+   }
+  },
+  "call_wall_s": {
+   "name": 11.02,
+   "docs": 10.89
+  },
+  "seat_substitutions": [
+   {
+    "configured": "openrouter/openai/gpt-6-luna",
+    "role": "names cycle 1",
+    "priced_as": "openrouter/openai/gpt-5.6-luna",
+    "n": 2925,
+    "mean_usd": 0.004914156581196569,
+    "bias": "gpt-6-luna completes at 0.50 USD/Mtok against gpt-5.6-luna's 0.60 at the same prompt rate, so the substitute over-states this seat and the incumbent arm reads high by whatever the recorded token mix spends on output tokens."
+   },
+   {
+    "configured": "openrouter/openai/gpt-6.1-sol",
+    "role": "docs cycle 2",
+    "priced_as": "openrouter/openai/gpt-6.1-sol",
+    "n": 0,
+    "mean_usd": null,
+    "bias": "No gpt-6.1-sol review_receipt exists. The arm carries no cycle-2 cost for the docs axis and therefore under-states it; the substitute used for the headline figure is the gpt-5.5 escalator receipt, whose recorded mean is 2.8 times the cycle-1 seat. The headline therefore brackets rather than pins the docs escalator."
+   }
+  ]
+ },
+ "incumbent": {
+  "name": {
+   "axis": "name",
+   "cycle0_seat": {
+    "seat": "openrouter/x-ai/grok-4.5",
+    "cycle": 0,
+    "n": 3194,
+    "mean_usd": 0.04326880056355669,
+    "phase": "review_name",
+    "window": "2026-07-21..2026-10-16"
+   },
+   "cycle1_seat": {
+    "seat": "openrouter/openai/gpt-5.6-luna",
+    "cycle": 1,
+    "n": 2925,
+    "mean_usd": 0.004914156581196569,
+    "phase": "review_name",
+    "window": "2026-07-22..2026-10-16"
+   },
+   "cycle2_seat": {
+    "seat": "openrouter/anthropic/claude-sonnet-5",
+    "cycle": 2,
+    "n": 1268,
+    "mean_usd": 0.07466746529968442,
+    "phase": "review_name",
+    "window": "2026-07-21..2026-10-16"
+   },
+   "escalation": {
+    "items": 2796,
+    "cycle2_items": 835,
+    "calls_per_item": 2.291,
+    "window": "2026-07-21..2026-10-17",
+    "cycle2_share": 0.2986409155937053
+   },
+   "per_item_usd": 0.07048171734691223,
+   "per_item_interval_usd": [
+    0.04818295714475326,
+    0.12285042244443768
+   ],
+   "calls_per_item": 2.291
+  },
+  "docs": {
+   "axis": "docs",
+   "cycle0_seat": {
+    "seat": "openrouter/anthropic/claude-sonnet-5",
+    "cycle": 0,
+    "n": 6511,
+    "mean_usd": 0.06537800998310529,
+    "phase": "review_docs",
+    "window": "2026-07-20..2026-10-17"
+   },
+   "cycle1_seat": {
+    "seat": "openrouter/x-ai/grok-4.5",
+    "cycle": 1,
+    "n": 5981,
+    "mean_usd": 0.034869080922922624,
+    "phase": "review_docs",
+    "window": "2026-07-20..2026-10-17"
+   },
+   "cycle2_seat": {
+    "seat": "openrouter/openai/gpt-5.5",
+    "cycle": 2,
+    "n": 1264,
+    "mean_usd": 0.16296273180379764,
+    "phase": "review_docs",
+    "window": "2026-07-04..2026-10-17"
+   },
+   "escalation": {
+    "items": 1689,
+    "cycle2_items": 431,
+    "calls_per_item": 2.245,
+    "window": "2026-07-21..2026-10-17",
+    "cycle2_share": 0.2551805802249852
+   },
+   "per_item_usd": 0.14183201536276965,
+   "per_item_interval_usd": [
+    0.10024709090602792,
+    0.26320982270982557
+   ],
+   "calls_per_item": 2.245
+  }
+ },
+ "cascade": {
+  "name": {
+   "axis": "name",
+   "jev_call_usd": 0.000234,
+   "jev_receipt_n": 706,
+   "jev_receipt_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl",
+   "chat_share": 0.1846,
+   "chat_share_interval": [
+    0.14468795682404445,
+    0.22451204317595552
+   ],
+   "chat_seat": {
+    "seat": "openrouter/x-ai/grok-4.5",
+    "mean_usd": 0.04326880056355669,
+    "n": 3194
+   },
+   "per_item_usd": 0.008221420584032564,
+   "per_item_interval_usd": [
+    0.00649447434776808,
+    0.009948366820297047
+   ]
+  },
+  "docs": {
+   "axis": "docs",
+   "jev_call_usd": 0.000127,
+   "jev_receipt_n": 540,
+   "jev_receipt_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/docs-decisions.jsonl",
+   "chat_share": 0.1852,
+   "chat_share_interval": [
+    0.13339458022347256,
+    0.23700541977652745
+   ],
+   "chat_seat": {
+    "seat": "openrouter/anthropic/claude-sonnet-5",
+    "mean_usd": 0.06537800998310529,
+    "n": 6511
+   },
+   "per_item_usd": 0.012235007448871101,
+   "per_item_interval_usd": [
+    0.00884807219754233,
+    0.015621942700199872
+   ]
+  }
+ },
+ "totals": {
+  "incumbent": {
+   "total_usd": 49.2567859886462,
+   "total_interval_usd": [
+    34.43577114778124,
+    89.56597687578908
+   ],
+   "per_axis_usd": {
+    "name": 16.351758424483638,
+    "docs": 32.90502756416256
+   }
+  },
+  "cascade": {
+   "total_usd": 4.74589130363365,
+   "total_interval_usd": [
+    3.559470798512015,
+    5.932311808755285
+   ],
+   "per_axis_usd": {
+    "name": 1.9073695754955549,
+    "docs": 2.8385217281380952
+   }
+  }
+ },
+ "per_accepted_name": {
+  "incumbent": {
+   "name": {
+    "accept_share": 0.0606,
+    "per_accepted_name_usd": 1.1630646426883207
+   },
+   "docs": {
+    "accept_share": 0.1157,
+    "per_accepted_name_usd": 1.225860115494984
+   }
+  },
+  "cascade": {
+   "name": {
+    "accept_share": 0.0606,
+    "per_accepted_name_usd": 0.13566700633717102
+   },
+   "docs": {
+    "accept_share": 0.1157,
+    "per_accepted_name_usd": 0.10574768754426189
+   }
+  }
+ },
+ "wall_plan": {
+  "call_wall_s": {
+   "name": 11.02,
+   "docs": 10.89
+  },
+  "per_item_seconds": {
+   "name": {
+    "incumbent": 25.24682,
+    "cascade": 5.7942919999999996
+   },
+   "docs": {
+    "incumbent": 24.448050000000002,
+    "cascade": 2.8868280000000004
+   }
+  },
+  "totals_seconds": {
+   "incumbent": 11529.20984,
+   "cascade": 2014.01984
+  },
+  "totals_minutes": {
+   "incumbent": 192.15349733333332,
+   "cascade": 33.56699733333333
+  },
+  "fits_one_worker_hour": {
+   "incumbent": false,
+   "cascade": true
+  },
+  "split": "Serial, one worker: the incumbent arm is the long pole because its escalator adds a third call on roughly a quarter of items. Run the two axes as separate work items, and where the incumbent arm exceeds one hour, split it by axis and run the docs half as its own item -- the two axes share no seat and no cohort item."
+ },
+ "figure_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-estimate/docs/figures/sn-review-through-jev/srtj-cohort-estimate/srtj-cohort-estimate.svg"
+}
