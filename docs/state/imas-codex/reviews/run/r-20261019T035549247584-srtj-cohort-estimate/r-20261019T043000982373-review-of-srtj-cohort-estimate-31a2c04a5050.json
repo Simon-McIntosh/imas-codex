@@ -37,6 +37,11 @@
       "kind": "exempted",
       "reason": "Default palette and a missing PNG render check; the figure has no clipped or overlapping labels, and it is superseded by the cohort run's figures, which carry the style rule in their brief.",
       "recorded_at": "2026-10-19T04:49:52.845223+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "The out-of-grant path was created and moved within the run; the net diff is inside the grant and the manifest discloses it.",
+      "recorded_at": "2026-10-19T04:49:58.388977+00:00"
     }
   },
   "findings": [
