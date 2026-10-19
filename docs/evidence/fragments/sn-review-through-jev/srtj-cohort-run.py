@@ -54,18 +54,33 @@ def save(path: Path, record: dict) -> None:
 
 
 def verify_containment(record: dict) -> None:
-    evidence = record["containment"]
-    if not (
-        evidence["scratch_run_rows"] == 1
-        and evidence["live_run_rows"] == 0
-        and evidence["scratch_cost_rows"] == record["receipt_count"]
-        and evidence["live_cost_rows"] == 0
-    ):
-        raise RuntimeError(f"run receipt escaped scratch graph: {evidence}")
+    checks = [(record["containment"], record["receipt_count"])]
+    if recovery := record.get("recovery"):
+        checks = [
+            (
+                record["containment"],
+                record["receipt_count"] - recovery["receipt_count"],
+            ),
+            (recovery["containment"], recovery["receipt_count"]),
+        ]
+    for evidence, count in checks:
+        if not (
+            evidence["scratch_run_rows"] == 1
+            and evidence["live_run_rows"] == 0
+            and evidence["scratch_cost_rows"] == count
+            and evidence["live_cost_rows"] == 0
+        ):
+            raise RuntimeError(f"run receipt escaped scratch graph: {evidence}")
 
 
 def verify_completion(record: dict) -> None:
     """Refuse a paid piece that stopped with selected identities still pending."""
+    if record.get("recovery") and (
+        len(record["items"]) != 231
+        or {item["id"] for item in record["items"]}
+        != {item["id"] for item in selected_items("name", None)}
+    ):
+        raise RuntimeError("combined review differs from the selected cohort")
     pending = [
         item["id"]
         for item in record["items"]
@@ -421,6 +436,17 @@ def combine_recovery(base: dict, recovery: dict) -> dict:
     if len(base["items"]) != len(selected_items("name", None)):
         raise RuntimeError("saved piece differs from the selected cohort")
     combined = dict(base)
+    combined["initial_attempt"] = {
+        key: combined.pop(key)
+        for key in (
+            "attempt_log",
+            "failure",
+            "receipt_accounting_note",
+            "run_status_at_stop",
+            "unfunded_items",
+        )
+        if key in combined
+    }
     combined["items"] = [recovered.get(item["id"], item) for item in base["items"]]
     combined["recovery"] = {
         "run_id": recovery["run_id"],
@@ -448,8 +474,11 @@ def combine_recovery(base: dict, recovery: dict) -> dict:
         route: sum(item["route"] == route for item in combined["items"])
         for route in ("accept", "refine", "band", "chat_below_reject", "unjudged")
     }
+    combined["band_share"] = round(
+        combined["route_counts"]["band"] / len(combined["items"]), 6
+    )
     combined["stage_counts"] = {
-        stage: sum(item["decision"] == stage for item in combined["items"])
+        str(stage): sum(item["decision"] == stage for item in combined["items"])
         for stage in {item["decision"] for item in combined["items"]}
     }
     combined["incomplete_ids"] = [
@@ -699,7 +728,7 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
             raise RuntimeError("piece cardinality or spend ceiling failed")
         record["selected_count"] = len(ids)
         record["measurement_complete"] = True
-        record["comparison_eligible"] = True
+        record["comparison_eligible"] = not args.retry_pending
     finally:
         if prior_uri is None:
             os.environ.pop("NEO4J_URI", None)
