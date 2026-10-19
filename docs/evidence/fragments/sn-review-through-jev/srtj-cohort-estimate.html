@@ -1,0 +1,533 @@
+<section id="srtj-cohort-estimate">
+<h2 id="srtj-cohort-estimate-heading">Fixed-cohort cost estimate: incumbent quorum against deciding cascade</h2>
+<p>Spend for this node: <strong>USD 0</strong>. No model was called and no graph write was made.
+Every figure below is an aggregate over rows the review pipeline recorded in the live graph or in a
+prior crew's own decision receipts.</p>
+
+<h3 id="srtj-cohort-estimate-cohort">The cohort</h3>
+<p id="srtj-cohort-estimate-rule">Eligible pool: 2220 identities with a bound
+<code>StandardNameSource</code>, <code>validation_status = 'valid'</code>, a non-derived origin,
+a non-terminal name stage, and a description. Removing the 369 identities that
+appear in the 476-name WEST review roster union leaves
+1851. Seeded draw (<code>seed=20261019</code>, Python
+<code>random.Random.sample</code> over ids in ascending order) of 464 items,
+232 per axis.</p>
+<p id="srtj-cohort-estimate-stage-note">The pool carries almost no item in a live drafted stage —
+the graph holds one name-drafted and four docs-drafted identities — so the run reaches the drafted
+pool through the review worker's restage path, and the cohort is drawn from identities that already
+satisfy both axes' structural requirements.</p>
+
+<h3 id="srtj-cohort-estimate-precision">Size and precision</h3>
+<p id="srtj-cohort-estimate-precision-text">At the calibration route share of
+0.1846 the Wald half-width needs 232 items for
+±0.05 at 95%; the worst case at p=0.5 needs
+385. The drawn 232 per axis gives a per-axis half-width of
+0.0499 and the pooled 464 gives
+0.0353, with pooled worst case 0.0455.
+The cohort is therefore sized to the ±5 pt bar on each axis separately as well as pooled.</p>
+
+<h3 id="srtj-cohort-estimate-receipts">Receipts</h3>
+<p id="srtj-cohort-estimate-receipts-text">Incumbent seats from <code>LLMCost</code> over
+2026-07-20..2026-10-17. Jev calls from the two crews' decision receipts
+(<code>n=706</code> on names,
+<code>n=540</code> on docs). Escalation from
+<code>StandardNameReview</code> cycle coverage over 2026-07-21..2026-10-17.</p>
+<ul id="srtj-cohort-estimate-substitutions"><li><strong>srtj-cohort-estimate-sub-0</strong>: configured <code>openrouter/openai/gpt-6-luna</code> (names cycle 1) priced as <code>openrouter/openai/gpt-5.6-luna</code> on n=2925. gpt-6-luna completes at 0.50 USD/Mtok against gpt-5.6-luna's 0.60 at the same prompt rate, so the substitute over-states this seat and the incumbent arm reads high by whatever the recorded token mix spends on output tokens.</li><li><strong>srtj-cohort-estimate-sub-1</strong>: configured <code>openrouter/openai/gpt-6.1-sol</code> (docs cycle 2) priced as <code>openrouter/openai/gpt-6.1-sol</code> on n=0. No gpt-6.1-sol review_receipt exists. The arm carries no cycle-2 cost for the docs axis and therefore under-states it; the substitute used for the headline figure is the gpt-5.5 escalator receipt, whose recorded mean is 2.8 times the cycle-1 seat. The headline therefore brackets rather than pins the docs escalator.</li></ul>
+
+<h3 id="srtj-cohort-estimate-totals">Both arms</h3>
+<p id="srtj-cohort-estimate-incumbent">Incumbent quorum:
+<strong>$49.26</strong> over 464 items, interval
+[$34.44,
+$89.57]; per item
+$0.0705 on names and
+$0.1418 on docs.</p>
+<p id="srtj-cohort-estimate-cascade">Deciding cascade:
+<strong>$4.75</strong>, interval
+[$3.56,
+$5.93]; per item
+$0.0082 on names and
+$0.0122 on docs.</p>
+<p id="srtj-cohort-estimate-ratio">Ratio of incumbent to cascade:
+10.38x.</p>
+<p id="srtj-cohort-estimate-accepted">Per accepted name, conditional on the recorded calibration
+accept share: incumbent $1.16
+on names and $1.23 on docs;
+cascade $0.14 and
+$0.11.</p>
+
+<h3 id="srtj-cohort-estimate-wall">Wall time</h3>
+<p id="srtj-cohort-estimate-wall-text">Amortised seat call 11.02 s (names) and
+10.89 s (docs). Incumbent
+192.2 min; cascade 33.6 min.
+Fits one worker hour: {'incumbent': False, 'cascade': True}. Serial, one worker: the incumbent arm is the long pole because its escalator adds a third call on roughly a quarter of items. Run the two axes as separate work items, and where the incumbent arm exceeds one hour, split it by axis and run the docs half as its own item -- the two axes share no seat and no cohort item.</p>
+
+<h3 id="srtj-cohort-estimate-items">Cohort items</h3>
+<table id="srtj-cohort-estimate-table">
+<thead><tr><th>slot</th><th>identity</th><th>axis</th></tr></thead>
+<tbody>
+<tr><td>srtj-cohort-estimate-item-1</td><td>resistivity_of_plasma_facing_component</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-2</td><td>normalized_particle_mass</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-3</td><td>toroidal_neutral_internal_state_momentum_diffusion_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-4</td><td>etendue_of_spectrometer</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-5</td><td>ion_charge_state_momentum_flux_due_to_diamagnetic_drift</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-6</td><td>poloidal_neutral_internal_state_convection_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-7</td><td>radial_neutral_particle_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-8</td><td>neutral_internal_state_particle_flux_at_wall</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-9</td><td>major_length_of_antenna_strap</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-10</td><td>toroidal_magnetic_field_at_flux_surface</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-11</td><td>argon_density_at_limiter</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-12</td><td>parallel_electron_diffusivity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-13</td><td>fast_particle_pressure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-14</td><td>accumulated_deuterium_count_due_to_gas_injection</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-15</td><td>toroidal_neutral_internal_state_velocity_due_to_e_cross_b_drift</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-16</td><td>radial_outline_of_divertor_tile</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-17</td><td>neutral_internal_state_pressure</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-18</td><td>poloidal_electron_convection_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-19</td><td>thickness_of_plasma_facing_component</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-20</td><td>methane_carbon_13_prefill_count</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-21</td><td>radial_total_current_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-22</td><td>normal_coordinate_of_correction_coil</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-23</td><td>deuterium_tritium_density_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-24</td><td>deuterium_tritium_emissivity_due_to_fusion</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-25</td><td>parallel_neutral_particle_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-26</td><td>y_direction_unit_vector_of_neutron_detector</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-27</td><td>line_averaged_toroidal_plasma_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-28</td><td>ion_particle_flux_limiter_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-29</td><td>poloidal_ion_charge_state_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-30</td><td>diamagnetic_current_density_due_to_heat_viscosity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-31</td><td>hydrogen_density_at_pedestal_top</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-32</td><td>pedestal_thermal_ion_energy</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-33</td><td>vertical_neutral_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-34</td><td>parallel_center_of_mass_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-35</td><td>alpha_angle_of_passive_loop_element</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-36</td><td>vertical_total_current_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-37</td><td>radial_perturbed_vacuum_magnetic_vector_potential_real_part</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-38</td><td>volume_averaged_ion_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-39</td><td>toroidal_coordinate_of_active_spatial_resolution_zone</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-40</td><td>outer_radius_of_plasma_filament</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-41</td><td>major_length_of_plasma_filament</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-42</td><td>vertical_coordinate_of_electron_cyclotron_launcher_mirror</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-43</td><td>hot_neutral_temperature_at_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-44</td><td>rate_due_to_pumping</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-45</td><td>electron_decay_time_at_magnetic_axis_due_to_disruption</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-46</td><td>total_heating_power_due_to_fusion_reactions</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-47</td><td>parallel_ion_energy_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-48</td><td>surface_current_per_toroidal_and_poloidal_mode_number_of_ion_cyclotron_heating_antenna</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-49</td><td>brightness_of_visible_camera</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-50</td><td>requested_voltage_of_spectrometer_channel</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-51</td><td>parallel_peak_launched_refractive_index_of_lower_hybrid_antenna</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-52</td><td>absorbed_power_due_to_neutral_beam_injection</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-53</td><td>total_counter_passing_particle_pressure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-54</td><td>toroidal_magnetic_flux_at_halo_boundary_due_to_poloidal_current</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-55</td><td>parallel_fast_neutral_internal_state_pressure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-56</td><td>volume_averaged_lithium_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-57</td><td>normalized_toroidal_flux_coordinate_of_reflectometer_cutoff_position</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-58</td><td>poloidal_total_momentum_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-59</td><td>ratio_of_vertical_vorticity_to_major_radius</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-60</td><td>toroidal_impurity_ion_velocity_at_measurement_position</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-61</td><td>major_angle_of_shatter_cone</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-62</td><td>radial_outline_of_coil_conductor_element</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-63</td><td>neutral_source_rate</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-64</td><td>normalized_poloidal_flux_coordinate_at_reflectometer_cutoff_position</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-65</td><td>line_averaged_helium_4_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-66</td><td>second_local_tangential_width_of_aperture</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-67</td><td>electron_particle_flux_at_wall_due_to_pumping</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-68</td><td>toroidal_carbon_velocity_at_magnetic_axis</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-69</td><td>toroidal_ion_charge_state_momentum_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-70</td><td>fast_particle_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-71</td><td>power_due_to_first_orbit_loss</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-72</td><td>poloidal_neutral_energy_diffusivity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-73</td><td>deposited_power_at_divertor_target_due_to_halo_current</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-74</td><td>iron_density_at_pedestal_top</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-75</td><td>toroidal_thermal_ion_torque_density_due_to_collisions</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-76</td><td>ion_charge_state_particle_flux_limiter_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-77</td><td>parallel_net_ion_momentum_source</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-78</td><td>co_passing_thermal_ion_power_density_due_to_collisions</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-79</td><td>volume_averaged_ion_charge_state_average_charge_number</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-80</td><td>y_unit_vector_of_pellet_injector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-81</td><td>neutron_emissivity_due_to_fusion</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-82</td><td>right_hand_circularly_polarized_wave_electric_field_imaginary_part</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-83</td><td>left_hand_circularly_polarized_wave_electric_field_real_part</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-84</td><td>carbon_prefill_count_due_to_gas_injection</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-85</td><td>right_hand_circularly_polarized_wave_electric_field</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-86</td><td>total_incident_neutral_energy_flux_at_wall</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-87</td><td>toroidal_krypton_velocity_at_pedestal_top</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-88</td><td>krypton_source_rate_due_to_gas_injection</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-89</td><td>parallel_neutral_state_momentum_flux_limiter_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-90</td><td>voltage_of_wall</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-91</td><td>toroidal_neutral_state_velocity_due_to_diamagnetic_drift</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-92</td><td>toroidal_hydrogen_velocity_at_magnetic_axis</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-93</td><td>line_averaged_tungsten_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-94</td><td>electron_larmor_radius_normalized_at_pedestal_top_low_field_side</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-95</td><td>normal_wave_electric_field</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-96</td><td>x_direction_unit_vector_of_neutron_detector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-97</td><td>radial_magnetic_field_at_ferritic_element_centroid</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-98</td><td>per_toroidal_mode_fast_ion_charge_state_power</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-99</td><td>toroidal_co_passing_torque_density_due_to_j_cross_b_force</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-100</td><td>flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-101</td><td>vertical_angular_width_of_camera</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-102</td><td>vertical_coordinate_of_current_center</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-103</td><td>rotation_frequency_time_derivative_of_neoclassical_tearing_mode</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-104</td><td>rate_due_to_beam_thermal_fusion</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-105</td><td>maximum_angle_of_electron_cyclotron_launcher_mirror</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-106</td><td>radial_ion_momentum_diffusivity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-107</td><td>current_due_to_non_inductive_current_drive</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-108</td><td>radial_center_of_mass_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-109</td><td>neutral_particle_flux_limiter_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-110</td><td>incident_ion_energy_flux_at_wall_due_to_recombination</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-111</td><td>oxygen_count_accumulated_due_to_gas_injection</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-112</td><td>power_at_divertor_target_due_to_conduction</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-113</td><td>width_of_iron_core_segment</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-114</td><td>normalized_fluctuating_electron_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-115</td><td>thermal_ion_charge_state_power_at_inside_flux_surface</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-116</td><td>flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-117</td><td>neutral_power_of_divertor_due_to_recombination</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-118</td><td>toroidal_ion_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-119</td><td>vertical_neutral_species_center_of_mass_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-120</td><td>vertical_coordinate_of_filter_window</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-121</td><td>ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-122</td><td>nuclear_heating_power_of_breeder_blanket_layer</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-123</td><td>inner_radius_of_ferritic_element</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-124</td><td>lower_outer_squareness_of_flux_surface</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-125</td><td>toroidal_perturbed_plasma_velocity_real_part</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-126</td><td>second_local_tangential_width_of_neutral_beam_injector</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-127</td><td>parallel_neutral_internal_state_momentum_convection_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-128</td><td>line_averaged_nitrogen_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-129</td><td>toroidal_torque_density_due_to_j_cross_b_force</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-130</td><td>co_passing_thermal_ion_charge_state_torque_density_due_to_collisions</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-131</td><td>normalized_perturbed_parallel_gyrocenter_current_density_bessel_1</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-132</td><td>center_of_mass_velocity_due_to_diamagnetic_drift</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-133</td><td>radial_volumetric_force</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-134</td><td>thermal_ion_charge_state_power_density_due_to_collisions</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-135</td><td>normalized_beam_power</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-136</td><td>radial_velocity_of_pellet</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-137</td><td>toroidal_ion_charge_state_momentum_flux_limiter_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-138</td><td>poloidal_ion_charge_state_energy_diffusion_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-139</td><td>first_local_tangential_width_of_filter_window</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-140</td><td>toroidal_ion_momentum_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-141</td><td>toroidal_nitrogen_velocity_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-142</td><td>radial_ion_momentum_flux_over_edge_region</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-143</td><td>effective_ion_diffusivity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-144</td><td>plasma_energy</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-145</td><td>power_due_to_neutral_beam_shinethrough</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-146</td><td>neutral_pressure_over_scrape_off_layer</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-147</td><td>poloidal_ion_energy_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-148</td><td>ion_charge_state_diamagnetic_momentum_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-149</td><td>ratio_of_poloidal_magnetic_field_at_outboard_midplane_separatrix_to_poloidal_magnetic_field_at_strike_point</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-150</td><td>magnetic_shear_at_internal_transport_barrier</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-151</td><td>line_averaged_carbon_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-152</td><td>parallel_fast_neutral_pressure</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-153</td><td>ion_charge_state_momentum_source</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-154</td><td>current_of_rogowski_coil</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-155</td><td>angular_width_of_camera</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-156</td><td>parallel_fluctuating_ion_current_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-157</td><td>first_local_tangential_width_of_soft_xray_detector</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-158</td><td>etendue_of_bolometer</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-159</td><td>major_length_of_iron_core_segment</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-160</td><td>voltage_of_flux_loop</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-161</td><td>neutral_state_diamagnetic_momentum_source</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-162</td><td>trapped_fast_ion_power_density_due_to_collisions</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-163</td><td>line_averaged_krypton_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-164</td><td>ion_energy_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-165</td><td>flux_surface_averaged_helium_3_density_at_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-166</td><td>ion_charge_state_kinetic_energy_flux_at_wall_due_to_surface_emission</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-167</td><td>surface_emissivity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-168</td><td>parallel_current_density_due_to_heat_viscosity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-169</td><td>toroidal_magnetic_field_at_ferritic_element_centroid</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-170</td><td>radial_perturbed_plasma_magnetic_field_imaginary_part</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-171</td><td>height_of_passive_structure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-172</td><td>implicit_ion_energy_source_rate</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-173</td><td>flux_surface_averaged_total_ion_density_at_plasma_boundary</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-174</td><td>poloidal_ion_velocity_at_charge_exchange_channel</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-175</td><td>upper_inner_squareness_of_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-176</td><td>radial_electric_field</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-177</td><td>alfven_frequency_real_part</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-178</td><td>vertical_coordinate_of_iron_core_segment</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-179</td><td>poloidal_neutral_internal_state_velocity_due_to_e_cross_b_drift</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-180</td><td>electron_density_at_pellet_path</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-181</td><td>thermal_ion_pressure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-182</td><td>vertical_back_surface_curvature_of_optical_element</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-183</td><td>height_of_neutron_detector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-184</td><td>spectral_refractive_index_of_optical_element</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-185</td><td>tilt_angle_of_passive_loop</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-186</td><td>vertical_non_axisymmetric_magnetic_field</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-187</td><td>parallel_ion_charge_state_momentum_flux</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-188</td><td>neutral_diffusion_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-189</td><td>toroidal_trapped_current_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-190</td><td>core_atomic_count_of_pellet</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-191</td><td>alpha_angle_of_plasma_filament</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-192</td><td>parallel_electric_field_at_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-193</td><td>deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-194</td><td>silane_source_rate</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-195</td><td>ethylene_prefill_count</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-196</td><td>current_of_plasma_filament</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-197</td><td>toroidal_carbon_velocity_at_pedestal_top</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-198</td><td>bandwidth_of_ece_channel</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-199</td><td>electron_source_rate_at_pellet_path_due_to_pellet_injection</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-200</td><td>poloidal_bulk_center_of_mass_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-201</td><td>poloidal_neutral_state_momentum_source</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-202</td><td>toroidal_coordinate_of_lower_hybrid_antenna_row</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-203</td><td>toroidal_lithium_velocity_at_internal_transport_barrier</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-204</td><td>total_ion_density_at_divertor_target</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-205</td><td>toroidal_co_passing_fast_ion_torque_density_due_to_collisions</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-206</td><td>vertical_displacement_of_beamlet_group</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-207</td><td>current_at_divertor_target</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-208</td><td>radial_total_momentum_source</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-209</td><td>poloidal_neutral_state_velocity_due_to_diamagnetic_drift</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-210</td><td>volume_integrated_particle_source_rate</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-211</td><td>perpendicular_power_normalized_of_beam_tracing_beam</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-212</td><td>second_local_tangential_coordinate_of_neutral_beam_injector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-213</td><td>total_absorbed_wave_power_at_inside_flux_surface</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-214</td><td>nuclear_power_density_of_limiter_tile</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-215</td><td>radial_momentum_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-216</td><td>x_direction_unit_vector_of_camera</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-217</td><td>poloidal_ion_charge_state_energy_velocity_due_to_convection</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-218</td><td>maximum_of_back_surface_neutron_flux</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-219</td><td>flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-220</td><td>poloidal_electron_beta_flux_surface_averaged_at_pedestal_top</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-221</td><td>ion_charge_state_energy_flux_at_wall_due_to_recombination</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-222</td><td>parallel_ion_charge_state_momentum_damping_rate</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-223</td><td>frequency_of_electron_cyclotron_beam</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-224</td><td>poloidal_ion_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-225</td><td>helium_4_density_at_limiter</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-226</td><td>outer_radius_of_poloidal_field_coil</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-227</td><td>radial_particle_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-228</td><td>toroidal_hydrogen_velocity_at_plasma_boundary</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-229</td><td>ratio_of_particle_count_to_particle_simulated_count</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-230</td><td>parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-231</td><td>second_local_tangential_back_surface_radius_of_optical_element</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-232</td><td>thermal_power_of_breeder_blanket</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-233</td><td>electron_absorbed_wave_power</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-234</td><td>electron_energy_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-235</td><td>helium_4_density_at_pedestal_top</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-236</td><td>z_coordinate_of_divertor_target</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-237</td><td>second_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-238</td><td>tungsten_density_flux_surface_averaged_at_plasma_boundary</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-239</td><td>launched_power_of_ion_cyclotron_heating_antenna</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-240</td><td>inner_radius_of_antenna_strap</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-241</td><td>parallel_counter_passing_fast_particle_pressure</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-242</td><td>outer_radius_of_iron_core_segment</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-243</td><td>line_averaged_boron_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-244</td><td>fast_ion_power_due_to_charge_exchange</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-245</td><td>ion_diamagnetic_momentum_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-246</td><td>radial_ion_momentum_source</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-247</td><td>krypton_density_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-248</td><td>vertical_coordinate_of_antenna_strap</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-249</td><td>tilt_angle_of_ferritic_element</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-250</td><td>counter_passing_thermal_electron_power_density_due_to_collisions</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-251</td><td>parallel_power_normalized_of_beam_tracing_beam</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-252</td><td>poloidal_total_ion_energy_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-253</td><td>x_major_axis_unit_vector_of_shatter_cone</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-254</td><td>external_loop_voltage</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-255</td><td>toroidal_co_passing_fast_current_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-256</td><td>toroidal_conductivity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-257</td><td>current_of_divertor_tile</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-258</td><td>neutral_energy_diffusion_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-259</td><td>boron_density_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-260</td><td>beryllium_density_at_pedestal_top</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-261</td><td>toroidal_deuterium_tritium_velocity_at_pedestal_top</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-262</td><td>electron_temperature_at_pedestal_top</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-263</td><td>poloidal_electric_field</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-264</td><td>radial_momentum</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-265</td><td>flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-266</td><td>poloidal_ion_momentum_diffusivity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-267</td><td>neutral_particle_flux_at_wall_due_to_recombination</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-268</td><td>perpendicular_fast_ion_pressure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-269</td><td>vertical_ion_charge_state_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-270</td><td>toroidal_ion_rotation_frequency</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-271</td><td>carbon_density_at_pedestal_top</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-272</td><td>line_averaged_lithium_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-273</td><td>vertical_conductivity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-274</td><td>vertical_ion_charge_state_velocity_due_to_diamagnetic_drift</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-275</td><td>second_local_tangential_coordinate_of_optical_element</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-276</td><td>toroidal_explicit_ion_torque</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-277</td><td>ion_charge_state_diamagnetic_momentum_diffusivity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-278</td><td>volume_averaged_ion_temperature</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-279</td><td>thermal_electron_absorbed_wave_power</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-280</td><td>toroidal_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-281</td><td>second_local_tangential_coordinate_of_hard_xray_detector</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-282</td><td>neutral_particle_flux</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-283</td><td>flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-284</td><td>minimum_force_of_poloidal_field_coil</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-285</td><td>parallel_ion_momentum_diffusion_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-286</td><td>poloidal_neutral_momentum_flux_limiter_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-287</td><td>radial_electron_energy_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-288</td><td>neutral_state_diamagnetic_momentum_diffusivity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-289</td><td>second_local_tangential_width_of_filter_window</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-290</td><td>parallel_ion_heat_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-291</td><td>toroidal_iron_velocity_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-292</td><td>toroidal_argon_velocity_at_internal_transport_barrier</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-293</td><td>neutral_state_particle_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-294</td><td>poloidal_linear_neutral_internal_state_momentum_flux</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-295</td><td>resistance_of_shunt</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-296</td><td>toroidal_tungsten_velocity_at_magnetic_axis</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-297</td><td>flux_surface_averaged_hydrogen_density_at_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-298</td><td>ion_absorbed_power_of_beam_tracing_beam</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-299</td><td>co_passing_thermal_electron_power_density_due_to_collisions</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-300</td><td>toroidal_counter_passing_fast_electron_torque_density_due_to_collisions</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-301</td><td>radial_wave_vector_normalized_of_beam_tracing_beam</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-302</td><td>normalized_collisionality</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-303</td><td>flux_surface_averaged_tritium_density_at_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-304</td><td>toroidal_xenon_velocity_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-305</td><td>electron_pressure_at_separatrix</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-306</td><td>vertical_ion_momentum_convection_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-307</td><td>y_coordinate_of_sensor_attachment_point</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-308</td><td>accumulated_deuterated_methane_prefill_count</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-309</td><td>toroidal_neutral_internal_state_momentum_flux_limiter_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-310</td><td>trapped_thermal_electron_power_density_due_to_collisions</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-311</td><td>poloidal_magnetic_flux_at_internal_transport_barrier</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-312</td><td>total_thermal_ion_heat_flux</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-313</td><td>total_gas_source_rate_at_midplane_due_to_gas_injection</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-314</td><td>wetted_area_of_divertor</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-315</td><td>radial_ion_momentum_diffusion_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-316</td><td>poloidal_angle_of_gyrokinetic_eigenmode</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-317</td><td>radial_total_thermal_ion_energy_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-318</td><td>first_local_tangential_width_of_aperture</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-319</td><td>ion_average_temperature_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-320</td><td>toroidal_coordinate_of_neutron_detector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-321</td><td>toroidal_helium_4_velocity_at_magnetic_axis</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-322</td><td>polarization_angle_at_constraint_position</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-323</td><td>parallel_co_passing_fast_particle_pressure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-324</td><td>neutron_maximum_energy_of_neutron_detector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-325</td><td>voltage_of_toroidal_magnetic_field_probe</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-326</td><td>inner_radius_of_plasma_filament</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-327</td><td>toroidal_ion_charge_state_torque_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-328</td><td>counter_passing_fast_ion_charge_state_power_density_due_to_collisions</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-329</td><td>diamagnetic_current_density_due_to_ion_neutral_friction</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-330</td><td>parallel_ion_charge_state_diffusivity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-331</td><td>parallel_electron_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-332</td><td>poloidal_ion_momentum_flux_limiter_coefficient</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-333</td><td>parallel_fast_particle_pressure</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-334</td><td>lithium_density_at_limiter</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-335</td><td>electron_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-336</td><td>volume_averaged_oxygen_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-337</td><td>toroidal_coordinate_of_reflectometer_antenna</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-338</td><td>vertical_vorticity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-339</td><td>radial_ion_state_momentum_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-340</td><td>radius_of_coil_conductor_element</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-341</td><td>poloidal_current_density_due_to_parallel_viscosity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-342</td><td>electron_density_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-343</td><td>z_direction_unit_vector_of_pellet_injector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-344</td><td>toroidal_current_density_due_to_heat_viscosity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-345</td><td>radial_current_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-346</td><td>ion_average_temperature_at_post_sawtooth_crash</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-347</td><td>toroidal_iron_velocity_at_magnetic_axis</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-348</td><td>vertical_plasma_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-349</td><td>poloidal_electron_energy_flux</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-350</td><td>ammonia_deuterated_prefill_count</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-351</td><td>toroidal_current_due_to_wave_driven_current_drive</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-352</td><td>parallel_plasma_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-353</td><td>neutral_internal_state_particle_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-354</td><td>beryllium_source_rate_due_to_gas_injection</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-355</td><td>radial_perturbed_plasma_magnetic_vector_potential_imaginary_part</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-356</td><td>resistance_of_correction_coil</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-357</td><td>vertical_current_density_due_to_ion_inertia</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-358</td><td>flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-359</td><td>radial_outline_of_iron_core_segment</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-360</td><td>deuterium_deuterium_emissivity_due_to_fusion</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-361</td><td>net_efficiency_of_plant_system</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-362</td><td>toroidal_helium_3_velocity_at_plasma_boundary</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-363</td><td>poloidal_neutral_internal_state_energy_diffusivity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-364</td><td>vertical_wave_electric_field</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-365</td><td>vertical_coordinate_of_soft_xray_detector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-366</td><td>toroidal_coordinate_of_pellet</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-367</td><td>perpendicular_wave_vector_of_ion_cyclotron_heating_antenna</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-368</td><td>radius_of_aperture</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-369</td><td>accumulated_silane_count_due_to_gas_injection</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-370</td><td>accumulated_ethane_count</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-371</td><td>toroidal_coordinate_of_optical_element</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-372</td><td>oxygen_density_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-373</td><td>momentum_source_due_to_diamagnetic_drift</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-374</td><td>wave_curvature_of_electron_cyclotron_beam</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-375</td><td>perpendicular_counter_passing_fast_particle_pressure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-376</td><td>ethane_prefill_count</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-377</td><td>vertical_bulk_neutral_internal_state_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-378</td><td>ion_charge_state_rotation_frequency</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-379</td><td>toroidal_nitrogen_velocity_at_pedestal_top</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-380</td><td>lower_outer_squareness_of_plasma_boundary</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-381</td><td>parallel_ion_momentum_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-382</td><td>total_ion_charge_state_power_due_to_collisions</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-383</td><td>toroidal_carbon_velocity_at_plasma_boundary</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-384</td><td>fast_ion_power_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-385</td><td>parallel_pfirsch_schlueter_current_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-386</td><td>toroidal_deuterium_velocity_at_internal_transport_barrier</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-387</td><td>extent_of_soft_xray_detector</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-388</td><td>toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-389</td><td>argon_density_at_internal_transport_barrier</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-390</td><td>toroidal_fast_torque_due_to_collisions</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-391</td><td>neon_density_at_limiter</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-392</td><td>runaway_electron_critical_momentum_due_to_hot_tail</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-393</td><td>total_fast_particle_count</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-394</td><td>coulomb_logarithm</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-395</td><td>force_of_poloidal_field_coil</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-396</td><td>line_averaged_beryllium_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-397</td><td>poloidal_current_density_due_to_heat_viscosity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-398</td><td>total_ion_density_at_limiter</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-399</td><td>toroidal_momentum_flux_limiter_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-400</td><td>radial_ion_charge_state_diffusivity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-401</td><td>vertical_coordinate_of_active_wall_point</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-402</td><td>helium_confinement_time</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-403</td><td>poloidal_ion_charge_state_particle_flux</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-404</td><td>x_coordinate_of_divertor_target</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-405</td><td>toroidal_coordinate_of_detector</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-406</td><td>total_absorbed_wave_power</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-407</td><td>second_local_tangential_coordinate_of_reflectometer_antenna</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-408</td><td>height_of_iron_core_segment</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-409</td><td>ratio_of_parallel_plasma_velocity_to_magnetic_field_magnitude</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-410</td><td>ion_particle_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-411</td><td>thermal_electron_energy</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-412</td><td>radial_neutral_state_momentum_flux_limiter_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-413</td><td>poloidal_current_density_due_to_ion_inertia</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-414</td><td>normal_coordinate_of_toroidal_field_coil</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-415</td><td>toroidal_perturbed_vacuum_magnetic_field_imaginary_part</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-416</td><td>ion_charge_state_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-417</td><td>radial_neutral_internal_state_momentum_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-418</td><td>width_of_passive_structure</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-419</td><td>poloidal_ion_energy_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-420</td><td>neutral_power_density</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-421</td><td>magnetic_field_magnitude_at_pedestal_top_high_field_side</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-422</td><td>electron_temperature_at_pellet_path</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-423</td><td>volume_averaged_total_ion_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-424</td><td>toroidal_current_density_due_to_diamagnetic_drift</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-425</td><td>diamagnetic_momentum_diffusivity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-426</td><td>z_major_axis_unit_vector_of_shatter_cone</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-427</td><td>calibration_factor_of_visible_camera</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-428</td><td>vertical_coordinate_of_aperture</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-429</td><td>radial_outline_of_poloidal_field_coil</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-430</td><td>field_line_length</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-431</td><td>poloidal_current_density_due_to_perpendicular_viscosity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-432</td><td>radial_outline_of_plasma_filament</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-433</td><td>carbon_density_at_internal_transport_barrier</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-434</td><td>poloidal_electron_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-435</td><td>total_implicit_ion_particle_source_rate</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-436</td><td>runaway_electron_kinetic_energy_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-437</td><td>ion_charge_state_temperature</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-438</td><td>neutral_state_convection_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-439</td><td>toroidal_current_density_due_to_anomalous_transport</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-440</td><td>electron_source_rate_due_to_surface_emission</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-441</td><td>volume_averaged_helium_4_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-442</td><td>radial_ion_particle_convection_velocity</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-443</td><td>parallel_neutral_internal_state_velocity_due_to_e_cross_b_drift</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-444</td><td>poloidal_conductivity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-445</td><td>argon_density_at_pedestal_top</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-446</td><td>major_length_of_poloidal_field_coil</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-447</td><td>incident_radiated_power_of_breeder_blanket_module</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-448</td><td>radial_ion_charge_state_momentum_diffusion_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-449</td><td>thickness_of_vacuum_vessel</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-450</td><td>inner_radius_of_passive_loop</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-451</td><td>thermal_radiative_power_of_divertor</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-452</td><td>poloidal_ion_state_momentum_convection_velocity</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-453</td><td>minor_length_of_antenna_strap</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-454</td><td>toroidal_ion_charge_state_rotation_frequency</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-455</td><td>fast_ion_power_at_inside_flux_surface</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-456</td><td>radial_ion_momentum_flux_limiter_coefficient</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-457</td><td>poloidal_perturbed_plasma_magnetic_field_real_part</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-458</td><td>vertical_pfirsch_schlueter_current_density</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-459</td><td>sawtooth_period</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-460</td><td>toroidal_total_momentum_flux</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-461</td><td>toroidal_lithium_velocity_at_pedestal_top</td><td>name</td></tr>
+<tr><td>srtj-cohort-estimate-item-462</td><td>parallel_electron_energy_flux</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-463</td><td>binormal_coordinate_of_toroidal_field_coil</td><td>docs</td></tr>
+<tr><td>srtj-cohort-estimate-item-464</td><td>ion_momentum_flux_due_to_diamagnetic_drift</td><td>docs</td></tr>
+</tbody></table>
+</section>
