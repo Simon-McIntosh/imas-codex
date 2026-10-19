@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="232">
+<meta name="plan-version" content="233">
 <meta name="plan-modified" content="2026-10-19">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -855,6 +855,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-s38-lead-ruling-apply" data-who="reckon-build" data-when="2026-10-19T18:55:00Z">
     <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-19, recorded by the coordinator.</strong> The lead's answer on the sheet: <em>apply all 10</em>.</p><ul><li>Retire <code>neutron_flux_due_to_fusion</code> and <code>toroidal_wave_vector_normalized_of_beam_tracing_beam</code> in favour of their holders.</li><li>Bind <code>flux_surface_averaged_parallel_electric_field_at_separatrix</code>.</li><li>Swap the separatrix temperatures: move <code>electron_temperature_at_separatrix</code> to the local path and bind the flux-surface-averaged name to the average path.</li><li>Hold the other six from release.</li></ul><p>The coordinator also found that the export's source gate fails the whole export on any dropped-edge or never-bound name, exhausted ones included. That contradicts the ruling that exhausted names stay dormant. Two nodes apply the ruling:</p><ul><li><code>sib-export-live-source-gate</code>: the gate counts live names only, lists the exhausted ones as dormant, and adds release holds for the six.</li><li><code>sib-apply-live-rulings</code>: the four graph changes, on a quiet graph.</li></ul><p>§38 closes when both have landed and the read-back shows no live, non-derived, unheld name without a source.</p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-run-r-20261019T200145656024-review-of-sib-export-live-source-gate-e654a59b44be" data-who="reckon-build" data-when="2026-10-19T20:13:37.290Z">
+    <div class="r-comment-body"><p>the review for r-20261019T185151966581-sib-export-live-source-gate is stored parsed at the reviewed run&#x27;s review-records/ path (and its .at-e654a59b4 alias), scoring goal_fidelity 19, evidence 13, scope_discipline 20, durability 16, fit 17, reuse 19 over the pair 5682157531..e654a59b4, with three follow-on findings and no blocker; added_failure_count 0. The record is the landing; no plan edit was made.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

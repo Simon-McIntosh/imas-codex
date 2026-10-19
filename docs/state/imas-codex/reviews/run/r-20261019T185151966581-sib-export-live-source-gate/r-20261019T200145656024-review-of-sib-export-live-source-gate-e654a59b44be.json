@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "Revert the live-only filter so exhausted rows stay in source_losses: run_export refuses before _fetch_export_population, so assert fetch.called reddens. Observed in negative-control-declared.log (assert fetch.called -> assert False). The discriminating assertions (fetch.called, all_gates_passed, 'source_audit' not in gates) are independent of the row the test passed in; the to_dict comparison echoes that row's own name/stage/population, which is the reported shape rather than a self-comparison.",
+      "lines": "tests/standard_names/test_source_audit_gate.py:358-376"
+    },
+    {
+      "failure_condition": "Force source_losses empty (remove the refusal): the export proceeds and calls _fetch_export_population, so assert not fetch.called reddens. Observed in negative-control-boundary.log (assert not True -> True). gate.issues is compared against the literal {'live_loss'} and the fixed detail string, both independent of the code under test.",
+      "lines": "tests/standard_names/test_source_audit_gate.py:412-419"
+    },
+    {
+      "failure_condition": "Drop the six holds from _RELEASE_IDENTITY_HOLDS: an accepted dropped-edge held row is counted by the gate and run_export refuses before the population fetch, so assert fetch.called reddens. Observed in negative-control-declared.log. held not in report.exported_names and the exclusion record's reason/stage are read from production output, not from the test's input.",
+      "lines": "tests/standard_names/test_source_audit_gate.py:424-441"
+    },
+    {
+      "failure_condition": "Rename or remove a hold: the dict returned by the production _RELEASE_IDENTITY_HOLDS disagrees with the test-side literal _HELD_IDENTITIES_TO_REASONS, and the exclusion records disagree with that literal, so the assertion reddens. The literal table is the independent source; the production dict and records are read from the code under test.",
+      "lines": "tests/standard_names/test_export_release_holds.py:120-136"
+    },
+    {
+      "failure_condition": "Remove one of the six names: _RELEASE_IDENTITY_HOLDS[name] raises KeyError. Observed in negative-control-declared.log (KeyError: 'electrostatic_potential_at_wall'). The name set is a test-side literal, independent of production.",
+      "lines": "tests/standard_names/test_export_release_holds.py:147-150"
+    },
+    {
+      "failure_condition": "A hold missing or mis-counted: the per-reason counts read from the report differ from Counter(_HELD_IDENTITIES_TO_REASONS.values()) built from the test-side literal, so the assertion reddens.",
+      "lines": "tests/standard_names/test_export_release_holds.py:176-186"
+    }
+  ],
+  "call_sites": [
+    "imas_codex/cli/sn.py:4488",
+    "imas_codex/standard_names/catalog_release.py:2290",
+    "imas_codex/standard_names/export.py:3147"
+  ],
+  "completed_at": "2026-10-19T20:13:37.290Z",
+  "dispatched_at": "2026-10-19T20:02:05Z",
+  "findings": [
+    {
+      "file": ".config/reckon/crew/runs/r-20261019T185151966581-sib-export-live-source-gate/manifest.md",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the covering gate is a strict subset of what the done_when requires. brief.md:49-51 asks that the gate cover test_source_audit_gate.py, test_export_release_holds.py, every other tests/standard_names/test_export_*.py file, and 'every test file importing export.py or classify_sourceless_standard_names must add no failures'. The manifest's after_suite names only the test_export_*.py glob plus test_source_audit_gate.py. Its own grep for importers turns up further files that were not run: tests/standard_names/test_provenance_ledger.py imports classify_sourceless_standard_names, and test_cli_export.py, test_review_release.py, test_manifest_generability.py, test_waived_sources.py, test_publish_transport_only.py, test_catalog_release.py and others import imas_codex.standard_names.export. None appear in head-gate.log. The landed change is additive and confined, so a regression there is unlikely, but the done_when's measured set was not fully measured."
+    },
+    {
+      "file": ".config/reckon/crew/runs/r-20261019T185151966581-sib-export-live-source-gate/head-gate.log",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate log's header names the wrong revision for the code it measured. Line 3 reads '# rev: 5682157531c0bad0443d13593ebf881a7ed74b25', which is the orientation_base_sha; the manifest (test_logs, after_suite) presents this log as the head suite 'at e654a59b4'. The suite ran at 21:41 with the change uncommitted and HEAD still at the base commit, then commit e654a59b4 was created at 21:42. The evidence is sound \u2014 test_export_release_holds.py shows 4 selected tests, the head count versus the base 3 \u2014 but a reader comparing the header (base) to the manifest's claim (head) sees a contradiction, and the header does not name the revision actually under test."
+    },
+    {
+      "file": ".config/reckon/crew/runs/r-20261019T185151966581-sib-export-live-source-gate/manifest.md",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline_suite and after_suite lines are prose, not the JSON object the manifest contract requires. Line 17 opens 'baseline_suite: 2 failed, 30 passed of the 32 ids ...' and line 18 opens 'after_suite: 1 failed, 221 passed ...'. The contract asks for {revision, command, exit_status, log_path or log_digest, completed, failure_count, failure_ids} each. A promotion reader cannot parse the delta mechanically from this field; it must instead re-read base-gate-rerun.log and head-gate.log, which is where this review derived added_failure_count 0 (head's single failure, test_export_over_empty_candidate_set_exits_non_zero, is also a base failure)."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Production runtime code that reaches the change: imas_codex/standard_names/export.py:3147 calls _classify_export_population inside run_export (where the six new holds are now honoured); imas_codex/cli/sn.py:4488 (the sn export CLI command) and imas_codex/standard_names/catalog_release.py:2290 (release_catalog's run_export wrapper) both call run_export, so both can reach the changed gate and the new holds. The node's own test files are excluded.",
+    "diff": "Read commit by commit against the base: one commit, e654a59b4, touching four files. imas_codex/standard_names/export.py adds the six holds to _RELEASE_IDENTITY_HOLDS, adds ExportReport.dormant_sourceless_names with its to_dict entry, and partitions run_export's source_losses into exhausted (dormant, reported) and live (blocking) rows; tests/standard_names/test_source_audit_gate.py adds the three behavioural tests and a stub harness; tests/standard_names/test_export_release_holds.py extends the hold table and the ledger assertion; docs/evidence/fragments/sn-integrity-backlog/sib-export-live-source-gate.html records the change. All four are inside the declared write paths.",
+    "done_when": "The done_when (brief.md:38-53) asks for three tested behaviours (exhausted sourceless row dormant not blocking; live sourceless row still blocks; held sourceless identity neither fails nor is exported), each shown to fail on revert, a delta gate over the named test set and every importer, and the fragment. The three behaviours are tested (test_source_audit_gate.py:358, 412, 424) and each is shown to redden under a named mutation in negative-control-declared.log / negative-control-boundary.log; the fragment exists; no live graph write or LLM call is claimed. The delta gate is a subset of the done_when's set \u2014 the importer clause is unmet (see finding on the manifest's covering suite).",
+    "goal": "The goal is that the export source gate counts live names only, lists exhausted sourceless rows as dormant with their count, and holds six named identities from release through the existing hold path. export.py:3068-3086 partitions the classifier's dropped-edge and never-bound rows by name_stage, records the exhausted ones under report.dormant_sourceless_names, and leaves the rest as source_losses; the six names at export.py:249-273 carry the reason release_hold_no_dd_source with the detail 'no Data Dictionary path measures the quantity'; _classify_export_population:853 already routes them out through the release-hold exclusion. The neutron_flux_due_to_fusion hold is untouched.",
+    "manifest": "The source manifest records status complete, the change, the six holds, three new tests, base and head suite results, four commits/paths. Its gate is the covering suite (test_export_*.py plus test_source_audit_gate.py) with head 1 failed / 221 passed and the single failure named as a pre-existing base failure; both claims reconcile with base-gate-rerun.log (2 failed, one of them the same empty-refusal test) and head-gate.log. Its baseline_suite and after_suite fields are prose rather than JSON, and its after_suite claim 'at e654a59b4' is not what head-gate.log:3 says (see findings).",
+    "write_paths": "The source prompt fences imas_codex/standard_names/export.py, tests/standard_names/test_source_audit_gate.py, tests/standard_names/test_export_release_holds.py and docs/evidence/fragments/sn-integrity-backlog/sib-export-live-source-gate.html (plus a docs/figures/ tree, unused). git show --stat e654a59b4 names exactly those four paths and no other; the declared figure tree was not touched."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T200145656024-review-of-sib-export-live-source-gate-e654a59b44be",
+  "reviewed_base_sha": "5682157531c0bad0443d13593ebf881a7ed74b25",
+  "reviewed_head_sha": "e654a59b44bee63892b3f6e291aabe17d35039b5",
+  "reviewed_run_id": "r-20261019T185151966581-sib-export-live-source-gate",
+  "scores": {
+    "durability": 16,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T20:14:58.797165+00:00",
+  "total": 104
+}
