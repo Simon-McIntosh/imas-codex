@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import os
 import shutil
@@ -18,8 +19,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
 from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
 from imas_codex.settings import _load_pyproject_settings
+from imas_codex.standard_names.dd_resolutions import (
+    DDResolutionError,
+    DDResolutionValue,
+    load_dd_resolution_manifest,
+    read_graph_dd_field,
+)
 from imas_codex.standard_names.loop import run_sn_pools
 
 HERE = Path(__file__).resolve().parent
@@ -29,7 +37,10 @@ ARCHIVE = (
     / ".local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 RESULTS = HERE / "srtj-cohort"
-LIMIT_USD = 3.0
+EXCLUSIONS = RESULTS / "excluded.json"
+PIECE_CEILING_USD = 3.0
+PRIOR_SPEND_USD = 0.000288
+RUN_LIMIT_USD = 2.99
 
 
 def stamp() -> str:
@@ -80,14 +91,227 @@ def make_instance(root: Path, dump: Path) -> tuple[Path, object, Path, str]:
     return place, proc, log, f"bolt://127.0.0.1:{bolt}"
 
 
-def selected_items(axis: str, half: int | None) -> list[dict]:
+def fixed_items() -> list[dict]:
     cohort = json.loads(COHORT.read_text())["cohort"]
     if cohort["size"] != 464 or cohort["per_axis"] != 232:
         raise RuntimeError("fixed cohort cardinality changed")
-    items = [item for item in cohort["items"] if item["axis"] == axis]
-    if len(items) != 232 or len({item["id"] for item in items}) != 232:
-        raise RuntimeError("fixed axis is incomplete or contains duplicate identities")
-    return items[(half - 1) * 116 : half * 116] if half else items
+    items = cohort["items"]
+    if len(items) != 464 or len({item["id"] for item in items}) != 464:
+        raise RuntimeError(
+            "fixed cohort is incomplete or contains duplicate identities"
+        )
+    if any(
+        sum(item["axis"] == axis for item in items) != 232 for axis in ("name", "docs")
+    ):
+        raise RuntimeError("fixed cohort axis cardinality changed")
+    return items
+
+
+def selected_items(axis: str, half: int | None) -> list[dict]:
+    items = [item for item in fixed_items() if item["axis"] == axis]
+    if half:
+        items = items[(half - 1) * 116 : half * 116]
+    excluded = json.loads(EXCLUSIONS.read_text())
+    if (
+        excluded["status"] != "accepted"
+        or excluded["cohort_digest"] != hashlib.sha256(COHORT.read_bytes()).hexdigest()
+        or excluded["excluded_count"] > 23
+    ):
+        raise RuntimeError("DD exclusion record is not valid for the fixed cohort")
+    omitted = {row["id"] for row in excluded["excluded_items"]}
+    if len(omitted) != excluded["excluded_count"]:
+        raise RuntimeError("DD exclusion record contains duplicate identities")
+    return [item for item in items if item["id"] not in omitted]
+
+
+def _resolution_value(field: DDResolutionField, raw: object) -> DDResolutionValue:
+    if field == DDResolutionField.coordinates:
+        return DDResolutionValue(
+            kind=DDResolutionValueKind.string_list,
+            value=tuple(raw or ()),
+        )
+    return DDResolutionValue(
+        kind=DDResolutionValueKind.null
+        if raw is None
+        else DDResolutionValueKind.string,
+        value=raw,
+    )
+
+
+def scan_dd_sources(gc: GraphClient) -> dict:
+    """Check each exact source projection that the review worker can resolve."""
+    items = fixed_items()
+    manifest = load_dd_resolution_manifest()
+    by_item = {item["id"]: item for item in items}
+    errors: dict[str, dict[tuple[str, str, str], dict]] = defaultdict(dict)
+    source_counts: dict[str, int] = defaultdict(int)
+    source_rows = 0
+    field_checks = 0
+    for start in range(0, len(items), 25):
+        ids = [item["id"] for item in items[start : start + 25]]
+        rows = gc.query(
+            "UNWIND $ids AS id MATCH (sn:StandardName {id:id}) "
+            "OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn) "
+            "WHERE source.source_type='dd' "
+            "RETURN sn.id AS item_id, sn.unit AS name_unit, "
+            "properties(source) AS source LIMIT 5001",
+            ids=ids,
+        )
+        if len(rows) == 5001:
+            raise RuntimeError("DD source read reached its row bound")
+        for row in rows:
+            item_id = row["item_id"]
+            source = row["source"]
+            if source is None:
+                continue
+            source_counts[item_id] += 1
+            source_rows += 1
+            path = str(
+                source.get("dd_path") or source.get("source_id") or ""
+            ).removeprefix("dd:")
+            version = source.get("dd_version") or ""
+            if not path or not version:
+                raise RuntimeError(
+                    f"DD source lacks exact path or version: {source.get('id')}"
+                )
+            values = {
+                "unit": source.get("dd_unit") or row["name_unit"] or None,
+                "documentation": source.get("dd_documentation"),
+                "data_type": source.get("dd_data_type"),
+                "coordinates": source.get("dd_coordinates") or (),
+                "lifecycle_status": source.get("dd_lifecycle_status"),
+                "lifecycle_version": None,
+            }
+            contexts = [(path, values)]
+            parent_path = source.get("dd_parent_path")
+            if parent_path:
+                contexts.append(
+                    (
+                        parent_path,
+                        {"documentation": source.get("dd_parent_documentation") or ""},
+                    )
+                )
+            for source_path, context in contexts:
+                for field in DDResolutionField:
+                    field_checks += 1
+                    try:
+                        read_graph_dd_field(
+                            path=source_path,
+                            dd_version=version,
+                            field=field,
+                            graph_value=_resolution_value(
+                                field, context.get(field.value)
+                            ),
+                            manifest=manifest,
+                        )
+                    except DDResolutionError as exc:
+                        key = (source_path, field.value, type(exc).__name__)
+                        errors[item_id][key] = {
+                            "path": source_path,
+                            "field": field.value,
+                            "error_type": type(exc).__name__,
+                            "reason": str(exc),
+                            "source_id": source.get("id"),
+                        }
+    if not source_rows or not any(source_counts.values()):
+        raise RuntimeError("DD source scan found no known-present source")
+    without_sources = sorted(set(by_item) - set(source_counts))
+    excluded_items = [
+        {
+            "id": item["id"],
+            "axis": item["axis"],
+            "errors": list(errors[item["id"]].values()),
+        }
+        for item in items
+        if errors[item["id"]]
+    ]
+    if not any(
+        error["path"] == "camera_ir/channel/camera/direction/x"
+        and error["field"] == "unit"
+        for item in excluded_items
+        for error in item["errors"]
+    ):
+        raise RuntimeError("DD source scan missed the known stale unit")
+    return {
+        "status": "accepted" if len(excluded_items) <= 23 else "over_limit",
+        "cohort_digest": hashlib.sha256(COHORT.read_bytes()).hexdigest(),
+        "cohort_count": 464,
+        "max_exclusions": 23,
+        "archive": str(ARCHIVE),
+        "manifest_digest": manifest.digest,
+        "resolution_count": len(manifest.resolutions),
+        "source_rows": source_rows,
+        "field_checks": field_checks,
+        "items_without_dd_sources": without_sources,
+        "excluded_count": len(excluded_items),
+        "excluded_by_axis": {
+            axis: sum(item["axis"] == axis for item in excluded_items)
+            for axis in ("name", "docs")
+        },
+        "excluded_items": excluded_items,
+        "scanned_at": stamp(),
+    }
+
+
+def preflight() -> None:
+    """Scan all fixed identities in a fresh export copy without a review call."""
+    import subprocess
+
+    record = {
+        "status": "scanning",
+        "created_at": stamp(),
+        "code_revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True
+        ).strip(),
+        "module_path": __file__,
+        "working_directory": str(Path.cwd().resolve()),
+    }
+    save(EXCLUSIONS, record)
+    root = Path(tempfile.mkdtemp(prefix="review-preflight-", dir=os.environ["TMPDIR"]))
+    record["scratch_tree"] = str(root)
+    save(EXCLUSIONS, record)
+    proc = None
+    prior_uri = os.environ.get("NEO4J_URI")
+    try:
+        with tarfile.open(ARCHIVE, "r:gz") as archive:
+            member = next(
+                member for member in archive if member.name.endswith("/graph.dump")
+            )
+            dump = root / "neo4j.dump"
+            with archive.extractfile(member) as source, dump.open("wb") as target:
+                shutil.copyfileobj(source, target)
+        place, proc, log, uri = make_instance(root, dump)
+        record["scratch_instance"] = {"path": str(place), "uri": uri, "log": str(log)}
+        os.environ["NEO4J_URI"] = uri
+        with GraphClient(uri=uri) as gc:
+            result = scan_dd_sources(gc)
+        record.update(result)
+        save(EXCLUSIONS, record)
+        print(
+            f"DD preflight: {result['excluded_count']} of 464 excluded; "
+            f"{result['source_rows']} source rows and {result['field_checks']} field checks",
+            flush=True,
+        )
+        if result["status"] != "accepted":
+            raise RuntimeError(
+                f"DD preflight exceeds 23-item exclusion limit: {result['excluded_count']}"
+            )
+    except Exception as exc:
+        if record["status"] == "scanning":
+            record["status"] = "failed"
+        record["failure"] = f"{type(exc).__name__}: {exc}"
+        raise
+    finally:
+        if prior_uri is None:
+            os.environ.pop("NEO4J_URI", None)
+        else:
+            os.environ["NEO4J_URI"] = prior_uri
+        if proc is not None:
+            stop_temp_neo4j(proc)
+            record["scratch_stopped"] = True
+        shutil.rmtree(root)
+        record["scratch_removed"] = {"path": str(root), "exists_after": root.exists()}
+        save(EXCLUSIONS, record)
 
 
 def prepare_scope(gc: GraphClient, items: list[dict], scope_id: str, axis: str) -> None:
@@ -172,6 +396,8 @@ def count_run(gc: GraphClient, run_id: str) -> dict:
 async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
     items = selected_items(args.axis, args.half)
     ids = [item["id"] for item in items]
+    record["exclusions"] = str(EXCLUSIONS)
+    record["excluded_count"] = json.loads(EXCLUSIONS.read_text())["excluded_count"]
     record["items"] = [
         {
             **item,
@@ -219,7 +445,7 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
         started = stamp()
         start_time = time.monotonic()
         summary = await run_sn_pools(
-            cost_limit=(LIMIT_USD if args.axis == "name" else 5.0)
+            cost_limit=(RUN_LIMIT_USD if args.axis == "name" else 5.0)
             if args.arm == "cascade"
             else 55.0,
             time_limit_s=2400,
@@ -311,6 +537,11 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
                 model: round(value, 6) for model, value in sorted(by_model.items())
             }
             record["spend_usd"] = round(sum(by_model.values()), 6)
+            if args.arm == "cascade" and args.axis == "name":
+                record["prior_attempt_spend_usd"] = PRIOR_SPEND_USD
+                record["piece_spend_total_usd"] = round(
+                    record["spend_usd"] + PRIOR_SPEND_USD, 6
+                )
             record["route_counts"] = {
                 route: sum(item["route"] == route for item in record["items"])
                 for route in (
@@ -344,9 +575,9 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
         finally:
             save(path, record)
         if len(record["items"]) != len(ids) or (
-            record["spend_usd"] >= LIMIT_USD
-            and args.arm == "cascade"
+            args.arm == "cascade"
             and args.axis == "name"
+            and record["piece_spend_total_usd"] >= PIECE_CEILING_USD
         ):
             raise RuntimeError("piece cardinality or spend ceiling failed")
     finally:
@@ -364,14 +595,20 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--arm", choices=("incumbent", "cascade"), required=True)
-    parser.add_argument("--axis", choices=("name", "docs"), required=True)
+    parser.add_argument("--arm", choices=("incumbent", "cascade"))
+    parser.add_argument("--axis", choices=("name", "docs"))
     parser.add_argument("--half", type=int, choices=(1, 2))
+    parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--check-containment", type=Path)
     args = parser.parse_args()
     if args.check_containment:
         verify_containment(json.loads(args.check_containment.read_text()))
         return
+    if args.preflight:
+        preflight()
+        return
+    if args.arm is None or args.axis is None:
+        parser.error("--arm and --axis are required for a review piece")
     import subprocess
 
     record = {
