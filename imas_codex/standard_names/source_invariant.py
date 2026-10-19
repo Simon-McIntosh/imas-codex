@@ -25,16 +25,24 @@ def _derived_parent_cypher() -> str:
 
 
 def find_sourceless_live_names(
-    query: Any, name_ids: Iterable[str], *, retired_is_exempt: bool = True
+    query: Any,
+    name_ids: Iterable[str],
+    *,
+    retired_is_exempt: bool = True,
+    exhausted_exempt_ids: Iterable[str] = (),
 ) -> list[str]:
     """Find touched live names with no producer through the caller's graph handle.
 
     Superseded names are historical. A derived parent with a live child is
-    structural and may legitimately have no direct producer.
+    structural and may legitimately have no direct producer.  A caller that has
+    signed a narrow exemption names those ids in ``exhausted_exempt_ids``; an id
+    is excused only while its own stage is ``exhausted``, so the exemption can
+    never excuse a name the graph has since moved on from.
     """
     ids = sorted(set(name_ids))
     if not ids:
         return []
+    exempt = sorted(set(exhausted_exempt_ids))
     rows = query.query(
         f"""
         // SOURCE_INVARIANT
@@ -48,20 +56,30 @@ def find_sourceless_live_names(
             AND coalesce(sn.status, '') <> 'superseded'))
           AND NOT ({_derived_parent_cypher()})
           AND producers = 0
+          AND NOT (coalesce(sn.name_stage, '') = 'exhausted'
+                   AND sn.id IN $exempt_ids)
         RETURN sn.id AS id ORDER BY id
         """,
         ids=ids,
         retired_is_exempt=retired_is_exempt,
+        exempt_ids=exempt
     )
     return [str(row["id"]) for row in rows]
 
 
 def require_producing_sources(
-    query: Any, name_ids: Iterable[str], *, retired_is_exempt: bool = True
+    query: Any,
+    name_ids: Iterable[str],
+    *,
+    retired_is_exempt: bool = True,
+    exhausted_exempt_ids: Iterable[str] = (),
 ) -> None:
     """Refuse a write that strands a live non-derived name without a source."""
     missing = find_sourceless_live_names(
-        query, name_ids, retired_is_exempt=retired_is_exempt
+        query,
+        name_ids,
+        retired_is_exempt=retired_is_exempt,
+        exhausted_exempt_ids=exhausted_exempt_ids,
     )
     if missing:
         raise MissingStandardNameSource(

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" font-family="sans-serif">
+  <rect width="1400" height="420" fill="#ffffff"/>
+  <g fill="none" stroke="#1a1a1a" stroke-width="2.4">
+    <rect x="30" y="164" width="220" height="92" rx="6"/>
+    <rect x="275" y="164" width="250" height="92" rx="6"/>
+    <rect x="550" y="164" width="270" height="92" rx="6"/>
+    <rect x="845" y="164" width="250" height="92" rx="6"/>
+    <rect x="1120" y="164" width="250" height="92" rx="6"/>
+    <path d="M250 210 H263"/>
+    <path d="M525 210 H538"/>
+    <path d="M820 210 H833"/>
+    <path d="M1095 210 H1108"/>
+  </g>
+  <g fill="#1a1a1a" stroke="none">
+    <path d="M263 204 l0 12 l12 -6 z"/>
+    <path d="M538 204 l0 12 l12 -6 z"/>
+    <path d="M833 204 l0 12 l12 -6 z"/>
+    <path d="M1108 204 l0 12 l12 -6 z"/>
+  </g>
+  <g font-size="18" fill="#1a1a1a" text-anchor="middle">
+    <text x="140" y="200">signed authority</text>
+    <text x="140" y="224">rows (name, source)</text>
+    <text x="400" y="190">binding present?</text>
+    <text x="400" y="214">source not stale?</text>
+    <text x="400" y="238">stage exhausted?</text>
+    <text x="685" y="200">delete PRODUCED_NAME</text>
+    <text x="685" y="224">compare-and-set</text>
+    <text x="970" y="190">record change node</text>
+    <text x="970" y="214">source, operation,</text>
+    <text x="970" y="238">manifest digest</text>
+    <text x="1245" y="200">postcondition</text>
+    <text x="1245" y="224">edge gone, name intact</text>
+  </g>
+  <g font-size="18" fill="#b03030" text-anchor="middle">
+    <text x="400" y="140">any check fails &#8594; refuse the whole authority, write nothing</text>
+  </g>
+  <path d="M400 164 V152" fill="none" stroke="#b03030" stroke-width="2.4"/>
+</svg>
