@@ -1,0 +1,58 @@
+<!-- One arm of the anchor comparison: the neutral_power_of_divertor_due_to_recombination family
+     harmonized from its Jev-selected anchor in a fresh scratch copy of the archived graph.
+     Runner: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py.
+     Record: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutral_power_of_divertor_due_to_recombination-jev.json. -->
+<section id="ssog-anchor-divertor-recomb-jev" data-reckon="evidence">
+  <h2 id="ssog-anchor-divertor-recomb-jev-heading">The Jev anchor arm for the divertor recombination power family</h2>
+
+  <p id="ssog-anchor-divertor-recomb-jev-run">
+    The per-arm runner harmonized the three-member <code>subject</code> family
+    <code>neutral_power_of_divertor_due_to_recombination</code> in a fresh scratch
+    copy of the fixed archived export, from the anchor the Jev scorer selected,
+    <code>plasma_power_of_divertor_due_to_recombination</code>. The heuristic selects
+    <code>power_of_divertor_due_to_recombination</code> instead, so the two arms of
+    this family pin the two different anchors through the existing
+    <code>harmonized_anchor</code> record and run the same code revision
+    (<code>5cf53a7b6</code>).
+  </p>
+
+  <p id="ssog-anchor-divertor-recomb-jev-lint">
+    Lint was already clean and stayed clean: <strong>0 before, 0 after</strong>. The
+    family carried no findings on the archived export, so this arm exercises the
+    documentation template the anchor sets rather than the lint repair, and its
+    comparison with the heuristic arm turns on the members' documentation scores
+    rather than on the finding count.
+  </p>
+
+  <p id="ssog-anchor-divertor-recomb-jev-scores">
+    Every member's documentation review score after harmonization, with its score
+    before in parentheses:
+    <code>neutral_power_of_divertor_due_to_recombination</code> 0.9625 (0.90625),
+    <code>plasma_power_of_divertor_due_to_recombination</code> 0.89375 (0.925),
+    <code>power_of_divertor_due_to_recombination</code> 0.849 (1.0). The harmonize
+    receipt halts with <code>docs acceptance 50.00% &lt; 90.00% (1/2 touched)</code>
+    and records two score regressions below the acceptance threshold; it writes with the
+    accepted members and leaves <code>resume_from: 2</code>.
+  </p>
+
+  <p id="ssog-anchor-divertor-recomb-jev-cost">
+    The arm spent <strong>USD 0.7416 over 26 calls in 2052.6 s</strong>
+    (<code>spend_limit_usd</code> 2.00; the apply was handed the smaller of the runner's
+    USD 1.98 per-three-call cap and the USD 2.00 arm budget, so the cap passed was
+    USD 1.98). Its per-model split is 6 calls/0.281529 sonnet-5, 6 calls/0.180344
+    grok-4.5, 3 calls/0.132461 gpt-6.1-sol, 1 call/0.143168 fable-5, 2 calls/0.002973
+    gpt-6-luna and 8 calls/0.001115 <code>typesafe/jev-1.13</code>.
+  </p>
+
+  <p id="ssog-anchor-divertor-recomb-jev-containment">
+    Containment holds. The apply's own cost rows are present in the scratch instance —
+    26 rows naming this family's members and 26 window ledger rows
+    (<code>scratch_signal 52</code>) — and no row attributable to this apply is
+    present in the live graph (<code>live_signal 0</code>; <code>live_family_rows 0</code>,
+    <code>live_scope_run_rows 0</code>). The scratch instance on
+    <code>bolt://127.0.0.1:28006</code> was stopped and its tree removed, and the
+    port pair's exclusive lock released. The record is
+    <code>outcome_status: complete</code>, written before containment was judged, and
+    the invocation's log ends <code>EXIT=0</code>.
+  </p>
+</section>
