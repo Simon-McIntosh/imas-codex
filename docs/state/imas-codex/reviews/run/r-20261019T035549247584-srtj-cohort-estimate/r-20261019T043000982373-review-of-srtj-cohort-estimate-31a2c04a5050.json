@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-10-19T04:45:40.268Z",
+  "dispatched_at": "2026-10-19T04:30:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-estimate-run.py",
+      "line": "204",
+      "severity": "follow-on",
+      "text": "follow-on: wilson_half_width implements the Wald/normal half-width z*sqrt(p(1-p)/n), not a Wilson interval; the fragment's own prose (srtj-cohort-estimate.html, 'the Wald half-width needs') names it correctly, so the symbol alone mislabels the estimator for any reader who trusts the name."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-estimate-run.py",
+      "line": "236",
+      "severity": "follow-on",
+      "text": "follow-on: the brief requires each arm's interval 'from the spread of per-call costs', but neither interval is built from that spread; the incumbent interval (lines 239-240, 248) spans escalation incidence between never and always firing, and the cascade interval (lines 259-263) uses the binomial spread of the chat share at the calibration n, while the recorded per-call sd_usd (lines 116, 127) is never used."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-estimate.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the committed JSON's figure_path is the reviewer will find a dead pointer: it is the worker's worktree-absolute path /home/ITER/mcintos/Code/.reckon-worktrees/.../srtj-cohort-estimate/docs/figures/sn-review-through-jev/srtj-cohort-estimate/srtj-cohort-estimate.svg, which dies when the worktree is reclaimed, rather than the repository-relative path the figure is actually committed at."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-estimate-run.py",
+      "line": "277",
+      "severity": "follow-on",
+      "text": "follow-on: per_accepted divides each arm's per-item cost by ROUTE_SHARES[axis]['accept'], the cascade's calibrated accept share, for BOTH arms (lines 277-286, 402-405), so the incumbent arm's spend per accepted name is priced against the cascade's acceptance rate rather than the quorum's own, which is not measured."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-estimate-run.py",
+      "line": "321",
+      "severity": "follow-on",
+      "text": "follow-on: build_figure never applies the mandated plt.style.use('data-ink') (the committed SVG carries matplotlib's default tab10 fills #1f77b4/#ff7f0e, not the muted component palette), and gate-cohort-estimate.log records no render-to-PNG check of the figure as the sprint's Figures rule requires."
+    },
+    {
+      "file": "docs/figures/sn-review-through-jev/srtj-cohort-estimate/srtj-cohort-estimate.svg",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: commit b074eddf7 first created the figure at docs/figures/sn-review-through-jev/srtj-cohort-estimate.svg, outside the granted directory docs/figures/sn-review-through-jev/srtj-cohort-estimate; the net diff base..head is clean (the final commit relocates it inside the grant) and the excursion is disclosed in manifest.md:45-54, but the per-commit history still carries the out-of-scope create."
+    }
+  ],
+  "justifications": {
+    "durability": "no test asserts the estimate's numbers, so nothing reddens if srtj-cohort-estimate.json is hand-edited away from srtj-cohort-estimate-run.py's output.",
+    "evidence": "gate-cohort-estimate.log records a real EXIT=0 and USD 0, reproduced byte-identically in a scratch rerun, but the interval basis deviates from the brief's per-call-cost-spread instruction (srtj-cohort-estimate-run.py:236-263).",
+    "fit": "srtj-cohort-estimate-run.py:204 is named wilson_half_width while implementing the Wald half-width, and :321-359 renders with default matplotlib styling rather than the mandated data-ink style.",
+    "goal_fidelity": "srtj-cohort-estimate.json records the cohort (464 items, seed 20261019, rule, precision argument) and both arms' totals with intervals and a wall plan, matching the goal's three deliverables.",
+    "reuse": "no owner for a binomial sizing or interval helper exists in imas_codex, so srtj-cohort-estimate-run.py:204-209 adds one where the search found none.",
+    "scope_discipline": "the net diff from 50459cc3f to 31a2c04a5 changes only the four granted paths, with one disclosed intermediate out-of-scope figure create at b074eddf7."
+  },
+  "notes": "added_failure_count=0 is derived from the reviewed run's own arms: its manifest declares baseline_suite and after_suite absent (tests: [], one driver gate log), so no suite delta exists to read.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is the fixed-cohort cost estimate; srtj-cohort-estimate.json carries the cohort, both arms' totals with intervals, and the wall plan.\nVERDICT done_when: the done_when is a driver ending EXIT=0 with USD 0 spent; the manifest names gate-cohort-estimate.log, whose last line is EXIT=0 and whose release line reads 'spend USD 0.00'.\nVERDICT write_paths: read FENCE \u2014 SCOPE at prompt.txt:217-221 (html, json, run.py, docs/figures/sn-review-through-jev/srtj-cohort-estimate); the net diff base..head touches exactly those paths.\nVERDICT manifest: read; manifest.md records status complete, four commits, four changed paths, an empty tests list with one gate log, and discloses the check-manifest finding on the figure's first location.\nVERDICT diff: read commit by commit against 50459cc3f; net four files, all inside the granted scope, no production module touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: srtj-cohort-estimate.json records the cohort (464 items, seed 20261019) and both arms' totals, matching the goal's three deliverables.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-cohort-estimate.log's EXIT=0 reproduces byte-identically on a scratch rerun, but the interval basis deviates from the brief (run.py:236-263).\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the net diff is inside the granted paths, with one disclosed intermediate out-of-scope figure create at b074eddf7.\nSCORE durability: 8\nJUSTIFICATION durability: no test or assertion guards the estimate, so nothing reddens if srtj-cohort-estimate.json drifts from srtj-cohort-estimate-run.py.\nSCORE fit: 15\nJUSTIFICATION fit: element ids are node-id-prefixed and the module is idiomatic, but srtj-cohort-estimate-run.py:204's wilson_half_width name contradicts the Wald estimator it computes.\nSCORE reuse: 19\nJUSTIFICATION reuse: a search of imas_codex for half_width, wilson, sample_size, required_n and confidence_interval found no owner for a binomial sizing helper, so run.py:204-209 adds one where none existed.",
+  "review_run_id": "r-20261019T043000982373-review-of-srtj-cohort-estimate-31a2c04a5050",
+  "reviewed_base_sha": "50459cc3f9d91f0069687103ce14358acc127da6",
+  "reviewed_head_sha": "31a2c04a5050f74106d2774129b3c87fc07bee15",
+  "reviewed_run_id": "r-20261019T035549247584-srtj-cohort-estimate",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T04:47:39.411375+00:00",
+  "verdicts": {
+    "diff": "read all four commits against base 50459cc3f; b074eddf7 adds the driver, html and json; ad1dbaa19 trims an import; 0842134e3 and 31a2c04a5 relocate and regenerate the figure; net diff is four files, all inside the granted paths.",
+    "done_when": "the done_when is 'a driver that ends at a real EXIT=0 with spend USD 0'; the manifest names gate-cohort-estimate.log whose last line is EXIT=0 and whose release line reads 'spend USD 0.00'.",
+    "goal": "the node goal is the fixed-cohort cost estimate; the landed fragment docs/evidence/fragments/sn-review-through-jev/srtj-cohort-estimate.json carries the cohort (464 items, seed 20261019), both arms' totals with intervals, and the wall plan.",
+    "manifest": "read manifest.md: it declares status complete, four commits, the four changed paths, tests [] and test_logs [gate-cohort-estimate.log], and honestly discloses the check-manifest finding on the figure's first location.",
+    "write_paths": "read the dispatch FENCE \u2014 SCOPE in the reviewed run's prompt.txt:217-221; the net diff base..head touches exactly those four granted paths."
+  }
+}
