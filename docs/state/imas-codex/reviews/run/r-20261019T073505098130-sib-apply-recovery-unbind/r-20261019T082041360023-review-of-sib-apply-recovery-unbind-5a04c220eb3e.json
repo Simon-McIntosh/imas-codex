@@ -34,6 +34,11 @@
       "kind": "exempted",
       "reason": "The reason text sits in the signed authority's rows, which are data recording the ruling the apply executed; the driver is a one-shot evidence script, not product source.",
       "recorded_at": "2026-10-19T12:38:03.275144+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Real gap, recorded on the plan: the recovery-unbind program has no production builder for its own schema, so this driver and the test helper serialize it separately. The writer's loader verified the signature and the preview ran before the apply, so the authority used here was checked by the owner.",
+      "recorded_at": "2026-10-19T12:38:11.143588+00:00"
     }
   },
   "findings": [
