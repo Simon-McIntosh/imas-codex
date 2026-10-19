@@ -1,0 +1,286 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "vertical_current_density_due_to_anomalous_transport",
+  "applied": true,
+  "arm": "heuristic",
+  "budget_limit_usd": 2.0,
+  "calls": 51,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-anomalous-current-heuristic",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-anomalous-current-heuristic/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-19T22:09:30.799402+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 51,
+      "scratch_ledger_rows": 51,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 102
+  },
+  "cost_limit_passed_usd": 2.0,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T22:09:28.324537+00:00",
+  "family": "current_density_due_to_anomalous_transport",
+  "harmonize_receipts": [
+    {
+      "anchor": "vertical_current_density_due_to_anomalous_transport",
+      "applied": true,
+      "batches": [
+        [
+          "vertical_current_density_due_to_anomalous_transport"
+        ],
+        [
+          "current_density_due_to_anomalous_transport",
+          "parallel_current_density_due_to_anomalous_transport",
+          "poloidal_current_density_due_to_anomalous_transport",
+          "radial_current_density_due_to_anomalous_transport",
+          "toroidal_current_density_due_to_anomalous_transport"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "e75ce54500aff946a61d6922da6bd8fb0708ea96c24459f063d1bd149323f7ea",
+      "harmonized": false,
+      "invariant": [
+        "current_density",
+        "",
+        "",
+        "anomalous_transport",
+        ""
+      ],
+      "member_scores": {
+        "current_density_due_to_anomalous_transport": 0.875,
+        "parallel_current_density_due_to_anomalous_transport": 0.91875,
+        "poloidal_current_density_due_to_anomalous_transport": 0.89375,
+        "radial_current_density_due_to_anomalous_transport": 0.9375,
+        "toroidal_current_density_due_to_anomalous_transport": 0.94375,
+        "vertical_current_density_due_to_anomalous_transport": 1.0
+      },
+      "members": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport"
+      ],
+      "n": 6,
+      "physical_base": "current_density",
+      "planned_calls": 6,
+      "result": {
+        "batches_run": 2,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 80.00% < 90.00% (4/5 touched)"
+        ],
+        "halted": true,
+        "resume_from": 2,
+        "run_ids": [
+          "780b015f-907c-40ef-9173-3b145cf405ae",
+          "1e888484-5799-4607-8825-77a6f228d848"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 5,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 1.2913,
+        "total_quarantined": 0,
+        "total_selected": 6,
+        "total_touched": 6
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.875,
+            "id": "current_density_due_to_anomalous_transport"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 0.875,
+            "id": "current_density_due_to_anomalous_transport"
+          },
+          {
+            "after": 0.9375,
+            "before": 1.0,
+            "id": "vertical_current_density_due_to_anomalous_transport"
+          }
+        ]
+      },
+      "scores_after": {
+        "current_density_due_to_anomalous_transport": 0.849,
+        "parallel_current_density_due_to_anomalous_transport": 1.0,
+        "poloidal_current_density_due_to_anomalous_transport": 0.9375,
+        "radial_current_density_due_to_anomalous_transport": 0.9375,
+        "toroidal_current_density_due_to_anomalous_transport": 1.0,
+        "vertical_current_density_due_to_anomalous_transport": 0.9375
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 2,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 80.00% < 90.00% (4/5 touched)"
+    ],
+    "halted": true,
+    "resume_from": 2,
+    "run_ids": [
+      "780b015f-907c-40ef-9173-3b145cf405ae",
+      "1e888484-5799-4607-8825-77a6f228d848"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 5,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 1.2913,
+    "total_quarantined": 0,
+    "total_selected": 6,
+    "total_touched": 6
+  },
+  "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+  "isolation": {
+    "at": "2026-10-19T21:39:16.287054+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771164,
+    "live_nodes_after": 1771164,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 51,
+    "scratch_ledger_rows": 51,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28000"
+  },
+  "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+  "kind": "component",
+  "ledger_calls": 51,
+  "ledger_spend_usd": 1.2913090000000003,
+  "ledger_window": {
+    "ended": "2026-10-19T22:09:30.202991+00:00",
+    "started": "2026-10-19T21:40:22.618951+00:00"
+  },
+  "lint_after": 12,
+  "lint_after_classes": {
+    "defining_equation": 1,
+    "link_hygiene": 1,
+    "link_missing_reverse": 5,
+    "sign_convention": 5
+  },
+  "lint_before": 5,
+  "lint_before_classes": {
+    "defining_equation": 1,
+    "link_missing_reverse": 3,
+    "sign_convention": 1
+  },
+  "members": [
+    "current_density_due_to_anomalous_transport",
+    "parallel_current_density_due_to_anomalous_transport",
+    "poloidal_current_density_due_to_anomalous_transport",
+    "radial_current_density_due_to_anomalous_transport",
+    "toroidal_current_density_due_to_anomalous_transport",
+    "vertical_current_density_due_to_anomalous_transport"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T211947135694-ssog-anchor-anomalous-current-heuristic/mcintos-1281970-vwnlje60/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.238915
+    },
+    {
+      "calls": 9,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.48358899999999994
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.005534
+    },
+    {
+      "calls": 9,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.286642
+    },
+    {
+      "calls": 9,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.27268099999999995
+    },
+    {
+      "calls": 21,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.003947999999999999
+    }
+  ],
+  "planned_calls": 6,
+  "port": 28000,
+  "port_lock": "/dev/shm/ssog-scratch-port-28000.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T22:09:46.747087+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28000.lock"
+  },
+  "recorded_anchor_before": "vertical_current_density_due_to_anomalous_transport",
+  "run_ids": [
+    "780b015f-907c-40ef-9173-3b145cf405ae",
+    "1e888484-5799-4607-8825-77a6f228d848"
+  ],
+  "scores_after": {
+    "current_density_due_to_anomalous_transport": 0.849,
+    "parallel_current_density_due_to_anomalous_transport": 1.0,
+    "poloidal_current_density_due_to_anomalous_transport": 0.9375,
+    "radial_current_density_due_to_anomalous_transport": 0.9375,
+    "toroidal_current_density_due_to_anomalous_transport": 1.0,
+    "vertical_current_density_due_to_anomalous_transport": 0.9375
+  },
+  "scores_before": {
+    "current_density_due_to_anomalous_transport": 0.875,
+    "parallel_current_density_due_to_anomalous_transport": 0.91875,
+    "poloidal_current_density_due_to_anomalous_transport": 0.89375,
+    "radial_current_density_due_to_anomalous_transport": 0.9375,
+    "toroidal_current_density_due_to_anomalous_transport": 0.94375,
+    "vertical_current_density_due_to_anomalous_transport": 1.0
+  },
+  "scratch_removed": {
+    "at": "2026-10-19T22:09:46.747012+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T211947135694-ssog-anchor-anomalous-current-heuristic/mcintos-1281970-vwnlje60"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T211947135694-ssog-anchor-anomalous-current-heuristic/mcintos-1281970-vwnlje60",
+  "scratch_uri": "bolt://127.0.0.1:28000",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 1.2913090000000003,
+  "stamped": false,
+  "started_at": "2026-10-19T21:25:30.150350+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T22:09:45.816596+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T211947135694-ssog-anchor-anomalous-current-heuristic/mcintos-1281970-vwnlje60/instance"
+  },
+  "wall_seconds": 1745.705547761172
+}
