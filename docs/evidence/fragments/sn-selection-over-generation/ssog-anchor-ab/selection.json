@@ -1,0 +1,220 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "selected": [
+    {
+      "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+      "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+      "jev_asked": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "jev_cost": 0.000103068,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "coordinate",
+      "members": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "physical_base": "",
+      "seed": "vertical_coordinate_of_diagnostic_aperture"
+    },
+    {
+      "heuristic_anchor": "toroidal_angular_width_of_camera",
+      "jev_anchor": "vertical_angular_width_of_camera",
+      "jev_asked": [
+        "vertical_angular_width_of_camera",
+        "toroidal_angular_width_of_camera"
+      ],
+      "jev_cost": 7.072799999999999e-05,
+      "jev_reason": null,
+      "jev_scored": 2,
+      "kind": "component",
+      "members": [
+        "angular_width_of_camera",
+        "toroidal_angular_width_of_camera",
+        "vertical_angular_width_of_camera"
+      ],
+      "physical_base": "angular_width",
+      "seed": "angular_width_of_camera"
+    },
+    {
+      "heuristic_anchor": "major_length_of_passive_loop_element",
+      "jev_anchor": "length_of_passive_loop_element",
+      "jev_asked": [
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element",
+        "length_of_passive_loop_element"
+      ],
+      "jev_cost": 0.000107772,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "length_of_passive_loop_element",
+        "major_length_of_passive_loop_element",
+        "minor_length_of_passive_loop_element"
+      ],
+      "physical_base": "length",
+      "seed": "length_of_passive_loop_element"
+    },
+    {
+      "heuristic_anchor": "power_of_divertor_due_to_recombination",
+      "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
+      "jev_asked": [
+        "power_of_divertor_due_to_recombination",
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination"
+      ],
+      "jev_cost": 0.00012205199999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "subject",
+      "members": [
+        "neutral_power_of_divertor_due_to_recombination",
+        "plasma_power_of_divertor_due_to_recombination",
+        "power_of_divertor_due_to_recombination"
+      ],
+      "physical_base": "power",
+      "seed": "neutral_power_of_divertor_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+      "jev_anchor": "current_density_due_to_wave_driven_current_drive",
+      "jev_asked": [
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "current_density_due_to_wave_driven_current_drive"
+      ],
+      "jev_cost": 0.00013385399999999998,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_wave_driven_current_drive"
+    },
+    {
+      "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_asked": [
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "momentum_flux_due_to_e_cross_b_drift"
+      ],
+      "jev_cost": 0.00015141000000000002,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "component",
+      "members": [
+        "momentum_flux_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
+      ],
+      "physical_base": "momentum",
+      "seed": "momentum_flux_due_to_e_cross_b_drift"
+    },
+    {
+      "heuristic_anchor": "wavelength_of_visible_camera",
+      "jev_anchor": "lower_bound_wavelength_of_visible_camera",
+      "jev_asked": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "jev_cost": 0.00010281599999999999,
+      "jev_reason": null,
+      "jev_scored": 3,
+      "kind": "unclassified",
+      "members": [
+        "lower_bound_wavelength_of_visible_camera",
+        "upper_bound_wavelength_of_visible_camera",
+        "wavelength_of_visible_camera"
+      ],
+      "physical_base": "wavelength",
+      "seed": "lower_bound_wavelength_of_visible_camera"
+    },
+    {
+      "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
+      "jev_anchor": "source_rate_due_to_thermal_fusion",
+      "jev_asked": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "jev_cost": 0.00017077199999999997,
+      "jev_reason": null,
+      "jev_scored": 4,
+      "kind": "subject",
+      "members": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "physical_base": "source_rate",
+      "seed": "neutron_source_rate_due_to_thermal_fusion"
+    },
+    {
+      "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+      "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+      "jev_asked": [
+        "energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination"
+      ],
+      "jev_cost": 0.00023553600000000003,
+      "jev_reason": null,
+      "jev_scored": 5,
+      "kind": "subject",
+      "members": [
+        "energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination"
+      ],
+      "physical_base": "energy",
+      "seed": "energy_flux_at_wall_due_to_recombination"
+    },
+    {
+      "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+      "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+      "jev_asked": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport"
+      ],
+      "jev_cost": 0.000220332,
+      "jev_reason": null,
+      "jev_scored": 6,
+      "kind": "component",
+      "members": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport"
+      ],
+      "physical_base": "current_density",
+      "seed": "current_density_due_to_anomalous_transport"
+    }
+  ],
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
+}
