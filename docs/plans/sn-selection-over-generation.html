@@ -24,8 +24,8 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="77">
-<meta name="plan-modified" content="2026-10-18">
+<meta name="plan-version" content="78">
+<meta name="plan-modified" content="2026-10-19">
 </head>
 <body>
   <main class="plan-doc">
@@ -357,6 +357,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-ceiling-raised" data-who="Simon McIntosh" data-when="2026-10-18T12:55:00Z">
     <div class="r-comment-body"><p>The fresh export (2026-10-18T11:47:48Z) passed the offline consistency check, with 1,770,101 nodes before and after. On it the A/B found 118 eligible non-WEST families, 42 with differing anchors. Ten three-member families, harmonized in both arms, dry-run at USD 40.65 (USD 0.66 per harmonize call), above the USD 30 ceiling. Lead ruling, 2026-10-18: raise the ceiling to USD 42 so all ten families run.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-s7-one-family-nodes" data-who="reckon-build" data-when="2026-10-19T03:40:00Z">
+    <div class="r-comment-body"><p>The lead raised the ceiling to USD 50 in total so all ten families run. They were then dry-run at USD 47.21, against USD 1.88 already committed. The run that followed (<code>r-20261018T102210638794-ssog-anchor-ab</code>, head <code>9e0c6fb2e</code>) completed one heuristic arm: 24 calls, USD 0.63 and 1,468 s. It then ran out of window, because ten families in sequence do not fit in one run. USD 2.38 is spent so far. The A/B is re-cut as one node per family, each loading two fresh scratch copies and running both arms on one code revision. The family selection, anchors and adoption rule are kept exactly as fixed on 2026-10-18 at 10:45:18Z. The first node builds the per-family runner and runs <code>vertical_coordinate_of_diagnostic_aperture</code>; nine more nodes follow, then one aggregating node applies the rule to all ten.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
