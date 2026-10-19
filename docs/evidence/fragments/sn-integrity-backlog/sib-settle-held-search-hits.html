@@ -1,66 +1,132 @@
 <h2 id='sib-settle-held-search-hits'>Held search hits settled</h2>
-<p id='sib-settle-held-search-hits-summary'>The search and lineage steps referred 60 names; 50 are still sourceless on the live graph and form this node's work list ({'corrected_filter': 50, 'corrected_referred_to_lead': 21, 'corrected_no_surviving_candidate': 15, 'searched_referred_to_dd_search': 27, 'lineage_referred_to_dd_search': 27, 'lineage_referred_to_lead': 0}). Of those, 6 were retired in a holder's favour through the signed supersede and 44 remain referred to the lead. The classifier read-back holds 92 sourceless names before and 86 after: a fall of exactly 6 with nothing entering the population. Spend USD 0.003609.</p>
-<p id='sib-settle-held-search-hits-suspect'>0 name(s) carry a suspect holder binding, where a holder's unit differs from the unit its held DD path declares. Those pairs are flagged below and change nothing about the holder.</p>
-<p id='sib-settle-held-search-hits-foreign'>A later writer moved dropped_edge 45 to 40, never_bound 23 to 22. That movement lands after this node&#x27;s last receipt and touches none of the settled names, and the overlap read below dates it.</p>
-<figure id='sib-settle-held-search-hits-fig'><img src='/imas-codex/figures/sn-integrity-backlog/sib-settle-held-search-hmm/sib-settle-held-search-hits.svg' alt='Sourceless population before and after this node&apos;s signed supersedes, and the work list split into settled, live and exhausted referrals.'><figcaption>Sourceless names by population before and after this node's 6 signed supersedes (left), and the 50-name work list split into 6 settled, 8 still-live and 36 exhausted referrals (right). Only the dropped-edge and never-bound populations moved; the other three are unchanged.</figcaption></figure>
+<p id='sib-settle-held-search-hits-summary'>The search and lineage steps referred 60 names; 44 are still sourceless on the live graph and form this node's work list ({'corrected_filter': 44, 'corrected_referred_to_lead': 17, 'corrected_no_surviving_candidate': 13, 'searched_referred_to_dd_search': 22, 'lineage_referred_to_dd_search': 22, 'lineage_referred_to_lead': 0}). Of those, 7 were retired in a holder's favour through the signed supersede and 37 remain referred to the lead. The classifier read-back holds 79 sourceless names now, against 86 before this round's apply; cumulatively the population has fallen from 92 to 79 across the 13 names this node has retired, with nothing entering it. Spend USD 0.003385.</p>
+<p id='sib-settle-held-search-hits-suspect'>0 name(s) carry a suspect holder binding, where a holder's unit differs from the unit its held DD path declares. Every holder in this cohort carries a held DD path and a resolved DD unit (114 of 114), so this count is a result the comparison reached rather than one an empty field made unfalsifiable; the derivation check below also runs the comparison on a planted mismatch. A flagged pair changes nothing about the holder.</p>
+<p id='sib-settle-held-search-hits-foreign'>A later writer moved dropped_edge 45 to 34, never_bound 23 to 21. That movement lands after this node&#x27;s last receipt and touches none of the settled names, and the overlap read below dates it.</p>
+<figure id='sib-settle-held-search-hits-fig'><img src='/imas-codex/figures/sn-integrity-backlog/sib-settle-held-search-hits/sib-settle-held-search-hits.svg' alt='Sourceless population before and after this node&apos;s signed supersedes, and the work list split into settled, live and exhausted referrals.'><figcaption>Sourceless names by population before and after this node's 7 signed supersedes (left), and the 44-name work list split into 7 settled, 8 still-live and 29 exhausted referrals (right). Only the dropped-edge and never-bound populations moved; the other three are unchanged.</figcaption></figure>
 <h3 id='sib-settle-held-search-hits-floors'>Floors</h3>
 <p>Coordinator's ruling for every retirement: the chosen option's probability at least <code>0.8</code> and Jev's self-reported confidence at least <code>0.5</code>.</p>
-<h3 id='sib-settle-held-search-hits-retired'>Retired in the holder's favour (6)</h3>
+<h3 id='sib-settle-held-search-hits-retired'>Retired in the holder's favour (7)</h3>
 <table id='sib-settle-held-search-hits-retired-t'><thead><tr><th>name</th><th>holder(s)</th><th>Jev</th><th>p</th><th>conf</th><th>action</th><th>held DD path</th></tr></thead><tbody>
-<tr><td>accumulated_total_coolant_absorbed_energy_of_calorimetry_component</td><td>accumulated_coolant_absorbed_energy_of_calorimetry_component</td><td>same quantity as `accumulated_coolant_absorbed_energy_of_calorimetry_component`</td><td>0.97</td><td>0.95</td><td>superseded</td><td></td></tr>
-<tr><td>calibration_factor_of_spectrometer_channel</td><td>spectral_calibration_factor_of_spectrometer</td><td>same quantity as `spectral_calibration_factor_of_spectrometer`</td><td>0.92</td><td>0.88</td><td>superseded</td><td></td></tr>
-<tr><td>normal_distance_of_antenna_strap</td><td>back_surface_distance_of_antenna_strap, height_of_antenna_strap, inner_radius_of_antenna_strap, major_length_of_antenna_strap, outer_radius_of_antenna_strap, radial_offset_of_lower_hybrid_antenna, radius_of_antenna_strap, thickness_of_antenna_strap, toroidal_width_of_antenna_strap</td><td>same quantity as `back_surface_distance_of_antenna_strap`</td><td>0.97</td><td>0.97</td><td>superseded</td><td></td></tr>
-<tr><td>surface_temperature_of_plasma_facing_component</td><td>coolant_temperature_of_plant_component_port, maximum_surface_temperature, surface_temperature, temperature_at_wall</td><td>same quantity as `surface_temperature`</td><td>0.85</td><td>0.82</td><td>superseded</td><td></td></tr>
-<tr><td>surface_thickness_of_cryostat</td><td>thickness_of_breeder_blanket_layer, thickness_of_cryostat, thickness_of_vacuum_vessel</td><td>same quantity as `thickness_of_cryostat`</td><td>0.97</td><td>0.96</td><td>superseded</td><td></td></tr>
-<tr><td>total_thermal_radiative_power_of_divertor_target</td><td>absorbed_radiated_power_at_divertor_target, absorbed_radiated_power_of_divertor, neutral_power_at_divertor_target, power_at_divertor_target, thermal_radiative_power_of_divertor, thermal_radiative_power_of_divertor_target, total_ion_power_at_inner_divertor_target</td><td>same quantity as `thermal_radiative_power_of_divertor_target`</td><td>0.88</td><td>0.87</td><td>superseded</td><td></td></tr>
+<tr><td>cumulative_ethylene_count_due_to_gas_injection</td><td>accumulated_ethylene_count</td><td>same quantity as `accumulated_ethylene_count`</td><td>1</td><td>1</td><td>superseded</td><td>summary/gas_injection_accumulated/ethylene/value</td></tr>
+<tr><td>cumulative_inside_flux_surface_total_electron_density</td><td>total_electron_count</td><td>same quantity as `total_electron_count`</td><td>0.95</td><td>0.92</td><td>superseded</td><td>interferometer/electrons_n</td></tr>
+<tr><td>normalized_toroidal_hard_xray_peak_external_half_width</td><td>inner_hard_xray_half_width_at_emissivity_peak, normalized_toroidal_flux_coordinate, normalized_toroidal_flux_coordinate_at_measurement_position, normalized_toroidal_hard_xray_peak_lower_bound_width, outer_hard_xray_half_width_at_emissivity_peak</td><td>same quantity as `outer_hard_xray_half_width_at_emissivity_peak`</td><td>0.94</td><td>0.93</td><td>superseded</td><td>ece/channel/position/rho_tor_norm, hard_x_rays/emissivity_profile_1d/half_width_external, hard_x_rays/emissivity_profile_1d/half_width_internal, neutron_diagnostic/reconstructed_emissivity/rho_tor_norm</td></tr>
+<tr><td>normalized_toroidal_hard_xray_peak_upper_bound_width</td><td>inner_hard_xray_half_width_at_emissivity_peak, normalized_toroidal_flux_coordinate, normalized_toroidal_flux_coordinate_at_measurement_position, normalized_toroidal_hard_xray_peak_lower_bound_width, outer_hard_xray_half_width_at_emissivity_peak</td><td>same quantity as `outer_hard_xray_half_width_at_emissivity_peak`</td><td>0.81</td><td>0.78</td><td>superseded</td><td>ece/channel/position/rho_tor_norm, hard_x_rays/emissivity_profile_1d/half_width_external, hard_x_rays/emissivity_profile_1d/half_width_internal, neutron_diagnostic/reconstructed_emissivity/rho_tor_norm</td></tr>
+<tr><td>ratio_of_charge_of_conductor_to_voltage_of_conductor</td><td>capacitance_of_ion_cyclotron_heating_antenna</td><td>same quantity as `capacitance_of_ion_cyclotron_heating_antenna`</td><td>0.92</td><td>0.88</td><td>superseded</td><td>ic_antennas/antenna/module/matching_element/capacitance</td></tr>
+<tr><td>thermal_energy_confinement_time</td><td>coolant_transit_time_of_plant_component_port, energy_confinement_time</td><td>same quantity as `energy_confinement_time`</td><td>0.99</td><td>0.99</td><td>superseded</td><td>calorimetry/group/component/transit_time, summary/global_quantities/tau_energy/value</td></tr>
+<tr><td>vertical_outline_of_wall</td><td>vertical_coordinate_of_active_wall_point, vertical_coordinate_of_dr_dz_zero_point, vertical_outline_of_divertor_tile, vertical_outline_of_vacuum_vessel</td><td>same quantity as `vertical_outline_of_vacuum_vessel`</td><td>0.86</td><td>0.83</td><td>superseded</td><td>disruption/halo_currents/active_wall_point/z, divertors/divertor/target/tile/surface_outline/z, equilibrium/time_slice/boundary/dr_dz_zero_point/z, wall/description_2d/vessel/unit/annular/outline_inner/z</td></tr>
 </tbody></table>
-<h3 id='sib-settle-held-search-hits-referrals'>Referred to the lead (44)</h3>
+<h3 id='sib-settle-held-search-hits-referrals'>Referred to the lead (37)</h3>
 <table id='sib-settle-held-search-hits-ref-t'><thead><tr><th>name</th><th>holder(s)</th><th>Jev</th><th>p</th><th>conf</th><th>action</th><th>held DD path</th></tr></thead><tbody>
-<tr><td>bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface</td><td>electron_temperature, volume_averaged_electron_temperature</td><td>a different quantity from all of these</td><td>0.93</td><td>0.91</td><td>referred to lead</td><td></td></tr>
-<tr><td>coolant_absorbed_energy_accumulated_of_plasma_facing_component</td><td>accumulated_coolant_absorbed_energy_of_calorimetry_component, fast_particle_energy</td><td>a different quantity from all of these</td><td>0.75</td><td>0.67</td><td>referred to lead</td><td></td></tr>
-<tr><td>count_normalized_at_detector_pixel</td><td>neutron_response_function_of_neutron_detector, normalized_ion_species_number_density</td><td>a different quantity from all of these</td><td>0.99</td><td>0.99</td><td>referred to lead</td><td></td></tr>
-<tr><td>cumulative_ethylene_count_due_to_gas_injection</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>cumulative_inside_flux_surface_total_electron_density</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>deposited_power_at_divertor_target</td><td>absorbed_radiated_power_at_divertor_target, absorbed_radiated_power_of_divertor, electron_power_at_outer_divertor_target, heat_power_of_divertor, neutral_power_at_divertor_target, plasma_power_at_divertor_target_due_to_recombination, power_of_divertor_due_to_convection, power_of_divertor_due_to_ohmic_dissipation, thermal_radiative_power_of_divertor, total_incident_power_of_divertor</td><td>a different quantity from all of these</td><td>0.62</td><td>0.59</td><td>referred to lead</td><td></td></tr>
-<tr><td>electron_energy_flux_limiter_coefficient</td><td>radial_ion_momentum_flux_limiter_coefficient, radial_neutral_momentum_flux_limiter_coefficient, radial_neutral_state_momentum_flux_limiter_coefficient</td><td>a different quantity from all of these</td><td>0.99</td><td>0.99</td><td>referred to lead</td><td></td></tr>
-<tr><td>electron_particle_diffusivity</td><td>parallel_electron_diffusivity, radial_effective_electron_diffusivity</td><td>a different quantity from all of these</td><td>0.68</td><td>0.57</td><td>referred to lead</td><td></td></tr>
-<tr><td>electron_temperature_at_first_wall</td><td>electron_temperature</td><td>a different quantity from all of these</td><td>0.56</td><td>0.34</td><td>referred to lead</td><td></td></tr>
-<tr><td>electrostatic_potential_at_outboard_midplane</td><td>electrostatic_potential, electrostatic_potential_at_langmuir_probe_position</td><td>a different quantity from all of these</td><td>0.56</td><td>0.41</td><td>referred to lead</td><td></td></tr>
+<tr><td>bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface</td><td>electron_temperature, volume_averaged_electron_temperature</td><td>a different quantity from all of these</td><td>0.91</td><td>0.88</td><td>referred to lead</td><td>core_profiles/global_quantities/t_e_volume_average, core_profiles/profiles_1d/electrons/temperature</td></tr>
+<tr><td>coolant_absorbed_energy_accumulated_of_plasma_facing_component</td><td>accumulated_coolant_absorbed_energy_of_calorimetry_component, fast_particle_energy</td><td>a different quantity from all of these</td><td>0.61</td><td>0.48</td><td>referred to lead</td><td>calorimetry/group/component/energy_cumulated, distributions/distribution/global_quantities/energy_fast</td></tr>
+<tr><td>count_normalized_at_detector_pixel</td><td>neutron_response_function_of_neutron_detector, normalized_ion_species_number_density</td><td>a different quantity from all of these</td><td>0.96</td><td>0.95</td><td>referred to lead</td><td>gyrokinetics_local/species/density_norm, neutron_diagnostic/detector/green_functions/response_function</td></tr>
+<tr><td>deposited_power_at_divertor_target</td><td>absorbed_radiated_power_at_divertor_target, absorbed_radiated_power_of_divertor, electron_power_at_outer_divertor_target, heat_power_of_divertor, neutral_power_at_divertor_target, plasma_power_at_divertor_target_due_to_recombination, power_of_divertor_due_to_convection, power_of_divertor_due_to_ohmic_dissipation, thermal_radiative_power_of_divertor, total_incident_power_of_divertor</td><td>a different quantity from all of these</td><td>0.64</td><td>0.61</td><td>referred to lead</td><td>balance_of_plant/power_plant/heat_load_divertor, divertors/divertor/power_black_body, divertors/divertor/power_convected, divertors/divertor/power_currents, divertors/divertor/power_incident, divertors/divertor/power_radiated, divertors/divertor/target/power_neutrals, divertors/divertor/target/power_radiated, divertors/divertor/target/power_recombination_plasma, wall/global_quantities/electrons/power_outer_target</td></tr>
+<tr><td>electron_energy_flux_limiter_coefficient</td><td>radial_ion_momentum_flux_limiter_coefficient, radial_neutral_momentum_flux_limiter_coefficient, radial_neutral_state_momentum_flux_limiter_coefficient</td><td>a different quantity from all of these</td><td>0.98</td><td>0.97</td><td>referred to lead</td><td>edge_transport/model/ggd/ion/momentum/flux_limiter/radial, edge_transport/model/ggd/neutral/momentum/flux_limiter/radial, edge_transport/model/ggd/neutral/state/momentum/flux_limiter/radial</td></tr>
+<tr><td>electron_particle_diffusivity</td><td>parallel_electron_diffusivity, radial_effective_electron_diffusivity</td><td>a different quantity from all of these</td><td>0.53</td><td>0.37</td><td>referred to lead</td><td>edge_transport/model/ggd/electrons/particles/d_parallel, edge_transport/model/ggd/electrons/particles/d_radial</td></tr>
+<tr><td>electron_temperature_at_first_wall</td><td>electron_temperature</td><td>a different quantity from all of these</td><td>0.62</td><td>0.43</td><td>referred to lead</td><td>core_profiles/profiles_1d/electrons/temperature</td></tr>
+<tr><td>electrostatic_potential_at_outboard_midplane</td><td>electrostatic_potential, electrostatic_potential_at_langmuir_probe_position</td><td>same quantity as `electrostatic_potential`</td><td>0.5</td><td>0.33</td><td>referred to lead</td><td>edge_profiles/profiles_1d/phi_potential, langmuir_probes/embedded/v_plasma</td></tr>
 <tr><td>energy_diffusion_coefficient_due_to_diffusion</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
 <tr><td>flux_surface_averaged_parallel_electric_field_at_separatrix</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>fraction_of_neutron_detector_converter</td><td>neutron_response_function_of_neutron_detector, ratio_of_tritium_density_to_deuterium_density, spectral_efficiency_of_neutron_detector</td><td>a different quantity from all of these</td><td>1</td><td>1</td><td>referred to lead</td><td></td></tr>
-<tr><td>front_surface_area_of_langmuir_probe</td><td>effective_area_of_langmuir_probe, poloidal_plane_cross_sectional_area_of_flux_surface, wetted_area_of_langmuir_probe</td><td>same quantity as `wetted_area_of_langmuir_probe`</td><td>0.5</td><td>0.37</td><td>referred to lead</td><td></td></tr>
-<tr><td>ion_charge_state_energy_flux_limiter_coefficient</td><td>radial_ion_state_momentum_flux_limiter_coefficient</td><td>a different quantity from all of these</td><td>0.94</td><td>0.91</td><td>referred to lead</td><td></td></tr>
-<tr><td>ion_power</td><td>total_ion_heating_power, total_ion_power, total_ion_power_at_inner_divertor_target</td><td>a different quantity from all of these</td><td>0.61</td><td>0.51</td><td>referred to lead</td><td></td></tr>
-<tr><td>ion_state_energy_flux_limiter_coefficient</td><td>radial_ion_momentum_flux_limiter_coefficient, radial_ion_state_momentum_flux_limiter_coefficient, radial_neutral_state_momentum_flux_limiter_coefficient</td><td>a different quantity from all of these</td><td>0.94</td><td>0.92</td><td>referred to lead</td><td></td></tr>
-<tr><td>magnetic_shear_at_pedestal_top</td><td>magnetic_shear_at_flux_surface, magnetic_shear_at_sawtooth_inversion_radius</td><td>a different quantity from all of these</td><td>0.89</td><td>0.85</td><td>referred to lead</td><td></td></tr>
-<tr><td>momentum_due_to_hot_tail</td><td>runaway_electron_critical_momentum_due_to_hot_tail</td><td>a different quantity from all of these</td><td>1</td><td>1</td><td>referred to lead</td><td></td></tr>
-<tr><td>net_forward_power_of_wave_beam</td><td>electron_absorbed_power_of_beam_tracing_beam, ion_absorbed_power_of_beam_tracing_beam, launched_power_of_lower_hybrid_antenna, total_absorbed_wave_power, total_absorbed_wave_power_at_inside_flux_surface</td><td>same quantity as `launched_power_of_lower_hybrid_antenna`</td><td>0.58</td><td>0.51</td><td>referred to lead</td><td></td></tr>
-<tr><td>net_plasma_current_due_to_ohmic_current_drive</td><td>current_due_to_non_inductive_current_drive, plasma_current</td><td>a different quantity from all of these</td><td>0.98</td><td>0.97</td><td>referred to lead</td><td></td></tr>
+<tr><td>fraction_of_neutron_detector_converter</td><td>neutron_response_function_of_neutron_detector, ratio_of_tritium_density_to_deuterium_density, spectral_efficiency_of_neutron_detector</td><td>a different quantity from all of these</td><td>0.98</td><td>0.97</td><td>referred to lead</td><td>neutron_diagnostic/detector/energy_band/detection_efficiency, neutron_diagnostic/detector/green_functions/response_function, neutron_diagnostic/reconstructed_emissivity/fuel_ratio</td></tr>
+<tr><td>front_surface_area_of_langmuir_probe</td><td>effective_area_of_langmuir_probe, poloidal_plane_cross_sectional_area_of_flux_surface, wetted_area_of_langmuir_probe</td><td>same quantity as `wetted_area_of_langmuir_probe`</td><td>0.57</td><td>0.46</td><td>referred to lead</td><td>core_profiles/profiles_1d/grid/area, langmuir_probes/embedded/surface_area_effective, langmuir_probes/reciprocating/surface_area</td></tr>
+<tr><td>ion_charge_state_energy_flux_limiter_coefficient</td><td>radial_ion_state_momentum_flux_limiter_coefficient</td><td>a different quantity from all of these</td><td>0.95</td><td>0.92</td><td>referred to lead</td><td>edge_transport/model/ggd/ion/state/momentum/flux_limiter/radial</td></tr>
+<tr><td>ion_power</td><td>total_ion_heating_power, total_ion_power, total_ion_power_at_inner_divertor_target</td><td>a different quantity from all of these</td><td>0.53</td><td>0.41</td><td>referred to lead</td><td>core_sources/source/global_quantities/total_ion_power, core_sources/source/profiles_1d/total_ion_power_inside, wall/global_quantities/power_inner_target_ion_total</td></tr>
+<tr><td>ion_state_energy_flux_limiter_coefficient</td><td>radial_ion_momentum_flux_limiter_coefficient, radial_ion_state_momentum_flux_limiter_coefficient, radial_neutral_state_momentum_flux_limiter_coefficient</td><td>a different quantity from all of these</td><td>0.88</td><td>0.85</td><td>referred to lead</td><td>edge_transport/model/ggd/ion/momentum/flux_limiter/radial, edge_transport/model/ggd/ion/state/momentum/flux_limiter/radial, edge_transport/model/ggd/neutral/state/momentum/flux_limiter/radial</td></tr>
+<tr><td>magnetic_shear_at_pedestal_top</td><td>magnetic_shear_at_flux_surface, magnetic_shear_at_sawtooth_inversion_radius</td><td>a different quantity from all of these</td><td>0.87</td><td>0.83</td><td>referred to lead</td><td>plasma_profiles/profiles_1d/magnetic_shear, sawteeth/diagnostics/magnetic_shear_q1</td></tr>
+<tr><td>momentum_due_to_hot_tail</td><td>runaway_electron_critical_momentum_due_to_hot_tail</td><td>a different quantity from all of these</td><td>0.99</td><td>0.98</td><td>referred to lead</td><td>runaway_electrons/global_quantities/volume_average/momentum_critical_hot_tail</td></tr>
+<tr><td>net_forward_power_of_wave_beam</td><td>electron_absorbed_power_of_beam_tracing_beam, ion_absorbed_power_of_beam_tracing_beam, launched_power_of_electron_cyclotron_beam, launched_power_of_lower_hybrid_antenna, total_absorbed_wave_power, total_absorbed_wave_power_at_inside_flux_surface</td><td>same quantity as `launched_power_of_lower_hybrid_antenna`</td><td>0.64</td><td>0.59</td><td>referred to lead</td><td>ec_launchers/beam/power_launched, lh_antennas/antenna/module/power_launched, waves/coherent_wave/beam_tracing/beam/electrons/power, waves/coherent_wave/beam_tracing/beam/ion/power, waves/coherent_wave/global_quantities/power, waves/coherent_wave/profiles_1d/power_inside</td></tr>
+<tr><td>net_plasma_current_due_to_ohmic_current_drive</td><td>current_due_to_non_inductive_current_drive, plasma_current</td><td>a different quantity from all of these</td><td>0.98</td><td>0.97</td><td>referred to lead</td><td>equilibrium/time_slice/global_quantities/ip, plasma_profiles/global_quantities/current_non_inductive</td></tr>
 <tr><td>net_plasma_power_density</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>neutron_flux_due_to_fusion</td><td>power_due_to_fusion_reactions, total_electron_source_rate, total_ion_particle_source_rate</td><td>a different quantity from all of these</td><td>0.99</td><td>0.99</td><td>referred to lead</td><td></td></tr>
+<tr><td>neutron_flux_due_to_fusion</td><td>power_due_to_fusion_reactions, total_electron_source_rate, total_ion_particle_source_rate</td><td>a different quantity from all of these</td><td>0.92</td><td>0.9</td><td>referred to lead</td><td>core_sources/source/global_quantities/electrons/particles, neutron_diagnostic/neutron_flux_total, plasma_sources/source/global_quantities/total_ion_particles</td></tr>
 <tr><td>normal_particle_flux_at_wall_due_to_recombination</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>normalized_poloidal_magnetic_flux_at_pedestal_top</td><td>toroidal_angle_of_measurement_position</td><td>a different quantity from all of these</td><td>1</td><td>1</td><td>referred to lead</td><td></td></tr>
-<tr><td>normalized_toroidal_hard_xray_peak_external_half_width</td><td>inner_hard_xray_half_width_at_emissivity_peak, normalized_toroidal_flux_coordinate, normalized_toroidal_flux_coordinate_at_measurement_position, normalized_toroidal_hard_xray_peak_lower_bound_width, outer_hard_xray_half_width_at_emissivity_peak</td><td>same quantity as `outer_hard_xray_half_width_at_emissivity_peak`</td><td>0.51</td><td>0.43</td><td>referred to lead</td><td></td></tr>
-<tr><td>normalized_toroidal_hard_xray_peak_upper_bound_width</td><td>inner_hard_xray_half_width_at_emissivity_peak, normalized_toroidal_flux_coordinate, normalized_toroidal_flux_coordinate_at_measurement_position, normalized_toroidal_hard_xray_peak_lower_bound_width, outer_hard_xray_half_width_at_emissivity_peak</td><td>same quantity as `outer_hard_xray_half_width_at_emissivity_peak`</td><td>0.73</td><td>0.69</td><td>referred to lead</td><td></td></tr>
-<tr><td>normalized_toroidal_thermal_plasma_beta</td><td>normalized_toroidal_beta, poloidal_beta, toroidal_beta</td><td>a different quantity from all of these</td><td>0.93</td><td>0.91</td><td>referred to lead</td><td></td></tr>
+<tr><td>normalized_poloidal_magnetic_flux_at_pedestal_top</td><td>toroidal_angle_of_measurement_position</td><td>a different quantity from all of these</td><td>0.99</td><td>0.98</td><td>referred to lead</td><td>magnetics/flux_loop/position/phi</td></tr>
+<tr><td>normalized_toroidal_thermal_plasma_beta</td><td>normalized_toroidal_beta, poloidal_beta, toroidal_beta</td><td>a different quantity from all of these</td><td>0.85</td><td>0.81</td><td>referred to lead</td><td>core_profiles/global_quantities/beta_pol, core_profiles/global_quantities/beta_tor, core_profiles/global_quantities/beta_tor_norm</td></tr>
 <tr><td>perturbed_vector_potential</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>radial_coordinate_of_vacuum_vessel</td><td>reference_major_radius</td><td>a different quantity from all of these</td><td>0.43</td><td>0.14</td><td>referred to lead</td><td></td></tr>
+<tr><td>radial_coordinate_of_vacuum_vessel</td><td>reference_major_radius</td><td>same quantity as `reference_major_radius`</td><td>0.63</td><td>0.45</td><td>referred to lead</td><td>core_transport/vacuum_toroidal_field/r0</td></tr>
 <tr><td>radial_surface_normal_of_control_surface</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>ratio_of_charge_of_conductor_to_voltage_of_conductor</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>root_mean_square_spectral_width_of_spectrometer_channel</td><td>lower_wavelength_of_filter, reference_calibration_wavelength_of_spectrometer_channel, reference_wavelength_of_spectrometer_channel, spectral_calibration_factor_of_spectrometer_channel, spectral_wavelength_of_optical_element, wavelength_of_bragg_crystal</td><td>a different quantity from all of these</td><td>0.98</td><td>0.98</td><td>referred to lead</td><td></td></tr>
-<tr><td>tangential_curvature_inverse_of_optical_element</td><td>curvature_of_electron_cyclotron_launcher_mirror, first_local_tangential_back_surface_radius_of_optical_element, first_local_tangential_front_surface_radius_of_optical_element, second_local_tangential_back_surface_radius_of_optical_element, second_local_tangential_front_surface_radius_of_optical_element, vertical_back_surface_curvature_of_optical_element</td><td>a different quantity from all of these</td><td>0.45</td><td>0.37</td><td>referred to lead</td><td></td></tr>
-<tr><td>thermal_energy_confinement_time</td><td>coolant_transit_time_of_plant_component_port</td><td>a different quantity from all of these</td><td>1</td><td>1</td><td>referred to lead</td><td></td></tr>
-<tr><td>toroidal_wave_vector_normalized_of_beam_tracing_beam</td><td>normalized_toroidal_wave_vector_of_beam_tracing_beam, poloidal_angle_of_beam_tracing_beam, radial_wave_vector_normalized_of_beam_tracing_beam, vertical_wave_vector_normalized_of_beam_tracing_beam</td><td>a different quantity from all of these</td><td>0.51</td><td>0.41</td><td>referred to lead</td><td></td></tr>
-<tr><td>total_absorbed_power_of_plant_system</td><td>net_power, power_of_plant_subsystem, power_of_plant_system, total_heating_power_due_to_fusion_reactions, total_ion_power, total_plasma_radiated_power, total_power</td><td>same quantity as `total_power`</td><td>0.48</td><td>0.42</td><td>referred to lead</td><td></td></tr>
-<tr><td>total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion</td><td>power_due_to_fusion_reactions</td><td>a different quantity from all of these</td><td>0.93</td><td>0.89</td><td>referred to lead</td><td></td></tr>
-<tr><td>total_incident_thermal_power</td><td>incident_radiated_power_of_breeder_blanket_module, incident_thermal_power_at_wall, power_of_plant_subsystem, thermal_electron_power_at_inside_flux_surface, total_heating_power_due_to_fusion_reactions, total_incident_power_of_divertor, total_ion_power, total_ion_power_at_inner_divertor_target, total_power, total_thermal_power_at_outlet</td><td>a different quantity from all of these</td><td>0.53</td><td>0.49</td><td>referred to lead</td><td></td></tr>
-<tr><td>total_ion_momentum_diffusivity</td><td>poloidal_effective_ion_state_momentum_diffusivity</td><td>a different quantity from all of these</td><td>0.63</td><td>0.45</td><td>referred to lead</td><td></td></tr>
+<tr><td>root_mean_square_spectral_width_of_spectrometer_channel</td><td>lower_wavelength_of_filter, reference_calibration_wavelength_of_spectrometer_channel, reference_wavelength_of_spectrometer_channel, spectral_calibration_factor_of_spectrometer_channel, spectral_wavelength_of_optical_element, wavelength_of_bragg_crystal</td><td>a different quantity from all of these</td><td>0.98</td><td>0.98</td><td>referred to lead</td><td>bremsstrahlung_visible/channel/filter/wavelength_lower, bremsstrahlung_visible/channel/filter/wavelengths, spectrometer_visible/channel/grating_spectrometer/wavelength_calibration/offset, spectrometer_x_ray_crystal/channel/crystal/wavelength_bragg, spectrometer_x_ray_crystal/channel/instrument_function/centre, spectrometer_x_ray_crystal/channel/instrument_function/intensity</td></tr>
+<tr><td>tangential_curvature_inverse_of_optical_element</td><td>curvature_of_electron_cyclotron_launcher_mirror, first_local_tangential_back_surface_radius_of_optical_element, first_local_tangential_front_surface_radius_of_optical_element, second_local_tangential_back_surface_radius_of_optical_element, second_local_tangential_front_surface_radius_of_optical_element, vertical_back_surface_curvature_of_optical_element</td><td>cannot tell</td><td>0.42</td><td>0.35</td><td>referred to lead</td><td>camera_ir/optical_element/back_surface/x1_curvature, camera_visible/channel/optical_element/back_surface/x2_curvature, camera_visible/channel/optical_element/front_surface/x1_curvature, camera_visible/channel/optical_element/front_surface/x2_curvature, ec_launchers/mirror/geometry/x1_curvature, spectrometer_visible/channel/optical_element/back_surface/x2_curvature</td></tr>
+<tr><td>toroidal_wave_vector_normalized_of_beam_tracing_beam</td><td>normalized_toroidal_wave_vector_of_beam_tracing_beam, poloidal_angle_of_beam_tracing_beam, radial_wave_vector_normalized_of_beam_tracing_beam, vertical_wave_vector_normalized_of_beam_tracing_beam</td><td>same quantity as `normalized_toroidal_wave_vector_of_beam_tracing_beam`</td><td>0.69</td><td>0.63</td><td>referred to lead</td><td>ece/channel/beam_tracing/beam/wave_vector/k_phi_norm, ece/channel/beam_tracing/beam/wave_vector/k_r_norm, ece/channel/beam_tracing/beam/wave_vector/k_z_norm, waves/coherent_wave/beam_tracing/beam/position/theta</td></tr>
+<tr><td>total_absorbed_power_of_plant_system</td><td>net_power, power_of_plant_subsystem, power_of_plant_system, total_heating_power_due_to_fusion_reactions, total_ion_power, total_plasma_radiated_power, total_power</td><td>same quantity as `total_power`</td><td>0.46</td><td>0.39</td><td>referred to lead</td><td>balance_of_plant/power_electric_plant_operation/power_total, balance_of_plant/power_electric_plant_operation/system/power, balance_of_plant/power_electric_plant_operation/system/subsystem/power, balance_of_plant/power_electricity_net, balance_of_plant/power_plant/total_heat_supplied, bolometer/power_radiated_total, core_sources/source/global_quantities/total_ion_power</td></tr>
+<tr><td>total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion</td><td>power_due_to_fusion_reactions</td><td>a different quantity from all of these</td><td>0.88</td><td>0.82</td><td>referred to lead</td><td>neutron_diagnostic/neutron_flux_total</td></tr>
+<tr><td>total_incident_thermal_power</td><td>incident_radiated_power_of_breeder_blanket_module, incident_thermal_power_at_wall, power_of_plant_subsystem, thermal_electron_power_at_inside_flux_surface, total_heating_power_due_to_fusion_reactions, total_incident_power_of_divertor, total_ion_power, total_ion_power_at_inner_divertor_target, total_power, total_thermal_power_at_outlet</td><td>same quantity as `total_heating_power_due_to_fusion_reactions`</td><td>0.36</td><td>0.3</td><td>referred to lead</td><td>balance_of_plant/power_electric_plant_operation/power_total, balance_of_plant/power_electric_plant_operation/system/subsystem/power, balance_of_plant/power_plant/heat_load_wall, balance_of_plant/power_plant/total_heat_rejected, balance_of_plant/power_plant/total_heat_supplied, breeding_blanket/module/time_slice/power_incident_radiated, core_sources/source/global_quantities/total_ion_power, divertors/divertor/power_incident, wall/global_quantities/power_inner_target_ion_total, waves/coherent_wave/profiles_1d/electrons/power_inside_thermal</td></tr>
+<tr><td>total_ion_momentum_diffusivity</td><td>poloidal_effective_ion_state_momentum_diffusivity, poloidal_ion_momentum_diffusivity</td><td>a different quantity from all of these</td><td>0.49</td><td>0.32</td><td>referred to lead</td><td>plasma_transport/model/ggd/ion/state/momentum/d_pol, plasma_transport/model/profiles_1d/ion/momentum/poloidal/d</td></tr>
 <tr><td>total_particle_flux</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
-<tr><td>total_particle_flux_at_divertor_target_due_to_recycling</td><td>electron_source_rate_due_to_surface_emission, incident_neutral_particle_flux_at_wall, total_particle_source_rate_of_divertor_due_to_recycling</td><td>same quantity as `total_particle_source_rate_of_divertor_due_to_recycling`</td><td>0.66</td><td>0.57</td><td>referred to lead</td><td></td></tr>
-<tr><td>vertical_outline_of_wall</td><td>vertical_coordinate_of_active_wall_point, vertical_coordinate_of_dr_dz_zero_point, vertical_outline_of_divertor_tile</td><td>a different quantity from all of these</td><td>0.68</td><td>0.6</td><td>referred to lead</td><td></td></tr>
+<tr><td>total_particle_flux_at_divertor_target_due_to_recycling</td><td>electron_source_rate_due_to_surface_emission, incident_neutral_particle_flux_at_wall, total_particle_source_rate_of_divertor_due_to_recycling</td><td>same quantity as `total_particle_source_rate_of_divertor_due_to_recycling`</td><td>0.74</td><td>0.68</td><td>referred to lead</td><td>divertors/divertor/particle_flux_recycled_total, wall/global_quantities/electrons/particle_flux_from_wall, wall/global_quantities/neutral/particle_flux_from_plasma</td></tr>
 <tr><td>volume_averaged_linear_electron_decay_time</td><td>—</td><td>None</td><td>None</td><td>None</td><td>referred to lead</td><td></td></tr>
 </tbody></table>
+<h3 id='sib-settle-held-search-hits-rounds'>Rounds</h3>
+<pre id='sib-settle-held-search-hits-rounds-pre'>[
+ {
+  &quot;round&quot;: 1,
+  &quot;what&quot;: &quot;the first derivation, which dropped every search-step held path and never attached a lineage holder&quot;,
+  &quot;worklist&quot;: 50,
+  &quot;retired&quot;: [
+   &quot;accumulated_total_coolant_absorbed_energy_of_calorimetry_component&quot;,
+   &quot;calibration_factor_of_spectrometer_channel&quot;,
+   &quot;normal_distance_of_antenna_strap&quot;,
+   &quot;surface_temperature_of_plasma_facing_component&quot;,
+   &quot;surface_thickness_of_cryostat&quot;,
+   &quot;total_thermal_radiative_power_of_divertor_target&quot;
+  ],
+  &quot;referrals&quot;: 44,
+  &quot;sourceless_before&quot;: 92,
+  &quot;sourceless_after&quot;: 86
+ },
+ {
+  &quot;round&quot;: 2,
+  &quot;what&quot;: &quot;the corrected derivation: every search-step held path and every lineage holder recorded, every held path resolved to its DD unit&quot;,
+  &quot;worklist&quot;: 44,
+  &quot;retired&quot;: [
+   &quot;cumulative_ethylene_count_due_to_gas_injection&quot;,
+   &quot;cumulative_inside_flux_surface_total_electron_density&quot;,
+   &quot;normalized_toroidal_hard_xray_peak_external_half_width&quot;,
+   &quot;normalized_toroidal_hard_xray_peak_upper_bound_width&quot;,
+   &quot;ratio_of_charge_of_conductor_to_voltage_of_conductor&quot;,
+   &quot;thermal_energy_confinement_time&quot;,
+   &quot;vertical_outline_of_wall&quot;
+  ],
+  &quot;referrals&quot;: 37,
+  &quot;sourceless_before&quot;: 86,
+  &quot;sourceless_after&quot;: 79
+ }
+]</pre>
+<h3 id='sib-settle-held-search-hits-cohort'>Derivation check</h3>
+<p id='sib-settle-held-search-hits-cohort-note'>The derivation is read back and checked: every lineage-reason holder is attached to its name, every holder carries the DD path it holds, and every held path resolves to a DD unit — the two ways a held hit could go missing, each of which leaves the suspect-binding check below with nothing to compare. The same comparison is then run on a planted mismatch so it is shown able to fire.</p>
+<pre id='sib-settle-held-search-hits-cohort-pre'>{
+ &quot;command&quot;: [
+  &quot;# sib-settle-held-search-hits mode: cohort-check &quot;
+ ],
+ &quot;exit_code&quot;: 0,
+ &quot;payload&quot;: {
+  &quot;cohort_file&quot;: &quot;/tmp/reckon-crew-scratch/r-20261019T035129214124-sib-settle-held-search-hits/round2/sib-settle-held-search-hits-cohort.json&quot;,
+  &quot;names&quot;: 44,
+  &quot;holders&quot;: 114,
+  &quot;holders_with_held_path&quot;: 114,
+  &quot;holders_with_dd_unit&quot;: 114,
+  &quot;lineage_held_pairs_expected&quot;: 22,
+  &quot;lineage_holders_missing&quot;: [],
+  &quot;holders_without_path&quot;: [],
+  &quot;holders_without_dd_unit&quot;: [],
+  &quot;suspect_holder_count&quot;: 0,
+  &quot;suspect_holders&quot;: [],
+  &quot;planted_mismatch&quot;: {
+   &quot;name&quot;: &quot;electron_temperature&quot;,
+   &quot;holder_unit&quot;: &quot;eV&quot;,
+   &quot;held_path_unit&quot;: &quot;eV&quot;,
+   &quot;planted_held_path_unit&quot;: &quot;eV (planted-mismatch)&quot;,
+   &quot;fires&quot;: true,
+   &quot;holds_on_the_unmutated_pair&quot;: false
+  },
+  &quot;planted_mismatch_fires&quot;: true,
+  &quot;checks&quot;: {
+   &quot;every_lineage_holder_recorded&quot;: true,
+   &quot;every_holder_carries_its_held_path&quot;: true,
+   &quot;every_held_path_resolved_to_a_dd_unit&quot;: true,
+   &quot;suspect_detector_fires_on_a_planted_mismatch&quot;: true
+  }
+ }
+}</pre>
 <h3 id='sib-settle-held-search-hits-suspect-table'>Suspect holder bindings (0)</h3>
 <pre id='sib-settle-held-search-hits-suspect-pre'>[]</pre>
 <h3 id='sib-settle-held-search-hits-lead-total'>Running lead-referral total (§38)</h3>
@@ -74,22 +140,22 @@
   &quot;this_node_with_candidates&quot;: 34
  },
  &quot;unchained_holder_referrals&quot;: 19,
- &quot;this_node_referrals&quot;: 44,
+ &quot;this_node_referrals&quot;: 37,
  &quot;this_node_referrals_by_stage&quot;: {
   &quot;reviewed&quot;: 3,
   &quot;accepted&quot;: 5,
-  &quot;exhausted&quot;: 36
+  &quot;exhausted&quot;: 29
  },
  &quot;this_node_referrals_live&quot;: 8,
- &quot;this_node_referrals_exhausted&quot;: 36,
- &quot;running_total&quot;: 130
+ &quot;this_node_referrals_exhausted&quot;: 29,
+ &quot;running_total&quot;: 123
 }</pre>
 <h3 id='sib-settle-held-search-hits-authority'>Signed authority</h3>
 <pre id='sib-settle-held-search-hits-authority-pre'>{
  &quot;path&quot;: &quot;docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-authority.json&quot;,
- &quot;file_sha256&quot;: &quot;73f956c8fd129316a5db2acdec2050473e55dd508eac3e19632ca20ee5bb5ae6&quot;,
- &quot;payload_sha256&quot;: &quot;305dc04f33023a0c9abbbe051632b443d2715a544a725c7e490715be15d36772&quot;,
- &quot;manifest_sha256&quot;: &quot;edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c&quot;,
+ &quot;file_sha256&quot;: &quot;e2a6728b15ffc84eb88e142dc83146d57e3dc4a371b4b636a4dfec147b1822fa&quot;,
+ &quot;payload_sha256&quot;: &quot;d41e1ae31900978fa4bc3d9b50b064df2541af4d4d2c30e2ba76cd3574cd65b6&quot;,
+ &quot;manifest_sha256&quot;: &quot;440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc&quot;,
  &quot;operation_id&quot;: &quot;retire-held-source-name-in-favour-of-its-holder&quot;,
  &quot;receipt_operation&quot;: &quot;link_signed_successor&quot;
 }</pre>
@@ -99,41 +165,42 @@
   &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;,
   &quot;outcome&quot;: &quot;would_apply&quot;,
   &quot;changed&quot;: 0,
-  &quot;would_change&quot;: 6,
+  &quot;would_change&quot;: 7,
   &quot;counts&quot;: {
-   &quot;authority_rows&quot;: 6,
-   &quot;admitted&quot;: 6,
+   &quot;authority_rows&quot;: 7,
+   &quot;admitted&quot;: 7,
    &quot;refused&quot;: 0
   },
   &quot;refusals&quot;: [],
-  &quot;manifest_sha256&quot;: &quot;edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c&quot;,
-  &quot;authority_file_sha256&quot;: &quot;73f956c8fd129316a5db2acdec2050473e55dd508eac3e19632ca20ee5bb5ae6&quot;,
-  &quot;authority_payload_sha256&quot;: &quot;305dc04f33023a0c9abbbe051632b443d2715a544a725c7e490715be15d36772&quot;,
+  &quot;manifest_sha256&quot;: &quot;440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc&quot;,
+  &quot;authority_file_sha256&quot;: &quot;e2a6728b15ffc84eb88e142dc83146d57e3dc4a371b4b636a4dfec147b1822fa&quot;,
+  &quot;authority_payload_sha256&quot;: &quot;d41e1ae31900978fa4bc3d9b50b064df2541af4d4d2c30e2ba76cd3574cd65b6&quot;,
   &quot;quiet_gate&quot;: null
  },
  &quot;receipt&quot;: {
   &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;,
   &quot;outcome&quot;: &quot;applied&quot;,
-  &quot;changed&quot;: 6,
-  &quot;mutations&quot;: 6,
-  &quot;receipt_rows&quot;: 6,
-  &quot;persistent_writes&quot;: 12,
+  &quot;changed&quot;: 7,
+  &quot;mutations&quot;: 7,
+  &quot;receipt_rows&quot;: 7,
+  &quot;persistent_writes&quot;: 14,
   &quot;counts&quot;: {
-   &quot;authority_rows&quot;: 6,
-   &quot;admitted&quot;: 6,
+   &quot;authority_rows&quot;: 7,
+   &quot;admitted&quot;: 7,
    &quot;refused&quot;: 0
   },
   &quot;refusals&quot;: [],
-  &quot;manifest_sha256&quot;: &quot;edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c&quot;,
-  &quot;authority_file_sha256&quot;: &quot;73f956c8fd129316a5db2acdec2050473e55dd508eac3e19632ca20ee5bb5ae6&quot;,
-  &quot;authority_payload_sha256&quot;: &quot;305dc04f33023a0c9abbbe051632b443d2715a544a725c7e490715be15d36772&quot;,
+  &quot;manifest_sha256&quot;: &quot;440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc&quot;,
+  &quot;authority_file_sha256&quot;: &quot;e2a6728b15ffc84eb88e142dc83146d57e3dc4a371b4b636a4dfec147b1822fa&quot;,
+  &quot;authority_payload_sha256&quot;: &quot;d41e1ae31900978fa4bc3d9b50b064df2541af4d4d2c30e2ba76cd3574cd65b6&quot;,
   &quot;change_ids&quot;: [
-   &quot;sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:0ca09476ea9279e3f68594b9&quot;,
-   &quot;sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:25538ae719c4c07bc365ca9d&quot;,
-   &quot;sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:4edb7113215fd11c80331117&quot;,
-   &quot;sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:53101970ded05a9f2ab61e74&quot;,
-   &quot;sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:d3218a71525b4c10ead42011&quot;,
-   &quot;sn-change:signed-manifest:edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c:fc099e7078d1de0cb7796ecd&quot;
+   &quot;sn-change:signed-manifest:440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc:13e863819751d83c0c25d3d3&quot;,
+   &quot;sn-change:signed-manifest:440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc:34a45f0db7d70c63b756018b&quot;,
+   &quot;sn-change:signed-manifest:440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc:36da31ccd8394bc3ddd1dea5&quot;,
+   &quot;sn-change:signed-manifest:440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc:4856966233b984ca23c5aa1d&quot;,
+   &quot;sn-change:signed-manifest:440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc:4f2dad782df59b584e02f64a&quot;,
+   &quot;sn-change:signed-manifest:440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc:c1e7fb184cd330140c996f85&quot;,
+   &quot;sn-change:signed-manifest:440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc:c5942f6144839fec7e119782&quot;
   ],
   &quot;quiet_gate&quot;: {
    &quot;window_seconds&quot;: 6.0,
@@ -164,103 +231,126 @@
   &quot;r-20261019T000654917566-review-of-reload-carries-skills-population-at-merge-b6558f0d1cab&quot;,
   &quot;r-20261019T004351278047-reload-shim-interpreter-population-at-merge&quot;,
   &quot;r-20261019T010646193471-review-of-reload-shim-interpreter-population-at-merge-461f3b8256ed&quot;,
-  &quot;r-20261019T012701997576-arc-assembly&quot;,
   &quot;r-20261019T034147435864-supersede-a-misattributed-review-row&quot;,
   &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
   &quot;r-20261019T035155396564-validator-signed-psi&quot;,
   &quot;r-20261019T035327482346-ssog-anchor-family-runner&quot;,
   &quot;r-20261019T035401464003-tcv-liuqe-recurate&quot;,
   &quot;r-20261019T035447399952-curate-psi-consistency-gate&quot;,
-  &quot;r-20261019T035549247584-srtj-cohort-estimate&quot;,
   &quot;r-20261019T035634203950-reference-sign-guard&quot;,
   &quot;r-20261019T035829094164-exact-integrator-convergence&quot;,
-  &quot;r-20261019T040158952125-tf-supply-circuit&quot;,
-  &quot;r-20261019T040333218543-plan-review-of-the-monitor-shows-the-work-it-watches&quot;,
   &quot;r-20261019T041502001216-review-of-a-producer-sweeps-only-on-change-d84d1d601931&quot;,
-  &quot;r-20261019T041647056272-review-of-arc-assembly-b547f9219ebf&quot;,
-  &quot;r-20261019T041947445167-review-of-tcv-liuqe-recurate-b979ae2ebc49&quot;,
   &quot;r-20261019T042001309375-review-of-a-stopped-worker-ends-inside-its-step-a6808040694c&quot;,
   &quot;r-20261019T042319449201-certificate-550-convergence&quot;,
-  &quot;r-20261019T042343658619-plan-review-of-a-read-answers-inside-its-deadline&quot;,
-  &quot;r-20261019T042350099511-sib-signed-recovery-unbind&quot;
+  &quot;r-20261019T042350099511-sib-signed-recovery-unbind&quot;,
+  &quot;r-20261019T043538908555-tcv-dina-sign-rca&quot;,
+  &quot;r-20261019T043729078602-a-reload-image-carries-the-model-catalogue&quot;,
+  &quot;r-20261019T044913095520-a-crew-poll-reads-the-roster-without-run-files&quot;,
+  &quot;r-20261019T045104882565-shared-model-follow-ons&quot;,
+  &quot;r-20261019T045155050141-review-of-a-producer-sweeps-only-on-change-a6e4fca22d6d&quot;,
+  &quot;r-20261019T045626346615-correction-coil-supplies&quot;,
+  &quot;r-20261019T051757344703-review-of-a-stopped-worker-ends-inside-its-step-04f6ace9a31c&quot;,
+  &quot;r-20261019T052001421094-review-of-correction-coil-supplies-0a230249582b&quot;,
+  &quot;r-20261019T052209366531-plan-review-of-every-plan-write-goes-through-edit-plan&quot;,
+  &quot;r-20261019T052210020686-review-of-reference-sign-guard-1cb509d4a5bb&quot;,
+  &quot;r-20261019T052440138945-review-of-tcv-dina-sign-rca-248dfe647ac6&quot;,
+  &quot;r-20261019T052715188642-plan-review-of-the-crew-surface-is-one-tool-and-a-few-verbs&quot;,
+  &quot;r-20261019T052844132696-review-of-sib-signed-recovery-unbind-3578ef089f4f&quot;,
+  &quot;r-20261019T052847998822-review-of-a-reload-image-carries-the-model-catalogue-dc14f3d108dd&quot;
  ],
- &quot;live_crew_run_count&quot;: 30,
+ &quot;live_crew_run_count&quot;: 37,
  &quot;runs_touched_within_1800s&quot;: [
   {
    &quot;run&quot;: &quot;r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot&quot;,
-   &quot;age_seconds&quot;: 106
+   &quot;age_seconds&quot;: 64
   },
   {
    &quot;run&quot;: &quot;r-20261009T015811146619-cocos-determination-core&quot;,
-   &quot;age_seconds&quot;: 33
+   &quot;age_seconds&quot;: 10
   },
   {
    &quot;run&quot;: &quot;r-20261018T150822949393-a-stopped-worker-ends-inside-its-step&quot;,
-   &quot;age_seconds&quot;: 324
-  },
-  {
-   &quot;run&quot;: &quot;r-20261018T151304298883-a-producer-sweeps-only-on-change&quot;,
-   &quot;age_seconds&quot;: 441
-  },
-  {
-   &quot;run&quot;: &quot;r-20261018T203817697724-vs1-switched-pulse&quot;,
-   &quot;age_seconds&quot;: 436
-  },
-  {
-   &quot;run&quot;: &quot;r-20261018T204951664681-stray-edge-rate&quot;,
-   &quot;age_seconds&quot;: 440
-  },
-  {
-   &quot;run&quot;: &quot;r-20261019T012701997576-arc-assembly&quot;,
-   &quot;age_seconds&quot;: 623
-  },
-  {
-   &quot;run&quot;: &quot;r-20261019T035401464003-tcv-liuqe-recurate&quot;,
-   &quot;age_seconds&quot;: 453
-  },
-  {
-   &quot;run&quot;: &quot;r-20261019T035829094164-exact-integrator-convergence&quot;,
-   &quot;age_seconds&quot;: 1606
-  },
-  {
-   &quot;run&quot;: &quot;r-20261019T040158952125-tf-supply-circuit&quot;,
-   &quot;age_seconds&quot;: 1434
-  },
-  {
-   &quot;run&quot;: &quot;r-20261019T040333218543-plan-review-of-the-monitor-shows-the-work-it-watches&quot;,
-   &quot;age_seconds&quot;: 344
-  },
-  {
-   &quot;run&quot;: &quot;r-20261019T041502001216-review-of-a-producer-sweeps-only-on-change-d84d1d601931&quot;,
-   &quot;age_seconds&quot;: 584
-  },
-  {
-   &quot;run&quot;: &quot;r-20261019T041647056272-review-of-arc-assembly-b547f9219ebf&quot;,
    &quot;age_seconds&quot;: 610
   },
   {
-   &quot;run&quot;: &quot;r-20261019T041947445167-review-of-tcv-liuqe-recurate-b979ae2ebc49&quot;,
-   &quot;age_seconds&quot;: 444
+   &quot;run&quot;: &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
+   &quot;age_seconds&quot;: 1643
   },
   {
-   &quot;run&quot;: &quot;r-20261019T042001309375-review-of-a-stopped-worker-ends-inside-its-step-a6808040694c&quot;,
-   &quot;age_seconds&quot;: 304
+   &quot;run&quot;: &quot;r-20261019T035155396564-validator-signed-psi&quot;,
+   &quot;age_seconds&quot;: 1405
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T035447399952-curate-psi-consistency-gate&quot;,
+   &quot;age_seconds&quot;: 926
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T035634203950-reference-sign-guard&quot;,
+   &quot;age_seconds&quot;: 368
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T035829094164-exact-integrator-convergence&quot;,
+   &quot;age_seconds&quot;: 1347
   },
   {
    &quot;run&quot;: &quot;r-20261019T042319449201-certificate-550-convergence&quot;,
-   &quot;age_seconds&quot;: 202
-  },
-  {
-   &quot;run&quot;: &quot;r-20261019T042343658619-plan-review-of-a-read-answers-inside-its-deadline&quot;,
-   &quot;age_seconds&quot;: 177
+   &quot;age_seconds&quot;: 551
   },
   {
    &quot;run&quot;: &quot;r-20261019T042350099511-sib-signed-recovery-unbind&quot;,
-   &quot;age_seconds&quot;: 186
+   &quot;age_seconds&quot;: 56
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T043538908555-tcv-dina-sign-rca&quot;,
+   &quot;age_seconds&quot;: 98
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T043729078602-a-reload-image-carries-the-model-catalogue&quot;,
+   &quot;age_seconds&quot;: 196
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T045155050141-review-of-a-producer-sweeps-only-on-change-a6e4fca22d6d&quot;,
+   &quot;age_seconds&quot;: 1510
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T045626346615-correction-coil-supplies&quot;,
+   &quot;age_seconds&quot;: 538
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T051757344703-review-of-a-stopped-worker-ends-inside-its-step-04f6ace9a31c&quot;,
+   &quot;age_seconds&quot;: 113
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T052001421094-review-of-correction-coil-supplies-0a230249582b&quot;,
+   &quot;age_seconds&quot;: 533
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T052209366531-plan-review-of-every-plan-write-goes-through-edit-plan&quot;,
+   &quot;age_seconds&quot;: 356
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T052210020686-review-of-reference-sign-guard-1cb509d4a5bb&quot;,
+   &quot;age_seconds&quot;: 363
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T052440138945-review-of-tcv-dina-sign-rca-248dfe647ac6&quot;,
+   &quot;age_seconds&quot;: 271
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T052715188642-plan-review-of-the-crew-surface-is-one-tool-and-a-few-verbs&quot;,
+   &quot;age_seconds&quot;: 113
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T052844132696-review-of-sib-signed-recovery-unbind-3578ef089f4f&quot;,
+   &quot;age_seconds&quot;: 20
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T052847998822-review-of-a-reload-image-carries-the-model-catalogue-dc14f3d108dd&quot;,
+   &quot;age_seconds&quot;: 0
   }
  ],
  &quot;neo4j_jobs&quot;: [
-  &quot;1288978 codex-neo4j RUNNING 16:38:00&quot;
+  &quot;1288978 codex-neo4j RUNNING 17:39:22&quot;
  ],
  &quot;activity_window_seconds&quot;: 6.0,
  &quot;foreign_transactions_started&quot;: 0,
@@ -269,7 +359,7 @@
 }</pre>
 <pre id='sib-settle-held-search-hits-quiet-refuse-pre'>{
  &quot;header&quot;: [
-  &quot;# mode=quiet-refuse&quot;
+  &quot;# sib-settle-held-search-hits mode: quiet-refuse &quot;
  ],
  &quot;exit_code&quot;: 0,
  &quot;payload&quot;: {
@@ -280,65 +370,73 @@
 <h3 id='sib-settle-held-search-hits-overlap'>Apply-window overlap (after the fact)</h3>
 <pre id='sib-settle-held-search-hits-overlap-pre'>{
  &quot;window&quot;: {
-  &quot;from&quot;: &quot;2026-10-19T04:23:35.344000000+00:00&quot;,
-  &quot;to&quot;: &quot;2026-10-19T04:29:35.344000000+00:00&quot;
+  &quot;from&quot;: &quot;2026-10-19T05:12:13.637000000+00:00&quot;,
+  &quot;to&quot;: &quot;2026-10-19T05:18:13.637000000+00:00&quot;
  },
  &quot;own_receipts&quot;: {
-  &quot;lo&quot;: &quot;2026-10-19T04:26:35.344000000+00:00&quot;,
-  &quot;hi&quot;: &quot;2026-10-19T04:26:35.344000000+00:00&quot;,
-  &quot;n&quot;: 6,
+  &quot;lo&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;,
+  &quot;hi&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;,
+  &quot;n&quot;: 7,
   &quot;digests&quot;: [
-   &quot;edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c&quot;
+   &quot;440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc&quot;
   ]
  },
  &quot;changes_in_window&quot;: [
   {
    &quot;run_id&quot;: &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
    &quot;op&quot;: &quot;link_signed_successor&quot;,
-   &quot;row_id&quot;: &quot;accumulated_total_coolant_absorbed_energy_of_calorimetry_component=&gt;accumulated_coolant_absorbed_energy_of_calorimetry_component&quot;,
-   &quot;frm&quot;: &quot;accumulated_total_coolant_absorbed_energy_of_calorimetry_component&quot;,
-   &quot;to&quot;: &quot;accumulated_coolant_absorbed_energy_of_calorimetry_component&quot;,
-   &quot;at&quot;: &quot;2026-10-19T04:26:35.344000000+00:00&quot;
+   &quot;row_id&quot;: &quot;cumulative_ethylene_count_due_to_gas_injection=&gt;accumulated_ethylene_count&quot;,
+   &quot;frm&quot;: &quot;cumulative_ethylene_count_due_to_gas_injection&quot;,
+   &quot;to&quot;: &quot;accumulated_ethylene_count&quot;,
+   &quot;at&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;
   },
   {
    &quot;run_id&quot;: &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
    &quot;op&quot;: &quot;link_signed_successor&quot;,
-   &quot;row_id&quot;: &quot;calibration_factor_of_spectrometer_channel=&gt;spectral_calibration_factor_of_spectrometer&quot;,
-   &quot;frm&quot;: &quot;calibration_factor_of_spectrometer_channel&quot;,
-   &quot;to&quot;: &quot;spectral_calibration_factor_of_spectrometer&quot;,
-   &quot;at&quot;: &quot;2026-10-19T04:26:35.344000000+00:00&quot;
+   &quot;row_id&quot;: &quot;cumulative_inside_flux_surface_total_electron_density=&gt;total_electron_count&quot;,
+   &quot;frm&quot;: &quot;cumulative_inside_flux_surface_total_electron_density&quot;,
+   &quot;to&quot;: &quot;total_electron_count&quot;,
+   &quot;at&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;
   },
   {
    &quot;run_id&quot;: &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
    &quot;op&quot;: &quot;link_signed_successor&quot;,
-   &quot;row_id&quot;: &quot;normal_distance_of_antenna_strap=&gt;back_surface_distance_of_antenna_strap&quot;,
-   &quot;frm&quot;: &quot;normal_distance_of_antenna_strap&quot;,
-   &quot;to&quot;: &quot;back_surface_distance_of_antenna_strap&quot;,
-   &quot;at&quot;: &quot;2026-10-19T04:26:35.344000000+00:00&quot;
+   &quot;row_id&quot;: &quot;normalized_toroidal_hard_xray_peak_external_half_width=&gt;outer_hard_xray_half_width_at_emissivity_peak&quot;,
+   &quot;frm&quot;: &quot;normalized_toroidal_hard_xray_peak_external_half_width&quot;,
+   &quot;to&quot;: &quot;outer_hard_xray_half_width_at_emissivity_peak&quot;,
+   &quot;at&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;
   },
   {
    &quot;run_id&quot;: &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
    &quot;op&quot;: &quot;link_signed_successor&quot;,
-   &quot;row_id&quot;: &quot;surface_temperature_of_plasma_facing_component=&gt;surface_temperature&quot;,
-   &quot;frm&quot;: &quot;surface_temperature_of_plasma_facing_component&quot;,
-   &quot;to&quot;: &quot;surface_temperature&quot;,
-   &quot;at&quot;: &quot;2026-10-19T04:26:35.344000000+00:00&quot;
+   &quot;row_id&quot;: &quot;normalized_toroidal_hard_xray_peak_upper_bound_width=&gt;outer_hard_xray_half_width_at_emissivity_peak&quot;,
+   &quot;frm&quot;: &quot;normalized_toroidal_hard_xray_peak_upper_bound_width&quot;,
+   &quot;to&quot;: &quot;outer_hard_xray_half_width_at_emissivity_peak&quot;,
+   &quot;at&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;
   },
   {
    &quot;run_id&quot;: &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
    &quot;op&quot;: &quot;link_signed_successor&quot;,
-   &quot;row_id&quot;: &quot;surface_thickness_of_cryostat=&gt;thickness_of_cryostat&quot;,
-   &quot;frm&quot;: &quot;surface_thickness_of_cryostat&quot;,
-   &quot;to&quot;: &quot;thickness_of_cryostat&quot;,
-   &quot;at&quot;: &quot;2026-10-19T04:26:35.344000000+00:00&quot;
+   &quot;row_id&quot;: &quot;ratio_of_charge_of_conductor_to_voltage_of_conductor=&gt;capacitance_of_ion_cyclotron_heating_antenna&quot;,
+   &quot;frm&quot;: &quot;ratio_of_charge_of_conductor_to_voltage_of_conductor&quot;,
+   &quot;to&quot;: &quot;capacitance_of_ion_cyclotron_heating_antenna&quot;,
+   &quot;at&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;
   },
   {
    &quot;run_id&quot;: &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
    &quot;op&quot;: &quot;link_signed_successor&quot;,
-   &quot;row_id&quot;: &quot;total_thermal_radiative_power_of_divertor_target=&gt;thermal_radiative_power_of_divertor_target&quot;,
-   &quot;frm&quot;: &quot;total_thermal_radiative_power_of_divertor_target&quot;,
-   &quot;to&quot;: &quot;thermal_radiative_power_of_divertor_target&quot;,
-   &quot;at&quot;: &quot;2026-10-19T04:26:35.344000000+00:00&quot;
+   &quot;row_id&quot;: &quot;thermal_energy_confinement_time=&gt;energy_confinement_time&quot;,
+   &quot;frm&quot;: &quot;thermal_energy_confinement_time&quot;,
+   &quot;to&quot;: &quot;energy_confinement_time&quot;,
+   &quot;at&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T035129214124-sib-settle-held-search-hits&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;vertical_outline_of_wall=&gt;vertical_outline_of_vacuum_vessel&quot;,
+   &quot;frm&quot;: &quot;vertical_outline_of_wall&quot;,
+   &quot;to&quot;: &quot;vertical_outline_of_vacuum_vessel&quot;,
+   &quot;at&quot;: &quot;2026-10-19T05:15:13.637000000+00:00&quot;
   }
  ],
  &quot;foreign_changes&quot;: [],
@@ -352,64 +450,106 @@
 }</pre>
 <h3 id='sib-settle-held-search-hits-guard'>Source-stays-held guard</h3>
 <pre id='sib-settle-held-search-hits-guard-pre'>{
- &quot;admitted&quot;: 6,
+ &quot;admitted&quot;: 7,
  &quot;pairs&quot;: [
   {
-   &quot;predecessor&quot;: &quot;accumulated_total_coolant_absorbed_energy_of_calorimetry_component&quot;,
-   &quot;successor&quot;: &quot;accumulated_coolant_absorbed_energy_of_calorimetry_component&quot;,
+   &quot;predecessor&quot;: &quot;cumulative_ethylene_count_due_to_gas_injection&quot;,
+   &quot;successor&quot;: &quot;accumulated_ethylene_count&quot;,
    &quot;predecessor_binds_source&quot;: 0,
-   &quot;recorded_paths&quot;: [],
+   &quot;pair_held_path&quot;: &quot;summary/gas_injection_accumulated/ethylene/value&quot;,
+   &quot;also_recorded_on_predecessor&quot;: [
+    &quot;summary/gas_injection_accumulated/ethylene/value&quot;
+   ],
    &quot;successor_holds_paths&quot;: [
-    &quot;calorimetry/group/component/energy_cumulated&quot;
+    &quot;summary/gas_injection_accumulated/ethylene/value&quot;
    ],
    &quot;paths_successor_does_not_hold&quot;: []
   },
   {
-   &quot;predecessor&quot;: &quot;calibration_factor_of_spectrometer_channel&quot;,
-   &quot;successor&quot;: &quot;spectral_calibration_factor_of_spectrometer&quot;,
+   &quot;predecessor&quot;: &quot;cumulative_inside_flux_surface_total_electron_density&quot;,
+   &quot;successor&quot;: &quot;total_electron_count&quot;,
    &quot;predecessor_binds_source&quot;: 0,
-   &quot;recorded_paths&quot;: [],
-   &quot;successor_holds_paths&quot;: [],
-   &quot;paths_successor_does_not_hold&quot;: []
-  },
-  {
-   &quot;predecessor&quot;: &quot;normal_distance_of_antenna_strap&quot;,
-   &quot;successor&quot;: &quot;back_surface_distance_of_antenna_strap&quot;,
-   &quot;predecessor_binds_source&quot;: 0,
-   &quot;recorded_paths&quot;: [],
+   &quot;pair_held_path&quot;: &quot;interferometer/electrons_n&quot;,
+   &quot;also_recorded_on_predecessor&quot;: [
+    &quot;interferometer/electrons_n&quot;
+   ],
    &quot;successor_holds_paths&quot;: [
-    &quot;ic_antennas/antenna/module/strap/distance_to_conductor&quot;
+    &quot;interferometer/electrons_n&quot;
    ],
    &quot;paths_successor_does_not_hold&quot;: []
   },
   {
-   &quot;predecessor&quot;: &quot;surface_temperature_of_plasma_facing_component&quot;,
-   &quot;successor&quot;: &quot;surface_temperature&quot;,
+   &quot;predecessor&quot;: &quot;normalized_toroidal_hard_xray_peak_external_half_width&quot;,
+   &quot;successor&quot;: &quot;outer_hard_xray_half_width_at_emissivity_peak&quot;,
    &quot;predecessor_binds_source&quot;: 0,
-   &quot;recorded_paths&quot;: [],
+   &quot;pair_held_path&quot;: &quot;hard_x_rays/emissivity_profile_1d/half_width_external&quot;,
+   &quot;also_recorded_on_predecessor&quot;: [
+    &quot;ece/channel/position/rho_tor_norm&quot;,
+    &quot;hard_x_rays/emissivity_profile_1d/half_width_external&quot;,
+    &quot;hard_x_rays/emissivity_profile_1d/half_width_internal&quot;,
+    &quot;neutron_diagnostic/reconstructed_emissivity/rho_tor_norm&quot;
+   ],
    &quot;successor_holds_paths&quot;: [
-    &quot;camera_ir/channel/camera/frame/apparent_temperature&quot;
+    &quot;hard_x_rays/emissivity_profile_1d/half_width_external&quot;
    ],
    &quot;paths_successor_does_not_hold&quot;: []
   },
   {
-   &quot;predecessor&quot;: &quot;surface_thickness_of_cryostat&quot;,
-   &quot;successor&quot;: &quot;thickness_of_cryostat&quot;,
+   &quot;predecessor&quot;: &quot;normalized_toroidal_hard_xray_peak_upper_bound_width&quot;,
+   &quot;successor&quot;: &quot;outer_hard_xray_half_width_at_emissivity_peak&quot;,
    &quot;predecessor_binds_source&quot;: 0,
-   &quot;recorded_paths&quot;: [],
+   &quot;pair_held_path&quot;: &quot;hard_x_rays/emissivity_profile_1d/half_width_external&quot;,
+   &quot;also_recorded_on_predecessor&quot;: [
+    &quot;ece/channel/position/rho_tor_norm&quot;,
+    &quot;hard_x_rays/emissivity_profile_1d/half_width_external&quot;,
+    &quot;hard_x_rays/emissivity_profile_1d/half_width_internal&quot;,
+    &quot;neutron_diagnostic/reconstructed_emissivity/rho_tor_norm&quot;
+   ],
    &quot;successor_holds_paths&quot;: [
-    &quot;cryostat/description_2d/cryostat/unit/annular/thickness&quot;,
-    &quot;cryostat/description_2d/cryostat/unit/element/midplane_thickness&quot;
+    &quot;hard_x_rays/emissivity_profile_1d/half_width_external&quot;
    ],
    &quot;paths_successor_does_not_hold&quot;: []
   },
   {
-   &quot;predecessor&quot;: &quot;total_thermal_radiative_power_of_divertor_target&quot;,
-   &quot;successor&quot;: &quot;thermal_radiative_power_of_divertor_target&quot;,
+   &quot;predecessor&quot;: &quot;ratio_of_charge_of_conductor_to_voltage_of_conductor&quot;,
+   &quot;successor&quot;: &quot;capacitance_of_ion_cyclotron_heating_antenna&quot;,
    &quot;predecessor_binds_source&quot;: 0,
-   &quot;recorded_paths&quot;: [],
+   &quot;pair_held_path&quot;: &quot;ic_antennas/antenna/module/matching_element/capacitance&quot;,
+   &quot;also_recorded_on_predecessor&quot;: [
+    &quot;ic_antennas/antenna/module/matching_element/capacitance&quot;
+   ],
    &quot;successor_holds_paths&quot;: [
-    &quot;divertors/divertor/target/power_black_body&quot;
+    &quot;ic_antennas/antenna/module/matching_element/capacitance&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;thermal_energy_confinement_time&quot;,
+   &quot;successor&quot;: &quot;energy_confinement_time&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;pair_held_path&quot;: &quot;summary/global_quantities/tau_energy/value&quot;,
+   &quot;also_recorded_on_predecessor&quot;: [
+    &quot;calorimetry/group/component/transit_time&quot;,
+    &quot;summary/global_quantities/tau_energy/value&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;summary/global_quantities/tau_energy/value&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;vertical_outline_of_wall&quot;,
+   &quot;successor&quot;: &quot;vertical_outline_of_vacuum_vessel&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;pair_held_path&quot;: &quot;wall/description_2d/vessel/unit/annular/outline_inner/z&quot;,
+   &quot;also_recorded_on_predecessor&quot;: [
+    &quot;disruption/halo_currents/active_wall_point/z&quot;,
+    &quot;divertors/divertor/target/tile/surface_outline/z&quot;,
+    &quot;equilibrium/time_slice/boundary/dr_dz_zero_point/z&quot;,
+    &quot;wall/description_2d/vessel/unit/annular/outline_inner/z&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;wall/description_2d/vessel/unit/annular/outline_inner/z&quot;
    ],
    &quot;paths_successor_does_not_hold&quot;: []
   }
@@ -418,40 +558,55 @@
 <h3 id='sib-settle-held-search-hits-verify'>Classifier read-back (raise on mismatch)</h3>
 <pre id='sib-settle-held-search-hits-verify-pre'>{
  &quot;command&quot;: [
-  &quot;# mode=verify&quot;
+  &quot;# sib-settle-held-search-hits mode: verify --prior-record /tmp/reckon-crew-scratch/r-20261019T035129214124-sib-settle-held-search-hits/round2/round1-record.json&quot;
  ],
  &quot;exit_code&quot;: 0,
  &quot;payload&quot;: {
   &quot;counts&quot;: {
-   &quot;dropped_edge&quot;: 40,
+   &quot;dropped_edge&quot;: 34,
    &quot;derived_parent&quot;: 2,
-   &quot;never_bound&quot;: 22,
+   &quot;never_bound&quot;: 21,
    &quot;unchained_holder&quot;: 19,
    &quot;orphan_awaiting_retirement&quot;: 3
   },
-  &quot;sourceless_total&quot;: 86,
+  &quot;sourceless_total&quot;: 79,
   &quot;targets&quot;: [
    &quot;accumulated_total_coolant_absorbed_energy_of_calorimetry_component&quot;,
    &quot;calibration_factor_of_spectrometer_channel&quot;,
+   &quot;cumulative_ethylene_count_due_to_gas_injection&quot;,
+   &quot;cumulative_inside_flux_surface_total_electron_density&quot;,
    &quot;normal_distance_of_antenna_strap&quot;,
+   &quot;normalized_toroidal_hard_xray_peak_external_half_width&quot;,
+   &quot;normalized_toroidal_hard_xray_peak_upper_bound_width&quot;,
+   &quot;ratio_of_charge_of_conductor_to_voltage_of_conductor&quot;,
    &quot;surface_temperature_of_plasma_facing_component&quot;,
    &quot;surface_thickness_of_cryostat&quot;,
-   &quot;total_thermal_radiative_power_of_divertor_target&quot;
+   &quot;thermal_energy_confinement_time&quot;,
+   &quot;total_thermal_radiative_power_of_divertor_target&quot;,
+   &quot;vertical_outline_of_wall&quot;
   ],
-  &quot;receipt_names&quot;: 6,
+  &quot;receipt_names&quot;: 13,
   &quot;receipt_targets&quot;: [
    &quot;accumulated_total_coolant_absorbed_energy_of_calorimetry_component&quot;,
    &quot;calibration_factor_of_spectrometer_channel&quot;,
+   &quot;cumulative_ethylene_count_due_to_gas_injection&quot;,
+   &quot;cumulative_inside_flux_surface_total_electron_density&quot;,
    &quot;normal_distance_of_antenna_strap&quot;,
+   &quot;normalized_toroidal_hard_xray_peak_external_half_width&quot;,
+   &quot;normalized_toroidal_hard_xray_peak_upper_bound_width&quot;,
+   &quot;ratio_of_charge_of_conductor_to_voltage_of_conductor&quot;,
    &quot;surface_temperature_of_plasma_facing_component&quot;,
    &quot;surface_thickness_of_cryostat&quot;,
-   &quot;total_thermal_radiative_power_of_divertor_target&quot;
+   &quot;thermal_energy_confinement_time&quot;,
+   &quot;total_thermal_radiative_power_of_divertor_target&quot;,
+   &quot;vertical_outline_of_wall&quot;
   ],
   &quot;targets_without_receipt&quot;: [],
   &quot;receipt_operations&quot;: [
    &quot;link_signed_successor&quot;
   ],
   &quot;digests&quot;: [
+   &quot;440ac6cd4c5518678a9fcd8739deda75fcb9fe53c600f0e4d9d44432bb8447dc&quot;,
    &quot;edea1c1d6fc4a12bf5ddee21f07a38e23c8f7a8f84f5f5bf84ce5519bd11615c&quot;
   ],
   &quot;retired_stages&quot;: [
@@ -467,24 +622,24 @@
    &quot;unchained_holder&quot;: 19,
    &quot;orphan_awaiting_retirement&quot;: 3
   },
-  &quot;expected_sourceless_total&quot;: 86,
+  &quot;expected_sourceless_total&quot;: 79,
   &quot;retired_still_sourceless&quot;: [],
   &quot;reconstructed_baseline_total&quot;: 92,
   &quot;reconstructed_baseline_counts&quot;: {
-   &quot;dropped_edge&quot;: 40,
+   &quot;dropped_edge&quot;: 34,
    &quot;derived_parent&quot;: 2,
-   &quot;never_bound&quot;: 22,
+   &quot;never_bound&quot;: 21,
    &quot;unchained_holder&quot;: 19,
    &quot;orphan_awaiting_retirement&quot;: 3
   },
   &quot;population_moves&quot;: {
    &quot;dropped_edge&quot;: [
     45,
-    40
+    34
    ],
    &quot;never_bound&quot;: [
     23,
-    22
+    21
    ]
   },
   &quot;shortfall&quot;: [],
@@ -499,11 +654,11 @@
   &quot;foreign_population_moves&quot;: {
    &quot;dropped_edge&quot;: [
     45,
-    40
+    34
    ],
    &quot;never_bound&quot;: [
     23,
-    22
+    21
    ]
   }
  }
@@ -511,12 +666,12 @@
 <h3 id='sib-settle-held-search-hits-falsify'>Read-back shown able to fail</h3>
 <pre id='sib-settle-held-search-hits-falsify-pre'>{
  &quot;command&quot;: [
-  &quot;# mode=falsify&quot;
+  &quot;# sib-settle-held-search-hits mode: falsify --prior-record /tmp/reckon-crew-scratch/r-20261019T035129214124-sib-settle-held-search-hits/round2/round1-record.json&quot;
  ],
  &quot;exit_code&quot;: 0,
  &quot;payload&quot;: {
   &quot;check_failed_as_expected&quot;: true,
-  &quot;detail&quot;: &quot;read-back mismatch: {&#x27;sourceless_fell_by_retired&#x27;: False, &#x27;no_retired_name_still_sourceless&#x27;: True, &#x27;nothing_entered_the_population&#x27;: True, &#x27;every_target_has_receipt&#x27;: True, &#x27;no_receipt_outside_targets&#x27;: True, &#x27;all_targets_superseded&#x27;: True} :: {&#x27;counts&#x27;: {&#x27;dropped_edge&#x27;: 40, &#x27;derived_parent&#x27;: 2, &#x27;n&quot;
+  &quot;detail&quot;: &quot;read-back mismatch: {&#x27;sourceless_fell_by_retired&#x27;: False, &#x27;no_retired_name_still_sourceless&#x27;: True, &#x27;nothing_entered_the_population&#x27;: True, &#x27;every_target_has_receipt&#x27;: True, &#x27;no_receipt_outside_targets&#x27;: True, &#x27;all_targets_superseded&#x27;: True} :: {&#x27;counts&#x27;: {&#x27;dropped_edge&#x27;: 34, &#x27;derived_parent&#x27;: 2, &#x27;n&quot;
  }
 }</pre>
 <h3 id='sib-settle-held-search-hits-negcontrol'>Negative control (planted different-quantity pair)</h3>
@@ -528,8 +683,8 @@
   ],
   &quot;holder&quot;: null,
   &quot;choice&quot;: &quot;a different quantity from all of these&quot;,
-  &quot;probability&quot;: 0.97,
-  &quot;confidence&quot;: 0.95,
+  &quot;probability&quot;: 0.98,
+  &quot;confidence&quot;: 0.97,
   &quot;answered&quot;: true
  },
  &quot;admitted_by_floors&quot;: [],

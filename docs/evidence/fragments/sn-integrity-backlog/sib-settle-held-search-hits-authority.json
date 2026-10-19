@@ -14,61 +14,62 @@
     ]
   },
   "repair_rows": [
-    "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component",
-    "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer",
-    "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap",
-    "surface_temperature_of_plasma_facing_component=>surface_temperature",
-    "surface_thickness_of_cryostat=>thickness_of_cryostat",
-    "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target"
+    "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count",
+    "cumulative_inside_flux_surface_total_electron_density=>total_electron_count",
+    "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
+    "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak",
+    "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna",
+    "thermal_energy_confinement_time=>energy_confinement_time",
+    "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel"
   ],
   "rows": [
     {
       "guards": [
         {
-          "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component:structural-legitimacy",
+          "id": "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count:structural-legitimacy",
           "implementation": "structural-legitimacy",
           "kind": "semantic_authority",
           "participant_ids": [
-            "accumulated_total_coolant_absorbed_energy_of_calorimetry_component"
+            "cumulative_ethylene_count_due_to_gas_injection"
           ]
         },
         {
-          "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component:out-of-allowlist-immutability",
+          "id": "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count:out-of-allowlist-immutability",
           "implementation": "out-of-allowlist-immutability",
           "kind": "collateral_immutability",
           "participant_ids": [
-            "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
-            "accumulated_coolant_absorbed_energy_of_calorimetry_component"
+            "cumulative_ethylene_count_due_to_gas_injection",
+            "accumulated_ethylene_count"
           ]
         }
       ],
-      "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component",
+      "id": "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count",
       "identity": {
-        "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component=>accumulated_coolant_absorbed_energy_of_calorimetry_component",
+        "id": "cumulative_ethylene_count_due_to_gas_injection=>accumulated_ethylene_count",
         "kind": "standard_name",
-        "target_id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component"
+        "target_id": "cumulative_ethylene_count_due_to_gas_injection"
       },
       "mutations": [
         {
           "arguments": {
-            "successor_id": "accumulated_coolant_absorbed_energy_of_calorimetry_component"
+            "successor_id": "accumulated_ethylene_count"
           },
-          "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component:supersede",
+          "id": "cumulative_ethylene_count_due_to_gas_injection:supersede",
           "kind": "supersede",
           "order": 0,
-          "participant_id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component"
+          "participant_id": "cumulative_ethylene_count_due_to_gas_injection"
         }
       ],
       "orphan_policy": "refuse",
       "participants": [
         {
           "graph_label": "StandardName",
-          "id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+          "id": "cumulative_ethylene_count_due_to_gas_injection",
           "kind": "node"
         },
         {
           "graph_label": "StandardName",
-          "id": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+          "id": "accumulated_ethylene_count",
           "kind": "node"
         }
       ],
@@ -81,50 +82,50 @@
     {
       "guards": [
         {
-          "id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer:structural-legitimacy",
+          "id": "cumulative_inside_flux_surface_total_electron_density=>total_electron_count:structural-legitimacy",
           "implementation": "structural-legitimacy",
           "kind": "semantic_authority",
           "participant_ids": [
-            "calibration_factor_of_spectrometer_channel"
+            "cumulative_inside_flux_surface_total_electron_density"
           ]
         },
         {
-          "id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer:out-of-allowlist-immutability",
+          "id": "cumulative_inside_flux_surface_total_electron_density=>total_electron_count:out-of-allowlist-immutability",
           "implementation": "out-of-allowlist-immutability",
           "kind": "collateral_immutability",
           "participant_ids": [
-            "calibration_factor_of_spectrometer_channel",
-            "spectral_calibration_factor_of_spectrometer"
+            "cumulative_inside_flux_surface_total_electron_density",
+            "total_electron_count"
           ]
         }
       ],
-      "id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer",
+      "id": "cumulative_inside_flux_surface_total_electron_density=>total_electron_count",
       "identity": {
-        "id": "calibration_factor_of_spectrometer_channel=>spectral_calibration_factor_of_spectrometer",
+        "id": "cumulative_inside_flux_surface_total_electron_density=>total_electron_count",
         "kind": "standard_name",
-        "target_id": "calibration_factor_of_spectrometer_channel"
+        "target_id": "cumulative_inside_flux_surface_total_electron_density"
       },
       "mutations": [
         {
           "arguments": {
-            "successor_id": "spectral_calibration_factor_of_spectrometer"
+            "successor_id": "total_electron_count"
           },
-          "id": "calibration_factor_of_spectrometer_channel:supersede",
+          "id": "cumulative_inside_flux_surface_total_electron_density:supersede",
           "kind": "supersede",
           "order": 0,
-          "participant_id": "calibration_factor_of_spectrometer_channel"
+          "participant_id": "cumulative_inside_flux_surface_total_electron_density"
         }
       ],
       "orphan_policy": "refuse",
       "participants": [
         {
           "graph_label": "StandardName",
-          "id": "calibration_factor_of_spectrometer_channel",
+          "id": "cumulative_inside_flux_surface_total_electron_density",
           "kind": "node"
         },
         {
           "graph_label": "StandardName",
-          "id": "spectral_calibration_factor_of_spectrometer",
+          "id": "total_electron_count",
           "kind": "node"
         }
       ],
@@ -137,50 +138,50 @@
     {
       "guards": [
         {
-          "id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap:structural-legitimacy",
+          "id": "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak:structural-legitimacy",
           "implementation": "structural-legitimacy",
           "kind": "semantic_authority",
           "participant_ids": [
-            "normal_distance_of_antenna_strap"
+            "normalized_toroidal_hard_xray_peak_external_half_width"
           ]
         },
         {
-          "id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap:out-of-allowlist-immutability",
+          "id": "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak:out-of-allowlist-immutability",
           "implementation": "out-of-allowlist-immutability",
           "kind": "collateral_immutability",
           "participant_ids": [
-            "normal_distance_of_antenna_strap",
-            "back_surface_distance_of_antenna_strap"
+            "normalized_toroidal_hard_xray_peak_external_half_width",
+            "outer_hard_xray_half_width_at_emissivity_peak"
           ]
         }
       ],
-      "id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap",
+      "id": "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
       "identity": {
-        "id": "normal_distance_of_antenna_strap=>back_surface_distance_of_antenna_strap",
+        "id": "normalized_toroidal_hard_xray_peak_external_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
         "kind": "standard_name",
-        "target_id": "normal_distance_of_antenna_strap"
+        "target_id": "normalized_toroidal_hard_xray_peak_external_half_width"
       },
       "mutations": [
         {
           "arguments": {
-            "successor_id": "back_surface_distance_of_antenna_strap"
+            "successor_id": "outer_hard_xray_half_width_at_emissivity_peak"
           },
-          "id": "normal_distance_of_antenna_strap:supersede",
+          "id": "normalized_toroidal_hard_xray_peak_external_half_width:supersede",
           "kind": "supersede",
           "order": 0,
-          "participant_id": "normal_distance_of_antenna_strap"
+          "participant_id": "normalized_toroidal_hard_xray_peak_external_half_width"
         }
       ],
       "orphan_policy": "refuse",
       "participants": [
         {
           "graph_label": "StandardName",
-          "id": "normal_distance_of_antenna_strap",
+          "id": "normalized_toroidal_hard_xray_peak_external_half_width",
           "kind": "node"
         },
         {
           "graph_label": "StandardName",
-          "id": "back_surface_distance_of_antenna_strap",
+          "id": "outer_hard_xray_half_width_at_emissivity_peak",
           "kind": "node"
         }
       ],
@@ -193,50 +194,50 @@
     {
       "guards": [
         {
-          "id": "surface_temperature_of_plasma_facing_component=>surface_temperature:structural-legitimacy",
+          "id": "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak:structural-legitimacy",
           "implementation": "structural-legitimacy",
           "kind": "semantic_authority",
           "participant_ids": [
-            "surface_temperature_of_plasma_facing_component"
+            "normalized_toroidal_hard_xray_peak_upper_bound_width"
           ]
         },
         {
-          "id": "surface_temperature_of_plasma_facing_component=>surface_temperature:out-of-allowlist-immutability",
+          "id": "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak:out-of-allowlist-immutability",
           "implementation": "out-of-allowlist-immutability",
           "kind": "collateral_immutability",
           "participant_ids": [
-            "surface_temperature_of_plasma_facing_component",
-            "surface_temperature"
+            "normalized_toroidal_hard_xray_peak_upper_bound_width",
+            "outer_hard_xray_half_width_at_emissivity_peak"
           ]
         }
       ],
-      "id": "surface_temperature_of_plasma_facing_component=>surface_temperature",
+      "id": "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak",
       "identity": {
-        "id": "surface_temperature_of_plasma_facing_component=>surface_temperature",
+        "id": "normalized_toroidal_hard_xray_peak_upper_bound_width=>outer_hard_xray_half_width_at_emissivity_peak",
         "kind": "standard_name",
-        "target_id": "surface_temperature_of_plasma_facing_component"
+        "target_id": "normalized_toroidal_hard_xray_peak_upper_bound_width"
       },
       "mutations": [
         {
           "arguments": {
-            "successor_id": "surface_temperature"
+            "successor_id": "outer_hard_xray_half_width_at_emissivity_peak"
           },
-          "id": "surface_temperature_of_plasma_facing_component:supersede",
+          "id": "normalized_toroidal_hard_xray_peak_upper_bound_width:supersede",
           "kind": "supersede",
           "order": 0,
-          "participant_id": "surface_temperature_of_plasma_facing_component"
+          "participant_id": "normalized_toroidal_hard_xray_peak_upper_bound_width"
         }
       ],
       "orphan_policy": "refuse",
       "participants": [
         {
           "graph_label": "StandardName",
-          "id": "surface_temperature_of_plasma_facing_component",
+          "id": "normalized_toroidal_hard_xray_peak_upper_bound_width",
           "kind": "node"
         },
         {
           "graph_label": "StandardName",
-          "id": "surface_temperature",
+          "id": "outer_hard_xray_half_width_at_emissivity_peak",
           "kind": "node"
         }
       ],
@@ -249,50 +250,50 @@
     {
       "guards": [
         {
-          "id": "surface_thickness_of_cryostat=>thickness_of_cryostat:structural-legitimacy",
+          "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna:structural-legitimacy",
           "implementation": "structural-legitimacy",
           "kind": "semantic_authority",
           "participant_ids": [
-            "surface_thickness_of_cryostat"
+            "ratio_of_charge_of_conductor_to_voltage_of_conductor"
           ]
         },
         {
-          "id": "surface_thickness_of_cryostat=>thickness_of_cryostat:out-of-allowlist-immutability",
+          "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna:out-of-allowlist-immutability",
           "implementation": "out-of-allowlist-immutability",
           "kind": "collateral_immutability",
           "participant_ids": [
-            "surface_thickness_of_cryostat",
-            "thickness_of_cryostat"
+            "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+            "capacitance_of_ion_cyclotron_heating_antenna"
           ]
         }
       ],
-      "id": "surface_thickness_of_cryostat=>thickness_of_cryostat",
+      "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna",
       "identity": {
-        "id": "surface_thickness_of_cryostat=>thickness_of_cryostat",
+        "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor=>capacitance_of_ion_cyclotron_heating_antenna",
         "kind": "standard_name",
-        "target_id": "surface_thickness_of_cryostat"
+        "target_id": "ratio_of_charge_of_conductor_to_voltage_of_conductor"
       },
       "mutations": [
         {
           "arguments": {
-            "successor_id": "thickness_of_cryostat"
+            "successor_id": "capacitance_of_ion_cyclotron_heating_antenna"
           },
-          "id": "surface_thickness_of_cryostat:supersede",
+          "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor:supersede",
           "kind": "supersede",
           "order": 0,
-          "participant_id": "surface_thickness_of_cryostat"
+          "participant_id": "ratio_of_charge_of_conductor_to_voltage_of_conductor"
         }
       ],
       "orphan_policy": "refuse",
       "participants": [
         {
           "graph_label": "StandardName",
-          "id": "surface_thickness_of_cryostat",
+          "id": "ratio_of_charge_of_conductor_to_voltage_of_conductor",
           "kind": "node"
         },
         {
           "graph_label": "StandardName",
-          "id": "thickness_of_cryostat",
+          "id": "capacitance_of_ion_cyclotron_heating_antenna",
           "kind": "node"
         }
       ],
@@ -305,50 +306,106 @@
     {
       "guards": [
         {
-          "id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target:structural-legitimacy",
+          "id": "thermal_energy_confinement_time=>energy_confinement_time:structural-legitimacy",
           "implementation": "structural-legitimacy",
           "kind": "semantic_authority",
           "participant_ids": [
-            "total_thermal_radiative_power_of_divertor_target"
+            "thermal_energy_confinement_time"
           ]
         },
         {
-          "id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target:out-of-allowlist-immutability",
+          "id": "thermal_energy_confinement_time=>energy_confinement_time:out-of-allowlist-immutability",
           "implementation": "out-of-allowlist-immutability",
           "kind": "collateral_immutability",
           "participant_ids": [
-            "total_thermal_radiative_power_of_divertor_target",
-            "thermal_radiative_power_of_divertor_target"
+            "thermal_energy_confinement_time",
+            "energy_confinement_time"
           ]
         }
       ],
-      "id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target",
+      "id": "thermal_energy_confinement_time=>energy_confinement_time",
       "identity": {
-        "id": "total_thermal_radiative_power_of_divertor_target=>thermal_radiative_power_of_divertor_target",
+        "id": "thermal_energy_confinement_time=>energy_confinement_time",
         "kind": "standard_name",
-        "target_id": "total_thermal_radiative_power_of_divertor_target"
+        "target_id": "thermal_energy_confinement_time"
       },
       "mutations": [
         {
           "arguments": {
-            "successor_id": "thermal_radiative_power_of_divertor_target"
+            "successor_id": "energy_confinement_time"
           },
-          "id": "total_thermal_radiative_power_of_divertor_target:supersede",
+          "id": "thermal_energy_confinement_time:supersede",
           "kind": "supersede",
           "order": 0,
-          "participant_id": "total_thermal_radiative_power_of_divertor_target"
+          "participant_id": "thermal_energy_confinement_time"
         }
       ],
       "orphan_policy": "refuse",
       "participants": [
         {
           "graph_label": "StandardName",
-          "id": "total_thermal_radiative_power_of_divertor_target",
+          "id": "thermal_energy_confinement_time",
           "kind": "node"
         },
         {
           "graph_label": "StandardName",
-          "id": "thermal_radiative_power_of_divertor_target",
+          "id": "energy_confinement_time",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "vertical_outline_of_wall"
+          ]
+        },
+        {
+          "id": "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "vertical_outline_of_wall",
+            "vertical_outline_of_vacuum_vessel"
+          ]
+        }
+      ],
+      "id": "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel",
+      "identity": {
+        "id": "vertical_outline_of_wall=>vertical_outline_of_vacuum_vessel",
+        "kind": "standard_name",
+        "target_id": "vertical_outline_of_wall"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "vertical_outline_of_vacuum_vessel"
+          },
+          "id": "vertical_outline_of_wall:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "vertical_outline_of_wall"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "vertical_outline_of_wall",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "vertical_outline_of_vacuum_vessel",
           "kind": "node"
         }
       ],
@@ -367,6 +424,6 @@
   },
   "signature": {
     "canonicalization": "json-sort-keys-v1",
-    "sha256": "305dc04f33023a0c9abbbe051632b443d2715a544a725c7e490715be15d36772"
+    "sha256": "d41e1ae31900978fa4bc3d9b50b064df2541af4d4d2c30e2ba76cd3574cd65b6"
   }
 }

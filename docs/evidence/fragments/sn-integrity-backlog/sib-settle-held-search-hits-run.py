@@ -160,12 +160,17 @@ def _holder_ids(detail: dict) -> list[str]:
     return [h["id"] for h in detail["holders"]]
 
 
-def _held_hits(reason: str) -> list[tuple[str, str]]:
-    """Yield ``(path, holder)`` pairs named by one held-hit reason string."""
+def _held_hits(reason: str, path: str = "") -> list[tuple[str, str]]:
+    """Yield ``(path, holder)`` pairs named by one held-hit reason string.
+
+    The search step's held-hit reason names only the holder; the DD path that
+    holder already holds is carried on the dropped hit itself, so it arrives
+    here as ``path``. The lineage step's reason names both, path first.
+    """
     text = str(reason)
     match = HELD_REASON.match(text)
     if match:
-        return [("", t.strip()) for t in match.group(1).split(",") if t.strip()]
+        return [(path, t.strip()) for t in match.group(1).split(",") if t.strip()]
     if LINEAGE_MARKER not in text:
         return []
     out: list[tuple[str, str]] = []
@@ -196,27 +201,38 @@ def _candidate_worklist() -> dict[str, dict]:
             name, {"held": {}, "steps": set(), "excluded": name in excluded}
         )
 
-    def add_hits(row: dict, reason: str) -> None:
-        for path, holder in _held_hits(reason):
+    def add_hits(row: dict, reason: str, path: str = "") -> None:
+        for hit_path, holder in _held_hits(reason, path):
             if holder and holder not in row["held"]:
-                row["held"][holder] = path
+                row["held"][holder] = hit_path
 
     for name, blob in search["corrected_filter"].items():
         row = entry(name)
         row["steps"].add("corrected_filter")
         for hit in blob.get("dropped_hits", []):
-            add_hits(row, hit.get("reason", ""))
+            add_hits(row, hit.get("reason", ""), hit.get("path", ""))
     for row in search["corrected_referred_to_lead"]:
         entry(row["name"])["steps"].add("corrected_referred_to_lead")
     for row in search["corrected_no_surviving_candidate"]:
         entry(row["name"])["steps"].add("corrected_no_surviving_candidate")
     for name in search.get("referred_to_dd_search", []):
         entry(name)["steps"].add("searched_referred_to_dd_search")
-    for row in lineage.get("referred_to_dd_search", []):
-        row = entry(row["name"])
+    for record in lineage.get("referred_to_dd_search", []):
+        row = entry(record["name"])
         row["steps"].add("lineage_referred_to_dd_search")
-        add_hits(row, row.get("reason", ""))
+        add_hits(row, record.get("reason", ""))
     return sources
+
+
+def suspect_unit_binding(name_unit, held_path_unit) -> bool:
+    """Whether a holder's declared unit differs from its held DD path's unit.
+
+    Both sides must be present: a missing unit on either side is absence of
+    evidence, not a mismatch, so only a pair the graph can actually compare is
+    reported. One predicate serves the derivation and the cohort check's
+    planted-mismatch control, so the control exercises the real comparison.
+    """
+    return bool(name_unit and held_path_unit and str(name_unit) != str(held_path_unit))
 
 
 def read() -> dict:
@@ -256,7 +272,7 @@ def read() -> dict:
         dd_rows = gc.query(
             "UNWIND $paths AS p MATCH (dd:IMASNode {id:p}) "
             "RETURN dd.id AS id, dd.documentation AS documentation, "
-            "dd.units AS units",
+            "coalesce(dd.unit, dd.units) AS units",
             paths=all_paths,
         )
         dd_by_path: dict[str, dict] = {}
@@ -292,10 +308,8 @@ def read() -> dict:
                         "held_path": path,
                         "held_path_unit": dd.get("units"),
                         "held_path_documentation": dd.get("documentation"),
-                        "suspect_unit_binding": bool(
-                            p.get("unit")
-                            and dd.get("units")
-                            and str(p.get("unit")) != str(dd.get("units"))
+                        "suspect_unit_binding": suspect_unit_binding(
+                            p.get("unit"), dd.get("units")
                         ),
                     }
                 )
@@ -331,6 +345,138 @@ def read() -> dict:
             "cohort": details,
         }
     COHORT_PATH.write_text(json.dumps(out, indent=2, default=str) + "\n")
+    return out
+
+
+def _prior_baseline(prior_record: str | None) -> tuple[dict, dict]:
+    """The population before this node's first write, plus the names it retired.
+
+    A later round can only see the graph as it stands, so the population before
+    anything was written survives only in the first round's record. Its counts
+    are the read-back baseline and its retired names are added back, so the
+    cumulative check still asserts this node's whole footprint rather than the
+    last round's slice of it.
+    """
+    current = json.loads(COHORT_PATH.read_text())
+    if not prior_record:
+        return current, {}
+    record = json.loads(Path(prior_record).read_text())
+    retired = [
+        row for row in record.get("per_name", []) if row.get("action") == "superseded"
+    ]
+    cohort = [
+        {"id": row["id"], "population": row.get("population")}
+        for row in record.get("per_name", [])
+    ]
+    known = {row["id"] for row in cohort}
+    cohort += [
+        {"id": d["id"], "population": d["population"]}
+        for d in current["cohort"]
+        if d["id"] not in known
+    ]
+    before = {
+        "counts": record["before"],
+        "sourceless_total": record["sourceless_before"],
+        "cohort": cohort,
+    }
+    prior = {
+        "targets": sorted(row["id"] for row in retired),
+        "retired": len(retired),
+        "authority_file_sha256": record["authority"]["file_sha256"],
+    }
+    return before, prior
+
+
+def cohort_check(cohort_file: Path | None = None) -> dict:
+    """Assert the derivation recorded every held pair the two steps named.
+
+    Two defects can each empty the suspect-binding check without failing
+    anything: a holder recorded without the DD path it holds, which leaves the
+    comparison no unit to compare, and a lineage reason whose holder was never
+    attached to its name, which judges the name with no holder at all. This
+    reads the cohort back and asserts both, then re-runs the suspect comparison
+    on a planted mismatch so the check is shown able to fire.
+    """
+    cohort = json.loads(Path(cohort_file or COHORT_PATH).read_text())
+    details = {d["id"]: d for d in cohort["cohort"]}
+
+    expected: dict[str, dict[str, str]] = {}
+    for record in _load(LINEAGE_RECORD).get("referred_to_dd_search", []):
+        for held_path, holder in _held_hits(record.get("reason", "")):
+            expected.setdefault(record["name"], {})[holder] = held_path
+    missing_lineage = [
+        {"name": name, "holder": holder, "held_path": held_path}
+        for name, pairs in expected.items()
+        if name in details
+        for holder, held_path in pairs.items()
+        if holder not in {h["id"] for h in details[name]["holders"]}
+    ]
+
+    holders = [h for d in cohort["cohort"] for h in d["holders"]]
+    without_path = [
+        {"name": d["id"], "holder": h["id"]}
+        for d in cohort["cohort"]
+        for h in d["holders"]
+        if not h.get("held_path")
+    ]
+    without_unit = [
+        {"name": d["id"], "holder": h["id"], "held_path": h.get("held_path")}
+        for d in cohort["cohort"]
+        for h in d["holders"]
+        if not h.get("held_path_unit")
+    ]
+    suspect = [
+        {
+            "name": d["id"],
+            "holder": h["id"],
+            "unit": h.get("unit"),
+            "held_path_unit": h.get("held_path_unit"),
+        }
+        for d in cohort["cohort"]
+        for h in d["holders"]
+        if h.get("suspect_unit_binding")
+    ]
+    sample = next(
+        (h for h in holders if h.get("held_path_unit") and h.get("unit")), None
+    )
+    planted = None
+    if sample:
+        planted = {
+            "name": sample["id"],
+            "holder_unit": sample["unit"],
+            "held_path_unit": sample["held_path_unit"],
+            "planted_held_path_unit": f"{sample['held_path_unit']} (planted-mismatch)",
+        }
+        planted["fires"] = suspect_unit_binding(
+            planted["holder_unit"], planted["planted_held_path_unit"]
+        )
+        planted["holds_on_the_unmutated_pair"] = suspect_unit_binding(
+            planted["holder_unit"], planted["held_path_unit"]
+        )
+    planted_fires = bool(planted and planted["fires"])
+    out = {
+        "cohort_file": str(cohort_file or COHORT_PATH),
+        "names": len(cohort["cohort"]),
+        "holders": len(holders),
+        "holders_with_held_path": len(holders) - len(without_path),
+        "holders_with_dd_unit": len(holders) - len(without_unit),
+        "lineage_held_pairs_expected": sum(len(p) for p in expected.values()),
+        "lineage_holders_missing": missing_lineage,
+        "holders_without_path": without_path[:20],
+        "holders_without_dd_unit": without_unit[:20],
+        "suspect_holder_count": len(suspect),
+        "suspect_holders": suspect,
+        "planted_mismatch": planted,
+        "planted_mismatch_fires": planted_fires,
+    }
+    out["checks"] = {
+        "every_lineage_holder_recorded": not missing_lineage,
+        "every_holder_carries_its_held_path": not without_path,
+        "every_held_path_resolved_to_a_dd_unit": not without_unit,
+        "suspect_detector_fires_on_a_planted_mismatch": planted_fires,
+    }
+    if not all(out["checks"].values()):
+        raise SystemExit(f"cohort check failed: {out['checks']} :: {out}")
     return out
 
 
@@ -583,11 +729,17 @@ def _signed_call(apply: bool, digest: str | None) -> dict:
     return out
 
 
-def readback(before: dict | None = None, raise_on_mismatch: bool = False) -> dict:
+def readback(
+    before: dict | None = None,
+    raise_on_mismatch: bool = False,
+    prior: dict | None = None,
+) -> dict:
     raw = AUTHORITY_PATH.read_bytes()
     file_sha = hashlib.sha256(raw).hexdigest()
     authority = json.loads(raw)
     targets = {row["identity"]["target_id"] for row in authority["rows"]}
+    targets |= set((prior or {}).get("targets") or [])
+    shas = [file_sha, *[s for s in [(prior or {}).get("authority_file_sha256")] if s]]
     with GraphClient() as gc:
         classified = classify_sourceless_standard_names(gc)
         counts: dict[str, int] = defaultdict(int)
@@ -595,10 +747,10 @@ def readback(before: dict | None = None, raise_on_mismatch: bool = False) -> dic
             counts[row["population"]] += 1
         sourceless_ids = {row["id"] for row in classified}
         receipts = gc.query(
-            "MATCH (c:StandardNameChange {authority_file_sha256:$fs}) "
+            "MATCH (c:StandardNameChange) WHERE c.authority_file_sha256 IN $fss "
             "RETURN c.row_id AS row_id, c.operation AS op, "
             "c.manifest_sha256 AS digest",
-            fs=file_sha,
+            fss=shas,
         )
         per: dict[str, int] = defaultdict(int)
         for c in receipts:
@@ -813,13 +965,22 @@ def shared_source_path_guard(gc) -> dict:
 
     The predecessor recorded the DD path but binds no ``StandardNameSource``
     (that is why it is sourceless); the successor holds the binding. Retiring
-    the predecessor therefore drops no source, and the shared path stays held
-    by the successor. The check raises if any admitted predecessor carries a
-    live source binding, or if the successor does not hold every path the
-    predecessor's own record names.
+    the predecessor therefore drops no source, and the path this pair is about
+    stays held by the successor.
+
+    The pair's own path is the one the admitted holder holds, not every path
+    any of the predecessor's holders holds: a predecessor may share different
+    paths with different names, and only the path that pairs it with the
+    admitted holder is what this supersede is retiring. The check raises if an
+    admitted predecessor carries a live source binding, or if the admitted
+    holder does not hold the path the pair was referred on.
     """
     answers = json.loads(ANSWERS_PATH.read_text())
     admitted = _admitted(answers["records"])
+    cohort = json.loads(COHORT_PATH.read_text())["cohort"]
+    pair_path = {
+        (d["id"], h["id"]): h.get("held_path") for d in cohort for h in d["holders"]
+    }
     ids = sorted({r["id"] for r in admitted} | {r["holder"] for r in admitted})
     rows = gc.query(
         "UNWIND $ids AS id MATCH (sn:StandardName {id:id}) "
@@ -833,15 +994,25 @@ def shared_source_path_guard(gc) -> dict:
     for rec in admitted:
         pred = by_id.get(rec["id"], {})
         succ = by_id.get(rec["holder"], {})
-        recorded = set(rec.get("shared_paths") or [])
+        pair_held = str(pair_path.get((rec["id"], rec["holder"])) or "").removeprefix(
+            "dd:"
+        )
+        if not pair_held:
+            raise SystemExit(
+                "no held path on the cohort for the admitted pair "
+                f"{rec['id']} <- {rec['holder']}: the pair cannot be checked"
+            )
         succ_paths = {str(p).removeprefix("dd:") for p in (succ.get("paths") or [])}
-        missing = sorted(p for p in recorded if p.removeprefix("dd:") not in succ_paths)
+        missing = [] if pair_held in succ_paths else [pair_held]
         pairs.append(
             {
                 "predecessor": rec["id"],
                 "successor": rec["holder"],
                 "predecessor_binds_source": int(pred.get("producers") or 0),
-                "recorded_paths": sorted(recorded),
+                "pair_held_path": pair_held,
+                "also_recorded_on_predecessor": sorted(
+                    str(p).removeprefix("dd:") for p in (rec.get("shared_paths") or [])
+                ),
                 "successor_holds_paths": sorted(succ_paths),
                 "paths_successor_does_not_hold": missing,
             }
@@ -1011,6 +1182,17 @@ def compose() -> dict:
     verify = verify_log["payload"]
     falsify = falsify_log["payload"]
     negcontrol = _gate_log(RUN_DIR / "negcontrol.log")["payload"]
+    cohort_gate = _gate_log(RUN_DIR / "cohort-check.log")
+    cohort_check_payload = (
+        cohort_gate["payload"] if "payload" in cohort_gate else cohort_gate
+    )
+    prior_path = RUN_DIR / "round1-record.json"
+    prior_record = json.loads(prior_path.read_text()) if prior_path.is_file() else None
+    prior_retired = [
+        row["id"]
+        for row in (prior_record or {}).get("per_name", [])
+        if row.get("action") == "superseded"
+    ]
 
     details = {row["id"]: row for row in cohort["cohort"]}
     admitted_ids = {r["id"] for r in _admitted(answers["records"])}
@@ -1062,6 +1244,32 @@ def compose() -> dict:
     retired = [r for r in per_name if r["action"] == "superseded"]
     suspect = [r for r in per_name if r["suspect_holders"]]
     totals = _referral_totals(referrals)
+    rounds = [
+        {
+            "round": 1,
+            "what": "the first derivation, which dropped every search-step held path "
+            "and never attached a lineage holder",
+            "worklist": prior_record.get("worklist_count") if prior_record else None,
+            "retired": prior_retired,
+            "referrals": prior_record.get("referral_count") if prior_record else None,
+            "sourceless_before": prior_record.get("sourceless_before")
+            if prior_record
+            else None,
+            "sourceless_after": prior_record.get("sourceless_after")
+            if prior_record
+            else None,
+        },
+        {
+            "round": 2,
+            "what": "the corrected derivation: every search-step held path and every "
+            "lineage holder recorded, every held path resolved to its DD unit",
+            "worklist": cohort["worklist_count"],
+            "retired": [r["id"] for r in retired],
+            "referrals": len(referrals),
+            "sourceless_before": cohort["sourceless_total"],
+            "sourceless_after": verify["sourceless_total"],
+        },
+    ]
     source_counts = {
         step: sum(1 for d in cohort["cohort"] if step in d["steps"])
         for step in (
@@ -1114,9 +1322,25 @@ def compose() -> dict:
         "falsification": falsify,
         "falsification_log": falsify_log,
         "negative_control": negcontrol,
+        "cohort_check": cohort_check_payload,
+        "rounds": rounds,
+        "retired_total": len(prior_retired) + len(retired),
         "lead_referral_total": totals,
         "per_name": per_name,
         "referrals": referrals,
+        "prior_round": (
+            {
+                "retired": prior_retired,
+                "referral_count": prior_record.get("referral_count"),
+                "sourceless_before": prior_record.get("sourceless_before"),
+                "sourceless_after": prior_record.get("sourceless_after"),
+                "authority_file_sha256": (prior_record.get("authority") or {}).get(
+                    "file_sha256"
+                ),
+            }
+            if prior_record
+            else None
+        ),
     }
     (HERE / f"{node}.json").write_text(json.dumps(record, indent=2, default=str) + "\n")
 
@@ -1157,15 +1381,23 @@ def compose() -> dict:
         f"sourceless on the live graph and form this node's work list "
         f"({source_counts}). Of those, {len(retired)} were retired in a holder's favour "
         f"through the signed supersede and {len(referrals)} remain referred to the lead. "
-        f"The classifier read-back holds {cohort['sourceless_total']} sourceless names before "
-        f"and {verify['sourceless_total']} after: a fall of exactly {len(retired)} with nothing "
-        f"entering the population. Spend USD {answers['spend_usd']:.6f}.</p>",
+        f"The classifier read-back holds {verify['sourceless_total']} sourceless names now, "
+        f"against {cohort['sourceless_total']} before this round's apply; cumulatively the "
+        f"population has fallen from {prior_record.get('sourceless_before') if prior_record else cohort['sourceless_total']} "
+        f"to {verify['sourceless_total']} across the "
+        f"{len(prior_retired) + len(retired)} names this node has retired, with nothing "
+        f"entering it. Spend USD {answers['spend_usd']:.6f}.</p>",
         f"<p id='{node}-suspect'>{len(suspect)} name(s) carry a suspect holder binding, "
-        "where a holder's unit differs from the unit its held DD path declares. Those pairs "
-        "are flagged below and change nothing about the holder.</p>",
+        "where a holder's unit differs from the unit its held DD path declares. Every "
+        f"holder in this cohort carries a held DD path and a resolved DD unit "
+        f"({cohort_check_payload.get('holders_with_held_path')} of "
+        f"{cohort_check_payload.get('holders')}), so this count is a result the comparison "
+        "reached rather than one an empty field made unfalsifiable; the derivation check "
+        "below also runs the comparison on a planted mismatch. A flagged pair changes "
+        "nothing about the holder.</p>",
         f"<p id='{node}-foreign'>{escape(foreign_note)}</p>",
         f"<figure id='{node}-fig'>"
-        f"<img src='/imas-codex/figures/sn-integrity-backlog/sib-settle-held-search-hmm/"
+        f"<img src='/imas-codex/figures/sn-integrity-backlog/{node}/"
         f"{node}.svg' alt='Sourceless population before and after this node&apos;s signed "
         f"supersedes, and the work list split into settled, live and exhausted referrals.'>"
         f"<figcaption>Sourceless names by population before and after this node's "
@@ -1189,6 +1421,16 @@ def compose() -> dict:
         "<th>p</th><th>conf</th><th>action</th><th>held DD path</th></tr></thead><tbody>",
         *[row_html(r) for r in referrals],
         "</tbody></table>",
+        f"<h3 id='{node}-rounds'>Rounds</h3>",
+        f"<pre id='{node}-rounds-pre'>{escape(json.dumps(record['rounds'], indent=1))}</pre>",
+        f"<h3 id='{node}-cohort'>Derivation check</h3>",
+        f"<p id='{node}-cohort-note'>The derivation is read back and checked: every "
+        "lineage-reason holder is attached to its name, every holder carries the DD path "
+        "it holds, and every held path resolves to a DD unit — the two ways a held hit "
+        "could go missing, each of which leaves the suspect-binding check below with "
+        "nothing to compare. The same comparison is then run on a planted mismatch so it "
+        "is shown able to fire.</p>",
+        f"<pre id='{node}-cohort-pre'>{escape(json.dumps({'command': cohort_gate.get('header'), 'exit_code': cohort_gate.get('exit_code'), 'payload': cohort_check_payload}, indent=1))}</pre>",
         f"<h3 id='{node}-suspect-table'>Suspect holder bindings ({len(suspect)})</h3>",
         f"<pre id='{node}-suspect-pre'>{escape(json.dumps([{'name': r['id'], 'suspect_holders': r['suspect_holders'], 'holders': r['holders']} for r in suspect], indent=1))}</pre>",
         f"<h3 id='{node}-lead-total'>Running lead-referral total (§38)</h3>",
@@ -1247,11 +1489,20 @@ def main() -> None:
             "overlap",
             "guard",
             "verify",
+            "cohort-check",
             "falsify",
             "record",
         ],
     )
     parser.add_argument("--digest")
+    parser.add_argument(
+        "--prior-record",
+        help="an earlier round's record, whose counts anchor the cumulative read-back",
+    )
+    parser.add_argument(
+        "--cohort-file",
+        help="a cohort file to check instead of this run's (the pre-repair cohort, for a control)",
+    )
     parser.add_argument("--run-dir", help="run directory holding the derived artifacts")
     parser.add_argument("--run-id", help="the crew run id recorded on new rows")
     args = parser.parse_args()
@@ -1280,14 +1531,22 @@ def main() -> None:
     elif args.mode == "readback":
         print(json.dumps(readback(), indent=2, default=str))
     elif args.mode == "verify":
-        before = json.loads(COHORT_PATH.read_text())
-        result = readback(before=before, raise_on_mismatch=True)
+        before, prior = _prior_baseline(args.prior_record)
+        result = readback(before=before, raise_on_mismatch=True, prior=prior)
         print(json.dumps(result, indent=2, default=str))
+    elif args.mode == "cohort-check":
+        print(
+            json.dumps(
+                cohort_check(Path(args.cohort_file) if args.cohort_file else None),
+                indent=2,
+                default=str,
+            )
+        )
     elif args.mode == "falsify":
-        before = json.loads(COHORT_PATH.read_text())
+        before, prior = _prior_baseline(args.prior_record)
         before["sourceless_total"] += 1
         try:
-            readback(before=before, raise_on_mismatch=True)
+            readback(before=before, raise_on_mismatch=True, prior=prior)
         except SystemExit as exc:
             print(
                 json.dumps({"check_failed_as_expected": True, "detail": str(exc)[:300]})
