@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-10-19T20:33:27.401Z",
   "dispatched_at": "2026-10-19T20:21:52Z",
+  "finding_dispositions": {
+    "1": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-19T20:36:50.449197+00:00"
+    }
+  },
   "findings": [
     "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:185 follow-on: outcome_status reads \"complete\" while the harmonization halted after 1 of 2 batches with stamped false (json lines 78, 123, 114, 251), because the unchanged runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:627-628 sets it on the containment gate alone (complete if containment holds else containment); an aggregator keying on the field alone reads a fully-harmonized family, though the node discloses the halt in docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-visible-wavelength-heuristic.html:16 and in its manifest follow_ons.",
     "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/lower_bound_wavelength_of_visible_camera-heuristic.json:31 follow-on: cost_limit_passed_usd holds the 1.98 apply ceiling, not a pass/fail, so a reader comparing spend_usd (json line 250, 0.521024) against a value stored under a name that asserts a verdict compares a spend to a cap; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508-509 (ceiling = min(apply_cap(planned_calls), ARM_BUDGET_USD))."
