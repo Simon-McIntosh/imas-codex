@@ -1,0 +1,54 @@
+<!-- The heuristic arm of the length_of_passive_loop_element anchor comparison,
+     run against a fresh scratch copy of the checked 2026-10-18 export through
+     the per-arm runner. Module:
+     docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py. -->
+<section id="ssog-anchor-passive-loop-heuristic-r2" data-reckon="evidence">
+  <h2 id="ssog-anchor-passive-loop-heuristic-r2-heading">length_of_passive_loop_element heuristic arm</h2>
+
+  <p id="ssog-anchor-passive-loop-heuristic-r2-arm">
+    The heuristic arm of the <code>length_of_passive_loop_element</code> family was
+    harmonized once against a scratch copy of the graph. The family has three
+    members and the fixed selection gives it the heuristic anchor
+    <code>major_length_of_passive_loop_element</code> (the Jev anchor arm is the
+    separate peer node <code>ssog-anchor-passive-loop-jev-r2</code>). The arm
+    record is
+    <code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-heuristic.json</code>,
+    with <code>outcome_status: complete</code>.
+  </p>
+
+  <p id="ssog-anchor-passive-loop-heuristic-r2-measure">
+    Lint findings fell <strong>3 &rarr; 0</strong> across the family (3
+    <code>convention_violation</code> before, none after). Every member's
+    documentation review score after harmonization is recorded:
+    <code>minor_length_of_passive_loop_element</code> 1.0,
+    <code>major_length_of_passive_loop_element</code> 0.9375,
+    <code>length_of_passive_loop_element</code> 0.849. The apply made 27 LLM calls
+    for <strong>USD 0.579152</strong> in <strong>1848.8 s</strong> of wall time,
+    below both the runner's USD 2.00 arm ceiling and the USD 1.98 per-apply cost
+    cap it passed (<code>min(apply_cap(3), 2.00) = 1.98</code>).
+  </p>
+
+  <p id="ssog-anchor-passive-loop-heuristic-r2-containment">
+    Containment holds on both controls. Positive: 27 scratch cost rows name this
+    family's members and 27 ledger rows fall in the apply window, so the apply
+    wrote to the copy being measured. Negative: 0 cost rows attributable to this
+    apply are present in the live graph
+    (<code>live_family_rows 0</code>, <code>live_scope_run_rows 0</code>). The
+    isolation probe contrasted a unique marker inserted into the scratch instance
+    (present, count 1) against the live graph (absent, count 0), and the live node
+    count was unchanged across the run (1771162 before and after; recorded as an
+    observation, not judged). The scratch instance was stopped and its tree
+    removed (<code>mcintos-1281970-ftjlwn3v</code> deleted, no Neo4j left on
+    port 28008), and the port reservation released.
+  </p>
+
+  <p id="ssog-anchor-passive-loop-heuristic-r2-code">
+    The arm was written by a detached invocation at head
+    <code>5cf53a7b6</code> whose runner log ends <code>EXIT=0</code>; the record's
+    code digest is <code>tree_digest_imas_codex d1e4f1e5</code>, identical to the
+    first arm's, so the product code is unchanged and only the scratch port
+    reservation differs. No adoption verdict is drawn here: the adoption rule
+    compares this arm against the Jev arm across all ten families, which the
+    aggregating node applies.
+  </p>
+</section>
