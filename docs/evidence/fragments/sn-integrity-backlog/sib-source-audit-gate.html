@@ -112,10 +112,20 @@ rebuild, loop and audit tests has 50 passed, no failures, in
 in <code>resume-graph-final-worktree.log</code>. The broader export covering
 base at <code>f6905424189b4379324408127c73b5de3ba0e8e6</code> has
 114 passed and <code>EXIT=0</code> in <code>resume-covering-base.log</code>.
-Its first resumed head run has 33 failures and three setup errors: ten more
-export fixture files return no row for the new audit count query. Those
-fixtures require a clean-audit response so their existing refusal checks can
-reach the behavior they test. The final head delta awaits that fixture update.</p>
+Its first resumed head run had 33 failures and three setup errors because ten
+export fake graph clients returned no row for the audit count. The shared
+<code>clean_source_audit_graph</code> helper in
+<code>tests/standard_names/conftest.py:35</code> now gives each of those fakes
+zero sourceless names and a matching zero supporting inventory, while each
+fake retains its other query behavior. All ten fixture classes use the helper;
+their existing assertions, including refusal checks, are unchanged.
+The committed head at <code>c83a35c4e1d0af16ce46957ff0e709ab1fa1e324</code>
+has 118 passed, 20 deselected, no failures, and <code>EXIT=0</code> in
+<code>resume-covering-head-committed.log</code>. The selection includes
+<code>test_scoped_global_maintenance.py</code>. Thus the base-to-head failure
+delta is zero. The separate real-graph export test still plants dropped-edge
+and never-bound exhausted names and observes refusal before population fetch;
+the per-candidate producer-refusal tests also pass.</p>
 </main>
 </body>
 </html>
