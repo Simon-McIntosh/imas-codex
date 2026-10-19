@@ -510,7 +510,9 @@
       "precondition_met": false
     },
     "refused_program": "signed ordinary-source migration",
-    "refusal_reason": "signed ordinary source lifecycle does not match migration authority"
+    "refusal_reason": "signed ordinary source lifecycle does not match migration authority",
+    "missing_owner": "a signed program that moves a name from one DD source to another in one transaction; no writer in the envelope moves a name between two sources, and the ordinary-source migration contract holds the moving source's FROM_DD_PATH invariant",
+    "disposition": "deferred to the node that builds the missing owner"
   },
   "readback_before": {
     "counts": {

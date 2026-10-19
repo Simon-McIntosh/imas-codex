@@ -12,21 +12,22 @@ Every write goes through its owning writer: the retirements through
 and previewed before it is applied on a quiet graph; the restored binding
 through ``bind_recovery_sources``. Nothing is written by hand Cypher.
 
-The swap is not applied. It has two halves: move the name
-``electron_temperature_at_separatrix`` off the flux-surface-averaged DD path
-onto the local one, then bind the averaged name to the now-free averaged path.
-The first half is previewed here as the single closed ordinary-source migration
-the envelope defines, with the local path's source as the migrating source and
-the accepted, valid name as its receiving target. That program retargets one
-*source* between two names; its contract holds the source's ``FROM_DD_PATH``
-invariant, so it cannot move a *name* between two sources. The row is refused
-on the migrating source's own lifecycle, because a source with no incumbent
-binding has nothing for the program to move. The second half is not run: its
-precondition is that the averaged path holds no name, and
-``bind_recovery_sources`` is add-only, so running it first would MERGE a second
-``PRODUCED_NAME`` edge onto the averaged path's source while that source is
-still attached to the separatrix name, leaving its scalar disagreeing with the
-edge that remains.
+The swap is not applied; it is deferred to a separate owner, which builds the
+missing writer this record names below. What the swap needs is a signed program
+that moves a *name* from one DD source to another in one transaction, and the
+envelope does not yet carry one. What exists cannot express it. The
+ordinary-source migration program retargets one *source* between two names and
+holds that source's ``FROM_DD_PATH`` invariant, so it cannot move a *name*
+between two sources; previewed with the local path's source as the migrating
+source and the accepted, valid receiving name, it refuses the row on the
+migrating source's own lifecycle. The pair's only other row it can shape, the
+averaged source reinstated at the name it already holds, is refused by the
+last-producing-source guard. The averaged-path binding is not run either: its
+precondition is that the averaged path holds no name, and the averaged path
+still holds ``electron_temperature_at_separatrix``, so running it now would
+MERGE a second ``PRODUCED_NAME`` edge onto a source that is still attached,
+leaving its scalar disagreeing with the edge that remains. Both refusal
+receipts, the unmet precondition and the missing owner are in the swap record.
 
 Modes: read | authority | preview | quiet | apply | bindings | readback |
 verify | falsify | swap | record.
@@ -584,6 +585,13 @@ def swap() -> dict[str, Any]:
             "averaged_path_holder": held_by,
             "precondition_met": False,
         },
+        "missing_owner": (
+            "a signed program that moves a name from one DD source to another in "
+            "one transaction; no writer in the envelope moves a name between two "
+            "sources, and the ordinary-source migration contract holds the moving "
+            "source's FROM_DD_PATH invariant"
+        ),
+        "disposition": "deferred to the node that builds the missing owner",
         "refused_program": "signed ordinary-source migration",
         "refusal_reason": (
             probes[0]["refusals"][0]["reason"] if probes[0]["refusals"] else None
@@ -848,11 +856,14 @@ def html_fragment(record: dict[str, Any]) -> str:
     )
     parts.append(
         "<p id='sib-apply-live-rulings-summary'>Three of the four ruled graph "
-        "changes are applied and one is reported unapplied. Two live names are "
-        "retired through the signed supersede with a successor link and one "
-        "lost DD binding is restored through <code>bind_recovery_sources</code>; "
-        f"the separatrix temperature swap is not expressible by any owner and "
-        f"stays unapplied. The classifier's live non-derived population reads "
+        "changes are applied. Two live names are retired through the signed "
+        "supersede with a successor link and one lost DD binding is restored "
+        "through <code>bind_recovery_sources</code>. The fourth, the separatrix "
+        "temperature swap, is deferred to a separate node that builds the "
+        "missing owner: a signed program that moves a name from one DD source "
+        "to another in one transaction, which no writer in the envelope can do "
+        "today. Both refusal receipts from the preview are kept below. The "
+        "classifier's live non-derived population reads "
         f"{record['readback_after']['live_non_derived']} after, against "
         f"{sum(v for k, v in before_counts.items() if k != 'derived_parent')} before.</p>"
     )
@@ -886,36 +897,39 @@ def html_fragment(record: dict[str, Any]) -> str:
     receiving = swap.get("receiving_name") or {}
     parts.append(
         "<h3 id='sib-apply-live-rulings-swap'>The separatrix temperature swap, "
-        "unapplied</h3>"
-        "<p id='sib-apply-live-rulings-swap-why'>The swap has two halves: move "
+        "deferred</h3>"
+        "<p id='sib-apply-live-rulings-swap-why'>The swap moves "
         f"<code>{html.escape(SWAP_LOCAL_NAME)}</code> off the "
-        "flux-surface-averaged DD path onto the local one, then bind "
-        f"<code>{html.escape(SWAP_AVERAGE_NAME)}</code> to the averaged path "
-        "that leaves free. The holder migration is previewed as the envelope's "
-        "single closed ordinary-source migration, with the local path's source "
-        "as the migrating source and the ruled receiving name as its target. "
-        "That name reads "
+        "flux-surface-averaged DD path onto the local one in one transaction. "
+        "It is deferred to a separate node that builds the writer it needs: a "
+        "signed program that moves a name from one DD source to another. No "
+        "writer in the envelope does that today, and the preview below shows "
+        "why the nearest one cannot stand in. That program retargets one "
+        "<em>source</em> between two names and holds that source's own DD path "
+        "invariant, so it cannot move a <em>name</em> between two sources. "
+        "Previewed with the local path's source as the moving source and the "
+        "receiving name as its target -- live, "
         f"<code>{html.escape(str(receiving.get('name_stage')))}</code> with "
-        f"validation <code>{html.escape(str(receiving.get('validation')))}</code>, "
-        "as the ruling required. The row is refused: "
+        f"validation <code>{html.escape(str(receiving.get('validation')))}</code> "
+        "-- the row is refused: "
         f"<code>{html.escape(str(swap.get('refusal_reason')))}</code>. The "
-        "refusal is about the migrating source, not the receiving name. The "
-        "program retargets one source between two names and holds that source's "
-        "own DD path invariant, so the source it moves must be the one already "
-        "holding the binding the row removes. The swap needs the opposite: the "
-        "name keeps its identity and the DD path behind it changes. The pair's "
-        "only other row the program can shape, which reinstates the averaged "
-        "source at the name it already holds, is refused as well, with "
-        "<code>target would lose its last producing source</code>: the guard "
-        "reads the removed edge as leaving the name unproduced. Neither shape "
-        "therefore performs any part of the swap.</p>"
-        "<p id='sib-apply-live-rulings-swap-averaged-path'>The averaged-path binding is not run. Its "
-        "precondition is that the averaged path holds no name, and it still "
-        f"holds <code>{html.escape(str(averaged_path_binding.get('averaged_path_holder')))}</code>;"
-        " <code>bind_recovery_sources</code> is add-only, so running it first "
-        "would <code>MERGE</code> a second <code>PRODUCED_NAME</code> edge onto a "
-        "source that is still attached, leaving the source's scalar disagreeing "
-        "with the edge that remains.</p>"
+        "refusal turns on the moving source's own lifecycle, not on the "
+        "receiving name, so no receiving name relieves it. The pair's only "
+        "other row the program can shape, which reinstates the averaged source "
+        "at the name it already holds, is refused as well, with "
+        "<code>target would lose its last producing source</code>. Both "
+        "refusal receipts are in the table below.</p>"
+        "<p id='sib-apply-live-rulings-swap-averaged-path'>The second half, "
+        "binding the averaged path to the averaged name, is not run either: "
+        "its precondition is that the averaged path holds no name, and it "
+        f"still holds <code>{html.escape(str(averaged_path_binding.get('averaged_path_holder')))}</code>, "
+        "so the swap cannot start from that end. "
+        "<code>bind_recovery_sources</code> is add-only, so running it now "
+        "would <code>MERGE</code> a second <code>PRODUCED_NAME</code> edge "
+        "onto a source that is still attached, leaving the source's scalar "
+        "disagreeing with the edge that remains. The missing owner, the two "
+        "refusal receipts and the unmet precondition are recorded in the swap "
+        "record and carried into the deferred node.</p>"
     )
     parts.append(
         _table(
