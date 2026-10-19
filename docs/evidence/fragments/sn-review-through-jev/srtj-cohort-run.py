@@ -38,9 +38,10 @@ ARCHIVE = (
 )
 RESULTS = HERE / "srtj-cohort"
 EXCLUSIONS = RESULTS / "excluded.json"
-PIECE_CEILING_USD = 3.0
+PIECE_CEILING_USD = 3.5
 PRIOR_SPEND_USD = 0.000288
 RUN_LIMIT_USD = 2.99
+RECOVERY_LIMIT_USD = 0.53
 
 
 def stamp() -> str:
@@ -68,7 +69,7 @@ def verify_completion(record: dict) -> None:
     pending = [
         item["id"]
         for item in record["items"]
-        if item.get("decision") == "drafted" or item.get("wall_time_s") is None
+        if item.get("decision") in {None, "drafted"} or item.get("wall_time_s") is None
     ]
     if pending:
         raise RuntimeError(
@@ -411,8 +412,77 @@ def count_run(gc: GraphClient, run_id: str) -> dict:
     return {"run": int(run), "cost": int(cost)}
 
 
+def combine_recovery(base: dict, recovery: dict) -> dict:
+    """Preserve the paid first run and add only the completed retry identities."""
+    pending = set(base["incomplete_ids"])
+    recovered = {item["id"]: item for item in recovery["items"]}
+    if not pending or pending != set(recovered):
+        raise RuntimeError("recovery identities differ from the saved pending set")
+    if len(base["items"]) != len(selected_items("name", None)):
+        raise RuntimeError("saved piece differs from the selected cohort")
+    combined = dict(base)
+    combined["items"] = [recovered.get(item["id"], item) for item in base["items"]]
+    combined["recovery"] = {
+        "run_id": recovery["run_id"],
+        "code_revision": recovery["code_revision"],
+        "receipt_count": recovery["receipt_count"],
+        "receipt_rows": recovery["receipt_rows"],
+        "spend_usd": recovery["spend_usd"],
+        "scratch_evidence": recovery["scratch_evidence"],
+        "switch": recovery["switch"],
+        "switch_value": recovery["switch_value"],
+    }
+    combined["receipt_count"] = base["receipt_count"] + recovery["receipt_count"]
+    combined["spend_usd"] = round(base["spend_usd"] + recovery["spend_usd"], 6)
+    combined["piece_spend_total_usd"] = round(
+        base["piece_spend_total_usd"] + recovery["spend_usd"], 6
+    )
+    models = defaultdict(float, base["per_model_spend_usd"])
+    for model, spend in recovery["per_model_spend_usd"].items():
+        models[model] += spend
+    combined["per_model_spend_usd"] = {
+        model: round(spend, 6) for model, spend in sorted(models.items())
+    }
+    combined["run_summary"] = recovery["run_summary"]
+    combined["route_counts"] = {
+        route: sum(item["route"] == route for item in combined["items"])
+        for route in ("accept", "refine", "band", "chat_below_reject", "unjudged")
+    }
+    combined["stage_counts"] = {
+        stage: sum(item["decision"] == stage for item in combined["items"])
+        for stage in {item["decision"] for item in combined["items"]}
+    }
+    combined["incomplete_ids"] = [
+        item["id"]
+        for item in combined["items"]
+        if item["decision"] in {None, "drafted"}
+    ]
+    combined["measurement_complete"] = False
+    combined["comparison_eligible"] = False
+    combined["status"] = "containment_pending"
+    return combined
+
+
 async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
     items = selected_items(args.axis, args.half)
+    base = None
+    combined_path = RESULTS / "cascade-name.json" if args.retry_pending else None
+    combined_ready = False
+    if args.retry_pending:
+        base = json.loads((RESULTS / "cascade-name.json").read_text())
+        pending = set(base["incomplete_ids"])
+        if (
+            args.arm != "cascade"
+            or args.axis != "name"
+            or args.half is not None
+            or len(pending) != 3
+            or pending
+            != {item["id"] for item in base["items"] if item["decision"] == "drafted"}
+        ):
+            raise RuntimeError("saved pending set is invalid for name recovery")
+        items = [item for item in items if item["id"] in pending]
+        if len(items) != len(pending):
+            raise RuntimeError("pending identities are absent from the selected cohort")
     ids = [item["id"] for item in items]
     record["exclusions"] = str(EXCLUSIONS)
     record["excluded_count"] = json.loads(EXCLUSIONS.read_text())["excluded_count"]
@@ -463,7 +533,13 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
         started = stamp()
         start_time = time.monotonic()
         summary = await run_sn_pools(
-            cost_limit=(RUN_LIMIT_USD if args.axis == "name" else 5.0)
+            cost_limit=(
+                RECOVERY_LIMIT_USD
+                if args.retry_pending
+                else RUN_LIMIT_USD
+                if args.axis == "name"
+                else 5.0
+            )
             if args.arm == "cascade"
             else 55.0,
             time_limit_s=2400,
@@ -549,6 +625,8 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
                     ),
                 )
             record["receipt_count"] = len(cost_rows)
+            if args.retry_pending:
+                record["receipt_rows"] = cost_rows
             if not cost_rows:
                 raise RuntimeError("review produced no cost receipts")
             record["per_model_spend_usd"] = {
@@ -556,9 +634,11 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
             }
             record["spend_usd"] = round(sum(by_model.values()), 6)
             if args.arm == "cascade" and args.axis == "name":
-                record["prior_attempt_spend_usd"] = PRIOR_SPEND_USD
+                record["prior_attempt_spend_usd"] = (
+                    base["piece_spend_total_usd"] if base else PRIOR_SPEND_USD
+                )
                 record["piece_spend_total_usd"] = round(
-                    record["spend_usd"] + PRIOR_SPEND_USD, 6
+                    record["spend_usd"] + record["prior_attempt_spend_usd"], 6
                 )
             record["route_counts"] = {
                 route: sum(item["route"] == route for item in record["items"])
@@ -576,6 +656,9 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
             record["scratch_evidence"] = count_run(gc, summary.run_id)
         # Preserve every paid item and receipt total before checking containment.
         save(path, record)
+        if base:
+            combined = combine_recovery(base, record)
+            save(combined_path, combined)
         with GraphClient(uri=uri) as scratch, GraphClient(uri=live_uri) as live:
             local = count_run(scratch, summary.run_id)
             remote = count_run(live, summary.run_id)
@@ -596,6 +679,18 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
         finally:
             save(path, record)
         verify_completion(record)
+        if base:
+            combined["recovery"]["containment"] = record["containment"]
+            combined["recovery"]["containment_verdict"] = record["containment_verdict"]
+            verify_containment(base)
+            verify_completion(combined)
+            if combined["piece_spend_total_usd"] >= PIECE_CEILING_USD:
+                raise RuntimeError("combined piece exceeds its spend ceiling")
+            combined["containment_verdict"] = "pass"
+            combined["code_revision"] = record["code_revision"]
+            combined["finished_at"] = stamp()
+            save(combined_path, combined)
+            combined_ready = True
         if len(record["items"]) != len(ids) or (
             args.arm == "cascade"
             and args.axis == "name"
@@ -616,6 +711,17 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
         shutil.rmtree(root)
         record["scratch_removed"] = {"path": str(root), "exists_after": root.exists()}
         save(path, record)
+        if base and combined_path and combined_path.exists():
+            combined = json.loads(combined_path.read_text())
+            combined.setdefault("recovery", {})["scratch_stopped"] = record.get(
+                "scratch_stopped", False
+            )
+            combined["recovery"]["scratch_removed"] = record["scratch_removed"]
+            if combined_ready and record.get("scratch_stopped") and not root.exists():
+                combined["measurement_complete"] = True
+                combined["comparison_eligible"] = True
+                combined["status"] = "complete"
+            save(combined_path, combined)
 
 
 def main() -> None:
@@ -624,6 +730,7 @@ def main() -> None:
     parser.add_argument("--axis", choices=("name", "docs"))
     parser.add_argument("--half", type=int, choices=(1, 2))
     parser.add_argument("--preflight", action="store_true")
+    parser.add_argument("--retry-pending", action="store_true")
     parser.add_argument("--check-containment", type=Path)
     parser.add_argument("--check-record", type=Path)
     args = parser.parse_args()
@@ -653,7 +760,11 @@ def main() -> None:
         "status": "running",
     }
     suffix = f"-{args.half}" if args.half else ""
-    path = RESULTS / f"{args.arm}-{args.axis}{suffix}.json"
+    path = RESULTS / (
+        "cascade-name-recovery.json"
+        if args.retry_pending
+        else f"{args.arm}-{args.axis}{suffix}.json"
+    )
     save(path, record)
     try:
         asyncio.run(measure(args, record, path))
