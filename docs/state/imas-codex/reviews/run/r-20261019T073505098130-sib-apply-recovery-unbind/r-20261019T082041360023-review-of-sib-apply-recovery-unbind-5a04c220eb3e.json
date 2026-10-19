@@ -29,6 +29,13 @@
   ],
   "completed_at": "2026-10-19T12:32:19Z",
   "dispatched_at": "2026-10-19T08:21:37Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The reason text sits in the signed authority's rows, which are data recording the ruling the apply executed; the driver is a one-shot evidence script, not product source.",
+      "recorded_at": "2026-10-19T12:38:03.275144+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py",
