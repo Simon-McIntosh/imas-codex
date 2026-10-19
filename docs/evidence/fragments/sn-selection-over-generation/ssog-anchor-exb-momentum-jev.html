@@ -1,0 +1,70 @@
+<!-- The jev arm of the momentum_flux_due_to_e_cross_b_drift anchor family could
+     not be produced: the scratch Neo4j instance did not reach Bolt readiness
+     within its fixed 180 s window while the node carried eighteen concurrent
+     arms. Module: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py. -->
+<section id="ssog-anchor-exb-momentum-jev" data-reckon="evidence">
+  <h2 id="ssog-anchor-exb-momentum-jev-heading">The jev arm of the e&#8202;&#215;&#8202;B momentum-flux family: scratch instance readiness timed out under node contention</h2>
+
+  <p id="ssog-anchor-exb-momentum-jev-intent">
+    Plan <code>sn-selection-over-generation</code> &#167;7 runs the anchor selection A/B one
+    node per family and arm through the per-family runner
+    <code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py</code>,
+    against the fixed selection in <code>ssog-anchor-ab/selection.json</code>. This node
+    ran the <strong>jev</strong> arm of the family <code>momentum_flux_due_to_e_cross_b_drift</code>,
+    whose members are <code>momentum_flux_due_to_e_cross_b_drift</code>,
+    <code>momentum_flux_normalized_due_to_e_cross_b_drift</code> and
+    <code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code>, with the
+    heuristic anchor <code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code>
+    and the jev anchor <code>momentum_flux_normalized_due_to_e_cross_b_drift</code>.
+  </p>
+
+  <p id="ssog-anchor-exb-momentum-jev-outcome">
+    <strong>Outcome: blocked, no arm written.</strong> The detached invocation
+    (<code>setsid nohup</code>, log <code>runner-jev.log</code>) ended
+    <code>EXIT=1</code> after 3&#8202;231&#8202;s. The dump (2&#8202;643&#8202;183&#8202;686&#8202;bytes)
+    extracted, a scratch instance started on the reserved pair
+    <code>bolt/http 28010/29010</code>, and then
+    <code>temp_neo4j._wait_for_bolt_ready</code> raised
+    <code>ClickException: Temp Neo4j did not reach Bolt readiness within 180 seconds</code>
+    at <code>imas_codex/graph/temp_neo4j.py:199</code>. The instance's own log shows it
+    had reached the vector-module warning line at <code>20:55:52</code> and was still
+    initialising when the window closed at <code>20:57:04</code>.
+  </p>
+
+  <p id="ssog-anchor-exb-momentum-jev-cause">
+    The cause is node contention, not a defect in the runner or the graph. The
+    readiness window is a fixed module constant
+    (<code>_TEMP_NEO4J_READY_TIMEOUT_SECONDS = 180.0</code>,
+    <code>temp_neo4j.py:56</code>) with no environment override, and the arm ran at
+    <code>load average 94</code> with <strong>18 concurrent anchor arms on the node
+    at launch</strong>; the 2.6&#8202;GB dump load alone took about 46 minutes against
+    roughly 5 under the light load the first arm saw. The instance became ready
+    marginally outside the window. Cleanup ran on the failure path: the port lock
+    at <code>/dev/shm/ssog-scratch-port-28010.lock</code> was released and the
+    scratch tree <code>&#8230;/mcintos-1281970-7r8s_mxj</code> removed, both stamped in
+    the partial record.
+  </p>
+
+  <p id="ssog-anchor-exb-momentum-jev-agent">
+    Agent judgement: this is a scheduling-contention failure, and one re-run is
+    permitted by the brief. It was not taken because the deadline
+    (<code>20:58:01Z</code>) passed before a re-run could be named as a bounded step,
+    and the remaining budget to the hard stop (<code>21:28:01Z</code>) is shorter
+    than the ~46-minute dump load this arm incurred under contention. The correct
+    recovery is one re-run of the same command on a lightly loaded node; the
+    selection, the anchors and the runner are unchanged and need no rework.
+  </p>
+
+  <p id="ssog-anchor-exb-momentum-jev-evidence">
+    Evidence on disk: runner log
+    <code>r-20261019T195728565703-ssog-anchor-exb-momentum-jev/runner-jev.log</code>
+    (first line <code>extracted dump: 2643183686 bytes</code>, last line
+    <code>EXIT=1</code>), and the partial arm record
+    <code>ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-jev.json</code> carrying
+    <code>outcome_status: running</code>, <code>port: 28010</code>, the code digest
+    <code>d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd</code> and
+    the cleanup stamps. Spend: none &#8212; the arm never reached the harmonize apply,
+    so no LLM calls were made and USD 0 was committed. The repo-wide A/B spend
+    ceiling (USD 50) is untouched by this node.
+  </p>
+</section>
