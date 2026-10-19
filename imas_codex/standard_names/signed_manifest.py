@@ -76,6 +76,8 @@ _SIGNED_LIFECYCLE = "signed-lifecycle-and-claim"
 _NO_LIVE_PRODUCER = "no-live-producing-source"
 _NO_LIVE_STRUCTURAL_CHILD = "no-live-structural-child"
 _ERROR_SIBLING_PARENT_ABSENCE = "recognized-error-sibling-parent-absence"
+_EXHAUSTED_TARGET = "exhausted-target-live-source"
+_RECOVERY_UNBIND_GUARDS = (_EXHAUSTED_TARGET, _COLLATERAL_IMMUTABILITY)
 _GUARD_KINDS = {
     _LAST_PRODUCER: RepairGuardKind.semantic_authority.value,
     _STRUCTURAL_LEGITIMACY: RepairGuardKind.semantic_authority.value,
@@ -84,6 +86,7 @@ _GUARD_KINDS = {
     _NO_LIVE_PRODUCER: RepairGuardKind.semantic_authority.value,
     _NO_LIVE_STRUCTURAL_CHILD: RepairGuardKind.semantic_authority.value,
     _ERROR_SIBLING_PARENT_ABSENCE: RepairGuardKind.semantic_authority.value,
+    _EXHAUSTED_TARGET: RepairGuardKind.semantic_authority.value,
 }
 
 _REFUSED_TARGET_ORPHAN_ADAPTER = "refused-target-orphan"
@@ -109,6 +112,12 @@ _STALE_SOURCE_GUARDS = (
     _LAST_PRODUCER,
     _COLLATERAL_IMMUTABILITY,
 )
+
+_RECOVERY_UNBIND_ADAPTER = "recovery-binding-unbind"
+_RECOVERY_UNBIND_SCHEMA = "imas-codex.recovery-binding-unbind.v1"
+_RECOVERY_UNBIND_RECEIPT_SCHEMA = "imas-codex.signed-recovery-unbind-receipt.v1"
+_RECOVERY_UNBIND_MUTATION = "unbind_recorded_recovery_binding"
+_RECOVERY_UNBIND_ORIGIN = "recovery_binding_unbind"
 
 _ERROR_SIBLING_ADAPTER = "error-sibling-reconcile"
 _ERROR_SIBLING_MODEL = "deterministic:dd_error_modifier"
@@ -292,6 +301,10 @@ class SignedManifestConflict(RuntimeError):
 
 class StaleSourceDetachConflict(SignedManifestConflict):
     """The signed stale-source closure no longer matches live graph authority."""
+
+
+class RecoveryUnbindConflict(SignedManifestConflict):
+    """A signed recovery-binding closure no longer matches live graph authority."""
 
 
 class _Query(Protocol):
@@ -6451,6 +6464,438 @@ def _apply_ineligible_source_retirement(
             client.close()
 
 
+def _load_recovery_unbind_rows(
+    authority_path: str | Path, name_ids: Sequence[str]
+) -> tuple[str, str, list[dict[str, Any]]]:
+    """Load the signed recovery-binding rows selected by the caller's names."""
+    path = Path(authority_path).expanduser().resolve()
+    raw = path.read_bytes()
+    try:
+        authority = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError("recovery-binding authority is not valid JSON") from exc
+    if authority.get("schema") != _RECOVERY_UNBIND_SCHEMA:
+        raise ValueError("unsupported recovery-binding authority schema")
+    signature = authority.get("signature")
+    expected_signature = {
+        "algorithm": "sha256",
+        "canonicalization": "jq -cS '.rows'",
+        "scope": "rows",
+        "digest": signature.get("digest") if isinstance(signature, dict) else None,
+    }
+    if not isinstance(signature, dict) or signature != expected_signature:
+        raise ValueError("recovery-binding signature contract is unsupported")
+    declared_digest = signature.get("digest")
+    if not isinstance(declared_digest, str) or len(declared_digest) != 64:
+        raise ValueError("recovery-binding signature requires a SHA-256 digest")
+    rows = authority.get("rows")
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("recovery-binding authority requires rows")
+    canonical_rows = (
+        json.dumps(rows, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        + "\n"
+    )
+    if hashlib.sha256(canonical_rows.encode()).hexdigest() != declared_digest:
+        raise ValueError("recovery-binding rows signature does not match")
+
+    requested = sorted(set(name_ids))
+    if not requested or len(requested) != len(name_ids):
+        raise ValueError("recovery-binding unbind requires unique non-empty name ids")
+    by_name = {row.get("name_id"): row for row in rows if isinstance(row, dict)}
+    if any(name_id not in by_name for name_id in requested):
+        raise ValueError("recovery-binding name is outside signed authority")
+    selected = [dict(by_name[name_id]) for name_id in requested]
+    for row in selected:
+        name_id = row.get("name_id")
+        source_id = row.get("source_id")
+        if (
+            not isinstance(name_id, str)
+            or not name_id
+            or not isinstance(source_id, str)
+            or not source_id
+        ):
+            raise ValueError(
+                "selected recovery-binding row lacks its signed name and source"
+            )
+    return hashlib.sha256(raw).hexdigest(), declared_digest, selected
+
+
+def _recovery_unbind_closure(
+    query: _Query, rows: Sequence[dict[str, Any]]
+) -> dict[tuple[str, str], dict[str, Any]]:
+    """Read the name, source, and binding state for every signed row."""
+    records = query.query(
+        """
+        // RECOVERY_UNBIND_CLOSURE
+        UNWIND $rows AS expected
+        OPTIONAL MATCH (source:StandardNameSource {id: expected.source_id})
+        OPTIONAL MATCH (name:StandardName {id: expected.name_id})
+        OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(name) WHERE name IS NOT NULL
+        RETURN expected.name_id AS name_id,
+               expected.source_id AS source_id,
+               elementId(source) AS source_element_id,
+               properties(source) AS source_properties,
+               elementId(name) AS name_element_id,
+               properties(name) AS name_properties,
+               elementId(binding) AS binding_element_id,
+               binding IS NOT NULL AS binding_present
+        ORDER BY name_id, source_id
+        """,
+        rows=[
+            {"name_id": str(row["name_id"]), "source_id": str(row["source_id"])}
+            for row in rows
+        ],
+    )
+    return {(str(r["name_id"]), str(r["source_id"])): r for r in records}
+
+
+def _recovery_unbind_refusal(record: dict[str, Any] | None) -> str | None:
+    """Return why a row cannot be unbound, or None when it is admissible."""
+    if record is None:
+        return "recovery binding participant is absent"
+    if record.get("name_element_id") is None:
+        return "target name does not exist"
+    if record.get("source_element_id") is None:
+        return "source does not exist"
+    if not record.get("binding_present"):
+        return "recovery binding does not exist"
+    source_properties = record.get("source_properties") or {}
+    if source_properties.get("status") == "stale":
+        return "source is stale"
+    name_properties = record.get("name_properties") or {}
+    if name_properties.get("name_stage") != "exhausted":
+        return "target name is not exhausted"
+    return None
+
+
+def _recovery_unbind_preview(
+    query: _Query,
+    rows: Sequence[dict[str, Any]],
+    reason: str,
+    *,
+    authority_file_sha256: str,
+    authority_rows_sha256: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+    """Decide each signed row and compose its manifest from live authority."""
+    closure = _recovery_unbind_closure(query, rows)
+    admitted: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for row in rows:
+        record = closure.get((str(row["name_id"]), str(row["source_id"])))
+        refusal = _recovery_unbind_refusal(record)
+        if refusal is not None:
+            refusals.append({"row_id": str(row["name_id"]), "reason": refusal})
+            continue
+        admitted.append({"row": dict(row), "closure": record})
+    refusals.sort(key=lambda item: (item["row_id"], item["reason"]))
+    manifest = {
+        "schema": _RECOVERY_UNBIND_SCHEMA,
+        "operation_id": _RECOVERY_UNBIND_MUTATION,
+        "reason": reason,
+        "authority_file_sha256": authority_file_sha256,
+        "authority_rows_sha256": authority_rows_sha256,
+        "rows": [
+            {
+                "row_id": str(action["row"]["name_id"]),
+                "name_id": str(action["row"]["name_id"]),
+                "source_id": str(action["row"]["source_id"]),
+                "name_element_id": action["closure"]["name_element_id"],
+                "source_element_id": action["closure"]["source_element_id"],
+                "binding_element_id": action["closure"]["binding_element_id"],
+                "closure_sha256": _digest(action["closure"]),
+            }
+            for action in admitted
+        ],
+        "admitted_row_ids": [str(action["row"]["name_id"]) for action in admitted],
+        "refusals": refusals,
+    }
+    return manifest, admitted, refusals
+
+
+def _recovery_unbind_event_id(
+    authority_rows_sha256: str, name_id: str, source_id: str
+) -> str:
+    return "sn-change:recovery-unbind:" + hashlib.sha256(
+        f"{authority_rows_sha256}\0{name_id}\0{source_id}".encode()
+    ).hexdigest()
+
+
+def _recovery_unbind_replay(
+    query: _Query,
+    rows: Sequence[dict[str, Any]],
+    *,
+    manifest_sha256: str,
+    authority_rows_sha256: str,
+) -> dict[str, Any] | None:
+    """Return an already_applied receipt when every row's change node exists."""
+    event_ids = [
+        _recovery_unbind_event_id(
+            authority_rows_sha256, str(row["name_id"]), str(row["source_id"])
+        )
+        for row in rows
+    ]
+    replay = query.query(
+        """
+        // RECOVERY_UNBIND_REPLAY
+        UNWIND $event_ids AS event_id
+        OPTIONAL MATCH (change:StandardNameChange {id: event_id})
+        RETURN event_id, change IS NOT NULL AS recorded
+        ORDER BY event_id
+        """,
+        event_ids=sorted(event_ids),
+    )
+    recorded = [row for row in replay if row.get("recorded")]
+    if not recorded:
+        return None
+    if len(recorded) != len(event_ids):
+        raise RecoveryUnbindConflict(
+            "recorded recovery unbind covers only part of the signed cohort"
+        )
+    return {
+        "schema": _RECOVERY_UNBIND_RECEIPT_SCHEMA,
+        "outcome": "already_applied",
+        "changed": 0,
+        "counts": {"authority_rows": len(rows), "admitted": 0, "refused": 0},
+        "manifest_sha256": manifest_sha256,
+        "change_ids": sorted(str(row["event_id"]) for row in recorded),
+    }
+
+
+def _apply_recovery_unbind(
+    authority_path: str | Path,
+    name_ids: Sequence[str],
+    *,
+    mutation_kind: str | None,
+    guard_set: tuple[str, ...] | None,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Remove recorded recovery bindings for signed exhausted names.
+
+    A row is admitted only when its ``PRODUCED_NAME`` edge exists, its source is
+    not stale, and its name's stage is ``exhausted``.  The name, its stage, its
+    other edges, and the ``StandardNameSource`` node are left unchanged.
+    """
+    if mutation_kind != RepairMutationKind.detach.value:
+        raise SignedManifestAuthorityError(
+            "recovery-binding unbind requires the detach mutation kind"
+        )
+    if guard_set != _RECOVERY_UNBIND_GUARDS:
+        raise SignedManifestAuthorityError(
+            "recovery-binding unbind requires its exact signed guard set"
+        )
+    if not reason.strip():
+        raise ValueError("recovery-binding unbind requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("recovery-binding unbind apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    file_sha256, rows_sha256, rows = _load_recovery_unbind_rows(authority_path, name_ids)
+    own_client = gc is None
+    client: Any = GraphClient() if own_client else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query = _TransactionQuery(transaction)
+            try:
+                if manifest_sha256 is not None:
+                    replay = _recovery_unbind_replay(
+                        query,
+                        rows,
+                        manifest_sha256=manifest_sha256,
+                        authority_rows_sha256=rows_sha256,
+                    )
+                    if replay is not None:
+                        transaction.rollback()
+                        return replay
+
+                manifest, admitted, refusals = _recovery_unbind_preview(
+                    query,
+                    rows,
+                    reason,
+                    authority_file_sha256=file_sha256,
+                    authority_rows_sha256=rows_sha256,
+                )
+                computed_sha256 = _digest(manifest)
+                counts = {
+                    "authority_rows": len(rows),
+                    "admitted": len(admitted),
+                    "refused": len(refusals),
+                }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": _RECOVERY_UNBIND_RECEIPT_SCHEMA,
+                        "outcome": "would_apply" if admitted and not refusals else "refused",
+                        "changed": 0,
+                        "would_change": len(admitted) if not refusals else 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_sha256,
+                        "authority_file_sha256": file_sha256,
+                        "authority_payload_sha256": rows_sha256,
+                    }
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": _RECOVERY_UNBIND_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "changed": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest_sha256": computed_sha256,
+                    }
+                if computed_sha256 != manifest_sha256:
+                    raise RecoveryUnbindConflict(
+                        "fresh recovery-binding closure does not match manifest SHA-256"
+                    )
+
+                mutation_count = 0
+                for action in admitted:
+                    closure = action["closure"]
+                    changed = query.query(
+                        """
+                        // RECOVERY_UNBIND_MUTATION
+                        MATCH (source:StandardNameSource {id: $source_id})
+                              -[binding:PRODUCED_NAME]->
+                              (name:StandardName {id: $name_id})
+                        WHERE elementId(binding) = $binding_element_id
+                          AND elementId(source) = $source_element_id
+                          AND elementId(name) = $name_element_id
+                        DELETE binding
+                        RETURN count(*) AS changed
+                        """,
+                        source_id=str(action["row"]["source_id"]),
+                        name_id=str(action["row"]["name_id"]),
+                        binding_element_id=closure["binding_element_id"],
+                        source_element_id=closure["source_element_id"],
+                        name_element_id=closure["name_element_id"],
+                    )
+                    if int(changed[0].get("changed") or 0) != 1:
+                        raise RecoveryUnbindConflict(
+                            "recovery-binding compare-and-set changed"
+                        )
+                    mutation_count += 1
+
+                change_ids = [
+                    _recovery_unbind_event_id(
+                        rows_sha256,
+                        str(action["row"]["name_id"]),
+                        str(action["row"]["source_id"]),
+                    )
+                    for action in admitted
+                ]
+                receipt_rows = [
+                    {
+                        "change_id": change_id,
+                        "name_id": str(action["row"]["name_id"]),
+                        "source_id": str(action["row"]["source_id"]),
+                    }
+                    for change_id, action in zip(change_ids, admitted, strict=True)
+                ]
+                receipts = query.query(
+                    """
+                    // RECOVERY_UNBIND_RECEIPT
+                    UNWIND $rows AS row
+                    CREATE (change:StandardNameChange {id: row.change_id})
+                    SET change.from_name = row.source_id,
+                        change.to_name = row.name_id,
+                        change.operation = $operation,
+                        change.reason = $reason,
+                        change.origin = $origin,
+                        change.run_id = $run_id,
+                        change.changed_at = datetime(),
+                        change.internal = true,
+                        change.manifest_sha256 = $manifest_sha256
+                    WITH row, change
+                    MATCH (target:StandardName {id: row.name_id})
+                    MERGE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN DISTINCT change.id AS change_id
+                    ORDER BY change_id
+                    """,
+                    rows=receipt_rows,
+                    operation=_RECOVERY_UNBIND_MUTATION,
+                    reason=reason,
+                    origin=_RECOVERY_UNBIND_ORIGIN,
+                    run_id=run_id,
+                    manifest_sha256=computed_sha256,
+                )
+                written = sorted(str(row["change_id"]) for row in receipts)
+                if written != sorted(change_ids):
+                    raise RecoveryUnbindConflict(
+                        "recovery-binding receipt cardinality changed"
+                    )
+
+                _verify_recovery_unbind_postcondition(query, admitted)
+                transaction.commit()
+                return {
+                    "schema": _RECOVERY_UNBIND_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "changed": len(admitted),
+                    "mutations": mutation_count,
+                    "receipt_rows": len(written),
+                    "persistent_writes": mutation_count + len(written),
+                    "counts": counts,
+                    "manifest_sha256": computed_sha256,
+                    "authority_file_sha256": file_sha256,
+                    "authority_payload_sha256": rows_sha256,
+                    "change_ids": written,
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own_client:
+            client.close()
+
+
+def _verify_recovery_unbind_postcondition(
+    query: _Query, admitted: Sequence[dict[str, Any]]
+) -> None:
+    """Prove the binding is gone and the name and source are otherwise intact."""
+    if not admitted:
+        return
+    rows = query.query(
+        """
+        // RECOVERY_UNBIND_POSTCONDITION
+        UNWIND $rows AS expected
+        MATCH (name:StandardName {id: expected.name_id})
+        MATCH (source:StandardNameSource {id: expected.source_id})
+        OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(name)
+        RETURN expected.name_id AS name_id,
+               expected.source_id AS source_id,
+               count(binding) AS bindings,
+               name.name_stage AS name_stage,
+               source.status AS source_status
+        ORDER BY name_id
+        """,
+        rows=[
+            {
+                "name_id": str(action["row"]["name_id"]),
+                "source_id": str(action["row"]["source_id"]),
+            }
+            for action in admitted
+        ],
+    )
+    if len(rows) != len(admitted):
+        raise RecoveryUnbindConflict("recovery-binding postcondition lost a row")
+    for row in rows:
+        if int(row.get("bindings") or 0) != 0:
+            raise RecoveryUnbindConflict("recovery-binding edge survived its removal")
+        if row.get("name_stage") != "exhausted":
+            raise RecoveryUnbindConflict("recovery-binding target stage changed")
+    from imas_codex.standard_names.source_invariant import require_producing_sources
+
+    name_ids = [str(action["row"]["name_id"]) for action in admitted]
+    require_producing_sources(query, name_ids, exhausted_exempt_ids=name_ids)
+
+
 def _apply_semantic_mirror_repair(
     source_ids: list[str],
     *,
@@ -7612,6 +8057,30 @@ def apply_signed_manifest(
     authorizes only the hash: participant closure, collateral rows, and counter
     baselines are always read again inside this invocation.
     """
+    if authority_adapter == _RECOVERY_UNBIND_ADAPTER:
+        if legacy_args:
+            raise SignedManifestAuthorityError(
+                "recovery-binding unbind does not accept positional adapter arguments"
+            )
+        if not isinstance(authority_path, str | Path):
+            raise SignedManifestAuthorityError(
+                "recovery-binding unbind requires a signed authority file"
+            )
+        if not name_ids:
+            raise SignedManifestAuthorityError(
+                "recovery-binding unbind requires the signed name ids"
+            )
+        return _apply_recovery_unbind(
+            authority_path,
+            name_ids,
+            mutation_kind=mutation_kind,
+            guard_set=guard_set,
+            reason=reason,
+            apply=apply,
+            manifest_sha256=manifest_sha256,
+            run_id=run_id,
+            gc=gc,
+        )
     if authority_adapter == _ARCHIVE_RECONSTRUCTION_ADAPTER:
         if legacy_args:
             raise SignedManifestAuthorityError(

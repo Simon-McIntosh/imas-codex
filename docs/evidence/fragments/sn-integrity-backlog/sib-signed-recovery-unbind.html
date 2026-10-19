@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-signed-recovery-unbind">
+<title>A signed program removes a recorded recovery binding from an exhausted name, and refuses one that is not exhausted</title>
+</head>
+<body>
+<main>
+<h1 id="sib-signed-recovery-unbind-title">Removing a recorded recovery binding from an exhausted name</h1>
+
+<p id="sib-signed-recovery-unbind-summary">
+The signed-repair envelope now carries one closed program,
+<code>recovery-binding-unbind</code>, that removes a recorded
+<code>PRODUCED_NAME</code> edge from a standard name whose
+<code>name_stage</code> is <code>exhausted</code>. A row is admitted only when
+the edge exists, its <code>StandardNameSource</code> is not stale, and the
+target name's stage is <code>exhausted</code>; any failing row refuses the whole
+authority and writes nothing. The name, its stage, its other edges and the
+source node are left exactly as they were, and the removal is recorded as a
+<code>StandardNameChange</code> naming the removed source, the operation and the
+authorized manifest digest. The source invariant keeps refusing a sourceless
+live name from every other writer; this program passes its own signed
+exhausted rows as a narrow exemption, and the exemption is honoured only while
+the row's own stage still reads <code>exhausted</code>.
+</p>
+
+<h2 id="sib-signed-recovery-unbind-design">Design: one closed program inside the existing envelope</h2>
+<figure id="sib-signed-recovery-unbind-flow">
+<img src="/imas-codex/figures/sn-integrity-backlog/sib-signed-recovery-unbind/decision-flow.svg"
+     alt="Per-row decision flow: an authority row is admitted only if the binding is present, the source is not stale and the target stage is exhausted; admitted rows have the PRODUCED_NAME edge deleted by compare-and-set, a change node recorded, and a postcondition proving the edge is gone and the name intact" width="1400">
+</figure>
+
+<p>
+The program is a self-contained adapter in
+<code>imas_codex/standard_names/signed_manifest.py</code>, dispatched from
+<code>apply_signed_manifest</code> ahead of the generic registry rather than
+beside it, so a signed recovery unbind is previewable and applies through the
+same entry point as every other signed repair. Its Cypher is marker-tagged and
+re-derives its closure inside the applying transaction:
+</p>
+<ul>
+<li><code>RECOVERY_UNBIND_CLOSURE</code> reads, per signed row, the existence of
+the name, the source and the binding, and the properties each decision reads.</li>
+<li><code>RECOVERY_UNBIND_MUTATION</code> deletes the edge only when its
+element id, its source's element id and its name's element id all still match
+the closure the manifest authorized &mdash; a compare-and-set, so a concurrent
+re-hardening of the binding cannot be silently removed.</li>
+<li><code>RECOVERY_UNBIND_RECEIPT</code> writes one
+<code>StandardNameChange</code>, linked by <code>HAS_INTERNAL_CHANGE</code>,
+carrying the removed source in <code>from_name</code>, the target in
+<code>to_name</code>, the operation, and the manifest digest in
+<code>manifest_sha256</code>.</li>
+<li><code>RECOVERY_UNBIND_POSTCONDITION</code> proves the edge is gone, the
+stage still reads <code>exhausted</code>, and then re-runs the source
+invariant over the admitted names with its narrow exemption.</li>
+<li><code>RECOVERY_UNBIND_REPLAY</code> answers a re-apply whose change nodes
+already exist with <code>already_applied</code> and no writes.</li>
+</ul>
+
+<h2 id="sib-signed-recovery-unbind-invariant">The invariant exemption is narrow and self-guarding</h2>
+<p>
+<code>find_sourceless_live_names</code> and <code>require_producing_sources</code>
+in <code>source_invariant.py</code> gained an optional
+<code>exhausted_exempt_ids</code> keyword, defaulting to empty. The predicate
+excuses an id only when <em>both</em> the id is in the caller's signed set
+<em>and</em> the node's own <code>name_stage</code> still reads
+<code>exhausted</code> in the live graph, so an exemption cannot survive the
+name being moved on. No existing caller changes: the keyword is optional and
+every other writer keeps refusing exactly as before, which
+<code>test_source_invariant_still_refuses_a_sourceless_live_name</code> and
+<code>test_exemption_is_confined_to_its_own_exhausted_rows</code> pin.
+</p>
+
+<h2 id="sib-signed-recovery-unbind-gate">Gate</h2>
+<p>
+Command (log <code>gate.log</code>, revision <code>8312b54ab</code> plus this
+node's working tree):
+</p>
+<pre><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync pytest -p no:cacheprovider \
+  $(grep -rl 'signed_manifest\|source_invariant' tests/ --include='*.py') \
+  tests/graph/test_cypher_property_check.py</code></pre>
+<p>
+Result: <strong>337 passed, 63 deselected</strong> (<code>EXIT=0</code>), no
+failures. The set is every test file that imports either touched module, found
+by <code>grep -rl</code>, plus the Cypher property check for the new
+statements. The graph-marked suites deselected themselves because no disposable
+Neo4j is configured for this node. New file
+<code>tests/standard_names/test_signed_recovery_unbind.py</code>: <strong>11
+passed</strong> (<code>test1.log</code>, <code>EXIT=0</code>).
+</p>
+
+<p>
+The program's own tests emulate the graph, so they exercise the program's
+decisions rather than a database: an exhausted row's edge is removed and its
+change node recorded; the name, stage, sibling edges and source node are
+byte-identical afterwards; a live row, a missing edge and a stale source each
+refuse with nothing written; an unauthorized manifest digest is refused before
+any mutation; and a re-apply is write-free.
+</p>
+
+<h2 id="sib-signed-recovery-unbind-negative">Negative control</h2>
+<p>
+Applied and logged (<code>negative_control.log</code>, <code>EXIT=1</code>):
+the program's dispatch in <code>apply_signed_manifest</code> disabled, the
+exhausted-stage refusal removed from <code>_recovery_unbind_refusal</code>, and
+the exhausted-name clause removed from the invariant predicate. Under that
+mutation <strong>7 of the 11 tests fail</strong>, including
+<code>test_exhausted_row_loses_its_binding_and_records_a_change</code> (nothing
+is unbound) and <code>test_live_name_is_refused_and_nothing_is_written</code>
+(the live-row refusal no longer fires). The tree was restored from a byte copy
+taken before the mutation; the restored tree reports zero traces of the
+neutering and re-passes the gate.
+</p>
+
+<h2 id="sib-signed-recovery-unbind-caveats">Caveats</h2>
+<ul>
+<li>No live graph write and no LLM call were made. The program has not been run
+against a real database by this node; the graph-marked contract suites skip
+without a disposable Neo4j.</li>
+<li>The change node carries the removed source in <code>from_name</code>,
+because <code>StandardNameChange</code> declares no source-id slot; the Cypher
+property check enforces that only declared slots are set.</li>
+</ul>
+</main>
+</body>
+</html>
