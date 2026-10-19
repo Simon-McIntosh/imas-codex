@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-export-live-source-gate">
+<title>The export source gate counts live names only and honours release holds</title></head>
+<body><main>
+<h1 id="sib-export-live-source-gate-title">The export source gate counts live names only</h1>
+<p id="sib-export-live-source-gate-summary">The release export no longer fails on an exhausted
+name whose recorded Data Dictionary source is missing. The gate in
+<code>imas_codex/standard_names/export.py</code> partitions the classifier's dropped-edge and
+never-bound rows: an <code>exhausted</code> row is recorded on the report as dormant with its
+count and left out of the gate, and any other stage still blocks the export. Six live names the
+lead held from release are added to <code>_RELEASE_IDENTITY_HOLDS</code> with the reason
+<code>release_hold_no_dd_source</code>; they leave through the existing release-hold path and the
+gate does not count them. No live graph write and no LLM call were made.</p>
+
+<h2 id="sib-export-live-source-gate-change">What changed in the source gate</h2>
+<p>Before the change the gate failed the whole export on any row whose population was
+<code>dropped_edge</code> or <code>never_bound</code>, whatever the name's stage. The classifier
+returns exhausted, accepted
+and other-stage names in the same two populations.</p>
+<p>Before:</p>
+<pre id="sib-export-live-source-gate-before">source_losses = [
+    row
+    for row in source_audit
+    if row["population"] in {"dropped_edge", "never_bound"}
+]
+if source_losses:   # blocks on exhausted names too</pre>
+<p>After:</p>
+<pre id="sib-export-live-source-gate-after">sourceless = [row for row in source_audit
+              if row["population"] in {"dropped_edge", "never_bound"}]
+dormant_sourceless = [row for row in sourceless
+                      if row["name_stage"] == "exhausted"]
+source_losses = [row for row in sourceless
+                 if row["name_stage"] != "exhausted"
+                 and row["id"] not in _RELEASE_IDENTITY_HOLDS]
+report.dormant_sourceless_names = [ ... ]   # visible on the report</pre>
+<p>The dormant rows are emitted in the export report under
+<code>dormant_sourceless</code> as a count and a list of
+<code>{name, name_stage, population}</code>, so the exclusion stays visible after the gate passes.</p>
+
+<h2 id="sib-export-live-source-gate-holds">The six release holds</h2>
+<p>Each of the six held names is a live, non-derived name with no Data Dictionary source. This node
+adds the holds and touches no graph row; a sibling node applies the graph changes. The reason key
+is <code>release_hold_no_dd_source</code> and the detail
+reads <em>no Data Dictionary path measures the quantity</em>, so a reviewer sees the measure is
+absent from the DD rather than the name being unreviewed. The existing
+<code>neutron_flux_due_to_fusion</code> hold is untouched.</p>
+<pre id="sib-export-live-source-gate-held">electrostatic_potential_at_outboard_midplane
+electrostatic_potential_at_wall
+root_mean_square_spectral_width_of_spectrometer_channel
+count_normalized_at_detector_pixel
+coolant_absorbed_energy_accumulated_of_plasma_facing_component
+volume_averaged_electron_number_density_over_scrape_off_layer</pre>
+
+<h2 id="sib-export-live-source-gate-measure">Measure</h2>
+<p>Three behavioural tests are added. Each drives <code>run_export</code> against a stubbed source
+audit, so the gate is exercised without a live graph:</p>
+<ul>
+<li><code>test_exhausted_sourceless_row_is_dormant_not_blocking</code> — an exhausted dropped-edge
+row no longer fails the export, the population is fetched, and the row appears under
+<code>dormant_sourceless</code> with count 1.</li>
+<li><code>test_live_sourceless_row_blocks_the_export</code> — an accepted dropped-edge row still
+fails the export and the population is never fetched.</li>
+<li><code>test_held_sourceless_identity_is_not_counted_and_not_exported</code> — a held sourceless
+identity does not fail the gate, is not exported, and is excluded with reason
+<code>release_hold_no_dd_source</code> at stage <code>release_authority</code>.</li>
+</ul>
+
+<h2 id="sib-export-live-source-gate-negative">Negative control</h2>
+<p>Reverting the live-only filter and the six holds (base-revision <code>export.py</code> with the
+head tests) fails the two behavioural tests that depend on the change plus the three hold tests
+in <code>test_export_release_holds.py</code>: 5 failed, 4 passed, <code>EXIT=1</code>. That is the
+set of tests the change exists to make pass, so each is shown able to fail.</p>
+<p>A second, boundary mutation — the gate blocks nothing (<code>source_losses</code> forced empty)
+— fails <code>test_live_sourceless_row_blocks_the_export</code> alone, showing that test fails when
+the live-name refusal is removed as well. Both logs are named in the manifest.</p>
+
+<h2 id="sib-export-live-source-gate-gate">Covering gate</h2>
+<p>The gate is every <code>tests/standard_names/test_export_*.py</code> file together with
+<code>tests/standard_names/test_source_audit_gate.py</code>, run at the base revision in a scratch
+extraction and at the head in this worktree. Its delta is recorded in the manifest as
+<code>baseline_suite</code> and <code>after_suite</code>.</p>
+</main></body></html>

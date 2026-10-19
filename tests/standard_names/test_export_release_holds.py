@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from pathlib import Path
 from unittest.mock import patch
 
@@ -12,6 +13,14 @@ from imas_codex.standard_names.export import (
 )
 from tests.standard_names.conftest import clean_source_audit_graph
 
+_DD_SOURCELESS_HELD_IDENTITIES = {
+    "electrostatic_potential_at_outboard_midplane",
+    "electrostatic_potential_at_wall",
+    "root_mean_square_spectral_width_of_spectrometer_channel",
+    "count_normalized_at_detector_pixel",
+    "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+    "volume_averaged_electron_number_density_over_scrape_off_layer",
+}
 _HELD_IDENTITIES_TO_REASONS = {
     "fast_ion_charge_state_power_at_inside_flux_surface": (
         "release_hold_dd_recipient_unresolved"
@@ -25,7 +34,7 @@ _HELD_IDENTITIES_TO_REASONS = {
     ),
     "voltage_of_diagnostic_antenna": "release_hold_exhausted_antenna_identity",
     "voltage_of_ece_channel": "release_hold_missing_reviewed_successor",
-}
+} | dict.fromkeys(_DD_SOURCELESS_HELD_IDENTITIES, "release_hold_no_dd_source")
 _INCLUDED_IDENTITIES = {
     "tendency_of_total_thermal_plasma_internal_energy",
     "radial_neutral_state_momentum_flux",
@@ -108,7 +117,7 @@ def _run_fixture_export(staging_dir: Path, population: list[dict]):
         )
 
 
-def test_each_held_identity_has_its_own_exclusion_reason() -> None:
+def test_each_held_identity_is_excluded_with_its_reason() -> None:
     population = [_candidate(name) for name in _HELD_IDENTITIES_TO_REASONS]
 
     eligible, excluded = _classify_export_population(
@@ -124,10 +133,21 @@ def test_each_held_identity_has_its_own_exclusion_reason() -> None:
     assert {
         name: reason for name, (reason, _) in _RELEASE_IDENTITY_HOLDS.items()
     } == _HELD_IDENTITIES_TO_REASONS
-    assert len({record.reason for record in excluded}) == len(
-        _HELD_IDENTITIES_TO_REASONS
-    )
     assert {record.stage for record in excluded} == {"release_authority"}
+
+
+def test_dd_sourceless_holds_name_the_missing_measure() -> None:
+    """Six live names with no source in the active DD are held from release.
+
+    No Data Dictionary path measures them, so no binding can be made and the
+    hold records why. The reason is shared because the condition is one
+    condition; the detail is what a reviewer reads to see the measure is
+    absent from the DD rather than the name being unreviewed.
+    """
+    for name in _DD_SOURCELESS_HELD_IDENTITIES:
+        reason, detail = _RELEASE_IDENTITY_HOLDS[name]
+        assert reason == "release_hold_no_dd_source"
+        assert "Data Dictionary path" in detail
 
 
 def test_explicitly_included_identities_remain_eligible() -> None:
@@ -156,7 +176,9 @@ def test_release_holds_close_the_identity_ledger(tmp_path: Path) -> None:
     assert report.total_candidates == len(population)
     assert set(report.exported_names) == _INCLUDED_IDENTITIES
     assert set(rows) == set(_HELD_IDENTITIES_TO_REASONS.values())
-    assert all(row["count"] == 1 for row in rows.values())
+    assert {reason: row["count"] for reason, row in rows.items()} == dict(
+        Counter(_HELD_IDENTITIES_TO_REASONS.values())
+    )
     assert report.exported_count + sum(row["count"] for row in rows.values()) == len(
         population
     )
