@@ -1,0 +1,27 @@
+<section id="ssog-anchor-exb-momentum-heuristic" data-reckon="evidence">
+  <h2 id="ssog-anchor-exb-momentum-heuristic-heading">Heuristic anchor arm of momentum_flux_due_to_e_cross_b_drift: scratch instance failed to start</h2>
+  <p id="ssog-anchor-exb-momentum-heuristic-state"><strong>Failed before the apply.</strong> The per-arm runner was launched detached for the heuristic arm of <code>momentum_flux_due_to_e_cross_b_drift</code> in a fresh scratch graph. The export extracted and the scratch instance's dump loaded, but the instance did not reach Bolt readiness within the runner's 180&nbsp;s window, the runner exited 1, and no harmonization ran. The arm record holds no anchor measurement, no lint before or after, no member documentation scores and no containment verdict, because none were ever produced. The fixed selection, the runner and the product code were not changed.</p>
+  <p id="ssog-anchor-exb-momentum-heuristic-inputs">Source export: <code>/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code> (2,643,183,686&nbsp;bytes extracted). Fixed selection row: family <code>momentum_flux_due_to_e_cross_b_drift</code> (kind <code>component</code>), heuristic anchor <code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code>, Jev anchor <code>momentum_flux_normalized_due_to_e_cross_b_drift</code>, and three members (heuristic anchor, Jev anchor, and <code>momentum_flux_due_to_e_cross_b_drift</code>). Run at revision <code>5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1</code>.</p>
+  <h3 id="ssog-anchor-exb-momentum-heuristic-failure">The refusal, quoted from the run log</h3>
+  <p id="ssog-anchor-exb-momentum-heuristic-traceback">The runner raised inside <code>imas_codex/graph/temp_neo4j.py</code>, at <code>_wait_for_bolt_ready</code>:</p>
+  <pre id="ssog-anchor-exb-momentum-heuristic-error">click.exceptions.ClickException: Temp Neo4j did not reach Bolt readiness within 180 seconds
+Recent Neo4j log output:
+Directories in use:
+home:         /var/lib/neo4j
+config:       /var/lib/neo4j/conf
+logs:         /var/lib/neo4j/logs
+plugins:      /var/lib/neo4j/plugins
+import:       /var/lib/neo4j
+data:         /var/lib/neo4j/data
+certificates: /var/lib/neo4j/certificates
+licenses:     /var/lib/neo4j/licenses
+run:          /var/lib/neo4j/run
+Starting Neo4j.</pre>
+  <p id="ssog-anchor-exb-momentum-heuristic-timing">The instance booted at <code>2026-10-19 20:50:04Z</code> and was still initializing when the 180&nbsp;s window closed: the last line before the failure printed at <code>20:52:12Z</code> (a vector-incubator warning during startup), so startup had not completed. The runner exited 1 at <code>20:53:17Z</code>.</p>
+  <h3 id="ssog-anchor-exb-momentum-heuristic-cause">Cause: node contention, not the arm</h3>
+  <p id="ssog-anchor-exb-momentum-heuristic-contention">At the moment of failure the node carried <strong>seven</strong> concurrent <code>neo4j-admin database load</code> processes, one per in-flight arm across the family wave, each materialising a ~10&nbsp;GB scratch store on the shared <code>/tmp</code> (62% full at the time). The extraction alone took ~11&nbsp;min and the load ~33&nbsp;min against roughly 5&nbsp;min when the node is quiet. The Jev sibling arms in the same wave hit the same wall. This is a resource-scheduling failure of the wave, not a defect in the runner or the product code: the same code ran the vertical_coordinate_of_diagnostic_aperture arm cleanly earlier at 1,702&nbsp;s.</p>
+  <h3 id="ssog-anchor-exb-momentum-heuristic-cleanup">Scratch cleanup</h3>
+  <p id="ssog-anchor-exb-momentum-heuristic-cleanup-state">The runner's teardown ran on the failure path. The scratch tree <code>&lt;TMPDIR&gt;/mcintos-1281970-{id}</code> was removed (entries: <code>instance</code>), the port pair 28008/29008 lock was released, and no process referencing the tree or port survives; the lock file remains on disk with no holder. The scratch instance is stopped and its tree removed. Spend for this arm is <strong>zero</strong>: no harmonize call ran, so no LLMCost rows and no charge accrued.</p>
+  <h3 id="ssog-anchor-exb-momentum-heuristic-outcome">Outcome</h3>
+  <p id="ssog-anchor-exb-momentum-heuristic-verdict">The arm did not complete; the arm record at <code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-heuristic.json</code> is the runner's as-written state at the point of failure (<code>outcome_status</code> never advanced past <code>running</code>) and was left unedited rather than given a status the runner did not assign. Under the brief a single re-run is permitted, but it was not taken: the deadline passed while the load was still running and a fresh load needs ~30&nbsp;min on the contended node, so a re-run could not have finished inside the window. The arm should be redispatched on a quieter node.</p>
+</section>
