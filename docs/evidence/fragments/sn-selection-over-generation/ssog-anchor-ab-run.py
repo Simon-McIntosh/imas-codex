@@ -361,12 +361,12 @@ def run_arm(seed: str, arm: str) -> dict:
                 live_nodes_after - data["isolation"]["live_nodes"]
             )
             data["isolation"]["live_scope_run_rows"] = int(live_runs)
-            data["isolation"]["scratch_ledger_rows"] = int(calls)
+            data["isolation"]["scratch_ledger_rows"] = int(ledger["calls"])
             if live_runs != 0:
                 raise RuntimeError(
                     f"Apply leaked into the live graph: live_rows={live_runs}"
                 )
-            if calls <= 0:
+            if int(ledger["calls"]) <= 0:
                 raise RuntimeError(
                     "No scratch cost rows in the apply window: the apply wrote "
                     "nothing to the scratch graph it was pointed at"
