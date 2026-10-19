@@ -1,0 +1,1962 @@
+{
+ "base_revision": "95985b6c88be740c4885f3de95121904af032779",
+ "classifier_rows_before": 264,
+ "classifier_rows_after": 152,
+ "baseline_populations": {
+  "derived_parent": 2,
+  "dropped_edge": 199,
+  "held_in_chain": 0,
+  "never_bound": 30,
+  "orphan_awaiting_retirement": 3,
+  "unchained_holder": 30
+ },
+ "post_populations": {
+  "derived_parent": 2,
+  "dropped_edge": 87,
+  "held_in_chain": 0,
+  "never_bound": 30,
+  "orphan_awaiting_retirement": 3,
+  "unchained_holder": 30
+ },
+ "population_delta": {
+  "derived_parent": 0,
+  "dropped_edge": -112,
+  "held_in_chain": 0,
+  "never_bound": 0,
+  "orphan_awaiting_retirement": 0,
+  "unchained_holder": 0
+ },
+ "worklist_count": 114,
+ "worklist": [
+  "alpha_angle_of_poloidal_field_coil",
+  "alpha_parameter",
+  "angle_of_antenna_strap",
+  "core_density_of_pellet",
+  "critical_momentum_due_to_avalanche",
+  "derivative_of_electron_density_at_pedestal_maximum_with_respect_to_normalized_poloidal_flux_coordinate",
+  "derivative_of_normalized_effective_particle_energy_with_respect_to_poloidal_angle",
+  "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+  "difference_of_poloidal_magnetic_flux_and_toroidal_magnetic_flux",
+  "energy_flux_due_to_eddy_current",
+  "energy_flux_due_to_radiation",
+  "energy_flux_normalized_due_to_e_cross_b_drift",
+  "equilibrium_weight_of_interferometer_beam",
+  "extent_of_detector_pixel",
+  "fast_electron_energy",
+  "fast_electron_source_rate_due_to_dreicer",
+  "gas_flow",
+  "gradient_of_electron_pressure",
+  "gradient_of_radial_electron_density",
+  "height_of_optical_element",
+  "height_of_soft_xray_detector",
+  "inertial_current_density_due_to_diamagnetic_drift",
+  "ion_charge_state_diamagnetic_velocity_due_to_diamagnetic_drift",
+  "ion_cyclotron_heating_antenna_phase",
+  "launched_power_due_to_ion_cyclotron_heating",
+  "left_hand_circularly_polarized_electric_field",
+  "line_averaged_neon_density",
+  "lower_bound_energy_of_neutron_detector",
+  "magnetic_shear_at_sawtooth_inversion_radius",
+  "measured_voltage_of_spectrometer_channel",
+  "momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+  "neutral_beam_mass",
+  "neutral_diffusivity",
+  "neutral_power_at_wall_due_to_recombination",
+  "neutral_species_fraction",
+  "neutral_velocity_magnitude_due_to_diamagnetic_drift",
+  "outer_atomic_count_of_pellet",
+  "parallel_current_density_flux_surface_averaged_due_to_wave_driven_current_drive",
+  "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential",
+  "parallel_neutral_momentum_diffusivity",
+  "parallel_neutral_species_energy_convection_velocity",
+  "parallel_normalized_particle_perturbed_pressure",
+  "parallel_normalized_perturbed_magnetic_field_amplitude",
+  "parallel_normalized_perturbed_vector_potential_amplitude",
+  "parallel_normalized_wave_vector",
+  "parallel_per_toroidal_mode_electric_field",
+  "parallel_wave_electric_field_amplitude",
+  "particle_flux_normalized_due_to_e_cross_b_drift",
+  "peak_incident_heat_flux_at_limiter",
+  "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field",
+  "perpendicular_gyrocenter_heat_perturbed_flux_normalized_of_gyrokinetic_eigenmode",
+  "perpendicular_neutral_state_velocity_due_to_diamagnetic_drift",
+  "perpendicular_normalized_gyrocenter_perturbed_pressure",
+  "plasma_pressure",
+  "plasma_velocity_due_to_diamagnetic_drift",
+  "poloidal_current_density_due_to_collisions",
+  "poloidal_current_density_due_to_viscosity",
+  "poloidal_electron_energy_diffusion_coefficient",
+  "poloidal_ion_charge_state_momentum_diffusivity",
+  "poloidal_turn_count",
+  "power_of_neutral_beam_injector",
+  "pressure_of_lower_hybrid_antenna",
+  "radial_angle_of_poloidal_field_coil",
+  "radial_centroid_of_electron_cyclotron_launcher_mirror",
+  "radial_coordinate_of_coordinate_system",
+  "radial_coordinate_of_passive_loop_element",
+  "radial_coordinate_of_pellet_path",
+  "radial_coordinate_of_reflector",
+  "radial_ion_energy_convection_velocity",
+  "radial_ion_energy_diffusion_coefficient",
+  "radial_ion_state_energy_flux",
+  "radial_total_neutral_momentum_diffusivity",
+  "radiated_power_density",
+  "radius_of_soft_xray_detector",
+  "ratio_of_critical_alpha_parameter_to_alpha_parameter_at_pedestal",
+  "ratio_of_diamagnetic_vorticity_to_major_radius",
+  "runaway_electron_critical_electric_field",
+  "safety_factor_at_pedestal",
+  "silane_prefill_count",
+  "spectral_calibration_factor_of_spectrometer",
+  "spectral_width_of_filter",
+  "surface_area_of_optical_element",
+  "thermal_electron_decay_length_over_scrape_off_layer",
+  "tilt_angle_of_antenna_strap",
+  "toroidal_coordinate_of_spectrometer",
+  "toroidal_ion_momentum_diffusion_coefficient",
+  "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+  "toroidal_tritium_velocity",
+  "total_diamagnetic_current_density",
+  "total_ion_power_density",
+  "total_ion_pressure",
+  "total_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+  "total_neutron_power",
+  "total_plasma_energy",
+  "total_power",
+  "total_power_due_to_fusion",
+  "tritium_prefill_count",
+  "vertical_centroid_of_coil_conductor_element",
+  "vertical_coordinate_of_closest_wall_point",
+  "vertical_coordinate_of_coil_conductor",
+  "vertical_coordinate_of_halo_boundary",
+  "vertical_coordinate_of_reflector",
+  "vertical_current_density",
+  "vertical_magnetic_field_at_wall",
+  "vertical_outline_of_cryostat",
+  "voltage_of_diagnostic_antenna",
+  "voltage_of_spectrometer",
+  "voltage_of_temperature_sensor",
+  "volume_averaged_runaway_electron_source_rate",
+  "wavelength",
+  "width_of_diagnostic_aperture",
+  "width_of_filter",
+  "width_of_optical_element",
+  "normal_particle_flux_at_wall_due_to_recombination"
+ ],
+ "recorded_source_slice": [
+  "alpha_angle_of_poloidal_field_coil",
+  "alpha_parameter",
+  "angle_of_antenna_strap",
+  "core_density_of_pellet",
+  "critical_momentum_due_to_avalanche",
+  "derivative_of_electron_density_at_pedestal_maximum_with_respect_to_normalized_poloidal_flux_coordinate",
+  "derivative_of_normalized_effective_particle_energy_with_respect_to_poloidal_angle",
+  "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+  "difference_of_poloidal_magnetic_flux_and_toroidal_magnetic_flux",
+  "energy_flux_due_to_eddy_current",
+  "energy_flux_due_to_radiation",
+  "energy_flux_normalized_due_to_e_cross_b_drift",
+  "equilibrium_weight_of_interferometer_beam",
+  "extent_of_detector_pixel",
+  "fast_electron_energy",
+  "fast_electron_source_rate_due_to_dreicer",
+  "gas_flow",
+  "gradient_of_electron_pressure",
+  "gradient_of_radial_electron_density",
+  "height_of_optical_element",
+  "height_of_soft_xray_detector",
+  "inertial_current_density_due_to_diamagnetic_drift",
+  "ion_charge_state_diamagnetic_velocity_due_to_diamagnetic_drift",
+  "ion_cyclotron_heating_antenna_phase",
+  "launched_power_due_to_ion_cyclotron_heating",
+  "left_hand_circularly_polarized_electric_field",
+  "line_averaged_neon_density",
+  "lower_bound_energy_of_neutron_detector",
+  "magnetic_shear_at_sawtooth_inversion_radius",
+  "measured_voltage_of_spectrometer_channel",
+  "momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+  "neutral_beam_mass",
+  "neutral_diffusivity",
+  "neutral_power_at_wall_due_to_recombination",
+  "neutral_species_fraction",
+  "neutral_velocity_magnitude_due_to_diamagnetic_drift",
+  "outer_atomic_count_of_pellet",
+  "parallel_current_density_flux_surface_averaged_due_to_wave_driven_current_drive",
+  "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential",
+  "parallel_neutral_momentum_diffusivity",
+  "parallel_neutral_species_energy_convection_velocity",
+  "parallel_normalized_particle_perturbed_pressure",
+  "parallel_normalized_perturbed_magnetic_field_amplitude",
+  "parallel_normalized_perturbed_vector_potential_amplitude",
+  "parallel_normalized_wave_vector",
+  "parallel_per_toroidal_mode_electric_field",
+  "parallel_wave_electric_field_amplitude",
+  "particle_flux_normalized_due_to_e_cross_b_drift",
+  "peak_incident_heat_flux_at_limiter",
+  "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field",
+  "perpendicular_gyrocenter_heat_perturbed_flux_normalized_of_gyrokinetic_eigenmode",
+  "perpendicular_neutral_state_velocity_due_to_diamagnetic_drift",
+  "perpendicular_normalized_gyrocenter_perturbed_pressure",
+  "plasma_pressure",
+  "plasma_velocity_due_to_diamagnetic_drift",
+  "poloidal_current_density_due_to_collisions",
+  "poloidal_current_density_due_to_viscosity",
+  "poloidal_electron_energy_diffusion_coefficient",
+  "poloidal_ion_charge_state_momentum_diffusivity",
+  "poloidal_turn_count",
+  "power_of_neutral_beam_injector",
+  "pressure_of_lower_hybrid_antenna",
+  "radial_angle_of_poloidal_field_coil",
+  "radial_centroid_of_electron_cyclotron_launcher_mirror",
+  "radial_coordinate_of_coordinate_system",
+  "radial_coordinate_of_passive_loop_element",
+  "radial_coordinate_of_pellet_path",
+  "radial_coordinate_of_reflector",
+  "radial_ion_energy_convection_velocity",
+  "radial_ion_energy_diffusion_coefficient",
+  "radial_ion_state_energy_flux",
+  "radial_total_neutral_momentum_diffusivity",
+  "radiated_power_density",
+  "radius_of_soft_xray_detector",
+  "ratio_of_critical_alpha_parameter_to_alpha_parameter_at_pedestal",
+  "ratio_of_diamagnetic_vorticity_to_major_radius",
+  "runaway_electron_critical_electric_field",
+  "safety_factor_at_pedestal",
+  "silane_prefill_count",
+  "spectral_calibration_factor_of_spectrometer",
+  "spectral_width_of_filter",
+  "surface_area_of_optical_element",
+  "thermal_electron_decay_length_over_scrape_off_layer",
+  "tilt_angle_of_antenna_strap",
+  "toroidal_coordinate_of_spectrometer",
+  "toroidal_ion_momentum_diffusion_coefficient",
+  "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+  "toroidal_tritium_velocity",
+  "total_diamagnetic_current_density",
+  "total_ion_power_density",
+  "total_ion_pressure",
+  "total_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+  "total_neutron_power",
+  "total_plasma_energy",
+  "total_power",
+  "total_power_due_to_fusion",
+  "tritium_prefill_count",
+  "vertical_centroid_of_coil_conductor_element",
+  "vertical_coordinate_of_closest_wall_point",
+  "vertical_coordinate_of_coil_conductor",
+  "vertical_coordinate_of_halo_boundary",
+  "vertical_coordinate_of_reflector",
+  "vertical_current_density",
+  "vertical_magnetic_field_at_wall",
+  "vertical_outline_of_cryostat",
+  "voltage_of_diagnostic_antenna",
+  "voltage_of_spectrometer",
+  "voltage_of_temperature_sensor",
+  "volume_averaged_runaway_electron_source_rate",
+  "wavelength",
+  "width_of_diagnostic_aperture",
+  "width_of_filter",
+  "width_of_optical_element"
+ ],
+ "successor_edge_slice": [
+  "normal_particle_flux_at_wall_due_to_recombination"
+ ],
+ "out_of_scope_slices": {
+  "lineage_path": [
+   "absorbed_coolant_power_of_plant_component_port",
+   "acceleration_of_passive_structure",
+   "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+   "beam_cross_sectional_area_of_aperture",
+   "co_passing_fast_electron_kinetic_power_density_due_to_collisions",
+   "cross_field_wave_vector_magnitude",
+   "cumulative_ethylene_count_due_to_gas_injection",
+   "cumulative_inside_flux_surface_total_electron_density",
+   "deposited_power_at_divertor_target",
+   "diameter_of_fibre_bundle",
+   "distance_of_beam_tracing_ray",
+   "effective_incident_neutral_coefficient_of_wall_material_due_to_sputtering",
+   "electron_heat_diffusivity",
+   "electron_particle_diffusion_coefficient",
+   "electron_temperature_at_first_wall",
+   "electrostatic_potential_at_outboard_midplane",
+   "energy_flux_at_control_surface",
+   "first_local_tangential_width_of_reflectometer_antenna",
+   "flux_surface_normal_momentum_convection_velocity",
+   "flux_surface_normal_momentum_diffusion_coefficient",
+   "flux_surface_normal_neutral_energy_diffusion_coefficient",
+   "front_surface_area_of_langmuir_probe",
+   "gas_atomic_count_of_pellet_injector",
+   "heat_power_of_divertor",
+   "incident_energy_flux_at_wall_due_to_radiation",
+   "ion_species_atomic_number",
+   "ion_temperature_at_outboard_midplane_separatrix",
+   "lithium_volume_of_breeder_blanket",
+   "molecular_gas_count_due_to_pellet_injection",
+   "net_forward_power_of_wave_beam",
+   "net_power",
+   "neutral_species_kinetic_energy_flux_at_wall_due_to_surface_emission",
+   "neutron_rate_of_detector",
+   "non_axisymmetric_current_of_conductor",
+   "normal_distance_of_antenna_strap",
+   "normal_width_of_plasma_filament",
+   "nuclear_power_density_at_midplane",
+   "parallel_bulk_ion_velocity",
+   "parallel_incident_heat_flux_at_divertor_target",
+   "parallel_thermal_neutral_energy_diffusivity",
+   "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+   "perturbed_linear_mhd_mode_number",
+   "poloidal_effective_ion_diffusion_coefficient",
+   "power_over_core_region_due_to_impurity_radiation",
+   "power_over_scrape_off_layer_due_to_radiation",
+   "radial_effective_thermal_energy_velocity_due_to_convection",
+   "radial_offset_of_lower_hybrid_antenna",
+   "ratio_of_charge_of_conductor_to_voltage_of_conductor",
+   "ratio_of_field_line_count_to_total_field_line_count",
+   "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+   "reference_wavelength_of_filter_window",
+   "second_local_tangential_width_of_diagnostic_aperture",
+   "surface_temperature_of_plasma_facing_component",
+   "surface_thickness_of_breeder_blanket_module",
+   "surface_thickness_of_cryostat",
+   "tendency_of_runaway_electron_density",
+   "thermal_energy_confinement_time",
+   "tilt_angle_of_poloidal_field_coil",
+   "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+   "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+   "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+   "total_absorbed_power_of_plant_system",
+   "total_electron_power_density",
+   "total_incident_thermal_power",
+   "total_ion_momentum_diffusivity",
+   "total_launched_power_due_to_ion_cyclotron_heating",
+   "total_particle_flux_at_divertor_target_due_to_recycling",
+   "total_suprathermal_electron_power_density_due_to_collisions",
+   "total_thermal_radiative_power_of_divertor_target",
+   "vertical_coordinate_of_passive_loop",
+   "vertical_coordinate_of_plasma_filament",
+   "vertical_outline_of_wall",
+   "vertical_position_of_grating",
+   "vertical_total_ion_momentum_diffusivity",
+   "volume_averaged_electron_number_density_over_scrape_off_layer",
+   "volume_integrated_net_plasma_particle_power_density",
+   "wave_critical_ordinary_mode_frequency",
+   "wave_magnetic_field_amplitude"
+  ],
+  "binding_receipt_without_path": [
+   "electron_particle_diffusivity",
+   "energy_diffusion_coefficient_due_to_diffusion",
+   "net_plasma_current_due_to_ohmic_current_drive",
+   "net_plasma_power_density",
+   "normalized_toroidal_hard_xray_peak_external_half_width",
+   "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+   "total_particle_flux"
+  ]
+ },
+ "planned_restorations": [
+  {
+   "name": "alpha_angle_of_poloidal_field_coil",
+   "source_ids": [
+    "dd:pf_active/coil/element/geometry/oblique/alpha"
+   ]
+  },
+  {
+   "name": "alpha_parameter",
+   "source_ids": [
+    "dd:summary/pedestal_fits/mtanh/stability/alpha_experimental/value"
+   ]
+  },
+  {
+   "name": "angle_of_antenna_strap",
+   "source_ids": [
+    "dd:ic_antennas/antenna/module/strap/geometry/oblique/beta"
+   ]
+  },
+  {
+   "name": "core_density_of_pellet",
+   "source_ids": [
+    "dd:spi/injector/pellet/core/species/density"
+   ]
+  },
+  {
+   "name": "critical_momentum_due_to_avalanche",
+   "source_ids": [
+    "dd:runaway_electrons/profiles_1d/momentum_critical_avalanche"
+   ]
+  },
+  {
+   "name": "derivative_of_electron_density_at_pedestal_maximum_with_respect_to_normalized_poloidal_flux_coordinate",
+   "source_ids": [
+    "dd:summary/pedestal_fits/mtanh/n_e/d_dpsi_norm_max/value"
+   ]
+  },
+  {
+   "name": "derivative_of_normalized_effective_particle_energy_with_respect_to_poloidal_angle",
+   "source_ids": [
+    "dd:gyrokinetics_local/species/potential_energy_gradient_norm"
+   ]
+  },
+  {
+   "name": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+   "source_ids": [
+    "dd:summary/local/separatrix_average/n_i/deuterium_tritium/value"
+   ]
+  },
+  {
+   "name": "difference_of_poloidal_magnetic_flux_and_toroidal_magnetic_flux",
+   "source_ids": [
+    "dd:sawteeth/profiles_1d/psi_star_pre_crash"
+   ]
+  },
+  {
+   "name": "energy_flux_due_to_eddy_current",
+   "source_ids": [
+    "dd:wall/description_ggd/ggd/energy_fluxes/current/emitted/values"
+   ]
+  },
+  {
+   "name": "energy_flux_due_to_radiation",
+   "source_ids": [
+    "dd:wall/description_ggd/ggd/energy_fluxes/radiation/emitted/values"
+   ]
+  },
+  {
+   "name": "energy_flux_normalized_due_to_e_cross_b_drift",
+   "source_ids": [
+    "dd:gyrokinetics_local/non_linear/fluxes_3d_k_x_sum_rotating_frame/energy_phi_potential"
+   ]
+  },
+  {
+   "name": "equilibrium_weight_of_interferometer_beam",
+   "source_ids": [
+    "dd:equilibrium/time_slice/constraints/n_e_line/weight"
+   ]
+  },
+  {
+   "name": "extent_of_detector_pixel",
+   "source_ids": [
+    "dd:spectrometer_x_ray_crystal/channel/camera/pixel_dimensions"
+   ]
+  },
+  {
+   "name": "fast_electron_energy",
+   "source_ids": [
+    "dd:summary/heating_current_drive/lh/energy_fast/value"
+   ]
+  },
+  {
+   "name": "fast_electron_source_rate_due_to_dreicer",
+   "source_ids": [
+    "dd:runaway_electrons/global_quantities/volume_average/ddensity_dt_dreicer"
+   ]
+  },
+  {
+   "name": "gas_flow",
+   "source_ids": [
+    "dd:spi/injector/fragmentation_gas/flow_rate"
+   ]
+  },
+  {
+   "name": "gradient_of_electron_pressure",
+   "source_ids": [
+    "dd:summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value"
+   ]
+  },
+  {
+   "name": "gradient_of_radial_electron_density",
+   "source_ids": [
+    "dd:summary/pedestal_fits/mtanh/n_e/d_dpsi_norm/value"
+   ]
+  },
+  {
+   "name": "height_of_optical_element",
+   "source_ids": [
+    "dd:spectrometer_x_ray_crystal/channel/reflector/x2_width"
+   ]
+  },
+  {
+   "name": "height_of_soft_xray_detector",
+   "source_ids": [
+    "dd:soft_x_rays/channel/detector/x2_width"
+   ]
+  },
+  {
+   "name": "inertial_current_density_due_to_diamagnetic_drift",
+   "source_ids": [
+    "dd:edge_profiles/ggd/j_inertial/diamagnetic",
+    "dd:plasma_profiles/ggd/j_inertial/diamagnetic"
+   ]
+  },
+  {
+   "name": "ion_charge_state_diamagnetic_velocity_due_to_diamagnetic_drift",
+   "source_ids": [
+    "dd:plasma_transport/model/ggd/ion/state/momentum/v/diamagnetic"
+   ]
+  },
+  {
+   "name": "ion_cyclotron_heating_antenna_phase",
+   "source_ids": [
+    "dd:summary/heating_current_drive/ic/phase/value"
+   ]
+  },
+  {
+   "name": "launched_power_due_to_ion_cyclotron_heating",
+   "source_ids": [
+    "dd:summary/heating_current_drive/power_launched_ic/value"
+   ]
+  },
+  {
+   "name": "left_hand_circularly_polarized_electric_field",
+   "source_ids": [
+    "dd:waves/coherent_wave/full_wave/e_field/plus/values"
+   ]
+  },
+  {
+   "name": "line_averaged_neon_density",
+   "source_ids": [
+    "dd:summary/line_average/n_i/neon/value"
+   ]
+  },
+  {
+   "name": "lower_bound_energy_of_neutron_detector",
+   "source_ids": [
+    "dd:neutron_diagnostic/detector/energy_band/lower_bound"
+   ]
+  },
+  {
+   "name": "magnetic_shear_at_sawtooth_inversion_radius",
+   "source_ids": [
+    "dd:sawteeth/diagnostics/magnetic_shear_q1"
+   ]
+  },
+  {
+   "name": "measured_voltage_of_spectrometer_channel",
+   "source_ids": [
+    "dd:spectrometer_visible/channel/filter_spectrometer/photoelectric_voltage"
+   ]
+  },
+  {
+   "name": "momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+   "source_ids": [
+    "dd:gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_parallel_b_field_parallel"
+   ]
+  },
+  {
+   "name": "neutral_beam_mass",
+   "source_ids": [
+    "dd:charge_exchange/channel/bes/a"
+   ]
+  },
+  {
+   "name": "neutral_diffusivity",
+   "source_ids": [
+    "dd:plasma_transport/model/ggd/neutral/particles/d/values"
+   ]
+  },
+  {
+   "name": "neutral_power_at_wall_due_to_recombination",
+   "source_ids": [
+    "dd:wall/global_quantities/power_recombination_neutrals"
+   ]
+  },
+  {
+   "name": "neutral_species_fraction",
+   "source_ids": [
+    "dd:pulse_schedule/density_control/valve/species/fraction"
+   ]
+  },
+  {
+   "name": "neutral_velocity_magnitude_due_to_diamagnetic_drift",
+   "source_ids": [
+    "dd:edge_transport/model/ggd/neutral/momentum/v/diamagnetic"
+   ]
+  },
+  {
+   "name": "outer_atomic_count_of_pellet",
+   "source_ids": [
+    "dd:spi/injector/pellet/shell/atoms_n"
+   ]
+  },
+  {
+   "name": "parallel_current_density_flux_surface_averaged_due_to_wave_driven_current_drive",
+   "source_ids": [
+    "dd:plasma_sources/source/profiles_1d/j_parallel"
+   ]
+  },
+  {
+   "name": "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential",
+   "source_ids": [
+    "dd:gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/momentum_phi_perpendicular_a_field_parallel"
+   ]
+  },
+  {
+   "name": "parallel_neutral_momentum_diffusivity",
+   "source_ids": [
+    "dd:plasma_transport/model/ggd/neutral/momentum/d_parallel/values"
+   ]
+  },
+  {
+   "name": "parallel_neutral_species_energy_convection_velocity",
+   "source_ids": [
+    "dd:plasma_transport/model/ggd/neutral/energy/v_parallel/values"
+   ]
+  },
+  {
+   "name": "parallel_normalized_particle_perturbed_pressure",
+   "source_ids": [
+    "dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/pressure_parallel"
+   ]
+  },
+  {
+   "name": "parallel_normalized_perturbed_magnetic_field_amplitude",
+   "source_ids": [
+    "dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/b_field_parallel_perturbed_norm"
+   ]
+  },
+  {
+   "name": "parallel_normalized_perturbed_vector_potential_amplitude",
+   "source_ids": [
+    "dd:gyrokinetics_local/non_linear/fields_intensity_3d/a_field_parallel_perturbed_norm"
+   ]
+  },
+  {
+   "name": "parallel_normalized_wave_vector",
+   "source_ids": [
+    "dd:gyrokinetics_local/non_linear/binormal_wavevector_norm"
+   ]
+  },
+  {
+   "name": "parallel_per_toroidal_mode_electric_field",
+   "source_ids": [
+    "dd:waves/coherent_wave/profiles_1d/e_field_n_phi/parallel/phase"
+   ]
+  },
+  {
+   "name": "parallel_wave_electric_field_amplitude",
+   "source_ids": [
+    "dd:waves/coherent_wave/profiles_1d/e_field_n_phi/parallel/amplitude"
+   ]
+  },
+  {
+   "name": "particle_flux_normalized_due_to_e_cross_b_drift",
+   "source_ids": [
+    "dd:gyrokinetics_local/linear/wavevector/eigenmode/linear_weights_rotating_frame/particles_phi_potential"
+   ]
+  },
+  {
+   "name": "peak_incident_heat_flux_at_limiter",
+   "source_ids": [
+    "dd:summary/local/limiter/power_flux_peak/value"
+   ]
+  },
+  {
+   "name": "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field",
+   "source_ids": [
+    "dd:waves/coherent_wave/profiles_1d/e_field_n_phi/minus/phase"
+   ]
+  },
+  {
+   "name": "perpendicular_gyrocenter_heat_perturbed_flux_normalized_of_gyrokinetic_eigenmode",
+   "source_ids": [
+    "dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/v_parallel_energy_perpendicular"
+   ]
+  },
+  {
+   "name": "perpendicular_neutral_state_velocity_due_to_diamagnetic_drift",
+   "source_ids": [
+    "dd:plasma_profiles/ggd/neutral/state/velocity_diamagnetic/diamagnetic"
+   ]
+  },
+  {
+   "name": "perpendicular_normalized_gyrocenter_perturbed_pressure",
+   "source_ids": [
+    "dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure_perpendicular"
+   ]
+  },
+  {
+   "name": "plasma_pressure",
+   "source_ids": [
+    "dd:equilibrium/time_slice/constraints/pressure/reconstructed"
+   ]
+  },
+  {
+   "name": "plasma_velocity_due_to_diamagnetic_drift",
+   "source_ids": [
+    "dd:edge_transport/model/ggd/momentum/v/diamagnetic"
+   ]
+  },
+  {
+   "name": "poloidal_current_density_due_to_collisions",
+   "source_ids": [
+    "dd:plasma_profiles/ggd/j_ion_neutral_friction/poloidal"
+   ]
+  },
+  {
+   "name": "poloidal_current_density_due_to_viscosity",
+   "source_ids": [
+    "dd:plasma_profiles/ggd/j_perpendicular_viscosity/poloidal"
+   ]
+  },
+  {
+   "name": "poloidal_electron_energy_diffusion_coefficient",
+   "source_ids": [
+    "dd:plasma_transport/model/ggd/electrons/energy/d_pol/values"
+   ]
+  },
+  {
+   "name": "poloidal_ion_charge_state_momentum_diffusivity",
+   "source_ids": [
+    "dd:core_transport/model/profiles_1d/ion/state/momentum/poloidal/d"
+   ]
+  },
+  {
+   "name": "poloidal_turn_count",
+   "source_ids": [
+    "dd:gyrokinetics_local/linear/wavevector/eigenmode/poloidal_turns"
+   ]
+  },
+  {
+   "name": "power_of_neutral_beam_injector",
+   "source_ids": [
+    "dd:summary/heating_current_drive/nbi/power_launched/value"
+   ]
+  },
+  {
+   "name": "pressure_of_lower_hybrid_antenna",
+   "source_ids": [
+    "dd:lh_antennas/antenna/pressure_tank"
+   ]
+  },
+  {
+   "name": "radial_angle_of_poloidal_field_coil",
+   "source_ids": [
+    "dd:pf_active/coil/element/geometry/oblique/alpha"
+   ]
+  },
+  {
+   "name": "radial_centroid_of_electron_cyclotron_launcher_mirror",
+   "source_ids": [
+    "dd:ec_launchers/mirror/geometry/centre/r"
+   ]
+  },
+  {
+   "name": "radial_coordinate_of_coordinate_system",
+   "source_ids": [
+    "dd:neutron_diagnostic/detector/field_of_view/emission_grid/r"
+   ]
+  },
+  {
+   "name": "radial_coordinate_of_passive_loop_element",
+   "source_ids": [
+    "dd:pf_passive/loop/element/geometry/thick_line/second_point/r"
+   ]
+  },
+  {
+   "name": "radial_coordinate_of_pellet_path",
+   "source_ids": [
+    "dd:pellets/time_slice/pellet/path_profiles/position/r"
+   ]
+  },
+  {
+   "name": "radial_coordinate_of_reflector",
+   "source_ids": [
+    "dd:spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r"
+   ]
+  },
+  {
+   "name": "radial_ion_energy_convection_velocity",
+   "source_ids": [
+    "dd:core_transport/model/profiles_1d/total_ion_energy/v"
+   ]
+  },
+  {
+   "name": "radial_ion_energy_diffusion_coefficient",
+   "source_ids": [
+    "dd:core_transport/model/profiles_1d/total_ion_energy/d"
+   ]
+  },
+  {
+   "name": "radial_ion_state_energy_flux",
+   "source_ids": [
+    "dd:plasma_transport/model/profiles_1d/ion/state/energy/flux"
+   ]
+  },
+  {
+   "name": "radial_total_neutral_momentum_diffusivity",
+   "source_ids": [
+    "dd:edge_transport/model/ggd/ion/momentum/d/r"
+   ]
+  },
+  {
+   "name": "radiated_power_density",
+   "source_ids": [
+    "dd:bolometer/power_density"
+   ]
+  },
+  {
+   "name": "radius_of_soft_xray_detector",
+   "source_ids": [
+    "dd:soft_x_rays/channel/detector/radius"
+   ]
+  },
+  {
+   "name": "ratio_of_critical_alpha_parameter_to_alpha_parameter_at_pedestal",
+   "source_ids": [
+    "dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_sauter/alpha_ratio/value"
+   ]
+  },
+  {
+   "name": "ratio_of_diamagnetic_vorticity_to_major_radius",
+   "source_ids": [
+    "dd:edge_profiles/ggd/vorticity_over_r/diamagnetic",
+    "dd:plasma_profiles/ggd/vorticity_over_r/diamagnetic"
+   ]
+  },
+  {
+   "name": "runaway_electron_critical_electric_field",
+   "source_ids": [
+    "dd:runaway_electrons/profiles_1d/e_field_critical"
+   ]
+  },
+  {
+   "name": "safety_factor_at_pedestal",
+   "source_ids": [
+    "dd:summary/local/pedestal/q/value"
+   ]
+  },
+  {
+   "name": "silane_prefill_count",
+   "source_ids": [
+    "dd:summary/gas_injection_prefill/silane/value"
+   ]
+  },
+  {
+   "name": "spectral_calibration_factor_of_spectrometer",
+   "source_ids": [
+    "dd:charge_exchange/channel/spectrum/radiance_calibration",
+    "dd:spectrometer_uv/channel/radiance_calibration"
+   ]
+  },
+  {
+   "name": "spectral_width_of_filter",
+   "source_ids": [
+    "dd:spectrometer_visible/channel/filter_spectrometer/filter/wavelength_width"
+   ]
+  },
+  {
+   "name": "surface_area_of_optical_element",
+   "source_ids": [
+    "dd:camera_ir/fibre_bundle/geometry/surface"
+   ]
+  },
+  {
+   "name": "thermal_electron_decay_length_over_scrape_off_layer",
+   "source_ids": [
+    "dd:summary/scrape_off_layer/t_e_decay_length/value"
+   ]
+  },
+  {
+   "name": "tilt_angle_of_antenna_strap",
+   "source_ids": [
+    "dd:ic_antennas/antenna/module/strap/geometry/oblique/beta"
+   ]
+  },
+  {
+   "name": "toroidal_coordinate_of_spectrometer",
+   "source_ids": [
+    "dd:spectrometer_visible/channel/geometry_matrix/interpolated/phi"
+   ]
+  },
+  {
+   "name": "toroidal_ion_momentum_diffusion_coefficient",
+   "source_ids": [
+    "dd:edge_transport/model/ggd/ion/momentum/d/phi"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+   "source_ids": [
+    "dd:distributions/distribution/profiles_2d/trapped/collisions/electrons/torque_thermal_phi"
+   ]
+  },
+  {
+   "name": "toroidal_tritium_velocity",
+   "source_ids": [
+    "dd:summary/local/pedestal/velocity_phi/tritium/value",
+    "dd:summary/local/separatrix/velocity_phi/tritium/value"
+   ]
+  },
+  {
+   "name": "total_diamagnetic_current_density",
+   "source_ids": [
+    "dd:edge_profiles/ggd/j_total/diamagnetic"
+   ]
+  },
+  {
+   "name": "total_ion_power_density",
+   "source_ids": [
+    "dd:plasma_sources/source/ggd/total_ion_energy/values"
+   ]
+  },
+  {
+   "name": "total_ion_pressure",
+   "source_ids": [
+    "dd:plasma_profiles/profiles_2d/ion/pressure"
+   ]
+  },
+  {
+   "name": "total_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+   "source_ids": [
+    "dd:gyrokinetics_local/non_linear/fluxes_3d/momentum_phi_parallel_a_field_parallel"
+   ]
+  },
+  {
+   "name": "total_neutron_power",
+   "source_ids": [
+    "dd:summary/fusion/neutron_power_total/value"
+   ]
+  },
+  {
+   "name": "total_plasma_energy",
+   "source_ids": [
+    "dd:summary/global_quantities/energy_total/value"
+   ]
+  },
+  {
+   "name": "total_power",
+   "source_ids": [
+    "dd:balance_of_plant/power_electric_plant_operation/power_total"
+   ]
+  },
+  {
+   "name": "total_power_due_to_fusion",
+   "source_ids": [
+    "dd:neutron_diagnostic/fusion_power"
+   ]
+  },
+  {
+   "name": "tritium_prefill_count",
+   "source_ids": [
+    "dd:summary/gas_injection_prefill/tritium/value"
+   ]
+  },
+  {
+   "name": "vertical_centroid_of_coil_conductor_element",
+   "source_ids": [
+    "dd:ferritic/object/axisymmetric/annulus/z",
+    "dd:ferritic/object/axisymmetric/oblique/z",
+    "dd:ic_antennas/antenna/module/strap/geometry/oblique/z",
+    "dd:ic_antennas/antenna/module/strap/geometry/rectangle/z",
+    "dd:iron_core/segment/geometry/oblique/z",
+    "dd:pf_active/coil/geometry/oblique/z",
+    "dd:pf_passive/loop/element/geometry/oblique/z",
+    "dd:pf_plasma/element/geometry/annulus/z",
+    "dd:pf_plasma/element/geometry/oblique/z",
+    "dd:pf_plasma/element/geometry/rectangle/z"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_closest_wall_point",
+   "source_ids": [
+    "dd:equilibrium/time_slice/boundary/closest_wall_point/z"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_coil_conductor",
+   "source_ids": [
+    "dd:ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_halo_boundary",
+   "source_ids": [
+    "dd:disruption/halo_currents/area/end_point/z"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_reflector",
+   "source_ids": [
+    "dd:spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z"
+   ]
+  },
+  {
+   "name": "vertical_current_density",
+   "source_ids": [
+    "dd:wall/description_ggd/ggd/j_total/z"
+   ]
+  },
+  {
+   "name": "vertical_magnetic_field_at_wall",
+   "source_ids": [
+    "dd:focs/b_field_z"
+   ]
+  },
+  {
+   "name": "vertical_outline_of_cryostat",
+   "source_ids": [
+    "dd:cryostat/description_2d/cryostat/unit/annular/outline_outer/z"
+   ]
+  },
+  {
+   "name": "voltage_of_spectrometer",
+   "source_ids": [
+    "dd:spectrometer_visible/channel/filter_spectrometer/photoelectric_voltage"
+   ]
+  },
+  {
+   "name": "voltage_of_temperature_sensor",
+   "source_ids": [
+    "dd:neutron_diagnostic/detector/temperature_sensor/amplitude"
+   ]
+  },
+  {
+   "name": "volume_averaged_runaway_electron_source_rate",
+   "source_ids": [
+    "dd:runaway_electrons/global_quantities/volume_average/ddensity_dt_tritium"
+   ]
+  },
+  {
+   "name": "wavelength",
+   "source_ids": [
+    "dd:thomson_scattering/polychromator/wavelength_band/wavelength_upper"
+   ]
+  },
+  {
+   "name": "width_of_diagnostic_aperture",
+   "source_ids": [
+    "dd:camera_visible/channel/fibre_bundle/geometry/x1_width"
+   ]
+  },
+  {
+   "name": "width_of_filter",
+   "source_ids": [
+    "dd:hard_x_rays/channel/filter_window/x1_width"
+   ]
+  },
+  {
+   "name": "width_of_optical_element",
+   "source_ids": [
+    "dd:spectrometer_visible/channel/optical_element/geometry/x1_width"
+   ]
+  }
+ ],
+ "restored_count": 112,
+ "skipped": [
+  {
+   "name": "voltage_of_diagnostic_antenna",
+   "reason": "no restorable recorded path",
+   "skips": [
+    {
+     "source_id": "dd:ece/channel/t_e_voltage",
+     "reason": "existing source is stale"
+    },
+    {
+     "source_id": "dd:ece/channel/voltage_t_radiation",
+     "reason": "source held by a live name: voltage_of_spectrometer_channel"
+    }
+   ]
+  },
+  {
+   "name": "normal_particle_flux_at_wall_due_to_recombination",
+   "reason": "records no path of its own: no own source token, and the only evidence is a relative's edge, which this slice does not follow (live relatives hold no source)",
+   "skips": [
+    {
+     "source_id": "\u2014",
+     "reason": "lineage paths none; receipts source_migration_manifest"
+    }
+   ]
+  }
+ ],
+ "preview": {
+  "would_bind": 125,
+  "rows_before": 264,
+  "rows_after": 264
+ },
+ "apply_receipt": {
+  "bound_total": 125,
+  "rows": [
+   {
+    "name": "alpha_angle_of_poloidal_field_coil",
+    "bound": 1,
+    "source_ids": [
+     "dd:pf_active/coil/element/geometry/oblique/alpha"
+    ]
+   },
+   {
+    "name": "alpha_parameter",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/pedestal_fits/mtanh/stability/alpha_experimental/value"
+    ]
+   },
+   {
+    "name": "angle_of_antenna_strap",
+    "bound": 1,
+    "source_ids": [
+     "dd:ic_antennas/antenna/module/strap/geometry/oblique/beta"
+    ]
+   },
+   {
+    "name": "core_density_of_pellet",
+    "bound": 1,
+    "source_ids": [
+     "dd:spi/injector/pellet/core/species/density"
+    ]
+   },
+   {
+    "name": "critical_momentum_due_to_avalanche",
+    "bound": 1,
+    "source_ids": [
+     "dd:runaway_electrons/profiles_1d/momentum_critical_avalanche"
+    ]
+   },
+   {
+    "name": "derivative_of_electron_density_at_pedestal_maximum_with_respect_to_normalized_poloidal_flux_coordinate",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/pedestal_fits/mtanh/n_e/d_dpsi_norm_max/value"
+    ]
+   },
+   {
+    "name": "derivative_of_normalized_effective_particle_energy_with_respect_to_poloidal_angle",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/species/potential_energy_gradient_norm"
+    ]
+   },
+   {
+    "name": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/local/separatrix_average/n_i/deuterium_tritium/value"
+    ]
+   },
+   {
+    "name": "difference_of_poloidal_magnetic_flux_and_toroidal_magnetic_flux",
+    "bound": 1,
+    "source_ids": [
+     "dd:sawteeth/profiles_1d/psi_star_pre_crash"
+    ]
+   },
+   {
+    "name": "energy_flux_due_to_eddy_current",
+    "bound": 1,
+    "source_ids": [
+     "dd:wall/description_ggd/ggd/energy_fluxes/current/emitted/values"
+    ]
+   },
+   {
+    "name": "energy_flux_due_to_radiation",
+    "bound": 1,
+    "source_ids": [
+     "dd:wall/description_ggd/ggd/energy_fluxes/radiation/emitted/values"
+    ]
+   },
+   {
+    "name": "energy_flux_normalized_due_to_e_cross_b_drift",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/non_linear/fluxes_3d_k_x_sum_rotating_frame/energy_phi_potential"
+    ]
+   },
+   {
+    "name": "equilibrium_weight_of_interferometer_beam",
+    "bound": 1,
+    "source_ids": [
+     "dd:equilibrium/time_slice/constraints/n_e_line/weight"
+    ]
+   },
+   {
+    "name": "extent_of_detector_pixel",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_x_ray_crystal/channel/camera/pixel_dimensions"
+    ]
+   },
+   {
+    "name": "fast_electron_energy",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/heating_current_drive/lh/energy_fast/value"
+    ]
+   },
+   {
+    "name": "fast_electron_source_rate_due_to_dreicer",
+    "bound": 1,
+    "source_ids": [
+     "dd:runaway_electrons/global_quantities/volume_average/ddensity_dt_dreicer"
+    ]
+   },
+   {
+    "name": "gas_flow",
+    "bound": 1,
+    "source_ids": [
+     "dd:spi/injector/fragmentation_gas/flow_rate"
+    ]
+   },
+   {
+    "name": "gradient_of_electron_pressure",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value"
+    ]
+   },
+   {
+    "name": "gradient_of_radial_electron_density",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/pedestal_fits/mtanh/n_e/d_dpsi_norm/value"
+    ]
+   },
+   {
+    "name": "height_of_optical_element",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_x_ray_crystal/channel/reflector/x2_width"
+    ]
+   },
+   {
+    "name": "height_of_soft_xray_detector",
+    "bound": 1,
+    "source_ids": [
+     "dd:soft_x_rays/channel/detector/x2_width"
+    ]
+   },
+   {
+    "name": "inertial_current_density_due_to_diamagnetic_drift",
+    "bound": 2,
+    "source_ids": [
+     "dd:edge_profiles/ggd/j_inertial/diamagnetic",
+     "dd:plasma_profiles/ggd/j_inertial/diamagnetic"
+    ]
+   },
+   {
+    "name": "ion_charge_state_diamagnetic_velocity_due_to_diamagnetic_drift",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_transport/model/ggd/ion/state/momentum/v/diamagnetic"
+    ]
+   },
+   {
+    "name": "ion_cyclotron_heating_antenna_phase",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/heating_current_drive/ic/phase/value"
+    ]
+   },
+   {
+    "name": "launched_power_due_to_ion_cyclotron_heating",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/heating_current_drive/power_launched_ic/value"
+    ]
+   },
+   {
+    "name": "left_hand_circularly_polarized_electric_field",
+    "bound": 1,
+    "source_ids": [
+     "dd:waves/coherent_wave/full_wave/e_field/plus/values"
+    ]
+   },
+   {
+    "name": "line_averaged_neon_density",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/line_average/n_i/neon/value"
+    ]
+   },
+   {
+    "name": "lower_bound_energy_of_neutron_detector",
+    "bound": 1,
+    "source_ids": [
+     "dd:neutron_diagnostic/detector/energy_band/lower_bound"
+    ]
+   },
+   {
+    "name": "magnetic_shear_at_sawtooth_inversion_radius",
+    "bound": 1,
+    "source_ids": [
+     "dd:sawteeth/diagnostics/magnetic_shear_q1"
+    ]
+   },
+   {
+    "name": "measured_voltage_of_spectrometer_channel",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_visible/channel/filter_spectrometer/photoelectric_voltage"
+    ]
+   },
+   {
+    "name": "momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_parallel_b_field_parallel"
+    ]
+   },
+   {
+    "name": "neutral_beam_mass",
+    "bound": 1,
+    "source_ids": [
+     "dd:charge_exchange/channel/bes/a"
+    ]
+   },
+   {
+    "name": "neutral_diffusivity",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_transport/model/ggd/neutral/particles/d/values"
+    ]
+   },
+   {
+    "name": "neutral_power_at_wall_due_to_recombination",
+    "bound": 1,
+    "source_ids": [
+     "dd:wall/global_quantities/power_recombination_neutrals"
+    ]
+   },
+   {
+    "name": "neutral_species_fraction",
+    "bound": 1,
+    "source_ids": [
+     "dd:pulse_schedule/density_control/valve/species/fraction"
+    ]
+   },
+   {
+    "name": "neutral_velocity_magnitude_due_to_diamagnetic_drift",
+    "bound": 1,
+    "source_ids": [
+     "dd:edge_transport/model/ggd/neutral/momentum/v/diamagnetic"
+    ]
+   },
+   {
+    "name": "outer_atomic_count_of_pellet",
+    "bound": 1,
+    "source_ids": [
+     "dd:spi/injector/pellet/shell/atoms_n"
+    ]
+   },
+   {
+    "name": "parallel_current_density_flux_surface_averaged_due_to_wave_driven_current_drive",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_sources/source/profiles_1d/j_parallel"
+    ]
+   },
+   {
+    "name": "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/momentum_phi_perpendicular_a_field_parallel"
+    ]
+   },
+   {
+    "name": "parallel_neutral_momentum_diffusivity",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_transport/model/ggd/neutral/momentum/d_parallel/values"
+    ]
+   },
+   {
+    "name": "parallel_neutral_species_energy_convection_velocity",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_transport/model/ggd/neutral/energy/v_parallel/values"
+    ]
+   },
+   {
+    "name": "parallel_normalized_particle_perturbed_pressure",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/pressure_parallel"
+    ]
+   },
+   {
+    "name": "parallel_normalized_perturbed_magnetic_field_amplitude",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/b_field_parallel_perturbed_norm"
+    ]
+   },
+   {
+    "name": "parallel_normalized_perturbed_vector_potential_amplitude",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/non_linear/fields_intensity_3d/a_field_parallel_perturbed_norm"
+    ]
+   },
+   {
+    "name": "parallel_normalized_wave_vector",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/non_linear/binormal_wavevector_norm"
+    ]
+   },
+   {
+    "name": "parallel_per_toroidal_mode_electric_field",
+    "bound": 1,
+    "source_ids": [
+     "dd:waves/coherent_wave/profiles_1d/e_field_n_phi/parallel/phase"
+    ]
+   },
+   {
+    "name": "parallel_wave_electric_field_amplitude",
+    "bound": 1,
+    "source_ids": [
+     "dd:waves/coherent_wave/profiles_1d/e_field_n_phi/parallel/amplitude"
+    ]
+   },
+   {
+    "name": "particle_flux_normalized_due_to_e_cross_b_drift",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/linear/wavevector/eigenmode/linear_weights_rotating_frame/particles_phi_potential"
+    ]
+   },
+   {
+    "name": "peak_incident_heat_flux_at_limiter",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/local/limiter/power_flux_peak/value"
+    ]
+   },
+   {
+    "name": "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field",
+    "bound": 1,
+    "source_ids": [
+     "dd:waves/coherent_wave/profiles_1d/e_field_n_phi/minus/phase"
+    ]
+   },
+   {
+    "name": "perpendicular_gyrocenter_heat_perturbed_flux_normalized_of_gyrokinetic_eigenmode",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/v_parallel_energy_perpendicular"
+    ]
+   },
+   {
+    "name": "perpendicular_neutral_state_velocity_due_to_diamagnetic_drift",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_profiles/ggd/neutral/state/velocity_diamagnetic/diamagnetic"
+    ]
+   },
+   {
+    "name": "perpendicular_normalized_gyrocenter_perturbed_pressure",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure_perpendicular"
+    ]
+   },
+   {
+    "name": "plasma_pressure",
+    "bound": 1,
+    "source_ids": [
+     "dd:equilibrium/time_slice/constraints/pressure/reconstructed"
+    ]
+   },
+   {
+    "name": "plasma_velocity_due_to_diamagnetic_drift",
+    "bound": 1,
+    "source_ids": [
+     "dd:edge_transport/model/ggd/momentum/v/diamagnetic"
+    ]
+   },
+   {
+    "name": "poloidal_current_density_due_to_collisions",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_profiles/ggd/j_ion_neutral_friction/poloidal"
+    ]
+   },
+   {
+    "name": "poloidal_current_density_due_to_viscosity",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_profiles/ggd/j_perpendicular_viscosity/poloidal"
+    ]
+   },
+   {
+    "name": "poloidal_electron_energy_diffusion_coefficient",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_transport/model/ggd/electrons/energy/d_pol/values"
+    ]
+   },
+   {
+    "name": "poloidal_ion_charge_state_momentum_diffusivity",
+    "bound": 1,
+    "source_ids": [
+     "dd:core_transport/model/profiles_1d/ion/state/momentum/poloidal/d"
+    ]
+   },
+   {
+    "name": "poloidal_turn_count",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/linear/wavevector/eigenmode/poloidal_turns"
+    ]
+   },
+   {
+    "name": "power_of_neutral_beam_injector",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/heating_current_drive/nbi/power_launched/value"
+    ]
+   },
+   {
+    "name": "pressure_of_lower_hybrid_antenna",
+    "bound": 1,
+    "source_ids": [
+     "dd:lh_antennas/antenna/pressure_tank"
+    ]
+   },
+   {
+    "name": "radial_angle_of_poloidal_field_coil",
+    "bound": 1,
+    "source_ids": [
+     "dd:pf_active/coil/element/geometry/oblique/alpha"
+    ]
+   },
+   {
+    "name": "radial_centroid_of_electron_cyclotron_launcher_mirror",
+    "bound": 1,
+    "source_ids": [
+     "dd:ec_launchers/mirror/geometry/centre/r"
+    ]
+   },
+   {
+    "name": "radial_coordinate_of_coordinate_system",
+    "bound": 1,
+    "source_ids": [
+     "dd:neutron_diagnostic/detector/field_of_view/emission_grid/r"
+    ]
+   },
+   {
+    "name": "radial_coordinate_of_passive_loop_element",
+    "bound": 1,
+    "source_ids": [
+     "dd:pf_passive/loop/element/geometry/thick_line/second_point/r"
+    ]
+   },
+   {
+    "name": "radial_coordinate_of_pellet_path",
+    "bound": 1,
+    "source_ids": [
+     "dd:pellets/time_slice/pellet/path_profiles/position/r"
+    ]
+   },
+   {
+    "name": "radial_coordinate_of_reflector",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r"
+    ]
+   },
+   {
+    "name": "radial_ion_energy_convection_velocity",
+    "bound": 1,
+    "source_ids": [
+     "dd:core_transport/model/profiles_1d/total_ion_energy/v"
+    ]
+   },
+   {
+    "name": "radial_ion_energy_diffusion_coefficient",
+    "bound": 1,
+    "source_ids": [
+     "dd:core_transport/model/profiles_1d/total_ion_energy/d"
+    ]
+   },
+   {
+    "name": "radial_ion_state_energy_flux",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_transport/model/profiles_1d/ion/state/energy/flux"
+    ]
+   },
+   {
+    "name": "radial_total_neutral_momentum_diffusivity",
+    "bound": 1,
+    "source_ids": [
+     "dd:edge_transport/model/ggd/ion/momentum/d/r"
+    ]
+   },
+   {
+    "name": "radiated_power_density",
+    "bound": 1,
+    "source_ids": [
+     "dd:bolometer/power_density"
+    ]
+   },
+   {
+    "name": "radius_of_soft_xray_detector",
+    "bound": 1,
+    "source_ids": [
+     "dd:soft_x_rays/channel/detector/radius"
+    ]
+   },
+   {
+    "name": "ratio_of_critical_alpha_parameter_to_alpha_parameter_at_pedestal",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_sauter/alpha_ratio/value"
+    ]
+   },
+   {
+    "name": "ratio_of_diamagnetic_vorticity_to_major_radius",
+    "bound": 2,
+    "source_ids": [
+     "dd:edge_profiles/ggd/vorticity_over_r/diamagnetic",
+     "dd:plasma_profiles/ggd/vorticity_over_r/diamagnetic"
+    ]
+   },
+   {
+    "name": "runaway_electron_critical_electric_field",
+    "bound": 1,
+    "source_ids": [
+     "dd:runaway_electrons/profiles_1d/e_field_critical"
+    ]
+   },
+   {
+    "name": "safety_factor_at_pedestal",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/local/pedestal/q/value"
+    ]
+   },
+   {
+    "name": "silane_prefill_count",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/gas_injection_prefill/silane/value"
+    ]
+   },
+   {
+    "name": "spectral_calibration_factor_of_spectrometer",
+    "bound": 2,
+    "source_ids": [
+     "dd:charge_exchange/channel/spectrum/radiance_calibration",
+     "dd:spectrometer_uv/channel/radiance_calibration"
+    ]
+   },
+   {
+    "name": "spectral_width_of_filter",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_visible/channel/filter_spectrometer/filter/wavelength_width"
+    ]
+   },
+   {
+    "name": "surface_area_of_optical_element",
+    "bound": 1,
+    "source_ids": [
+     "dd:camera_ir/fibre_bundle/geometry/surface"
+    ]
+   },
+   {
+    "name": "thermal_electron_decay_length_over_scrape_off_layer",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/scrape_off_layer/t_e_decay_length/value"
+    ]
+   },
+   {
+    "name": "tilt_angle_of_antenna_strap",
+    "bound": 1,
+    "source_ids": [
+     "dd:ic_antennas/antenna/module/strap/geometry/oblique/beta"
+    ]
+   },
+   {
+    "name": "toroidal_coordinate_of_spectrometer",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_visible/channel/geometry_matrix/interpolated/phi"
+    ]
+   },
+   {
+    "name": "toroidal_ion_momentum_diffusion_coefficient",
+    "bound": 1,
+    "source_ids": [
+     "dd:edge_transport/model/ggd/ion/momentum/d/phi"
+    ]
+   },
+   {
+    "name": "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+    "bound": 1,
+    "source_ids": [
+     "dd:distributions/distribution/profiles_2d/trapped/collisions/electrons/torque_thermal_phi"
+    ]
+   },
+   {
+    "name": "toroidal_tritium_velocity",
+    "bound": 2,
+    "source_ids": [
+     "dd:summary/local/pedestal/velocity_phi/tritium/value",
+     "dd:summary/local/separatrix/velocity_phi/tritium/value"
+    ]
+   },
+   {
+    "name": "total_diamagnetic_current_density",
+    "bound": 1,
+    "source_ids": [
+     "dd:edge_profiles/ggd/j_total/diamagnetic"
+    ]
+   },
+   {
+    "name": "total_ion_power_density",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_sources/source/ggd/total_ion_energy/values"
+    ]
+   },
+   {
+    "name": "total_ion_pressure",
+    "bound": 1,
+    "source_ids": [
+     "dd:plasma_profiles/profiles_2d/ion/pressure"
+    ]
+   },
+   {
+    "name": "total_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+    "bound": 1,
+    "source_ids": [
+     "dd:gyrokinetics_local/non_linear/fluxes_3d/momentum_phi_parallel_a_field_parallel"
+    ]
+   },
+   {
+    "name": "total_neutron_power",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/fusion/neutron_power_total/value"
+    ]
+   },
+   {
+    "name": "total_plasma_energy",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/global_quantities/energy_total/value"
+    ]
+   },
+   {
+    "name": "total_power",
+    "bound": 1,
+    "source_ids": [
+     "dd:balance_of_plant/power_electric_plant_operation/power_total"
+    ]
+   },
+   {
+    "name": "total_power_due_to_fusion",
+    "bound": 1,
+    "source_ids": [
+     "dd:neutron_diagnostic/fusion_power"
+    ]
+   },
+   {
+    "name": "tritium_prefill_count",
+    "bound": 1,
+    "source_ids": [
+     "dd:summary/gas_injection_prefill/tritium/value"
+    ]
+   },
+   {
+    "name": "vertical_centroid_of_coil_conductor_element",
+    "bound": 10,
+    "source_ids": [
+     "dd:ferritic/object/axisymmetric/annulus/z",
+     "dd:ferritic/object/axisymmetric/oblique/z",
+     "dd:ic_antennas/antenna/module/strap/geometry/oblique/z",
+     "dd:ic_antennas/antenna/module/strap/geometry/rectangle/z",
+     "dd:iron_core/segment/geometry/oblique/z",
+     "dd:pf_active/coil/geometry/oblique/z",
+     "dd:pf_passive/loop/element/geometry/oblique/z",
+     "dd:pf_plasma/element/geometry/annulus/z",
+     "dd:pf_plasma/element/geometry/oblique/z",
+     "dd:pf_plasma/element/geometry/rectangle/z"
+    ]
+   },
+   {
+    "name": "vertical_coordinate_of_closest_wall_point",
+    "bound": 1,
+    "source_ids": [
+     "dd:equilibrium/time_slice/boundary/closest_wall_point/z"
+    ]
+   },
+   {
+    "name": "vertical_coordinate_of_coil_conductor",
+    "bound": 1,
+    "source_ids": [
+     "dd:ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z"
+    ]
+   },
+   {
+    "name": "vertical_coordinate_of_halo_boundary",
+    "bound": 1,
+    "source_ids": [
+     "dd:disruption/halo_currents/area/end_point/z"
+    ]
+   },
+   {
+    "name": "vertical_coordinate_of_reflector",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z"
+    ]
+   },
+   {
+    "name": "vertical_current_density",
+    "bound": 1,
+    "source_ids": [
+     "dd:wall/description_ggd/ggd/j_total/z"
+    ]
+   },
+   {
+    "name": "vertical_magnetic_field_at_wall",
+    "bound": 1,
+    "source_ids": [
+     "dd:focs/b_field_z"
+    ]
+   },
+   {
+    "name": "vertical_outline_of_cryostat",
+    "bound": 1,
+    "source_ids": [
+     "dd:cryostat/description_2d/cryostat/unit/annular/outline_outer/z"
+    ]
+   },
+   {
+    "name": "voltage_of_spectrometer",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_visible/channel/filter_spectrometer/photoelectric_voltage"
+    ]
+   },
+   {
+    "name": "voltage_of_temperature_sensor",
+    "bound": 1,
+    "source_ids": [
+     "dd:neutron_diagnostic/detector/temperature_sensor/amplitude"
+    ]
+   },
+   {
+    "name": "volume_averaged_runaway_electron_source_rate",
+    "bound": 1,
+    "source_ids": [
+     "dd:runaway_electrons/global_quantities/volume_average/ddensity_dt_tritium"
+    ]
+   },
+   {
+    "name": "wavelength",
+    "bound": 1,
+    "source_ids": [
+     "dd:thomson_scattering/polychromator/wavelength_band/wavelength_upper"
+    ]
+   },
+   {
+    "name": "width_of_diagnostic_aperture",
+    "bound": 1,
+    "source_ids": [
+     "dd:camera_visible/channel/fibre_bundle/geometry/x1_width"
+    ]
+   },
+   {
+    "name": "width_of_filter",
+    "bound": 1,
+    "source_ids": [
+     "dd:hard_x_rays/channel/filter_window/x1_width"
+    ]
+   },
+   {
+    "name": "width_of_optical_element",
+    "bound": 1,
+    "source_ids": [
+     "dd:spectrometer_visible/channel/optical_element/geometry/x1_width"
+    ]
+   }
+  ]
+ },
+ "pre_apply_readback": {
+  "dropped_names": 112,
+  "all_planned_still_dropped": true,
+  "names_absent_from_sourceless_read": []
+ },
+ "post_apply_readback": {
+  "restored_names_still_dropped": [],
+  "restored_names_still_sourceless": []
+ },
+ "quiet_graph": {
+  "live_crew_runs": [
+   "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+   "r-20261009T015811146619-cocos-determination-core",
+   "r-20261009T033905549459-plan-review-of-jt60sa-machine-map",
+   "r-20261017T193125631298-integrated-run-assembly",
+   "r-20261018T102210638794-ssog-anchor-ab",
+   "r-20261018T145435653862-plan-review-of-the-fleet-node-stays-in-service",
+   "r-20261018T150822949393-a-stopped-worker-ends-inside-its-step",
+   "r-20261018T151304298883-a-producer-sweeps-only-on-change",
+   "r-20261018T203817697724-vs1-switched-pulse",
+   "r-20261018T204951664681-stray-edge-rate",
+   "r-20261018T214318686755-text-responses-are-compressed",
+   "r-20261018T215115257728-a-review-delivers-only-its-own-head",
+   "r-20261018T221255178004-cbl-merged-unit-gate",
+   "r-20261018T221808668605-cbl-tcv-liuqe-sign-rca",
+   "r-20261018T222222954695-review-of-text-responses-are-compressed-f4737074616d",
+   "r-20261018T225708053988-review-of-cbl-tcv-liuqe-sign-rca-37131b826a5b",
+   "r-20261018T225754567394-cbl-tcv-liuqe-probe-sign",
+   "r-20261018T230224199909-arc-fast-discharge",
+   "r-20261018T232819745998-srtj-cascade-quorum-regression",
+   "r-20261018T233110930132-axis-slot-refusal",
+   "r-20261019T000300604250-a-reloaded-process-launches-through-its-interpreter",
+   "r-20261019T000654917566-review-of-reload-carries-skills-population-at-merge-b6558f0d1cab",
+   "r-20261019T003009581037-exact-integrator-performance",
+   "r-20261019T004351278047-reload-shim-interpreter-population-at-merge",
+   "r-20261019T005026090249-review-of-a-review-delivers-only-its-own-head-870b8e31ec4f",
+   "r-20261019T005033029518-sib-restore-recorded-sources"
+  ],
+  "live_crew_run_count": 26,
+  "runs_touched_within_1800s": [
+   {
+    "run": "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+    "age_seconds": 20
+   },
+   {
+    "run": "r-20261009T015811146619-cocos-determination-core",
+    "age_seconds": 59
+   },
+   {
+    "run": "r-20261018T215115257728-a-review-delivers-only-its-own-head",
+    "age_seconds": 43
+   },
+   {
+    "run": "r-20261019T000300604250-a-reloaded-process-launches-through-its-interpreter",
+    "age_seconds": 1100
+   },
+   {
+    "run": "r-20261019T003009581037-exact-integrator-performance",
+    "age_seconds": 1
+   },
+   {
+    "run": "r-20261019T004351278047-reload-shim-interpreter-population-at-merge",
+    "age_seconds": 129
+   },
+   {
+    "run": "r-20261019T005026090249-review-of-a-review-delivers-only-its-own-head-870b8e31ec4f",
+    "age_seconds": 160
+   },
+   {
+    "run": "r-20261019T005033029518-sib-restore-recorded-sources",
+    "age_seconds": 917
+   }
+  ],
+  "neo4j_jobs": [
+   "1288978 codex-neo4j RUNNING 13:16:25"
+  ],
+  "active_transactions": [
+   {
+    "transactionId": "neo4j-transaction-1989",
+    "status": "Running",
+    "currentQuery": "SHOW TRANSACTIONS YIELD transactionId, currentQuery, status RETURN transactionId, status, currentQuery LIMIT 50"
+   }
+  ]
+ },
+ "elapsed_seconds": 12.6,
+ "out_of_scope_slices_note": "Relabelled by a read-only pass over the post-apply graph. Membership is identical to the apply pass; the earlier label came from resolving a name's lineage through a read that dropped retired names, which hid the superseded relative its recorded path came from."
+}
