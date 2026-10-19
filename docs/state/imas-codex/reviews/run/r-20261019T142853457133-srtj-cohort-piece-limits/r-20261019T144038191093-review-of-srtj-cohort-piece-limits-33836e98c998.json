@@ -7,6 +7,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-19T14:57:43.290Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "srtj-cohort-piece",
+      "recorded_at": "2026-10-19T15:06:46.344092+00:00"
+    }
+  },
   "dispatched_at": "2026-10-19T14:41:19Z",
   "findings": [
     {
