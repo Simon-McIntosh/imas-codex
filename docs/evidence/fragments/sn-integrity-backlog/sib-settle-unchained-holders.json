@@ -1,0 +1,1564 @@
+{
+  "node": "sib-settle-unchained-holders",
+  "plan": "sn-integrity-backlog",
+  "section": "\u00a738",
+  "population": "unchained_holder",
+  "floors": {
+    "probability": 0.8,
+    "confidence": 0.5
+  },
+  "before": {
+    "dropped_edge": 45,
+    "derived_parent": 2,
+    "never_bound": 28,
+    "unchained_holder": 30,
+    "orphan_awaiting_retirement": 3
+  },
+  "after": {
+    "dropped_edge": 45,
+    "derived_parent": 2,
+    "never_bound": 23,
+    "unchained_holder": 19,
+    "orphan_awaiting_retirement": 3
+  },
+  "retired_count": 11,
+  "referral_count": 19,
+  "spend_usd": 0.001584576,
+  "judge_model": "typesafe/jev-1.13",
+  "authority": {
+    "path": "docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-authority.json",
+    "file_sha256": "1debe8924b55ce52eee6fdd39a7a4649fee4522fa968afd5376e765541e8ba57",
+    "payload_sha256": "f96de475985f0303623a835da97527187f0fd838c107ea08f64b0b21e47ab69c",
+    "manifest_sha256": "391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350",
+    "operation_id": "retire-unchained-holder-in-favour-of-its-source-holder",
+    "receipt_operation": "link_signed_successor"
+  },
+  "preview": {
+    "schema": "imas-codex.signed-repair-receipt.v1",
+    "outcome": "already_applied",
+    "changed": 0,
+    "persistent_writes": 0,
+    "receipt_rows": 11,
+    "manifest_sha256": null,
+    "admitted_row_ids": [
+      "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "electron_average_temperature_at_midplane=>electron_field_line_average_temperature_over_scrape_off_layer",
+      "neutron_rate=>total_neutron_rate",
+      "outer_hard_xray_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
+      "poloidal_ion_state_momentum_diffusion_coefficient=>poloidal_ion_charge_state_momentum_diffusion_coefficient",
+      "poloidal_neutral_momentum_diffusivity=>poloidal_neutral_momentum_diffusion_coefficient",
+      "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position=>opacity_at_ece_channel_emission_position",
+      "toroidal_angle_of_along_pellet_path=>toroidal_coordinate_at_pellet_path_point",
+      "total_power_of_neutral_beam_injector=>launched_power_due_to_neutral_beam_injection",
+      "voltage_amplitude=>voltage_amplitude_of_ion_cyclotron_heating_antenna",
+      "width_of_antenna_strap=>toroidal_width_of_antenna_strap"
+    ]
+  },
+  "receipt": {
+    "schema": "imas-codex.signed-repair-receipt.v1",
+    "outcome": "applied",
+    "changed": 11,
+    "mutations": 11,
+    "receipt_rows": 11,
+    "persistent_writes": 22,
+    "counts": {
+      "authority_rows": 11,
+      "admitted": 11,
+      "refused": 0
+    },
+    "refusals": [],
+    "manifest_sha256": "391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350",
+    "authority_file_sha256": "1debe8924b55ce52eee6fdd39a7a4649fee4522fa968afd5376e765541e8ba57",
+    "authority_payload_sha256": "f96de475985f0303623a835da97527187f0fd838c107ea08f64b0b21e47ab69c",
+    "change_ids": [
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:176635ff4715552ed554a29b",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:1d377e86291bdc5f2465fe67",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:217f490593d7884adacbc971",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:2478314af9a47d0005f95dd6",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:295f5ed29323e4e84c70558a",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:4f20b9e82fd8affab9880485",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:5c25dbe29003e6c0207129fa",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:aa688c64783789271055a2ba",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:b27c033703d442832d82ad1e",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:becbde2da42d84f1bad5ceda",
+      "sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:e2cc57d02cf46c3e277b38b1"
+    ]
+  },
+  "quiet_graph": {
+    "live_crew_runs": [
+      "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+      "r-20261009T015811146619-cocos-determination-core",
+      "r-20261009T033905549459-plan-review-of-jt60sa-machine-map",
+      "r-20261017T193125631298-integrated-run-assembly",
+      "r-20261018T102210638794-ssog-anchor-ab",
+      "r-20261018T145435653862-plan-review-of-the-fleet-node-stays-in-service",
+      "r-20261018T150822949393-a-stopped-worker-ends-inside-its-step",
+      "r-20261018T151304298883-a-producer-sweeps-only-on-change",
+      "r-20261018T203817697724-vs1-switched-pulse",
+      "r-20261018T204951664681-stray-edge-rate",
+      "r-20261018T214318686755-text-responses-are-compressed",
+      "r-20261018T221255178004-cbl-merged-unit-gate",
+      "r-20261018T221808668605-cbl-tcv-liuqe-sign-rca",
+      "r-20261018T222222954695-review-of-text-responses-are-compressed-f4737074616d",
+      "r-20261018T225708053988-review-of-cbl-tcv-liuqe-sign-rca-37131b826a5b",
+      "r-20261018T225754567394-cbl-tcv-liuqe-probe-sign",
+      "r-20261019T000654917566-review-of-reload-carries-skills-population-at-merge-b6558f0d1cab",
+      "r-20261019T003009581037-exact-integrator-performance",
+      "r-20261019T004351278047-reload-shim-interpreter-population-at-merge",
+      "r-20261019T010646193471-review-of-reload-shim-interpreter-population-at-merge-461f3b8256ed",
+      "r-20261019T012006559216-plan-review-of-the-monitor-shows-the-work-it-watches",
+      "r-20261019T012701997576-arc-assembly",
+      "r-20261019T013447800511-jt60sa-composed-plant",
+      "r-20261019T013810288111-plant-tests-independence",
+      "r-20261019T014150673041-carrier-axis-orientation",
+      "r-20261019T021901634768-sib-settle-unchained-holders",
+      "r-20261019T031833410177-review-of-arc-assembly-ef691c7b0f18",
+      "r-20261019T032255046652-plan-review-of-a-review-promotes-only-its-own-verdict"
+    ],
+    "live_crew_run_count": 28,
+    "runs_touched_within_1800s": [
+      {
+        "run": "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+        "age_seconds": 82
+      },
+      {
+        "run": "r-20261009T015811146619-cocos-determination-core",
+        "age_seconds": 5
+      },
+      {
+        "run": "r-20261019T012701997576-arc-assembly",
+        "age_seconds": 146
+      },
+      {
+        "run": "r-20261019T013447800511-jt60sa-composed-plant",
+        "age_seconds": 1152
+      },
+      {
+        "run": "r-20261019T014150673041-carrier-axis-orientation",
+        "age_seconds": 1095
+      },
+      {
+        "run": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "age_seconds": 1767
+      },
+      {
+        "run": "r-20261019T031833410177-review-of-arc-assembly-ef691c7b0f18",
+        "age_seconds": 267
+      },
+      {
+        "run": "r-20261019T032255046652-plan-review-of-a-review-promotes-only-its-own-verdict",
+        "age_seconds": 28
+      }
+    ],
+    "neo4j_jobs": [
+      "1288978 codex-neo4j RUNNING 15:33:44"
+    ],
+    "activity_window_seconds": 6.0,
+    "foreign_transactions_started": 0,
+    "foreign_open_queries": [],
+    "quiet": true
+  },
+  "quiet_graph_before_apply": {
+    "live_crew_runs": [
+      "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+      "r-20261009T015811146619-cocos-determination-core",
+      "r-20261009T033905549459-plan-review-of-jt60sa-machine-map",
+      "r-20261017T193125631298-integrated-run-assembly",
+      "r-20261018T102210638794-ssog-anchor-ab",
+      "r-20261018T145435653862-plan-review-of-the-fleet-node-stays-in-service",
+      "r-20261018T150822949393-a-stopped-worker-ends-inside-its-step",
+      "r-20261018T151304298883-a-producer-sweeps-only-on-change",
+      "r-20261018T203817697724-vs1-switched-pulse",
+      "r-20261018T204951664681-stray-edge-rate",
+      "r-20261018T214318686755-text-responses-are-compressed",
+      "r-20261018T221255178004-cbl-merged-unit-gate",
+      "r-20261018T221808668605-cbl-tcv-liuqe-sign-rca",
+      "r-20261018T222222954695-review-of-text-responses-are-compressed-f4737074616d",
+      "r-20261018T225708053988-review-of-cbl-tcv-liuqe-sign-rca-37131b826a5b",
+      "r-20261018T225754567394-cbl-tcv-liuqe-probe-sign",
+      "r-20261018T232819745998-srtj-cascade-quorum-regression",
+      "r-20261019T000654917566-review-of-reload-carries-skills-population-at-merge-b6558f0d1cab",
+      "r-20261019T003009581037-exact-integrator-performance",
+      "r-20261019T004351278047-reload-shim-interpreter-population-at-merge",
+      "r-20261019T010646193471-review-of-reload-shim-interpreter-population-at-merge-461f3b8256ed",
+      "r-20261019T012006559216-plan-review-of-the-monitor-shows-the-work-it-watches",
+      "r-20261019T012032672589-sib-restore-lineage-sources",
+      "r-20261019T012701997576-arc-assembly",
+      "r-20261019T013447800511-jt60sa-composed-plant",
+      "r-20261019T013810288111-plant-tests-independence",
+      "r-20261019T014150673041-carrier-axis-orientation",
+      "r-20261019T015039275505-sib-restore-searched-sources",
+      "r-20261019T020114916771-one-promotion-of-a-run-at-a-time",
+      "r-20261019T021105205837-plan-review-of-a-review-promotes-only-its-own-verdict",
+      "r-20261019T021331583055-review-of-jt60sa-composed-plant-b3c1fa1da0c4",
+      "r-20261019T021601438192-review-of-sib-restore-searched-sources-9269556e597e",
+      "r-20261019T021901634768-sib-settle-unchained-holders",
+      "r-20261019T022201295911-review-of-sib-restore-lineage-sources-282623af6d33",
+      "r-20261019T022541161236-review-of-plant-tests-independence-8fb37069191e"
+    ],
+    "live_crew_run_count": 35,
+    "runs_touched_within_1800s": [
+      {
+        "run": "r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot",
+        "age_seconds": 52
+      },
+      {
+        "run": "r-20261009T015811146619-cocos-determination-core",
+        "age_seconds": 8
+      },
+      {
+        "run": "r-20261019T003009581037-exact-integrator-performance",
+        "age_seconds": 721
+      },
+      {
+        "run": "r-20261019T012032672589-sib-restore-lineage-sources",
+        "age_seconds": 346
+      },
+      {
+        "run": "r-20261019T013447800511-jt60sa-composed-plant",
+        "age_seconds": 843
+      },
+      {
+        "run": "r-20261019T013810288111-plant-tests-independence",
+        "age_seconds": 118
+      },
+      {
+        "run": "r-20261019T014150673041-carrier-axis-orientation",
+        "age_seconds": 340
+      },
+      {
+        "run": "r-20261019T015039275505-sib-restore-searched-sources",
+        "age_seconds": 707
+      },
+      {
+        "run": "r-20261019T020114916771-one-promotion-of-a-run-at-a-time",
+        "age_seconds": 1434
+      },
+      {
+        "run": "r-20261019T021105205837-plan-review-of-a-review-promotes-only-its-own-verdict",
+        "age_seconds": 354
+      },
+      {
+        "run": "r-20261019T021331583055-review-of-jt60sa-composed-plant-b3c1fa1da0c4",
+        "age_seconds": 35
+      },
+      {
+        "run": "r-20261019T021601438192-review-of-sib-restore-searched-sources-9269556e597e",
+        "age_seconds": 700
+      },
+      {
+        "run": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "age_seconds": 516
+      },
+      {
+        "run": "r-20261019T022201295911-review-of-sib-restore-lineage-sources-282623af6d33",
+        "age_seconds": 338
+      },
+      {
+        "run": "r-20261019T022541161236-review-of-plant-tests-independence-8fb37069191e",
+        "age_seconds": 112
+      }
+    ],
+    "neo4j_jobs": [
+      "1288978 codex-neo4j RUNNING 14:38:14"
+    ],
+    "active_transactions": [
+      {
+        "transactionId": "neo4j-transaction-4936",
+        "status": "Running",
+        "currentQuery": "SHOW TRANSACTIONS YIELD transactionId, currentQuery, status RETURN transactionId, status, currentQuery LIMIT 50"
+      }
+    ],
+    "foreign_running_transactions": [],
+    "quiet": true
+  },
+  "foreign_population_moves": {
+    "never_bound": [
+      28,
+      23
+    ]
+  },
+  "apply_overlap": {
+    "window": {
+      "from": "2026-10-19T02:26:38.397000000+00:00",
+      "to": "2026-10-19T02:32:38.397000000+00:00"
+    },
+    "own_receipts": {
+      "lo": "2026-10-19T02:29:38.397000000+00:00",
+      "hi": "2026-10-19T02:29:38.397000000+00:00",
+      "n": 11,
+      "digests": [
+        "391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350"
+      ]
+    },
+    "changes_in_window": [
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "frm": "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "to": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "electron_average_temperature_at_midplane=>electron_field_line_average_temperature_over_scrape_off_layer",
+        "frm": "electron_average_temperature_at_midplane",
+        "to": "electron_field_line_average_temperature_over_scrape_off_layer",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "neutron_rate=>total_neutron_rate",
+        "frm": "neutron_rate",
+        "to": "total_neutron_rate",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "outer_hard_xray_half_width=>outer_hard_xray_half_width_at_emissivity_peak",
+        "frm": "outer_hard_xray_half_width",
+        "to": "outer_hard_xray_half_width_at_emissivity_peak",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "poloidal_ion_state_momentum_diffusion_coefficient=>poloidal_ion_charge_state_momentum_diffusion_coefficient",
+        "frm": "poloidal_ion_state_momentum_diffusion_coefficient",
+        "to": "poloidal_ion_charge_state_momentum_diffusion_coefficient",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "poloidal_neutral_momentum_diffusivity=>poloidal_neutral_momentum_diffusion_coefficient",
+        "frm": "poloidal_neutral_momentum_diffusivity",
+        "to": "poloidal_neutral_momentum_diffusion_coefficient",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position=>opacity_at_ece_channel_emission_position",
+        "frm": "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "to": "opacity_at_ece_channel_emission_position",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "toroidal_angle_of_along_pellet_path=>toroidal_coordinate_at_pellet_path_point",
+        "frm": "toroidal_angle_of_along_pellet_path",
+        "to": "toroidal_coordinate_at_pellet_path_point",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "total_power_of_neutral_beam_injector=>launched_power_due_to_neutral_beam_injection",
+        "frm": "total_power_of_neutral_beam_injector",
+        "to": "launched_power_due_to_neutral_beam_injection",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "voltage_amplitude=>voltage_amplitude_of_ion_cyclotron_heating_antenna",
+        "frm": "voltage_amplitude",
+        "to": "voltage_amplitude_of_ion_cyclotron_heating_antenna",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      },
+      {
+        "run_id": "r-20261019T021901634768-sib-settle-unchained-holders",
+        "op": "link_signed_successor",
+        "row_id": "width_of_antenna_strap=>toroidal_width_of_antenna_strap",
+        "frm": "width_of_antenna_strap",
+        "to": "toroidal_width_of_antenna_strap",
+        "at": "2026-10-19T02:29:38.397000000+00:00"
+      }
+    ],
+    "foreign_changes": [],
+    "foreign_changes_touching_settled_names": [],
+    "sources_in_window": [],
+    "foreign_sources_touching_settled_names": [],
+    "settled_name_updates": [],
+    "sources_rebound_after_last_receipt": [
+      {
+        "source": "dd:gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+        "name": "elongation_radial_derivative_of_flux_surface",
+        "created": null,
+        "at": "2026-10-19T02:38:13.377000000+00:00"
+      },
+      {
+        "source": "dd:waves/coherent_wave/profiles_1d/current_parallel_density_n_phi",
+        "name": "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "created": null,
+        "at": "2026-10-19T02:38:13.380000000+00:00"
+      },
+      {
+        "source": "dd:camera_x_rays/camera/camera_dimensions",
+        "name": "size_of_camera",
+        "created": null,
+        "at": "2026-10-19T02:38:13.383000000+00:00"
+      },
+      {
+        "source": "dd:distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi",
+        "name": "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions",
+        "created": null,
+        "at": "2026-10-19T02:38:13.386000000+00:00"
+      }
+    ],
+    "overlap": false
+  },
+  "source_held_guard": {
+    "admitted": 11,
+    "pairs": [
+      {
+        "predecessor": "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "successor": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "equilibrium/time_slice/profiles_1d/darea_dpsi"
+        ],
+        "successor_holds_paths": [
+          "equilibrium/time_slice/profiles_1d/darea_dpsi"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "electron_average_temperature_at_midplane",
+        "successor": "electron_field_line_average_temperature_over_scrape_off_layer",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "langmuir_probes/reciprocating/plunge/t_e_average"
+        ],
+        "successor_holds_paths": [
+          "langmuir_probes/reciprocating/plunge/t_e_average"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "neutron_rate",
+        "successor": "total_neutron_rate",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "summary/fusion/neutron_rates/total/value"
+        ],
+        "successor_holds_paths": [
+          "summary/fusion/neutron_rates/total/value"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "outer_hard_xray_half_width",
+        "successor": "outer_hard_xray_half_width_at_emissivity_peak",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "hard_x_rays/emissivity_profile_1d/half_width_external"
+        ],
+        "successor_holds_paths": [
+          "hard_x_rays/emissivity_profile_1d/half_width_external"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "poloidal_ion_state_momentum_diffusion_coefficient",
+        "successor": "poloidal_ion_charge_state_momentum_diffusion_coefficient",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "plasma_transport/model/ggd/ion/state/momentum/d_pol/values"
+        ],
+        "successor_holds_paths": [
+          "edge_transport/model/ggd/ion/state/momentum/d_pol/values",
+          "plasma_transport/model/ggd/ion/state/momentum/d_pol/values"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "poloidal_neutral_momentum_diffusivity",
+        "successor": "poloidal_neutral_momentum_diffusion_coefficient",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "edge_transport/model/ggd/neutral/momentum/d_pol/values"
+        ],
+        "successor_holds_paths": [
+          "edge_transport/model/ggd/neutral/momentum/d_pol/values"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "successor": "opacity_at_ece_channel_emission_position",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "ece/channel/optical_depth"
+        ],
+        "successor_holds_paths": [
+          "ece/channel/optical_depth"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "toroidal_angle_of_along_pellet_path",
+        "successor": "toroidal_coordinate_at_pellet_path_point",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "pellets/time_slice/pellet/path_geometry/first_point/phi"
+        ],
+        "successor_holds_paths": [
+          "pellets/time_slice/pellet/path_geometry/first_point/phi"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "total_power_of_neutral_beam_injector",
+        "successor": "launched_power_due_to_neutral_beam_injection",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "summary/heating_current_drive/power_launched_nbi/value"
+        ],
+        "successor_holds_paths": [
+          "nbi/unit/power_launched",
+          "summary/heating_current_drive/power_launched_nbi/value"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "voltage_amplitude",
+        "successor": "voltage_amplitude_of_ion_cyclotron_heating_antenna",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "ic_antennas/antenna/module/voltage/amplitude"
+        ],
+        "successor_holds_paths": [
+          "ic_antennas/antenna/module/voltage/amplitude"
+        ],
+        "paths_successor_does_not_hold": []
+      },
+      {
+        "predecessor": "width_of_antenna_strap",
+        "successor": "toroidal_width_of_antenna_strap",
+        "predecessor_binds_source": 0,
+        "recorded_paths": [
+          "ic_antennas/antenna/module/strap/width_phi"
+        ],
+        "successor_holds_paths": [
+          "ic_antennas/antenna/module/strap/width_phi"
+        ],
+        "paths_successor_does_not_hold": []
+      }
+    ]
+  },
+  "verification": {
+    "counts": {
+      "dropped_edge": 45,
+      "derived_parent": 2,
+      "never_bound": 23,
+      "unchained_holder": 19,
+      "orphan_awaiting_retirement": 3
+    },
+    "unchained_holder_count": 19,
+    "targets": [
+      "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+      "electron_average_temperature_at_midplane",
+      "neutron_rate",
+      "outer_hard_xray_half_width",
+      "poloidal_ion_state_momentum_diffusion_coefficient",
+      "poloidal_neutral_momentum_diffusivity",
+      "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+      "toroidal_angle_of_along_pellet_path",
+      "total_power_of_neutral_beam_injector",
+      "voltage_amplitude",
+      "width_of_antenna_strap"
+    ],
+    "receipt_names": 11,
+    "receipt_targets": [
+      "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+      "electron_average_temperature_at_midplane",
+      "neutron_rate",
+      "outer_hard_xray_half_width",
+      "poloidal_ion_state_momentum_diffusion_coefficient",
+      "poloidal_neutral_momentum_diffusivity",
+      "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+      "toroidal_angle_of_along_pellet_path",
+      "total_power_of_neutral_beam_injector",
+      "voltage_amplitude",
+      "width_of_antenna_strap"
+    ],
+    "targets_without_receipt": [],
+    "receipt_operations": [
+      "link_signed_successor"
+    ],
+    "digests": [
+      "391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350"
+    ],
+    "retired_stages": [
+      [
+        "superseded",
+        "superseded"
+      ]
+    ],
+    "before": {
+      "dropped_edge": 45,
+      "derived_parent": 2,
+      "never_bound": 28,
+      "unchained_holder": 30,
+      "orphan_awaiting_retirement": 3
+    },
+    "expected_unchained_holder": 19,
+    "moved_other_populations": {
+      "never_bound": [
+        28,
+        23
+      ]
+    },
+    "unchained_holder_entered": [],
+    "unchained_holder_left": [
+      "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+      "electron_average_temperature_at_midplane",
+      "neutron_rate",
+      "outer_hard_xray_half_width",
+      "poloidal_ion_state_momentum_diffusion_coefficient",
+      "poloidal_neutral_momentum_diffusivity",
+      "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+      "toroidal_angle_of_along_pellet_path",
+      "total_power_of_neutral_beam_injector",
+      "voltage_amplitude",
+      "width_of_antenna_strap"
+    ],
+    "shortfall": [],
+    "checks": {
+      "unchained_holder_fell_by_retired": true,
+      "unchained_holder_set_is_baseline_minus_retired": true,
+      "every_target_has_receipt": true,
+      "no_receipt_outside_targets": true,
+      "all_targets_superseded": true
+    },
+    "foreign_population_moves": {
+      "never_bound": [
+        28,
+        23
+      ]
+    }
+  },
+  "verification_log": {
+    "header": [
+      "# command: uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders python /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders/docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py verify --run-dir /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders --run-id r-20261019T021901634768-sib-settle-unchained-holders",
+      "# revision: e4def604bbabcf2fa6551640c99113360658f61e"
+    ],
+    "exit_line": "EXIT=0",
+    "exit_code": 0,
+    "payload": {
+      "counts": {
+        "dropped_edge": 45,
+        "derived_parent": 2,
+        "never_bound": 23,
+        "unchained_holder": 19,
+        "orphan_awaiting_retirement": 3
+      },
+      "unchained_holder_count": 19,
+      "targets": [
+        "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "electron_average_temperature_at_midplane",
+        "neutron_rate",
+        "outer_hard_xray_half_width",
+        "poloidal_ion_state_momentum_diffusion_coefficient",
+        "poloidal_neutral_momentum_diffusivity",
+        "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "toroidal_angle_of_along_pellet_path",
+        "total_power_of_neutral_beam_injector",
+        "voltage_amplitude",
+        "width_of_antenna_strap"
+      ],
+      "receipt_names": 11,
+      "receipt_targets": [
+        "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "electron_average_temperature_at_midplane",
+        "neutron_rate",
+        "outer_hard_xray_half_width",
+        "poloidal_ion_state_momentum_diffusion_coefficient",
+        "poloidal_neutral_momentum_diffusivity",
+        "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "toroidal_angle_of_along_pellet_path",
+        "total_power_of_neutral_beam_injector",
+        "voltage_amplitude",
+        "width_of_antenna_strap"
+      ],
+      "targets_without_receipt": [],
+      "receipt_operations": [
+        "link_signed_successor"
+      ],
+      "digests": [
+        "391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350"
+      ],
+      "retired_stages": [
+        [
+          "superseded",
+          "superseded"
+        ]
+      ],
+      "before": {
+        "dropped_edge": 45,
+        "derived_parent": 2,
+        "never_bound": 28,
+        "unchained_holder": 30,
+        "orphan_awaiting_retirement": 3
+      },
+      "expected_unchained_holder": 19,
+      "moved_other_populations": {
+        "never_bound": [
+          28,
+          23
+        ]
+      },
+      "unchained_holder_entered": [],
+      "unchained_holder_left": [
+        "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+        "electron_average_temperature_at_midplane",
+        "neutron_rate",
+        "outer_hard_xray_half_width",
+        "poloidal_ion_state_momentum_diffusion_coefficient",
+        "poloidal_neutral_momentum_diffusivity",
+        "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+        "toroidal_angle_of_along_pellet_path",
+        "total_power_of_neutral_beam_injector",
+        "voltage_amplitude",
+        "width_of_antenna_strap"
+      ],
+      "shortfall": [],
+      "checks": {
+        "unchained_holder_fell_by_retired": true,
+        "unchained_holder_set_is_baseline_minus_retired": true,
+        "every_target_has_receipt": true,
+        "no_receipt_outside_targets": true,
+        "all_targets_superseded": true
+      },
+      "foreign_population_moves": {
+        "never_bound": [
+          28,
+          23
+        ]
+      }
+    }
+  },
+  "falsification": {
+    "check_failed_as_expected": true,
+    "detail": "read-back mismatch: {'unchained_holder_fell_by_retired': False, 'unchained_holder_set_is_baseline_minus_retired': True, 'every_target_has_receipt': True, 'no_receipt_outside_targets': True, 'all_targets_superseded': True} :: {'counts': {'dropped_edge': 45, 'derived_parent': 2, 'never_bound': 23, 'un"
+  },
+  "falsification_log": {
+    "header": [
+      "# command: uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders python /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders/docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py falsify --run-dir /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders --run-id r-20261019T021901634768-sib-settle-unchained-holders",
+      "# revision: e4def604bbabcf2fa6551640c99113360658f61e"
+    ],
+    "exit_line": "EXIT=0",
+    "exit_code": 0,
+    "payload": {
+      "check_failed_as_expected": true,
+      "detail": "read-back mismatch: {'unchained_holder_fell_by_retired': False, 'unchained_holder_set_is_baseline_minus_retired': True, 'every_target_has_receipt': True, 'no_receipt_outside_targets': True, 'all_targets_superseded': True} :: {'counts': {'dropped_edge': 45, 'derived_parent': 2, 'never_bound': 23, 'un"
+    }
+  },
+  "negative_control": {
+    "planted": {
+      "id": "PLANTED-neutron_rate",
+      "holder": "PLANTED-voltage_amplitude",
+      "choice": "different quantity",
+      "probability": 0.99,
+      "confidence": 0.98,
+      "answered": true
+    },
+    "admitted_by_floors": [],
+    "refused": true
+  },
+  "per_name": [
+    {
+      "id": "deposited_energy_accumulated_of_plasma_facing_component",
+      "holder": "total_energy_of_calorimetry_component",
+      "name_stage": "exhausted",
+      "description": "Pulse-integrated heat deposited in a plasma-facing component, including heat recovered during post-discharge cooling as the component returns toward thermal equilibrium.",
+      "holder_description": "Total energy extracted from a calorimetry component over the whole discharge.",
+      "shared_paths": [
+        "calorimetry/group/component/energy_total/data"
+      ],
+      "choice": "different quantity",
+      "probability": 0.44,
+      "confidence": 0.16,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate",
+      "holder": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "name_stage": "exhausted",
+      "description": "Rate of change of the area enclosed by a closed magnetic flux surface\u2019s poloidal cross-section as its signed poloidal magnetic-flux label varies.",
+      "holder_description": "Rate at which the poloidal-plane area enclosed by a nested magnetic flux surface changes with signed poloidal magnetic flux; it supplies a geometric metric for flux-surface averages.",
+      "shared_paths": [
+        "equilibrium/time_slice/profiles_1d/darea_dpsi"
+      ],
+      "choice": "same quantity",
+      "probability": 0.97,
+      "confidence": 0.95,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "electron_average_temperature_at_midplane",
+      "holder": "electron_field_line_average_temperature_over_scrape_off_layer",
+      "name_stage": "exhausted",
+      "description": "Electron average temperature at midplane is the path-length-weighted mean electron kinetic temperature along an open scrape-off-layer magnetic field line between its upstream midplane crossing and its connected downstream divertor target.",
+      "holder_description": "Electron temperature averaged along an open magnetic field line between upstream and downstream locations in the scrape-off layer.",
+      "shared_paths": [
+        "langmuir_probes/reciprocating/plunge/t_e_average"
+      ],
+      "choice": "same quantity",
+      "probability": 0.81,
+      "confidence": 0.72,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "electron_temperature_at_midplane",
+      "holder": "electron_temperature",
+      "name_stage": "exhausted",
+      "description": "Local kinetic temperature of the electron population at the outboard, low-field-side midplane in the scrape-off layer.",
+      "holder_description": "Energy-equivalent measure of the mean random kinetic energy per electron in the bulk electron population, defined by its second velocity moment.",
+      "shared_paths": [
+        "langmuir_probes/reciprocating/plunge/collector/t_e"
+      ],
+      "choice": "different quantity",
+      "probability": 0.89,
+      "confidence": 0.83,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "electrostatic_potential_at_wall",
+      "holder": "electrostatic_potential_at_langmuir_probe_position",
+      "name_stage": "reviewed",
+      "description": "Electrostatic potential at wall is the voltage-valued scalar potential of the plasma immediately adjacent to a plasma-facing wall, relative to a chosen electrical reference.",
+      "holder_description": "Local plasma electrostatic potential evaluated at a Langmuir-probe position in the edge or boundary plasma, distinct from the floating potential established by zero net probe current.",
+      "shared_paths": [
+        "langmuir_probes/embedded/v_plasma"
+      ],
+      "choice": "different quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "energy_flux_at_wall_due_to_eddy_current",
+      "holder": "incident_energy_flux_at_wall_due_to_eddy_current",
+      "name_stage": "exhausted",
+      "description": "Energy flux at the wall due to eddy current is the thermal energy flux density emitted from a plasma-facing wall surface toward the plasma by heat generated from eddy-current Joule dissipation in conducting structures.",
+      "holder_description": "Local energy flux density entering each plasma-facing wall element from the plasma side, attributed specifically to eddy-current processes rather than emitted wall energy.",
+      "shared_paths": [
+        "wall/description_ggd/ggd/energy_fluxes/current/incident/values"
+      ],
+      "choice": "different quantity",
+      "probability": 0.96,
+      "confidence": 0.94,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "fast_electron_source_rate",
+      "holder": "volume_averaged_total_runaway_electron_source_rate",
+      "name_stage": "exhausted",
+      "description": "Total volumetric generation rate of fast, suprathermal electrons, summed over all relevant production mechanisms. It counts creation into the fast-electron population and excludes transport losses or explicit sink terms in the number-density balance.",
+      "holder_description": "Plasma-volume-averaged volumetric production rate of runaway electrons, summed over Dreicer, avalanche, hot-tail, Compton, and tritium-decay generation mechanisms.",
+      "shared_paths": [
+        "runaway_electrons/global_quantities/volume_average/ddensity_dt_total"
+      ],
+      "choice": "different quantity",
+      "probability": 0.93,
+      "confidence": 0.89,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "fast_electron_source_rate_due_to_compton_scattering",
+      "holder": "runaway_electron_source_rate_due_to_compton_scattering",
+      "name_stage": "exhausted",
+      "description": "Volumetric production rate of fast electrons created when high-energy gamma rays Compton-scatter from free plasma electrons; subsequent losses and evolution are excluded.",
+      "holder_description": "Local volumetric rate at which high-energy gamma-ray Compton scattering produces electrons that enter the runaway regime.",
+      "shared_paths": [
+        "runaway_electrons/profiles_1d/ddensity_dt_compton"
+      ],
+      "choice": "different quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "fast_electron_source_rate_due_to_hot_tail",
+      "holder": "runaway_electron_source_rate_due_to_hot_tail",
+      "name_stage": "exhausted",
+      "description": "Volumetric production rate of fast electrons due to hot-tail generation during a rapid thermal quench is the local production into the fast-electron population when an initially hotter high-energy tail does not rethermalize with the cooling bulk. It is not restricted to electrons satisfying a runaway-electron criterion.",
+      "holder_description": "Volumetric production rate of runaway electrons generated when the high-energy tail survives rapid thermal-quench cooling.",
+      "shared_paths": [
+        "runaway_electrons/profiles_1d/ddensity_dt_hot_tail"
+      ],
+      "choice": "different quantity",
+      "probability": 0.93,
+      "confidence": 0.89,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "length_of_passive_structure",
+      "holder": "minor_length_of_passive_loop_element",
+      "name_stage": "exhausted",
+      "description": "Length of a passive conducting structure is the Euclidean length of its beta-side inclined edge in an oblique parallelogram cross-section, evaluated in a constant-\u03c6 poloidal plane of the right-handed cylindrical (R, \u03c6, Z) frame, where R is major radius and Z is vertical height.",
+      "holder_description": "Length of the minor, beta-inclined side of a parallelogram-shaped cross-section in a passive conductor element.",
+      "shared_paths": [
+        "pf_passive/loop/element/geometry/oblique/length_beta"
+      ],
+      "choice": "same quantity",
+      "probability": 0.66,
+      "confidence": 0.49,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "maximum_power_at_inner_divertor_target",
+      "holder": "energy_flux_maximum_at_divertor_target",
+      "name_stage": "exhausted",
+      "description": "Maximum total power deposited on the inner, high-field-side divertor target over a specified interval, integrating all incident energy channels across the wetted strike-zone surface.",
+      "holder_description": "Peak local energy-deposition rate per unit area on one divertor target surface, combining incident plasma-particle and radiative energy-carrying channels.",
+      "shared_paths": [
+        "wall/global_quantities/power_density_inner_target_max"
+      ],
+      "choice": "different quantity",
+      "probability": 0.97,
+      "confidence": 0.95,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "maximum_power_at_outer_divertor_target",
+      "holder": "energy_flux_maximum_at_divertor_target",
+      "name_stage": "exhausted",
+      "description": "Maximum total power deposited on the outer divertor target by all incident energy channels over a specified interval, evaluated from the wetted strike-zone power.",
+      "holder_description": "Peak local energy-deposition rate per unit area on one divertor target surface, combining incident plasma-particle and radiative energy-carrying channels.",
+      "shared_paths": [
+        "wall/global_quantities/power_density_outer_target_max"
+      ],
+      "choice": "different quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "neutral_beam_atomic_number",
+      "holder": "neutral_beam_charge_number",
+      "name_stage": "exhausted",
+      "description": "Nuclear charge number of the neutral-beam species, equal to the integer count of protons in its nucleus and invariant across ionization states and isotopes.",
+      "holder_description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
+      "shared_paths": [
+        "charge_exchange/channel/bes/z_ion"
+      ],
+      "choice": "different quantity",
+      "probability": 0.94,
+      "confidence": 0.91,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "neutron_rate",
+      "holder": "total_neutron_rate",
+      "name_stage": "exhausted",
+      "description": "Total neutron production rate from fusion reactions, integrated over the plasma volume and summed across reaction channels and reacting-population classes.",
+      "holder_description": "Total neutron emission rate produced by deuterium\u2013tritium, deuterium\u2013deuterium, and tritium\u2013tritium fusion reactions in the plasma.",
+      "shared_paths": [
+        "summary/fusion/neutron_rates/total/value"
+      ],
+      "choice": "same quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "outer_hard_xray_half_width",
+      "holder": "outer_hard_xray_half_width_at_emissivity_peak",
+      "name_stage": "exhausted",
+      "description": "External (outward) half-width of the hard X-ray emissivity peak in normalized toroidal flux coordinate.",
+      "holder_description": "Outward extent of the hard X-ray emissivity peak from its maximum to the outer half-maximum point toward the separatrix in normalized toroidal flux.",
+      "shared_paths": [
+        "hard_x_rays/emissivity_profile_1d/half_width_external"
+      ],
+      "choice": "same quantity",
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "parallel_normalized_perturbed_magnetic_field",
+      "holder": "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+      "name_stage": "exhausted",
+      "description": "Signed dimensionless component of a magnetic-field perturbation along the local equilibrium magnetic-field direction, identifying compressional fluctuations.",
+      "holder_description": "Dimensionless compressional electromagnetic fluctuation amplitude from the parallel magnetic-field perturbation, time- and flux-surface-averaged and summed over kx for each ky.",
+      "shared_paths": [
+        "gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm"
+      ],
+      "choice": "different quantity",
+      "probability": 0.91,
+      "confidence": 0.86,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "poloidal_ion_state_momentum_diffusion_coefficient",
+      "holder": "poloidal_ion_charge_state_momentum_diffusion_coefficient",
+      "name_stage": "pending",
+      "description": null,
+      "holder_description": "Poloidal momentum diffusion coefficient for ions in a specified charge state, describing effective Fickian transport of the poloidal momentum component.",
+      "shared_paths": [
+        "plasma_transport/model/ggd/ion/state/momentum/d_pol/values"
+      ],
+      "choice": "same quantity",
+      "probability": 0.86,
+      "confidence": 0.79,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "poloidal_neutral_momentum_diffusivity",
+      "holder": "poloidal_neutral_momentum_diffusion_coefficient",
+      "name_stage": "exhausted",
+      "description": "Poloidal neutral momentum diffusivity is the diagonal poloidal component of an effective neutral-particle momentum diffusivity tensor, governing down-gradient redistribution of aggregate neutral momentum along increasing poloidal angle \u03b8 on flux surfaces in flux coordinates (\u03c1, \u03b8, \u03c6). The poloidal qualifier identifies the flux and gradient direction, not the momentum component.",
+      "holder_description": "Poloidal diffusion coefficient for neutral momentum transport on the GGD grid.",
+      "shared_paths": [
+        "edge_transport/model/ggd/neutral/momentum/d_pol/values"
+      ],
+      "choice": "same quantity",
+      "probability": 0.97,
+      "confidence": 0.95,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "radiative_temperature",
+      "holder": "radiative_ordinary_mode_temperature_at_ece_channel",
+      "name_stage": "exhausted",
+      "description": "Blackbody-equivalent brightness temperature inferred from electron cyclotron emission, approaching the local electron temperature when the resonant layer is optically thick.",
+      "holder_description": "Predicted equivalent blackbody temperature of ordinary-mode electron cyclotron emission at a frequency-selective ECE channel.",
+      "shared_paths": [
+        "ece/channel/t_radiation_o"
+      ],
+      "choice": "different quantity",
+      "probability": 0.68,
+      "confidence": 0.52,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "spectral_wave_opacity_line_integrated_at_ece_channel_emission_position",
+      "holder": "opacity_at_ece_channel_emission_position",
+      "name_stage": "exhausted",
+      "description": "Spectral wave opacity integrated along the channel line of sight to the electron cyclotron emission position.",
+      "holder_description": "Dimensionless optical depth along the electron-cyclotron-emission viewing path at a channel emission position, indicating whether the detected emission is local and thermal.",
+      "shared_paths": [
+        "ece/channel/optical_depth"
+      ],
+      "choice": "same quantity",
+      "probability": 0.83,
+      "confidence": 0.74,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "surface_temperature_at_sensor_attachment_point",
+      "holder": "temperature_of_sensor",
+      "name_stage": "exhausted",
+      "description": "Thermodynamic temperature of the component surface at the sensor attachment point.",
+      "holder_description": "Thermodynamic temperature associated with a selected thermocouple sensor attached to a tokamak structural component.",
+      "shared_paths": [
+        "operational_instrumentation/sensor/temperature"
+      ],
+      "choice": "same quantity",
+      "probability": 0.65,
+      "confidence": 0.48,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "thermal_energy_of_plant_component_port",
+      "holder": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+      "name_stage": "exhausted",
+      "description": "Cumulative thermal energy extracted through a cooling-loop port on a plant component since the start of the plasma pulse, obtained by time-integrating the measured coolant enthalpy balance.",
+      "holder_description": "Cumulative thermal energy transferred from a calorimetry component to its coolant since pulse start, determined from the coolant enthalpy gain.",
+      "shared_paths": [
+        "calorimetry/group/component/energy_cumulated"
+      ],
+      "choice": "same quantity",
+      "probability": 0.58,
+      "confidence": 0.37,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "thickness_of_passive_loop",
+      "holder": "thickness_of_passive_loop_element",
+      "name_stage": "exhausted",
+      "description": "Non-negative thickness of a passive conducting loop element measured between parallel bounding sides in its poloidal cross-section.",
+      "holder_description": "Transverse dimension of the rectangular cross-section used to represent each passive conductor loop element, measured perpendicular to its central segment.",
+      "shared_paths": [
+        "pf_passive/loop/element/geometry/thick_line/thickness"
+      ],
+      "choice": "same quantity",
+      "probability": 0.73,
+      "confidence": 0.59,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "toroidal_angle_of_along_pellet_path",
+      "holder": "toroidal_coordinate_at_pellet_path_point",
+      "name_stage": "exhausted",
+      "description": "Toroidal angle (\u03c6) coordinate of points along the pellet injection trajectory in the cylindrical (R, \u03c6, Z) frame",
+      "holder_description": "Azimuthal location of a sampled point along the pellet path in the right-handed cylindrical (R, \u03c6, Z) frame about the machine symmetry axis. Phi increases counterclockwise when viewed from above +Z.",
+      "shared_paths": [
+        "pellets/time_slice/pellet/path_geometry/first_point/phi"
+      ],
+      "choice": "same quantity",
+      "probability": 0.99,
+      "confidence": 0.98,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "total_power_of_neutral_beam_injector",
+      "holder": "launched_power_due_to_neutral_beam_injection",
+      "name_stage": "exhausted",
+      "description": "Power delivered by all neutral beam injectors at the vacuum vessel boundary, evaluated before plasma absorption, shine-through, and fast-ion first-orbit loss corrections. It is the non-negative sum of launched kinetic powers over the injectors.",
+      "holder_description": "NBI power delivered into the vacuum vessel before shine-through or orbit losses.",
+      "shared_paths": [
+        "summary/heating_current_drive/power_launched_nbi/value"
+      ],
+      "choice": "same quantity",
+      "probability": 0.98,
+      "confidence": 0.97,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "trapped_fast_particle_power_density_due_to_collisions",
+      "holder": "trapped_fast_electron_power_density_due_to_collisions",
+      "name_stage": "exhausted",
+      "description": "Local Coulomb-collisional power density changing the kinetic-energy density of fast particles on trapped guiding-center orbits.",
+      "holder_description": "Trapped fast-electron collisional power density is the signed local volumetric rate of kinetic-energy exchange for the trapped guiding-center component of the suprathermal electron population caused by Coulomb collisions.",
+      "shared_paths": [
+        "distributions/distribution/profiles_1d/trapped/collisions/electrons/power_fast"
+      ],
+      "choice": "different quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "vertical_coordinate_of_active_limiter_point",
+      "holder": "vertical_neutral_state_momentum_flux_limiter_coefficient",
+      "name_stage": "exhausted",
+      "description": "Signed vertical Z coordinate of the point where a limited plasma boundary contacts the active limiter, expressed in the right-handed cylindrical (R, \u03c6, Z) frame.",
+      "holder_description": "Dimensionless flux-limiter coefficient that scales the free-streaming bound on the vertical (Z) momentum-flux-density component in the right-handed cylindrical (R, \u03c6, Z) frame for a specified neutral particle state in edge-plasma transport closures.",
+      "shared_paths": [
+        "plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/z"
+      ],
+      "choice": "different quantity",
+      "probability": 0.97,
+      "confidence": 0.95,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "voltage_amplitude",
+      "holder": "voltage_amplitude_of_ion_cyclotron_heating_antenna",
+      "name_stage": "exhausted",
+      "description": "Maximum absolute instantaneous radio-frequency voltage at the transmission-line feed of an ion-cyclotron heating antenna module during one waveform cycle.",
+      "holder_description": "Peak magnitude of the radio-frequency voltage waveform on a single transmission-line feed of an ion-cyclotron-heating antenna module.",
+      "shared_paths": [
+        "ic_antennas/antenna/module/voltage/amplitude"
+      ],
+      "choice": "same quantity",
+      "probability": 0.99,
+      "confidence": 0.98,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "width_of_antenna_strap",
+      "holder": "toroidal_width_of_antenna_strap",
+      "name_stage": "exhausted",
+      "description": "Width of an ICRH antenna strap in the toroidal direction.",
+      "holder_description": "Full toroidal width of the rectangular cross-section of an ICRH antenna strap conductor element, measured along the toroidal direction in the right-handed cylindrical (R, \u03c6, Z) frame.",
+      "shared_paths": [
+        "ic_antennas/antenna/module/strap/width_phi"
+      ],
+      "choice": "same quantity",
+      "probability": 1,
+      "confidence": 1,
+      "answered": true,
+      "action": "superseded",
+      "reason": "same quantity, cleared both floors"
+    },
+    {
+      "id": "width_of_aperture",
+      "holder": "first_local_tangential_width_of_aperture",
+      "name_stage": "exhausted",
+      "description": "Aperture width is the non-negative clear opening extent along the first local tangential direction in a right-handed aperture-local frame (first tangential, second tangential, normal). The second local tangential direction also lies in the aperture plane, and the normal is orthogonal to that plane.",
+      "holder_description": "Full clear-opening width of a rectangular collimating aperture measured along its object-local first tangential axis.",
+      "shared_paths": [
+        "nbi/unit/aperture/x1_width"
+      ],
+      "choice": "same quantity",
+      "probability": 0.69,
+      "confidence": 0.53,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    }
+  ],
+  "referrals": [
+    {
+      "id": "deposited_energy_accumulated_of_plasma_facing_component",
+      "holder": "total_energy_of_calorimetry_component",
+      "name_stage": "exhausted",
+      "description": "Pulse-integrated heat deposited in a plasma-facing component, including heat recovered during post-discharge cooling as the component returns toward thermal equilibrium.",
+      "holder_description": "Total energy extracted from a calorimetry component over the whole discharge.",
+      "shared_paths": [
+        "calorimetry/group/component/energy_total/data"
+      ],
+      "choice": "different quantity",
+      "probability": 0.44,
+      "confidence": 0.16,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "electron_temperature_at_midplane",
+      "holder": "electron_temperature",
+      "name_stage": "exhausted",
+      "description": "Local kinetic temperature of the electron population at the outboard, low-field-side midplane in the scrape-off layer.",
+      "holder_description": "Energy-equivalent measure of the mean random kinetic energy per electron in the bulk electron population, defined by its second velocity moment.",
+      "shared_paths": [
+        "langmuir_probes/reciprocating/plunge/collector/t_e"
+      ],
+      "choice": "different quantity",
+      "probability": 0.89,
+      "confidence": 0.83,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "electrostatic_potential_at_wall",
+      "holder": "electrostatic_potential_at_langmuir_probe_position",
+      "name_stage": "reviewed",
+      "description": "Electrostatic potential at wall is the voltage-valued scalar potential of the plasma immediately adjacent to a plasma-facing wall, relative to a chosen electrical reference.",
+      "holder_description": "Local plasma electrostatic potential evaluated at a Langmuir-probe position in the edge or boundary plasma, distinct from the floating potential established by zero net probe current.",
+      "shared_paths": [
+        "langmuir_probes/embedded/v_plasma"
+      ],
+      "choice": "different quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "energy_flux_at_wall_due_to_eddy_current",
+      "holder": "incident_energy_flux_at_wall_due_to_eddy_current",
+      "name_stage": "exhausted",
+      "description": "Energy flux at the wall due to eddy current is the thermal energy flux density emitted from a plasma-facing wall surface toward the plasma by heat generated from eddy-current Joule dissipation in conducting structures.",
+      "holder_description": "Local energy flux density entering each plasma-facing wall element from the plasma side, attributed specifically to eddy-current processes rather than emitted wall energy.",
+      "shared_paths": [
+        "wall/description_ggd/ggd/energy_fluxes/current/incident/values"
+      ],
+      "choice": "different quantity",
+      "probability": 0.96,
+      "confidence": 0.94,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "fast_electron_source_rate",
+      "holder": "volume_averaged_total_runaway_electron_source_rate",
+      "name_stage": "exhausted",
+      "description": "Total volumetric generation rate of fast, suprathermal electrons, summed over all relevant production mechanisms. It counts creation into the fast-electron population and excludes transport losses or explicit sink terms in the number-density balance.",
+      "holder_description": "Plasma-volume-averaged volumetric production rate of runaway electrons, summed over Dreicer, avalanche, hot-tail, Compton, and tritium-decay generation mechanisms.",
+      "shared_paths": [
+        "runaway_electrons/global_quantities/volume_average/ddensity_dt_total"
+      ],
+      "choice": "different quantity",
+      "probability": 0.93,
+      "confidence": 0.89,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "fast_electron_source_rate_due_to_compton_scattering",
+      "holder": "runaway_electron_source_rate_due_to_compton_scattering",
+      "name_stage": "exhausted",
+      "description": "Volumetric production rate of fast electrons created when high-energy gamma rays Compton-scatter from free plasma electrons; subsequent losses and evolution are excluded.",
+      "holder_description": "Local volumetric rate at which high-energy gamma-ray Compton scattering produces electrons that enter the runaway regime.",
+      "shared_paths": [
+        "runaway_electrons/profiles_1d/ddensity_dt_compton"
+      ],
+      "choice": "different quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "fast_electron_source_rate_due_to_hot_tail",
+      "holder": "runaway_electron_source_rate_due_to_hot_tail",
+      "name_stage": "exhausted",
+      "description": "Volumetric production rate of fast electrons due to hot-tail generation during a rapid thermal quench is the local production into the fast-electron population when an initially hotter high-energy tail does not rethermalize with the cooling bulk. It is not restricted to electrons satisfying a runaway-electron criterion.",
+      "holder_description": "Volumetric production rate of runaway electrons generated when the high-energy tail survives rapid thermal-quench cooling.",
+      "shared_paths": [
+        "runaway_electrons/profiles_1d/ddensity_dt_hot_tail"
+      ],
+      "choice": "different quantity",
+      "probability": 0.93,
+      "confidence": 0.89,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "length_of_passive_structure",
+      "holder": "minor_length_of_passive_loop_element",
+      "name_stage": "exhausted",
+      "description": "Length of a passive conducting structure is the Euclidean length of its beta-side inclined edge in an oblique parallelogram cross-section, evaluated in a constant-\u03c6 poloidal plane of the right-handed cylindrical (R, \u03c6, Z) frame, where R is major radius and Z is vertical height.",
+      "holder_description": "Length of the minor, beta-inclined side of a parallelogram-shaped cross-section in a passive conductor element.",
+      "shared_paths": [
+        "pf_passive/loop/element/geometry/oblique/length_beta"
+      ],
+      "choice": "same quantity",
+      "probability": 0.66,
+      "confidence": 0.49,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "maximum_power_at_inner_divertor_target",
+      "holder": "energy_flux_maximum_at_divertor_target",
+      "name_stage": "exhausted",
+      "description": "Maximum total power deposited on the inner, high-field-side divertor target over a specified interval, integrating all incident energy channels across the wetted strike-zone surface.",
+      "holder_description": "Peak local energy-deposition rate per unit area on one divertor target surface, combining incident plasma-particle and radiative energy-carrying channels.",
+      "shared_paths": [
+        "wall/global_quantities/power_density_inner_target_max"
+      ],
+      "choice": "different quantity",
+      "probability": 0.97,
+      "confidence": 0.95,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "maximum_power_at_outer_divertor_target",
+      "holder": "energy_flux_maximum_at_divertor_target",
+      "name_stage": "exhausted",
+      "description": "Maximum total power deposited on the outer divertor target by all incident energy channels over a specified interval, evaluated from the wetted strike-zone power.",
+      "holder_description": "Peak local energy-deposition rate per unit area on one divertor target surface, combining incident plasma-particle and radiative energy-carrying channels.",
+      "shared_paths": [
+        "wall/global_quantities/power_density_outer_target_max"
+      ],
+      "choice": "different quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "neutral_beam_atomic_number",
+      "holder": "neutral_beam_charge_number",
+      "name_stage": "exhausted",
+      "description": "Nuclear charge number of the neutral-beam species, equal to the integer count of protons in its nucleus and invariant across ionization states and isotopes.",
+      "holder_description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
+      "shared_paths": [
+        "charge_exchange/channel/bes/z_ion"
+      ],
+      "choice": "different quantity",
+      "probability": 0.94,
+      "confidence": 0.91,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "parallel_normalized_perturbed_magnetic_field",
+      "holder": "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+      "name_stage": "exhausted",
+      "description": "Signed dimensionless component of a magnetic-field perturbation along the local equilibrium magnetic-field direction, identifying compressional fluctuations.",
+      "holder_description": "Dimensionless compressional electromagnetic fluctuation amplitude from the parallel magnetic-field perturbation, time- and flux-surface-averaged and summed over kx for each ky.",
+      "shared_paths": [
+        "gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm"
+      ],
+      "choice": "different quantity",
+      "probability": 0.91,
+      "confidence": 0.86,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "radiative_temperature",
+      "holder": "radiative_ordinary_mode_temperature_at_ece_channel",
+      "name_stage": "exhausted",
+      "description": "Blackbody-equivalent brightness temperature inferred from electron cyclotron emission, approaching the local electron temperature when the resonant layer is optically thick.",
+      "holder_description": "Predicted equivalent blackbody temperature of ordinary-mode electron cyclotron emission at a frequency-selective ECE channel.",
+      "shared_paths": [
+        "ece/channel/t_radiation_o"
+      ],
+      "choice": "different quantity",
+      "probability": 0.68,
+      "confidence": 0.52,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "surface_temperature_at_sensor_attachment_point",
+      "holder": "temperature_of_sensor",
+      "name_stage": "exhausted",
+      "description": "Thermodynamic temperature of the component surface at the sensor attachment point.",
+      "holder_description": "Thermodynamic temperature associated with a selected thermocouple sensor attached to a tokamak structural component.",
+      "shared_paths": [
+        "operational_instrumentation/sensor/temperature"
+      ],
+      "choice": "same quantity",
+      "probability": 0.65,
+      "confidence": 0.48,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "thermal_energy_of_plant_component_port",
+      "holder": "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+      "name_stage": "exhausted",
+      "description": "Cumulative thermal energy extracted through a cooling-loop port on a plant component since the start of the plasma pulse, obtained by time-integrating the measured coolant enthalpy balance.",
+      "holder_description": "Cumulative thermal energy transferred from a calorimetry component to its coolant since pulse start, determined from the coolant enthalpy gain.",
+      "shared_paths": [
+        "calorimetry/group/component/energy_cumulated"
+      ],
+      "choice": "same quantity",
+      "probability": 0.58,
+      "confidence": 0.37,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "thickness_of_passive_loop",
+      "holder": "thickness_of_passive_loop_element",
+      "name_stage": "exhausted",
+      "description": "Non-negative thickness of a passive conducting loop element measured between parallel bounding sides in its poloidal cross-section.",
+      "holder_description": "Transverse dimension of the rectangular cross-section used to represent each passive conductor loop element, measured perpendicular to its central segment.",
+      "shared_paths": [
+        "pf_passive/loop/element/geometry/thick_line/thickness"
+      ],
+      "choice": "same quantity",
+      "probability": 0.73,
+      "confidence": 0.59,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    },
+    {
+      "id": "trapped_fast_particle_power_density_due_to_collisions",
+      "holder": "trapped_fast_electron_power_density_due_to_collisions",
+      "name_stage": "exhausted",
+      "description": "Local Coulomb-collisional power density changing the kinetic-energy density of fast particles on trapped guiding-center orbits.",
+      "holder_description": "Trapped fast-electron collisional power density is the signed local volumetric rate of kinetic-energy exchange for the trapped guiding-center component of the suprathermal electron population caused by Coulomb collisions.",
+      "shared_paths": [
+        "distributions/distribution/profiles_1d/trapped/collisions/electrons/power_fast"
+      ],
+      "choice": "different quantity",
+      "probability": 0.95,
+      "confidence": 0.92,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "vertical_coordinate_of_active_limiter_point",
+      "holder": "vertical_neutral_state_momentum_flux_limiter_coefficient",
+      "name_stage": "exhausted",
+      "description": "Signed vertical Z coordinate of the point where a limited plasma boundary contacts the active limiter, expressed in the right-handed cylindrical (R, \u03c6, Z) frame.",
+      "holder_description": "Dimensionless flux-limiter coefficient that scales the free-streaming bound on the vertical (Z) momentum-flux-density component in the right-handed cylindrical (R, \u03c6, Z) frame for a specified neutral particle state in edge-plasma transport closures.",
+      "shared_paths": [
+        "plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/z"
+      ],
+      "choice": "different quantity",
+      "probability": 0.97,
+      "confidence": 0.95,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "Jev answered different quantity"
+    },
+    {
+      "id": "width_of_aperture",
+      "holder": "first_local_tangential_width_of_aperture",
+      "name_stage": "exhausted",
+      "description": "Aperture width is the non-negative clear opening extent along the first local tangential direction in a right-handed aperture-local frame (first tangential, second tangential, normal). The second local tangential direction also lies in the aperture plane, and the normal is orthogonal to that plane.",
+      "holder_description": "Full clear-opening width of a rectangular collimating aperture measured along its object-local first tangential axis.",
+      "shared_paths": [
+        "nbi/unit/aperture/x1_width"
+      ],
+      "choice": "same quantity",
+      "probability": 0.69,
+      "confidence": 0.53,
+      "answered": true,
+      "action": "referred to lead",
+      "reason": "below the probability/confidence floor"
+    }
+  ]
+}

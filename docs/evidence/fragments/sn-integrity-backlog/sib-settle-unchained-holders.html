@@ -1,0 +1,631 @@
+<h2 id='sib-settle-unchained-holders'>Unchained holders settled</h2>
+<p id='sib-settle-unchained-holders-summary'>The classifier read-back holds 30 unchained-holder names before this node and 19 after: exactly 11 retired through the signed supersede and 19 referred to the lead. This node's own footprint is exact, the retired set being the baseline minus those 11 with nothing entering the population. Spend USD 0.001585.</p>
+<p id='sib-settle-unchained-holders-foreign'>A later writer moved never_bound 28 to 23. That movement lands after this node&#x27;s last receipt and touches none of the settled names, and the overlap read below dates it.</p>
+<p id='sib-settle-unchained-holders-overlap-summary'>The apply-window overlap read finds no other change, source write or name update on the settled names: overlap is <code>False</code>.</p>
+<h3 id='sib-settle-unchained-holders-floors'>Floors</h3>
+<p>Coordinator's ruling for every binding and retirement: the chosen option's probability at least <code>0.8</code> and Jev's self-reported confidence at least <code>0.5</code>.</p>
+<h3 id='sib-settle-unchained-holders-retired'>Retired in the holder's favour (11)</h3>
+<table id='sib-settle-unchained-holders-retired-t'><thead><tr><th>predecessor</th><th>successor (holder)</th><th>Jev</th><th>p</th><th>conf</th><th>action</th><th>shared DD path</th></tr></thead><tbody>
+<tr class='retired'><td>derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate</td><td>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</td><td>same quantity</td><td>0.97</td><td>0.95</td><td>superseded</td><td>equilibrium/time_slice/profiles_1d/darea_dpsi</td></tr>
+<tr class='retired'><td>electron_average_temperature_at_midplane</td><td>electron_field_line_average_temperature_over_scrape_off_layer</td><td>same quantity</td><td>0.81</td><td>0.72</td><td>superseded</td><td>langmuir_probes/reciprocating/plunge/t_e_average</td></tr>
+<tr class='retired'><td>neutron_rate</td><td>total_neutron_rate</td><td>same quantity</td><td>0.95</td><td>0.92</td><td>superseded</td><td>summary/fusion/neutron_rates/total/value</td></tr>
+<tr class='retired'><td>outer_hard_xray_half_width</td><td>outer_hard_xray_half_width_at_emissivity_peak</td><td>same quantity</td><td>1</td><td>1</td><td>superseded</td><td>hard_x_rays/emissivity_profile_1d/half_width_external</td></tr>
+<tr class='retired'><td>poloidal_ion_state_momentum_diffusion_coefficient</td><td>poloidal_ion_charge_state_momentum_diffusion_coefficient</td><td>same quantity</td><td>0.86</td><td>0.79</td><td>superseded</td><td>plasma_transport/model/ggd/ion/state/momentum/d_pol/values</td></tr>
+<tr class='retired'><td>poloidal_neutral_momentum_diffusivity</td><td>poloidal_neutral_momentum_diffusion_coefficient</td><td>same quantity</td><td>0.97</td><td>0.95</td><td>superseded</td><td>edge_transport/model/ggd/neutral/momentum/d_pol/values</td></tr>
+<tr class='retired'><td>spectral_wave_opacity_line_integrated_at_ece_channel_emission_position</td><td>opacity_at_ece_channel_emission_position</td><td>same quantity</td><td>0.83</td><td>0.74</td><td>superseded</td><td>ece/channel/optical_depth</td></tr>
+<tr class='retired'><td>toroidal_angle_of_along_pellet_path</td><td>toroidal_coordinate_at_pellet_path_point</td><td>same quantity</td><td>0.99</td><td>0.98</td><td>superseded</td><td>pellets/time_slice/pellet/path_geometry/first_point/phi</td></tr>
+<tr class='retired'><td>total_power_of_neutral_beam_injector</td><td>launched_power_due_to_neutral_beam_injection</td><td>same quantity</td><td>0.98</td><td>0.97</td><td>superseded</td><td>summary/heating_current_drive/power_launched_nbi/value</td></tr>
+<tr class='retired'><td>voltage_amplitude</td><td>voltage_amplitude_of_ion_cyclotron_heating_antenna</td><td>same quantity</td><td>0.99</td><td>0.98</td><td>superseded</td><td>ic_antennas/antenna/module/voltage/amplitude</td></tr>
+<tr class='retired'><td>width_of_antenna_strap</td><td>toroidal_width_of_antenna_strap</td><td>same quantity</td><td>1</td><td>1</td><td>superseded</td><td>ic_antennas/antenna/module/strap/width_phi</td></tr>
+</tbody></table>
+<h3 id='sib-settle-unchained-holders-referrals'>Referred to the lead (19)</h3>
+<table id='sib-settle-unchained-holders-ref-t'><thead><tr><th>name</th><th>holder</th><th>Jev</th><th>p</th><th>conf</th><th>action</th><th>shared DD path</th></tr></thead><tbody>
+<tr class='referred'><td>deposited_energy_accumulated_of_plasma_facing_component</td><td>total_energy_of_calorimetry_component</td><td>different quantity</td><td>0.44</td><td>0.16</td><td>referred to lead</td><td>calorimetry/group/component/energy_total/data</td></tr>
+<tr class='referred'><td>electron_temperature_at_midplane</td><td>electron_temperature</td><td>different quantity</td><td>0.89</td><td>0.83</td><td>referred to lead</td><td>langmuir_probes/reciprocating/plunge/collector/t_e</td></tr>
+<tr class='referred'><td>electrostatic_potential_at_wall</td><td>electrostatic_potential_at_langmuir_probe_position</td><td>different quantity</td><td>0.95</td><td>0.92</td><td>referred to lead</td><td>langmuir_probes/embedded/v_plasma</td></tr>
+<tr class='referred'><td>energy_flux_at_wall_due_to_eddy_current</td><td>incident_energy_flux_at_wall_due_to_eddy_current</td><td>different quantity</td><td>0.96</td><td>0.94</td><td>referred to lead</td><td>wall/description_ggd/ggd/energy_fluxes/current/incident/values</td></tr>
+<tr class='referred'><td>fast_electron_source_rate</td><td>volume_averaged_total_runaway_electron_source_rate</td><td>different quantity</td><td>0.93</td><td>0.89</td><td>referred to lead</td><td>runaway_electrons/global_quantities/volume_average/ddensity_dt_total</td></tr>
+<tr class='referred'><td>fast_electron_source_rate_due_to_compton_scattering</td><td>runaway_electron_source_rate_due_to_compton_scattering</td><td>different quantity</td><td>0.95</td><td>0.92</td><td>referred to lead</td><td>runaway_electrons/profiles_1d/ddensity_dt_compton</td></tr>
+<tr class='referred'><td>fast_electron_source_rate_due_to_hot_tail</td><td>runaway_electron_source_rate_due_to_hot_tail</td><td>different quantity</td><td>0.93</td><td>0.89</td><td>referred to lead</td><td>runaway_electrons/profiles_1d/ddensity_dt_hot_tail</td></tr>
+<tr class='referred'><td>length_of_passive_structure</td><td>minor_length_of_passive_loop_element</td><td>same quantity</td><td>0.66</td><td>0.49</td><td>referred to lead</td><td>pf_passive/loop/element/geometry/oblique/length_beta</td></tr>
+<tr class='referred'><td>maximum_power_at_inner_divertor_target</td><td>energy_flux_maximum_at_divertor_target</td><td>different quantity</td><td>0.97</td><td>0.95</td><td>referred to lead</td><td>wall/global_quantities/power_density_inner_target_max</td></tr>
+<tr class='referred'><td>maximum_power_at_outer_divertor_target</td><td>energy_flux_maximum_at_divertor_target</td><td>different quantity</td><td>0.95</td><td>0.92</td><td>referred to lead</td><td>wall/global_quantities/power_density_outer_target_max</td></tr>
+<tr class='referred'><td>neutral_beam_atomic_number</td><td>neutral_beam_charge_number</td><td>different quantity</td><td>0.94</td><td>0.91</td><td>referred to lead</td><td>charge_exchange/channel/bes/z_ion</td></tr>
+<tr class='referred'><td>parallel_normalized_perturbed_magnetic_field</td><td>flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</td><td>different quantity</td><td>0.91</td><td>0.86</td><td>referred to lead</td><td>gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm</td></tr>
+<tr class='referred'><td>radiative_temperature</td><td>radiative_ordinary_mode_temperature_at_ece_channel</td><td>different quantity</td><td>0.68</td><td>0.52</td><td>referred to lead</td><td>ece/channel/t_radiation_o</td></tr>
+<tr class='referred'><td>surface_temperature_at_sensor_attachment_point</td><td>temperature_of_sensor</td><td>same quantity</td><td>0.65</td><td>0.48</td><td>referred to lead</td><td>operational_instrumentation/sensor/temperature</td></tr>
+<tr class='referred'><td>thermal_energy_of_plant_component_port</td><td>accumulated_coolant_absorbed_energy_of_calorimetry_component</td><td>same quantity</td><td>0.58</td><td>0.37</td><td>referred to lead</td><td>calorimetry/group/component/energy_cumulated</td></tr>
+<tr class='referred'><td>thickness_of_passive_loop</td><td>thickness_of_passive_loop_element</td><td>same quantity</td><td>0.73</td><td>0.59</td><td>referred to lead</td><td>pf_passive/loop/element/geometry/thick_line/thickness</td></tr>
+<tr class='referred'><td>trapped_fast_particle_power_density_due_to_collisions</td><td>trapped_fast_electron_power_density_due_to_collisions</td><td>different quantity</td><td>0.95</td><td>0.92</td><td>referred to lead</td><td>distributions/distribution/profiles_1d/trapped/collisions/electrons/power_fast</td></tr>
+<tr class='referred'><td>vertical_coordinate_of_active_limiter_point</td><td>vertical_neutral_state_momentum_flux_limiter_coefficient</td><td>different quantity</td><td>0.97</td><td>0.95</td><td>referred to lead</td><td>plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/z</td></tr>
+<tr class='referred'><td>width_of_aperture</td><td>first_local_tangential_width_of_aperture</td><td>same quantity</td><td>0.69</td><td>0.53</td><td>referred to lead</td><td>nbi/unit/aperture/x1_width</td></tr>
+</tbody></table>
+<h3 id='sib-settle-unchained-holders-authority'>Signed authority</h3>
+<pre id='sib-settle-unchained-holders-authority-pre'>{
+ &quot;path&quot;: &quot;docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-authority.json&quot;,
+ &quot;file_sha256&quot;: &quot;1debe8924b55ce52eee6fdd39a7a4649fee4522fa968afd5376e765541e8ba57&quot;,
+ &quot;payload_sha256&quot;: &quot;f96de475985f0303623a835da97527187f0fd838c107ea08f64b0b21e47ab69c&quot;,
+ &quot;manifest_sha256&quot;: &quot;391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350&quot;,
+ &quot;operation_id&quot;: &quot;retire-unchained-holder-in-favour-of-its-source-holder&quot;,
+ &quot;receipt_operation&quot;: &quot;link_signed_successor&quot;
+}</pre>
+<h3 id='sib-settle-unchained-holders-preview'>Preview and receipt</h3>
+<pre id='sib-settle-unchained-holders-preview-pre'>{
+ &quot;preview&quot;: {
+  &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;,
+  &quot;outcome&quot;: &quot;already_applied&quot;,
+  &quot;changed&quot;: 0,
+  &quot;persistent_writes&quot;: 0,
+  &quot;receipt_rows&quot;: 11,
+  &quot;manifest_sha256&quot;: null,
+  &quot;admitted_row_ids&quot;: [
+   &quot;derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate=&gt;derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate&quot;,
+   &quot;electron_average_temperature_at_midplane=&gt;electron_field_line_average_temperature_over_scrape_off_layer&quot;,
+   &quot;neutron_rate=&gt;total_neutron_rate&quot;,
+   &quot;outer_hard_xray_half_width=&gt;outer_hard_xray_half_width_at_emissivity_peak&quot;,
+   &quot;poloidal_ion_state_momentum_diffusion_coefficient=&gt;poloidal_ion_charge_state_momentum_diffusion_coefficient&quot;,
+   &quot;poloidal_neutral_momentum_diffusivity=&gt;poloidal_neutral_momentum_diffusion_coefficient&quot;,
+   &quot;spectral_wave_opacity_line_integrated_at_ece_channel_emission_position=&gt;opacity_at_ece_channel_emission_position&quot;,
+   &quot;toroidal_angle_of_along_pellet_path=&gt;toroidal_coordinate_at_pellet_path_point&quot;,
+   &quot;total_power_of_neutral_beam_injector=&gt;launched_power_due_to_neutral_beam_injection&quot;,
+   &quot;voltage_amplitude=&gt;voltage_amplitude_of_ion_cyclotron_heating_antenna&quot;,
+   &quot;width_of_antenna_strap=&gt;toroidal_width_of_antenna_strap&quot;
+  ]
+ },
+ &quot;receipt&quot;: {
+  &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;,
+  &quot;outcome&quot;: &quot;applied&quot;,
+  &quot;changed&quot;: 11,
+  &quot;mutations&quot;: 11,
+  &quot;receipt_rows&quot;: 11,
+  &quot;persistent_writes&quot;: 22,
+  &quot;counts&quot;: {
+   &quot;authority_rows&quot;: 11,
+   &quot;admitted&quot;: 11,
+   &quot;refused&quot;: 0
+  },
+  &quot;refusals&quot;: [],
+  &quot;manifest_sha256&quot;: &quot;391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350&quot;,
+  &quot;authority_file_sha256&quot;: &quot;1debe8924b55ce52eee6fdd39a7a4649fee4522fa968afd5376e765541e8ba57&quot;,
+  &quot;authority_payload_sha256&quot;: &quot;f96de475985f0303623a835da97527187f0fd838c107ea08f64b0b21e47ab69c&quot;,
+  &quot;change_ids&quot;: [
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:176635ff4715552ed554a29b&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:1d377e86291bdc5f2465fe67&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:217f490593d7884adacbc971&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:2478314af9a47d0005f95dd6&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:295f5ed29323e4e84c70558a&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:4f20b9e82fd8affab9880485&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:5c25dbe29003e6c0207129fa&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:aa688c64783789271055a2ba&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:b27c033703d442832d82ad1e&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:becbde2da42d84f1bad5ceda&quot;,
+   &quot;sn-change:signed-manifest:391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350:e2cc57d02cf46c3e277b38b1&quot;
+  ]
+ }
+}</pre>
+<h3 id='sib-settle-unchained-holders-quiet'>Quiet-graph probe (owner instrument)</h3>
+<p id='sib-settle-unchained-holders-quiet-note'>The reading below is the repository's own probe taken now. The probe taken before the apply was vacuous: it compared the transaction status to a spelling the server never returns and did not subtract its own probe, so it could not have reported a busy graph. The apply-window overlap read replaces it; the pre-apply payload is kept beneath as the record of what that instrument actually measured.</p>
+<pre id='sib-settle-unchained-holders-quiet-pre'>{
+ &quot;quiet&quot;: true,
+ &quot;foreign_transactions_started&quot;: 0,
+ &quot;foreign_open_queries&quot;: [],
+ &quot;neo4j_jobs&quot;: [
+  &quot;1288978 codex-neo4j RUNNING 15:33:44&quot;
+ ]
+}</pre>
+<pre id='sib-settle-unchained-holders-quiet-before-pre'>{
+ &quot;live_crew_runs&quot;: [
+  &quot;r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot&quot;,
+  &quot;r-20261009T015811146619-cocos-determination-core&quot;,
+  &quot;r-20261009T033905549459-plan-review-of-jt60sa-machine-map&quot;,
+  &quot;r-20261017T193125631298-integrated-run-assembly&quot;,
+  &quot;r-20261018T102210638794-ssog-anchor-ab&quot;,
+  &quot;r-20261018T145435653862-plan-review-of-the-fleet-node-stays-in-service&quot;,
+  &quot;r-20261018T150822949393-a-stopped-worker-ends-inside-its-step&quot;,
+  &quot;r-20261018T151304298883-a-producer-sweeps-only-on-change&quot;,
+  &quot;r-20261018T203817697724-vs1-switched-pulse&quot;,
+  &quot;r-20261018T204951664681-stray-edge-rate&quot;,
+  &quot;r-20261018T214318686755-text-responses-are-compressed&quot;,
+  &quot;r-20261018T221255178004-cbl-merged-unit-gate&quot;,
+  &quot;r-20261018T221808668605-cbl-tcv-liuqe-sign-rca&quot;,
+  &quot;r-20261018T222222954695-review-of-text-responses-are-compressed-f4737074616d&quot;,
+  &quot;r-20261018T225708053988-review-of-cbl-tcv-liuqe-sign-rca-37131b826a5b&quot;,
+  &quot;r-20261018T225754567394-cbl-tcv-liuqe-probe-sign&quot;,
+  &quot;r-20261018T232819745998-srtj-cascade-quorum-regression&quot;,
+  &quot;r-20261019T000654917566-review-of-reload-carries-skills-population-at-merge-b6558f0d1cab&quot;,
+  &quot;r-20261019T003009581037-exact-integrator-performance&quot;,
+  &quot;r-20261019T004351278047-reload-shim-interpreter-population-at-merge&quot;,
+  &quot;r-20261019T010646193471-review-of-reload-shim-interpreter-population-at-merge-461f3b8256ed&quot;,
+  &quot;r-20261019T012006559216-plan-review-of-the-monitor-shows-the-work-it-watches&quot;,
+  &quot;r-20261019T012032672589-sib-restore-lineage-sources&quot;,
+  &quot;r-20261019T012701997576-arc-assembly&quot;,
+  &quot;r-20261019T013447800511-jt60sa-composed-plant&quot;,
+  &quot;r-20261019T013810288111-plant-tests-independence&quot;,
+  &quot;r-20261019T014150673041-carrier-axis-orientation&quot;,
+  &quot;r-20261019T015039275505-sib-restore-searched-sources&quot;,
+  &quot;r-20261019T020114916771-one-promotion-of-a-run-at-a-time&quot;,
+  &quot;r-20261019T021105205837-plan-review-of-a-review-promotes-only-its-own-verdict&quot;,
+  &quot;r-20261019T021331583055-review-of-jt60sa-composed-plant-b3c1fa1da0c4&quot;,
+  &quot;r-20261019T021601438192-review-of-sib-restore-searched-sources-9269556e597e&quot;,
+  &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+  &quot;r-20261019T022201295911-review-of-sib-restore-lineage-sources-282623af6d33&quot;,
+  &quot;r-20261019T022541161236-review-of-plant-tests-independence-8fb37069191e&quot;
+ ],
+ &quot;live_crew_run_count&quot;: 35,
+ &quot;runs_touched_within_1800s&quot;: [
+  {
+   &quot;run&quot;: &quot;r-20261008T104759434567-the-order-test-fails-when-a-queued-run-holds-a-slot&quot;,
+   &quot;age_seconds&quot;: 52
+  },
+  {
+   &quot;run&quot;: &quot;r-20261009T015811146619-cocos-determination-core&quot;,
+   &quot;age_seconds&quot;: 8
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T003009581037-exact-integrator-performance&quot;,
+   &quot;age_seconds&quot;: 721
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T012032672589-sib-restore-lineage-sources&quot;,
+   &quot;age_seconds&quot;: 346
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T013447800511-jt60sa-composed-plant&quot;,
+   &quot;age_seconds&quot;: 843
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T013810288111-plant-tests-independence&quot;,
+   &quot;age_seconds&quot;: 118
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T014150673041-carrier-axis-orientation&quot;,
+   &quot;age_seconds&quot;: 340
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T015039275505-sib-restore-searched-sources&quot;,
+   &quot;age_seconds&quot;: 707
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T020114916771-one-promotion-of-a-run-at-a-time&quot;,
+   &quot;age_seconds&quot;: 1434
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T021105205837-plan-review-of-a-review-promotes-only-its-own-verdict&quot;,
+   &quot;age_seconds&quot;: 354
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T021331583055-review-of-jt60sa-composed-plant-b3c1fa1da0c4&quot;,
+   &quot;age_seconds&quot;: 35
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T021601438192-review-of-sib-restore-searched-sources-9269556e597e&quot;,
+   &quot;age_seconds&quot;: 700
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;age_seconds&quot;: 516
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T022201295911-review-of-sib-restore-lineage-sources-282623af6d33&quot;,
+   &quot;age_seconds&quot;: 338
+  },
+  {
+   &quot;run&quot;: &quot;r-20261019T022541161236-review-of-plant-tests-independence-8fb37069191e&quot;,
+   &quot;age_seconds&quot;: 112
+  }
+ ],
+ &quot;neo4j_jobs&quot;: [
+  &quot;1288978 codex-neo4j RUNNING 14:38:14&quot;
+ ],
+ &quot;active_transactions&quot;: [
+  {
+   &quot;transactionId&quot;: &quot;neo4j-transaction-4936&quot;,
+   &quot;status&quot;: &quot;Running&quot;,
+   &quot;currentQuery&quot;: &quot;SHOW TRANSACTIONS YIELD transactionId, currentQuery, status RETURN transactionId, status, currentQuery LIMIT 50&quot;
+  }
+ ],
+ &quot;foreign_running_transactions&quot;: [],
+ &quot;quiet&quot;: true
+}</pre>
+<h3 id='sib-settle-unchained-holders-overlap'>Apply-window overlap (after the fact)</h3>
+<pre id='sib-settle-unchained-holders-overlap-pre'>{
+ &quot;window&quot;: {
+  &quot;from&quot;: &quot;2026-10-19T02:26:38.397000000+00:00&quot;,
+  &quot;to&quot;: &quot;2026-10-19T02:32:38.397000000+00:00&quot;
+ },
+ &quot;own_receipts&quot;: {
+  &quot;lo&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;,
+  &quot;hi&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;,
+  &quot;n&quot;: 11,
+  &quot;digests&quot;: [
+   &quot;391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350&quot;
+  ]
+ },
+ &quot;changes_in_window&quot;: [
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate=&gt;derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate&quot;,
+   &quot;frm&quot;: &quot;derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate&quot;,
+   &quot;to&quot;: &quot;derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;electron_average_temperature_at_midplane=&gt;electron_field_line_average_temperature_over_scrape_off_layer&quot;,
+   &quot;frm&quot;: &quot;electron_average_temperature_at_midplane&quot;,
+   &quot;to&quot;: &quot;electron_field_line_average_temperature_over_scrape_off_layer&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;neutron_rate=&gt;total_neutron_rate&quot;,
+   &quot;frm&quot;: &quot;neutron_rate&quot;,
+   &quot;to&quot;: &quot;total_neutron_rate&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;outer_hard_xray_half_width=&gt;outer_hard_xray_half_width_at_emissivity_peak&quot;,
+   &quot;frm&quot;: &quot;outer_hard_xray_half_width&quot;,
+   &quot;to&quot;: &quot;outer_hard_xray_half_width_at_emissivity_peak&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;poloidal_ion_state_momentum_diffusion_coefficient=&gt;poloidal_ion_charge_state_momentum_diffusion_coefficient&quot;,
+   &quot;frm&quot;: &quot;poloidal_ion_state_momentum_diffusion_coefficient&quot;,
+   &quot;to&quot;: &quot;poloidal_ion_charge_state_momentum_diffusion_coefficient&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;poloidal_neutral_momentum_diffusivity=&gt;poloidal_neutral_momentum_diffusion_coefficient&quot;,
+   &quot;frm&quot;: &quot;poloidal_neutral_momentum_diffusivity&quot;,
+   &quot;to&quot;: &quot;poloidal_neutral_momentum_diffusion_coefficient&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;spectral_wave_opacity_line_integrated_at_ece_channel_emission_position=&gt;opacity_at_ece_channel_emission_position&quot;,
+   &quot;frm&quot;: &quot;spectral_wave_opacity_line_integrated_at_ece_channel_emission_position&quot;,
+   &quot;to&quot;: &quot;opacity_at_ece_channel_emission_position&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;toroidal_angle_of_along_pellet_path=&gt;toroidal_coordinate_at_pellet_path_point&quot;,
+   &quot;frm&quot;: &quot;toroidal_angle_of_along_pellet_path&quot;,
+   &quot;to&quot;: &quot;toroidal_coordinate_at_pellet_path_point&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;total_power_of_neutral_beam_injector=&gt;launched_power_due_to_neutral_beam_injection&quot;,
+   &quot;frm&quot;: &quot;total_power_of_neutral_beam_injector&quot;,
+   &quot;to&quot;: &quot;launched_power_due_to_neutral_beam_injection&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;voltage_amplitude=&gt;voltage_amplitude_of_ion_cyclotron_heating_antenna&quot;,
+   &quot;frm&quot;: &quot;voltage_amplitude&quot;,
+   &quot;to&quot;: &quot;voltage_amplitude_of_ion_cyclotron_heating_antenna&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  },
+  {
+   &quot;run_id&quot;: &quot;r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+   &quot;op&quot;: &quot;link_signed_successor&quot;,
+   &quot;row_id&quot;: &quot;width_of_antenna_strap=&gt;toroidal_width_of_antenna_strap&quot;,
+   &quot;frm&quot;: &quot;width_of_antenna_strap&quot;,
+   &quot;to&quot;: &quot;toroidal_width_of_antenna_strap&quot;,
+   &quot;at&quot;: &quot;2026-10-19T02:29:38.397000000+00:00&quot;
+  }
+ ],
+ &quot;foreign_changes&quot;: [],
+ &quot;foreign_changes_touching_settled_names&quot;: [],
+ &quot;sources_in_window&quot;: [],
+ &quot;foreign_sources_touching_settled_names&quot;: [],
+ &quot;settled_name_updates&quot;: [],
+ &quot;sources_rebound_after_last_receipt&quot;: [
+  {
+   &quot;source&quot;: &quot;dd:gyrokinetics_local/flux_surface/delongation_dr_minor_norm&quot;,
+   &quot;name&quot;: &quot;elongation_radial_derivative_of_flux_surface&quot;,
+   &quot;created&quot;: null,
+   &quot;at&quot;: &quot;2026-10-19T02:38:13.377000000+00:00&quot;
+  },
+  {
+   &quot;source&quot;: &quot;dd:waves/coherent_wave/profiles_1d/current_parallel_density_n_phi&quot;,
+   &quot;name&quot;: &quot;parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive&quot;,
+   &quot;created&quot;: null,
+   &quot;at&quot;: &quot;2026-10-19T02:38:13.380000000+00:00&quot;
+  },
+  {
+   &quot;source&quot;: &quot;dd:camera_x_rays/camera/camera_dimensions&quot;,
+   &quot;name&quot;: &quot;size_of_camera&quot;,
+   &quot;created&quot;: null,
+   &quot;at&quot;: &quot;2026-10-19T02:38:13.383000000+00:00&quot;
+  },
+  {
+   &quot;source&quot;: &quot;dd:distributions/distribution/global_quantities/collisions/electrons/torque_fast_phi&quot;,
+   &quot;name&quot;: &quot;volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions&quot;,
+   &quot;created&quot;: null,
+   &quot;at&quot;: &quot;2026-10-19T02:38:13.386000000+00:00&quot;
+  }
+ ],
+ &quot;overlap&quot;: false
+}</pre>
+<h3 id='sib-settle-unchained-holders-guard'>Source-stays-held guard</h3>
+<pre id='sib-settle-unchained-holders-guard-pre'>{
+ &quot;admitted&quot;: 11,
+ &quot;pairs&quot;: [
+  {
+   &quot;predecessor&quot;: &quot;derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate&quot;,
+   &quot;successor&quot;: &quot;derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;equilibrium/time_slice/profiles_1d/darea_dpsi&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;equilibrium/time_slice/profiles_1d/darea_dpsi&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;electron_average_temperature_at_midplane&quot;,
+   &quot;successor&quot;: &quot;electron_field_line_average_temperature_over_scrape_off_layer&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;langmuir_probes/reciprocating/plunge/t_e_average&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;langmuir_probes/reciprocating/plunge/t_e_average&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;neutron_rate&quot;,
+   &quot;successor&quot;: &quot;total_neutron_rate&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;summary/fusion/neutron_rates/total/value&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;summary/fusion/neutron_rates/total/value&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;outer_hard_xray_half_width&quot;,
+   &quot;successor&quot;: &quot;outer_hard_xray_half_width_at_emissivity_peak&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;hard_x_rays/emissivity_profile_1d/half_width_external&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;hard_x_rays/emissivity_profile_1d/half_width_external&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;poloidal_ion_state_momentum_diffusion_coefficient&quot;,
+   &quot;successor&quot;: &quot;poloidal_ion_charge_state_momentum_diffusion_coefficient&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;plasma_transport/model/ggd/ion/state/momentum/d_pol/values&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;edge_transport/model/ggd/ion/state/momentum/d_pol/values&quot;,
+    &quot;plasma_transport/model/ggd/ion/state/momentum/d_pol/values&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;poloidal_neutral_momentum_diffusivity&quot;,
+   &quot;successor&quot;: &quot;poloidal_neutral_momentum_diffusion_coefficient&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;edge_transport/model/ggd/neutral/momentum/d_pol/values&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;edge_transport/model/ggd/neutral/momentum/d_pol/values&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;spectral_wave_opacity_line_integrated_at_ece_channel_emission_position&quot;,
+   &quot;successor&quot;: &quot;opacity_at_ece_channel_emission_position&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;ece/channel/optical_depth&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;ece/channel/optical_depth&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;toroidal_angle_of_along_pellet_path&quot;,
+   &quot;successor&quot;: &quot;toroidal_coordinate_at_pellet_path_point&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;pellets/time_slice/pellet/path_geometry/first_point/phi&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;pellets/time_slice/pellet/path_geometry/first_point/phi&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;total_power_of_neutral_beam_injector&quot;,
+   &quot;successor&quot;: &quot;launched_power_due_to_neutral_beam_injection&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;summary/heating_current_drive/power_launched_nbi/value&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;nbi/unit/power_launched&quot;,
+    &quot;summary/heating_current_drive/power_launched_nbi/value&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;voltage_amplitude&quot;,
+   &quot;successor&quot;: &quot;voltage_amplitude_of_ion_cyclotron_heating_antenna&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;ic_antennas/antenna/module/voltage/amplitude&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;ic_antennas/antenna/module/voltage/amplitude&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  },
+  {
+   &quot;predecessor&quot;: &quot;width_of_antenna_strap&quot;,
+   &quot;successor&quot;: &quot;toroidal_width_of_antenna_strap&quot;,
+   &quot;predecessor_binds_source&quot;: 0,
+   &quot;recorded_paths&quot;: [
+    &quot;ic_antennas/antenna/module/strap/width_phi&quot;
+   ],
+   &quot;successor_holds_paths&quot;: [
+    &quot;ic_antennas/antenna/module/strap/width_phi&quot;
+   ],
+   &quot;paths_successor_does_not_hold&quot;: []
+  }
+ ]
+}</pre>
+<h3 id='sib-settle-unchained-holders-verify'>Classifier read-back (raise on mismatch)</h3>
+<pre id='sib-settle-unchained-holders-verify-pre'>{
+ &quot;command&quot;: [
+  &quot;# command: uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders python /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders/docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py verify --run-dir /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders --run-id r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+  &quot;# revision: e4def604bbabcf2fa6551640c99113360658f61e&quot;
+ ],
+ &quot;exit_code&quot;: 0,
+ &quot;payload&quot;: {
+  &quot;counts&quot;: {
+   &quot;dropped_edge&quot;: 45,
+   &quot;derived_parent&quot;: 2,
+   &quot;never_bound&quot;: 23,
+   &quot;unchained_holder&quot;: 19,
+   &quot;orphan_awaiting_retirement&quot;: 3
+  },
+  &quot;unchained_holder_count&quot;: 19,
+  &quot;targets&quot;: [
+   &quot;derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate&quot;,
+   &quot;electron_average_temperature_at_midplane&quot;,
+   &quot;neutron_rate&quot;,
+   &quot;outer_hard_xray_half_width&quot;,
+   &quot;poloidal_ion_state_momentum_diffusion_coefficient&quot;,
+   &quot;poloidal_neutral_momentum_diffusivity&quot;,
+   &quot;spectral_wave_opacity_line_integrated_at_ece_channel_emission_position&quot;,
+   &quot;toroidal_angle_of_along_pellet_path&quot;,
+   &quot;total_power_of_neutral_beam_injector&quot;,
+   &quot;voltage_amplitude&quot;,
+   &quot;width_of_antenna_strap&quot;
+  ],
+  &quot;receipt_names&quot;: 11,
+  &quot;receipt_targets&quot;: [
+   &quot;derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate&quot;,
+   &quot;electron_average_temperature_at_midplane&quot;,
+   &quot;neutron_rate&quot;,
+   &quot;outer_hard_xray_half_width&quot;,
+   &quot;poloidal_ion_state_momentum_diffusion_coefficient&quot;,
+   &quot;poloidal_neutral_momentum_diffusivity&quot;,
+   &quot;spectral_wave_opacity_line_integrated_at_ece_channel_emission_position&quot;,
+   &quot;toroidal_angle_of_along_pellet_path&quot;,
+   &quot;total_power_of_neutral_beam_injector&quot;,
+   &quot;voltage_amplitude&quot;,
+   &quot;width_of_antenna_strap&quot;
+  ],
+  &quot;targets_without_receipt&quot;: [],
+  &quot;receipt_operations&quot;: [
+   &quot;link_signed_successor&quot;
+  ],
+  &quot;digests&quot;: [
+   &quot;391037a53a7f8b1987fa2e57fbfabccddd7b4571ad4e6a7e65e728b71d98e350&quot;
+  ],
+  &quot;retired_stages&quot;: [
+   [
+    &quot;superseded&quot;,
+    &quot;superseded&quot;
+   ]
+  ],
+  &quot;before&quot;: {
+   &quot;dropped_edge&quot;: 45,
+   &quot;derived_parent&quot;: 2,
+   &quot;never_bound&quot;: 28,
+   &quot;unchained_holder&quot;: 30,
+   &quot;orphan_awaiting_retirement&quot;: 3
+  },
+  &quot;expected_unchained_holder&quot;: 19,
+  &quot;moved_other_populations&quot;: {
+   &quot;never_bound&quot;: [
+    28,
+    23
+   ]
+  },
+  &quot;unchained_holder_entered&quot;: [],
+  &quot;unchained_holder_left&quot;: [
+   &quot;derivative_of_area_of_flux_surface_with_respect_to_normalized_poloidal_flux_coordinate&quot;,
+   &quot;electron_average_temperature_at_midplane&quot;,
+   &quot;neutron_rate&quot;,
+   &quot;outer_hard_xray_half_width&quot;,
+   &quot;poloidal_ion_state_momentum_diffusion_coefficient&quot;,
+   &quot;poloidal_neutral_momentum_diffusivity&quot;,
+   &quot;spectral_wave_opacity_line_integrated_at_ece_channel_emission_position&quot;,
+   &quot;toroidal_angle_of_along_pellet_path&quot;,
+   &quot;total_power_of_neutral_beam_injector&quot;,
+   &quot;voltage_amplitude&quot;,
+   &quot;width_of_antenna_strap&quot;
+  ],
+  &quot;shortfall&quot;: [],
+  &quot;checks&quot;: {
+   &quot;unchained_holder_fell_by_retired&quot;: true,
+   &quot;unchained_holder_set_is_baseline_minus_retired&quot;: true,
+   &quot;every_target_has_receipt&quot;: true,
+   &quot;no_receipt_outside_targets&quot;: true,
+   &quot;all_targets_superseded&quot;: true
+  },
+  &quot;foreign_population_moves&quot;: {
+   &quot;never_bound&quot;: [
+    28,
+    23
+   ]
+  }
+ }
+}</pre>
+<h3 id='sib-settle-unchained-holders-falsify'>Read-back shown able to fail</h3>
+<pre id='sib-settle-unchained-holders-falsify-pre'>{
+ &quot;command&quot;: [
+  &quot;# command: uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders python /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-settle-unchained-holders/docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py falsify --run-dir /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T021901634768-sib-settle-unchained-holders --run-id r-20261019T021901634768-sib-settle-unchained-holders&quot;,
+  &quot;# revision: e4def604bbabcf2fa6551640c99113360658f61e&quot;
+ ],
+ &quot;exit_code&quot;: 0,
+ &quot;payload&quot;: {
+  &quot;check_failed_as_expected&quot;: true,
+  &quot;detail&quot;: &quot;read-back mismatch: {&#x27;unchained_holder_fell_by_retired&#x27;: False, &#x27;unchained_holder_set_is_baseline_minus_retired&#x27;: True, &#x27;every_target_has_receipt&#x27;: True, &#x27;no_receipt_outside_targets&#x27;: True, &#x27;all_targets_superseded&#x27;: True} :: {&#x27;counts&#x27;: {&#x27;dropped_edge&#x27;: 45, &#x27;derived_parent&#x27;: 2, &#x27;never_bound&#x27;: 23, &#x27;un&quot;
+ }
+}</pre>
+<h3 id='sib-settle-unchained-holders-negcontrol'>Negative control (planted different-quantity pair)</h3>
+<pre id='sib-settle-unchained-holders-negcontrol-pre'>{
+ &quot;planted&quot;: {
+  &quot;id&quot;: &quot;PLANTED-neutron_rate&quot;,
+  &quot;holder&quot;: &quot;PLANTED-voltage_amplitude&quot;,
+  &quot;choice&quot;: &quot;different quantity&quot;,
+  &quot;probability&quot;: 0.99,
+  &quot;confidence&quot;: 0.98,
+  &quot;answered&quot;: true
+ },
+ &quot;admitted_by_floors&quot;: [],
+ &quot;refused&quot;: true
+}</pre>
