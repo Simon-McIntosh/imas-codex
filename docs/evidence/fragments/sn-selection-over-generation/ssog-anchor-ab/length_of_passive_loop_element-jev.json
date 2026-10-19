@@ -1,0 +1,57 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "length_of_passive_loop_element",
+  "arm": "jev",
+  "budget_limit_usd": 2.0,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-jev",
+    "git_head": "c96f0f0d874b01c4b623a395637fc17018e66831",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-jev/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "dump_bytes": 2643183686,
+  "failure": {
+    "exit_status": 1,
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T122811246805-ssog-anchor-passive-loop-jev/runner-jev-final.log",
+    "phase": "scratch-isolation",
+    "probe": {
+      "live_nodes": 1771162,
+      "live_probe": 0,
+      "marked_scratch_nodes": 1770104,
+      "restored_scratch_nodes": 1770101,
+      "scratch_nodes": 1770101,
+      "scratch_probe": 1
+    },
+    "reason": "Scratch-only marker contrast failed before harmonization"
+  },
+  "family": "length_of_passive_loop_element",
+  "heuristic_anchor": "major_length_of_passive_loop_element",
+  "jev_anchor": "length_of_passive_loop_element",
+  "kind": "unclassified",
+  "members": [
+    "length_of_passive_loop_element",
+    "major_length_of_passive_loop_element",
+    "minor_length_of_passive_loop_element"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T122811246805-ssog-anchor-passive-loop-jev/mcintos-1281970-ck4mjas8/instance/logs/neo4j-temp.log",
+  "outcome_status": "failed-isolation",
+  "port": 28002,
+  "scratch_removed": {
+    "at": "2026-10-19T13:10:37.139921+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T122811246805-ssog-anchor-passive-loop-jev/mcintos-1281970-ck4mjas8"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T122811246805-ssog-anchor-passive-loop-jev/mcintos-1281970-ck4mjas8",
+  "scratch_uri": "bolt://127.0.0.1:28002",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "started_at": "2026-10-19T12:36:26.412457+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T13:10:27.647767+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T122811246805-ssog-anchor-passive-loop-jev/mcintos-1281970-ck4mjas8/instance"
+  }
+}
