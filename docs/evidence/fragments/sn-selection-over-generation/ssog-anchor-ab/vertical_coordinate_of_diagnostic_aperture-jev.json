@@ -1,0 +1,240 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "y_coordinate_of_diagnostic_aperture",
+  "applied": true,
+  "arm": "jev",
+  "budget_limit_usd": 2.0,
+  "calls": 48,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-aperture-jev",
+    "git_head": "c96f0f0d874b01c4b623a395637fc17018e66831",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-aperture-jev/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-19T13:10:17.966578+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 48,
+      "scratch_ledger_rows": 48,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 96
+  },
+  "cost_limit_passed_usd": 1.98,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T13:10:14.016677+00:00",
+  "family": "vertical_coordinate_of_diagnostic_aperture",
+  "harmonize_receipts": [
+    {
+      "anchor": "y_coordinate_of_diagnostic_aperture",
+      "applied": true,
+      "batches": [
+        [
+          "y_coordinate_of_diagnostic_aperture"
+        ],
+        [
+          "vertical_coordinate_of_diagnostic_aperture",
+          "x_coordinate_of_diagnostic_aperture"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "6c3142d94cd1c783e819ffd03dfdb49770ef620ce8a7d95d642a6667145f7a72",
+      "harmonized": false,
+      "invariant": [
+        "",
+        "coordinate",
+        "",
+        "",
+        "diagnostic_aperture"
+      ],
+      "member_scores": {
+        "vertical_coordinate_of_diagnostic_aperture": 0.875,
+        "x_coordinate_of_diagnostic_aperture": 0.91875,
+        "y_coordinate_of_diagnostic_aperture": 0.89375
+      },
+      "members": [
+        "vertical_coordinate_of_diagnostic_aperture",
+        "x_coordinate_of_diagnostic_aperture",
+        "y_coordinate_of_diagnostic_aperture"
+      ],
+      "n": 3,
+      "physical_base": "",
+      "planned_calls": 3,
+      "result": {
+        "batches_run": 2,
+        "batches_total": 2,
+        "halt_reasons": [],
+        "halted": false,
+        "resume_from": null,
+        "run_ids": [
+          "648578c5-3e2d-4648-9681-418a1235b2b8",
+          "4c912a72-fde8-4d96-bd77-7b91512b3f3a"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 3,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.778,
+        "total_quarantined": 0,
+        "total_selected": 3,
+        "total_touched": 3
+      },
+      "reverse_links": {
+        "added": 0,
+        "members": 3,
+        "protected": [],
+        "removed": 0,
+        "written": 0
+      },
+      "score_regressions": {
+        "below_threshold": [],
+        "fell": [
+          {
+            "after": 0.875,
+            "before": 0.89375,
+            "id": "y_coordinate_of_diagnostic_aperture"
+          }
+        ]
+      },
+      "scores_after": {
+        "vertical_coordinate_of_diagnostic_aperture": 1.0,
+        "x_coordinate_of_diagnostic_aperture": 1.0,
+        "y_coordinate_of_diagnostic_aperture": 0.875
+      },
+      "stamped": true
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 2,
+    "batches_total": 2,
+    "halt_reasons": [],
+    "halted": false,
+    "resume_from": null,
+    "run_ids": [
+      "648578c5-3e2d-4648-9681-418a1235b2b8",
+      "4c912a72-fde8-4d96-bd77-7b91512b3f3a"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 3,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.778,
+    "total_quarantined": 0,
+    "total_selected": 3,
+    "total_touched": 3
+  },
+  "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+  "isolation": {
+    "at": "2026-10-19T12:32:04.719312+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771162,
+    "live_nodes_after": 1771162,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 48,
+    "scratch_ledger_rows": 48,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28000"
+  },
+  "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+  "kind": "coordinate",
+  "ledger_calls": 48,
+  "ledger_spend_usd": 0.7780130000000001,
+  "ledger_window": {
+    "ended": "2026-10-19T13:10:16.499217+00:00",
+    "started": "2026-10-19T12:32:09.294182+00:00"
+  },
+  "lint_after": 0,
+  "lint_after_classes": {},
+  "lint_before": 2,
+  "lint_before_classes": {
+    "convention_violation": 1,
+    "link_missing_reverse": 1
+  },
+  "members": [
+    "vertical_coordinate_of_diagnostic_aperture",
+    "x_coordinate_of_diagnostic_aperture",
+    "y_coordinate_of_diagnostic_aperture"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T122440955153-ssog-anchor-aperture-jev/tmpdsrp073x/mcintos-1281970-rfa0pfy0/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 5,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.36912200000000006
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.003969
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.191656
+    },
+    {
+      "calls": 5,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.20779599999999998
+    },
+    {
+      "calls": 32,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.005470000000000003
+    }
+  ],
+  "planned_calls": 3,
+  "port": 28000,
+  "recorded_anchor_before": "y_coordinate_of_diagnostic_aperture",
+  "run_ids": [
+    "648578c5-3e2d-4648-9681-418a1235b2b8",
+    "4c912a72-fde8-4d96-bd77-7b91512b3f3a"
+  ],
+  "scores_after": {
+    "vertical_coordinate_of_diagnostic_aperture": 1.0,
+    "x_coordinate_of_diagnostic_aperture": 1.0,
+    "y_coordinate_of_diagnostic_aperture": 0.875
+  },
+  "scores_before": {
+    "vertical_coordinate_of_diagnostic_aperture": 0.875,
+    "x_coordinate_of_diagnostic_aperture": 0.91875,
+    "y_coordinate_of_diagnostic_aperture": 0.89375
+  },
+  "scratch_removed": {
+    "at": "2026-10-19T13:10:35.766535+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T122440955153-ssog-anchor-aperture-jev/tmpdsrp073x/mcintos-1281970-rfa0pfy0"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T122440955153-ssog-anchor-aperture-jev/tmpdsrp073x/mcintos-1281970-rfa0pfy0",
+  "scratch_uri": "bolt://127.0.0.1:28000",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.7780130000000001,
+  "stamped": true,
+  "started_at": "2026-10-19T12:28:42.264724+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T13:10:33.605438+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T122440955153-ssog-anchor-aperture-jev/tmpdsrp073x/mcintos-1281970-rfa0pfy0/instance"
+  },
+  "wall_seconds": 2284.7224487224594
+}
