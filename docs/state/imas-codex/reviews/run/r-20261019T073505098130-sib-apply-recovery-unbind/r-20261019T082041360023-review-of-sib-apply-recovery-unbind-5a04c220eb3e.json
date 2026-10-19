@@ -39,6 +39,11 @@
       "kind": "exempted",
       "reason": "Real gap, recorded on the plan: the recovery-unbind program has no production builder for its own schema, so this driver and the test helper serialize it separately. The writer's loader verified the signature and the preview ran before the apply, so the authority used here was checked by the owner.",
       "recorded_at": "2026-10-19T12:38:11.143588+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The reviewer confirms the next line asserts the rise independently; the redundant assertion guards nothing false.",
+      "recorded_at": "2026-10-19T12:38:19.773787+00:00"
     }
   },
   "findings": [
