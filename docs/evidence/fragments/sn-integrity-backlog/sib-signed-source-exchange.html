@@ -22,7 +22,8 @@ manifest digest; apply re-derives and compares that closure before writing.</p>
 <p id="sib-signed-source-exchange-admission">A row is refused before any write
 when the giving name is absent, exhausted or superseded; its given source does
 not produce exactly that name; the taken DD path is absent or removed from the
-current DD; a live name already holds the taken source; the receiving name is
+current DD; the taken source node does not exist; a live name already holds
+the taken source; the receiving name is
 absent, exhausted or superseded; or the given DD path is absent or removed when
 there is a receiver. A taken source with any existing producing edge is also
 refused, since it cannot meet the exact ownership postcondition. Overlapping
@@ -64,14 +65,20 @@ immutable DD snapshot pinned to <code>4.1.0</code>. Apply preserves that
 snapshot while validating the path against the current DD. The giving name is
 accepted and the receiving name is reviewed; neither DD path is marked
 removed.</p>
+<p id="sib-signed-source-exchange-input-gap">The separately prepared
+apply-rulings HTML and JSON receipts referenced in the brief were absent from
+both this base checkout and the main checkout at inspection time. Their two
+prior refusal receipts and missing-owner statement could not be quoted here;
+the live closure and read-only preview above are the fresh evidence for this
+writer's admission decision.</p>
 
 <h2 id="sib-signed-source-exchange-measure">Gate and negative control</h2>
 <p id="sib-signed-source-exchange-gate">The baseline signed-manifest import
 gate completed with <strong>254 passed, 46 deselected, zero failures</strong>
 (<code>baseline-suite.log</code>, <code>EXIT=0</code>). The head gate includes
-the new test file and completed with <strong>269 passed, 46 deselected, zero
+the new test file and completed with <strong>270 passed, 46 deselected, zero
 failures</strong> (<code>head-suite.log</code>, <code>EXIT=0</code>): zero
-added failures. The focused source-exchange file has 15 passing cases. The
+added failures. The focused source-exchange file has 16 passing cases. The
 Cypher property checker completed with 4 passed (<code>cypher-property.log</code>,
 <code>EXIT=0</code>). A read-only <code>EXPLAIN</code> against Neo4j parsed
 all seven source-exchange statements (<code>cypher-explain.log</code>,
