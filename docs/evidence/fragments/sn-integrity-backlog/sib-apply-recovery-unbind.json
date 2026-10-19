@@ -2,6 +2,113 @@
   "authority_file_sha256": "f508bc37bb04b30da8a91b07614c56eff48e93519ae7211e8a6acce6621f44f0",
   "authority_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-apply-recovery-unbind/docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-authority.json",
   "authority_schema": "imas-codex.recovery-binding-unbind.v1",
+  "classifier_after": {
+    "count": 95,
+    "counts_by_kind": {
+      "derived_parent": 2,
+      "dropped_edge": 50,
+      "never_bound": 21,
+      "orphan_awaiting_retirement": 3,
+      "unchained_holder": 19
+    },
+    "names": [
+      "absorbed_coolant_power_of_plant_component_port",
+      "beam_cross_sectional_area_of_aperture",
+      "beta",
+      "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+      "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+      "count_normalized_at_detector_pixel",
+      "cross_field_wave_vector_magnitude",
+      "deposited_energy_accumulated_of_plasma_facing_component",
+      "deposited_power_at_divertor_target",
+      "electron_energy_flux_limiter_coefficient",
+      "electron_heat_diffusivity",
+      "electron_particle_diffusion_coefficient",
+      "electron_particle_diffusivity",
+      "electron_temperature_at_first_wall",
+      "electron_temperature_at_midplane",
+      "electrostatic_potential_at_outboard_midplane",
+      "electrostatic_potential_at_wall",
+      "energy_diffusion_coefficient_due_to_diffusion",
+      "energy_flux_at_control_surface",
+      "energy_flux_at_wall_due_to_eddy_current",
+      "fast_electron_source_rate",
+      "fast_electron_source_rate_due_to_compton_scattering",
+      "fast_electron_source_rate_due_to_hot_tail",
+      "first_local_tangential_width_of_reflectometer_antenna",
+      "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "flux_surface_normal_neutral_energy_diffusion_coefficient",
+      "fraction_of_neutron_detector_converter",
+      "front_surface_area_of_langmuir_probe",
+      "gap_of_antenna_strap",
+      "hard_xray_rate",
+      "heat_power_of_divertor",
+      "ion_charge_state_energy_flux_limiter_coefficient",
+      "ion_power",
+      "ion_pressure",
+      "ion_state_energy_flux_limiter_coefficient",
+      "ion_temperature_at_outboard_midplane_separatrix",
+      "length_of_passive_structure",
+      "magnetic_shear_at_pedestal_top",
+      "maximum_power_at_inner_divertor_target",
+      "maximum_power_at_outer_divertor_target",
+      "molecular_gas_count_due_to_pellet_injection",
+      "momentum_due_to_hot_tail",
+      "net_forward_power_of_wave_beam",
+      "net_plasma_current_due_to_ohmic_current_drive",
+      "net_plasma_power_density",
+      "neutral_beam_atomic_number",
+      "neutron_flux_due_to_fusion",
+      "normal_particle_flux_at_wall_due_to_recombination",
+      "normalized_poloidal_magnetic_flux_at_pedestal_top",
+      "normalized_toroidal_thermal_plasma_beta",
+      "parallel_bulk_ion_velocity",
+      "parallel_incident_heat_flux_at_divertor_target",
+      "parallel_normalized_perturbed_magnetic_field",
+      "parallel_thermal_neutral_energy_diffusivity",
+      "perpendicular_ion_velocity_due_to_diamagnetic_drift",
+      "perturbed_linear_mhd_mode_number",
+      "perturbed_vector_potential",
+      "poloidal_effective_ion_diffusion_coefficient",
+      "power_over_core_region_due_to_impurity_radiation",
+      "radial_coordinate_of_vacuum_vessel",
+      "radial_effective_thermal_energy_velocity_due_to_convection",
+      "radial_surface_normal_of_control_surface",
+      "radiative_temperature",
+      "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
+      "root_mean_square_spectral_width_of_spectrometer_channel",
+      "second_local_tangential_width_of_diagnostic_aperture",
+      "surface_temperature_at_sensor_attachment_point",
+      "tangential_curvature_inverse_of_optical_element",
+      "tendency_of_runaway_electron_density",
+      "thermal_energy_of_plant_component_port",
+      "thickness_of_passive_loop",
+      "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
+      "toroidal_cumulative_inside_flux_surface_total_plasma_momentum_at_separatrix",
+      "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
+      "toroidal_wave_vector_normalized_of_beam_tracing_beam",
+      "total_absorbed_power_of_plant_system",
+      "total_deuterium_tritium_neutron_source_rate_due_to_beam_beam_fusion",
+      "total_electron_power_density",
+      "total_incident_thermal_power",
+      "total_ion_momentum_diffusivity",
+      "total_particle_count_accumulated_due_to_gas_injection",
+      "total_particle_flux",
+      "total_particle_flux_at_divertor_target_due_to_recycling",
+      "total_suprathermal_electron_power_density_due_to_collisions",
+      "trapped_fast_particle_power_density_due_to_collisions",
+      "vertical_coordinate_of_active_limiter_point",
+      "vertical_coordinate_of_passive_loop",
+      "vertical_position_of_grating",
+      "vertical_total_ion_momentum_diffusivity",
+      "voltage_of_diagnostic_antenna",
+      "volume_averaged_electron_number_density_over_scrape_off_layer",
+      "volume_averaged_linear_electron_decay_time",
+      "volume_integrated_net_plasma_particle_power_density",
+      "wave_magnetic_field_amplitude",
+      "width_of_aperture"
+    ]
+  },
   "classifier_before": {
     "count": 79,
     "counts_by_kind": {
@@ -96,6 +203,85 @@
   "input": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-apply-recovery-unbind/docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources.json",
   "left_alone_count": 0,
   "matched_count": 16,
+  "path_recorder_instrument": {
+    "with_source_path": 3327,
+    "with_source_paths": 2481
+  },
+  "post_apply_refusal_control": {
+    "counts": {
+      "admitted": 0,
+      "authority_rows": 16,
+      "refused": 16
+    },
+    "outcome": "refused",
+    "refusals": [
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "electron_particle_diffusion_coefficient"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "flux_surface_normal_neutral_energy_diffusion_coefficient"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "heat_power_of_divertor"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "ion_temperature_at_outboard_midplane_separatrix"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "parallel_thermal_neutral_energy_diffusivity"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "perpendicular_ion_velocity_due_to_diamagnetic_drift"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "perturbed_linear_mhd_mode_number"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "poloidal_effective_ion_diffusion_coefficient"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "second_local_tangential_width_of_diagnostic_aperture"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "tendency_of_runaway_electron_density"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "vertical_position_of_grating"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "vertical_total_ion_momentum_diffusivity"
+      },
+      {
+        "reason": "recovery binding does not exist",
+        "row_id": "wave_magnetic_field_amplitude"
+      }
+    ],
+    "would_change": 0
+  },
   "preview": {
     "authority_file_sha256": "f508bc37bb04b30da8a91b07614c56eff48e93519ae7211e8a6acce6621f44f0",
     "authority_payload_sha256": "f37dcd819ba29abfe7817b1856bdfe2c94572753c6598061aed94b69ea33c105",
@@ -324,13 +510,22 @@
     "receipt_rows": 16,
     "schema": "imas-codex.signed-recovery-unbind-receipt.v1"
   },
-  "recorded_at": "2026-10-19T08:03:17.084460+00:00",
+  "recorded_at": "2026-10-19T08:14:44.635669+00:00",
   "rows": [
     {
       "action": "unbind",
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "plasma_transport/model/ggd/electrons/particles/d/values",
       "confidence": 0.54,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "plasma_transport/model/ggd/electrons/particles/d/values",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402276"
@@ -342,6 +537,17 @@
       "name": "electron_particle_diffusion_coefficient",
       "original_reason": "P(choice) 0.77 below 0.8",
       "probability": 0.77,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:plasma_transport/model/ggd/electrons/particles/d/values"
     },
     {
@@ -349,6 +555,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
       "confidence": 0.12,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "plasma_transport/model/ggd/neutral/energy/d_radial/values",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402281"
@@ -360,6 +575,17 @@
       "name": "flux_surface_normal_neutral_energy_diffusion_coefficient",
       "original_reason": "P(choice) 0.56 below 0.8",
       "probability": 0.56,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:plasma_transport/model/ggd/neutral/energy/d_radial/values"
     },
     {
@@ -367,6 +593,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "balance_of_plant/power_plant/heat_load_divertor",
       "confidence": 0.26,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "balance_of_plant/power_plant/heat_load_divertor",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402284"
@@ -378,6 +613,17 @@
       "name": "heat_power_of_divertor",
       "original_reason": "P(choice) 0.63 below 0.8",
       "probability": 0.63,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:balance_of_plant/power_plant/heat_load_divertor"
     },
     {
@@ -385,6 +631,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "langmuir_probes/reciprocating/plunge/collector/t_i",
       "confidence": 0.08,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "langmuir_probes/reciprocating/plunge/collector/t_i",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402288"
@@ -396,6 +651,17 @@
       "name": "ion_temperature_at_outboard_midplane_separatrix",
       "original_reason": "P(choice) 0.54 below 0.8",
       "probability": 0.54,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:langmuir_probes/reciprocating/plunge/collector/t_i"
     },
     {
@@ -403,6 +669,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
       "confidence": 0.52,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "edge_transport/model/ggd/neutral/energy/d_parallel/values",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402303"
@@ -414,6 +689,17 @@
       "name": "parallel_thermal_neutral_energy_diffusivity",
       "original_reason": "P(choice) 0.76 below 0.8",
       "probability": 0.76,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:edge_transport/model/ggd/neutral/energy/d_parallel/values"
     },
     {
@@ -421,6 +707,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
       "confidence": 0.55,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402304"
@@ -432,6 +727,17 @@
       "name": "perpendicular_ion_velocity_due_to_diamagnetic_drift",
       "original_reason": "P(choice) 0.70 below 0.8",
       "probability": 0.7,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:edge_profiles/ggd/ion/velocity_over_b_field/diamagnetic"
     },
     {
@@ -439,6 +745,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "distribution_sources/source/markers/orbit_integrals/m_pol",
       "confidence": 0.02,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "distribution_sources/source/markers/orbit_integrals/m_pol",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402305"
@@ -450,6 +765,17 @@
       "name": "perturbed_linear_mhd_mode_number",
       "original_reason": "P(choice) 0.51 below 0.8",
       "probability": 0.51,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:distribution_sources/source/markers/orbit_integrals/m_pol"
     },
     {
@@ -457,6 +783,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "edge_transport/model/ggd/ion/particles/d_pol/values",
       "confidence": 0.52,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "edge_transport/model/ggd/ion/particles/d_pol/values",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402306"
@@ -468,6 +803,17 @@
       "name": "poloidal_effective_ion_diffusion_coefficient",
       "original_reason": "P(choice) 0.76 below 0.8",
       "probability": 0.76,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:edge_transport/model/ggd/ion/particles/d_pol/values"
     },
     {
@@ -475,6 +821,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
       "confidence": 0.34,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "cryostat/description_2d/cryostat/unit/material_volume_fraction",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402310"
@@ -486,6 +841,17 @@
       "name": "ratio_of_volume_of_wall_material_to_volume_of_passive_structure",
       "original_reason": "P(choice) 0.67 below 0.8",
       "probability": 0.67,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:cryostat/description_2d/cryostat/unit/material_volume_fraction"
     },
     {
@@ -493,6 +859,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "neutron_diagnostic/detector/aperture/x2_width",
       "confidence": 0.28,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "neutron_diagnostic/detector/aperture/x2_width",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402312"
@@ -504,6 +879,17 @@
       "name": "second_local_tangential_width_of_diagnostic_aperture",
       "original_reason": "P(choice) 0.64 below 0.8",
       "probability": 0.64,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:neutron_diagnostic/detector/aperture/x2_width"
     },
     {
@@ -511,6 +897,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
       "confidence": 0.24,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "runaway_electrons/ggd_fluid/ddensity_dt_tritium/values",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402314"
@@ -522,6 +917,17 @@
       "name": "tendency_of_runaway_electron_density",
       "original_reason": "P(choice) 0.62 below 0.8",
       "probability": 0.62,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:runaway_electrons/ggd_fluid/ddensity_dt_tritium/values"
     },
     {
@@ -529,6 +935,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
       "confidence": 0.52,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402317"
@@ -540,6 +955,17 @@
       "name": "toroidal_co_passing_fast_electron_torque_density_due_to_collisional_transport",
       "original_reason": "P(choice) 0.76 below 0.8",
       "probability": 0.76,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_fast_phi"
     },
     {
@@ -547,6 +973,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
       "confidence": 0.56,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402318"
@@ -558,6 +993,17 @@
       "name": "toroidal_trapped_fast_electron_torque_density_due_to_collisional_transport",
       "original_reason": "P(choice) 0.78 below 0.8",
       "probability": 0.78,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:distributions/distribution/profiles_1d/trapped/collisions/electrons/torque_fast_phi"
     },
     {
@@ -565,6 +1011,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
       "confidence": 0,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "spectrometer_x_ray_crystal/channel/reflector/centre/z",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402323"
@@ -576,6 +1031,17 @@
       "name": "vertical_position_of_grating",
       "original_reason": "P(choice) 0.50 below 0.8",
       "probability": 0.5,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:spectrometer_x_ray_crystal/channel/reflector/centre/z"
     },
     {
@@ -583,6 +1049,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "plasma_transport/model/ggd/ion/momentum/d/z",
       "confidence": 0.56,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "plasma_transport/model/ggd/ion/momentum/d/z",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1402325"
@@ -594,6 +1069,17 @@
       "name": "vertical_total_ion_momentum_diffusivity",
       "original_reason": "P(choice) 0.78 below 0.8",
       "probability": 0.78,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:plasma_transport/model/ggd/ion/momentum/d/z"
     },
     {
@@ -601,6 +1087,15 @@
       "before_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-before-snapshots.json",
       "candidate": "waves/coherent_wave/full_wave/b_field/normal/values",
       "confidence": 0.36,
+      "freed_path": {
+        "available_in_graph": true,
+        "dd_path": "waves/coherent_wave/full_wave/b_field/normal/values",
+        "other_live_name_could_take": true,
+        "other_live_recorders": [],
+        "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths",
+        "remaining_holders": [],
+        "source_dd_path_positive_control": true
+      },
       "match": {
         "binding_ids": [
           "5:64c142ee-5782-46f9-a287-8df126a67943:1404429"
@@ -612,7 +1107,25 @@
       "name": "wave_magnetic_field_amplitude",
       "original_reason": "P(choice) 0.68 below 0.8",
       "probability": 0.68,
+      "readback": {
+        "after_snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T073505098130-sib-apply-recovery-unbind/recovery-unbind-after-snapshots.json",
+        "binding_gone": true,
+        "name_unchanged": true,
+        "other_edges_unchanged": true,
+        "source_status": "attached",
+        "source_status_unchanged": true,
+        "source_unchanged": true,
+        "sourceless": true,
+        "stage_unchanged": true
+      },
       "source_id": "dd:waves/coherent_wave/full_wave/b_field/normal/values"
     }
-  ]
+  ],
+  "verification": {
+    "all_rows_checked": true,
+    "applied": 16,
+    "increase": 16,
+    "sourceless_after": 95,
+    "sourceless_before": 79
+  }
 }

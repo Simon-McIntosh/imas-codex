@@ -9,6 +9,7 @@ import os
 import time
 from collections import Counter
 from datetime import UTC, datetime
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +22,7 @@ HERE = Path(__file__).resolve().parent
 INPUT = HERE / "sib-restore-lineage-sources.json"
 AUTHORITY = Path(__file__).with_name("sib-apply-recovery-unbind-authority.json")
 RECORD = Path(__file__).with_name("sib-apply-recovery-unbind.json")
+FRAGMENT = Path(__file__).with_name("sib-apply-recovery-unbind.html")
 RUN_DIR = Path(os.environ["RECOVERY_UNBIND_RUN_DIR"])
 BEFORE_SNAPSHOTS = RUN_DIR / "recovery-unbind-before-snapshots.json"
 AFTER_SNAPSHOTS = RUN_DIR / "recovery-unbind-after-snapshots.json"
@@ -337,6 +339,19 @@ def verify() -> None:
         paths = [
             row["candidate"] for row in record["rows"] if row["action"] == "unbind"
         ]
+        recorder_control = query(
+            graph,
+            """MATCH (name:StandardName)
+            RETURN count(name.source_path) AS with_source_path,
+                   count(CASE WHEN size(coalesce(name.source_paths, [])) > 0 THEN 1 END)
+                   AS with_source_paths""",
+        )[0]
+        if (
+            not recorder_control["with_source_path"]
+            or not recorder_control["with_source_paths"]
+        ):
+            raise RuntimeError("live name path-property query has no positive control")
+        record["path_recorder_instrument"] = recorder_control
         candidates = query(
             graph,
             """UNWIND $paths AS path
@@ -363,6 +378,10 @@ def verify() -> None:
                 RETURN [name IN collect(holder.id) WHERE name IS NOT NULL] AS holders""",
                 source_id=row["source_id"],
             )
+            assert not holders[0]["holders"], f"DD path remains bound for {row['name']}"
+            assert (
+                after_snapshots[row["name"]]["source"]["dd_path"] == row["candidate"]
+            ), f"DD source path identity changed for {row['name']}"
             other_recorders = [
                 candidate
                 for candidate in by_path[row["candidate"]]
@@ -373,7 +392,11 @@ def verify() -> None:
                 "remaining_holders": holders[0]["holders"],
                 "available_in_graph": not holders[0]["holders"],
                 "other_live_recorders": other_recorders,
-                "other_live_name_could_take": bool(other_recorders),
+                "other_live_name_could_take": not holders[0]["holders"],
+                "source_dd_path_positive_control": True,
+                "reassignment_condition": "A different live name may bind this free path after semantic review; no other live name has it in source_path or source_paths"
+                if not other_recorders
+                else "A different live name may bind this free path after semantic review; other live path recorders are listed",
             }
     AFTER_SNAPSHOTS.write_text(
         json.dumps(after_snapshots, indent=2, sort_keys=True) + "\n"
@@ -389,11 +412,159 @@ def verify() -> None:
     print(json.dumps(record["verification"], sort_keys=True))
 
 
+def refusal_control() -> None:
+    record = read()
+    outcome = run_writer(apply=False)
+    record["post_apply_refusal_control"] = {
+        "outcome": outcome["outcome"],
+        "would_change": outcome["would_change"],
+        "counts": outcome["counts"],
+        "refusals": outcome["refusals"],
+    }
+    save(record)
+    expected_names = {
+        row["name"] for row in record["rows"] if row["action"] == "unbind"
+    }
+    refused_names = {row["row_id"] for row in outcome["refusals"]}
+    if (
+        outcome["outcome"] != "refused"
+        or outcome["would_change"] != 0
+        or refused_names != expected_names
+    ):
+        raise RuntimeError(
+            "absent-edge refusal control did not fire for every applied row"
+        )
+    if {row["reason"] for row in outcome["refusals"]} != {
+        "recovery binding does not exist"
+    }:
+        raise RuntimeError("absent-edge refusal control produced an unexpected reason")
+    print(json.dumps(record["post_apply_refusal_control"], sort_keys=True))
+
+
+def render() -> None:
+    record = read()
+    verified = record.get("verification") or {}
+    if not verified.get("all_rows_checked") or verified.get("increase") != 16:
+        raise RuntimeError("complete graph verification is required before rendering")
+    if (
+        record.get("post_apply_refusal_control", {}).get("counts", {}).get("refused")
+        != 16
+    ):
+        raise RuntimeError(
+            "writer's absent-edge refusal control is required before rendering"
+        )
+    prefix = "sib-apply-recovery-unbind"
+    authority = json.loads(AUTHORITY.read_text())
+    preview_result = record["preview"]
+    receipt = record["receipt"]
+    quiet = record["quiet_graph"]
+    rows = []
+    for index, row in enumerate(record["rows"], 1):
+        match = row["match"]
+        readback = row["readback"]
+        freed = row["freed_path"]
+        if not all(
+            readback[key]
+            for key in (
+                "binding_gone",
+                "name_unchanged",
+                "stage_unchanged",
+                "other_edges_unchanged",
+                "source_unchanged",
+                "source_status_unchanged",
+                "sourceless",
+            )
+        ):
+            raise RuntimeError(f"row {row['name']} has an incomplete read-back")
+        if match["reasons"] or not freed["available_in_graph"]:
+            raise RuntimeError(
+                f"row {row['name']} is not matched or its path remains bound"
+            )
+        rows.append(
+            f'<tr id="{prefix}-row-{index}"><td><code>{escape(row["name"])}</code></td>'
+            f"<td><code>{escape(row['candidate'])}</code></td>"
+            f"<td>{row['probability']:.2f} / {row['confidence']:.2f}</td>"
+            f"<td>edge present; stage <code>{escape(match['name_stage'])}</code>; "
+            f"source <code>{escape(match['source_status'])}</code>; no refusals</td>"
+            f"<td>{escape(row['action'])}; edge gone; name, stage, other edges and "
+            f"source including status unchanged (<code>{escape(readback['source_status'])}</code>); sourceless</td>"
+            f"<td>free; another live name may take it after semantic review; "
+            f"{len(freed['other_live_recorders'])} other live path recorders</td></tr>"
+        )
+    table_rows = "\n".join(rows)
+    html = f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="{prefix}">
+<title>Sixteen exhausted-name recovery bindings removed through signed authority</title></head>
+<body><main>
+<h1 id="{prefix}-title">Sixteen sub-floor recovery bindings removed</h1>
+<p id="{prefix}-summary">All 16 recorded bindings still existed on exhausted names with non-stale
+sources when re-derived from the live graph. The signed writer preview admitted all 16 with
+zero refusals. A quiet-graph probe immediately preceded the apply, and the writer removed
+16 edges and recorded 16 change receipts. The independent classifier rose from
+{verified["sourceless_before"]} to {verified["sourceless_after"]}, exactly 16, with each
+unbound name appearing in the new sourceless set. No LLM call was made; spend USD 0.</p>
+<h2 id="{prefix}-authority">Authority and preview</h2>
+<p>The authority uses this program's own <code>{escape(authority["schema"])}</code>
+schema. Its loader requires a SHA-256 signature over canonical rows rather than the
+canonical repair-authority envelope, so this operation follows the program-specific
+contract. <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-authority.json">Signed authority</a>;
+<a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind.json">full machine record</a>.</p>
+<pre id="{prefix}-authority-data">{escape(json.dumps({"authority_rows": len(authority["rows"]), "signature": authority["signature"], "authority_file_sha256": record["authority_file_sha256"], "preview_outcome": preview_result["outcome"], "preview_would_change": preview_result["would_change"], "preview_refusals": preview_result["refusals"], "preview_manifest_sha256": preview_result["manifest_sha256"]}, indent=2))}</pre>
+<h2 id="{prefix}-apply">Quiet graph and signed receipt</h2>
+<pre id="{prefix}-receipt">{escape(json.dumps({"quiet_graph": quiet, "receipt": {"outcome": receipt["outcome"], "changed": receipt["changed"], "mutations": receipt["mutations"], "receipt_rows": receipt["receipt_rows"], "manifest_sha256": receipt["manifest_sha256"], "authority_payload_sha256": receipt["authority_payload_sha256"]}}, indent=2))}</pre>
+<h2 id="{prefix}-rows">Every binding and freed DD path</h2>
+<p>The match column records the pre-apply edge, stage and source status. Each read-back
+compares full pre- and post-apply name and source properties and every other edge; the
+only new name edge is the writer's signed change receipt. All 16 DD paths have no
+remaining producer. A free path can be assigned to another live name only after its
+quantity is reviewed; none of these paths appears in another live name's
+<code>source_path</code> or <code>source_paths</code> record. The path-property
+query has a positive control across the live name population:
+{record["path_recorder_instrument"]["with_source_path"]} names have
+<code>source_path</code>, and {record["path_recorder_instrument"]["with_source_paths"]}
+have nonempty <code>source_paths</code>. Each freed source's own <code>dd_path</code>
+still equals the listed path.</p>
+<table id="{prefix}-table"><thead><tr><th>Name</th><th>DD path freed</th><th>P(choice) / confidence</th><th>Live match</th><th>Action and read-back</th><th>Other live use</th></tr></thead>
+<tbody>{table_rows}</tbody></table>
+<h2 id="{prefix}-classifier">Classifier check</h2>
+<p>The same <code>classify_sourceless_standard_names(gc)</code> ran before and after:
+{verified["sourceless_before"]} + {receipt["changed"]} = {verified["sourceless_after"]}.
+The set difference equals the 16 signed names, with no other entrant. The
+<code>verify-final.log</code> run ended at <code>EXIT=0</code> after every assertion.
+The writer's post-apply preview then refused all 16 absent edges with
+<code>recovery binding does not exist</code> and <code>would_change: 0</code>
+(<code>refusal-control.log</code>, <code>EXIT=0</code>).</p>
+</main></body></html>
+'''
+    FRAGMENT.write_text(html)
+    print(
+        json.dumps(
+            {
+                "fragment": str(FRAGMENT),
+                "rows": len(rows),
+                "sourceless_increase": verified["increase"],
+            }
+        )
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("prepare", "preview", "apply", "verify"))
+    parser.add_argument(
+        "mode", choices=("prepare", "preview", "apply", "verify", "refusal", "render")
+    )
     mode = parser.parse_args().mode
-    {"prepare": prepare, "preview": preview, "apply": apply, "verify": verify}[mode]()
+    {
+        "prepare": prepare,
+        "preview": preview,
+        "apply": apply,
+        "verify": verify,
+        "refusal": refusal_control,
+        "render": render,
+    }[mode]()
 
 
 if __name__ == "__main__":
