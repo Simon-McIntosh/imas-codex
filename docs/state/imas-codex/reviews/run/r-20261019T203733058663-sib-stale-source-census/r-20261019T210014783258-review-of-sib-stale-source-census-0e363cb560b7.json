@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "call_sites_emission": "empty",
+  "completed_at": "2026-10-19T21:17:26.496Z",
+  "dispatched_at": "2026-10-19T21:00:50Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py",
+      "line": "322",
+      "severity": "follow-on",
+      "text": "the positive control keeps the first 20 passing candidates (positive = [...][:20]) out of up to 100 composed accepted sources, so a composed control the selector or qualifier rejected is invisible; the control proves 'at least 20 pass' but records no pass rate over the 100 candidates, and the JSON carries candidate_count=100 beside 20 rows with nothing accounting for the other 80"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py",
+      "line": "62",
+      "severity": "follow-on",
+      "text": "SELECTOR_REASONS is mapped onto the production clauses by position and only the clause count is checked (len(clauses) != len(SELECTOR_REASONS)), so a production reorder that preserves the count relabels the production clause reasons silently; the boolean flags stay correct but every human-readable refusal reason becomes wrong"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py",
+      "line": "223",
+      "severity": "follow-on",
+      "text": "qualification() re-implements the skip/override branch of _apply_unit_overrides (imas_codex/standard_names/sources/dd.py:222) by calling resolve_unit directly and then calling the owner a second time, resolving the same path twice; the skip reason should be taken from the owner rather than duplicated"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py",
+      "line": "414",
+      "severity": "follow-on",
+      "text": "assert sum(class_counts.values()) == len(cohort) cannot fail: rows is appended once per cohort member, so the counter always sums to len(cohort) whatever the classification is; it reads as coverage but guards nothing"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py",
+      "line": "381",
+      "severity": "follow-on",
+      "text": "the covered class's second arm (source recorded_name in prior_holders) is dead in this population because recorded_name_count is 0 across all 1438 rows, and the brief's 'the same quantity, through another source' sub-case is never attempted, so a removed DD path already represented by another accepted name is reported ineligible"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site was found; no module under imas_codex/ or tests/ references the census script, so none exists.",
+    "diff": "read commit by commit against base 6367074c; four commits add 495 lines across the three declared files, with the selector literals read from production via AST.",
+    "done_when": "the done_when needs one classified row per population member with counts by class, IDS and node category summing to the population, a passing 20-source positive control and a log ending EXIT=0; census-delivery.log ends EXIT=0 and the JSON's class_counts, by_ids (66 IDSs) and by_category each sum to 1438 with positive_control count 20.",
+    "goal": "the node's goal is to classify every stale DD source without a name as dropped, covered, ineligible or other through the extraction's own predicate; sib-stale-source-census.json holds 1438 rows each carrying one of the four classes with the selector's reason as evidence.",
+    "manifest": "read; it records status complete, four commits, the census command in the tests key, census-delivery.log in test_logs, and no baseline_suite or after_suite arm.",
+    "write_paths": "the pointer declares the json, html and -run.py under docs/evidence/fragments/sn-integrity-backlog/; the diff lands exactly those three and nothing else."
+  },
+  "justifications": {
+    "durability": "no test file exists for the change; the guards at sib-stale-source-census-run.py:63, :161 and :331 have named failure conditions but run only when the one-shot census runs, no mutation was recorded, and the reason mapping at :62 is only count-checked.",
+    "evidence": "census-delivery.log ends EXIT=0 and the JSON I read directly records class_counts summing to 1438, by_ids (66 IDSs) and by_category summing to 1438, and positive_control count 20; the [:20] slice at sib-stale-source-census-run.py:322 weakens what the 20 proves.",
+    "fit": "the module follows the repo idiom (future annotations, list[str] annotations, a module docstring) and introduces no plan, phase or ticket identifier in its names.",
+    "goal_fidelity": "sib-stale-source-census.json holds 1438 rows each classified into the brief's four classes with the selector's own reason as evidence, answering dropped-vs-retired, but the covered class is only partially realised at sib-stale-source-census-run.py:381.",
+    "reuse": "the script reads the selector from extract_dd_candidates via AST and calls qualify_dd, _apply_typed_dd_resolutions and _apply_unit_overrides rather than writing a second predicate, but qualification() at sib-stale-source-census-run.py:223 duplicates the skip/override fragment of its owner imas_codex/standard_names/sources/dd.py:222.",
+    "scope_discipline": "all 495 added lines land in the three declared write paths and nothing else in the diff; the script only reads the graph (gc.query) and calls _apply_unit_overrides with write_skipped=False, so no graph write occurs."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to classify every stale DD source without a name as dropped, covered, ineligible or other through the extraction's own predicate; sib-stale-source-census.json holds 1438 rows each carrying one of the four classes with the selector's reason as evidence.\nVERDICT done_when: the done_when needs one classified row per population member with counts by class, IDS and node category summing to the population, a passing 20-source positive control and a log ending EXIT=0; census-delivery.log ends EXIT=0 and the JSON's class_counts, by_ids (66 IDSs) and by_category each sum to 1438 with positive_control count 20.\nVERDICT write_paths: the pointer declares the json, html and -run.py under docs/evidence/fragments/sn-integrity-backlog/; the diff lands exactly those three and nothing else.\nVERDICT manifest: read; it records status complete, four commits, the census command in the tests key, census-delivery.log in test_logs, and no baseline_suite or after_suite arm.\nVERDICT diff: read commit by commit against base 6367074c; four commits add 495 lines across the three declared files, with the selector literals read from production via AST.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: sib-stale-source-census.json holds 1438 rows each classified into the brief's four classes with the selector's own reason, but the covered class is only partially realised at sib-stale-source-census-run.py:381.\nSCORE evidence: 17\nJUSTIFICATION evidence: census-delivery.log ends EXIT=0 and the JSON records class_counts, by_ids and by_category each summing to 1438 and positive_control count 20; the [:20] slice at sib-stale-source-census-run.py:322 weakens what the 20 proves.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all 495 added lines land in the three declared write paths and the script only reads the graph and calls _apply_unit_overrides with write_skipped=False.\nSCORE durability: 12\nJUSTIFICATION durability: no test exists for the change; the guards at sib-stale-source-census-run.py:63, :161 and :331 have named failure conditions but run only when the one-shot census runs and the reason mapping at :62 is only count-checked.\nSCORE fit: 17\nJUSTIFICATION fit: the module follows the repo idiom and introduces no plan, phase or ticket identifier in its names.\nSCORE reuse: 15\nJUSTIFICATION reuse: the script reads the selector from extract_dd_candidates via AST and calls qualify_dd and _apply_unit_overrides, but qualification() at sib-stale-source-census-run.py:223 duplicates the skip fragment of its owner dd.py:222.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py:322 follow-on: the positive control keeps the first 20 passing candidates out of up to 100, so a rejected composed control is invisible and no pass rate is recorded.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py:62 follow-on: SELECTOR_REASONS is mapped to the production clauses positionally and only the count is checked, so a reorder that preserves the count mislabels every reason string silently.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py:223 follow-on: qualification() re-implements the skip/override branch of _apply_unit_overrides (imas_codex/standard_names/sources/dd.py:222) and resolves the same path twice.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py:414 follow-on: assert sum(class_counts.values()) == len(cohort) cannot fail because rows is built one entry per cohort member.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py:381 follow-on: the covered class's recorded_name arm is dead (recorded_name_count is 0) and the same-quantity-through-another-source sub-case is never attempted.\n",
+  "review_run_id": "r-20261019T210014783258-review-of-sib-stale-source-census-0e363cb560b7",
+  "reviewed_base_sha": "6367074c182e835cc7ad497cc864450c3bf3117d",
+  "reviewed_head_sha": "0e363cb560b7f2ed43979b1eccfbb2b46e45936e",
+  "reviewed_run_id": "r-20261019T203733058663-sib-stale-source-census",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T21:19:46.720993+00:00",
+  "total": 96
+}
