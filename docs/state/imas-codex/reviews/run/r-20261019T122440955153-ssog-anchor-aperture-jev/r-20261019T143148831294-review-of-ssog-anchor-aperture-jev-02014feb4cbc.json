@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite or after_suite (both blank in its manifest), so it carries no two-arm suite delta of its own. Its gate was the per-arm runner at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, whose retry log runner-jev-retry.log ends EXIT=0, plus receipt assertions and a containment self-check that fires on planted inputs; the change touches only docs/evidence paths that no test module covers, so the added-failure set is empty rather than unmeasured by a suite that could have exercised it.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T14:49:52.229Z",
+  "dispatched_at": "2026-10-19T14:32:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: the field cost_limit_passed_usd holds the 1.98 ceiling, not a pass/fail, so a reader comparing spend (0.778013) against it compares a spend to a cap stored under a name that asserts a verdict; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:441, which sets it to min(apply_cap(3), ARM_BUDGET_USD)."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base c96f0f0d874b01c4b623a395637fc17018e66831; two commits add two files -- the arm JSON and the landing HTML -- and nothing else.",
+    "done_when": "the done_when asks for the arm written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, the scratch stopped and removed, and spend under USD 2.00 -- all six sites are present (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:176).",
+    "goal": "the node's goal is to run the jev arm of vertical_coordinate_of_diagnostic_aperture in a scratch graph and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:6 holds that arm, anchored at y_coordinate_of_diagnostic_aperture.",
+    "manifest": "read in full; status complete, two commits, changed_paths and test_logs present, the initial scaffolding failure attributed to a read-only /tmp, blockers none.",
+    "write_paths": "the brief's Write scope names the arm JSON and the working rules add the landing HTML; the manifest declares both plus a figures directory, and the diff touches only the JSON and the landing HTML, both inside those declared paths."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced, and the only guard is the runner's write-time containment gate at ssog-anchor-ab-run.py:559.",
+    "evidence": "the heuristic arm's after-scores in ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json independently confirm the overlay at ssog-anchor-aperture-jev.html:3-7, but no pytest arm ran so the added-failure delta is an empty set.",
+    "fit": "the record follows the ab-record JSON idiom and the landing HTML follows the reckon evidence-fragment idiom at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-aperture-jev.html:1, though line 31 carries a field name that asserts a verdict its value does not hold.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:6 records the arm's anchor and every quantity the goal names in the JSON shape set by ssog-anchor-ab-run.py:505-531.",
+    "reuse": "the change adds no new definition and forks no definition the repository already owns -- the record is produced by the existing runner ssog-anchor-ab-run.py:335 run_arm, which delegates to harmonize and temp_neo4j.",
+    "scope_discipline": "git diff --numstat c96f0f0d874b01c4b623a395637fc17018e66831 02014feb4cbc542976972118310b8e158062c1f3 lists only vertical_coordinate_of_diagnostic_aperture-jev.json and ssog-anchor-aperture-jev.html, both inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to run the jev arm of vertical_coordinate_of_diagnostic_aperture in a scratch graph and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:6 holds that arm, anchored at y_coordinate_of_diagnostic_aperture.\nVERDICT done_when: the done_when asks for the arm written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence and the code digest, the scratch stopped and removed, and spend under USD 2.00; the arm JSON carries every one of these and runner-jev-retry.log ends EXIT=0 (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:176).\nVERDICT write_paths: the brief's Write scope names the arm JSON and the working rules add the landing HTML; the manifest declares both plus a figures directory, and the diff touches only the JSON and the landing HTML, both inside those declared paths.\nVERDICT manifest: read in full; status complete, two commits (8614f7a011e71c81286df728c605d974a27b9f08, 02014feb4cbc542976972118310b8e158062c1f3), changed_paths and test_logs present, the initial scaffolding failure attributed to a read-only /tmp, blockers none.\nVERDICT diff: read commit by commit against base c96f0f0d874b01c4b623a395637fc17018e66831; two commits add two files -- the arm JSON and the landing HTML -- and nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:6 records the arm's anchor and every quantity the goal names in the same shape as the sibling heuristic record.\nSCORE evidence: 18\nJUSTIFICATION evidence: every done_when item is recorded and independently checkable -- the heuristic arm's after-scores in ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json (scores_after 1.0/1.0/1.0) confirm the overlay the landing HTML draws -- but no pytest arm ran, so the added-failure delta is a measured empty set rather than a suite result.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: git diff --numstat c96f0f0d874b01c4b623a395637fc17018e66831 02014feb4cbc542976972118310b8e158062c1f3 lists only vertical_coordinate_of_diagnostic_aperture-jev.json and ssog-anchor-aperture-jev.html, both inside the manifest's declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced, and the only guard is the runner's write-time containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:559.\nSCORE fit: 15\nJUSTIFICATION fit: the record follows the ab-record JSON idiom and the landing HTML follows the reckon evidence-fragment idiom at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-aperture-jev.html:1, though line 31 carries a field name that asserts a verdict its value does not hold.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no new definition and forks no capability -- the record is produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:335 run_arm, which delegates to harmonize and temp_neo4j.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:31 follow-on: the field cost_limit_passed_usd holds the 1.98 ceiling, not a pass/fail, so a reader comparing spend (0.778013) against it compares a spend to a cap stored under a name that asserts a verdict; the value is copied verbatim from ssog-anchor-ab-run.py:441, which sets it to min(apply_cap(3), ARM_BUDGET_USD).",
+  "review_run_id": "r-20261019T143148831294-review-of-ssog-anchor-aperture-jev-02014feb4cbc",
+  "reviewed_base_sha": "c96f0f0d874b01c4b623a395637fc17018e66831",
+  "reviewed_head_sha": "02014feb4cbc542976972118310b8e158062c1f3",
+  "reviewed_run_id": "r-20261019T122440955153-ssog-anchor-aperture-jev",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261019T143148831294-review-of-ssog-anchor-aperture-jev-02014feb4cbc"
+  },
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T14:42:12Z",
+  "total": 100
+}
