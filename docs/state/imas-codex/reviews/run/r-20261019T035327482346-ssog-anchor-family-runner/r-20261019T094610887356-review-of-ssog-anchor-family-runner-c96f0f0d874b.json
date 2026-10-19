@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite or after_suite (both null in its classification.json; the keys are absent from its manifest), so it carries no two-arm suite delta of its own. Its own gate log (runs/r-20261019T035327482346-ssog-anchor-family-runner/runner-heuristic.log) ends EXIT=0 and its arm JSON records outcome_status complete with containment holds, and its gate was its own instrument (ruff, py_compile and --self-check-containment on four planted inputs, all matching), not pytest; the change touches only docs/evidence paths that no test module covers, so the added-failure set is empty rather than unmeasured by a suite that could have exercised it.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-19T10:08:19.858Z",
+  "dispatched_at": "2026-10-19T09:46:42Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "follow-on: LOG_DIR's default embeds this dispatch's reckon run id (r-20261019T035327482346-ssog-anchor-family-runner), a transient identifier the run-record GC removes, so a later arm for any other of the nine families in selection.json writes its apply log into a directory that may no longer exist, and the runner's log location is pinned to one past dispatch rather than to the arm being run."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
+      "line": "571",
+      "severity": "follow-on",
+      "text": "follow-on: the post-apply budget test compares spend against ARM_BUDGET_USD (2.00) while the cap handed to harmonize is apply_cap() (1.98 for a three-call family), so an arm that spent between 1.98 and 2.00 would be recorded complete though it exceeded the limit the runner itself passed to the apply."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
+      "line": "154",
+      "severity": "follow-on",
+      "text": "follow-on: the containment check has no test -- a grep of tests/ finds no reference to evaluate_containment or self_check_containment -- so its only guard is a flag a caller must remember to pass, and an edit that weakened either control would stay green in the default gate."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 50459cc3f9d91f0069687103ce14358acc127da6; the six commits touch only the runner and the two ssog-anchor-ab/ files -- the reshape, then three fixes to the containment check and the arm record -- and the head runner is the file at c96f0f0d874b01c4b623a395637fc17018e66831.",
+    "done_when": "the done_when asks for the runner and selection.json committed, the arm JSON holding every named field with its isolation proof and code digest from a run that ended EXIT=0, the stopped instance and removed scratch recorded, and per-model spend under USD 2.00; the manifest's owned gate log runner-heuristic.log ends EXIT=0 and the arm JSON carries all of it.",
+    "goal": "the node's goal is to build a per-arm anchor-comparison runner and run the first family's heuristic arm; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:335 run_arm does that and docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json holds the arm with its family anchor x_coordinate_of_diagnostic_aperture.",
+    "manifest": "read in full; status complete, six commits, changed_paths and test_logs present, retry_failures documented across five attempts, blockers none; it records no baseline_suite or after_suite, so the run carries no two-arm suite delta of its own.",
+    "write_paths": "the brief's Write scope is docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py and ssog-anchor-ab/; git diff --numstat 50459cc3f9d91f0069687103ce14358acc127da6 c96f0f0d874b01c4b623a395637fc17018e66831 lists exactly three paths, all inside it."
+  },
+  "justifications": {
+    "durability": "evaluate_containment (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:109) is guarded only by the manual --self-check-containment mode at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:154-212, whose expectations are independent hardcoded booleans but which nothing runs automatically, and no test module imports the runner.",
+    "evidence": "each done_when item is present and verifiable -- runner-heuristic.log ends EXIT=0, the arm JSON holds the isolation proof and the imas_codex tree digest, and per-model spend sums to 0.7064 < 2.00 -- but no pytest arm ran, so the added-failure delta is unmeasured rather than a measured zero.",
+    "fit": "the runner follows the <slug>-run.py evidence-script idiom of docs/evidence/fragments/sn-selection-over-generation/, but docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:44-45 pins a reckon run id in LOG_DIR's default.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:335-363 run_arm records the anchor, the lint before and after with classes, every member's documentation review score after, calls, spend and wall time, the stamp and the harmonize receipts, and the committed arm JSON carries the family's x_coordinate heuristic anchor.",
+    "reuse": "the runner imports the owners of the capabilities it needs -- start_temp_neo4j/stop_temp_neo4j (imas_codex/graph/temp_neo4j.py), plan_family_applies, report_family_rows and _record_family_anchor (imas_codex/standard_names/harmonize.py) -- and shells out to the harmonize CLI; a search of docs/ and imas_codex/ for another scratch-neo4j harness or containment checker found none.",
+    "scope_discipline": "git diff --numstat 50459cc3f9d91f0069687103ce14358acc127da6 c96f0f0d874b01c4b623a395637fc17018e66831 lists only docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, ssog-anchor-ab/selection.json and ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json, all inside the declared scope, with no plan or peer path touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to build a per-arm anchor-comparison runner and run the first family's heuristic arm; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:335 run_arm does that and docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json holds the arm with its family anchor x_coordinate_of_diagnostic_aperture.\nVERDICT done_when: the done_when asks for the runner and selection.json committed, the arm JSON holding every named field with its isolation proof and code digest from a run that ended EXIT=0, the stopped instance and removed scratch recorded, and per-model spend under USD 2.00; the manifest's owned gate log runner-heuristic.log ends EXIT=0 and the arm JSON carries all of it.\nVERDICT write_paths: the brief's Write scope is docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py and ssog-anchor-ab/; git diff --numstat 50459cc3f9d91f0069687103ce14358acc127da6 c96f0f0d874b01c4b623a395637fc17018e66831 lists exactly three paths, all inside it.\nVERDICT manifest: read in full; status complete, six commits, changed_paths and test_logs present, retry_failures documented across five attempts, blockers none; it records no baseline_suite or after_suite, so the run carries no two-arm suite delta of its own.\nVERDICT diff: read commit by commit against base 50459cc3f9d91f0069687103ce14358acc127da6; the six commits touch only the runner and the two ssog-anchor-ab/ files -- the reshape, then three fixes to the containment check and the arm record -- and the head runner is the file at c96f0f0d874b01c4b623a395637fc17018e66831.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:335-363 run_arm records the anchor, the lint before and after with classes, every member's documentation review score after, calls, spend and wall time, the stamp and the harmonize receipts, and the committed arm JSON carries the family's x_coordinate heuristic anchor.\nSCORE evidence: 17\nJUSTIFICATION evidence: each done_when item is present and verifiable -- runner-heuristic.log ends EXIT=0, the arm JSON holds the isolation proof and the imas_codex tree digest, and per-model spend sums to 0.7064 < 2.00 -- but no pytest arm ran, so the added-failure delta is unmeasured rather than a measured zero.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --numstat 50459cc3f9d91f0069687103ce14358acc127da6 c96f0f0d874b01c4b623a395637fc17018e66831 lists only docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, ssog-anchor-ab/selection.json and ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json, all inside the declared scope, with no plan or peer path touched.\nSCORE durability: 13\nJUSTIFICATION durability: evaluate_containment (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:109) is guarded only by the manual --self-check-containment mode at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:154-212, whose expectations are independent hardcoded booleans but which nothing runs automatically, and no test module imports the runner.\nSCORE fit: 15\nJUSTIFICATION fit: the runner follows the <slug>-run.py evidence-script idiom of docs/evidence/fragments/sn-selection-over-generation/, but docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:44-45 pins a reckon run id in LOG_DIR's default.\nSCORE reuse: 20\nJUSTIFICATION reuse: the runner imports the owners of the capabilities it needs -- start_temp_neo4j/stop_temp_neo4j (imas_codex/graph/temp_neo4j.py), plan_family_applies, report_family_rows and _record_family_anchor (imas_codex/standard_names/harmonize.py) -- and shells out to the harmonize CLI; a search of docs/ and imas_codex/ for another scratch-neo4j harness or containment checker found none.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:45 follow-on: LOG_DIR's default embeds this dispatch's reckon run id (r-20261019T035327482346-ssog-anchor-family-runner), a transient identifier the run-record GC removes, so a later arm for any other of the nine families in selection.json writes its apply log into a directory that may no longer exist, and the runner's log location is pinned to one past dispatch rather than to the arm being run.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:571 follow-on: the post-apply budget test compares spend against ARM_BUDGET_USD (2.00) while the cap handed to harmonize is apply_cap() (1.98 for a three-call family), so an arm that spent between 1.98 and 2.00 would be recorded complete though it exceeded the limit the runner itself passed to the apply.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:154 follow-on: the containment check has no test -- a grep of tests/ finds no reference to evaluate_containment or self_check_containment -- so its only guard is a flag a caller must remember to pass, and an edit that weakened either control would stay green in the default gate.\n",
+  "review_run_id": "r-20261019T094610887356-review-of-ssog-anchor-family-runner-c96f0f0d874b",
+  "reviewed_base_sha": "50459cc3f9d91f0069687103ce14358acc127da6",
+  "reviewed_head_sha": "c96f0f0d874b01c4b623a395637fc17018e66831",
+  "reviewed_run_id": "r-20261019T035327482346-ssog-anchor-family-runner",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261019T094610887356-review-of-ssog-anchor-family-runner-c96f0f0d874b"
+  },
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-19T09:58:00+00:00",
+  "total": 104
+}
