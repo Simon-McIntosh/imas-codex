@@ -1,0 +1,95 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded no baseline_suite or after_suite (both null in its classification record); its gate is the recorder's own selftest and build in gate.log, which I re-ran at the reviewed head (12 checks passed, EXIT=0), and the change is evidence-only with no test suite covering it, so no added failures arise.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T08:38:53.461Z",
+  "dispatched_at": "2026-10-20T08:23:58Z",
+  "emissions": [
+    "VERDICT goal: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab.html:3 states the verdict and results.json applies the rule per family, matching the source brief.md:1-2 goal.",
+    "VERDICT done_when: gate.log:4-9 records the recorder writing both artifacts with EXIT=0 and the manifest records the figure rendered and checked, as the source brief.md:54-57 requires.",
+    "VERDICT write_paths: the diff changes exactly the five paths granted by the source brief.md:61-65.",
+    "VERDICT manifest: read; it names both commits, the five changed paths, the self-test and build results, the follow-on it leaves open and no retry failures.",
+    "VERDICT diff: read commit by commit from 580b06c1d; the runner adds 844 lines, the JSON, fragment and figure are regenerated, and the follow-up commit pins the SVG salt and stops publishing a PNG twin.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 18",
+    "JUSTIFICATION goal_fidelity: ssog-anchor-ab-results.json rows for the aperture and weld-free families match their source arm records field for field.",
+    "SCORE evidence: 17",
+    "JUSTIFICATION evidence: gate.log:5-9 ends the build in EXIT=0 and I re-ran the named selftest at the reviewed head in scratch (12 checks passed), against a gate of the recorder's own self-test rather than a suite.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: every path in the diff 580b06c1d..0271c8ff3ed7fa757737e30b3865727556f635d1 is one of the five declared write paths, and the render-check PNG stays in the run directory.",
+    "SCORE durability: 12",
+    "JUSTIFICATION durability: the selftest at ssog-anchor-ab-aggregate-run.py:735-814 guards classification and both rule halves with independent expectations, but _totals, build() and the figure check at :383 carry none.",
+    "SCORE fit: 17",
+    "JUSTIFICATION fit: ssog-anchor-ab-aggregate-run.py:437 uses the data-ink sheet and despines the top and right spines at :498-499, following the sibling fragment recorders.",
+    "SCORE reuse: 13",
+    "JUSTIFICATION reuse: _check_text at ssog-anchor-ab-aggregate-run.py:383 re-implements a capability seven sibling fragment recorders already carry with no shared owner.",
+    "FINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:306 follow-on: the adopt_jev flag and verdict string are literals rather than the evaluated conjunction of the two computed conditions.",
+    "FINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:635 follow-on: 'Neither condition is satisfied' contradicts the payload's met_on_both_measured_subset true.",
+    "FINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:383 follow-on: the figure text check omits the direct-label-over-data clause and has no negative control showing it refuse a bad figure.",
+    "FINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:383 follow-on: the figure text check duplicates a capability seven sibling recorders already own, with no owner extended."
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "306",
+      "severity": "follow-on",
+      "text": "follow-on: the top-level adopt_jev and its verdict string at :328 are literals while the rule's two conditions are computed at :295-303 and only reported as sub-fields, so a re-run over corrected records would still emit 'do not adopt' rather than evaluate the registered rule."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "635",
+      "severity": "follow-on",
+      "text": "follow-on: the generated sentence 'Neither condition is satisfied' contradicts the payload's own condition_fewer_total_lint_across_families.met_on_both_measured_subset, which is true (heuristic 24 against Jev 21 over the nine measured families), so a reader of the fragment alone is told the Jev arm never had fewer lint findings, which the data does not support."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "383",
+      "severity": "follow-on",
+      "text": "follow-on: _check_text refuses clipped text and overlapping text but omits the third clause the repository figure rules require, a direct label sitting over plotted data, and the manifest records only that the check passed on the real figure, so nothing shows it refusing a bad one."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "383",
+      "severity": "follow-on",
+      "text": "follow-on: the figure text check duplicates the capability already carried by seven sibling fragment recorders with no shared owner, so an eighth divergent copy now exists and a fix to one will not reach the others."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 580b06c1d: b9d01da667f78a0863c5889ff4100d20998f1c87 adds the 844-line aggregate runner and regenerates the JSON, the fragment and the figure, and 0271c8ff pins matplotlib's svg.hashsalt and stops writing a PNG into the published figure directory.",
+    "done_when": "the source brief.md:54-57 requires both artifacts committed, written by ssog-anchor-ab-aggregate-run.py with a log ending in a real EXIT=0, and the figure rendered and checked; gate.log:4-9 records the build writing the JSON, the SVG and the fragment with EXIT=0 and the manifest records the render inspection.",
+    "goal": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab.html:3 states the verdict on the registered rule and ssog-anchor-ab-results.json carries one row per family and arm, which is what the source brief.md:1-2 dispatched.",
+    "manifest": "read at the reviewed run directory; it names both commits, the five changed paths, the self-test, build, ruff and figure checks, no retry failures and the follow-on it leaves open, and every figure it states is consistent with the artifacts.",
+    "write_paths": "the source brief.md:61-65 grants five paths and the base-to-head diff changes exactly those five, with the render-check PNG kept outside the repository tree."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:735-814 guards the classifier and both halves of the rule with independent expectations including a real score refusal at :777-786, but nothing covers _totals, build() or _prior_cut_usd, and no negative control shows _check_text at :383 refusing a bad figure.",
+    "evidence": "gate.log:5-9 records the build writing the JSON, the SVG and the fragment and ending EXIT=0, and I re-ran the named selftest from the reviewed head in a scratch directory (12 checks passed, EXIT=0); the reviewed run recorded no baseline_suite or after_suite, so added_failure_count rests on that gate rather than on a suite.",
+    "fit": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:437 uses the repository's data-ink sheet, despines the top and right axes at :498-499 and draws one figure-level legend at :506, matching the sibling fragment recorders.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-results.json applies the rule per family and overall, and I checked its rows for the aperture and weld-free families against the source arm records under ssog-anchor-ab/ and found the anchors, lint counts, batch counts and scores identical.",
+    "reuse": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:383 re-implements the canvas-clipping and text-overlap refusal that seven sibling fragment recorders already carry, for example docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev-run.py, with no shared owner to extend.",
+    "scope_discipline": "the diff 580b06c1d..0271c8ff3ed7fa757737e30b3865727556f635d1 touches only the five paths granted by the source brief.md:61-65, and the render-check PNG lands in the run directory rather than the repository."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261020T082334648187-review-of-ssog-anchor-ab-aggregate-0271c8ff3ed7",
+  "reviewed_base_sha": "580b06c1dbfb4662742dc3aceb6de16ed6baca32",
+  "reviewed_commits": [
+    "b9d01da667f78a0863c5889ff4100d20998f1c87",
+    "0271c8ff3ed7fa757737e30b3865727556f635d1"
+  ],
+  "reviewed_head_sha": "0271c8ff3ed7fa757737e30b3865727556f635d1",
+  "reviewed_run_id": "r-20261020T075532261262-ssog-anchor-ab-aggregate",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T08:36:26Z",
+  "total": 97
+}
