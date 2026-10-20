@@ -1,0 +1,67 @@
+<!-- The heuristic anchor arm of the wave-driven current-density family, run
+     against a scratch copy of the archived export by
+     ssog-anchor-ab-run.py --family current_density_due_to_wave_driven_current_drive
+     --arm heuristic. Record:
+     ssog-anchor-ab/current_density_due_to_wave_driven_current_drive-heuristic.json -->
+<section id="ssog-anchor-wave-current-heuristic-r2" data-reckon="evidence">
+  <h2 id="ssog-anchor-wave-current-heuristic-r2-heading">Heuristic anchor arm: wave-driven current density</h2>
+
+  <p id="ssog-anchor-wave-current-heuristic-r2-measure">
+    One arm of one family. The heuristic anchor for
+    <code>current_density_due_to_wave_driven_current_drive</code> is
+    <code>current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code>,
+    which the scratch copy recorded before the apply. The harmonize apply
+    <span id="ssog-anchor-wave-current-heuristic-r2-numbers">made 16 calls for
+    USD 0.54058 in 906.5&nbsp;s</span>, under both ceilings it was handed: the
+    per-apply cap of USD 1.98 for a three-call plan, and the arm budget of
+    USD 2.00.
+  </p>
+
+  <p id="ssog-anchor-wave-current-heuristic-r2-lint">
+    Lint did not move: <span id="ssog-anchor-wave-current-heuristic-r2-lint-pair">1 finding before, 1 after</span>,
+    both of them <code>link_missing_reverse</code>. The run halted after one of
+    its two planned batches, with
+    <code>result.halted true</code> and the reason
+    <code>docs acceptance 0.00% &lt; 90.00% (0/1 touched)</code>: one member was
+    touched, nothing was accepted, so the second batch was not run and
+    <code>stamped</code> is false.
+  </p>
+
+  <p id="ssog-anchor-wave-current-heuristic-r2-scores">
+    Documentation review scores after the apply, for every member of the family:
+    <code>current_density_due_to_wave_driven_current_drive</code> 0.9625
+    (unchanged), <code>current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code>
+    0.849, and
+    <code>parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code>
+    with no score recorded, before or after. The family's own receipt records that middle member as a score
+    regression, 0.9875 to 0.849, and as the member that fell below threshold;
+    the anchor itself is that member, so this arm moved its own anchor's
+    documentation score down. The heuristic arm's numbers for this family are
+    therefore lint 1 and a lowest member score of 0.849 — the pair the
+    registered adoption rule compares the Jev arm against.
+  </p>
+
+  <p id="ssog-anchor-wave-current-heuristic-r2-containment">
+    Containment holds, with a positive control that fires:
+    <code>scratch_signal 32</code> (16 cost rows naming this family's members
+    plus the 16-row apply window on the copy only this run writes) and
+    <code>live_signal 0</code>, so nothing attributable to this apply landed in
+    the live graph. The arm's own guard was exercised separately: the
+    containment self-check took a saved record and planted four inputs, three
+    of which the check refuses and one of which it must accept
+    (<code>{"all_match": true, "cases": 4, "failed_as_planted": 3,
+    "passed_as_expected": 1}</code>, <code>EXIT=0</code>).
+  </p>
+
+  <p id="ssog-anchor-wave-current-heuristic-r2-cleanup">
+    The scratch instance is stopped and its tree removed
+    (<code>removed_entries ["instance"]</code>), and the arm's bolt/http pair
+    (28000/29000) was released after the tree was gone; both ports probe free
+    afterwards. The record carries the code it ran: head
+    <code>5cf53a7b6</code> and tree digest
+    <code>d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd</code>
+    and
+    <code>imas_codex/standard_names/harmonize.py</code> imported from this
+    worktree. The run's log ends <code>EXIT=0</code>.
+  </p>
+</section>
