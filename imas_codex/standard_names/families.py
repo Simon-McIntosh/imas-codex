@@ -1024,13 +1024,16 @@ def _family_member_collect() -> str:
     are what the review lint reads, so an enumerating caller hands it rows it
     can score without a second read.
     """
-    return """collect({
+    return (
+        """collect({
         id: m.id,
         description: m.description,
         documentation: m.documentation,
         docs_stage: m.docs_stage,
         reviewer_score_docs: m.reviewer_score_docs,
-        has_dd_source: """ + dd_source_exists("m") + """,
+        has_dd_source: """
+        + dd_source_exists("m")
+        + """,
         harmonized_group_signature: m.harmonized_group_signature,
         harmonized_anchor: m.harmonized_anchor,
         unit: m.unit,
@@ -1040,6 +1043,7 @@ def _family_member_collect() -> str:
         links: m.links,
         link_status: m.link_status
     }) AS members"""
+    )
 
 
 def _pattern_family_rows_query(*, seeded: bool, node_filter: str) -> str:

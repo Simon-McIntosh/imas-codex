@@ -100,7 +100,9 @@ def test_family_with_no_dd_sourced_member_has_no_anchor():
 
     assert select_anchor(None, None, None, members) is None
     assert (
-        select_anchor("derived_parent", "accepted", "a real parent description", members)
+        select_anchor(
+            "derived_parent", "accepted", "a real parent description", members
+        )
         is None
     )
 
