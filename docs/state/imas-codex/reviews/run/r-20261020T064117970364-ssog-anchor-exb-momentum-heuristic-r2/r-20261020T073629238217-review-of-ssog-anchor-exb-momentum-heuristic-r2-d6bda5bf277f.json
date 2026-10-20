@@ -7,6 +7,13 @@
   "assertion_analysis": [],
   "completed_at": "2026-10-20T07:49:59.911Z",
   "dispatched_at": "2026-10-20T07:36:57Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-20T07:54:54.737609+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-heuristic-r2.html",
