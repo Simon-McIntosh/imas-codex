@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-20T11:38:31.094Z",
+  "dispatched_at": "2026-10-20T11:26:00Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": 10384,
+      "severity": "blocking",
+      "text": "blocking: the added dd:-prefix filter is applied to a source_paths list this same module has already stripped of that prefix. workers.py:10793 sets veto_item['source_paths'] = _bound_docs_review_dd_paths(veto_item), whose return is strip_dd_prefix'd (10387); workers.py:11114 then re-runs _documentation_contradiction_note on that same item, which reads the paths back through the helper at 10931/10384. For a name whose DD path arrives only as a dd:-prefixed source path with no dd binding - the shape tests/standard_names/test_docs_hold_dd_bindings.py:75 guards and the fragment calls 'still held' - the second pass sees a bare path, the filter drops it, required_paths goes empty and the hold is lost. Probed read-only on both arms (run logs/probe_roundtrip.log): the helper returns ['equilibrium/time_slice/profiles_1d/psi'] then [] at head against ['equilibrium/...'] then ['equilibrium/...'] at base, and through 10793 the note at 11114 is None at head against 'DD source text unavailable at equilibrium/time_slice/profiles_1d/psi' at base. This is a live production path (process_review_docs_batch, 11032) and it breaks the brief's explicit 'A DD-bound item with missing text still holds, exactly as now'; the DD text is genuinely absent exactly when _fetch_review_dd_context (10793-10799) attaches no dd_source_docs."
+    },
+    {
+      "file": "logs/gate_base.log",
+      "line": 10,
+      "severity": "follow-on",
+      "text": "follow-on: the base arm's log is truncated at 45% of collection (1026 bytes, 10 lines, ending mid-progress with no summary line and no EXIT= line) while the reviewed manifest records baseline_suite completed true, exit_status 0, failure_count 0 and names this log; by the delivery contract a log without a completion summary or an EXIT= line leaves the arm unread, so the recorded base arm attests nothing and the delta cannot be read from it. The conclusion survives only because the head arm (logs/gate_head.log) is complete at 77 passed, EXIT=0, so added_failure_count is 0 either way; baseline_suite.completed is the unverifiable claim."
+    }
+  ],
+  "project": "imas-codex",
+  "review": "VERDICT goal: the node goal is to stop facility-only source paths from triggering the documentation DD-text hold; the filter added at imas_codex/standard_names/workers.py:10384 achieves that for a facility-only item, verified at head as note None against 'DD source text unavailable at tcv:ip/measured' at base.\nVERDICT done_when: the done_when is 'committed change and tests, fragment records the caller audit and the gate with no added failures'; the gate named in the brief over tests/standard_names/test_docs_hold_dd_bindings.py and test_review_cascade.py ran for both arms (logs/gate_base.log, logs/gate_head.log) and the fragment records the caller audit, but the base arm's log is unread.\nVERDICT write_paths: the declared scope was workers.py, test_docs_hold_dd_bindings.py and the fragment (plus a figures directory); git diff --name-status 8fc4843c9 100a86a4d shows exactly those three files, nothing outside them.\nVERDICT manifest: read; it records status complete, the head gate 77 passed, the base arm 75 passed, the negative control at 2 failed/75 passed, EXIT=1, and the before/after probe - but its baseline_suite claims completed true for a log that stops at 45%.\nVERDICT diff: read commit by commit against the source run's base; the single commit 100a86a4d carries a docstring and a dd:-prefix filter in _bound_docs_review_dd_paths (workers.py:10359-10387), two new tests plus one predicate assertion (test_docs_hold_dd_bindings.py:81-103,128) and the new fragment.\nCALL_SITES: imas_codex/standard_names/workers.py:10403 _has_dd_source_reference, imas_codex/standard_names/workers.py:10793 prepare_docs_review_request, imas_codex/standard_names/workers.py:10931 _documentation_contradiction_note (reached from process_review_docs_batch at workers.py:11032)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the filter at imas_codex/standard_names/workers.py:10384 removes the facility-path hold that is the node's goal, but it also removes a genuine DD hold on the veto path, so the deliverable is not what the brief specifies.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate's head arm is recorded and complete at logs/gate_head.log (77 passed, EXIT=0) but logs/gate_base.log stops at 45% with no summary and no EXIT line while the manifest records baseline_suite completed true.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --name-status 8fc4843c9 100a86a4d is inside the declared write paths, and the one caller whose behaviour the brief asked be preserved (workers.py:10403) is disclosed in the fragment's caller audit.\nSCORE durability: 12\nJUSTIFICATION durability: tests/standard_names/test_docs_hold_dd_bindings.py:82 reddens on the reverted filter (logs/negative_control.log, 2 failed), but the still-holds requirement is asserted only on the unstripped helper input, so nothing covers the workers.py:10793 round trip where the behaviour actually regressed.\nSCORE fit: 17\nJUSTIFICATION fit: the addition follows the surrounding style and reuses DD_PREFIX from imas_codex/standard_names/source_paths.py:19, though the str normalisation at workers.py:10380 is immediately repeated at 10381 and again at 10386.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing owner of the capability (_bound_docs_review_dd_paths at workers.py:10359 and DD_PREFIX at source_paths.py:19) and adds no second implementation; a search for another DD-path extractor over imas_codex/standard_names found none.\nFINDING imas_codex/standard_names/workers.py:10384 blocking: the dd:-prefix filter reads a source_paths list that workers.py:10793 has already stripped, so on the docs-review veto path a dd:-prefixed source path with no dd binding loses its required DD path and its missing-text hold (note None at head against 'DD source text unavailable at equilibrium/time_slice/profiles_1d/psi' at base), breaking the brief's still-holds requirement.\nFINDING logs/gate_base.log:10 follow-on: the base arm's log is truncated at 45% with no completion summary and no EXIT= line, so the recorded baseline_suite completed true, exit_status 0 and failure_count 0 are not attested by the log they name.",
+  "review_run_id": "r-20261020T112531504938-review-of-ssog-docs-hold-facility-paths-100a86a4d845",
+  "reviewed_base_sha": "8fc4843c9f843a669519a94a793d58854fd85146",
+  "reviewed_head_sha": "100a86a4d8455da8e2e14ece4d9d8d071ad331fb",
+  "reviewed_run_id": "r-20261020T104134139630-ssog-docs-hold-facility-paths",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T11:39:21.332798+00:00",
+  "total": 98
+}
