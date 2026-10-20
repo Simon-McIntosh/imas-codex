@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite and no after_suite (both null in its manifest), so it carries no two-arm suite delta of its own and the added-failure set is empty rather than measured by a suite that could have exercised it. Its gate was the per-arm runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, whose log runner-heuristic.log ends EXIT=0; the change touches only docs/evidence paths that no test module covers.",
+  "assertion_analysis": [],
+  "completed_at": "2026-10-20T07:49:59.911Z",
+  "dispatched_at": "2026-10-20T07:36:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-heuristic-r2.html",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the landing fragment reports only the three documentation scores after harmonization and omits that the apply halted after batch 1 of 2 and that the anchor member's score fell from 1.0 to 0.849 -- precisely the lower-score condition the section's adoption rule turns on; the record carries both (scores_before, score_regressions and halt_reasons), but the landing prose reads as a neutral completion and a reader of the fragment alone cannot see that this arm worsened its own anchor."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-heuristic-r2.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the landing filename and its section id embed the plan abbreviation ssog and a -r2 version marker, both of which the naming rules forbid in a path, so the fragment cannot be understood apart from the plan; the pattern is mandated verbatim by the sprint's working rules, so the defect is the convention's rather than the worker's, and prior siblings in this sprint were flagged the same way."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-heuristic.json",
+      "line": "59",
+      "severity": "follow-on",
+      "text": "follow-on: the harmonize receipt's member_scores records the anchor member at 1.0, its pre-apply value, while the same record's scores_after (line 219) records it at 0.849, so two similarly named fields carry opposing values for the same member; a consumer that reads member_scores rather than scores_after would miss the score fall the section's rule is designed to catch, and the record documents neither field's time-base."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "call_sites": "verified 0 production call site(s)",
+    "diff": "read against base 064b60fbf851; one commit rewrites the arm JSON (12 deletions, 230 insertions, replacing the earlier attempt's outcome_status running stub with the completed measurement) and adds the landing fragment (22 lines), nothing else.",
+    "done_when": "the done_when asks for the arm JSON written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's score after, calls, spend and wall time, stamped, the containment verdict with its evidence, the code digest, the scratch stopped and its tree removed, and spend under USD 2.00; runner-heuristic.log ends EXIT=0 and the record carries every one of them.",
+    "goal": "the node's goal is to run the heuristic anchor arm of momentum_flux_due_to_e_cross_b_drift in a scratch graph through the per-arm runner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-heuristic.json:175 records that arm with outcome_status complete, anchored at perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift and isolated to bolt://127.0.0.1:28004 rather than the live graph.",
+    "manifest": "read in full; status complete, one commit d6bda5bf2, changed_paths and test_logs present, retry_failures empty, blockers none; its tests line is the literal detached invocation with absolute paths and no placeholder, and its negative_control_log is none with a stated reason citing the runner's self-check log.",
+    "write_paths": "the brief's Write scope names only the arm JSON while the shared working rules add the landing fragment and permit a figures directory; the manifest declares all three and the diff touches exactly the JSON and the landing HTML, both inside the granted fence of three paths."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced, and the only guard is the runner's write-time containment gate, exercised through --self-check-containment rather than through a test of this change.",
+    "evidence": "the gate is the arm invocation whose log runner-heuristic.log ends EXIT=0 with the summary line \"lint 0->0, 73 calls, $1.2403, 1654.1s, stamped=False, containment=True\", the record's numbers reconcile with the apply log's own receipt (cost_spent reconciles at 1.240277), and the containment guard's refusal was demonstrated on this record by --self-check-containment (4 cases, 3 planted-live cases fail as expected) although that control belongs to the unchanged runner.",
+    "fit": "the record reproduces the sibling arm schema key for key and the HTML follows the evidence-fragment idiom, but the landing filename carries the plan abbreviation ssog and a -r2 version marker, and the receipt keeps the runner's member_scores (pre-apply) beside scores_after (post-apply), two similarly named fields that diverge whenever a member's score moves.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-heuristic.json:175 records the arm at outcome_status complete with the fixed anchor, and its isolation block proves the apply wrote to a scratch copy (scratch_probe 1, live_probe 0) rather than the live graph.",
+    "reuse": "the change adds no new definition and forks no capability the repository owns -- the record is produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py and the fragment reuses the existing plan-fragment shape.",
+    "scope_discipline": "every path in the diff -- the arm JSON and the landing fragment ssog-anchor-exb-momentum-heuristic-r2.html -- is inside the three declared write paths, and the earlier attempt's files were left in place rather than overwritten in a second path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to run the heuristic anchor arm of momentum_flux_due_to_e_cross_b_drift in a scratch graph through the per-arm runner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-heuristic.json:175 records that arm with outcome_status complete, anchored at perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift and isolated to bolt://127.0.0.1:28004 rather than the live graph.\nVERDICT done_when: the done_when asks for the arm JSON written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's score after, calls, spend and wall time, stamped, the containment verdict with its evidence, the code digest, the scratch stopped and its tree removed, and spend under USD 2.00; runner-heuristic.log ends EXIT=0 and the record carries every one (json:175 outcome_status complete, :219 scores_after for all three members, lint_before 0 / lint_after 0, calls 73, spend_usd 1.2403, wall_seconds 1654.1, stamped false, containment.holds true with its evidence, code digest d1e4f1e5..., scratch instance stopped and tree removed).\nVERDICT write_paths: the brief's Write scope names only the arm JSON while the shared working rules add the landing fragment and permit a figures directory; the manifest declares all three and the diff touches exactly the JSON and the landing HTML, both inside the granted fence of three paths.\nVERDICT manifest: read in full; status complete, one commit d6bda5bf2, changed_paths and test_logs present, retry_failures empty, blockers none; its tests line is the literal detached invocation with absolute paths and no placeholder, and its negative_control_log is none with a stated reason citing the runner's self-check log.\nVERDICT diff: read against base 064b60fbf851; one commit rewrites the arm JSON (12 deletions, 230 insertions, replacing the earlier attempt's outcome_status running stub with the completed measurement) and adds the landing fragment (22 lines), nothing else.\nCALL_SITES: none (the record is read by no runtime code; its only writer is the runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, and no reader of ssog-anchor-ab/*.json exists in imas_codex/ or tests/)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-heuristic.json:175 records the arm at outcome_status complete with the fixed anchor, and its isolation block proves the apply wrote to a scratch copy (scratch_probe 1, live_probe 0) rather than the live graph.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is the arm invocation whose log runner-heuristic.log ends EXIT=0 with the summary line \"lint 0->0, 73 calls, $1.2403, 1654.1s, stamped=False, containment=True\", the record's numbers reconcile with the apply log's own receipt (cost_spent 1.240277), and the containment guard's refusal was demonstrated on this record by --self-check-containment (4 cases, 3 planted-live cases fail as expected) although that control belongs to the unchanged runner.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff -- the arm JSON and the landing fragment ssog-anchor-exb-momentum-heuristic-r2.html -- is inside the three declared write paths.\nSCORE durability: 10\nJUSTIFICATION durability: the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced, and the only guard is the runner's write-time containment gate, exercised through --self-check-containment rather than through a test of this change.\nSCORE fit: 16\nJUSTIFICATION fit: the record reproduces the sibling arm schema key for key, but the landing filename carries the plan abbreviation ssog and a -r2 version marker, and the receipt keeps the runner's member_scores (json:59) beside scores_after (json:219), two similarly named fields that diverge whenever a member's score moves.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no new definition and forks no capability the repository owns -- the record is produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, and a capability search found no other owner of arm-record serialization.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-heuristic-r2.html:15 follow-on: the landing fragment reports only the three documentation scores after harmonization and omits that the apply halted after batch 1 of 2 and that the anchor member's score fell from 1.0 to 0.849 -- precisely the lower-score condition the section's adoption rule turns on; the record carries both (scores_before, score_regressions and halt_reasons), but the landing prose reads as a neutral completion and a reader of the fragment alone cannot see that this arm worsened its own anchor.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-heuristic-r2.html:1 follow-on: the landing filename and its section id embed the plan abbreviation ssog and a -r2 version marker, both of which the naming rules forbid in a path, so the fragment cannot be understood apart from the plan; the pattern is mandated verbatim by the sprint's working rules, so the defect is the convention's rather than the worker's.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-heuristic.json:59 follow-on: the harmonize receipt's member_scores records the anchor member at 1.0, its pre-apply value, while the same record's scores_after (line 219) records it at 0.849, so two similarly named fields carry opposing values for the same member; a consumer that reads member_scores rather than scores_after would miss the score fall the section's rule is designed to catch, and the record documents neither field's time-base.\n",
+  "review_run_id": "r-20261020T073629238217-review-of-ssog-anchor-exb-momentum-heuristic-r2-d6bda5bf277f",
+  "reviewed_base_sha": "064b60fbf851efa1f37474677c4292322c38416a",
+  "reviewed_commits": [
+    "d6bda5bf277fe29f7ce021f750b86aae6268b211"
+  ],
+  "reviewed_head_sha": "d6bda5bf277fe29f7ce021f750b86aae6268b211",
+  "reviewed_run_id": "r-20261020T064117970364-ssog-anchor-exb-momentum-heuristic-r2",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261020T073629238217-review-of-ssog-anchor-exb-momentum-heuristic-r2-d6bda5bf277f"
+  },
+  "scores": {
+    "durability": 10,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T07:52:05.387862+00:00",
+  "total": 102
+}
