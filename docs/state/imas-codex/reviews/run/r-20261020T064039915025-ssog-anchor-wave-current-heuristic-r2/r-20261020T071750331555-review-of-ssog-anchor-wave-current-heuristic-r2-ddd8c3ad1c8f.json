@@ -11,6 +11,11 @@
       "kind": "folded",
       "node": "ssog-anchor-ab-aggregate",
       "recorded_at": "2026-10-20T07:41:19.423424+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-20T07:41:25.829846+00:00"
     }
   },
   "findings": [
