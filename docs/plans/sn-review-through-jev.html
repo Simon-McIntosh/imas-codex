@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="117">
+<meta name="plan-version" content="118">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -576,6 +576,9 @@ Spend for this node: USD 0.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261020T045936605881-srtj-cohort-incumbent-docs-part3of4" data-who="reckon-build" data-when="2026-10-20T05:58:34.555Z">
     <div class="r-comment-body"><p>srtj-cohort-incumbent-docs-part3of4 — incumbent docs arm part 3 of 4: 50 of 55 items judged (accept 3 / refine 34 / band 13 / unjudged 5), 5 pending on a USD 9.085208-of-9.20 ceiling shortfall; containment pass, 442 receipts all in scratch, scratch stopped and tree removed</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-cascade-defects" data-who="reckon-build" data-when="2026-10-20T06:30:00Z">
+    <div class="r-comment-body"><p>Lead direction, 2026-10-20: fix the cascade's recording and routing before the comparison concludes, and spend no more on docs piece 4. The cohort exposed two defects.</p><ol><li><strong>Vetoes are calibrated one check at a time.</strong> <code>_route</code> refines an item when any selected check crosses its cutoff. Each cutoff was chosen alone, allowed to wrongly flag up to 10% of accepted calibration items, so the false vetoes add up across 19 name checks and 12 docs checks. On its own calibration set the router accepts 6% of names and 12% of docs, and refines 75% and 70%. On the cohort it agreed with the incumbent on 49 of 115 names and 39 of 59 docs, refining names the incumbent accepted. The score ranks well (validation AUC 0.745 on names and 0.754 on docs). The decision rule was never validated as a decision.</li><li><strong>A decided review records no rubric.</strong> <code>_direct_result</code> stores <code>winning_score</code> as 1.0 or 0.0 and an empty <code>winning_scores</code>. A cascade review therefore carries no calibrated probability, no per-dimension scores comparable to the incumbent's 0-to-20 dimensions, and no failed checks in the cohort records.</li></ol><p>Two nodes fix them:</p><ul><li><code>srtj-cascade-joint-veto</code> rebuilds the thresholds from the frozen receipts with joint selection, so the union of vetoes wrongly flags at most 10% of accepted items, and judges the rule on the validation split.</li><li><code>srtj-cascade-rubric-record</code> records the probability, a 0-to-20 score per dimension and the failed checks. It audits every consumer so the route still decides.</li></ul><p>A Jev-only re-route of the cohort follows, within the remaining USD 3.31.</p></div>
 </div>
 </section>
 </main>
