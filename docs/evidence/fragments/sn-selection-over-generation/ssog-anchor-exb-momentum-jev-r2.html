@@ -1,0 +1,44 @@
+<!-- The jev arm of the momentum_flux_due_to_e_cross_b_drift anchor family, run
+     through the per-arm runner against a fresh scratch graph copy. Arm record:
+     docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/
+     momentum_flux_due_to_e_cross_b_drift-jev.json. -->
+<section id="ssog-anchor-exb-momentum-jev-r2" data-reckon="evidence">
+  <h2 id="ssog-anchor-exb-momentum-jev-r2-heading">The jev arm of the momentum_flux_due_to_e_cross_b_drift family ran clean</h2>
+
+  <p id="ssog-anchor-exb-momentum-jev-r2-run">
+    The runner loaded a fresh scratch copy of the archived export
+    (<code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code>, 2,643,183,686
+    bytes), applied the jev anchor
+    <code>momentum_flux_normalized_due_to_e_cross_b_drift</code> to the family's
+    three members, and recorded the arm. The detached invocation's log ends
+    <code>EXIT=0</code> and the arm record carries
+    <code>outcome_status: complete</code>.
+  </p>
+
+  <p id="ssog-anchor-exb-momentum-jev-r2-result">
+    Lint before and after are both <strong>0</strong> — the apply adds no finding.
+    The arm made <strong>16</strong> calls for <strong>$0.6029</strong> in
+    <strong>1,114.6 s</strong>, under both the USD 2.00 arm cap and the USD 1.98
+    per-apply cap it was handed. The anchor was not stamped by the apply
+    (<code>stamped: false</code>).
+  </p>
+
+  <p id="ssog-anchor-exb-momentum-jev-r2-containment">
+    Containment holds. The evidence table contrasts the two graphs: scratch cost
+    rows naming this family <strong>32</strong> (<code>scratch_family_rows 16</code>,
+    <code>scratch_ledger_rows 16</code>) against <strong>0</strong> on the live graph
+    (<code>live_family_rows 0</code>, <code>live_scope_run_rows 0</code>). The
+    scratch rows are the arm's positive control — the instrument is shown to see the
+    writes that exist before the live zero is read as absence. The scratch instance
+    was stopped and its tree removed, and the port lock released.
+  </p>
+
+  <p id="ssog-anchor-exb-momentum-jev-r2-scores">
+    Documentation review scores after the jev apply: <code>momentum_flux_due_to_e_cross_b_drift</code>
+    <strong>0.9375</strong> (unchanged), <code>momentum_flux_normalized_due_to_e_cross_b_drift</code>
+    <strong>0.849</strong> (was 0.9625), <code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code>
+    <strong>1.0</strong> (unchanged). The adoption rule compares each member against the
+    same member's score in the heuristic arm, so these figures are the input the
+    coordinator's comparison reads, not a verdict on their own.
+  </p>
+</section>

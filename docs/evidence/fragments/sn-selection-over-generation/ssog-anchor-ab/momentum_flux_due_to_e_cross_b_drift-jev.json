@@ -1,0 +1,248 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+  "applied": true,
+  "arm": "jev",
+  "budget_limit_usd": 2.0,
+  "calls": 16,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-exb-momentum-jev-r2",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-exb-momentum-jev-r2/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-20T07:11:34.145234+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 16,
+      "scratch_ledger_rows": 16,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 32
+  },
+  "cost_limit_passed_usd": 1.98,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-20T07:11:32.251689+00:00",
+  "family": "momentum_flux_due_to_e_cross_b_drift",
+  "harmonize_receipts": [
+    {
+      "anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+      "applied": true,
+      "batches": [
+        [
+          "momentum_flux_normalized_due_to_e_cross_b_drift"
+        ],
+        [
+          "momentum_flux_due_to_e_cross_b_drift",
+          "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "f1c57c0d15cbb4ce9e2c46b02c78fb9b2155f74d709eabb506c5e896e157b656",
+      "harmonized": false,
+      "invariant": [
+        "momentum",
+        "",
+        "",
+        "e_cross_b_drift",
+        ""
+      ],
+      "member_scores": {
+        "momentum_flux_due_to_e_cross_b_drift": 0.9375,
+        "momentum_flux_normalized_due_to_e_cross_b_drift": 0.9625,
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift": 1.0
+      },
+      "members": [
+        "momentum_flux_due_to_e_cross_b_drift",
+        "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
+      ],
+      "n": 3,
+      "physical_base": "momentum",
+      "planned_calls": 3,
+      "result": {
+        "batches_run": 1,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 0.00% < 90.00% (0/1 touched)"
+        ],
+        "halted": true,
+        "resume_from": 1,
+        "run_ids": [
+          "80708471-76e0-453f-8379-be62ffba0dc7"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 0,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.6029,
+        "total_quarantined": 0,
+        "total_selected": 3,
+        "total_touched": 1
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.9625,
+            "id": "momentum_flux_normalized_due_to_e_cross_b_drift"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 0.9625,
+            "id": "momentum_flux_normalized_due_to_e_cross_b_drift"
+          }
+        ]
+      },
+      "scores_after": {
+        "momentum_flux_due_to_e_cross_b_drift": 0.9375,
+        "momentum_flux_normalized_due_to_e_cross_b_drift": 0.849,
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift": 1.0
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 1,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 0.00% < 90.00% (0/1 touched)"
+    ],
+    "halted": true,
+    "resume_from": 1,
+    "run_ids": [
+      "80708471-76e0-453f-8379-be62ffba0dc7"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 0,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.6029,
+    "total_quarantined": 0,
+    "total_selected": 3,
+    "total_touched": 1
+  },
+  "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+  "isolation": {
+    "at": "2026-10-20T06:52:52.323607+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771165,
+    "live_nodes_after": 1771165,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 16,
+    "scratch_ledger_rows": 16,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28002"
+  },
+  "jev_anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+  "kind": "component",
+  "ledger_calls": 16,
+  "ledger_spend_usd": 0.6028520000000002,
+  "ledger_window": {
+    "ended": "2026-10-20T07:11:33.695012+00:00",
+    "started": "2026-10-20T06:52:57.640468+00:00"
+  },
+  "lint_after": 0,
+  "lint_after_classes": {},
+  "lint_before": 0,
+  "lint_before_classes": {},
+  "members": [
+    "momentum_flux_due_to_e_cross_b_drift",
+    "momentum_flux_normalized_due_to_e_cross_b_drift",
+    "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/mcintos-1281970-fb6mfs0f/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.211025
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.156978
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.004876
+    },
+    {
+      "calls": 1,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.093699
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.13568
+    },
+    {
+      "calls": 4,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.000594
+    }
+  ],
+  "planned_calls": 3,
+  "port": 28002,
+  "port_lock": "/dev/shm/ssog-scratch-port-28002.lock",
+  "port_lock_released": {
+    "at": "2026-10-20T07:11:50.290174+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28002.lock"
+  },
+  "recorded_anchor_before": "momentum_flux_normalized_due_to_e_cross_b_drift",
+  "run_ids": [
+    "80708471-76e0-453f-8379-be62ffba0dc7"
+  ],
+  "scores_after": {
+    "momentum_flux_due_to_e_cross_b_drift": 0.9375,
+    "momentum_flux_normalized_due_to_e_cross_b_drift": 0.849,
+    "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift": 1.0
+  },
+  "scores_before": {
+    "momentum_flux_due_to_e_cross_b_drift": 0.9375,
+    "momentum_flux_normalized_due_to_e_cross_b_drift": 0.9625,
+    "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift": 1.0
+  },
+  "scratch_removed": {
+    "at": "2026-10-20T07:11:50.290110+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/mcintos-1281970-fb6mfs0f"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/mcintos-1281970-fb6mfs0f",
+  "scratch_uri": "bolt://127.0.0.1:28002",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.6028520000000002,
+  "stamped": false,
+  "started_at": "2026-10-20T06:44:55.094011+00:00",
+  "stopped_instance": {
+    "at": "2026-10-20T07:11:49.155110+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/mcintos-1281970-fb6mfs0f/instance"
+  },
+  "wall_seconds": 1114.611185638234
+}
