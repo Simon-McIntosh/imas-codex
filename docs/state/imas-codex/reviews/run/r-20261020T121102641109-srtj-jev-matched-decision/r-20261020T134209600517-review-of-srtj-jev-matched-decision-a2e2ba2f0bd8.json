@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8987",
+    "imas_codex/standard_names/workers.py:11079",
+    "imas_codex/standard_names/workers.py:11319",
+    "imas_codex/standard_names/review/cascade_calibration.py:426"
+  ],
+  "completed_at": "2026-10-20T13:53:17.081Z",
+  "dispatched_at": "2026-10-20T13:42:30Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-matched-decision.html",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "the validation comparison against the paid panel is delivered as two tables with no figure, although the dispatch fence granted docs/figures/sn-review-through-jev/srtj-jev-matched-decision and the user's graphics mandate expects a figure wherever one would improve understanding; the sibling fragment srtj-jev-vs-panel-operating-point.html in the same directory carries one."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "the base arm names sixteen test files and the head arm seventeen: tests/discovery/test_evaluation.py, which covers the changed imas_codex/discovery/base/evaluation.py, is run only at head, so the delta is not taken over one command and the extended bootstrap_interval has no base measurement."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that Jev decides at thresholds matched to the paid panel's accept rates; imas_codex/standard_names/review/cascade_calibration.py:536 fits the inclusive cutoff matching the panel's calibration rate and imas_codex/standard_names/review/cascade.py:194-200 routes on the mapped decision score.\nVERDICT done_when: the done_when names the cutoffs, the map, a validation table beside the panel and a gate with no added failures; docs/evidence/fragments/sn-review-through-jev/srtj-jev-matched-decision.html:5,18,24-31 records all four and runs/r-20261020T121102641109-srtj-jev-matched-decision/baseline.log and head.log record the gate.\nVERDICT write_paths: the dispatch fence grants eight paths including docs/figures/sn-review-through-jev/srtj-jev-matched-decision; the diff touches seven of them and every changed path is inside that fence.\nVERDICT manifest: read at runs/r-20261020T121102641109-srtj-jev-matched-decision/manifest.md; status complete, commits 22242c1ca/bd658567d/a2e2ba2f0, baseline 5 failed/377 passed and head 5 failed/396 passed with identical failure ids.\nVERDICT diff: read commit by commit against base e8bad938a; 22242c1ca and a2e2ba2f0 add only the evidence fragment, bd658567d rewrites cascade_calibration.py, extends bootstrap_interval with a statistic argument, rewires _route and the deciding path, and adjusts the two test modules.\nCALL_SITES: imas_codex/standard_names/workers.py:8987, imas_codex/standard_names/workers.py:11079, imas_codex/standard_names/workers.py:11319, imas_codex/standard_names/review/cascade_calibration.py:426\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/cascade.py:197 maps the selected score so the matched cutoff lands exactly at DEFAULT_MIN_SCORE and cascade.py:457 emits it as winning_score while winning_scores keeps the 0-to-20 rubric.\nSCORE evidence: 18\nJUSTIFICATION evidence: runs/r-20261020T121102641109-srtj-jev-matched-decision/head.log ends '5 failed, 396 passed' with the same five ids as baseline.log, but the base arm omits tests/discovery/test_evaluation.py so the delta is not over one command.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff e8bad938a..a2e2ba2f0 lies inside the dispatch fence, and no consumer, settings or pyproject file was touched.\nSCORE durability: 18\nJUSTIFICATION durability: runs/r-20261020T121102641109-srtj-jev-matched-decision/negative-score.log shows test_mapped_score_crosses_exactly_at_matched_cutoff failing for both axes when cascade.py:457 stores the unmapped selected score.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/review/cascade.py:213 documents the map in-module and cascade_calibration.py:578 writes the policy text into the thresholds artifact, matching the surrounding review package.\nSCORE reuse: 18\nJUSTIFICATION reuse: imas_codex/discovery/base/evaluation.py:144 gained a statistic argument instead of a second resampling loop, and the search over evaluation.py (choose_operating_point, classification_metrics) and the review package found no owner for a rate-matched cutoff.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-matched-decision.html:24 follow-on: the validation comparison is two tables with no figure although the fence granted a figures directory and the graphics mandate expects one; the sibling fragment in the same directory carries one.",
+  "review_run_id": "r-20261020T134209600517-review-of-srtj-jev-matched-decision-a2e2ba2f0bd8",
+  "reviewed_base_sha": "e8bad938afffb0f651061389b2d6517dceff97ca",
+  "reviewed_head_sha": "a2e2ba2f0bd8cd881181ce1340e230fa1a24499b",
+  "reviewed_run_id": "r-20261020T121102641109-srtj-jev-matched-decision",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "subject": "run",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T13:54:17.958903+00:00",
+  "total": 110,
+  "verdicts": {
+    "diff": "read commit by commit against base e8bad938a; 22242c1ca and a2e2ba2f0 add only the evidence fragment, bd658567d rewrites cascade_calibration.py, extends bootstrap_interval with a statistic argument, rewires _route and the deciding path, and adjusts the two test modules.",
+    "done_when": "the done_when names the cutoffs, the map, the validation table beside the panel and a gate with no added failures; docs/evidence/fragments/sn-review-through-jev/srtj-jev-matched-decision.html records all four at lines 5, 18, 24-31 and 33, and the gate is recorded in baseline.log and head.log.",
+    "goal": "the node goal is that Jev decides at thresholds matched to the paid panel's accept rates; imas_codex/standard_names/review/cascade.py:194 selects the score by score_kind and cross-checks it against the panel's calibration rate; cascade_calibration.py:536 fits the inclusive cutoff that matches that rate and cascade.py:457 emits the mapped decision_score as winning_score.",
+    "manifest": "read at runs/r-20261020T121102641109-srtj-jev-matched-decision/manifest.md; status complete, commits 22242c1ca/bd658567d/a2e2ba2f0, baseline 5 failed/377 passed and head 5 failed/396 passed with identical failure ids, and three negative-control logs recorded.",
+    "write_paths": "the dispatch fence grants eight paths, including docs/figures/sn-review-through-jev/srtj-jev-matched-decision; the diff touches seven of them and every changed path lies inside that fence."
+  }
+}
