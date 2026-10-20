@@ -1,0 +1,83 @@
+<!-- Re-ran the heuristic anchor arm of the current_density_due_to_anomalous_transport
+     family through the per-arm runner
+     (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py) on
+     the fixed code revision and the re-derived anchors. One arm only; the Jev arm
+     and the adoption verdict belong to sibling nodes and the aggregating node. -->
+<section id="ssog-anchor-rerun-anomalous-current-heuristic-r2" data-reckon="evidence">
+  <h2 id="ssog-anchor-rerun-anomalous-current-heuristic-r2-heading">Anomalous-transport heuristic arm, re-run: the false 0.849 hold does not reproduce</h2>
+
+  <p id="ssog-anchor-rerun-anomalous-current-heuristic-r2-arm">
+    Family seed <code>current_density_due_to_anomalous_transport</code>, variation
+    kind <em>component</em>, six members. The re-derived selection leaves the
+    heuristic anchor unchanged at
+    <code>vertical_current_density_due_to_anomalous_transport</code> (only the Jev
+    anchor moved,
+    <code>radial_&hellip;</code> to <code>poloidal_current_density_due_to_anomalous_transport</code>),
+    so this node re-runs the arm that was inconclusive in the first round. It ran
+    alone, detached, on code revision <code>284f17bcb</code> against a fresh scratch
+    copy of the archived export. The apply planned and touched all six members in
+    two batches; <code>batches_run 2</code> of <code>batches_total 2</code>.
+  </p>
+
+  <p id="ssog-anchor-rerun-anomalous-current-heuristic-r2-defect">
+    The first round's two failures do not reproduce. That round's second batch
+    halted on <code>docs acceptance 80.00% &lt; 90.00% (4/5 touched)</code> at
+    <code>resume_from 2</code>, halting the arm after batch 1 and holding the anchor
+    member's documentation score at <strong>0.849</strong>. On the fixed code the
+    same family and the same anchor run to completion: <code>halt_reasons []</code>,
+    <code>halted false</code>, <code>resume_from null</code>, <code>stamped true</code>,
+    <code>score_regressions.below_threshold []</code>. No member scores 0.849; the
+    lowest after-score is 0.93750.
+  </p>
+
+  <table id="ssog-anchor-rerun-anomalous-current-heuristic-r2-table"><thead><tr><th>Member</th><th>Documentation score before</th><th>Documentation score after</th></tr></thead><tbody>
+    <tr><td><code>current_density_due_to_anomalous_transport</code></td><td>0.87500</td><td>1.00000</td></tr>
+    <tr><td><code>parallel_current_density_due_to_anomalous_transport</code></td><td>0.91875</td><td>1.00000</td></tr>
+    <tr><td><code>poloidal_current_density_due_to_anomalous_transport</code></td><td>0.89375</td><td>0.98750</td></tr>
+    <tr><td><code>radial_current_density_due_to_anomalous_transport</code></td><td>0.93750</td><td>1.00000</td></tr>
+    <tr><td><code>toroidal_current_density_due_to_anomalous_transport</code></td><td>0.94375</td><td>1.00000</td></tr>
+    <tr><td><code>vertical_current_density_due_to_anomalous_transport</code></td><td>1.00000</td><td>0.93750</td></tr>
+  </tbody></table>
+
+  <p id="ssog-anchor-rerun-anomalous-current-heuristic-r2-outcome">
+    Lint before the apply was <strong>5</strong> findings (1 defining equation,
+    3 missing reverse link, 1 sign convention); after, <strong>6</strong>, all sign
+    convention. All six members were touched; <code>total_accepted 6</code>,
+    <code>total_touched 6</code>, <code>total_quarantined 0</code>. One member fell
+    on documentation score, <code>vertical_current_density_due_to_anomalous_transport
+    1.0</code> to <code>0.93750</code>, well above the acceptance threshold, and the
+    anchor member rose <code>0.87500</code> to <code>1.00000</code>. The paired
+    adoption verdict belongs to the aggregating node.
+  </p>
+
+  <p id="ssog-anchor-rerun-anomalous-current-heuristic-r2-containment">
+    The scratch instance read <strong>1,770,101</strong> nodes at
+    <code>bolt://127.0.0.1:28004</code>, a scratch-only marker raised its count to
+    1,770,102 and back, and the live graph at <code>bolt://98dci4-gpu-0002:7687</code>
+    never saw the marker (<code>live_probe 0</code>). Containment <strong>holds</strong>
+    on both controls: <strong>38</strong> scratch cost rows name this family and 38
+    are in the apply window (signal 76), and <strong>0</strong> rows attributable to
+    this apply appear in the live graph (<code>live_family_rows 0</code>,
+    <code>live_scope_run_rows 0</code>). The scratch instance was stopped and its
+    tree removed, and the port reservation released.
+  </p>
+
+  <p id="ssog-anchor-rerun-anomalous-current-heuristic-r2-spend">
+    <strong>38</strong> LLMCost rows totalling <strong>USD 0.888126</strong> over a
+    <strong>1305.2 s</strong> wall time. By model: Claude Sonnet 5 USD 0.372841
+    (6 calls), GPT-6.1 Sol USD 0.298457 (8), Grok 4.5 USD 0.213548 (6), Jev USD
+    0.003280 (18). The runner's per-apply cap for six planned calls is USD 4.04, so
+    the effective ceiling was the smaller arm budget, <strong>USD 2.00</strong>; the
+    arm spent below both.
+  </p>
+
+  <p id="ssog-anchor-rerun-anomalous-current-heuristic-r2-cleanup">
+    The invocation was detached and its log ends <code>EXIT=0</code>. The run
+    resolved module
+    <code>&lt;worktree&gt;/imas_codex/standard_names/harmonize.py</code> from git head
+    <code>284f17bcb</code>, digest <code>sha256 53d14e51fb7a7d8cf73c8c6876afecd3db2f3791f0cfb6c78218500ad7c3bdf4</code>
+    of the <code>imas_codex</code> tree. The runner and the fixed selection are
+    unchanged. The full arm record is at
+    <code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-heuristic.json</code>.
+  </p>
+</section>
