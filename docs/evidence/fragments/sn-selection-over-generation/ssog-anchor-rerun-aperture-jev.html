@@ -1,0 +1,75 @@
+<section id="ssog-anchor-rerun-aperture-jev" data-reckon="evidence">
+  <h2 id="ssog-anchor-rerun-aperture-jev-heading">Diagnostic aperture: Jev arm re-run on the fixed code and re-derived anchor</h2>
+  <p id="ssog-anchor-rerun-aperture-jev-result">
+    A fresh scratch copy of the archived graph export was harmonized from
+    <code>y_coordinate_of_diagnostic_aperture</code>, the re-derived Jev anchor
+    (<code>ssog-anchor-reselect</code>, derived 2026-10-20T13:45:53Z), on the
+    fixed revision <code>284f17bcb</code>. The detached runner exited
+    <code>0</code> and the arm recorded <code>outcome_status=complete</code>.
+    Unlike the first round, the apply ran <strong>both batches</strong> — batch 1
+    <code>y_coordinate_of_diagnostic_aperture</code>, batch 2
+    <code>vertical_coordinate_of_diagnostic_aperture</code> and
+    <code>x_coordinate_of_diagnostic_aperture</code> — with
+    <code>halt_reasons=[]</code> and <code>halted=false</code>.
+  </p>
+  <p id="ssog-anchor-rerun-aperture-jev-lint">
+    Lint findings fell from <strong>2 to 0</strong> (before: one
+    <code>convention_violation</code> and one <code>link_missing_reverse</code>;
+    after: no findings in any class). Every member was stamped
+    (<code>stamped=true</code>, <code>total_touched=3</code>,
+    <code>total_accepted=3</code>, <code>total_quarantined=0</code>).
+    Member documentation scores:
+  </p>
+  <table id="ssog-anchor-rerun-aperture-jev-scores">
+    <thead><tr><th>Member</th><th>Documentation before</th><th>Documentation after</th></tr></thead>
+    <tbody>
+      <tr><td><code>vertical_coordinate_of_diagnostic_aperture</code></td><td>0.87500</td><td>1.00000</td></tr>
+      <tr><td><code>x_coordinate_of_diagnostic_aperture</code></td><td>0.91875</td><td>1.00000</td></tr>
+      <tr><td><code>y_coordinate_of_diagnostic_aperture</code></td><td>0.89375</td><td>1.00000</td></tr>
+    </tbody>
+  </table>
+  <p id="ssog-anchor-rerun-aperture-jev-hold">
+    No member scored exactly <strong>0.849</strong> and no documentation hold was
+    recorded: the false hold that dominated the inconclusive first round did not
+    reproduce. The lowest before-score is 0.87500 (the anchor member) and every
+    after-score is 1.00000.
+  </p>
+  <p id="ssog-anchor-rerun-aperture-jev-spend">
+    The scratch ledger holds <strong>44 calls</strong> and
+    <strong>USD 0.640979</strong> in the apply window; the harmonization summary
+    reports USD 0.641. Both sit below the stricter USD 1.98 apply cap and well
+    under the arm's USD 2.00 limit. Apply wall time was
+    <strong>1,832.5 s</strong>. By model: 30 calls on
+    <code>typesafe/jev-1.13</code> (USD 0.005191), 4 on
+    <code>claude-sonnet-5</code> (USD 0.333364), 5 on
+    <code>gpt-6.1-sol</code> (USD 0.153773), 4 on <code>grok-4.5</code>
+    (USD 0.146088) and 1 on <code>gpt-6-luna</code> (USD 0.002563).
+  </p>
+  <p id="ssog-anchor-rerun-aperture-jev-containment">
+    Containment holds. A scratch-only marker changed the copy's node count from
+    1,770,101 to 1,770,102 and back while the live graph read 1,771,165 and saw
+    no marker (<code>scratch_probe=1</code>, <code>live_probe=0</code>). The
+    post-apply positive control found 44 family cost rows and 44 ledger rows in
+    scratch, and zero attributable live family and run-id rows (<code
+    >live_signal=0</code>). The temporary Neo4j instance was stopped, its tree
+    removed, and no listener remained on its port pair. The scratch instance
+    process count returned to its pre-run baseline.
+  </p>
+  <p id="ssog-anchor-rerun-aperture-jev-comparison">
+    Against the first-round Jev arm on the same family (lint 2 to 0, 48 calls,
+    USD 0.778013, three members stamped with after-scores
+    0.875/0.91875/0.89375), the re-run reaches the same lint floor and stamps the
+    same three members, and raises every documentation after-score to 1.00000.
+    The adoption call itself remains with the coordinator over the whole set of
+    families.
+  </p>
+  <p id="ssog-anchor-rerun-aperture-jev-links">
+    Source export
+    <code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code>
+    (2,643,183,686 B dump). <code>imas_codex</code> tree digest
+    <code>53d14e51fb7a7d8cf73c8c6876afecd3db2f3791f0cfb6c78218500ad7c3bdf4</code>.
+    Run ids <code>a2fa9d65-2e82-49bc-bbe6-afccbb87042d</code> and
+    <code>0749a93f-c0a6-49e2-88dd-c846e6633868</code>.
+    <a href="/imas-codex/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json">Full Jev arm receipt</a>.
+  </p>
+</section>
