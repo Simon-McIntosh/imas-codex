@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="121">
+<meta name="plan-version" content="122">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -593,8 +593,45 @@ c6f652c62abb586a89c457decb4d316c488804c8 and head
 review-records/r-20261020T061244408145-srtj-cascade-joint-veto.at-3fee9211ffbae7469a9f91dd3e627ac3fd64778b.json
 and its unsuffixed twin. Six dimensions scored 17/14/16/15/15/10
 (goal_fidelity/evidence/scope_discipline/durability/fit/reuse), zero added
-failures against the reviewed run&#x27;s own two arms, six follow-on findings and
+failures against the reviewed run's own two arms, six follow-on findings and
 no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261020T061244408145-srtj-cascade-joint-veto" data-who="reckon-build" data-when="2026-10-20T07:15:49Z">
+    <div class="r-comment-body"><p>Four commits on the worktree branch, none merged and none pushed.
+
+The defect. The route rule refines when any selected check crosses its
+cutoff. Each cutoff had been fitted alone to flag at most a tenth of the
+accepted items, and nothing bounded what several such cutoffs flag
+together, so the vetoes compounded: the name axis accepted 22 of 363
+calibration items and refined 274.
+
+The rebuild. cascade_calibration.py derives both axes from the frozen
+receipts with no model call. Checks are added to the veto set one at a time
+by the defect recall they add, holding the union of cutoffs to at most a
+tenth of the accepted calibration items on each axis; a check left out is
+not a veto and still feeds the score. Accept and reject cutoffs are
+re-derived by the existing policy. A second run reproduces
+cascade_thresholds.json byte for byte.
+
+Validation split, before -&gt; after. Name axis: refine share 0.814 -&gt; 0.352,
+false-veto rate on accepted 0.722 -&gt; 0.183, refine precision 0.669 -&gt; 0.807,
+accept precision 0.875 -&gt; 0.750. Docs axis: refine share 0.647 -&gt; 0.391,
+false-veto rate 0.486 -&gt; 0.189, refine precision 0.697 -&gt; 0.806, accept
+precision 0.765 -&gt; 0.850. AUC is unchanged on both axes (0.745246 names,
+0.752580 docs), which is the check that the score was not touched.
+
+Control. The rebuilt accept cutoffs reproduce the ones they replace: name
+0.7085 against 0.709657, docs 0.5541 against 0.5500.
+
+Checks dropped from the veto: 18 of 19 on names, keeping
+missing_required_segment at 0.62; 8 of 12 on docs, which keep four, gain
+raw_dd_reference_in_prose and retain the hard contradiction veto. Named in
+full in the fragment.
+
+The artifact carries the per-axis route counts, route shares, source
+receipts and a digest over its own content, so a reader comparing it with
+its predecessor sees the whole document and an edit that changes a cutoff
+without re-deriving it is visible.</p></div>
 </div>
 </section>
 </main>
