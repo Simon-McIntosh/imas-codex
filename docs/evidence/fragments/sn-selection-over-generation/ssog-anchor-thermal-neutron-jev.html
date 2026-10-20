@@ -1,0 +1,68 @@
+<!--
+  The jev arm of the neutron_source_rate_due_to_thermal_fusion anchor family,
+  run in a fresh scratch copy of the fixed graph export by the per-arm runner
+  docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py.
+  Record: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-jev.json
+-->
+<section id="ssog-anchor-thermal-neutron-jev" data-reckon="evidence">
+  <h2 id="ssog-anchor-thermal-neutron-jev-heading">The jev anchor arm of the thermal-fusion neutron-source family</h2>
+
+  <p id="ssog-anchor-thermal-neutron-jev-arm">
+    One arm of one family: <code>neutron_source_rate_due_to_thermal_fusion</code>
+    (kind <em>subject</em>, physical base <code>source_rate</code>; four members).
+    The heuristic anchor is <code>neutron_source_rate_due_to_thermal_fusion</code>;
+    the Jev anchor for this arm is <code>source_rate_due_to_thermal_fusion</code>.
+    The family selection, both anchors and the adoption rule are fixed in
+    <code>ssog-anchor-ab/selection.json</code> and were not re-derived here.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-jev-run">
+    The arm loaded a fresh scratch copy of the checked export
+    <code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code> (2,643,183,686
+    bytes) on its own reserved port pair (bolt <code>28006</code>, http
+    <code>29006</code>), pinned the family's anchor through
+    <code>_record_family_anchor</code>, and applied one harmonize. The scratch copy
+    is a distinct, live-free instance: scratch <code>1770101</code> nodes against
+    live <code>1771164</code>, and the scratch-only <code>ScratchProbe</code> marker
+    was present in the copy and absent from the live graph.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-jev-measure">
+    Harmonized from the Jev anchor the family's lint fell <strong>5 to 4</strong>
+    (<code>convention_violation</code> 1&rarr;1, <code>link_dead_link</code>
+    2&rarr;1, <code>link_missing_reverse</code> 2&rarr;2) over 16 calls,
+    <strong>USD 0.4253</strong> and 1,181.6 s of wall clock, under the USD 2.00 arm
+    ceiling. The run stamped no revision (<code>stamped false</code>) and halted
+    after 1 of 2 planned batches with reason
+    <code>docs acceptance 0.00% &lt; 90.00% (0/1 touched)</code>.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-jev-scores">
+    Documentation review score after the apply, per member:
+    <code>neutron_source_rate_due_to_thermal_fusion</code> 1.000,
+    <code>source_rate_due_to_thermal_fusion</code> 0.849,
+    <code>total_neutron_source_rate_due_to_thermal_fusion</code> 0.931,
+    <code>tritium_tritium_neutron_source_rate_due_to_thermal_fusion</code> 0.944.
+    One member moved: the Jev anchor itself fell from 0.988 to 0.849.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-jev-containment">
+    The apply stayed inside the scratch copy. Its cost rows are present there
+    (<code>scratch_family_rows 16</code>, <code>scratch_ledger_rows 16</code>) and
+    no row attributable to this apply is present in the live graph
+    (<code>live_family_rows 0</code>, <code>live_scope_run_rows 0</code>), so
+    containment holds. The scratch instance was stopped and its tree removed after
+    the arm. The code digest for the run is the tree of
+    <code>5cf53a7b6</code> (<code>tree_digest_imas_codex
+    d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd</code>),
+    module <code>imas_codex/standard_names/harmonize.py</code> resolved inside this
+    worktree.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-jev-rule">
+    Adoption is not decided here: the registered rule takes the Jev anchor only if
+    its arm has fewer total lint findings across the ten families with no member's
+    documentation score lower than in the heuristic arm. This fragment reports one
+    arm; the aggregating node applies the rule to all ten.
+  </p>
+</section>

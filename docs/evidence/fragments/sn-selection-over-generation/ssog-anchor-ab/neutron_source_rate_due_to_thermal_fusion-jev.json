@@ -1,0 +1,263 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "source_rate_due_to_thermal_fusion",
+  "applied": true,
+  "arm": "jev",
+  "budget_limit_usd": 2.0,
+  "calls": 16,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-thermal-neutron-jev",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-thermal-neutron-jev/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-19T21:43:03.648882+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 16,
+      "scratch_ledger_rows": 16,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 32
+  },
+  "cost_limit_passed_usd": 2.0,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T21:43:01.797408+00:00",
+  "family": "neutron_source_rate_due_to_thermal_fusion",
+  "harmonize_receipts": [
+    {
+      "anchor": "source_rate_due_to_thermal_fusion",
+      "applied": true,
+      "batches": [
+        [
+          "source_rate_due_to_thermal_fusion"
+        ],
+        [
+          "neutron_source_rate_due_to_thermal_fusion",
+          "total_neutron_source_rate_due_to_thermal_fusion",
+          "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "8f67d1ffe66128e362c4e6aa23383bb59acd8f764744e3d6be2c392f7919b73e",
+      "harmonized": false,
+      "invariant": [
+        "source_rate",
+        "",
+        "",
+        "thermal_fusion",
+        ""
+      ],
+      "member_scores": {
+        "neutron_source_rate_due_to_thermal_fusion": 1.0,
+        "source_rate_due_to_thermal_fusion": 0.9875,
+        "total_neutron_source_rate_due_to_thermal_fusion": 0.93125,
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion": 0.9437500000000001
+      },
+      "members": [
+        "neutron_source_rate_due_to_thermal_fusion",
+        "source_rate_due_to_thermal_fusion",
+        "total_neutron_source_rate_due_to_thermal_fusion",
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+      ],
+      "n": 4,
+      "physical_base": "source_rate",
+      "planned_calls": 4,
+      "result": {
+        "batches_run": 1,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 0.00% < 90.00% (0/1 touched)"
+        ],
+        "halted": true,
+        "resume_from": 1,
+        "run_ids": [
+          "ada89798-9fd5-40be-931c-df77f55331e8"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 0,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.4253,
+        "total_quarantined": 0,
+        "total_selected": 4,
+        "total_touched": 1
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.9875,
+            "id": "source_rate_due_to_thermal_fusion"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 0.9875,
+            "id": "source_rate_due_to_thermal_fusion"
+          }
+        ]
+      },
+      "scores_after": {
+        "neutron_source_rate_due_to_thermal_fusion": 1.0,
+        "source_rate_due_to_thermal_fusion": 0.849,
+        "total_neutron_source_rate_due_to_thermal_fusion": 0.93125,
+        "tritium_tritium_neutron_source_rate_due_to_thermal_fusion": 0.9437500000000001
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 1,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 0.00% < 90.00% (0/1 touched)"
+    ],
+    "halted": true,
+    "resume_from": 1,
+    "run_ids": [
+      "ada89798-9fd5-40be-931c-df77f55331e8"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 0,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.4253,
+    "total_quarantined": 0,
+    "total_selected": 4,
+    "total_touched": 1
+  },
+  "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
+  "isolation": {
+    "at": "2026-10-19T21:22:10.919856+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771164,
+    "live_nodes_after": 1771164,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 16,
+    "scratch_ledger_rows": 16,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28006"
+  },
+  "jev_anchor": "source_rate_due_to_thermal_fusion",
+  "kind": "subject",
+  "ledger_calls": 16,
+  "ledger_spend_usd": 0.425342,
+  "ledger_window": {
+    "ended": "2026-10-19T21:43:03.209310+00:00",
+    "started": "2026-10-19T21:23:20.157021+00:00"
+  },
+  "lint_after": 4,
+  "lint_after_classes": {
+    "convention_violation": 1,
+    "link_dead_link": 1,
+    "link_missing_reverse": 2
+  },
+  "lint_before": 5,
+  "lint_before_classes": {
+    "convention_violation": 1,
+    "link_dead_link": 2,
+    "link_missing_reverse": 2
+  },
+  "members": [
+    "neutron_source_rate_due_to_thermal_fusion",
+    "source_rate_due_to_thermal_fusion",
+    "total_neutron_source_rate_due_to_thermal_fusion",
+    "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/mcintos-1281970-ch7l0pa8/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.187465
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.11776799999999998
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.003316
+    },
+    {
+      "calls": 1,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.026654
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.089584
+    },
+    {
+      "calls": 4,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.000555
+    }
+  ],
+  "planned_calls": 4,
+  "port": 28006,
+  "port_lock": "/dev/shm/ssog-scratch-port-28006.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T21:43:19.707051+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28006.lock"
+  },
+  "recorded_anchor_before": "source_rate_due_to_thermal_fusion",
+  "run_ids": [
+    "ada89798-9fd5-40be-931c-df77f55331e8"
+  ],
+  "scores_after": {
+    "neutron_source_rate_due_to_thermal_fusion": 1.0,
+    "source_rate_due_to_thermal_fusion": 0.849,
+    "total_neutron_source_rate_due_to_thermal_fusion": 0.93125,
+    "tritium_tritium_neutron_source_rate_due_to_thermal_fusion": 0.9437500000000001
+  },
+  "scores_before": {
+    "neutron_source_rate_due_to_thermal_fusion": 1.0,
+    "source_rate_due_to_thermal_fusion": 0.9875,
+    "total_neutron_source_rate_due_to_thermal_fusion": 0.93125,
+    "tritium_tritium_neutron_source_rate_due_to_thermal_fusion": 0.9437500000000001
+  },
+  "scratch_removed": {
+    "at": "2026-10-19T21:43:19.706959+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/mcintos-1281970-ch7l0pa8"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/mcintos-1281970-ch7l0pa8",
+  "scratch_uri": "bolt://127.0.0.1:28006",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.425342,
+  "stamped": false,
+  "started_at": "2026-10-19T20:52:40.867798+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T21:43:18.655086+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/mcintos-1281970-ch7l0pa8/instance"
+  },
+  "wall_seconds": 1181.6403497206047
+}
