@@ -243,6 +243,57 @@ def record_apply(
     print(json.dumps(payload["applies"][-1], sort_keys=True))
 
 
+def record_run_cost(run_id: str) -> None:
+    """Record one run's own call count and spend, by phase.
+
+    The record's headline figures are the *run's*, not the plan's: the dry run's
+    ``planned_calls`` is what it would do and ``estimate_basis`` describes the
+    prior runs the estimate comes from, so neither answers how many calls the
+    apply itself made.  The run's LLMCost rows do, and they carry the phase each
+    call belongs to.  The per-name apportionment names which standard names the
+    spend reached, which for a run that halted outside its family is the answer
+    to whether the family paid for it.
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import aggregate_spend_per_name
+
+    with GraphClient() as graph:
+        rows = list(
+            graph.query(
+                """
+                MATCH (cost:LLMCost)
+                WHERE cost.run_id STARTS WITH $run
+                RETURN cost.run_id AS run_id,
+                       cost.phase AS phase,
+                       sum(cost.llm_cost) AS usd,
+                       count(*) AS calls
+                ORDER BY usd DESC
+                """,
+                run=run_id,
+            )
+        )
+    if not rows:
+        raise RuntimeError(f"no LLMCost rows for run {run_id}")
+    full_run_id = rows[0]["run_id"]
+    per_name = aggregate_spend_per_name(full_run_id)
+    payload = read_results()
+    if not payload.get("applies"):
+        raise RuntimeError("record a apply before its run cost")
+    entry = payload["applies"][-1]
+    entry["llm_run_id"] = full_run_id
+    entry["llm_cost_rows"] = {
+        row["phase"]: {
+            "calls": int(row["calls"]),
+            "usd": round(float(row["usd"]), 6),
+        }
+        for row in rows
+    }
+    entry["calls_total"] = sum(int(row["calls"]) for row in rows)
+    entry["per_name_usd"] = {name: round(value, 6) for name, value in per_name.items()}
+    write_results(payload)
+    print(json.dumps(entry, sort_keys=True))
+
+
 def _score_rows(members: list[str], before: dict, after: dict) -> str:
     rows = []
     for member in members:
@@ -316,6 +367,23 @@ def render() -> None:
     lint_before = json.dumps(initial.get("lint") or {}, sort_keys=True)
     lint_after = json.dumps(after.get("lint") or {}, sort_keys=True)
 
+    calls_total = apply_entry.get("calls_total")
+    cost_rows = apply_entry.get("llm_cost_rows") or {}
+    calls_by_phase = ", ".join(
+        f"{phase} {row['calls']}" for phase, row in sorted(cost_rows.items())
+    )
+    per_name = apply_entry.get("per_name_usd") or {}
+    per_name_clause = (
+        "; every dollar of it is apportioned to "
+        + ", ".join(
+            f"<code>{name}</code> (USD {_fmt(value)})"
+            for name, value in sorted(per_name.items())
+        )
+        + ", a name outside the family, so the family itself paid nothing"
+        if per_name
+        else ""
+    )
+
     lines = ["<section>"]
     lines.append(
         f'  <h2 id="shc-locus-remeasure">Locus family {SEED}: convergence and cost</h2>'
@@ -325,7 +393,9 @@ def render() -> None:
         f"    The non-WEST locus family <code>{SEED}</code> ran under "
         f"<code>sn harmonize --apply --cost-limit {COST_CAP_USD:.2f}</code>. It "
         f"<strong>{verdict}</strong>{halt_clause}. Spend "
-        f"<strong>USD {_fmt(spend)}</strong>"
+        f"<strong>USD {_fmt(spend)}</strong> over "
+        f"<strong>{calls_total if calls_total is not None else '—'} LLM call(s)</strong>"
+        + (f" ({calls_by_phase})" if calls_by_phase else "")
         + (f" over {_fmt(touched, 0)} touched name(s)" if touched is not None else "")
         + f"; wall {_fmt(apply_entry.get('wall_seconds'), 0)}s. Lint findings "
         f"{lint_before} before, {lint_after} after. {len(below)} member(s) are below "
@@ -376,12 +446,12 @@ def render() -> None:
     lines.append('  <p id="shc-locus-remeasure-apply-body">')
     lines.append(
         f"    Apply log <code>{apply_entry.get('log', '—')}</code> ending "
-        f"<code>{apply_entry.get('exit_line', '—')}</code>. Spend "
-        f"<strong>USD {_fmt(spend)}</strong> of the USD {COST_CAP_USD:.2f} "
-        f"cap, from the run's LLMCost documentation-phase rows read while the "
-        f"graph was reachable; a later graph authentication outage prevented "
-        f"re-reading the per-name apportionment, so the per-name split is not "
-        f"recorded."
+        f"<code>{apply_entry.get('exit_line', '—')}</code>. The run "
+        f"<code>{apply_entry.get('llm_run_id', '—')}</code> made "
+        f"<strong>{calls_total if calls_total is not None else '—'} LLM call(s)</strong> "
+        f"in {len(cost_rows)} phase(s) ({calls_by_phase or '—'}), spending "
+        f"<strong>USD {_fmt(spend)}</strong> of the USD {COST_CAP_USD:.2f} cap, "
+        f"read from that run's own LLMCost rows" + per_name_clause + "."
     )
     lines.append("  </p>")
     lines.append("  <table>")
@@ -416,6 +486,8 @@ def main() -> None:
         "--cost-limit", dest="cost_limit", type=float, default=COST_CAP_USD
     )
     rec.add_argument("--spend", dest="spend", type=float, default=None)
+    cost = subcommands.add_parser("record-run-cost")
+    cost.add_argument("run_id")
     subcommands.add_parser("render")
     args = parser.parse_args()
     if args.command == "roster":
@@ -434,6 +506,8 @@ def main() -> None:
         snapshot(args.phase)
     elif args.command == "record-apply":
         record_apply(args.log, args.wall_seconds, args.cost_limit, args.spend)
+    elif args.command == "record-run-cost":
+        record_run_cost(args.run_id)
     elif args.command == "render":
         render()
     else:
