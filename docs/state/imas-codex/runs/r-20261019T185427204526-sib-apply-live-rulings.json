@@ -1,0 +1,5255 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "5682157531c0bad0443d13593ebf881a7ed74b25",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T185427204526-sib-apply-live-rulings/brief.md",
+    "sha256": "f8c05ed582b020aee40e94155aec43c066e510453f6c093ca9f3fb552abacef1"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6736782,
+      "input_tokens_cumulative": 6736782,
+      "output_tokens": 16932,
+      "output_tokens_cumulative": 16932,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3415,
+    "files": 5,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "_specification",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 260
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_manifest_operator.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_supersede_edge.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_supersede_replay.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 136,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_release.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_reparent.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 67,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_supersede_successor_scalar.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 246,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 164,
+        "name": "test_multiple_signals",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 393
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "sample_groups",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 392
+    },
+    {
+      "existing_function": {
+        "line": 1083,
+        "name": "test_page_grouping",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 392
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 395
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 395
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_reconcile_does_not_turn_exhaustion_into_validation_failure",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 389
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "_authority_row",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 649,
+        "name": "test_multi_ids_context",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 391
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_row",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 367
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_change_history_recovery_uses_existing_composed_sources",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 390
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "_relationship_delete_row",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 378
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "_relationship_add_row",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 368
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_row",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 9,
+        "name": "query",
+        "path": "tests/standard_names/test_roster_reason_transcription.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 392
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_dd_projection_reconcile_uses_full_attachment_guard",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 389
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_reconciliation_row",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 401
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "_revival_row",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_row",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 337,
+        "name": "_migration_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 2503,
+        "name": "test_search_docs_includes_matching_signals",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_review_request_renders_production_source_and_neighbour_context",
+        "path": "tests/standard_names/test_campaign_pricing.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 465
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "_authority_row",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 463
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_row",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 445
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "_relationship_add_row",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 445
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_row",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "_revival_row",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 445
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_row",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 445
+    },
+    {
+      "existing_function": {
+        "line": 440,
+        "name": "test_build_process_table_multi_node",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 461
+    },
+    {
+      "existing_function": {
+        "line": 668,
+        "name": "test_text_only_match_uses_text_score",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 706,
+        "name": "test_dual_match_boosted",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 746,
+        "name": "test_enrichment_includes_lifecycle",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "_attachment_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 462
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "_specification",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 488
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_manifest_operator.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_supersede_edge.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_supersede_replay.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 136,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_release.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_reparent.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 67,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_supersede_successor_scalar.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 475,
+        "name": "_preview_rows",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_pass_symbols_defined",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 515,
+        "name": "swap",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 588
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_domain_export_uses_review_friendly_yaml_and_round_trips",
+        "path": "tests/standard_names/test_export_yaml_format.py"
+      },
+      "run_function": {
+        "line": 515,
+        "name": "swap",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 590
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 875
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_focus_run_preflights_before_graph_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 875
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "test_engine_import_does_not_load_cli",
+        "path": "tests/discovery/test_engine_import_order.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 928
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 638,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 928
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 335,
+        "name": "test_cli_reaches_atomic_operator",
+        "path": "tests/standard_names/test_accepted_cohort_restage.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 875
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "test_clears_stale_run_ids_before_seeding",
+        "path": "tests/standard_names/test_focus_flag.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 875
+    },
+    {
+      "existing_function": {
+        "line": 448,
+        "name": "test_seeds_sns_nodes_with_correct_fields",
+        "path": "tests/standard_names/test_focus_flag.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 875
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "_write_taxonomy",
+        "path": "tests/standard_names/test_review_checks.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 836,
+        "name": "html_fragment",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 858
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_candidate_selection_passes_focus_to_the_stage",
+        "path": "tests/cli/test_discover_candidates_focus.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_map_command_builds_options_and_delegates",
+        "path": "tests/cli/test_discover_candidates_stage.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_command_is_a_thin_wrapper_that_builds_the_options",
+        "path": "tests/cli/test_discover_documents_stage.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_command_builds_options_and_calls_stage",
+        "path": "tests/cli/test_discover_paths_stage.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 875,
+        "name": "test_repeated_category_and_scanner_options_all_reach_the_run",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 282,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_focus_run_preflights_before_graph_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1110
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_help_shows_new_flags",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 1606,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 385,
+        "name": "test_facility_records_every_database_route_and_loader",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_every_database_signal_has_a_persisted_access_method",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 1708,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 598,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 1220,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_structural_authority_contract_is_schema_declared",
+        "path": "tests/graph/test_sn_accept_authority.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_builder_expands_members_and_carries_cocos_labels",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_see_also_in_report",
+        "path": "tests/search/test_cluster_output.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1110
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 335,
+        "name": "test_cli_reaches_atomic_operator",
+        "path": "tests/standard_names/test_accepted_cohort_restage.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1110
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 1266,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 710,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 913,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 373,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_payload_keys_enrich",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_payload_keys_refine_name",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_release_refine_claim_apply_requires_scope_and_manifest",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 384,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_schema_declares_resolution_provenance_and_surviving_gates",
+        "path": "tests/standard_names/test_dd_resolution_graph.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 133,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scope_family_and_subtree_pass_through",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 592,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 365,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 406,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 948,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_variation_axes_are_the_non_locus_owner_segments",
+        "path": "tests/standard_names/test_pattern_families.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_normalize_pool_idempotent",
+        "path": "tests/standard_names/test_refine_cap.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 599,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_canonical_authority_fields_cover_the_recorded_extensions",
+        "path": "tests/standard_names/test_repair_authority_schema.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_ineligible_edit_exits_before_graph_or_catalog_mutation",
+        "path": "tests/standard_names/test_sn_approve_preflight.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_delete_covers_all_typed_labels",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_report_has_section_per_domain_and_global_summary",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "test_judgment_question_set_and_storage_slots",
+        "path": "tests/wiki/test_wiki_judgments.py"
+      },
+      "run_function": {
+        "line": 1097,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py"
+      },
+      "window_line": 1102
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "d33d95b85554e5af9609a4f94af0d1dd7f7b3c62",
+    "fb3318c68fbc1d5165f2cd5b3ba5f3b389022215",
+    "fe92e296d810d7decabbd1341ad4a0220d8b6f15",
+    "035b2229cb4f307b38a59c88ada1e550cad4ec71",
+    "204494370c9e7f791357bf3372eae17152e25fce"
+  ],
+  "completed_at": "2026-10-19T21:07:25Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-19T18:56:04Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9686429987385115,
+    "plan": "sn-integrity-backlog",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-19T19:54:28.492067+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-19T18:54:28Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 30,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 7,
+    "mean_context": 128000,
+    "observed_at": "2026-10-19T18:54:13Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 30,
+      "aggregate_tokens_per_second": 395.483,
+      "detail": "",
+      "mean_tokens_per_second": 85.975,
+      "observed_at": "2026-10-19T18:54:13Z",
+      "runs": 4.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-19T21:07:25Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T185427204526-sib-apply-live-rulings/manifest.md",
+  "member": "disposable-r-20261019T185427204526-sib-apply-live-rulings",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-apply-live-rulings",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/sib-apply-live-rulings.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T185427204526-sib-apply-live-rulings/brief.md",
+    "brief_sha256": "f8c05ed582b020aee40e94155aec43c066e510453f6c093ca9f3fb552abacef1",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3929,
+          "cached_input_tokens": 735324,
+          "input_tokens": 739255,
+          "output_tokens": 1842,
+          "reasoning_output_tokens": 52,
+          "total_tokens": 741097,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "the fragment and JSON record both retirements through the signed supersede with successor links, the parallel-field binding, and the separatrix temperature swap through an atomic source migration, each with match check, preview, authority and receipt after a quiet-graph probe; the read-back at a real EXIT= shows the four names leaving the sourceless set with nothing entering it; USD 0",
+    "estimated_hours": null,
+    "goal": "Apply the lead's retire and bind rulings on the live standard names without a DD source",
+    "id": "sib-apply-live-rulings",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-19T18:54:28Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 30,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 7,
+      "mean_context": 128000,
+      "observed_at": "2026-10-19T18:54:13Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 30,
+        "aggregate_tokens_per_second": 395.483,
+        "detail": "",
+        "mean_tokens_per_second": 85.975,
+        "observed_at": "2026-10-19T18:54:13Z",
+        "runs": 4.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T185427204526-sib-apply-live-rulings/manifest.md",
+    "negative_control": "",
+    "plan": "sn-integrity-backlog",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§38",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings.html",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings.json",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-authority.json",
+      "docs/figures/sn-integrity-backlog/sib-apply-live-rulings"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 8834461.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-apply-live-rulings",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-19T18:55:27.698841+00:00",
+    "score": 0.71875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "s38's done-when was edited to the lead's closing ruling, which this node applies; the edits since its stored review are that ruling and landing comments",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.413,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1234.091,
+      "context-estimate": 2009.261,
+      "records": 680.896,
+      "verdict-inputs": 390.872
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.9686429987385115,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "204494370c9e7f791357bf3372eae17152e25fce",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "5682157531c0bad0443d13593ebf881a7ed74b25",
+    "reviewed_head_sha": "204494370c9e7f791357bf3372eae17152e25fce",
+    "scores": {
+      "durability": 12,
+      "evidence": 15,
+      "fit": 17,
+      "goal_fidelity": 15,
+      "reuse": 16,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 95
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261019T185427204526-sib-apply-live-rulings",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§38",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "755f2ea7-1661-4876-9294-baf733e71b71",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 48950874,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 723.047,
+    "generated_tokens": 254282,
+    "generation_seconds": 493.486,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 74.7,
+    "machine_seconds": 229.561,
+    "peak_input_tokens": 171969,
+    "tokens_per_second": 515.28,
+    "wall_tokens_per_second": 351.68
+  },
+  "time_budget": "60m",
+  "tool_steps": 189.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 10739,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 14339,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T15:45:45Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-19T14:56:33Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 4263,
+          "worker_pid": 2735901
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T15:45:45Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 11373,
+        "log_fresh": false,
+        "manifest_commits": [
+          "2e3eaeb05",
+          "bf9ecaa75"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "55cfd323d44e3e91505dc91f32abc6934d530b7e0be774e3268924816094a0d9",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/review-brief.md --plan sn-selection-over-generation --section '§7' --role review --spec-level exact --node review-of-ssog-anchor-camera-width-heuristic-r2-2e3eaeb05db7 --goal 'attach an independent review to run r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2' --done-when 'the review for r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2 stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/review-records/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2/review-records/r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2.at-2e3eaeb05db722174db8b743acd701b1caa103d2.json --time-budget 60m --session 4f554c2d-3a28-4c55-8645-67a1e8a30dea --allow-unreconciled-runs --local",
+        "node": "ssog-anchor-camera-width-heuristic-r2",
+        "phase": "complete",
+        "plan": "sn-selection-over-generation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261019T145549607057-ssog-anchor-camera-width-heuristic-r2",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 11489,
+        "terminal_at": "2026-10-19T15:43:41Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-heuristic-r2"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 10696,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 14296,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T15:41:37Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-19T14:57:15Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T145637709026-ssog-anchor-camera-width-jev-r2",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 4764,
+          "worker_pid": 2744899
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T15:41:37Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 11621,
+        "log_fresh": false,
+        "manifest_commits": [
+          "66ad10613"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "65cf98c2f9fc1dfe3e8411127abfb0c60725f72aaea9ae6a7ccda43b487d7120",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145637709026-ssog-anchor-camera-width-jev-r2/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261019T145637709026-ssog-anchor-camera-width-jev-r2 --gate <verdict> --commit 66ad106134b91b43bb9f799b37839ac4a04d3f89",
+        "node": "ssog-anchor-camera-width-jev-r2",
+        "phase": "complete",
+        "plan": "sn-selection-over-generation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261019T145637709026-ssog-anchor-camera-width-jev-r2",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 11840,
+        "terminal_at": "2026-10-19T15:37:56Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-camera-width-jev-r2"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 10616,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 14216,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T15:28:42Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-19T14:58:49Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 280,
+          "worker_pid": 2762541
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T15:28:42Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 12399,
+        "log_fresh": false,
+        "manifest_commits": [
+          "37dd447ee9ff06ad352d4c415751b32de003fed9",
+          "eac710923b047c8785b88de4313c29ea017e0f4a"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "d33f62ddf794481ff3460e578e2bfb83961b2a1fe07d01d60b247b54b00e0a52",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/review-brief.md --plan sn-selection-over-generation --section '§7' --role review --spec-level exact --node review-of-ssog-anchor-passive-loop-jev-r2-eac710923b04 --goal 'attach an independent review to run r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2' --done-when 'the review for r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2 stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/review-records/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/review-records/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2.at-eac710923b047c8785b88de4313c29ea017e0f4a.json --time-budget 60m --session 4f554c2d-3a28-4c55-8645-67a1e8a30dea --allow-unreconciled-runs --local",
+        "node": "ssog-anchor-passive-loop-jev-r2",
+        "phase": "complete",
+        "plan": "sn-selection-over-generation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 12451,
+        "terminal_at": "2026-10-19T15:27:45Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-jev-r2"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 10131,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 13731,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [
+            2997616,
+            2997627
+          ],
+          "exit_code": null,
+          "exited_at": "2026-10-19T15:52:14Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-19T15:06:36Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic",
+          "signal": 9,
+          "signal_name": "SIGKILL",
+          "stream_records_seen": 4742,
+          "worker_pid": 2998286
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T15:52:14Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 11228,
+        "log_fresh": false,
+        "manifest_commits": [
+          "e452fc85e"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "62b9341ccedad6fe396cea93689420d37165cd86e8f1ef3640e57eb7e39c74a1",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/review-brief.md --plan sn-selection-over-generation --section '§7' --role review --spec-level exact --node review-of-ssog-anchor-divertor-recomb-heuristic-e452fc85e5b6 --goal 'attach an independent review to run r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic' --done-when 'the review for r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/review-records/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/review-records/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic.at-e452fc85e5b6df131e00453b264d910b8f0ba04e.json --time-budget 60m --session 4f554c2d-3a28-4c55-8645-67a1e8a30dea --allow-unreconciled-runs --local",
+        "node": "ssog-anchor-divertor-recomb-heuristic",
+        "phase": "complete",
+        "plan": "sn-selection-over-generation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 11294,
+        "terminal_at": "2026-10-19T15:47:02Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-divertor-recomb-heuristic"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 10445,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 14045,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T15:49:01Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-19T15:01:43Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T150026994505-ssog-anchor-divertor-recomb-jev",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 2377,
+          "worker_pid": 2797169
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T15:49:01Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 11179,
+        "log_fresh": false,
+        "manifest_commits": [
+          "cae372164",
+          "039c58d41"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "4d43d7b9dd4a3698db3ed41eedbbc736c2a3b9b2d2989f2705d735d9f2c9de1a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150026994505-ssog-anchor-divertor-recomb-jev/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150026994505-ssog-anchor-divertor-recomb-jev/review-brief.md --plan sn-selection-over-generation --section '§7' --role review --spec-level exact --node review-of-ssog-anchor-divertor-recomb-jev-039c58d4152a --goal 'attach an independent review to run r-20261019T150026994505-ssog-anchor-divertor-recomb-jev' --done-when 'the review for r-20261019T150026994505-ssog-anchor-divertor-recomb-jev stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261019T150026994505-ssog-anchor-divertor-recomb-jev, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150026994505-ssog-anchor-divertor-recomb-jev/review-records/r-20261019T150026994505-ssog-anchor-divertor-recomb-jev.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150026994505-ssog-anchor-divertor-recomb-jev/review-records/r-20261019T150026994505-ssog-anchor-divertor-recomb-jev.at-039c58d4152a4b3a85cdc9bb472c477b8a730057.json --time-budget 60m --session 4f554c2d-3a28-4c55-8645-67a1e8a30dea --allow-unreconciled-runs --local",
+        "node": "ssog-anchor-divertor-recomb-jev",
+        "phase": "complete",
+        "plan": "sn-selection-over-generation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261019T150026994505-ssog-anchor-divertor-recomb-jev",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 11218,
+        "terminal_at": "2026-10-19T15:48:20Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-divertor-recomb-jev"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 10440,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 14040,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T15:51:51Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-19T15:01:46Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 4992,
+          "worker_pid": 2797908
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T15:51:51Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 11012,
+        "log_fresh": false,
+        "manifest_commits": [
+          "e5bf582ad"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "fa6dd698e8800d6708647617d27eb04db199cdd4c51a7eceb80bbcf4963b97e4",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/review-brief.md --plan sn-selection-over-generation --section '§7' --role review --spec-level exact --node review-of-ssog-anchor-passive-loop-heuristic-r2-e5bf582ad5d4 --goal 'attach an independent review to run r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2' --done-when 'the review for r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2 stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/review-records/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/review-records/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2.at-e5bf582ad5d4c0fcc8a40fc53e3ca51b2b82482a.json --time-budget 60m --session 4f554c2d-3a28-4c55-8645-67a1e8a30dea --allow-unreconciled-runs --local",
+        "node": "ssog-anchor-passive-loop-heuristic-r2",
+        "phase": "complete",
+        "plan": "sn-selection-over-generation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 11097,
+        "terminal_at": "2026-10-19T15:50:23Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-passive-loop-heuristic-r2"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 9274,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Scratch pool eligibility refuses 13 of 232 docs items before review; the authorized extra attempt is exhausted and the complete cascade-docs.json required by done-when was not produced.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 12874,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T15:47:15Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-19T15:20:53Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T150756018922-srtj-cohort-cascade-docs",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 458,
+          "worker_pid": 3009454
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Scratch pool eligibility refuses 13 of 232 docs items before review; the authorized extra attempt is exhausted and the complete cascade-docs.json required by done-when was not produced.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T15:47:15Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 11295,
+        "log_fresh": false,
+        "manifest_commits": [
+          "28ff4870778bd2564a20f34c2c49558e448c9e2d",
+          "70b0baf7b47c6f2d6953dbf5788ec0bc8a7243b7"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "b329ee7f243a89c2ac2274e24eb8e69d443e3c374d72a4d49a8521647d0843f3",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150756018922-srtj-cohort-cascade-docs/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150756018922-srtj-cohort-cascade-docs/manifest.md; resolve the blocker before resuming the run",
+        "node": "srtj-cohort-cascade-docs",
+        "phase": "blocked",
+        "plan": "sn-review-through-jev",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261019T150756018922-srtj-cohort-cascade-docs",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261019T150756018922-srtj-cohort-cascade-docs",
+          "session_id": "01a154b5-7a02-7c02-a930-df5b12f13018",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 11327,
+        "terminal_at": "2026-10-19T15:46:33Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-cascade-docs"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 9241,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 12841,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T15:58:04Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-19T15:21:35Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 600,
+          "worker_pid": 3018872
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T15:58:04Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 10639,
+        "log_fresh": false,
+        "manifest_commits": [
+          "654f0c5b3c59c918386451353bdd267b9e84f38f",
+          "b8f276b6522495672ee29d91684083acb7cf3ee9",
+          "0551289890c63b17bb6701919bbb2f16f73df02d"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "d21e8cf9d14da378ef770ba89ea7f9619cbf2f545614a295fd335b1460e8b45b",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4/review-brief.md --plan sn-review-through-jev --section '§6' --role review --spec-level exact --node review-of-srtj-cohort-incumbent-name-part1of4-0551289890c6 --goal 'attach an independent review to run r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4' --done-when 'the review for r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4 stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4/review-records/r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4/review-records/r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4.at-0551289890c63b17bb6701919bbb2f16f73df02d.json --time-budget 60m --session 4f554c2d-3a28-4c55-8645-67a1e8a30dea --allow-unreconciled-runs --local",
+        "node": "srtj-cohort-incumbent-name-part1of4",
+        "phase": "complete",
+        "plan": "sn-review-through-jev",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261019T150902286759-srtj-cohort-incumbent-name-part1of4",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 10687,
+        "terminal_at": "2026-10-19T15:57:13Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-incumbent-name-part1of4"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 9278,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 12878,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-19T16:01:49Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-19T15:21:07Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 3750,
+          "worker_pid": 3013355
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-19T16:01:49Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 10416,
+        "log_fresh": false,
+        "manifest_commits": [
+          "42d66baa19b5eadbde160976166937f9e9f4bcd2"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "75d507d7af04777f140405c7fa76b011e8cf8e0ef4e9fafda2988350307352c8",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project imas-codex --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4/review-brief.md --plan sn-review-through-jev --section '§6' --role review --spec-level exact --node review-of-srtj-cohort-incumbent-name-part2of4-42d66baa19b5 --goal 'attach an independent review to run r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4' --done-when 'the review for r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4 stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4/review-records/r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4/review-records/r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4.at-42d66baa19b5eadbde160976166937f9e9f4bcd2.json --time-budget 60m --session 4f554c2d-3a28-4c55-8645-67a1e8a30dea --allow-unreconciled-runs --local",
+        "node": "srtj-cohort-incumbent-name-part2of4",
+        "phase": "complete",
+        "plan": "sn-review-through-jev",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261019T152024168998-srtj-cohort-incumbent-name-part2of4",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 10435,
+        "terminal_at": "2026-10-19T16:01:26Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-incumbent-name-part2of4"
+      }
+    ]
+  },
+  "wall_seconds": 7881,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-19T21:07:30Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-19T20:54:43Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261019T185427204526-sib-apply-live-rulings",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 42675,
+    "worker_pid": 2827827
+  },
+  "worker_seconds": 7321,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
