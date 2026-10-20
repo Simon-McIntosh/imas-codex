@@ -1,0 +1,79 @@
+<!-- The documentation hold's DD-source precondition, repaired. The gate logs
+     quoted here are
+     ~/.config/reckon/crew/runs/r-20261020T100542250882-ssog-docs-hold-dd-bindings/gate_base.log
+     and gate_head.log. -->
+<section id="ssog-docs-hold-dd-bindings" data-reckon="evidence">
+  <h2 id="ssog-docs-hold-dd-bindings-heading">The documentation hold compares only against DD source text</h2>
+
+  <p id="ssog-docs-hold-dd-bindings-defect">
+    <strong>Defect.</strong> <code>_documentation_contradiction_note</code> in
+    <code>imas_codex/standard_names/workers.py</code> compares authored documentation claims with
+    the DD text a name is bound to. Its fallback branch held a name whenever it carried
+    <em>any</em> source path or binding, so a name whose sources are all derived names with no DD
+    path — for which no DD text was ever fetched — was held with
+    <code>DD source text unavailable; claim comparison could not run</code>. Documentation review
+    clamps a held name below <code>DEFAULT_MIN_SCORE</code>, so the anchor comparison held 14 of its
+    15 rewritten members and halted after its first batch. Any later regeneration of a derived
+    parent's documentation reaches the same branch.
+  </p>
+
+  <p id="ssog-docs-hold-dd-bindings-reproduction">
+    <strong>Reproduction at the base revision</strong> (<code>fe3c8b79e</code>), driven through the
+    function directly with the graph and the model stubbed, so the run spends nothing:
+    <code>power_of_divertor_due_to_recombination</code> with
+    <code>source_paths=[]</code> and one binding
+    <code>{source_type: derived, source_id: derived:power_of_divertor_due_to_recombination}</code>
+    returned <code>'DD source text unavailable; claim comparison could not run'</code> (log
+    <code>repro_base.log</code>). The same probe on a manual-only item returned the same note at
+    base; the DD-bound items returned the missing-text note
+    <code>'DD source text unavailable at equilibrium/time_slice/profiles_1d/psi'</code>. After the
+    repair the derived-only and manual-only items return no note and the three DD cases are
+    unchanged (<code>repro_head.log</code>).
+  </p>
+
+  <p id="ssog-docs-hold-dd-bindings-change">
+    <strong>Change.</strong> The fallback now asks
+    <code>_has_dd_source_reference(item)</code>, which reports a DD source when
+    <code>_bound_docs_review_dd_paths</code> yields a path, or when a <code>dd:</code>-prefixed
+    entry appears in <code>source_paths</code> or among a binding's <code>dd_path</code>,
+    <code>source_id</code>, <code>path</code> or <code>id</code>. The second clause matters because
+    a binding of another source type can still carry a <code>dd:</code> path, and
+    <code>_bound_docs_review_dd_paths</code> only consults <code>source_paths</code> when no
+    <code>dd</code> binding exists. Everything else in the function is untouched: a DD binding whose
+    text is missing or empty, and a <code>dd:</code>-prefixed source path with no binding, are still
+    held, because for those the comparison genuinely cannot run.
+  </p>
+
+  <p id="ssog-docs-hold-dd-bindings-measure">
+    <strong>Measure.</strong> Gate over the new test file, <code>test_review_cascade.py</code> and
+    every test file that imports the contradiction note or runs the documentation review worker
+    (17 files): base arm <code>8 failed, 258 passed, 1 skipped, 3 deselected</code>; head arm
+    <code>5 failed, 261 passed, 1 skipped, 3 deselected</code>. Added failures
+    <code>0</code>. The three failures the head arm does not carry are the new node's own tests,
+    and the five shared failures are pre-existing at the base revision: every one is
+    <code>test_docs_contradiction_veto.py::test_claim_verdict_controls_acceptance</code>, failing on
+    a stale <code>manager.reserve</code> call-count expectation while the cascade refuses the
+    stubbed rubric answers with <code>ValueError: incomplete rubric answers for completeness</code>
+    in <code>cascade.py</code>. No LLM spend: the probe and the tests return before any model call.
+  </p>
+
+  <p id="ssog-docs-hold-dd-bindings-negative-control">
+    <strong>Negative control.</strong> The declared mutation — restore the any-binding fallback —
+    is the base arm's source. Against it
+    <code>test_derived_only_binding_is_not_held</code> fails with
+    <code>AssertionError: assert 'DD source text unavailable; claim comparison could not run' is
+    None</code>, and <code>test_hold_predicate_reads_only_dd_sources</code> fails with
+    <code>AttributeError: module 'imas_codex.standard_names.workers' has no attribute
+    '_has_dd_source_reference'</code>. That second failure is also the positive control that the
+    base arm imported the base source and not the worktree's copy: the base arm ran with its
+    working directory inside the scratch tree. Exit status non-zero in both arms; log
+    <code>gate_base.log</code>.
+  </p>
+
+  <p id="ssog-docs-hold-dd-bindings-state">
+    <strong>State.</strong> Committed at <code>d1c39e7b6</code>, touching
+    <code>imas_codex/standard_names/workers.py</code> and
+    <code>tests/standard_names/test_docs_hold_dd_bindings.py</code>. The gate measures this node's
+    own change only; verifying the merged result is a separate node's work.
+  </p>
+</section>
