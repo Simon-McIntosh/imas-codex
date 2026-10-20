@@ -139,13 +139,22 @@ and function, as found on the tree this node ran against:</p>
 
 <ul>
   <li>Head gate (<code>logs/gate-head.log</code>, <code>EXIT=0</code>): 91
-  passed, the disposable-graph test deselected from the default tier,
-  <code>-m graph</code> run separately and passing.</li>
+  passed, one deselected — the graph-marked writer test is excluded from the
+  default tier, which is why the two logs below carry its proof.</li>
+  <li>Head gate with the graph tests included
+  (<code>logs/gate-head-with-graph.log</code>, <code>-m "not slow"</code>,
+  <code>EXIT=0</code>): 92 passed, nothing deselected and nothing skipped — the
+  writer test runs beside the rest, not apart from it.</li>
   <li>Base gate (<code>logs/gate-base.log</code>, <code>EXIT=0</code>): 81
   passed — the base-revision audit test run against the base-revision module,
   plus the four gate files this node did not touch.</li>
-  <li>Disposable Neo4j: the writer's Cypher executed on an instance started
-  empty and planted with the test's own fixture, not skipped.</li>
+  <li><strong>The disposable-graph run is proven by
+  <code>logs/gate-head-graph.log</code></strong> (<code>EXIT=0</code>, 1 passed,
+  8 deselected): on the head, with the writer's guard in place, the writer's
+  Cypher executed against a Neo4j started empty and planted with the test's own
+  fixture. The instance was started through the repository's own temp-Neo4j
+  configuration writer and readiness probe, loading no dump, and was stopped by
+  its own pid afterwards.</li>
   <li>Negative control (<code>logs/negative-control-edges-left-as-found.log</code>,
   <code>EXIT=1</code>): reverting the writer's edge rewrite so the
   <code>HAS_PHYSICS_DOMAIN</code> edges are left as found fails
