@@ -52,8 +52,19 @@ stamped flag unchanged, so the field reads <code>false</code>.
 
 <p id="ssog-anchor-rerun-wall-recomb-jev-849">
 A documentation score of exactly <strong>0.849</strong> appears for the anchor
-<code>neutral_energy_flux_at_wall_due_to_recombination</code>. The apply log records it as a
-review outcome, not a hold: the name</p>
+<code>neutral_energy_flux_at_wall_due_to_recombination</code>. The apply log records it
+<strong>held from acceptance</strong> on every one of the four review passes, each pass naming the
+same DD source as contradicted: four hold notes at lines 525, 631, 744 and 828, one per
+<code>chain=N/3</code> pass, followed by the score that pass persisted.</p>
+
+<pre id="ssog-anchor-rerun-wall-recomb-jev-849-holds"><code>line 525  22:08:42  review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance &mdash; contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: &hellip; DD: One scalar value is provided per element in the grid subset.
+line 631  22:13:02  review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance &mdash; contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: &hellip; DD: One scalar value is provided per element in the grid subset.
+line 744  22:18:18  review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance &mdash; contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: &hellip; DD: One scalar value is provided per element in the grid subset.
+line 828  22:21:44  review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance &mdash; contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: &hellip; DD: One scalar value is provided per element in the grid subset.</code></pre>
+
+<p id="ssog-anchor-rerun-wall-recomb-jev-849-scores">
+Each hold note sits directly above the score line it produced, so the four 0.849 scores are the
+held scores of the four passes:</p>
 
 <pre id="ssog-anchor-rerun-wall-recomb-jev-849-lines"><code>persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination &rarr; docs_stage=reviewed (score=0.849, chain=0/3, resolution=quorum_consensus, shortfall=None)
 persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination &rarr; docs_stage=reviewed (score=0.849, chain=1/3, resolution=quorum_consensus, shortfall=None)
@@ -61,13 +72,15 @@ persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination &rarr; d
 persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination &rarr; docs_stage=exhausted (score=0.849, chain=3/3, resolution=quorum_consensus, shortfall=None)</code></pre>
 
 <p id="ssog-anchor-rerun-wall-recomb-jev-849-note">
-Two facts are recorded as measured and are not adjudicated here. First, the score of 0.849 is a
-<code>quorum_consensus</code> review result whose refinement chain ran to <code>3/3</code> and
-reached <code>docs_stage=exhausted</code>; every line carries <code>shortfall=None</code>, so
-<strong>the log names no hold note</strong> for 0.849 &mdash; the value is a review score, not a
-held parse. Second, the score fell from 0.96875 to 0.849, so this member's documentation score is
-lower after the arm than before it, which the adoption rule counts against the jev anchor. Whether
-that constitutes the false 0.849 hold the first round recorded, or a genuine review outcome, is
+The hold note is named by the log, and its grounds are the DD source: each pass held
+<code>neutral_energy_flux_at_wall_due_to_recombination</code> from acceptance for contradicting
+<code>wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values</code>, against
+which the DD clause reads <em>one scalar value is provided per element in the grid subset.</em>
+The full contradiction text is long and lives in the four log lines above; the head and the DD
+clause are quoted here verbatim. The score is therefore a review score that was
+<strong>held</strong>, not a bare score, and it fell from 0.96875 to 0.849 while its refinement
+chain ran <code>0/3</code>&rarr;<code>3/3</code> to <code>docs_stage=exhausted</code>. Whether
+this is the false 0.849 hold the first round recorded, or a genuine DD-source contradiction, is
 for the family's adoption comparison (the heuristic sibling arm and the aggregate) to settle, not
 this arm.
 </p>
