@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="120">
+<meta name="plan-version" content="121">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -585,6 +585,16 @@ Spend for this node: USD 0.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s6-rubric-score" data-who="reckon-build" data-when="2026-10-20T06:55:00Z">
     <div class="r-comment-body"><p>The rubric-record node stopped before implementing, and was right to (merge <code>f01306ce1</code>). Four consumers decide from the review score against <code>min_score</code> 0.75: name and docs persistence, refine eligibility and the export minimum-score gate. Storing the calibrated probability as the score would accept a refine-routed name at 0.90 and hold an accept-routed one at 0.60.</p><p>Following the lead's direction that Jev score against the reviewers' rubric, the cascade will produce a rubric score instead:</p><ul><li>a 0-to-20 score for each of the reviewers' dimensions, derived from Jev's category answers and from the checks that dock each dimension;</li><li>a total normalised as the incumbent's is.</li></ul><p>The cascade decides on that total with the consumers' own threshold, after the joint veto. Score and route then agree by construction, and no consumer changes. <code>srtj-cascade-rubric-score</code> fits the mapping on the calibration split and judges it on the validation split. It is dispatched once <code>srtj-cascade-joint-veto</code> lands, because it builds on those thresholds.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261020T071815894708-review-of-srtj-cascade-joint-veto-3fee9211ffba" data-who="reckon-build" data-when="2026-10-20T07:38:21.009Z">
+    <div class="r-comment-body"><p>Review of r-20261020T061244408145-srtj-cascade-joint-veto at base
+c6f652c62abb586a89c457decb4d316c488804c8 and head
+3fee9211ffbae7469a9f91dd3e627ac3fd64778b, stored as a parsed record at
+review-records/r-20261020T061244408145-srtj-cascade-joint-veto.at-3fee9211ffbae7469a9f91dd3e627ac3fd64778b.json
+and its unsuffixed twin. Six dimensions scored 17/14/16/15/15/10
+(goal_fidelity/evidence/scope_discipline/durability/fit/reuse), zero added
+failures against the reviewed run&#x27;s own two arms, six follow-on findings and
+no blocking finding.</p></div>
 </div>
 </section>
 </main>

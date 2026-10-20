@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/review/cascade.py:57",
+    "imas_codex/standard_names/review/cascade.py:83",
+    "imas_codex/standard_names/review/cascade.py:118",
+    "imas_codex/standard_names/review/cascade_calibration.py:681"
+  ],
+  "completed_at": "2026-10-20T07:38:21.009Z",
+  "dispatched_at": "2026-10-20T07:18:53Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/cascade_calibration.py:773",
+      "severity": "follow-on",
+      "text": "_dropped subtracts the selected set from the same admissibility gate select_vetoes draws its candidates from, so dropped_checks is [] in the artifact on both axes while the fragment claims 18 name and 8 docs checks were dropped."
+    },
+    {
+      "file": "tests/standard_names/test_cascade_calibration.py:121",
+      "severity": "follow-on",
+      "text": "The determinism test runs on the synthetic four-check fixture, so the brief's requirement that rebuilding from the same receipts is deterministic is not asserted."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061244408145-srtj-cascade-joint-veto/logs/gate.log:3",
+      "severity": "follow-on",
+      "text": "The recorded gate ran at revision 6022125f, not the reviewed head 3fee9211f, and its header omits the tree= and cwd= fields."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cascade-joint-veto.html:29",
+      "severity": "follow-on",
+      "text": "Says the documentation axis drops eight checks and names six."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py:19",
+      "severity": "follow-on",
+      "text": "Outside the node's declared write paths; the change is a single re-pinned digest."
+    },
+    {
+      "file": "imas_codex/standard_names/review/cascade_calibration.py:222",
+      "severity": "follow-on",
+      "text": "_fit_name_logistic reproduces docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:212 parameter for parameter."
+    }
+  ],
+  "project": "imas-codex",
+  "review": "VERDICT goal: the node goal is to add a calibration module that rebuilds cascade_thresholds.json with jointly selected vetoes; imas_codex/standard_names/review/cascade_calibration.py:409 select_vetoes adds checks one at a time by defect recall gained while the union stays under the budget, and build() at :681 rewrites both axes and the policy text.\nVERDICT done_when: the done_when asks for a regenerated artifact, a fragment carrying the before-and-after table and the dropped checks, and tests passing with the negative-control log kept; logs/gate.log records 43 passed EXIT=0 against logs/gate-base.log 39 passed EXIT=0 and logs/negctl.log EXIT=1, and imas_codex/standard_names/review/cascade_thresholds.json:2 carries a digest I recomputed independently to the same value.\nVERDICT write_paths: the manifest declares four source paths plus docs/figures; every diff path lies inside them except tests/standard_names/test_review_cascade.py:19, which the brief did not grant.\nVERDICT manifest: read; it states the gate both arms, the negative control and the before/after metrics, but it omits the baseline_suite and after_suite blocks the record contract requires, so the arm results had to be read from logs/gate.log and logs/gate-base.log.\nVERDICT diff: read commit by commit from c6f652c62abb to 3fee9211ffba; five commits, six files, 2894 insertions against 210 deletions, all in the cascade review surface.\nCALL_SITES: imas_codex/standard_names/review/cascade.py:57 _route, imas_codex/standard_names/review/cascade.py:83 score_name_review, imas_codex/standard_names/review/cascade.py:118 route_name, imas_codex/standard_names/review/cascade.py:128 route_docs\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: cascade_calibration.py:409 implements the joint union budget the goal names and cascade_calibration.py:739 rewrites the policy text, but the artifact's own dropped_checks field at cascade_calibration.py:773 is empty.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/gate.log and logs/gate-base.log record 43 and 39 passed at EXIT=0 with no failures, yet the head log's header names revision 6022125f3475384609bd4cacf60ac9fc307de1b3 rather than the reviewed head 3fee9211ffba.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: tests/standard_names/test_review_cascade.py:19 is outside the four declared write paths, though the one-line digest re-pin it makes is forced by the regenerated artifact.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_cascade_calibration.py:115 fails when select_vetoes is replaced by per-check selection, as logs/negctl.log shows at EXIT=1, but the determinism test at :121 rebuilds a fixture rather than the receipts.\nSCORE fit: 15\nJUSTIFICATION fit: cascade_calibration.py:1-17 follows the module idiom of the review package and names no plan label, though select_vetoes at :409 takes an axis argument it never reads.\nSCORE reuse: 10\nJUSTIFICATION reuse: the accept/reject and cutoff policy has no prior owner anywhere in the repository, but cascade_calibration.py:222 re-implements the fit already committed at docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:212 instead of extending it.\nFINDING imas_codex/standard_names/review/cascade_calibration.py:773 follow-on: _dropped subtracts the selected set from the same admissibility gate select_vetoes draws its candidates from, so dropped_checks is [] in imas_codex/standard_names/review/cascade_thresholds.json on both axes while the fragment claims 18 name and 8 docs checks were dropped; a reader comparing the artifact with its predecessor is told nothing changed.\nFINDING tests/standard_names/test_cascade_calibration.py:121 follow-on: test_joint_selection_is_deterministic runs on the synthetic four-check fixture, so the brief's requirement that rebuilding from the same receipts is deterministic is not asserted, and nothing pins the committed artifact to a fresh build().\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T061244408145-srtj-cascade-joint-veto/logs/gate.log:3 follow-on: the recorded gate ran at revision 6022125f, which is not the reviewed head 3fee9211f, and the header omits the tree= and cwd= fields logs/head.log carries, so the landed revision was never gated as committed.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-cascade-joint-veto.html:29 follow-on: the sentence says the documentation axis drops eight checks and then names six, so the record of the dropped set disagrees with its own count.\nFINDING tests/standard_names/test_review_cascade.py:19 follow-on: the file is outside the node's declared write paths; the change is a single re-pinned digest.\nFINDING imas_codex/standard_names/review/cascade_calibration.py:222 follow-on: _fit_name_logistic reproduces docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-run.py:212 parameter for parameter, a capability the repository already owns.\n",
+  "review_run_id": "r-20261020T071815894708-review-of-srtj-cascade-joint-veto-3fee9211ffba",
+  "reviewed_base_sha": "c6f652c62abb586a89c457decb4d316c488804c8",
+  "reviewed_head_sha": "3fee9211ffbae7469a9f91dd3e627ac3fd64778b",
+  "reviewed_run_id": "r-20261020T061244408145-srtj-cascade-joint-veto",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 10,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T07:42:37.782637+00:00",
+  "total": 87
+}
