@@ -1,0 +1,291 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "radial_current_density_due_to_anomalous_transport",
+  "applied": true,
+  "arm": "jev",
+  "budget_limit_usd": 2.0,
+  "calls": 50,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-anomalous-current-jev",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-anomalous-current-jev/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-19T21:50:47.490521+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 50,
+      "scratch_ledger_rows": 50,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 100
+  },
+  "cost_limit_passed_usd": 2.0,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T21:50:45.248068+00:00",
+  "family": "current_density_due_to_anomalous_transport",
+  "harmonize_receipts": [
+    {
+      "anchor": "radial_current_density_due_to_anomalous_transport",
+      "applied": true,
+      "batches": [
+        [
+          "radial_current_density_due_to_anomalous_transport"
+        ],
+        [
+          "current_density_due_to_anomalous_transport",
+          "parallel_current_density_due_to_anomalous_transport",
+          "poloidal_current_density_due_to_anomalous_transport",
+          "toroidal_current_density_due_to_anomalous_transport",
+          "vertical_current_density_due_to_anomalous_transport"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "e75ce54500aff946a61d6922da6bd8fb0708ea96c24459f063d1bd149323f7ea",
+      "harmonized": false,
+      "invariant": [
+        "current_density",
+        "",
+        "",
+        "anomalous_transport",
+        ""
+      ],
+      "member_scores": {
+        "current_density_due_to_anomalous_transport": 0.875,
+        "parallel_current_density_due_to_anomalous_transport": 0.91875,
+        "poloidal_current_density_due_to_anomalous_transport": 0.89375,
+        "radial_current_density_due_to_anomalous_transport": 0.9375,
+        "toroidal_current_density_due_to_anomalous_transport": 0.94375,
+        "vertical_current_density_due_to_anomalous_transport": 1.0
+      },
+      "members": [
+        "current_density_due_to_anomalous_transport",
+        "parallel_current_density_due_to_anomalous_transport",
+        "poloidal_current_density_due_to_anomalous_transport",
+        "radial_current_density_due_to_anomalous_transport",
+        "toroidal_current_density_due_to_anomalous_transport",
+        "vertical_current_density_due_to_anomalous_transport"
+      ],
+      "n": 6,
+      "physical_base": "current_density",
+      "planned_calls": 6,
+      "result": {
+        "batches_run": 2,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 80.00% < 90.00% (4/5 touched)"
+        ],
+        "halted": true,
+        "resume_from": 2,
+        "run_ids": [
+          "cf78ec68-1e6b-444d-a3d7-b49e06db9dac",
+          "0b62e19a-168d-4e44-89ec-e6d630af561c"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 5,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 1.2833,
+        "total_quarantined": 0,
+        "total_selected": 6,
+        "total_touched": 6
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.875,
+            "id": "current_density_due_to_anomalous_transport"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 0.875,
+            "id": "current_density_due_to_anomalous_transport"
+          },
+          {
+            "after": 0.925,
+            "before": 0.9375,
+            "id": "radial_current_density_due_to_anomalous_transport"
+          },
+          {
+            "after": 0.9375,
+            "before": 1.0,
+            "id": "vertical_current_density_due_to_anomalous_transport"
+          }
+        ]
+      },
+      "scores_after": {
+        "current_density_due_to_anomalous_transport": 0.849,
+        "parallel_current_density_due_to_anomalous_transport": 1.0,
+        "poloidal_current_density_due_to_anomalous_transport": 0.9375,
+        "radial_current_density_due_to_anomalous_transport": 0.925,
+        "toroidal_current_density_due_to_anomalous_transport": 1.0,
+        "vertical_current_density_due_to_anomalous_transport": 0.9375
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 2,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 80.00% < 90.00% (4/5 touched)"
+    ],
+    "halted": true,
+    "resume_from": 2,
+    "run_ids": [
+      "cf78ec68-1e6b-444d-a3d7-b49e06db9dac",
+      "0b62e19a-168d-4e44-89ec-e6d630af561c"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 5,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 1.2833,
+    "total_quarantined": 0,
+    "total_selected": 6,
+    "total_touched": 6
+  },
+  "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+  "isolation": {
+    "at": "2026-10-19T21:20:42.936699+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771164,
+    "live_nodes_after": 1771164,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 50,
+    "scratch_ledger_rows": 50,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28012"
+  },
+  "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+  "kind": "component",
+  "ledger_calls": 50,
+  "ledger_spend_usd": 1.2833189999999997,
+  "ledger_window": {
+    "ended": "2026-10-19T21:50:46.910019+00:00",
+    "started": "2026-10-19T21:20:50.845415+00:00"
+  },
+  "lint_after": 12,
+  "lint_after_classes": {
+    "defining_equation": 1,
+    "link_hygiene": 1,
+    "link_missing_reverse": 5,
+    "sign_convention": 5
+  },
+  "lint_before": 5,
+  "lint_before_classes": {
+    "defining_equation": 1,
+    "link_missing_reverse": 3,
+    "sign_convention": 1
+  },
+  "members": [
+    "current_density_due_to_anomalous_transport",
+    "parallel_current_density_due_to_anomalous_transport",
+    "poloidal_current_density_due_to_anomalous_transport",
+    "radial_current_density_due_to_anomalous_transport",
+    "toroidal_current_density_due_to_anomalous_transport",
+    "vertical_current_density_due_to_anomalous_transport"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T204530252833-ssog-anchor-anomalous-current-jev/mcintos-1281970-egovx4v_/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.242925
+    },
+    {
+      "calls": 9,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.5060439999999999
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.00544
+    },
+    {
+      "calls": 8,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.24963400000000002
+    },
+    {
+      "calls": 9,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.27539
+    },
+    {
+      "calls": 21,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.0038859999999999993
+    }
+  ],
+  "planned_calls": 6,
+  "port": 28012,
+  "port_lock": "/dev/shm/ssog-scratch-port-28012.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T21:51:04.799793+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28012.lock"
+  },
+  "recorded_anchor_before": "radial_current_density_due_to_anomalous_transport",
+  "run_ids": [
+    "cf78ec68-1e6b-444d-a3d7-b49e06db9dac",
+    "0b62e19a-168d-4e44-89ec-e6d630af561c"
+  ],
+  "scores_after": {
+    "current_density_due_to_anomalous_transport": 0.849,
+    "parallel_current_density_due_to_anomalous_transport": 1.0,
+    "poloidal_current_density_due_to_anomalous_transport": 0.9375,
+    "radial_current_density_due_to_anomalous_transport": 0.925,
+    "toroidal_current_density_due_to_anomalous_transport": 1.0,
+    "vertical_current_density_due_to_anomalous_transport": 0.9375
+  },
+  "scores_before": {
+    "current_density_due_to_anomalous_transport": 0.875,
+    "parallel_current_density_due_to_anomalous_transport": 0.91875,
+    "poloidal_current_density_due_to_anomalous_transport": 0.89375,
+    "radial_current_density_due_to_anomalous_transport": 0.9375,
+    "toroidal_current_density_due_to_anomalous_transport": 0.94375,
+    "vertical_current_density_due_to_anomalous_transport": 1.0
+  },
+  "scratch_removed": {
+    "at": "2026-10-19T21:51:04.799628+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T204530252833-ssog-anchor-anomalous-current-jev/mcintos-1281970-egovx4v_"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T204530252833-ssog-anchor-anomalous-current-jev/mcintos-1281970-egovx4v_",
+  "scratch_uri": "bolt://127.0.0.1:28012",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 1.2833189999999997,
+  "stamped": false,
+  "started_at": "2026-10-19T20:48:34.620948+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T21:51:02.501026+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261019T204530252833-ssog-anchor-anomalous-current-jev/mcintos-1281970-egovx4v_/instance"
+  },
+  "wall_seconds": 1794.4026037510484
+}
