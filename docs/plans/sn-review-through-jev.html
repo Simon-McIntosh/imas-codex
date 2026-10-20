@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="122">
+<meta name="plan-version" content="123">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -632,6 +632,9 @@ The artifact carries the per-axis route counts, route shares, source
 receipts and a digest over its own content, so a reader comparing it with
 its predecessor sees the whole document and an edit that changes a cutoff
 without re-deriving it is visible.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-improve-jev" data-who="reckon-build" data-when="2026-10-20T08:55:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-10-20: keep the cascade in shadow, improve Jev's discrimination, then retest. Do not switch it on.</p><p>The evidence for the ruling. With the rubric score at the consumers' threshold (<code>min_score</code> 0.85) and a cross-validated veto, the validation split shows:</p><ul><li><strong>Names:</strong> 1.8% accepted, 16% to the chat reviewer, 82% to refine, refine precision 68%, false vetoes 3%.</li><li><strong>Docs:</strong> 3.3% accepted, 47% to the chat reviewer, 50% to refine, refine precision 82%.</li></ul><p>The only accepts are 6 of 6 on each axis. Name AUC is 0.72 to 0.75 and docs AUC 0.75 to 0.78, so Jev can decide only a small fraction with confidence.</p><p>The 3 to 5 times cheaper review measured on the cohort came from the defective router sending 65 to 70% of items to refine without review. That is not a saving. Honest routing decides about 10 to 20% of items, so the saving is about 10 to 20%.</p><p>Next:</p><ul><li>a diagnosis of where Jev's name and documentation signal is weak, per check and per dimension, with the evidence each check lacks;</li><li>then the improvements it ranks, and more golden labels, until AUC clears a target the lead sets (0.85 proposed);</li><li>then routing is re-measured on the validation split.</li></ul><p>Meanwhile §5 proceeds, so refine reads Jev's named failed checks.</p></div>
 </div>
 </section>
 </main>
