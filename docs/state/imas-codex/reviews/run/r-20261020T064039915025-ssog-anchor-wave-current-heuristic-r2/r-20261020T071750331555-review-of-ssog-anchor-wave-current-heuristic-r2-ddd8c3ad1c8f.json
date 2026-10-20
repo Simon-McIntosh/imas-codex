@@ -6,6 +6,13 @@
   "call_sites": [],
   "completed_at": "2026-10-20T07:35:33.513Z",
   "dispatched_at": "2026-10-20T07:18:35Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-20T07:41:19.423424+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_wave_driven_current_drive-heuristic.json",
