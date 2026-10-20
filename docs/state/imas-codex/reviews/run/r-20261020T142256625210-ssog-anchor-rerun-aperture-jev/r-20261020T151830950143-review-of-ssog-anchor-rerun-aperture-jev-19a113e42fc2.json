@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:261",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:137",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:429"
+  ],
+  "completed_at": "2026-10-20T19:54:42Z",
+  "dispatched_at": "2026-10-20T15:19:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-aperture-jev.html",
+      "line": "60",
+      "severity": "blocking",
+      "text": "blocking: the landing fragment's comparison paragraph states the first-round Jev arm's result as 'three members stamped with after-scores 0.875/0.91875/0.89375'. Those are the first round's BEFORE scores, not its after-scores: the parent revision's record at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json records scores_before {vertical 0.875, x 0.91875, y 0.89375} and scores_after {vertical 1.0, x 1.0, y 0.875} (git show 284f17bcba6f17457c54d40527d5f1776f6fa0e9:<path>). The re-run's own scores_before are the same three numbers, which is where the sentence's figures appear to come from. The paragraph therefore misstates the baseline it compares against and overstates the re-run's improvement: against the true first-round after-scores the only documentation move the re-run makes is the anchor member, y_coordinate_of_diagnostic_aperture 0.875 to 1.0, where the fragment reads as though all three members rose. The fragments are the evidence the coordinator's adoption call reads, so a wrong baseline belongs to the deliverable rather than to a summary of it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json",
+      "line": "210",
+      "severity": "follow-on",
+      "text": "follow-on: nothing asserts the receipt's required field set, so the change has no guard that fails if it regresses. The done_when names outcome_status, anchor, lint before and after, per-member documentation scores before and after, batches run, calls, spend, wall time, stamped, containment and the code digest; this node adds no test, and no test in tests/ reads this record (grep over tests/ for outcome_status/ssog-anchor-ab finds only unrelated matches in tests/standard_names/test_export_tombstone_selection.py and tests/standard_names/test_rerank_label_sheet.py). The one consumer, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:261 with :137-139, degrades rather than failing: _classify substitutes {} for a missing scores_after and _family_verdict then reports the arm as 'no completed record', so a receipt that lost scores_after, batches_run or lint_after would be read as an absent arm instead of an error. Testing this fragment family is an established idiom (tests/standard_names/test_rerank_label_sheet.py loads an ssog runner script directly), so a schema assertion on the receipt is available rather than novel."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit over 284f17bcb..19a113e42fc2: one commit, 19a113e42fc2, touching two files - a rewrite of the arm receipt (calls 48 to 44, new run ids a2fa9d65/0749a93f, per-model spend, port 28002 with lock release, scores_after all 1.0, score_regressions.fell emptied, new containment/isolation/scratch_removed timestamps) and a new 75-line landing fragment.",
+    "done_when": "The done_when asks the arm record to hold outcome status, anchor, lint before and after, every member's documentation score before and after, batches run, calls, spend, wall time, stamped, containment verdict and code digest, written by a detached run whose log ends EXIT=0. The record holds every one of those keys (outcome_status=complete, anchor=y_coordinate_of_diagnostic_aperture, lint_before=2/lint_after=0, scores_before 0.875/0.91875/0.89375 and scores_after 1.0 across all three, harmonize_summary.result.batches_run=2, calls=44, spend_usd=0.640979, wall_seconds=1832.54, stamped=true, containment.holds=true, code.tree_digest_imas_codex=53d14e51...), and ssog-jev-run/runner-jev.log ends with a bare EXIT=0 on a header naming revision 284f17bcb and module.__file__ harmonize.py.",
+    "goal": "The node goal is to re-run the jev arm of the vertical_coordinate_of_diagnostic_aperture anchor family on the fixed code and re-derived anchors in a scratch graph. The landed commit 19a113e42fc2 rewrites docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json to a complete arm record (outcome_status=complete, anchor=y_coordinate_of_diagnostic_aperture, code.git_head=284f17bcb) and adds the landing fragment docs/evidence/fragments...ssog-anchor-rerun-aperture-jev.html, so both halves of the goal landed.",
+    "manifest": "Read in full: status complete, commits 19a113e42fc2, changed_paths the two declared files, tests carrying the literal detached runner invocation with absolute paths, test_logs the runner and apply logs, measurement_module harmonize.py and measurement_cwd the node worktree. Its headline figures reconcile with the logs, except that the landing fragment's own comparison sentence disagrees with the parent record (finding above).",
+    "write_paths": "The declared write paths are docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json and docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-aperture-jev.html; git show --stat 19a113e42fc2 lists exactly those two paths and nothing else."
+  },
+  "justifications": {
+    "durability": "No assertion was added and no test reads the receipt, so reverting the runner's scores_after or batches_run writes would redden nothing, and the aggregate consumer at ssog-anchor-ab-aggregate-run.py:261 would report the arm as absent rather than failing.",
+    "evidence": "ssog-jev-run/runner-jev.log ends EXIT=0 on a header naming revision 284f17bcb, and the receipt's run ids a2fa9d65/0749a93f, batches_run 2, halted false and per-member before-scores match the apply log's own final JSON block independently; the one gap is that lint_before=2 and its two classes rest on the receipt and the runner's one-line summary alone.",
+    "fit": "The HTML matches the sibling fragments' section/paragraph id idiom and the JSON keeps the runner's sort_keys formatting, and the added names carry no version, ticket or gate label.",
+    "goal_fidelity": "The receipt at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json carries code.git_head 284f17bcb and outcome_status=complete with the Jev anchor, and the landing fragment exists, which is what the goal names.",
+    "reuse": "The commit adds no definition: the receipt is produced by the existing docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:429 and consumed by ssog-anchor-ab-aggregate-run.py, so no capability for the arm record was forked.",
+    "scope_discipline": "git show --stat 19a113e42fc2 changes exactly the two paths the brief declares, and no runner, selection or product code is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to re-run the jev arm of the vertical_coordinate_of_diagnostic_aperture family on the fixed code and re-derived anchors in a scratch graph; ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json carries the result and ssog-anchor-rerun-aperture-jev.html is the landing fragment.\nVERDICT done_when: the record holds every field the done_when names (lint_before 2 / lint_after 0, per-member before and after scores, batches_run 2, calls 44, spend_usd 0.640979, wall_seconds 1832.54, stamped true, containment.holds true, code digest) and ssog-jev-run/runner-jev.log ends EXIT=0 at revision 284f17bcb.\nVERDICT write_paths: the manifest declares the two evidence paths and git show --stat 19a113e42fc2 changes exactly those two.\nVERDICT manifest: read in full; it records status complete, commit 19a113e42fc2, the literal runner command, the two logs and the reconciling figures.\nVERDICT diff: one commit over 284f17bcb..19a113e42fc2, rewriting the arm receipt (48 to 44 calls, new run ids, scores_after all 1.0, score_regressions.fell emptied, port 28002) and adding the 75-line landing fragment.\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:261, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:137, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:429\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:5 carries code.git_head 284f17bcb and outcome_status complete with the Jev anchor, which is what the goal names.\nSCORE evidence: 17\nJUSTIFICATION evidence: ssog-jev-run/runner-jev.log ends EXIT=0 at revision 284f17bcb and the receipt's run ids and before-scores match the apply log's own final JSON block.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 19a113e42fc2 changes exactly the two paths the brief declares.\nSCORE durability: 7\nJUSTIFICATION durability: no test reads the receipt, and ssog-anchor-ab-aggregate-run.py:137 would report a lost scores_after as an absent arm rather than failing.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment matches the sibling evidence idioms and adds no version, ticket or gate label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the commit adds no definition; ssog-anchor-ab-run.py:429 produces the record and ssog-anchor-ab-aggregate-run.py consumes it.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-aperture-jev.html:60 blocking: the comparison paragraph calls the first-round Jev arm's after-scores 0.875/0.91875/0.89375, which are that round's before-scores; the parent record's scores_after are 1.0/1.0/0.875.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json:210 follow-on: no test asserts the receipt's required field set, so a regression that dropped scores_after or batches_run would redden nothing and read as an absent arm.",
+  "review_run_id": "r-20261020T151830950143-review-of-ssog-anchor-rerun-aperture-jev-19a113e42fc2",
+  "reviewed_base_sha": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+  "reviewed_head_sha": "19a113e42fc2c2e3ca1595c937cc6848d79ccda1",
+  "reviewed_run_id": "r-20261020T142256625210-ssog-anchor-rerun-aperture-jev",
+  "scores": {
+    "durability": 7,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T20:14:46.345335+00:00",
+  "total": 100
+}
