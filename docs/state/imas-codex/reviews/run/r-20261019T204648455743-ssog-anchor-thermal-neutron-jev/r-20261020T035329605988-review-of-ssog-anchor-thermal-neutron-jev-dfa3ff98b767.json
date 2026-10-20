@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite and no after_suite (both null in its manifest), so it carries no two-arm suite delta of its own and the added-failure set is empty rather than measured by a suite that could have exercised it. Its gate was the per-arm runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, whose log runner-jev.log ends EXIT=0; the change touches only docs/evidence paths that no test module covers.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T04:16:34.004Z",
+  "dispatched_at": "2026-10-20T03:54:31Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/manifest.md",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the tests line carries the unsubstituted placeholders <run-dir> and <run-scratch>, the exact shape the node contract refuses because promotion fills its gate receipt from this line and cannot re-run a template; the literal command survives as the first line of runner-jev.log, so the node is recoverable rather than lost."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/manifest.md",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "follow-on: negative_control_note calls the arm's containment block itself \"the built-in negative control\", but that block is a positive verdict (holds true) and shows no refusal; the runner exposes the real falsification as --self-check-containment, which plants a live row and requires the check to fire, and nine sibling arm runs recorded containment-self-check.log while this node's manifest names no such log."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read against base 5cf53a7b6; one commit adds two new files -- the arm JSON and the landing HTML -- 331 insertions and no deletions.",
+    "done_when": "the done_when asks for the arm written by an invocation whose log ends EXIT=0 and carrying outcome_status complete, the anchor, lint before and after, every done_when field, the containment verdict with its evidence and the code digest; runner-jev.log ends EXIT=0 and neutron_source_rate_due_to_thermal_fusion-jev.json:188 carries outcome_status complete with every listed field present.",
+    "goal": "the node's goal is to run the jev anchor arm of neutron_source_rate_due_to_thermal_fusion in a scratch graph and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-jev.json:6 holds that arm.",
+    "manifest": "read in full; status complete, one commit dfa3ff98b, changed_paths and test_logs present, the single scaffolding retry attributed to a read-only /tmp, blockers none; its tests line carries placeholder tokens.",
+    "write_paths": "the brief's Write scope names the arm JSON and the working rules add the landing fragment; the manifest declares both plus a figures directory, and the diff touches only the JSON and the landing HTML, both inside those declared paths."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion -- it is a data record and a doc -- and the only guard is the runner's write-time containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:630.",
+    "evidence": "the runner asserts the planned anchor equals the target before applying at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:487 and its log runner-jev.log ends EXIT=0, but the containment guard's refusal was never shown in this node.",
+    "fit": "the record reproduces the sibling arm schema key for key and the landing HTML follows the evidence-fragment idiom, though neutron_source_rate_due_to_thermal_fusion-jev.json:31 keeps the runner's cost_limit_passed_usd, a ceiling under a name that asserts a verdict.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-jev.json:6 records the arm at the exact path and anchor the goal names.",
+    "reuse": "the change adds no new definition and forks no capability the repository owns -- the record is produced by the existing runner run_arm at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:335.",
+    "scope_discipline": "git diff --numstat 5cf53a7b6 dfa3ff98b lists only the arm JSON and the landing fragment, both inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to run the jev anchor arm of the family neutron_source_rate_due_to_thermal_fusion in a scratch graph and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-jev.json:6 holds that arm, anchored at source_rate_due_to_thermal_fusion, matching the fixed selection row at ssog-anchor-ab/selection.json.\nVERDICT done_when: the done_when asks for the arm record written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, the stamp, the containment verdict with its evidence, the code digest, the scratch stopped and its tree removed, and spend under USD 2.00; runner-jev.log ends EXIT=0 and the record carries all of them (neutron_source_rate_due_to_thermal_fusion-jev.json:188 outcome_status complete, :6 anchor, :175/:169 lint before/after, :232 all four member scores after, :255/:262 spend and wall, :256 stamp, :17 containment with its evidence, :11 code digest).\nVERDICT write_paths: the brief's Write scope names only the arm JSON while the shared working rules require the landing fragment and permit a figures directory; the manifest declares all three, and the diff touches only the JSON (263 lines) and the landing HTML (68 lines), both inside the declared set.\nVERDICT manifest: read in full; status complete, one commit dfa3ff98b, changed_paths and test_logs present, the single scaffolding retry attributed to a read-only /tmp with no spend, blockers none -- but its tests line (manifest.md:12) carries the unsubstituted placeholders <run-dir> and <run-scratch>.\nVERDICT diff: read against base 5cf53a7b6; the one commit adds two new files and deletes nothing -- the arm record ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-jev.json and the landing fragment ssog-anchor-thermal-neutron-jev.html, 331 insertions, 0 deletions.\nCALL_SITES: none (the record is read by no runtime code; its only writer is the runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:428, and no reader of ssog-anchor-ab/*.json exists in the repository)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-jev.json:6 records the arm at the exact path and anchor the goal names, and every field the brief's done_when lists is present.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate is the arm invocation itself, whose runner asserts the planned anchor equals the target before applying (ssog-anchor-ab-run.py:487) and derives every recorded number from live graph reads, and its log runner-jev.log ends EXIT=0 with the record landing at :188 outcome_status complete -- but the run's own containment check was never falsified here.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --numstat 5cf53a7b6 dfa3ff98b lists only the arm JSON and the landing fragment, both inside the manifest's declared write paths, though the brief's Write scope section names only the JSON and the fragment rests on the shared working rules.\nSCORE durability: 10\nJUSTIFICATION durability: the diff adds no assertion at all -- it is a data record and a doc -- so nothing committed reddens if the record's scores or containment verdict were later replaced, and the one guard is the runner's write-time containment gate at ssog-anchor-ab-run.py:630 setting outcome_status from data[\"containment\"][\"holds\"].\nSCORE fit: 17\nJUSTIFICATION fit: the record reproduces the sibling arm schema key for key (only port_lock and port_lock_released are new, added by the runner's port reservation at ssog-anchor-ab-run.py) and the HTML follows the evidence-fragment idiom, though line 31 keeps the runner's cost_limit_passed_usd, a field name that asserts a verdict while holding a ceiling.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no new definition and forks no capability the repository owns -- the record is produced by the existing runner run_arm at ssog-anchor-ab-run.py:335 and the fragment reuses the existing plan-fragment shape.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/manifest.md:12 follow-on: the tests line carries the unsubstituted placeholders <run-dir> and <run-scratch>, the exact shape the node contract refuses because promotion fills its gate receipt from this line and cannot re-run a template; the literal command survives as the first line of runner-jev.log, so the node is recoverable rather than lost.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/manifest.md:17 follow-on: negative_control_note calls the arm's containment block itself \"the built-in negative control\", but that block is a positive verdict (holds true) and shows no refusal; the runner exposes the real falsification as --self-check-containment, which plants a live row and requires the check to fire, and nine sibling arm runs recorded containment-self-check.log while this node's manifest names no such log.\n",
+  "review_run_id": "r-20261020T035329605988-review-of-ssog-anchor-thermal-neutron-jev-dfa3ff98b767",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "dfa3ff98b767708a6ffe95e1bab57adbfc2a25b7",
+  "reviewed_run_id": "r-20261019T204648455743-ssog-anchor-thermal-neutron-jev",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261020T035329605988-review-of-ssog-anchor-thermal-neutron-jev-dfa3ff98b767"
+  },
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T04:05:35.308206Z",
+  "total": 101
+}
