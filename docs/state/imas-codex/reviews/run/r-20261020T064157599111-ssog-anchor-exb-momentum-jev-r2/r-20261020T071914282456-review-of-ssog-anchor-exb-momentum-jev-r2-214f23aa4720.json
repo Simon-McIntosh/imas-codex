@@ -25,6 +25,11 @@
       "kind": "folded",
       "node": "ssog-anchor-ab-aggregate",
       "recorded_at": "2026-10-20T07:38:10.748981+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the landing contract names each fragment by its node id, as every sibling fragment is",
+      "recorded_at": "2026-10-20T07:38:16.418806+00:00"
     }
   },
   "findings": [
