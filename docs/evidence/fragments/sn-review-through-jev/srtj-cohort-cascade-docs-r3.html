@@ -1,0 +1,64 @@
+<h2 id="srtj-cohort-cascade-docs-r3">Cascade docs piece would not complete inside the runner's caps</h2>
+
+<p id="srtj-cohort-cascade-docs-r3-outcome">
+  The cascade arm was run on the docs axis of the fixed review cohort in a scratch graph, once,
+  exactly as briefed (<code>--arm cascade --axis docs --ceiling-usd 5.75</code>, part 1 of 1,
+  219 items after the 13 docs exclusions). The invocation ended <code>EXIT=1</code>. Its record
+  <code>cascade-docs.json</code> carries <code>status: failed</code>,
+  <code>stop_reason: time_limit_reached</code>, spend <strong>USD 4.706927</strong> over 252 cost
+  receipts, and <code>measurement_complete</code> unset. Containment passed
+  (<code>scratch_run_rows 1, live_run_rows 0, scratch_cost_rows 252, live_cost_rows 0</code>),
+  and the scratch instance was stopped with its tree removed. Spend for this node is
+  <strong>USD 4.71</strong>, inside the USD 5.75 ceiling.
+</p>
+
+<p id="srtj-cohort-cascade-docs-r3-gap">
+  The completion check refused it rather than certifying a partial piece:
+  <code>review piece left 135 selected items pending</code>.
+  The piece came apart in two places, and the sibling name piece shows the contrast. On
+  <code>cascade-name.json</code> the cascade left <strong>3</strong> of 231 items unjudged (1.3%)
+  and finished, <code>stop_reason: no_eligible_work</code>. On docs it left
+  <strong>141</strong> of 219 unjudged (64%): <code>route_counts</code> are
+  <code>refine 64, band 8, accept 6, unjudged 141</code>, against
+  <code>refine 151, band 64, accept 13, unjudged 3</code> on names. Only 78 docs items were
+  judged at all, and the piece spent 4.707 of its 5.0 internal run cap to get that far.
+</p>
+
+<p id="srtj-cohort-cascade-docs-r3-refusal">
+  The unjudged docs items are not idle rows. 132 of the 141 carry the failure reason
+  <code>no route row</code> — the docs judgment produced nothing for them — and 9 carry the
+  <code>ValueError: no usable judgment for documentation review</code> raised by
+  <code>_docs_judgment</code>. Each then fell to the fallback the plan specifies for an
+  unjudgeable item, the incumbent quorum, and the budget refused those seats by the hundred:
+  the log repeats <code>the run budget could not reserve $0.0585 of pre-launch exposure — the
+  reviewer was never called</code> and <code>0/3 reviews succeeded ... deferring, NOT accepting
+  on a single review</code>.
+</p>
+
+<p id="srtj-cohort-cascade-docs-r3-uncompletable">
+  <strong>This piece is not completable at the configured caps, so re-running the identical
+  command is futile rather than unlucky.</strong> The runner caps the pools at an internal,
+  non-CLI <code>time_limit_s=2400</code> and at a run cost limit of
+  <code>min(ceiling_usd, 5.0)</code> — the 5.0 binds here, not the 5.75 ceiling. The first run
+  reached the time cap having spent 4.707 of 5.0 with 135 items still pending; the 141 items
+  that needed the quorum fallback would need roughly 0.18 USD each, near USD 25 of seats, to be
+  reviewed. A second run therefore meets the same wall clock and the same cost wall, and would
+  spend up to another ~5 USD of the lead's USD 60 without reaching the done-when. The node
+  stopped instead of spending it.
+</p>
+
+<p id="srtj-cohort-cascade-docs-r3-remedy">
+  The fixture the coordinator already has for this is the split: the incumbent docs arm is
+  running as <code>--part K --parts 4</code>, and the added <code>--part</code>/<code>--parts</code>
+  flags exist to fit a piece inside one worker's hour. Either the docs axis must be run in parts
+  for the cascade arm too, or the docs judgment must be repaired so that a docs item yields a
+  route row before it reaches the quorum fallback. Both are coordinator decisions, and the second
+  is a product-code change outside this node's write scope.
+</p>
+
+<p id="srtj-cohort-cascade-docs-r3-artifacts">
+  Record: <code>docs/evidence/fragments/sn-review-through-jev/srtj-cohort/cascade-docs.json</code>
+  (committed). Log:
+  <code>/tmp/reckon-crew-scratch/r-20261020T041913475408-srtj-cohort-cascade-docs-r3/piece.log</code>,
+  3675 lines, last line <code>EXIT=1</code>.
+</p>
