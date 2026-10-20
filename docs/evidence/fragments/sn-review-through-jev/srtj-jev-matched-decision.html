@@ -1,4 +1,58 @@
 <section id="srtj-jev-matched-decision">
+<h2 id="srtj-jev-matched-decision-policy">Jev decides at panel-matched calibration thresholds</h2>
+<p><strong>Implemented with cascade deciding still disabled.</strong> The name logistic cutoff is <code>0.32447569396775017</code>; the documentation rubric cutoff is <code>0.38829396813183875</code>. Both match the panel’s calibration acceptance rate before veto. Documentation then applies only the contradiction veto. Other failed checks remain available to refinement without vetoing acceptance. Judged items take accept or refine, with no chat band.</p>
+<p>The coordinator resolved matching as <em>before veto</em> on the resumed attempt. No consumer implementation or production switch changed. No LLM calls or live graph writes were made; spend USD 0 against an authorised ceiling of USD 0.</p>
+<h3 id="srtj-jev-matched-decision-cutoffs">Frozen score selection and calibration fit</h3>
+<table><thead><tr><th>Axis</th><th>Calibration score population</th><th>Logistic AUC</th><th>Rubric AUC</th><th>Selected score</th><th>Cutoff</th></tr></thead><tbody>
+<tr><td>name</td><td>363</td><td>0.795099</td><td>0.727739</td><td>logistic</td><td>0.32447569396775017</td></tr>
+<tr><td>docs</td><td>216</td><td>0.834539</td><td>0.836516</td><td>rubric</td><td>0.38829396813183875</td></tr>
+</tbody></table>
+<p>AUC selection uses all scored calibration items, consistent with the existing calibration report. The landed logistic and rubric fits are retained. Operating cutoffs use only calibration identities with verified panel scores; validation never selects a model, cutoff or mapping. A boundary tie that prevents an exact inclusive-threshold match is refused. All paired metadata and rebuilt logistic values are checked against the <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point.json">frozen paired comparison</a>. The comparison’s missing-panel and revision exclusions remain in effect; its historical panel-input-hash limitation remains.</p>
+<table><thead><tr><th>Axis / split</th><th>Panel accepts at 0.85</th><th>Jev before veto</th><th>Jev after veto</th><th>Veto refusals / defective</th><th>Additional veto refines</th><th>Veto precision [95%]</th></tr></thead><tbody>
+<tr><td>name / calibration</td><td>174/283 = 61.48% [55.72%, 67.13%]</td><td>174/283 = 61.48% [55.71%, 67.13%]</td><td>174/283 = 61.48% [55.71%, 67.13%]</td><td>0 / 0</td><td>0</td><td>undefined</td></tr>
+<tr><td>docs / calibration</td><td>208/210 = 99.05% [97.44%, 100.00%]</td><td>208/210 = 99.05% [97.46%, 100.00%]</td><td>195/210 = 92.86% [89.41%, 95.86%]</td><td>15 / 13</td><td>13</td><td>86.67% [66.67%, 100.00%]</td></tr>
+<tr><td>name / validation</td><td>157/259 = 60.62% [54.41%, 66.79%]</td><td>140/259 = 54.05% [47.86%, 60.15%]</td><td>140/259 = 54.05% [47.86%, 60.15%]</td><td>0 / 0</td><td>0</td><td>undefined</td></tr>
+<tr><td>docs / validation</td><td>172/176 = 97.73% [95.48%, 99.47%]</td><td>174/176 = 98.86% [96.84%, 100.00%]</td><td>169/176 = 96.02% [93.09%, 98.50%]</td><td>6 / 4</td><td>5</td><td>66.67% [25.00%, 100.00%]</td></tr>
+</tbody></table>
+<p>Veto precision is the defective share of every vetoed item, including items already below cutoff. This is rejection precision against binary defensibility labels, not independently adjudicated claim-level contradiction precision. Additional veto refines count only items that the score predicate would have accepted. On calibration, the documentation veto refines 15 items, 13 defective, and changes 13 decisions; on validation it refines six, four defective, and changes five decisions. Validation pre-veto rates need not equal panel rates because calibration cutoffs remain fixed.</p>
+<h3 id="srtj-jev-matched-decision-mapping">Stored decision score and unchanged rubric</h3>
+<p>For selected Jev score <code>s</code>, cutoff <code>c</code>, and consumer threshold <code>m = DEFAULT_MIN_SCORE = 0.85</code>, the stored score is:</p>
+<pre>below cutoff:       m × s / c
+at cutoff:          m
+above cutoff:       m + (1 − m) × (s − c) / (1 − c)</pre>
+<p>This is monotone on 0..1 and places the cutoff exactly at the consumer threshold. The strict lower branch is capped at the representable float immediately below m to prevent roundoff accepting an item below cutoff. Endpoint cutoffs use only the nonempty branch. An explicit consumer min_score is mapped in the same way. A documentation contradiction caps only the mapped scalar below m. <code>winning_score</code> carries that decision score; <code>winning_scores</code> retains the original four 0-to-20 dimensions. The selected raw score, reference logistic probability, rubric and named failed-check evidence remain available. The mapped value is an operating score, not a calibrated probability.</p>
+<h3 id="srtj-jev-matched-decision-validation">Validation beside the paid panel</h3>
+<table><thead><tr><th>Axis / metric</th><th>Panel [95%]</th><th>Final Jev [95%]</th><th>Jev − panel, paired [95%]</th></tr></thead><tbody>
+<tr><td>name / accept rate</td><td>157/259 = 60.62% [54.41%, 66.79%]</td><td>140/259 = 54.05% [47.86%, 60.15%]</td><td>-6.56 [-13.01, +0.00] pp</td></tr>
+<tr><td>name / accept precision</td><td>84/157 = 53.50% [47.17%, 59.88%]</td><td>82/140 = 58.57% [51.20%, 65.93%]</td><td>+5.07 [+0.07, +10.15] pp</td></tr>
+<tr><td>name / accept recall</td><td>84/103 = 81.55% [73.53%, 88.78%]</td><td>82/103 = 79.61% [71.57%, 87.16%]</td><td>-1.94 [-11.11, +7.00] pp</td></tr>
+<tr><td>name / refine precision</td><td>83/102 = 81.37% [73.79%, 88.54%]</td><td>98/119 = 82.35% [75.86%, 88.70%]</td><td>+0.98 [-5.91, +7.97] pp</td></tr>
+<tr><td>name / refine recall</td><td>83/156 = 53.21% [45.40%, 61.25%]</td><td>98/156 = 62.82% [55.13%, 70.37%]</td><td>+9.62 [+1.33, +17.65] pp</td></tr>
+<tr><td>name / false refine rate</td><td>19/103 = 18.45% [11.22%, 26.47%]</td><td>21/103 = 20.39% [12.84%, 28.43%]</td><td>+1.94 [-7.00, +11.11] pp</td></tr>
+<tr><td>docs / accept rate</td><td>172/176 = 97.73% [95.48%, 99.47%]</td><td>169/176 = 96.02% [93.09%, 98.50%]</td><td>-1.70 [-4.65, +1.11] pp</td></tr>
+<tr><td>docs / accept precision</td><td>69/172 = 40.12% [31.68%, 48.52%]</td><td>70/169 = 41.42% [32.14%, 50.56%]</td><td>+1.30 [-0.21, +2.79] pp</td></tr>
+<tr><td>docs / accept recall</td><td>69/72 = 95.83% [91.84%, 100.00%]</td><td>70/72 = 97.22% [92.75%, 100.00%]</td><td>+1.39 [-3.45, +5.48] pp</td></tr>
+<tr><td>docs / refine precision</td><td>1/4 = 25.00% [0.00%, 100.00%]</td><td>5/7 = 71.43% [33.33%, 100.00%]</td><td>+46.43 [-6.67, +100.00] pp</td></tr>
+<tr><td>docs / refine recall</td><td>1/104 = 0.96% [0.00%, 3.45%]</td><td>5/104 = 4.81% [1.09%, 9.59%]</td><td>+3.85 [+0.85, +7.97] pp</td></tr>
+<tr><td>docs / false refine rate</td><td>3/72 = 4.17% [0.00%, 8.16%]</td><td>2/72 = 2.78% [0.00%, 7.25%]</td><td>-1.39 [-5.48, +3.45] pp</td></tr>
+</tbody></table>
+<p><strong>Names are worse on accept recall and false-refine rate:</strong> accept recall is 79.61% versus 81.55%, and false-refine rate is 20.39% versus 18.45%. Accept precision improves to 58.57% from 53.50%, refine precision to 82.35% from 81.37%, and refine recall to 62.82% from 53.21%. The final name accept rate is lower: 54.05% versus 60.62%. Documentation’s final accept rate is also lower, 96.02% versus 97.73%; its accept/refine precision and recall point estimates improve and its false-refine rate decreases. These are finite-cohort point comparisons, not claims of statistical superiority.</p>
+<p>Every interval above comes from <code>imas_codex.discovery.base.evaluation.bootstrap_interval</code>: 10,000 seeded resamples of copy groups, with both policies fixed and paired on the same draws. The owner now accepts a statistic function; this adds no second resampling loop. Undefined ratios and their intervals are null, and undefined resamples are redrawn with the usable count recorded. Degenerate intervals condition on the observed data; intervals exclude fitting uncertainty, tuning exposure and future drift. False-refine rate is acceptable items sent to refine divided by all acceptable items.</p>
+<h3 id="srtj-jev-matched-decision-checks">Reproduction, gate and mutations</h3>
+<p>Before repair, a Jev name score of 0.6 with rubric mean 0.83 produced <code>route=chat_review; winning_score=0.8300000000000001</code>, despite exceeding the matched name cutoff. The frozen-receipt rebuild reproduces the committed artifact twice. Consumer tests execute the actual persistence and export functions with mocked storage and evaluate both emitted refinement-claim predicates at min_score 0.65, 0.75 and 0.85. The original contradiction veto was verified before editing and retained, with its rubric unchanged.</p>
+<p>Baseline: <strong>5 failed, 377 passed, 1 warning in 176.15s (0:02:56)</strong>. Head: <strong>5 failed, 396 passed, 1 warning in 393.38s (0:06:33)</strong>. <strong>Zero added failure IDs.</strong> The five common failures are the <code>test_claim_verdict_controls_acceptance</code> cases in <code>test_docs_contradiction_veto.py</code>, expecting one budget reservation but observing two. They stay enabled and are outside the assigned worker scope. The head gate also covers the shared evaluation owner’s tests. The gate ran on these working-tree changes based on 22242c1ca0e80d69e54d1a21b492e1c449621748, then identical source and test bytes were committed; its recorded revision therefore names that base.</p>
+<ul>
+<li>Store the unmapped selected Jev score as winning_score: 11 failing test IDs, <code>EXIT=1</code>. tests/standard_names/test_review_cascade.py::test_mapped_score_crosses_exactly_at_matched_cutoff[name], tests/standard_names/test_review_cascade.py::test_mapped_score_crosses_exactly_at_matched_cutoff[docs].</li>
+<li>Remove the documentation contradiction veto: 4 failing test IDs, <code>EXIT=1</code>. tests/standard_names/test_review_cascade.py::test_unsupported_claim_is_not_a_contradiction_veto, tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.65-veto-docs].</li>
+<li>Restore the chat band and its incumbent call: 2 failing test IDs, <code>EXIT=1</code>. tests/standard_names/test_review_cascade.py::test_deciding_never_calls_chat[0.39-refine-name], tests/standard_names/test_review_cascade.py::test_deciding_never_calls_chat[0.39-refine-docs].</li>
+</ul>
+<p>Mutations run only in isolated test processes. The score mutation fails both exact-cutoff and consumer-agreement tests; the veto mutation fails the high-score contradiction refusal; the chat mutation makes the deciding test observe an incumbent call. No product source was restored or rewritten to run these controls.</p>
+<h3 id="srtj-jev-matched-decision-example">Representative contradiction</h3>
+<p><code>pressure_of_ion_cyclotron_heating_antenna</code> — Pressure associated with an ion-cyclotron-heating antenna module, representing mechanical normal loading or contained-gas pressure at hardware components. Bindings: ic_antennas/antenna/module/pressure, ic_antennas/antenna/module/pressure/amplitude. Panel score 0.937500; raw rubric 0.698333; pre-veto mapped score 0.926026. The golden fixture marks it defective: the documentation denies being an amplitude while a binding explicitly names measurement amplitude. The documentation contradiction veto sends it to refine and caps the stored score below 0.85 while keeping its dimension scores.</p>
+<h3 id="srtj-jev-matched-decision-artifacts">Reproducibility and remaining work</h3>
+<p>Code commit: <code>bd658567d5a3054481cfdfe52ad21e65e420d39f</code>. Threshold content SHA-256: <code>4e47220f157edee78fc6b0c1c98994606fce42be6a620a68f9f09980eccba428</code>. Gate, calibration and mutation logs and literal commands are recorded in the run manifest under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T121102641109-srtj-jev-matched-decision</code>. No new production decision was enabled. The coordinator’s audit sample, dry run and eventual switch remain later work; pre-existing worker-test failures remain a follow-on.</p>
+<details id="srtj-jev-matched-decision-history"><summary>Initial feasibility checkpoint, superseded by pre-veto matching ruling</summary>
+<section id="srtj-jev-matched-decision-initial">
 <h2 id="srtj-jev-matched-decision-title">Exact panel acceptance matching conflicts with the documentation veto</h2>
 <p><strong>Blocked before implementation.</strong> The paired calibration panel accepts 208 of
 210 documentation items (99.05%). The required contradiction veto flags 15 of those 210,
@@ -72,3 +126,5 @@ The initial <code>feasibility.log</code> records a probe-only failure resolving 
 under a retired predecessor worktree; local fixture paths with matching hashes repaired that
 probe before calibration code ran. Base revision: <code>e8bad938afffb0f651061389b2d6517dceff97ca</code>.</p>
 </section>
+
+</details></section>
