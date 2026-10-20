@@ -1,24 +1,23 @@
 """Read-only audit of every live standard name's physics domain.
 
-A standard name's physics domain is not authored: it is derived from the DD
-graph. ``IMASNode.physics_domain`` is the one source of truth, a name's
-``source_domains`` is exactly the set of its current DD sources' domains, and
-its ``physics_domain`` is the single domain ``select_primary_domain`` (see
-``domain_ranking``) picks from that set. A name with no DD source — a derived
-parent — takes the union of its children's domains through the same function.
+A standard name's physics domain is not authored: ``source_domains`` is exactly
+the set of its current DD sources' domains, and ``physics_domain`` is the
+recorded correction or, failing that, the decision stored on the name by the one
+writer in ``domain_decision``. A name with no DD source — a derived parent —
+takes the union of its children's domains.
 
 Nothing enforces any of that at write time across every writer that touches a
-name's domain, so the graph drifts: a name keeps a scalar the derivation would
-not choose, an edge set that disagrees with its own ``source_domains``, or a
-stale value from a source that has since been detached. This module re-asks the
-derivation's question of every live name and reports the ones that disagree. It
-is the measuring instrument the repair node runs against, so its counts now are
-the "before" figure.
+name's domain, so the graph drifts: a name keeps a scalar no stored decision
+names, an edge set that disagrees with its own ``source_domains``, or a stale
+value from a source that has since been detached. This module checks every live
+name against the decision it stored and reports the ones that disagree, together
+with the names that are undecided and why. It is the measuring instrument the
+repair node runs against, so its counts now are the "before" figure.
 
 **Four checks**, one per property the derivation ties together:
 
 1. ``physics_domain`` is set.
-2. ``physics_domain`` equals ``select_primary_domain(expected)``.
+2. ``physics_domain`` equals the stored decision or the recorded correction.
 3. ``source_domains`` equals the expected set — the domains of the name's
    current DD sources, or, for a derived parent with no DD source, the union of
    its live children's expected sets.
@@ -39,12 +38,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from imas_codex.standard_names.domain_ranking import select_primary_domain
-
 __all__ = [
     "LIVE_NAME_STAGES",
     "CHECK_PHYSICS_DOMAIN_SET",
-    "CHECK_PHYSICS_DOMAIN_DERIVED",
+    "CHECK_PHYSICS_DOMAIN_DECISION",
     "CHECK_SOURCE_DOMAINS_EXPECTED",
     "CHECK_DOMAIN_EDGES_SOURCE_DOMAINS",
     "DomainCheck",
@@ -63,7 +60,7 @@ LIVE_NAME_STAGES: frozenset[str] = frozenset(
 )
 
 CHECK_PHYSICS_DOMAIN_SET = "physics_domain_unset"
-CHECK_PHYSICS_DOMAIN_DERIVED = "physics_domain_not_derived"
+CHECK_PHYSICS_DOMAIN_DECISION = "physics_domain_not_stored_decision"
 CHECK_SOURCE_DOMAINS_EXPECTED = "source_domains_not_expected"
 CHECK_DOMAIN_EDGES_SOURCE_DOMAINS = "edges_not_source_domains"
 
@@ -106,6 +103,9 @@ RETURN sn.id AS sn_id,
        sn.name_stage AS name_stage,
        sn.physics_domain AS physics_domain,
        sn.source_domains AS source_domains,
+       sn.domain_decision_choice AS decision_choice,
+       sn.domain_decision_candidates AS decision_candidates,
+       sn.domain_correction AS correction,
        dd_paths,
        dd_domains,
        child_ids,
@@ -146,11 +146,18 @@ class NameDomainState:
     source_domains: frozenset[str]
     expected: frozenset[str]
     edge_domains: frozenset[str]
-    derived_domain: str | None
-    derived_domain_error: str | None
+    stored_choice: str | None
+    correction: str | None
+    decided_domain: str | None
+    undecided_reason: str | None
+    decision_candidates: tuple[str, ...]
     dd_source_count: int
     is_derived_parent: bool
     unnamed_edge_count: int
+
+    @property
+    def undecided(self) -> bool:
+        return self.decided_domain is None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -160,8 +167,11 @@ class NameDomainState:
             "source_domains": sorted(self.source_domains),
             "expected": sorted(self.expected),
             "edge_domains": sorted(self.edge_domains),
-            "derived_domain": self.derived_domain,
-            "derived_domain_error": self.derived_domain_error,
+            "stored_choice": self.stored_choice,
+            "correction": self.correction,
+            "decided_domain": self.decided_domain,
+            "undecided_reason": self.undecided_reason,
+            "decision_candidates": list(self.decision_candidates),
             "dd_source_count": self.dd_source_count,
             "is_derived_parent": self.is_derived_parent,
             "unnamed_edge_count": self.unnamed_edge_count,
@@ -178,6 +188,21 @@ class DomainAuditResult:
 
     def counts(self) -> dict[str, int]:
         return {key: check.count for key, check in self.checks.items()}
+
+    @property
+    def undecided(self) -> tuple[NameDomainState, ...]:
+        """Live names with neither a stored decision nor a recorded correction."""
+        return tuple(state for state in self.states if state.undecided)
+
+    def undecided_reasons(self) -> dict[str, str]:
+        return {state.sn_id: state.undecided_reason or "" for state in self.undecided}
+
+    @property
+    def undecided_share(self) -> float:
+        """The undecided names' share of the live names, 0.0 when none are live."""
+        if not self.live_names:
+            return 0.0
+        return len(self.undecided) / self.live_names
 
     def state_for(self, sn_id: str) -> NameDomainState | None:
         for state in self.states:
@@ -197,6 +222,11 @@ class DomainAuditResult:
             "live_names": self.live_names,
             "checks": {key: check.as_dict() for key, check in self.checks.items()},
             "counts": self.counts(),
+            "undecided": {
+                "count": len(self.undecided),
+                "share": self.undecided_share,
+                "reasons": self.undecided_reasons(),
+            },
         }
 
 
@@ -231,18 +261,21 @@ def _expected_domains(
     return result
 
 
-def _derived_domain(expected: frozenset[str]) -> tuple[str | None, str | None]:
-    """The one domain the declaration selects from *expected*, or why it refuses.
+def _decided_domain(row: dict[str, Any]) -> tuple[str | None, str | None]:
+    """The domain a name's stored decision or recorded correction names.
 
-    ``select_primary_domain`` refuses a set carrying a value outside the
-    declared vocabulary. That is a real finding — an unclassified or misspelt
-    domain reaching a name — not an audit crash, so the refusal is returned
-    beside the (absent) answer and the caller records it as a failure.
+    A recorded correction stands above the stored decision, the order the one
+    writer applies. A name with neither — an undecided name, whose call failed
+    or whose probability fell below the floor — has no decided domain and is
+    reported with the reason it is undecided.
     """
-    try:
-        return select_primary_domain(expected), None
-    except ValueError as exc:
-        return None, str(exc)
+    correction = row.get("correction") or None
+    if correction:
+        return correction, None
+    choice = row.get("decision_choice") or None
+    if choice:
+        return choice, None
+    return None, "no stored decision and no recorded correction"
 
 
 def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
@@ -252,7 +285,7 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
 
     states: list[NameDomainState] = []
     unset: list[str] = []
-    not_derived: list[str] = []
+    not_decided: list[str] = []
     wrong_sources: list[str] = []
     wrong_edges: list[str] = []
 
@@ -262,7 +295,7 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
         stored_primary = row.get("physics_domain") or None
         stored_sources = frozenset(row.get("source_domains") or [])
         edges = frozenset(row.get("edge_domains") or [])
-        derived, derivation_error = _derived_domain(expected)
+        decided, undecided_reason = _decided_domain(row)
         dd_paths = row.get("dd_paths") or []
         unnamed_edges = max(0, (row.get("edge_count") or 0) - len(edges))
 
@@ -274,8 +307,11 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
                 source_domains=stored_sources,
                 expected=expected,
                 edge_domains=edges,
-                derived_domain=derived,
-                derived_domain_error=derivation_error,
+                stored_choice=row.get("decision_choice") or None,
+                correction=row.get("correction") or None,
+                decided_domain=decided,
+                undecided_reason=undecided_reason,
+                decision_candidates=tuple(row.get("decision_candidates") or ()),
                 dd_source_count=len(dd_paths),
                 is_derived_parent=not dd_paths,
                 unnamed_edge_count=unnamed_edges,
@@ -284,8 +320,8 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
 
         if not stored_primary:
             unset.append(sn_id)
-        if stored_primary != derived:
-            not_derived.append(sn_id)
+        if stored_primary != decided:
+            not_decided.append(sn_id)
         if stored_sources != expected:
             wrong_sources.append(sn_id)
         if edges != stored_sources or unnamed_edges:
@@ -297,13 +333,13 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
             description=("physics_domain is set on the live name"),
             names=tuple(unset),
         ),
-        CHECK_PHYSICS_DOMAIN_DERIVED: DomainCheck(
-            key=CHECK_PHYSICS_DOMAIN_DERIVED,
+        CHECK_PHYSICS_DOMAIN_DECISION: DomainCheck(
+            key=CHECK_PHYSICS_DOMAIN_DECISION,
             description=(
-                "physics_domain equals select_primary_domain(expected), the "
-                "derivation's answer for the name's expected source set"
+                "physics_domain equals the stored decision or the recorded "
+                "correction, the one writer's order"
             ),
-            names=tuple(not_derived),
+            names=tuple(not_decided),
         ),
         CHECK_SOURCE_DOMAINS_EXPECTED: DomainCheck(
             key=CHECK_SOURCE_DOMAINS_EXPECTED,

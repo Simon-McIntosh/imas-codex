@@ -1109,6 +1109,38 @@ classes:
           ``source_domains=['transport', 'equilibrium']``.
         multivalued: true
         range: string
+      domain_decision_candidates:
+        description: >-
+          The candidate domains the measured Jev Choice offered for this
+          StandardName, stored with the choice so the decision is reproducible
+          from what is stored.
+        multivalued: true
+        range: string
+      domain_decision_choice:
+        description: >-
+          The domain the stored Jev decision chose. Null when the name is
+          undecided, in which case it keeps its current physics_domain.
+        range: string
+      domain_decision_probability:
+        description: >-
+          The probability the model gave the domain it chose. A name below the
+          confidence floor is undecided and receives no guessed domain.
+        range: float
+      domain_decision_model:
+        description: The model that decided this name's physics domain.
+        range: string
+      domain_decision_at:
+        description: When the physics-domain decision was taken (ISO-8601 UTC).
+        range: string
+      domain_correction:
+        description: >-
+          A lead-approved domain for this name where the stored decision is
+          wrong. When set it overrides the decision in the one writer, and the
+          audit checks the name's physics_domain against it.
+        range: string
+      domain_correction_reason:
+        description: Why the recorded domain correction was made.
+        range: string
       primary_cluster_id:
         description: >-
           ID of the primary semantic cluster this standard name belongs to.

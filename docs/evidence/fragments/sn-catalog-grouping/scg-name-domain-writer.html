@@ -1,0 +1,166 @@
+<h2 id="scg-name-domain-writer">One writer for a name's domain, with its Jev decision stored</h2>
+
+<p>A standard name's physics domain was authored by whichever writer reached it
+first. This node gives it one writer and one stored decision, so the scalar, the
+source set and the <code>HAS_PHYSICS_DOMAIN</code> edges can no longer disagree
+and the audit can check the scalar against something reproducible.</p>
+
+<h3>The writer's contract</h3>
+
+<p><code>imas_codex.standard_names.domain_decision.write_name_domain(gc, sn_id,
+decision, *, correction=None)</code> reads the name's current state and writes
+all three together in one Cypher statement
+(<code>domain_decision._WRITE_DOMAIN</code>):</p>
+
+<ul>
+  <li><code>source_domains</code> — exactly the set of the name's current DD
+  sources' domains, through
+  <code>StandardName &lt;-PRODUCED_NAME- StandardNameSource -FROM_DD_PATH-&gt; IMASNode</code>.
+  A derived parent, with no DD source, takes the union of its children's domains
+  (the children's DD domains where they have any, their stored
+  <code>source_domains</code> otherwise).</li>
+  <li><code>physics_domain</code> — the recorded correction when one exists,
+  otherwise the stored decision. An undecided name keeps its current value: the
+  writer never guesses.</li>
+  <li>The <code>HAS_PHYSICS_DOMAIN</code> edges — rewritten to exactly one per
+  entry of <code>source_domains</code>, the stale ones deleted in the same
+  statement.</li>
+</ul>
+
+<p>One statement means one transaction, so a partially written name is not a
+state the graph can reach. The returned
+<code>NameDomainWrite</code> carries what was set and why.</p>
+
+<h3>The stored decision and its fields</h3>
+
+<p>The candidates are exactly the ones the measurement derived, from the same
+guidance file the measurement read
+(<code>imas_codex/definitions/physics/domains.yaml</code>): each source path's
+stored domain, each source IDS's mapped domain from
+<code>imas_codex/definitions/physics/ids_domains.json</code>, the band umbrella
+of every band those candidates fall in, and <code>general</code>. The Choice is
+the runner's <code>build_state</code> and <code>build_question</code>, called
+through the same <code>decide_batch</code> the runner used; there is no second
+client and no product import of an evidence script.</p>
+
+<p>Seven slots on <code>StandardName</code> (<code>standard_name.yaml</code>)
+hold it, so a decision is reproducible from what is stored, not re-derived:</p>
+
+<table>
+  <tr><th>Slot</th><th>Holds</th></tr>
+  <tr><td><code>domain_decision_candidates</code></td><td>the options offered</td></tr>
+  <tr><td><code>domain_decision_choice</code></td><td>the chosen domain</td></tr>
+  <tr><td><code>domain_decision_probability</code></td><td>its probability</td></tr>
+  <tr><td><code>domain_decision_model</code></td><td>the model that decided</td></tr>
+  <tr><td><code>domain_decision_at</code></td><td>when it was decided</td></tr>
+  <tr><td><code>domain_correction</code></td><td>a lead-approved domain, which stands above the decision</td></tr>
+  <tr><td><code>domain_correction_reason</code></td><td>why the correction was made</td></tr>
+</table>
+
+<p>A name below the floor, or whose call fails, is <em>undecided</em>: it keeps
+its current domain, and the audit reports it with the reason. The undecided
+reasons are named verbatim — no answer returned, a choice outside the
+candidates, an answer with no probability, or a probability under the
+floor.</p>
+
+<h3>The confidence floor, and its derivation</h3>
+
+<p><code>CONFIDENCE_FLOOR = 0.68</code>, derived from the calibration answers in
+the node's results JSON as <em>the highest observed probability at which at most
+5% of the calibration names fall strictly below it</em>. With 73 calibration
+probabilities sorted ascending, the 5% budget is 3.65 names, so the floor is the
+larger of the two adjacent observed values whose count-below still fits: 0.68,
+below-fraction 3/73 = 4.1%.</p>
+
+<p>Accuracy of the answers that clear it:</p>
+
+<table>
+  <tr><th>Cohort</th><th>Correct / answered</th><th>Accuracy</th></tr>
+  <tr><td>calibration</td><td>56 / 70</td><td>0.800</td></tr>
+  <tr><td>approved</td><td>12 / 18</td><td>0.667</td></tr>
+  <tr><td>validation</td><td>52 / 71</td><td>0.732</td></tr>
+  <tr><td>pooled</td><td>120 / 159</td><td>0.755</td></tr>
+</table>
+
+<p>The pooled figure is the one to hold a repaired name to: about three in four
+answered names are right, and the rest are reported undecided rather than
+written.</p>
+
+<h3>The audit now checks the decision, not a re-derivation</h3>
+
+<p><code>imas_codex/standard_names/domain_audit.py</code> no longer calls
+<code>select_primary_domain</code>. Check 2,
+<code>physics_domain_not_stored_decision</code>, compares the scalar against the
+recorded correction or, failing that, the stored decision — the same order the
+one writer applies. The audit also lists the undecided names with their reasons
+and reports their share of live names in
+<code>DomainAuditResult.as_dict()["undecided"]</code>.</p>
+
+<h3>What the next node must route through it</h3>
+
+<p>Every other writer of a name's domain is now a second writer and must be
+routed through <code>domain_decision.write_name_domain</code>. Named by module
+and function, as found on the tree this node ran against:</p>
+
+<ul>
+  <li><strong>compose</strong> —
+  <code>imas_codex.standard_names.workers.compose_worker</code> and
+  <code>imas_codex.standard_names.workers.compose_batch</code>, which set
+  <code>source_domains</code> from a single raw domain beside the name they
+  write.</li>
+  <li><strong>consolidation</strong> —
+  <code>imas_codex.standard_names.workers.consolidate_worker</code> and
+  <code>imas_codex.standard_names.consolidation.consolidate_candidates</code>.</li>
+  <li><strong>catalog import</strong> —
+  <code>imas_codex.standard_names.catalog_import.record_catalog_import_provenance</code>
+  and the name-writing path it feeds.</li>
+  <li><strong>export</strong> — <code>imas_codex.standard_names.catalog_release</code>,
+  whose exported name records carry the scalar and must carry the stored decision
+  beside it.</li>
+  <li><strong>reclassify</strong> — a name's domain is currently set by
+  <code>imas_codex.standard_names.graph_ops.reclassify_standard_name_domain</code>,
+  which writes the scalar, <code>source_domains</code> and the edge in one
+  statement of its own.</li>
+  <li><strong>derived parents</strong> —
+  <code>imas_codex.standard_names.graph_ops._materialize_derived_parent_rows</code>
+  (and the <code>parent.source_domains = CASE</code> promotions beside it),
+  <code>graph_ops._bootstrap_missing_derived_parent_targets</code> and
+  <code>graph_ops._validate_derived_parent_identity</code>.</li>
+  <li><strong>graph-ops sites that set or promote a domain</strong> —
+  <code>imas_codex.standard_names.graph_ops.write_standard_names</code>,
+  <code>graph_ops._write_standard_name_edges</code> (the
+  <code>HAS_PHYSICS_DOMAIN</code> edges, one per source domain) and the batch
+  sync at <code>sn.physics_domain = coalesce(b.physics_domain, ...)</code>.</li>
+</ul>
+
+<p>None of them is routed by this node: that is the next node's work.</p>
+
+<h3>Evidence</h3>
+
+<ul>
+  <li>Head gate (<code>logs/gate-head.log</code>, <code>EXIT=0</code>): 91
+  passed, one deselected — the graph-marked writer test is excluded from the
+  default tier, which is why the two logs below carry its proof.</li>
+  <li>Head gate with the graph tests included
+  (<code>logs/gate-head-with-graph.log</code>, <code>-m "not slow"</code>,
+  <code>EXIT=0</code>): 92 passed, nothing deselected and nothing skipped — the
+  writer test runs beside the rest, not apart from it.</li>
+  <li>Base gate (<code>logs/gate-base.log</code>, <code>EXIT=0</code>): 81
+  passed — the base-revision audit test run against the base-revision module,
+  plus the four gate files this node did not touch.</li>
+  <li><strong>The disposable-graph run is proven by
+  <code>logs/gate-head-graph.log</code></strong> (<code>EXIT=0</code>, 1 passed,
+  8 deselected): on the head, with the writer's guard in place, the writer's
+  Cypher executed against a Neo4j started empty and planted with the test's own
+  fixture. The instance was started through the repository's own temp-Neo4j
+  configuration writer and readiness probe, loading no dump, and was stopped by
+  its own pid afterwards.</li>
+  <li>Negative control (<code>logs/negative-control-edges-left-as-found.log</code>,
+  <code>EXIT=1</code>): reverting the writer's edge rewrite so the
+  <code>HAS_PHYSICS_DOMAIN</code> edges are left as found fails
+  <code>test_writer_sets_the_three_together_on_a_disposable_graph</code>, which
+  the head arm passes.</li>
+  <li>Cypher property check (<code>logs/cypher-property-check.log</code>,
+  <code>EXIT=0</code>): every property literal in the new Cypher is declared on
+  its label in the LinkML schemas.</li>
+</ul>

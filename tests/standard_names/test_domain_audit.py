@@ -14,7 +14,7 @@ from typing import Any
 
 from imas_codex.standard_names.domain_audit import (
     CHECK_DOMAIN_EDGES_SOURCE_DOMAINS,
-    CHECK_PHYSICS_DOMAIN_DERIVED,
+    CHECK_PHYSICS_DOMAIN_DECISION,
     CHECK_PHYSICS_DOMAIN_SET,
     CHECK_SOURCE_DOMAINS_EXPECTED,
     audit_domains,
@@ -48,6 +48,8 @@ def _row(
     child_ids: list[str] | None = None,
     edge_domains: list[str] | None = None,
     edge_count: int | None = None,
+    decision_choice: str | None = None,
+    correction: str | None = None,
 ) -> dict[str, Any]:
     return {
         "sn_id": sn_id,
@@ -57,6 +59,8 @@ def _row(
         "dd_paths": dd_paths or [],
         "dd_domains": dd_domains or [],
         "child_ids": child_ids or [],
+        "decision_choice": decision_choice,
+        "correction": correction,
         "edge_domains": edge_domains or [],
         "edge_count": len(edge_domains or []) if edge_count is None else edge_count,
     }
@@ -71,12 +75,13 @@ def _consistent_name(sn_id: str = "sn:equilibrium") -> dict[str, Any]:
         dd_paths=["equilibrium/time_slice/profiles_1d/psi"],
         dd_domains=["equilibrium", "transport"],
         edge_domains=["equilibrium", "transport"],
+        decision_choice="equilibrium",
     )
 
 
 ALL_CHECKS = (
     CHECK_PHYSICS_DOMAIN_SET,
-    CHECK_PHYSICS_DOMAIN_DERIVED,
+    CHECK_PHYSICS_DOMAIN_DECISION,
     CHECK_SOURCE_DOMAINS_EXPECTED,
     CHECK_DOMAIN_EDGES_SOURCE_DOMAINS,
 )
@@ -131,7 +136,7 @@ class TestPhysicsDomainSet:
         row = _row("sn:bare", physics_domain=None, source_domains=[])
         result = audit_domains(_StubGraph([row]))
         assert result.checks[CHECK_PHYSICS_DOMAIN_SET].names == ("sn:bare",)
-        assert result.checks[CHECK_PHYSICS_DOMAIN_DERIVED].names == ()
+        assert result.checks[CHECK_PHYSICS_DOMAIN_DECISION].names == ()
         assert result.checks[CHECK_SOURCE_DOMAINS_EXPECTED].names == ()
         assert result.checks[CHECK_DOMAIN_EDGES_SOURCE_DOMAINS].names == ()
 
@@ -141,13 +146,13 @@ class TestPhysicsDomainDerived:
 
     def test_passes_when_it_matches_the_derivation(self):
         result = audit_domains(_StubGraph([_consistent_name()]))
-        assert result.checks[CHECK_PHYSICS_DOMAIN_DERIVED].names == ()
+        assert result.checks[CHECK_PHYSICS_DOMAIN_DECISION].names == ()
 
     def test_fails_when_it_is_a_different_member_of_the_expected_set(self):
         row = _consistent_name("sn:wrong-primary")
         row["physics_domain"] = "transport"  # equilibrium outranks transport
         result = audit_domains(_StubGraph([row]))
-        assert result.checks[CHECK_PHYSICS_DOMAIN_DERIVED].names == (
+        assert result.checks[CHECK_PHYSICS_DOMAIN_DECISION].names == (
             "sn:wrong-primary",
         )
         assert result.checks[CHECK_PHYSICS_DOMAIN_SET].names == ()
@@ -171,7 +176,7 @@ class TestSourceDomains:
         assert result.checks[CHECK_SOURCE_DOMAINS_EXPECTED].names == (
             "sn:short-sources",
         )
-        assert result.checks[CHECK_PHYSICS_DOMAIN_DERIVED].names == ()
+        assert result.checks[CHECK_PHYSICS_DOMAIN_DECISION].names == ()
         assert result.checks[CHECK_DOMAIN_EDGES_SOURCE_DOMAINS].names == ()
 
     def test_order_and_duplicates_carry_no_meaning(self):
@@ -268,10 +273,12 @@ class TestDerivedParent:
             dd_paths=[],
             child_ids=["sn:child"],
             edge_domains=["equilibrium", "transport"],
+            decision_choice=parent_physics_domain,
         )
         child = _row(
             "sn:child",
             physics_domain="equilibrium",
+            decision_choice="equilibrium",
             source_domains=["equilibrium", "transport"],
             dd_paths=["equilibrium/time_slice/profiles_1d/psi"],
             dd_domains=["equilibrium", "transport"],
@@ -286,14 +293,35 @@ class TestDerivedParent:
         assert parent.is_derived_parent is True
         assert parent.dd_source_count == 0
         assert parent.expected == frozenset({"equilibrium", "transport"})
-        assert result.checks[CHECK_PHYSICS_DOMAIN_DERIVED].names == ()
+        assert result.checks[CHECK_PHYSICS_DOMAIN_DECISION].names == ()
         assert result.checks[CHECK_SOURCE_DOMAINS_EXPECTED].names == ()
 
-    def test_parent_fails_when_its_primary_ignores_the_child_union(self):
-        rows = self._parent_and_child(parent_physics_domain="transport")
+    def test_parent_fails_when_its_scalar_disagrees_with_its_decision(self):
+        # The scalar is not derived from the child union any more; it is checked
+        # against the decision stored on the name.
+        rows = self._parent_and_child(parent_physics_domain="equilibrium")
+        rows[0]["physics_domain"] = "transport"
         result = audit_domains(_StubGraph(rows))
-        assert result.checks[CHECK_PHYSICS_DOMAIN_DERIVED].names == ("sn:parent",)
+        assert result.checks[CHECK_PHYSICS_DOMAIN_DECISION].names == ("sn:parent",)
         assert result.checks[CHECK_SOURCE_DOMAINS_EXPECTED].names == ()
+
+    def test_a_recorded_correction_stands_above_the_stored_decision(self):
+        row = _consistent_name("sn:corrected")
+        row["physics_domain"] = "transport"
+        row["decision_choice"] = "equilibrium"
+        row["correction"] = "transport"
+        row["source_domains"] = ["equilibrium", "transport"]
+        result = audit_domains(_StubGraph([row]))
+        assert result.checks[CHECK_PHYSICS_DOMAIN_DECISION].names == ()
+
+    def test_an_undecided_name_is_reported_with_its_reason(self):
+        row = _consistent_name("sn:undecided")
+        row["decision_choice"] = None
+        row["correction"] = None
+        result = audit_domains(_StubGraph([row]))
+        assert [state.sn_id for state in result.undecided] == ["sn:undecided"]
+        assert "no stored decision" in result.undecided_reasons()["sn:undecided"]
+        assert result.undecided_share == 1.0
 
     def test_parent_fails_when_its_sources_drop_a_child_domain(self):
         rows = self._parent_and_child(parent_source_domains=["equilibrium"])
