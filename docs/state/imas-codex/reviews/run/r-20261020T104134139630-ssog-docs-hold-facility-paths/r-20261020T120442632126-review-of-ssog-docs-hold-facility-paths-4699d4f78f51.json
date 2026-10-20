@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_docs_hold_dd_bindings.py tests/standard_names/test_review_cascade.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/logs/repair_gate_head.log",
+    "revision": "4699d4f78f5150bf55e33e51ce061888c45dc58e"
+  },
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_docs_hold_dd_bindings.py tests/standard_names/test_review_cascade.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/logs/repair_gate_base.log",
+    "revision": "100a86a4d8455da8e2e14ece4d9d8d071ad331fb"
+  },
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:_has_dd_source_reference:10425",
+    "imas_codex/standard_names/workers.py:prepare_docs_review_request:10815",
+    "imas_codex/standard_names/workers.py:_documentation_contradiction_note:10953",
+    "imas_codex/standard_names/workers.py:process_review_docs_batch:11148"
+  ],
+  "completed_at": "2026-10-20T12:18:09Z",
+  "dispatched_at": "2026-10-20T12:05:31Z",
+  "findings": [
+    {
+      "description": "baseline_suite starts at 100a86a4d8455da8e2e14ece4d9d8d071ad331fb rather than the reviewed base 8fc4843c9f843a669519a94a793d58854fd85146; the only original-base suite log, logs/gate_base.log, stops in progress output without a summary or EXIT, so the full reviewed diff lacks a complete no-added-failures measurement.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md",
+      "line": 18,
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md",
+      "severity": "blocking",
+      "text": "baseline_suite starts at 100a86a4d8455da8e2e14ece4d9d8d071ad331fb rather than the reviewed base 8fc4843c9f843a669519a94a793d58854fd85146; the only original-base suite log, logs/gate_base.log, stops in progress output without a summary or EXIT, so the full reviewed diff lacks a complete no-added-failures measurement."
+    }
+  ],
+  "justifications": {
+    "durability": "test_docs_hold_dd_bindings.py:84, 94, 102, and 146 fail on facility-fallback or provenance regressions and repair_negative_control_surgical.log confirms the round-trip regression is caught; line 119 protects DD-binding continuity separately.",
+    "evidence": "repair_gate_base.log and repair_gate_head.log show 77 and 79 passed with EXIT=0 and the surgical control fails, but manifest.md:18 and logs/gate_base.log leave the complete 8fc-to-head delta unmeasured.",
+    "fit": "workers.py:10359-10414 follows the module's existing helper and list/dedup style while naming DD provenance directly.",
+    "goal_fidelity": "workers.py:10359-10397 filters the fallback to DD paths and workers.py:10401-10414 preserves DD provenance through normalization, matching the reproduced facility-only defect.",
+    "reuse": "workers.py:10401 extends the existing item-level DD path resolver; source_paths.py:132 normalizes a path prefix but does not preserve provenance across a prepared review-item rewrite.",
+    "scope_discipline": "manifest.md:3 declares four paths and manifest.md:8-9 plus the commit diffs show changes only to the three declared code, test, and evidence paths."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261020T120442632126-review-of-ssog-docs-hold-facility-paths-4699d4f78f51",
+  "review_text": "VERDICT goal: the live run goal and brief.md:1 say to stop facility-only source paths triggering the DD-text hold; repro_base.log records `facility_only: required=['tcv:ip/measured'] note='DD source text unavailable at tcv:ip/measured'`, while repro_head.log records `required=[] note=None`.\nVERDICT done_when: the live node requires facility-only paths to get no hold, missing DD text to hold only its DD path, a caller audit, independent reverting tests, zero added failures and no LLM spend; repair_gate_base.log and repair_gate_head.log show 77/79 passed and the surgical control reddens, but that gate pair starts at 100a86a4d rather than the declared base.\nVERDICT write_paths: the live node declares workers.py, test_docs_hold_dd_bindings.py, the evidence fragment and its figure directory; both commits change only the first three declared paths.\nVERDICT manifest: manifest.md:5-19 records complete status, both commits, a complete 100a86a4d to 4699d4f78 gate at 77/79 passed with EXIT=0, and an earlier gate_base.log at the declared 8fc4843c base without summary or EXIT.\nVERDICT diff: both commits against 8fc4843c9f843a669519a94a793d58854fd85146 add facility-only direct-note and predicate assertions that fail if facility paths count as DD; the prepared DD assertion fails when provenance is dropped (the surgical control confirms this), the prepared facility assertion fails if a facility path survives normalization, and the facility-plus-DD assertion at test_docs_hold_dd_bindings.py:119 fails if DD-binding resolution regresses but not on the facility-only fallback because the DD binding short-circuits it.\nCALL_SITES: imas_codex/standard_names/workers.py:_has_dd_source_reference:10425, imas_codex/standard_names/workers.py:prepare_docs_review_request:10815, imas_codex/standard_names/workers.py:_documentation_contradiction_note:10953, imas_codex/standard_names/workers.py:process_review_docs_batch:11148\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: workers.py:10359-10397 filters facility paths out of required DD paths and workers.py:10401-10414 preserves DD provenance through normalization.\nSCORE evidence: 14\nJUSTIFICATION evidence: repair_gate_base.log and repair_gate_head.log show 77/79 passed with EXIT=0, but manifest.md:18 and logs/gate_base.log leave the full 8fc-to-head delta without a completed base receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: manifest.md:3 declares four paths and manifest.md:8-9 plus the two commit diffs show only three of them changed.\nSCORE durability: 18\nJUSTIFICATION durability: test_docs_hold_dd_bindings.py:84, 94, 102 and 146 cover fallback and provenance regressions, and repair_negative_control_surgical.log confirms the round-trip test fails when provenance is dropped.\nSCORE fit: 19\nJUSTIFICATION fit: workers.py:10359-10414 follows the existing helper structure and uses the established DD prefix and stripping operations.\nSCORE reuse: 20\nJUSTIFICATION reuse: workers.py:10401 extends the existing item-level DD path resolver, while source_paths.py:132 only normalizes one path string.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md:18 blocking: baseline_suite starts at 100a86a4d8455da8e2e14ece4d9d8d071ad331fb rather than the reviewed base 8fc4843c9f843a669519a94a793d58854fd85146; the only original-base suite log, logs/gate_base.log, stops in progress output without a summary or EXIT, so the full reviewed diff lacks a complete no-added-failures measurement.",
+  "reviewed_base_sha": "8fc4843c9f843a669519a94a793d58854fd85146",
+  "reviewed_head_sha": "4699d4f78f5150bf55e33e51ce061888c45dc58e",
+  "reviewed_run_id": "r-20261020T104134139630-ssog-docs-hold-facility-paths",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T13:07:43.360127+00:00",
+  "total": 111,
+  "verdicts": {
+    "diff": "Read both commits against 8fc4843c9f843a669519a94a793d58854fd85146: facility-only direct-note and predicate assertions fail if facility paths count as DD, the prepared DD assertion fails when provenance is dropped (confirmed by the surgical mutation), the prepared facility assertion fails if facility paths survive normalization, and the facility-plus-DD assertion at test_docs_hold_dd_bindings.py:119 fails if DD-binding resolution/holding regresses but is not sensitive to the facility-only fallback because the DD binding short-circuits it; all changed paths are declared.",
+    "done_when": "The live node done_when requires facility-only paths to get no note, missing DD text to hold only the DD path, a caller audit, independent tests that fail when reverted, no added failures, and no LLM spend; the current repair gate logs show 77 to 79 passed and the negative control reddens, but that pair starts at 100a86a4d rather than the declared base.",
+    "goal": "The source node goal in the live run record and brief.md:1 is to stop facility-only source paths from triggering the DD-text hold; repro_base.log records facility_only: required=['tcv:ip/measured'] note='DD source text unavailable at tcv:ip/measured', and repro_head.log records required=[] note=None.",
+    "manifest": "The source manifest says complete and records both commits plus a complete repair baseline/head at 100a86a4d/4699d4f78 with 77/79 passed and EXIT=0; the earlier gate_base.log at the declared 8fc4843c base has no summary or EXIT.",
+    "write_paths": "The live node declares workers.py, test_docs_hold_dd_bindings.py, the evidence fragment, and its figure directory; the two commits change only the first three paths."
+  }
+}
