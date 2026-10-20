@@ -19,6 +19,7 @@
 # bands is the deliverable.
 precedence:
   - band: core_physics
+    umbrella: core_plasma_physics
     rationale: >-
       The plasma's own configuration, state and macroscopic behaviour. A
       quantity that is a property of the plasma column outranks any system that
@@ -33,6 +34,7 @@ precedence:
       - fast_particles
       - runaway_electrons
   - band: heating_current_drive
+    umbrella: auxiliary_heating
     rationale: >-
       The actuators that add energy, momentum or current and the wave physics
       that carries their power: central to a discharge, but below the plasma
@@ -42,6 +44,7 @@ precedence:
       - current_drive
       - waves
   - band: edge
+    umbrella: edge_plasma_physics
     rationale: >-
       The boundary plasma and the material surfaces it meets: resolved at the
       edge of the column rather than the plasma as a whole, so it ranks below
@@ -52,6 +55,7 @@ precedence:
       - divertor_physics
       - fueling
   - band: diagnostics
+    umbrella: plasma_measurement_diagnostics
     rationale: >-
       Measurement systems and their responses, below the plasma state they
       observe, so a profile derived from a measurement outranks the instrument
@@ -66,6 +70,7 @@ precedence:
       - spectroscopy
       - neutronics
   - band: operations_engineering
+    umbrella: machine_operations
     rationale: >-
       Control, scheduling and the engineering plant: a command or a component,
       ranked below the physics it acts on.
@@ -77,6 +82,7 @@ precedence:
       - structural_components
       - plant_systems
   - band: data
+    umbrella: data_management
     rationale: >-
       Data products and computational infrastructure: assembled or reference
       data, ranked below the direct measurement or state it summarises.
@@ -84,6 +90,7 @@ precedence:
       - data_management
       - computational_workflow
   - band: general
+    umbrella: general
     rationale: >-
       The last resort, for quantities that genuinely carry no single subject.
     domains:
