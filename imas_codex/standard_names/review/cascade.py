@@ -521,6 +521,94 @@ async def _docs_judgment(
     return route_docs(judgment, probability=score), answers, batch_cost
 
 
+async def _audit_skipped(
+    item: Mapping[str, Any],
+    axis: str,
+    jev_route: str,
+    reason: str,
+) -> None:
+    from imas_codex.standard_names.review import panel_audit
+
+    try:
+        await panel_audit.store_panel_audit(
+            item,
+            axis,
+            panel_result=None,
+            jev_route=jev_route,
+            skipped_reason=reason,
+            min_score=DEFAULT_MIN_SCORE,
+        )
+    except Exception:
+        logger.exception(
+            "panel audit skip row could not be stored for %s", item.get("id")
+        )
+
+
+async def _run_panel_audit(
+    axis: str,
+    item: Mapping[str, Any],
+    models: Sequence[str],
+    incumbent: Callable[..., Awaitable[dict[str, Any] | None]],
+    route: CascadeRoute,
+    *,
+    mgr: Any,
+) -> None:
+    """Run the paid panel on a sampled deciding item, beside Jev's route.
+
+    The decision has already been stored and returned by the caller, so every
+    failure here is recorded as a skipped audit rather than raised: an audit
+    that cannot run must never withhold or change a decided item. The panel's
+    own result is persisted by the incumbent; the audit adds a non-deciding row
+    carrying its verdict for comparison.
+    """
+    from imas_codex.standard_names.review import panel_audit
+
+    if not panel_audit.audit_selected(
+        axis,
+        str(item.get("id", "")),
+        str(getattr(mgr, "run_id", "")),
+        panel_audit.panel_audit_rate(),
+    ):
+        return
+    reason: str | None = None
+    try:
+        lease = mgr.reserve(0.001, phase="review_audit_" + axis)
+    except Exception as exc:
+        lease, reason = None, f"{type(exc).__name__}: {exc}"
+    else:
+        if lease is None:
+            reason = "review audit lease refused"
+        else:
+            try:
+                lease.release_unused()
+            except Exception:
+                logger.exception(
+                    "panel audit lease release failed for %s", item.get("id")
+                )
+    if reason is not None:
+        await _audit_skipped(item, axis, route.route, reason)
+        return
+    try:
+        panel_result = await incumbent(models=models)
+    except Exception as exc:
+        logger.exception("panel audit run failed for %s", item.get("id"))
+        await _audit_skipped(item, axis, route.route, f"{type(exc).__name__}: {exc}")
+        return
+    if panel_result is None:
+        await _audit_skipped(item, axis, route.route, "panel produced no verdict")
+        return
+    try:
+        await panel_audit.store_panel_audit(
+            item,
+            axis,
+            panel_result=panel_result,
+            jev_route=route.route,
+            min_score=DEFAULT_MIN_SCORE,
+        )
+    except Exception:
+        logger.exception("panel audit row could not be stored for %s", item.get("id"))
+
+
 async def adjudicate_review(
     axis: str,
     item: Mapping[str, Any],
@@ -602,6 +690,10 @@ async def adjudicate_review(
             logger.exception(
                 "Jev cascade route could not be stored for %s", item.get("id")
             )
+        try:
+            await _run_panel_audit(axis, item, models, incumbent, route, mgr=mgr)
+        except Exception:
+            logger.exception("panel audit failed for %s", item.get("id"))
         return _direct_result(route, model, spent, item, axis)
     result = await incumbent(models=models)
     if result is None:

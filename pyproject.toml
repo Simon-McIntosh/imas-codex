@@ -672,6 +672,9 @@ reasoning-effort = "high"
 # equal to the base. If a future study shows a cheaper base is safe, the
 # escalator can stay high while the base drops.
 escalation-reasoning-effort = "high"
+# Fraction of decided items that also run the paid panel as a non-deciding
+# audit, so the two judges' drift can be watched. 0 disables the audit.
+panel-audit-rate = 0.05
 
 [tool.imas-codex.sn-review.names]
 # Mixed-vendor RD-quorum chain.

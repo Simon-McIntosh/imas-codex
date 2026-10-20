@@ -1658,6 +1658,7 @@ _SN_REVIEW_DEFAULTS: dict[str, Any] = {
     "max-cycles": 3,
     "reasoning-effort": "medium",
     "escalation-reasoning-effort": "high",
+    "panel-audit-rate": 0.05,
 }
 
 
@@ -1882,6 +1883,22 @@ def get_sn_review_max_cycles() -> int:
     """
     section = _get_section("sn-review")
     return int(section.get("max-cycles", _SN_REVIEW_DEFAULTS["max-cycles"]))
+
+
+def get_sn_review_panel_audit_rate() -> float:
+    """Fraction of decided items that also run the paid panel as an audit.
+
+    Reads ``[sn-review].panel-audit-rate``. ``0`` disables the audit and
+    ``1`` audits every decided item. The rate only selects which items the
+    audit covers; it never turns the panel into the decider.
+    """
+    section = _get_section("sn-review")
+    rate = float(
+        section.get("panel-audit-rate", _SN_REVIEW_DEFAULTS["panel-audit-rate"])
+    )
+    if not 0.0 <= rate <= 1.0:
+        raise ValueError("[sn-review].panel-audit-rate must be in [0, 1]")
+    return rate
 
 
 def get_sn_review_disagreement_threshold() -> float:
