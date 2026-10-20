@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_release.py::test_collect_catalog_changes",
+    "tests/standard_names/test_review_release.py::test_pr_target_derived_from_remotes"
+  ],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The delta adds no assertion: ebda1eaf5 edits a comment in imas_codex/standard_names/export.py:3063-3068 and prose in the fragment; 33acec5c4 edits the fragment's 'Covering gate' paragraph only. There is no value under test for an assertion to compare against, so the self-comparison defect the rule names cannot occur in this delta. The node's behavioural guards added earlier remain in the head tree and were judged at the prior review: tests/standard_names/test_source_audit_gate.py:218 (dormant_sourceless_names equal to a test-side literal row), :394 (to_dict()['dormant_sourceless']), :434 (count 0 for the held case).",
+      "lines": "none (delta)"
+    }
+  ],
+  "call_sites": [
+    "imas_codex/cli/sn.py:4488",
+    "imas_codex/cli/sn.py:4619",
+    "imas_codex/standard_names/catalog_release.py:2290"
+  ],
+  "changed_paths": [
+    "imas_codex/standard_names/export.py",
+    "docs/evidence/fragments/sn-integrity-backlog/sib-export-live-source-gate.html"
+  ],
+  "commit_list": [
+    "ebda1eaf50061de1f20c161b03dd8a51d4676ce5",
+    "33acec5c47fb5784d4816602bda1f31ba0dd972e"
+  ],
+  "completed_at": "2026-10-19T21:48:07.419Z",
+  "dispatched_at": "2026-10-19T21:31:21Z",
+  "findings": [
+    {
+      "file": ".config/reckon/crew/runs/r-20261019T185151966581-sib-export-live-source-gate/manifest.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the two gate logs recorded as baseline_suite/after_suite differ by two failing ids \u2014 tests/standard_names/test_review_release.py::test_collect_catalog_changes and tests/standard_names/test_review_release.py::test_pr_target_derived_from_remotes fail at head (head-importers.log, 22 failed) and pass at base (base-importers.log, 30 failed + 3 errors). The run's manifest reports the importer gate as adding zero failures by attributing both to load, on the strength of a standalone recheck (head-importers-flake-recheck.log, '2 passed' EXIT=0, 63.23s). The derivation from the two recorded gates is therefore 2, not 0; the flake attribution is plausible (both are >30s pytest-timeout on a git subprocess under concurrent load) but rests on a third log, and a promotion reader comparing the recorded gates against a count of 0 sees a gap unless the recheck is read too. Neither id reaches the docs-only delta."
+    },
+    {
+      "file": ".config/reckon/crew/runs/r-20261019T185151966581-sib-export-live-source-gate/manifest.md",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the after_suite revision is ebda1eaf50061de1f20c161b03dd8a51d4676ce5, one commit short of the run head 33acec5c4. The covering gate ran before 33acec5c4 landed, so the suite does not measure the promoted head. It is harmless here because 33acec5c4 is documentation-only (it edits the fragment's 'Covering gate' paragraph, no code path), and head-importers.log's header names ebda1eaf5 honestly rather than claiming the head \u2014 but a reader comparing after_suite.revision is not the promoted head by one commit, and that gap is not stated anywhere in the manifest."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against the prior reviewed head e654a59b. ebda1eaf5 touches export.py (3 lines) and the fragment (5 lines): comment and prose rewritten to state the mechanism without attributing it to a person. 33acec5c4 touches the fragment (12 lines): the 'Covering gate' paragraph rewritten to name the importer set, the 53-file count, the scratch extraction with SOURCE_DATE_EPOCH, and the per-arm revision/command/exit/failing ids. Both are inside the declared write paths; no functional line changed.",
+    "done_when": "The delta is not the change the run's done_when measured; it is two post-hoc corrections to the fragment and one comment, made after the done_when's gate ran. The done_when's behavioural measures (three tests shown to redden under a named mutation, a delta gate over the importers, the fragment) were judged at the prior review. What this delta must satisfy is narrower \u2014 that its two claims are true \u2014 and both are: the 53-file importer set is a superset of the files that import export.py or classify_sourceless_standard_names, and the attribution ban is satisfied.",
+    "goal": "The delta's two commits each state their own goal and each meets it: ebda1eaf5 (docs(standard_names), 'state the release-hold mechanism without naming who decided it') rewrites export.py:3063-3068 to 'A name listed in _RELEASE_IDENTITY_HOLDS leaves through the release-hold path instead' and the fragment summary to 'Six live names whose quantity no Data Dictionary path measures', removing the person attribution the naming rule bans; 33acec5c4 ('record the importer-wide covering gate') corrects the fragment's 'Covering gate' paragraph from the test_export_*.py family to the 53-file importer list. git grep at the reviewed head finds no remaining 'the lead' in either file.",
+    "manifest": "Read the run manifest, which was itself updated alongside the delta: baseline_suite and after_suite are now the run's gate logs as JSON (revision, command, exit_status, log_path, completed, failure_count, failure_ids), correcting the prior review's finding that they were prose. The revision, command and status on each reconcile with base-importers.log and head-importers.log; the two gaps are the after_suite revision (ebda1eaf5, not the head) and the failure-count derivation (see findings).",
+    "write_paths": "The run declared imas_codex/standard_names/export.py, tests/standard_names/test_source_audit_gate.py, tests/standard_names/test_export_release_holds.py, docs/evidence/fragments/sn-integrity-backlog/sib-export-live-source-gate.html (plus an unused docs/figures tree). The delta touches only export.py and that fragment; git diff --stat e654a59b..33acec5c4 names exactly those two files and no other."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T213054900640-review-of-sib-export-live-source-gate-33acec5c47fb",
+  "reviewed_base_sha": "e654a59b44bee63892b3f6e291aabe17d35039b5",
+  "reviewed_head_sha": "33acec5c47fb5784d4816602bda1f31ba0dd972e",
+  "reviewed_run_id": "r-20261019T185151966581-sib-export-live-source-gate",
+  "reviewed_run_orientation_base_sha": "5682157531c0bad0443d13593ebf881a7ed74b25",
+  "scope_note": "This review covers only the commits the run gained since its first review (review_run_id r-20261019T200145656024-review-of-sib-export-live-source-gate-e654a59b44be, reviewed_head_sha e654a59b4). The delta is ebda1eaf5 and 33acec5c4, a comment in imas_codex/standard_names/export.py and edits to docs/evidence/fragments/sn-integrity-backlog/sib-export-live-source-gate.html. No production behaviour changed.",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T03:35:47.923198+00:00",
+  "total": 113,
+  "verification": [
+    "git merge-base --is-ancestor 33acec5c4 HEAD -> NO; the reviewed head is not an ancestor of this review worktree, so all reads were taken from the reviewed revision via git show / git grep <sha>.",
+    "Importer coverage: grep -rlE 'standard_names\\.export|classify_sourceless_standard_names' tests/ -> 52 files; the run's importer-files.txt -> 53; the set difference 'fresh not in run list' is empty, so no importer was omitted. The extra file (tests/standard_names/test_defaulted_attributes_exist.py) references the export.py path string rather than importing it, so the run's list is a superset of the true importers \u2014 the fragment's 'every test file that can reach the changed code' is accurate.",
+    "Gate logs: base-importers.log header names revision 568215753 and the scratch tree; tail '30 failed, 448 passed ... 3 errors' then EXIT=1. head-importers.log header names revision ebda1eaf5 and the worktree; tail '22 failed, 464 passed' then EXIT=1. Both use the same importer-files.txt, so the fragment's 'both arms run that same file list' holds. head-importers-flake-recheck.log re-runs the two head-only ids alone: '2 passed' EXIT=0, 63.23s.",
+    "Attribution removal: git show 33acec5c4:imas_codex/standard_names/export.py | grep -n 'the lead' -> no match; same over the fragment -> no match."
+  ]
+}
