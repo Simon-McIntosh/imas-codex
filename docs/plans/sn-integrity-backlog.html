@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="234">
+<meta name="plan-version" content="235">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -860,7 +860,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>the review for r-20261019T185151966581-sib-export-live-source-gate is stored parsed at the reviewed run's review-records/ path (and its .at-e654a59b4 alias), scoring goal_fidelity 19, evidence 13, scope_discipline 20, durability 16, fit 17, reuse 19 over the pair 5682157531..e654a59b4, with three follow-on findings and no blocker; added_failure_count 0. The record is the landing; no plan edit was made.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-run-r-20261019T213054900640-review-of-sib-export-live-source-gate-33acec5c47fb" data-who="reckon-build" data-when="2026-10-19T21:48:07.419Z">
-    <div class="r-comment-body"><p>reviewed run r-20261019T185151966581-sib-export-live-source-gate over the two commits it gained since its first review (ebda1eaf5 comment and fragment prose removing the person attribution; 33acec5c4 correcting the fragment&#x27;s covering gate to the verified 53-file importer set. Both records carry reviewed_base_sha e654a59b44bee63892b3f6e291aabe17d35039b5 and reviewed_head_sha 33acec5c47fb5784d4816602bda1f31ba0dd972e, all six dimensions scored, two follow-on findings, and added_failure_count 2.</p></div>
+    <div class="r-comment-body"><p>reviewed run r-20261019T185151966581-sib-export-live-source-gate over the two commits it gained since its first review (ebda1eaf5 comment and fragment prose removing the person attribution; 33acec5c4 correcting the fragment's covering gate to the verified 53-file importer set. Both records carry reviewed_base_sha e654a59b44bee63892b3f6e291aabe17d35039b5 and reviewed_head_sha 33acec5c47fb5784d4816602bda1f31ba0dd972e, all six dimensions scored, two follow-on findings, and added_failure_count 2.</p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-run-r-20261019T185151966581-sib-export-live-source-gate" data-who="reckon-build" data-when="2026-10-19T21:29:33Z">
+    <div class="r-comment-body"><p>the export source gate counts live names only — an exhausted sourceless row is recorded on the report as dormant with its count instead of failing the cut, any other stage still blocks, and six live names whose quantity no Data Dictionary path measures are held from release through the existing hold path with reason release_hold_no_dd_source so the gate does not count them and they are not exported. The new tests fail when the live-only filter and the holds are reverted.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
