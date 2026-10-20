@@ -76,6 +76,28 @@ ended up with no source at all is still surfaced for a human decision rather
 than auto-superseded. The two sets cannot overlap, since a misnamed name's
 attachments are never detached.
 
+**A detach that would strand its name is held, not performed.** Detaching a
+name's LAST consistent-looking-but-rejected producer would leave a live,
+non-derived name with no source at all. That is precisely the state the
+``require_producing_sources`` invariant exists to refuse, so performing the
+detach would raise ``MissingStandardNameSource`` inside the reconcile
+transaction and abort the whole pass — including the family apply that runs
+after it — for one name the pass was never going to fix. Worse, the halt is
+self-sustaining: the next pass detaches the same set and raises again.  So a
+verdict whose detach would leave its name sourceless is classified into
+``skipped_stranding`` and its attachment is LEFT EXACTLY AS FOUND — no binding
+written, none removed — and named loudly as an operator worklist, the way
+``names_misnamed`` is. The ``require_producing_sources`` call after the detach
+is unchanged and still runs: it is the backstop, and it now sees only the
+surviving names, so a genuine stranding the hold did not anticipate still
+refuses the write. The ``would strand`` test reuses the invariant's own
+predicate (``find_sourceless_live_names``), evaluating it against the state the
+detach would produce: a name is held when every one of its non-stale producers
+is in the detach set, unless the invariant itself exempts the name (a
+superseded name, or a derived parent with a live child). ``names_orphaned`` is
+computed on the names that remain actionable, so the held names never appear
+there — the hold is reported in its own bucket instead.
+
 Idempotent: a detached attachment no longer matches the selector, and an
 attachment the guard accepts is never touched, so a second pass acts on nothing.
 """
@@ -265,6 +287,38 @@ SET src.produced_sn_id = CASE WHEN size(remaining_ids) > 0
     src.claim_token = CASE WHEN item.reroute THEN null ELSE src.claim_token END
 RETURN count(*) AS detached
 """
+
+
+#: Names a pending detach would leave with no producing source. The invariant's
+#: derived-parent clause is composed in at call time (``_stranding_hold_query``)
+#: so the exempt set is the one ``require_producing_sources`` applies rather than
+#: a second copy of it. Producers are counted with the invariant's own rule:
+#: distinct ``PRODUCED_NAME`` sources whose status is not ``stale``.
+_STRANDING_HOLD_QUERY_TEMPLATE = """
+// STRANDING_HOLD
+UNWIND $items AS item
+WITH item.sn_id AS sn_id, collect(DISTINCT item.source_node_id) AS detaching
+MATCH (sn:StandardName {{id: sn_id}})
+OPTIONAL MATCH (producer:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+WHERE producer.status <> 'stale'
+WITH sn, detaching,
+     [p IN collect(DISTINCT producer.id) WHERE p IS NOT NULL] AS producers
+WHERE size(producers) > 0
+  AND size([p IN producers WHERE NOT p IN detaching]) = 0
+  AND coalesce(sn.name_stage, '') <> 'superseded'
+  AND coalesce(sn.status, '') <> 'superseded'
+  AND NOT ({derived_parent})
+RETURN sn.id AS sn_id
+"""
+
+
+def _stranding_hold_query() -> str:
+    """Return the stranding-hold query, composing the invariant's exemption."""
+    from imas_codex.standard_names.source_invariant import _derived_parent_cypher
+
+    return _STRANDING_HOLD_QUERY_TEMPLATE.format(
+        derived_parent=_derived_parent_cypher()
+    )
 
 
 #: Remove a DD-side realization that has no provenance node behind it. There is
@@ -655,6 +709,15 @@ class AttachmentVerdict:
         """Whether detaching leaves the source with no live name to realize."""
         return self.other_live_names == 0
 
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "source_node_id": self.source_node_id,
+            "dd_path": self.dd_path,
+            "sn_id": self.sn_id,
+            "name_stage": self.name_stage,
+            "reason": self.reason,
+        }
+
 
 @dataclass(frozen=True)
 class AttachmentPairingGuardResult:
@@ -866,6 +929,8 @@ class AttachmentAuditResult:
     skipped_protected: int = 0
     skipped_historical: int = 0
     skipped_misnamed: int = 0
+    skipped_stranding: int = 0
+    held_stranding: list[AttachmentVerdict] = field(default_factory=list)
     names_misnamed: list[NameLevelDefect] = field(default_factory=list)
     names_orphaned: list[str] = field(default_factory=list)
     dd_gap_evidence: list[dict[str, Any]] = field(default_factory=list)
@@ -886,6 +951,11 @@ class AttachmentAuditResult:
             "skipped_protected": self.skipped_protected,
             "skipped_historical": self.skipped_historical,
             "skipped_misnamed": self.skipped_misnamed,
+            "skipped_stranding": self.skipped_stranding,
+            # The attach-or-retire worklist itself, not just its size — the
+            # operator acts on it directly, so it is reported in full.
+            "held_stranding": len(self.held_stranding),
+            "stranding": [v.as_dict() for v in self.held_stranding],
             "names_misnamed": len(self.names_misnamed),
             # The rename worklist itself, not just its size — it is the whole
             # point of the classification and the operator acts on it directly.
@@ -1136,6 +1206,23 @@ def reconcile_attachment_consistency(
             else:
                 actionable.append(v)
 
+        # Hold, before any detach, every verdict whose removal would leave its
+        # name with no non-stale producer. Detaching it would trip the
+        # ``require_producing_sources`` backstop below and abort the whole
+        # transaction; the name is not one the pass can repair, so it becomes an
+        # operator worklist instead. Exemptions match the invariant's own.
+        if actionable:
+            stranded = _names_stranded_by_detach(client, actionable)
+            if stranded:
+                retained: list[AttachmentVerdict] = []
+                for v in actionable:
+                    if v.sn_id in stranded:
+                        result.skipped_stranding += 1
+                        result.held_stranding.append(v)
+                    else:
+                        retained.append(v)
+                actionable = retained
+
         if result.rejected:
             logger.warning(
                 "reconcile_attachment_consistency: %d of %d attachment(s) fail "
@@ -1157,6 +1244,21 @@ def reconcile_attachment_consistency(
                     for v in result.rejected
                     if v.protected and v.sn_id not in misnamed
                 )[:1200],
+            )
+        if result.skipped_stranding:
+            # Loud: this is a worklist the operator must act on. The pass
+            # declines to detach because doing so would strand the name and
+            # abort every apply that runs after it.
+            logger.warning(
+                "reconcile_attachment_consistency: %d attachment(s) held — "
+                "detaching would leave these live names with no producing "
+                "source, so the pass left them exactly as found. Attach a "
+                "correct source or retire the name: %s",
+                result.skipped_stranding,
+                "; ".join(
+                    f"{v.dd_path} → {v.sn_id} ({v.reason})"
+                    for v in result.held_stranding
+                )[:2000],
             )
         if result.names_misnamed:
             # Loud: this is a worklist the operator must act on, and the audit
@@ -2829,6 +2931,21 @@ def count_unattributed_detachments(gc: Any | None = None) -> int:
         if own:
             client.close()
     return int(rows[0]["n"]) if rows else 0
+
+
+def _names_stranded_by_detach(gc: Any, actionable: list[AttachmentVerdict]) -> set[str]:
+    """Names whose every non-stale producer is in *actionable*'s detach set.
+
+    The predicate is the invariant's: a name is stranded once it has no
+    remaining non-stale producer, unless the invariant exempts it (superseded,
+    or a derived parent with a live child). Read-only, so it runs for a dry run
+    too — the held list is the outcome the operator needs.
+    """
+    items = [{"sn_id": v.sn_id, "source_node_id": v.source_node_id} for v in actionable]
+    if not items:
+        return set()
+    rows = gc.query(_stranding_hold_query(), items=items)
+    return {str(row["sn_id"]) for row in rows}
 
 
 def _find_orphaned_names(gc: Any, sn_ids: list[str]) -> list[str]:
