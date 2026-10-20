@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_basis": "The reviewed run's manifest carries baseline_suite: null and after_suite: null (confirmed against the run's classification.json, both null), so there is no before or after suite receipt and no added failure id can be derived from them. The node added no test file and changed no code path: the diff adds one evidence JSON and one landing fragment.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:428 (OUT_DIR writes the arm record)"
+  ],
+  "completed_at": "2026-10-20T04:14:23.484Z",
+  "dispatched_at": "2026-10-20T03:55:57Z",
+  "findings": [
+    {
+      "claim": "the arm JSON line 178 records scratch_scope_run_rows 0 while scratch_family_rows is 50 in the same graph",
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-anomalous-current-jev.html",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "follow-on: the containment paragraph cites the run-id arm of the negative control as corroborating evidence ('The negative control saw 0 rows attributable to this apply on the live graph, by family members and by run id alike'), but that arm has no discriminating power. The same probe reads 0 on the scratch copy the apply demonstrably wrote to: the arm record carries scratch_scope_run_rows 0 at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-jev.json:178, while the family-rows probe on the same scratch graph found 50 rows. A probe that returns 0 where 50 rows are known to exist measures nothing, so its 0 on the live graph cannot corroborate containment, and the sentence presents a vacuous half as if it were a second control. The verdict still holds on the family-rows arm, which does discriminate (50 on scratch, 0 on live), so this does not block the node; it is a defect of the runner's containment instrument reproduced in this node's evidence chain, and it is shared by every sibling arm record."
+    },
+    {
+      "claim": "isolation.at 21:20:42 precedes the row counts it carries, which were measured at 21:50:47",
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-jev.json",
+      "line": "163",
+      "severity": "follow-on",
+      "text": "follow-on: the isolation block's 'at' is the pre-apply isolation-proof timestamp 2026-10-19T21:20:42.936699+00:00, but the same block also carries the post-apply row counts the containment check measured at 21:50:47 (scratch_family_rows 50, scratch_ledger_rows 50, live_family_rows 0). The runner merges those measurements into the isolation dict after the apply ('data[\"isolation\"].update(...)' at ssog-anchor-ab-run.py:607), leaving the earlier 'at' in place, so a reader who takes the block's timestamp as the time of its contents reads 50 family cost rows as existing before the apply started at 21:20:50. No numeric claim in the record is wrong and the containment block carries its own correct 'at', so this does not block; it is a runner-produced misattribution shared by every sibling arm record."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production call site. The only runtime code that reaches the landed files is the arm runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:428, which writes the record; search over imas_codex and tests for readers of its fields (scores_after, lint_after, harmonize_receipts, outcome_status) returned nothing, and the record is consumed by the aggregating node's workflow rather than by runtime code.",
+    "diff": "Read commit by commit against the base 5cf53a7b6: d4478f6d6 is the only commit, a feat(evidence) with a body, adding docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-jev.json (291 lines, sort_keys output identical in shape and key set to the two already-merged sibling arm records) and docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-anomalous-current-jev.html (17 lines). No code, no test, no runner and no selection change; nothing outside the declared scope.",
+    "done_when": "The source brief names eight fields the record must carry plus a log ending EXIT=0, the scratch stopped with its tree removed, and spend under USD 2.00. Every named field is present: outcome_status 'complete'; anchor radial_current_density_due_to_anomalous_transport; lint_before 5 and lint_after 12; scores_after for all six members; calls 50, spend_usd 1.283319, wall_seconds 1794.4; stamped false; containment holds true with its evidence block; code.tree_digest_imas_codex d1e4f1e54323571a. runner-jev.log line 10 is a bare EXIT=0.",
+    "goal": "The source brief.md asks for one arm: the jev arm of the current_density_due_to_anomalous_transport family, run in a scratch graph. docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-jev.json lands exactly that: anchor radial_current_density_due_to_anomalous_transport, family current_density_due_to_anomalous_transport, arm jev, kind component, all six members, applied true, decision apply, scratch_uri bolt://127.0.0.1:28012, source_export imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz.",
+    "manifest": "Read the source run's manifest.md: status complete, one commit d4478f6d6, changed_paths exactly the two landed files, the arm numbers (lint 5->12, 50 calls, USD 1.283319, 1794.4 s, stamped false, containment holds with scratch_signal 100 and live_signal 0), the two log paths, and follow_ons naming the paired heuristic arm and the adoption-rule verdict. baseline_suite and after_suite are null, so the manifest records no suite receipt and no added failure can be derived from it.",
+    "write_paths": "The source brief declares three write paths: the arm JSON, the landing fragment, and docs/figures/sn-selection-over-generation/ssog-anchor-anomalous-current-jev. git show --stat d4478f6d6 lists exactly two new files, the first two of those, 308 insertions and no deletions; the figures directory is absent and none was needed, since the brief names no figure and the fragment carries none."
+  },
+  "justifications": {
+    "durability": "The run added no assertion and no test file \u2014 the diff is one evidence JSON and one fragment \u2014 so nothing in the tree fails if a future arm record regresses; the only guard the numbers have is that they are re-derivable from the apply log's own receipt line, which is a property of the artifact rather than a test that fires.",
+    "evidence": "The done_when's measure is the record's contents, and every named field is present at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-jev.json with its result recorded, not merely claimed: the central numbers reconcile exactly against the apply invocation's own output, where harmonize_receipts[0] equals the CLI JSON line at apply-jev-current_density_due_to_anomalous_transport.log:2057 byte for byte.",
+    "fit": "The record's key set is identical to the two already-merged sibling arm records (current_density_due_to_wave_driven_current_drive-jev.json and vertical_coordinate_of_diagnostic_aperture-jev.json) and the fragment follows the sibling fragment idiom of a data-reckon=evidence section with node-id-prefixed element ids, with no plan, section or sprint label in any filename, id or comment.",
+    "goal_fidelity": "The landed record docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-jev.json carries arm jev, family current_density_due_to_anomalous_transport and scratch_uri bolt://127.0.0.1:28012, which is the one sentence the brief's goal states, and its anchor, members, kind, jev_anchor and heuristic_anchor fields agree with the fixed selection at ssog-anchor-ab/selection.json.",
+    "reuse": "The node added no definition at all: it invoked the existing per-arm runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, which owns scratch load, port reservation, apply, containment and record writing, against the fixed ssog-anchor-ab/selection.json, so there is no capability to check for a duplicate owner.",
+    "scope_discipline": "Both landed paths are inside the declared write paths and the diff at d4478f6d6 is two new files with no deletions, no runner edit and no selection edit, which is what the brief's 'Do not change the runner or the selection' requires."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261020T035459106668-review-of-ssog-anchor-anomalous-current-jev-d4478f6d6c8b",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_commits": [
+    "d4478f6d6c8b3538a7100daef4ab9a12e7c30ed6"
+  ],
+  "reviewed_head_sha": "d4478f6d6c8b3538a7100daef4ab9a12e7c30ed6",
+  "reviewed_run_id": "r-20261019T204530252833-ssog-anchor-anomalous-current-jev",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T04:21:49.325743+00:00",
+  "total": 108
+}
