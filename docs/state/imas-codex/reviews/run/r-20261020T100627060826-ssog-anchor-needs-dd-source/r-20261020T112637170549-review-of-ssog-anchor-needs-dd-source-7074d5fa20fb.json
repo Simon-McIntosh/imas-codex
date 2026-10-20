@@ -15,6 +15,13 @@
   ],
   "completed_at": "2026-10-20T11:32:52.480Z",
   "dispatched_at": "2026-10-20T11:27:06Z",
+  "finding_dispositions": {
+    "1": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-rerun",
+      "recorded_at": "2026-10-20T11:37:25.796343+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/harmonize.py",
