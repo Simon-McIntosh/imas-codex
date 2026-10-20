@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run recorded no baseline_suite and no after_suite (both absent from its manifest, which is an evidence node that adds no test and changes no product source), so it carries no two-arm suite delta of its own. Its gate was the per-arm runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py; the run log .../runner-heuristic.log header names revision 5cf53a7b6, the tree, TMPDIR and the literal command, its body prints 'heuristic neutron_source_rate_due_to_thermal_fusion: lint 5->4, 16 calls, $0.5033, 1012.4s, stamped=False, containment=True' and '{\"family\": ..., \"arm\": \"heuristic\", \"outcome_status\": \"complete\"}', and its last line is EXIT=0. The change touches only docs/evidence data and doc paths that no pytest module covers, so the added-failure set is an empty measured set rather than unmeasured by a suite that could have exercised it.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T04:06:44.958Z",
+  "dispatched_at": "2026-10-20T03:52:51Z",
+  "findings": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:188 follow-on: outcome_status reads \"complete\" while the harmonization halted after 1 of 2 batches with stamped false (json lines 81, 127, 118, 256), because the unchanged runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:627-628 sets it on the containment gate alone (complete if containment holds else containment); an aggregator keying on the field alone reads a fully-harmonized four-member family, though the node discloses the halt in docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-thermal-neutron-heuristic.html:40-48 and in its manifest follow_ons.",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:31 follow-on: cost_limit_passed_usd holds the 2.0 arm budget ceiling, not a pass/fail verdict, so a reader comparing spend_usd (json line 255, 0.503306) against a value stored under a name that asserts a verdict compares a spend to a cap; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508-510 (ceiling = min(apply_cap(planned_calls), ARM_BUDGET_USD)).",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-thermal-neutron-heuristic.html:53 follow-on: the containment paragraph opens <code>scratch_ledger_rows and then opens a second <code> for scratch_signal without closing the first, leaving one stray open code tag so the remainder of the paragraph renders as monospace; the sibling arm fragments carry the same defect, and it is cosmetic to the record's data rather than a claim about it."
+  ],
+  "findings_structured": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json",
+      "line": "188",
+      "severity": "follow-on",
+      "text": "outcome_status reads complete while the harmonization halted after 1 of 2 batches with stamped false; the unchanged runner sets it on the containment gate alone, so an aggregator keying on the field alone reads a fully-harmonized four-member family, though the node discloses the halt in the landing fragment and its manifest follow_ons."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "cost_limit_passed_usd holds the 2.0 arm budget ceiling, not a pass/fail verdict; comparing spend_usd against it compares a spend to a cap. Copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508-510."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-thermal-neutron-heuristic.html",
+      "line": "53",
+      "severity": "follow-on",
+      "text": "an unclosed <code> tag opens for scratch_ledger_rows before a nested <code> opens for scratch_signal, leaving a stray open tag that renders the rest of the containment paragraph as monospace; cosmetic to the record's data, present in sibling fragments too."
+    }
+  ],
+  "findings_text": "see findings",
+  "item_verdicts": {
+    "diff": "one commit, two added files, all inside scope.",
+    "done_when": "every field the brief's done_when asks for is present in the arm JSON and the gate log .../runner-heuristic.log ends EXIT=0.",
+    "goal": "the node's goal is to run the heuristic anchor arm of the neutron_source_rate_due_to_thermal_fusion family in a scratch graph copy and record it; ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:6 records that arm, anchor neutron_source_rate_due_to_thermal_fusion.",
+    "manifest": "read in full; status complete with the partial-family limitation disclosed.",
+    "write_paths": "both changed paths are inside the brief's declared write scope plus its landing fragment."
+  },
+  "justifications": {
+    "durability": "no assertion added; the only guard is the unchanged runner's write-time containment gate.",
+    "evidence": "scores_after and score_regressions reconcile internally, containment evidence names its counts, the log ends EXIT=0.",
+    "fit": "key set matches the sibling arm record; one field name asserts a verdict its value does not hold and the fragment has a stray open code tag.",
+    "goal_fidelity": "the arm JSON records the anchor and every named quantity, partial harmonization disclosed.",
+    "reuse": "no new definition; the existing runner produces both artifacts and no other owner exists.",
+    "scope_discipline": "git diff --stat 5cf53a7b6..bca66aeb6 lists only the two declared paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to run the heuristic anchor arm of the neutron_source_rate_due_to_thermal_fusion family against a scratch copy of the archived graph and record it; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:6 records that arm, anchor neutron_source_rate_due_to_thermal_fusion.\nVERDICT done_when: the brief's done_when asks for the arm JSON written by an invocation whose log ends EXIT=0, carrying outcome_status complete, the anchor, lint before and after, every member's documentation score after, calls, spend and wall time, stamped, the containment verdict with its evidence and the code digest, the scratch stopped and removed, and spend under USD 2.00; every one is present in docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json (outcome_status line 188, anchor line 6, lint_before 175 and lint_after 169, scores_after line 232, calls line 10, spend_usd line 255, wall_seconds line 262, stamped line 256, containment line 17 with holds line 26 and evidence lines 19-25, code digest line 15) and .../runner-heuristic.log ends EXIT=0 on its line 13; the scratch tree is removed and the port released (json scratch_removed, port_lock_released). Spend USD 0.503306 is under the USD 2.00 ceiling.\nVERDICT write_paths: the reviewed manifest declares changed_paths as the two files the diff touches, and git diff --name-only 5cf53a7b6..bca66aeb6 lists exactly docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json and docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-thermal-neutron-heuristic.html, both inside the brief's declared write scope (the JSON) plus its working-rules landing fragment (the HTML).\nVERDICT manifest: read in full; status complete, one commit (bca66aeb6), changed_paths names the two files, tests names the literal runner command, test_logs names runner-heuristic.log, measurement_module and measurement_cwd name the harmonize.py under test and the worktree it resolves from, negative_control_log reads 'none: this node adds no test and changes no product source', baseline_suite and after_suite absent as an evidence node, and the partial-family limitation is disclosed in follow_ons and the landing line.\nVERDICT diff: read commit by commit against base 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1; one commit bca66aeb6 adds the 263-line arm JSON and the 62-line landing HTML, two files, 325 insertions, no deletions, nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:6 records the anchor and every quantity the goal names, in the JSON shape set by ssog-anchor-ab-run.py:573-599, and the family's partial harmonization (1 of 2 batches, stamped false, json lines 81, 256) is disclosed rather than concealed.\nSCORE evidence: 18\nJUSTIFICATION evidence: the record's scores_after at ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:232 (four members 0.849/0.9875/0.93125/0.94375) reconcile with its score_regressions block (json line 181, the anchor fell 1.0->0.849) and its containment.evidence at json lines 19-25 names the counts the verdict rests on (scratch_family_rows 16, live_family_rows 0, scratch_signal 32, live_signal 0), but no pytest arm ran, so the added-failure delta is a measured empty set over paths no test covers.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1..bca66aeb6 lists only the arm JSON and ssog-anchor-thermal-neutron-heuristic.html, both inside the manifest's declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: the diff adds no assertion at all \u2014 it is a data record and a doc \u2014 so nothing committed reddens if the record's scores or containment verdict were later replaced; the only guard is the runner's write-time containment gate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:600-628 and its planted self-check --self-check-containment, neither of which the diff touches.\nSCORE fit: 16\nJUSTIFICATION fit: the record's key set matches the sibling ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json plus the port_lock keys of the port-reservation fix, and the landing HTML follows the reckon evidence-fragment idiom at ssog-anchor-thermal-neutron-heuristic.html:1, though json line 31 carries a field name (cost_limit_passed_usd) that asserts a verdict its value does not hold and the fragment carries a stray open code tag at line 53.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no new definition and forks no capability \u2014 the record and fragment are produced by the existing runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:399 run_arm, which delegates to imas_codex/standard_names/harmonize.py and the temp-instance helpers, and a capability search over docs/evidence and imas_codex found no other owner of an arm-record producer.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:188 follow-on: outcome_status reads complete while the harmonization halted after 1 of 2 batches with stamped false (json lines 81, 127, 118, 256), because the unchanged runner ssog-anchor-ab-run.py:627-628 sets it on the containment gate alone; an aggregator keying on the field reads a fully-harmonized family, though the node discloses the halt in ssog-anchor-thermal-neutron-heuristic.html:40-48 and its manifest follow_ons.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:31 follow-on: cost_limit_passed_usd holds the 2.0 arm budget ceiling, not a pass/fail, so comparing spend_usd (json line 255) against it compares a spend to a cap; the value is copied verbatim from ssog-anchor-ab-run.py:508-510.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-thermal-neutron-heuristic.html:53 follow-on: an unclosed <code> opens for scratch_ledger_rows before a nested <code> opens for scratch_signal, leaving a stray open tag that renders the rest of the containment paragraph as monospace; cosmetic to the record's data.\n",
+  "review_run_id": "r-20261020T035203921261-review-of-ssog-anchor-thermal-neutron-heuristic-bca66aeb6de4",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_commits": [
+    "bca66aeb6de4aafd463ad471f96ed936860d4dc1",
+    "bca66aeb6de4aafd463ad471f96ed936860d4dc1"
+  ],
+  "reviewed_head_sha": "bca66aeb6de4aafd463ad471f96ed936860d4dc1",
+  "reviewed_run_id": "r-20261019T203837258480-ssog-anchor-thermal-neutron-heuristic",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261020T035203921261-review-of-ssog-anchor-thermal-neutron-heuristic-bca66aeb6de4"
+  },
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T04:10:00Z",
+  "total": 104
+}
