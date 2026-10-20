@@ -3,49 +3,76 @@
     "registered_at": "2026-10-18T10:45:18.869980+00:00",
     "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
   },
-  "anchor": "energy_flux_at_wall_due_to_recombination",
+  "anchor": "neutral_energy_flux_at_wall_due_to_recombination",
   "applied": true,
   "arm": "jev",
   "budget_limit_usd": 2.0,
-  "calls": 17,
+  "calls": 20,
   "code": {
-    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wall-recomb-jev",
-    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
-    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wall-recomb-jev/imas_codex/standard_names/harmonize.py",
-    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-rerun-wall-recomb-jev",
+    "git_head": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-rerun-wall-recomb-jev/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "53d14e51fb7a7d8cf73c8c6876afecd3db2f3791f0cfb6c78218500ad7c3bdf4"
   },
   "containment": {
-    "at": "2026-10-19T21:06:11.472238+00:00",
+    "at": "2026-10-20T20:23:50.801754+00:00",
     "evidence": {
       "live_family_rows": 0,
       "live_scope_run_rows": 0,
-      "scratch_family_rows": 17,
-      "scratch_ledger_rows": 17,
+      "scratch_family_rows": 20,
+      "scratch_ledger_rows": 20,
       "scratch_scope_run_rows": 0
     },
     "holds": true,
     "live_signal": 0,
     "reasons": [],
-    "scratch_signal": 34
+    "scratch_signal": 40
   },
   "cost_limit_passed_usd": 2.0,
   "decision": "apply",
+  "documentation_holds": {
+    "annotation": "added post-hoc by the repairing review round; the runner does not emit this key",
+    "contradicted_source": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+    "dd_clause": "One scalar value is provided per element in the grid subset.",
+    "member": "neutral_energy_flux_at_wall_due_to_recombination",
+    "note_text": "review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance \u2014 contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: \u2026 DD: One scalar value is provided per element in the grid subset.",
+    "passes": [
+      {
+        "chain": "0/3",
+        "line": 525
+      },
+      {
+        "chain": "1/3",
+        "line": 631
+      },
+      {
+        "chain": "2/3",
+        "line": 744
+      },
+      {
+        "chain": "3/3",
+        "line": 828
+      }
+    ],
+    "score": 0.849,
+    "source_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev/apply-jev-energy_flux_at_wall_due_to_recombination.log"
+  },
   "dump_bytes": 2643183686,
-  "ended_at": "2026-10-19T21:06:09.356453+00:00",
+  "ended_at": "2026-10-20T20:23:48.896334+00:00",
   "family": "energy_flux_at_wall_due_to_recombination",
   "harmonize_receipts": [
     {
-      "anchor": "energy_flux_at_wall_due_to_recombination",
+      "anchor": "neutral_energy_flux_at_wall_due_to_recombination",
       "applied": true,
       "batches": [
         [
-          "energy_flux_at_wall_due_to_recombination"
+          "neutral_energy_flux_at_wall_due_to_recombination"
         ],
         [
+          "energy_flux_at_wall_due_to_recombination",
           "incident_ion_energy_flux_at_wall_due_to_recombination",
           "ion_charge_state_energy_flux_at_wall_due_to_recombination",
-          "ion_energy_flux_at_wall_due_to_recombination",
-          "neutral_energy_flux_at_wall_due_to_recombination"
+          "ion_energy_flux_at_wall_due_to_recombination"
         ]
       ],
       "decision": "apply",
@@ -84,13 +111,13 @@
         "halted": true,
         "resume_from": 1,
         "run_ids": [
-          "64c4d185-73ae-4675-84f1-c3e8ce1a3868"
+          "bbdb9ea7-61bb-4661-ae2a-8479d13776f0"
         ],
         "spec": "harmonize-pattern-family",
         "total_accepted": 0,
         "total_audit_cleared": 0,
         "total_audit_requarantined": 0,
-        "total_cost": 0.8457,
+        "total_cost": 1.1772,
         "total_quarantined": 0,
         "total_selected": 5,
         "total_touched": 1
@@ -100,24 +127,24 @@
         "below_threshold": [
           {
             "after": 0.849,
-            "before": 0.95625,
-            "id": "energy_flux_at_wall_due_to_recombination"
+            "before": 0.96875,
+            "id": "neutral_energy_flux_at_wall_due_to_recombination"
           }
         ],
         "fell": [
           {
             "after": 0.849,
-            "before": 0.95625,
-            "id": "energy_flux_at_wall_due_to_recombination"
+            "before": 0.96875,
+            "id": "neutral_energy_flux_at_wall_due_to_recombination"
           }
         ]
       },
       "scores_after": {
-        "energy_flux_at_wall_due_to_recombination": 0.849,
+        "energy_flux_at_wall_due_to_recombination": 0.95625,
         "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
         "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
         "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
-        "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+        "neutral_energy_flux_at_wall_due_to_recombination": 0.849
       },
       "stamped": false
     }
@@ -131,23 +158,23 @@
     "halted": true,
     "resume_from": 1,
     "run_ids": [
-      "64c4d185-73ae-4675-84f1-c3e8ce1a3868"
+      "bbdb9ea7-61bb-4661-ae2a-8479d13776f0"
     ],
     "spec": "harmonize-pattern-family",
     "total_accepted": 0,
     "total_audit_cleared": 0,
     "total_audit_requarantined": 0,
-    "total_cost": 0.8457,
+    "total_cost": 1.1772,
     "total_quarantined": 0,
     "total_selected": 5,
     "total_touched": 1
   },
   "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
   "isolation": {
-    "at": "2026-10-19T20:46:44.682900+00:00",
+    "at": "2026-10-20T19:53:55.657263+00:00",
     "live_family_rows": 0,
-    "live_nodes": 1771164,
-    "live_nodes_after": 1771164,
+    "live_nodes": 1771165,
+    "live_nodes_after": 1771165,
     "live_nodes_delta_observed": 0,
     "live_probe": 0,
     "live_scope_run_rows": 0,
@@ -155,24 +182,24 @@
     "live_window_rows_observed": 0,
     "marked_scratch_nodes": 1770102,
     "restored_scratch_nodes": 1770101,
-    "scratch_family_rows": 17,
-    "scratch_ledger_rows": 17,
+    "scratch_family_rows": 20,
+    "scratch_ledger_rows": 20,
     "scratch_nodes": 1770101,
     "scratch_probe": 1,
     "scratch_scope_run_rows": 0,
-    "scratch_uri": "bolt://127.0.0.1:28004"
+    "scratch_uri": "bolt://127.0.0.1:28000"
   },
-  "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+  "jev_anchor": "neutral_energy_flux_at_wall_due_to_recombination",
   "kind": "subject",
-  "ledger_calls": 17,
-  "ledger_spend_usd": 0.845692,
+  "ledger_calls": 20,
+  "ledger_spend_usd": 1.177209,
   "ledger_window": {
-    "ended": "2026-10-19T21:06:10.985535+00:00",
-    "started": "2026-10-19T20:46:49.994173+00:00"
+    "ended": "2026-10-20T20:23:50.303268+00:00",
+    "started": "2026-10-20T19:53:59.837826+00:00"
   },
-  "lint_after": 3,
+  "lint_after": 2,
   "lint_after_classes": {
-    "link_missing_reverse": 3
+    "link_missing_reverse": 2
   },
   "lint_before": 3,
   "lint_before_classes": {
@@ -185,57 +212,57 @@
     "ion_energy_flux_at_wall_due_to_recombination",
     "neutral_energy_flux_at_wall_due_to_recombination"
   ],
-  "neo4j_log": "/dev/shm/mcintos-1281970-2tvumh07/instance/logs/neo4j-temp.log",
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev/mcintos-1291600-7pfvd0ny/instance/logs/neo4j-temp.log",
   "outcome_status": "complete",
   "per_model": [
     {
       "calls": 1,
       "model": "openrouter/anthropic/claude-fable-5",
-      "spend_usd": 0.379425
+      "spend_usd": 0.381615
     },
     {
       "calls": 4,
       "model": "openrouter/anthropic/claude-sonnet-5",
-      "spend_usd": 0.22751300000000002
+      "spend_usd": 0.445499
     },
     {
       "calls": 2,
       "model": "openrouter/openai/gpt-6-luna",
-      "spend_usd": 0.007343000000000001
+      "spend_usd": 0.005582999999999999
     },
     {
-      "calls": 2,
+      "calls": 1,
       "model": "openrouter/openai/gpt-6.1-sol",
-      "spend_usd": 0.124003
+      "spend_usd": 0.096326
     },
     {
       "calls": 4,
       "model": "openrouter/x-ai/grok-4.5",
-      "spend_usd": 0.1068
+      "spend_usd": 0.246366
     },
     {
-      "calls": 4,
+      "calls": 8,
       "model": "typesafe/jev-1.13",
-      "spend_usd": 0.000608
+      "spend_usd": 0.00182
     }
   ],
   "planned_calls": 5,
-  "port": 28004,
-  "port_lock": "/dev/shm/ssog-scratch-port-28004.lock",
+  "port": 28000,
+  "port_lock": "/dev/shm/ssog-scratch-port-28000.lock",
   "port_lock_released": {
-    "at": "2026-10-19T21:06:24.439130+00:00",
-    "lock": "/dev/shm/ssog-scratch-port-28004.lock"
+    "at": "2026-10-20T20:24:06.095050+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28000.lock"
   },
-  "recorded_anchor_before": "energy_flux_at_wall_due_to_recombination",
+  "recorded_anchor_before": "neutral_energy_flux_at_wall_due_to_recombination",
   "run_ids": [
-    "64c4d185-73ae-4675-84f1-c3e8ce1a3868"
+    "bbdb9ea7-61bb-4661-ae2a-8479d13776f0"
   ],
   "scores_after": {
-    "energy_flux_at_wall_due_to_recombination": 0.849,
+    "energy_flux_at_wall_due_to_recombination": 0.95625,
     "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
     "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
     "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
-    "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+    "neutral_energy_flux_at_wall_due_to_recombination": 0.849
   },
   "scores_before": {
     "energy_flux_at_wall_due_to_recombination": 0.95625,
@@ -245,22 +272,22 @@
     "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
   },
   "scratch_removed": {
-    "at": "2026-10-19T21:06:24.439044+00:00",
+    "at": "2026-10-20T20:24:06.094976+00:00",
     "removed_entries": [
       "instance"
     ],
-    "tree": "/dev/shm/mcintos-1281970-2tvumh07"
+    "tree": "/tmp/reckon-crew-scratch/r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev/mcintos-1291600-7pfvd0ny"
   },
-  "scratch_tree": "/dev/shm/mcintos-1281970-2tvumh07",
-  "scratch_uri": "bolt://127.0.0.1:28004",
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev/mcintos-1291600-7pfvd0ny",
+  "scratch_uri": "bolt://127.0.0.1:28000",
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
   "spend_limit_usd": 2.0,
-  "spend_usd": 0.845692,
+  "spend_usd": 1.177209,
   "stamped": false,
-  "started_at": "2026-10-19T20:45:08.646350+00:00",
+  "started_at": "2026-10-20T19:51:45.080786+00:00",
   "stopped_instance": {
-    "at": "2026-10-19T21:06:23.071156+00:00",
-    "tree": "/dev/shm/mcintos-1281970-2tvumh07/instance"
+    "at": "2026-10-20T20:24:05.809124+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev/mcintos-1291600-7pfvd0ny/instance"
   },
-  "wall_seconds": 1159.3622414609417
+  "wall_seconds": 1789.058486961294
 }

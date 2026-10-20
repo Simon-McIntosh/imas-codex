@@ -1,0 +1,99 @@
+<h2 id="ssog-anchor-rerun-wall-recomb-jev">Energy-flux-at-wall-due-to-recombination family: jev arm re-run on the fixed code</h2>
+
+<p id="ssog-anchor-rerun-wall-recomb-jev-run">
+The jev arm of the <code>energy_flux_at_wall_due_to_recombination</code> family ran through the
+per-arm runner on revision <code>284f17bcb</code>, against a fresh scratch copy of the fixed
+archived export (<code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code>), with the
+re-derived anchors kept exactly as fixed by the selection (<code>ssog-anchor-reselect</code>).
+The arm is recorded at <code>ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-jev.json</code>
+with <code>outcome_status: complete</code>, written by a detached invocation whose log ends
+<code>EXIT=0</code>.
+</p>
+
+<h3 id="ssog-anchor-rerun-wall-recomb-jev-arm-heading">The arm</h3>
+
+<ul id="ssog-anchor-rerun-wall-recomb-jev-facts">
+<li>Anchor: jev <code>neutral_energy_flux_at_wall_due_to_recombination</code> (heuristic anchor
+    <code>incident_ion_energy_flux_at_wall_due_to_recombination</code>). The planned anchor
+    matched the target anchor; no anchor mismatch was raised.</li>
+<li>Members: <code>energy_flux_at_wall_due_to_recombination</code>,
+    <code>incident_ion_energy_flux_at_wall_due_to_recombination</code>,
+    <code>ion_charge_state_energy_flux_at_wall_due_to_recombination</code>,
+    <code>ion_energy_flux_at_wall_due_to_recombination</code>,
+    <code>neutral_energy_flux_at_wall_due_to_recombination</code> (kind <code>subject</code>,
+    physical base <code>energy</code>).</li>
+<li>Lint findings after harmonization: <strong>3 &rarr; 2</strong>.</li>
+<li>Documentation review score after, per member (before &rarr; after):
+    <code>energy_flux_at_wall_due_to_recombination</code> 0.95625 &rarr; 0.95625,
+    <code>incident_ion_&hellip;</code> 1.0 &rarr; 1.0,
+    <code>ion_charge_state_&hellip;</code> 0.95 &rarr; 0.95,
+    <code>ion_&hellip;</code> 0.85625 &rarr; 0.85625,
+    <code>neutral_&hellip;</code> 0.96875 &rarr; <strong>0.849</strong>.</li>
+<li>Calls 20, spend <strong>USD 1.1772</strong> against the apply cap USD 2.00 and the arm
+    ceiling USD 2.00, wall time 1,789 s.</li>
+<li>Containment holds: two scratch signals (20 member-named cost rows + 20 ledger rows) and zero
+    live-signal rows attributable to this apply.</li>
+<li>Code digest <code>tree_digest_imas_codex 53d14e51fb7a&hellip;</code>, from the fixed
+    revision <code>284f17bcba6f</code>.</li>
+</ul>
+
+<h3 id="ssog-anchor-rerun-wall-recomb-jev-batches-heading">Batches run and the recorded halt</h3>
+
+<p id="ssog-anchor-rerun-wall-recomb-jev-batches">
+The apply ran <strong>1 of 2 batches</strong> (<code>batches_run: 1</code>,
+<code>batches_total: 2</code>, 1 of 5 names touched) and halted with
+<code>halt_reasons: ["docs acceptance 0.00% &lt; 90.00% (0/1 touched)"]</code>,
+<code>halted: true</code>, <code>resume_from: 1</code>. The harmonize receipt is
+<code>applied: true</code> but <code>stamped: false</code>; the runner records the receipt's
+stamped flag unchanged, so the field reads <code>false</code>.
+</p>
+
+<h3 id="ssog-anchor-rerun-wall-recomb-jev-849-heading">The 0.849 score and its hold note</h3>
+
+<p id="ssog-anchor-rerun-wall-recomb-jev-849">
+A documentation score of exactly <strong>0.849</strong> appears for the anchor
+<code>neutral_energy_flux_at_wall_due_to_recombination</code>. The apply log records it
+<strong>held from acceptance</strong> on every one of the four review passes, each pass naming the
+same DD source as contradicted: four hold notes at lines 525, 631, 744 and 828, one per
+<code>chain=N/3</code> pass, followed by the score that pass persisted.</p>
+
+<pre id="ssog-anchor-rerun-wall-recomb-jev-849-holds"><code>line 525  22:08:42  review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance &mdash; contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: &hellip; DD: One scalar value is provided per element in the grid subset.
+line 631  22:13:02  review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance &mdash; contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: &hellip; DD: One scalar value is provided per element in the grid subset.
+line 744  22:18:18  review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance &mdash; contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: &hellip; DD: One scalar value is provided per element in the grid subset.
+line 828  22:21:44  review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance &mdash; contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: &hellip; DD: One scalar value is provided per element in the grid subset.</code></pre>
+
+<p id="ssog-anchor-rerun-wall-recomb-jev-849-scores">
+Each hold note sits directly above the score line it produced, so the four 0.849 scores are the
+held scores of the four passes:</p>
+
+<pre id="ssog-anchor-rerun-wall-recomb-jev-849-lines"><code>persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination &rarr; docs_stage=reviewed (score=0.849, chain=0/3, resolution=quorum_consensus, shortfall=None)
+persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination &rarr; docs_stage=reviewed (score=0.849, chain=1/3, resolution=quorum_consensus, shortfall=None)
+persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination &rarr; docs_stage=reviewed (score=0.849, chain=2/3, resolution=quorum_consensus, shortfall=None)
+persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination &rarr; docs_stage=exhausted (score=0.849, chain=3/3, resolution=quorum_consensus, shortfall=None)</code></pre>
+
+<p id="ssog-anchor-rerun-wall-recomb-jev-849-note">
+The hold note is named by the log, and its grounds are the DD source: each pass held
+<code>neutral_energy_flux_at_wall_due_to_recombination</code> from acceptance for contradicting
+<code>wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values</code>, against
+which the DD clause reads <em>one scalar value is provided per element in the grid subset.</em>
+The full contradiction text is long and lives in the four log lines above; the head and the DD
+clause are quoted here verbatim. The score is therefore a review score that was
+<strong>held</strong>, not a bare score, and it fell from 0.96875 to 0.849 while its refinement
+chain ran <code>0/3</code>&rarr;<code>3/3</code> to <code>docs_stage=exhausted</code>. Whether
+this is the false 0.849 hold the first round recorded, or a genuine DD-source contradiction, is
+for the family's adoption comparison (the heuristic sibling arm and the aggregate) to settle, not
+this arm.
+</p>
+
+<h3 id="ssog-anchor-rerun-wall-recomb-jev-cleanup-heading">Cleanup</h3>
+
+<p id="ssog-anchor-rerun-wall-recomb-jev-cleanup">
+The scratch instance was stopped and its tree removed by the runner's teardown
+(<code>scratch_removed tree &hellip;/mcintos-1291600-7pfvd0ny</code>, verified absent on disk), the
+exclusive port reservation on <code>/dev/shm/ssog-scratch-port-28000.lock</code> was released, and
+no Neo4j process remained bound to the reserved ports. A first attempt on the previous fleet node
+died with that node during dump load &mdash; no <code>EXIT</code> line, the arm JSON holding only
+its <code>running</code> placeholder &mdash; and its abandoned 7.8&nbsp;GiB scratch tree was
+removed before this re-run. The re-run is the detached invocation whose log ends
+<code>EXIT=0</code>.
+</p>
