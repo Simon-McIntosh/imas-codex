@@ -20,6 +20,11 @@
       "node": "srtj-cascade-rubric-score",
       "recorded_at": "2026-10-20T07:46:07.755153+00:00"
     },
+    "2": {
+      "kind": "exempted",
+      "reason": "the gate ran on the working tree that carried the fix later committed as 6192dc596, passing 43 of 43; the only later commit is a figure and its prose",
+      "recorded_at": "2026-10-20T07:46:23.689963+00:00"
+    },
     "3": {
       "kind": "folded",
       "node": "srtj-cascade-rubric-score",
