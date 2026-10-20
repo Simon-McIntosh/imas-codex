@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T09:45:20.648Z",
+  "dispatched_at": "2026-10-20T09:31:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py",
+      "line": "36",
+      "severity": "follow-on",
+      "text": "follow-on: the driver's auc() re-implements imas_codex/discovery/base/evaluation.py:98 roc_auc, the module whose own docstring declares it \"The one AUC owner\" and which imas_codex/standard_names/benchmark_roles.py:46 and the sibling driver srtj-evidence-supply-run.py:15 already import; the file should import it and keep only the degenerate-class guard at the call site, so a second AUC implementation cannot drift from the owner's tie handling."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py",
+      "line": "954",
+      "severity": "follow-on",
+      "text": "follow-on: the gate writes the HTML and JSON at :954-955 and asserts only the serialized byte size at :953, so dropping one of the tables the done_when requires from render() would leave the gate exiting 0; assert the rendered tables and the improvement count against independent expected content, the same shape the srtj-evidence-supply review recorded at srtj-evidence-supply-run.py:476."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py",
+      "line": "1034",
+      "severity": "follow-on",
+      "text": "follow-on: the third ranked improvement hardcodes \"The name gold has 194 human source/target pairs\", while the report's own paired_edits measures 83 + 104 = 187 scored pairs; 194 is the raw human_edit_source row count (108 calibration + 86 validation), so the headline number in the recommendation disagrees with the measurement printed beside it unless the two counts are distinguished."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: the artifact stem derived at :22 begins \"srtj\", an abbreviation of the plan name sn-review-through-jev, which the repository naming rule bans in filenames; the path is fixed by brief.md:44-46 so the defect is the assignment, and the whole fragment directory already carries the same pattern."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T085428812852-srtj-jev-discrimination-diagnosis/gate.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the node adds no production module, so no runtime code reaches the change; the driver is a terminal analysis script whose outputs are static artifacts",
+    "diff": "Read all four gained commits from 9bba70e2d697060adf3d56f98f06ae0c6bfeca27 to 042bdbccb3a80fba929ae87e133d126a55b14b72; 847bc834e adds the 810-line driver, 837f9fde6 separates the claim contradiction veto from claim non-support and adds the planted controls, bab7c8b2c ranks the improvements, and 042bdbccb adds only the HTML and JSON, so no production module is touched and the driver consumes cascade.rubric_scores/cascade._route, cascade_calibration._name_axis/_docs_axis, jev_review.audit_finding_for/claim_contradicts and audits.run_link_integrity rather than re-implementing their scoring.",
+    "done_when": "The source brief at brief.md:28-40 requires the HTML and JSON to report the per-check, per-dimension, evidence, label and disagreement tables and to end with at most five ranked improvements, written by a driver whose log ends EXIT=0; gate.log:1 names revision bab7c8b2, the tree and the literal command, gate.log:10 is a bare EXIT=0, and gate.log:9 records json_bytes 285991, which is the committed JSON's exact byte length.",
+    "goal": "The brief at brief.md:11-40 asks where Jev's name and documentation signal is lost, from frozen receipts and with no LLM call, per check, per dimension, for evidence, labels and disagreements; srtj-jev-discrimination-diagnosis.json reports 32 name and 27 docs checks with per-split AUC, separation, defects caught, false flags and answered counts, four name and four docs dimension AUCs, per-evidence-field presence, the label classes, 20 worst-ranked items per axis and four ranked improvements.",
+    "manifest": "The source manifest names its four commits, the driver gate command and its gate.log, measurement_module and measurement_cwd, and a summary of 0.7223345 name and 0.77543 docs validation AUC over 59 checks; each of those numbers is present in gate.log:5-9 and in the committed JSON, and the manifest's declared three changed paths are exactly the diff's three files.",
+    "write_paths": "The brief at brief.md:42-46 grants docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis.{html,json,run.py}; git diff --stat 9bba70e2d697060adf3d56f98f06ae0c6bfeca27..042bdbccb3a80fba929ae87e133d126a55b14b72 lists exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "srtj-jev-discrimination-diagnosis-run.py:907 asserts the recomputed raw-rubric AUC against the landed cascade_thresholds.json report value and :813 asserts the docs receipt digest against the recorded frozen_sha256, so a mapping or receipt drift reddens the gate, but :954-955 write the report with no assertion over the tables the done_when requires and no suite re-runs the driver.",
+    "evidence": "srtj-jev-discrimination-diagnosis-run.py:768-771 replaces jev.decide_batch with a refusing stub so a judge call cannot pass silently, :444-445 requires the contradiction veto to fire on all 60 planted contradictions and stay clear on all 20 silent controls, and gate.log:4 records that control's line with gate.log:10 ending EXIT=0.",
+    "fit": "srtj-jev-discrimination-diagnosis-run.py:121 check_report, :293 ablations and :344 paired_edits are named for what they measure and the module opens with a one-line docstring at :1, though the assigned artifact stem at :22 carries the plan abbreviation \"srtj\".",
+    "goal_fidelity": "srtj-jev-discrimination-diagnosis.json carries axes.name.checks (32) and axes.docs.checks (27) each with per-split auc, separation, midpoint.defects_caught, midpoint.false_flags and answered, plus axes.*.dimensions auc, axes.*.checks[].splits.*.evidence presence counts and 20 disagreements per axis with their driver contributions.",
+    "reuse": "imas_codex/discovery/base/evaluation.py:98 roc_auc documents itself as \"The one AUC owner\" and is imported by imas_codex/standard_names/benchmark_roles.py:46, while srtj-jev-discrimination-diagnosis-run.py:36 defines a second AUC over roc_auc_score; the driver does extend the cascade, cascade_calibration, jev_review and audits owners for every other measurement.",
+    "scope_discipline": "git diff --stat 9bba70e2d697060adf3d56f98f06ae0c6bfeca27..042bdbccb3a80fba929ae87e133d126a55b14b72 lists only the fragment's run.py, html and json, the exact three paths brief.md:42-46 grants."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The brief at brief.md:11-40 asks where Jev's name and documentation signal is lost, from frozen receipts and with no LLM call, per check, per dimension, for evidence, labels and disagreements; srtj-jev-discrimination-diagnosis.json reports 32 name and 27 docs checks with per-split AUC, separation, defects caught, false flags and answered counts, four name and four docs dimension AUCs, per-evidence-field presence, the label classes, 20 worst-ranked items per axis and four ranked improvements.\nVERDICT done_when: The source brief at brief.md:28-40 requires the HTML and JSON to report the per-check, per-dimension, evidence, label and disagreement tables and to end with at most five ranked improvements, written by a driver whose log ends EXIT=0; gate.log:1 names revision bab7c8b2, the tree and the literal command, gate.log:10 is a bare EXIT=0, and gate.log:9 records json_bytes 285991, which is the committed JSON's exact byte length.\nVERDICT write_paths: The brief at brief.md:42-46 grants docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis.{html,json,run.py}; git diff --stat 9bba70e2d697060adf3d56f98f06ae0c6bfeca27..042bdbccb3a80fba929ae87e133d126a55b14b72 lists exactly those three files and nothing else.\nVERDICT manifest: The source manifest names its four commits, the driver gate command and its gate.log, measurement_module and measurement_cwd, and a summary of 0.7223345 name and 0.77543 docs validation AUC over 59 checks; each of those numbers is present in gate.log:5-9 and in the committed JSON, and the manifest's declared three changed paths are exactly the diff's three files.\nVERDICT diff: Read all four gained commits from 9bba70e2d697060adf3d56f98f06ae0c6bfeca27 to 042bdbccb3a80fba929ae87e133d126a55b14b72; 847bc834e adds the 810-line driver, 837f9fde6 separates the claim contradiction veto from claim non-support and adds the planted controls, bab7c8b2c ranks the improvements, and 042bdbccb adds only the HTML and JSON, so no production module is touched and the driver consumes cascade.rubric_scores/cascade._route, cascade_calibration._name_axis/_docs_axis, jev_review.audit_finding_for/claim_contradicts and audits.run_link_integrity rather than re-implementing their scoring.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: srtj-jev-discrimination-diagnosis.json carries axes.name.checks (32) and axes.docs.checks (27) each with per-split auc, separation, midpoint.defects_caught, midpoint.false_flags and answered, plus axes.*.dimensions auc, axes.*.checks[].splits.*.evidence presence counts and 20 disagreements per axis with their driver contributions.\nSCORE evidence: 18\nJUSTIFICATION evidence: srtj-jev-discrimination-diagnosis-run.py:768-771 replaces jev.decide_batch with a refusing stub so a judge call cannot pass silently, :444-445 requires the contradiction veto to fire on all 60 planted contradictions and stay clear on all 20 silent controls, and gate.log:4 records that control's line with gate.log:10 ending EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 9bba70e2d697060adf3d56f98f06ae0c6bfeca27..042bdbccb3a80fba929ae87e133d126a55b14b72 lists only the fragment's run.py, html and json, the exact three paths brief.md:42-46 grants.\nSCORE durability: 13\nJUSTIFICATION durability: srtj-jev-discrimination-diagnosis-run.py:907 asserts the recomputed raw-rubric AUC against the landed cascade_thresholds.json report value and :813 asserts the docs receipt digest against the recorded frozen_sha256, so a mapping or receipt drift reddens the gate, but :954-955 write the report with no assertion over the tables the done_when requires and no suite re-runs the driver.\nSCORE fit: 16\nJUSTIFICATION fit: srtj-jev-discrimination-diagnosis-run.py:121 check_report, :293 ablations and :344 paired_edits are named for what they measure and the module opens with a one-line docstring at :1, though the assigned artifact stem at :22 carries the plan abbreviation \"srtj\".\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/discovery/base/evaluation.py:98 roc_auc documents itself as \"The one AUC owner\" and is imported by imas_codex/standard_names/benchmark_roles.py:46, while srtj-jev-discrimination-diagnosis-run.py:36 defines a second AUC over roc_auc_score; the driver does extend the cascade, cascade_calibration, jev_review and audits owners for every other measurement.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py:36 follow-on: the driver's auc() re-implements imas_codex/discovery/base/evaluation.py:98 roc_auc, the module whose own docstring declares it \"The one AUC owner\" and which imas_codex/standard_names/benchmark_roles.py:46 and the sibling driver srtj-evidence-supply-run.py:15 already import; the file should import it and keep only the degenerate-class guard at the call site, so a second AUC implementation cannot drift from the owner's tie handling.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py:954 follow-on: the gate writes the HTML and JSON at :954-955 and asserts only the serialized byte size at :953, so dropping one of the tables the done_when requires from render() would leave the gate exiting 0; assert the rendered tables and the improvement count against independent expected content, the same shape the srtj-evidence-supply review recorded at srtj-evidence-supply-run.py:476.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py:1034 follow-on: the third ranked improvement hardcodes \"The name gold has 194 human source/target pairs\", while the report's own paired_edits measures 83 + 104 = 187 scored pairs; 194 is the raw human_edit_source row count (108 calibration + 86 validation), so the headline number in the recommendation disagrees with the measurement printed beside it unless the two counts are distinguished.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py:22 follow-on: the artifact stem derived at :22 begins \"srtj\", an abbreviation of the plan name sn-review-through-jev, which the repository naming rule bans in filenames; the path is fixed by brief.md:44-46 so the defect is the assignment, and the whole fragment directory already carries the same pattern.\n",
+  "review_run_id": "r-20261020T093115987970-review-of-srtj-jev-discrimination-diagnosis-042bdbccb3a8",
+  "reviewed_base_sha": "9bba70e2d697060adf3d56f98f06ae0c6bfeca27",
+  "reviewed_head_sha": "042bdbccb3a80fba929ae87e133d126a55b14b72",
+  "reviewed_run_id": "r-20261020T085428812852-srtj-jev-discrimination-diagnosis",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T09:55:00+00:00",
+  "total": 91
+}
