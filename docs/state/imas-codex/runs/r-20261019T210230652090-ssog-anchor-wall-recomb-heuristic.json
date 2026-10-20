@@ -1,0 +1,373 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/brief.md",
+    "sha256": "5b35aec86fe5b9d55f6e23d452d9372541806141651652ce7434106a0304d25e"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 10731366,
+      "input_tokens_cumulative": 10731366,
+      "output_tokens": 34797,
+      "output_tokens_cumulative": 34797,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 129,
+    "files": 2,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "5902366936061e079993eebdfe375530695fb8bb",
+    "9bd8bd24783b8a0c78973cdd7188dad5bada4372"
+  ],
+  "completed_at": "2026-10-19T22:23:51.216Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-19T21:03:06Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9081632653061223,
+    "plan": "sn-selection-over-generation",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-19T22:02:35.096053+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-19T21:02:35Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 4,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 9,
+    "headroom": 3,
+    "mean_context": 140000,
+    "observed_at": "2026-10-19T21:02:31Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 4,
+      "aggregate_tokens_per_second": 374.184,
+      "detail": "",
+      "mean_tokens_per_second": 42.521,
+      "observed_at": "2026-10-19T21:02:31Z",
+      "runs": 8.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-19T22:23:51.216Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/manifest.md",
+  "member": "disposable-r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "ssog-anchor-wall-recomb-heuristic",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/anchor-arms/energy_flux_at_wall_due_to_recombination-heuristic.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/brief.md",
+    "brief_sha256": "5b35aec86fe5b9d55f6e23d452d9372541806141651652ce7434106a0304d25e",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "low",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json holds the arm with outcome_status complete, anchor, lint before and after, every member's documentation score after, calls, spend, wall time, stamped, containment verdict and code digest, written by a detached invocation whose log ends EXIT=0; the scratch instance is stopped and its tree removed; spend is under USD 2.00",
+    "estimated_hours": null,
+    "goal": "Run the heuristic arm of the energy_flux_at_wall_due_to_recombination anchor family in a scratch graph through the per-arm runner",
+    "id": "ssog-anchor-wall-recomb-heuristic",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-19T21:02:35Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 4,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 9,
+      "headroom": 3,
+      "mean_context": 140000,
+      "observed_at": "2026-10-19T21:02:31Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 4,
+        "aggregate_tokens_per_second": 374.184,
+        "detail": "",
+        "mean_tokens_per_second": 42.521,
+        "observed_at": "2026-10-19T21:02:31Z",
+        "runs": 8.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic/manifest.md",
+    "negative_control": "",
+    "plan": "sn-selection-over-generation",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§7",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json",
+      "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-wall-recomb-heuristic.html",
+      "docs/figures/sn-selection-over-generation/ssog-anchor-wall-recomb-heuristic"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 9204326.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "ssog-anchor-wall-recomb-heuristic",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-19T21:02:50.078187+00:00",
+    "score": 0.71875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "s7's authored body is unchanged since its stored content review; the edits since are landing comments recording the one-arm-per-node re-cut",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.554,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 695.843,
+      "context-estimate": 19.613,
+      "records": 630.375,
+      "verdict-inputs": 231.396
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.9081632653061223,
+  "plan_link": null,
+  "predecessor_run": "r-20261019T141051788349-ssog-anchor-port-reservation",
+  "promoted_by": null,
+  "promoted_revision": "9bd8bd24783b8a0c78973cdd7188dad5bada4372",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§7",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "9117c969-77ff-4734-a6e1-ba63ae58d181",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 10731366,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 4826.016,
+    "generated_tokens": 34797,
+    "generation_seconds": 1003.705,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 74.6,
+    "machine_seconds": 3822.311,
+    "peak_input_tokens": 171768,
+    "tokens_per_second": 34.67,
+    "wall_tokens_per_second": 7.21
+  },
+  "time_budget": "60m",
+  "tool_steps": 86.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 4845,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-19T22:23:56Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-19T21:03:19Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261019T210230652090-ssog-anchor-wall-recomb-heuristic",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6071,
+    "worker_pid": 2921636
+  },
+  "worker_seconds": 4796,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-19T22:23:51.216Z",
+    "session_id": "9117c969-77ff-4734-a6e1-ba63ae58d181",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wall-recomb-heuristic"
+  }
+}
