@@ -1,264 +1,545 @@
 {
-  "content_sha256": "8fd2b51e30887ab1dbed55688f38a154c1633985fb81717382b611fd254c7090",
+  "content_sha256": "4e47220f157edee78fc6b0c1c98994606fce42be6a620a68f9f09980eccba428",
   "docs": {
-    "accept_basis": "best-available-precision",
-    "accept_threshold": 0.554122583888,
-    "check_diagnostics": {
-      "claim_contradicts_source": {
-        "accepted_flagged": 3,
-        "defects_caught": 13,
-        "separation": 0.0486,
-        "threshold": 1.0
-      }
+    "accept_threshold": 0.38829396813183875,
+    "calibration_auc": {
+      "logistic": 0.8345389660493827,
+      "rubric": 0.8365162037037037
     },
-    "check_thresholds": {
-      "claim_contradicts_source": 1.0
+    "golden_sha256": "b8390859634f21394e6f816536d579b9f8275c6feb5ccd24ce0f99f585e55a60",
+    "matched_calibration": {
+      "cutoff": 0.38829396813183875,
+      "n": 210,
+      "panel_accepts": 208,
+      "panel_min_score": 0.85,
+      "pre_veto_accepts": 208
     },
-    "dropped_checks": [
-      "defining_equation_missing",
-      "description_false_of_some_binding",
-      "description_not_single_definition",
-      "description_template_opening_mismatch",
-      "equation_physically_incorrect",
-      "false_equivalence_with_related",
-      "incompatible_physics_qualifier",
-      "latex_escaping_broken",
-      "non_normative_documentation",
-      "relationship_link_missing",
-      "sign_convention_missing",
-      "units_in_prose"
-    ],
-    "fixed_veto_only": true,
-    "joint_only_removed_checks": [
-      "description_not_single_definition",
-      "equation_physically_incorrect",
-      "false_equivalence_with_related",
-      "incompatible_physics_qualifier",
-      "latex_escaping_broken",
-      "non_normative_documentation",
-      "relationship_link_missing",
-      "units_in_prose"
-    ],
-    "joint_only_report": {
-      "calibration": {
-        "accept_correct": 22,
-        "accept_n": 26,
-        "accept_precision": 0.846154,
-        "accept_precision_interval": [
-          0.6646880067178652,
-          0.9384996627642165
-        ],
-        "auc": 0.834539,
-        "false_veto_rate_on_accepted": 0.083333,
-        "n": 216,
-        "refine_precision": 0.931818,
-        "route_counts": {
-          "accept": 26,
-          "chat_review": 102,
-          "refine": 88
-        },
-        "route_shares": {
-          "accept": 0.12037,
-          "chat_review": 0.472222,
-          "refine": 0.407407
-        }
-      },
-      "validation": {
-        "accept_correct": 17,
-        "accept_n": 20,
-        "accept_precision": 0.85,
-        "accept_precision_interval": [
-          0.6395811352592431,
-          0.9476312541037835
-        ],
-        "auc": 0.75258,
-        "false_veto_rate_on_accepted": 0.189189,
-        "n": 184,
-        "refine_precision": 0.805556,
-        "route_counts": {
-          "accept": 20,
-          "chat_review": 92,
-          "refine": 72
-        },
-        "route_shares": {
-          "accept": 0.108696,
-          "chat_review": 0.5,
-          "refine": 0.391304
-        }
-      }
-    },
-    "joint_selection": {
-      "accepted_flagged": 3,
-      "accepted_n": 72,
-      "defect_n": 144,
-      "defects_caught": 13,
-      "false_veto_rate": 0.041666666666666664,
-      "selected": [
-        "claim_contradicts_source"
-      ]
-    },
-    "logistic_only_report": {
-      "calibration": {
-        "accept_correct": 24,
-        "accept_n": 29,
-        "accept_precision": 0.827586,
-        "accept_precision_interval": [
-          0.6545156010980476,
-          0.9240214274710877
-        ],
-        "auc": 0.834539,
-        "false_veto_rate_on_accepted": 0.0,
-        "n": 216,
-        "refine_precision": null,
-        "route_counts": {
-          "accept": 29,
-          "chat_below_reject": 22,
-          "chat_review": 165
-        },
-        "route_shares": {
-          "accept": 0.134259,
-          "chat_below_reject": 0.101852,
-          "chat_review": 0.763889
-        }
-      },
-      "validation": {
-        "accept_correct": 18,
-        "accept_n": 23,
-        "accept_precision": 0.782609,
-        "accept_precision_interval": [
-          0.5809651698373599,
-          0.9033602197341379
-        ],
-        "auc": 0.75258,
-        "false_veto_rate_on_accepted": 0.0,
-        "n": 184,
-        "refine_precision": null,
-        "route_counts": {
-          "accept": 23,
-          "chat_below_reject": 8,
-          "chat_review": 153
-        },
-        "route_shares": {
-          "accept": 0.125,
-          "chat_below_reject": 0.043478,
-          "chat_review": 0.831522
-        }
-      }
-    },
-    "n": 216,
-    "prior_veto_checks": [
-      "claim_contradicts_source",
-      "defining_equation_missing",
-      "description_false_of_some_binding",
-      "description_template_opening_mismatch",
-      "raw_dd_reference_in_prose",
-      "sign_convention_missing"
-    ],
-    "reference_veto_checks": [
-      "defining_equation_missing",
-      "description_false_of_some_binding",
-      "description_not_single_definition",
-      "description_template_opening_mismatch",
-      "equation_physically_incorrect",
-      "false_equivalence_with_related",
-      "incompatible_physics_qualifier",
-      "latex_escaping_broken",
-      "non_normative_documentation",
-      "relationship_link_missing",
-      "sign_convention_missing",
-      "units_in_prose"
-    ],
-    "reference_veto_sha256": "a797be9b51cceb5bb1691a98240c2f2be17066fecfbc46837f6664d3336fc9bb",
-    "reject_threshold": 0.006109023247700607,
-    "removed_from_joint_veto": [
-      "defining_equation_missing",
-      "description_false_of_some_binding",
-      "description_template_opening_mismatch",
-      "raw_dd_reference_in_prose",
-      "sign_convention_missing"
-    ],
+    "n": 210,
     "report": {
       "calibration": {
-        "accept_correct": 11,
-        "accept_n": 12,
-        "accept_precision": 0.9166666666666666,
-        "accept_precision_interval": [
-          0.646120088858883,
-          0.9851349055950829
-        ],
-        "auc": 0.836516,
-        "false_refine_rate_on_accepted": 0.18055555555555555,
-        "false_veto_rate_on_accepted": 0.041666666666666664,
-        "logistic_auc": 0.834539,
-        "n": 216,
-        "raw_rubric_auc": 0.836516,
-        "refine_precision": 0.8828828828828829,
-        "route_counts": {
-          "accept": 12,
-          "chat_review": 93,
-          "refine": 111
+        "copy_groups": 83,
+        "jev": {
+          "accept_precision": {
+            "denominator": 195,
+            "level": 0.95,
+            "lower": 0.2705283200236617,
+            "n_resamples": 10000,
+            "numerator": 67,
+            "point": 0.3435897435897436,
+            "seed": 20261020,
+            "upper": 0.43506493506493504
+          },
+          "accept_rate": {
+            "denominator": 210,
+            "level": 0.95,
+            "lower": 0.8941164007976072,
+            "n_resamples": 10000,
+            "numerator": 195,
+            "point": 0.9285714285714286,
+            "seed": 20261020,
+            "upper": 0.9585798816568047
+          },
+          "accept_recall": {
+            "denominator": 69,
+            "level": 0.95,
+            "lower": 0.9193548387096774,
+            "n_resamples": 10000,
+            "numerator": 67,
+            "point": 0.9710144927536232,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "false_refine_rate": {
+            "denominator": 69,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 2,
+            "point": 0.028985507246376812,
+            "seed": 20261020,
+            "upper": 0.08064516129032258
+          },
+          "refine_precision": {
+            "denominator": 15,
+            "level": 0.95,
+            "lower": 0.6666666666666666,
+            "n_resamples": 10000,
+            "numerator": 13,
+            "point": 0.8666666666666667,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_recall": {
+            "denominator": 141,
+            "level": 0.95,
+            "lower": 0.05072234452394059,
+            "n_resamples": 10000,
+            "numerator": 13,
+            "point": 0.09219858156028368,
+            "seed": 20261020,
+            "upper": 0.1402439024390244
+          }
         },
-        "route_shares": {
-          "accept": 0.05555555555555555,
-          "chat_review": 0.4305555555555556,
-          "refine": 0.5138888888888888
+        "n": 210,
+        "paired_difference": {
+          "accept_precision": {
+            "level": 0.95,
+            "lower": -0.004901512434241964,
+            "n_resamples": 10000,
+            "point": 0.011858974358974372,
+            "seed": 20261020,
+            "upper": 0.02750591235201946
+          },
+          "accept_rate": {
+            "level": 0.95,
+            "lower": -0.09883880654229485,
+            "n_resamples": 10000,
+            "point": -0.06190476190476191,
+            "seed": 20261020,
+            "upper": -0.027027027027027084
+          },
+          "accept_recall": {
+            "level": 0.95,
+            "lower": -0.08064516129032262,
+            "n_resamples": 10000,
+            "point": -0.02898550724637683,
+            "seed": 20261020,
+            "upper": 0.0
+          },
+          "false_refine_rate": {
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "point": 0.028985507246376812,
+            "seed": 20261020,
+            "upper": 0.08064516129032258
+          },
+          "refine_precision": {
+            "level": 0.95,
+            "lower": -0.33333333333333337,
+            "n_resamples": 10000,
+            "point": -0.1333333333333333,
+            "seed": 20261020,
+            "upper": 0.0
+          },
+          "refine_recall": {
+            "level": 0.95,
+            "lower": 0.028846153846153848,
+            "n_resamples": 10000,
+            "point": 0.07801418439716312,
+            "seed": 20261020,
+            "upper": 0.12941388066017773
+          }
+        },
+        "panel": {
+          "accept_precision": {
+            "denominator": 208,
+            "level": 0.95,
+            "lower": 0.2628543417366947,
+            "n_resamples": 10000,
+            "numerator": 69,
+            "point": 0.3317307692307692,
+            "seed": 20261020,
+            "upper": 0.4202939723320157
+          },
+          "accept_rate": {
+            "denominator": 210,
+            "level": 0.95,
+            "lower": 0.9743589743589743,
+            "n_resamples": 10000,
+            "numerator": 208,
+            "point": 0.9904761904761905,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "accept_recall": {
+            "denominator": 69,
+            "level": 0.95,
+            "lower": 1.0,
+            "n_resamples": 10000,
+            "numerator": 69,
+            "point": 1.0,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "false_refine_rate": {
+            "denominator": 69,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 0,
+            "point": 0.0,
+            "seed": 20261020,
+            "upper": 0.0
+          },
+          "refine_precision": {
+            "denominator": 2,
+            "level": 0.95,
+            "lower": 1.0,
+            "n_resamples": 10000,
+            "numerator": 2,
+            "point": 1.0,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_recall": {
+            "denominator": 141,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 2,
+            "point": 0.014184397163120567,
+            "seed": 20261020,
+            "upper": 0.03875968992248062
+          }
+        },
+        "pre_veto": {
+          "accept_precision": {
+            "denominator": 208,
+            "level": 0.95,
+            "lower": 0.2631578947368421,
+            "n_resamples": 10000,
+            "numerator": 69,
+            "point": 0.3317307692307692,
+            "seed": 20261020,
+            "upper": 0.41935483870967744
+          },
+          "accept_rate": {
+            "denominator": 210,
+            "level": 0.95,
+            "lower": 0.9746192893401016,
+            "n_resamples": 10000,
+            "numerator": 208,
+            "point": 0.9904761904761905,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "accept_recall": {
+            "denominator": 69,
+            "level": 0.95,
+            "lower": 1.0,
+            "n_resamples": 10000,
+            "numerator": 69,
+            "point": 1.0,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "false_refine_rate": {
+            "denominator": 69,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 0,
+            "point": 0.0,
+            "seed": 20261020,
+            "upper": 0.0
+          },
+          "refine_precision": {
+            "denominator": 2,
+            "level": 0.95,
+            "lower": 1.0,
+            "n_resamples": 10000,
+            "numerator": 2,
+            "point": 1.0,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_recall": {
+            "denominator": 141,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 2,
+            "point": 0.014184397163120567,
+            "seed": 20261020,
+            "upper": 0.038461538461538464
+          }
+        },
+        "route_counts": {
+          "accept": 195,
+          "refine": 15
+        },
+        "veto": {
+          "defects": 13,
+          "incremental_refine_count": 13,
+          "precision": {
+            "level": 0.95,
+            "lower": 0.6666666666666666,
+            "n_resamples": 10000,
+            "point": 0.8666666666666667,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_count": 15
         }
       },
       "validation": {
-        "accept_correct": 6,
-        "accept_n": 6,
-        "accept_precision": 1.0,
-        "accept_precision_interval": [
-          0.6096657120978346,
-          1.0
-        ],
-        "auc": 0.77543,
-        "false_refine_rate_on_accepted": 0.21621621621621623,
-        "false_veto_rate_on_accepted": 0.02702702702702703,
-        "logistic_auc": 0.75258,
-        "n": 184,
-        "raw_rubric_auc": 0.77543,
-        "refine_precision": 0.8241758241758241,
-        "route_counts": {
-          "accept": 6,
-          "chat_review": 87,
-          "refine": 91
+        "copy_groups": 73,
+        "jev": {
+          "accept_precision": {
+            "denominator": 169,
+            "level": 0.95,
+            "lower": 0.32142316017316025,
+            "n_resamples": 10000,
+            "numerator": 70,
+            "point": 0.41420118343195267,
+            "seed": 20261020,
+            "upper": 0.5056195735444331
+          },
+          "accept_rate": {
+            "denominator": 176,
+            "level": 0.95,
+            "lower": 0.9308502274856149,
+            "n_resamples": 10000,
+            "numerator": 169,
+            "point": 0.9602272727272727,
+            "seed": 20261020,
+            "upper": 0.985
+          },
+          "accept_recall": {
+            "denominator": 72,
+            "level": 0.95,
+            "lower": 0.927536231884058,
+            "n_resamples": 10000,
+            "numerator": 70,
+            "point": 0.9722222222222222,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "false_refine_rate": {
+            "denominator": 72,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 2,
+            "point": 0.027777777777777776,
+            "seed": 20261020,
+            "upper": 0.07246376811594203
+          },
+          "refine_precision": {
+            "denominator": 7,
+            "level": 0.95,
+            "lower": 0.3333333333333333,
+            "n_resamples": 10000,
+            "numerator": 5,
+            "point": 0.7142857142857143,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_recall": {
+            "denominator": 104,
+            "level": 0.95,
+            "lower": 0.010869565217391304,
+            "n_resamples": 10000,
+            "numerator": 5,
+            "point": 0.04807692307692308,
+            "seed": 20261020,
+            "upper": 0.09589315068493146
+          }
         },
-        "route_shares": {
-          "accept": 0.03260869565217391,
-          "chat_review": 0.47282608695652173,
-          "refine": 0.4945652173913043
+        "n": 176,
+        "paired_difference": {
+          "accept_precision": {
+            "level": 0.95,
+            "lower": -0.0020712139020000265,
+            "n_resamples": 10000,
+            "point": 0.013038392734278259,
+            "seed": 20261020,
+            "upper": 0.027880614673377845
+          },
+          "accept_rate": {
+            "level": 0.95,
+            "lower": -0.046511627906976716,
+            "n_resamples": 10000,
+            "point": -0.017045454545454586,
+            "seed": 20261020,
+            "upper": 0.011111111111111072
+          },
+          "accept_recall": {
+            "level": 0.95,
+            "lower": -0.034482758620689724,
+            "n_resamples": 10000,
+            "point": 0.01388888888888884,
+            "seed": 20261020,
+            "upper": 0.0547945205479452
+          },
+          "false_refine_rate": {
+            "level": 0.95,
+            "lower": -0.0547945205479452,
+            "n_resamples": 10000,
+            "point": -0.013888888888888888,
+            "seed": 20261020,
+            "upper": 0.034482758620689655
+          },
+          "refine_precision": {
+            "level": 0.95,
+            "lower": -0.06666666666666665,
+            "n_resamples": 10000,
+            "point": 0.4642857142857143,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_recall": {
+            "level": 0.95,
+            "lower": 0.008545197740113008,
+            "n_resamples": 10000,
+            "point": 0.038461538461538464,
+            "seed": 20261020,
+            "upper": 0.07965486725663704
+          }
+        },
+        "panel": {
+          "accept_precision": {
+            "denominator": 172,
+            "level": 0.95,
+            "lower": 0.3167701863354037,
+            "n_resamples": 10000,
+            "numerator": 69,
+            "point": 0.4011627906976744,
+            "seed": 20261020,
+            "upper": 0.4852092760180995
+          },
+          "accept_rate": {
+            "denominator": 176,
+            "level": 0.95,
+            "lower": 0.9547958397534669,
+            "n_resamples": 10000,
+            "numerator": 172,
+            "point": 0.9772727272727273,
+            "seed": 20261020,
+            "upper": 0.9946524064171123
+          },
+          "accept_recall": {
+            "denominator": 72,
+            "level": 0.95,
+            "lower": 0.9183673469387755,
+            "n_resamples": 10000,
+            "numerator": 69,
+            "point": 0.9583333333333334,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "false_refine_rate": {
+            "denominator": 72,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 3,
+            "point": 0.041666666666666664,
+            "seed": 20261020,
+            "upper": 0.08163265306122448
+          },
+          "refine_precision": {
+            "denominator": 4,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 1,
+            "point": 0.25,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_recall": {
+            "denominator": 104,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 1,
+            "point": 0.009615384615384616,
+            "seed": 20261020,
+            "upper": 0.034482758620689655
+          }
+        },
+        "pre_veto": {
+          "accept_precision": {
+            "denominator": 174,
+            "level": 0.95,
+            "lower": 0.32539073911773303,
+            "n_resamples": 10000,
+            "numerator": 72,
+            "point": 0.41379310344827586,
+            "seed": 20261020,
+            "upper": 0.5
+          },
+          "accept_rate": {
+            "denominator": 176,
+            "level": 0.95,
+            "lower": 0.9683519188266024,
+            "n_resamples": 10000,
+            "numerator": 174,
+            "point": 0.9886363636363636,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "accept_recall": {
+            "denominator": 72,
+            "level": 0.95,
+            "lower": 1.0,
+            "n_resamples": 10000,
+            "numerator": 72,
+            "point": 1.0,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "false_refine_rate": {
+            "denominator": 72,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 0,
+            "point": 0.0,
+            "seed": 20261020,
+            "upper": 0.0
+          },
+          "refine_precision": {
+            "denominator": 2,
+            "level": 0.95,
+            "lower": 1.0,
+            "n_resamples": 10000,
+            "numerator": 2,
+            "point": 1.0,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_recall": {
+            "denominator": 104,
+            "level": 0.95,
+            "lower": 0.0,
+            "n_resamples": 10000,
+            "numerator": 2,
+            "point": 0.019230769230769232,
+            "seed": 20261020,
+            "upper": 0.05357142857142857
+          }
+        },
+        "route_counts": {
+          "accept": 169,
+          "refine": 7
+        },
+        "veto": {
+          "defects": 4,
+          "incremental_refine_count": 5,
+          "precision": {
+            "level": 0.95,
+            "lower": 0.25,
+            "n_resamples": 10000,
+            "point": 0.6666666666666666,
+            "seed": 20261020,
+            "upper": 1.0
+          },
+          "refine_count": 6
         }
       }
     },
     "route_counts": {
-      "accept": 12,
-      "chat_review": 93,
-      "refine": 111
+      "accept": 195,
+      "refine": 15
     },
     "route_shares": {
-      "accept": 0.05555555555555555,
-      "chat_review": 0.4305555555555556,
-      "refine": 0.5138888888888888
+      "accept": 0.9285714285714286,
+      "refine": 0.07142857142857142
     },
     "rubric": {
-      "band_width": 0.05,
-      "calibration_accept_n": 12,
-      "calibration_accept_precision": 0.9166666666666666,
-      "cv": [
-        {
-          "auc": 0.739005,
-          "penalty": 0.001
-        },
-        {
-          "auc": 0.735822,
-          "penalty": 0.01
-        },
-        {
-          "auc": 0.711709,
-          "penalty": 0.1
-        }
-      ],
       "dimensions": {
         "completeness": {
           "intercept": -5.641875964844099,
@@ -311,522 +592,555 @@
           }
         }
       },
-      "min_score": 0.85,
-      "offset": 2.037926208484185,
-      "offset_basis": "precision",
-      "penalty": 0.001
+      "offset": 2.037926208484185
     },
+    "score_kind": "rubric",
+    "score_selection_n": 216,
     "source_receipts": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/documentation-score-frozen.json.xz",
     "source_sha256": "de689527ec16379a32f8f4da09aa954d215b9cfaeb04fb744b34316f41bab892",
-    "unjudged_count": 0,
-    "veto_budget": 0.0,
-    "veto_budget_cv": [
-      {
-        "accepted_n": 0,
-        "budget": 0.0,
-        "defect_recall": 0.0,
-        "false_veto_interval": null,
-        "false_vetoes": 0,
-        "feasible": false
-      },
-      {
-        "accepted_n": 0,
-        "budget": 0.01,
-        "defect_recall": 0.0,
-        "false_veto_interval": null,
-        "false_vetoes": 0,
-        "feasible": false
-      },
-      {
-        "accepted_n": 0,
-        "budget": 0.025,
-        "defect_recall": 0.0,
-        "false_veto_interval": null,
-        "false_vetoes": 0,
-        "feasible": false
-      },
-      {
-        "accepted_n": 0,
-        "budget": 0.05,
-        "defect_recall": 0.0,
-        "false_veto_interval": null,
-        "false_vetoes": 0,
-        "feasible": false
-      },
-      {
-        "accepted_n": 72,
-        "budget": 0.075,
-        "defect_recall": 0.5902777777777778,
-        "false_veto_interval": [
-          0.06717784220573504,
-          0.22081053724160832
-        ],
-        "false_vetoes": 9,
-        "feasible": true
-      },
-      {
-        "accepted_n": 72,
-        "budget": 0.1,
-        "defect_recall": 0.6180555555555556,
-        "false_veto_interval": [
-          0.1195147937945056,
-          0.3003275894588853
-        ],
-        "false_vetoes": 14,
-        "feasible": true
-      },
-      {
-        "accepted_n": 72,
-        "budget": 0.0,
-        "defect_recall": 0.09027777777777778,
-        "false_veto_interval": [
-          0.014270807466925182,
-          0.11549276741316111
-        ],
-        "false_vetoes": 3,
-        "feasible": true,
-        "fixed_only": true
-      }
-    ]
+    "unjudged_count": 0
   },
   "name": {
-    "accept_basis": "precision",
-    "accept_threshold": 0.800086830588,
-    "check_diagnostics": {
-      "advisory_alias_collapsed": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0229,
-        "threshold": null
-      },
-      "ambiguity_in_isolation": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0618,
-        "threshold": null
-      },
-      "bare_shape_parameter_missing_surface": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0275,
-        "threshold": null
-      },
-      "bound_to_wrong_object": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.1778,
-        "threshold": null
-      },
-      "collapsed_two_quantities": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0528,
-        "threshold": null
-      },
-      "coupled_vs_launched_confusion": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0254,
-        "threshold": null
-      },
-      "decomposition_group_absorbed_into_base": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0047,
-        "threshold": null
-      },
-      "device_attributed_observable": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0207,
-        "threshold": null
-      },
-      "dropped_distinguishing_axis": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0077,
-        "threshold": null
-      },
-      "field_region_preposition_wrong": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0155,
-        "threshold": null
-      },
-      "malformed_physical_base": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.1124,
-        "threshold": null
-      },
-      "minority_spelling_not_in_roster": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0221,
-        "threshold": null
-      },
-      "missing_required_segment": {
-        "accepted_flagged": 3,
-        "defects_caught": 39,
-        "separation": 0.0815,
-        "threshold": 0.74
-      },
-      "model_surname_suffix": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.001,
-        "threshold": null
-      },
-      "non_canonical_locus_token": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0216,
-        "threshold": null
-      },
-      "non_canonical_operator_join": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0213,
-        "threshold": null
-      },
-      "non_canonical_render": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0143,
-        "threshold": null
-      },
-      "non_canonical_segment_order": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.002,
-        "threshold": null
-      },
-      "ordered_sample_positional_token": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0012,
-        "threshold": null
-      },
-      "over_qualified_modifier": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0042,
-        "threshold": null
-      },
-      "over_specialised_parent": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0048,
-        "threshold": null
-      },
-      "owner_erased_outline": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0035,
-        "threshold": null
-      },
-      "retired_operator_spelling": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0006,
-        "threshold": null
-      },
-      "source_binding_drift": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": -0.0039,
-        "threshold": null
-      },
-      "source_fidelity_unsupported_qualifier": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0397,
-        "threshold": null
-      },
-      "unit_kind_inconsistent": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0295,
-        "threshold": null
-      },
-      "unregistered_token_in_closed_segment": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0194,
-        "threshold": null
-      },
-      "value_provenance_in_name": {
-        "accepted_flagged": 0,
-        "defects_caught": 0,
-        "separation": 0.0037,
-        "threshold": null
-      }
+    "accept_threshold": 0.32447569396775017,
+    "calibration_auc": {
+      "logistic": 0.7950992953235104,
+      "rubric": 0.7277386290839206
     },
-    "check_thresholds": {
-      "missing_required_segment": 0.74
+    "golden_sha256": "469b03b47282d2fa29c2558a5738f3b9bd19a279ab9df32859c45ef7dd4bcb1a",
+    "matched_calibration": {
+      "cutoff": 0.32447569396775017,
+      "n": 283,
+      "panel_accepts": 174,
+      "panel_min_score": 0.85,
+      "pre_veto_accepts": 174
     },
-    "dropped_checks": [
-      "advisory_alias_collapsed",
-      "ambiguity_in_isolation",
-      "bare_shape_parameter_missing_surface",
-      "bound_to_wrong_object",
-      "coupled_vs_launched_confusion",
-      "device_attributed_observable",
-      "dropped_distinguishing_axis",
-      "malformed_physical_base",
-      "model_surname_suffix",
-      "non_canonical_locus_token",
-      "non_canonical_operator_join",
-      "ordered_sample_positional_token",
-      "over_qualified_modifier",
-      "over_specialised_parent",
-      "source_fidelity_unsupported_qualifier",
-      "unit_kind_inconsistent",
-      "unregistered_token_in_closed_segment",
-      "value_provenance_in_name"
-    ],
-    "fixed_veto_only": false,
-    "joint_only_removed_checks": [
-      "advisory_alias_collapsed",
-      "ambiguity_in_isolation",
-      "bare_shape_parameter_missing_surface",
-      "bound_to_wrong_object",
-      "coupled_vs_launched_confusion",
-      "device_attributed_observable",
-      "dropped_distinguishing_axis",
-      "malformed_physical_base",
-      "model_surname_suffix",
-      "non_canonical_locus_token",
-      "non_canonical_operator_join",
-      "ordered_sample_positional_token",
-      "over_qualified_modifier",
-      "over_specialised_parent",
-      "source_fidelity_unsupported_qualifier",
-      "unit_kind_inconsistent",
-      "unregistered_token_in_closed_segment",
-      "value_provenance_in_name"
-    ],
-    "joint_only_report": {
-      "calibration": {
-        "accept_correct": 30,
-        "accept_n": 33,
-        "accept_precision": 0.909091,
-        "accept_precision_interval": [
-          0.7642739435353026,
-          0.9685960584754184
-        ],
-        "auc": 0.795099,
-        "false_veto_rate_on_accepted": 0.1,
-        "n": 363,
-        "refine_precision": 0.840909,
-        "route_counts": {
-          "accept": 33,
-          "chat_below_reject": 5,
-          "chat_review": 237,
-          "refine": 88
-        },
-        "route_shares": {
-          "accept": 0.090909,
-          "chat_below_reject": 0.013774,
-          "chat_review": 0.652893,
-          "refine": 0.242424
-        }
-      },
-      "validation": {
-        "accept_correct": 15,
-        "accept_n": 20,
-        "accept_precision": 0.75,
-        "accept_precision_interval": [
-          0.531299122381256,
-          0.8881382985923343
-        ],
-        "auc": 0.745246,
-        "false_veto_rate_on_accepted": 0.18254,
-        "n": 338,
-        "refine_precision": 0.806723,
-        "route_counts": {
-          "accept": 20,
-          "chat_below_reject": 4,
-          "chat_review": 195,
-          "refine": 119
-        },
-        "route_shares": {
-          "accept": 0.059172,
-          "chat_below_reject": 0.011834,
-          "chat_review": 0.576923,
-          "refine": 0.352071
-        }
-      }
-    },
-    "joint_selection": {
-      "accepted_flagged": 3,
-      "accepted_n": 140,
-      "defect_n": 223,
-      "defects_caught": 39,
-      "false_veto_rate": 0.02142857142857143,
-      "selected": [
-        "missing_required_segment"
-      ]
-    },
-    "logistic_only_report": {
-      "calibration": {
-        "accept_correct": 33,
-        "accept_n": 37,
-        "accept_precision": 0.891892,
-        "accept_precision_interval": [
-          0.7529146845587398,
-          0.9571481005958853
-        ],
-        "auc": 0.795099,
-        "false_veto_rate_on_accepted": 0.0,
-        "n": 363,
-        "refine_precision": null,
-        "route_counts": {
-          "accept": 37,
-          "chat_below_reject": 37,
-          "chat_review": 289
-        },
-        "route_shares": {
-          "accept": 0.101928,
-          "chat_below_reject": 0.101928,
-          "chat_review": 0.796143
-        }
-      },
-      "validation": {
-        "accept_correct": 16,
-        "accept_n": 25,
-        "accept_precision": 0.64,
-        "accept_precision_interval": [
-          0.44518497748164865,
-          0.7975211922554178
-        ],
-        "auc": 0.745246,
-        "false_veto_rate_on_accepted": 0.0,
-        "n": 338,
-        "refine_precision": null,
-        "route_counts": {
-          "accept": 25,
-          "chat_below_reject": 29,
-          "chat_review": 284
-        },
-        "route_shares": {
-          "accept": 0.073964,
-          "chat_below_reject": 0.085799,
-          "chat_review": 0.840237
-        }
-      }
-    },
-    "n": 363,
-    "prior_veto_checks": [
-      "missing_required_segment"
-    ],
-    "reference_veto_checks": [
-      "advisory_alias_collapsed",
-      "ambiguity_in_isolation",
-      "bare_shape_parameter_missing_surface",
-      "bound_to_wrong_object",
-      "coupled_vs_launched_confusion",
-      "device_attributed_observable",
-      "dropped_distinguishing_axis",
-      "malformed_physical_base",
-      "missing_required_segment",
-      "model_surname_suffix",
-      "non_canonical_locus_token",
-      "non_canonical_operator_join",
-      "ordered_sample_positional_token",
-      "over_qualified_modifier",
-      "over_specialised_parent",
-      "source_fidelity_unsupported_qualifier",
-      "unit_kind_inconsistent",
-      "unregistered_token_in_closed_segment",
-      "value_provenance_in_name"
-    ],
-    "reference_veto_sha256": "a797be9b51cceb5bb1691a98240c2f2be17066fecfbc46837f6664d3336fc9bb",
+    "n": 283,
     "regularization": 10.0,
-    "reject_threshold": 0.10243969692302993,
-    "removed_from_joint_veto": [],
     "report": {
       "calibration": {
-        "accept_correct": 12,
-        "accept_n": 13,
-        "accept_precision": 0.9230769230769231,
-        "accept_precision_interval": [
-          0.6668604907890041,
-          0.9862895787574435
-        ],
-        "auc": 0.727739,
-        "false_refine_rate_on_accepted": 0.6428571428571429,
-        "false_veto_rate_on_accepted": 0.02142857142857143,
-        "logistic_auc": 0.795099,
-        "n": 363,
-        "raw_rubric_auc": 0.727739,
-        "refine_precision": 0.6808510638297872,
-        "route_counts": {
-          "accept": 13,
-          "chat_review": 68,
-          "refine": 282
+        "copy_groups": 223,
+        "jev": {
+          "accept_precision": {
+            "denominator": 174,
+            "level": 0.95,
+            "lower": 0.5058823529411764,
+            "n_resamples": 10000,
+            "numerator": 98,
+            "point": 0.5632183908045977,
+            "seed": 20261020,
+            "upper": 0.6211226064904993
+          },
+          "accept_rate": {
+            "denominator": 283,
+            "level": 0.95,
+            "lower": 0.5570934256055363,
+            "n_resamples": 10000,
+            "numerator": 174,
+            "point": 0.6148409893992933,
+            "seed": 20261020,
+            "upper": 0.671280276816609
+          },
+          "accept_recall": {
+            "denominator": 114,
+            "level": 0.95,
+            "lower": 0.7946428571428571,
+            "n_resamples": 10000,
+            "numerator": 98,
+            "point": 0.8596491228070176,
+            "seed": 20261020,
+            "upper": 0.92
+          },
+          "false_refine_rate": {
+            "denominator": 114,
+            "level": 0.95,
+            "lower": 0.08,
+            "n_resamples": 10000,
+            "numerator": 16,
+            "point": 0.14035087719298245,
+            "seed": 20261020,
+            "upper": 0.20535714285714285
+          },
+          "refine_precision": {
+            "denominator": 109,
+            "level": 0.95,
+            "lower": 0.7876106194690266,
+            "n_resamples": 10000,
+            "numerator": 93,
+            "point": 0.8532110091743119,
+            "seed": 20261020,
+            "upper": 0.9158878504672897
+          },
+          "refine_recall": {
+            "denominator": 169,
+            "level": 0.95,
+            "lower": 0.47398843930635837,
+            "n_resamples": 10000,
+            "numerator": 93,
+            "point": 0.5502958579881657,
+            "seed": 20261020,
+            "upper": 0.6257668711656442
+          }
         },
-        "route_shares": {
-          "accept": 0.03581267217630854,
-          "chat_review": 0.18732782369146006,
-          "refine": 0.7768595041322314
+        "n": 283,
+        "paired_difference": {
+          "accept_precision": {
+            "level": 0.95,
+            "lower": 0.010750289495465075,
+            "n_resamples": 10000,
+            "point": 0.05747126436781602,
+            "seed": 20261020,
+            "upper": 0.10322580185735793
+          },
+          "accept_rate": {
+            "level": 0.95,
+            "lower": -0.05693950177935947,
+            "n_resamples": 10000,
+            "point": 0.0,
+            "seed": 20261020,
+            "upper": 0.05734767025089604
+          },
+          "accept_recall": {
+            "level": 0.95,
+            "lower": 0.00847279589802022,
+            "n_resamples": 10000,
+            "point": 0.08771929824561409,
+            "seed": 20261020,
+            "upper": 0.17094594594594592
+          },
+          "false_refine_rate": {
+            "level": 0.95,
+            "lower": -0.17094594594594592,
+            "n_resamples": 10000,
+            "point": -0.08771929824561403,
+            "seed": 20261020,
+            "upper": -0.00847279589802023
+          },
+          "refine_precision": {
+            "level": 0.95,
+            "lower": 0.018454760421643335,
+            "n_resamples": 10000,
+            "point": 0.09174311926605505,
+            "seed": 20261020,
+            "upper": 0.16961862237592001
+          },
+          "refine_recall": {
+            "level": 0.95,
+            "lower": -0.017647058823529405,
+            "n_resamples": 10000,
+            "point": 0.05917159763313612,
+            "seed": 20261020,
+            "upper": 0.13714285714285718
+          }
+        },
+        "panel": {
+          "accept_precision": {
+            "denominator": 174,
+            "level": 0.95,
+            "lower": 0.4486486486486487,
+            "n_resamples": 10000,
+            "numerator": 88,
+            "point": 0.5057471264367817,
+            "seed": 20261020,
+            "upper": 0.5618060634266338
+          },
+          "accept_rate": {
+            "denominator": 283,
+            "level": 0.95,
+            "lower": 0.557194254085398,
+            "n_resamples": 10000,
+            "numerator": 174,
+            "point": 0.6148409893992933,
+            "seed": 20261020,
+            "upper": 0.6713286713286714
+          },
+          "accept_recall": {
+            "denominator": 114,
+            "level": 0.95,
+            "lower": 0.6923076923076923,
+            "n_resamples": 10000,
+            "numerator": 88,
+            "point": 0.7719298245614035,
+            "seed": 20261020,
+            "upper": 0.8476190476190476
+          },
+          "false_refine_rate": {
+            "denominator": 114,
+            "level": 0.95,
+            "lower": 0.1523809523809524,
+            "n_resamples": 10000,
+            "numerator": 26,
+            "point": 0.22807017543859648,
+            "seed": 20261020,
+            "upper": 0.3076923076923077
+          },
+          "refine_precision": {
+            "denominator": 109,
+            "level": 0.95,
+            "lower": 0.6788990825688074,
+            "n_resamples": 10000,
+            "numerator": 83,
+            "point": 0.7614678899082569,
+            "seed": 20261020,
+            "upper": 0.8392857142857143
+          },
+          "refine_recall": {
+            "denominator": 169,
+            "level": 0.95,
+            "lower": 0.4146341463414634,
+            "n_resamples": 10000,
+            "numerator": 83,
+            "point": 0.4911242603550296,
+            "seed": 20261020,
+            "upper": 0.5664788053949903
+          }
+        },
+        "pre_veto": {
+          "accept_precision": {
+            "denominator": 174,
+            "level": 0.95,
+            "lower": 0.5058823529411764,
+            "n_resamples": 10000,
+            "numerator": 98,
+            "point": 0.5632183908045977,
+            "seed": 20261020,
+            "upper": 0.6211226064904993
+          },
+          "accept_rate": {
+            "denominator": 283,
+            "level": 0.95,
+            "lower": 0.5570934256055363,
+            "n_resamples": 10000,
+            "numerator": 174,
+            "point": 0.6148409893992933,
+            "seed": 20261020,
+            "upper": 0.671280276816609
+          },
+          "accept_recall": {
+            "denominator": 114,
+            "level": 0.95,
+            "lower": 0.7946428571428571,
+            "n_resamples": 10000,
+            "numerator": 98,
+            "point": 0.8596491228070176,
+            "seed": 20261020,
+            "upper": 0.92
+          },
+          "false_refine_rate": {
+            "denominator": 114,
+            "level": 0.95,
+            "lower": 0.08,
+            "n_resamples": 10000,
+            "numerator": 16,
+            "point": 0.14035087719298245,
+            "seed": 20261020,
+            "upper": 0.20535714285714285
+          },
+          "refine_precision": {
+            "denominator": 109,
+            "level": 0.95,
+            "lower": 0.7876106194690266,
+            "n_resamples": 10000,
+            "numerator": 93,
+            "point": 0.8532110091743119,
+            "seed": 20261020,
+            "upper": 0.9158878504672897
+          },
+          "refine_recall": {
+            "denominator": 169,
+            "level": 0.95,
+            "lower": 0.47398843930635837,
+            "n_resamples": 10000,
+            "numerator": 93,
+            "point": 0.5502958579881657,
+            "seed": 20261020,
+            "upper": 0.6257668711656442
+          }
+        },
+        "route_counts": {
+          "accept": 174,
+          "refine": 109
+        },
+        "veto": {
+          "defects": 0,
+          "incremental_refine_count": 0,
+          "precision": {
+            "level": 0.95,
+            "lower": null,
+            "n_resamples": 0,
+            "point": null,
+            "seed": 20261020,
+            "upper": null
+          },
+          "refine_count": 0
         }
       },
       "validation": {
-        "accept_correct": 6,
-        "accept_n": 6,
-        "accept_precision": 1.0,
-        "accept_precision_interval": [
-          0.6096657120978346,
-          1.0
-        ],
-        "auc": 0.722335,
-        "false_refine_rate_on_accepted": 0.6984126984126984,
-        "false_veto_rate_on_accepted": 0.031746031746031744,
-        "logistic_auc": 0.745246,
-        "n": 338,
-        "raw_rubric_auc": 0.722335,
-        "refine_precision": 0.6834532374100719,
-        "route_counts": {
-          "accept": 6,
-          "chat_review": 54,
-          "refine": 278
+        "copy_groups": 218,
+        "jev": {
+          "accept_precision": {
+            "denominator": 140,
+            "level": 0.95,
+            "lower": 0.512,
+            "n_resamples": 10000,
+            "numerator": 82,
+            "point": 0.5857142857142857,
+            "seed": 20261020,
+            "upper": 0.6592592592592592
+          },
+          "accept_rate": {
+            "denominator": 259,
+            "level": 0.95,
+            "lower": 0.4785992217898833,
+            "n_resamples": 10000,
+            "numerator": 140,
+            "point": 0.5405405405405406,
+            "seed": 20261020,
+            "upper": 0.601504479589779
+          },
+          "accept_recall": {
+            "denominator": 103,
+            "level": 0.95,
+            "lower": 0.7156862745098039,
+            "n_resamples": 10000,
+            "numerator": 82,
+            "point": 0.7961165048543689,
+            "seed": 20261020,
+            "upper": 0.8715655139967066
+          },
+          "false_refine_rate": {
+            "denominator": 103,
+            "level": 0.95,
+            "lower": 0.1284344860032934,
+            "n_resamples": 10000,
+            "numerator": 21,
+            "point": 0.20388349514563106,
+            "seed": 20261020,
+            "upper": 0.28431372549019607
+          },
+          "refine_precision": {
+            "denominator": 119,
+            "level": 0.95,
+            "lower": 0.7586135057471265,
+            "n_resamples": 10000,
+            "numerator": 98,
+            "point": 0.8235294117647058,
+            "seed": 20261020,
+            "upper": 0.8869565217391304
+          },
+          "refine_recall": {
+            "denominator": 156,
+            "level": 0.95,
+            "lower": 0.5512755102040817,
+            "n_resamples": 10000,
+            "numerator": 98,
+            "point": 0.6282051282051282,
+            "seed": 20261020,
+            "upper": 0.7037037037037037
+          }
         },
-        "route_shares": {
-          "accept": 0.01775147928994083,
-          "chat_review": 0.15976331360946747,
-          "refine": 0.8224852071005917
+        "n": 259,
+        "paired_difference": {
+          "accept_precision": {
+            "level": 0.95,
+            "lower": 0.0006721835944158013,
+            "n_resamples": 10000,
+            "point": 0.05068243858052779,
+            "seed": 20261020,
+            "upper": 0.10153985293618067
+          },
+          "accept_rate": {
+            "level": 0.95,
+            "lower": -0.13011152416356875,
+            "n_resamples": 10000,
+            "point": -0.06563706563706562,
+            "seed": 20261020,
+            "upper": 0.0
+          },
+          "accept_recall": {
+            "level": 0.95,
+            "lower": -0.11111111111111105,
+            "n_resamples": 10000,
+            "point": -0.01941747572815533,
+            "seed": 20261020,
+            "upper": 0.07000000000000006
+          },
+          "false_refine_rate": {
+            "level": 0.95,
+            "lower": -0.07,
+            "n_resamples": 10000,
+            "point": 0.01941747572815533,
+            "seed": 20261020,
+            "upper": 0.1111111111111111
+          },
+          "refine_precision": {
+            "level": 0.95,
+            "lower": -0.05906769802301711,
+            "n_resamples": 10000,
+            "point": 0.009803921568627416,
+            "seed": 20261020,
+            "upper": 0.0797288726811479
+          },
+          "refine_recall": {
+            "level": 0.95,
+            "lower": 0.013333333333333416,
+            "n_resamples": 10000,
+            "point": 0.09615384615384615,
+            "seed": 20261020,
+            "upper": 0.17647058823529416
+          }
+        },
+        "panel": {
+          "accept_precision": {
+            "denominator": 157,
+            "level": 0.95,
+            "lower": 0.47169543310463125,
+            "n_resamples": 10000,
+            "numerator": 84,
+            "point": 0.535031847133758,
+            "seed": 20261020,
+            "upper": 0.5988032655618994
+          },
+          "accept_rate": {
+            "denominator": 259,
+            "level": 0.95,
+            "lower": 0.5440597701149426,
+            "n_resamples": 10000,
+            "numerator": 157,
+            "point": 0.6061776061776062,
+            "seed": 20261020,
+            "upper": 0.6679248883767823
+          },
+          "accept_recall": {
+            "denominator": 103,
+            "level": 0.95,
+            "lower": 0.7352941176470589,
+            "n_resamples": 10000,
+            "numerator": 84,
+            "point": 0.8155339805825242,
+            "seed": 20261020,
+            "upper": 0.8877551020408163
+          },
+          "false_refine_rate": {
+            "denominator": 103,
+            "level": 0.95,
+            "lower": 0.11224489795918367,
+            "n_resamples": 10000,
+            "numerator": 19,
+            "point": 0.18446601941747573,
+            "seed": 20261020,
+            "upper": 0.2647058823529412
+          },
+          "refine_precision": {
+            "denominator": 102,
+            "level": 0.95,
+            "lower": 0.7378640776699029,
+            "n_resamples": 10000,
+            "numerator": 83,
+            "point": 0.8137254901960784,
+            "seed": 20261020,
+            "upper": 0.8854166666666666
+          },
+          "refine_recall": {
+            "denominator": 156,
+            "level": 0.95,
+            "lower": 0.45398672102034227,
+            "n_resamples": 10000,
+            "numerator": 83,
+            "point": 0.532051282051282,
+            "seed": 20261020,
+            "upper": 0.6125
+          }
+        },
+        "pre_veto": {
+          "accept_precision": {
+            "denominator": 140,
+            "level": 0.95,
+            "lower": 0.512,
+            "n_resamples": 10000,
+            "numerator": 82,
+            "point": 0.5857142857142857,
+            "seed": 20261020,
+            "upper": 0.6592592592592592
+          },
+          "accept_rate": {
+            "denominator": 259,
+            "level": 0.95,
+            "lower": 0.4785992217898833,
+            "n_resamples": 10000,
+            "numerator": 140,
+            "point": 0.5405405405405406,
+            "seed": 20261020,
+            "upper": 0.601504479589779
+          },
+          "accept_recall": {
+            "denominator": 103,
+            "level": 0.95,
+            "lower": 0.7156862745098039,
+            "n_resamples": 10000,
+            "numerator": 82,
+            "point": 0.7961165048543689,
+            "seed": 20261020,
+            "upper": 0.8715655139967066
+          },
+          "false_refine_rate": {
+            "denominator": 103,
+            "level": 0.95,
+            "lower": 0.1284344860032934,
+            "n_resamples": 10000,
+            "numerator": 21,
+            "point": 0.20388349514563106,
+            "seed": 20261020,
+            "upper": 0.28431372549019607
+          },
+          "refine_precision": {
+            "denominator": 119,
+            "level": 0.95,
+            "lower": 0.7586135057471265,
+            "n_resamples": 10000,
+            "numerator": 98,
+            "point": 0.8235294117647058,
+            "seed": 20261020,
+            "upper": 0.8869565217391304
+          },
+          "refine_recall": {
+            "denominator": 156,
+            "level": 0.95,
+            "lower": 0.5512755102040817,
+            "n_resamples": 10000,
+            "numerator": 98,
+            "point": 0.6282051282051282,
+            "seed": 20261020,
+            "upper": 0.7037037037037037
+          }
+        },
+        "route_counts": {
+          "accept": 140,
+          "refine": 119
+        },
+        "veto": {
+          "defects": 0,
+          "incremental_refine_count": 0,
+          "precision": {
+            "level": 0.95,
+            "lower": null,
+            "n_resamples": 0,
+            "point": null,
+            "seed": 20261020,
+            "upper": null
+          },
+          "refine_count": 0
         }
       }
     },
     "route_counts": {
-      "accept": 13,
-      "chat_review": 68,
-      "refine": 282
+      "accept": 174,
+      "refine": 109
     },
     "route_shares": {
-      "accept": 0.03581267217630854,
-      "chat_review": 0.18732782369146006,
-      "refine": 0.7768595041322314
+      "accept": 0.6148409893992933,
+      "refine": 0.38515901060070673
     },
     "rubric": {
-      "band_width": 0.05,
-      "calibration_accept_n": 13,
-      "calibration_accept_precision": 0.9230769230769231,
-      "cv": [
-        {
-          "auc": 0.706054,
-          "penalty": 0.001
-        },
-        {
-          "auc": 0.700352,
-          "penalty": 0.01
-        },
-        {
-          "auc": 0.689974,
-          "penalty": 0.1
-        }
-      ],
       "dimensions": {
         "completeness": {
           "intercept": -5.624009995013102,
@@ -881,12 +1195,11 @@
           }
         }
       },
-      "min_score": 0.85,
-      "offset": 1.5750000000000002,
-      "offset_basis": "precision",
-      "penalty": 0.001
+      "offset": 1.5750000000000002
     },
     "score_intercept": -4.027030572986243,
+    "score_kind": "logistic",
+    "score_selection_n": 363,
     "score_weights": {
       "check:advisory_alias_collapsed": 1.1484935612070741,
       "check:ambiguity_in_isolation": 1.2499143109025341,
@@ -923,85 +1236,28 @@
     },
     "source_receipts": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl",
     "source_sha256": "e998be186272ad0be4b4fc66283f194dc3b30c7e3d3f338b317f449b2e729eda",
-    "unjudged_count": 0,
-    "veto_budget": 0.025,
-    "veto_budget_cv": [
-      {
-        "accepted_n": 140,
-        "budget": 0.0,
-        "defect_recall": 0.24663677130044842,
-        "false_veto_interval": [
-          0.03925838437386533,
-          0.12648978737134578
-        ],
-        "false_vetoes": 10,
-        "feasible": true
-      },
-      {
-        "accepted_n": 140,
-        "budget": 0.01,
-        "defect_recall": 0.2062780269058296,
-        "false_veto_interval": [
-          0.029236485290990835,
-          0.10870329217906068
-        ],
-        "false_vetoes": 8,
-        "feasible": true
-      },
-      {
-        "accepted_n": 140,
-        "budget": 0.025,
-        "defect_recall": 0.17040358744394618,
-        "false_veto_interval": [
-          0.015349715646256056,
-          0.080877470411056
-        ],
-        "false_vetoes": 5,
-        "feasible": true
-      },
-      {
-        "accepted_n": 140,
-        "budget": 0.05,
-        "defect_recall": 0.2914798206278027,
-        "false_veto_interval": [
-          0.029236485290990835,
-          0.10870329217906068
-        ],
-        "false_vetoes": 8,
-        "feasible": true
-      },
-      {
-        "accepted_n": 140,
-        "budget": 0.075,
-        "defect_recall": 0.32286995515695066,
-        "false_veto_interval": [
-          0.04971124458699671,
-          0.14384532143337403
-        ],
-        "false_vetoes": 12,
-        "feasible": true
-      },
-      {
-        "accepted_n": 140,
-        "budget": 0.1,
-        "defect_recall": 0.3273542600896861,
-        "false_veto_interval": [
-          0.08289789018597554,
-          0.1940838586598741
-        ],
-        "false_vetoes": 18,
-        "feasible": true
-      }
-    ]
+    "unjudged_count": 0
+  },
+  "paired_evidence_sha256": "dc417e1e9d71f7e76ad62f808680dc439c2fadaec98b62f357c2d09acd18b69e",
+  "paired_exclusions": {
+    "docs": {
+      "documentation_revision_mismatch": 1,
+      "no_panel_score": 13
+    },
+    "name": {
+      "no_jev_score": 19,
+      "no_panel_score": 99,
+      "unverified_panel_resolution": 60
+    }
   },
   "policy": {
-    "accept_selection": "accept at the consumer min_score (default 0.85) after veto; a common dimension-logit offset maximises calibration accept count with at least five accepts and precision at least 0.90; fallback maximises attainable precision and is recorded",
-    "check_cutoff": "one cutoff per check, maximising defect recall minus accepted false positive rate with that rate at most 0.10, at least 2 defects caught and separation at least 0.02",
-    "check_selection": "five-fold copy-group CV within calibration selects the budget with highest held-out defect recall whose pooled 95% Wilson upper false-veto bound is at most 0.10; ties use the smaller budget; check cutoffs and union are then refitted on calibration. If none qualifies, disable all learned vetoes and retain only the fixed contradiction rule, provided its observed CV rate is at most 0.10; its interval is reported without claiming a bound.",
-    "reject_selection": "the interval [min_score - 0.05, min_score) uses chat_review; below it refines. The policy width is one point of a 20-point rubric.",
-    "rubric": "mean of four dimension logits normalised to 0..1, reported as 0..20 dimension scores; nonnegative weights on category expectation (best=1, middle=0.5, worst=0) and own-check compliance (1-p_failure). Binary defensibility supervision fits dimension evidence, not dimension gold labels. L2 penalty is selected by five-fold copy-group CV AUC.",
-    "unjudged_selection": "A refused lease or unusable Jev judgment writes a separate unjudged shadow row with its failure reason; unjudged rows are excluded from route shares",
-    "veto_score": "a veto scales the dimensions together if needed so their normalised mean is at most min_score - 0.001; raw dimensions and failed-check probability, cutoff and evidence remain in the review record"
+    "accept_selection": "On paired calibration items, select an inclusive cutoff matching panel accepts at min_score 0.85 before veto; refuse an unresolved boundary tie. Validation never fits a cutoff.",
+    "decision_score": "For raw score s, cutoff c and consumer min_score m: m*s/c below c; m+(1-m)*(s-c)/(1-c) at or above c. At c store exactly m; protect the strict lower branch against rounding. Endpoint c=0 or c=1 uses only its defined branch.",
+    "intervals": "Shared evaluation.bootstrap_interval: 10000 seeded copy-group draws, policies held fixed. Paired differences are final Jev minus panel. Undefined ratios have null estimates; undefined draws are omitted and resampled. Intervals condition on frozen fits and cutoffs, not fitting uncertainty.",
+    "routing": "Accept at or above the cutoff; refine below. No chat band. Only the documentation contradiction veto overrides acceptance; failed checks remain recorded without other vetoes.",
+    "score_selection": "Higher AUC on all scored calibration items: landed logistic or unvetoed rubric mean. Ties prefer logistic. Score models remain frozen.",
+    "unjudged_selection": "Unjudged failures retain the existing incumbent fallback and separate unjudged shadow record.",
+    "veto_score": "A documentation contradiction refines and caps the mapped score at the representable float immediately below min_score. Preserve all original 0-to-20 rubric dimensions and failed checks."
   },
   "schema": "review-cascade-thresholds",
   "source_split": "calibration"
