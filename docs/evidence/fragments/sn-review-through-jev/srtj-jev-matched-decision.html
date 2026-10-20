@@ -1,0 +1,74 @@
+<section id="srtj-jev-matched-decision">
+<h2 id="srtj-jev-matched-decision-title">Exact panel acceptance matching conflicts with the documentation veto</h2>
+<p><strong>Blocked before implementation.</strong> The paired calibration panel accepts 208 of
+210 documentation items (99.05%). The required contradiction veto flags 15 of those 210,
+so any route preserving that veto accepts at most 195 (92.86%). The shortfall is at least
+13 items, or 6.19 percentage points. No score choice, cutoff or monotone score map can
+satisfy both requirements simultaneously.</p>
+<p>The live plan was read at version 134, including
+<a href="/imas-codex/plans/sn-review-through-jev.html#c-s6-lead-ruling-switch">the decision to replace the paid panel</a>.
+Its exact implementation brief requires matched calibration accept rates and retention of the
+documentation contradiction veto. It does not settle whether matching means the score predicate
+before veto or the final route after veto. This record requests that decision; it does not claim
+a completed routing change.</p>
+<h3 id="srtj-jev-matched-decision-feasibility">Calibration feasibility</h3>
+<table><thead><tr><th>Axis</th><th>Paired items</th><th>Panel accepts at 0.85</th>
+<th>Contradiction vetoes</th><th>Maximum accepts retaining veto</th></tr></thead><tbody>
+<tr><td>Names</td><td>283</td><td>174 (61.48%)</td><td>0</td><td>283 (100%)</td></tr>
+<tr><td>Documentation</td><td>210</td><td>208 (99.05%)</td><td>15</td><td>195 (92.86%)</td></tr>
+</tbody></table>
+<p>The name logistic cutoff <code>0.32447569396775017</code> accepts exactly 174 of 283
+calibration items. The documentation logistic cutoff is zero: a pure inclusive threshold accepts
+all 210, and the veto reduces that to 195. The earlier descriptive comparison reached 208 only
+by selecting 13 of the 15 zero-score ties. Those ties are precisely the vetoed identities;
+accepting them contradicts the retained-veto requirement. This independently reproduces
+<a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point.html">the operating-point report's caveat</a>.</p>
+<table><thead><tr><th>Axis / calibration population</th><th>Logistic AUC</th><th>Rubric AUC</th>
+<th>Higher AUC</th></tr></thead><tbody>
+<tr><td>Names / all 363 scored</td><td>0.795099</td><td>0.727739</td><td>logistic</td></tr>
+<tr><td>Names / 283 paired</td><td>0.817139</td><td>0.721011</td><td>logistic</td></tr>
+<tr><td>Documentation / all 216 scored</td><td>0.834539</td><td>0.836516</td><td>rubric</td></tr>
+<tr><td>Documentation / 210 paired</td><td>0.849008</td><td>0.843972</td><td>logistic</td></tr>
+</tbody></table>
+<p>The documentation score choice depends on whether calibration AUC uses every scored item
+or the matched panel population. The brief's existing calibration report uses all scored items,
+which favours the rubric. The impossibility bound holds for either choice, because 15 fixed
+refusals already exceed the panel's two refusals. No score choice was deployed.</p>
+<h3 id="srtj-jev-matched-decision-controls">Receipt verification and controls</h3>
+<p>The probe recomputed both axes from frozen raw receipts, verified all four receipt and golden
+fixture SHA-256 digests against the committed comparison, and matched every paired item's
+identity, label, split, copy group and logistic score (absolute tolerance 1e-10). It counted the
+vetoes independently through both the reconstructed row flag and the aggregated judgment's
+<code>contradiction_veto</code> field. A known veto must refine and carry
+<code>claim_contradicts_source</code>; a check-clear control must lack that veto.</p>
+<p>The positive control is <code>fast_ion_atomic_number</code>, described as the nuclear proton
+count of the fast-ion species. Its source binding is <code>charge_exchange/channel/ion_fast/z_ion</code>,
+whose DD description is “Fast ion charge”: ionic charge state and nuclear atomic number are
+different physical quantities. The frozen panel score is 0.856250, Jev logistic
+0.000000, and rubric 0.258217; the existing route refines it through the
+contradiction veto. The non-veto control, <code>width_of_spectrometer_channel</code>, describes a
+spectral passband width and has no DD source binding in the golden fixture. Check-clear here
+means free of contradiction veto, not acceptable on every criterion.</p>
+<p>Exact reproduction: <code>REFUSAL exact docs match requires 208/210 accepts but the retained
+veto permits at most 195/210; shortfall=13</code>. The completed feasibility log ends
+<code>EXIT=0</code>, meaning the asserted incompatibility and controls were reproduced; it is
+not a passing implementation gate. There are no confidence intervals because this is an exact
+finite-cohort feasibility bound, not an estimated population metric.</p>
+<h3 id="srtj-jev-matched-decision-next">Decision required and remaining work</h3>
+<p>Recommended resolution: match the score threshold before the contradiction veto, then report
+both the pre-veto match and the final route's lower accept rate. An alternative is to match on
+only the contradiction-clear calibration population. Both change the literal final-route target
+and require coordinator adjudication. Dropping the veto could permit the original target but
+violates the explicit instruction and is not recommended.</p>
+<p>After that decision, resume the score selection, shared-owner intervals, monotone mapping,
+accept/refine routing, validation comparison, consumer tests and declared mutation checks.
+No product source, thresholds, tests or settings changed. No validation table or baseline/head
+suite delta is claimed. Cascade deciding remains disabled by its absent-setting default.
+LLM spend: USD 0 against the authorised ceiling of USD 0.</p>
+<p>Durable probe, detailed veto identities and gate log are in
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T121102641109-srtj-jev-matched-decision</code> as <code>feasibility.py</code>,
+<code>feasibility.json</code> and <code>feasibility-verified.log</code>.
+The initial <code>feasibility.log</code> records a probe-only failure resolving golden fixtures
+under a retired predecessor worktree; local fixture paths with matching hashes repaired that
+probe before calibration code ran. Base revision: <code>e8bad938afffb0f651061389b2d6517dceff97ca</code>.</p>
+</section>
