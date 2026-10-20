@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="150">
+<meta name="plan-version" content="151">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -576,6 +576,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261020T152056551159-ssog-anchor-rerun-anomalous-current-heuristic" data-who="reckon-build" data-when="2026-10-20T15:27:54.597Z">
     <div class="r-comment-body"><p>anomalous-transport heuristic re-run arm ended by its own node-wide kill; no measurement; redispatched fresh</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261020T151711624210-review-of-ssog-anchor-rerun-aperture-heuristic-4faa767bed7b" data-who="reckon-build" data-when="2026-10-20T19:55:10Z">
+    <div class="r-comment-body"><p>Independent review of r-20261020T142109334235-ssog-anchor-rerun-aperture-heuristic at reviewed_base_sha 284f17bcba6f17457c54d40527d5f1776f6fa0e9 and reviewed_head_sha 4faa767bed7bc0212f91ef1b1f73b6e294b1902a: parsed record scoring all six dimensions (goal_fidelity 18, evidence 14, scope_discipline 20, durability 12, fit 17, reuse 20; total 101), added_failure_count 0 with added_failure_ids [], one blocking finding and one follow-on finding; CALL_SITES docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:41; the reviewed node re-ran the heuristic arm on the fixed tree and its record is complete, but it reports the 0.849 documentation hold as absent while its own apply log records that hold and its hold note. Promotion lands this as a comment on imas-codex:sn-selection-over-generation §7; no plan is edited here.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
