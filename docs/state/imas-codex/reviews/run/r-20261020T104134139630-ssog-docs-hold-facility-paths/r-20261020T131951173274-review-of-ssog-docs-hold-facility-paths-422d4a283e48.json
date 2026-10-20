@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-10-20T13:29:59.622Z",
   "dispatched_at": "2026-10-20T13:20:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "manifest wording on a landed fix whose gate logs carry the literal commands and whose declared mutation log is present",
+      "recorded_at": "2026-10-20T13:34:11.826155+00:00"
+    }
+  },
   "findings": [
     {
       "description": "negative_control_log names logs/repair_round2_negative_control.log, whose run applies the provenance mutation (pre-repair source 100a86a4d with post-repair tests; failing ids test_normalised_dd_source_path_still_holds, test_normalised_facility_source_path_is_not_held, test_veto_request_holds_a_dd_source_path_with_missing_text; 3 failed, EXIT=1). The node's declared mutation is 'let facility source paths count as required DD paths again; the facility-only test must then fail', whose log is logs/negative_control.log at revision 8fc4843c9 (2 failed including test_facility_only_source_path_is_not_held, EXIT=1). The named log does not demonstrate the declared mutation, so a reader comparing the two sees the declared control undischarged even though a log that does discharge it exists.",
