@@ -45,6 +45,11 @@
       "kind": "folded",
       "node": "ssog-anchor-ab-rerun",
       "recorded_at": "2026-10-20T08:44:32.957876+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "a shared figure-text checker for every fragment recorder is repository tooling outside this plan; recorded for the house-style owner",
+      "recorded_at": "2026-10-20T08:44:39.330635+00:00"
     }
   },
   "findings": [
