@@ -15,6 +15,13 @@
     }
   },
   "dispatched_at": "2026-10-20T07:19:55Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-20T07:38:05.170385+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-jev-r2.html",
