@@ -247,9 +247,7 @@ def _score_rows(members: list[str], before: dict, after: dict) -> str:
     rows = []
     for member in members:
         rows.append(
-            "<tr><td><code>{}</code></td><td>{}</td><td>{}</td></tr>".format(
-                member, _fmt(before.get(member)), _fmt(after.get(member))
-            )
+            f"<tr><td><code>{member}</code></td><td>{_fmt(before.get(member))}</td><td>{_fmt(after.get(member))}</td></tr>"
         )
     return "".join(rows)
 
@@ -281,19 +279,15 @@ def render() -> None:
             fell.append((member, b, a))
 
     roster_rows = "".join(
-        "<tr><td><code>{}</code></td><td>{}</td></tr>".format(name, count)
+        f"<tr><td><code>{name}</code></td><td>{count}</td></tr>"
         for name, count in sorted(check["member_matches"].items())
     )
     below_rows = "".join(
-        "<tr><td><code>{}</code></td><td>{}</td><td>{}</td></tr>".format(
-            m, _fmt(b), _fmt(a)
-        )
+        f"<tr><td><code>{m}</code></td><td>{_fmt(b)}</td><td>{_fmt(a)}</td></tr>"
         for m, b, a in below
     )
     fell_rows = "".join(
-        "<tr><td><code>{}</code></td><td>{}</td><td>{}</td></tr>".format(
-            m, _fmt(b), _fmt(a)
-        )
+        f"<tr><td><code>{m}</code></td><td>{_fmt(b)}</td><td>{_fmt(a)}</td></tr>"
         for m, b, a in fell
     )
     score_rows = _score_rows(members, scores_before, scores_after)
