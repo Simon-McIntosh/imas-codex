@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T10:58:19.418Z",
+  "dispatched_at": "2026-10-20T10:50:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-name-evidence-measure-run.py",
+      "line": "520",
+      "severity": "follow-on",
+      "text": "follow-on: the evidence_changed group selects any field whose state differs, and because sibling_fields and derived_children move from unobserved to observed for all 701 items every state qualifies, so the rendered table is identical to the all table and the brief's requested subset whose evidence changed delivers no subset; label it or report the nonempty-addition cohort as the changed subset."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read commit by commit from fe3c8b79 to 5a19933c6; b46d65245 adds the 850-line read-only driver, 5e242d2bf isolates the evidence changes and reverses the DD sibling traversal direction after the production reader returned an empty column, and 5a19933c6 commits the rendered fragment and JSON with no product or test code.",
+    "done_when": "The done_when names the fragment and JSON holding before/after tables, evidence-presence counts and spend, written by a driver whose log ends EXIT=0 and which asserts its tables against independently computed counts, at most USD 2.00, no graph write and no product change; measurement.log ends EXIT=0 with SUMMARY paired 701, the JSON records graph_writes 0 and spend_usd 0.125102628, and the independent recomputation gates at srtj-jev-name-evidence-measure-run.py:555-594 ran inside that same gate.",
+    "goal": "The source goal is to measure Jev's name-review AUC on golden A with the missing DD source, parent, sibling and child evidence supplied from the live graph; srtj-jev-name-evidence-measure-run.py:236-345 builds each state from read-only graph reads and srtj-jev-name-evidence-measure.html reports the before/after AUC those states produce.",
+    "manifest": "Read; it names commits b46d65245, 5e242d2bf and 5a19933c6, the gate command with its log path, spend 0.125102628 of 2.00 and no blockers, and the gate log's driver_sha256 1e9ca875507b matches the driver committed at head.",
+    "write_paths": "The source brief grants three files; git diff fe3c8b79e767850d02730b9a58eae6eb7eca6057..5a19933c6cfb01076d4ce5d3ba1ea5d2432fd747 changes exactly those three paths (the driver, the HTML fragment and the JSON) and nothing else, 979 added lines and no deletions."
+  },
+  "justifications": {
+    "durability": "no test file guards the artifact; the only regression guard is srtj-jev-name-evidence-measure-run.py:550-594 and :808 inside the driver itself, which reddens only when the driver is re-run.",
+    "evidence": "measurement.log ends EXIT=0 with SUMMARY paired 701 spent_usd 0.125102628, and srtj-jev-name-evidence-measure-run.py:550-594 asserts the tables and presence counts against independently recomputed counts from golden identities and persisted receipts.",
+    "fit": "the driver adopts the repository evaluation idiom at srtj-jev-name-evidence-measure-run.py:431-440 and the fragment element id begins with the node id as the landing contract requires at srtj-jev-name-evidence-measure.html:1.",
+    "goal_fidelity": "srtj-jev-name-evidence-measure-run.py:240-305 supplies dd_source_docs, parent_path, sibling_names and derived_children from the read-only live graph and srtj-jev-name-evidence-measure.html reports the before/after AUC those states produce for calibration and validation.",
+    "reuse": "the driver calls evaluation.roc_auc and evaluation.bootstrap_interval at imas_codex/discovery/base/evaluation.py:98,144 rather than reimplementing AUC, and a search over imas_codex for a read-only graph wrapper or a name-state unflatten helper found no owner.",
+    "scope_discipline": "git diff fe3c8b79..5a19933c6 changes only the three declared fragment paths and adds no product or test code."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal is to measure Jev's name-review AUC on golden A with the missing DD source, parent, sibling and child evidence supplied from the live graph; srtj-jev-name-evidence-measure-run.py:236-345 builds each state from read-only graph reads and srtj-jev-name-evidence-measure.html reports the before/after AUC those states produce.\nVERDICT done_when: The done_when names the fragment and JSON holding before/after tables, evidence-presence counts and spend, written by a driver whose log ends EXIT=0 and which asserts its tables against independently computed counts, at most USD 2.00, no graph write and no product change; measurement.log ends EXIT=0 with SUMMARY paired 701, the JSON records graph_writes 0 and spend_usd 0.125102628, and the independent recomputation gates at srtj-jev-name-evidence-measure-run.py:555-594 ran inside that same gate.\nVERDICT write_paths: The source brief grants three files; git diff fe3c8b79e767850d02730b9a58eae6eb7eca6057..5a19933c6cfb01076d4ce5d3ba1ea5d2432fd747 changes exactly those three paths (the driver, the HTML fragment and the JSON) and nothing else, 979 added lines and no deletions.\nVERDICT manifest: Read; it names commits b46d65245, 5e242d2bf and 5a19933c6, the gate command with its log path, spend 0.125102628 of 2.00 and no blockers, and the gate log's driver_sha256 1e9ca875507b matches the driver committed at head.\nVERDICT diff: Read commit by commit from fe3c8b79 to 5a19933c6; b46d65245 adds the 850-line read-only driver, 5e242d2bf isolates the evidence changes and reverses the DD sibling traversal direction after the production reader returned an empty column, and 5a19933c6 commits the rendered fragment and JSON with no product or test code.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: srtj-jev-name-evidence-measure-run.py:240-305 supplies dd_source_docs, parent_path, sibling_names and derived_children from the read-only live graph and srtj-jev-name-evidence-measure.html reports the before/after AUC those states produce for calibration and validation.\nSCORE evidence: 18\nJUSTIFICATION evidence: measurement.log ends EXIT=0 with SUMMARY paired 701 spent_usd 0.125102628, and srtj-jev-name-evidence-measure-run.py:550-594 asserts the tables and presence counts against independently recomputed counts from golden identities and persisted receipts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff fe3c8b79..5a19933c6 changes only the three declared fragment paths and adds no product or test code.\nSCORE durability: 14\nJUSTIFICATION durability: no test file guards the artifact; the only regression guard is srtj-jev-name-evidence-measure-run.py:550-594 and :808 inside the driver itself, which reddens only when the driver is re-run.\nSCORE fit: 17\nJUSTIFICATION fit: the driver adopts the repository evaluation idiom at srtj-jev-name-evidence-measure-run.py:431-440 and the fragment element id begins with the node id as the landing contract requires at srtj-jev-name-evidence-measure.html:1.\nSCORE reuse: 19\nJUSTIFICATION reuse: the driver calls evaluation.roc_auc and evaluation.bootstrap_interval at imas_codex/discovery/base/evaluation.py:98,144 rather than reimplementing AUC, and a search over imas_codex for a read-only graph wrapper or a name-state unflatten helper found no owner.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-name-evidence-measure-run.py:520 follow-on: the evidence_changed group selects any field whose state differs, and because sibling_fields and derived_children move from unobserved to observed for all 701 items every state qualifies, so the rendered table is identical to the all table and the brief's requested subset whose evidence changed delivers no subset; label it or report the nonempty-addition cohort as the changed subset.",
+  "review_run_id": "r-20261020T104914215957-review-of-srtj-jev-name-evidence-measure-5a19933c6cfb",
+  "reviewed_base_sha": "fe3c8b79e767850d02730b9a58eae6eb7eca6057",
+  "reviewed_head_sha": "5a19933c6cfb01076d4ce5d3ba1ea5d2432fd747",
+  "reviewed_run_id": "r-20261020T100751925654-srtj-jev-name-evidence-measure",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T10:58:00+00:00",
+  "total": 107
+}
