@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-10-20T07:38:21.009Z",
   "dispatched_at": "2026-10-20T07:18:53Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-cascade-rubric-score",
+      "recorded_at": "2026-10-20T07:46:00.444045+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/review/cascade_calibration.py:773",
