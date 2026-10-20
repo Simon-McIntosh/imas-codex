@@ -1,0 +1,1120 @@
+<section id="srtj-jev-discrimination-diagnosis">
+<h2>Where frozen review signal is lost</h2>
+<p>Offline diagnosis; no LLM calls and USD 0 spent. The cascade remains in shadow. AUC is oriented toward acceptable items; 0.5 is chance. Each check uses 1 − failure probability. Calibration results are in-sample diagnostics; validation has been inspected repeatedly and is no longer an untouched deployment holdout.</p>
+<p>All dimensions use the landed 0–20 rubric mapping before the route ceiling. Documentation physics accuracy has checks but no category question. Dimensions were fitted to whole-item binary labels, not dimension-specific gold ratings. Observed-empty evidence is distinct from missing or unobserved evidence; a null optional grammar segment need not be a defect. Deterministic audits do not ask Jev and may read richer inputs than the prompt state.</p>
+<h3>name: labels and score reproduction</h3>
+<p>737 golden rows, 720 canonical identities. Duplicate identities retain the first label provenance for the class table, matching the calibration loader; split and binary-label consistency are asserted. Paired-edit analysis retains all provenance memberships.</p>
+<table><thead><tr><th>Split</th><th>Golden unique</th><th>Scored</th><th>Acceptable</th><th>Defective</th><th>Logistic AUC</th><th>Raw rubric AUC</th><th>Routed rubric AUC</th></tr></thead><tbody>
+<tr><td>calibration</td><td>371</td><td>363</td><td>140</td><td>223</td><td>0.795</td><td>0.728</td><td>0.728</td></tr>
+<tr><td>validation</td><td>349</td><td>338</td><td>126</td><td>212</td><td>0.745</td><td>0.722</td><td>0.722</td></tr>
+</tbody></table>
+<table><thead><tr><th>Split</th><th>Label class</th><th>Label</th><th>Golden count</th></tr></thead><tbody>
+<tr><td>calibration</td><td>grammar_quarantine</td><td>0</td><td>97</td></tr>
+<tr><td>calibration</td><td>human_edit_source</td><td>0</td><td>108</td></tr>
+<tr><td>calibration</td><td>west_audit</td><td>0</td><td>21</td></tr>
+<tr><td>calibration</td><td>benchmark_reference</td><td>1</td><td>17</td></tr>
+<tr><td>calibration</td><td>human_edit_target</td><td>1</td><td>107</td></tr>
+<tr><td>calibration</td><td>isn_expert_reply</td><td>1</td><td>7</td></tr>
+<tr><td>calibration</td><td>isn_expert_review</td><td>1</td><td>14</td></tr>
+<tr><td>validation</td><td>grammar_quarantine</td><td>0</td><td>101</td></tr>
+<tr><td>validation</td><td>human_edit_source</td><td>0</td><td>86</td></tr>
+<tr><td>validation</td><td>west_audit</td><td>0</td><td>28</td></tr>
+<tr><td>validation</td><td>benchmark_reference</td><td>1</td><td>20</td></tr>
+<tr><td>validation</td><td>human_edit_target</td><td>1</td><td>85</td></tr>
+<tr><td>validation</td><td>isn_expert_reply</td><td>1</td><td>4</td></tr>
+<tr><td>validation</td><td>isn_expert_review</td><td>1</td><td>25</td></tr>
+</tbody></table>
+<p>No golden row labels a specific taxonomy check. Exact defect counts for all checks are therefore unknown, not zero. The JSON reports every check against each broad label class as a proxy; these are not check-specific sensitivity estimates. Classes with fewer than five defects are: [].</p>
+<table><thead><tr><th>Dimension</th><th>Calibration AUC</th><th>Validation AUC</th><th>Validation category AUC</th></tr></thead><tbody>
+<tr><td>completeness</td><td>0.651</td><td>0.700</td><td>0.693</td></tr>
+<tr><td>convention</td><td>0.690</td><td>0.644</td><td>0.565</td></tr>
+<tr><td>grammar</td><td>0.630</td><td>0.624</td><td>0.547</td></tr>
+<tr><td>semantic</td><td>0.691</td><td>0.692</td><td>0.594</td></tr>
+</tbody></table>
+<h4>Every check</h4><p>C/V denotes calibration/validation. TP and FP use a common failure cutoff of 0.5; they count whole-item defects and acceptable items. The JSON also evaluates the saved calibration cutoff and selected veto cutoff. The claim check here measures non-support, including “says nothing”; its separate hard veto measures contradiction only.</p>
+<table><thead><tr><th>Check / dimension</th><th>Answered C/V</th><th>AUC C/V</th><th>Separation C/V</th><th>TP C/V</th><th>FP C/V</th></tr></thead><tbody>
+<tr><td>malformed_physical_base / grammar</td><td>363/338</td><td>0.624/0.649</td><td>0.112/0.124</td><td>43/39</td><td>10/6</td></tr>
+<tr><td>unregistered_token_in_closed_segment / grammar</td><td>363/338</td><td>0.615/0.599</td><td>0.019/0.014</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>decomposition_group_absorbed_into_base / grammar</td><td>363/338</td><td>0.477/0.470</td><td>-0.005/-0.009</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>field_region_preposition_wrong / grammar</td><td>363/338</td><td>0.488/0.492</td><td>-0.015/-0.004</td><td>22/28</td><td>29/24</td></tr>
+<tr><td>ordered_sample_positional_token / grammar</td><td>363/338</td><td>0.493/0.535</td><td>-0.001/0.018</td><td>22/16</td><td>10/4</td></tr>
+<tr><td>retired_operator_spelling / grammar</td><td>363/338</td><td>0.500/0.505</td><td>-0.001/0.001</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>grammar_round_trip_failure / grammar</td><td>0/0</td><td>unknown/unknown</td><td>unknown/unknown</td><td>unknown/unknown</td><td>unknown/unknown</td></tr>
+<tr><td>dropped_distinguishing_axis / semantic</td><td>363/338</td><td>0.492/0.426</td><td>-0.008/-0.037</td><td>51/38</td><td>36/31</td></tr>
+<tr><td>ambiguity_in_isolation / semantic</td><td>363/338</td><td>0.619/0.598</td><td>0.062/0.045</td><td>84/71</td><td>33/30</td></tr>
+<tr><td>device_attributed_observable / semantic</td><td>363/338</td><td>0.616/0.654</td><td>0.021/0.047</td><td>10/14</td><td>5/5</td></tr>
+<tr><td>over_qualified_modifier / semantic</td><td>363/338</td><td>0.458/0.524</td><td>-0.004/0.019</td><td>17/13</td><td>7/0</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier / semantic</td><td>363/338</td><td>0.568/0.565</td><td>0.040/0.035</td><td>29/32</td><td>9/5</td></tr>
+<tr><td>bound_to_wrong_object / semantic</td><td>363/338</td><td>0.682/0.700</td><td>0.178/0.182</td><td>175/177</td><td>77/76</td></tr>
+<tr><td>collapsed_two_quantities / semantic</td><td>363/338</td><td>0.483/0.474</td><td>-0.053/-0.044</td><td>4/13</td><td>10/13</td></tr>
+<tr><td>over_specialised_parent / semantic</td><td>363/338</td><td>0.536/0.508</td><td>0.005/0.001</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>owner_erased_outline / semantic</td><td>363/338</td><td>0.511/0.504</td><td>-0.003/-0.001</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>coupled_vs_launched_confusion / semantic</td><td>363/338</td><td>0.586/0.550</td><td>0.025/0.010</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>value_provenance_in_name / semantic</td><td>363/338</td><td>0.539/0.585</td><td>0.004/0.005</td><td>0/1</td><td>0/0</td></tr>
+<tr><td>non_canonical_operator_join / convention</td><td>363/338</td><td>0.639/0.600</td><td>0.021/0.018</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>non_canonical_segment_order / convention</td><td>363/338</td><td>0.491/0.528</td><td>-0.002/0.005</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>non_canonical_render / convention</td><td>363/338</td><td>0.466/0.514</td><td>-0.014/-0.002</td><td>0/0</td><td>5/3</td></tr>
+<tr><td>non_canonical_locus_token / convention</td><td>363/338</td><td>0.572/0.594</td><td>0.022/0.031</td><td>3/4</td><td>1/1</td></tr>
+<tr><td>advisory_alias_collapsed / convention</td><td>363/338</td><td>0.449/0.464</td><td>-0.023/-0.010</td><td>5/4</td><td>5/2</td></tr>
+<tr><td>bare_shape_parameter_missing_surface / convention</td><td>363/338</td><td>0.644/0.549</td><td>0.027/0.014</td><td>10/14</td><td>1/2</td></tr>
+<tr><td>model_surname_suffix / convention</td><td>363/338</td><td>0.541/0.514</td><td>-0.001/0.002</td><td>0/1</td><td>0/0</td></tr>
+<tr><td>minority_spelling_not_in_roster / convention</td><td>363/338</td><td>0.465/0.508</td><td>-0.022/0.002</td><td>0/4</td><td>6/1</td></tr>
+<tr><td>redundant_repeated_segment / convention</td><td>0/0</td><td>unknown/unknown</td><td>unknown/unknown</td><td>unknown/unknown</td><td>unknown/unknown</td></tr>
+<tr><td>missing_required_segment / completeness</td><td>363/338</td><td>0.618/0.670</td><td>0.081/0.109</td><td>122/138</td><td>60/56</td></tr>
+<tr><td>unit_kind_inconsistent / completeness</td><td>363/338</td><td>0.570/0.585</td><td>0.030/0.049</td><td>6/10</td><td>6/0</td></tr>
+<tr><td>source_binding_drift / completeness</td><td>363/338</td><td>0.518/0.510</td><td>-0.004/-0.002</td><td>3/2</td><td>2/1</td></tr>
+<tr><td>duplicate_catalog_identity / convention</td><td>0/0</td><td>unknown/unknown</td><td>unknown/unknown</td><td>unknown/unknown</td><td>unknown/unknown</td></tr>
+<tr><td>lexical_convention_violation / convention</td><td>0/0</td><td>unknown/unknown</td><td>unknown/unknown</td><td>unknown/unknown</td><td>unknown/unknown</td></tr>
+</tbody></table>
+<p>Checks catching fewer than five calibration defects at 0.5: unregistered_token_in_closed_segment, decomposition_group_absorbed_into_base, retired_operator_spelling, collapsed_two_quantities, over_specialised_parent, owner_erased_outline, coupled_vs_launched_confusion, value_provenance_in_name, non_canonical_operator_join, non_canonical_segment_order, non_canonical_render, non_canonical_locus_token, model_surname_suffix, minority_spelling_not_in_roster, source_binding_drift. This is observed detection support, not a count of the true defects belonging to a check.</p>
+<p>Human source/target edit pairs: {&quot;calibration&quot;: {&quot;pairs&quot;: 104, &quot;preferred_ranked_higher&quot;: 73, &quot;ties&quot;: 0, &quot;preference_accuracy&quot;: 0.7019231}, &quot;validation&quot;: {&quot;pairs&quot;: 83, &quot;preferred_ranked_higher&quot;: 62, &quot;ties&quot;: 0, &quot;preference_accuracy&quot;: 0.746988}}. Each pair shares a copy group; the preferred target should rank above the rejected source.</p>
+<h4>Evidence present in the actual frozen states</h4>
+<table><thead><tr><th>Check</th><th>Field</th><th>Calibration nonempty / empty / unknown</th><th>Validation nonempty / empty / unknown</th></tr></thead><tbody>
+<tr><td>malformed_physical_base</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>process</td><td>60 / 0 / 303</td><td>57 / 0 / 281</td></tr>
+<tr><td>decomposition_group_absorbed_into_base</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>decomposition_group_absorbed_into_base</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>decomposition_group_absorbed_into_base</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>decomposition_group_absorbed_into_base</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>field_region_preposition_wrong</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>field_region_preposition_wrong</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>ordered_sample_positional_token</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>ordered_sample_positional_token</td><td>description</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>ordered_sample_positional_token</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>retired_operator_spelling</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>retired_operator_spelling</td><td>process</td><td>60 / 0 / 303</td><td>57 / 0 / 281</td></tr>
+<tr><td>grammar_round_trip_failure</td><td>id</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>grammar_round_trip_failure</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>grammar_round_trip_failure</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>grammar_round_trip_failure</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>grammar_round_trip_failure</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>grammar_round_trip_failure</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>grammar_round_trip_failure</td><td>process</td><td>60 / 0 / 303</td><td>57 / 0 / 281</td></tr>
+<tr><td>dropped_distinguishing_axis</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>dropped_distinguishing_axis</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>dropped_distinguishing_axis</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>dropped_distinguishing_axis</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>dropped_distinguishing_axis</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>dropped_distinguishing_axis</td><td>process</td><td>60 / 0 / 303</td><td>57 / 0 / 281</td></tr>
+<tr><td>dropped_distinguishing_axis</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>dropped_distinguishing_axis</td><td>dd_source_docs</td><td>155 / 208 / 0</td><td>140 / 198 / 0</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>description</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>sibling_fields</td><td>0 / 0 / 363</td><td>0 / 0 / 338</td></tr>
+<tr><td>device_attributed_observable</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>device_attributed_observable</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>device_attributed_observable</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>device_attributed_observable</td><td>dd_source_docs</td><td>155 / 208 / 0</td><td>140 / 198 / 0</td></tr>
+<tr><td>over_qualified_modifier</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>over_qualified_modifier</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>over_qualified_modifier</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>over_qualified_modifier</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>over_qualified_modifier</td><td>dd_source_docs</td><td>155 / 208 / 0</td><td>140 / 198 / 0</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>process</td><td>60 / 0 / 303</td><td>57 / 0 / 281</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>dd_source_docs</td><td>155 / 208 / 0</td><td>140 / 198 / 0</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>bound_to_wrong_object</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>bound_to_wrong_object</td><td>dd_source_docs</td><td>155 / 208 / 0</td><td>140 / 198 / 0</td></tr>
+<tr><td>bound_to_wrong_object</td><td>description</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>bound_to_wrong_object</td><td>parent_path</td><td>152 / 0 / 211</td><td>138 / 0 / 200</td></tr>
+<tr><td>bound_to_wrong_object</td><td>sibling_fields</td><td>0 / 0 / 363</td><td>0 / 0 / 338</td></tr>
+<tr><td>collapsed_two_quantities</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>collapsed_two_quantities</td><td>dd_source_docs</td><td>155 / 208 / 0</td><td>140 / 198 / 0</td></tr>
+<tr><td>collapsed_two_quantities</td><td>unit</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>collapsed_two_quantities</td><td>description</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>over_specialised_parent</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>over_specialised_parent</td><td>derived_children</td><td>0 / 0 / 363</td><td>0 / 0 / 338</td></tr>
+<tr><td>over_specialised_parent</td><td>derived_parent_note</td><td>0 / 0 / 363</td><td>0 / 0 / 338</td></tr>
+<tr><td>owner_erased_outline</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>owner_erased_outline</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>owner_erased_outline</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>dd_source_docs</td><td>155 / 208 / 0</td><td>140 / 198 / 0</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>description</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>value_provenance_in_name</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>value_provenance_in_name</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>non_canonical_operator_join</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>non_canonical_operator_join</td><td>process</td><td>60 / 0 / 303</td><td>57 / 0 / 281</td></tr>
+<tr><td>non_canonical_operator_join</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>non_canonical_segment_order</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>non_canonical_segment_order</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>non_canonical_segment_order</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>non_canonical_segment_order</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>non_canonical_segment_order</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>non_canonical_render</td><td>id</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>non_canonical_render</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>non_canonical_render</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>non_canonical_render</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>non_canonical_render</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>non_canonical_render</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>non_canonical_render</td><td>process</td><td>60 / 0 / 303</td><td>57 / 0 / 281</td></tr>
+<tr><td>non_canonical_locus_token</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>non_canonical_locus_token</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>non_canonical_locus_token</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>advisory_alias_collapsed</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>advisory_alias_collapsed</td><td>coordinate</td><td>17 / 0 / 346</td><td>15 / 0 / 323</td></tr>
+<tr><td>advisory_alias_collapsed</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>advisory_alias_collapsed</td><td>cocos_label</td><td>4 / 0 / 359</td><td>6 / 0 / 332</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>model_surname_suffix</td><td>id</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>model_surname_suffix</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>minority_spelling_not_in_roster</td><td>id</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>minority_spelling_not_in_roster</td><td>existing_names</td><td>300 / 63 / 0</td><td>284 / 54 / 0</td></tr>
+<tr><td>redundant_repeated_segment</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>redundant_repeated_segment</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>redundant_repeated_segment</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>missing_required_segment</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>missing_required_segment</td><td>subject</td><td>135 / 0 / 228</td><td>90 / 0 / 248</td></tr>
+<tr><td>missing_required_segment</td><td>component</td><td>67 / 0 / 296</td><td>59 / 0 / 279</td></tr>
+<tr><td>missing_required_segment</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>unit_kind_inconsistent</td><td>unit</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>unit_kind_inconsistent</td><td>kind</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>unit_kind_inconsistent</td><td>physical_base</td><td>311 / 0 / 52</td><td>293 / 0 / 45</td></tr>
+<tr><td>source_binding_drift</td><td>source_paths</td><td>155 / 175 / 33</td><td>147 / 151 / 40</td></tr>
+<tr><td>source_binding_drift</td><td>version_notes</td><td>0 / 0 / 363</td><td>0 / 0 / 338</td></tr>
+<tr><td>source_binding_drift</td><td>documentation</td><td>269 / 0 / 94</td><td>242 / 0 / 96</td></tr>
+<tr><td>duplicate_catalog_identity</td><td>id</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>duplicate_catalog_identity</td><td>existing_names</td><td>300 / 63 / 0</td><td>284 / 54 / 0</td></tr>
+<tr><td>duplicate_catalog_identity</td><td>nearby_existing_names</td><td>300 / 63 / 0</td><td>284 / 54 / 0</td></tr>
+<tr><td>lexical_convention_violation</td><td>id</td><td>363 / 0 / 0</td><td>338 / 0 / 0</td></tr>
+<tr><td>lexical_convention_violation</td><td>position</td><td>114 / 0 / 249</td><td>78 / 0 / 260</td></tr>
+<tr><td>lexical_convention_violation</td><td>physics_domain</td><td>351 / 0 / 12</td><td>316 / 0 / 22</td></tr>
+</tbody></table>
+<h4>Twenty worst-ranked golden items</h4><p>Rank error is the fraction of opposite-label items in the same split ordered incorrectly by the raw rubric, with ties counting one half. It lies in [0,1]; the largest errors across both splits are shown. Check contributions are exact weighted compliance shortfalls from a perfect answer in the fitted dimension logit, not causal attributions. All check answers and probabilities are retained in the JSON.</p>
+<details><summary>volume_integrated_runaway_electron_density — validation, label 0, rank error 0.952, rubric 0.849</summary>
+<p>Total number of runaway electrons in the confined plasma, obtained by integrating the local density of the accelerating suprathermal tail.</p><p>Source bindings: [&#x27;dd:summary/runaways/particles/value&#x27;]</p><p>Golden evidence: StandardName:validation_status=quarantined; grammar_quarantine</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.621</td></tr>
+<tr><td>convention</td><td>16.546</td></tr>
+<tr><td>grammar</td><td>16.460</td></tr>
+<tr><td>semantic</td><td>18.299</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.13}</td><td>9.039</td><td>1.175</td><td>7.864</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.18}</td><td>6.993</td><td>1.259</td><td>5.734</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.39}</td><td>8.444</td><td>3.293</td><td>5.151</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.97}</td><td>5.115</td><td>0.153</td><td>4.962</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.05}</td><td>2.521</td><td>0.126</td><td>2.395</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.86, &quot;a different object&quot;: 0.13, &quot;one of several bound objects&quot;: 0.01}}</td><td>1.570</td><td>0.220</td><td>1.350</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.15}</td><td>1.548</td><td>0.232</td><td>1.316</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.2}</td><td>1.484</td><td>0.297</td><td>1.187</td></tr>
+</tbody></table>
+</details>
+<details><summary>temperature_of_soft_xray_detector — validation, label 0, rank error 0.944, rubric 0.847</summary>
+<p>Thermodynamic temperature of the soft X-ray detector assembly, describing its physical thermal state for calibration and monitoring rather than a plasma temperature inferred from radiation.</p><p>Source bindings: [&#x27;dd:camera_x_rays/detector_temperature&#x27;]</p><p>Golden evidence: west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=28; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.831</td></tr>
+<tr><td>convention</td><td>16.951</td></tr>
+<tr><td>grammar</td><td>17.001</td></tr>
+<tr><td>semantic</td><td>16.977</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.1}</td><td>9.039</td><td>0.904</td><td>8.135</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.15}</td><td>6.993</td><td>1.049</td><td>5.944</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.985}</td><td>5.115</td><td>0.077</td><td>5.039</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.41}</td><td>8.444</td><td>3.462</td><td>4.982</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.04}</td><td>2.521</td><td>0.101</td><td>2.420</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.96, &quot;a different object&quot;: 0.04, &quot;one of several bound objects&quot;: 0}}</td><td>1.570</td><td>0.063</td><td>1.507</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.12}</td><td>1.548</td><td>0.186</td><td>1.363</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.13}</td><td>1.484</td><td>0.193</td><td>1.291</td></tr>
+</tbody></table>
+</details>
+<details><summary>energy_confinement_enhancement_factor — validation, label 0, rank error 0.937, rubric 0.842</summary>
+<p>Dimensionless ratio comparing the plasma energy confinement time with the IPB98(y,2) reference scaling prediction.</p><p>Source bindings: [&#x27;dd:summary/global_quantities/h_98/value&#x27;]</p><p>Golden evidence: west-name-audit-spectrometer-visible-to-wall.md:row=21; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.341</td></tr>
+<tr><td>convention</td><td>16.748</td></tr>
+<tr><td>grammar</td><td>15.488</td></tr>
+<tr><td>semantic</td><td>18.745</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.11}</td><td>9.039</td><td>0.994</td><td>8.044</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.21}</td><td>6.993</td><td>1.469</td><td>5.525</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.39}</td><td>8.444</td><td>3.293</td><td>5.151</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.96}</td><td>5.115</td><td>0.205</td><td>4.911</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.05}</td><td>2.521</td><td>0.126</td><td>2.395</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.96, &quot;a different object&quot;: 0.04, &quot;one of several bound objects&quot;: 0}}</td><td>1.570</td><td>0.063</td><td>1.507</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.13}</td><td>1.484</td><td>0.193</td><td>1.291</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.22}</td><td>1.548</td><td>0.341</td><td>1.208</td></tr>
+</tbody></table>
+</details>
+<details><summary>toroidal_angle_of_antenna_strap — validation, label 0, rank error 0.937, rubric 0.844</summary>
+<p>Toroidal angular coordinate of each antenna-strap outline point around the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.</p><p>Source bindings: [&#x27;dd:ic_antennas/antenna/module/strap/outline/phi&#x27;]</p><p>Golden evidence: west-name-audit-equilibrium-profiles-to-magnetics.md:row=25; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.203</td></tr>
+<tr><td>convention</td><td>17.672</td></tr>
+<tr><td>grammar</td><td>15.324</td></tr>
+<tr><td>semantic</td><td>18.357</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.13}</td><td>9.039</td><td>1.175</td><td>7.864</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.33}</td><td>8.444</td><td>2.787</td><td>5.657</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.22}</td><td>6.993</td><td>1.539</td><td>5.455</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.96}</td><td>5.115</td><td>0.205</td><td>4.911</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.05}</td><td>2.521</td><td>0.126</td><td>2.395</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.95, &quot;a different object&quot;: 0.05, &quot;one of several bound objects&quot;: 0}}</td><td>1.570</td><td>0.078</td><td>1.491</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.18}</td><td>1.548</td><td>0.279</td><td>1.270</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.05}</td><td>1.221</td><td>0.061</td><td>1.160</td></tr>
+</tbody></table>
+</details>
+<details><summary>volume_of_flux_surface — validation, label 0, rank error 0.937, rubric 0.843</summary>
+<p>Geometric volume contained within a nested magnetic flux surface, cumulative from the magnetic axis toward the outermost closed surface.</p><p>Source bindings: [&#x27;dd:core_profiles/profiles_1d/grid/volume&#x27;, &#x27;dd:core_sources/source/profiles_1d/grid/volume&#x27;, &#x27;dd:core_transport/model/profiles_1d/grid_d/volume&#x27;, &#x27;dd:core_transport/model/profiles_1d/grid_flux/volume&#x27;, &#x27;dd:core_transport/model/profiles_1d/grid_v/volume&#x27;, &#x27;dd:disruption/profiles_1d/grid/volume&#x27;, &#x27;dd:distribution_sources/source/profiles_1d/grid/volume&#x27;, &#x27;dd:distributions/distribution/profiles_1d/grid/volume&#x27;, &#x27;dd:distributions/distribution/profiles_2d/grid/volume&#x27;, &#x27;dd:edge_profiles/profiles_1d/grid/volume&#x27;, &#x27;dd:equilibrium/time_slice/global_quantities/volume&#x27;, &#x27;dd:equilibrium/time_slice/profiles_1d/volume&#x27;, &#x27;dd:plasma_profiles/profiles_1d/grid/volume&#x27;, &#x27;dd:plasma_sources/source/profiles_1d/grid/volume&#x27;, &#x27;dd:plasma_transport/model/profiles_1d/grid_d/volume&#x27;, &#x27;dd:plasma_transport/model/profiles_1d/grid_flux/volume&#x27;, &#x27;dd:plasma_transport/model/profiles_1d/grid_v/volume&#x27;, &#x27;dd:runaway_electrons/profiles_1d/grid/volume&#x27;, &#x27;dd:sawteeth/profiles_1d/grid/volume&#x27;, &#x27;dd:transport_solver_numerics/solver_1d/grid/volume&#x27;, &#x27;dd:waves/coherent_wave/profiles_1d/grid/volume&#x27;, &#x27;dd:waves/coherent_wave/profiles_2d/grid/volume&#x27;]</p><p>Golden evidence: west-name-audit-equilibrium-boundary-to-profiles.md:row=28; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.549</td></tr>
+<tr><td>convention</td><td>17.027</td></tr>
+<tr><td>grammar</td><td>16.627</td></tr>
+<tr><td>semantic</td><td>17.239</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.14}</td><td>9.039</td><td>1.265</td><td>7.773</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.17}</td><td>6.993</td><td>1.189</td><td>5.804</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.36}</td><td>8.444</td><td>3.040</td><td>5.404</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.985}</td><td>5.115</td><td>0.077</td><td>5.039</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.04}</td><td>2.521</td><td>0.101</td><td>2.420</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.14}</td><td>1.548</td><td>0.217</td><td>1.332</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.15}</td><td>1.484</td><td>0.223</td><td>1.261</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.03}</td><td>1.221</td><td>0.037</td><td>1.184</td></tr>
+</tbody></table>
+</details>
+<details><summary>opacity_at_ece_channel_emission_position — validation, label 0, rank error 0.921, rubric 0.840</summary>
+<p>Dimensionless optical depth along the electron-cyclotron-emission viewing path at a channel emission position, indicating whether the detected emission is local and thermal.</p><p>Source bindings: [&#x27;dd:ece/channel/optical_depth&#x27;]</p><p>Golden evidence: west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=43; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>15.709</td></tr>
+<tr><td>convention</td><td>18.300</td></tr>
+<tr><td>grammar</td><td>15.868</td></tr>
+<tr><td>semantic</td><td>17.297</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.11}</td><td>9.039</td><td>0.994</td><td>8.044</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.31}</td><td>8.444</td><td>2.618</td><td>5.826</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.2}</td><td>6.993</td><td>1.399</td><td>5.595</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.93}</td><td>5.115</td><td>0.358</td><td>4.757</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.1}</td><td>2.521</td><td>0.252</td><td>2.269</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.95, &quot;a different object&quot;: 0.04, &quot;one of several bound objects&quot;: 0.01}}</td><td>1.570</td><td>0.078</td><td>1.491</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.18}</td><td>1.548</td><td>0.279</td><td>1.270</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.03}</td><td>1.221</td><td>0.037</td><td>1.184</td></tr>
+</tbody></table>
+</details>
+<details><summary>toroidal_angular_width_of_limiter — calibration, label 0, rank error 0.914, rubric 0.850</summary>
+<p>Full toroidal angular span of each defined plasma-facing zone associated with a limiter unit.</p><p>Source bindings: [&#x27;dd:wall/description_2d/limiter/unit/phi_extensions&#x27;]</p><p>Golden evidence: StandardName:validation_status=quarantined; grammar_quarantine</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>17.086</td></tr>
+<tr><td>convention</td><td>18.128</td></tr>
+<tr><td>grammar</td><td>15.942</td></tr>
+<tr><td>semantic</td><td>16.865</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.12}</td><td>9.039</td><td>1.085</td><td>7.954</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.31}</td><td>8.444</td><td>2.618</td><td>5.826</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.2}</td><td>6.993</td><td>1.399</td><td>5.595</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.98}</td><td>5.115</td><td>0.102</td><td>5.013</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.06}</td><td>2.521</td><td>0.151</td><td>2.370</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.19}</td><td>1.548</td><td>0.294</td><td>1.254</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.2}</td><td>1.484</td><td>0.297</td><td>1.187</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.03}</td><td>1.221</td><td>0.037</td><td>1.184</td></tr>
+</tbody></table>
+</details>
+<details><summary>spectral_rate — validation, label 1, rank error 0.910, rubric 0.556</summary>
+<p>Calibrated photon-number spectral radiance of plasma emission, resolved by wavelength and viewing direction per projected area, solid angle, and wavelength interval.</p><p>Source bindings: []</p><p>Golden evidence: StandardNameChange:sn-change:3c1aec96-cc90-467e-8c45-9e16536f7be0; human_edit_target</p>
+<p>Paired golden alternatives: [{&#x27;name&#x27;: &#x27;spectral_radiance&#x27;, &#x27;label&#x27;: 0, &#x27;score&#x27;: 0.7426362}]. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>4.826</td></tr>
+<tr><td>convention</td><td>14.067</td></tr>
+<tr><td>grammar</td><td>15.505</td></tr>
+<tr><td>semantic</td><td>10.060</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.44}</td><td>8.444</td><td>3.715</td><td>4.729</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.51}</td><td>5.115</td><td>2.506</td><td>2.609</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.22}</td><td>6.993</td><td>1.539</td><td>5.455</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;a different object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.11, &quot;a different object&quot;: 0.86, &quot;one of several bound objects&quot;: 0.03}}</td><td>1.570</td><td>1.397</td><td>0.173</td></tr>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.12}</td><td>9.039</td><td>1.085</td><td>7.954</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>{&quot;noul&quot;: 0.8}</td><td>1.344</td><td>1.075</td><td>0.269</td></tr>
+<tr><td>missing_required_segment</td><td>{&quot;noul&quot;: 0.74}</td><td>1.134</td><td>0.839</td><td>0.295</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.39}</td><td>1.548</td><td>0.604</td><td>0.944</td></tr>
+</tbody></table>
+</details>
+<details><summary>accumulated_deuterium_count_due_to_gas_injection — calibration, label 0, rank error 0.907, rubric 0.849</summary>
+<p>Cumulative equivalent-electron inventory of deuterium delivered by gas injection after plasma breakdown.</p><p>Source bindings: [&#x27;dd:summary/gas_injection_accumulated/deuterium/value&#x27;]</p><p>Golden evidence: StandardNameChange:sn-change:2d34c8f7-6e4a-4c61-b301-b7e73aaaa43d; human_edit_source</p>
+<p>Paired golden alternatives: [{&#x27;name&#x27;: &#x27;deuterium_count_accumulated_due_to_gas_injection&#x27;, &#x27;label&#x27;: 1, &#x27;score&#x27;: 0.7810286}]. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.707</td></tr>
+<tr><td>convention</td><td>16.787</td></tr>
+<tr><td>grammar</td><td>16.799</td></tr>
+<tr><td>semantic</td><td>17.633</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.1}</td><td>9.039</td><td>0.904</td><td>8.135</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.17}</td><td>6.993</td><td>1.189</td><td>5.804</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.41}</td><td>8.444</td><td>3.462</td><td>4.982</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.965}</td><td>5.115</td><td>0.179</td><td>4.936</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.16}</td><td>2.521</td><td>0.403</td><td>2.118</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.96, &quot;a different object&quot;: 0.03, &quot;one of several bound objects&quot;: 0.01}}</td><td>1.570</td><td>0.063</td><td>1.507</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.16}</td><td>1.548</td><td>0.248</td><td>1.301</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.03}</td><td>1.221</td><td>0.037</td><td>1.184</td></tr>
+</tbody></table>
+</details>
+<details><summary>minimum_safety_factor — calibration, label 0, rank error 0.907, rubric 0.849</summary>
+<p>Signed safety-factor value on the closed magnetic flux surface where the magnitude of field-line winding is smallest, distinct from that surface’s location.</p><p>Source bindings: [&#x27;dd:equilibrium/time_slice/global_quantities/q_min/value&#x27;]</p><p>Golden evidence: west-name-audit-equilibrium-boundary-to-profiles.md:row=27; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.034</td></tr>
+<tr><td>convention</td><td>17.487</td></tr>
+<tr><td>grammar</td><td>16.201</td></tr>
+<tr><td>semantic</td><td>18.161</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.12}</td><td>9.039</td><td>1.085</td><td>7.954</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.18}</td><td>6.993</td><td>1.259</td><td>5.734</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.34}</td><td>8.444</td><td>2.871</td><td>5.573</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.945}</td><td>5.115</td><td>0.281</td><td>4.834</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.04}</td><td>2.521</td><td>0.101</td><td>2.420</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.98, &quot;a different object&quot;: 0.02, &quot;one of several bound objects&quot;: 0}}</td><td>1.570</td><td>0.031</td><td>1.538</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.24}</td><td>1.548</td><td>0.372</td><td>1.177</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.04}</td><td>1.221</td><td>0.049</td><td>1.172</td></tr>
+</tbody></table>
+</details>
+<details><summary>total_volumetric_ion_particle_source_rate — calibration, label 1, rank error 0.906, rubric 0.526</summary>
+<p>Net per-volume production rate of ion particles summed over species and charge states.</p><p>Source bindings: [&#x27;dd:core_sources/source/profiles_1d/total_ion_particles&#x27;, &#x27;dd:plasma_sources/source/profiles_1d/total_ion_particles&#x27;]</p><p>Golden evidence: StandardNameChange:sn-change:fe192014-8969-4762-bf9a-0f4b96ebda42; human_edit_target</p>
+<p>Paired golden alternatives: [{&#x27;name&#x27;: &#x27;total_ion_source_rate&#x27;, &#x27;label&#x27;: 0, &#x27;score&#x27;: 0.7771532}]. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>9.815</td></tr>
+<tr><td>convention</td><td>10.107</td></tr>
+<tr><td>grammar</td><td>10.910</td></tr>
+<tr><td>semantic</td><td>11.269</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.44}</td><td>8.444</td><td>3.715</td><td>4.729</td></tr>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.22}</td><td>9.039</td><td>1.988</td><td>7.050</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.23}</td><td>6.993</td><td>1.608</td><td>5.385</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.74}</td><td>5.115</td><td>1.330</td><td>3.785</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;one of several bound objects&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.27, &quot;a different object&quot;: 0.04, &quot;one of several bound objects&quot;: 0.69}}</td><td>1.570</td><td>1.146</td><td>0.424</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.89}</td><td>1.221</td><td>1.087</td><td>0.134</td></tr>
+<tr><td>missing_required_segment</td><td>{&quot;noul&quot;: 0.8}</td><td>1.134</td><td>0.907</td><td>0.227</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>{&quot;noul&quot;: 0.61}</td><td>1.344</td><td>0.820</td><td>0.524</td></tr>
+</tbody></table>
+</details>
+<details><summary>radial_coordinate_at_outboard_midplane — calibration, label 0, rank error 0.893, rubric 0.846</summary>
+<p>Major-radius coordinate of the low-field-side intersection between a magnetic flux surface and the equatorial midplane.</p><p>Source bindings: [&#x27;dd:equilibrium/time_slice/profiles_1d/r_outboard&#x27;]</p><p>Golden evidence: west-name-audit-equilibrium-boundary-to-profiles.md:row=50; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.581</td></tr>
+<tr><td>convention</td><td>16.426</td></tr>
+<tr><td>grammar</td><td>16.378</td></tr>
+<tr><td>semantic</td><td>18.314</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.11}</td><td>9.039</td><td>0.994</td><td>8.044</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.17}</td><td>6.993</td><td>1.189</td><td>5.804</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.985}</td><td>5.115</td><td>0.077</td><td>5.039</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.42}</td><td>8.444</td><td>3.546</td><td>4.897</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.05}</td><td>2.521</td><td>0.126</td><td>2.395</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.97, &quot;a different object&quot;: 0.03, &quot;one of several bound objects&quot;: 0}}</td><td>1.570</td><td>0.047</td><td>1.523</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.13}</td><td>1.548</td><td>0.201</td><td>1.347</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.04}</td><td>1.221</td><td>0.049</td><td>1.172</td></tr>
+</tbody></table>
+</details>
+<details><summary>radial_outline_of_wall — calibration, label 0, rank error 0.893, rubric 0.846</summary>
+<p>Major-radius coordinate of every point on a wall boundary outline, measured from the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.</p><p>Source bindings: [&#x27;dd:wall/description_2d/mobile/unit/outline/r&#x27;]</p><p>Golden evidence: west-name-audit-spectrometer-visible-to-wall.md:row=51; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>15.980</td></tr>
+<tr><td>convention</td><td>17.508</td></tr>
+<tr><td>grammar</td><td>15.744</td></tr>
+<tr><td>semantic</td><td>18.477</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.13}</td><td>9.039</td><td>1.175</td><td>7.864</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.33}</td><td>8.444</td><td>2.787</td><td>5.657</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.21}</td><td>6.993</td><td>1.469</td><td>5.525</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.955}</td><td>5.115</td><td>0.230</td><td>4.885</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.04}</td><td>2.521</td><td>0.101</td><td>2.420</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.98, &quot;a different object&quot;: 0.02, &quot;one of several bound objects&quot;: 0}}</td><td>1.570</td><td>0.031</td><td>1.538</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.23}</td><td>1.548</td><td>0.356</td><td>1.192</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.2}</td><td>1.484</td><td>0.297</td><td>1.187</td></tr>
+</tbody></table>
+</details>
+<details><summary>flux_surface_averaged_argon_density_at_plasma_boundary — validation, label 0, rank error 0.889, rubric 0.834</summary>
+<p>Number density of argon ions averaged over the last closed magnetic flux surface bounding the confined plasma, summed over all ion charge states and excluding neutral argon.</p><p>Source bindings: [&#x27;dd:summary/local/separatrix_average/n_i/argon/value&#x27;]</p><p>Golden evidence: StandardNameChange:sn-change:6a2f07a0-ab94-4455-b736-aa9705f27984; human_edit_source</p>
+<p>Paired golden alternatives: [{&#x27;name&#x27;: &#x27;argon_density_flux_surface_averaged_at_plasma_boundary&#x27;, &#x27;label&#x27;: 1, &#x27;score&#x27;: 0.7172668}]. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.800</td></tr>
+<tr><td>convention</td><td>15.227</td></tr>
+<tr><td>grammar</td><td>16.371</td></tr>
+<tr><td>semantic</td><td>18.342</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.13}</td><td>9.039</td><td>1.175</td><td>7.864</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.19}</td><td>6.993</td><td>1.329</td><td>5.665</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.965}</td><td>5.115</td><td>0.179</td><td>4.936</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.44}</td><td>8.444</td><td>3.715</td><td>4.729</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.05}</td><td>2.521</td><td>0.126</td><td>2.395</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.97, &quot;a different object&quot;: 0.03, &quot;one of several bound objects&quot;: 0}}</td><td>1.570</td><td>0.047</td><td>1.523</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.14}</td><td>1.548</td><td>0.217</td><td>1.332</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.03}</td><td>1.221</td><td>0.037</td><td>1.184</td></tr>
+</tbody></table>
+</details>
+<details><summary>total_rate_due_to_fusion — validation, label 1, rank error 0.887, rubric 0.590</summary>
+<p>Rate of neutron production by the plasma, formed by aggregating neutron-generating source contributions over the relevant emitting volume.</p><p>Source bindings: [&#x27;derived:flux_due_to_fusion&#x27;]</p><p>Golden evidence: StandardNameChange:sn-change:5095475a-0be1-4dd7-acb1-40319545d8c2; human_edit_target</p>
+<p>Paired golden alternatives: [{&#x27;name&#x27;: &#x27;flux_due_to_fusion&#x27;, &#x27;label&#x27;: 0, &#x27;score&#x27;: 0.6187576}]. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>4.921</td></tr>
+<tr><td>convention</td><td>13.907</td></tr>
+<tr><td>grammar</td><td>15.301</td></tr>
+<tr><td>semantic</td><td>13.046</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.45}</td><td>8.444</td><td>3.800</td><td>4.644</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.515}</td><td>5.115</td><td>2.481</td><td>2.634</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.23}</td><td>6.993</td><td>1.608</td><td>5.385</td></tr>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.12}</td><td>9.039</td><td>1.085</td><td>7.954</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>{&quot;noul&quot;: 0.79}</td><td>1.344</td><td>1.062</td><td>0.282</td></tr>
+<tr><td>missing_required_segment</td><td>{&quot;noul&quot;: 0.74}</td><td>1.134</td><td>0.839</td><td>0.295</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.54, &quot;a different object&quot;: 0.45, &quot;one of several bound objects&quot;: 0.01}}</td><td>1.570</td><td>0.722</td><td>0.848</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.44}</td><td>1.484</td><td>0.653</td><td>0.831</td></tr>
+</tbody></table>
+</details>
+<details><summary>vertical_coordinate_of_pellet_path_point — calibration, label 1, rank error 0.874, rubric 0.567</summary>
+<p>Signed vertical (Z) coordinate of a pellet path point in the right-handed cylindrical (R, φ, Z) frame, measured from the equatorial plane; for two-point path geometry this denotes the second defining point of the pellet injection trajectory.</p><p>Source bindings: [&#x27;dd:pellets/time_slice/pellet/path_geometry/first_point/z&#x27;, &#x27;dd:pellets/time_slice/pellet/path_geometry/second_point/z&#x27;, &#x27;dd:pellets/time_slice/pellet/path_profiles/position/z&#x27;, &#x27;dd:spi/injector/fragment/position/z&#x27;, &#x27;dd:spi/injector/pellet/position/z&#x27;]</p><p>Golden evidence: independent-review-fixes-dup-paths-classification.html:table-row=30; isn_expert_review</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>12.541</td></tr>
+<tr><td>convention</td><td>14.696</td></tr>
+<tr><td>grammar</td><td>7.343</td></tr>
+<tr><td>semantic</td><td>10.765</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.42}</td><td>8.444</td><td>3.546</td><td>4.897</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.34}</td><td>6.993</td><td>2.378</td><td>4.616</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;one of several bound objects&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.18, &quot;a different object&quot;: 0.34, &quot;one of several bound objects&quot;: 0.48}}</td><td>1.570</td><td>1.287</td><td>0.283</td></tr>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.13}</td><td>9.039</td><td>1.175</td><td>7.864</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.86}</td><td>1.221</td><td>1.050</td><td>0.171</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.82}</td><td>5.115</td><td>0.921</td><td>4.195</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.58}</td><td>1.484</td><td>0.861</td><td>0.623</td></tr>
+<tr><td>missing_required_segment</td><td>{&quot;noul&quot;: 0.67}</td><td>1.134</td><td>0.759</td><td>0.374</td></tr>
+</tbody></table>
+</details>
+<details><summary>radiated_power_over_core_region — validation, label 0, rank error 0.873, rubric 0.830</summary>
+<p>Total electromagnetic power radiated by plasma inside the last closed flux surface, representing the core-region contribution to global radiative energy loss.</p><p>Source bindings: [&#x27;dd:bolometer/power_radiated_inside_lcfs&#x27;, &#x27;dd:summary/global_quantities/power_radiated_inside_lcfs/value&#x27;]</p><p>Golden evidence: west-name-audit-spectrometer-visible-to-wall.md:row=25; west_audit</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.071</td></tr>
+<tr><td>convention</td><td>16.100</td></tr>
+<tr><td>grammar</td><td>16.303</td></tr>
+<tr><td>semantic</td><td>17.947</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.12}</td><td>9.039</td><td>1.085</td><td>7.954</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.19}</td><td>6.993</td><td>1.329</td><td>5.665</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.4}</td><td>8.444</td><td>3.378</td><td>5.066</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.965}</td><td>5.115</td><td>0.179</td><td>4.936</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.06}</td><td>2.521</td><td>0.151</td><td>2.370</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.78, &quot;a different object&quot;: 0.04, &quot;one of several bound objects&quot;: 0.18}}</td><td>1.570</td><td>0.345</td><td>1.224</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.2}</td><td>1.484</td><td>0.297</td><td>1.187</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.03}</td><td>1.221</td><td>0.037</td><td>1.184</td></tr>
+</tbody></table>
+</details>
+<details><summary>electron_particle_source_rate — validation, label 1, rank error 0.873, rubric 0.592</summary>
+<p>Volume-integrated electron particle source rate inside the enclosing flux surface.</p><p>Source bindings: []</p><p>Golden evidence: StandardNameChange:sn-change:3d2b44b7-35a1-4052-a924-ed098542d727; human_edit_target</p>
+<p>Paired golden alternatives: [{&#x27;name&#x27;: &#x27;electron_source_rate&#x27;, &#x27;label&#x27;: 0, &#x27;score&#x27;: 0.7609084}]. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>6.800</td></tr>
+<tr><td>convention</td><td>14.385</td></tr>
+<tr><td>grammar</td><td>16.029</td></tr>
+<tr><td>semantic</td><td>10.161</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.44}</td><td>8.444</td><td>3.715</td><td>4.729</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.54}</td><td>5.115</td><td>2.353</td><td>2.762</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.2}</td><td>6.993</td><td>1.399</td><td>5.595</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;a different object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.18, &quot;a different object&quot;: 0.8, &quot;one of several bound objects&quot;: 0.02}}</td><td>1.570</td><td>1.287</td><td>0.283</td></tr>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.12}</td><td>9.039</td><td>1.085</td><td>7.954</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>{&quot;noul&quot;: 0.65}</td><td>1.344</td><td>0.873</td><td>0.470</td></tr>
+<tr><td>source_fidelity_unsupported_qualifier</td><td>{&quot;noul&quot;: 0.51}</td><td>1.484</td><td>0.757</td><td>0.727</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.34}</td><td>1.548</td><td>0.526</td><td>1.022</td></tr>
+</tbody></table>
+</details>
+<details><summary>total_particle_count_accumulated_due_to_gas_injection — validation, label 1, rank error 0.854, rubric 0.596</summary>
+<p>Cumulative equivalent-electron inventory of all gas particles delivered since plasma breakdown, summed over every injected species and injection location.</p><p>Source bindings: []</p><p>Golden evidence: StandardNameChange:sn-change:04166aa3-46f4-48d2-a176-8c2be4635109; human_edit_target</p>
+<p>Paired golden alternatives: [{&#x27;name&#x27;: &#x27;accumulated_total_particle_count_due_to_gas_injection&#x27;, &#x27;label&#x27;: 0, &#x27;score&#x27;: 0.7331786}]. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>14.918</td></tr>
+<tr><td>convention</td><td>13.074</td></tr>
+<tr><td>grammar</td><td>10.817</td></tr>
+<tr><td>semantic</td><td>8.891</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.4}</td><td>8.444</td><td>3.378</td><td>5.066</td></tr>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.21}</td><td>9.039</td><td>1.898</td><td>7.140</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.23}</td><td>6.993</td><td>1.608</td><td>5.385</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;a different object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.15, &quot;a different object&quot;: 0.84, &quot;one of several bound objects&quot;: 0.01}}</td><td>1.570</td><td>1.334</td><td>0.235</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.91}</td><td>1.221</td><td>1.111</td><td>0.110</td></tr>
+<tr><td>ambiguity_in_isolation</td><td>{&quot;noul&quot;: 0.64}</td><td>1.344</td><td>0.860</td><td>0.484</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.33}</td><td>2.521</td><td>0.832</td><td>1.689</td></tr>
+<tr><td>missing_required_segment</td><td>{&quot;noul&quot;: 0.72}</td><td>1.134</td><td>0.816</td><td>0.317</td></tr>
+</tbody></table>
+</details>
+<details><summary>accumulated_propane_count_due_to_gas_injection — calibration, label 0, rank error 0.850, rubric 0.835</summary>
+<p>Cumulative post-breakdown propane inventory delivered by gas injection, expressed as 26 equivalent electrons for each neutral molecule.</p><p>Source bindings: [&#x27;dd:summary/gas_injection_accumulated/propane/value&#x27;]</p><p>Golden evidence: StandardNameChange:sn-change:e898d80d-fd58-4a62-aed4-a641405ec87d; human_edit_source</p>
+<p>Paired golden alternatives: [{&#x27;name&#x27;: &#x27;propane_count_accumulated_due_to_gas_injection&#x27;, &#x27;label&#x27;: 1, &#x27;score&#x27;: 0.7558691}]. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.264</td></tr>
+<tr><td>convention</td><td>16.913</td></tr>
+<tr><td>grammar</td><td>16.997</td></tr>
+<tr><td>semantic</td><td>16.648</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>non_canonical_operator_join</td><td>{&quot;noul&quot;: 0.11}</td><td>9.039</td><td>0.994</td><td>8.044</td></tr>
+<tr><td>unregistered_token_in_closed_segment</td><td>{&quot;noul&quot;: 0.16}</td><td>6.993</td><td>1.119</td><td>5.874</td></tr>
+<tr><td>bare_shape_parameter_missing_surface</td><td>{&quot;noul&quot;: 0.39}</td><td>8.444</td><td>3.293</td><td>5.151</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.955}</td><td>5.115</td><td>0.230</td><td>4.885</td></tr>
+<tr><td>coupled_vs_launched_confusion</td><td>{&quot;noul&quot;: 0.2}</td><td>2.521</td><td>0.504</td><td>2.017</td></tr>
+<tr><td>bound_to_wrong_object</td><td>{&quot;choice&quot;: &quot;the bound source object&quot;, &quot;probabilities&quot;: {&quot;the bound source object&quot;: 0.97, &quot;a different object&quot;: 0.02, &quot;one of several bound objects&quot;: 0.01}}</td><td>1.570</td><td>0.047</td><td>1.523</td></tr>
+<tr><td>non_canonical_locus_token</td><td>{&quot;noul&quot;: 0.18}</td><td>1.548</td><td>0.279</td><td>1.270</td></tr>
+<tr><td>malformed_physical_base</td><td>{&quot;noul&quot;: 0.03}</td><td>1.221</td><td>0.037</td><td>1.184</td></tr>
+</tbody></table>
+</details>
+<h3>docs: labels and score reproduction</h3>
+<p>400 golden rows, 400 canonical identities. Duplicate identities retain the first label provenance for the class table, matching the calibration loader; split and binary-label consistency are asserted. Paired-edit analysis retains all provenance memberships.</p>
+<table><thead><tr><th>Split</th><th>Golden unique</th><th>Scored</th><th>Acceptable</th><th>Defective</th><th>Logistic AUC</th><th>Raw rubric AUC</th><th>Routed rubric AUC</th></tr></thead><tbody>
+<tr><td>calibration</td><td>216</td><td>216</td><td>72</td><td>144</td><td>0.835</td><td>0.837</td><td>0.837</td></tr>
+<tr><td>validation</td><td>184</td><td>184</td><td>74</td><td>110</td><td>0.753</td><td>0.775</td><td>0.775</td></tr>
+</tbody></table>
+<table><thead><tr><th>Split</th><th>Label class</th><th>Label</th><th>Golden count</th></tr></thead><tbody>
+<tr><td>calibration</td><td>complete</td><td>0</td><td>3</td></tr>
+<tr><td>calibration</td><td>house_style</td><td>0</td><td>75</td></tr>
+<tr><td>calibration</td><td>links</td><td>0</td><td>42</td></tr>
+<tr><td>calibration</td><td>physics</td><td>0</td><td>7</td></tr>
+<tr><td>calibration</td><td>scope</td><td>0</td><td>5</td></tr>
+<tr><td>calibration</td><td>subject</td><td>0</td><td>12</td></tr>
+<tr><td>calibration</td><td>acceptable</td><td>1</td><td>72</td></tr>
+<tr><td>validation</td><td>complete</td><td>0</td><td>0</td></tr>
+<tr><td>validation</td><td>house_style</td><td>0</td><td>63</td></tr>
+<tr><td>validation</td><td>links</td><td>0</td><td>24</td></tr>
+<tr><td>validation</td><td>physics</td><td>0</td><td>7</td></tr>
+<tr><td>validation</td><td>scope</td><td>0</td><td>5</td></tr>
+<tr><td>validation</td><td>subject</td><td>0</td><td>11</td></tr>
+<tr><td>validation</td><td>acceptable</td><td>1</td><td>74</td></tr>
+</tbody></table>
+<p>No golden row labels a specific taxonomy check. Exact defect counts for all checks are therefore unknown, not zero. The JSON reports every check against each broad label class as a proxy; these are not check-specific sensitivity estimates. Classes with fewer than five defects are: [{&#x27;split&#x27;: &#x27;calibration&#x27;, &#x27;label&#x27;: 0, &#x27;label_class&#x27;: &#x27;complete&#x27;, &#x27;count&#x27;: 3}, {&#x27;split&#x27;: &#x27;validation&#x27;, &#x27;label&#x27;: 0, &#x27;label_class&#x27;: &#x27;complete&#x27;, &#x27;count&#x27;: 0}].</p>
+<table><thead><tr><th>Dimension</th><th>Calibration AUC</th><th>Validation AUC</th><th>Validation category AUC</th></tr></thead><tbody>
+<tr><td>completeness</td><td>0.629</td><td>0.614</td><td>0.514</td></tr>
+<tr><td>description_quality</td><td>0.702</td><td>0.677</td><td>0.607</td></tr>
+<tr><td>documentation_quality</td><td>0.655</td><td>0.660</td><td>0.633</td></tr>
+<tr><td>physics_accuracy</td><td>0.606</td><td>0.624</td><td>unknown</td></tr>
+</tbody></table>
+<h4>Every check</h4><p>C/V denotes calibration/validation. TP and FP use a common failure cutoff of 0.5; they count whole-item defects and acceptable items. The JSON also evaluates the saved calibration cutoff and selected veto cutoff. The claim check here measures non-support, including “says nothing”; its separate hard veto measures contradiction only.</p>
+<table><thead><tr><th>Check / dimension</th><th>Answered C/V</th><th>AUC C/V</th><th>Separation C/V</th><th>TP C/V</th><th>FP C/V</th></tr></thead><tbody>
+<tr><td>description_not_single_definition / description_quality</td><td>216/184</td><td>0.499/0.488</td><td>0.004/-0.006</td><td>1/0</td><td>0/0</td></tr>
+<tr><td>description_template_opening_mismatch / description_quality</td><td>216/184</td><td>0.694/0.662</td><td>0.389/0.323</td><td>56/43</td><td>0/5</td></tr>
+<tr><td>description_false_of_some_binding / documentation_quality</td><td>216/184</td><td>0.585/0.632</td><td>0.057/0.073</td><td>16/8</td><td>2/1</td></tr>
+<tr><td>units_in_prose / documentation_quality</td><td>216/184</td><td>0.514/0.437</td><td>0.015/-0.003</td><td>11/9</td><td>3/7</td></tr>
+<tr><td>cocos_number_in_prose / documentation_quality</td><td>216/184</td><td>0.571/0.550</td><td>0.001/0.001</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>latex_escaping_broken / documentation_quality</td><td>216/184</td><td>0.478/0.598</td><td>0.005/0.011</td><td>0/1</td><td>0/0</td></tr>
+<tr><td>non_normative_documentation / documentation_quality</td><td>216/184</td><td>0.495/0.487</td><td>0.001/0.002</td><td>1/0</td><td>0/0</td></tr>
+<tr><td>symbols_undefined / documentation_quality</td><td>216/184</td><td>0.503/0.509</td><td>0.007/0.018</td><td>1/2</td><td>0/0</td></tr>
+<tr><td>defining_equation_missing / documentation_quality</td><td>216/184</td><td>0.535/0.514</td><td>0.069/0.028</td><td>10/6</td><td>0/2</td></tr>
+<tr><td>link_hygiene / documentation_quality</td><td>216/184</td><td>0.500/0.500</td><td>0.000/0.000</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>forbidden_equation_variant / documentation_quality</td><td>216/184</td><td>0.500/0.500</td><td>0.000/0.000</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>forbidden_symbol_spelling / documentation_quality</td><td>216/184</td><td>0.500/0.500</td><td>0.000/0.000</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>forbidden_locus_gloss / documentation_quality</td><td>216/184</td><td>0.500/0.505</td><td>0.000/0.009</td><td>0/1</td><td>0/0</td></tr>
+<tr><td>locus_definition_mismatch / documentation_quality</td><td>216/184</td><td>0.490/0.498</td><td>-0.021/-0.004</td><td>1/1</td><td>2/1</td></tr>
+<tr><td>template_note / documentation_quality</td><td>216/184</td><td>0.500/0.500</td><td>0.000/0.000</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>non_canonical_equation / documentation_quality</td><td>216/184</td><td>0.500/0.514</td><td>0.000/0.028</td><td>6/6</td><td>3/2</td></tr>
+<tr><td>minimum_word_count / completeness</td><td>216/184</td><td>0.500/0.505</td><td>0.000/0.009</td><td>0/1</td><td>0/0</td></tr>
+<tr><td>relationship_link_missing / completeness</td><td>216/184</td><td>0.510/0.530</td><td>0.021/0.060</td><td>17/14</td><td>7/5</td></tr>
+<tr><td>raw_dd_reference_in_prose / completeness</td><td>216/184</td><td>0.503/0.569</td><td>0.051/0.115</td><td>125/99</td><td>57/55</td></tr>
+<tr><td>sign_convention_missing / documentation_quality</td><td>216/184</td><td>0.535/0.509</td><td>0.069/0.018</td><td>10/2</td><td>0/0</td></tr>
+<tr><td>link_unresolved / completeness</td><td>216/184</td><td>0.500/0.500</td><td>0.000/0.000</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>link_dead / completeness</td><td>216/184</td><td>0.458/0.468</td><td>-0.083/-0.064</td><td>128/97</td><td>70/70</td></tr>
+<tr><td>link_missing_reverse / completeness</td><td>216/184</td><td>0.500/0.500</td><td>0.000/0.000</td><td>0/0</td><td>0/0</td></tr>
+<tr><td>claim_contradicts_source / physics_accuracy</td><td>216/184</td><td>0.493/0.496</td><td>0.005/0.019</td><td>142/110</td><td>71/72</td></tr>
+<tr><td>false_equivalence_with_related / physics_accuracy</td><td>216/184</td><td>0.572/0.561</td><td>0.011/0.015</td><td>0/1</td><td>0/0</td></tr>
+<tr><td>incompatible_physics_qualifier / physics_accuracy</td><td>216/184</td><td>0.593/0.623</td><td>0.016/0.024</td><td>1/2</td><td>0/0</td></tr>
+<tr><td>equation_physically_incorrect / physics_accuracy</td><td>216/184</td><td>0.553/0.556</td><td>0.011/0.009</td><td>0/0</td><td>0/0</td></tr>
+</tbody></table>
+<p>Checks catching fewer than five calibration defects at 0.5: description_not_single_definition, cocos_number_in_prose, latex_escaping_broken, non_normative_documentation, symbols_undefined, link_hygiene, forbidden_equation_variant, forbidden_symbol_spelling, forbidden_locus_gloss, locus_definition_mismatch, template_note, minimum_word_count, link_unresolved, link_missing_reverse, false_equivalence_with_related, incompatible_physics_qualifier, equation_physically_incorrect. This is observed detection support, not a count of the true defects belonging to a check.</p>
+<h4>Evidence present in the actual frozen states</h4>
+<table><thead><tr><th>Check</th><th>Field</th><th>Calibration nonempty / empty / unknown</th><th>Validation nonempty / empty / unknown</th></tr></thead><tbody>
+<tr><td>description_not_single_definition</td><td>description</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>description_not_single_definition</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>description_template_opening_mismatch</td><td>description</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>description_false_of_some_binding</td><td>description</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>description_false_of_some_binding</td><td>source_paths</td><td>182 / 34 / 0</td><td>157 / 27 / 0</td></tr>
+<tr><td>description_false_of_some_binding</td><td>dd_source_docs</td><td>182 / 34 / 0</td><td>157 / 27 / 0</td></tr>
+<tr><td>units_in_prose</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>units_in_prose</td><td>unit</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>cocos_number_in_prose</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>cocos_number_in_prose</td><td>cocos_label</td><td>0 / 0 / 216</td><td>0 / 0 / 184</td></tr>
+<tr><td>latex_escaping_broken</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>non_normative_documentation</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>symbols_undefined</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>defining_equation_missing</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>link_hygiene</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>link_hygiene</td><td>links</td><td>198 / 18 / 0</td><td>167 / 17 / 0</td></tr>
+<tr><td>forbidden_equation_variant</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>forbidden_symbol_spelling</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>forbidden_locus_gloss</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>locus_definition_mismatch</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>template_note</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>non_canonical_equation</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>minimum_word_count</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>relationship_link_missing</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>relationship_link_missing</td><td>related_neighbours</td><td>204 / 12 / 0</td><td>171 / 13 / 0</td></tr>
+<tr><td>raw_dd_reference_in_prose</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>raw_dd_reference_in_prose</td><td>source_paths</td><td>182 / 34 / 0</td><td>157 / 27 / 0</td></tr>
+<tr><td>sign_convention_missing</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>sign_convention_missing</td><td>cocos_label</td><td>0 / 0 / 216</td><td>0 / 0 / 184</td></tr>
+<tr><td>link_unresolved</td><td>links</td><td>198 / 18 / 0</td><td>167 / 17 / 0</td></tr>
+<tr><td>link_unresolved</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>link_dead</td><td>links</td><td>198 / 18 / 0</td><td>167 / 17 / 0</td></tr>
+<tr><td>link_dead</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>link_missing_reverse</td><td>links</td><td>198 / 18 / 0</td><td>167 / 17 / 0</td></tr>
+<tr><td>claim_contradicts_source</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>claim_contradicts_source</td><td>dd_source_docs</td><td>182 / 34 / 0</td><td>157 / 27 / 0</td></tr>
+<tr><td>claim_contradicts_source</td><td>description</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>false_equivalence_with_related</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>false_equivalence_with_related</td><td>related_neighbours</td><td>204 / 12 / 0</td><td>171 / 13 / 0</td></tr>
+<tr><td>false_equivalence_with_related</td><td>cross_ids_paths</td><td>0 / 0 / 216</td><td>0 / 0 / 184</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>physical_base</td><td>0 / 0 / 216</td><td>0 / 0 / 184</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>unit</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>equation_physically_incorrect</td><td>documentation</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+<tr><td>equation_physically_incorrect</td><td>unit</td><td>216 / 0 / 0</td><td>184 / 0 / 0</td></tr>
+</tbody></table>
+<h4>Twenty worst-ranked golden items</h4><p>Rank error is the fraction of opposite-label items in the same split ordered incorrectly by the raw rubric, with ties counting one half. It lies in [0,1]; the largest errors across both splits are shown. Check contributions are exact weighted compliance shortfalls from a perfect answer in the fitted dimension logit, not causal attributions. All check answers and probabilities are retained in the JSON.</p>
+<details><summary>ratio_of_particle_count_to_particle_simulated_count — validation, label 1, rank error 0.936, rubric 0.548</summary>
+<p>Dimensionless statistical weight assigning each Monte Carlo marker the number of real particles it represents, expressed as a real-particle count divided by the simulated marker count.</p><p>Source bindings: [&#x27;distribution_sources/source/markers/weights&#x27;, &#x27;distributions/distribution/markers/weights&#x27;]</p><p>Golden evidence: aa9d553872a5e999416b23d1e73a6c7b3a432c05edc8428ce89d4723750cdacf; marker weight as real particles per simulated marker matches both sources and the ratio concept</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>14.362</td></tr>
+<tr><td>description_quality</td><td>0.447</td></tr>
+<tr><td>documentation_quality</td><td>16.067</td></tr>
+<tr><td>physics_accuracy</td><td>13.002</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 0.0}</td><td>5.640</td><td>5.640</td><td>0.000</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.32}</td><td>3.655</td><td>1.170</td><td>2.486</td></tr>
+<tr><td>raw_dd_reference_in_prose</td><td>{&quot;noul&quot;: 0.83}</td><td>0.876</td><td>0.727</td><td>0.149</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.865}</td><td>5.075</td><td>0.685</td><td>4.390</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.24}</td><td>2.544</td><td>0.610</td><td>1.933</td></tr>
+<tr><td>units_in_prose</td><td>{&quot;noul&quot;: 0.62}</td><td>0.777</td><td>0.482</td><td>0.295</td></tr>
+<tr><td>non_normative_documentation</td><td>{&quot;noul&quot;: 0.29}</td><td>0.659</td><td>0.191</td><td>0.468</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.06}</td><td>2.678</td><td>0.161</td><td>2.517</td></tr>
+</tbody></table>
+</details>
+<details><summary>linear_mhd_mode_reference_phase — calibration, label 0, rank error 0.917, rubric 0.852</summary>
+<p>Signed angular offset that fixes the phase origin of a linear MHD eigenmode relative to its zero-phase complex representation.</p><p>Source bindings: []</p><p>Golden evidence: ba434baf3003535929bfa90b56b639ebfa5c0ec92c3d03420fa8290055b4c902; phi_ref where the registry phase symbol is varphi</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>17.114</td></tr>
+<tr><td>description_quality</td><td>17.421</td></tr>
+<tr><td>documentation_quality</td><td>17.403</td></tr>
+<tr><td>physics_accuracy</td><td>16.201</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.89}</td><td>5.075</td><td>0.558</td><td>4.517</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.19}</td><td>3.655</td><td>0.695</td><td>2.961</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.06}</td><td>2.678</td><td>0.161</td><td>2.517</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.1}</td><td>2.544</td><td>0.254</td><td>2.289</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>ratio_of_vertical_vorticity_to_major_radius — validation, label 1, rank error 0.900, rubric 0.581</summary>
+<p>Vertical plasma vorticity divided by the local major radius, retaining the signed rotation rate about the vertical axis with inverse-length scaling.</p><p>Source bindings: [&#x27;edge_profiles/ggd/vorticity_over_r/z&#x27;]</p><p>Golden evidence: 9615e655eada86a80b61368d4f0897602aae9ad4896a50f2d1f4033d7393f9d0; omega_Z/R as the ratio concept gives, with omega_Z = (curl v).Z-hat; no template applies; links resolve</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>14.043</td></tr>
+<tr><td>description_quality</td><td>0.436</td></tr>
+<tr><td>documentation_quality</td><td>16.389</td></tr>
+<tr><td>physics_accuracy</td><td>15.588</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 0.0}</td><td>5.640</td><td>5.640</td><td>0.000</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.22}</td><td>3.655</td><td>0.804</td><td>2.851</td></tr>
+<tr><td>raw_dd_reference_in_prose</td><td>{&quot;noul&quot;: 0.91}</td><td>0.876</td><td>0.798</td><td>0.079</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.855}</td><td>5.075</td><td>0.736</td><td>4.339</td></tr>
+<tr><td>description_false_of_some_binding</td><td>{&quot;choice&quot;: &quot;true of all&quot;, &quot;probabilities&quot;: {&quot;true of all&quot;: 0.8, &quot;narrower than the bindings&quot;: 0.06, &quot;false of at least one binding&quot;: 0.14}}</td><td>2.057</td><td>0.411</td><td>1.646</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.11}</td><td>2.544</td><td>0.280</td><td>2.264</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.08}</td><td>2.678</td><td>0.214</td><td>2.464</td></tr>
+<tr><td>non_normative_documentation</td><td>{&quot;noul&quot;: 0.29}</td><td>0.659</td><td>0.191</td><td>0.468</td></tr>
+</tbody></table>
+</details>
+<details><summary>spectral_efficiency_of_neutron_detector — calibration, label 1, rank error 0.889, rubric 0.571</summary>
+<p>Energy-dependent probability that an incident neutron within a specified energy band is recorded as an accepted count by the neutron detector.</p><p>Source bindings: [&#x27;neutron_diagnostic/detector/energy_band/detection_efficiency&#x27;]</p><p>Golden evidence: ad65d1cf4d92f695cb6c5962586821f47231ea209204533ce4be67b63fae206d; recorded over incident neutrons per energy band; no registry entry applies; links resolve (the DD text says photon, a DD copy slip)</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>7.304</td></tr>
+<tr><td>description_quality</td><td>17.050</td></tr>
+<tr><td>documentation_quality</td><td>13.690</td></tr>
+<tr><td>physics_accuracy</td><td>7.654</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.565}</td><td>5.075</td><td>2.208</td><td>2.867</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.47}</td><td>3.655</td><td>1.718</td><td>1.937</td></tr>
+<tr><td>description_false_of_some_binding</td><td>{&quot;choice&quot;: &quot;false of at least one binding&quot;, &quot;probabilities&quot;: {&quot;true of all&quot;: 0.49, &quot;narrower than the bindings&quot;: 0.02, &quot;false of at least one binding&quot;: 0.49}}</td><td>2.057</td><td>1.049</td><td>1.008</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.34}</td><td>2.544</td><td>0.865</td><td>1.679</td></tr>
+<tr><td>raw_dd_reference_in_prose</td><td>{&quot;noul&quot;: 0.84}</td><td>0.876</td><td>0.736</td><td>0.140</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.17}</td><td>2.678</td><td>0.455</td><td>2.223</td></tr>
+<tr><td>non_normative_documentation</td><td>{&quot;noul&quot;: 0.28}</td><td>0.659</td><td>0.185</td><td>0.474</td></tr>
+<tr><td>description_not_single_definition</td><td>{&quot;noul&quot;: 0.19}</td><td>0.789</td><td>0.150</td><td>0.639</td></tr>
+</tbody></table>
+</details>
+<details><summary>exposure_time_of_spectrometer_channel — validation, label 0, rank error 0.824, rubric 0.842</summary>
+<p>Temporal duration over which a spectrometer channel accumulates incident photons to form one spectral measurement.</p><p>Source bindings: [&#x27;spectrometer_visible/channel/filter_spectrometer/exposure_time&#x27;]</p><p>Golden evidence: 6ead09456699e4afd9bd7f87201495a9029f2e0ae59bafb1258a322f768c3e8b; unresolved [incident spectral flux]</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>15.852</td></tr>
+<tr><td>description_quality</td><td>17.396</td></tr>
+<tr><td>documentation_quality</td><td>17.302</td></tr>
+<tr><td>physics_accuracy</td><td>16.779</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.945}</td><td>5.075</td><td>0.279</td><td>4.796</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.15}</td><td>3.655</td><td>0.548</td><td>3.107</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.04}</td><td>2.678</td><td>0.107</td><td>2.571</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.1}</td><td>2.544</td><td>0.254</td><td>2.289</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>reflected_phase_of_ion_cyclotron_heating_antenna — validation, label 0, rank error 0.824, rubric 0.841</summary>
+<p>Relative phase angle of a reflected radio-frequency power-wave phasor at an antenna element in an ion-cyclotron heating launcher, measured relative to the forward power-wave phasor of that same element.</p><p>Source bindings: [&#x27;ic_antennas/antenna/module/phase_reflected&#x27;]</p><p>Golden evidence: da44a71a619c7f2d65932b15f074f5f3230f8876259cbd98ac856bb4a5e6ba90; writes phi (the toroidal-angle symbol) where the registry phase symbol is varphi; unresolved [phase of the ion-cyclotron heating antenna]</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.230</td></tr>
+<tr><td>description_quality</td><td>17.400</td></tr>
+<tr><td>documentation_quality</td><td>17.203</td></tr>
+<tr><td>physics_accuracy</td><td>16.434</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.965}</td><td>5.075</td><td>0.178</td><td>4.897</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.19}</td><td>3.655</td><td>0.695</td><td>2.961</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.06}</td><td>2.678</td><td>0.161</td><td>2.517</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.07}</td><td>2.544</td><td>0.178</td><td>2.365</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>equilibrium_weight_of_interferometer_beam — calibration, label 0, rank error 0.819, rubric 0.849</summary>
+<p>Dimensionless factor controlling the relative contribution of an interferometer beam’s line-integrated electron-density residual to an equilibrium objective function.</p><p>Source bindings: []</p><p>Golden evidence: 4f59d265220433671981f5b406ab95de9cb363beb406344fbdcd00bbe8debaca; link text &#x27;calibration coefficient of an interferometer beam&#x27; points at spectral_calibration_factor_at_line_of_sight; unresolved [equilibrium weight of a flux loop] and [equilibrium weight of a poloidal magnetic-field probe]</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>17.277</td></tr>
+<tr><td>description_quality</td><td>17.337</td></tr>
+<tr><td>documentation_quality</td><td>17.320</td></tr>
+<tr><td>physics_accuracy</td><td>16.010</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.905}</td><td>5.075</td><td>0.482</td><td>4.593</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.17}</td><td>3.655</td><td>0.621</td><td>3.034</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.11}</td><td>2.678</td><td>0.295</td><td>2.384</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.1}</td><td>2.544</td><td>0.254</td><td>2.289</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>poloidal_magnetic_flux_at_pellet_path — validation, label 0, rank error 0.797, rubric 0.838</summary>
+<p>Poloidal magnetic flux at a pellet-path point is the value of the equilibrium poloidal magnetic-flux function evaluated at the position of a pellet along its injection trajectory. For an axisymmetric equilibrium it depends only on the major-radius and vertical coordinates of that trajectory point.</p><p>Source bindings: [&#x27;pellets/time_slice/pellet/path_profiles/psi&#x27;]</p><p>Golden evidence: c2328f100047fb3020a23a202f0079cc338681f1fb98d7d37b7e3d6db8602cbf; psi where the registry magnetic-flux symbol is Phi with the poloidal subscript</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.173</td></tr>
+<tr><td>description_quality</td><td>17.280</td></tr>
+<tr><td>documentation_quality</td><td>17.046</td></tr>
+<tr><td>physics_accuracy</td><td>16.546</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.97}</td><td>5.075</td><td>0.152</td><td>4.923</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.18}</td><td>3.655</td><td>0.658</td><td>2.997</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.04}</td><td>2.678</td><td>0.107</td><td>2.571</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.09}</td><td>2.544</td><td>0.229</td><td>2.315</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>ratio_of_particle_temperature_to_particle_reference_temperature — validation, label 1, rank error 0.782, rubric 0.603</summary>
+<p>Dimensionless ratio comparing a particle species’ kinetic temperature with the positive reference temperature on the same magnetic flux surface.</p><p>Source bindings: [&#x27;gyrokinetics_local/species/temperature_norm&#x27;]</p><p>Golden evidence: 31a0a8f872282a54dca6d5d563e5c9f18f73486e371dfff26c7aecae63512ff8; T_p/T_ref as the ratio concept and temperature_norm; no template applies; link resolves</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>14.799</td></tr>
+<tr><td>description_quality</td><td>0.462</td></tr>
+<tr><td>documentation_quality</td><td>16.617</td></tr>
+<tr><td>physics_accuracy</td><td>16.371</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 0.0}</td><td>5.640</td><td>5.640</td><td>0.000</td></tr>
+<tr><td>raw_dd_reference_in_prose</td><td>{&quot;noul&quot;: 0.84}</td><td>0.876</td><td>0.736</td><td>0.140</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.19}</td><td>3.655</td><td>0.695</td><td>2.961</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.88}</td><td>5.075</td><td>0.609</td><td>4.466</td></tr>
+<tr><td>description_false_of_some_binding</td><td>{&quot;choice&quot;: &quot;true of all&quot;, &quot;probabilities&quot;: {&quot;true of all&quot;: 0.87, &quot;narrower than the bindings&quot;: 0.04, &quot;false of at least one binding&quot;: 0.09}}</td><td>2.057</td><td>0.267</td><td>1.790</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.1}</td><td>2.544</td><td>0.254</td><td>2.289</td></tr>
+<tr><td>units_in_prose</td><td>{&quot;noul&quot;: 0.26}</td><td>0.777</td><td>0.202</td><td>0.575</td></tr>
+<tr><td>non_normative_documentation</td><td>{&quot;noul&quot;: 0.21}</td><td>0.659</td><td>0.138</td><td>0.521</td></tr>
+</tbody></table>
+</details>
+<details><summary>poloidal_perturbed_plasma_magnetic_vector_potential_real_part — calibration, label 0, rank error 0.778, rubric 0.847</summary>
+<p>Real-valued poloidal component of the perturbed plasma magnetic-vector-potential eigenfunction for a specified toroidal mode in linear MHD stability analysis.</p><p>Source bindings: [&#x27;mhd_linear/time_slice/toroidal_mode/plasma/a_field_perturbed/coordinate2/real&#x27;]</p><p>Golden evidence: 2e025cff9d5d883fdf4b6b510066bde2a1ec3ab1b7a9bd3f71bf356962560406; subscript &#x27;pol&#x27; where the registry poloidal symbol is upright p</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.151</td></tr>
+<tr><td>description_quality</td><td>17.357</td></tr>
+<tr><td>documentation_quality</td><td>17.359</td></tr>
+<tr><td>physics_accuracy</td><td>16.885</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.96}</td><td>5.075</td><td>0.203</td><td>4.872</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.16}</td><td>3.655</td><td>0.585</td><td>3.071</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.05}</td><td>2.678</td><td>0.134</td><td>2.544</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.06}</td><td>2.544</td><td>0.153</td><td>2.391</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>power_density_due_to_fusion — calibration, label 0, rank error 0.764, rubric 0.843</summary>
+<p>Local volumetric rate of energy release from all included nuclear-fusion reaction channels, including energy carried by charged particles and neutrons.</p><p>Source bindings: []</p><p>Golden evidence: 83c397058c461a9653ca3223536b59b12a378ecd0b9eb8b315ae0bf5cbc77217; unresolved [fusion neutron emissivity]</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>17.316</td></tr>
+<tr><td>description_quality</td><td>17.265</td></tr>
+<tr><td>documentation_quality</td><td>16.120</td></tr>
+<tr><td>physics_accuracy</td><td>16.771</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.91}</td><td>5.075</td><td>0.457</td><td>4.618</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.15}</td><td>3.655</td><td>0.548</td><td>3.107</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.06}</td><td>2.678</td><td>0.161</td><td>2.517</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.08}</td><td>2.544</td><td>0.203</td><td>2.340</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>radial_perturbed_vacuum_magnetic_vector_potential_real_part — calibration, label 0, rank error 0.764, rubric 0.845</summary>
+<p>Real part of the first-order radial magnetic-vector-potential eigenfunction for a single toroidal mode in the vacuum region.</p><p>Source bindings: [&#x27;mhd_linear/time_slice/toroidal_mode/vacuum/a_field_perturbed/coordinate1/real&#x27;]</p><p>Golden evidence: b78b5eaa4fc5974d10785ea8b40ddc34d121156d8b5aa4a9882441c5f1f8bddb; projects onto the major-radius direction, but the source is mhd_linear coordinate1, the solver&#x27;s first coordinate rather than R; the name&#x27;s &#x27;radial&#x27; cannot match both registry and source</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.173</td></tr>
+<tr><td>description_quality</td><td>17.350</td></tr>
+<tr><td>documentation_quality</td><td>17.353</td></tr>
+<tr><td>physics_accuracy</td><td>16.711</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.97}</td><td>5.075</td><td>0.152</td><td>4.923</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.17}</td><td>3.655</td><td>0.621</td><td>3.034</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.06}</td><td>2.678</td><td>0.161</td><td>2.517</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.06}</td><td>2.544</td><td>0.153</td><td>2.391</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>toroidal_wave_vector_normalized_of_beam_tracing_beam — calibration, label 0, rank error 0.764, rubric 0.843</summary>
+<p>Toroidal normalized wave vector of a beam-tracing beam is the signed toroidal direction cosine k_phi/|k| of the electromagnetic wave vector at the beam launch point in the right-handed cylindrical (R, φ, Z) frame.</p><p>Source bindings: []</p><p>Golden evidence: 6f08421e24235f6f8a11b7b96e17f4bb3ee6c0bceb461ba55691aa30b211a9fe; unresolved [vertical normalized wave vector of a beam-tracing beam] and [poloidal normalized wave vector of a beam-tracing beam]; also invents a launch-point versus along-path split from its near-duplicate normalized_toroidal_wave_vector_of_beam_tracing_beam</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>17.451</td></tr>
+<tr><td>description_quality</td><td>17.392</td></tr>
+<tr><td>documentation_quality</td><td>17.329</td></tr>
+<tr><td>physics_accuracy</td><td>15.237</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.92}</td><td>5.075</td><td>0.406</td><td>4.669</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.22}</td><td>3.655</td><td>0.804</td><td>2.851</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.06}</td><td>2.678</td><td>0.161</td><td>2.517</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.17}</td><td>2.544</td><td>0.432</td><td>2.111</td></tr>
+</tbody></table>
+</details>
+<details><summary>vertical_coordinate_of_annulus_center — calibration, label 0, rank error 0.764, rubric 0.845</summary>
+<p>Vertical (Z) coordinate locating the geometric center of an annulus in the right-handed cylindrical (R, φ, Z) frame.</p><p>Source bindings: [&#x27;iron_core/segment/geometry/annulus/z&#x27;, &#x27;pf_active/coil/element/geometry/annulus/z&#x27;]</p><p>Golden evidence: c594c44e2ca16874a3f6605116e0ad77d85283b5d3726bcf1cb05f689064e241; writes z_c where the registry vertical symbol is Z</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.341</td></tr>
+<tr><td>description_quality</td><td>17.410</td></tr>
+<tr><td>documentation_quality</td><td>17.243</td></tr>
+<tr><td>physics_accuracy</td><td>16.619</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.955}</td><td>5.075</td><td>0.228</td><td>4.847</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.18}</td><td>3.655</td><td>0.658</td><td>2.997</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.04}</td><td>2.678</td><td>0.107</td><td>2.571</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.08}</td><td>2.544</td><td>0.203</td><td>2.340</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>radial_perturbed_plasma_magnetic_field_imaginary_part — validation, label 0, rank error 0.743, rubric 0.836</summary>
+<p>Imaginary part of the radial flux-coordinate component of the complex first-order perturbed magnetic-field eigenfunction in the confined plasma, for a single toroidal Fourier mode in linear MHD stability analysis. It is not the cylindrical major-radius component.</p><p>Source bindings: [&#x27;mhd_linear/time_slice/toroidal_mode/plasma/b_field_perturbed/coordinate1/imaginary&#x27;]</p><p>Golden evidence: 66477955228c710cabeda53dc35bf20f167e5d0cbf589990f3155d1ebb4f7789; uses &#x27;radial&#x27; for the flux-coordinate rho direction and says so, against the registry concept of radial as the major-radius direction; the conflict is in the name and registry, which the text exposes</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.327</td></tr>
+<tr><td>description_quality</td><td>17.135</td></tr>
+<tr><td>documentation_quality</td><td>17.097</td></tr>
+<tr><td>physics_accuracy</td><td>16.326</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.98}</td><td>5.075</td><td>0.102</td><td>4.974</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.2}</td><td>3.655</td><td>0.731</td><td>2.924</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.05}</td><td>2.678</td><td>0.134</td><td>2.544</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.08}</td><td>2.544</td><td>0.203</td><td>2.340</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>decay_length_over_scrape_off_layer — validation, label 0, rank error 0.730, rubric 0.835</summary>
+<p>Characteristic outward distance over which a decaying plasma quantity decreases by one e-folding in the scrape-off layer.</p><p>Source bindings: []</p><p>Golden evidence: 32f4645a5d811ee4ce7d53d6f495349d6d5366ac5361c749ab5f5db1e1080c58; unresolved [ion decay length]</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.739</td></tr>
+<tr><td>description_quality</td><td>17.410</td></tr>
+<tr><td>documentation_quality</td><td>17.277</td></tr>
+<tr><td>physics_accuracy</td><td>15.395</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.865}</td><td>5.075</td><td>0.685</td><td>4.390</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.25}</td><td>3.655</td><td>0.914</td><td>2.742</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.05}</td><td>2.678</td><td>0.134</td><td>2.544</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.12}</td><td>2.544</td><td>0.305</td><td>2.238</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>radius_of_plasma_filament — validation, label 0, rank error 0.730, rubric 0.834</summary>
+<p>Radius of a plasma filament is the geometric radius of a circular boundary of the annular cross-section representing a current-carrying plasma filament. In the hollow-disk geometry it denotes either the inner or outer boundary radius.</p><p>Source bindings: []</p><p>Golden evidence: 7803b4baa9704e02cd589393ae5d5415de952116ee197193430a0b33ba74b001; writes a where the registry radius symbol is R (R would collide with the major radius in the same equation, so the registry entry is the harder fault)</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>17.155</td></tr>
+<tr><td>description_quality</td><td>16.897</td></tr>
+<tr><td>documentation_quality</td><td>17.267</td></tr>
+<tr><td>physics_accuracy</td><td>15.423</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.895}</td><td>5.075</td><td>0.533</td><td>4.542</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.22}</td><td>3.655</td><td>0.804</td><td>2.851</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.05}</td><td>2.678</td><td>0.134</td><td>2.544</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.16}</td><td>2.544</td><td>0.407</td><td>2.137</td></tr>
+</tbody></table>
+</details>
+<details><summary>total_neutron_source_rate_due_to_thermal_fusion — validation, label 0, rank error 0.730, rubric 0.834</summary>
+<p>Total neutron production rate from thermonuclear neutron-producing deuterium-deuterium, deuterium-tritium, and tritium-tritium reaction branches among Maxwellian bulk ions, excluding beam-target and beam-beam fast-ion contributions.</p><p>Source bindings: [&#x27;summary/fusion/neutron_rates/thermal/value&#x27;]</p><p>Golden evidence: 1b0febd6c9451339d203c98b85b500a1fa40e2e65d2a933bbecdf834fe9bc60a; unresolved per-channel source-rate references; physics and template otherwise sound</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.744</td></tr>
+<tr><td>description_quality</td><td>17.128</td></tr>
+<tr><td>documentation_quality</td><td>16.935</td></tr>
+<tr><td>physics_accuracy</td><td>15.911</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.95}</td><td>5.075</td><td>0.254</td><td>4.821</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.18}</td><td>3.655</td><td>0.658</td><td>2.997</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.07}</td><td>2.678</td><td>0.187</td><td>2.491</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.14}</td><td>2.544</td><td>0.356</td><td>2.187</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>twist_period_of_fiber_optic_current_sensor — validation, label 0, rank error 0.730, rubric 0.835</summary>
+<p>Repeat arclength along the sensing-fiber centerline at which the effective birefringent-axis orientation completes one spatial cycle.</p><p>Source bindings: [&#x27;focs/fibre_properties/twist&#x27;]</p><p>Golden evidence: bee10f142932053474c47be112c98022fea9efaa0163c4b67ba00f0aa449a568; unresolved [fiber optic current sensor period] and [polarization beat length]</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>15.745</td></tr>
+<tr><td>description_quality</td><td>17.385</td></tr>
+<tr><td>documentation_quality</td><td>16.990</td></tr>
+<tr><td>physics_accuracy</td><td>16.672</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.93}</td><td>5.075</td><td>0.355</td><td>4.720</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.16}</td><td>3.655</td><td>0.585</td><td>3.071</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.06}</td><td>2.678</td><td>0.161</td><td>2.517</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.08}</td><td>2.544</td><td>0.203</td><td>2.340</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<details><summary>wave_mode_number — validation, label 0, rank error 0.730, rubric 0.835</summary>
+<p>Dimensionless mode-number vector labeling the discrete Fourier periodicities of a coherent wave perturbation.</p><p>Source bindings: []</p><p>Golden evidence: ee352fcc648f1a692d0a2ccda2a06d169c134b3b0bb2ec0edc5b21fd985cf0e5; unresolved [mode number]</p>
+<p>Paired golden alternatives: []. The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>
+<table><thead><tr><th>Dimension</th><th>Score / 20</th></tr></thead><tbody>
+<tr><td>completeness</td><td>16.551</td></tr>
+<tr><td>description_quality</td><td>17.351</td></tr>
+<tr><td>documentation_quality</td><td>17.369</td></tr>
+<tr><td>physics_accuracy</td><td>15.537</td></tr>
+</tbody></table>
+<table><thead><tr><th>Driver</th><th>Answer</th><th>Weight</th><th>Penalty from perfect</th><th>Support logit</th></tr></thead><tbody>
+<tr><td>description_template_opening_mismatch</td><td>{&quot;compliance&quot;: 1.0}</td><td>5.640</td><td>0.000</td><td>5.640</td></tr>
+<tr><td>category</td><td>{&quot;compliance&quot;: 0.85}</td><td>5.075</td><td>0.761</td><td>4.314</td></tr>
+<tr><td>sign_convention_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>4.020</td><td>0.000</td><td>4.020</td></tr>
+<tr><td>defining_equation_missing</td><td>{&quot;compliance&quot;: 1.0}</td><td>3.703</td><td>0.000</td><td>3.703</td></tr>
+<tr><td>incompatible_physics_qualifier</td><td>{&quot;noul&quot;: 0.21}</td><td>3.655</td><td>0.768</td><td>2.888</td></tr>
+<tr><td>equation_physically_incorrect</td><td>{&quot;noul&quot;: 0.08}</td><td>2.678</td><td>0.214</td><td>2.464</td></tr>
+<tr><td>false_equivalence_with_related</td><td>{&quot;noul&quot;: 0.13}</td><td>2.544</td><td>0.331</td><td>2.213</td></tr>
+<tr><td>symbols_undefined</td><td>{&quot;compliance&quot;: 1.0}</td><td>2.150</td><td>0.000</td><td>2.150</td></tr>
+</tbody></table>
+</details>
+<h3>Instrument checks and limitations</h3><p>Golden truth is whole-item only. Name label_source is provenance, not a defect taxonomy; docs label_check is a broad primary reason, not a complete per-check annotation. Thus no check has a measured exact defect count, and no check-specific sensitivity can be calibrated from these receipts. AUC by check and dimension is against overall defensibility. Deterministic docs audit values reproduce the calibration builder with a one-item catalog and known-id set; this context is narrower than the catalog frozen alongside the receipts. Absent name audit answers are unknown. Ablations hold every other parameter fixed and replace a term by its calibration mean; they are diagnostics, not refitted or independently validated improvements. Repeated validation inspection makes a fresh grouped holdout necessary before deployment. Missing evidence and sparse labels do not identify a numerical future AUC gain.</p>
+<p>Control and reproduction receipt: {&quot;name&quot;: {&quot;record_count&quot;: 701, &quot;scored&quot;: 701, &quot;description_nonempty&quot;: 701, &quot;source_docs_nonempty&quot;: 295, &quot;rubric_auc_reproduced&quot;: true}, &quot;planted_claim_veto&quot;: {&quot;contradicts / True&quot;: 60, &quot;says_nothing / False&quot;: 20}, &quot;docs&quot;: {&quot;record_count&quot;: 400, &quot;scored&quot;: 400, &quot;description_nonempty&quot;: 400, &quot;source_docs_nonempty&quot;: 339, &quot;rubric_auc_reproduced&quot;: true}, &quot;name_state_mismatches&quot;: 0, &quot;docs_receipt_digest_verified&quot;: true}</p>
+<p>Source hashes, coverage exclusions, every broad-class proxy, term ablations and full disagreement answers are in the adjacent JSON. The driver records the imported modules and code revision in its durable gate log.</p>
+<h3>Changes that do not establish a gain</h3>
+<table><thead><tr><th>Axis</th><th>Calibration-selected term removed</th><th>Calibration delta</th><th>Validation delta</th></tr></thead><tbody>
+<tr><td>name</td><td>source_fidelity_unsupported_qualifier</td><td>0.004</td><td>-0.000</td></tr>
+<tr><td>docs</td><td>raw_dd_reference_in_prose</td><td>0.014</td><td>-0.017</td></tr>
+</tbody></table>
+<p>Full frozen-catalog replay (same fitted mapping, no judge call): {&quot;calibration&quot;: {&quot;auc&quot;: 0.8365162, &quot;delta&quot;: 0.0, &quot;changed_checks&quot;: {&quot;link_dead&quot;: 197, &quot;link_missing_reverse&quot;: 137}, &quot;examples&quot;: [{&quot;name&quot;: &quot;width_of_spectrometer_channel&quot;, &quot;label&quot;: 0, &quot;check&quot;: &quot;link_dead&quot;, &quot;before&quot;: 1.0, &quot;after&quot;: 0.0}, {&quot;name&quot;: &quot;width_of_spectrometer_channel&quot;, &quot;label&quot;: 0, &quot;check&quot;: &quot;link_missing_reverse&quot;, &quot;before&quot;: 0.0, &quot;after&quot;: 1.0}, {&quot;name&quot;: &quot;weight_of_interferometer_beam&quot;, &quot;label&quot;: 1, &quot;check&quot;: &quot;link_dead&quot;, &quot;before&quot;: 1.0, &quot;after&quot;: 0.0}], &quot;catalog_size&quot;: 491}, &quot;validation&quot;: {&quot;auc&quot;: 0.77543, &quot;delta&quot;: 0.0, &quot;changed_checks&quot;: {&quot;link_dead&quot;: 167, &quot;link_missing_reverse&quot;: 126}, &quot;examples&quot;: [{&quot;name&quot;: &quot;electron_energy&quot;, &quot;label&quot;: 0, &quot;check&quot;: &quot;link_dead&quot;, &quot;before&quot;: 1.0, &quot;after&quot;: 0.0}, {&quot;name&quot;: &quot;krypton_density_flux_surface_averaged_at_plasma_boundary&quot;, &quot;label&quot;: 1, &quot;check&quot;: &quot;link_dead&quot;, &quot;before&quot;: 1.0, &quot;after&quot;: 0.0}, {&quot;name&quot;: &quot;krypton_density_flux_surface_averaged_at_plasma_boundary&quot;, &quot;label&quot;: 1, &quot;check&quot;: &quot;link_missing_reverse&quot;, &quot;before&quot;: 0.0, &quot;after&quot;: 1.0}], &quot;catalog_size&quot;: 450}}. Dead-link classifications change for 364 entries; zero fitted weight makes their score effect zero. This diagnoses an audit-context defect, not a demonstrated AUC improvement.</p>
+<h3>Ranked improvements</h3><ol>
+<li><strong>Supply DD source, parent and sibling evidence to source-sensitive name checks</strong><p>Name dd_source_docs {&#x27;nonempty&#x27;: 295, &#x27;empty&#x27;: 406}; parent_path {&#x27;nonempty&#x27;: 290, &#x27;unobserved&#x27;: 411}; sibling_fields {&#x27;unobserved&#x27;: 701}; derived_children {&#x27;unobserved&#x27;: 701}. bound_to_wrong_object validation AUC 0.6996, but its 0.5 cutoff falsely flags 76 acceptable items. Preserve source absence as unknown and measure applicability rather than forcing a defect answer.</p><p>Expected AUC effect: No point forecast is identifiable from frozen answers. Expected improvement is concentrated in source-sensitive checks; zero immediate gain without rejudging. The available-full-catalog audit replay separately changes 364 dead-link findings but produces exactly zero rubric AUC gain, so evidence plumbing alone must not be advertised as a measured discrimination gain.</p></li>
+<li><strong>Rewrite raw_dd_reference_in_prose to identify an offending span in candidate prose and distinguish canonical quantity names</strong><p>Validation AUC 0.5693; 55/74 acceptable entries flagged. ratio_of_particle_count_to_particle_simulated_count is labelled acceptable and receives P(defect)=0.83, although its prose contains canonical particle_count/particle_simulated_count identifiers rather than a raw DD path. Its source paths appear separately in the state. This motivates a candidate-text-only question with a span, not reversal of polarity.</p><p>Expected AUC effect: Unknown before a paired question arm. Simply removing this term is not supported: calibration AUC rises 0.014371 but validation falls 0.016708. Retain the check until a rewritten question demonstrates improvement on fresh labels.</p></li>
+<li><strong>Add check-specific and dimension-specific golden labels, including completeness and paired provenance corrections</strong><p>The frozen fixtures label whole-item defensibility. No exact check-level defect count is known. Documentation complete has only 3 calibration defects and 0 validation defects; exact subtypes of the 14 physics, 23 subject and 10 scope defects are unlabelled. The name gold has 194 human source/target pairs; label which check each edit fixes and add matched acceptable controls, keeping copy groups together. Dimension models currently fit the same binary target without dimension gold scores.</p><p>Expected AUC effect: Zero immediate AUC change; gain after retraining is unknown. Obtain at least five independent defect groups per targeted check before even provisional calibration, plus a fresh grouped validation set. Five is a minimum identifiability screen, not a precision guarantee.</p></li>
+<li><strong>Refit name dimension mappings against dimension labels and separate documentation non-support from contradiction</strong><p>Name validation grammar rubric AUC is 0.6240 and convention 0.6439, while raw category AUCs are 0.5466 and 0.5651. The existing logistic reference exceeds the raw rubric by 0.022911 AUC on identical receipts. Docs physics has no category question; the claim non-support channel is near chance (0.4959) despite a functioning hard contradiction veto (60/60 planted contradictions, 0/20 silent controls). Removing its fitted term gives calibration delta 0.000193 and validation delta 0.000123.</p><p>Expected AUC effect: The name reference gap of 0.022911 is a measured comparison target, not a forecast for a new mapping. The claim-term sensitivity is only about +0.000123 validation AUC, far short of the proposed 0.85 target. Preserve the hard veto, fit only within calibration, and test the mapping with new independent labels.</p></li>
+</ol></section>

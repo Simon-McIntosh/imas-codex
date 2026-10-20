@@ -1,0 +1,1047 @@
+"""Diagnose frozen review discrimination without making judge or graph calls."""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import copy
+import hashlib
+import html
+import json
+import lzma
+import math
+import subprocess
+import sys
+from collections import Counter
+from pathlib import Path
+
+import numpy as np
+from sklearn.metrics import roc_auc_score
+
+ROOT = Path(__file__).resolve().parents[4]
+STEM = Path(__file__).name.removesuffix("-run.py")
+OUTPUT = Path(__file__).parent
+SPLITS = ("calibration", "validation")
+
+
+def read(path):
+    raw = path.read_bytes()
+    return json.loads(lzma.decompress(raw) if path.suffix == ".xz" else raw)
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def auc(labels, scores):
+    return float(roc_auc_score(labels, scores)) if len(set(labels)) == 2 else None
+
+
+def summary(rows, scores):
+    pairs = [(r, s) for r, s in zip(rows, scores, strict=True) if s is not None]
+    labels = [r["label"] for r, _ in pairs]
+    values = [float(s) for _, s in pairs]
+    assert all(math.isfinite(s) for s in values)
+    return {
+        "n": len(pairs),
+        "acceptable": sum(labels),
+        "defective": len(labels) - sum(labels),
+        "auc": auc(labels, values),
+        "distinct": len(set(values)),
+        "mean_acceptable": float(np.mean([s for (r, s) in pairs if r["label"]]))
+        if sum(labels)
+        else None,
+        "mean_defective": float(np.mean([s for (r, s) in pairs if not r["label"]]))
+        if len(labels) - sum(labels)
+        else None,
+    }
+
+
+def field_value(state, field):
+    if "name" in state:
+        container = (
+            state["name"]["segments"]
+            if field in state["name"]["segments"]
+            else state["name"]
+        )
+        if field not in container:
+            container = state["neighbourhood"]
+        return container.get(field), field in container
+    key = "name_id" if field == "id" else field
+    return state.get(key), key in state
+
+
+def presence(state, field):
+    value, present = field_value(state, field)
+    if not present:
+        return "missing"
+    if isinstance(value, dict) and "observed" in value:
+        if not value["observed"]:
+            return "unobserved"
+        value = value["value"]
+    if value is None:
+        return "null"
+    return "empty" if value in ("", [], {}) else "nonempty"
+
+
+def unwrapped(state, field):
+    value, _ = field_value(state, field)
+    return (
+        value.get("value") if isinstance(value, dict) and "observed" in value else value
+    )
+
+
+def label_class(row, axis):
+    return (
+        (row.get("label_check") or "acceptable")
+        if axis == "docs"
+        else row["label_source"]
+    )
+
+
+def confusion(rows, probs, cutoff):
+    if cutoff is None:
+        return None
+    pairs = [(r, p) for r, p in zip(rows, probs, strict=True) if p is not None]
+    if not pairs:
+        return None
+    tp = sum(not r["label"] and p >= cutoff for r, p in pairs)
+    fp = sum(r["label"] and p >= cutoff for r, p in pairs)
+    defects = sum(not r["label"] for r, _ in pairs)
+    acceptable = sum(r["label"] for r, _ in pairs)
+    return {
+        "cutoff": cutoff,
+        "defects_caught": tp,
+        "false_flags": fp,
+        "defect_recall": tp / defects if defects else None,
+        "false_flag_rate": fp / acceptable if acceptable else None,
+    }
+
+
+def check_report(check, rows, block, axis):
+    out = {
+        "id": check.id,
+        "dimension": check.dimension,
+        "kind": check.question.kind.value if check.question else "deterministic_audit",
+        "question": check.question.text if check.question else None,
+        "audit_finding_class": check.audit_finding_class,
+        "evidence_fields": check.evidence_fields,
+        "saved_diagnostic": block["check_diagnostics"].get(check.id),
+        "splits": {},
+    }
+    for split in SPLITS:
+        selected = [r for r in rows if r["split"] == split]
+        probs = [r["failure"].get(check.id) for r in selected]
+        stats = summary(selected, [1 - p if p is not None else None for p in probs])
+        stats["answered"] = stats["n"]
+        stats["unanswered"] = len(selected) - stats["n"]
+        stats["separation"] = (
+            (stats["mean_acceptable"] - stats["mean_defective"])
+            if stats["auc"] is not None
+            else None
+        )
+        stats["midpoint"] = confusion(selected, probs, 0.5)
+        cutoff = (out["saved_diagnostic"] or {}).get("threshold")
+        diagnostic_probs = [r["check_fail"].get(check.id) for r in selected]
+        stats["calibration_cutoff"] = confusion(selected, diagnostic_probs, cutoff)
+        stats["selected_veto"] = confusion(
+            selected, diagnostic_probs, block["check_thresholds"].get(check.id)
+        )
+        stats["evidence"] = {
+            f: dict(Counter(presence(r["state"], f) for r in selected))
+            for f in check.evidence_fields
+        }
+        # Golden records identify whole-item defects, never individual check truth.
+        stats["fewer_than_five_caught_defects"] = (
+            (stats["midpoint"]["defects_caught"] < 5) if stats["midpoint"] else None
+        )
+        stats["exact_check_defect_labels"] = None
+        stats["calibratable_check_truth"] = False
+        stats["class_proxy_auc"] = {}
+        for cls in sorted(
+            {label_class(r["golden"], axis) for r in selected if not r["label"]}
+        ):
+            group = [
+                r
+                for r in selected
+                if r["label"] or label_class(r["golden"], axis) == cls
+            ]
+            gp = [r["failure"].get(check.id) for r in group]
+            item = summary(group, [1 - p if p is not None else None for p in gp])
+            item["fewer_than_five_defects"] = item["defective"] < 5
+            stats["class_proxy_auc"][cls] = item["auc"]
+        out["splits"][split] = stats
+    return out
+
+
+def counter_rows(rows, axis):
+    counts = Counter((r["split"], r["label"], label_class(r, axis)) for r in rows)
+    classes = sorted({(r["label"], label_class(r, axis)) for r in rows})
+    return [
+        {
+            "split": split,
+            "label": label,
+            "label_class": cls,
+            "count": counts[(split, label, cls)],
+        }
+        for split in SPLITS
+        for label, cls in classes
+    ]
+
+
+def attach(rows, records, golden, axis, cascade, block):
+    for row in rows:
+        row["golden"] = golden[row["id"]]
+        record = records[row["id"]]
+        row["state"] = record["state"]
+        row["answers"] = record["answers"]
+        row["failure"] = {
+            k: v["failure_probability"] if v["answered"] else None
+            for k, v in row["judgment"]["checks"].items()
+        }
+        row["dimensions"] = cascade.rubric_scores(
+            axis, row["judgment"], block["rubric"]
+        )
+        routed = cascade._route(axis, row["judgment"], row["score"], thresholds=block)
+        row["routed_dimensions"] = dict(routed.scores)
+        row["rubric_total"] = sum(row["dimensions"].values()) / 80
+        row["routed_total"] = routed.total
+        row["route"] = routed.route
+        row["features"] = cascade.rubric_features(axis, row["judgment"])
+
+
+def disagreements(rows, axis, block):
+    ranked = []
+    for row in rows:
+        others = [
+            r for r in rows if r["split"] == row["split"] and r["label"] != row["label"]
+        ]
+        score = row["rubric_total"]
+        wrong = sum(
+            (r["rubric_total"] > score if row["label"] else r["rubric_total"] < score)
+            + 0.5 * (r["rubric_total"] == score)
+            for r in others
+        )
+        ranked.append((wrong / len(others), row))
+    out = []
+    for error, row in sorted(ranked, key=lambda x: (-x[0], x[1]["id"]))[:20]:
+        contributions = []
+        for dim, model in block["rubric"]["dimensions"].items():
+            for feature, weight in model["weights"].items():
+                value = row["features"][dim][feature]
+                contributions.append(
+                    {
+                        "dimension": dim,
+                        "feature": feature,
+                        "weight": weight,
+                        "compliance": value,
+                        "penalty_from_perfect_logit": weight * (1 - value),
+                        "support_logit": weight * value,
+                    }
+                )
+        contributions.sort(
+            key=lambda x: (
+                -x["penalty_from_perfect_logit" if row["label"] else "support_logit"]
+            )
+        )
+        answers = {
+            k.removeprefix("check:"): (
+                {"noul": v["noul"]}
+                if "noul" in v
+                else {"choice": v["choice"], "probabilities": v["probabilities"]}
+            )
+            for k, v in row["answers"].items()
+            if k.startswith("check:")
+        }
+        out.append(
+            {
+                "name": row["id"],
+                "split": row["split"],
+                "label": row["label"],
+                "label_class": label_class(row["golden"], axis),
+                "label_note": row["golden"].get("label_note"),
+                "paired_alternatives": [
+                    {"name": r["id"], "label": r["label"], "score": r["rubric_total"]}
+                    for r in rows
+                    if axis == "name"
+                    and r["copy_group"] == row["copy_group"]
+                    and r["id"] != row["id"]
+                ],
+                "source_evidence": row["golden"]["source_evidence"],
+                "rank_error": error,
+                "rubric_total": row["rubric_total"],
+                "logistic_score": row["score"],
+                "route": row["route"],
+                "description": unwrapped(row["state"], "description"),
+                "source_paths": unwrapped(row["state"], "source_paths"),
+                "dimensions": row["dimensions"],
+                "driver_contributions": contributions[:8],
+                "audit_failures": {
+                    k: v
+                    for k, v in row["failure"].items()
+                    if not any(
+                        a == "check:" + k or a.startswith("check:" + k + ":")
+                        for a in row["answers"]
+                    )
+                },
+                "check_answers": answers,
+            }
+        )
+    return out
+
+
+def ablations(rows, axis, checks, block, cascade):
+    """Remove one fitted term, replacing it with its calibration mean."""
+    variants = []
+    baseline = {
+        s: summary(
+            [r for r in rows if r["split"] == s],
+            [r["rubric_total"] for r in rows if r["split"] == s],
+        )["auc"]
+        for s in SPLITS
+    }
+    for dim, model in block["rubric"]["dimensions"].items():
+        for key in model["weights"]:
+            fit = copy.deepcopy(block["rubric"])
+            mean = float(
+                np.mean(
+                    [
+                        r["features"][dim][key]
+                        for r in rows
+                        if r["split"] == "calibration"
+                    ]
+                )
+            )
+            fit["dimensions"][dim]["intercept"] += (
+                fit["dimensions"][dim]["weights"].pop(key) * mean
+            )
+            stats = {}
+            for split in SPLITS:
+                group = [r for r in rows if r["split"] == split]
+                result = summary(
+                    group,
+                    [
+                        sum(cascade.rubric_scores(axis, r["judgment"], fit).values())
+                        / 80
+                        for r in group
+                    ],
+                )
+                stats[split] = {
+                    "auc": result["auc"],
+                    "delta": result["auc"] - baseline[split],
+                }
+            variants.append(
+                {
+                    "dimension": dim,
+                    "feature": key,
+                    "calibration_mean": mean,
+                    "splits": stats,
+                }
+            )
+    return sorted(variants, key=lambda v: -v["splits"]["calibration"]["delta"])
+
+
+def paired_edits(rows):
+    """Measure whether each preferred human spelling outranks its rejected peer."""
+    result = {}
+    for split in SPLITS:
+        pairs = [
+            (good, bad)
+            for good in rows
+            for bad in rows
+            if good["split"] == split
+            and good["label"] == 1
+            and bad["label"] == 0
+            and good["copy_group"] == bad["copy_group"]
+            and "human_edit_target" in good["golden"]["all_label_sources"]
+            and "human_edit_source" in bad["golden"]["all_label_sources"]
+        ]
+        deltas = [g["rubric_total"] - b["rubric_total"] for g, b in pairs]
+        result[split] = {
+            "pairs": len(pairs),
+            "preferred_ranked_higher": sum(d > 0 for d in deltas),
+            "ties": sum(d == 0 for d in deltas),
+            "preference_accuracy": sum((d > 0) + 0.5 * (d == 0) for d in deltas)
+            / len(pairs),
+        }
+    return result
+
+
+def docs_context_replay(rows, frozen, checks, block, cascade, jev):
+    """Replay link audits with the catalog already present in the frozen receipt."""
+    from imas_codex.standard_names.review.audits import AuditReport, run_link_integrity
+
+    result = {}
+    link_checks = [
+        c
+        for c in checks
+        if c.audit_finding_class in {"unresolved", "dead_link", "missing_reverse"}
+    ]
+    for split in SPLITS:
+        group = [r for r in rows if r["split"] == split]
+        context = frozen[split]
+        audit = AuditReport(
+            link_findings=run_link_integrity(
+                context["catalog"], known_ids=set(context["known_ids"])
+            )
+        )
+        scores = []
+        changes = Counter()
+        examples = []
+        for row in group:
+            judgment = copy.deepcopy(row["judgment"])
+            for check in link_checks:
+                finding = jev.audit_finding_for(check, row["id"], audit)
+                value = float(finding is not None)
+                before = row["failure"][check.id]
+                judgment["checks"][check.id]["failure_probability"] = value
+                if value != before:
+                    changes[check.id] += 1
+                    if len(examples) < 3:
+                        examples.append(
+                            {
+                                "name": row["id"],
+                                "label": row["label"],
+                                "check": check.id,
+                                "before": before,
+                                "after": value,
+                            }
+                        )
+            scores.append(
+                sum(cascade.rubric_scores("docs", judgment, block["rubric"]).values())
+                / 80
+            )
+        measured = summary(group, scores)
+        result[split] = {
+            "auc": measured["auc"],
+            "delta": measured["auc"]
+            - auc([r["label"] for r in group], [r["rubric_total"] for r in group]),
+            "changed_checks": dict(changes),
+            "examples": examples,
+            "catalog_size": len(context["catalog"]),
+        }
+    return result
+
+
+def claim_controls(frozen, jev):
+    counts = Counter()
+    plants = {
+        r["id"]: r for r in read(OUTPUT / "golden-documentation-planted.json")["copies"]
+    }
+    for key, receipt in frozen["receipts"].items():
+        if not key.startswith("plant:"):
+            continue
+        expected = key.split(":", 1)[1].rsplit("-", 1)[0]
+        sentence = plants[key.removeprefix("plant:")]["planted_sentence"]
+        indices = [
+            i
+            for i, c in enumerate(receipt["state"]["documentation_claims"])
+            if sentence in c
+        ]
+        assert len(indices) == 1
+        answer = receipt["answers"][f"check:claim_contradicts_source:{indices[0]}"]
+        counts[(expected, str(jev.claim_contradicts(answer)))] += 1
+    assert counts[("contradicts", "True")] == 60
+    assert counts[("says_nothing", "False")] == 20
+    return {" / ".join(k): v for k, v in sorted(counts.items())}
+
+
+def controls():
+    assert auc([0, 1], [0, 1]) == 1
+    assert auc([0, 1], [1, 0]) == 0
+    assert auc([0, 1], [0.5, 0.5]) == 0.5
+    assert auc([1], [1]) is None
+    assert presence({"description": "known"}, "description") == "nonempty"
+    assert presence({"description": "known"}, "absent") == "missing"
+    assert presence({"links": {"observed": True, "value": []}}, "links") == "empty"
+    assert (
+        presence({"links": {"observed": False, "value": None}}, "links") == "unobserved"
+    )
+    print(
+        "CONTROL perfect AUC=1; reversed AUC=0; tied AUC=0.5; absent class=null; nonempty/empty/unobserved/missing distinguished",
+        flush=True,
+    )
+
+
+def render(report):
+    def esc(value):
+        return html.escape(str(value))
+
+    def fmt(value):
+        return "unknown" if value is None else f"{value:.3f}"
+
+    parts = [
+        f'<section id="{STEM}">',
+        "<h2>Where frozen review signal is lost</h2>",
+        "<p>Offline diagnosis; no LLM calls and USD 0 spent. The cascade remains in shadow. "
+        "AUC is oriented toward acceptable items; 0.5 is chance. Each check uses 1 − failure probability. "
+        "Calibration results are in-sample diagnostics; validation has been inspected repeatedly and is no longer an untouched deployment holdout.</p>",
+        "<p>All dimensions use the landed 0–20 rubric mapping before the route ceiling. "
+        "Documentation physics accuracy has checks but no category question. Dimensions were fitted to whole-item binary labels, not dimension-specific gold ratings. "
+        "Observed-empty evidence is distinct from missing or unobserved evidence; a null optional grammar segment need not be a defect. "
+        "Deterministic audits do not ask Jev and may read richer inputs than the prompt state.</p>",
+    ]
+
+    def table(headers, data):
+        parts.append(
+            "<table><thead><tr>"
+            + "".join(f"<th>{esc(x)}</th>" for x in headers)
+            + "</tr></thead><tbody>"
+        )
+        parts.extend(
+            "<tr>" + "".join(f"<td>{esc(x)}</td>" for x in row) + "</tr>"
+            for row in data
+        )
+        parts.append("</tbody></table>")
+
+    for axis, data in report["axes"].items():
+        parts.append(f"<h3>{esc(axis)}: labels and score reproduction</h3>")
+        parts.append(
+            "<p>"
+            + esc(data["label_row_count"])
+            + " golden rows, "
+            + esc(data["canonical_count"])
+            + " canonical identities. Duplicate identities retain the first label provenance for the class table, matching the calibration loader; split and binary-label consistency are asserted. Paired-edit analysis retains all provenance memberships.</p>"
+        )
+        table(
+            [
+                "Split",
+                "Golden unique",
+                "Scored",
+                "Acceptable",
+                "Defective",
+                "Logistic AUC",
+                "Raw rubric AUC",
+                "Routed rubric AUC",
+            ],
+            [
+                [
+                    s,
+                    data["coverage"][s]["golden_unique"],
+                    data["summary"][s]["n"],
+                    data["summary"][s]["acceptable"],
+                    data["summary"][s]["defective"],
+                    fmt(data["logistic"][s]["auc"]),
+                    fmt(data["summary"][s]["auc"]),
+                    fmt(data["routed"][s]["auc"]),
+                ]
+                for s in SPLITS
+            ],
+        )
+        table(
+            ["Split", "Label class", "Label", "Golden count"],
+            [
+                [r["split"], r["label_class"], r["label"], r["count"]]
+                for r in data["labels"]
+            ],
+        )
+        parts.append(
+            "<p>No golden row labels a specific taxonomy check. Exact defect counts for all checks are therefore unknown, not zero. "
+            "The JSON reports every check against each broad label class as a proxy; these are not check-specific sensitivity estimates. "
+            "Classes with fewer than five defects are: "
+            + esc(data["thin_classes"])
+            + ".</p>"
+        )
+        table(
+            [
+                "Dimension",
+                "Calibration AUC",
+                "Validation AUC",
+                "Validation category AUC",
+            ],
+            [
+                [
+                    d,
+                    fmt(v["calibration"]["auc"]),
+                    fmt(v["validation"]["auc"]),
+                    fmt(data["categories"][d]["validation"]["auc"]),
+                ]
+                for d, v in data["dimensions"].items()
+            ],
+        )
+        parts.append(
+            "<h4>Every check</h4><p>C/V denotes calibration/validation. TP and FP use a common failure cutoff of 0.5; "
+            "they count whole-item defects and acceptable items. The JSON also evaluates the saved calibration cutoff and selected veto cutoff. "
+            "The claim check here measures non-support, including “says nothing”; its separate hard veto measures contradiction only.</p>"
+        )
+        table(
+            [
+                "Check / dimension",
+                "Answered C/V",
+                "AUC C/V",
+                "Separation C/V",
+                "TP C/V",
+                "FP C/V",
+            ],
+            [
+                [
+                    c["id"] + " / " + c["dimension"],
+                    "/".join(str(c["splits"][s]["answered"]) for s in SPLITS),
+                    "/".join(fmt(c["splits"][s]["auc"]) for s in SPLITS),
+                    "/".join(fmt(c["splits"][s]["separation"]) for s in SPLITS),
+                    "/".join(
+                        str(
+                            (c["splits"][s]["midpoint"] or {}).get(
+                                "defects_caught", "unknown"
+                            )
+                        )
+                        for s in SPLITS
+                    ),
+                    "/".join(
+                        str(
+                            (c["splits"][s]["midpoint"] or {}).get(
+                                "false_flags", "unknown"
+                            )
+                        )
+                        for s in SPLITS
+                    ),
+                ]
+                for c in data["checks"]
+            ],
+        )
+        thin = [
+            c["id"]
+            for c in data["checks"]
+            if c["splits"]["calibration"]["fewer_than_five_caught_defects"]
+        ]
+        parts.append(
+            "<p>Checks catching fewer than five calibration defects at 0.5: "
+            + esc(", ".join(thin) or "none")
+            + ". This is observed detection support, not a count of the true defects belonging to a check.</p>"
+        )
+        if axis == "name":
+            parts.append(
+                "<p>Human source/target edit pairs: "
+                + esc(json.dumps(data["paired_edits"]))
+                + ". Each pair shares a copy group; the preferred target should rank above the rejected source.</p>"
+            )
+        parts.append("<h4>Evidence present in the actual frozen states</h4>")
+        table(
+            [
+                "Check",
+                "Field",
+                "Calibration nonempty / empty / unknown",
+                "Validation nonempty / empty / unknown",
+            ],
+            [
+                [
+                    c["id"],
+                    f,
+                    *[
+                        " / ".join(
+                            str(v)
+                            for v in (
+                                c["splits"][s]["evidence"][f].get("nonempty", 0),
+                                c["splits"][s]["evidence"][f].get("empty", 0),
+                                sum(
+                                    c["splits"][s]["evidence"][f].get(k, 0)
+                                    for k in ("missing", "null", "unobserved")
+                                ),
+                            )
+                        )
+                        for s in SPLITS
+                    ],
+                ]
+                for c in data["checks"]
+                for f in c["evidence_fields"]
+            ],
+        )
+        parts.append(
+            "<h4>Twenty worst-ranked golden items</h4><p>Rank error is the fraction of opposite-label items in the same split "
+            "ordered incorrectly by the raw rubric, with ties counting one half. It lies in [0,1]; the largest errors across both splits are shown. "
+            "Check contributions are exact weighted compliance shortfalls from a perfect answer in the fitted dimension logit, not causal attributions. "
+            "All check answers and probabilities are retained in the JSON.</p>"
+        )
+        for row in data["disagreements"]:
+            parts.append(
+                "<details><summary>"
+                + esc(
+                    f"{row['name']} — {row['split']}, label {row['label']}, rank error {row['rank_error']:.3f}, rubric {row['rubric_total']:.3f}"
+                )
+                + "</summary>"
+            )
+            parts.append(
+                "<p>"
+                + esc(row["description"])
+                + "</p><p>Source bindings: "
+                + esc(row["source_paths"])
+                + "</p><p>Golden evidence: "
+                + esc(row["source_evidence"])
+                + "; "
+                + esc(row["label_note"] or row["label_class"])
+                + "</p>"
+            )
+            parts.append(
+                "<p>Paired golden alternatives: "
+                + esc(row["paired_alternatives"])
+                + ". The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>"
+            )
+            table(
+                ["Dimension", "Score / 20"],
+                [[d, fmt(v)] for d, v in row["dimensions"].items()],
+            )
+            table(
+                ["Driver", "Answer", "Weight", "Penalty from perfect", "Support logit"],
+                [
+                    [
+                        d["feature"],
+                        json.dumps(
+                            row["check_answers"].get(
+                                d["feature"], {"compliance": d["compliance"]}
+                            ),
+                            ensure_ascii=False,
+                        ),
+                        fmt(d["weight"]),
+                        fmt(d["penalty_from_perfect_logit"]),
+                        fmt(d["support_logit"]),
+                    ]
+                    for d in row["driver_contributions"]
+                ],
+            )
+            parts.append("</details>")
+    parts.append(
+        "<h3>Instrument checks and limitations</h3><p>"
+        + esc(report["limitations"])
+        + "</p>"
+    )
+    parts.append(
+        "<p>Control and reproduction receipt: "
+        + esc(json.dumps(report["controls"], ensure_ascii=False))
+        + "</p>"
+    )
+    parts.append(
+        "<p>Source hashes, coverage exclusions, every broad-class proxy, term ablations and full disagreement answers are in the adjacent JSON. "
+        "The driver records the imported modules and code revision in its durable gate log.</p>"
+    )
+    parts.append("<h3>Changes that do not establish a gain</h3>")
+    table(
+        [
+            "Axis",
+            "Calibration-selected term removed",
+            "Calibration delta",
+            "Validation delta",
+        ],
+        [
+            [
+                a,
+                report["axes"][a]["ablations"][0]["feature"],
+                fmt(
+                    report["axes"][a]["ablations"][0]["splits"]["calibration"]["delta"]
+                ),
+                fmt(report["axes"][a]["ablations"][0]["splits"]["validation"]["delta"]),
+            ]
+            for a in ("name", "docs")
+        ],
+    )
+    parts.append(
+        "<p>Full frozen-catalog replay (same fitted mapping, no judge call): "
+        + esc(json.dumps(report["axes"]["docs"]["catalog_context_replay"]))
+        + ". Dead-link classifications change for 364 entries; zero fitted weight makes their score effect zero. This diagnoses an audit-context defect, not a demonstrated AUC improvement.</p>"
+    )
+    parts.append("<h3>Ranked improvements</h3><ol>")
+    for item in report["improvements"]:
+        parts.append(
+            "<li><strong>"
+            + esc(item["change"])
+            + "</strong><p>"
+            + esc(item["evidence"])
+            + "</p><p>Expected AUC effect: "
+            + esc(item["expected_auc_effect"])
+            + "</p></li>"
+        )
+    parts.append("</ol></section>")
+    return "\n".join(parts) + "\n"
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--model-root", type=Path, default=ROOT)
+    args = parser.parse_args()
+    sys.path.insert(0, str(args.model_root.resolve()))
+    from imas_codex.standard_names.review import (
+        cascade,
+        cascade_calibration as cal,
+        jev_review as jev,
+    )
+    from imas_codex.standard_names.review.checks import load_review_checks
+
+    def refuse(*args, **kwargs):
+        raise RuntimeError("Offline diagnosis refuses judge calls")
+
+    jev.decide_batch = refuse
+    print("measurement_module=" + cascade.__file__, flush=True)
+    print("measurement_cwd=" + str(Path.cwd().resolve()), flush=True)
+    controls()
+    threshold_path = Path(cascade.__file__).with_name("cascade_thresholds.json")
+    thresholds = read(threshold_path)
+    assert all("rubric" in thresholds[a] for a in ("name", "docs")), (
+        "The rubric mapping must be landed before this diagnosis runs"
+    )
+    inputs = [
+        threshold_path,
+        Path(cascade.__file__),
+        Path(cal.__file__),
+        Path(jev.__file__),
+        args.model_root / "imas_codex/llm/prompts/sn/review_checks.yaml",
+    ]
+    for name in (
+        "srtj-evidence-supply-results.json",
+        "srtj-docs-score-arm-results.json",
+        "srtj-docs-score-diagnosis-results.json",
+    ):
+        inputs.append(OUTPUT / name)
+    state_report = read(inputs[-3])
+    name_states = json.loads(
+        lzma.decompress(base64.b85decode(state_report["frozen_states"]["data"]))
+    )
+    name_path = cal.DEFAULT_NAME_RECEIPTS
+    docs_path = cal.DEFAULT_DOCS_RECEIPTS
+    inputs.extend([name_path, docs_path, OUTPUT / "golden-documentation-planted.json"])
+    name_records = {}
+    for line in name_path.read_text().splitlines():
+        record = json.loads(line)
+        if record.get("mode") == "base" and record.get("answered"):
+            name_records[record["name"]] = record
+    assert len(name_states) == state_report["frozen_states"]["count"] == 701
+    assert set(name_states) <= set(name_records)
+    # The compressed states are the exact states frozen after evidence enrichment.
+    mismatches = [
+        name for name in name_states if name_states[name] != name_records[name]["state"]
+    ]
+    assert not mismatches, f"Name state provenance mismatch: {mismatches[:3]}"
+    frozen_docs = read(docs_path)
+    assert (
+        digest(docs_path)
+        == read(OUTPUT / "srtj-docs-score-arm-results.json")["frozen_sha256"]
+    )
+    docs_records = {
+        k.removeprefix("base:"): v
+        for k, v in frozen_docs["receipts"].items()
+        if k.startswith("base:")
+    }
+    report = {
+        "schema": "frozen-review-discrimination",
+        "llm_spend_usd": 0,
+        "axes": {},
+        "controls": {},
+        "improvements": [],
+    }
+    checks = load_review_checks()[0]
+    for axis, fixture, receipt, records in [
+        ("name", cal.GOLDEN_NAME, name_path, name_records),
+        ("docs", cal.GOLDEN_DOCS, docs_path, docs_records),
+    ]:
+        inputs.append(fixture)
+        labels = read(fixture)
+        unique = {}
+        for row in labels:
+            name = row["canonical_unit"]
+            if name in unique:
+                assert (row["split"], row["label"]) == (
+                    unique[name]["split"],
+                    unique[name]["label"],
+                )
+            unique.setdefault(name, row)
+            sources = unique[name].setdefault("all_label_sources", [])
+            if row["label_source"] not in sources:
+                sources.append(row["label_source"])
+        rows, _ = (
+            cal._name_axis(receipt, fixture)
+            if axis == "name"
+            else cal._docs_axis(receipt, fixture)
+        )
+        block = thresholds[axis]
+        attach(rows, records, unique, axis, cascade, block)
+        selected_checks = [c for c in checks if c.axis == axis]
+        data = {
+            "labels": counter_rows(list(unique.values()), axis),
+            "raw_label_rows": counter_rows(labels, axis),
+            "label_row_count": len(labels),
+            "canonical_count": len(unique),
+            "coverage": {},
+            "summary": {},
+            "logistic": {},
+            "routed": {},
+            "dimensions": {},
+            "categories": {},
+            "checks": [],
+        }
+        data["thin_classes"] = [
+            r for r in data["labels"] if r["label"] == 0 and r["count"] < 5
+        ]
+        for split in SPLITS:
+            group = [r for r in rows if r["split"] == split]
+            eligible = [r for r in unique.values() if r["split"] == split]
+            missing = sorted(
+                {r["canonical_unit"] for r in eligible} - {r["id"] for r in group}
+            )
+            data["coverage"][split] = {
+                "golden_unique": len(eligible),
+                "scored": len(group),
+                "excluded": missing,
+            }
+            data["summary"][split] = summary(group, [r["rubric_total"] for r in group])
+            data["logistic"][split] = summary(group, [r["score"] for r in group])
+            data["routed"][split] = summary(group, [r["routed_total"] for r in group])
+            for dimension in rows[0]["dimensions"]:
+                data["dimensions"].setdefault(dimension, {})[split] = summary(
+                    group, [r["dimensions"][dimension] for r in group]
+                )
+                data["categories"].setdefault(dimension, {})[split] = summary(
+                    group, [r["features"][dimension].get("category") for r in group]
+                )
+        data["checks"] = [check_report(c, rows, block, axis) for c in selected_checks]
+        data["disagreements"] = disagreements(rows, axis, block)
+        if axis == "name":
+            data["paired_edits"] = paired_edits(rows)
+        data["ablations"] = ablations(rows, axis, selected_checks, block, cascade)
+        if axis == "docs":
+            data["catalog_context_replay"] = docs_context_replay(
+                rows, frozen_docs, selected_checks, block, cascade, jev
+            )
+            report["controls"]["planted_claim_veto"] = claim_controls(frozen_docs, jev)
+        report["axes"][axis] = data
+        # Reproduction is tested against the artifact that owns the mapping.
+        for split in SPLITS:
+            expected = block["report"][split]["raw_rubric_auc"]
+            assert abs(expected - data["summary"][split]["auc"]) < 5.1e-7, (
+                axis,
+                split,
+                expected,
+                data["summary"][split],
+            )
+        print(axis + " " + json.dumps(data["summary"]), flush=True)
+        print(
+            axis
+            + " best calibration term ablations "
+            + json.dumps(data["ablations"][:3]),
+            flush=True,
+        )
+        report["controls"][axis] = {
+            "record_count": len(records),
+            "scored": len(rows),
+            "description_nonempty": sum(
+                presence(r["state"], "description") == "nonempty" for r in rows
+            ),
+            "source_docs_nonempty": sum(
+                presence(r["state"], "dd_source_docs") == "nonempty" for r in rows
+            ),
+            "rubric_auc_reproduced": True,
+        }
+    assert all(
+        report["controls"][a]["description_nonempty"] > 0
+        and report["controls"][a]["source_docs_nonempty"] > 0
+        for a in ("name", "docs")
+    )
+    report["controls"]["name_state_mismatches"] = len(mismatches)
+    report["controls"]["docs_receipt_digest_verified"] = True
+    report["limitations"] = (
+        "Golden truth is whole-item only. Name label_source is provenance, not a defect taxonomy; docs label_check is a broad primary reason, not a complete per-check annotation. "
+        "Thus no check has a measured exact defect count, and no check-specific sensitivity can be calibrated from these receipts. "
+        "AUC by check and dimension is against overall defensibility. Deterministic docs audit values reproduce the calibration builder with a one-item catalog and known-id set; "
+        "this context is narrower than the catalog frozen alongside the receipts. Absent name audit answers are unknown. "
+        "Ablations hold every other parameter fixed and replace a term by its calibration mean; they are diagnostics, not refitted or independently validated improvements. "
+        "Repeated validation inspection makes a fresh grouped holdout necessary before deployment. Missing evidence and sparse labels do not identify a numerical future AUC gain."
+    )
+    report["inputs"] = [{"path": str(p.resolve()), "sha256": digest(p)} for p in inputs]
+    report["model_revision"] = subprocess.check_output(
+        ["git", "-C", str(args.model_root), "rev-parse", "HEAD"], text=True
+    ).strip()
+    report["improvements"] = recommendations(report)
+    report = compact_numbers(report)
+    encoded = json.dumps(report, ensure_ascii=False, separators=(",", ":")) + "\n"
+    assert len(encoded.encode()) <= 300000, f"Report too large: {len(encoded.encode())}"
+    (OUTPUT / (STEM + ".json")).write_text(encoded)
+    (OUTPUT / (STEM + ".html")).write_text(render(report))
+    print(
+        "SUMMARY "
+        + json.dumps(
+            {
+                "name_validation_auc": report["axes"]["name"]["summary"]["validation"][
+                    "auc"
+                ],
+                "docs_validation_auc": report["axes"]["docs"]["summary"]["validation"][
+                    "auc"
+                ],
+                "checks": sum(len(a["checks"]) for a in report["axes"].values()),
+                "dimensions": sum(
+                    len(a["dimensions"]) for a in report["axes"].values()
+                ),
+                "disagreements": sum(
+                    len(a["disagreements"]) for a in report["axes"].values()
+                ),
+                "llm_spend_usd": 0,
+                "json_bytes": len(encoded.encode()),
+            }
+        ),
+        flush=True,
+    )
+
+
+def compact_numbers(value):
+    """Keep more precision than displayed tables without float repr noise."""
+    if isinstance(value, float):
+        return round(value, 7)
+    if isinstance(value, dict):
+        return {k: compact_numbers(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [compact_numbers(v) for v in value]
+    return value
+
+
+def recommendations(report):
+    def get_check(axis, name):
+        return next(c for c in report["axes"][axis]["checks"] if c["id"] == name)
+
+    def totals(axis, field):
+        check = next(
+            c for c in report["axes"][axis]["checks"] if field in c["evidence_fields"]
+        )
+        return dict(
+            sum(
+                (Counter(check["splits"][s]["evidence"][field]) for s in SPLITS),
+                Counter(),
+            )
+        )
+
+    wrong = get_check("name", "bound_to_wrong_object")["splits"]["validation"]
+    raw = get_check("docs", "raw_dd_reference_in_prose")["splits"]["validation"]
+    claim = next(
+        a
+        for a in report["axes"]["docs"]["ablations"]
+        if a["feature"] == "claim_contradicts_source"
+    )
+    gap = (
+        report["axes"]["name"]["logistic"]["validation"]["auc"]
+        - report["axes"]["name"]["summary"]["validation"]["auc"]
+    )
+    return [
+        {
+            "change": "Supply DD source, parent and sibling evidence to source-sensitive name checks",
+            "candidate": "supply missing evidence",
+            "evidence": f"Name dd_source_docs {totals('name', 'dd_source_docs')}; parent_path {totals('name', 'parent_path')}; sibling_fields {totals('name', 'sibling_fields')}; derived_children {totals('name', 'derived_children')}. bound_to_wrong_object validation AUC {wrong['auc']:.4f}, but its 0.5 cutoff falsely flags {wrong['midpoint']['false_flags']} acceptable items. Preserve source absence as unknown and measure applicability rather than forcing a defect answer.",
+            "expected_auc_effect": "No point forecast is identifiable from frozen answers. Expected improvement is concentrated in source-sensitive checks; zero immediate gain without rejudging. The available-full-catalog audit replay separately changes 364 dead-link findings but produces exactly zero rubric AUC gain, so evidence plumbing alone must not be advertised as a measured discrimination gain.",
+        },
+        {
+            "change": "Rewrite raw_dd_reference_in_prose to identify an offending span in candidate prose and distinguish canonical quantity names",
+            "candidate": "rewrite a check's question",
+            "evidence": f"Validation AUC {raw['auc']:.4f}; {raw['midpoint']['false_flags']}/74 acceptable entries flagged. ratio_of_particle_count_to_particle_simulated_count is labelled acceptable and receives P(defect)=0.83, although its prose contains canonical particle_count/particle_simulated_count identifiers rather than a raw DD path. Its source paths appear separately in the state. This motivates a candidate-text-only question with a span, not reversal of polarity.",
+            "expected_auc_effect": "Unknown before a paired question arm. Simply removing this term is not supported: calibration AUC rises 0.014371 but validation falls 0.016708. Retain the check until a rewritten question demonstrates improvement on fresh labels.",
+        },
+        {
+            "change": "Add check-specific and dimension-specific golden labels, including completeness and paired provenance corrections",
+            "candidate": "add golden labels of a named kind",
+            "evidence": "The frozen fixtures label whole-item defensibility. No exact check-level defect count is known. Documentation complete has only 3 calibration defects and 0 validation defects; exact subtypes of the 14 physics, 23 subject and 10 scope defects are unlabelled. The name gold has 194 human source/target pairs; label which check each edit fixes and add matched acceptable controls, keeping copy groups together. Dimension models currently fit the same binary target without dimension gold scores.",
+            "expected_auc_effect": "Zero immediate AUC change; gain after retraining is unknown. Obtain at least five independent defect groups per targeted check before even provisional calibration, plus a fresh grouped validation set. Five is a minimum identifiability screen, not a precision guarantee.",
+        },
+        {
+            "change": "Refit name dimension mappings against dimension labels and separate documentation non-support from contradiction",
+            "candidate": "change a dimension's mapping",
+            "evidence": f"Name validation grammar rubric AUC is 0.6240 and convention 0.6439, while raw category AUCs are 0.5466 and 0.5651. The existing logistic reference exceeds the raw rubric by {gap:.6f} AUC on identical receipts. Docs physics has no category question; the claim non-support channel is near chance (0.4959) despite a functioning hard contradiction veto (60/60 planted contradictions, 0/20 silent controls). Removing its fitted term gives calibration delta {claim['splits']['calibration']['delta']:.6f} and validation delta {claim['splits']['validation']['delta']:.6f}.",
+            "expected_auc_effect": f"The name reference gap of {gap:.6f} is a measured comparison target, not a forecast for a new mapping. The claim-term sensitivity is only about +0.000123 validation AUC, far short of the proposed 0.85 target. Preserve the hard veto, fit only within calibration, and test the mapping with new independent labels.",
+        },
+    ]
+
+
+if __name__ == "__main__":
+    main()
