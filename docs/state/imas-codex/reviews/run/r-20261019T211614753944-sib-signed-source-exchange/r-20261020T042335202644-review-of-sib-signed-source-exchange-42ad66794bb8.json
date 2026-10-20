@@ -8,6 +8,13 @@
   ],
   "completed_at": "2026-10-20T04:39:27.684Z",
   "dispatched_at": "2026-10-20T04:24:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-separatrix-swap-apply",
+      "recorded_at": "2026-10-20T04:47:43.603755+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/signed_manifest.py",
