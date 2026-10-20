@@ -1,0 +1,114 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate records: baseline_suite and after_suite are both 'not run' at manifest.md:21-22 because the delta is docs/evidence only and changes no importable module, and the single gate the run ran reports '1 passed, 1 warning in 37.84s' with EXIT=0 at sib-separatrix-swap-apply.json step1_graph_test, so no failure was added.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "The live precondition read disagrees with the ruled state: the giving name's stage is not accepted, the taken DD path already carries a holder or a producing edge, or either DD path projects to a third name.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py",
+      "line": 192
+    },
+    {
+      "condition_to_fail": "The swap is reverted or never applied: the giving name's source_paths or producing edge is not exactly dd:summary/local/separatrix/t_e/value, or the bulk name's is not exactly dd:summary/local/separatrix_average/t_e/value; the doctored control at line 788 demonstrates this exact failure.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py",
+      "line": 286
+    },
+    {
+      "condition_to_fail": "The probe reports a busy graph, so guarded_apply raises QuietGraphRequired instead of reaching the writer; the constructed busy reading at line 712 demonstrates it.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py",
+      "line": 668
+    },
+    {
+      "condition_to_fail": "The bulk name is absent from the sourceless set before the swap or still present after it, or any other name enters the set.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py",
+      "line": 596
+    }
+  ],
+  "base_log_revision": "c0381ee8ca3d19d50c92394bf08a60b2619fb2ac",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T06:11:56.209Z",
+  "dispatched_at": "2026-10-20T05:52:30Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/manifest.md",
+      "line": "11",
+      "severity": "blocking",
+      "text": "blocking: The commits entries are joined with '; ' rather than a comma or a JSON array, and 'reckon crew check-manifest --run r-20261020T044913680539-sib-separatrix-swap-apply' returns ok:false with \"field 'commits' joins its entries with ';' before '4247a6d5e0a5...', a separator the list parser does not split on\", so the manifest is unreadable and every other field goes unread with it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: negative_control_log carries two log paths joined with '; ' where the contract requires the bare path of one log; the node writes no test path, so the negative-control readers are exempt rather than refusing it, but the value names no single file a reader can open."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the tests line carries a JSON array literal whose one entry appends the pytest summary and '(marked graph)' to the command, so it is not the literal text a shell was handed; promotion's reader takes that string as the gate command even though the cited log's own '# command:' header names the real one."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py",
+      "line": 367,
+      "severity": "follow-on",
+      "text": "follow-on: _start_bootstrap duplicates the apptainer exec vector owned by imas_codex/graph/temp_neo4j.py:257-287, diverging from start_temp_neo4j only by omitting the dump load, so the two launch paths can drift apart; the owner already exposes write_temp_neo4j_conf, _neo4j_image, _wait_for_bolt_ready and stop_temp_neo4j, all of which this function calls."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py",
+      "line": 149,
+      "severity": "follow-on",
+      "text": "follow-on: the Cypher markers // SIB_SWAP_PRECONDITIONS (line 149), // SIB_SWAP_READBACK (line 242) and // SIB_SWAP_EXISTENCE (line 615) name the plan slug abbreviation in source comments, which the repository's naming rules forbid; the constants at lines 54-57 already name the same facts without the plan prefix."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py",
+      "line": 367,
+      "severity": "follow-on",
+      "text": "follow-on: the step-1 proof ran on an empty disposable instance rather than from the checked export the brief's step 1 names; the substitution is behaviourally equivalent because the fixture at tests/standard_names/test_source_target_reconciliation.py:153,166 erases the whole store before the test seeds its own closure, and both the fragment and the manifest state the substitution and its reason."
+    }
+  ],
+  "head_log_revision": "c0381ee8ca3d19d50c92394bf08a60b2619fb2ac",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "The two commits from c0381ee8ca3d19d50c92394bf08a60b2619fb2ac to 4247a6d5e0a55261c6cac175c0f2c8c4e15d1ce7 add the evidence fragment, its JSON, its authority JSON and a 1018-line runner, then apply ruff formatting to the runner; both messages carry bodies and neither carries an attribution trailer, and no product source or test file is touched.",
+    "done_when": "prompt.txt:319-328 requires the fragment HTML and JSON to record a passing (not skipped) graph-marked test, a scratch rehearsal, the live preconditions, an enforced quiet refusal, the live receipt and the read-back with classifier counts; sib-separatrix-swap-apply.html holds all six sections and sib-separatrix-swap-apply.json holds the matching receipts, and every log ends in a bare EXIT= line.",
+    "goal": "prompt.txt:62 states the goal as applying the separatrix temperature swap through the signed source-exchange writer after proving it on a scratch graph; sib-separatrix-swap-apply.json records the applied receipt and the read-back, and an independent live read of both StandardName nodes at 2026-10-20T06:05Z returns electron_temperature_at_separatrix holding only dd:summary/local/separatrix/t_e/value and the bulk name holding only dd:summary/local/separatrix_average/t_e/value.",
+    "manifest": "manifest.md:5 records status complete and manifest.md:10 a worktree without pending changes at 4247a6d5e, but 'reckon crew check-manifest --run r-20261020T044913680539-sib-separatrix-swap-apply' returns ok:false on manifest.md:11, where the commits entries are joined with '; ' and the list parser refuses the value.",
+    "write_paths": "prompt.txt:344-349 grants four files plus one figure directory; git diff --stat c0381ee8 4247a6d5e0 changes exactly those four files (1395 insertions) and leaves the figure directory unused."
+  },
+  "justifications": {
+    "durability": "sib-separatrix-swap-apply-run.py:286-322 compares the live read-back against literal TAKEN_PATH and GIVEN_PATH constants and is shown reddening on a doctored expectation, so reverting the swap fails it, but the guard lives in an ad-hoc evidence script with no committed test pinning the graph state it checks.",
+    "evidence": "sib-separatrix-swap-apply.json records the graph-marked test log with its PASSED summary and EXIT=0, the scratch rehearsal, the quiet refusal at EXIT=1, the doctored read-back refusal at EXIT=1 and the classifier counts 92 to 91, but the fragment describes the step-1 proof as running on an empty store rather than from the checked export the brief's step 1 names.",
+    "fit": "sib-separatrix-swap-apply-run.py:76-96 follows the sibling evidence runners' Log-with-EXIT= idiom and its function names describe their behaviour, but the query markers at lines 149, 242 and 615 carry the plan-slug abbreviation.",
+    "goal_fidelity": "sib-separatrix-swap-apply.json records the swap as applied in one signed dd-source-exchange transaction and docs/plans/sn-integrity-backlog.html:857 rules exactly this swap, and an independent live read of the two StandardName nodes confirms the moved and the bound path.",
+    "reuse": "sib-separatrix-swap-apply-run.py:107-145 reuses repair_authority and the signed writer as the brief requires, but line 367's _start_bootstrap re-implements the apptainer launch vector owned by imas_codex/graph/temp_neo4j.py:257-287 instead of parameterising start_temp_neo4j.",
+    "scope_discipline": "The diff from c0381ee8ca3d19d50c92394bf08a60b2619fb2ac to 4247a6d5e0a55261c6cac175c0f2c8c4e15d1ce7 changes only the four files granted by prompt.txt:344-349."
+  },
+  "node": "review-of-sib-separatrix-swap-apply-4247a6d5e0a5",
+  "node:reviewed": "sib-separatrix-swap-apply",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: prompt.txt:62 states the goal as applying the separatrix temperature swap through the signed source-exchange writer after proving it on a scratch graph; sib-separatrix-swap-apply.json records the applied receipt and the read-back, and an independent live read of both StandardName nodes at 2026-10-20T06:05Z returns electron_temperature_at_separatrix holding only dd:summary/local/separatrix/t_e/value and the bulk name holding only dd:summary/local/separatrix_average/t_e/value.\nVERDICT done_when: prompt.txt:319-328 requires the fragment HTML and JSON to record a passing (not skipped) graph-marked test, a scratch rehearsal, the live preconditions, an enforced quiet refusal, the live receipt and the read-back with classifier counts; sib-separatrix-swap-apply.html holds all six sections and sib-separatrix-swap-apply.json holds the matching receipts, and every log ends in a bare EXIT= line.\nVERDICT write_paths: prompt.txt:344-349 grants four files plus one figure directory; git diff --stat c0381ee8 4247a6d5e0 changes exactly those four files (1395 insertions) and leaves the figure directory unused.\nVERDICT manifest: manifest.md:5 records status complete and manifest.md:10 a worktree without pending changes at 4247a6d5e, but 'reckon crew check-manifest --run r-20261020T044913680539-sib-separatrix-swap-apply' returns ok:false on manifest.md:11, where the commits entries are joined with '; ' and the list parser refuses the value.\nVERDICT diff: The two commits from c0381ee8ca3d19d50c92394bf08a60b2619fb2ac to 4247a6d5e0a55261c6cac175c0f2c8c4e15d1ce7 add the evidence fragment, its JSON, its authority JSON and a 1018-line runner, then apply ruff formatting to the runner; both messages carry bodies and neither carries an attribution trailer, and no product source or test file is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: sib-separatrix-swap-apply.json records the swap as applied in one signed dd-source-exchange transaction and docs/plans/sn-integrity-backlog.html:857 rules exactly this swap, and an independent live read of the two StandardName nodes confirms the moved and the bound path.\nSCORE evidence: 18\nJUSTIFICATION evidence: sib-separatrix-swap-apply.json records the graph-marked test log with its PASSED summary and EXIT=0, the scratch rehearsal, the quiet refusal at EXIT=1, the doctored read-back refusal at EXIT=1 and the classifier counts 92 to 91, but the fragment describes the step-1 proof as running on an empty store rather than from the checked export the brief's step 1 names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff from c0381ee8ca3d19d50c92394bf08a60b2619fb2ac to 4247a6d5e0a55261c6cac175c0f2c8c4e15d1ce7 changes only the four files granted by prompt.txt:344-349.\nSCORE durability: 13\nJUSTIFICATION durability: sib-separatrix-swap-apply-run.py:286-322 compares the live read-back against literal TAKEN_PATH and GIVEN_PATH constants and is shown reddening on a doctored expectation, so reverting the swap fails it, but the guard lives in an ad-hoc evidence script with no committed test pinning the graph state it checks.\nSCORE fit: 16\nJUSTIFICATION fit: sib-separatrix-swap-apply-run.py:76-96 follows the sibling evidence runners' Log-with-EXIT= idiom and its function names describe their behaviour, but the query markers at lines 149, 242 and 615 carry the plan-slug abbreviation.\nSCORE reuse: 15\nJUSTIFICATION reuse: sib-separatrix-swap-apply-run.py:107-145 reuses repair_authority and the signed writer as the brief requires, but line 367's _start_bootstrap re-implements the apptainer launch vector owned by imas_codex/graph/temp_neo4j.py:257-287 instead of parameterising start_temp_neo4j.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/manifest.md:11 blocking: The commits entries are joined with '; ' rather than a comma or a JSON array, and 'reckon crew check-manifest --run r-20261020T044913680539-sib-separatrix-swap-apply' returns ok:false with \"field 'commits' joins its entries with ';' before '4247a6d5e0a5...', a separator the list parser does not split on\", so the manifest is unreadable and every other field goes unread with it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/manifest.md:19 follow-on: negative_control_log carries two log paths joined with '; ' where the contract requires the bare path of one log; the node writes no test path, so the negative-control readers are exempt rather than refusing it, but the value names no single file a reader can open.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/manifest.md:15 follow-on: the tests line carries a JSON array literal whose one entry appends the pytest summary and '(marked graph)' to the command, so it is not the literal text a shell was handed; promotion's reader takes that string as the gate command even though the cited log's own '# command:' header names the real one.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py:367 follow-on: _start_bootstrap duplicates the apptainer exec vector owned by imas_codex/graph/temp_neo4j.py:257-287, diverging from start_temp_neo4j only by omitting the dump load, so the two launch paths can drift apart; the owner already exposes write_temp_neo4j_conf, _neo4j_image, _wait_for_bolt_ready and stop_temp_neo4j, all of which this function calls.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py:149 follow-on: the Cypher markers // SIB_SWAP_PRECONDITIONS (line 149), // SIB_SWAP_READBACK (line 242) and // SIB_SWAP_EXISTENCE (line 615) name the plan slug abbreviation in source comments, which the repository's naming rules forbid; the constants at lines 54-57 already name the same facts without the plan prefix.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py:367 follow-on: the step-1 proof ran on an empty disposable instance rather than from the checked export the brief's step 1 names; the substitution is behaviourally equivalent because the fixture at tests/standard_names/test_source_target_reconciliation.py:153,166 erases the whole store before the test seeds its own closure, and both the fragment and the manifest state the substitution and its reason.\n",
+  "review_run_id": "r-20261020T055206119210-review-of-sib-separatrix-swap-apply-4247a6d5e0a5",
+  "reviewed_base_sha": "c0381ee8ca3d19d50c92394bf08a60b2619fb2ac",
+  "reviewed_commits": [
+    "e604a9f51b10006fdf9ddd3827c84e33273feec8",
+    "4247a6d5e0a55261c6cac175c0f2c8c4e15d1ce7"
+  ],
+  "reviewed_head_sha": "4247a6d5e0a55261c6cac175c0f2c8c4e15d1ce7",
+  "reviewed_run_id": "r-20261020T044913680539-sib-separatrix-swap-apply",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T06:12:00Z",
+  "total": 101
+}

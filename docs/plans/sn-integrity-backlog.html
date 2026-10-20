@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="240">
+<meta name="plan-version" content="241">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -879,6 +879,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-run-r-20261019T211614753944-sib-signed-source-exchange" data-who="reckon-build" data-when="2026-10-20T04:19:41Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-integrity-backlog/sib-signed-source-exchange.html — exchange now maintains DD projections and source_paths in one transaction; base 254 passed, head 272 passed, zero added failures; both projection mutations EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-run-r-20261020T055206119210-review-of-sib-separatrix-swap-apply-4247a6d5e0a5" data-who="reckon-build" data-when="2026-10-20T06:11:56.209Z">
+    <div class="r-comment-body"><p>A review node produces records, not commits. It writes no repository path: both changed_paths sit in the reviewed run&#x27;s review-records directory, outside this worktree, and this worktree is unmodified at 7cd113f7. Nothing here needs merging; the coordinator reads the records directly and the promotion path takes them from the run directory.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
