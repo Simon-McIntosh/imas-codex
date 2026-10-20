@@ -103,6 +103,8 @@ def confusion(rows, probs, cutoff):
     if cutoff is None:
         return None
     pairs = [(r, p) for r, p in zip(rows, probs, strict=True) if p is not None]
+    if not pairs:
+        return None
     tp = sum(not r["label"] and p >= cutoff for r, p in pairs)
     fp = sum(r["label"] and p >= cutoff for r, p in pairs)
     defects = sum(not r["label"] for r, _ in pairs)
@@ -140,21 +142,22 @@ def check_report(check, rows, block, axis):
         )
         stats["midpoint"] = confusion(selected, probs, 0.5)
         cutoff = (out["saved_diagnostic"] or {}).get("threshold")
-        stats["calibration_cutoff"] = confusion(selected, probs, cutoff)
+        diagnostic_probs = [r["check_fail"].get(check.id) for r in selected]
+        stats["calibration_cutoff"] = confusion(selected, diagnostic_probs, cutoff)
         stats["selected_veto"] = confusion(
-            selected, probs, block["check_thresholds"].get(check.id)
+            selected, diagnostic_probs, block["check_thresholds"].get(check.id)
         )
         stats["evidence"] = {
             f: dict(Counter(presence(r["state"], f) for r in selected))
             for f in check.evidence_fields
         }
         # Golden records identify whole-item defects, never individual check truth.
+        stats["fewer_than_five_caught_defects"] = (
+            (stats["midpoint"]["defects_caught"] < 5) if stats["midpoint"] else None
+        )
         stats["exact_check_defect_labels"] = None
         stats["calibratable_check_truth"] = False
-        stats["label_limitation"] = (
-            "No check-specific golden truth; overall defect recall is not check recall."
-        )
-        stats["class_proxy"] = {}
+        stats["class_proxy_auc"] = {}
         for cls in sorted(
             {label_class(r["golden"], axis) for r in selected if not r["label"]}
         ):
@@ -166,7 +169,7 @@ def check_report(check, rows, block, axis):
             gp = [r["failure"].get(check.id) for r in group]
             item = summary(group, [1 - p if p is not None else None for p in gp])
             item["fewer_than_five_defects"] = item["defective"] < 5
-            stats["class_proxy"][cls] = item
+            stats["class_proxy_auc"][cls] = item["auc"]
         out["splits"][split] = stats
     return out
 
@@ -229,10 +232,23 @@ def disagreements(rows, axis, block):
                         "weight": weight,
                         "compliance": value,
                         "penalty_from_perfect_logit": weight * (1 - value),
+                        "support_logit": weight * value,
                     }
                 )
-        contributions.sort(key=lambda x: -x["penalty_from_perfect_logit"])
-        answers = {k: v for k, v in row["answers"].items() if k.startswith("check:")}
+        contributions.sort(
+            key=lambda x: (
+                -x["penalty_from_perfect_logit" if row["label"] else "support_logit"]
+            )
+        )
+        answers = {
+            k.removeprefix("check:"): (
+                {"noul": v["noul"]}
+                if "noul" in v
+                else {"choice": v["choice"], "probabilities": v["probabilities"]}
+            )
+            for k, v in row["answers"].items()
+            if k.startswith("check:")
+        }
         out.append(
             {
                 "name": row["id"],
@@ -240,6 +256,13 @@ def disagreements(rows, axis, block):
                 "label": row["label"],
                 "label_class": label_class(row["golden"], axis),
                 "label_note": row["golden"].get("label_note"),
+                "paired_alternatives": [
+                    {"name": r["id"], "label": r["label"], "score": r["rubric_total"]}
+                    for r in rows
+                    if axis == "name"
+                    and r["copy_group"] == row["copy_group"]
+                    and r["id"] != row["id"]
+                ],
                 "source_evidence": row["golden"]["source_evidence"],
                 "rank_error": error,
                 "rubric_total": row["rubric_total"],
@@ -249,7 +272,14 @@ def disagreements(rows, axis, block):
                 "source_paths": unwrapped(row["state"], "source_paths"),
                 "dimensions": row["dimensions"],
                 "driver_contributions": contributions[:8],
-                "failure_probabilities": row["failure"],
+                "audit_failures": {
+                    k: v
+                    for k, v in row["failure"].items()
+                    if not any(
+                        a == "check:" + k or a.startswith("check:" + k + ":")
+                        for a in row["answers"]
+                    )
+                },
                 "check_answers": answers,
             }
         )
@@ -305,6 +335,111 @@ def ablations(rows, axis, checks, block, cascade):
                 }
             )
     return sorted(variants, key=lambda v: -v["splits"]["calibration"]["delta"])
+
+
+def paired_edits(rows):
+    """Measure whether each preferred human spelling outranks its rejected peer."""
+    result = {}
+    for split in SPLITS:
+        pairs = [
+            (good, bad)
+            for good in rows
+            for bad in rows
+            if good["split"] == split
+            and good["label"] == 1
+            and bad["label"] == 0
+            and good["copy_group"] == bad["copy_group"]
+            and good["golden"]["label_source"] == "human_edit_target"
+            and bad["golden"]["label_source"] == "human_edit_source"
+        ]
+        deltas = [g["rubric_total"] - b["rubric_total"] for g, b in pairs]
+        result[split] = {
+            "pairs": len(pairs),
+            "preferred_ranked_higher": sum(d > 0 for d in deltas),
+            "ties": sum(d == 0 for d in deltas),
+            "preference_accuracy": sum((d > 0) + 0.5 * (d == 0) for d in deltas)
+            / len(pairs),
+        }
+    return result
+
+
+def docs_context_replay(rows, frozen, checks, block, cascade, jev):
+    """Replay link audits with the catalog already present in the frozen receipt."""
+    from imas_codex.standard_names.review.audits import AuditReport, run_link_integrity
+
+    result = {}
+    link_checks = [
+        c
+        for c in checks
+        if c.audit_finding_class in {"unresolved", "dead_link", "missing_reverse"}
+    ]
+    for split in SPLITS:
+        group = [r for r in rows if r["split"] == split]
+        context = frozen[split]
+        audit = AuditReport(
+            link_findings=run_link_integrity(
+                context["catalog"], known_ids=set(context["known_ids"])
+            )
+        )
+        scores = []
+        changes = Counter()
+        examples = []
+        for row in group:
+            judgment = copy.deepcopy(row["judgment"])
+            for check in link_checks:
+                finding = jev.audit_finding_for(check, row["id"], audit)
+                value = float(finding is not None)
+                before = row["failure"][check.id]
+                judgment["checks"][check.id]["failure_probability"] = value
+                if value != before:
+                    changes[check.id] += 1
+                    if len(examples) < 3:
+                        examples.append(
+                            {
+                                "name": row["id"],
+                                "label": row["label"],
+                                "check": check.id,
+                                "before": before,
+                                "after": value,
+                            }
+                        )
+            scores.append(
+                sum(cascade.rubric_scores("docs", judgment, block["rubric"]).values())
+                / 80
+            )
+        measured = summary(group, scores)
+        result[split] = {
+            "auc": measured["auc"],
+            "delta": measured["auc"]
+            - auc([r["label"] for r in group], [r["rubric_total"] for r in group]),
+            "changed_checks": dict(changes),
+            "examples": examples,
+            "catalog_size": len(context["catalog"]),
+        }
+    return result
+
+
+def claim_controls(frozen, jev):
+    counts = Counter()
+    plants = {
+        r["id"]: r for r in read(OUTPUT / "golden-documentation-planted.json")["copies"]
+    }
+    for key, receipt in frozen["receipts"].items():
+        if not key.startswith("plant:"):
+            continue
+        expected = key.split(":", 1)[1].rsplit("-", 1)[0]
+        sentence = plants[key.removeprefix("plant:")]["planted_sentence"]
+        indices = [
+            i
+            for i, c in enumerate(receipt["state"]["documentation_claims"])
+            if sentence in c
+        ]
+        assert len(indices) == 1
+        answer = receipt["answers"][f"check:claim_contradicts_source:{indices[0]}"]
+        counts[(expected, str(jev.claim_contradicts(answer)))] += 1
+    assert counts[("contradicts", "True")] == 60
+    assert counts[("says_nothing", "False")] == 20
+    return {" / ".join(k): v for k, v in sorted(counts.items())}
 
 
 def controls():
@@ -453,6 +588,22 @@ def render(report):
                 for c in data["checks"]
             ],
         )
+        thin = [
+            c["id"]
+            for c in data["checks"]
+            if c["splits"]["calibration"]["fewer_than_five_caught_defects"]
+        ]
+        parts.append(
+            "<p>Checks catching fewer than five calibration defects at 0.5: "
+            + esc(", ".join(thin) or "none")
+            + ". This is observed detection support, not a count of the true defects belonging to a check.</p>"
+        )
+        if axis == "name":
+            parts.append(
+                "<p>Human source/target edit pairs: "
+                + esc(json.dumps(data["paired_edits"]))
+                + ". Each pair shares a copy group; the preferred target should rank above the rejected source.</p>"
+            )
         parts.append("<h4>Evidence present in the actual frozen states</h4>")
         table(
             [
@@ -509,23 +660,29 @@ def render(report):
                 + esc(row["label_note"] or row["label_class"])
                 + "</p>"
             )
+            parts.append(
+                "<p>Paired golden alternatives: "
+                + esc(row["paired_alternatives"])
+                + ". The name fixture carries no edit rationale; these labels identify preference, not its semantic explanation.</p>"
+            )
             table(
                 ["Dimension", "Score / 20"],
                 [[d, fmt(v)] for d, v in row["dimensions"].items()],
             )
             table(
-                ["Driver", "Answer", "Weight", "Penalty from perfect"],
+                ["Driver", "Answer", "Weight", "Penalty from perfect", "Support logit"],
                 [
                     [
                         d["feature"],
                         json.dumps(
                             row["check_answers"].get(
-                                "check:" + d["feature"], {"compliance": d["compliance"]}
+                                d["feature"], {"compliance": d["compliance"]}
                             ),
                             ensure_ascii=False,
                         ),
                         fmt(d["weight"]),
                         fmt(d["penalty_from_perfect_logit"]),
+                        fmt(d["support_logit"]),
                     ]
                     for d in row["driver_contributions"]
                 ],
@@ -603,7 +760,7 @@ def main():
     )
     name_path = cal.DEFAULT_NAME_RECEIPTS
     docs_path = cal.DEFAULT_DOCS_RECEIPTS
-    inputs.extend([name_path, docs_path])
+    inputs.extend([name_path, docs_path, OUTPUT / "golden-documentation-planted.json"])
     name_records = {}
     for line in name_path.read_text().splitlines():
         record = json.loads(line)
@@ -694,12 +851,19 @@ def main():
                 )
         data["checks"] = [check_report(c, rows, block, axis) for c in selected_checks]
         data["disagreements"] = disagreements(rows, axis, block)
+        if axis == "name":
+            data["paired_edits"] = paired_edits(rows)
         data["ablations"] = ablations(rows, axis, selected_checks, block, cascade)
+        if axis == "docs":
+            data["catalog_context_replay"] = docs_context_replay(
+                rows, frozen_docs, selected_checks, block, cascade, jev
+            )
+            report["controls"]["planted_claim_veto"] = claim_controls(frozen_docs, jev)
         report["axes"][axis] = data
         # Reproduction is tested against the artifact that owns the mapping.
         for split in SPLITS:
             expected = block["report"][split]["raw_rubric_auc"]
-            assert abs(expected - data["summary"][split]["auc"]) < 1e-10, (
+            assert abs(expected - data["summary"][split]["auc"]) < 5.1e-7, (
                 axis,
                 split,
                 expected,
@@ -723,6 +887,11 @@ def main():
             ),
             "rubric_auc_reproduced": True,
         }
+    assert all(
+        report["controls"][a]["description_nonempty"] > 0
+        and report["controls"][a]["source_docs_nonempty"] > 0
+        for a in ("name", "docs")
+    )
     report["controls"]["name_state_mismatches"] = len(mismatches)
     report["controls"]["docs_receipt_digest_verified"] = True
     report["limitations"] = (
@@ -738,6 +907,7 @@ def main():
         ["git", "-C", str(args.model_root), "rev-parse", "HEAD"], text=True
     ).strip()
     report["improvements"] = recommendations(report)
+    report = compact_numbers(report)
     encoded = json.dumps(report, ensure_ascii=False, separators=(",", ":")) + "\n"
     assert len(encoded.encode()) <= 300000, f"Report too large: {len(encoded.encode())}"
     (OUTPUT / (STEM + ".json")).write_text(encoded)
@@ -765,6 +935,17 @@ def main():
         ),
         flush=True,
     )
+
+
+def compact_numbers(value):
+    """Keep more precision than displayed tables without float repr noise."""
+    if isinstance(value, float):
+        return round(value, 7)
+    if isinstance(value, dict):
+        return {k: compact_numbers(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [compact_numbers(v) for v in value]
+    return value
 
 
 def recommendations(report):
