@@ -60,6 +60,21 @@
     <code>['equilibrium/time_slice/profiles_1d/psi']</code> on both passes and the note holds.
   </p>
 
+  <p id="ssog-docs-hold-facility-paths-veto-path">
+    <strong>End-to-end veto path.</strong> The round trip above was measured through
+    <code>prepare_docs_review_request</code> itself, on the shape that exercises it: a name
+    bound to DD text only by a <code>dd:</code>-prefixed source path, with no
+    <code>dd</code> binding, whose text is missing. A <code>dd</code> binding alone cannot
+    show the defect, because it short-circuits the source-path normalisation — the first
+    version of the test used one and passed on the pre-repair source. The request is now
+    driven with the DD-context read stubbed to return nothing — no graph read, no model
+    call — and the note is re-run on <code>request["veto_item"]</code>, which is the item
+    the claimed worker receives. On the pre-repair source
+    (<code>logs/repair_round2_negative_control.log</code>, <code>100a86a4d</code>) the
+    re-check returns <code>None</code> and the hold is lost; on the landed head it returns
+    <code>'DD source text unavailable at equilibrium/time_slice/profiles_1d/j_tor'</code>.
+  </p>
+
   <p id="ssog-docs-hold-facility-paths-caller-audit">
     <strong>Caller audit.</strong> <code>_bound_docs_review_dd_paths</code> has three callers. Its
     return is DD paths only, and its input may be a raw item or a prepared one:
@@ -89,28 +104,36 @@
     <strong>Measure.</strong> Gate over <code>test_docs_hold_dd_bindings.py</code> and
     <code>test_review_cascade.py</code> — every test file that imports
     <code>_bound_docs_review_dd_paths</code> or <code>_documentation_contradiction_note</code> —
-    against the pre-repair base (<code>100a86a4d</code>): base arm <code>77 passed</code>; head
-    arm <code>79 passed</code> (the two added tests). Added failures <code>0</code>. The arms ran
-    from a scratch copy of <code>imas_codex/</code> and <code>tests/</code> under
-    <code>$TMPDIR</code>, each naming
-    <code>.../scratch/imas_codex/standard_names/workers.py</code> as the module under test
-    (<code>logs/repair_gate_base.log</code>, <code>logs/repair_gate_head.log</code>). No LLM
-    spend: every case returns before a model call.
+    base arm at the run's base revision <code>8fc4843c9</code>, in its own checkout outside
+    the worktree (a <code>git archive</code> extract under <code>$TMPDIR</code>):
+    <code>75 passed</code>, <code>EXIT=0</code>; head arm at <code>069bf7caa</code>:
+    <code>81 passed</code>, <code>EXIT=0</code>
+    (<code>logs/gate_base_8fc4843c9.log</code>, <code>logs/gate_head_069bf7caa.log</code>).
+    Added failures <code>0</code>; the six added tests are the two veto-path cases of this
+    round and the four of the earlier rounds. Each log's source is hash-verified against the
+    revision it names and its header names the module under test. No LLM spend: every case
+    returns before a model call, and the veto-path cases stub the DD-context read so no
+    graph read happens either.
   </p>
 
   <p id="ssog-docs-hold-facility-paths-negative-control">
-    <strong>Negative control.</strong> The surgical mutation drops the one line recording
-    <code>dd_source_paths</code>, restoring the round-trip loss while the rest of the repair
-    stands: <code>test_normalised_dd_source_path_still_holds</code> then fails with
+    <strong>Negative control.</strong> The two veto-path tests run against the source from
+    before the provenance fix (<code>100a86a4d</code>) fail —
+    <code>test_veto_request_holds_a_dd_source_path_with_missing_text</code> with
     <code>AssertionError: assert None == 'DD source text unavailable at
-    equilibrium/time_slice/profiles_1d/j_tor'</code> (<code>1 failed, 78 passed</code>,
-    <code>EXIT=1</code>; <code>logs/repair_negative_control_surgical.log</code>). Reverting the
-    answering commit whole (pre-repair source with the head tests) fails the same test and
+    equilibrium/time_slice/profiles_1d/j_tor'</code>, alongside the two round-trip cases
+    (<code>3 failed, 9 passed</code>, <code>EXIT=1</code>;
+    <code>logs/repair_round2_negative_control.log</code>) — and pass on the landed head.
+    Measured against the earlier head, dropping only the line recording
+    <code>dd_source_paths</code> failed <code>test_normalised_dd_source_path_still_holds</code>
+    (<code>1 failed, 78 passed</code>, <code>EXIT=1</code>;
+    <code>logs/repair_negative_control_surgical.log</code>), and reverting the answering
+    commit whole failed that test and
     <code>test_normalised_facility_source_path_is_not_held</code> (<code>2 failed</code>,
-    <code>EXIT=1</code>; <code>logs/repair_negative_control.log</code>). Expectations are literals
-    built without the constant that fed their input: the held case expects
-    <code>.../profiles_1d/j_tor</code> while its input path is prefixed <code>dd:</code>, so
-    echoing the input cannot satisfy it.
+    <code>EXIT=1</code>; <code>logs/repair_negative_control.log</code>). Expectations are
+    literals built without the constant that fed their input: the held cases expect
+    <code>.../profiles_1d/j_tor</code> while their input path is prefixed <code>dd:</code>, so
+    echoing the input cannot satisfy them.
   </p>
 
   <p id="ssog-docs-hold-facility-paths-state">
