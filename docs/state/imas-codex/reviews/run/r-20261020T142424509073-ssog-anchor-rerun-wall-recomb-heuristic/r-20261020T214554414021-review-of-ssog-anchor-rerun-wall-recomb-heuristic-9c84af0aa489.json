@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest records baseline_suite null and after_suite null (classification.json agrees), so the run has no base/head gate-log pair to difference and adds zero failures; its single gate log, runner-heuristic.log, ends EXIT=0, so the count is 0 by absence of suite arms rather than a measured green suite.",
+  "call_site_count": 1,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:_classify"
+  ],
+  "completed_at": "2026-10-20T22:03:22.296Z",
+  "dispatched_at": "2026-10-20T21:46:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json",
+      "line": 6,
+      "text": "follow-on: the commit rewrites the family's arm record in place, so the prior attempt's attempt_outcome and its runner_exit_code=1 are dropped; the aggregate at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:130 now reads attempt_outcome null for this family and the first round's failure survives only in the narrative of ssog-anchor-wall-recomb-heuristic.html."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-wall-recomb-heuristic.html",
+      "line": 54,
+      "text": "follow-on: the score note claims four of five members carry distinct real documentation scores, but the after-values are {1.0, 1.0, 0.9375, 0.98125, 0.849} \u2014 four distinct values across five members with 1.0 repeated; the material claim, that the uniform 0.849 column is gone, is correct and verified in the apply log."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production runtime code reads the landed artifacts; the only consumer found is the evidence aggregator docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:_classify, which loads the per-family arm records and reads lint_after, harmonize_summary, scores_after and attempt_outcome (line 130).",
+    "diff": "read commit 9c84af0aa against its parent 284f17bcb: two files, the arm record (+159/-24, rewritten from the first round's failed 'running' state to a completed arm) and the new 93-line landing fragment.",
+    "done_when": "every field the done_when names is present in the landed record (outcome_status complete, anchor, lint_before 3 -> lint_after 2, scores_before/scores_after for all five members, harmonize_summary.batches_run 2 of 2, calls 43, spend_usd 1.947944, wall_seconds 2447.6, stamped false, containment.holds true, code digest 53d14e51fb7a7d8c); the run's manifest tests line names the exact detached command whose log ends EXIT=0.",
+    "goal": "the node goal is to re-run the heuristic arm of the energy_flux_at_wall_due_to_recombination anchor family on the fixed code and the re-derived anchors in a scratch graph; commit 9c84af0aa records that arm at ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json with anchor incident_ion_energy_flux_at_wall_due_to_recombination on code.git_head 284f17bcb.",
+    "manifest": "read the run's manifest.md; status complete, commit 9c84af0aa, tests names the detached arm invocation, test_logs names runner-heuristic.log and the apply log, baseline_suite and after_suite both null (classification.json agrees), and retry_failures records the killed first attempt as an external cause.",
+    "write_paths": "read the manifest's declared paths (the ab/ arm record, the rerun landing fragment and a figures dir) and the node's orientation_write_paths; git show --stat 9c84af0aa changes only the two declared files, both inside the scope."
+  },
+  "justifications": {
+    "durability": "the change is an evidence artifact with no test and the diff adds no assertion, so nothing reddens if the arm's numbers regress; the record's code digest and revision pair make a mismatched revision visible to a reader but fail nothing.",
+    "evidence": "the done_when's field list is fully present in the landed record and reconciles with the run's own logs: runner-heuristic.log ends 'EXIT=0', the apply log prints the same member_scores and scores_after, and per_model sums (0.389145+0.840325+0.00539+0.326206+0.38367+0.003208) to the recorded spend_usd 1.947944.",
+    "fit": "the record follows the schema the sibling arms already use (ssog-anchor-ab/*-heuristic.json), which the aggregate reads at ssog-anchor-ab-aggregate-run.py:63-131, and the fragment follows the sibling fragments' table-only idiom; the paths and symbols name the arm, not a plan stage.",
+    "goal_fidelity": "the node goal is to re-run the heuristic arm of the energy_flux_at_wall_due_to_recombination family on the fixed code and the re-derived anchors; the landed record at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json carries anchor 'incident_ion_energy_flux_at_wall_due_to_recombination', the value selection.json gives for this family, and ran on code.git_head 284f17bcb.",
+    "reuse": "the landed diff adds no source definition and no capability; it reuses the existing ssog-anchor-ab-run.py runner and the shared per-family arm-record schema, so a search over docs/evidence/fragments/sn-selection-over-generation for an existing arm-record producer found this one owner and nothing to fork.",
+    "scope_discipline": "git show --stat 9c84af0aa lists exactly two files, both declared write paths (the ab/ arm record and the new landing fragment); no runner, selection or product source is touched and no concurrent node's path appears."
+  },
+  "node": "review-of-ssog-anchor-rerun-wall-recomb-heuristic-9c84af0aa489",
+  "node:reviewed": "ssog-anchor-rerun-wall-recomb-heuristic",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to re-run the heuristic arm of the energy_flux_at_wall_due_to_recombination family on the fixed code and the re-derived anchors in a scratch graph; commit 9c84af0aa records that arm at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json with anchor incident_ion_energy_flux_at_wall_due_to_recombination on code.git_head 284f17bcb.\nVERDICT done_when: the done_when names ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json holding outcome status, anchor, lint before/after, every member's before/after documentation score, batches, calls, spend, wall time, stamped, containment and code digest; all of those keys are in the landed record and reconcile with the run's own logs, whose runner log ends EXIT=0.\nVERDICT write_paths: read the reviewed manifest's declared paths plus the node's orientation_write_paths; git show --stat 9c84af0aa changes exactly two files, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json and docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-wall-recomb-heuristic.html, both inside the declared scope.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T142424509073-ssog-anchor-rerun-wall-recomb-heuristic/manifest.md; status complete, commit 9c84af0aa, tests names the detached arm invocation, test_logs names runner-heuristic.log and the apply log, and baseline_suite and after_suite are both null.\nVERDICT diff: read commit 9c84af0aa against its parent 284f17bcb: the arm record rewritten in place (+159/-24, from the first round's failed 'running' state to a completed arm) and a new 93-line landing fragment; nothing else.\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:_classify\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json records anchor incident_ion_energy_flux_at_wall_due_to_recombination on code.git_head 284f17bcb, which is the goal the node was dispatched to produce.\nSCORE evidence: 18\nJUSTIFICATION evidence: the landed record's lint_before 3 / lint_after 2, member scores and per_model spend reconcile with the reviewed run's own logs/apply-heuristic-energy_flux_at_wall_due_to_recombination.log, and runner-heuristic.log:10 ends EXIT=0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat 9c84af0aa lists only the two declared write paths, so no product source, runner or peer path is touched.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no assertion and no test guards the arm record, so a regression in the recorded numbers would fail nothing; the code digest at the record's code key only makes a mismatch visible to a reader.\nSCORE fit: 17\nJUSTIFICATION fit: the record follows the sibling arm records' schema that ssog-anchor-ab-aggregate-run.py:63-131 reads, and the fragment follows the table-only idiom of sibling fragments such as ssog-anchor-wall-recomb-heuristic.html.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no source definition, reusing the existing docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py runner and the shared arm-record schema, so no capability is forked.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json:6 follow-on: the record is rewritten in place, dropping the prior attempt's attempt_outcome and runner_exit_code=1, so ssog-anchor-ab-aggregate-run.py:130 now reads attempt_outcome null for this family.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-wall-recomb-heuristic.html:54 follow-on: the note says four of five members carry distinct real documentation scores, but the after-values are {1.0, 1.0, 0.9375, 0.98125, 0.849}; the uniform-0.849-column claim itself is correct.",
+  "review_run_id": "r-20261020T214554414021-review-of-ssog-anchor-rerun-wall-recomb-heuristic-9c84af0aa489",
+  "reviewed_base_sha": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+  "reviewed_head_sha": "9c84af0aa489c24ec1ddcae313677cc0f5ee63c6",
+  "reviewed_run_id": "r-20261020T142424509073-ssog-anchor-rerun-wall-recomb-heuristic",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T22:25:00+00:00",
+  "total": 101
+}
