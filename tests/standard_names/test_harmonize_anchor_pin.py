@@ -55,6 +55,7 @@ def _node(
         "harmonized_group_signature": signature,
         "harmonized_anchor": anchor,
         "links": [],
+        "has_dd_source": True,
     }
 
 

@@ -39,6 +39,7 @@ from imas_codex.standard_names.doc_links import (
 from imas_codex.standard_names.families import (
     DOCS_STAGE_ACCEPTED,
     _pattern_family_rows_query as _pattern_family_rows_query,
+    dd_source_exists,
     fetch_pattern_families,
     fetch_pattern_family,
     select_anchor,
@@ -153,6 +154,7 @@ def _row_to_member(row: dict[str, Any]) -> dict[str, Any]:
         "reviewer_score_docs": row.get("reviewer_score_docs"),
         "operator_kind": row.get("operator_kind"),
         "operator": row.get("operator"),
+        "has_dd_source": row.get("has_dd_source"),
     }
 
 
@@ -245,8 +247,8 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
             parent_id = eligible_parent_rows[0]["parent_id"]
             member_rows = (
                 resolved_gc.query(
-                    """
-                    MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName {id: $parent_id})
+                    f"""
+                    MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName {{id: $parent_id}})
                     WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                       AND coalesce(c.name_stage, '') <> $superseded
                       AND c.description IS NOT NULL
@@ -255,7 +257,8 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                            c.docs_stage AS docs_stage,
                            c.reviewer_score_docs AS reviewer_score_docs,
                            r.operator_kind AS operator_kind,
-                           r.operator AS operator
+                           r.operator AS operator,
+                           {dd_source_exists("c")} AS has_dd_source
                     """,
                     parent_id=parent_id,
                     kinds=list(_FAMILY_OPERATOR_KINDS),
@@ -266,9 +269,11 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
             )
             parent_info_rows = (
                 resolved_gc.query(
-                    """
-                    MATCH (p:StandardName {id: $parent_id})
-                    RETURN p.docs_stage AS docs_stage, p.description AS description
+                    f"""
+                    MATCH (p:StandardName {{id: $parent_id}})
+                    RETURN p.docs_stage AS docs_stage,
+                           p.description AS description,
+                           {dd_source_exists("p")} AS has_dd_source
                     """,
                     parent_id=parent_id,
                 )
@@ -286,6 +291,7 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                 parent_info.get("docs_stage"),
                 parent_info.get("description"),
                 members,
+                parent_has_dd_source=parent_info.get("has_dd_source"),
             )
             return {
                 "parent": parent_id,
@@ -350,7 +356,7 @@ def build_worklist(
     try:
         family_rows = (
             resolved_gc.query(
-                """
+                f"""
                 MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
                 WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                   AND coalesce(c.name_stage, '') <> $superseded
@@ -358,16 +364,18 @@ def build_worklist(
                 RETURN p.id AS parent_id,
                        p.docs_stage AS parent_docs_stage,
                        p.description AS parent_description,
+                       {dd_source_exists("p")} AS parent_has_dd_source,
                        p.harmonized_group_signature AS harmonized_group_signature,
-                       collect({
+                       collect({{
                            id: c.id,
                            description: c.description,
                            documentation: c.documentation,
                            docs_stage: c.docs_stage,
                            reviewer_score_docs: c.reviewer_score_docs,
                            operator_kind: r.operator_kind,
-                           operator: r.operator
-                       }) AS members
+                           operator: r.operator,
+                           has_dd_source: {dd_source_exists("c")}
+                       }}) AS members
                 """,
                 kinds=list(_FAMILY_OPERATOR_KINDS),
                 reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
@@ -397,6 +405,7 @@ def build_worklist(
                 row.get("parent_docs_stage"),
                 row.get("parent_description"),
                 members,
+                parent_has_dd_source=row.get("parent_has_dd_source"),
             )
             docs_accepted = sum(
                 1 for m in members if m.get("docs_stage") == DOCS_STAGE_ACCEPTED

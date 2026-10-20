@@ -30,6 +30,7 @@ _MEMBERS = [
         "documentation": "Alpha base at the plasma boundary.",
         "docs_stage": "drafted",
         "harmonized_group_signature": None,
+        "has_dd_source": True,
     },
     {
         "id": "alpha_base_at_axis",
@@ -38,6 +39,7 @@ _MEMBERS = [
         "documentation": "A different opening entirely.",
         "docs_stage": "accepted",
         "harmonized_group_signature": None,
+        "has_dd_source": True,
     },
     {
         "id": "alpha_base_of_probe",
@@ -46,6 +48,7 @@ _MEMBERS = [
         "documentation": "Yet another opening.",
         "docs_stage": "drafted",
         "harmonized_group_signature": None,
+        "has_dd_source": True,
     },
 ]
 

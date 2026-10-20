@@ -143,10 +143,15 @@ class TestSelectAnchor:
                 "description": "child description",
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.99,
+                "has_dd_source": True,
             }
         ]
         anchor = select_anchor(
-            "parent_id", "accepted", "a real parent description", members
+            "parent_id",
+            "accepted",
+            "a real parent description",
+            members,
+            parent_has_dd_source=True,
         )
         assert anchor == "parent_id"
 
@@ -161,12 +166,14 @@ class TestSelectAnchor:
                 "description": "low score child",
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.7,
+                "has_dd_source": True,
             },
             {
                 "id": "child_high",
                 "description": "high score child",
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.95,
+                "has_dd_source": True,
             },
         ]
         anchor = select_anchor(
@@ -184,12 +191,14 @@ class TestSelectAnchor:
                 "description": "low score child",
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.6,
+                "has_dd_source": True,
             },
             {
                 "id": "child_high",
                 "description": "high score child",
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.9,
+                "has_dd_source": True,
             },
         ]
         anchor = select_anchor("parent_id", "drafted", "pending desc", members)
@@ -201,6 +210,7 @@ class TestSelectAnchor:
                 "id": "child1",
                 "description": "some description",
                 "docs_stage": "drafted",
+                "has_dd_source": True,
             },
         ]
         anchor = select_anchor(None, None, None, members)
@@ -220,12 +230,14 @@ class TestSelectAnchor:
                 ),
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.80,
+                "has_dd_source": True,
             },
             {
                 "id": "short_high_score",
                 "description": "short accepted description",
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.95,
+                "has_dd_source": True,
             },
         ]
         assert select_anchor(None, None, None, members) == "short_high_score"
@@ -240,6 +252,7 @@ class TestSelectAnchor:
                 "description": "short one",
                 "docs_stage": "drafted",
                 "reviewer_score_docs": None,
+                "has_dd_source": True,
             },
             {
                 "id": "zzz_very_long",
@@ -248,6 +261,7 @@ class TestSelectAnchor:
                 ),
                 "docs_stage": "drafted",
                 "reviewer_score_docs": None,
+                "has_dd_source": True,
             },
         ]
         assert select_anchor(None, None, None, members) == "aaa_short"
@@ -262,6 +276,7 @@ class TestSelectAnchor:
                 "id": "child1",
                 "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
                 "docs_stage": "drafted",
+                "has_dd_source": True,
             },
         ]
         anchor = select_anchor(None, None, None, members)
@@ -279,11 +294,13 @@ def _family_row(
     parent_docs_stage="accepted",
     parent_desc="parent desc",
     sig=None,
+    parent_has_dd_source=True,
 ):
     return {
         "parent_id": parent_id,
         "parent_docs_stage": parent_docs_stage,
         "parent_description": parent_desc,
+        "parent_has_dd_source": parent_has_dd_source,
         "harmonized_group_signature": sig,
         "members": members,
     }
@@ -320,6 +337,7 @@ class TestBuildWorklist:
                             "documentation": "",
                             "docs_stage": "accepted",
                             "reviewer_score_docs": 0.9,
+                            "has_dd_source": True,
                         }
                         for i, desc in enumerate(
                             (
@@ -405,6 +423,7 @@ class TestBuildWorklist:
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.9,
                 "operator_kind": "projection",
+                "has_dd_source": True,
             },
             {
                 "id": "toroidal_mode_number",
@@ -413,6 +432,7 @@ class TestBuildWorklist:
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.9,
                 "operator_kind": "projection",
+                "has_dd_source": True,
             },
             {
                 "id": "radial_mode_number",
@@ -421,6 +441,7 @@ class TestBuildWorklist:
                 "docs_stage": "drafted",
                 "reviewer_score_docs": None,
                 "operator_kind": "projection",
+                "has_dd_source": True,
             },
         ]
         current_sig = group_signature(members)
@@ -439,6 +460,7 @@ class TestBuildWorklist:
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.9,
                 "operator_kind": "projection",
+                "has_dd_source": True,
             },
             {
                 "id": "toroidal_mode_number",
@@ -447,6 +469,7 @@ class TestBuildWorklist:
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.9,
                 "operator_kind": "projection",
+                "has_dd_source": True,
             },
             {
                 "id": "radial_mode_number",
@@ -455,6 +478,7 @@ class TestBuildWorklist:
                 "docs_stage": "drafted",
                 "reviewer_score_docs": None,
                 "operator_kind": "projection",
+                "has_dd_source": True,
             },
         ]
         gc = MagicMock()
@@ -549,6 +573,7 @@ class TestBuildWorklist:
                 "docs_stage": "drafted",
                 "reviewer_score_docs": None,
                 "operator_kind": "projection",
+                "has_dd_source": True,
             }
             for i in range(3)
         ]

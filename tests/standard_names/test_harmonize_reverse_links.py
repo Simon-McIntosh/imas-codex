@@ -75,6 +75,7 @@ def _node(
         "reviewer_score_docs": 0.9,
         "name_stage": name_stage,
         "harmonized_group_signature": None,
+        "has_dd_source": True,
     }
 
 

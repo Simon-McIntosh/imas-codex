@@ -179,6 +179,7 @@ def _name(
         ),
         "docs_stage": docs_stage,
         "reviewer_score_docs": reviewer_score_docs,
+        "has_dd_source": True,
     }
 
 
