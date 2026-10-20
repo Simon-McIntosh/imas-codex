@@ -23,6 +23,11 @@
   },
   "dispatched_at": "2026-10-20T13:59:24Z",
   "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the re-selection driver is a one-off whose output, the anchors, the review did not dispute; it is not run again",
+      "recorded_at": "2026-10-20T14:19:49.474703+00:00"
+    },
     "2": {
       "kind": "folded",
       "node": "ssog-anchor-ab-rerun-aggregate",
