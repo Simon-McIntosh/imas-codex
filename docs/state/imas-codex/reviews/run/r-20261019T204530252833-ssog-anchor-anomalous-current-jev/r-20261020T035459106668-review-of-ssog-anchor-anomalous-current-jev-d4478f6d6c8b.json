@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-10-20T04:14:23.484Z",
   "dispatched_at": "2026-10-20T03:55:57Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-20T04:25:23.451092+00:00"
+    }
+  },
   "findings": [
     {
       "claim": "the arm JSON line 178 records scratch_scope_run_rows 0 while scratch_family_rows is 50 in the same graph",
