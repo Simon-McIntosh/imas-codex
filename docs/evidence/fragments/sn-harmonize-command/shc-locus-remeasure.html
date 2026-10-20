@@ -1,0 +1,29 @@
+<section>
+  <h2 id="shc-locus-remeasure">Locus family electrostatic_potential: convergence and cost</h2>
+  <p id="shc-locus-remeasure-summary">
+    The non-WEST locus family <code>electrostatic_potential</code> ran under <code>sn harmonize --apply --cost-limit 4.00</code>. It <strong>raised</strong>. Spend <strong>USD 0.4055</strong> over <strong>9 LLM call(s)</strong> (generate_docs 1, refine_docs 2, review_docs 6); wall 695s. Lint findings {"link_missing_reverse": 2} before, {"link_missing_reverse": 2} after. 1 member(s) are below the 0.85 threshold after the apply and 0 fell.
+    The apply reached no summary line: it raised <code>imas_codex.standard_names.source_invariant.MissingStandardNameSource: live standard name has no PRODUCED_NAME source: vertical_coordinate_of_coil_conductor</code>, so the family is unstamped.
+  </p>
+  <h3 id="shc-locus-remeasure-choice">Family choice and roster check</h3>
+  <p id="shc-locus-remeasure-choice-body">
+    <code>electrostatic_potential</code> is a locus family not yet stamped harmonized whose members appear in no frozen WEST review roster. The search reads 14 files under <code>imas_codex/standard_names/manifests/reviews</code>. Positive control <code>flux_surface_averaged_electron_density_at_plasma_boundary</code> matched 10 times, so a zero member count is a real absence. Members: <code>electrostatic_potential</code>, <code>electrostatic_potential_at_langmuir_probe_position</code>, <code>electrostatic_potential_at_outboard_midplane</code>, <code>electrostatic_potential_at_wall</code>, <code>floating_electrostatic_potential</code>.
+  </p>
+  <table>
+    <thead><tr><th>member</th><th>roster matches</th></tr></thead>
+    <tbody><tr><td><code>electrostatic_potential</code></td><td>0</td></tr><tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>0</td></tr><tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>0</td></tr><tr><td><code>electrostatic_potential_at_wall</code></td><td>0</td></tr><tr><td><code>floating_electrostatic_potential</code></td><td>0</td></tr></tbody>
+  </table>
+  <h3 id="shc-locus-remeasure-dry-run">Dry run and planned calls</h3>
+  <p id="shc-locus-remeasure-dry-run-body">
+    The dry run planned 5 call(s), estimated USD 3.2906 from 22 recent run(s). The second dry run after the apply planned 5 call(s); the family is unstamped.
+  </p>
+  <h3 id="shc-locus-remeasure-apply">Member documentation score before and after</h3>
+  <p id="shc-locus-remeasure-apply-body">
+    Apply log <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T204942364841-shc-locus-remeasure/apply-1.log</code> ending <code>EXIT=1</code>. The run <code>e0509ebe-f720-4da9-84b4-2d7848b66216</code> made <strong>9 LLM call(s)</strong> in 3 phase(s) (generate_docs 1, refine_docs 2, review_docs 6), spending <strong>USD 0.4055</strong> of the USD 4.00 cap, read from that run's own LLMCost rows; every dollar of it is apportioned to <code>gap_at_outboard_midplane</code> (USD 0.4055), a name outside the family, so the family itself paid nothing.
+  </p>
+  <table>
+    <thead><tr><th>member</th><th>before</th><th>after</th>
+    <th></th></tr></thead>
+    <tbody><tr><td><code>electrostatic_potential</code></td><td>0.8490</td><td>0.8490</td></tr><tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>0.9437</td><td>—</td></tr><tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>—</td><td>—</td></tr><tr><td><code>electrostatic_potential_at_wall</code></td><td>0.8625</td><td>0.8625</td></tr><tr><td><code>floating_electrostatic_potential</code></td><td>0.9375</td><td>0.9375</td></tr></tbody>
+  </table>
+  <p>Members below the acceptance threshold (both scores): <code>electrostatic_potential: 0.8490 &rarr; 0.8490</code>. Members whose score fell: none. Members reset back into the pipeline (score to none) with their doc stage before and after: <code>electrostatic_potential_at_langmuir_probe_position: 0.9437 (accepted &rarr; pending)</code>.</p>
+</section>
