@@ -18,6 +18,11 @@
       "kind": "folded",
       "node": "sib-separatrix-swap-apply",
       "recorded_at": "2026-10-20T04:48:04.296203+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "three formatting hunks in adjacent code, harmless and already merged",
+      "recorded_at": "2026-10-20T04:48:15.387856+00:00"
     }
   },
   "findings": [
