@@ -15,9 +15,9 @@
   "dispatched_at": "2026-10-20T21:29:58Z",
   "finding_dispositions": {
     "0": {
-      "kind": "exempted",
-      "reason": "factual correction made by the coordinator in the commit on main that follows this run's merge: the fragment now records the four hold notes at apply log lines 525, 631, 744 and 828 (contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values), so the 0.849 is a genuine documentation hold ending exhausted at chain 3/3; the arm record is unchanged",
-      "recorded_at": "2026-10-20T21:46:19.519413+00:00"
+      "kind": "folded",
+      "node": "ssog-anchor-rerun-wall-recomb-jev",
+      "recorded_at": "2026-10-20T21:47:39.687125+00:00"
     },
     "1": {
       "kind": "folded",
