@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="133">
+<meta name="plan-version" content="134">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -665,6 +665,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261020T112748325543-srtj-jev-vs-panel-operating-point" data-who="reckon-build" data-when="2026-10-20T11:48:55Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point.html#srtj-jev-vs-panel-operating-point — paired validation names n=259, panel/Jev same-rate precision 84/157 vs 87/157, delta +1.91 pp [-2.93,+6.78]; docs n=176, 69/172 vs 71/172, delta +1.16 pp [-0.33,+2.54]. Neither axis demonstrates panel superiority or equivalence. Full calibration and validation metrics, precision-matched recall, zero-score tie sensitivity, one revision exclusion, panel costs USD 0.068856/name and 0.171871/docs, inspected figure, independent tallies, EXIT=0, USD 0 spend.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-switch" data-who="reckon-build" data-when="2026-10-20T12:10:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-10-20: Jev replaces the paid review panel's accept or refine decision on names and on documentation, at thresholds matched to the panel's own accept rates. A paid audit sample is kept.</p><p>The evidence is the operating-point comparison (merge <code>2b84bdc24</code>, review 93). At the panel's <code>min_score</code> 0.85 on the golden validation split:</p><ul><li><strong>Names:</strong> Jev's accept precision is 55.4% against the panel's 53.5% at a matched 60.6% accept rate. Its refine precision is 84.3% against 81.4%, and its AUC 0.765 against 0.726. On calibration Jev's name gains are significant.</li><li><strong>Documentation:</strong> the panel accepts 97.7% of entries and refines 1% of the defective ones. Jev at the same rate matches it.</li></ul><p>The panel is therefore not better than Jev on either axis. Review is about 85% of the cost per accepted name.</p><p>The work, in order:</p><ol><li><code>srtj-jev-matched-decision</code>: per-axis Jev thresholds matched to the panel's accept rates on calibration, judged on validation. The stored review score is mapped so that the consumers' 0.85 falls exactly at the matched cutoff, so score and route agree. The per-dimension rubric is still recorded. Only the validated documentation contradiction veto is kept.</li><li>A paid audit sample. A random 5% of items also go to the paid panel, whose verdict is stored beside Jev's without deciding, so the two judges' drift can be watched.</li><li>A Jev-only dry run on the fixed cohort within the remaining USD 3.31.</li><li>Then <code>[sn-review].cascade-deciding</code> is turned on. One setting reverts it.</li></ol></div>
 </div>
 </section>
 </main>
