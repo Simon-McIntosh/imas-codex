@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "zero by absence, not by measurement: the reviewed manifest records no baseline_suite and no after_suite arm (only one tests/test_logs pair naming the evidence driver), so no base/head gate-log pair exists to difference; the reviewed node adds no test file and changes no product code.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T10:02:32.285Z",
+  "dispatched_at": "2026-10-20T09:51:22Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause-run.py",
+      "line": "248",
+      "text": "follow-on: the out-path literal is \"ssog-anchor-held-cause.json\" while the recorded gate log's last stdout line names \".../ssog-anchor-held-cause-run.json\", a file that does not exist in the tree, so held-cause-gate.log was produced by a revision that differs from the committed one and re-running the committed driver cannot reproduce the record as logged; the JSON content does reconcile with the log row for row, so the attribution itself stands."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093027497180-ssog-anchor-held-cause/held-cause-gate.log",
+      "line": "3",
+      "text": "follow-on: the header records the command \"uv run --no-sync python docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause-run.py\" while the manifest's tests line records a \"timeout 900 /home/ITER/mcintos/Code/imas-codex/.venv/bin/python ... -run.py\" invocation; promotion fills its gate receipt from the tests line, so the receipt names a command no log attests."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause-run.py",
+      "line": "95",
+      "text": "follow-on: recorded_note() scans all 25 apply logs and returns the first member-name match without tying the log to the arm being reported, so rows 1, 2, 6, 7, 8, 9, 12 and 13 of the JSON cite a sibling arm's log (rows 12 and 13 both cite the divertor-recomb heuristic log although r-20261019T150026994505-ssog-anchor-divertor-recomb-jev/apply-jev-neutral_power_of_divertor_due_to_recombination.log carries the same hold line), contradicting ssog-anchor-held-cause.html:4's claim that each note comes from that arm's own apply-*.log."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html",
+      "line": "40",
+      "text": "follow-on: the summary states \"15 held members across 14 arm records, 20 arm apply logs scanned\"; enumerating ssog-anchor-ab/*.json independently gives 15 arm records holding a 0.849 member, and the driver's own log prints \"arm apply logs: 25\", so both counts in the artefact disagree with the measurement behind it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html",
+      "line": "36",
+      "text": "follow-on: the anchor-eligibility fix names its owner as imas_codex/standard_names/harmonize.py (select_anchor), but select_anchor is defined at imas_codex/standard_names/families.py:480 and only imported and called by harmonize.py, so a fix dispatched at the named file edits the caller rather than the ranking."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html",
+      "line": "37",
+      "text": "follow-on: the convergence gate is cited as imas_codex/standard_names/campaign.py:521-530, which is the ConvergenceThresholds dataclass; the comparison that refuses a held batch is at campaign.py:583."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read against the base fdbd76fb; the single commit a972ae121 adds 925 lines across ssog-anchor-held-cause-run.py (255), .html (41) and .json (629), all additions, nothing outside the declared paths.",
+    "done_when": "the done-when names ssog-anchor-held-cause.html and its JSON for every 0.849 member plus a driver log ending EXIT=0 with no product change; the manifest names the driver and held-cause-gate.log, the diff adds only those artefacts, and the log's last line reads EXIT=0.",
+    "goal": "the goal is to say, for every 0.849 member of the anchor A/B, which hold note fired with its text, whether the hold is right, and the recommended fix with its owner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html:23-39 delivers all three across 0.849 members.",
+    "manifest": "read; it reports status complete with held_members 15, lint_cap_firings_total 0 and its landing paragraph, but its tests line records a command that neither held-cause-gate.log's header nor its output attests.",
+    "write_paths": "the manifest declares the html, the json and run.py (plus an unused docs/figures directory); git show --stat a972ae121 adds exactly those three files, all inside the declared scope."
+  },
+  "justifications": {
+    "durability": "ssog-anchor-held-cause-run.py:255 raises SystemExit(main()) where main() returns 0 on every path, so nothing reddens if held_members() finds no arm, if no hold note is recovered, or if every live load fails.",
+    "evidence": "ssog-anchor-held-cause-run.py:148-165 re-runs the production note on each member with a binding-drop control whose 14/14 result is recorded, but held-cause-gate.log:146 names an output file the committed script does not write and the manifest's tests line names a different command, so the gate receipt does not attest the landed revision.",
+    "fit": "ssog-anchor-held-cause-run.py:1-13 follows the evidence-driver idiom of its sibling ssog-anchor-ab-aggregate-run.py:1-22 (module docstring, REPO rooted from __file__, no plan, issue or version label in a name or comment).",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html:30-44 gives every 0.849 member's hold note, its right-vs-artefact call and the owner of each recommended fix, which is the deliverable the goal states.",
+    "reuse": "ssog-anchor-held-cause-run.py:127-137 imports _load_docs_review_source_item and the three note functions and calls them rather than reimplementing them, and a search of imas_codex/ and the sibling ssog-anchor drivers for a hold-note log parser found only the emitter at imas_codex/standard_names/workers.py:11110.",
+    "scope_discipline": "git show --stat a972ae121 adds only docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause-run.py, .html and .json, every one a declared write path, with no product code touched."
+  },
+  "node": "review-of-ssog-anchor-held-cause-a972ae121fc0",
+  "node:reviewed": "ssog-anchor-held-cause",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to say, for every 0.849 member of the anchor A/B, which hold note fired with its text, whether the hold is right, and the recommended fix with its owner; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html:23-39 delivers all three for the members it enumerates.\nVERDICT done_when: the done-when names ssog-anchor-held-cause.html and its JSON for every 0.849 member plus a driver log ending EXIT=0 with no product change; the manifest names the driver and held-cause-gate.log, the diff adds only those artefacts, and the log's last line reads EXIT=0.\nVERDICT write_paths: the manifest declares the html, the json and run.py (plus an unused docs/figures directory); git show --stat a972ae121 adds exactly those three files, all inside the declared scope.\nVERDICT manifest: read; it reports status complete with held_members 15, lint_cap_firings_total 0 and its landing paragraph, but its tests line records a command that neither held-cause-gate.log's header nor its output attests.\nVERDICT diff: read against the base fdbd76fb; the single commit a972ae121 adds 925 lines across ssog-anchor-held-cause-run.py, .html and .json, all additions, nothing outside the declared paths.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html:30-44 gives every 0.849 member's hold note, its right-vs-artefact call and the owner of each recommended fix.\nSCORE evidence: 13\nJUSTIFICATION evidence: ssog-anchor-held-cause-run.py:148-165 re-runs the production note with a binding-drop control recorded 14/14, but held-cause-gate.log:146 names an output file the committed script does not write and the manifest's tests line names a different command.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat a972ae121 adds only ssog-anchor-held-cause-run.py, .html and .json under docs/evidence/fragments/sn-selection-over-generation/, every one a declared write path.\nSCORE durability: 8\nJUSTIFICATION durability: ssog-anchor-held-cause-run.py:255 exits via main(), which returns 0 on every path, so nothing reddens if no arm matches or every live load fails.\nSCORE fit: 18\nJUSTIFICATION fit: ssog-anchor-held-cause-run.py:1-13 follows the evidence-driver idiom of its sibling ssog-anchor-ab-aggregate-run.py:1-22 and introduces no name the naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: ssog-anchor-held-cause-run.py:127-137 calls the production note functions instead of reimplementing them, and no owner of a hold-note log parser exists (search of imas_codex/ and the sibling ssog-anchor drivers found only the emitter at workers.py:11110).\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause-run.py:248 follow-on: the out-path literal names ssog-anchor-held-cause.json while the gate log says it wrote ...-run.json, so the EXIT=0 log is not from the committed revision.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T093027497180-ssog-anchor-held-cause/held-cause-gate.log:3 follow-on: the log header's command and the manifest's tests line disagree.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause-run.py:95 follow-on: recorded_note pairs by member name across all logs, so eight rows cite a sibling arm's apply log.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html:40 follow-on: \"14 arm records\" and \"20 arm apply logs\" disagree with the measured 15 and 25.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html:36 follow-on: the anchor-eligibility fix names harmonize.py as owner but select_anchor is defined in families.py:480.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause.html:37 follow-on: the convergence gate is cited at campaign.py:521-530, a thresholds dataclass, not the enforcement at campaign.py:583.\n",
+  "review_run_id": "r-20261020T095051227878-review-of-ssog-anchor-held-cause-a972ae121fc0",
+  "reviewed_base_sha": "fdbd76fb401329f79c0881231aa2c7cb4906479c",
+  "reviewed_head_sha": "a972ae121fc08bd41c2f2e5fb9ffdf1d64bf9783",
+  "reviewed_run_id": "r-20261020T093027497180-ssog-anchor-held-cause",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T10:14:00+00:00",
+  "total": 96
+}
