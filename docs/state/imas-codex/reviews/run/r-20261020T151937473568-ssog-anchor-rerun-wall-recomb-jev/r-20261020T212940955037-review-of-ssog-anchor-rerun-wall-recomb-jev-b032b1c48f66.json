@@ -1,0 +1,71 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:261"
+  ],
+  "completed_at": "2026-10-20T21:44:24.209Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-rerun-aggregate",
+      "recorded_at": "2026-10-20T21:46:27.121618+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-20T21:29:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "factual correction made by the coordinator in the commit on main that follows this run's merge: the fragment now records the four hold notes at apply log lines 525, 631, 744 and 828 (contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values), so the 0.849 is a genuine documentation hold ending exhausted at chain 3/3; the arm record is unchanged",
+      "recorded_at": "2026-10-20T21:46:19.519413+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-rerun-aggregate",
+      "recorded_at": "2026-10-20T21:46:22.127882+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the fragment directory has no single wrapper convention (22 of 55 omit the section wrapper) and the landing record links the fragment by path; no rendering depends on the wrapper",
+      "recorded_at": "2026-10-20T21:46:24.729310+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-wall-recomb-jev.html",
+      "line": "67",
+      "severity": "blocking",
+      "text": "blocking: the landing fragment asserts \"the log names no hold note\" for the documentation score of 0.849, but the node's own apply log records four hold notes for that score -- review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance -- contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: ... DD: One scalar value is provided per element in the grid subset (apply-jev-energy_flux_at_wall_due_to_recombination.log lines 525, 631, 744, 828). The done_when required any 0.849 score to be recorded with its hold note if the log names one, so the record inverts the required evidence; the same defect the sibling aperture-heuristic review (r-20261020T151711624210) raised as blocking."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-jev.json",
+      "line": "188",
+      "severity": "follow-on",
+      "text": "follow-on: neo4j_log names /tmp/reckon-crew-scratch/r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev/mcintos-1291600-7pfvd0ny/instance/logs/neo4j-temp.log, a path inside the scratch tree this same run removed; the directory is absent from disk (verified), so a reader following the citation opens nothing. The field is written by the shared arm runner, not chosen by this node, and the containment verdict is carried elsewhere in the record, so it does not hold the node."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-wall-recomb-jev.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the new fragment opens directly with <h2> and carries no <section id=\"...\" data-reckon=\"evidence\"> wrapper, unlike its nearest rerun siblings (ssog-anchor-rerun-aperture-jev.html:1); if the reckon page keys on that wrapper the landing fragment renders nowhere. 22 of 55 fragments in the directory also omit it, so this is recorded rather than held."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261020T212940955037-review-of-ssog-anchor-rerun-wall-recomb-jev-b032b1c48f66",
+  "review_text": "VERDICT goal: the node goal is to re-run the jev arm of the energy_flux_at_wall_due_to_recombination family and record it; the committed record at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-jev.json carries outcome_status complete, anchor neutral_energy_flux_at_wall_due_to_recombination, lint 3->2, all five members' before/after documentation scores, batches_run 1 of 2, 20 calls, USD 1.177209, 1789.06 s, stamped false, containment holds true and code digest 53d14e51..., matching runner-jev.log which ends EXIT=0.\nVERDICT done_when: the done_when asks the arm record to hold its fields and be produced by a detached invocation ending EXIT=0, and any 0.849 score to carry its hold note if the log names one; the fields and the EXIT=0 log are present, but the 0.849 clause is not met -- the landing fragment reports no hold note while the apply log names one (see FINDING ssog-anchor-rerun-wall-recomb-jev.html:67).\nVERDICT write_paths: the source brief fenced two paths -- the arm JSON and the rerun landing HTML; the diff at b032b1c changes exactly those two and nothing else.\nVERDICT manifest: read; it records status complete, the literal gate command, the two test logs, the containment/cleanup facts and the arm metrics, but its evidence_inputs asserts the log names no hold note for 0.849, which the apply log contradicts.\nVERDICT diff: read against base 284f17bcb; one commit b032b1c rewrites the jev arm JSON with the re-run values and adds the landing fragment, both inside the declared scope, no runner/selection/product code touched.\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:261\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-jev.json holds every field the done_when names, written by the detached runner.\nSCORE evidence: 10\nJUSTIFICATION evidence: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-wall-recomb-jev.html:67 claims the log names no hold note for 0.849 although apply-jev-energy_flux_at_wall_due_to_recombination.log:525 names one.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff at b032b1c touches only the two paths the source brief declared (the arm JSON and ssog-anchor-rerun-wall-recomb-jev.html).\nSCORE durability: 6\nJUSTIFICATION durability: no test asserts the arm record; the runner's EXIT=0 in runner-jev.log does not re-assert any of the recorded score or the hold note it omitted.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the sibling evidence-fragment idiom (ssog-anchor-wall-recomb-jev.html) but omits the <section data-reckon=\"evidence\"> wrapper its nearest rerun siblings use.\nSCORE reuse: 20\nJUSTIFICATION reuse: no module, function or class was added; the change is a data record plus a landing fragment, and a search of docs/evidence/fragments found no emittable capability to extend.",
+  "reviewed_base_sha": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+  "reviewed_head_sha": "b032b1c48f66b313ab5ebf0ae2ee96c579127ac9",
+  "reviewed_run_id": "r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev",
+  "scores": {
+    "durability": 6,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T21:46:47.049499+00:00",
+  "total": 90
+}
