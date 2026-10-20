@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8987",
+    "imas_codex/standard_names/workers.py:11113"
+  ],
+  "completed_at": "2026-10-20T20:36:27.171Z",
+  "dispatched_at": "2026-10-20T20:21:59Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/panel_audit.py",
+      "line": "92",
+      "severity": "follow-on",
+      "text": "quorum_without_persisting recognises the persisting incumbent by object identity (incumbent.func is workers._persisting_quorum_cycles), so any change to how workers.py:8990 wraps it - a decorator or a further partial layer - silently restores the canonical-row write this node's fix removes, and no test fails because the seam test constructs its own partial of the same shape rather than reading the call site."
+    },
+    {
+      "file": "imas_codex/standard_names/review/panel_audit.py",
+      "line": "193",
+      "severity": "follow-on",
+      "text": "store_panel_audit's graph write is stubbed in every test (write_reviews or GraphClient monkeypatched), so acceptance of the audit row by the StandardNameReview schema is unproven beyond the aggregate exclusion clause; the row follows the shadow-row shape at cascade.py:336 but omits the review_group_id that graph_ops.py:6050 documents as required for new-style reviews."
+    },
+    {
+      "file": "imas_codex/standard_names/review/panel_audit.py",
+      "line": "9",
+      "severity": "follow-on",
+      "text": "the module docstring says 'Three things keep the audit from deciding anything' above four bullets, because the non-persisting bullet was added in f86b0301c without updating the count."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a deterministic per-item, per-run paid-panel audit stored beside Jev's deciding route; imas_codex/standard_names/review/panel_audit.py:60 audit_selected, :165 store_panel_audit and :216 panel_audit_report implement the sample, the non-deciding row and the drift report, wired in at imas_codex/standard_names/review/cascade.py:547 _run_panel_audit.\nVERDICT done_when: the done-when requires the change and tests committed and the fragment to record the design, the report output on a stubbed run and a gate with no added failures; the fragment at docs/evidence/fragments/sn-review-through-jev/srtj-jev-panel-audit-sample.html records all three, and gate-base-final.log (282 passed, EXIT=0) and gate-head-final.log (292 passed, EXIT=0) are the delta the measure names.\nVERDICT write_paths: read the brief's Write scope and the manifest's changed_paths; all seven paths in the diff against 5fc8638eafd90ae3de04d3fa25de773d99de2ba9 are inside the declared scope.\nVERDICT manifest: read; it states status complete, commits 362908954, f284d1137, f86b0301c and 8f13c910, baseline_suite and after_suite both completed true with failure_count 0 and failure_ids [], and names negctl.log and negctl-persist.log as its negative controls.\nVERDICT diff: read commit by commit; 362908954 adds the audit, the setting, the tests, the fragment and the figure, f284d1137 and 8f13c910 are fragment-only, and f86b0301c fixes the two findings of the earlier review at this node, so the gate at gate-head-final.log runs the post-fix revision f86b0301c with only a docs commit after it.\nCALL_SITES: imas_codex/standard_names/workers.py:8987 process_review_name_batch calls adjudicate_review with partial(_persisting_quorum_cycles), imas_codex/standard_names/workers.py:11113 documents the docs-axis batch call with the same incumbent shape\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: panel_audit.py:60, :165 and :216 deliver the sample, the setting, the non-deciding row and the per-axis report, and cascade.py:697 reaches them only under deciding_enabled(), which matches the brief's 'when cascade-deciding is on'.\nSCORE evidence: 19\nJUSTIFICATION evidence: gate-head-final.log ends in a bare EXIT=0 line at 292 passed and gate-base-final.log at 282 passed, both with completed true in the manifest, and the fragment carries the stub-backlog report output the done-when names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the four-commit diff is inside the seven declared write paths, and no path outside them was touched.\nSCORE durability: 18\nJUSTIFICATION durability: test_panel_audit_sample.py:275 drives the real persisting seam and negctl-persist.log shows it reddening (1 failed, EXIT=1) when the non-persisting rebinding is removed, so the fixed defect has a test that fails if it regresses; I read each added assertion and none compares a value against the same variable its own test passed in, though the seam test builds its own partial and so cannot catch a producer-side change.\nSCORE fit: 16\nJUSTIFICATION fit: the row is built through pipeline.py:176 _build_review_record and updated the same way the shadow writer at cascade.py:313 does, matching the surrounding idiom, but the module docstring at panel_audit.py:9 says 'Three things' above four bullets since the fix added a bullet without changing the count.\nSCORE reuse: 20\nJUSTIFICATION reuse: the audit extends existing owners rather than forking them - pipeline.py:176 _build_review_record for the row, workers.py:8016 _run_rd_quorum_cycles for the non-persisting path, graph_ops.py:6301 update_review_aggregates for the exclusion and the budget pool for spend - and a capability search over imas_codex/ gave no prior owner for per-run hash sampling or panel-drift reporting.\nFINDING imas_codex/standard_names/review/panel_audit.py:92 follow-on: quorum_without_persisting recognises the persisting incumbent by object identity (incumbent.func is workers._persisting_quorum_cycles), so any change to how workers.py:8990 wraps it - a decorator or a further partial layer - silently restores the canonical-row write this node's fix removes, and no test fails because the seam test constructs its own partial of the same shape rather than reading the call site.\nFINDING imas_codex/standard_names/review/panel_audit.py:193 follow-on: store_panel_audit's graph write is stubbed in every test (write_reviews or GraphClient monkeypatched), so acceptance of the audit row by the StandardNameReview schema is unproven beyond the aggregate exclusion clause; the row follows the shadow-row shape at cascade.py:336 but omits the review_group_id that graph_ops.py:6050 documents as required for new-style reviews.\nFINDING imas_codex/standard_names/review/panel_audit.py:9 follow-on: the module docstring says 'Three things keep the audit from deciding anything' above four bullets, because the non-persisting bullet was added in f86b0301c without updating the count.\n",
+  "review_run_id": "r-20261020T202138689902-review-of-srtj-jev-panel-audit-sample-8f13c910f879",
+  "reviewed_base_sha": "5fc8638eafd90ae3de04d3fa25de773d99de2ba9",
+  "reviewed_head_sha": "8f13c910f879770938948d1fe39cecb9dd4750e4",
+  "reviewed_run_id": "r-20261020T135935020217-srtj-jev-panel-audit-sample",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T20:46:39.776740+00:00",
+  "total": 112
+}
