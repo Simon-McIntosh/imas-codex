@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-10-20T09:06:58.125Z",
   "dispatched_at": "2026-10-20T08:51:46Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-jev-routing-retest",
+      "recorded_at": "2026-10-20T09:11:00.985343+00:00"
+    }
+  },
   "findings": [
     {
       "claim": "The landing fragment records its validation arms in a table and carries no figure, despite a granted figures write path.",
