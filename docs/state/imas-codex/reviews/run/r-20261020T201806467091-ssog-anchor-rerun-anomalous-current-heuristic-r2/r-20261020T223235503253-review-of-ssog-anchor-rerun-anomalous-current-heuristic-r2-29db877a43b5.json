@@ -1,0 +1,41 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest names no baseline_suite and no after_suite (both parse as null), so no suite delta exists to take: this node's gate is the per-arm runner invocation (manifest.md tests line), which ran once and exited 0, and it adds no pytest ids. The zero and empty list record the absence of a suite gate rather than a measured equal-count delta.",
+  "completed_at": "2026-10-20T22:52:39.575Z",
+  "dispatched_at": "2026-10-20T22:32:53Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-anomalous-current-heuristic.html",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "the section id ssog-anchor-rerun-anomalous-current-heuristic-r2 disagrees with the fragment's own filename (ssog-anchor-rerun-anomalous-current-heuristic.html) and with every sibling fragment in the directory, whose section id equals its filename stem; the declared sibling write path ssog-anchor-rerun-anomalous-current-heuristic-r2.html was never written, so a reader resolving the anchor back to a path reaches a file that does not exist."
+    }
+  ],
+  "justifications": {
+    "durability": "no test under tests/ covers the ab arm record or the landing fragment, so the outcome is guarded only by the runner invocation's own exit status (ssog-anchor-ab-run.py:627) and the diff adds no assertion that fails if the record regresses.",
+    "evidence": "manifest.md names the literal runner command and runner-heuristic.log ends EXIT=0, while every field the done_when (prompt.txt:155-156) requires is present in the record and reconciles with the apply log; the apply_cap(6) = 4.04 quoted in the landing fragment matches ssog-anchor-ab-run.py:56-60.",
+    "fit": "the fragment follows the surrounding evidence idiom, but its section id at line 6 ends in -r2 while its own filename does not, against every sibling fragment in the directory whose section id equals its filename stem.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-heuristic.json holds harmonize_summary.batches_run 2 of 2, halted false and score_regressions.below_threshold [], which is exactly the re-run the goal names.",
+    "reuse": "the diff adds no function, class or module: the landing fragment is prose and the record is data produced by the existing docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py, which the diff leaves unchanged.",
+    "scope_discipline": "the diff 284f17bcb..29db877a4 changes only the arm JSON and the landing fragment, both among the declared write paths listed in manifest.md, and no runner, selection or product file is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to re-run the heuristic arm of the current_density_due_to_anomalous_transport anchor family on the fixed code and the re-derived anchors in a scratch graph; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-heuristic.json holds that arm with outcome_status \"complete\" and heuristic anchor vertical_current_density_due_to_anomalous_transport.\nVERDICT done_when: read at prompt.txt:155-156; it requires the arm record to hold outcome status, anchor, lint before and after, every member's documentation score before and after, batches run, calls, spend, wall time, stamped, containment verdict and code digest, written by a detached invocation whose log ends EXIT=0, scratch stopped and removed, and spend under USD 2.00 \u2014 every field is present in the record, and runner-heuristic.log ends EXIT=0.\nVERDICT write_paths: read at manifest.md:3; five paths are declared (the arm JSON, two landing fragments, two figure directories), and the diff touches the arm JSON and docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-anomalous-current-heuristic.html, both inside that set.\nVERDICT manifest: read manifest.md; it reports status complete, one commit 29db877a43b549adc1caa0cd63b34b5951f4dbf4, the literal runner command under tests, both gate logs under test_logs, and states the first round's 0.849 documentation hold does not reproduce.\nVERDICT diff: read commit 29db877a4 against its base 284f17bcb commit by commit (one commit): two files, the arm JSON rewritten in place with lint 5 to 6, six before/after member scores, batches_run 2 of 2, halted false, stamped true, calls 38, spend USD 0.888126, wall 1305.2 s, containment holds true and code digest 53d14e51, plus the new landing fragment.\nCALL_SITES: reckon/doccheck.py:audit_fragment_ids, reckon/doccheck.py:audit_composed_record_ids, reckon/resources.py:EVIDENCE_FRAGMENTS_SUBTREE\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-heuristic.json holds harmonize_summary.batches_run 2 of 2, halted false and score_regressions.below_threshold [], the re-run the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: manifest.md names the literal runner command, runner-heuristic.log ends EXIT=0, and every number in the landing fragment reconciles with the arm JSON, including apply_cap(6) = 4.04 at ssog-anchor-ab-run.py:56-60.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two changed paths at manifest.md:8 are both inside the declared write paths at manifest.md:3, and no runner or product file is touched.\nSCORE durability: 12\nJUSTIFICATION durability: no test under tests/ covers the arm record or the landing fragment; the only guard is the runner exit status at ssog-anchor-ab-run.py:627 and the diff adds no assertion.\nSCORE fit: 14\nJUSTIFICATION fit: the fragment id at docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-anomalous-current-heuristic.html:6 ends in -r2 while the filename does not, diverging from every sibling fragment whose id equals its stem.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, and re-uses the unchanged runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-rerun-anomalous-current-heuristic.html:6 follow-on: the section id ends in -r2 while the fragment's filename does not and the declared sibling path ssog-anchor-rerun-anomalous-current-heuristic-r2.html was never written, so the anchor names a path that does not exist.\n",
+  "review_run_id": "r-20261020T223235503253-review-of-ssog-anchor-rerun-anomalous-current-heuristic-r2-29db877a43b5",
+  "reviewed_base_sha": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+  "reviewed_head_sha": "29db877a43b549adc1caa0cd63b34b5951f4dbf4",
+  "reviewed_run_id": "r-20261020T201806467091-ssog-anchor-rerun-anomalous-current-heuristic-r2",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 14,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T22:45:00+00:00",
+  "total": 102
+}
