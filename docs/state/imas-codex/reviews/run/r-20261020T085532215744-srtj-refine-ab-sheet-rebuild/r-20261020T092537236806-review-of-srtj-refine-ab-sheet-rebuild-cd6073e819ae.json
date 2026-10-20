@@ -6,6 +6,13 @@
   "call_sites": [],
   "completed_at": "2026-10-20T09:34:15.188Z",
   "dispatched_at": "2026-10-20T09:26:06Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "robustness of a one-off sheet-rebuild driver whose output the review verified row by row; it is not run again",
+      "recorded_at": "2026-10-20T09:38:55.521400+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py",
