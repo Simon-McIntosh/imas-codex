@@ -9,13 +9,13 @@
   "budget_limit_usd": 2.0,
   "calls": 49,
   "code": {
-    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-family-runner",
-    "git_head": "c1e2fcdca7b5b68bb01af543a39765f4f0a444ff",
-    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-family-runner/imas_codex/standard_names/harmonize.py",
-    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-rerun-aperture-heuristic",
+    "git_head": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-rerun-aperture-heuristic/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "53d14e51fb7a7d8cf73c8c6876afecd3db2f3791f0cfb6c78218500ad7c3bdf4"
   },
   "containment": {
-    "at": "2026-10-19T08:19:20.566034+00:00",
+    "at": "2026-10-20T15:00:07.192802+00:00",
     "evidence": {
       "live_family_rows": 0,
       "live_scope_run_rows": 0,
@@ -31,7 +31,7 @@
   "cost_limit_passed_usd": 1.98,
   "decision": "apply",
   "dump_bytes": 2643183686,
-  "ended_at": "2026-10-19T08:19:17.954419+00:00",
+  "ended_at": "2026-10-20T15:00:04.469410+00:00",
   "family": "vertical_coordinate_of_diagnostic_aperture",
   "harmonize_receipts": [
     {
@@ -76,14 +76,14 @@
         "halted": false,
         "resume_from": null,
         "run_ids": [
-          "1e4e9029-7477-4a5f-a802-510a2bfb324f",
-          "b1f4cb54-4862-4083-8389-2a8b2b9556c1"
+          "f8256871-143d-48c0-8d75-7829e4c337e4",
+          "4211593c-1746-4a57-b3aa-600c7e85d812"
         ],
         "spec": "harmonize-pattern-family",
         "total_accepted": 3,
         "total_audit_cleared": 0,
         "total_audit_requarantined": 0,
-        "total_cost": 0.7064,
+        "total_cost": 0.7574,
         "total_quarantined": 0,
         "total_selected": 3,
         "total_touched": 3
@@ -100,7 +100,7 @@
         "fell": []
       },
       "scores_after": {
-        "vertical_coordinate_of_diagnostic_aperture": 1.0,
+        "vertical_coordinate_of_diagnostic_aperture": 0.9375,
         "x_coordinate_of_diagnostic_aperture": 1.0,
         "y_coordinate_of_diagnostic_aperture": 1.0
       },
@@ -114,25 +114,25 @@
     "halted": false,
     "resume_from": null,
     "run_ids": [
-      "1e4e9029-7477-4a5f-a802-510a2bfb324f",
-      "b1f4cb54-4862-4083-8389-2a8b2b9556c1"
+      "f8256871-143d-48c0-8d75-7829e4c337e4",
+      "4211593c-1746-4a57-b3aa-600c7e85d812"
     ],
     "spec": "harmonize-pattern-family",
     "total_accepted": 3,
     "total_audit_cleared": 0,
     "total_audit_requarantined": 0,
-    "total_cost": 0.7064,
+    "total_cost": 0.7574,
     "total_quarantined": 0,
     "total_selected": 3,
     "total_touched": 3
   },
   "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
   "isolation": {
-    "at": "2026-10-19T07:50:50.452522+00:00",
+    "at": "2026-10-20T14:29:27.842135+00:00",
     "live_family_rows": 0,
-    "live_nodes": 1771146,
-    "live_nodes_after": 1771162,
-    "live_nodes_delta_observed": 16,
+    "live_nodes": 1771165,
+    "live_nodes_after": 1771165,
+    "live_nodes_delta_observed": 0,
     "live_probe": 0,
     "live_scope_run_rows": 0,
     "live_uri": "bolt://98dci4-gpu-0002:7687",
@@ -149,10 +149,10 @@
   "jev_anchor": "y_coordinate_of_diagnostic_aperture",
   "kind": "coordinate",
   "ledger_calls": 49,
-  "ledger_spend_usd": 0.7064380000000005,
+  "ledger_spend_usd": 0.7573960000000003,
   "ledger_window": {
-    "ended": "2026-10-19T08:19:19.681307+00:00",
-    "started": "2026-10-19T07:50:55.886850+00:00"
+    "ended": "2026-10-20T15:00:06.449923+00:00",
+    "started": "2026-10-20T14:29:36.096974+00:00"
   },
   "lint_after": 0,
   "lint_after_classes": {},
@@ -166,44 +166,49 @@
     "x_coordinate_of_diagnostic_aperture",
     "y_coordinate_of_diagnostic_aperture"
   ],
-  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261019T035327482346-ssog-anchor-family-runner/mcintos-1281970-xw26yzmp/instance/logs/neo4j-temp.log",
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261020T142109334235-ssog-anchor-rerun-aperture-heuristic/mcintos-1281970-dea1xy4o/instance/logs/neo4j-temp.log",
   "outcome_status": "complete",
   "per_model": [
     {
       "calls": 5,
       "model": "openrouter/anthropic/claude-sonnet-5",
-      "spend_usd": 0.323258
+      "spend_usd": 0.346707
     },
     {
       "calls": 2,
       "model": "openrouter/openai/gpt-6-luna",
-      "spend_usd": 0.004966
+      "spend_usd": 0.005806
     },
     {
       "calls": 5,
       "model": "openrouter/openai/gpt-6.1-sol",
-      "spend_usd": 0.209904
+      "spend_usd": 0.201189
     },
     {
       "calls": 5,
       "model": "openrouter/x-ai/grok-4.5",
-      "spend_usd": 0.162886
+      "spend_usd": 0.197888
     },
     {
       "calls": 32,
       "model": "typesafe/jev-1.13",
-      "spend_usd": 0.005423999999999998
+      "spend_usd": 0.005805999999999996
     }
   ],
   "planned_calls": 3,
   "port": 28000,
+  "port_lock": "/dev/shm/ssog-scratch-port-28000.lock",
+  "port_lock_released": {
+    "at": "2026-10-20T15:00:23.071217+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28000.lock"
+  },
   "recorded_anchor_before": "x_coordinate_of_diagnostic_aperture",
   "run_ids": [
-    "1e4e9029-7477-4a5f-a802-510a2bfb324f",
-    "b1f4cb54-4862-4083-8389-2a8b2b9556c1"
+    "f8256871-143d-48c0-8d75-7829e4c337e4",
+    "4211593c-1746-4a57-b3aa-600c7e85d812"
   ],
   "scores_after": {
-    "vertical_coordinate_of_diagnostic_aperture": 1.0,
+    "vertical_coordinate_of_diagnostic_aperture": 0.9375,
     "x_coordinate_of_diagnostic_aperture": 1.0,
     "y_coordinate_of_diagnostic_aperture": 1.0
   },
@@ -213,22 +218,22 @@
     "y_coordinate_of_diagnostic_aperture": 0.89375
   },
   "scratch_removed": {
-    "at": "2026-10-19T08:19:36.701843+00:00",
+    "at": "2026-10-20T15:00:23.071081+00:00",
     "removed_entries": [
       "instance"
     ],
-    "tree": "/tmp/reckon-crew-scratch/r-20261019T035327482346-ssog-anchor-family-runner/mcintos-1281970-xw26yzmp"
+    "tree": "/tmp/reckon-crew-scratch/r-20261020T142109334235-ssog-anchor-rerun-aperture-heuristic/mcintos-1281970-dea1xy4o"
   },
-  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261019T035327482346-ssog-anchor-family-runner/mcintos-1281970-xw26yzmp",
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261020T142109334235-ssog-anchor-rerun-aperture-heuristic/mcintos-1281970-dea1xy4o",
   "scratch_uri": "bolt://127.0.0.1:28000",
   "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
   "spend_limit_usd": 2.0,
-  "spend_usd": 0.7064380000000005,
+  "spend_usd": 0.7573960000000003,
   "stamped": true,
-  "started_at": "2026-10-19T07:48:28.598068+00:00",
+  "started_at": "2026-10-20T14:27:02.865198+00:00",
   "stopped_instance": {
-    "at": "2026-10-19T08:19:35.652954+00:00",
-    "tree": "/tmp/reckon-crew-scratch/r-20261019T035327482346-ssog-anchor-family-runner/mcintos-1281970-xw26yzmp/instance"
+    "at": "2026-10-20T15:00:22.268952+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261020T142109334235-ssog-anchor-rerun-aperture-heuristic/mcintos-1281970-dea1xy4o/instance"
   },
-  "wall_seconds": 1702.0675368718803
+  "wall_seconds": 1828.372392824851
 }
