@@ -1,19 +1,16 @@
 """Rebuild the cascade routing thresholds from the frozen calibration receipts.
 
-``cascade_thresholds.json`` is derived data: per-axis check cutoffs, a name
-score fit, and accept/reject score thresholds. This module rebuilds it from the
-frozen receipts its ``source_receipts`` fields name, with no LLM call.
+``cascade_thresholds.json`` contains monotone dimension fits, a joint veto
+selected using grouped cross-validation, and reports against the logistic
+reference. Only calibration rows fit parameters; validation rows measure the
+result. All answers come from frozen receipts, with no LLM call.
 
-The veto set is chosen **jointly**. A check's cutoff on its own was chosen to
-wrongly flag at most ten per cent of accepted calibration items, so a union of
-many such cutoffs flags far more than that. Here checks are added one at a time
-in descending order of the defect recall they add, and the union of the chosen
-cutoffs is held to flagging at most ``VETO_BUDGET`` of the accepted calibration
-items on each axis. A check left out is simply not a veto; it still feeds the
-axis score, through the name logistic and the docs component weights.
+The binary labels calibrate each dimension's evidence, not a dimension gold
+score. Their mean decides at the same threshold the persistence consumers use.
+A veto lowers that mean, and the raw dimension scores remain in the record.
 
-Run ``python -m imas_codex.standard_names.review.cascade_calibration`` to rebuild
-the route file, or import :func:`build` to derive the same thresholds in memory.
+Run ``uv run python -m imas_codex.standard_names.review.cascade_calibration``
+to rebuild the route file, or import :func:`build` for an in-memory derivation.
 """
 
 from __future__ import annotations
@@ -28,6 +25,8 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 
 THRESHOLDS_PATH = Path(__file__).with_name("cascade_thresholds.json")
 _REPO = Path(__file__).resolve().parents[3]
@@ -56,6 +55,49 @@ ACCEPT_GROUP_MIN = 5
 ACCEPT_PRECISION = 0.90
 REJECT_PERCENTILE = 10.0
 SCHEMA = "review-cascade-thresholds"
+
+# Membership of the independent-veto reference artifact, used only for removal
+# accounting. It is not an admissible candidate pool or an input to selection.
+INDEPENDENT_VETO_REFERENCE_SHA256 = (
+    "a797be9b51cceb5bb1691a98240c2f2be17066fecfbc46837f6664d3336fc9bb"
+)
+INDEPENDENT_VETO_CHECKS = {
+    "name": (
+        "advisory_alias_collapsed",
+        "ambiguity_in_isolation",
+        "bare_shape_parameter_missing_surface",
+        "bound_to_wrong_object",
+        "coupled_vs_launched_confusion",
+        "device_attributed_observable",
+        "dropped_distinguishing_axis",
+        "malformed_physical_base",
+        "missing_required_segment",
+        "model_surname_suffix",
+        "non_canonical_locus_token",
+        "non_canonical_operator_join",
+        "ordered_sample_positional_token",
+        "over_qualified_modifier",
+        "over_specialised_parent",
+        "source_fidelity_unsupported_qualifier",
+        "unit_kind_inconsistent",
+        "unregistered_token_in_closed_segment",
+        "value_provenance_in_name",
+    ),
+    "docs": (
+        "defining_equation_missing",
+        "description_false_of_some_binding",
+        "description_not_single_definition",
+        "description_template_opening_mismatch",
+        "equation_physically_incorrect",
+        "false_equivalence_with_related",
+        "incompatible_physics_qualifier",
+        "latex_escaping_broken",
+        "non_normative_documentation",
+        "relationship_link_missing",
+        "sign_convention_missing",
+        "units_in_prose",
+    ),
+}
 
 
 class ReceiptUnavailable(RuntimeError):
@@ -199,6 +241,15 @@ def _name_axis(
                 "values": values,
                 "check_fail": check_fail,
                 "contradiction": False,
+                "judgment": {
+                    "categories": {
+                        dim: answers[f"dimension:{dim}"] for dim in dimensions
+                    },
+                    "checks": {
+                        key: {"answered": True, "failure_probability": value}
+                        for key, value in check_fail.items()
+                    },
+                },
             }
         )
     fit = _fit_name_logistic(items, questions)
@@ -316,6 +367,15 @@ def _docs_axis(
                         "check_fail": check_fail,
                         "contradiction": contradiction,
                         "score": float(score),
+                        "judgment": {
+                            **jev_review.aggregate_docs_review(
+                                state, checks, answers, audit_report=audit
+                            ),
+                            "categories": {
+                                dimension: answers.get("dimension:" + dimension)
+                                for dimension in jev_review._DOCS_DIMENSION_CRITERIA
+                            },
+                        },
                     }
                 )
     return items, {"questions": [], "fit": {}}
@@ -335,7 +395,12 @@ def _candidate_cutoffs(
 
 
 def _per_check_threshold(
-    items, check_id: str, accepted_ids: set[str], defect_ids: set[str]
+    items,
+    check_id: str,
+    accepted_ids: set[str],
+    defect_ids: set[str],
+    *,
+    max_fpr: float = PER_CHECK_FPR,
 ) -> tuple[float | None, dict[str, Any]]:
     """The cutoff for one check, maximising recall minus false positives."""
     best: tuple[float, float, dict[str, Any]] | None = None
@@ -350,7 +415,7 @@ def _per_check_threshold(
         if defect_ids and defects_caught < MIN_DEFECTS:
             continue
         fpr = accepted_flagged / len(accepted_ids) if accepted_ids else 1.0
-        if fpr > PER_CHECK_FPR:
+        if fpr > max_fpr:
             continue
         defect_values = [
             item["check_fail"].get(check_id, 0.0)
@@ -428,7 +493,13 @@ def select_vetoes(
 
     candidates: dict[str, tuple[float, dict[str, Any]]] = {}
     for check_id in _check_ids(items):
-        cutoff, stats = _per_check_threshold(items, check_id, accepted_ids, defect_ids)
+        cutoff, stats = _per_check_threshold(
+            items,
+            check_id,
+            accepted_ids,
+            defect_ids,
+            max_fpr=min(budget, PER_CHECK_FPR),
+        )
         if cutoff is not None:
             candidates[check_id] = (cutoff, stats)
 
@@ -630,6 +701,11 @@ def _axis_report(
                 if accepts
                 else None
             ),
+            "accept_n": len(accepts),
+            "accept_correct": sum(item["label"] for item in accepts),
+            "accept_precision_interval": _wilson(
+                sum(item["label"] for item in accepts), len(accepts)
+            ),
             "auc": _auc(items),
         }
 
@@ -650,9 +726,27 @@ def _axis_thresholds(
     axis: str,
     *,
     hard_veto: bool,
+    budget: float = VETO_BUDGET,
+    fixed_only: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     calibration = _calibration_items(items, "calibration")
-    selected, diagnostics = select_vetoes(calibration, axis, hard_veto=hard_veto)
+    selection_rows = (
+        [
+            {
+                **row,
+                "check_fail": {"claim_contradicts_source": float(row["contradiction"])},
+            }
+            for row in calibration
+        ]
+        if fixed_only
+        else calibration
+    )
+    selected, diagnostics = select_vetoes(
+        selection_rows,
+        axis,
+        hard_veto=hard_veto,
+        budget=VETO_BUDGET if fixed_only else budget,
+    )
     union = diagnostics["__union__"]
     accept, accept_basis = _accept_threshold(
         calibration,
@@ -678,6 +772,299 @@ def _axis_thresholds(
     return block, union
 
 
+def _wilson(successes: int, total: int) -> list[float] | None:
+    """Two-sided 95% Wilson interval, including the small accept cohorts."""
+    if not total:
+        return None
+    z = 1.959963984540054
+    p = successes / total
+    denominator = 1 + z * z / total
+    centre = (p + z * z / (2 * total)) / denominator
+    radius = (
+        z * math.sqrt(p * (1 - p) / total + z * z / (4 * total * total)) / denominator
+    )
+    return [max(0.0, centre - radius), min(1.0, centre + radius)]
+
+
+def _folds(items):
+    from sklearn.model_selection import GroupKFold
+
+    return list(
+        GroupKFold(n_splits=5).split(
+            np.zeros(len(items)), groups=[item["copy_group"] for item in items]
+        )
+    )
+
+
+def cross_validated_veto_budget(items, axis: str, *, hard_veto: bool):
+    """Select recall using held-out calibration groups, with an uncertainty bound."""
+    rows = _calibration_items(items, "calibration")
+    reports = []
+    for budget in (0.0, 0.01, 0.025, 0.05, 0.075, 0.10):
+        accepted_n = false_vetoes = defects_n = caught = 0
+        feasible = True
+        for train, test in _folds(rows):
+            try:
+                selected, _ = select_vetoes(
+                    [rows[i] for i in train], axis, budget=budget, hard_veto=hard_veto
+                )
+            except ValueError:
+                feasible = False
+                break
+            held = [rows[i] for i in test]
+            flagged = _flagged_at(held, selected)
+            for item in held:
+                veto = item["id"] in flagged or (hard_veto and item["contradiction"])
+                if item["label"] == ACCEPTABLE_LABEL:
+                    accepted_n += 1
+                    false_vetoes += int(veto)
+                else:
+                    defects_n += 1
+                    caught += int(veto)
+        interval = _wilson(false_vetoes, accepted_n) if feasible else None
+        reports.append(
+            {
+                "budget": budget,
+                "feasible": feasible,
+                "accepted_n": accepted_n,
+                "false_vetoes": false_vetoes,
+                "false_veto_interval": interval,
+                "defect_recall": caught / defects_n if defects_n else 0.0,
+            }
+        )
+    admissible = [
+        row
+        for row in reports
+        if row["feasible"] and row["false_veto_interval"][1] <= VETO_BUDGET
+    ]
+    if admissible:
+        winner = max(admissible, key=lambda row: (row["defect_recall"], -row["budget"]))
+        return winner["budget"], reports, False
+    # Refuse every learned veto when CV cannot substantiate its budget.
+    # A fixed contradiction rule has no fitted cutoff, so its held-out count
+    # is exact across these folds; retain it only within the observed limit.
+    accepted_n = sum(row["label"] for row in rows)
+    false_vetoes = sum(
+        row["label"] and hard_veto and row["contradiction"] for row in rows
+    )
+    if false_vetoes / accepted_n > VETO_BUDGET:
+        raise ValueError(f"{axis}: fixed veto alone exceeds the held-out limit")
+    reports.append(
+        {
+            "budget": 0.0,
+            "fixed_only": True,
+            "feasible": True,
+            "accepted_n": accepted_n,
+            "false_vetoes": false_vetoes,
+            "false_veto_interval": _wilson(false_vetoes, accepted_n),
+            "defect_recall": sum(
+                not row["label"] and hard_veto and row["contradiction"] for row in rows
+            )
+            / sum(not row["label"] for row in rows),
+        }
+    )
+    return 0.0, reports, True
+
+
+def _fit_rubric(rows, axis: str, penalty: float) -> dict[str, Any]:
+    """Fit monotone dimension logits against defensibility labels.
+
+    No dimension labels exist in the receipts. Each dimension sees only its
+    own category expectation and check compliance; the binary supervision
+    calibrates each dimension's evidence and is not an incumbent dimension gold.
+    """
+    from scipy.optimize import minimize
+    from scipy.special import expit
+
+    from imas_codex.standard_names.review.cascade import rubric_features
+
+    features = [rubric_features(axis, row["judgment"]) for row in rows]
+    dimensions = sorted(features[0])
+    keys = {
+        dim: sorted(set.intersection(*(set(row[dim]) for row in features)))
+        for dim in dimensions
+    }
+    if any(not values for values in keys.values()):
+        raise ValueError("each rubric dimension needs observed calibration features")
+    matrices = {
+        dim: np.asarray([[row[dim][key] for key in keys[dim]] for row in features])
+        for dim in dimensions
+    }
+    labels = np.asarray([row["label"] for row in rows])
+    slices = {}
+    cursor = len(dimensions)
+    for dim in dimensions:
+        slices[dim] = slice(cursor, cursor + len(keys[dim]))
+        cursor += len(keys[dim])
+    initial = np.zeros(cursor)
+    for dim in dimensions:
+        initial[slices[dim]] = 1 / len(keys[dim])
+
+    def objective(parameters):
+        predicted = np.column_stack(
+            [
+                expit(parameters[i] + matrices[dim] @ parameters[slices[dim]])
+                for i, dim in enumerate(dimensions)
+            ]
+        )
+        bounded = np.clip(predicted, 1e-12, 1 - 1e-12)
+        loss = -np.mean(
+            labels[:, None] * np.log(bounded)
+            + (1 - labels[:, None]) * np.log(1 - bounded)
+        )
+        gradient = np.zeros_like(parameters)
+        for i, dim in enumerate(dimensions):
+            local = (predicted[:, i] - labels) / (len(rows) * len(dimensions))
+            gradient[i] = local.sum()
+            gradient[slices[dim]] = matrices[dim].T @ local
+        weights = parameters[len(dimensions) :]
+        loss += penalty * np.dot(weights, weights) / (2 * len(weights))
+        gradient[len(dimensions) :] += penalty * weights / len(weights)
+        return loss, gradient
+
+    model = minimize(
+        objective,
+        initial,
+        jac=True,
+        method="L-BFGS-B",
+        bounds=[(-30, 30)] * len(dimensions) + [(0, 30)] * (cursor - len(dimensions)),
+        options={"maxiter": 2000, "ftol": 1e-12, "gtol": 1e-8},
+    )
+    if not model.success:
+        raise ValueError(f"rubric fit failed: {model.message}")
+    return {
+        "dimensions": {
+            dim: {
+                "intercept": float(model.x[i]),
+                "weights": dict(
+                    zip(keys[dim], map(float, model.x[slices[dim]]), strict=True)
+                ),
+            }
+            for i, dim in enumerate(dimensions)
+        },
+        "offset": 0.0,
+        "band_width": 0.05,
+        "penalty": penalty,
+    }
+
+
+def fit_rubric(items, axis: str, vetoes) -> dict[str, Any]:
+    from scipy.special import expit
+
+    from imas_codex.standard_names.review.cascade import rubric_scores
+
+    rows = _calibration_items(items, "calibration")
+    trials = []
+    for penalty in (0.001, 0.01, 0.1):
+        predictions = []
+        for train, test in _folds(rows):
+            fit = _fit_rubric([rows[i] for i in train], axis, penalty)
+            for index in test:
+                scores = rubric_scores(axis, rows[index]["judgment"], fit)
+                predictions.append(
+                    {**rows[index], "score": sum(scores.values()) / (20 * len(scores))}
+                )
+        trials.append({"penalty": penalty, "auc": _auc(predictions)})
+    winner = max(trials, key=lambda trial: (trial["auc"], trial["penalty"]))
+    fit = _fit_rubric(rows, axis, winner["penalty"])
+    # Translate every dimension logit equally. Select the largest check-clear
+    # cohort at the policy precision; fallback reports the attainable precision.
+    vetoed = _flagged_at(rows, vetoes)
+    clear = [row for row in rows if row["id"] not in vetoed]
+    base = (
+        np.asarray(
+            [list(rubric_scores(axis, row["judgment"], fit).values()) for row in clear]
+        )
+        / 20
+    )
+    logits = np.log(base / (1 - base))
+    labels = np.asarray([row["label"] for row in clear])
+    candidates = []
+    for offset in np.linspace(-6, max(6, 2 - float(logits.min())), 481):
+        selected = expit(logits + offset).mean(axis=1) >= DEFAULT_MIN_SCORE
+        count = int(selected.sum())
+        if count >= ACCEPT_GROUP_MIN:
+            precision = float(labels[selected].mean())
+            candidates.append((precision, count, float(offset)))
+    if not candidates:
+        raise ValueError("no rubric accept cohort for calibration")
+    qualified = [row for row in candidates if row[0] >= ACCEPT_PRECISION]
+    chosen = (
+        max(qualified, key=lambda row: (row[1], row[0], -row[2]))
+        if qualified
+        else max(candidates)
+    )
+    fit.update(
+        offset=chosen[2],
+        cv=trials,
+        calibration_accept_precision=chosen[0],
+        calibration_accept_n=chosen[1],
+        min_score=DEFAULT_MIN_SCORE,
+        offset_basis="precision" if qualified else "best-available-precision",
+    )
+    return fit
+
+
+def _rubric_report(items, axis, block):
+    from imas_codex.standard_names.review.cascade import _route
+
+    report = {}
+    for split in ("calibration", "validation"):
+        rows = _calibration_items(items, split)
+        decisions = [
+            _route(axis, row["judgment"], row["score"], thresholds=block)
+            for row in rows
+        ]
+        counts = {
+            route: sum(d.route == route for d in decisions)
+            for route in ("accept", "chat_review", "refine")
+        }
+        accepts = [
+            row for row, d in zip(rows, decisions, strict=True) if d.route == "accept"
+        ]
+        refines = [
+            row for row, d in zip(rows, decisions, strict=True) if d.route == "refine"
+        ]
+        accepted_n = sum(row["label"] for row in rows)
+        false_vetoes = sum(
+            row["label"] == ACCEPTABLE_LABEL and bool(d.failed_checks)
+            for row, d in zip(rows, decisions, strict=True)
+        )
+        correct = sum(row["label"] for row in accepts)
+        report[split] = {
+            "n": len(rows),
+            "route_counts": counts,
+            "route_shares": {key: value / len(rows) for key, value in counts.items()},
+            "accept_n": len(accepts),
+            "accept_correct": correct,
+            "accept_precision": correct / len(accepts) if accepts else None,
+            "accept_precision_interval": _wilson(correct, len(accepts)),
+            "refine_precision": sum(1 - row["label"] for row in refines) / len(refines)
+            if refines
+            else None,
+            "false_veto_rate_on_accepted": false_vetoes / accepted_n,
+            "false_refine_rate_on_accepted": sum(row["label"] for row in refines)
+            / accepted_n,
+            "auc": _auc(
+                [
+                    {**row, "score": d.total}
+                    for row, d in zip(rows, decisions, strict=True)
+                ]
+            ),
+            "raw_rubric_auc": _auc(
+                [
+                    {
+                        **row,
+                        "score": sum(d.raw_scores.values()) / (20 * len(d.raw_scores)),
+                    }
+                    for row, d in zip(rows, decisions, strict=True)
+                ]
+            ),
+            "logistic_auc": _auc(rows),
+        }
+    return report
+
+
 def build(
     *,
     name_receipts: Path = DEFAULT_NAME_RECEIPTS,
@@ -689,30 +1076,56 @@ def build(
     name_items, name_context = _name_axis(name_receipts, golden_name)
     docs_items, _docs_context = _docs_axis(docs_receipts, golden_docs)
 
-    name_block, name_union = _axis_thresholds(name_items, "name", hard_veto=False)
-    docs_block, docs_union = _axis_thresholds(docs_items, "docs", hard_veto=True)
+    name_block, _ = _axis_thresholds(name_items, "name", hard_veto=False)
+    docs_block, _ = _axis_thresholds(docs_items, "docs", hard_veto=True)
+
+    for axis, items, block in (
+        ("name", name_items, name_block),
+        ("docs", docs_items, docs_block),
+    ):
+        block["logistic_only_report"] = _axis_report(
+            _calibration_items(items, "calibration"),
+            _calibration_items(items, "validation"),
+            {**block, "check_thresholds": {}},
+            hard_veto=False,
+        )
+        block["joint_only_report"] = _axis_report(
+            _calibration_items(items, "calibration"),
+            _calibration_items(items, "validation"),
+            block,
+            hard_veto=axis == "docs",
+        )
+        block["prior_veto_checks"] = sorted(block["check_thresholds"])
+        block["reference_veto_checks"] = sorted(INDEPENDENT_VETO_CHECKS[axis])
+        block["reference_veto_sha256"] = INDEPENDENT_VETO_REFERENCE_SHA256
+        block["joint_only_removed_checks"] = sorted(
+            set(block["reference_veto_checks"]) - set(block["prior_veto_checks"])
+        )
+        budget, cv, fixed_only = cross_validated_veto_budget(
+            items, axis, hard_veto=axis == "docs"
+        )
+        fitted, _ = _axis_thresholds(
+            items, axis, hard_veto=axis == "docs", budget=budget, fixed_only=fixed_only
+        )
+        block.update(fitted)
+        block["veto_budget"] = budget
+        block["fixed_veto_only"] = fixed_only
+        block["veto_budget_cv"] = cv
+        block["rubric"] = fit_rubric(items, axis, block["check_thresholds"])
+        block["report"] = _rubric_report(items, axis, block)
+        block["dropped_checks"] = _dropped(items, block)
+        block["removed_from_joint_veto"] = sorted(
+            set(block["prior_veto_checks"]) - set(block["check_thresholds"])
+        )
 
     name_block["score_intercept"] = name_context["fit"]["intercept"]
     name_block["score_weights"] = name_context["fit"]["weights"]
     name_block["regularization"] = name_context["fit"]["regularization"]
 
-    name_block["report"] = _axis_report(
-        _calibration_items(name_items, "calibration"),
-        _calibration_items(name_items, "validation"),
-        name_block,
-        hard_veto=False,
-    )
-    docs_block["report"] = _axis_report(
-        _calibration_items(docs_items, "calibration"),
-        _calibration_items(docs_items, "validation"),
-        docs_block,
-        hard_veto=True,
-    )
-    name_block["dropped_checks"] = _dropped(name_items, name_block)
-    docs_block["dropped_checks"] = _dropped(docs_items, docs_block)
-
     name_block["source_receipts"] = str(name_receipts)
     docs_block["source_receipts"] = str(docs_receipts)
+    name_block["source_sha256"] = hashlib.sha256(name_receipts.read_bytes()).hexdigest()
+    docs_block["source_sha256"] = hashlib.sha256(docs_receipts.read_bytes()).hexdigest()
     for block in (name_block, docs_block):
         fitted = block["report"]["calibration"]
         block["route_counts"] = dict(sorted(fitted["route_counts"].items()))
@@ -723,10 +1136,13 @@ def build(
         "source_split": "calibration",
         "policy": {
             "check_selection": (
-                "checks are added to the veto set one at a time by the defect "
-                "recall they add, holding the union of cutoffs to at most "
-                f"{VETO_BUDGET:.2f} of accepted calibration items on each axis; "
-                "a check left out is not a veto and still feeds the score"
+                "five-fold copy-group CV within calibration selects the budget "
+                "with highest held-out defect recall whose pooled 95% Wilson "
+                "upper false-veto bound is at most 0.10; ties use the smaller "
+                "budget; check cutoffs and union are then refitted on calibration. "
+                "If none qualifies, disable all learned vetoes and retain only "
+                "the fixed contradiction rule, provided its observed CV rate "
+                "is at most 0.10; its interval is reported without claiming a bound."
             ),
             "check_cutoff": (
                 "one cutoff per check, maximising defect recall minus accepted "
@@ -735,15 +1151,26 @@ def build(
                 f"{MIN_SEPARATION:.2f}"
             ),
             "accept_selection": (
-                "lowest check-clear calibration score bin of at least "
-                f"{ACCEPT_GROUP_MIN} items at empirical precision at least "
-                f"{ACCEPT_PRECISION:.2f}; where no bin reaches it, the bin of "
-                "least five items with the highest available precision"
+                f"accept at the consumer min_score (default {DEFAULT_MIN_SCORE}) after veto; "
+                "a common dimension-logit offset maximises calibration accept "
+                "count with at least five accepts and precision at least 0.90; "
+                "fallback maximises attainable precision and is recorded"
             ),
             "reject_selection": (
-                f"calibration score {REJECT_PERCENTILE:.0f}th percentile; a "
-                "check-clear low-tail case uses chat_below_reject, distinct from "
-                "the uncertain band"
+                "the interval [min_score - 0.05, min_score) uses chat_review; "
+                "below it refines. The policy width is one point of a 20-point rubric."
+            ),
+            "rubric": (
+                "mean of four dimension logits normalised to 0..1, reported as "
+                "0..20 dimension scores; nonnegative weights on category expectation "
+                "(best=1, middle=0.5, worst=0) and own-check compliance (1-p_failure). "
+                "Binary defensibility supervision fits dimension evidence, not dimension gold "
+                "labels. L2 penalty is selected by five-fold copy-group CV AUC."
+            ),
+            "veto_score": (
+                "a veto scales the dimensions together if needed so their normalised "
+                "mean is at most min_score - 0.001; raw dimensions and failed-check "
+                "probability, cutoff and evidence remain in the review record"
             ),
             "unjudged_selection": (
                 "A refused lease or unusable Jev judgment writes a separate "
@@ -772,10 +1199,15 @@ def _content_digest(document: Mapping[str, Any]) -> str:
 
 def _dropped(items: Sequence[Mapping[str, Any]], block: Mapping[str, Any]) -> list[str]:
     selected = set(block["check_thresholds"])
+    if "reference_veto_checks" in block:
+        return sorted(set(block["reference_veto_checks"]) - selected)
+    calibration = _calibration_items(items, "calibration")
+    accepted = {row["id"] for row in calibration if row["label"] == ACCEPTABLE_LABEL}
+    defects = {row["id"] for row in calibration if row["label"] != ACCEPTABLE_LABEL}
     per_check = {
-        check_id
-        for check_id, stats in block["check_diagnostics"].items()
-        if stats["threshold"] is not None
+        key
+        for key in _check_ids(calibration)
+        if _per_check_threshold(calibration, key, accepted, defects)[0] is not None
     }
     return sorted(per_check - selected)
 
