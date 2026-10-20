@@ -24,8 +24,8 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="110">
-<meta name="plan-modified" content="2026-10-19">
+<meta name="plan-version" content="111">
+<meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
 <body>
@@ -554,7 +554,10 @@ Spend for this node: USD 0.</p></div>
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-cohort-incumbent-docs-part1of4.html records the blocked incumbent-docs part 1 of 4 piece: launched 2026-10-19T20:01:56Z, the temporary Neo4j missed its 180-second Bolt-readiness window at 20:53Z while four cohort pieces loaded scratch instances on this node, EXIT=1 with USD 0 spend, scratch instance stopped and tree removed, and the comparison budget check now refuses every further piece in this checkout on the spend-less piece record</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261019T195315394940-srtj-cohort-incumbent-name-part4of4" data-who="reckon-build" data-when="2026-10-19T21:15:56.666Z">
-    <div class="r-comment-body"><p>cohort piece incumbent/name 4of4 could not be produced: the run exhausted its USD 4.50 piece ceiling (overspend recorded at spend 4.2165 of cap 4.5000), could not fund the remaining selected items on any later cycle, and the runner&#x27;s verify_completion refuses a piece with pending identities, so measurement_complete was never set. Evidence in the run log r-20261019T195315394940-srtj-cohort-incumbent-name-part4of4/piece.log.</p></div>
+    <div class="r-comment-body"><p>cohort piece incumbent/name 4of4 could not be produced: the run exhausted its USD 4.50 piece ceiling (overspend recorded at spend 4.2165 of cap 4.5000), could not fund the remaining selected items on any later cycle, and the runner's verify_completion refuses a piece with pending identities, so measurement_complete was never set. Evidence in the run log r-20261019T195315394940-srtj-cohort-incumbent-name-part4of4/piece.log.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261019T195052296536-srtj-cohort-cascade-docs-r2" data-who="reckon-build" data-when="2026-10-19T21:23:05.832Z">
+    <div class="r-comment-body"><p>cascade docs piece failed twice: scratch Neo4j readiness on the first attempt, and the retry&#x27;s detached process died when its worker step ended; no completed piece file; re-run as a new node</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,376 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "c2cfedcd05e6df642a6a987a04c2615f173a1a4b",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195052296536-srtj-cohort-cascade-docs-r2/brief.md",
+    "sha256": "62fa872bc24eb43241cf1a8157a54f1e3f7198cac83dd359b0413ddf0417cfb7"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5850141,
+      "input_tokens_cumulative": 5850141,
+      "output_tokens": 26276,
+      "output_tokens_cumulative": 26276,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-19T21:23:05.832Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-19T19:52:03Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5714285714285715,
+    "plan": "sn-review-through-jev",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-19T20:50:54.858327+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-19T19:50:54Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 17,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 7,
+    "headroom": 5,
+    "mean_context": 126667,
+    "observed_at": "2026-10-19T19:50:37Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 17,
+      "aggregate_tokens_per_second": 312.653,
+      "detail": "",
+      "mean_tokens_per_second": 60.125,
+      "observed_at": "2026-10-19T19:50:37Z",
+      "runs": 5.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-19T21:23:05.832Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195052296536-srtj-cohort-cascade-docs-r2/manifest.md",
+  "member": "disposable-r-20261019T195052296536-srtj-cohort-cascade-docs-r2",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "the run's only commit is a mid-flight checkpoint of a piece file that never completed; landing it would place a torn record at the path the re-run writes, so it is kept at refs/reckon/failed/srtj-cohort-cascade-docs-r2 instead",
+  "node": "srtj-cohort-cascade-docs-r2",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/cohort-pieces/cascade-docs.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195052296536-srtj-cohort-cascade-docs-r2/brief.md",
+    "brief_sha256": "62fa872bc24eb43241cf1a8157a54f1e3f7198cac83dd359b0413ddf0417cfb7",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1183,
+          "cached_input_tokens": 795764,
+          "input_tokens": 796949,
+          "output_tokens": 396,
+          "reasoning_output_tokens": 55,
+          "total_tokens": 797345,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "srtj-cohort/cascade-docs.json holds every item of the piece with route, chat-reviewer call, decision, score, calls, receipt spend and wall time, measurement_complete true and a passing containment verdict, written by a detached invocation whose log ends EXIT=0; the scratch instance is stopped and its tree removed; spend is at most USD 5.00",
+    "estimated_hours": null,
+    "goal": "Run the cascade-docs piece of the fixed review cohort in a scratch graph through the cohort runner",
+    "id": "srtj-cohort-cascade-docs-r2",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-19T19:50:54Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 17,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 7,
+      "headroom": 5,
+      "mean_context": 126667,
+      "observed_at": "2026-10-19T19:50:37Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 17,
+        "aggregate_tokens_per_second": 312.653,
+        "detail": "",
+        "mean_tokens_per_second": 60.125,
+        "observed_at": "2026-10-19T19:50:37Z",
+        "runs": 5.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195052296536-srtj-cohort-cascade-docs-r2/manifest.md",
+    "negative_control": "",
+    "plan": "sn-review-through-jev",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-review-through-jev/srtj-cohort/cascade-docs.json",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-cascade-docs-r2.html",
+      "docs/figures/sn-review-through-jev/srtj-cohort-cascade-docs-r2"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "srtj-cohort-cascade-docs-r2",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-19T19:51:46.139044+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "s6's authored body is unchanged since its stored content review; the edits since are landing comments and the lead's USD 60 ruling",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.382,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1329.084,
+      "context-estimate": 19.412,
+      "records": 1721.148,
+      "verdict-inputs": 1551.159
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5714285714285715,
+  "plan_link": null,
+  "predecessor_run": "r-20261019T184516856377-srtj-cohort-eligibility",
+  "promoted_by": null,
+  "promoted_revision": "1208404a0e94a1f197bef8f055db18d5330d6a09",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261019T195052296536-srtj-cohort-cascade-docs-r2",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "284159ae-5e78-4a48-bc3f-bd48bd449958",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 5850141,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 5447.497,
+    "generated_tokens": 26276,
+    "generation_seconds": 705.433,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 65.3,
+    "machine_seconds": 4742.064,
+    "peak_input_tokens": 150203,
+    "tokens_per_second": 37.25,
+    "wall_tokens_per_second": 4.82
+  },
+  "time_budget": "60m",
+  "tool_steps": 47.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 5462,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-19T21:23:12Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-19T19:52:14Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261019T195052296536-srtj-cohort-cascade-docs-r2",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 4345,
+    "worker_pid": 2053687
+  },
+  "worker_seconds": 5413,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-19T21:23:05.832Z",
+    "session_id": "284159ae-5e78-4a48-bc3f-bd48bd449958",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-cohort-cascade-docs-r2"
+  }
+}
