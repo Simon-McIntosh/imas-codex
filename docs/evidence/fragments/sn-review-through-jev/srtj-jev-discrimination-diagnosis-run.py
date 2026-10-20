@@ -175,13 +175,17 @@ def check_report(check, rows, block, axis):
 
 
 def counter_rows(rows, axis):
+    counts = Counter((r["split"], r["label"], label_class(r, axis)) for r in rows)
+    classes = sorted({(r["label"], label_class(r, axis)) for r in rows})
     return [
-        {"split": s, "label": label, "label_class": c, "count": n}
-        for (s, label, c), n in sorted(
-            Counter(
-                (r["split"], r["label"], label_class(r, axis)) for r in rows
-            ).items()
-        )
+        {
+            "split": split,
+            "label": label,
+            "label_class": cls,
+            "count": counts[(split, label, cls)],
+        }
+        for split in SPLITS
+        for label, cls in classes
     ]
 
 
@@ -349,8 +353,8 @@ def paired_edits(rows):
             and good["label"] == 1
             and bad["label"] == 0
             and good["copy_group"] == bad["copy_group"]
-            and good["golden"]["label_source"] == "human_edit_target"
-            and bad["golden"]["label_source"] == "human_edit_source"
+            and "human_edit_target" in good["golden"]["all_label_sources"]
+            and "human_edit_source" in bad["golden"]["all_label_sources"]
         ]
         deltas = [g["rubric_total"] - b["rubric_total"] for g, b in pairs]
         result[split] = {
@@ -492,6 +496,13 @@ def render(report):
 
     for axis, data in report["axes"].items():
         parts.append(f"<h3>{esc(axis)}: labels and score reproduction</h3>")
+        parts.append(
+            "<p>"
+            + esc(data["label_row_count"])
+            + " golden rows, "
+            + esc(data["canonical_count"])
+            + " canonical identities. Duplicate identities retain the first label provenance for the class table, matching the calibration loader; split and binary-label consistency are asserted. Paired-edit analysis retains all provenance memberships.</p>"
+        )
         table(
             [
                 "Split",
@@ -702,6 +713,31 @@ def render(report):
         "<p>Source hashes, coverage exclusions, every broad-class proxy, term ablations and full disagreement answers are in the adjacent JSON. "
         "The driver records the imported modules and code revision in its durable gate log.</p>"
     )
+    parts.append("<h3>Changes that do not establish a gain</h3>")
+    table(
+        [
+            "Axis",
+            "Calibration-selected term removed",
+            "Calibration delta",
+            "Validation delta",
+        ],
+        [
+            [
+                a,
+                report["axes"][a]["ablations"][0]["feature"],
+                fmt(
+                    report["axes"][a]["ablations"][0]["splits"]["calibration"]["delta"]
+                ),
+                fmt(report["axes"][a]["ablations"][0]["splits"]["validation"]["delta"]),
+            ]
+            for a in ("name", "docs")
+        ],
+    )
+    parts.append(
+        "<p>Full frozen-catalog replay (same fitted mapping, no judge call): "
+        + esc(json.dumps(report["axes"]["docs"]["catalog_context_replay"]))
+        + ". Dead-link classifications change for 364 entries; zero fitted weight makes their score effect zero. This diagnoses an audit-context defect, not a demonstrated AUC improvement.</p>"
+    )
     parts.append("<h3>Ranked improvements</h3><ol>")
     for item in report["improvements"]:
         parts.append(
@@ -806,6 +842,9 @@ def main():
                     unique[name]["label"],
                 )
             unique.setdefault(name, row)
+            sources = unique[name].setdefault("all_label_sources", [])
+            if row["label_source"] not in sources:
+                sources.append(row["label_source"])
         rows, _ = (
             cal._name_axis(receipt, fixture)
             if axis == "name"
@@ -817,6 +856,8 @@ def main():
         data = {
             "labels": counter_rows(list(unique.values()), axis),
             "raw_label_rows": counter_rows(labels, axis),
+            "label_row_count": len(labels),
+            "canonical_count": len(unique),
             "coverage": {},
             "summary": {},
             "logistic": {},
@@ -949,42 +990,57 @@ def compact_numbers(value):
 
 
 def recommendations(report):
-    out = []
-    for axis in ("name", "docs"):
-        best = report["axes"][axis]["ablations"][0]
-        out.append(
-            {
-                "change": f"Drop or downweight {axis} term {best['feature']} in {best['dimension']}",
-                "candidate": "drop a noisy check"
-                if best["feature"] != "category"
-                else "change a dimension's mapping",
-                "evidence": f"Highest calibration-selected single-term ablation; replacing the term by its calibration mean, holding every other parameter fixed: {best['splits']}",
-                "expected_auc_effect": "The measured deltas above are sensitivity estimates, not promised gains; refit within grouped calibration and test on a fresh holdout.",
-            }
+    def get_check(axis, name):
+        return next(c for c in report["axes"][axis]["checks"] if c["id"] == name)
+
+    def totals(axis, field):
+        check = next(
+            c for c in report["axes"][axis]["checks"] if field in c["evidence_fields"]
         )
-    out.extend(
-        [
-            {
-                "change": "Supply source and relationship evidence where the frozen states are empty or unobserved",
-                "candidate": "supply missing evidence",
-                "evidence": "Per-check evidence tables identify the precise missing fields. The current docs arm already observes units, links and source paths; the earlier diagnosis of wholly absent fields is obsolete. Link target meanings, source ancestor descriptions and family provenance must be distinguished from merely carrying identifier strings.",
-                "expected_auc_effect": "Direction expected positive for affected checks; numerical gain is not identifiable without new paired answers. Zero immediate change to frozen scores.",
-            },
-            {
-                "change": "Add check-specific golden labels, especially documentation completeness and name provenance defects",
-                "candidate": "add golden labels of a named kind",
-                "evidence": "No exact check truth exists. Documentation complete has fewer than five defects; name sources identify how labels were obtained rather than which check should fire. Annotate independent copy groups with multiple applicable checks and explicit acceptable controls.",
-                "expected_auc_effect": "Zero direct change to frozen AUC; enables valid check calibration and reduces uncertainty. No evidence supports a point forecast.",
-            },
-            {
-                "change": "Rewrite ambiguous source-comparison questions only after supplying their evidence",
-                "candidate": "rewrite a check's question",
-                "evidence": "Claim non-support pools contradiction with says-nothing, while the hard veto uses contradiction only. Worst-ranked items expose the answers and evidence needed to distinguish unsupported, contradictory and wrong-object claims. Preserve separate outcomes and never count unobserved evidence as a false claim.",
-                "expected_auc_effect": "Unknown until a paired question arm is judged; frozen receipts cannot predict responses to rewritten questions. Keep the hard contradiction rule and measure category-specific recall.",
-            },
-        ]
+        return dict(
+            sum(
+                (Counter(check["splits"][s]["evidence"][field]) for s in SPLITS),
+                Counter(),
+            )
+        )
+
+    wrong = get_check("name", "bound_to_wrong_object")["splits"]["validation"]
+    raw = get_check("docs", "raw_dd_reference_in_prose")["splits"]["validation"]
+    claim = next(
+        a
+        for a in report["axes"]["docs"]["ablations"]
+        if a["feature"] == "claim_contradicts_source"
     )
-    return out
+    gap = (
+        report["axes"]["name"]["logistic"]["validation"]["auc"]
+        - report["axes"]["name"]["summary"]["validation"]["auc"]
+    )
+    return [
+        {
+            "change": "Supply DD source, parent and sibling evidence to source-sensitive name checks",
+            "candidate": "supply missing evidence",
+            "evidence": f"Name dd_source_docs {totals('name', 'dd_source_docs')}; parent_path {totals('name', 'parent_path')}; sibling_fields {totals('name', 'sibling_fields')}; derived_children {totals('name', 'derived_children')}. bound_to_wrong_object validation AUC {wrong['auc']:.4f}, but its 0.5 cutoff falsely flags {wrong['midpoint']['false_flags']} acceptable items. Preserve source absence as unknown and measure applicability rather than forcing a defect answer.",
+            "expected_auc_effect": "No point forecast is identifiable from frozen answers. Expected improvement is concentrated in source-sensitive checks; zero immediate gain without rejudging. The available-full-catalog audit replay separately changes 364 dead-link findings but produces exactly zero rubric AUC gain, so evidence plumbing alone must not be advertised as a measured discrimination gain.",
+        },
+        {
+            "change": "Rewrite raw_dd_reference_in_prose to identify an offending span in candidate prose and distinguish canonical quantity names",
+            "candidate": "rewrite a check's question",
+            "evidence": f"Validation AUC {raw['auc']:.4f}; {raw['midpoint']['false_flags']}/74 acceptable entries flagged. ratio_of_particle_count_to_particle_simulated_count is labelled acceptable and receives P(defect)=0.83, although its prose contains canonical particle_count/particle_simulated_count identifiers rather than a raw DD path. Its source paths appear separately in the state. This motivates a candidate-text-only question with a span, not reversal of polarity.",
+            "expected_auc_effect": "Unknown before a paired question arm. Simply removing this term is not supported: calibration AUC rises 0.014371 but validation falls 0.016708. Retain the check until a rewritten question demonstrates improvement on fresh labels.",
+        },
+        {
+            "change": "Add check-specific and dimension-specific golden labels, including completeness and paired provenance corrections",
+            "candidate": "add golden labels of a named kind",
+            "evidence": "The frozen fixtures label whole-item defensibility. No exact check-level defect count is known. Documentation complete has only 3 calibration defects and 0 validation defects; exact subtypes of the 14 physics, 23 subject and 10 scope defects are unlabelled. The name gold has 194 human source/target pairs; label which check each edit fixes and add matched acceptable controls, keeping copy groups together. Dimension models currently fit the same binary target without dimension gold scores.",
+            "expected_auc_effect": "Zero immediate AUC change; gain after retraining is unknown. Obtain at least five independent defect groups per targeted check before even provisional calibration, plus a fresh grouped validation set. Five is a minimum identifiability screen, not a precision guarantee.",
+        },
+        {
+            "change": "Refit name dimension mappings against dimension labels and separate documentation non-support from contradiction",
+            "candidate": "change a dimension's mapping",
+            "evidence": f"Name validation grammar rubric AUC is 0.6240 and convention 0.6439, while raw category AUCs are 0.5466 and 0.5651. The existing logistic reference exceeds the raw rubric by {gap:.6f} AUC on identical receipts. Docs physics has no category question; the claim non-support channel is near chance (0.4959) despite a functioning hard contradiction veto (60/60 planted contradictions, 0/20 silent controls). Removing its fitted term gives calibration delta {claim['splits']['calibration']['delta']:.6f} and validation delta {claim['splits']['validation']['delta']:.6f}.",
+            "expected_auc_effect": f"The name reference gap of {gap:.6f} is a measured comparison target, not a forecast for a new mapping. The claim-term sensitivity is only about +0.000123 validation AUC, far short of the proposed 0.85 target. Preserve the hard veto, fit only within calibration, and test the mapping with new independent labels.",
+        },
+    ]
 
 
 if __name__ == "__main__":
