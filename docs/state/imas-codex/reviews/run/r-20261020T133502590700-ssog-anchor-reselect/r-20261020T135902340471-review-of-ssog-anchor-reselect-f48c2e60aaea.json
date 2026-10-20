@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:405",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:406",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:494",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py"
+  ],
+  "completed_at": "2026-10-20T14:10:21.088Z",
+  "dispatched_at": "2026-10-20T13:59:24Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect-run.py",
+      "line": "66",
+      "severity": "follow-on",
+      "text": "follow-on: reserve_port_pair and _free at :66-98 duplicate the capability ssog-anchor-ab-run.py:98 already owns (which ssog-anchor-port-reservation added to fix the four-arm port collision), but the copy takes the lock file ssog-reselect-port-<base>.lock while the runner takes ssog-scratch-port-<base>.lock. Because the guarded fact is that a scratch instance binds its bolt port only minutes after the pair is chosen, a reselect driver and an arm run concurrently now both see 31000/28000 free, hold different lock files, and can be handed the same pair - reintroducing exactly the collision the port-reservation node exists to prevent. No concurrency occurred in this run, so it is a latent hazard rather than a live one."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect-run.py",
+      "line": "737",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded gate does not attest the committed revision. reselect.log and verify.log both stamp revision=bb068aa9d, but the reviewed head is f48c2e60a, whose render_fragment adds the attribution paragraph (:418-442), the 'is/are' fix, and the verified section (:468-491) and which added verify_dd_sources and the --verify-family/--render-only entry points. The committed ssog-anchor-reselect.html therefore contains prose no logged driver produced: reselect.log's driver wrote a fragment without those sections at bb068aa9d, and the committed one was rewritten by an unlogged --render-only run at f48c2e60a. The done_when's 'both written by a driver whose log ends EXIT=0' holds for the bb068aa9d fragment, not for the one on disk."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect-run.py",
+      "line": "680",
+      "severity": "follow-on",
+      "text": "follow-on: the summary's 'dropped' list tests the wrong predicate. At :680 it reads 'd[\"heuristic_new\"] is None and d[\"jev_changed\"] is None', where the sibling key out_of_anchor at :685 correctly tests 'd[\"jev_new\"] is None'. For the one dropping family (current_density_due_to_wave_driven_current_drive) jev_changed is True, so dropped is [] in reselect-summary.json while out_of_anchor names the family; a reader deriving the drop-out count from 'dropped' would miss it. The fragment computes its own dropped list correctly at :314-316, so the deliverable prose is right and only the summary record understates the result."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment filenames ssog-anchor-reselect.html and ssog-anchor-reselect-run.py embed the plan abbreviation 'ssog', which the naming rules forbid in source, test and script filenames, and the selection.json writes an absolute worktree path (reselect.runner_reads_anchors_from_selection.runner, .../ssog-anchor-reselect/docs/...) into a committed artifact. Both continue a pattern a prior review of this family already flagged as follow-on."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit over de3a5225b..f48c2e60a: bb068aa9d adds the 595-line driver, and f48c2e60a adds the 323-line selection.json rewrite, the 42-line fragment, and 190 further lines of the driver (the attribution paragraph, the '(is/are)' fix, the verify_dd_sources positive-control query, and the --verify-family/--render-only paths).",
+    "done_when": "The done_when requires selection.json to carry the re-derived anchors and their predecessors, the fragment to list every family's anchors before and after for both arms, both written by a driver whose log ends EXIT=0, the scratch instance stopped and removed, and spend under USD 0.50; reselect.log ends EXIT=0 at revision bb068aa9d, but the committed fragment was regenerated afterwards by an ungated --render-only invocation, so the recorded gate does not attest the head.",
+    "goal": "The node's goal is to re-derive both arms' anchors for the ten comparison families under the DD-source rule; selection.json's per-family heuristic_anchor and jev_anchor are rewritten by the driver at ssog-anchor-reselect-run.py:266-267 from select_anchor(None,None,None,members) at :222 and score_family_anchor's choice at :223, with the ten families and the adoption rule re-read unchanged.",
+    "manifest": "Read in full; it records status complete, commits bb068aa9d and f48c2e60a, the driver command as its tests line, reselect.log and verify.log as its logs, spend USD 0.000907 against the USD 0.50 ceiling, and the scratch tree removed; its checkpoint states both deliverables are committed at f48c2e60a 'from a driver run that ended EXIT=0', but that driver run is the bb068aa9d revision.",
+    "write_paths": "The declared write scope is the selection.json, ssog-anchor-reselect.html and ssog-anchor-reselect-run.py under docs/evidence/fragments/sn-selection-over-generation; the diff over de3a5225b..f48c2e60a touches exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "No test file is added or changed by either commit, and the driver's only guards are runtime raises (runner_anchor_source at ssog-anchor-reselect-run.py:127, the positive control at :569, the spend ceiling at :639) that no test asserts; the wrong 'dropped' predicate at :680 survived the gate, which is what an unasserted guard allows.",
+    "evidence": "reselect.log and verify.log both stamp revision=bb068aa9d (the first commit) while the reviewed head is f48c2e60a, and the committed fragment's attribution paragraph and verified section exist only in f48c2e60a's render_fragment, so the committed deliverable was produced by an ungated --render-only run rather than by the logged driver.",
+    "fit": "The driver follows the sibling runner's structure and the evidence-fragment idiom, but its filenames ssog-anchor-reselect.html and ssog-anchor-reselect-run.py embed the plan abbreviation 'ssog', which the naming rule forbids in source and test filenames.",
+    "goal_fidelity": "Both arms are re-derived per family and written beside their predecessors at selection.json rows carrying previous_anchors plus anchor_changed and anchor_change_reason, and the one family with no DD-sourced member is dropped rather than substituted, matching the goal and the brief's step 3.",
+    "reuse": "reserve_port_pair and _free at ssog-anchor-reselect-run.py:66-98 re-implement the capability ssog-anchor-ab-run.py:98 already owns rather than extending it, and the copy locks a different filename (prefix ssog-reselect-port- against ssog-scratch-port-), so the two scripts do not exclude each other on a port pair.",
+    "scope_discipline": "The diff over de3a5225b..f48c2e60a changes only the three declared write paths (selection.json, ssog-anchor-reselect.html, ssog-anchor-reselect-run.py), with the run-directory summary and verify logs written outside the fence as run-scoped artifacts."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to re-derive both arms' anchors for the ten families under the DD-source rule; ssog-anchor-reselect-run.py:266-267 rewrites each family's heuristic_anchor and jev_anchor from select_anchor at :222 and score_family_anchor at :223 with the families and rule re-read unchanged.\nVERDICT done_when: the done_when requires the re-derived anchors with predecessors in selection.json, a before/after table in the fragment, both from a driver whose log ends EXIT=0, a stopped-and-removed scratch instance, and spend under USD 0.50; the selection.json and removal arms hold, but the committed fragment was regenerated by an ungated --render-only after the gate.\nVERDICT write_paths: the declared scope is the three docs/evidence paths; the diff over de3a5225b..f48c2e60a touches exactly those and nothing else.\nVERDICT manifest: read in full - status complete, commits bb068aa9d and f48c2e60a, the driver command as its tests line, reselect.log and verify.log, spend USD 0.000907, scratch removed.\nVERDICT diff: read commit by commit - bb068aa9d adds the 595-line driver; f48c2e60a adds the selection.json rewrite, the fragment, and 190 further driver lines (attribution paragraph, verified section, verify_dd_sources, --verify-family/--render-only).\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:405, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:406, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:494, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: both anchors are re-derived per family and written beside their predecessors with anchor_changed and anchor_change_reason at ssog-anchor-ab/selection.json, and the one family with no DD-sourced member is dropped rather than substituted.\nSCORE evidence: 12\nJUSTIFICATION evidence: reselect.log and verify.log both stamp revision=bb068aa9d while the head is f48c2e60a, and the committed fragment's attribution and verified sections exist only in f48c2e60a's render_fragment, so the on-disk deliverable came from an ungated --render-only run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff over de3a5225b..f48c2e60a changes only the three declared write paths and nothing else.\nSCORE durability: 8\nJUSTIFICATION durability: neither commit adds or changes a test, and the driver's only guards (runner_anchor_source at ssog-anchor-reselect-run.py:127, the positive control at :569, the spend ceiling at :639) are runtime raises no test asserts, which is how the wrong 'dropped' predicate at :680 passed the gate.\nSCORE fit: 15\nJUSTIFICATION fit: the driver follows ssog-anchor-ab-run.py's structure and the evidence-fragment idiom, but ssog-anchor-reselect.html and ssog-anchor-reselect-run.py embed the plan abbreviation 'ssog' in their filenames.\nSCORE reuse: 5\nJUSTIFICATION reuse: reserve_port_pair and _free at ssog-anchor-reselect-run.py:66-98 duplicate the capability owned at ssog-anchor-ab-run.py:98 without extending it, and lock a different filename so the two scripts do not exclude each other on a port pair.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect-run.py:66 follow-on: reserve_port_pair and _free duplicate ssog-anchor-ab-run.py:98's capability with a different lock prefix (ssog-reselect-port- vs ssog-scratch-port-), so a reselect driver and an arm run concurrently hold different lock files and can be handed the same port pair, reintroducing the collision the port-reservation node fixed; latent here because no concurrency occurred.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect-run.py:737 follow-on: the recorded gate does not attest the head - reselect.log and verify.log stamp revision=bb068aa9d while the head is f48c2e60a, and the committed fragment's attribution paragraph and verified section exist only in f48c2e60a's render_fragment, so the on-disk HTML was rewritten by an unlogged --render-only run after the gate.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect-run.py:680 follow-on: the summary's dropped list tests 'd[\"jev_changed\"] is None' where the sibling out_of_anchor at :685 correctly tests 'd[\"jev_new\"] is None', so reselect-summary.json reports dropped [] while out_of_anchor names the one family that drops; the fragment computes it correctly so only the summary understates the result.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect.html:1 follow-on: the fragment filenames embed the plan abbreviation 'ssog' and selection.json writes an absolute worktree path into a committed artifact, both continuing a pattern a prior review already flagged.\nREVIEWED_BASE_SHA: de3a5225bec2394589f539f625270a499b668764\nREVIEWED_HEAD_SHA: f48c2e60aaea0f642b0089e941d3c12486e8dc55\n\nThe reviewed range is de3a5225b..f48c2e60a, two commits by one worker in its own detached worktree. The worker's reselect.log and verify.log are on disk, each ending in a bare EXIT= line.\n",
+  "review_run_id": "r-20261020T135902340471-review-of-ssog-anchor-reselect-f48c2e60aaea",
+  "reviewed_base_sha": "de3a5225bec2394589f539f625270a499b668764",
+  "reviewed_head_sha": "f48c2e60aaea0f642b0089e941d3c12486e8dc55",
+  "reviewed_run_id": "r-20261020T133502590700-ssog-anchor-reselect",
+  "scores": {
+    "durability": 8,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T14:22:00.000000+00:00",
+  "total": 79
+}

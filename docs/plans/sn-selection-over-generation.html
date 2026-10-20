@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="147">
+<meta name="plan-version" content="148">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -566,7 +566,10 @@
     <div class="r-comment-body"><p>Reviewed run r-20261020T104134139630-ssog-docs-hold-facility-paths at reviewed_base_sha 8fc4843c9f843a669519a94a793d58854fd85146 and reviewed_head_sha 422d4a283e48aa21c9d1834423d5fa7ab2c4a431; stored a parsed review scoring all six dimensions (goal_fidelity 20, evidence 18, scope_discipline 20, durability 19, fit 19, reuse 20), added_failure_count 0 with added_failure_ids [], two follow-on findings and no blocking finding. Promotion lands this as a comment on imas-codex:sn-selection-over-generation §7 and no plan is edited here.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261020T104134139630-ssog-docs-hold-facility-paths" data-who="reckon-build" data-when="2026-10-20T13:19:12Z">
-    <div class="r-comment-body"><p>A facility source path never becomes a required DD path, and the DD provenance survives the request builder&#x27;s normalisation of a veto item, so the hold still fires on the re-check. _bound_docs_review_dd_paths takes DD bindings, dd_source_paths, or dd:-prefixed source_paths only; _set_docs_review_dd_source_paths records dd_source_paths beside the rewritten source_paths. Base arm at 8fc4843c9 75 passed / head arm at 069bf7caa 81 passed / 0 added failures; the veto-path test fails on the pre-repair source (assert None == &#x27;DD source text unavailable at equilibrium/time_slice/profiles_1d/j_tor&#x27;).</p></div>
+    <div class="r-comment-body"><p>A facility source path never becomes a required DD path, and the DD provenance survives the request builder's normalisation of a veto item, so the hold still fires on the re-check. _bound_docs_review_dd_paths takes DD bindings, dd_source_paths, or dd:-prefixed source_paths only; _set_docs_review_dd_source_paths records dd_source_paths beside the rewritten source_paths. Base arm at 8fc4843c9 75 passed / head arm at 069bf7caa 81 passed / 0 added failures; the veto-path test fails on the pre-repair source (assert None == 'DD source text unavailable at equilibrium/time_slice/profiles_1d/j_tor').</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261020T135902340471-review-of-ssog-anchor-reselect-f48c2e60aaea" data-who="reckon-build" data-when="2026-10-20T14:10:21.088Z">
+    <div class="r-comment-body"><p>Independent review of r-20261020T133502590700-ssog-anchor-reselect at reviewed_base_sha de3a5225bec2394589f539f625270a499b668764 and reviewed_head_sha f48c2e60aaea0f642b0089e941d3c12486e8dc55: parsed record scoring all six dimensions (goal_fidelity 19, evidence 12, scope_discipline 20, durability 8, fit 15, reuse 5; total 79), added_failure_count 0 with added_failure_ids [], four follow-on findings and no blocking finding. Promotion lands this as a comment on imas-codex:sn-selection-over-generation §7; no plan is edited here.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
