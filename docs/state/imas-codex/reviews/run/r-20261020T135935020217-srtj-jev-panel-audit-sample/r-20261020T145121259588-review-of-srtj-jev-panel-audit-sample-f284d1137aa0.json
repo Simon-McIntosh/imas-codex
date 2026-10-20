@@ -1,0 +1,42 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8987",
+    "imas_codex/standard_names/workers.py:11113"
+  ],
+  "completed_at": "2026-10-20T15:10:39.316Z",
+  "dispatched_at": "2026-10-20T14:52:02Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": "592",
+      "severity": "follow-on",
+      "text": "the audit runs the real incumbent, partial(_persisting_quorum_cycles) at workers.py:8979, which calls write_reviews at workers.py:8531, so the panel's canonical rows land and are counted by update_review_aggregates for the sampled items, a side effect beyond the non-deciding audit row that the tests cannot see because they stub the incumbent"
+    },
+    {
+      "file": "imas_codex/standard_names/review/panel_audit.py",
+      "line": "232",
+      "severity": "follow-on",
+      "text": "a row carrying neither audit_skipped nor both routes, which _audit_record writes when the sample returns a verdict with no winning_score, is dropped with neither a sample nor a skipped count, so the report's sample size silently understates the audited set"
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a deterministic per-item, per-run sample of cascade-decided items re-run through the paid panel with its verdict stored beside Jev's as a non-deciding row; imas_codex/standard_names/review/panel_audit.py:47 audit_selected and imas_codex/standard_names/review/cascade.py:547 _run_panel_audit implement it.\nVERDICT done_when: the done-when requires the change and tests committed and a fragment recording the design, the report output on a stubbed run and a gate with no added failures; gate-base4.log records 282 passed at EXIT=0 and gate-head-committed.log 291 passed at EXIT=0, the fragment carries the stubbed report output, so the gate asserts that measure.\nVERDICT write_paths: read the brief's Write scope and the manifest changed_paths; all seven paths in the diff are inside cascade.py, panel_audit.py, settings.py, pyproject.toml, test_panel_audit_sample.py, the fragment and the figure directory.\nVERDICT manifest: read; it states status complete, commits 362908954 and f284d1137, baseline_suite and after_suite both completed true with failure_count 0, and names negctl.log as the negative control.\nVERDICT diff: read commit by commit against 5fc8638eafd90ae3de04d3fa25de773d99de2ba9; 362908954 adds the audit, setting, tests, fragment and figure, and f284d1137 changes only two lines of the fragment, so the gate revision is the code revision.\nCALL_SITES: imas_codex/standard_names/workers.py:8987 process_review_name_batch calls adjudicate_review for the name axis, imas_codex/standard_names/workers.py:11113 process docs review batch calls adjudicate_review for the docs axis, with incumbent partial(_persisting_quorum_cycles)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: panel_audit.py:47 audits_selected and cascade.py:547 implement the sample, the audit row and the report, but cascade.py:592 re-runs the persisting quorum incumbent whose own canonical rows land outside the audit row.\nSCORE evidence: 19\nJUSTIFICATION evidence: the base arm at gate-base4.log and the head arm at gate-head-committed.log both end in a bare EXIT=0 line at 282 and 291 passed, and the fragment carries the stub-backlog report output.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the two-commit diff is inside the declared write scope, and no path outside it was touched.\nSCORE durability: 18\nJUSTIFICATION durability: nine tests were added and negctl.log shows test_panel_audit_sample.py:test_audited_item_keeps_jev_stage_score_route reddening at 2 failed EXIT=1 under the declared mutation, though the aggregate test at test_panel_audit_sample.py:196 re-implements the production exclusion in a fake rather than running the Cypher.\nSCORE fit: 16\nJUSTIFICATION fit: the reserve/release idiom at cascade.py:575 mirrors the existing cascade.py:646 pattern and the record is built through pipeline.py:176 _build_review_record, but panel_audit.py:154 store_panel_audit writes a row with no review_group_id that the write_reviews docstring at graph_ops.py:6050 calls required.\nSCORE reuse: 19\nJUSTIFICATION reuse: the audit row reuses pipeline.py:176 _build_review_record, graph_ops.py:6293 update_review_aggregates' existing exclusion clause and the budget pool; a capability search over imas_codex/standard_names/review found no prior owner for per-run hash sampling or panel-drift reporting.\nFINDING imas_codex/standard_names/review/cascade.py:592 follow-on: the audit runs the real incumbent, partial(_persisting_quorum_cycles) at workers.py:8979, which calls write_reviews at workers.py:8531, so the panel's canonical rows land and are counted by update_review_aggregates for the sampled items, which is a side effect beyond the non-deciding audit row and is invisible to the tests because they stub the incumbent.\nFINDING imas_codex/standard_names/review/panel_audit.py:232 follow-on: a row that carries neither audit_skipped nor both routes, which is what _audit_record writes when the panel returns a verdict with no winning_score, is dropped with neither a sample nor a skipped count, so the report's sample size silently understates the audited set.\n",
+  "review_run_id": "r-20261020T145121259588-review-of-srtj-jev-panel-audit-sample-f284d1137aa0",
+  "reviewed_base_sha": "5fc8638eafd90ae3de04d3fa25de773d99de2ba9",
+  "reviewed_head_sha": "f284d1137aa05efaed684c7f51686609fe4175e0",
+  "reviewed_run_id": "r-20261020T135935020217-srtj-jev-panel-audit-sample",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T15:11:54.079610+00:00",
+  "total": 109
+}
