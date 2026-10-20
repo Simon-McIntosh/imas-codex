@@ -1,19 +1,18 @@
 """Read-only audit of every live standard name's physics domain.
 
-A standard name's physics domain is not authored: it is derived from the DD
-graph. ``IMASNode.physics_domain`` is the one source of truth, a name's
-``source_domains`` is exactly the set of its current DD sources' domains, and
-its ``physics_domain`` is the single domain ``select_primary_domain`` (see
-``domain_ranking``) picks from that set. A name with no DD source — a derived
-parent — takes the union of its children's domains through the same function.
+A standard name's physics domain is not authored: ``source_domains`` is exactly
+the set of its current DD sources' domains, and ``physics_domain`` is the
+recorded correction or, failing that, the decision stored on the name by the one
+writer in ``domain_decision``. A name with no DD source — a derived parent —
+takes the union of its children's domains.
 
 Nothing enforces any of that at write time across every writer that touches a
-name's domain, so the graph drifts: a name keeps a scalar the derivation would
-not choose, an edge set that disagrees with its own ``source_domains``, or a
-stale value from a source that has since been detached. This module re-asks the
-derivation's question of every live name and reports the ones that disagree. It
-is the measuring instrument the repair node runs against, so its counts now are
-the "before" figure.
+name's domain, so the graph drifts: a name keeps a scalar no stored decision
+names, an edge set that disagrees with its own ``source_domains``, or a stale
+value from a source that has since been detached. This module checks every live
+name against the decision it stored and reports the ones that disagree, together
+with the names that are undecided and why. It is the measuring instrument the
+repair node runs against, so its counts now are the "before" figure.
 
 **Four checks**, one per property the derivation ties together:
 

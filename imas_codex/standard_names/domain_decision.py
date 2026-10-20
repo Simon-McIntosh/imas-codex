@@ -30,10 +30,11 @@ from __future__ import annotations
 import asyncio
 import json
 from collections import Counter
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 import yaml
 
@@ -66,8 +67,8 @@ CONCURRENCY = 8
 
 #: The confidence floor a name's chosen probability must clear to be decided.
 #: Derived from the calibration names' measured answers as the highest observed
-#: probability at which at which-cases the measured calibration names fall
-#: below it; the derivation and the accuracy above it are recorded in
+#: probability at which at most 5% of the calibration names fall strictly below
+#: it; the derivation and the accuracy above it are recorded in
 #: ``docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-writer.html``.
 CONFIDENCE_FLOOR: float = 0.68
 
