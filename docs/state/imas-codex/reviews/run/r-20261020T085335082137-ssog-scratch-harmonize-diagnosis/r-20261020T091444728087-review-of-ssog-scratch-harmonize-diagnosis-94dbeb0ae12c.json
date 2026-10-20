@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-10-20T09:25:45.013Z",
+  "derivation": {
+    "added_failure_count": "derived from the reviewed run's own baseline_suite and after_suite fields, both empty in .../r-20261020T085335082137-ssog-scratch-harmonize-diagnosis/manifest.md (the lines read 'baseline_suite:' and 'after_suite:' with no JSON); this is a diagnosis/evidence node whose gate is the fragment-driver invocation recorded in its tests: line, not a test-role suite, so there is no baseline arm and no after arm to difference and the added-failure count is 0. The reviewed gate logs were read directly: scratch-probe.log, scratch-probe-jev.log and live-source-compare.log each end in a bare EXIT=0.",
+    "notes": "reviewed manifest records status complete, one commit 94dbeb0ae12ca45403d14617d5612c07ab7efbb6, USD 0.00 LLM spend, and an empty negative_control (no test file is in the node's write paths)."
+  },
+  "dispatched_at": "2026-10-20T09:15:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis-run.py",
+      "line": 196,
+      "severity": "follow-on",
+      "text": "the lint-cap probe passes a planted finding string to _cap_docs_scores_for_lint_errors, so it shows only that the cap maps any score at or above 0.85 to 0.849 (already readable at imas_codex/standard_names/review/pipeline.py:1978) and not that the production error-lint input reached the cap; the printed 1.0 to 0.849 is therefore not evidence that any of the 15 observed 0.849 values arose from this path, though the fragment's caveat at html:4 concedes the attribution is open."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis.html",
+      "line": 4,
+      "severity": "follow-on",
+      "text": "the caveat says the arm summaries retain no lint-cap metadata, but the arm record the fragment cites for the halt (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-jev.json:166-167) records lint_after_classes as {convention_violation: 2}, and every convention_violation emitter is severity=warning (imas_codex/standard_names/review/audits.py:365,394), so the cited family carries no error-severity finding and the pipeline lint cap is unlikely to have fired for it; that signal points toward the workers.py:11095 hold-note clamp and was not recorded against the record the fragment cites."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis.html",
+      "line": 8,
+      "severity": "follow-on",
+      "text": "the recommendation names workers.py as the owner but states no concrete change (it says to investigate the held-review note and repair the anchor-generation/review input), so the root cause of the 0/1 documentation acceptance that halted batch one is left open: the halt mechanism is precisely diagnosed and reproduced, but why the anchor's review was held is not, and imas_codex/standard_names/workers.py:10918-10922 returns no note for the very absence the fragment reports."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the reviewed node's goal (explain why harmonization halts in the scratch copies and where 0.849 comes from, naming file and line); the landed docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis.html:3 names imas_codex/standard_names/workers.py:11095 and imas_codex/standard_names/review/pipeline.py:1978 as the two clamps that set 0.849, with the condition each fires under.\nVERDICT done_when: read the done_when (fragment names with file and line the source of 0.849 and its trigger, the halt condition, what the scratch copy lacks shown in a scratch instance whose log ends EXIT=0, and the proposed fix with its owner); html:3-8 names each and .../scratch-probe-jev.log's last line is EXIT=0, but which clamp actually fired and the concrete repair are left open.\nVERDICT write_paths: read the manifest's declared write paths (the fragment HTML and its driver under docs/evidence/fragments/sn-selection-over-generation/, plus a docs/figures directory); the diff adds exactly the two files and nothing else.\nVERDICT manifest: read .../r-20261020T085335082137-ssog-scratch-harmonize-diagnosis/manifest.md; it records status complete, one commit 94dbeb0a, three gate logs each ending EXIT=0, USD 0.00 spend, and baseline_suite and after_suite both empty.\nVERDICT diff: read the single commit 94dbeb0a against base 9bba70e2; it adds only the 10-line fragment HTML and the 246-line driver, both inside the declared scope, changing no product code.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis.html:3 names both clamp lines and their triggers, but the fragment concedes at html:4 that it cannot say which fired.\nSCORE evidence: 15\nJUSTIFICATION evidence: the manifest's tests: line names the driver and .../scratch-probe-jev.log ends in EXIT=0, but the lint-cap demonstration at ssog-scratch-harmonize-diagnosis-run.py:196 plants its own input rather than exercising the production path.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff adds only ssog-scratch-harmonize-diagnosis.html and -run.py, both inside the declared write paths, and changes no product file.\nSCORE durability: 8\nJUSTIFICATION durability: run.py:92 raises unless the export yields exactly one planned apply, an independent guard, but no assertion pins 0.849 or the halt, so nothing reddens if imas_codex/standard_names/workers.py:11095 changes.\nSCORE fit: 16\nJUSTIFICATION fit: the driver mirrors ssog-anchor-ab-run.py's structure and imports its reserve_port_pair, though the file name carries the plan abbreviation ssog consistent with the whole fragments directory.\nSCORE reuse: 18\nJUSTIFICATION reuse: the driver adds only main() and imports the existing owners _cap_docs_scores_for_lint_errors (review/pipeline.py:1963), evaluate_convergence (campaign.py:573), _record_family_anchor and plan_family_applies (harmonize.py:938,1210).\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis-run.py:196 follow-on: the lint-cap probe passes a planted finding string to _cap_docs_scores_for_lint_errors, so it shows only that the cap maps any score at or above 0.85 to 0.849 (already readable at imas_codex/standard_names/review/pipeline.py:1978) and not that the production error-lint input reached the cap; the printed 1.0 to 0.849 is therefore not evidence that any of the 15 observed 0.849 values arose from this path, though the fragment's caveat at html:4 concedes the attribution is open.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis.html:4 follow-on: the caveat says the arm summaries retain no lint-cap metadata, but the arm record the fragment cites for the halt (docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/length_of_passive_loop_element-jev.json:166-167) records lint_after_classes as {convention_violation: 2}, and every convention_violation emitter is severity=warning (imas_codex/standard_names/review/audits.py:365,394), so the cited family carries no error-severity finding and the pipeline lint cap is unlikely to have fired for it; that signal points toward the workers.py:11095 hold-note clamp and was not recorded against the record the fragment cites.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis.html:8 follow-on: the recommendation names workers.py as the owner but states no concrete change (it says to investigate the held-review note and repair the anchor-generation/review input), so the root cause of the 0/1 documentation acceptance that halted batch one is left open: the halt mechanism is precisely diagnosed and reproduced, but why the anchor's review was held is not, and imas_codex/standard_names/workers.py:10918-10922 returns no note for the very absence the fragment reports.\n",
+  "review_run_id": "r-20261020T091444728087-review-of-ssog-scratch-harmonize-diagnosis-94dbeb0ae12c",
+  "reviewed_base_sha": "9bba70e2d697060adf3d56f98f06ae0c6bfeca27",
+  "reviewed_head_sha": "94dbeb0ae12ca45403d14617d5612c07ab7efbb6",
+  "reviewed_run_id": "r-20261020T085335082137-ssog-scratch-harmonize-diagnosis",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T09:24:00.000000+00:00",
+  "total": 94,
+  "verdicts": {
+    "diff": "read the single commit 94dbeb0a against base 9bba70e2; it adds only the 10-line fragment HTML and the 246-line driver, both inside the declared scope, changing no product code.",
+    "done_when": "read the done_when (fragment names with file and line the source of 0.849 and its trigger, the halt condition, what the scratch copy lacks shown in a scratch instance whose log ends EXIT=0, and the proposed fix with its owner); html:3-8 names each and .../scratch-probe-jev.log's last line is EXIT=0, but which clamp actually fired and the concrete repair are left open.",
+    "goal": "read the reviewed node's goal (explain why harmonization halts in the scratch copies and where 0.849 comes from, naming file and line); the landed docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis.html:3 names imas_codex/standard_names/workers.py:11095 and imas_codex/standard_names/review/pipeline.py:1978 as the two clamps that set 0.849, with the condition each fires under.",
+    "manifest": "read .../r-20261020T085335082137-ssog-scratch-harmonize-diagnosis/manifest.md; it records status complete, one commit 94dbeb0a, three gate logs each ending EXIT=0, USD 0.00 spend, and baseline_suite and after_suite both empty.",
+    "write_paths": "read the manifest's declared write paths (the fragment HTML and its driver under docs/evidence/fragments/sn-selection-over-generation/, plus a docs/figures directory); the diff adds exactly the two files and nothing else."
+  }
+}

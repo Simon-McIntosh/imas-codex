@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="134">
+<meta name="plan-version" content="135">
 <meta name="plan-modified" content="2026-10-20">
 </head>
 <body>
@@ -528,6 +528,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-inconclusive" data-who="reckon-build" data-when="2026-10-20T08:55:00Z">
     <div class="r-comment-body"><p>Lead ruling, 2026-10-20: §7 is recorded as inconclusive, not as a result for the heuristic. The scratch environment is to be fixed, then the ten families re-run within the remaining budget (USD 17.02 of USD 50 spent).</p><p>The aggregate (merge <code>04839d541</code>, review 97) found that the score condition fails in 9 of 10 families, and that lint is equal at 17 over the six like-for-like families. But the comparison does not measure anchor quality:</p><ul><li>15 of the 20 arm records give whichever member the first batch rewrote the identical score 0.849, just under the 0.85 acceptance score.</li><li>Most applies halted after batch 1 at 0% documentation acceptance, consistent with the scratch copies lacking DD source text.</li></ul><p>The score condition therefore mostly compares which member was rewritten. The review also found the verdict string is a literal rather than computed from the rule.</p><p>Next:</p><ol><li>Diagnose where 0.849 is set and why applies halt in the scratch copies.</li><li>Fix the scratch environment so harmonization finishes both batches.</li><li>Re-run both arms of the ten families, with the verdict computed from the rule.</li></ol><p>The heuristic anchor stays in use meanwhile.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261020T091444728087-review-of-ssog-scratch-harmonize-diagnosis-94dbeb0ae12c" data-who="reckon-build" data-when="2026-10-20T09:25:45.013Z">
+    <div class="r-comment-body"><p>Independent review of r-20261020T085335082137-ssog-scratch-harmonize-diagnosis at base 9bba70e2d697060adf3d56f98f06ae0c6bfeca27 head 94dbeb0ae12ca45403d14617d5612c07ab7efbb6: scores goal_fidelity 17, evidence 15, scope_discipline 20, durability 8, fit 16, reuse 18 (total 94), 0 added failures, three follow-on findings and no blocking finding; no plan is edited here, promotion lands this as a comment on imas-codex:sn-selection-over-generation §7.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
