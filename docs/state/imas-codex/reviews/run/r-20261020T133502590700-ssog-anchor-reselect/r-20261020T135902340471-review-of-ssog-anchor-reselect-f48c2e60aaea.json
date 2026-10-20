@@ -27,6 +27,11 @@
       "kind": "folded",
       "node": "ssog-anchor-ab-rerun-aggregate",
       "recorded_at": "2026-10-20T14:19:10.692503+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-rerun-aggregate",
+      "recorded_at": "2026-10-20T14:19:33.743144+00:00"
     }
   },
   "findings": [
