@@ -13,6 +13,11 @@
       "node": "ssog-anchor-ab-aggregate",
       "recorded_at": "2026-10-20T07:54:54.737609+00:00"
     },
+    "1": {
+      "kind": "exempted",
+      "reason": "the landing contract names each fragment by its node id",
+      "recorded_at": "2026-10-20T07:55:08.138155+00:00"
+    },
     "2": {
       "kind": "folded",
       "node": "ssog-anchor-ab-aggregate",
