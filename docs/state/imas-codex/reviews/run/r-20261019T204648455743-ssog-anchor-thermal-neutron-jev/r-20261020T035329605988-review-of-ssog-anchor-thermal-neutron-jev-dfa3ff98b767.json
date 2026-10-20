@@ -8,7 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-10-20T04:16:34.004Z",
   "dispatched_at": "2026-10-20T03:54:31Z",
-  "finding_dispositions": {},
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-20T04:25:00.082959+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/manifest.md",
