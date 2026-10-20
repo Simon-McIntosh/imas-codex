@@ -7,6 +7,13 @@
     "added_failure_count": "derived from the reviewed run's own baseline_suite and after_suite fields, both null in .../r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/manifest.md and in its classification.json: this is an evidence-artifact node whose gate is the ssog-anchor-ab-run.py invocation, not a test-role suite, so there is no baseline or after arm to difference and the added-failure count is 0.",
     "notes": "the reviewed gate is the per-arm runner invocation recorded in .../ssog-run/runner-jev.log, whose last line is EXIT=0, and .../ssog-run/apply-jev-momentum_flux_due_to_e_cross_b_drift.log, whose last line is EXIT=0; both were read directly."
   },
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-20T07:37:59.886442+00:00"
+    }
+  },
   "dispatched_at": "2026-10-20T07:19:55Z",
   "findings": [
     {
