@@ -27,7 +27,7 @@ A labelled fixture row carries exactly these fields, and
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -150,13 +150,16 @@ def bootstrap_interval(
     n_resamples: int = 1000,
     seed: int = 123,
     level: float = 0.95,
-) -> dict[str, float]:
+    statistic: Callable[[np.ndarray, np.ndarray], float] | None = None,
+) -> dict[str, Any]:
     """Percentile bootstrap interval over copy groups.
 
     Resamples copy groups with replacement and recomputes the statistic under
     ``labels``/``scores``.  Without ``scores_b`` the interval is for a single
     arm's AUC; with it, for the paired difference ``AUC(a) - AUC(b)`` over the
-    same units.
+    same units. A custom ``statistic(labels, scores)`` replaces AUC in both
+    arms. It may return NaN for an undefined ratio: undefined draws are
+    resampled, and an undefined point returns null bounds with zero draws.
 
     A resample that draws only one label class has no defined AUC, so it is
     redrawn; ``n_resamples`` is the number of usable draws, which equals the
@@ -167,17 +170,36 @@ def bootstrap_interval(
     vb = _floats(scores_b) if scores_b is not None else None
     if y.size == 0:
         raise ValueError("bootstrap_interval needs at least one observation")
-    if np.unique(y).size < 2:
+    if va.shape != y.shape or (vb is not None and vb.shape != y.shape):
+        raise ValueError("bootstrap_interval needs aligned labels and scores")
+    if copy_groups is not None and len(copy_groups) != y.size:
+        raise ValueError("bootstrap_interval needs one copy group per observation")
+    if n_resamples < 2 or not 0 < level < 1:
+        raise ValueError(
+            "bootstrap_interval needs at least two draws and 0 < level < 1"
+        )
+    auc_default = statistic is None
+    measure = roc_auc if statistic is None else statistic
+    if auc_default and np.unique(y).size < 2:
         raise ValueError("bootstrap_interval needs both label classes present")
 
-    def statistic(
+    def paired_statistic(
         labels_in: np.ndarray, va_in: np.ndarray, vb_in: np.ndarray | None
     ) -> float:
         if vb_in is None:
-            return roc_auc(labels_in, va_in)
-        return roc_auc(labels_in, va_in) - roc_auc(labels_in, vb_in)
+            return measure(labels_in, va_in)
+        return measure(labels_in, va_in) - measure(labels_in, vb_in)
 
-    point = statistic(y, va, vb)
+    point = paired_statistic(y, va, vb)
+    if not np.isfinite(point):
+        return {
+            "point": None,
+            "lower": None,
+            "upper": None,
+            "level": level,
+            "n_resamples": 0,
+            "seed": seed,
+        }
     groups = _group_indices(copy_groups, y.size)
     rng = np.random.default_rng(seed)
     draws: list[float] = []
@@ -187,12 +209,14 @@ def bootstrap_interval(
         picks = rng.integers(0, len(groups), len(groups))
         idx = np.concatenate([groups[p] for p in picks])
         y_bs = y[idx]
-        if np.unique(y_bs).size < 2:
+        if auc_default and np.unique(y_bs).size < 2:
             continue
-        draws.append(statistic(y_bs, va[idx], None if vb is None else vb[idx]))
+        draw = paired_statistic(y_bs, va[idx], None if vb is None else vb[idx])
+        if np.isfinite(draw):
+            draws.append(draw)
 
     if len(draws) < 2:
-        raise ValueError("bootstrap_interval could not draw two-class resamples")
+        raise ValueError("bootstrap_interval could not draw defined resamples")
     tail = (1.0 - level) / 2.0
     lower, upper = np.percentile(draws, [tail * 100.0, (1.0 - tail) * 100.0])
     return {

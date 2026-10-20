@@ -15,7 +15,7 @@ from imas_codex.standard_names.review.cascade import (
     route_name,
 )
 
-_CALIBRATION_SHA256 = "8fd2b51e30887ab1dbed55688f38a154c1633985fb81717382b611fd254c7090"
+_CALIBRATION_SHA256 = "4e47220f157edee78fc6b0c1c98994606fce42be6a620a68f9f09980eccba428"
 
 
 def _decision(route, probability, failed_checks=()):
@@ -27,6 +27,8 @@ def _decision(route, probability, failed_checks=()):
         probability,
         failed_checks,
         dict.fromkeys(NAME_DIMENSIONS, 20 * total),
+        selected_score=probability,
+        decision_score=total,
     )
 
 
@@ -245,10 +247,9 @@ def test_docs_audit_calls_house_style_owner(monkeypatch):
 def planted_thresholds(monkeypatch):
     thresholds = {
         axis: {
-            "accept_threshold": 0.8,
-            "reject_threshold": 0.2,
-            "check_thresholds": {"named_failure": 0.6},
-            "rubric": {"band_width": 0.05},
+            "accept_threshold": 0.4,
+            "score_kind": "logistic" if axis == "name" else "rubric",
+            "rubric": {},
         }
         for axis in ("name", "docs")
     }
@@ -266,81 +267,85 @@ def planted_thresholds(monkeypatch):
     return thresholds
 
 
-@pytest.mark.parametrize("route", [route_name, route_docs])
-def test_accept_at_threshold(route, planted_thresholds):
-    judgment = {"checks": {}}
-    assert (
-        route({**judgment, "quality": 0.75}, probability=0.2, min_score=0.75).route
-        == "accept"
+@pytest.mark.parametrize("axis", ["name", "docs"])
+def test_mapped_score_crosses_exactly_at_matched_cutoff(axis, planted_thresholds):
+    import math
+
+    cutoff = planted_thresholds[axis]["accept_threshold"]
+    for score in (math.nextafter(cutoff, 0), cutoff, math.nextafter(cutoff, 1)):
+        route = cascade._route(axis, {"quality": score, "checks": {}}, score)
+        result = cascade._direct_result(route, "mock", 0, {"id": "temperature"}, axis)
+        assert (result["winning_score"] >= 0.85) == (score >= cutoff)
+        assert (route.route == "accept") == (score >= cutoff)
+        if score == cutoff:
+            assert result["winning_score"] == 0.85
+
+
+@pytest.mark.parametrize("cutoff", [0, 0.1, 0.4, 0.99, 1])
+def test_decision_map_is_monotone_and_bounded(cutoff):
+    import math
+
+    scores = sorted(
+        {
+            0,
+            0.1,
+            0.5,
+            0.9,
+            1,
+            cutoff,
+            max(0, math.nextafter(cutoff, 0)),
+            min(1, math.nextafter(cutoff, 1)),
+        }
     )
-    assert (
-        route(
-            {**judgment, "quality": 0.75 - 0.000001}, probability=0.99, min_score=0.75
-        ).route
-        == "chat_review"
+    mapped = [cascade.map_decision_score(score, cutoff) for score in scores]
+    assert mapped == sorted(mapped)
+    assert all(0 <= value <= 1 for value in mapped)
+    assert cascade.map_decision_score(cutoff, cutoff) == 0.85
+    assert all(
+        (value >= 0.85) == (score >= cutoff)
+        for score, value in zip(scores, mapped, strict=True)
     )
 
 
-@pytest.mark.parametrize("route", [route_name, route_docs])
-def test_refine_at_check_threshold(route, planted_thresholds):
-    check_id, threshold = "named_failure", 0.6
+@pytest.mark.parametrize("axis", ["name", "docs"])
+def test_other_failed_checks_are_recorded_without_veto(axis, planted_thresholds):
+    check_id = (
+        "source_fidelity_unsupported_qualifier"
+        if axis == "name"
+        else "description_false_of_some_binding"
+    )
+    # A stale learned cutoff must not regain decision authority.
+    planted_thresholds[axis]["check_thresholds"] = {check_id: 0.6}
     judgment = {
-        "checks": {check_id: {"answered": True, "failure_probability": threshold}}
+        "quality": 0.9,
+        "checks": {
+            check_id: {
+                "answered": True,
+                "failure_probability": 0.9,
+                "answer": {"noul": 0.9},
+            }
+        },
     }
-    decision = route(judgment, probability=0.9)
-    assert decision.route == "refine"
-    assert decision.failed_checks == (check_id,)
-    judgment["checks"][check_id]["failure_probability"] = threshold - 0.000001
-    assert route(judgment, probability=0.9).route == "accept"
-
-
-@pytest.mark.parametrize("route", [route_name, route_docs])
-def test_below_band_refines(route, planted_thresholds):
-    judgment = {"checks": {}}
-    assert (
-        route({**judgment, "quality": 0.70}, probability=0.2, min_score=0.75).route
-        == "chat_review"
+    route = cascade._route(axis, judgment, 0.9)
+    assert route.route == "accept" and not route.failed_checks
+    result = cascade._direct_result(
+        route, "mock", 0, {"id": "temperature", "description": "Temperature"}, axis
     )
-    assert (
-        route(
-            {**judgment, "quality": 0.70 - 0.000001}, probability=0.99, min_score=0.75
-        ).route
-        == "refine"
-    )
-    assert (
-        route({**judgment, "quality": 0.74}, probability=0.99, min_score=0.75).route
-        == "chat_review"
-    )
-
-
-@pytest.mark.parametrize("route", [route_name, route_docs])
-def test_default_threshold_is_the_persistence_consumers_default(
-    route, planted_thresholds
-):
-    from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-
-    assert (
-        route({"quality": DEFAULT_MIN_SCORE, "checks": {}}, probability=0.2).route
-        == "accept"
-    )
-    assert (
-        route(
-            {"quality": DEFAULT_MIN_SCORE - 0.01, "checks": {}}, probability=0.99
-        ).route
-        == "chat_review"
-    )
+    failure = result["winning_comments_per_dim"]["failed_checks"][0]
+    assert failure["id"] == check_id and failure["probability"] == 0.9
+    assert failure["veto"] is False and failure["cutoff"] == 0.5
 
 
 def test_unsupported_claim_is_not_a_contradiction_veto(planted_thresholds):
-    planted_thresholds["docs"]["check_thresholds"] = {"claim_contradicts_source": 1.0}
     judgment = {
         "quality": 0.96,
         "contradiction_veto": False,
         "checks": {
-            "claim_contradicts_source": {"answered": True, "failure_probability": 1.0}
+            "claim_contradicts_source": {"answered": True, "failure_probability": 1.0},
         },
     }
-    assert route_docs(judgment, probability=0.9).route == "accept"
+    clear = route_docs(judgment, probability=0.9)
+    assert clear.route == "accept"
     judgment.update(
         contradiction_veto=True,
         contradiction_reason="source states the opposite sign",
@@ -350,42 +355,15 @@ def test_unsupported_claim_is_not_a_contradiction_veto(planted_thresholds):
     )
     decision = route_docs(judgment, probability=0.9)
     assert decision.route == "refine"
+    assert decision.decision_score < 0.85
+    assert decision.scores == clear.scores == decision.raw_scores
     assert decision.check_details["claim_contradicts_source"]["probability"] == 0.3
     assert decision.check_details["claim_contradicts_source"]["cutoff"] == 0.3
 
 
-@pytest.mark.parametrize("quality,expected_route", [(0.52, "refine"), (0.96, "accept")])
-def test_failed_check_is_recorded_even_when_it_is_not_a_veto(
-    planted_thresholds, quality, expected_route
-):
-    check_id = "source_fidelity_unsupported_qualifier"
-    planted_thresholds["name"]["check_thresholds"] = {check_id: 0.95}
-    judgment = {
-        "quality": quality,
-        "checks": {
-            check_id: {
-                "answered": True,
-                "failure_probability": 0.8,
-                "answer": {"noul": 0.8},
-            }
-        },
-    }
-    route = route_name(judgment, probability=0.9)
-    assert route.route == expected_route
-    assert not route.failed_checks
-    result = cascade._direct_result(
-        route, "judge-model", 0.0, {"id": "temperature"}, "name"
-    )
-    failure = result["winning_comments_per_dim"]["failed_checks"][0]
-    assert failure["id"] == check_id
-    assert failure["probability"] == 0.8 and failure["cutoff"] == 0.5
-    assert failure["veto"] is False
-    assert failure["judgment_evidence"] == {"noul": 0.8}
-
-
 @pytest.mark.parametrize("axis", ["name", "docs"])
-@pytest.mark.parametrize("veto,quality", [(False, 0.86), (False, 0.52), (True, 0.96)])
-def test_decided_review_stores_dimension_scores_and_their_mean(
+@pytest.mark.parametrize("veto,quality", [(False, 0.86), (False, 0.2), (True, 0.96)])
+def test_decided_review_preserves_rubric_and_failed_checks(
     axis, veto, quality, planted_thresholds
 ):
     from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS, NAME_DIMENSIONS
@@ -395,38 +373,35 @@ def test_decided_review_stores_dimension_scores_and_their_mean(
         if axis == "name"
         else "description_false_of_some_binding"
     )
-    planted_thresholds[axis]["check_thresholds"] = {check_id: 0.6}
     judgment = {
         "quality": quality,
+        "contradiction_veto": veto,
         "checks": {
             check_id: {
                 "answered": True,
                 "failure_probability": 0.8 if veto else 0.1,
                 "answer": {"noul": 0.8 if veto else 0.1},
-            },
+            }
         },
     }
-    route = cascade._route(axis, judgment, 0.9, min_score=0.75)
+    route = cascade._route(axis, judgment, quality, min_score=0.75)
     item = {
         "id": "temperature",
+        "description": "Temperature",
         "source_paths": ["core_profiles/profiles_1d/electrons/temperature"],
     }
-    result = cascade._direct_result(route, "judge-model", 0.0, item, axis)
-    expected = NAME_DIMENSIONS if axis == "name" else DOCS_DIMENSIONS
-    assert set(result["winning_scores"]) == expected
-    assert all(0 <= value <= 20 for value in result["winning_scores"].values())
-    assert result["winning_score"] == pytest.approx(
-        sum(result["winning_scores"].values()) / 80
-    )
-    assert 0 < result["winning_score"] < 1
+    result = cascade._direct_result(route, "mock", 0, item, axis)
+    dimensions = NAME_DIMENSIONS if axis == "name" else DOCS_DIMENSIONS
+    assert result["winning_scores"] == dict.fromkeys(dimensions, quality * 20)
+    assert route.scores == route.raw_scores
     assert (result["winning_score"] >= 0.75) == (route.route == "accept")
     if veto:
-        failure = result["winning_comments_per_dim"]["failed_checks"][0]
-        assert failure["probability"] == 0.8
-        assert failure["cutoff"] == 0.6
-        assert failure["judgment_evidence"] == {"noul": 0.8}
-        assert failure["evidence"]
-        assert route.raw_scores != route.scores
+        failures = {
+            f["id"]: f for f in result["winning_comments_per_dim"]["failed_checks"]
+        }
+        assert failures[check_id]["probability"] == 0.8
+        assert failures[check_id]["judgment_evidence"] == {"noul": 0.8}
+        assert failures[check_id]["evidence"]
 
 
 @pytest.mark.parametrize("axis", ["name", "docs"])
@@ -442,23 +417,14 @@ def test_consumer_predicates_agree_with_rubric_route(
     from imas_codex.standard_names import graph_ops
     from imas_codex.standard_names.export import _run_gate_c
 
-    judgment = {
-        "quality": min_score + 0.10 if kind != "low" else min_score - 0.10,
-        "checks": {
-            "named_failure": {
-                "answered": True,
-                "failure_probability": 0.9 if kind == "veto" else 0.1,
-            }
-        },
-    }
-    route = cascade._route(axis, judgment, 0.95, min_score=min_score)
-    result = cascade._direct_result(
-        route, "judge-model", 0.0, {"id": "temperature"}, axis
-    )
+    raw = 0.1 if kind == "low" else 0.4
+    judgment = {"quality": raw, "contradiction_veto": kind == "veto", "checks": {}}
+    route = cascade._route(axis, judgment, raw, min_score=min_score)
+    result = cascade._direct_result(route, "mock", 0, {"id": "temperature"}, axis)
     score = result["winning_score"]
-    assert score == pytest.approx(sum(result["winning_scores"].values()) / 80)
-    expected_accept = kind == "accept"
+    expected_accept = kind == "accept" or (axis == "name" and kind == "veto")
     assert (route.route == "accept") == expected_accept
+    assert (score >= min_score) == expected_accept
 
     gc = MagicMock()
     gc.__enter__.return_value = gc
@@ -469,19 +435,17 @@ def test_consumer_predicates_agree_with_rubric_route(
     monkeypatch.setattr(graph_ops, "GraphClient", lambda: gc)
     monkeypatch.setattr(graph_ops, "write_reviews", lambda _rows: None)
     monkeypatch.setattr(graph_ops, "_doc_link_mismatches", lambda *_args: [])
-    persist = getattr(graph_ops, "persist_reviewed_" + axis)
-    stage = persist(
+    stage = getattr(graph_ops, "persist_reviewed_" + axis)(
         sn_id="temperature",
         claim_token="token",
         score=score,
         scores=result["winning_scores"],
-        model="judge-model",
+        model="mock",
         min_score=min_score,
         resolution_method=result["resolution_method"],
         reviewer_chain_size=3,
     )
     assert stage == ("accepted" if expected_accept else "reviewed")
-
     captured = {}
 
     def claim(**kwargs):
@@ -500,10 +464,7 @@ def test_consumer_predicates_agree_with_rubric_route(
     )
     assert eligible == (not expected_accept)
     _, exported, below, _ = _run_gate_c(
-        [{"id": "temperature", "reviewer_score_name": score}],
-        min_score,
-        False,
-        None,
+        [{"id": "temperature", "reviewer_score_name": score}], min_score, False, None
     )
     assert bool(exported) == expected_accept
     assert below == int(not expected_accept)
@@ -595,70 +556,44 @@ async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "route,expected_calls,expected_score",
-    [
-        ("accept", [], 0.85),
-        ("refine", [], 0.60),
-        ("chat_review", [["primary"]], 0.3),
-        ("chat_below_reject", [["primary"]], 0.3),
-    ],
-)
 @pytest.mark.parametrize("axis", ["name", "docs"])
-async def test_deciding_routes_use_one_chat_seat(
-    monkeypatch, route, expected_calls, expected_score, axis
+@pytest.mark.parametrize("raw,expected_route", [(0.4, "accept"), (0.39, "refine")])
+async def test_deciding_never_calls_chat(
+    monkeypatch, planted_thresholds, axis, raw, expected_route
 ):
     from imas_codex import settings
 
     calls = []
-    check_id = (
-        "advisory_alias_collapsed" if axis == "name" else "claim_contradicts_source"
-    )
 
     async def judgment(_item, _model):
-        return (
-            _decision(route, 0.5, (check_id,) if route == "refine" else ()),
-            {},
-            0.0,
-        )
+        return cascade._route(axis, {"quality": raw, "checks": {}}, raw), {}, 0.0
 
     async def store(*_args):
         pass
 
     async def incumbent(*, models):
-        calls.append(list(models))
-        return {"winning_score": 0.3}
-
-    class Lease:
-        def charge_event(self, *_args):
-            pass
-
-        def release_unused(self):
-            pass
+        calls.append(models)
+        return {"winning_score": 0.1}
 
     class Manager:
         def reserve(self, *_args, **_kwargs):
-            return Lease()
+            return MagicMock()
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+    )
     monkeypatch.setattr(
         cascade, "_name_judgment" if axis == "name" else "_docs_judgment", judgment
     )
     monkeypatch.setattr(cascade, "_store_route", store)
     monkeypatch.setattr(cascade, "deciding_enabled", lambda: True)
     result = await cascade.adjudicate_review(
-        axis,
-        {"id": "temperature"},
-        ["primary", "secondary"],
-        incumbent,
-        mgr=Manager(),
+        axis, {"id": "temperature"}, ["primary", "secondary"], incumbent, mgr=Manager()
     )
-    assert calls == expected_calls
-    assert result["winning_score"] == expected_score
-    if route == "refine":
-        assert result["winning_comments_per_dim"]["failed_checks"][0]["id"] == check_id
-    if route.startswith("chat"):
-        assert result["resolution_method"] == "jev_cascade_" + route
+    assert calls == []
+    assert result["resolution_method"] == "jev_cascade_" + expected_route
+    assert (result["winning_score"] >= 0.85) == (expected_route == "accept")
 
 
 @pytest.mark.parametrize(

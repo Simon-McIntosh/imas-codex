@@ -1,5 +1,10 @@
 """Calibrated Jev review routes with a default-off deciding mode.
 
+Cutoffs match the panel's calibration acceptance rate before the docs veto.
+The decision score is piecewise linear through (0, 0), (cutoff, min_score)
+and (1, 1); it is an operating-score mapping, not an acceptance probability.
+A contradiction caps only that scalar below min_score; rubric dimensions stay
+unchanged. The same mapping handles explicit consumer min_score values.
 Thresholds and name-score weights are fitted on frozen calibration judgments.
 Every Jev judgment is stored as a noncanonical review with no scalar score;
 only the explicit deciding switch may replace the incumbent.
@@ -32,6 +37,9 @@ class CascadeRoute:
     scores: Mapping[str, float] = field(default_factory=dict)
     check_details: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
     raw_scores: Mapping[str, float] = field(default_factory=dict)
+
+    selected_score: float | None = None
+    decision_score: float | None = None
 
     @property
     def total(self) -> float | None:
@@ -162,23 +170,6 @@ def _route(
                 "evidence": record.get("audit_finding") or record.get("answer"),
                 "criterion": "nonconforming check answer",
             }
-    for check_id, cutoff in thresholds["check_thresholds"].items():
-        # Claim non-support also includes "says nothing"; only the explicit
-        # contradiction predicate below is a hard veto.
-        if axis == "docs" and check_id == "claim_contradicts_source":
-            continue
-        record = judgment.get("checks", {}).get(check_id)
-        if not record or not record.get("answered"):
-            continue
-        score = _failure_probability(record)
-        if score is not None and score >= cutoff:
-            failed.append(check_id)
-            details[check_id] = {
-                "probability": score,
-                "cutoff": cutoff,
-                "evidence": record.get("audit_finding") or record.get("answer"),
-            }
-    failed = tuple(sorted(failed))
     if axis == "docs" and judgment.get("contradiction_veto"):
         failed = tuple(sorted({*failed, "claim_contradicts_source"}))
         from imas_codex.standard_names.review.jev_review import (
@@ -199,23 +190,41 @@ def _route(
             "criterion": "choice=contradicts or probability>=cutoff",
             "evidence": judgment.get("contradiction_reason") or record.get("answer"),
         }
-    if failed:
-        # A veto is an acceptance ceiling on the rubric itself. Scale all
-        # dimensions together to preserve their relative values and their mean.
-        total = sum(scores.values()) / (20 * len(scores))
-        ceiling = max(0.0, min_score - 0.001)
-        if total > ceiling:
-            scores = {key: value * ceiling / total for key, value in scores.items()}
-        return CascadeRoute("refine", probability, failed, scores, details, raw_scores)
     total = sum(scores.values()) / (20 * len(scores))
-    route = (
-        "accept"
-        if total >= min_score
-        else "chat_review"
-        if total >= min_score - thresholds["rubric"]["band_width"]
-        else "refine"
+    selected = probability if thresholds["score_kind"] == "logistic" else total
+    if selected is None:
+        raise ValueError("a decided review requires the selected Jev score")
+    mapped = map_decision_score(selected, thresholds["accept_threshold"], min_score)
+    if failed:
+        mapped = min(mapped, math.nextafter(min_score, 0.0))
+    route = "accept" if mapped >= min_score else "refine"
+    return CascadeRoute(
+        route,
+        probability,
+        tuple(failed),
+        scores,
+        details,
+        raw_scores,
+        selected_score=selected,
+        decision_score=mapped,
     )
-    return CascadeRoute(route, probability, (), scores, details, raw_scores)
+
+
+def map_decision_score(
+    score: float, cutoff: float, min_score: float = DEFAULT_MIN_SCORE
+) -> float:
+    """Map [0, cutoff, 1] to [0, min_score, 1], retaining the strict boundary.
+
+    At an endpoint cutoff only its nonempty branch is used. Roundoff just below
+    the cutoff is clamped to the preceding float so consumers cannot accept it.
+    """
+    if not (0 <= score <= 1 and 0 <= cutoff <= 1 and 0 < min_score <= 1):
+        raise ValueError("score and cutoff must be in [0, 1]; min_score in (0, 1]")
+    if score < cutoff:
+        return min(min_score * score / cutoff, math.nextafter(min_score, 0.0))
+    if score == cutoff:
+        return min_score
+    return min_score + (1 - min_score) * (score - cutoff) / (1 - cutoff)
 
 
 def score_name_review(judgment: Mapping[str, Any]) -> float | None:
@@ -321,6 +330,8 @@ async def _store_route(
                 "route": route.route,
                 "failed_checks": route.failed_checks,
                 "rubric_total": route.total,
+                "selected_score": route.selected_score,
+                "decision_score": route.decision_score,
                 "dimension_scores": dict(route.scores),
                 "raw_dimension_scores": dict(route.raw_scores),
                 "failed_check_details": _failed_check_instructions(route, item, axis),
@@ -439,17 +450,18 @@ def _direct_result(
     item: Mapping[str, Any],
     axis: str,
 ) -> dict[str, Any]:
-    if route.total is None:
+    if route.total is None or route.decision_score is None:
         raise ValueError("a decided review requires dimension scores")
     return {
         "records": [],
-        "winning_score": route.total,
+        "winning_score": route.decision_score,
         "winning_scores": dict(route.scores),
         "winning_comments": "Calibrated Jev route: " + route.route,
         "winning_comments_per_dim": {
             "failed_checks": _failed_check_instructions(route, item, axis),
             "raw_dimension_scores": dict(route.raw_scores),
             "acceptance_probability": route.probability,
+            "selected_score": route.selected_score,
         },
         "canonical_model": model,
         "total_cost": cost,
@@ -584,25 +596,13 @@ async def adjudicate_review(
         except Exception:
             logger.exception("Jev cascade lease release failed for %s", item.get("id"))
     if deciding_enabled():
-        if route.route in {"accept", "refine"}:
-            try:
-                await _store_route(item, axis, model, route, answers, spent)
-            except Exception:
-                logger.exception(
-                    "Jev cascade route could not be stored for %s", item.get("id")
-                )
-            return _direct_result(route, model, spent, item, axis)
-        result = await incumbent(models=models[:1])
-        if result is None:
-            return None
         try:
             await _store_route(item, axis, model, route, answers, spent)
         except Exception:
             logger.exception(
                 "Jev cascade route could not be stored for %s", item.get("id")
             )
-        result["resolution_method"] = "jev_cascade_" + route.route
-        return result
+        return _direct_result(route, model, spent, item, axis)
     result = await incumbent(models=models)
     if result is None:
         return None
