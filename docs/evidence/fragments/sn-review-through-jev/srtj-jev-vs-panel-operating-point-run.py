@@ -259,7 +259,27 @@ def input_rows():
                     canonical[identity]["copy_group"],
                 )
             canonical.setdefault(identity, row)
-        scored, _ = builder(sources[axis + "_receipts"], sources[axis + "_golden"])
+        scored, score_context = builder(
+            sources[axis + "_receipts"], sources[axis + "_golden"]
+        )
+        if axis == "name":
+            landed = read(sources["name_fit"])["name"]
+            fit = score_context["fit"]
+            assert fit["weights"].keys() == landed["score_weights"].keys()
+            assert math.isclose(
+                fit["intercept"], landed["score_intercept"], abs_tol=1e-10
+            )
+            assert all(
+                math.isclose(value, landed["score_weights"][key], abs_tol=1e-10)
+                for key, value in fit["weights"].items()
+            ), "rebuilt name score differs from landed logistic"
+        else:
+            from imas_codex.standard_names.review import jev_review
+
+            fit = read(sources["docs_fit"])["fit"]
+            assert jev_review.DOCS_SCORE_WEIGHTS == fit["weights"]
+            assert jev_review.DOCS_SCORE_INTERCEPT == fit["intercept"]
+        print("SCORE", axis, "matches landed logistic coefficients", flush=True)
         scored_by_id = {r["id"]: r for r in scored}
         assert len(scored_by_id) == len(scored)
         excluded, kept = [], []
@@ -678,7 +698,7 @@ def fragment(report):
         "<h3>Paired populations and score provenance</h3>",
         "<p>The Jev score is the landed logistic on each axis, including the documentation "
         "contradiction hard zero. No model is fitted on validation. Both judges in each row "
-        "see the same retained identities; the calibration name fit is in-sample. "
+        "see the same retained identities; calibration fits on both axes are in-sample. "
         "Same-rate and same-precision thresholds are selected separately within each split "
         "for this descriptive comparison. They are not deployment cutoffs.</p>",
         "<p>Panel name input is checked against the frozen Jev name, description, kind, unit "
