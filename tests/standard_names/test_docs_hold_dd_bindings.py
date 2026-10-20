@@ -85,6 +85,24 @@ async def test_facility_only_source_path_is_not_held():
 
 
 @pytest.mark.asyncio
+async def test_normalised_dd_source_path_still_holds():
+    """A prepared item keeps its DD hold through the source-path rewrite."""
+    item = _item(source_paths=["dd:equilibrium/time_slice/profiles_1d/j_tor"])
+    workers._set_docs_review_dd_source_paths(item)
+    note = await workers._documentation_contradiction_note(item, MagicMock())
+    assert (
+        note == "DD source text unavailable at equilibrium/time_slice/profiles_1d/j_tor"
+    )
+
+
+@pytest.mark.asyncio
+async def test_normalised_facility_source_path_is_not_held():
+    item = _item(source_paths=["tcv:ip/measured"])
+    workers._set_docs_review_dd_source_paths(item)
+    assert await workers._documentation_contradiction_note(item, MagicMock()) is None
+
+
+@pytest.mark.asyncio
 async def test_facility_path_with_dd_binding_holds_only_the_dd_path():
     item = _item(
         source_paths=["tcv:ip/measured"],

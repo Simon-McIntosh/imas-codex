@@ -27,10 +27,7 @@
     <code>_bound_docs_review_dd_paths({'source_paths': ['tcv:ip/measured'], 'source_bindings': []})</code>
     returned <code>['tcv:ip/measured']</code> and the note returned
     <code>'DD source text unavailable at tcv:ip/measured'</code>. The same probe after the repair
-    (<code>logs/repro_head.log</code>) returns <code>[]</code> and <code>None</code>. Both the base
-    and head probe runs printed
-    <code>module: .../ssog-docs-hold-facility-paths/imas_codex/standard_names/workers.py</code>, so
-    the worktree source is the one measured, not the main checkout's copy.
+    (<code>logs/repro_head.log</code>) returns <code>[]</code> and <code>None</code>.
   </p>
 
   <p id="ssog-docs-hold-facility-paths-change">
@@ -42,9 +39,30 @@
     binding is still held.
   </p>
 
+  <p id="ssog-docs-hold-facility-paths-roundtrip">
+    <strong>Repair — the prefix rule broke the prepared-item round trip.</strong> A review of the
+    first cut found that <code>prepare_docs_review_request</code> rewrites a veto item's
+    <code>source_paths</code> to this helper's output — the paths with the <code>dd:</code>
+    prefix stripped, so the DD-source read and the review prompt see bare paths — and
+    <code>process_review_docs_batch</code> then runs the note on that same item. For a name whose
+    DD path arrives only as a <code>dd:</code>-prefixed source path with no <code>dd</code>
+    binding, the second pass saw a bare path, the prefix rule dropped it, the required list went
+    empty and the hold was lost — the opposite of the brief's "a DD-bound item with missing text
+    still holds". Probed on the pre-repair tree
+    (<code>logs/repro_roundtrip_base.log</code>, <code>100a86a4d</code>): the helper returned
+    <code>['equilibrium/time_slice/profiles_1d/psi']</code> on the raw item and <code>[]</code> on
+    its normalised form, and the note returned <code>None</code>. The repair keeps the provenance
+    across that rewrite: <code>_set_docs_review_dd_source_paths</code> sets
+    <code>source_paths</code> to the bare DD paths and records the same list in
+    <code>dd_source_paths</code>, which the helper reads when present, ahead of the
+    <code>dd:</code>-prefix fallback. After the repair the same probe
+    (<code>logs/repro_roundtrip.log</code>) returns
+    <code>['equilibrium/time_slice/profiles_1d/psi']</code> on both passes and the note holds.
+  </p>
+
   <p id="ssog-docs-hold-facility-paths-caller-audit">
     <strong>Caller audit.</strong> <code>_bound_docs_review_dd_paths</code> has three callers. Its
-    fallback change is what each expects:
+    return is DD paths only, and its input may be a raw item or a prepared one:
   </p>
   <ul id="ssog-docs-hold-facility-paths-callers">
     <li id="ssog-docs-hold-facility-paths-caller-predicate">
@@ -54,14 +72,16 @@
       <code>False</code>.
     </li>
     <li id="ssog-docs-hold-facility-paths-caller-veto">
-      the docs-review request builder — sets <code>veto_item["source_paths"] =
-      _bound_docs_review_dd_paths(veto_item)</code> and fetches DD context for those paths via
-      <code>_fetch_review_dd_context</code>. It expects genuine DD paths to read; a facility path
-      was fetched as DD context, a read that can only miss. It is now excluded.
+      <code>_set_docs_review_dd_source_paths</code>, called by the docs-review request builder —
+      expects the DD paths to normalise into <code>source_paths</code> for the DD-source read and
+      the prompt, and now records them in <code>dd_source_paths</code> so those paths stay DD
+      after the rewrite. A facility path was previously normalised in as a DD path and fetched as
+      DD context, a read that can only miss; it is now dropped.
     </li>
     <li id="ssog-docs-hold-facility-paths-caller-note">
       <code>_documentation_contradiction_note</code> — the required DD paths whose text must be
-      present, and the site of the defect. A facility-only name now carries no required DD path.
+      present, and the site of the defect. A facility-only name carries no required DD path; a
+      prepared item with a DD path still carries it.
     </li>
   </ul>
 
@@ -69,27 +89,28 @@
     <strong>Measure.</strong> Gate over <code>test_docs_hold_dd_bindings.py</code> and
     <code>test_review_cascade.py</code> — every test file that imports
     <code>_bound_docs_review_dd_paths</code> or <code>_documentation_contradiction_note</code> —
-    base arm <code>75 passed</code>; head arm <code>77 passed</code> (the two new tests). Added
-    failures <code>0</code>. The base and head arms ran from a scratch copy of
-    <code>imas_codex/</code> and <code>tests/</code> under <code>$TMPDIR</code>, each naming
+    against the pre-repair base (<code>100a86a4d</code>): base arm <code>77 passed</code>; head
+    arm <code>79 passed</code> (the two added tests). Added failures <code>0</code>. The arms ran
+    from a scratch copy of <code>imas_codex/</code> and <code>tests/</code> under
+    <code>$TMPDIR</code>, each naming
     <code>.../scratch/imas_codex/standard_names/workers.py</code> as the module under test
-    (<code>logs/gate_base.log</code>, <code>logs/gate_head.log</code>). No LLM spend: every case in
-    these two files returns before a model call. Generated-model regeneration was refused
-    (read-only) and did not affect collection.
+    (<code>logs/repair_gate_base.log</code>, <code>logs/repair_gate_head.log</code>). No LLM
+    spend: every case returns before a model call.
   </p>
 
   <p id="ssog-docs-hold-facility-paths-negative-control">
-    <strong>Negative control.</strong> The declared mutation — let facility source paths count as
-    required DD paths again — is the base helper's fallback. Applied to the head tests, it fails
-    <code>test_facility_only_source_path_is_not_held</code> and
-    <code>test_hold_predicate_reads_only_dd_sources</code> while the rest pass
-    (<code>2 failed, 75 passed</code>, <code>EXIT=1</code>; <code>logs/negative_control.log</code>).
-    <code>test_facility_path_with_dd_binding_holds_only_the_dd_path</code> passes in both arms: a
-    <code>dd</code> binding short-circuits the fallback, so that test is a non-regression guard
-    that the fix does not overreach, not a mutation-sensitive one. Each accessor expectation is a
-    literal, built without the constant that fed its input: the held case expects
-    <code>.../profiles_1d/j_tor</code> while its input <code>dd_path</code> is prefixed
-    <code>dd:</code>, so echoing the input cannot satisfy it.
+    <strong>Negative control.</strong> The surgical mutation drops the one line recording
+    <code>dd_source_paths</code>, restoring the round-trip loss while the rest of the repair
+    stands: <code>test_normalised_dd_source_path_still_holds</code> then fails with
+    <code>AssertionError: assert None == 'DD source text unavailable at
+    equilibrium/time_slice/profiles_1d/j_tor'</code> (<code>1 failed, 78 passed</code>,
+    <code>EXIT=1</code>; <code>logs/repair_negative_control_surgical.log</code>). Reverting the
+    answering commit whole (pre-repair source with the head tests) fails the same test and
+    <code>test_normalised_facility_source_path_is_not_held</code> (<code>2 failed</code>,
+    <code>EXIT=1</code>; <code>logs/repair_negative_control.log</code>). Expectations are literals
+    built without the constant that fed their input: the held case expects
+    <code>.../profiles_1d/j_tor</code> while its input path is prefixed <code>dd:</code>, so
+    echoing the input cannot satisfy it.
   </p>
 
   <p id="ssog-docs-hold-facility-paths-state">
