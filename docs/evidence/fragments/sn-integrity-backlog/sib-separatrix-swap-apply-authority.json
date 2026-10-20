@@ -1,0 +1,43 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "exchange_dd_producing_source",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-logical-change",
+    "link_participant_kind": "standard_name",
+    "operation": "exchange_dd_producing_source",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "electron_temperature_at_separatrix"
+  ],
+  "rows": [
+    {
+      "given_source_id": "dd:summary/local/separatrix_average/t_e/value",
+      "id": "electron_temperature_at_separatrix",
+      "name_id": "electron_temperature_at_separatrix",
+      "receiving_name_id": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      },
+      "taken_source_id": "dd:summary/local/separatrix/t_e/value"
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "62543ee72e7b77c2d4cc4818b2570993edb62c160c3a25899bffeb6522f75ebc"
+  }
+}

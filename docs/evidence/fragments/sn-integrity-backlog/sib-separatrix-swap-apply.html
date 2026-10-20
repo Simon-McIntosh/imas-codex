@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-separatrix-swap-apply">
+<title>Separatrix temperature DD-source swap applied through the signed exchange</title>
+</head>
+<body>
+<main>
+<h1 id="sib-separatrix-swap-apply-title">Separatrix temperature swap applied</h1>
+<p id="sib-separatrix-swap-apply-contract">One signed <code>dd-source-exchange</code>
+transaction swaps the separatrix temperature DD ownership.
+<code>electron_temperature_at_separatrix</code> (accepted) gives up <code>dd:summary/local/separatrix_average/t_e/value</code> and takes the
+unheld <code>dd:summary/local/separatrix/t_e/value</code>; the freed average path is bound to
+<code>bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface</code>. The authority was built by
+<code>build_repair_authority</code>, never by hand.</p>
+
+<h2 id="sib-separatrix-swap-apply-graph-test">The writer's Cypher on a disposable Neo4j</h2>
+<p id="sib-separatrix-swap-apply-graph-test-p">The graph-marked test
+<code>test_exchange_executes_its_cypher_on_disposable_neo4j</code> passed (not
+skipped) on an empty disposable Neo4j. The instance is started empty rather than
+from the checked export because the contract's fixture erases the whole graph in
+a single transaction before seeding its own closure, which the temp instance's
+512&#160;MB transaction budget cannot hold for a 1.77M-node export: the JVM died
+mid-erase. Emptying the loaded export first was measured at about 460 nodes/s,
+roughly an hour. Log:
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/logs/step1-graph-test.log</code>.</p>
+
+<h2 id="sib-separatrix-swap-apply-rehearsal">Scratch rehearsal</h2>
+<p id="sib-separatrix-swap-apply-rehearsal-p">The swap rows were re-derived on a
+fresh copy of the checked export (<code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code>), previewed,
+applied and read back with the same checks as the live read-back, and the
+sourceless classifier delta was taken there too. Log:
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/logs/step2-scratch-rehearsal.log</code>.</p>
+
+<h2 id="sib-separatrix-swap-apply-preconditions">Live preconditions</h2>
+<pre id="sib-separatrix-swap-apply-preconditions-pre">{
+  "given_dd_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:694438",
+  "given_dd_status": null,
+  "given_exists": true,
+  "given_holders": [
+    "electron_temperature_at_separatrix"
+  ],
+  "given_owning_edges": 1,
+  "given_projections": [
+    "electron_temperature_at_separatrix"
+  ],
+  "name_stage": "accepted",
+  "name_status": "draft",
+  "receiver_stage": "reviewed",
+  "receiver_status": "draft",
+  "taken_dd_element_id": "4:64c142ee-5782-46f9-a287-8df126a67943:698049",
+  "taken_dd_status": null,
+  "taken_exists": true,
+  "taken_holders": [],
+  "taken_owning_edges": 0,
+  "taken_projections": []
+}</pre>
+
+<h2 id="sib-separatrix-swap-apply-quiet">Enforced quiet-graph gate</h2>
+<p id="sib-separatrix-swap-apply-quiet-p">The apply path refuses when the graph
+does not read quiet. Shown once on a simulated busy reading (refusal log
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/logs/step4-quiet-refusal.log</code>, <code>EXIT=1</code>) and then
+gated the real write.</p>
+<pre id="sib-separatrix-swap-apply-quiet-probe">{
+  "busy": false,
+  "open_queries": [],
+  "transactions_started": 0,
+  "window_seconds": 30.0
+}</pre>
+
+<h2 id="sib-separatrix-swap-apply-receipt">Live receipt</h2>
+<pre id="sib-separatrix-swap-apply-receipt-pre">{
+  "change_ids": [
+    "sn-change:source-exchange:cc4adef474e06cafca34a94e4181af36f1e96c94d86ea334e839cedb99e78242"
+  ],
+  "changed": 1,
+  "manifest_sha256": "7e1605e7d29b4e81d809db02d6286a760f3ab64bf14d17623e75249a1486d775",
+  "outcome": "applied",
+  "schema": "imas-codex.signed-source-exchange-receipt.v1"
+}
+</pre>
+
+<h2 id="sib-separatrix-swap-apply-readback">Read-back</h2>
+<p id="sib-separatrix-swap-apply-readback-p">bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface left the sourceless set
+(92 to 91);
+nothing entered it. <code>electron_temperature_at_separatrix</code> holds only <code>dd:summary/local/separatrix/t_e/value</code> and
+the bulk name only <code>dd:summary/local/separatrix_average/t_e/value</code>, with <code>source_paths</code> and
+<code>HAS_STANDARD_NAME</code> matching and <code>require_producing_sources</code>
+holding. The read-back check was shown refusing on a doctored expectation
+(<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/logs/step6-readback-doctored.log</code>).</p>
+<table id="sib-separatrix-swap-apply-populations">
+<caption>Sourceless classifier populations before and after the swap</caption>
+<thead><tr><th>population</th><th>before</th><th>after</th></tr></thead>
+<tbody>
+<tr><td><code>derived_parent</code></td><td>2</td><td>2</td></tr>
+<tr><td><code>dropped_edge</code></td><td>50</td><td>50</td></tr>
+<tr><td><code>never_bound</code></td><td>18</td><td>17</td></tr>
+<tr><td><code>orphan_awaiting_retirement</code></td><td>3</td><td>3</td></tr>
+<tr><td><code>unchained_holder</code></td><td>19</td><td>19</td></tr>
+</tbody>
+</table>
+<p id="sib-separatrix-swap-apply-readback-detail">Left sourceless:
+bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface. Entered:
+none.</p>
+</main>
+</body>
+</html>
