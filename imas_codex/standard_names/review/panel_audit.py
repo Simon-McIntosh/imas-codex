@@ -13,6 +13,10 @@ Three things keep the audit from deciding anything:
 * the audit row is written as a non-canonical judge record
   (``judge_kind='jev'``, ``resolution_role='audit'``), which the review
   aggregate query already excludes the way it excludes a shadow row;
+* the panel runs through the quorum's non-persisting path
+  (:func:`quorum_without_persisting`), so the canonical rows the deciding path
+  would have written are not written for an audited item, and the audit's own
+  row is the only thing it persists;
 * the audit is attempted only after the route is stored, spends through the
   same budget pool, and a refused reservation or a failed panel run records a
   skipped audit instead of failing the decision.
@@ -25,10 +29,11 @@ comparison, not a score that mirrors onto the StandardName.
 from __future__ import annotations
 
 import asyncio
+import functools
 import hashlib
 import json
 import logging
-from collections.abc import Mapping, Sequence
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -66,6 +71,32 @@ def audit_selected(axis: str, item_id: str, run_id: str, rate: float) -> bool:
     payload = _SAMPLE_DOMAIN + b"\x00" + "\x00".join((run_id, axis, item_id)).encode()
     draw = int.from_bytes(hashlib.sha256(payload).digest()[:8], "big")
     return draw / 2**64 < rate
+
+
+def quorum_without_persisting(
+    incumbent: Callable[..., Awaitable[Any]],
+) -> Callable[..., Awaitable[Any]]:
+    """*incumbent* with its record write removed, where the caller supplied one.
+
+    The deciding path hands the cascade a callable that persists the quorum's
+    review rows before returning them. An audit must read the panel's verdict
+    without those rows: they are canonical, so they reach
+    ``update_review_aggregates`` and change the audited item's score, which is
+    the outcome the audit exists not to touch. Where the callable is that
+    persisting wrapper, rebinding it to the cycle runner keeps every argument and
+    drops only the write. Any other callable is returned unchanged, so a stub
+    still runs exactly as its caller gave it.
+    """
+    from imas_codex.standard_names import workers
+
+    keywords = getattr(incumbent, "keywords", None)
+    if (
+        isinstance(incumbent, functools.partial)
+        and incumbent.func is workers._persisting_quorum_cycles
+        and keywords
+    ):
+        return functools.partial(workers._run_rd_quorum_cycles, **keywords)
+    return incumbent
 
 
 def panel_route(score: float, *, min_score: float) -> str:
@@ -171,6 +202,7 @@ class PanelAuditAxisReport:
     agreement_count: int = 0
     disagreement_counts: Mapping[str, int] = field(default_factory=dict)
     skipped_count: int = 0
+    skipped_reasons: Mapping[str, int] = field(default_factory=dict)
 
     @property
     def agreement_rate(self) -> float | None:
@@ -212,25 +244,37 @@ def panel_audit_report(
         )
 
     tallies: dict[str, dict[str, Any]] = {
-        axis: {"sample": 0, "agree": 0, "directions": {}, "skipped": 0} for axis in axes
+        axis: {"sample": 0, "agree": 0, "directions": {}, "skipped": 0, "reasons": {}}
+        for axis in axes
     }
     for row in rows or []:
         axis = row.get("axis")
         bucket = tallies.get(axis)
+        if bucket is None:
+            continue
         try:
             comments = json.loads(row.get("comments") or "{}")
         except ValueError:
-            logger.warning("unreadable audit row comments for axis %r", axis)
-            continue
-        if bucket is None:
-            continue
-        if comments.get("audit_skipped"):
+            reason = "audit row comments are not readable JSON"
+            logger.warning("%s for axis %r", reason, axis)
             bucket["skipped"] += 1
+            bucket["reasons"][reason] = bucket["reasons"].get(reason, 0) + 1
+            continue
+        reason = comments.get("audit_skipped")
+        if reason is None:
+            missing = [
+                name
+                for name in ("jev_route", "panel_route")
+                if comments.get(name) is None
+            ]
+            if missing:
+                reason = "audit row carries no " + " and no ".join(missing)
+        if reason is not None:
+            bucket["skipped"] += 1
+            bucket["reasons"][reason] = bucket["reasons"].get(reason, 0) + 1
             continue
         panel = comments.get("panel_route")
         jev = comments.get("jev_route")
-        if panel is None or jev is None:
-            continue
         bucket["sample"] += 1
         if panel == jev:
             bucket["agree"] += 1
@@ -245,6 +289,7 @@ def panel_audit_report(
             agreement_count=bucket["agree"],
             disagreement_counts=bucket["directions"],
             skipped_count=bucket["skipped"],
+            skipped_reasons=bucket["reasons"],
         )
         for axis, bucket in tallies.items()
     }

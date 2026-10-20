@@ -271,6 +271,72 @@ async def test_exhausted_budget_skips_the_audit_without_failing_the_decision(
     assert "lease refused" in skipped["skipped_reason"]
 
 
+@pytest.mark.asyncio
+async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
+    """The real persisting seam runs the quorum but writes only the audit row."""
+    from functools import partial
+
+    from imas_codex import settings
+    from imas_codex.standard_names import graph_ops, workers
+
+    written = []
+    canonical_row = {
+        "judge_kind": "incumbent",
+        "is_canonical": True,
+        "score": 0.44,
+        "model": "rd-primary",
+    }
+
+    async def cycles(**_kwargs):
+        return {
+            "records": [canonical_row],
+            "winning_score": 0.44,
+            "canonical_model": "rd-primary",
+        }
+
+    monkeypatch.setattr(workers, "_run_rd_quorum_cycles", cycles)
+    monkeypatch.setattr(graph_ops, "write_reviews", lambda rows: written.extend(rows))
+
+    async def judgment(_item, _model):
+        return _route("name"), {}, 0.0
+
+    async def store(*_args):
+        pass
+
+    monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+    )
+    monkeypatch.setattr(cascade, "_name_judgment", judgment)
+    monkeypatch.setattr(cascade, "_store_route", store)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda: True)
+    monkeypatch.setattr(panel_audit, "panel_audit_rate", lambda: 1.0)
+
+    incumbent = partial(
+        workers._persisting_quorum_cycles,
+        sn_id="temperature",
+        review_axis="name",
+        phase="review_name",
+    )
+    result = await cascade.adjudicate_review(
+        "name",
+        {"id": "temperature"},
+        ["primary", "secondary"],
+        incumbent,
+        mgr=_Manager(),
+    )
+
+    assert result["winning_score"] == _JEV_DECISION_SCORE
+    assert [row["resolution_role"] for row in written] == ["audit"]
+    assert not [row for row in written if row.get("judge_kind") == "incumbent"]
+
+    graph = _AggregateGraph()
+    graph.reviews.extend(written)
+    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    assert graph_ops.update_review_aggregates(["temperature"]) == 1
+    assert graph.aggregate == (2, 0.45, False)
+
+
 def test_report_pairs_jev_and_panel_routes(monkeypatch):
     from imas_codex.graph import client as graph_client
 
@@ -292,6 +358,14 @@ def test_report_pairs_jev_and_panel_routes(monkeypatch):
             "comments": json.dumps(
                 {"jev_route": "accept", "audit_skipped": "review audit lease refused"}
             ),
+        },
+        {
+            "axis": "name",
+            "comments": json.dumps({"jev_route": "accept"}),
+        },
+        {
+            "axis": "name",
+            "comments": "not a payload",
         },
         {
             "axis": "docs",
@@ -318,7 +392,12 @@ def test_report_pairs_jev_and_panel_routes(monkeypatch):
         "jev_accept_panel_refine": 1,
         "jev_refine_panel_accept": 1,
     }
-    assert name.skipped_count == 1
+    assert name.skipped_count == 3
+    assert name.skipped_reasons == {
+        "review audit lease refused": 1,
+        "audit row carries no panel_route": 1,
+        "audit row comments are not readable JSON": 1,
+    }
     docs = report["docs"]
     assert (docs.sample_size, docs.agreement_count) == (1, 1)
     assert docs.agreement_rate == 1.0

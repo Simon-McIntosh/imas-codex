@@ -557,9 +557,10 @@ async def _run_panel_audit(
 
     The decision has already been stored and returned by the caller, so every
     failure here is recorded as a skipped audit rather than raised: an audit
-    that cannot run must never withhold or change a decided item. The panel's
-    own result is persisted by the incumbent; the audit adds a non-deciding row
-    carrying its verdict for comparison.
+    that cannot run must never withhold or change a decided item. The panel runs
+    through the quorum's non-persisting path, so its own review rows are never
+    written and the item's aggregate is untouched; the audit adds one
+    non-deciding row carrying the verdict for comparison.
     """
     from imas_codex.standard_names.review import panel_audit
 
@@ -589,7 +590,9 @@ async def _run_panel_audit(
         await _audit_skipped(item, axis, route.route, reason)
         return
     try:
-        panel_result = await incumbent(models=models)
+        panel_result = await panel_audit.quorum_without_persisting(incumbent)(
+            models=models
+        )
     except Exception as exc:
         logger.exception("panel audit run failed for %s", item.get("id"))
         await _audit_skipped(item, axis, route.route, f"{type(exc).__name__}: {exc}")
