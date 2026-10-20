@@ -31,6 +31,13 @@
   "call_sites": [],
   "completed_at": "2026-10-20T06:11:56.209Z",
   "dispatched_at": "2026-10-20T05:52:30Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "manifest formatting repaired before promotion, or a robustness note on a one-off evidence runner whose live write is complete and receipted",
+      "recorded_at": "2026-10-20T06:26:13.026618+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T044913680539-sib-separatrix-swap-apply/manifest.md",
