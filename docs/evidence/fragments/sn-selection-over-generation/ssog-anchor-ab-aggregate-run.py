@@ -44,7 +44,6 @@ RESULTS = HERE / "ssog-anchor-ab-results.json"
 FRAGMENT = HERE / "ssog-anchor-ab.html"
 FIGURE_DIR = REPO / "docs/figures/sn-selection-over-generation/ssog-anchor-ab-aggregate"
 FIGURE = FIGURE_DIR / "lint-before-after.svg"
-FIGURE_PNG = FIGURE_DIR / "lint-before-after.png"
 
 ARMS = ("heuristic", "jev")
 NODE = "ssog-anchor-ab-aggregate"
@@ -428,7 +427,7 @@ def _check_text(fig) -> None:
         raise SystemExit("figure text check failed:\n  " + "\n  ".join(problems))
 
 
-def figure(payload: dict) -> None:
+def figure(payload: dict, render_check: Path | None = None) -> None:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -514,8 +513,13 @@ def figure(payload: dict) -> None:
     fig.tight_layout(rect=(0, 0, 1, 0.92))
     _check_text(fig)
     FIGURE_DIR.mkdir(parents=True, exist_ok=True)
+    # A fixed salt keeps matplotlib's generated SVG element ids stable across
+    # runs, so a re-run rewrites identical bytes instead of churning the diff.
+    matplotlib.rcParams["svg.hashsalt"] = NODE
     fig.savefig(FIGURE, format="svg", metadata={"Date": None})
-    fig.savefig(FIGURE_PNG, format="png", dpi=100, metadata={"Date": None})
+    if render_check is not None:
+        render_check.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(render_check, format="png", dpi=100, metadata={"Date": None})
     plt.close(fig)
 
 
@@ -822,6 +826,11 @@ def main() -> int:
     parser.add_argument(
         "command", nargs="?", default="build", choices=("build", "selftest", "figure")
     )
+    parser.add_argument(
+        "--render-check",
+        metavar="PATH",
+        help="also render the figure to a PNG at PATH, for inspection",
+    )
     args = parser.parse_args()
 
     if args.command == "selftest":
@@ -831,7 +840,7 @@ def main() -> int:
     if args.command == "build":
         RESULTS.write_text(json.dumps(payload, indent=2) + "\n")
         print(f"wrote {RESULTS.relative_to(REPO)}")
-    figure(payload)
+    figure(payload, Path(args.render_check) if args.render_check else None)
     print(f"wrote {FIGURE.relative_to(REPO)}")
     if args.command == "build":
         fragment(payload)
