@@ -1,0 +1,66 @@
+<section id="srtj-cascade-rubric-record">
+  <h2 id="srtj-cascade-rubric-record-title">Calibrated rubric recording requires route-aware consumers</h2>
+  <p>Blocked before implementation at base <code>f219b598dfe9cf49aa09227a35796b83fe842a77</code>.
+    The live plan's recording direction was read at version 118. The assigned write scope
+    excludes consumers whose decisions change when the calibrated probability replaces the
+    placeholder. No product source, cohort runner or tests were changed; this fragment
+    records the required scope extension, not a completed scoring change.</p>
+  <h3 id="srtj-cascade-rubric-record-reproduction">Observed decision reversal</h3>
+  <p>A mocked call through the actual <code>persist_reviewed_name</code>, with
+    <code>min_score=0.75</code>, no spent refinement attempts and the original cascade
+    resolution method, produced the following. GraphClient and write_reviews were mocked;
+    there were zero LLM calls and zero live graph writes.</p>
+  <table>
+    <thead><tr><th>Route</th><th>Probability</th><th>Placeholder result</th><th>Probability result</th></tr></thead>
+    <tbody>
+      <tr><td>refine</td><td>0.90</td><td>0.0 → reviewed</td><td>0.90 → accepted</td></tr>
+      <tr><td>accept</td><td>0.60</td><td>1.0 → accepted</td><td>0.60 → reviewed</td></tr>
+    </tbody>
+  </table>
+  <p>The accept example exercises the persistence consumer independently of the currently
+    calibrated accept cutoff. The refine example matches the existing cascade test's
+    high-probability veto fixture. Both baseline records had empty
+    <code>winning_scores</code>. Exact log excerpts:
+    <code>stage refine placeholder 0.0 =&gt; reviewed</code> and
+    <code>stage refine probability 0.9 =&gt; accepted</code>.
+    The run-directory artifact <code>consumer-reproduction.log</code> records the imported
+    module, worktree, revision, <code>completed=true</code> and <code>EXIT=0</code>.
+    Exit zero means the reproduction assertions succeeded, not that the requested repair passed.</p>
+  <h3 id="srtj-cascade-rubric-record-audit">Consumer audit</h3>
+  <table>
+    <thead><tr><th>Consumer</th><th>Finding</th><th>Required action</th></tr></thead>
+    <tbody>
+      <tr><td>workers.py: process_review_name_batch / process_review_docs_batch</td>
+        <td>Forward winning_score and resolution_method to persistence. Docs guards also clamp the score below the acceptance threshold.</td>
+        <td>Preserve independent documentation refusals when separating probability from route authority.</td></tr>
+      <tr><td>graph_ops.py: persist_reviewed_name / persist_reviewed_docs</td>
+        <td>Both choose accepted by score &gt;= min_score. _quorum_admits_acceptance admits both cascade accept and refine methods; it does not enforce their route.</td>
+        <td>Use explicit cascade route authority while retaining grammar, claim, quorum and documentation guards.</td></tr>
+      <tr><td>graph_ops.py: REFINE_NAME_ELIGIBILITY_WHERE / claim_refine_docs_batch</td>
+        <td>Both require reviewer_score below min_score. A high-probability veto would be ineligible even if persistence alone were corrected.</td>
+        <td>Make explicit cascade refine routes eligible independently of probability, preserving existing budget and claim guards.</td></tr>
+      <tr><td>export.py: _run_gate_c</td>
+        <td>Thresholds reviewer_score_name against the export min_score. Replacing 1.0 changes publication membership whenever the probability is below that bound.</td>
+        <td>Define and implement route-aware publication handling without silently overriding an operator's explicit export threshold.</td></tr>
+      <tr><td>graph_ops.py: update_review_aggregates</td>
+        <td>Excludes noncanonical Jev rows before count, mean and spread; leaves axis score and resolution mirrors to their owners.</td>
+        <td>No adaptation indicated for shadow rows. Existing test_shadow_jev_row_does_not_change_review_aggregates covers null and 0.99 shadow scores; not rerun here.</td></tr>
+      <tr><td>srtj-cohort-run.py: per-item record assembly</td>
+        <td>Copies route and scalar mirror, but no probability, dimension scores or failed-check details. failure_reason is explicitly null for every judged route.</td>
+        <td>Add full judgment fields after the product representation and its consumers agree.</td></tr>
+    </tbody>
+  </table>
+  <h3 id="srtj-cascade-rubric-record-rule">Scoring rule to implement after scope extension</h3>
+  <p>Record the route's calibrated acceptance probability as winning_score. For each of
+    grammar, semantic, convention and completeness, compute 20 × P(best) + 10 × P(middle)
+    from _DIMENSION_LEVELS. For other dimensions use 20 × (1 − max failure probability)
+    across checks docking that dimension. Docs dimensions are description_quality,
+    documentation_quality, completeness and physics_accuracy. Preserve each failed check's
+    probability, cutoff and evidence in both the direct result and shadow record, and copy
+    the full judgment to cohort items. These rules are requirements, not implemented results.</p>
+  <p>No baseline/head suite delta or placeholder-reversion negative control is claimed:
+    implementation stopped at the out-of-scope consumer defect as required by the dispatch.
+    Next action: extend scope to graph_ops.py, export.py, workers.py and the focused consumer
+    tests, settle explicit export-threshold handling, then resume the recording change and
+    run the declared base/head and negative-control gates. Spend: USD 0.</p>
+</section>
