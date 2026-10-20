@@ -10357,7 +10357,12 @@ def _canonical_docs_review_item(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def _bound_docs_review_dd_paths(item: dict[str, Any]) -> list[str]:
-    """List every DD path bound to the name, preserving source order."""
+    """List every DD path bound to the name, preserving source order.
+
+    Only DD paths are returned: the paths of ``dd`` source bindings, or
+    ``source_paths`` entries carrying the ``dd:`` prefix. A facility signal
+    path names no DD text, so it never becomes a required DD path.
+    """
     bindings = item.get("source_bindings") or []
     paths = [
         binding.get("dd_path") or binding.get("source_id") or binding.get("id")
@@ -10371,6 +10376,13 @@ def _bound_docs_review_dd_paths(item: dict[str, Any]) -> list[str]:
                 paths = json.loads(paths)
             except (json.JSONDecodeError, TypeError):
                 paths = [paths]
+        if isinstance(paths, str):
+            paths = [paths]
+        paths = [
+            path
+            for path in paths
+            if isinstance(path, str) and path.startswith(DD_PREFIX)
+        ]
     if isinstance(paths, str):
         paths = [paths]
     return list(

@@ -1,0 +1,99 @@
+<!-- The documentation hold's required DD paths, drawn from DD sources only. Gate
+     logs quoted here are under
+     ~/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/logs/. -->
+<section id="ssog-docs-hold-facility-paths" data-reckon="evidence">
+  <h2 id="ssog-docs-hold-facility-paths-heading">A facility-only source path does not require DD text</h2>
+
+  <p id="ssog-docs-hold-facility-paths-defect">
+    <strong>Defect.</strong> <code>_bound_docs_review_dd_paths</code> in
+    <code>imas_codex/standard_names/workers.py</code> returns the paths of the name's
+    <code>dd</code> source bindings, but when no <code>dd</code> binding exists it falls back to
+    the raw <code>source_paths</code> — including facility signal paths such as
+    <code>tcv:ip/measured</code>. <code>_documentation_contradiction_note</code> takes that list
+    as the DD paths whose text must be present. A name sourced only from facility signals
+    therefore demanded DD text at <code>tcv:ip/measured</code>, was held with
+    <code>DD source text unavailable at tcv:ip/measured</code>, and documentation review clamped
+    it below <code>DEFAULT_MIN_SCORE</code> — although no DD text exists to compare against. This
+    is the facility-path member of the hold's DD-source precondition; the derived- and
+    manual-only members were closed by <code>ssog-docs-hold-dd-bindings</code>, whose
+    <code>_has_dd_source_reference</code> fallback still read a facility path as a DD source
+    through this helper.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-reproduction">
+    <strong>Reproduction at the base revision</strong> (<code>8fc4843c9</code>), driven through
+    the helper and the note directly with the model stubbed, so the run spends nothing
+    (<code>logs/repro_base.log</code>):
+    <code>_bound_docs_review_dd_paths({'source_paths': ['tcv:ip/measured'], 'source_bindings': []})</code>
+    returned <code>['tcv:ip/measured']</code> and the note returned
+    <code>'DD source text unavailable at tcv:ip/measured'</code>. The same probe after the repair
+    (<code>logs/repro_head.log</code>) returns <code>[]</code> and <code>None</code>. Both the base
+    and head probe runs printed
+    <code>module: .../ssog-docs-hold-facility-paths/imas_codex/standard_names/workers.py</code>, so
+    the worktree source is the one measured, not the main checkout's copy.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-change">
+    <strong>Change.</strong> The helper's fallback now keeps only <code>source_paths</code> entries
+    carrying the <code>dd:</code> prefix, so a required DD path comes either from a
+    <code>dd</code> binding or from a <code>dd:</code>-prefixed source path — never from a
+    facility path. Everything else is untouched: a <code>dd</code> binding whose text is missing
+    still holds, naming only the DD path, and a <code>dd:</code>-prefixed source path with no
+    binding is still held.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-caller-audit">
+    <strong>Caller audit.</strong> <code>_bound_docs_review_dd_paths</code> has three callers. Its
+    fallback change is what each expects:
+  </p>
+  <ul id="ssog-docs-hold-facility-paths-callers">
+    <li id="ssog-docs-hold-facility-paths-caller-predicate">
+      <code>_has_dd_source_reference</code> — expects a non-empty result to mean the name
+      <em>names DD text</em>. A facility path made this predicate answer <code>True</code> for a
+      name with no DD source, defeating the fallback the sibling node added. It now answers
+      <code>False</code>.
+    </li>
+    <li id="ssog-docs-hold-facility-paths-caller-veto">
+      the docs-review request builder — sets <code>veto_item["source_paths"] =
+      _bound_docs_review_dd_paths(veto_item)</code> and fetches DD context for those paths via
+      <code>_fetch_review_dd_context</code>. It expects genuine DD paths to read; a facility path
+      was fetched as DD context, a read that can only miss. It is now excluded.
+    </li>
+    <li id="ssog-docs-hold-facility-paths-caller-note">
+      <code>_documentation_contradiction_note</code> — the required DD paths whose text must be
+      present, and the site of the defect. A facility-only name now carries no required DD path.
+    </li>
+  </ul>
+
+  <p id="ssog-docs-hold-facility-paths-measure">
+    <strong>Measure.</strong> Gate over <code>test_docs_hold_dd_bindings.py</code> and
+    <code>test_review_cascade.py</code> — every test file that imports
+    <code>_bound_docs_review_dd_paths</code> or <code>_documentation_contradiction_note</code> —
+    base arm <code>75 passed</code>; head arm <code>77 passed</code> (the two new tests). Added
+    failures <code>0</code>. The base and head arms ran from a scratch copy of
+    <code>imas_codex/</code> and <code>tests/</code> under <code>$TMPDIR</code>, each naming
+    <code>.../scratch/imas_codex/standard_names/workers.py</code> as the module under test
+    (<code>logs/gate_base.log</code>, <code>logs/gate_head.log</code>). No LLM spend: every case in
+    these two files returns before a model call. Generated-model regeneration was refused
+    (read-only) and did not affect collection.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-negative-control">
+    <strong>Negative control.</strong> The declared mutation — let facility source paths count as
+    required DD paths again — is the base helper's fallback. Applied to the head tests, it fails
+    <code>test_facility_only_source_path_is_not_held</code> and
+    <code>test_hold_predicate_reads_only_dd_sources</code> while the rest pass
+    (<code>2 failed, 75 passed</code>, <code>EXIT=1</code>; <code>logs/negative_control.log</code>).
+    <code>test_facility_path_with_dd_binding_holds_only_the_dd_path</code> passes in both arms: a
+    <code>dd</code> binding short-circuits the fallback, so that test is a non-regression guard
+    that the fix does not overreach, not a mutation-sensitive one. Each accessor expectation is a
+    literal, built without the constant that fed its input: the held case expects
+    <code>.../profiles_1d/j_tor</code> while its input <code>dd_path</code> is prefixed
+    <code>dd:</code>, so echoing the input cannot satisfy it.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-state">
+    <strong>State.</strong> The gate measures this node's own change only; verifying the merged
+    result is a separate node's work.
+  </p>
+</section>

@@ -79,6 +79,30 @@ async def test_dd_source_path_without_binding_is_held():
 
 
 @pytest.mark.asyncio
+async def test_facility_only_source_path_is_not_held():
+    item = _item(source_paths=["tcv:ip/measured"])
+    assert await workers._documentation_contradiction_note(item, MagicMock()) is None
+
+
+@pytest.mark.asyncio
+async def test_facility_path_with_dd_binding_holds_only_the_dd_path():
+    item = _item(
+        source_paths=["tcv:ip/measured"],
+        source_bindings=[
+            {
+                "id": "src-dd",
+                "source_type": "dd",
+                "dd_path": "dd:equilibrium/time_slice/profiles_1d/j_tor",
+            }
+        ],
+    )
+    note = await workers._documentation_contradiction_note(item, MagicMock())
+    assert (
+        note == "DD source text unavailable at equilibrium/time_slice/profiles_1d/j_tor"
+    )
+
+
+@pytest.mark.asyncio
 async def test_dd_prefixed_binding_source_id_is_held():
     item = _item(
         source_bindings=[
@@ -101,3 +125,4 @@ def test_hold_predicate_reads_only_dd_sources():
     )
     assert workers._has_dd_source_reference(_item(source_paths=[f"dd:{DD_PATH}"]))
     assert not workers._has_dd_source_reference(_item())
+    assert not workers._has_dd_source_reference(_item(source_paths=["tcv:ip/measured"]))
