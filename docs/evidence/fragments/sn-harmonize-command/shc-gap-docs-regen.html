@@ -5,11 +5,11 @@
   <meta name="reckon-type" content="evidence-fragment">
   <meta name="plan-slug" content="sn-harmonize-command">
   <meta name="node-id" content="shc-gap-docs-regen">
-  <title>Regenerating the split gap names: radial's docs land, gap's fall below threshold</title>
+  <title>Regenerating the split gap names: radial's docs land, gap's stay unreviewed</title>
 </head>
 <body>
 <main>
-  <h1 id="shc-gap-docs-regen-title">The two split gap names are documented through their own stages: radial accepted, gap regenerated but under threshold</h1>
+  <h1 id="shc-gap-docs-regen-title">The two split gap names are driven through their own stages: radial accepted, gap's steered candidate left unreviewed at the node's spend ceiling</h1>
 
   <p id="shc-gap-docs-regen-invocation">
     The documentation stage could not claim either name at the start — its
@@ -82,19 +82,41 @@
   </p>
 
   <p id="shc-gap-docs-regen-gap-docs">
-    <strong>gap's regenerated documentation was reviewed below threshold.</strong>
+    <strong>gap's first regenerated documentation was reviewed below
+    threshold.</strong>
     The docs pools scored it <code>0.5625</code> and held it from acceptance —
     <em>"held from acceptance — contradicts source:
-    summary/boundary/distance_inner_outer_separatrices/value"</em> — meaning the
-    candidate's wording conflicted with the bound DD leaf's own definition, and
-    the refine rotation then re-attempted it. The regenerated text does, as
-    steered, describe the inner/outer separatrix separation in physics terms and
-    no longer names a DD field or option value; the shortfall is that its
-    statement of the quantity did not match the source. The refine rotation
-    re-attempted it once more (chain 2/3) and scored it <code>0.500</code>,
-    still below threshold, so the route stops there and the decision is the
-    lead's. The name itself stays accepted at <code>0.91875</code> — only its
-    documentation is short.
+    summary/boundary/distance_inner_outer_separatrices/value"</em>. The
+    candidate's wording conflicted with the bound DD leaf's own definition. The
+    refine rotation re-attempted it once more (chain 2/3) and scored it
+    <code>0.500</code>. Both reviewers docked the same defect: the body defines
+    the gap at <code>Z*</code>, the height where the inner separatrix reaches
+    its maximum major radius, and then appends the outboard midplane concept
+    text asserting <code>Z = Z_mid</code> as if that were a second, different
+    height. The regenerated text did, as steered, describe the separation in
+    physics terms and no longer named a DD field or option value.
+  </p>
+
+  <p id="shc-gap-docs-regen-steer2">
+    <strong>The second steering edit regenerated the text; the review that would
+    have scored it could not be funded.</strong> The refinement the first review
+    triggered had claimed the name and died, leaving
+    <code>docs_stage='refining'</code>; the pipeline's own orphan sweep (its
+    <code>docs_refining</code> arm, 1800 s age threshold) reverted it to
+    <code>reviewed</code> and cleared the claim — the stage was never written by
+    hand. A second <code>sn edit --hint --axis docs</code> then attached a
+    direction to reconcile the two statements into one height and generated a
+    fresh candidate. It did not take: the trailing midplane sentence came back
+    unchanged, still asserting the midplane height beside <code>Z*</code>. The
+    documentation scope over the re-edit's run id generated the candidate
+    (<code>$0.0958</code>) but its three-seat review quorum could never reserve
+    its second seat — the run's remaining lease was <code>$0.0456</code> against
+    a next-seat need of <code>$0.0457</code> — so 107 cycles deferred, one seat
+    ran and was discarded for want of a quorum, and no score was persisted
+    (<code>$0.1572</code> for no accepted verdict). The node's measured spend
+    reached <code>$0.945642</code> of the <code>$1.00</code> ceiling, leaving
+    <code>$0.054</code> against a quorum that costs roughly
+    <code>$0.20</code>. The ceiling bound the verdict, not the pipeline.
   </p>
 
   <p id="shc-gap-docs-regen-record">
@@ -103,19 +125,24 @@
     <code>shc-gap-docs-regen-run.py</code>; the record carries each run's
     invocation, log path, the before and after state, both names' reviewer
     comments, the read-back checks and the spend. The runner performs no graph
-    write. Gap's documentation came back below the <code>0.85</code> acceptance
-    threshold, so by the work item's own rule it stops there and leaves the
-    decision to the lead; radial's clears it.
+    write. Gap's first reviewed documentation came back below the
+    <code>0.85</code> acceptance threshold and its steered re-attempt could not
+    be reviewed within the node's spend ceiling, so by the work item's own rule
+    it stops there and leaves the decision to the lead; radial's clears it.
   </p>
 
   <p id="shc-gap-docs-regen-next">
-    Next, on the sanctioned paths only: gap_at_outboard_midplane's documentation
-    needs a further review cycle — its steer should reconcile the candidate's
-    wording with the bound leaf
-    <code>summary/boundary/distance_inner_outer_separatrices/value</code> rather
-    than re-describe the quantity — or the lead accepts the below-threshold
-    result as the reviewed outcome. radial_separatrix_distance_at_outboard_midplane
-    needs no further action: name accepted, documentation accepted.
+    Next, on the sanctioned paths only: gap_at_outboard_midplane holds a fresh
+    candidate at <code>docs_stage='drafted'</code> with no claim, which the next
+    funded review rotation scores without any further edit. Two things decide
+    what to give it: the node's spend ceiling needs raising by roughly
+    <code>$0.20</code> for one three-seat quorum, and the steer itself must land
+    — the regeneration reproduced the trailing midplane sentence, so a further
+    edit must reconcile it with <code>Z*</code> rather than re-describe the
+    quantity, or the lead accepts the below-threshold reviewed result as the
+    outcome. radial_separatrix_distance_at_outboard_midplane needs no further
+    action: name accepted at <code>1.0</code>, documentation accepted at
+    <code>0.90625</code>.
   </p>
 </main>
 </body>
