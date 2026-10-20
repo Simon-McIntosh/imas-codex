@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/cli/sn.py:9013 sn_restore_apply",
+    "imas_codex/standard_names/graph_ops.py:3427 structural-edge-reconcile partial",
+    "imas_codex/standard_names/graph_ops.py:4546 normalization-peel-unit-repair partial",
+    "imas_codex/standard_names/graph_ops.py:5305 lifecycleless-stub-reconcile partial",
+    "imas_codex/standard_names/graph_ops.py:15173 error-sibling-reconcile partial",
+    "imas_codex/standard_names/graph_ops.py:21677 catalog-disposition partial",
+    "imas_codex/standard_names/graph_ops.py:22001 semantic-mirror-repair partial",
+    "imas_codex/standard_names/graph_ops.py:22030 ineligible-source-retirement partial",
+    "imas_codex/standard_names/graph_ops.py:22507 dual-authority-retirement partial",
+    "imas_codex/standard_names/graph_ops.py:22540 refused-target-orphan partial",
+    "imas_codex/standard_names/provenance_lifecycle.py:1246 stale-source-lifecycle partial"
+  ],
+  "completed_at": "2026-10-19T22:12:15.354Z",
+  "dispatched_at": "2026-10-19T21:51:44Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_signed_source_exchange.py",
+      "line": 32,
+      "severity": "follow-on",
+      "text": "follow-on: the exchange is exercised only against an in-memory FakeGraph whose _Transaction.run reimplements every SOURCE_EXCHANGE statement in Python (tests/standard_names/test_signed_source_exchange.py:32), so the real closure, refusal, mutation and postcondition Cypher has no test that reddens if it regresses; the only check on those statements is the EXPLAIN parse gate, and two mutation-statement defects found during development (an invalid infix NOT IN, commit 7459ff1; a missing participant recheck, commit af537ca1) were caught by EXPLAIN and review rather than by any test."
+    },
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": 7275,
+      "severity": "follow-on",
+      "text": "follow-on: SOURCE_EXCHANGE_MUTATION (imas_codex/standard_names/signed_manifest.py:7275) writes PRODUCED_NAME, the source scalar mirror and status but does not maintain the touched names' source_paths projection nor the DD-side HAS_STANDARD_NAME edge that the sibling ordinary-source migration writer maintains (signed_manifest.py:4546), so after a live apply readers of those projections see the pre-swap ownership until a reconcile pass runs (imas_codex/standard_names/loop.py:1493)."
+    },
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": 7167,
+      "severity": "follow-on",
+      "text": "follow-on: the new adapter has no production call site \u2014 no CLI command and no graph_ops partial passes authority_adapter=\"dd-source-exchange\" (the literal occurs nowhere outside signed_manifest.py), so the separately dispatched apply node must add the caller that this writer is built for before the swap can run."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-signed-source-exchange.html",
+      "line": 68,
+      "severity": "follow-on",
+      "text": "follow-on: the brief named sib-apply-live-rulings.html and its JSON as authority to read (both refusal receipts and the missing-owner statement); the fragment records them absent at inspection (docs/evidence/fragments/sn-integrity-backlog/sib-signed-source-exchange.html:68) and they remain absent from both the base and the main checkout, the apply run r-20261019T185427204526 still being in flight, so the preview's admission decision rests on the fresh live closure rather than on the prior receipts the brief required."
+    }
+  ],
+  "justifications": {
+    "durability": "test_failed_name_postcondition_rolls_back_every_write fails when the name postcondition is removed (negative-control.log, EXIT=1), but the tests drive a Python stand-in for the Cypher at tests/standard_names/test_signed_source_exchange.py:32 so the shipped statements have no regression-failing test.",
+    "evidence": "the gate's own logs are recorded and complete \u2014 baseline-suite.log and head-suite.log each end on a passed totals line and EXIT=0 \u2014 and the negative-control log shows a real red at EXIT=1 whose failing id the head arm passes.",
+    "fit": "the adapter follows the newest sibling idiom \u2014 _load/_closure/_refusal/_preview/_apply mirroring _load_recovery_unbind_rows at signed_manifest.py:6467, reusing _TransactionQuery, _digest and require_producing_sources, with SourceExchangeConflict subclassing SignedManifestConflict at :320.",
+    "goal_fidelity": "signed_manifest.py:7167 builds the one-transaction exchange with the four required refusals at :7059 and the three postconditions at :7167, and live-preview.json shows the intended separatrix swap previewing as would_apply with zero refusals.",
+    "reuse": "the capability owner was searched by mechanism: retarget_standard_name_sources (provenance_lifecycle.py:505) moves a bound source to another name and the ordinary-source migration (signed_manifest.py:4546) moves a fixed source's holder, neither of which binds an unheld source to a fixed name, so the new adapter extends the shared envelope rather than forking an existing owner.",
+    "scope_discipline": "git diff 5220d41e..fff443986 touches only signed_manifest.py, test_signed_source_exchange.py and the fragment, all three inside the declared write paths, with no goal-external change."
+  },
+  "notes": "Independent review of the landed node. Head gate recorded at 322a28752, which is the last code commit; the final commit fff443986 changes the fragment only. The single named test file was re-run at head inside the source worktree and passed 16 cases (review-test-run.log, EXIT=0).",
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T215119085880-review-of-sib-signed-source-exchange-fff4439866a4",
+  "reviewed_base_sha": "5220d41ec6c4c02fc996b46dba94f2bda6edcf34",
+  "reviewed_head_sha": "fff4439866a4c947fbc0349aa0e3e413d8934006",
+  "reviewed_run_id": "r-20261019T211614753944-sib-signed-source-exchange",
+  "rubric": "run-review-six-dimension",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T04:10:20.234936+00:00",
+  "total": 104,
+  "verdicts": {
+    "diff": "read commit by commit from 5220d41e to fff443986; seven commits touch only the declared three paths (+997/-5), the final commit fff443986 being fragment prose only so the head gate at 322a28752 covers every line; the diff adds the exchange adapter and its tests and nothing else.",
+    "done_when": "the done_when is no added failures on the signed-manifest gate; baseline-suite.log shows 254 passed/0 failed and head-suite.log shows 270 passed/0 failed, both EXIT=0, so added_failure_count is 0.",
+    "goal": "the node goal is a signed program that exchanges a live name's DD producing source in one transaction; imas_codex/standard_names/signed_manifest.py:7167 _apply_source_exchange implements it, and the read-only preview in live-preview.json returned outcome=would_apply, would_change=1, 0 refusals against DD 4.1.1.",
+    "manifest": "read at .../manifest.md; it states 254\u2192270 passed with zero added failures, the negative-control log at EXIT=1, and the live preview receipt, all of which the run's own logs confirm.",
+    "write_paths": "the declared write paths are signed_manifest.py, tests/standard_names/test_signed_source_exchange.py and the sib-signed-source-exchange.html fragment; every path in the diff 5220d41e..fff443986 is one of the three."
+  }
+}
