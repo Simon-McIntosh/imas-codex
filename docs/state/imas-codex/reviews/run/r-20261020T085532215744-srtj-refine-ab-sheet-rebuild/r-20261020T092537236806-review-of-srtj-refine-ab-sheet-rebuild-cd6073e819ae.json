@@ -11,6 +11,11 @@
       "kind": "exempted",
       "reason": "robustness of a one-off sheet-rebuild driver whose output the review verified row by row; it is not run again",
       "recorded_at": "2026-10-20T09:38:55.521400+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "robustness of a one-off sheet-rebuild driver whose output the review verified row by row; it is not run again",
+      "recorded_at": "2026-10-20T09:39:00.634642+00:00"
     }
   },
   "findings": [
