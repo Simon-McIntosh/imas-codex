@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8986",
+    "imas_codex/standard_names/workers.py:11050",
+    "imas_codex/standard_names/workers.py:7279",
+    "imas_codex/standard_names/workers.py:11292"
+  ],
+  "completed_at": "2026-10-20T09:06:58.125Z",
+  "dispatched_at": "2026-10-20T08:51:46Z",
+  "findings": [
+    {
+      "claim": "The landing fragment records its validation arms in a table and carries no figure, despite a granted figures write path.",
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cascade-rubric-score.html",
+      "line": 53,
+      "severity": "follow-on",
+      "text": "follow-on: docs/evidence/fragments/sn-review-through-jev/srtj-cascade-rubric-score.html:53 carries no figure - no <svg>, <img> or <figure> anywhere in the fragment - although the node's own declared write paths included docs/figures/sn-review-through-jev/srtj-cascade-rubric-score and the user's documentation mandate expects a figure where one aids understanding. The six-row validation table at line 53 (AUC, accept precision with interval, refine precision, false-veto rate and route shares for three arms on two axes) is exactly the per-arm comparison a figure serves, and the fragment is the only durable record of that comparison."
+    },
+    {
+      "claim": "The committed artifact's docs check_thresholds names a 1.0 cutoff the router ignores, while the cutoff it does apply lives only in code.",
+      "file": "imas_codex/standard_names/review/cascade_thresholds.json",
+      "line": 15,
+      "severity": "follow-on",
+      "text": "follow-on: imas_codex/standard_names/review/cascade_thresholds.json:15 records the docs veto set as {\"claim_contradicts_source\": 1.0} and joint_selection.selected names it, but the router never applies that cutoff: imas_codex/standard_names/review/cascade.py:168 skips the entry outright and vetoes instead on CONTRADICTION_VETO_PROBABILITY, emitted at cascade.py:198, which is 0.30. A reader deriving docs routes from the committed artifact alone gets a different answer from the router's, and the effective cutoff for the one docs veto that does fire exists only in code. The behaviour is correct and the 0.30 rule is described in the fragment, so the defect is the artifact's unreadability rather than the route."
+    }
+  ],
+  "justifications": [
+    "JUSTIFICATION goal_fidelity: cascade.py:186-201 replaces the 1.0/0.0 placeholder with the rubric mean at min_score and keeps a joint veto routing to refine, which is the stated deliverable; the brief's 0.75 is corrected to the consumer default 0.85 that defaults.py:13 actually defines, and that correction is reported rather than hidden.",
+    "JUSTIFICATION evidence: head.log ends '5 failed, 302 passed' against baseline.log '5 failed, 271 passed' with the same five test_docs_contradiction_veto failure ids, and cascade_thresholds.json's report.validation carries auc 0.722335/0.775430, false-veto 3.17%/2.70% and 6/6 accepts with 95% interval [0.6097, 1.0], matching the fragment.",
+    "JUSTIFICATION scope_discipline: every path in the diff is inside the brief's write scope and no consumer file is touched; the only shortfall is the unused figures grant at srtj-cascade-rubric-score.html:53 rather than any out-of-scope edit.",
+    "JUSTIFICATION durability: negative-control.log records 25 failing tests with EXIT=1 under the declared placeholder mutation, including tests/standard_names/test_review_cascade.py:319 test_decided_review_stores_dimension_scores_and_their_mean and :444 test_consumer_predicates_agree_with_rubric_route, so reinstating winning_score=1.0/winning_scores={} reddens the assertions that guard the rubric store.",
+    "JUSTIFICATION fit: the added cascade.py helpers follow the module's existing lru_cache and dataclass idiom, cascade.py:29-31 extends CascadeRoute with plain fields, and no added symbol carries a plan label or ticket reference.",
+    "JUSTIFICATION reuse: the search for an owner of the capability found imas_codex/discovery/base/evaluation.py (roc_auc, bootstrap_interval) and the pre-existing _fit_name_logistic in the same calibration module; the new _fit_rubric at cascade_calibration.py:869 fits per-dimension monotone logits, a distinct capability, and the new _wilson at :775 is an analytic interval beside a bootstrap owner rather than a copy of it."
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261020T085110632593-review-of-srtj-cascade-rubric-score-1885b6ba93b3",
+  "reviewed_base_sha": "c25ee01fb2c2027bd9d61f02191ba2b220d2ff05",
+  "reviewed_by": "review-of-srtj-cascade-rubric-score-1885b6ba93b3",
+  "reviewed_head_sha": "1885b6ba93b39f1b828c0e65ed6feb26245dd810",
+  "reviewed_run_id": "r-20261020T074706488475-srtj-cascade-rubric-score",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T09:07:52.800692+00:00",
+  "total": 114,
+  "verdicts": [
+    "VERDICT goal: the goal is a rubric score from Jev's answers that the cascade decides on at the consumers' threshold; imas_codex/standard_names/review/cascade.py:168-201 scales dimension scores, routes on their mean and keeps the failed checks, and cascade.py:446-447 stores that mean as winning_score with the 0..20 winning_scores.",
+    "VERDICT done_when: the done_when requires a test showing every consumer predicate agrees with the route; tests/standard_names/test_review_cascade.py:444 test_consumer_predicates_agree_with_rubric_route runs persist_reviewed_name/docs, both claim_refine_*_batch predicates parsed from the emitted Cypher, and export _run_gate_c at min_score 0.65, 0.75 and 0.85.",
+    "VERDICT write_paths: read from the reviewed manifest's orientation_write_paths; all seven paths in git diff --stat c25ee01f..1885b6ba (cascade.py, cascade_calibration.py, cascade_thresholds.json, srtj-cohort-run.py, test_review_cascade.py, test_cascade_calibration.py, srtj-cascade-rubric-score.html) are inside the brief's declared write scope, and the granted docs/figures path is unused.",
+    "VERDICT manifest: read; it records baseline 5 failed/271 passed and head 5 failed/302 passed with identical failure ids, 25 negative-control failures, USD 0 spend, and names the artifact's validation numbers, which reconcile with cascade_thresholds.json at the head revision.",
+    "VERDICT diff: read commit by commit against c25ee01fb2c2027bd9d61f02191ba2b220d2ff05; af511c4e8 carries the rubric fit, routing and cohort record, 1885b6ba9 carries the fragment, and no change reaches a consumer (graph_ops.py, export.py and defaults.py are untouched).",
+    "VERDICT call_sites: imas_codex/standard_names/workers.py:8986 and workers.py:11050 call adjudicate_review, which reaches _name_judgment/_docs_judgment, _route and _direct_result; workers.py:7279 and workers.py:11292 call failed_check_instructions, which reads the check_details the diff adds."
+  ]
+}
