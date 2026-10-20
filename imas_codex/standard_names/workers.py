@@ -41,6 +41,7 @@ from imas_codex.standard_names.defaults import (
 )
 from imas_codex.standard_names.provenance import detect_value_provenance
 from imas_codex.standard_names.source_paths import (
+    DD_PREFIX,
     encode_source_path,
     strip_dd_prefix,
 )
@@ -10379,6 +10380,34 @@ def _bound_docs_review_dd_paths(item: dict[str, Any]) -> list[str]:
     )
 
 
+def _has_dd_source_reference(item: dict[str, Any]) -> bool:
+    """Report whether an item names DD source text to compare claims against.
+
+    A DD path reaches the item either as a ``dd`` source binding or as a
+    ``dd:``-prefixed entry, which a binding of another source type can also
+    carry. Items whose sources are all derived or manual name no DD text, so
+    there is nothing for a claim comparison to read.
+    """
+    if _bound_docs_review_dd_paths(item):
+        return True
+    paths = item.get("source_paths")
+    entries: list[Any] = list(paths) if isinstance(paths, (list, tuple)) else []
+    bindings = item.get("source_bindings")
+    if isinstance(bindings, (list, tuple)):
+        entries.extend(bindings)
+    for entry in entries:
+        if isinstance(entry, str):
+            if entry.startswith(DD_PREFIX):
+                return True
+            continue
+        if isinstance(entry, dict) and any(
+            isinstance(entry.get(key), str) and entry[key].startswith(DD_PREFIX)
+            for key in ("dd_path", "source_id", "path", "id")
+        ):
+            return True
+    return False
+
+
 def _load_docs_review_source_item(sn_id: str) -> dict[str, Any]:
     """Read the same prompt-bearing projection returned by a docs claim."""
     from imas_codex.graph.client import GraphClient
@@ -10916,7 +10945,7 @@ async def _documentation_contradiction_note(
         )
         return "DD source text unavailable at " + ", ".join(empty_paths)
     if not sources:
-        if item.get("source_paths") or item.get("source_bindings"):
+        if _has_dd_source_reference(item):
             logger.warning("review_docs: DD source text unavailable for %s", item["id"])
             return "DD source text unavailable; claim comparison could not run"
         return None
