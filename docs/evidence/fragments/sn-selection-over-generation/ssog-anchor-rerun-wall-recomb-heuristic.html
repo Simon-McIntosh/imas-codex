@@ -1,0 +1,93 @@
+<section id="ssog-anchor-rerun-wall-recomb-heuristic">
+  <h2 id="ssog-anchor-rerun-wall-recomb-heuristic-heading">Heuristic arm, energy_flux_at_wall_due_to_recombination: re-run on the fixed code and the re-derived anchors</h2>
+
+  <p id="ssog-anchor-rerun-wall-recomb-heuristic-outcome">
+    The heuristic arm of the <code>energy_flux_at_wall_due_to_recombination</code> family was re-run once, to
+    completion, in a fresh scratch copy of the fixed export, on the tree carrying the three scratch-holdup fixes
+    (commit <code>284f17bcb</code>). The anchor is the re-derived heuristic anchor
+    <code>incident_ion_energy_flux_at_wall_due_to_recombination</code>, read from
+    <code>ssog-anchor-ab/selection.json</code> (re-derived 2026-10-20T13:45:30Z), not a pinned literal.
+    Outcome: <strong>complete</strong>, <code>stamped=false</code> (halted at 75% documentation acceptance),
+    lint 3&nbsp;&rarr;&nbsp;2, USD&nbsp;1.9480 of the USD&nbsp;2.00 arm cap, 2,447.6&nbsp;s wall.
+    <strong>Both apply batches ran</strong> (2 of 2), which is the behaviour the fixed code was expected to
+    restore.
+  </p>
+
+  <h3 id="ssog-anchor-rerun-wall-recomb-heuristic-record">The arm record</h3>
+  <p id="ssog-anchor-rerun-wall-recomb-heuristic-record-text">
+    Record at
+    <code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json</code>,
+    written by a detached invocation whose log ends <code>EXIT=0</code>.
+  </p>
+  <table id="ssog-anchor-rerun-wall-recomb-heuristic-figures">
+    <thead>
+      <tr><th>field</th><th>value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>outcome_status</td><td>complete</td></tr>
+      <tr><td>anchor</td><td>incident_ion_energy_flux_at_wall_due_to_recombination</td></tr>
+      <tr><td>lint before &rarr; after</td><td>3 &rarr; 2 (link_missing_reverse 3 &rarr; 2)</td></tr>
+      <tr><td>batches run</td><td>2 of 2</td></tr>
+      <tr><td>calls</td><td>43</td></tr>
+      <tr><td>spend</td><td>USD 1.947944 (limit USD 2.00)</td></tr>
+      <tr><td>wall time</td><td>2447.6 s (38.8 min apply)</td></tr>
+      <tr><td>stamped</td><td>false &mdash; halted: docs acceptance 75.00% &lt; 90.00% (3/4 touched)</td></tr>
+      <tr><td>containment</td><td>holds &mdash; scratch_signal 86, live_signal 0</td></tr>
+      <tr><td>code digest</td><td>git_head 284f17bcb; tree_digest_imas_codex 53d14e51fb7a7d8c</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="ssog-anchor-rerun-wall-recomb-heuristic-scores">Every member's documentation score, before and after</h3>
+  <table id="ssog-anchor-rerun-wall-recomb-heuristic-score-table">
+    <thead>
+      <tr><th>member</th><th>before</th><th>after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>energy_flux_at_wall_due_to_recombination</td><td>0.95625</td><td>1.0</td></tr>
+      <tr><td>incident_ion_energy_flux_at_wall_due_to_recombination (anchor)</td><td>1.0</td><td>0.9375</td></tr>
+      <tr><td>ion_charge_state_energy_flux_at_wall_due_to_recombination</td><td>0.95</td><td>0.98125</td></tr>
+      <tr><td>ion_energy_flux_at_wall_due_to_recombination</td><td>0.85625</td><td>1.0</td></tr>
+      <tr><td>neutral_energy_flux_at_wall_due_to_recombination</td><td>0.96875</td><td>0.849</td></tr>
+    </tbody>
+  </table>
+  <p id="ssog-anchor-rerun-wall-recomb-heuristic-score-note">
+    The uniformly-0.849 column the first round produced is gone: four of five members now carry distinct,
+    real documentation scores. One member still reads exactly <strong>0.849</strong> &mdash;
+    <code>neutral_energy_flux_at_wall_due_to_recombination</code> &mdash; and it is a genuine hold, not the
+    false one. The apply log names the note beside it, four times:
+  </p>
+  <pre id="ssog-anchor-rerun-wall-recomb-heuristic-hold-note">review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance — contradicts source:
+wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values:
+contradicts source: The local incident energy flux is defined by:; where [equation] is the incident neutral
+energy flux attributed to recombination, ... DD: One scalar value is provided per element in the grid subset.
+persist_reviewed_docs: neutral_energy_flux_at_wall_due_to_recombination → docs_stage=reviewed (score=0.849,
+chain=1/3, resolution=quorum_consensus, shortfall=None)</pre>
+  <p id="ssog-anchor-rerun-wall-recomb-heuristic-hold-meaning">
+    The persisted score stays 0.849 across retries while the reviewer's own score moves (0.750 then 0.849),
+    and the reason is a source contradiction against
+    <code>wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values</code> &mdash; a DD
+    source is present and is being read, which is what the fixed code requires. This member is also the Jev
+    arm's anchor for this family, so the same hold is the thing to look for in the Jev arm's record.
+  </p>
+
+  <h3 id="ssog-anchor-rerun-wall-recomb-heuristic-containments">Containment and cleanup</h3>
+  <p id="ssog-anchor-rerun-wall-recomb-heuristic-containment-text">
+    The scratch-only marker contrast passed before the apply: 1,770,101 nodes in the scratch copy, probe visible
+    once there and zero times in the live graph, restored to 1,770,101. At the end, 43 cost rows naming this
+    family's members are present in the scratch copy and none in the live graph, so the containment verdict
+    holds on both controls. The scratch instance was stopped at 20:37:27Z, its tree removed at 20:37:28Z, and
+    the port lock for 28002 released; no scratch tree and no runner process remain.
+  </p>
+
+  <h3 id="ssog-anchor-rerun-wall-recomb-heuristic-attempt1">The first attempt, killed with its node</h3>
+  <p id="ssog-anchor-rerun-wall-recomb-heuristic-attempt1-text">
+    An earlier attempt of this same arm was launched at 14:35Z and was killed at 15:27:55Z with the fleet node
+    that hosted it (an unrelated worker signalled every process on that node). It had reached the second
+    documentation-review cycle after 51&nbsp;min of apply and had spent at least USD&nbsp;1.44 (the apply's own
+    last heartbeat, <code>spend=$1.4409</code>); it produced no after-values and is not the arm of record. Its
+    run logs are preserved beside the run at
+    <code>logs/apply-heuristic-energy_flux_at_wall_due_to_recombination.attempt1-killed.log</code> and
+    <code>logs/runner-heuristic.attempt1-killed.log</code>, and its 10&nbsp;GB scratch tree was removed. The
+    re-run used a fresh scratch copy and a different port (28002).
+  </p>
+</section>
