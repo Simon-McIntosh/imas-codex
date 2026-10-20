@@ -1,0 +1,32 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-10-19T21:46:56.190Z",
+  "dispatched_at": "2026-10-19T21:22:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-jev.json",
+      "line": "188",
+      "severity": "follow-on",
+      "text": "follow-on: the record's neo4j_log (energy_flux_at_wall_due_to_recombination-jev.json:188) names /dev/shm/mcintos-1281970-2tvumh07/instance/logs/neo4j-temp.log, a path inside the scratch tree the same run removed under its cleanup clause; that directory is absent from disk (verified), so a reader following the citation opens nothing. The field is written by the shared arm runner rather than chosen by this node, and the containment verdict it would corroborate is already carried in the record, so this does not hold the node; the durable form is to copy the containment log outside the scratch tree, or to mark the field transient."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T212210674046-review-of-ssog-anchor-wall-recomb-jev-ed3b0bb9cef2",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "ed3b0bb9cef20106b99b07af7bba22ae731f34e1",
+  "reviewed_run_id": "r-20261019T204040007775-ssog-anchor-wall-recomb-jev",
+  "scores": {
+    "durability": 6,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T03:41:45.387886+00:00",
+  "total": 97
+}
