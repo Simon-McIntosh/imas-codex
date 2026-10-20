@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:8043 apply_signed_manifest adapter dispatch",
+    "imas_codex/standard_names/signed_manifest.py:8638 the dispatch branch that reaches _apply_source_exchange",
+    "no caller outside signed_manifest.py passes authority_adapter=\"dd-source-exchange\"; imas_codex/cli/sn.py:9013 and the graph_ops and provenance_lifecycle partials all pass other adapters"
+  ],
+  "completed_at": "2026-10-20T04:39:27.684Z",
+  "dispatched_at": "2026-10-20T04:24:17Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": 7059,
+      "severity": "follow-on",
+      "text": "follow-on: _source_exchange_refusal (imas_codex/standard_names/signed_manifest.py:7059) admits a row on the producing edges alone, while the postcondition added at dec3562b6 requires exact DD projection equality (imas_codex/standard_names/signed_manifest.py:7202 for HAS_STANDARD_NAME, :7228 for source_paths); a taken or given DD path that already carries a stale HAS_STANDARD_NAME edge to a third name therefore previews as would_apply and then raises SourceExchangeConflict at apply, so preview is not authoritative for the row it just admitted. The state is reachable, not hypothetical: the commit that introduced the postcondition exists because these projections are observed to go stale, and the shared detach query is built to clear exactly that residue. The refusal should name the projection condition it can already test in the closure query."
+    },
+    {
+      "file": "tests/standard_names/test_signed_source_exchange.py",
+      "line": 32,
+      "severity": "follow-on",
+      "text": "follow-on: every new postcondition and refusal is exercised only against the in-memory FakeGraph, whose _Transaction.run (tests/standard_names/test_signed_source_exchange.py:32) reimplements each SOURCE_EXCHANGE_* statement in Python, and the one test that would execute the real Cypher, test_exchange_executes_its_cypher_on_disposable_neo4j, was collected and skipped (resume-disposable-graph.log: '1 skipped, 1 warning', EXIT=0) because no disposable Neo4j URI was available; the nine statements were only EXPLAIN-parsed (resume-cypher-explain.log), which proves they parse and not that they return the shape the postconditions demand, so a drift between the real queries and the fake reddens nothing here."
+    },
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": 6632,
+      "severity": "follow-on",
+      "text": "follow-on: the diff carries three reformatting hunks in pre-existing code it does not change, at imas_codex/standard_names/signed_manifest.py:6632 _recovery_unbind_event_id and in _apply_recovery_unbind's receipt literal, unrelated to the goal and outside what the brief implies; they are harmless but they widen the diff a reviewer must read."
+    }
+  ],
+  "justifications": {
+    "durability": "negative-control.log is red on the declared mutation to the touched-name guard ('DID NOT RAISE', 'EXIT=1'), and resume-negative-dd-projection.log and resume-negative-source-paths.log each redden at EXIT=1 when the projection or source_paths maintenance is removed, but the surviving coverage of the new postconditions is the in-memory fake at tests/standard_names/test_signed_source_exchange.py:32 that the mutation exercises.",
+    "evidence": "baseline-suite.log '254 passed' and head-suite.log '272 passed' both end EXIT=0 on a gate whose 28 files are exactly the 27 test files importing signed_manifest plus the new test file, but the head arm ran at dec3562b6, one docs-only commit behind the reviewed head 42ad66794.",
+    "fit": "the program mirrors the sibling program in the same module and reuses _require_sha256 and _digest, but imas_codex/standard_names/signed_manifest.py:7259 accepts any manifest_sha256 string where its recovery-unbind sibling validates _SHA256_RE.fullmatch.",
+    "goal_fidelity": "imas_codex/standard_names/signed_manifest.py:7234 _apply_source_exchange performs the swap in one transaction and live-preview.json records outcome=would_apply with would_change=1 and zero refusals.",
+    "reuse": "the binding write is delegated to the owners attachment_audit._DETACH_QUERY and _ATTACH_QUERY and the invariant to source_invariant.require_producing_sources, but _load_source_exchange_rows at imas_codex/standard_names/signed_manifest.py:6920 re-implements the trusted-file-digest, payload-digest and signature-canonicalization preamble that _load_authority owns at imas_codex/standard_names/signed_manifest.py:1125, which is now its third copy.",
+    "scope_discipline": "git diff --name-only 5220d41e..42ad66794 lists only the three declared paths, though the same file also carries the unrelated reformatting at imas_codex/standard_names/signed_manifest.py:6632."
+  },
+  "notes": "Measured, not assumed, that _load_authority cannot absorb this authority: a file built by repair_authority.build_repair_authority for operation_id exchange_dd_producing_source is refused by _load_authority ('repair row identity must be an object') and accepted by _load_source_exchange_rows, so the new loader is not a plain fork of an owned capability and the preamble is the only duplicated part. Prior review r-20261019T215119085880 found that the exchange wrote PRODUCED_NAME without maintaining the DD projection and source_paths; commit dec3562b6 repaired that by delegating to the shared attachment queries and the fragment records it. The adopted finding that no production caller passes the adapter still stands, and the brief assigns that caller to a later apply node. live-preview.json's manifest_sha256 17c1df2247f0b48503bd4f1fff131bbd201a8e1e1efe48ce689f5aa5f350a1b8 matches the digest quoted in the fragment, and the preview carries a known_name_control with known_name_count=1.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261020T042335202644-review-of-sib-signed-source-exchange-42ad66794bb8",
+  "reviewed_base_sha": "5220d41ec6c4c02fc996b46dba94f2bda6edcf34",
+  "reviewed_head_sha": "42ad66794bb899d0c6ed44769267686b95a268d5",
+  "reviewed_run_id": "r-20261019T211614753944-sib-signed-source-exchange",
+  "rubric": "run-review-six-dimension",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T04:40:30.495061+00:00",
+  "total": 102,
+  "verdicts": {
+    "diff": "read commit by commit from 5220d41e to 42ad66794: nine commits, three files, +1321/-5; f13305672 adds the program and its tests, a79076dc4 .. dfb04518d harden the refusals, dec3562b6 replaces the hand-written binding mutation with the shared attachment_audit._DETACH_QUERY/_ATTACH_QUERY and adds the projection and source_paths postconditions, and 42ad66794 is fragment prose only, so the head gate at dec3562b6 covers every executable line reviewed here.",
+    "done_when": "the brief's done-when is no added failures on the signed-manifest gate plus a kept negative-control log and a fragment recording contract, refusals and preview; baseline-suite.log ends '254 passed, 46 deselected, 1 warning in 17.26s' with EXIT=0 and head-suite.log ends '272 passed, 47 deselected, 1 warning in 38.89s' with EXIT=0, both completed and both with zero failure ids, so added_failure_count is 0 against the reviewed run's own logs.",
+    "goal": "the brief's goal is a new signed program in imas_codex/standard_names/signed_manifest.py that exchanges a live name's producing DD source in one transaction, with an optional receiving name, refusing before any write unless the four named admissions hold; imas_codex/standard_names/signed_manifest.py:7059 _source_exchange_refusal and :7234 _apply_source_exchange implement exactly that, and the read-only live preview in live-preview.json returned outcome=would_apply, would_change=1, changed=0, zero refusals against DD 4.1.1.",
+    "manifest": "read at .../r-20261019T211614753944-sib-signed-source-exchange/manifest.md; it reports the two gate arms with their logs, the observed/declared negative control at EXIT=1, two further projection mutations at EXIT=1, and the live preview receipt, and each of those claims resolves to the log or JSON it names.",
+    "write_paths": "the declared write paths are imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_source_exchange.py and docs/evidence/fragments/sn-integrity-backlog/sib-signed-source-exchange.html; every path in git diff 5220d41e..42ad66794 is one of those three and there is no fourth file."
+  }
+}
