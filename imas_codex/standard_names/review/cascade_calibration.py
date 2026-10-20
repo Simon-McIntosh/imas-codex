@@ -250,7 +250,8 @@ def _fit_name_logistic(items: Sequence[Mapping[str, Any]], questions) -> dict[st
     return {
         "intercept": float(model.intercept_[0]),
         "weights": {
-            key: float(coef) for key, coef in zip(questions, model.coef_[0], strict=True)
+            key: float(coef)
+            for key, coef in zip(questions, model.coef_[0], strict=True)
         },
         "regularization": float(model.C_[0]),
     }
@@ -323,8 +324,12 @@ def _threshold_key(cutoff: float) -> float:
     return round(float(cutoff), 12)
 
 
-def _candidate_cutoffs(items: Sequence[Mapping[str, Any]], check_id: str) -> list[float]:
-    values = sorted({_threshold_key(item["check_fail"].get(check_id, 0.0)) for item in items})
+def _candidate_cutoffs(
+    items: Sequence[Mapping[str, Any]], check_id: str
+) -> list[float]:
+    values = sorted(
+        {_threshold_key(item["check_fail"].get(check_id, 0.0)) for item in items}
+    )
     return [value for value in values if value > 0.0]
 
 
@@ -367,8 +372,10 @@ def _per_check_threshold(
             "separation": round(separation, 4),
             "threshold": cutoff,
         }
-        if best is None or score > best[1] or (
-            score == best[1] and defects_caught > best[2]["defects_caught"]
+        if (
+            best is None
+            or score > best[1]
+            or (score == best[1] and defects_caught > best[2]["defects_caught"])
         ):
             best = (cutoff, score, stats)
     if best is None:
@@ -420,9 +427,7 @@ def select_vetoes(
 
     candidates: dict[str, tuple[float, dict[str, Any]]] = {}
     for check_id in _check_ids(items):
-        cutoff, stats = _per_check_threshold(
-            items, check_id, accepted_ids, defect_ids
-        )
+        cutoff, stats = _per_check_threshold(items, check_id, accepted_ids, defect_ids)
         if cutoff is not None:
             candidates[check_id] = (cutoff, stats)
 
@@ -450,7 +455,11 @@ def select_vetoes(
             gain = len((union | flagged) & defect_ids) - len(union & defect_ids)
             if gain <= 0:
                 continue
-            if best is None or gain > best[0] or (gain == best[0] and check_id < best[1]):
+            if (
+                best is None
+                or gain > best[0]
+                or (gain == best[0] and check_id < best[1])
+            ):
                 best = (gain, check_id)
         if best is None:
             break
@@ -535,8 +544,8 @@ def _accept_threshold(
         group = [item for item in clear if item["score"] >= cutoff]
         if len(group) < ACCEPT_GROUP_MIN:
             continue
-        precision = (
-            sum(1 for item in group if item["label"] == ACCEPTABLE_LABEL) / len(group)
+        precision = sum(1 for item in group if item["label"] == ACCEPTABLE_LABEL) / len(
+            group
         )
         if precision >= ACCEPT_PRECISION:
             return cutoff, "precision"
@@ -578,8 +587,10 @@ def _axis_report(
         return "chat_review"
 
     def measure(items: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-        routed = [(item, route(item))  # type: ignore[arg-type]
-                  for item in items]
+        routed = [
+            (item, route(item))  # type: ignore[arg-type]
+            for item in items
+        ]
         counts: dict[str, int] = {}
         for _item, decision in routed:
             counts[decision] = counts.get(decision, 0) + 1
@@ -629,9 +640,7 @@ def _auc(items: Sequence[Mapping[str, Any]]) -> float | None:
     neg = [item["score"] for item in items if item["label"] != ACCEPTABLE_LABEL]
     if not pos or not neg:
         return None
-    wins = sum(
-        1.0 if p > n else 0.5 if p == n else 0.0 for p in pos for n in neg
-    )
+    wins = sum(1.0 if p > n else 0.5 if p == n else 0.0 for p in pos for n in neg)
     return round(wins / (len(pos) * len(neg)), 6)
 
 
@@ -642,16 +651,16 @@ def _axis_thresholds(
     hard_veto: bool,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     calibration = _calibration_items(items, "calibration")
-    selected, diagnostics = select_vetoes(
-        calibration, axis, hard_veto=hard_veto
-    )
+    selected, diagnostics = select_vetoes(calibration, axis, hard_veto=hard_veto)
     union = diagnostics["__union__"]
     accept, accept_basis = _accept_threshold(
-        calibration, _flagged_at(calibration, selected) | (
+        calibration,
+        _flagged_at(calibration, selected)
+        | (
             {item["id"] for item in calibration if item["contradiction"]}
             if hard_veto
             else set()
-        )
+        ),
     )
     block = {
         "check_thresholds": selected,
