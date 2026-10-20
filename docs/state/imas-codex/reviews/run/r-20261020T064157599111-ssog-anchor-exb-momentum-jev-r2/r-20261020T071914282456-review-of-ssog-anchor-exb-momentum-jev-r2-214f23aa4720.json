@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-10-20T07:33:25.852Z",
+  "derivation": {
+    "added_failure_count": "derived from the reviewed run's own baseline_suite and after_suite fields, both null in .../r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/manifest.md and in its classification.json: this is an evidence-artifact node whose gate is the ssog-anchor-ab-run.py invocation, not a test-role suite, so there is no baseline or after arm to difference and the added-failure count is 0.",
+    "notes": "the reviewed gate is the per-arm runner invocation recorded in .../ssog-run/runner-jev.log, whose last line is EXIT=0, and .../ssog-run/apply-jev-momentum_flux_due_to_e_cross_b_drift.log, whose last line is EXIT=0; both were read directly."
+  },
+  "dispatched_at": "2026-10-20T07:19:55Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-jev-r2.html",
+      "line": 13,
+      "severity": "follow-on",
+      "text": "the landing narrative says the anchor was applied \"to the family's three members\", but the arm record it cites (momentum_flux_due_to_e_cross_b_drift-jev.json:135 total_touched 1, :120 halt_reasons, harmonize_summary batches_run 1 of batches_total 2) shows the harmonize halted after the first batch, so only the anchor member was touched; the fragment overstates what the record supports."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-jev.json",
+      "line": 174,
+      "severity": "follow-on",
+      "text": "neo4j_log points inside the scratch tree the same record records as removed (scratch_removed at line 229, tree /tmp/reckon-crew-scratch/.../mcintos-1281970-fb6mfs0f), so the pointer dangles and a reader cannot open the log it cites."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-jev-r2.html",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "the landing fragment's filename embeds the plan abbreviation `ssog`, which the repository naming rules forbid in a file name; the path was coordinator-assigned and the whole fragments directory carries the same prefix, so the fragment is consistent with its neighbours but still violates the rule."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the reviewed node's goal (run the jev arm of the momentum_flux_due_to_e_cross_b_drift anchor family in a scratch graph through the per-arm runner); the landed docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-jev.json:175 carries outcome_status complete with the anchor, lint before/after, every member's post-apply score, calls, spend, wall time, stamped, containment and code digest.\nVERDICT done_when: read the done_when (record holds the arm with outcome_status complete, the anchor, lint before/after, every member's documentation score after, calls, spend, wall time, stamped, containment verdict with its evidence and the code digest, written by an invocation whose log ends EXIT=0; scratch instance stopped and tree removed; spend under USD 2.00); each clause is satisfied by momentum_flux_due_to_e_cross_b_drift-jev.json and by runner-jev.log, whose last line is EXIT=0, and the scratch tree named at json:229 is absent from /tmp on this node.\nVERDICT write_paths: read the manifest's declared write paths (the arm JSON, the landing HTML under docs/evidence/fragments/sn-selection-over-generation/, and a docs/figures directory); the diff adds only the arm JSON and the landing HTML, both inside the first two paths.\nVERDICT manifest: read .../r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/manifest.md; it records status complete, one commit 214f23aa, the runner-jev.log gate ending EXIT=0, spend USD 0.602852 under both caps, and baseline_suite and after_suite both null.\nVERDICT diff: read the single commit 214f23aa against base 5cf53a7b6; it adds the 248-line arm JSON and the 44-line landing HTML, both inside the declared scope, with no production code changed.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-jev.json:175 records outcome_status complete with every field the node goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest's test_logs names runner-jev.log, whose last line is EXIT=0, and the record's figures at json:56 reconcile with the apply log's summary table.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff adds only the arm JSON and the landing HTML, both inside the manifest's declared write paths, and no production file.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no test, so nothing reddens if the arm record is deleted or corrupted, and the node declares negative_control none with the containment contrast as a within-run control, not a regression guard.\nSCORE fit: 15\nJUSTIFICATION fit: the JSON matches its sibling arm record's schema, but the landing fragment at ssog-anchor-exb-momentum-jev-r2.html:13 overstates the apply's reach and its file name at line 1 embeds the plan abbreviation ssog.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, so nothing forks a repository capability; a search over the runner and the receipt-emitting code for a receipt-schema owner found none.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-jev-r2.html:13 follow-on: the landing narrative says the anchor was applied \"to the family's three members\", but the arm record it cites (momentum_flux_due_to_e_cross_b_drift-jev.json:135 total_touched 1, :120 halt_reasons, harmonize_summary batches_run 1 of 2) shows the harmonize halted after the first batch, so only the anchor member was touched.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-jev.json:174 follow-on: neo4j_log points inside the scratch tree the same record records as removed (scratch_removed at line 229), so the pointer dangles.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-exb-momentum-jev-r2.html:1 follow-on: the landing fragment's filename embeds the plan abbreviation ssog, which the repository naming rules forbid in a file name.",
+  "review_run_id": "r-20261020T071914282456-review-of-ssog-anchor-exb-momentum-jev-r2-214f23aa4720",
+  "reviewed_base_sha": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+  "reviewed_head_sha": "214f23aa47202476b0ac4dc3deb27e2f35c7baa0",
+  "reviewed_run_id": "r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T07:33:00.000000+00:00",
+  "total": 99,
+  "verdicts": {
+    "diff": "read the single commit 214f23aa against base 5cf53a7b6; it adds the 248-line arm JSON and the 44-line landing HTML, both inside the declared scope, with no production code changed and no name the naming rules forbid in the JSON; the landing file name carries the plan abbreviation ssog.",
+    "done_when": "read the done_when (record holds the arm with outcome_status complete, the anchor, lint before/after, every member's documentation score after, calls, spend, wall time, stamped, containment verdict with its evidence and the code digest, written by an invocation whose log ends EXIT=0; scratch instance stopped and tree removed; spend under USD 2.00); each clause is satisfied by momentum_flux_due_to_e_cross_b_drift-jev.json and by runner-jev.log, whose last line is EXIT=0, and the scratch tree named at json:229 is absent from /tmp on this node.",
+    "goal": "read the reviewed node's goal (run the jev arm of the momentum_flux_due_to_e_cross_b_drift anchor family in a scratch graph through the per-arm runner); the landed docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/momentum_flux_due_to_e_cross_b_drift-jev.json:175 carries outcome_status complete with the anchor, lint before/after, every member's post-apply score, calls, spend, wall time, stamped, containment and code digest.",
+    "manifest": "read .../r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/manifest.md; it records status complete, one commit 214f23aa, the runner-jev.log gate ending EXIT=0, spend USD 0.602852 under both caps, and baseline_suite and after_suite both null.",
+    "write_paths": "read the manifest's declared write paths (the arm JSON, the landing HTML under docs/evidence/fragments/sn-selection-over-generation/, and a docs/figures directory); the diff adds only the arm JSON and the landing HTML, both inside the first two paths."
+  }
+}
