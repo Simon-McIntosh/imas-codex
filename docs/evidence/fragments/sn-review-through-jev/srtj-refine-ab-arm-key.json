@@ -1,0 +1,2819 @@
+{
+ "rows": {
+  "row-001": {
+   "cases": [
+    "power_of_divertor_due_to_ohmic_dissipation"
+   ],
+   "prior_names": [
+    "total_deposited_power_at_divertor_target_due_to_ohmic_dissipation"
+   ],
+   "arms": {
+    "comments": [
+     "power_of_divertor_due_to_ohmic_dissipation"
+    ]
+   }
+  },
+  "row-002": {
+   "cases": [
+    "power_of_divertor_due_to_ohmic_dissipation"
+   ],
+   "prior_names": [
+    "total_deposited_power_at_divertor_target_due_to_ohmic_dissipation"
+   ],
+   "arms": {
+    "checks": [
+     "power_of_divertor_due_to_ohmic_dissipation"
+    ]
+   }
+  },
+  "row-003": {
+   "cases": [
+    "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency"
+   ],
+   "prior_names": [
+    "reflected_wave_doppler_beat_frequency"
+   ],
+   "arms": {
+    "comments": [
+     "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency"
+    ]
+   }
+  },
+  "row-004": {
+   "cases": [
+    "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency"
+   ],
+   "prior_names": [
+    "reflected_wave_doppler_beat_frequency"
+   ],
+   "arms": {
+    "checks": [
+     "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency"
+    ]
+   }
+  },
+  "row-005": {
+   "cases": [
+    "plasma_pulse_confinement_time"
+   ],
+   "prior_names": [
+    "plasma_duration"
+   ],
+   "arms": {
+    "comments": [
+     "plasma_pulse_confinement_time"
+    ]
+   }
+  },
+  "row-006": {
+   "cases": [
+    "plasma_pulse_confinement_time"
+   ],
+   "prior_names": [
+    "plasma_duration"
+   ],
+   "arms": {
+    "checks": [
+     "plasma_pulse_confinement_time"
+    ]
+   }
+  },
+  "row-007": {
+   "cases": [
+    "vertical_angle_of_ferritic_element"
+   ],
+   "prior_names": [
+    "beta_angle_of_ferritic_element"
+   ],
+   "arms": {
+    "comments": [
+     "vertical_angle_of_ferritic_element"
+    ]
+   }
+  },
+  "row-008": {
+   "cases": [
+    "vertical_angle_of_ferritic_element"
+   ],
+   "prior_names": [
+    "beta_angle_of_ferritic_element"
+   ],
+   "arms": {
+    "checks": [
+     "vertical_angle_of_ferritic_element"
+    ]
+   }
+  },
+  "row-009": {
+   "cases": [
+    "total_thermal_power_density_due_to_conductive_losses"
+   ],
+   "prior_names": [
+    "thermal_plasma_power_density_due_to_conductive_losses"
+   ],
+   "arms": {
+    "comments": [
+     "total_thermal_power_density_due_to_conductive_losses"
+    ]
+   }
+  },
+  "row-010": {
+   "cases": [
+    "total_thermal_power_density_due_to_conductive_losses"
+   ],
+   "prior_names": [
+    "thermal_plasma_power_density_due_to_conductive_losses"
+   ],
+   "arms": {
+    "checks": [
+     "total_thermal_power_density_due_to_conductive_losses"
+    ]
+   }
+  },
+  "row-011": {
+   "cases": [
+    "nuclear_heating_power_of_limiter_tile"
+   ],
+   "prior_names": [
+    "total_deposited_nuclear_heating_power_of_limiter_tile"
+   ],
+   "arms": {
+    "comments": [
+     "nuclear_heating_power_of_limiter_tile"
+    ]
+   }
+  },
+  "row-012": {
+   "cases": [
+    "nuclear_heating_power_of_limiter_tile"
+   ],
+   "prior_names": [
+    "total_deposited_nuclear_heating_power_of_limiter_tile"
+   ],
+   "arms": {
+    "checks": [
+     "nuclear_heating_power_of_limiter_tile"
+    ]
+   }
+  },
+  "row-013": {
+   "cases": [
+    "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_over_inside_flux_surface"
+   ],
+   "prior_names": [
+    "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_inside_flux_surface"
+   ],
+   "arms": {
+    "comments": [
+     "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_over_inside_flux_surface"
+    ]
+   }
+  },
+  "row-014": {
+   "cases": [
+    "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_over_inside_flux_surface"
+   ],
+   "prior_names": [
+    "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_inside_flux_surface"
+   ],
+   "arms": {
+    "checks": [
+     "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_over_inside_flux_surface"
+    ]
+   }
+  },
+  "row-015": {
+   "cases": [
+    "ratio_of_deposited_power_at_divertor_target_to_total_incident_power_of_divertor"
+   ],
+   "prior_names": [
+    "incident_fraction_at_divertor_target"
+   ],
+   "arms": {
+    "checks": [
+     "ratio_of_deposited_power_at_divertor_target_to_total_incident_power_of_divertor"
+    ],
+    "comments": [
+     "ratio_of_deposited_power_at_divertor_target_to_total_incident_power_of_divertor"
+    ]
+   }
+  },
+  "row-016": {
+   "cases": [
+    "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary"
+   ],
+   "prior_names": [
+    "toroidal_flux_surface_averaged_krypton_velocity_at_plasma_boundary"
+   ],
+   "arms": {
+    "comments": [
+     "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary"
+    ]
+   }
+  },
+  "row-017": {
+   "cases": [
+    "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary"
+   ],
+   "prior_names": [
+    "toroidal_flux_surface_averaged_krypton_velocity_at_plasma_boundary"
+   ],
+   "arms": {
+    "checks": [
+     "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary"
+    ]
+   }
+  },
+  "row-018": {
+   "cases": [
+    "radial_flux_surface_averaged_metric"
+   ],
+   "prior_names": [
+    "radial_flux_surface_averaged_metric_magnitude"
+   ],
+   "arms": {
+    "comments": [
+     "radial_flux_surface_averaged_metric"
+    ]
+   }
+  },
+  "row-019": {
+   "cases": [
+    "radial_flux_surface_averaged_metric"
+   ],
+   "prior_names": [
+    "radial_flux_surface_averaged_metric_magnitude"
+   ],
+   "arms": {
+    "checks": [
+     "radial_flux_surface_averaged_metric"
+    ]
+   }
+  },
+  "row-020": {
+   "cases": [
+    "difference_of_coordinate_and_radial_coordinate_of_outboard_midplane_separatrix"
+   ],
+   "prior_names": [
+    "radial_distance_at_outboard_midplane"
+   ],
+   "arms": {
+    "comments": [
+     "difference_of_coordinate_and_radial_coordinate_of_outboard_midplane_separatrix"
+    ]
+   }
+  },
+  "row-021": {
+   "cases": [
+    "difference_of_coordinate_and_radial_coordinate_of_outboard_midplane_separatrix"
+   ],
+   "prior_names": [
+    "radial_distance_at_outboard_midplane"
+   ],
+   "arms": {
+    "checks": [
+     "difference_of_coordinate_and_radial_coordinate_of_outboard_midplane_separatrix"
+    ]
+   }
+  },
+  "row-022": {
+   "cases": [
+    "radial_coordinate_of_shatter_cone"
+   ],
+   "prior_names": [
+    "radial_coordinate_of_shattering_position"
+   ],
+   "arms": {
+    "checks": [
+     "radial_coordinate_of_shatter_cone"
+    ],
+    "comments": [
+     "radial_coordinate_of_shatter_cone"
+    ]
+   }
+  },
+  "row-023": {
+   "cases": [
+    "neutral_energy_flux_at_wall_due_to_recombination"
+   ],
+   "prior_names": [
+    "neutral_energy_flux_due_to_recombination"
+   ],
+   "arms": {
+    "comments": [
+     "neutral_energy_flux_at_wall_due_to_recombination"
+    ]
+   }
+  },
+  "row-024": {
+   "cases": [
+    "neutral_energy_flux_at_wall_due_to_recombination"
+   ],
+   "prior_names": [
+    "neutral_energy_flux_due_to_recombination"
+   ],
+   "arms": {
+    "checks": [
+     "neutral_energy_flux_at_wall_due_to_recombination"
+    ]
+   }
+  },
+  "row-025": {
+   "cases": [
+    "total_plasma_radiated_power"
+   ],
+   "prior_names": [
+    "total_radiated_power"
+   ],
+   "arms": {
+    "comments": [
+     "total_plasma_radiated_power"
+    ]
+   }
+  },
+  "row-026": {
+   "cases": [
+    "total_plasma_radiated_power"
+   ],
+   "prior_names": [
+    "total_radiated_power"
+   ],
+   "arms": {
+    "checks": [
+     "total_plasma_radiated_power"
+    ]
+   }
+  },
+  "row-027": {
+   "cases": [
+    "particle_flux_normalized_due_to_e_cross_b_drift"
+   ],
+   "prior_names": [
+    "normalized_particle_flux_due_to_e_cross_b_drift"
+   ],
+   "arms": {
+    "comments": [
+     "particle_flux_normalized_due_to_e_cross_b_drift"
+    ]
+   }
+  },
+  "row-028": {
+   "cases": [
+    "particle_flux_normalized_due_to_e_cross_b_drift"
+   ],
+   "prior_names": [
+    "normalized_particle_flux_due_to_e_cross_b_drift"
+   ],
+   "arms": {
+    "checks": [
+     "particle_flux_normalized_due_to_e_cross_b_drift"
+    ]
+   }
+  },
+  "row-029": {
+   "cases": [
+    "diameter_of_fibre_bundle"
+   ],
+   "prior_names": [
+    "viewing_width_of_line_of_sight"
+   ],
+   "arms": {
+    "comments": [
+     "diameter_of_fibre_bundle"
+    ]
+   }
+  },
+  "row-030": {
+   "cases": [
+    "diameter_of_fibre_bundle"
+   ],
+   "prior_names": [
+    "viewing_width_of_line_of_sight"
+   ],
+   "arms": {
+    "checks": [
+     "diameter_of_fibre_bundle"
+    ]
+   }
+  },
+  "row-031": {
+   "cases": [
+    "deposited_power_of_divertor_due_to_fusion"
+   ],
+   "prior_names": [
+    "nuclear_heating_power_of_divertor_due_to_fusion"
+   ],
+   "arms": {
+    "comments": [
+     "deposited_power_of_divertor_due_to_fusion"
+    ]
+   }
+  },
+  "row-032": {
+   "cases": [
+    "deposited_power_of_divertor_due_to_fusion"
+   ],
+   "prior_names": [
+    "nuclear_heating_power_of_divertor_due_to_fusion"
+   ],
+   "arms": {
+    "checks": [
+     "deposited_power_of_divertor_due_to_fusion"
+    ]
+   }
+  },
+  "row-033": {
+   "cases": [
+    "flux_surface_normal_surface_integrated_net_plasma_energy_flux_at_plasma_boundary"
+   ],
+   "prior_names": [
+    "net_power_at_plasma_boundary"
+   ],
+   "arms": {
+    "comments": [
+     "flux_surface_normal_surface_integrated_net_plasma_energy_flux_at_plasma_boundary"
+    ]
+   }
+  },
+  "row-034": {
+   "cases": [
+    "flux_surface_normal_surface_integrated_net_plasma_energy_flux_at_plasma_boundary"
+   ],
+   "prior_names": [
+    "net_power_at_plasma_boundary"
+   ],
+   "arms": {
+    "checks": [
+     "flux_surface_normal_surface_integrated_net_plasma_energy_flux_at_plasma_boundary"
+    ]
+   }
+  },
+  "row-035": {
+   "cases": [
+    "inner_outer_distance"
+   ],
+   "prior_names": [
+    "radial_inner_outer_distance_of_secondary_separatrix"
+   ],
+   "arms": {
+    "comments": [
+     "inner_outer_distance"
+    ]
+   }
+  },
+  "row-036": {
+   "cases": [
+    "inner_outer_distance"
+   ],
+   "prior_names": [
+    "radial_inner_outer_distance_of_secondary_separatrix"
+   ],
+   "arms": {
+    "checks": [
+     "inner_outer_distance"
+    ]
+   }
+  },
+  "row-037": {
+   "cases": [
+    "plasma_confinement_time"
+   ],
+   "prior_names": [
+    "plasma_duration"
+   ],
+   "arms": {
+    "comments": [
+     "plasma_confinement_time"
+    ]
+   }
+  },
+  "row-038": {
+   "cases": [
+    "plasma_confinement_time"
+   ],
+   "prior_names": [
+    "plasma_duration"
+   ],
+   "arms": {
+    "checks": [
+     "plasma_confinement_time"
+    ]
+   }
+  },
+  "row-039": {
+   "cases": [
+    "radial_distance_at_outboard_midplane"
+   ],
+   "prior_names": [
+    "radial_inner_outer_distance_of_secondary_separatrix"
+   ],
+   "arms": {
+    "comments": [
+     "radial_distance_at_outboard_midplane"
+    ]
+   }
+  },
+  "row-040": {
+   "cases": [
+    "radial_distance_at_outboard_midplane"
+   ],
+   "prior_names": [
+    "radial_inner_outer_distance_of_secondary_separatrix"
+   ],
+   "arms": {
+    "checks": [
+     "radial_distance_at_outboard_midplane"
+    ]
+   }
+  },
+  "row-041": {
+   "cases": [
+    "total_neutral_particle_source_rate_at_wall_due_to_convection"
+   ],
+   "prior_names": [
+    "neutral_particle_flow_at_wall_due_to_convection"
+   ],
+   "arms": {
+    "comments": [
+     "total_neutral_particle_source_rate_at_wall_due_to_convection"
+    ]
+   }
+  },
+  "row-042": {
+   "cases": [
+    "total_neutral_particle_source_rate_at_wall_due_to_convection"
+   ],
+   "prior_names": [
+    "neutral_particle_flow_at_wall_due_to_convection"
+   ],
+   "arms": {
+    "checks": [
+     "total_neutral_particle_source_rate_at_wall_due_to_convection"
+    ]
+   }
+  },
+  "row-043": {
+   "cases": [
+    "incident_neutron_power_of_breeder_blanket_module"
+   ],
+   "prior_names": [
+    "incident_power_of_breeder_blanket_module"
+   ],
+   "arms": {
+    "comments": [
+     "incident_neutron_power_of_breeder_blanket_module"
+    ]
+   }
+  },
+  "row-044": {
+   "cases": [
+    "incident_neutron_power_of_breeder_blanket_module"
+   ],
+   "prior_names": [
+    "incident_power_of_breeder_blanket_module"
+   ],
+   "arms": {
+    "checks": [
+     "incident_neutron_power_of_breeder_blanket_module"
+    ]
+   }
+  },
+  "row-045": {
+   "cases": [
+    "normalized_radial_gyrocenter_energy_flux_of_flux_surface_due_to_perturbed_parallel_magnetic_field"
+   ],
+   "prior_names": [
+    "normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_magnetic_field"
+   ],
+   "arms": {
+    "comments": [
+     "normalized_radial_gyrocenter_energy_flux_of_flux_surface_due_to_perturbed_parallel_magnetic_field"
+    ]
+   }
+  },
+  "row-046": {
+   "cases": [
+    "normalized_radial_gyrocenter_energy_flux_of_flux_surface_due_to_perturbed_parallel_magnetic_field"
+   ],
+   "prior_names": [
+    "normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_magnetic_field"
+   ],
+   "arms": {
+    "checks": [
+     "normalized_radial_gyrocenter_energy_flux_of_flux_surface_due_to_perturbed_parallel_magnetic_field"
+    ]
+   }
+  },
+  "row-047": {
+   "cases": [
+    "toroidal_coordinate_of_measurement_position"
+   ],
+   "prior_names": [
+    "toroidal_angle_of_line_of_sight"
+   ],
+   "arms": {
+    "comments": [
+     "toroidal_coordinate_of_measurement_position"
+    ]
+   }
+  },
+  "row-048": {
+   "cases": [
+    "toroidal_coordinate_of_measurement_position"
+   ],
+   "prior_names": [
+    "toroidal_angle_of_line_of_sight"
+   ],
+   "arms": {
+    "checks": [
+     "toroidal_coordinate_of_measurement_position"
+    ]
+   }
+  },
+  "row-049": {
+   "cases": [
+    "initial_breakdown_time"
+   ],
+   "prior_names": [
+    "breakdown_time"
+   ],
+   "arms": {
+    "comments": [
+     "initial_breakdown_time"
+    ]
+   }
+  },
+  "row-050": {
+   "cases": [
+    "initial_breakdown_time"
+   ],
+   "prior_names": [
+    "breakdown_time"
+   ],
+   "arms": {
+    "checks": [
+     "initial_breakdown_time"
+    ]
+   }
+  },
+  "row-051": {
+   "cases": [
+    "turn_count_of_poloidal_magnetic_field_probe"
+   ],
+   "prior_names": [
+    "effective_turn_count_of_coil_conductor_element"
+   ],
+   "arms": {
+    "comments": [
+     "turn_count_of_poloidal_magnetic_field_probe"
+    ]
+   }
+  },
+  "row-052": {
+   "cases": [
+    "turn_count_of_poloidal_magnetic_field_probe"
+   ],
+   "prior_names": [
+    "effective_turn_count_of_coil_conductor_element"
+   ],
+   "arms": {
+    "checks": [
+     "turn_count_of_poloidal_magnetic_field_probe"
+    ]
+   }
+  },
+  "row-053": {
+   "cases": [
+    "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function"
+   ],
+   "prior_names": [
+    "toroidal_change_in_vacuum_magnetic_field"
+   ],
+   "arms": {
+    "comments": [
+     "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function"
+    ]
+   }
+  },
+  "row-054": {
+   "cases": [
+    "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function"
+   ],
+   "prior_names": [
+    "toroidal_change_in_vacuum_magnetic_field"
+   ],
+   "arms": {
+    "checks": [
+     "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function"
+    ]
+   }
+  },
+  "row-055": {
+   "cases": [
+    "net_power"
+   ],
+   "prior_names": [
+    "net_power_of_plant_system"
+   ],
+   "arms": {
+    "comments": [
+     "net_power"
+    ]
+   }
+  },
+  "row-056": {
+   "cases": [
+    "net_power"
+   ],
+   "prior_names": [
+    "net_power_of_plant_system"
+   ],
+   "arms": {
+    "checks": [
+     "net_power"
+    ]
+   }
+  },
+  "row-057": {
+   "cases": [
+    "energy_flux_normalized_due_to_e_cross_b_drift"
+   ],
+   "prior_names": [
+    "normalized_energy_flux_due_to_e_cross_b_drift"
+   ],
+   "arms": {
+    "comments": [
+     "energy_flux_normalized_due_to_e_cross_b_drift"
+    ]
+   }
+  },
+  "row-058": {
+   "cases": [
+    "energy_flux_normalized_due_to_e_cross_b_drift"
+   ],
+   "prior_names": [
+    "normalized_energy_flux_due_to_e_cross_b_drift"
+   ],
+   "arms": {
+    "checks": [
+     "energy_flux_normalized_due_to_e_cross_b_drift"
+    ]
+   }
+  },
+  "row-059": {
+   "cases": [
+    "effective_charge_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "prior_names": [
+    "flux_surface_averaged_effective_charge_at_plasma_boundary"
+   ],
+   "arms": {
+    "comments": [
+     "effective_charge_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  "row-060": {
+   "cases": [
+    "effective_charge_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "prior_names": [
+    "flux_surface_averaged_effective_charge_at_plasma_boundary"
+   ],
+   "arms": {
+    "checks": [
+     "effective_charge_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  "row-061": {
+   "cases": [
+    "poloidal_magnetic_flux_at_minimum_absolute_safety_factor"
+   ],
+   "prior_names": [
+    "poloidal_magnetic_flux_at_minimum_safety_factor"
+   ],
+   "arms": {
+    "comments": [
+     "poloidal_magnetic_flux_at_minimum_absolute_safety_factor"
+    ]
+   }
+  },
+  "row-062": {
+   "cases": [
+    "poloidal_magnetic_flux_at_minimum_absolute_safety_factor"
+   ],
+   "prior_names": [
+    "poloidal_magnetic_flux_at_minimum_safety_factor"
+   ],
+   "arms": {
+    "checks": [
+     "poloidal_magnetic_flux_at_minimum_absolute_safety_factor"
+    ]
+   }
+  },
+  "row-063": {
+   "cases": [
+    "total_particle_source_rate_at_wall_due_to_gas_injection"
+   ],
+   "prior_names": [
+    "gas_source_rate_at_wall"
+   ],
+   "arms": {
+    "comments": [
+     "total_particle_source_rate_at_wall_due_to_gas_injection"
+    ]
+   }
+  },
+  "row-064": {
+   "cases": [
+    "total_particle_source_rate_at_wall_due_to_gas_injection"
+   ],
+   "prior_names": [
+    "gas_source_rate_at_wall"
+   ],
+   "arms": {
+    "checks": [
+     "total_particle_source_rate_at_wall_due_to_gas_injection"
+    ]
+   }
+  },
+  "row-065": {
+   "cases": [
+    "surface_thickness_of_breeder_blanket_module"
+   ],
+   "prior_names": [
+    "thickness_of_breeder_blanket"
+   ],
+   "arms": {
+    "comments": [
+     "surface_thickness_of_breeder_blanket_module"
+    ]
+   }
+  },
+  "row-066": {
+   "cases": [
+    "surface_thickness_of_breeder_blanket_module"
+   ],
+   "prior_names": [
+    "thickness_of_breeder_blanket"
+   ],
+   "arms": {
+    "checks": [
+     "surface_thickness_of_breeder_blanket_module"
+    ]
+   }
+  },
+  "row-067": {
+   "cases": [
+    "radiated_power_at_wall_due_to_surface_emission"
+   ],
+   "prior_names": [
+    "thermal_power_of_wall_material_due_to_radiation_emission"
+   ],
+   "arms": {
+    "comments": [
+     "radiated_power_at_wall_due_to_surface_emission"
+    ]
+   }
+  },
+  "row-068": {
+   "cases": [
+    "radiated_power_at_wall_due_to_surface_emission"
+   ],
+   "prior_names": [
+    "thermal_power_of_wall_material_due_to_radiation_emission"
+   ],
+   "arms": {
+    "checks": [
+     "radiated_power_at_wall_due_to_surface_emission"
+    ]
+   }
+  },
+  "row-069": {
+   "cases": [
+    "lithium_volume_of_breeder_blanket"
+   ],
+   "prior_names": [
+    "volume_of_breeder_blanket"
+   ],
+   "arms": {
+    "comments": [
+     "lithium_volume_of_breeder_blanket"
+    ]
+   }
+  },
+  "row-070": {
+   "cases": [
+    "lithium_volume_of_breeder_blanket"
+   ],
+   "prior_names": [
+    "volume_of_breeder_blanket"
+   ],
+   "arms": {
+    "checks": [
+     "lithium_volume_of_breeder_blanket"
+    ]
+   }
+  },
+  "row-071": {
+   "cases": [
+    "flux_surface_normal_magnetic_vector_potential"
+   ],
+   "prior_names": [
+    "radial_ion_state_momentum_flux"
+   ],
+   "arms": {
+    "comments": [
+     "flux_surface_normal_magnetic_vector_potential"
+    ]
+   }
+  },
+  "row-072": {
+   "cases": [
+    "flux_surface_normal_magnetic_vector_potential"
+   ],
+   "prior_names": [
+    "radial_ion_state_momentum_flux"
+   ],
+   "arms": {
+    "checks": [
+     "flux_surface_normal_magnetic_vector_potential"
+    ]
+   }
+  },
+  "row-073": {
+   "cases": [
+    "neutron_flux_maximum_at_first_wall"
+   ],
+   "prior_names": [
+    "maximum_of_neutron_flux"
+   ],
+   "arms": {
+    "comments": [
+     "neutron_flux_maximum_at_first_wall"
+    ]
+   }
+  },
+  "row-074": {
+   "cases": [
+    "neutron_flux_maximum_at_first_wall"
+   ],
+   "prior_names": [
+    "maximum_of_neutron_flux"
+   ],
+   "arms": {
+    "checks": [
+     "neutron_flux_maximum_at_first_wall"
+    ]
+   }
+  },
+  "row-075": {
+   "cases": [
+    "ion_state_average_charge"
+   ],
+   "prior_names": [
+    "ion_charge_state_average_charge"
+   ],
+   "arms": {
+    "comments": [
+     "ion_state_average_charge"
+    ]
+   }
+  },
+  "row-076": {
+   "cases": [
+    "ion_state_average_charge"
+   ],
+   "prior_names": [
+    "ion_charge_state_average_charge"
+   ],
+   "arms": {
+    "checks": [
+     "ion_state_average_charge"
+    ]
+   }
+  },
+  "row-077": {
+   "cases": [
+    "initial_polarization_ellipticity_of_wave_beam"
+   ],
+   "prior_names": [
+    "initial_ellipticity_at_line_of_sight"
+   ],
+   "arms": {
+    "comments": [
+     "initial_polarization_ellipticity_of_wave_beam"
+    ]
+   }
+  },
+  "row-078": {
+   "cases": [
+    "initial_polarization_ellipticity_of_wave_beam"
+   ],
+   "prior_names": [
+    "initial_ellipticity_at_line_of_sight"
+   ],
+   "arms": {
+    "checks": [
+     "initial_polarization_ellipticity_of_wave_beam"
+    ]
+   }
+  },
+  "row-079": {
+   "cases": [
+    "tilt_angle_of_plasma_filament"
+   ],
+   "prior_names": [
+    "vertical_angle_of_plasma_filament"
+   ],
+   "arms": {
+    "comments": [
+     "tilt_angle_of_plasma_filament"
+    ]
+   }
+  },
+  "row-080": {
+   "cases": [
+    "tilt_angle_of_plasma_filament"
+   ],
+   "prior_names": [
+    "vertical_angle_of_plasma_filament"
+   ],
+   "arms": {
+    "checks": [
+     "tilt_angle_of_plasma_filament"
+    ]
+   }
+  },
+  "row-081": {
+   "cases": [
+    "ratio_of_volume_averaged_lithium_density_to_volume_averaged_electron_density"
+   ],
+   "prior_names": [
+    "ratio_of_volume_averaged_lithium_density_to_electron_density"
+   ],
+   "arms": {
+    "comments": [
+     "ratio_of_volume_averaged_lithium_density_to_volume_averaged_electron_density"
+    ]
+   }
+  },
+  "row-082": {
+   "cases": [
+    "ratio_of_volume_averaged_lithium_density_to_volume_averaged_electron_density"
+   ],
+   "prior_names": [
+    "ratio_of_volume_averaged_lithium_density_to_electron_density"
+   ],
+   "arms": {
+    "checks": [
+     "ratio_of_volume_averaged_lithium_density_to_volume_averaged_electron_density"
+    ]
+   }
+  },
+  "row-083": {
+   "cases": [
+    "power_due_to_fusion_reactions"
+   ],
+   "prior_names": [
+    "total_neutron_flux_due_to_fusion"
+   ],
+   "arms": {
+    "comments": [
+     "power_due_to_fusion_reactions"
+    ]
+   }
+  },
+  "row-084": {
+   "cases": [
+    "power_due_to_fusion_reactions"
+   ],
+   "prior_names": [
+    "total_neutron_flux_due_to_fusion"
+   ],
+   "arms": {
+    "checks": [
+     "power_due_to_fusion_reactions"
+    ]
+   }
+  },
+  "row-085": {
+   "cases": [
+    "nuclear_heating_power_of_breeder_blanket_module"
+   ],
+   "prior_names": [
+    "total_neutron_power_of_breeder_blanket_module"
+   ],
+   "arms": {
+    "comments": [
+     "nuclear_heating_power_of_breeder_blanket_module"
+    ]
+   }
+  },
+  "row-086": {
+   "cases": [
+    "nuclear_heating_power_of_breeder_blanket_module"
+   ],
+   "prior_names": [
+    "total_neutron_power_of_breeder_blanket_module"
+   ],
+   "arms": {
+    "checks": [
+     "nuclear_heating_power_of_breeder_blanket_module"
+    ]
+   }
+  },
+  "row-087": {
+   "cases": [
+    "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field"
+   ],
+   "prior_names": [
+    "normalized_energy_flux_due_to_perturbed_parallel_magnetic_field"
+   ],
+   "arms": {
+    "comments": [
+     "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field"
+    ]
+   }
+  },
+  "row-088": {
+   "cases": [
+    "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field"
+   ],
+   "prior_names": [
+    "normalized_energy_flux_due_to_perturbed_parallel_magnetic_field"
+   ],
+   "arms": {
+    "checks": [
+     "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field"
+    ]
+   }
+  },
+  "row-089": {
+   "cases": [
+    "launched_wave_reference_frequency"
+   ],
+   "prior_names": [
+    "initial_launched_wave_frequency"
+   ],
+   "arms": {
+    "comments": [
+     "launched_wave_reference_frequency"
+    ]
+   }
+  },
+  "row-090": {
+   "cases": [
+    "launched_wave_reference_frequency"
+   ],
+   "prior_names": [
+    "initial_launched_wave_frequency"
+   ],
+   "arms": {
+    "checks": [
+     "launched_wave_reference_frequency"
+    ]
+   }
+  },
+  "row-091": {
+   "cases": [
+    "effective_turn_count_of_coil_conductor_element"
+   ],
+   "prior_names": [
+    "turn_count_of_toroidal_magnetic_field_probe"
+   ],
+   "arms": {
+    "comments": [
+     "effective_turn_count_of_coil_conductor_element"
+    ]
+   }
+  },
+  "row-092": {
+   "cases": [
+    "effective_turn_count_of_coil_conductor_element"
+   ],
+   "prior_names": [
+    "turn_count_of_toroidal_magnetic_field_probe"
+   ],
+   "arms": {
+    "checks": [
+     "effective_turn_count_of_coil_conductor_element"
+    ]
+   }
+  },
+  "row-093": {
+   "cases": [
+    "volume_averaged_runaway_electron_kinetic_energy_density"
+   ],
+   "prior_names": [
+    "volume_averaged_energy_density"
+   ],
+   "arms": {
+    "comments": [
+     "volume_averaged_runaway_electron_kinetic_energy_density"
+    ]
+   }
+  },
+  "row-094": {
+   "cases": [
+    "volume_averaged_runaway_electron_kinetic_energy_density"
+   ],
+   "prior_names": [
+    "volume_averaged_energy_density"
+   ],
+   "arms": {
+    "checks": [
+     "volume_averaged_runaway_electron_kinetic_energy_density"
+    ]
+   }
+  }
+ },
+ "identical_output_pairs": 2,
+ "cases_in_sheet": [
+  "power_of_divertor_due_to_ohmic_dissipation",
+  "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency",
+  "flux_surface_averaged_metric",
+  "plasma_pulse_confinement_time",
+  "poloidal_breakdown_stray_magnetic_field_magnitude",
+  "vertical_angle_of_ferritic_element",
+  "field_aligned_power_over_halo_region_due_to_conduction",
+  "fluctuating_floating_electrostatic_potential",
+  "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
+  "normalized_molecular_gas_count",
+  "total_thermal_power_density_due_to_conductive_losses",
+  "spectral_factor_of_spectrometer_channel",
+  "nuclear_heating_power_of_limiter_tile",
+  "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_over_inside_flux_surface",
+  "normalized_radial_gyrocenter_energy_flux_due_to_perturbed_parallel_magnetic_field",
+  "viewing_diameter_of_line_of_sight",
+  "ratio_of_deposited_power_at_divertor_target_to_total_incident_power_of_divertor",
+  "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+  "initial_wave_stokes_parameter_at_line_of_sight",
+  "radial_flux_surface_averaged_metric",
+  "plasma_pulse_duration",
+  "stray_magnetic_field",
+  "inverse_of_curvature_of_iron_core_segment",
+  "net_coefficient_due_to_neoclassical_tearing_mode",
+  "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+  "difference_of_coordinate_and_radial_coordinate_of_outboard_midplane_separatrix",
+  "radial_coordinate_of_shatter_cone",
+  "neutral_energy_flux_at_wall_due_to_recombination",
+  "total_plasma_radiated_power",
+  "volume_of_breeder_blanket",
+  "particle_flux_normalized_due_to_e_cross_b_drift",
+  "diameter_of_fibre_bundle",
+  "effective_wave_current_of_antenna_strap",
+  "deposited_power_of_divertor_due_to_fusion",
+  "flux_surface_normal_surface_integrated_net_plasma_energy_flux_at_plasma_boundary",
+  "inner_outer_distance",
+  "plasma_confinement_time",
+  "tendency_of_diamagnetic_energy",
+  "non_axisymmetric_current_of_coil_conductor",
+  "linear_mhd_mode_frequency_real_part",
+  "z_direction_unit_vector_of_sensor",
+  "radial_distance_at_outboard_midplane",
+  "total_neutral_particle_source_rate_at_wall_due_to_convection",
+  "time_derivative_of_count_at_detector_pixel",
+  "incident_neutron_power_of_breeder_blanket_module",
+  "ion_charge_state_average_charge",
+  "normalized_radial_gyrocenter_energy_flux_of_flux_surface_due_to_perturbed_parallel_magnetic_field",
+  "toroidal_coordinate_of_measurement_position",
+  "total_thermal_radiative_power_of_divertor_target",
+  "difference_of_magnetic_flux_and_toroidal_magnetic_flux",
+  "initial_breakdown_time",
+  "turn_count_of_poloidal_magnetic_field_probe",
+  "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+  "root_mean_square_of_fluctuating_floating_electrostatic_potential",
+  "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+  "net_power",
+  "total_ion_particle_flux_at_wall_due_to_surface_emission",
+  "spectral_etendue_of_soft_xray_detector",
+  "ratio_of_volume_to_volume_of_passive_structure",
+  "energy_flux_normalized_due_to_e_cross_b_drift",
+  "volume_averaged_linear_electron_decay_time_due_to_disruption",
+  "neutral_beam_absorbed_power",
+  "effective_charge_flux_surface_averaged_at_plasma_boundary",
+  "poloidal_perturbed_suprathermal_electron_angle_at_measurement_position",
+  "poloidal_magnetic_flux_at_minimum_absolute_safety_factor",
+  "deposited_energy_of_plasma_facing_component",
+  "surface_area_of_langmuir_probe",
+  "total_particle_source_rate_at_wall_due_to_gas_injection",
+  "plasma_viewing_height_of_spectrometer_channel",
+  "surface_thickness_of_breeder_blanket_module",
+  "vertical_perturbed_beam_tilt_angle_of_neutral_beam_injector",
+  "poloidal_effective_ion_diffusion_coefficient",
+  "initial_launched_wave_frequency",
+  "poloidal_magnetic_field_of_poloidal_magnetic_field_probe",
+  "radial_outline_of_conductor_cross_section",
+  "toroidal_torque_of_neoclassical_tearing_mode",
+  "ratio_of_neutron_flux_to_neutron_source_rate",
+  "heat_power_of_divertor",
+  "radiated_power_at_wall_due_to_surface_emission",
+  "spectral_surface_curvature_of_optical_element",
+  "lithium_volume_of_breeder_blanket",
+  "flux_surface_normal_magnetic_vector_potential",
+  "radial_normalized_wave_vector",
+  "neutron_flux_maximum_at_first_wall",
+  "ion_mass",
+  "ion_state_average_charge",
+  "initial_polarization_ellipticity_of_wave_beam",
+  "trapped_particle_fraction",
+  "tilt_angle_of_plasma_filament",
+  "toroidal_linear_mode_reference_phase",
+  "ratio_of_plasma_velocity_to_ion_sonic_speed",
+  "ratio_of_volume_averaged_lithium_density_to_volume_averaged_electron_density",
+  "power_due_to_fusion_reactions",
+  "nuclear_heating_power_of_breeder_blanket_module",
+  "toroidal_plasma_torque",
+  "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+  "line_integrated_opacity_at_ece_channel_emission_position",
+  "particle_probability",
+  "launched_wave_reference_frequency",
+  "flux_surface_trapped_particle_fraction",
+  "effective_turn_count_of_coil_conductor_element",
+  "volume_averaged_runaway_electron_kinetic_energy_density",
+  "coolant_delay_of_plant_component_port_due_to_convection",
+  "total_incident_thermal_power_at_inlet"
+ ],
+ "cases_incomplete": {
+  "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate": "empty_name",
+  "difference_of_x1_coordinate_and_reference_x1_coordinate_of_electron_cyclotron_launcher_mirror": "error:LLMStructuredCallError",
+  "radial_edge_electron_effective_energy_convection_velocity": "empty_name",
+  "ratio_of_atomic_count_to_molecular_neutral_species_count": "empty_name",
+  "tilt_angle_of_wave_beam": "empty_name",
+  "normalized_toroidal_hard_xray_peak_external_half_width": "empty_name",
+  "calibration_spectral_coefficient_of_line_of_sight": "error:LLMStructuredCallError",
+  "toroidal_pulse_maximum_runaway_electron_current": "empty_name",
+  "beta_angle_of_ferritic_element": "empty_name",
+  "ratio_of_critical_bootstrap_pedestal_alpha_factor_to_measured_bootstrap_pedestal_alpha_factor": "empty_name",
+  "plasma_power_density_at_wall_due_to_conductive_losses": "empty_name",
+  "steady_state_total_plasma_deposited_power_due_to_heating": "empty_name",
+  "accumulated_thermal_coolant_absorbed_energy_of_calorimetry_component": "empty_name",
+  "electron_density_at_along_pellet_path": "error:LLMStructuredCallError",
+  "per_toroidal_mode_power": "empty_name",
+  "difference_of_coordinate_and_vertical_coordinate_of_measurement_position": "empty_name"
+ },
+ "cases_without_dd_source": [
+  "flux_surface_averaged_metric",
+  "poloidal_breakdown_stray_magnetic_field_magnitude",
+  "field_aligned_power_over_halo_region_due_to_conduction",
+  "fluctuating_floating_electrostatic_potential",
+  "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
+  "normalized_molecular_gas_count",
+  "spectral_factor_of_spectrometer_channel",
+  "normalized_radial_gyrocenter_energy_flux_due_to_perturbed_parallel_magnetic_field",
+  "viewing_diameter_of_line_of_sight",
+  "initial_wave_stokes_parameter_at_line_of_sight",
+  "plasma_pulse_duration",
+  "stray_magnetic_field",
+  "inverse_of_curvature_of_iron_core_segment",
+  "net_coefficient_due_to_neoclassical_tearing_mode",
+  "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+  "volume_of_breeder_blanket",
+  "effective_wave_current_of_antenna_strap",
+  "tendency_of_diamagnetic_energy",
+  "non_axisymmetric_current_of_coil_conductor",
+  "linear_mhd_mode_frequency_real_part",
+  "z_direction_unit_vector_of_sensor",
+  "time_derivative_of_count_at_detector_pixel",
+  "ion_charge_state_average_charge",
+  "total_thermal_radiative_power_of_divertor_target",
+  "difference_of_magnetic_flux_and_toroidal_magnetic_flux",
+  "root_mean_square_of_fluctuating_floating_electrostatic_potential",
+  "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+  "total_ion_particle_flux_at_wall_due_to_surface_emission",
+  "spectral_etendue_of_soft_xray_detector",
+  "ratio_of_volume_to_volume_of_passive_structure",
+  "volume_averaged_linear_electron_decay_time_due_to_disruption",
+  "neutral_beam_absorbed_power",
+  "poloidal_perturbed_suprathermal_electron_angle_at_measurement_position",
+  "deposited_energy_of_plasma_facing_component",
+  "surface_area_of_langmuir_probe",
+  "plasma_viewing_height_of_spectrometer_channel",
+  "vertical_perturbed_beam_tilt_angle_of_neutral_beam_injector",
+  "poloidal_effective_ion_diffusion_coefficient",
+  "initial_launched_wave_frequency",
+  "poloidal_magnetic_field_of_poloidal_magnetic_field_probe",
+  "radial_outline_of_conductor_cross_section",
+  "toroidal_torque_of_neoclassical_tearing_mode",
+  "ratio_of_neutron_flux_to_neutron_source_rate",
+  "heat_power_of_divertor",
+  "spectral_surface_curvature_of_optical_element",
+  "radial_normalized_wave_vector",
+  "ion_mass",
+  "trapped_particle_fraction",
+  "toroidal_linear_mode_reference_phase",
+  "ratio_of_plasma_velocity_to_ion_sonic_speed",
+  "toroidal_plasma_torque",
+  "line_integrated_opacity_at_ece_channel_emission_position",
+  "particle_probability",
+  "flux_surface_trapped_particle_fraction",
+  "coolant_delay_of_plant_component_port_due_to_convection",
+  "total_incident_thermal_power_at_inlet"
+ ],
+ "sheet_seed": 20261020,
+ "cohort_seed": 20261018,
+ "contributing_cases": [
+  "deposited_power_of_divertor_due_to_fusion",
+  "diameter_of_fibre_bundle",
+  "difference_of_coordinate_and_radial_coordinate_of_outboard_midplane_separatrix",
+  "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency",
+  "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+  "effective_charge_flux_surface_averaged_at_plasma_boundary",
+  "effective_turn_count_of_coil_conductor_element",
+  "energy_flux_normalized_due_to_e_cross_b_drift",
+  "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+  "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+  "flux_surface_normal_magnetic_vector_potential",
+  "flux_surface_normal_surface_integrated_net_plasma_energy_flux_at_plasma_boundary",
+  "incident_neutron_power_of_breeder_blanket_module",
+  "initial_breakdown_time",
+  "initial_polarization_ellipticity_of_wave_beam",
+  "inner_outer_distance",
+  "ion_state_average_charge",
+  "launched_wave_reference_frequency",
+  "lithium_volume_of_breeder_blanket",
+  "net_power",
+  "neutral_energy_flux_at_wall_due_to_recombination",
+  "neutron_flux_maximum_at_first_wall",
+  "normalized_radial_gyrocenter_energy_flux_of_flux_surface_due_to_perturbed_parallel_magnetic_field",
+  "nuclear_heating_power_of_breeder_blanket_module",
+  "nuclear_heating_power_of_limiter_tile",
+  "particle_flux_normalized_due_to_e_cross_b_drift",
+  "plasma_confinement_time",
+  "plasma_pulse_confinement_time",
+  "poloidal_magnetic_flux_at_minimum_absolute_safety_factor",
+  "power_due_to_fusion_reactions",
+  "power_of_divertor_due_to_ohmic_dissipation",
+  "radial_coordinate_of_shatter_cone",
+  "radial_distance_at_outboard_midplane",
+  "radial_flux_surface_averaged_metric",
+  "radiated_power_at_wall_due_to_surface_emission",
+  "ratio_of_deposited_power_at_divertor_target_to_total_incident_power_of_divertor",
+  "ratio_of_electron_temperature_to_volume_averaged_electron_temperature_over_inside_flux_surface",
+  "ratio_of_volume_averaged_lithium_density_to_volume_averaged_electron_density",
+  "surface_thickness_of_breeder_blanket_module",
+  "tilt_angle_of_plasma_filament",
+  "toroidal_coordinate_of_measurement_position",
+  "total_neutral_particle_source_rate_at_wall_due_to_convection",
+  "total_particle_source_rate_at_wall_due_to_gas_injection",
+  "total_plasma_radiated_power",
+  "total_thermal_power_density_due_to_conductive_losses",
+  "turn_count_of_poloidal_magnetic_field_probe",
+  "vertical_angle_of_ferritic_element",
+  "volume_averaged_runaway_electron_kinetic_energy_density"
+ ],
+ "source_lookup_missing_cases": [
+  {
+   "case": "difference_of_x1_coordinate_and_reference_x1_coordinate_of_electron_cyclotron_launcher_mirror",
+   "ancestor": "offset_of_electron_cyclotron_launcher_mirror",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; projection-only dd:ec_launchers/mirror/movement/translation is not provenance",
+   "identities": [
+    {
+     "nid": "difference_of_x1_coordinate_and_reference_x1_coordinate_of_electron_cyclotron_launcher_mirror",
+     "name_id": "difference_of_x1_coordinate_and_reference_x1_coordinate_of_electron_cyclotron_launcher_mirror",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "offset_of_electron_cyclotron_launcher_mirror",
+     "name_id": "offset_of_electron_cyclotron_launcher_mirror",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "radial_edge_electron_effective_energy_convection_velocity",
+   "ancestor": "radial_electron_energy_convection_velocity",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "radial_edge_electron_effective_energy_convection_velocity",
+     "name_id": "radial_edge_electron_effective_energy_convection_velocity",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "radial_electron_energy_convection_velocity",
+     "name_id": "radial_electron_energy_convection_velocity",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "flux_surface_averaged_metric",
+   "ancestor": "radial_flux_surface_averaged_metric",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "flux_surface_averaged_metric",
+     "name_id": "flux_surface_averaged_metric",
+     "status": "superseded",
+     "sources": [
+      "derived:flux_surface_averaged_metric"
+     ]
+    },
+    {
+     "nid": "radial_flux_surface_averaged_metric",
+     "name_id": "radial_flux_surface_averaged_metric",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "poloidal_breakdown_stray_magnetic_field_magnitude",
+   "ancestor": "perpendicular_magnetic_field",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "poloidal_breakdown_stray_magnetic_field_magnitude",
+     "name_id": "poloidal_breakdown_stray_magnetic_field_magnitude",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "perpendicular_magnetic_field",
+     "name_id": "perpendicular_magnetic_field",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "field_aligned_power_over_halo_region_due_to_conduction",
+   "ancestor": "power_over_halo_region",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "field_aligned_power_over_halo_region_due_to_conduction",
+     "name_id": "field_aligned_power_over_halo_region_due_to_conduction",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "power_over_halo_region",
+     "name_id": "power_over_halo_region",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "fluctuating_floating_electrostatic_potential",
+   "ancestor": "fluctuating_floating_electrostatic_potential_amplitude",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "fluctuating_floating_electrostatic_potential",
+     "name_id": "fluctuating_floating_electrostatic_potential",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "fluctuating_floating_electrostatic_potential_amplitude",
+     "name_id": "fluctuating_floating_electrostatic_potential_amplitude",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
+   "ancestor": "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
+     "name_id": "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+     "name_id": "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "normalized_molecular_gas_count",
+   "ancestor": "normalized_atomic_count_of_pellet",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "normalized_molecular_gas_count",
+     "name_id": "normalized_molecular_gas_count",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "normalized_atomic_count_of_pellet",
+     "name_id": "normalized_atomic_count_of_pellet",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "spectral_factor_of_spectrometer_channel",
+   "ancestor": "spectral_instrument_function_of_spectrometer_channel",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "spectral_factor_of_spectrometer_channel",
+     "name_id": "spectral_factor_of_spectrometer_channel",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "spectral_instrument_function_of_spectrometer_channel",
+     "name_id": "spectral_instrument_function_of_spectrometer_channel",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "normalized_radial_gyrocenter_energy_flux_due_to_perturbed_parallel_magnetic_field",
+   "ancestor": "normalized_energy_flux_due_to_perturbed_parallel_magnetic_field",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "normalized_radial_gyrocenter_energy_flux_due_to_perturbed_parallel_magnetic_field",
+     "name_id": "normalized_radial_gyrocenter_energy_flux_due_to_perturbed_parallel_magnetic_field",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "normalized_energy_flux_due_to_perturbed_parallel_magnetic_field",
+     "name_id": "normalized_energy_flux_due_to_perturbed_parallel_magnetic_field",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "viewing_diameter_of_line_of_sight",
+   "ancestor": "diameter_of_line_of_sight",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "viewing_diameter_of_line_of_sight",
+     "name_id": "viewing_diameter_of_line_of_sight",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "diameter_of_line_of_sight",
+     "name_id": "diameter_of_line_of_sight",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "initial_wave_stokes_parameter_at_line_of_sight",
+   "ancestor": "initial_stokes_parameter_of_polarimeter_beam",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "initial_wave_stokes_parameter_at_line_of_sight",
+     "name_id": "initial_wave_stokes_parameter_at_line_of_sight",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "initial_stokes_parameter_of_polarimeter_beam",
+     "name_id": "initial_stokes_parameter_of_polarimeter_beam",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "plasma_pulse_duration",
+   "ancestor": "plasma_confinement_time",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "plasma_pulse_duration",
+     "name_id": "plasma_pulse_duration",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "plasma_confinement_time",
+     "name_id": "plasma_confinement_time",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "stray_magnetic_field",
+   "ancestor": "stray_magnetic_field_magnitude",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "stray_magnetic_field",
+     "name_id": "stray_magnetic_field",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "stray_magnetic_field_magnitude",
+     "name_id": "stray_magnetic_field_magnitude",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "inverse_of_curvature_of_iron_core_segment",
+   "ancestor": "radius_of_iron_core_segment",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "inverse_of_curvature_of_iron_core_segment",
+     "name_id": "inverse_of_curvature_of_iron_core_segment",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "radius_of_iron_core_segment",
+     "name_id": "radius_of_iron_core_segment",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "net_coefficient_due_to_neoclassical_tearing_mode",
+   "ancestor": "coefficient_of_neoclassical_tearing_mode",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "net_coefficient_due_to_neoclassical_tearing_mode",
+     "name_id": "net_coefficient_due_to_neoclassical_tearing_mode",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "coefficient_of_neoclassical_tearing_mode",
+     "name_id": "coefficient_of_neoclassical_tearing_mode",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+   "ancestor": "total_energy",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+     "name_id": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "total_energy",
+     "name_id": "total_energy",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "volume_of_breeder_blanket",
+   "ancestor": "total_coolant_volume_of_breeder_blanket",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "volume_of_breeder_blanket",
+     "name_id": "volume_of_breeder_blanket",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "total_coolant_volume_of_breeder_blanket",
+     "name_id": "total_coolant_volume_of_breeder_blanket",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "effective_wave_current_of_antenna_strap",
+   "ancestor": "current_of_antenna_strap_amplitude",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "effective_wave_current_of_antenna_strap",
+     "name_id": "effective_wave_current_of_antenna_strap",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "current_of_antenna_strap_amplitude",
+     "name_id": "current_of_antenna_strap_amplitude",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "tilt_angle_of_wave_beam",
+   "ancestor": "angle_of_beam_tracing_beam",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "tilt_angle_of_wave_beam",
+     "name_id": "tilt_angle_of_wave_beam",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "angle_of_beam_tracing_beam",
+     "name_id": "angle_of_beam_tracing_beam",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "tendency_of_diamagnetic_energy",
+   "ancestor": "total_diamagnetic_stored_power",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "tendency_of_diamagnetic_energy",
+     "name_id": "tendency_of_diamagnetic_energy",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "total_diamagnetic_stored_power",
+     "name_id": "total_diamagnetic_stored_power",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "non_axisymmetric_current_of_coil_conductor",
+   "ancestor": "current_of_correction_coil",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "non_axisymmetric_current_of_coil_conductor",
+     "name_id": "non_axisymmetric_current_of_coil_conductor",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "current_of_correction_coil",
+     "name_id": "current_of_correction_coil",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "linear_mhd_mode_frequency_real_part",
+   "ancestor": "mode_frequency",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "linear_mhd_mode_frequency_real_part",
+     "name_id": "linear_mhd_mode_frequency_real_part",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "mode_frequency",
+     "name_id": "mode_frequency",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "z_direction_unit_vector_of_sensor",
+   "ancestor": "z_unit_vector_of_sensor",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "z_direction_unit_vector_of_sensor",
+     "name_id": "z_direction_unit_vector_of_sensor",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "z_unit_vector_of_sensor",
+     "name_id": "z_unit_vector_of_sensor",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "time_derivative_of_count_at_detector_pixel",
+   "ancestor": "tendency_of_count_at_detector_pixel",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; projection-only dd:spectrometer_x_ray_crystal/channel/frame/photon_count is not provenance",
+   "identities": [
+    {
+     "nid": "time_derivative_of_count_at_detector_pixel",
+     "name_id": "time_derivative_of_count_at_detector_pixel",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "tendency_of_count_at_detector_pixel",
+     "name_id": "tendency_of_count_at_detector_pixel",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "ion_charge_state_average_charge",
+   "ancestor": "ion_state_potential",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "ion_charge_state_average_charge",
+     "name_id": "ion_charge_state_average_charge",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "ion_state_potential",
+     "name_id": "ion_state_potential",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "normalized_toroidal_hard_xray_peak_external_half_width",
+   "ancestor": "hard_xray_peak_upper_bound_width",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "normalized_toroidal_hard_xray_peak_external_half_width",
+     "name_id": "normalized_toroidal_hard_xray_peak_external_half_width",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "hard_xray_peak_upper_bound_width",
+     "name_id": "hard_xray_peak_upper_bound_width",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "total_thermal_radiative_power_of_divertor_target",
+   "ancestor": "power_of_divertor_due_to_radiation",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "total_thermal_radiative_power_of_divertor_target",
+     "name_id": "total_thermal_radiative_power_of_divertor_target",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "power_of_divertor_due_to_radiation",
+     "name_id": "power_of_divertor_due_to_radiation",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "difference_of_magnetic_flux_and_toroidal_magnetic_flux",
+   "ancestor": "psi_star",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; projection-only dd:sawteeth/profiles_1d/psi_star_post_crash is not provenance",
+   "identities": [
+    {
+     "nid": "difference_of_magnetic_flux_and_toroidal_magnetic_flux",
+     "name_id": "difference_of_magnetic_flux_and_toroidal_magnetic_flux",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "psi_star",
+     "name_id": "psi_star",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "toroidal_pulse_maximum_runaway_electron_current",
+   "ancestor": "runaway_electron_maximum_current",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "toroidal_pulse_maximum_runaway_electron_current",
+     "name_id": "toroidal_pulse_maximum_runaway_electron_current",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "runaway_electron_maximum_current",
+     "name_id": "runaway_electron_maximum_current",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "root_mean_square_of_fluctuating_floating_electrostatic_potential",
+   "ancestor": "fluctuating_floating_electrostatic_potential",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "root_mean_square_of_fluctuating_floating_electrostatic_potential",
+     "name_id": "root_mean_square_of_fluctuating_floating_electrostatic_potential",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "fluctuating_floating_electrostatic_potential",
+     "name_id": "fluctuating_floating_electrostatic_potential",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+   "ancestor": "fast_ion_radiance_due_to_charge_exchange",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+     "name_id": "line_integrated_fast_ion_emissivity_of_spectral_line_due_to_charge_exchange",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "fast_ion_radiance_due_to_charge_exchange",
+     "name_id": "fast_ion_radiance_due_to_charge_exchange",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "total_ion_particle_flux_at_wall_due_to_surface_emission",
+   "ancestor": "ion_particle_flux_at_wall_due_to_surface_emission",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "total_ion_particle_flux_at_wall_due_to_surface_emission",
+     "name_id": "total_ion_particle_flux_at_wall_due_to_surface_emission",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "ion_particle_flux_at_wall_due_to_surface_emission",
+     "name_id": "ion_particle_flux_at_wall_due_to_surface_emission",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "spectral_etendue_of_soft_xray_detector",
+   "ancestor": "spectral_factor_of_spectrometer_channel",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "spectral_etendue_of_soft_xray_detector",
+     "name_id": "spectral_etendue_of_soft_xray_detector",
+     "status": "draft",
+     "sources": [
+      "derived:spectral_etendue_of_spectrometer_channel"
+     ]
+    },
+    {
+     "nid": "spectral_factor_of_spectrometer_channel",
+     "name_id": "spectral_factor_of_spectrometer_channel",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "ratio_of_volume_to_volume_of_passive_structure",
+   "ancestor": "volumetric_fraction",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; projection-only dd:wall/description_2d/vessel/unit/material_volume_fraction is not provenance",
+   "identities": [
+    {
+     "nid": "ratio_of_volume_to_volume_of_passive_structure",
+     "name_id": "ratio_of_volume_to_volume_of_passive_structure",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "volumetric_fraction",
+     "name_id": "volumetric_fraction",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "volume_averaged_linear_electron_decay_time_due_to_disruption",
+   "ancestor": "volume_averaged_electron_decay_time",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "volume_averaged_linear_electron_decay_time_due_to_disruption",
+     "name_id": "volume_averaged_linear_electron_decay_time_due_to_disruption",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "volume_averaged_electron_decay_time",
+     "name_id": "volume_averaged_electron_decay_time",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "neutral_beam_absorbed_power",
+   "ancestor": "power_due_to_neutral_beam_injection",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "neutral_beam_absorbed_power",
+     "name_id": "neutral_beam_absorbed_power",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "power_due_to_neutral_beam_injection",
+     "name_id": "power_due_to_neutral_beam_injection",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "poloidal_perturbed_suprathermal_electron_angle_at_measurement_position",
+   "ancestor": "poloidal_suprathermal_electron_perturbed_angle_of_ece_channel_emission_position",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "poloidal_perturbed_suprathermal_electron_angle_at_measurement_position",
+     "name_id": "poloidal_perturbed_suprathermal_electron_angle_at_measurement_position",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "poloidal_suprathermal_electron_perturbed_angle_of_ece_channel_emission_position",
+     "name_id": "poloidal_suprathermal_electron_perturbed_angle_of_ece_channel_emission_position",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "beta_angle_of_ferritic_element",
+   "ancestor": "angle_of_ferritic_element",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "beta_angle_of_ferritic_element",
+     "name_id": "beta_angle_of_ferritic_element",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "angle_of_ferritic_element",
+     "name_id": "angle_of_ferritic_element",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "ratio_of_critical_bootstrap_pedestal_alpha_factor_to_measured_bootstrap_pedestal_alpha_factor",
+   "ancestor": "critical_alpha_factor",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "ratio_of_critical_bootstrap_pedestal_alpha_factor_to_measured_bootstrap_pedestal_alpha_factor",
+     "name_id": "ratio_of_critical_bootstrap_pedestal_alpha_factor_to_measured_bootstrap_pedestal_alpha_factor",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "critical_alpha_factor",
+     "name_id": "critical_alpha_factor",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "deposited_energy_of_plasma_facing_component",
+   "ancestor": "total_energy",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "deposited_energy_of_plasma_facing_component",
+     "name_id": "deposited_energy_of_plasma_facing_component",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "total_energy",
+     "name_id": "total_energy",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "surface_area_of_langmuir_probe",
+   "ancestor": "area_of_langmuir_probe",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; projection-only dd:langmuir_probes/embedded/surface_area is not provenance",
+   "identities": [
+    {
+     "nid": "surface_area_of_langmuir_probe",
+     "name_id": "surface_area_of_langmuir_probe",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "area_of_langmuir_probe",
+     "name_id": "area_of_langmuir_probe",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "plasma_power_density_at_wall_due_to_conductive_losses",
+   "ancestor": "power_density_due_to_conduction",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "plasma_power_density_at_wall_due_to_conductive_losses",
+     "name_id": "plasma_power_density_at_wall_due_to_conductive_losses",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "power_density_due_to_conduction",
+     "name_id": "power_density_due_to_conduction",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "plasma_viewing_height_of_spectrometer_channel",
+   "ancestor": "height_at_measurement_position",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "plasma_viewing_height_of_spectrometer_channel",
+     "name_id": "plasma_viewing_height_of_spectrometer_channel",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "height_at_measurement_position",
+     "name_id": "height_at_measurement_position",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "accumulated_thermal_coolant_absorbed_energy_of_calorimetry_component",
+   "ancestor": "accumulated_thermal_energy",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "accumulated_thermal_coolant_absorbed_energy_of_calorimetry_component",
+     "name_id": "accumulated_thermal_coolant_absorbed_energy_of_calorimetry_component",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "accumulated_thermal_energy",
+     "name_id": "accumulated_thermal_energy",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "vertical_perturbed_beam_tilt_angle_of_neutral_beam_injector",
+   "ancestor": "perturbed_angle_of_neutral_beam_injector",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "vertical_perturbed_beam_tilt_angle_of_neutral_beam_injector",
+     "name_id": "vertical_perturbed_beam_tilt_angle_of_neutral_beam_injector",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "perturbed_angle_of_neutral_beam_injector",
+     "name_id": "perturbed_angle_of_neutral_beam_injector",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "poloidal_effective_ion_diffusion_coefficient",
+   "ancestor": "poloidal_total_ion_particle_diffusivity",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "poloidal_effective_ion_diffusion_coefficient",
+     "name_id": "poloidal_effective_ion_diffusion_coefficient",
+     "status": "draft",
+     "sources": []
+    },
+    {
+     "nid": "poloidal_total_ion_particle_diffusivity",
+     "name_id": "poloidal_total_ion_particle_diffusivity",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "initial_launched_wave_frequency",
+   "ancestor": "reference_frequency",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "initial_launched_wave_frequency",
+     "name_id": "initial_launched_wave_frequency",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "reference_frequency",
+     "name_id": "reference_frequency",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "poloidal_magnetic_field_of_poloidal_magnetic_field_probe",
+   "ancestor": "magnetic_field_of_poloidal_magnetic_field_probe",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "poloidal_magnetic_field_of_poloidal_magnetic_field_probe",
+     "name_id": "poloidal_magnetic_field_of_poloidal_magnetic_field_probe",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "magnetic_field_of_poloidal_magnetic_field_probe",
+     "name_id": "magnetic_field_of_poloidal_magnetic_field_probe",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "radial_outline_of_conductor_cross_section",
+   "ancestor": "radial_outline_of_passive_loop",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "radial_outline_of_conductor_cross_section",
+     "name_id": "radial_outline_of_conductor_cross_section",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "radial_outline_of_passive_loop",
+     "name_id": "radial_outline_of_passive_loop",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "toroidal_torque_of_neoclassical_tearing_mode",
+   "ancestor": "torque_due_to_neoclassical_tearing_mode",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "toroidal_torque_of_neoclassical_tearing_mode",
+     "name_id": "toroidal_torque_of_neoclassical_tearing_mode",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "torque_due_to_neoclassical_tearing_mode",
+     "name_id": "torque_due_to_neoclassical_tearing_mode",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "ratio_of_neutron_flux_to_neutron_source_rate",
+   "ancestor": "neutron_coefficient_of_neutron_detector",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; projection-only dd:neutron_diagnostic/detector/green_functions/neutron_flux is not provenance",
+   "identities": [
+    {
+     "nid": "ratio_of_neutron_flux_to_neutron_source_rate",
+     "name_id": "ratio_of_neutron_flux_to_neutron_source_rate",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "neutron_coefficient_of_neutron_detector",
+     "name_id": "neutron_coefficient_of_neutron_detector",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "heat_power_of_divertor",
+   "ancestor": "thermal_power_of_divertor",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "heat_power_of_divertor",
+     "name_id": "heat_power_of_divertor",
+     "status": "draft",
+     "sources": []
+    },
+    {
+     "nid": "thermal_power_of_divertor",
+     "name_id": "thermal_power_of_divertor",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "spectral_surface_curvature_of_optical_element",
+   "ancestor": "spectral_surface_radius_of_optical_element",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "spectral_surface_curvature_of_optical_element",
+     "name_id": "spectral_surface_curvature_of_optical_element",
+     "status": "superseded",
+     "sources": [
+      "derived:spectral_surface_curvature_of_optical_element"
+     ]
+    },
+    {
+     "nid": "spectral_surface_radius_of_optical_element",
+     "name_id": "spectral_surface_radius_of_optical_element",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "radial_normalized_wave_vector",
+   "ancestor": "normalized_radial_wave_vector",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "radial_normalized_wave_vector",
+     "name_id": "radial_normalized_wave_vector",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "normalized_radial_wave_vector",
+     "name_id": "normalized_radial_wave_vector",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "ion_mass",
+   "ancestor": "fast_ion_mass",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "ion_mass",
+     "name_id": "ion_mass",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "fast_ion_mass",
+     "name_id": "fast_ion_mass",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "trapped_particle_fraction",
+   "ancestor": "flux_surface_trapped_particle_fraction",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "trapped_particle_fraction",
+     "name_id": "trapped_particle_fraction",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "flux_surface_trapped_particle_fraction",
+     "name_id": "flux_surface_trapped_particle_fraction",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "toroidal_linear_mode_reference_phase",
+   "ancestor": "mode_phase",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "toroidal_linear_mode_reference_phase",
+     "name_id": "toroidal_linear_mode_reference_phase",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "mode_phase",
+     "name_id": "mode_phase",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "ratio_of_plasma_velocity_to_ion_sonic_speed",
+   "ancestor": "parallel_plasma_mach_number",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; projection-only dd:langmuir_probes/probe/mach_number_parallel is not provenance",
+   "identities": [
+    {
+     "nid": "ratio_of_plasma_velocity_to_ion_sonic_speed",
+     "name_id": "ratio_of_plasma_velocity_to_ion_sonic_speed",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "parallel_plasma_mach_number",
+     "name_id": "parallel_plasma_mach_number",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "toroidal_plasma_torque",
+   "ancestor": "toroidal_torque",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "toroidal_plasma_torque",
+     "name_id": "toroidal_plasma_torque",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "toroidal_torque",
+     "name_id": "toroidal_torque",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "line_integrated_opacity_at_ece_channel_emission_position",
+   "ancestor": "line_integrated_opacity",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "line_integrated_opacity_at_ece_channel_emission_position",
+     "name_id": "line_integrated_opacity_at_ece_channel_emission_position",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "line_integrated_opacity",
+     "name_id": "line_integrated_opacity",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "per_toroidal_mode_power",
+   "ancestor": "per_toroidal_mode_absorbed_power",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "per_toroidal_mode_power",
+     "name_id": "per_toroidal_mode_power",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "per_toroidal_mode_absorbed_power",
+     "name_id": "per_toroidal_mode_absorbed_power",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "particle_probability",
+   "ancestor": "normalized_particle_distribution",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "particle_probability",
+     "name_id": "particle_probability",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "normalized_particle_distribution",
+     "name_id": "normalized_particle_distribution",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "flux_surface_trapped_particle_fraction",
+   "ancestor": "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "flux_surface_trapped_particle_fraction",
+     "name_id": "flux_surface_trapped_particle_fraction",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux",
+     "name_id": "trapped_particle_fraction_at_normalized_poloidal_magnetic_flux",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "coolant_delay_of_plant_component_port_due_to_convection",
+   "ancestor": "coolant_delay",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "coolant_delay_of_plant_component_port_due_to_convection",
+     "name_id": "coolant_delay_of_plant_component_port_due_to_convection",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "coolant_delay",
+     "name_id": "coolant_delay",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "difference_of_coordinate_and_vertical_coordinate_of_measurement_position",
+   "ancestor": "z_displacement_of_neutron_detector",
+   "complete_pair": false,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "difference_of_coordinate_and_vertical_coordinate_of_measurement_position",
+     "name_id": "difference_of_coordinate_and_vertical_coordinate_of_measurement_position",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "z_displacement_of_neutron_detector",
+     "name_id": "z_displacement_of_neutron_detector",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  },
+  {
+   "case": "total_incident_thermal_power_at_inlet",
+   "ancestor": "total_heat_power_at_inlet",
+   "complete_pair": true,
+   "reason": "No DD PRODUCED_NAME provenance for either recorded identity; neither identity has a DD projection",
+   "identities": [
+    {
+     "nid": "total_incident_thermal_power_at_inlet",
+     "name_id": "total_incident_thermal_power_at_inlet",
+     "status": "superseded",
+     "sources": []
+    },
+    {
+     "nid": "total_heat_power_at_inlet",
+     "name_id": "total_heat_power_at_inlet",
+     "status": "superseded",
+     "sources": []
+    }
+   ]
+  }
+ ],
+ "input_sha256": {
+  "srtj-refine-ab-run.py": "f77f8b1b403ec7c7919a8d69c189d62b76067589a5b7c331460a4fba965fb499",
+  "srtj-refine-ab-run-results.json": "cab12260507bc541d17bd40b3b1afc4392f5d2f9a7176635c3a1cd2adc942f66"
+ }
+}
