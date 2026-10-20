@@ -14,6 +14,11 @@
       "kind": "exempted",
       "reason": "manifest wording on a landed fix whose gate logs carry the literal commands and whose declared mutation log is present",
       "recorded_at": "2026-10-20T13:34:11.826155+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "manifest wording on a landed fix whose gate logs carry the literal commands and whose declared mutation log is present",
+      "recorded_at": "2026-10-20T13:34:17.654580+00:00"
     }
   },
   "findings": [
