@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="156">
+<meta name="plan-version" content="157">
 <meta name="plan-modified" content="2026-10-21">
 </head>
 <body>
@@ -551,7 +551,10 @@
     <div class="r-comment-body"><p>an independent review of run r-20261020T204942364841-shc-locus-remeasure is stored parsed at review-records/r-20261020T204942364841-shc-locus-remeasure.json for head 98ecc656a0a065556b8b8889e156bbf73ec26f66 (base f9de429a00da2bf8039d103cf7472b29ff9d1407): scores goal_fidelity 16, evidence 13, scope_discipline 20, durability 6, fit 15, reuse 18; one blocking finding (the record omits the apply's call count, a figure the node's done-when names) and two follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261020T223736262410-review-of-shc-locus-remeasure-29131714d43c" data-who="reckon-build" data-when="2026-10-20T22:53:03.559Z">
-    <div class="r-comment-body"><p>review of shc-locus-remeasure at 29131714d: scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 7, fit 14, reuse 15; the gained commit repairs the prior blocking finding by recording the apply&#x27;s own 9 calls, verified against the live graph and by byte-identical html regeneration; four follow-on findings, no blocking finding; record at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T204942364841-shc-locus-remeasure/review-records/r-20261020T204942364841-shc-locus-remeasure.json</p></div>
+    <div class="r-comment-body"><p>review of shc-locus-remeasure at 29131714d: scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 7, fit 14, reuse 15; the gained commit repairs the prior blocking finding by recording the apply's own 9 calls, verified against the live graph and by byte-identical html regeneration; four follow-on findings, no blocking finding; record at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T204942364841-shc-locus-remeasure/review-records/r-20261020T204942364841-shc-locus-remeasure.json</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261020T204942364841-shc-locus-remeasure" data-who="reckon-build" data-when="2026-10-20T22:33:29Z">
+    <div class="r-comment-body"><p>shc-locus-remeasure: chose the non-WEST locus family electrostatic_potential (roster check 0 member matches, positive control 10) and applied it with sn harmonize --apply --cost-limit 4.00; the apply raised on a global maintenance guard (MissingStandardNameSource: vertical_coordinate_of_coil_conductor) before converging, spending USD 0.4055 of the USD 4.00 cap, leaving the family unstamped with the second dry run planning 5 calls; see docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure.html</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
