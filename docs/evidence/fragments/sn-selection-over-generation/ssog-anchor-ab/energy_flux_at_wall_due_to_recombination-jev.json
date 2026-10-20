@@ -1,0 +1,266 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "energy_flux_at_wall_due_to_recombination",
+  "applied": true,
+  "arm": "jev",
+  "budget_limit_usd": 2.0,
+  "calls": 17,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wall-recomb-jev",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wall-recomb-jev/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-19T21:06:11.472238+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 17,
+      "scratch_ledger_rows": 17,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 34
+  },
+  "cost_limit_passed_usd": 2.0,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-19T21:06:09.356453+00:00",
+  "family": "energy_flux_at_wall_due_to_recombination",
+  "harmonize_receipts": [
+    {
+      "anchor": "energy_flux_at_wall_due_to_recombination",
+      "applied": true,
+      "batches": [
+        [
+          "energy_flux_at_wall_due_to_recombination"
+        ],
+        [
+          "incident_ion_energy_flux_at_wall_due_to_recombination",
+          "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+          "ion_energy_flux_at_wall_due_to_recombination",
+          "neutral_energy_flux_at_wall_due_to_recombination"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "2635ba50115af36d9073d4bcba3bf5261b3dc4af61eaffa6839ba5dcebf4f6c1",
+      "harmonized": false,
+      "invariant": [
+        "energy",
+        "",
+        "",
+        "recombination",
+        ""
+      ],
+      "member_scores": {
+        "energy_flux_at_wall_due_to_recombination": 0.95625,
+        "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
+        "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
+        "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+      },
+      "members": [
+        "energy_flux_at_wall_due_to_recombination",
+        "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "neutral_energy_flux_at_wall_due_to_recombination"
+      ],
+      "n": 5,
+      "physical_base": "energy",
+      "planned_calls": 5,
+      "result": {
+        "batches_run": 1,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 0.00% < 90.00% (0/1 touched)"
+        ],
+        "halted": true,
+        "resume_from": 1,
+        "run_ids": [
+          "64c4d185-73ae-4675-84f1-c3e8ce1a3868"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 0,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.8457,
+        "total_quarantined": 0,
+        "total_selected": 5,
+        "total_touched": 1
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.95625,
+            "id": "energy_flux_at_wall_due_to_recombination"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 0.95625,
+            "id": "energy_flux_at_wall_due_to_recombination"
+          }
+        ]
+      },
+      "scores_after": {
+        "energy_flux_at_wall_due_to_recombination": 0.849,
+        "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
+        "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
+        "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
+        "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 1,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 0.00% < 90.00% (0/1 touched)"
+    ],
+    "halted": true,
+    "resume_from": 1,
+    "run_ids": [
+      "64c4d185-73ae-4675-84f1-c3e8ce1a3868"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 0,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.8457,
+    "total_quarantined": 0,
+    "total_selected": 5,
+    "total_touched": 1
+  },
+  "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+  "isolation": {
+    "at": "2026-10-19T20:46:44.682900+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771164,
+    "live_nodes_after": 1771164,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 17,
+    "scratch_ledger_rows": 17,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28004"
+  },
+  "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+  "kind": "subject",
+  "ledger_calls": 17,
+  "ledger_spend_usd": 0.845692,
+  "ledger_window": {
+    "ended": "2026-10-19T21:06:10.985535+00:00",
+    "started": "2026-10-19T20:46:49.994173+00:00"
+  },
+  "lint_after": 3,
+  "lint_after_classes": {
+    "link_missing_reverse": 3
+  },
+  "lint_before": 3,
+  "lint_before_classes": {
+    "link_missing_reverse": 3
+  },
+  "members": [
+    "energy_flux_at_wall_due_to_recombination",
+    "incident_ion_energy_flux_at_wall_due_to_recombination",
+    "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+    "ion_energy_flux_at_wall_due_to_recombination",
+    "neutral_energy_flux_at_wall_due_to_recombination"
+  ],
+  "neo4j_log": "/dev/shm/mcintos-1281970-2tvumh07/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.379425
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.22751300000000002
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.007343000000000001
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.124003
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.1068
+    },
+    {
+      "calls": 4,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.000608
+    }
+  ],
+  "planned_calls": 5,
+  "port": 28004,
+  "port_lock": "/dev/shm/ssog-scratch-port-28004.lock",
+  "port_lock_released": {
+    "at": "2026-10-19T21:06:24.439130+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28004.lock"
+  },
+  "recorded_anchor_before": "energy_flux_at_wall_due_to_recombination",
+  "run_ids": [
+    "64c4d185-73ae-4675-84f1-c3e8ce1a3868"
+  ],
+  "scores_after": {
+    "energy_flux_at_wall_due_to_recombination": 0.849,
+    "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
+    "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
+    "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
+    "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+  },
+  "scores_before": {
+    "energy_flux_at_wall_due_to_recombination": 0.95625,
+    "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
+    "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
+    "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
+    "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+  },
+  "scratch_removed": {
+    "at": "2026-10-19T21:06:24.439044+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/dev/shm/mcintos-1281970-2tvumh07"
+  },
+  "scratch_tree": "/dev/shm/mcintos-1281970-2tvumh07",
+  "scratch_uri": "bolt://127.0.0.1:28004",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.845692,
+  "stamped": false,
+  "started_at": "2026-10-19T20:45:08.646350+00:00",
+  "stopped_instance": {
+    "at": "2026-10-19T21:06:23.071156+00:00",
+    "tree": "/dev/shm/mcintos-1281970-2tvumh07/instance"
+  },
+  "wall_seconds": 1159.3622414609417
+}
