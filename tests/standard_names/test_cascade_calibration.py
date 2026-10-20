@@ -10,6 +10,7 @@ and per-check selection disagree.
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
@@ -118,16 +119,46 @@ def test_joint_selection_keeps_the_union_inside_its_budget(selector):
     assert len(selected) == 1
 
 
-def test_joint_selection_is_deterministic(selector):
-    """The same receipts must always yield the same cutoffs."""
-    items = _disjoint_checks_fixture(checks=4)
-    first, _ = selector(items, "name")
-    second, _ = selector(items, "name")
+@pytest.mark.timeout(600)
+@pytest.mark.skipif(
+    not cc.DEFAULT_NAME_RECEIPTS.exists() or not cc.DEFAULT_DOCS_RECEIPTS.exists(),
+    reason="frozen calibration receipts are not installed",
+)
+def test_rubric_fit_is_deterministic_from_real_frozen_receipts():
+    """Rebuild twice, including feature extraction, fitting, CV and reports."""
+    first = cc.build()
+    second = cc.build()
     assert first == second
+    assert first == json.loads(cc.THRESHOLDS_PATH.read_text())
+    for axis in ("name", "docs"):
+        block = first[axis]
+        assert set(block["rubric"]["dimensions"]) == (
+            {"grammar", "semantic", "convention", "completeness"}
+            if axis == "name"
+            else {
+                "description_quality",
+                "documentation_quality",
+                "completeness",
+                "physics_accuracy",
+            }
+        )
+        assert block["report"]["validation"]["false_veto_rate_on_accepted"] <= 0.10
+        assert block["joint_selection"]["defects_caught"] > 0
+        assert block["dropped_checks"]
+        assert block["source_sha256"]
+        assert block["report"]["validation"]["accept_precision_interval"] is not None
 
-    reversed_items = list(reversed(items))
-    third, _ = selector(reversed_items, "name")
-    assert third == first
+
+def test_dropped_checks_include_individually_admissible_checks_not_selected():
+    items = _disjoint_checks_fixture(checks=4)
+    for item in items:
+        item["split"] = "calibration"
+    selected, diagnostics = cc.select_vetoes(items, "name")
+    block = {"check_thresholds": selected, "check_diagnostics": diagnostics}
+    assert cc._dropped(items, block) == sorted(
+        set(cc._check_ids(items)) - set(selected)
+    )
+    assert len(cc._dropped(items, block)) == 3
 
 
 def test_a_missing_receipt_names_the_receipt_it_could_not_read():

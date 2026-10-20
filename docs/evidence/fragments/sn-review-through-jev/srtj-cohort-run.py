@@ -545,6 +545,9 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
             "chat_reviewer_called": False,
             "decision": None,
             "score": None,
+            "rubric_total": None,
+            "dimension_scores": {},
+            "failed_checks": [],
             "calls": 0,
             "spend_usd": 0.0,
             "wall_time_s": None,
@@ -663,6 +666,9 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
                     and bool(by_name[name]),
                     decision=states[name]["stage"],
                     score=states[name]["score"],
+                    rubric_total=route_data.get("rubric_total"),
+                    dimension_scores=route_data.get("dimension_scores", {}),
+                    failed_checks=route_data.get("failed_check_details", []),
                     calls=len(by_name[name]),
                     spend_usd=round(
                         sum(

@@ -1,0 +1,101 @@
+<section id="srtj-cascade-rubric-score">
+<h2 id="srtj-cascade-rubric-score-title">Dimension rubrics decide at the consumers’ threshold</h2>
+<p>Product, cohort runner, calibration artifact and tests are committed in <code>af511c4e8ca837479468fc5ba708a6edee6bee3f</code>.
+The original defect reproduced: <code>winning_score=1.0 winning_scores={}</code> for a direct accept review whose probability was 0.83.
+The implementation now stores four 0-to-20 dimension scores and their normalised mean, with failed-check probabilities, cutoffs and evidence.
+No consumer was changed. LLM spend was USD 0 against an authorised ceiling of USD 0; no live graph write occurred.</p>
+
+<h3 id="srtj-cascade-rubric-score-threshold">Threshold discrepancy in the brief</h3>
+<p>The brief and consumer audit describe 0.75. In the assigned base <code>c25ee01fb2c2027bd9d61f02191ba2b220d2ff05</code>,
+<code>standard_names/defaults.py</code> defines <code>DEFAULT_MIN_SCORE = 0.85</code>; the name and documentation workers explicitly pass that constant to persistence.
+The implementation imports the consumers’ actual default, 0.85, and calibrates at it. Explicit 0.65, 0.75 and 0.85 thresholds are covered by consumer-agreement tests.
+The default chat interval is [0.80, 0.85); a caller supplying 0.75 gets [0.70, 0.75).</p>
+
+<h3 id="srtj-cascade-rubric-score-mapping">Mapping and calibration</h3>
+<p>Each dimension sees only its own category probabilities and the failure probabilities of checks assigned to it by <code>ReviewCheck.dimension</code>.
+Category expectation is <code>P(best) + 0.5 × P(middle)</code>; the worst category contributes zero.
+Name categories use <code>_DIMENSION_LEVELS</code>; the three documentation category questions use <code>_DOCS_DIMENSION_CRITERIA</code>.
+Documentation physics accuracy has no category question and uses its checks. A check contributes compliance <code>1 − P(failure)</code>.
+The score is <code>score_d = 20 × sigmoid(intercept_d + offset + Σ weight_d,j × feature_d,j)</code>,
+with nonnegative feature weights, so increasing a dimension’s failure probability cannot improve its score.
+The total is <code>sum(dimension_scores) / 80</code>, the incumbent’s normalisation.</p>
+<p>The frozen receipts contain binary defensibility labels, not incumbent dimension ratings. The fits therefore calibrate each dimension’s evidence against that binary target;
+they do not claim agreement with unavailable dimension gold scores. Five-fold cross-validation groups by <code>copy_group</code> within calibration only.
+It selects the regularisation penalty from 0.001, 0.01 and 0.1 by the AUC of the mean dimension score; both axes select 0.001.
+A shared logit offset maximises the check-clear accept cohort at at least 90% precision and five items, using calibration only.
+The resulting offsets are 1.575000 for names and 2.037926 for docs; calibration accepts are 12/13 and 11/12 respectively.
+The calibration policy fixes the chat width at 0.05, one point on a 20-point scale. Validation was measured after fitting and was not used to tune these parameters.</p>
+<p>A selected veto routes to refine. If its raw rubric total would be at or above acceptance, all dimensions are scaled by the same factor to cap the total at
+<code>min_score − 0.001</code>; their relative values and exact normalised mean survive. Raw dimension scores remain in the record, so this decision ceiling is visible.
+Without a veto, the total at or above <code>min_score</code> accepts, the narrow interval below it uses the chat reviewer, and lower totals refine.
+Calibrated acceptance probability remains separate and does not decide a consumer’s stage.</p>
+<p>Failed checks include non-veto failures at the taxonomy’s 0.5 failure threshold, each marked <code>veto: false</code>; selected vetoes carry their fitted cutoff.
+A source contradiction uses the explicit choice-or-probability rule, with probability cutoff 0.30. An unsupported claim is not automatically a contradiction:
+<code>contradiction-reproduction.log</code> records the incorrect refine route for <code>contradiction_veto=False</code> and a non-support probability of 1.0,
+and the test now proves refusal only when the contradiction predicate fires.</p>
+
+<h3 id="srtj-cascade-rubric-score-budget">Choosing a veto budget inside calibration</h3>
+<p>Budgets 0, 0.01, 0.025, 0.05, 0.075 and 0.10 are evaluated on held-out calibration groups. Learned veto sets must have a pooled 95% Wilson upper false-veto bound
+at or below 10%; among qualifying sets the policy maximises defect recall, breaking ties toward the smaller budget.
+Names select 0.025: cross-validation falsely vetoes 5/140 accepted items, with interval [1.53%, 8.09%]. Refit selects
+<code>missing_required_segment</code> at 0.74 (the joint-only cutoff was 0.62), falsely vetoing 3/140 on calibration.</p>
+<p>No learned documentation veto set qualifies: the feasible 0.075 and 0.10 budgets falsely veto 9/72 and 14/72 accepted held-out calibration items.
+The policy therefore disables all learned docs vetoes and retains only the fixed contradiction rule. Its observed calibration rate is 3/72 = 4.17%,
+with interval [1.43%, 11.55%]. The zero recorded budget is for learned vetoes, not a claim that the fixed rule has zero errors or a 95% upper bound below 10%.
+On validation, the selected name rule falsely vetoes 4/126 = 3.17%; the docs rule falsely vetoes 2/74 = 2.70%.
+Both observed validation rates meet the requested 10% limit.</p>
+
+<h3 id="srtj-cascade-rubric-score-validation">Validation comparison</h3>
+<p>Names: 338 items, 126 acceptable. Documentation: 184 items, 74 acceptable. Accept intervals are nominal two-sided 95% Wilson intervals.
+Chat combines the reference router’s <code>chat_review</code> and <code>chat_below_reject</code> routes; the rubric has only <code>chat_review</code>.
+The logistic reference uses the published logistic score and reference accept/reject cutoffs with route vetoes removed; the docs scorer itself still maps explicit contradiction to zero.
+The joint-veto reference is rebuilt at its 0.10 calibration budget. Neither reference is refitted against validation.</p>
+<table id="srtj-cascade-rubric-score-validation-table"><thead><tr><th>Axis</th><th>Arm</th><th>AUC</th><th>Accept precision, count and 95% interval</th><th>Refine precision</th><th>False veto / acceptable</th><th>Accept / chat / refine counts and shares</th></tr></thead><tbody>
+<tr><td>name</td><td>Logistic, no route veto</td><td>0.745246</td><td>16/25 (64.00%); [44.52%, 79.75%]</td><td>—</td><td>0.00%</td><td>25 (7.4%) / 313 (92.6%) / 0 (0.0%)</td></tr>
+<tr><td>name</td><td>Joint veto with logistic</td><td>0.745246</td><td>15/20 (75.00%); [53.13%, 88.81%]</td><td>80.67%</td><td>18.25%</td><td>20 (5.9%) / 199 (58.9%) / 119 (35.2%)</td></tr>
+<tr><td>name</td><td>Rubric with CV veto</td><td>0.722335</td><td>6/6 (100.00%); [60.97%, 100.00%]</td><td>68.35%</td><td>3.17%</td><td>6 (1.8%) / 54 (16.0%) / 278 (82.2%)</td></tr>
+<tr><td>docs</td><td>Logistic, no route veto</td><td>0.752580</td><td>18/23 (78.26%); [58.10%, 90.34%]</td><td>—</td><td>0.00%</td><td>23 (12.5%) / 161 (87.5%) / 0 (0.0%)</td></tr>
+<tr><td>docs</td><td>Joint veto with logistic</td><td>0.752580</td><td>17/20 (85.00%); [63.96%, 94.76%]</td><td>80.56%</td><td>18.92%</td><td>20 (10.9%) / 92 (50.0%) / 72 (39.1%)</td></tr>
+<tr><td>docs</td><td>Rubric with CV veto</td><td>0.775430</td><td>6/6 (100.00%); [60.97%, 100.00%]</td><td>82.42%</td><td>2.70%</td><td>6 (3.3%) / 87 (47.3%) / 91 (49.5%)</td></tr>
+</tbody></table>
+<p><strong>The name rubric AUC is 0.722335 versus logistic 0.745246, a loss of 0.022911: more than 0.02.</strong>
+Docs AUC rises from 0.752580 to 0.775430. Each rubric accepts only six validation items, all correctly labelled; the 61.0–100% intervals are too wide to claim assured perfect precision.
+The lower veto rate is not a lower total refusal rate: names refine 278/338 (82.25%), including 88/126 acceptable names (69.84%), and refine precision falls to 68.35% from 80.67% for the joint-veto reference.
+Docs refine 91/184 (49.46%), including 16/74 acceptable items (21.62%), at 82.42% refine precision. The artifact reports false-refine and false-veto rates separately.
+These are measured tradeoffs, not a claim that the rubric dominates the logistic router.</p>
+
+<h3 id="srtj-cascade-rubric-score-removed">Actual removal lists</h3>
+<p>The independent-veto reference is identified by content digest <code>a797be9b51cceb5bb1691a98240c2f2be17066fecfbc46837f6664d3336fc9bb</code>.
+Its membership is retained solely for audit accounting, never as a candidate whitelist. <code>dropped_checks</code> subtracts the selected set from that reference membership;
+<code>removed_from_joint_veto</code> separately names membership removed in this change. The synthetic disjoint-set test proves the removal list is nonempty when it should be,
+and the full frozen-receipt rebuild is compared twice byte-for-byte with the committed artifact.</p>
+<p>The prior joint-veto fragment’s claim that docs removed eight checks was correct, but its six-name list was incomplete. The full eight are
+<code>description_not_single_definition</code>, <code>equation_physically_incorrect</code>, <code>false_equivalence_with_related</code>, <code>incompatible_physics_qualifier</code>, <code>latex_escaping_broken</code>, <code>non_normative_documentation</code>, <code>relationship_link_missing</code>, <code>units_in_prose</code>. The missing two were <code>relationship_link_missing</code> and <code>units_in_prose</code>.
+The prior joint rule removed eighteen name checks. This change retains its sole name check and tightens its cutoff; it removes these five learned docs vetoes:
+<code>defining_equation_missing</code>, <code>description_false_of_some_binding</code>, <code>description_template_opening_mismatch</code>, <code>raw_dd_reference_in_prose</code>, <code>sign_convention_missing</code>. The fixed contradiction rule remains. Relative to the independent reference, eighteen name checks and all twelve docs checks are now absent.</p>
+
+<h3 id="srtj-cascade-rubric-score-example">A review with readable dimensions and source bindings</h3>
+<p><code>elongation_of_flux_surface</code> is accepted at 0.855228. Its description is “Ratio of the vertical to horizontal semi-axes of a nested magnetic flux surface’s poloidal cross-section, independent of its overall size.”.
+The frozen source bindings are <code>dd:equilibrium/time_slice/profiles_1d/elongation</code>, <code>dd:gyrokinetics_local/flux_surface/elongation</code>.
+Its scores are grammar 16.274, semantic 16.798, convention 18.822,
+and completeness 16.524, each out of 20. Their sum divided by 80 is the stored total.</p>
+
+<h3 id="srtj-cascade-rubric-score-consumers">Consumer agreement and cohort record</h3>
+<p>The tests execute actual <code>persist_reviewed_name</code>, <code>persist_reviewed_docs</code> and export <code>_run_gate_c</code> with mocked storage.
+They call both refinement claim functions, read the actual emitted score comparison and its bound, and evaluate that predicate against the cascade result.
+Accept, low-score refine and high-score veto cases are covered at 0.65, 0.75 and 0.85. The tests also require that the stored total equal the dimension mean;
+a 1.0/0.0 placeholder could agree with a route at one threshold while failing this rubric invariant. This is score-predicate verification, not a live-graph concurrency test.</p>
+<p>The cohort runner records <code>route</code>, <code>rubric_total</code>, <code>dimension_scores</code> and <code>failed_checks</code> per item, including each failure’s probability,
+cutoff, evidence and veto flag. Its existing <code>score</code> field remains the persisted result; after a chat route that may be the chat reviewer’s score,
+while <code>rubric_total</code> remains the cascade’s pre-chat rubric. Unjudged items explicitly carry null total and empty dimensions/checks.</p>
+
+<h3 id="srtj-cascade-rubric-score-gate">Gate and negative control</h3>
+<p id="srtj-cascade-rubric-score-gate-result">The baseline completed with <strong>5 failed, 271 passed</strong>; the head completed with <strong>5 failed, 302 passed</strong> in 149.95 seconds. The exact failure-ID sets are equal: <strong>zero added failures</strong>. All 74 cascade/rubric calibration tests passed, including two complete real-receipt rebuilds matching the committed artifact. Both gate logs end with EXIT=1 because the five existing tests remain enabled. They are the five <code>test_claim_verdict_controls_acceptance</code> cases in <code>test_docs_contradiction_veto.py</code>, each expecting one budget reservation but observing two. That file and its worker behavior are outside this node’s write scope and are handed back as a follow-on.</p>
+<p>The declared mutation replaces the stored total with 1.0 for accept and 0.0 for refine. A process-local test plugin also substitutes the previous calibration builder
+from the recorded base to test removal of the rubric fit. The control completed with 25 failing tests and <code>EXIT=1</code>, including all six dimension/mean cases,
+all eighteen consumer-agreement cases and the real-receipt determinism case. Source files were not restored or reset to run the control.</p>
+<p>Durable logs and receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T074706488475-srtj-cascade-rubric-score</code>: <code>reproduction.log</code>, <code>contradiction-reproduction.log</code>, <code>calibration.log</code>,
+<code>baseline.log</code>, <code>head.log</code>, <code>negative-control.log</code> and <code>representative-reviews.json</code>.
+The first head attempt exited 139 during the 60-second faulthandler stack dump. Its incomplete log is preserved as <code>head-interrupted.log</code>;
+the completed retry delayed that diagnostic dump to 300 seconds and retained the real-receipt test’s 600-second timeout. No application exception was hidden. A fresh process after the negative control records <code>winning_score=0.875</code> with four dimensions on both axes, and the missing-rubric guard refuses a direct result, in <code>landed-marker.log</code>.</p>
+</section>

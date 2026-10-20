@@ -11,12 +11,23 @@ import pytest
 
 from imas_codex.standard_names.review import cascade
 from imas_codex.standard_names.review.cascade import (
-    CascadeRoute,
     route_docs,
     route_name,
 )
 
-_CALIBRATION_SHA256 = "792291e8ba6cef4581ecc4c7421b5b96ea3f1c7e135435ec0ad39b5c6644935d"
+_CALIBRATION_SHA256 = "8fd2b51e30887ab1dbed55688f38a154c1633985fb81717382b611fd254c7090"
+
+
+def _decision(route, probability, failed_checks=()):
+    from imas_codex.standard_names.review.checks import NAME_DIMENSIONS
+
+    total = 0.85 if route == "accept" else 0.60
+    return cascade.CascadeRoute(
+        route,
+        probability,
+        failed_checks,
+        dict.fromkeys(NAME_DIMENSIONS, 20 * total),
+    )
 
 
 def _assert_calibration_digest(artifact):
@@ -113,7 +124,7 @@ async def test_shadow_review_record_is_noncanonical(monkeypatch):
         {"id": "temperature"},
         "name",
         "judge-model",
-        CascadeRoute("refine", 0.2, ("source_fidelity_unsupported_qualifier",)),
+        _decision("refine", 0.2, ("source_fidelity_unsupported_qualifier",)),
         {"check:source_fidelity_unsupported_qualifier": {"noul": 0.9}},
         0.0,
     )
@@ -130,7 +141,7 @@ def test_failed_checks_feed_existing_refine_trigger():
     from imas_codex.standard_names.fanout.trigger import should_trigger_fanout
     from imas_codex.standard_names.review.checks import load_review_checks
 
-    route = CascadeRoute("refine", 0.1, ("source_fidelity_unsupported_qualifier",))
+    route = _decision("refine", 0.1, ("source_fidelity_unsupported_qualifier",))
     result = cascade._direct_result(
         route, "judge-model", 0.0, {"id": "temperature"}, "name"
     )
@@ -237,18 +248,37 @@ def planted_thresholds(monkeypatch):
             "accept_threshold": 0.8,
             "reject_threshold": 0.2,
             "check_thresholds": {"named_failure": 0.6},
+            "rubric": {"band_width": 0.05},
         }
         for axis in ("name", "docs")
     }
     monkeypatch.setattr(cascade, "_calibration", lambda: thresholds)
+    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS, NAME_DIMENSIONS
+
+    monkeypatch.setattr(
+        cascade,
+        "rubric_scores",
+        lambda axis, judgment, fit: {
+            dimension: judgment.get("quality", 0.9) * 20
+            for dimension in (NAME_DIMENSIONS if axis == "name" else DOCS_DIMENSIONS)
+        },
+    )
     return thresholds
 
 
 @pytest.mark.parametrize("route", [route_name, route_docs])
 def test_accept_at_threshold(route, planted_thresholds):
     judgment = {"checks": {}}
-    assert route(judgment, probability=0.8).route == "accept"
-    assert route(judgment, probability=0.8 - 0.000001).route == "chat_review"
+    assert (
+        route({**judgment, "quality": 0.75}, probability=0.2, min_score=0.75).route
+        == "accept"
+    )
+    assert (
+        route(
+            {**judgment, "quality": 0.75 - 0.000001}, probability=0.99, min_score=0.75
+        ).route
+        == "chat_review"
+    )
 
 
 @pytest.mark.parametrize("route", [route_name, route_docs])
@@ -265,11 +295,259 @@ def test_refine_at_check_threshold(route, planted_thresholds):
 
 
 @pytest.mark.parametrize("route", [route_name, route_docs])
-def test_reject_boundary_has_separate_chat_label(route, planted_thresholds):
+def test_below_band_refines(route, planted_thresholds):
     judgment = {"checks": {}}
-    assert route(judgment, probability=0.2).route == "chat_review"
-    assert route(judgment, probability=0.2 - 0.000001).route == "chat_below_reject"
-    assert route(judgment, probability=0.79).route == "chat_review"
+    assert (
+        route({**judgment, "quality": 0.70}, probability=0.2, min_score=0.75).route
+        == "chat_review"
+    )
+    assert (
+        route(
+            {**judgment, "quality": 0.70 - 0.000001}, probability=0.99, min_score=0.75
+        ).route
+        == "refine"
+    )
+    assert (
+        route({**judgment, "quality": 0.74}, probability=0.99, min_score=0.75).route
+        == "chat_review"
+    )
+
+
+@pytest.mark.parametrize("route", [route_name, route_docs])
+def test_default_threshold_is_the_persistence_consumers_default(
+    route, planted_thresholds
+):
+    from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+
+    assert (
+        route({"quality": DEFAULT_MIN_SCORE, "checks": {}}, probability=0.2).route
+        == "accept"
+    )
+    assert (
+        route(
+            {"quality": DEFAULT_MIN_SCORE - 0.01, "checks": {}}, probability=0.99
+        ).route
+        == "chat_review"
+    )
+
+
+def test_unsupported_claim_is_not_a_contradiction_veto(planted_thresholds):
+    planted_thresholds["docs"]["check_thresholds"] = {"claim_contradicts_source": 1.0}
+    judgment = {
+        "quality": 0.96,
+        "contradiction_veto": False,
+        "checks": {
+            "claim_contradicts_source": {"answered": True, "failure_probability": 1.0}
+        },
+    }
+    assert route_docs(judgment, probability=0.9).route == "accept"
+    judgment.update(
+        contradiction_veto=True,
+        contradiction_reason="source states the opposite sign",
+        raw_claim_answers=[
+            {"choice": "supports", "probabilities": {"contradicts": 0.3}}
+        ],
+    )
+    decision = route_docs(judgment, probability=0.9)
+    assert decision.route == "refine"
+    assert decision.check_details["claim_contradicts_source"]["probability"] == 0.3
+    assert decision.check_details["claim_contradicts_source"]["cutoff"] == 0.3
+
+
+@pytest.mark.parametrize("quality,expected_route", [(0.52, "refine"), (0.96, "accept")])
+def test_failed_check_is_recorded_even_when_it_is_not_a_veto(
+    planted_thresholds, quality, expected_route
+):
+    check_id = "source_fidelity_unsupported_qualifier"
+    planted_thresholds["name"]["check_thresholds"] = {check_id: 0.95}
+    judgment = {
+        "quality": quality,
+        "checks": {
+            check_id: {
+                "answered": True,
+                "failure_probability": 0.8,
+                "answer": {"noul": 0.8},
+            }
+        },
+    }
+    route = route_name(judgment, probability=0.9)
+    assert route.route == expected_route
+    assert not route.failed_checks
+    result = cascade._direct_result(
+        route, "judge-model", 0.0, {"id": "temperature"}, "name"
+    )
+    failure = result["winning_comments_per_dim"]["failed_checks"][0]
+    assert failure["id"] == check_id
+    assert failure["probability"] == 0.8 and failure["cutoff"] == 0.5
+    assert failure["veto"] is False
+    assert failure["judgment_evidence"] == {"noul": 0.8}
+
+
+@pytest.mark.parametrize("axis", ["name", "docs"])
+@pytest.mark.parametrize("veto,quality", [(False, 0.86), (False, 0.52), (True, 0.96)])
+def test_decided_review_stores_dimension_scores_and_their_mean(
+    axis, veto, quality, planted_thresholds
+):
+    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS, NAME_DIMENSIONS
+
+    check_id = (
+        "source_fidelity_unsupported_qualifier"
+        if axis == "name"
+        else "description_false_of_some_binding"
+    )
+    planted_thresholds[axis]["check_thresholds"] = {check_id: 0.6}
+    judgment = {
+        "quality": quality,
+        "checks": {
+            check_id: {
+                "answered": True,
+                "failure_probability": 0.8 if veto else 0.1,
+                "answer": {"noul": 0.8 if veto else 0.1},
+            },
+        },
+    }
+    route = cascade._route(axis, judgment, 0.9, min_score=0.75)
+    item = {
+        "id": "temperature",
+        "source_paths": ["core_profiles/profiles_1d/electrons/temperature"],
+    }
+    result = cascade._direct_result(route, "judge-model", 0.0, item, axis)
+    expected = NAME_DIMENSIONS if axis == "name" else DOCS_DIMENSIONS
+    assert set(result["winning_scores"]) == expected
+    assert all(0 <= value <= 20 for value in result["winning_scores"].values())
+    assert result["winning_score"] == pytest.approx(
+        sum(result["winning_scores"].values()) / 80
+    )
+    assert 0 < result["winning_score"] < 1
+    assert (result["winning_score"] >= 0.75) == (route.route == "accept")
+    if veto:
+        failure = result["winning_comments_per_dim"]["failed_checks"][0]
+        assert failure["probability"] == 0.8
+        assert failure["cutoff"] == 0.6
+        assert failure["judgment_evidence"] == {"noul": 0.8}
+        assert failure["evidence"]
+        assert route.raw_scores != route.scores
+
+
+@pytest.mark.parametrize("axis", ["name", "docs"])
+@pytest.mark.parametrize("kind", ["accept", "low", "veto"])
+@pytest.mark.parametrize("min_score", [0.65, 0.75, 0.85])
+def test_consumer_predicates_agree_with_rubric_route(
+    monkeypatch, planted_thresholds, axis, kind, min_score
+):
+    """Execute persistence/export and the score predicate emitted by each claim."""
+    import operator
+    import re
+
+    from imas_codex.standard_names import graph_ops
+    from imas_codex.standard_names.export import _run_gate_c
+
+    judgment = {
+        "quality": min_score + 0.10 if kind != "low" else min_score - 0.10,
+        "checks": {
+            "named_failure": {
+                "answered": True,
+                "failure_probability": 0.9 if kind == "veto" else 0.1,
+            }
+        },
+    }
+    route = cascade._route(axis, judgment, 0.95, min_score=min_score)
+    result = cascade._direct_result(
+        route, "judge-model", 0.0, {"id": "temperature"}, axis
+    )
+    score = result["winning_score"]
+    assert score == pytest.approx(sum(result["winning_scores"].values()) / 80)
+    expected_accept = kind == "accept"
+    assert (route.route == "accept") == expected_accept
+
+    gc = MagicMock()
+    gc.__enter__.return_value = gc
+    gc.query.side_effect = [
+        [{"chain_length": 0, "docs_chain_length": 0, "documentation": ""}],
+        [{"id": "temperature"}],
+    ]
+    monkeypatch.setattr(graph_ops, "GraphClient", lambda: gc)
+    monkeypatch.setattr(graph_ops, "write_reviews", lambda _rows: None)
+    monkeypatch.setattr(graph_ops, "_doc_link_mismatches", lambda *_args: [])
+    persist = getattr(graph_ops, "persist_reviewed_" + axis)
+    stage = persist(
+        sn_id="temperature",
+        claim_token="token",
+        score=score,
+        scores=result["winning_scores"],
+        model="judge-model",
+        min_score=min_score,
+        resolution_method=result["resolution_method"],
+        reviewer_chain_size=3,
+    )
+    assert stage == ("accepted" if expected_accept else "reviewed")
+
+    captured = {}
+
+    def claim(**kwargs):
+        captured.update(kwargs)
+        return []
+
+    monkeypatch.setattr(graph_ops, "_claim_sn_atomic", claim)
+    getattr(graph_ops, "claim_refine_" + axis + "_batch")(min_score=min_score)
+    comparator = re.search(
+        rf"sn\.reviewer_score_{axis}\s*(<|>=)\s*\$min_score",
+        captured["eligibility_where"],
+    )
+    assert comparator is not None
+    eligible = {"<": operator.lt, ">=": operator.ge}[comparator[1]](
+        score, captured["query_params"]["min_score"]
+    )
+    assert eligible == (not expected_accept)
+    _, exported, below, _ = _run_gate_c(
+        [{"id": "temperature", "reviewer_score_name": score}],
+        min_score,
+        False,
+        None,
+    )
+    assert bool(exported) == expected_accept
+    assert below == int(not expected_accept)
+
+
+def test_rubric_uses_only_a_dimensions_own_answers():
+    from imas_codex.standard_names.review.checks import NAME_DIMENSIONS
+
+    fit = {
+        "offset": 0.0,
+        "dimensions": {
+            dim: {"intercept": 0.0, "weights": {"category": 1.0}}
+            for dim in NAME_DIMENSIONS
+        },
+    }
+    fit["dimensions"]["semantic"]["weights"][
+        "source_fidelity_unsupported_qualifier"
+    ] = 1.0
+    from imas_codex.standard_names.review.jev_review import _DIMENSION_LEVELS
+
+    judgment = {
+        "categories": {
+            dim: {"probabilities": {levels[0]: 0.6, levels[1]: 0.3, levels[2]: 0.1}}
+            for dim, levels in _DIMENSION_LEVELS.items()
+        },
+        "checks": {
+            "source_fidelity_unsupported_qualifier": {
+                "answered": True,
+                "failure_probability": 0.1,
+            }
+        },
+    }
+    first = cascade.rubric_scores("name", judgment, fit)
+    judgment["checks"]["source_fidelity_unsupported_qualifier"][
+        "failure_probability"
+    ] = 0.9
+    second = cascade.rubric_scores("name", judgment, fit)
+    assert second["semantic"] < first["semantic"]
+    assert {k: v for k, v in second.items() if k != "semantic"} == {
+        k: v for k, v in first.items() if k != "semantic"
+    }
+    judgment["categories"]["grammar"] = None
+    with pytest.raises(ValueError, match="incomplete rubric answers"):
+        cascade.rubric_scores("name", judgment, fit)
 
 
 @pytest.mark.asyncio
@@ -280,7 +558,7 @@ async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
     calls = []
 
     async def judgment(_item, _model):
-        return CascadeRoute("accept", 0.95), {}, 0.0
+        return _decision("accept", 0.95), {}, 0.0
 
     async def store(_item, _axis, _model, route, _answers, _cost):
         records.append(route.route)
@@ -320,8 +598,8 @@ async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
 @pytest.mark.parametrize(
     "route,expected_calls,expected_score",
     [
-        ("accept", [], 1.0),
-        ("refine", [], 0.0),
+        ("accept", [], 0.85),
+        ("refine", [], 0.60),
         ("chat_review", [["primary"]], 0.3),
         ("chat_below_reject", [["primary"]], 0.3),
     ],
@@ -339,7 +617,7 @@ async def test_deciding_routes_use_one_chat_seat(
 
     async def judgment(_item, _model):
         return (
-            CascadeRoute(route, 0.5, (check_id,) if route == "refine" else ()),
+            _decision(route, 0.5, (check_id,) if route == "refine" else ()),
             {},
             0.0,
         )
@@ -395,7 +673,7 @@ def test_deciding_result_reaches_name_stage(monkeypatch, route, expected_stage):
     monkeypatch.setattr(graph_ops, "GraphClient", lambda: gc)
     monkeypatch.setattr(graph_ops, "write_reviews", lambda _rows: None)
     decision = cascade._direct_result(
-        CascadeRoute(
+        _decision(
             route, 0.9, ("advisory_alias_collapsed",) if route == "refine" else ()
         ),
         "judge-model",
@@ -562,7 +840,7 @@ async def test_refine_worker_receives_named_checks(monkeypatch):
     from imas_codex.standard_names import fanout, workers
     from imas_codex.standard_names.models import RefinedName
 
-    route = CascadeRoute("refine", 0.1, ("source_fidelity_unsupported_qualifier",))
+    route = _decision("refine", 0.1, ("source_fidelity_unsupported_qualifier",))
     result = cascade._direct_result(
         route, "judge-model", 0.0, {"id": "test_name"}, "name"
     )
@@ -661,7 +939,7 @@ async def test_shadow_row_is_written_after_the_incumbents_rows(monkeypatch):
     writes = []
 
     async def judgment(_item, _model):
-        return CascadeRoute("accept", 0.95), {}, 0.0
+        return _decision("accept", 0.95), {}, 0.0
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(
@@ -694,7 +972,7 @@ async def test_failed_incumbent_cycle_writes_no_shadow_row(monkeypatch):
     writes = []
 
     async def judgment(_item, _model):
-        return CascadeRoute("accept", 0.95), {}, 0.0
+        return _decision("accept", 0.95), {}, 0.0
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(
