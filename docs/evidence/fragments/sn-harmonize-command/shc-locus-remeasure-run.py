@@ -282,15 +282,29 @@ def render() -> None:
         f"<tr><td><code>{name}</code></td><td>{count}</td></tr>"
         for name, count in sorted(check["member_matches"].items())
     )
-    below_rows = "".join(
-        f"<tr><td><code>{m}</code></td><td>{_fmt(b)}</td><td>{_fmt(a)}</td></tr>"
-        for m, b, a in below
+    below_rows = "; ".join(
+        f"<code>{m}: {_fmt(b)} &rarr; {_fmt(a)}</code>" for m, b, a in below
     )
-    fell_rows = "".join(
-        f"<tr><td><code>{m}</code></td><td>{_fmt(b)}</td><td>{_fmt(a)}</td></tr>"
-        for m, b, a in fell
+    fell_rows = "; ".join(
+        f"<code>{m}: {_fmt(b)} &rarr; {_fmt(a)}</code>" for m, b, a in fell
     )
     score_rows = _score_rows(members, scores_before, scores_after)
+
+    # A member the drain reset re-entered the pipeline and is
+    # unscored again: its documentation score went from a value to none.
+    status_before = initial.get("member_status") or {}
+    status_after = after.get("member_status") or {}
+    reset_rows = []
+    for member in members:
+        b = scores_before.get(member)
+        a = scores_after.get(member)
+        sb = (status_before.get(member) or {}).get("docs_stage")
+        sa = (status_after.get(member) or {}).get("docs_stage")
+        if b is not None and a is None and sb != sa:
+            reset_rows.append((member, b, sb, sa))
+    reset_html = "; ".join(
+        f"<code>{m}: {_fmt(b)} ({sb} &rarr; {sa})</code>" for m, b, sb, sa in reset_rows
+    )
 
     spend = apply_entry.get("spend_usd")
     touched = summary.get("total_touched")
@@ -311,8 +325,9 @@ def render() -> None:
         f"    The non-WEST locus family <code>{SEED}</code> ran under "
         f"<code>sn harmonize --apply --cost-limit {COST_CAP_USD:.2f}</code>. It "
         f"<strong>{verdict}</strong>{halt_clause}. Spend "
-        f"<strong>USD {_fmt(spend)}</strong> over {_fmt(touched, 0)} touched "
-        f"name(s); wall {_fmt(apply_entry.get('wall_seconds'), 0)}s. Lint findings "
+        f"<strong>USD {_fmt(spend)}</strong>"
+        + (f" over {_fmt(touched, 0)} touched name(s)" if touched is not None else "")
+        + f"; wall {_fmt(apply_entry.get('wall_seconds'), 0)}s. Lint findings "
         f"{lint_before} before, {lint_after} after. {len(below)} member(s) are below "
         f"the {DEFAULT_MIN_SCORE} threshold after the apply and {len(fell)} fell."
     )
@@ -361,11 +376,12 @@ def render() -> None:
     lines.append('  <p id="shc-locus-remeasure-apply-body">')
     lines.append(
         f"    Apply log <code>{apply_entry.get('log', '—')}</code> ending "
-        f"<code>{apply_entry.get('exit_line', '—')}</code>. Below threshold: "
-        + (below_rows or "none")
-        + ". Fell: "
-        + (fell_rows or "none")
-        + "."
+        f"<code>{apply_entry.get('exit_line', '—')}</code>. Spend "
+        f"<strong>USD {_fmt(spend)}</strong> of the USD {COST_CAP_USD:.2f} "
+        f"cap, from the run's LLMCost documentation-phase rows read while the "
+        f"graph was reachable; a later graph authentication outage prevented "
+        f"re-reading the per-name apportionment, so the per-name split is not "
+        f"recorded."
     )
     lines.append("  </p>")
     lines.append("  <table>")
@@ -373,6 +389,14 @@ def render() -> None:
     lines.append("    <th></th></tr></thead>")
     lines.append("    <tbody>" + score_rows + "</tbody>")
     lines.append("  </table>")
+    lines.append(
+        "  <p>Members below the acceptance threshold (both scores): "
+        + (below_rows or "none")
+        + ". Members whose score fell: "
+        + (fell_rows or "none")
+        + ". Members reset back into the pipeline (score to none) with their "
+        "doc stage before and after: " + (reset_html or "none") + ".</p>"
+    )
     lines.append("</section>")
     HTML.write_text("\n".join(lines) + "\n")
     print(f"wrote {HTML}")
