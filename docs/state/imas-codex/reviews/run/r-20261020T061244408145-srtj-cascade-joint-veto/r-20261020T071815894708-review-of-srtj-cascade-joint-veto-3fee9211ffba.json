@@ -34,6 +34,11 @@
       "kind": "exempted",
       "reason": "the coordinator widened the node's scope to that test file before the re-pin",
       "recorded_at": "2026-10-20T07:46:31.864521+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "the module is now the owner of the logistic fit; the evidence script is the earlier one-off measurement",
+      "recorded_at": "2026-10-20T07:46:40.108328+00:00"
     }
   },
   "findings": [
