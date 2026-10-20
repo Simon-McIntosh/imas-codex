@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T12:00:07.409Z",
+  "dispatched_at": "2026-10-20T11:50:29Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point-run.py",
+      "line": "191",
+      "severity": "follow-on",
+      "text": "follow-on: paired_bootstrap duplicates the owner at imas_codex/discovery/base/evaluation.py:144 rather than extending it (copy-group bucketing at :193-195 repeats _group_indices at evaluation.py:128-141, the draw loop at :200-203 repeats evaluation.py:185-192, and the quantile at :214 repeats evaluation.py:197), so the repository now carries two seeded copy-group resample loops; the owner's statistic is fixed to roc_auc so this node's five decision metrics cannot be expressed through it, and extracting a statistic hook or reusing _group_indices would remove the fork."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T112748325543-srtj-jev-vs-panel-operating-point/replay.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: neither gate log records the revision being reviewed -- the generation log's header names base 5d08729a and the replay log's header names afe9c1eb, while the node's head is 49b0626a -- so a reader cannot confirm from the receipts that the committed revision was the one gated, even though the replay's SCORE lines show the head code ran."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point-run.py",
+      "line": "655",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded mechanical_check claims \"no direct labels on data\" but save_checked at srtj-jev-vs-panel-operating-point-run.py:526-547 asserts only that visible text lies within the canvas and that no two text artists overlap, so the field records a check that was never implemented (vacuously true here only because the figure draws no direct labels)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read commit by commit from 5d08729a to 49b0626a; afe9c1eb adds the 974-line offline driver, the fragment, the JSON and the SVG, and 49b0626a:260-282 adds coefficient assertions against the frozen landed fits with no metric change.",
+    "done_when": "The fence's evidence list is met in the artefacts (per-axis and per-split metrics at 0.85, Jev at the panel's rate with paired bootstrap differences, precision-matched recall, figure, verdict with cost, EXIT=0, no LLM spend), but neither gate log names the head revision it gated.",
+    "goal": "srtj-jev-vs-panel-operating-point-run.py:465-506 computes the panel at min_score 0.85 and Jev at the matched accept count on all five metrics per axis and split, rendered at srtj-jev-vs-panel-operating-point.html:465 if False else srtj-jev-vs-panel-operating-point.html:15-26 and :36-47.",
+    "manifest": "Read; it names commits afe9c1eb and 49b0626a, the replay gate command and logs, USD 0 spend, content-marker verification and an inspected PNG, with status complete.",
+    "write_paths": "git diff 5d08729a..49b0626a adds exactly the four granted paths, 3632 insertions, no deletions and no production code."
+  },
+  "justifications": {
+    "durability": "srtj-jev-vs-panel-operating-point-run.py:945-955 recomputes the report and asserts it equals the committed JSON on axes, coverage, inputs, costs and per-item scores, so a regressed metric reddens the replay; the HTML is not compared and no test file guards the artifact.",
+    "evidence": "Both gate logs end EXIT=0 and identity-set tallies are asserted at srtj-jev-vs-panel-operating-point-run.py:107-111, but neither log records the head revision and the JSON's mechanical_check overstates the check that ran.",
+    "fit": "The driver follows the sibling fragment idiom and the data-ink style with despined axes and one figure-level legend at srtj-jev-vs-panel-operating-point-run.py:558-644.",
+    "goal_fidelity": "srtj-jev-vs-panel-operating-point-run.py:465-506 covers all five metrics for both judges per axis and split and the precision-matched recall is reported at srtj-jev-vs-panel-operating-point-run.py:136-188.",
+    "reuse": "srtj-jev-vs-panel-operating-point-run.py:191 re-implements the copy-group percentile bootstrap owned by imas_codex/discovery/base/evaluation.py:144 instead of extending it.",
+    "scope_discipline": "git diff 5d08729a7adadc66032033f261f6625355cffcb6..49b0626ab2b8c652c36315fee8efc4466a23e296 adds only the four declared paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is to compare Jev with the paid panel at the panel's own accept rate and precision on the golden labels, and srtj-jev-vs-panel-operating-point-run.py:465-506 computes the panel at min_score 0.85 and Jev at the same accept count for all five metrics per axis and split, rendered in srtj-jev-vs-panel-operating-point.html:15-26 (validation) and :36-47 (calibration).\nVERDICT done_when: The evidence fence asks for per-axis and per-split panel metrics at 0.85, Jev's same five at the panel's rate with paired bootstrap differences, Jev's accept recall at the panel's precision, a rendered checked figure, a verdict with panel cost per item, a driver log ending EXIT=0 and no LLM spend; all are present in the JSON and HTML, but neither gate log records the head revision, so measurement.log:1 runs at base 5d08729a and replay.log:1 at 49b0626a's parent afe9c1eb.\nVERDICT write_paths: The source scope grants four paths (the driver, HTML, JSON and the figure directory); git diff 5d08729a..49b0626a adds exactly those four, 3632 insertions and no deletions, and touches no production code.\nVERDICT manifest: Read; it names commits afe9c1eb and 49b0626a, the replay gate command with its log, USD 0 spend, verification of the committed content markers and an inspected PNG preview, and its checkpoint claims the replay matched the landed coefficients and reproduced every persisted metric and independent tally.\nVERDICT diff: Read commit by commit from 5d08729a to 49b0626a; afe9c1eb adds the 974-line offline driver, the fragment, the JSON and the SVG, and 49b0626a:260-282 adds an assertion that the rebuilt name weights and intercept and the documentation score constants equal the frozen landed fits, plus one clarifying sentence at srtj-jev-vs-panel-operating-point.html:6, with no metric change.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: srtj-jev-vs-panel-operating-point-run.py:465-506 reports the panel at 0.85 and Jev at the matched accept count for accept rate, accept precision and recall and refine precision and recall on both axes and splits, and the precision-matched recall is reported at srtj-jev-vs-panel-operating-point-run.py:136-188.\nSCORE evidence: 15\nJUSTIFICATION evidence: measurement.log and replay.log both end EXIT=0 and srtj-jev-vs-panel-operating-point-run.py:107-111 re-derives every confusion count by identity-set intersection, but neither log records the head revision it gated and the JSON's figure.mechanical_check at srtj-jev-vs-panel-operating-point-run.py:655 records a check the code does not perform.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 5d08729a7adadc66032033f261f6625355cffcb6..49b0626ab2b8c652c36315fee8efc4466a23e296 adds only the four declared paths and no product or test file.\nSCORE durability: 17\nJUSTIFICATION durability: srtj-jev-vs-panel-operating-point-run.py:945-955 re-computes the report and asserts axes, coverage, inputs, costs and per-item scores equal the committed JSON, so an edited or regressed metric reddens the replay, though nothing compares the HTML to the JSON and no test file guards either.\nSCORE fit: 17\nJUSTIFICATION fit: the driver follows the sibling fragment idiom (module docstring, ROOT/HERE/STEM at srtj-jev-vs-panel-operating-point-run.py:25-27, EXIT=0 wrapper at :966-974) and draws with the mandated data-ink style at srtj-jev-vs-panel-operating-point-run.py:558 with despined axes and one figure-level legend.\nSCORE reuse: 5\nJUSTIFICATION reuse: srtj-jev-vs-panel-operating-point-run.py:191,193-195,200-203,214 re-implements the seeded copy-group percentile bootstrap that imas_codex/discovery/base/evaluation.py:144 bootstrap_interval already owns, while the sibling drivers in this plan call that owner.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point-run.py:191 follow-on: paired_bootstrap duplicates the owner at imas_codex/discovery/base/evaluation.py:144 rather than extending it (copy-group bucketing at :193-195 repeats _group_indices at evaluation.py:128-141, the draw loop at :200-203 repeats evaluation.py:185-192, and the quantile at :214 repeats evaluation.py:197), so the repository now carries two seeded copy-group resample loops; the owner's statistic is fixed to roc_auc so this node's five decision metrics cannot be expressed through it, and extracting a statistic hook or reusing _group_indices would remove the fork.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T112748325543-srtj-jev-vs-panel-operating-point/replay.log:1 follow-on: neither gate log records the revision being reviewed -- the generation log's header names base 5d08729a and the replay log's header names afe9c1eb, while the node's head is 49b0626a -- so a reader cannot confirm from the receipts that the committed revision was the one gated, even though the replay's SCORE lines show the head code ran.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point-run.py:655 follow-on: the recorded mechanical_check claims \"no direct labels on data\" but save_checked at srtj-jev-vs-panel-operating-point-run.py:526-547 asserts only that visible text lies within the canvas and that no two text artists overlap, so the field records a check that was never implemented (vacuously true here only because the figure draws no direct labels).",
+  "review_run_id": "r-20261020T114952122500-review-of-srtj-jev-vs-panel-operating-point-49b0626ab2b8",
+  "reviewed_base_sha": "5d08729a7adadc66032033f261f6625355cffcb6",
+  "reviewed_head_sha": "49b0626ab2b8c652c36315fee8efc4466a23e296",
+  "reviewed_run_id": "r-20261020T112748325543-srtj-jev-vs-panel-operating-point",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T12:00:00+00:00",
+  "total": 93
+}
