@@ -16,7 +16,7 @@ from imas_codex.standard_names.review.cascade import (
     route_name,
 )
 
-_CALIBRATION_SHA256 = "a797be9b51cceb5bb1691a98240c2f2be17066fecfbc46837f6664d3336fc9bb"
+_CALIBRATION_SHA256 = "792291e8ba6cef4581ecc4c7421b5b96ea3f1c7e135435ec0ad39b5c6644935d"
 
 
 def _assert_calibration_digest(artifact):

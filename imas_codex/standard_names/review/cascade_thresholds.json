@@ -1,18 +1,19 @@
 {
-  "content_sha256": "a797be9b51cceb5bb1691a98240c2f2be17066fecfbc46837f6664d3336fc9bb",
+  "content_sha256": "792291e8ba6cef4581ecc4c7421b5b96ea3f1c7e135435ec0ad39b5c6644935d",
   "docs": {
-    "accept_threshold": 0.55,
+    "accept_basis": "best-available-precision",
+    "accept_threshold": 0.554122583888,
     "check_diagnostics": {
       "claim_contradicts_source": {
-        "accepted_flagged": 4,
-        "defects_caught": 6,
-        "separation": -0.0139,
-        "threshold": null
+        "accepted_flagged": 3,
+        "defects_caught": 13,
+        "separation": 0.0486,
+        "threshold": 1.0
       },
       "cocos_number_in_prose": {
-        "accepted_flagged": 3,
-        "defects_caught": 3,
-        "separation": -0.0208,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0014,
         "threshold": null
       },
       "defining_equation_missing": {
@@ -23,15 +24,15 @@
       },
       "description_false_of_some_binding": {
         "accepted_flagged": 2,
-        "defects_caught": 21,
-        "separation": 0.1181,
-        "threshold": 0.43999999999999995
+        "defects_caught": 20,
+        "separation": 0.0565,
+        "threshold": 0.44
       },
       "description_not_single_definition": {
-        "accepted_flagged": 6,
-        "defects_caught": 15,
-        "separation": 0.0208,
-        "threshold": 0.33
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0037,
+        "threshold": null
       },
       "description_template_opening_mismatch": {
         "accepted_flagged": 0,
@@ -40,106 +41,106 @@
         "threshold": 1.0
       },
       "equation_physically_incorrect": {
-        "accepted_flagged": 2,
-        "defects_caught": 11,
-        "separation": 0.0486,
-        "threshold": 0.13
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0108,
+        "threshold": null
       },
       "false_equivalence_with_related": {
-        "accepted_flagged": 3,
-        "defects_caught": 23,
-        "separation": 0.1181,
-        "threshold": 0.16
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0114,
+        "threshold": null
       },
       "forbidden_equation_variant": {
         "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": 0,
+        "separation": 0.0,
         "threshold": null
       },
       "forbidden_locus_gloss": {
         "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": 0,
+        "separation": 0.0,
         "threshold": null
       },
       "forbidden_symbol_spelling": {
         "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": 0,
+        "separation": 0.0,
         "threshold": null
       },
       "incompatible_physics_qualifier": {
-        "accepted_flagged": 3,
-        "defects_caught": 23,
-        "separation": 0.1181,
-        "threshold": 0.26
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0159,
+        "threshold": null
       },
       "latex_escaping_broken": {
-        "accepted_flagged": 7,
-        "defects_caught": 22,
-        "separation": 0.0556,
-        "threshold": 0.15
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0047,
+        "threshold": null
       },
       "link_dead": {
-        "accepted_flagged": 1,
+        "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": -0.0139,
+        "separation": -0.0833,
         "threshold": null
       },
       "link_hygiene": {
         "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": 0,
+        "separation": 0.0,
         "threshold": null
       },
       "link_missing_reverse": {
         "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": 0,
+        "separation": 0.0,
         "threshold": null
       },
       "link_unresolved": {
         "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": 0,
+        "separation": 0.0,
         "threshold": null
       },
       "locus_definition_mismatch": {
-        "accepted_flagged": 2,
-        "defects_caught": 1,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
         "separation": -0.0208,
         "threshold": null
       },
       "minimum_word_count": {
         "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": 0,
+        "separation": 0.0,
         "threshold": null
       },
       "non_canonical_equation": {
-        "accepted_flagged": 3,
-        "defects_caught": 6,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
         "separation": 0.0,
         "threshold": null
       },
       "non_normative_documentation": {
-        "accepted_flagged": 6,
-        "defects_caught": 15,
-        "separation": 0.0208,
-        "threshold": 0.33
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0013,
+        "threshold": null
       },
       "raw_dd_reference_in_prose": {
         "accepted_flagged": 2,
         "defects_caught": 6,
-        "separation": 0.0139,
-        "threshold": null
+        "separation": 0.051,
+        "threshold": 0.91
       },
       "relationship_link_missing": {
-        "accepted_flagged": 7,
-        "defects_caught": 17,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
         "separation": 0.0208,
-        "threshold": 1.0
+        "threshold": null
       },
       "sign_convention_missing": {
         "accepted_flagged": 0,
@@ -149,262 +150,339 @@
       },
       "symbols_undefined": {
         "accepted_flagged": 0,
-        "defects_caught": 1,
+        "defects_caught": 0,
         "separation": 0.0069,
         "threshold": null
       },
       "template_note": {
         "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": 0,
+        "separation": 0.0,
         "threshold": null
       },
       "units_in_prose": {
-        "accepted_flagged": 3,
-        "defects_caught": 15,
-        "separation": 0.0625,
-        "threshold": 0.35
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0151,
+        "threshold": null
       }
     },
     "check_thresholds": {
+      "claim_contradicts_source": 1.0,
       "defining_equation_missing": 1.0,
-      "description_false_of_some_binding": 0.43999999999999995,
-      "description_not_single_definition": 0.33,
+      "description_false_of_some_binding": 0.44,
       "description_template_opening_mismatch": 1.0,
-      "equation_physically_incorrect": 0.13,
-      "false_equivalence_with_related": 0.16,
-      "incompatible_physics_qualifier": 0.26,
-      "latex_escaping_broken": 0.15,
-      "non_normative_documentation": 0.33,
-      "relationship_link_missing": 1.0,
-      "sign_convention_missing": 1.0,
-      "units_in_prose": 0.35
+      "raw_dd_reference_in_prose": 0.91,
+      "sign_convention_missing": 1.0
+    },
+    "dropped_checks": [],
+    "joint_selection": {
+      "accepted_flagged": 6,
+      "accepted_n": 72,
+      "defect_n": 144,
+      "defects_caught": 82,
+      "false_veto_rate": 0.08333333333333333,
+      "selected": [
+        "claim_contradicts_source",
+        "defining_equation_missing",
+        "description_false_of_some_binding",
+        "description_template_opening_mismatch",
+        "raw_dd_reference_in_prose",
+        "sign_convention_missing"
+      ]
     },
     "n": 216,
-    "reject_threshold": 0.005567,
+    "reject_threshold": 0.006109023247700607,
+    "report": {
+      "calibration": {
+        "accept_precision": 0.846154,
+        "auc": 0.834539,
+        "false_veto_rate_on_accepted": 0.083333,
+        "n": 216,
+        "refine_precision": 0.931818,
+        "route_counts": {
+          "accept": 26,
+          "chat_review": 102,
+          "refine": 88
+        },
+        "route_shares": {
+          "accept": 0.12037,
+          "chat_review": 0.472222,
+          "refine": 0.407407
+        }
+      },
+      "validation": {
+        "accept_precision": 0.85,
+        "auc": 0.75258,
+        "false_veto_rate_on_accepted": 0.189189,
+        "n": 184,
+        "refine_precision": 0.805556,
+        "route_counts": {
+          "accept": 20,
+          "chat_review": 92,
+          "refine": 72
+        },
+        "route_shares": {
+          "accept": 0.108696,
+          "chat_review": 0.5,
+          "refine": 0.391304
+        }
+      }
+    },
     "route_counts": {
-      "accept": 25,
-      "chat_below_reject": 0,
-      "chat_review": 40,
-      "refine": 151
+      "accept": 26,
+      "chat_review": 102,
+      "refine": 88
     },
     "route_shares": {
-      "accept": 0.11574074074074074,
-      "chat_below_reject": 0.0,
-      "chat_review": 0.18518518518518517,
-      "refine": 0.6990740740740741
+      "accept": 0.12037,
+      "chat_review": 0.472222,
+      "refine": 0.407407
     },
     "source_receipts": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/documentation-score-frozen.json.xz",
-    "source_sha256": "de689527ec16379a32f8f4da09aa954d215b9cfaeb04fb744b34316f41bab892",
     "unjudged_count": 0
   },
   "name": {
-    "accept_threshold": 0.709657,
+    "accept_basis": "precision",
+    "accept_threshold": 0.708523788949,
     "check_diagnostics": {
       "advisory_alias_collapsed": {
-        "accepted_flagged": 11,
-        "defects_caught": 22,
-        "separation": 0.0201,
-        "threshold": 0.46
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.0229,
+        "threshold": null
       },
       "ambiguity_in_isolation": {
-        "accepted_flagged": 14,
-        "defects_caught": 49,
-        "separation": 0.1197,
-        "threshold": 0.59
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0618,
+        "threshold": null
       },
       "bare_shape_parameter_missing_surface": {
-        "accepted_flagged": 7,
-        "defects_caught": 26,
-        "separation": 0.0666,
-        "threshold": 0.47
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0275,
+        "threshold": null
       },
       "bound_to_wrong_object": {
-        "accepted_flagged": 12,
-        "defects_caught": 54,
-        "separation": 0.1564,
-        "threshold": 0.82
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.1778,
+        "threshold": null
       },
       "collapsed_two_quantities": {
-        "accepted_flagged": 1,
+        "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": -0.0071,
+        "separation": -0.0528,
         "threshold": null
       },
       "coupled_vs_launched_confusion": {
-        "accepted_flagged": 14,
-        "defects_caught": 43,
-        "separation": 0.0928,
-        "threshold": 0.18
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0254,
+        "threshold": null
       },
       "decomposition_group_absorbed_into_base": {
-        "accepted_flagged": 5,
-        "defects_caught": 12,
-        "separation": 0.0181,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.0047,
         "threshold": null
       },
       "device_attributed_observable": {
-        "accepted_flagged": 10,
-        "defects_caught": 22,
-        "separation": 0.0272,
-        "threshold": 0.3
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0207,
+        "threshold": null
       },
       "dropped_distinguishing_axis": {
-        "accepted_flagged": 2,
-        "defects_caught": 11,
-        "separation": 0.035,
-        "threshold": 0.84
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.0077,
+        "threshold": null
       },
       "field_region_preposition_wrong": {
-        "accepted_flagged": 5,
-        "defects_caught": 7,
-        "separation": -0.0043,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.0155,
         "threshold": null
       },
       "malformed_physical_base": {
-        "accepted_flagged": 12,
-        "defects_caught": 62,
-        "separation": 0.1923,
-        "threshold": 0.08
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.1124,
+        "threshold": null
       },
       "minority_spelling_not_in_roster": {
-        "accepted_flagged": 1,
+        "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": -0.0071,
+        "separation": -0.0221,
         "threshold": null
       },
       "missing_required_segment": {
         "accepted_flagged": 14,
         "defects_caught": 74,
-        "separation": 0.2318,
+        "separation": 0.0815,
         "threshold": 0.62
       },
       "model_surname_suffix": {
-        "accepted_flagged": 11,
-        "defects_caught": 25,
-        "separation": 0.0335,
-        "threshold": 0.06
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.001,
+        "threshold": null
       },
       "non_canonical_locus_token": {
-        "accepted_flagged": 4,
-        "defects_caught": 27,
-        "separation": 0.0925,
-        "threshold": 0.38
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0216,
+        "threshold": null
       },
       "non_canonical_operator_join": {
-        "accepted_flagged": 10,
-        "defects_caught": 53,
-        "separation": 0.1662,
-        "threshold": 0.21
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0213,
+        "threshold": null
       },
       "non_canonical_render": {
-        "accepted_flagged": 1,
+        "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": -0.0071,
+        "separation": -0.0143,
         "threshold": null
       },
       "non_canonical_segment_order": {
-        "accepted_flagged": 9,
-        "defects_caught": 14,
-        "separation": -0.0015,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.002,
         "threshold": null
       },
       "ordered_sample_positional_token": {
-        "accepted_flagged": 2,
-        "defects_caught": 14,
-        "separation": 0.0485,
-        "threshold": 0.59
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.0012,
+        "threshold": null
       },
       "over_qualified_modifier": {
-        "accepted_flagged": 2,
-        "defects_caught": 10,
-        "separation": 0.0306,
-        "threshold": 0.55
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.0042,
+        "threshold": null
       },
       "over_specialised_parent": {
-        "accepted_flagged": 9,
-        "defects_caught": 21,
-        "separation": 0.0299,
-        "threshold": 0.37
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0048,
+        "threshold": null
       },
       "owner_erased_outline": {
-        "accepted_flagged": 1,
+        "accepted_flagged": 0,
         "defects_caught": 0,
-        "separation": -0.0071,
+        "separation": -0.0035,
         "threshold": null
       },
       "retired_operator_spelling": {
-        "accepted_flagged": 5,
-        "defects_caught": 10,
-        "separation": 0.0091,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.0006,
         "threshold": null
       },
       "source_binding_drift": {
-        "accepted_flagged": 1,
-        "defects_caught": 3,
-        "separation": 0.0063,
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": -0.0039,
         "threshold": null
       },
       "source_fidelity_unsupported_qualifier": {
-        "accepted_flagged": 14,
-        "defects_caught": 54,
-        "separation": 0.1422,
-        "threshold": 0.46
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0397,
+        "threshold": null
       },
       "unit_kind_inconsistent": {
-        "accepted_flagged": 14,
-        "defects_caught": 53,
-        "separation": 0.1377,
-        "threshold": 0.2
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0295,
+        "threshold": null
       },
       "unregistered_token_in_closed_segment": {
-        "accepted_flagged": 10,
-        "defects_caught": 53,
-        "separation": 0.1662,
-        "threshold": 0.26
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0194,
+        "threshold": null
       },
       "value_provenance_in_name": {
-        "accepted_flagged": 6,
-        "defects_caught": 17,
-        "separation": 0.0334,
-        "threshold": 0.1
+        "accepted_flagged": 0,
+        "defects_caught": 0,
+        "separation": 0.0037,
+        "threshold": null
       }
     },
     "check_thresholds": {
-      "advisory_alias_collapsed": 0.46,
-      "ambiguity_in_isolation": 0.59,
-      "bare_shape_parameter_missing_surface": 0.47,
-      "bound_to_wrong_object": 0.82,
-      "coupled_vs_launched_confusion": 0.18,
-      "device_attributed_observable": 0.3,
-      "dropped_distinguishing_axis": 0.84,
-      "malformed_physical_base": 0.08,
-      "missing_required_segment": 0.62,
-      "model_surname_suffix": 0.06,
-      "non_canonical_locus_token": 0.38,
-      "non_canonical_operator_join": 0.21,
-      "ordered_sample_positional_token": 0.59,
-      "over_qualified_modifier": 0.55,
-      "over_specialised_parent": 0.37,
-      "source_fidelity_unsupported_qualifier": 0.46,
-      "unit_kind_inconsistent": 0.2,
-      "unregistered_token_in_closed_segment": 0.26,
-      "value_provenance_in_name": 0.1
+      "missing_required_segment": 0.62
+    },
+    "dropped_checks": [],
+    "joint_selection": {
+      "accepted_flagged": 14,
+      "accepted_n": 140,
+      "defect_n": 223,
+      "defects_caught": 74,
+      "false_veto_rate": 0.1,
+      "selected": [
+        "missing_required_segment"
+      ]
     },
     "n": 363,
     "regularization": 10.0,
-    "reject_threshold": 0.102035,
+    "reject_threshold": 0.10243969692302993,
+    "report": {
+      "calibration": {
+        "accept_precision": 0.909091,
+        "auc": 0.795099,
+        "false_veto_rate_on_accepted": 0.1,
+        "n": 363,
+        "refine_precision": 0.840909,
+        "route_counts": {
+          "accept": 33,
+          "chat_below_reject": 5,
+          "chat_review": 237,
+          "refine": 88
+        },
+        "route_shares": {
+          "accept": 0.090909,
+          "chat_below_reject": 0.013774,
+          "chat_review": 0.652893,
+          "refine": 0.242424
+        }
+      },
+      "validation": {
+        "accept_precision": 0.75,
+        "auc": 0.745246,
+        "false_veto_rate_on_accepted": 0.18254,
+        "n": 338,
+        "refine_precision": 0.806723,
+        "route_counts": {
+          "accept": 20,
+          "chat_below_reject": 4,
+          "chat_review": 195,
+          "refine": 119
+        },
+        "route_shares": {
+          "accept": 0.059172,
+          "chat_below_reject": 0.011834,
+          "chat_review": 0.576923,
+          "refine": 0.352071
+        }
+      }
+    },
     "route_counts": {
-      "accept": 22,
-      "chat_below_reject": 0,
-      "chat_review": 67,
-      "refine": 274
+      "accept": 33,
+      "chat_below_reject": 5,
+      "chat_review": 237,
+      "refine": 88
     },
     "route_shares": {
-      "accept": 0.06060606060606061,
-      "chat_below_reject": 0.0,
-      "chat_review": 0.18457300275482094,
-      "refine": 0.7548209366391184
+      "accept": 0.090909,
+      "chat_below_reject": 0.013774,
+      "chat_review": 0.652893,
+      "refine": 0.242424
     },
     "score_intercept": -4.027030572986243,
     "score_weights": {
@@ -441,13 +519,14 @@
       "dimension:grammar": -1.1361280308414912,
       "dimension:semantic": -0.5414076714156649
     },
-    "source_receipts": "r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl",
+    "source_receipts": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl",
     "unjudged_count": 0
   },
   "policy": {
-    "accept_selection": "Name: lowest check-clear calibration score with at least five items and empirical precision at least 0.90. Docs: calibrated score bin at 0.55 with 20/25 accepted; no threshold with at least five items reached 0.90.",
-    "check_selection": "maximize defect recall minus accepted false positive rate with accepted false positive rate at most 0.10, at least two defects caught, and separation at least 0.02",
-    "reject_selection": "calibration score tenth percentile; a check-clear low-tail case uses chat_below_reject, distinct from the uncertain band",
+    "accept_selection": "lowest check-clear calibration score bin of at least 5 items at empirical precision at least 0.90; where no bin reaches it, the bin of least five items with the highest available precision",
+    "check_cutoff": "one cutoff per check, maximising defect recall minus accepted false positive rate with that rate at most 0.10, at least 2 defects caught and separation at least 0.02",
+    "check_selection": "checks are added to the veto set one at a time by the defect recall they add, holding the union of cutoffs to at most 0.10 of accepted calibration items on each axis; a check left out is not a veto and still feeds the score",
+    "reject_selection": "calibration score 10th percentile; a check-clear low-tail case uses chat_below_reject, distinct from the uncertain band",
     "unjudged_selection": "A refused lease or unusable Jev judgment writes a separate unjudged shadow row with its failure reason; unjudged rows are excluded from route shares"
   },
   "schema": "review-cascade-thresholds",
