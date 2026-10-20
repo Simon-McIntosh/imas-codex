@@ -38,6 +38,7 @@ def _node(node_id: str) -> dict[str, Any]:
         "docs_stage": "drafted",
         "reviewer_score_docs": None,
         "harmonized_group_signature": None,
+        "has_dd_source": True,
     }
 
 

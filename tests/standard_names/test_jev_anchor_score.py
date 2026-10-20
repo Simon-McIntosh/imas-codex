@@ -26,6 +26,7 @@ def _member(member_id: str, **extra: Any) -> dict[str, Any]:
         "id": member_id,
         "description": f"{member_id} described as the shared family quantity",
         "documentation": f"# {member_id}\n\nOpening sentence for this member.",
+        "has_dd_source": True,
     }
     member.update(extra)
     return member
@@ -270,6 +271,7 @@ def test_template_resolved_from_a_member_when_the_parent_id_does_not_parse(
             "the family's real base description",
             [_member("scorable")],
             parent_documentation="the parent's documentation",
+            parent_has_dd_source=True,
             pattern="p",
         )
     )
@@ -309,6 +311,7 @@ def test_an_accepted_parent_tied_at_the_top_wins_the_tie_break(
             "the base quantity's real description",
             [_member("child", docs_stage="accepted", reviewer_score_docs=0.99)],
             parent_documentation="the base quantity's documentation",
+            parent_has_dd_source=True,
             pattern="p",
         )
     )
@@ -329,6 +332,7 @@ def test_parent_node_is_offered_as_a_template(monkeypatch, _stub_template):
             "the base quantity's real description",
             [_member("child")],
             parent_documentation="the base quantity's documentation",
+            parent_has_dd_source=True,
             pattern="p",
         )
     )

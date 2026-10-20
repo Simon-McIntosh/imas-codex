@@ -926,6 +926,7 @@ def fetch_sibling_family(
         base_row.get("docs_stage"),
         base_row.get("description"),
         [r for r in other_rows if r.get("docs_stage") == "accepted"],
+        parent_has_dd_source=base_row.get("has_dd_source"),
     )
     if anchor_id is not None and anchor_id == parent_name:
         anchor = {
