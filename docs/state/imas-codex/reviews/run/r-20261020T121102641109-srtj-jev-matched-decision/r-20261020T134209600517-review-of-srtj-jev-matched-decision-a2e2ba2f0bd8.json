@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-10-20T13:53:17.081Z",
   "dispatched_at": "2026-10-20T13:42:30Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-jev-panel-audit-sample",
+      "recorded_at": "2026-10-20T13:58:16.273512+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-matched-decision.html",
