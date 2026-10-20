@@ -1,0 +1,171 @@
+{
+  "after": {
+    "gap_at_outboard_midplane": {
+      "description": "Gap at the outboard midplane is the signed major-radius separation between a measurement position and the magnetic separatrix after mapping the position along its magnetic flux surface to the outboard midplane. Positive values indicate a position outside the separatrix, in the scrape-off layer.",
+      "docs_chain_length": 3,
+      "docs_model": "openrouter/anthropic/claude-fable-5",
+      "docs_stage": "exhausted",
+      "documentation": "Gap at outboard midplane\n\nThe gap is defined by\n\n$$\ng = R_{\\mathrm{pos,mid}} - R_{\\mathrm{sep,mid}}\n$$\n\nwhere $g$ is the gap at the outboard midplane, $R_{\\mathrm{pos,mid}}$ is the major-radius coordinate of the mapped measurement position at the outboard midplane, and $R_{\\mathrm{sep,mid}}$ is the major-radius coordinate of the magnetic separatrix there. Both terms in the difference are outboard-midplane major radii of the type defined by the [radial coordinate at outboard midplane](name:radial_coordinate_at_outboard_midplane), expressed in the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height.\n\nThe quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation. It is a signed major-radius projection at the outboard midplane, not a shortest Euclidean clearance such as the [gap at plasma boundary] or the [gap at closest wall point](name:gap_at_closest_wall_point), not a plasma-wall clearance, and not the separation between inner and outer separatrices.\n\nMapping along the magnetic flux surface converts the original position into a common outboard-midplane reference before the major-radius difference is taken, so positions located anywhere on a flux surface can be compared on the same separatrix-relative scale.\n\nSign convention: Positive when the mapped measurement position lies outside the magnetic separatrix, at larger major radius $R$ than the separatrix at the outboard midplane, and therefore in the scrape-off layer.\n\nLow-field-side (outboard) equatorial midplane. The outer-midplane reference follows the DD midplane_identifier (default option 'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a value at the separatrix intersection use outboard_midplane_separatrix. Where $Z = Z_{\\mathrm{mid}},\\quad R > R_{\\mathrm{axis}}$, $Z_{\\mathrm{mid}}$ is the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given; $R_{\\mathrm{axis}}$ is major radius of the magnetic axis.",
+      "documentation_present": true,
+      "edit_mode": "hint",
+      "edit_status": "exhausted",
+      "name_stage": "accepted",
+      "reviewer_score_docs": 0.75,
+      "source_paths": [
+        "dd:summary/boundary/distance_inner_outer_separatrices/value"
+      ]
+    },
+    "radial_separatrix_distance_at_outboard_midplane": {
+      "description": "Radial distance from the plasma boundary at the outboard midplane, positive outside it.",
+      "docs_chain_length": 0,
+      "docs_model": null,
+      "docs_stage": "pending",
+      "documentation": null,
+      "documentation_present": false,
+      "edit_mode": null,
+      "edit_status": null,
+      "name_stage": "drafted",
+      "reviewer_score_docs": null,
+      "source_paths": [
+        "dd:langmuir_probes/embedded/distance_separatrix_midplane",
+        "dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane",
+        "dd:thomson_scattering/channel/distance_separatrix_midplane"
+      ]
+    }
+  },
+  "before": {
+    "gap_at_outboard_midplane": {
+      "description": "Gap at the outboard midplane is the signed major-radius separation between a measurement position and the magnetic separatrix after mapping the position along its magnetic flux surface to the outboard midplane. Positive values indicate a position outside the separatrix, in the scrape-off layer.",
+      "docs_chain_length": 3,
+      "docs_model": "openrouter/anthropic/claude-fable-5",
+      "docs_stage": "exhausted",
+      "documentation": "Gap at outboard midplane\n\nThe gap is defined by\n\n$$\ng = R_{\\mathrm{pos,mid}} - R_{\\mathrm{sep,mid}}\n$$\n\nwhere $g$ is the gap at the outboard midplane, $R_{\\mathrm{pos,mid}}$ is the major-radius coordinate of the mapped measurement position at the outboard midplane, and $R_{\\mathrm{sep,mid}}$ is the major-radius coordinate of the magnetic separatrix there. Both terms in the difference are outboard-midplane major radii of the type defined by the [radial coordinate at outboard midplane](name:radial_coordinate_at_outboard_midplane), expressed in the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height.\n\nThe quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation. It is a signed major-radius projection at the outboard midplane, not a shortest Euclidean clearance such as the [gap at plasma boundary] or the [gap at closest wall point](name:gap_at_closest_wall_point), not a plasma-wall clearance, and not the separation between inner and outer separatrices.\n\nMapping along the magnetic flux surface converts the original position into a common outboard-midplane reference before the major-radius difference is taken, so positions located anywhere on a flux surface can be compared on the same separatrix-relative scale.\n\nSign convention: Positive when the mapped measurement position lies outside the magnetic separatrix, at larger major radius $R$ than the separatrix at the outboard midplane, and therefore in the scrape-off layer.\n\nLow-field-side (outboard) equatorial midplane. The outer-midplane reference follows the DD midplane_identifier (default option 'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a value at the separatrix intersection use outboard_midplane_separatrix. Where $Z = Z_{\\mathrm{mid}},\\quad R > R_{\\mathrm{axis}}$, $Z_{\\mathrm{mid}}$ is the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given; $R_{\\mathrm{axis}}$ is major radius of the magnetic axis.",
+      "documentation_present": true,
+      "edit_mode": "hint",
+      "edit_status": "exhausted",
+      "name_stage": "accepted",
+      "reviewer_score_docs": 0.75,
+      "source_paths": [
+        "dd:summary/boundary/distance_inner_outer_separatrices/value"
+      ]
+    },
+    "radial_separatrix_distance_at_outboard_midplane": {
+      "description": "Radial distance from the plasma boundary at the outboard midplane, positive outside it.",
+      "docs_chain_length": 0,
+      "docs_model": null,
+      "docs_stage": "pending",
+      "documentation": null,
+      "documentation_present": false,
+      "edit_mode": null,
+      "edit_status": null,
+      "name_stage": "drafted",
+      "reviewer_score_docs": null,
+      "source_paths": [
+        "dd:langmuir_probes/embedded/distance_separatrix_midplane",
+        "dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane",
+        "dd:thomson_scattering/channel/distance_separatrix_midplane"
+      ]
+    }
+  },
+  "before_after_identical": true,
+  "before_after_note": "the documentation stage claimed no work (every docs pool processed 0), so the graph state is unchanged; before and after are the same single read and are recorded once rather than duplicated",
+  "blocker": {
+    "acceptance_threshold": 0.85,
+    "gap_at_outboard_midplane": "name_stage=accepted but docs_stage=exhausted; generate_docs requires docs_stage=pending, so a prior docs reset is required",
+    "radial_separatrix_distance_at_outboard_midplane": "docs_stage=pending but name_stage=drafted; generate_docs requires name_stage=accepted, so name acceptance is required",
+    "summary": "neither name is in a state the documentation pools claim"
+  },
+  "dry_run_output": "Exact-name dry run: 2 existing name(s) eligible; no graph writes performed",
+  "invocation": {
+    "dry_run": "uv run --no-sync imas-codex sn run --docs-only --name gap_at_outboard_midplane --name radial_separatrix_distance_at_outboard_midplane --dry-run --skip-global-maintenance",
+    "live": "uv run --no-sync imas-codex sn run --docs-only --name gap_at_outboard_midplane --name radial_separatrix_distance_at_outboard_midplane --cost-limit 0.90 --skip-global-maintenance"
+  },
+  "node": "shc-gap-docs-regen",
+  "read_checks": {
+    "gap_at_outboard_midplane": {
+      "dd_field_or_path_hits": [
+        "dr_dz_zero_sep",
+        "midplane_identifier"
+      ],
+      "has_documentation": true,
+      "names_dd_field_or_path": true,
+      "names_option_value": true,
+      "option_value_hits": [
+        ""
+      ],
+      "score": 0.75,
+      "score_at_or_above_threshold": false
+    },
+    "radial_separatrix_distance_at_outboard_midplane": {
+      "dd_field_or_path_hits": [],
+      "has_documentation": false,
+      "names_dd_field_or_path": false,
+      "names_option_value": false,
+      "option_value_hits": [],
+      "score": null,
+      "score_at_or_above_threshold": false
+    }
+  },
+  "run_id": "90a76a40-f6fc-44df-83f0-d49ba887be0e",
+  "run_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T202608740663-shc-gap-docs-regen/logs/sn-run-docs-only.log",
+  "run_outcome": {
+    "cost_limit_usd": 0.9,
+    "cost_spent_usd": 0.0,
+    "docs_pools_processed": {
+      "generate_docs": {
+        "processed": 0,
+        "spent_usd": 0.0
+      },
+      "refine_docs": {
+        "processed": 0,
+        "spent_usd": 0.0
+      },
+      "review_docs": {
+        "processed": 0,
+        "spent_usd": 0.0
+      }
+    },
+    "exit": 0,
+    "names_regenerated": 0,
+    "stop_reason": "no_eligible_work"
+  },
+  "spend": {
+    "authorized_usd": 1.0,
+    "basis": "the run's own summary table in the log",
+    "spent_usd": 0.0
+  },
+  "state": {
+    "gap_at_outboard_midplane": {
+      "description": "Gap at the outboard midplane is the signed major-radius separation between a measurement position and the magnetic separatrix after mapping the position along its magnetic flux surface to the outboard midplane. Positive values indicate a position outside the separatrix, in the scrape-off layer.",
+      "docs_chain_length": 3,
+      "docs_model": "openrouter/anthropic/claude-fable-5",
+      "docs_stage": "exhausted",
+      "documentation": "Gap at outboard midplane\n\nThe gap is defined by\n\n$$\ng = R_{\\mathrm{pos,mid}} - R_{\\mathrm{sep,mid}}\n$$\n\nwhere $g$ is the gap at the outboard midplane, $R_{\\mathrm{pos,mid}}$ is the major-radius coordinate of the mapped measurement position at the outboard midplane, and $R_{\\mathrm{sep,mid}}$ is the major-radius coordinate of the magnetic separatrix there. Both terms in the difference are outboard-midplane major radii of the type defined by the [radial coordinate at outboard midplane](name:radial_coordinate_at_outboard_midplane), expressed in the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height.\n\nThe quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation. It is a signed major-radius projection at the outboard midplane, not a shortest Euclidean clearance such as the [gap at plasma boundary] or the [gap at closest wall point](name:gap_at_closest_wall_point), not a plasma-wall clearance, and not the separation between inner and outer separatrices.\n\nMapping along the magnetic flux surface converts the original position into a common outboard-midplane reference before the major-radius difference is taken, so positions located anywhere on a flux surface can be compared on the same separatrix-relative scale.\n\nSign convention: Positive when the mapped measurement position lies outside the magnetic separatrix, at larger major radius $R$ than the separatrix at the outboard midplane, and therefore in the scrape-off layer.\n\nLow-field-side (outboard) equatorial midplane. The outer-midplane reference follows the DD midplane_identifier (default option 'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a value at the separatrix intersection use outboard_midplane_separatrix. Where $Z = Z_{\\mathrm{mid}},\\quad R > R_{\\mathrm{axis}}$, $Z_{\\mathrm{mid}}$ is the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given; $R_{\\mathrm{axis}}$ is major radius of the magnetic axis.",
+      "documentation_present": true,
+      "edit_mode": "hint",
+      "edit_status": "exhausted",
+      "name_stage": "accepted",
+      "reviewer_score_docs": 0.75,
+      "source_paths": [
+        "dd:summary/boundary/distance_inner_outer_separatrices/value"
+      ]
+    },
+    "radial_separatrix_distance_at_outboard_midplane": {
+      "description": "Radial distance from the plasma boundary at the outboard midplane, positive outside it.",
+      "docs_chain_length": 0,
+      "docs_model": null,
+      "docs_stage": "pending",
+      "documentation": null,
+      "documentation_present": false,
+      "edit_mode": null,
+      "edit_status": null,
+      "name_stage": "drafted",
+      "reviewer_score_docs": null,
+      "source_paths": [
+        "dd:langmuir_probes/embedded/distance_separatrix_midplane",
+        "dd:langmuir_probes/reciprocating/plunge/distance_separatrix_midplane",
+        "dd:thomson_scattering/channel/distance_separatrix_midplane"
+      ]
+    }
+  }
+}

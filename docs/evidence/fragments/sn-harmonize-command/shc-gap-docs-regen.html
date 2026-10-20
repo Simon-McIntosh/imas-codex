@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-gap-docs-regen">
+  <title>Regenerating the split gap names' documentation is blocked by their lifecycle state</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-gap-docs-regen-title">The documentation-only scope claims neither gap name: the two names are not in a state any docs pool admits</h1>
+
+  <p id="shc-gap-docs-regen-invocation">
+    The sanctioned invocation the plan names is the documentation-only worker
+    scope over the two names, confirmed first with its dry run:
+    <code>uv run --no-sync imas-codex sn run --docs-only --name
+    gap_at_outboard_midplane --name
+    radial_separatrix_distance_at_outboard_midplane --dry-run</code> reported
+    &ldquo;Exact-name dry run: 2 existing name(s) eligible; no graph writes
+    performed&rdquo;. The live run dropped <code>--dry-run</code>, added
+    <code>--cost-limit 0.90 --skip-global-maintenance</code> and exited 0. Its
+    own log is
+    <code>~/.local/share/imas-codex/logs/&hellip;</code> for the pipeline
+    internals and the run copy at
+    <code>r-20261020T202608740663-shc-gap-docs-regen/logs/sn-run-docs-only.log</code>.
+  </p>
+
+  <p id="shc-gap-docs-regen-outcome">
+    The run regenerated nothing. Every documentation pool claimed zero work
+    (<code>generate_docs</code>, <code>review_docs</code>,
+    <code>refine_docs</code> each <code>processed=0</code>,
+    <code>spent=$0.0000</code>), the summary table reads
+    <code>stop_reason=no_eligible_work</code>, <code>cost_spent=0.0</code>,
+    <code>names_regenerated=0</code>, and the pools exited after 30 idle polls.
+    Spend was <code>$0.00</code> of the <code>$1.00</code> cap, against a
+    <code>$0.90</code> run limit.
+  </p>
+
+  <p id="shc-gap-docs-regen-why">
+    Both names sit outside the documentation stage's claim predicate, which
+    under a scoped run is <code>name_stage = 'accepted' AND docs_stage =
+    'pending'</code> for <code>generate_docs</code>.
+    <code>gap_at_outboard_midplane</code> is <code>name_stage='accepted'</code>
+    but <code>docs_stage='exhausted'</code> &mdash; a prior steered docs edit
+    reset it, regenerated it and left it exhausted at
+    <code>reviewer_score_docs=0.75</code>, so before it can re-enter the docs
+    stage its docs must be reset from <code>exhausted</code> to
+    <code>pending</code>.
+    <code>radial_separatrix_distance_at_outboard_midplane</code> is
+    <code>docs_stage='pending'</code> but <code>name_stage='drafted'</code> &mdash;
+    revived to <code>drafted</code> by the split's merge <code>f114daa47</code>
+    &mdash; so it cannot receive documentation until its <em>name</em> earns
+    acceptance, and its recorded <code>reviewer_score_name</code> is
+    <code>0.80625</code>, below the <code>0.85</code> acceptance threshold. The
+    documentation-only scope performs neither of these state transitions, and
+    neither is a production-code change, so the node stops and reports the
+    missing precondition rather than working around it with a hand graph write.
+  </p>
+
+  <p id="shc-gap-docs-regen-state">
+    Before and after are the same state, because the run changed nothing.
+    <code>gap_at_outboard_midplane</code>: documentation present, score
+    <code>0.75</code>, <code>docs_stage='exhausted'</code>; its text still ends
+    <em>&ldquo;&hellip; follows the DD <code>midplane_identifier</code> (default
+    option <code>'dr_dz_zero_sep'</code>&hellip;)&rdquo;</em>, naming both a DD
+    field and an option value.
+    <code>radial_separatrix_distance_at_outboard_midplane</code>: no
+    documentation, no docs score, description only.
+  </p>
+
+  <p id="shc-gap-docs-regen-checks">
+    Read-back checks over the live graph: <code>gap_at_outboard_midplane</code>
+    <span>fails</span> &mdash; it <em>does</em> name a DD field
+    (<code>midplane_identifier</code>) and an option value
+    (<code>dr_dz_zero_sep</code>), and its score <code>0.75</code> is below
+    <code>0.85</code>. <code>radial_separatrix_distance_at_outboard_midplane</code>
+    carries no documentation and no score, so it also fails. Neither name can be
+    certified as describing only its own quantity while one holds the
+    pre-split text and the other holds none.
+  </p>
+
+  <p id="shc-gap-docs-regen-record">
+    The machine record is beside this fragment at
+    <code>shc-gap-docs-regen.json</code>, written by
+    <code>shc-gap-docs-regen-run.py</code>; the runner's log ends
+    <code>EXIT=0</code>. The runner reads both names' lifecycle, scores and
+    documentation from the live graph and evaluates the plan's read-back
+    checks; it performed no graph write.
+  </p>
+
+  <p id="shc-gap-docs-regen-next">
+    Unblocking needs, on the sanctioned paths only: a docs reset for
+    <code>gap_at_outboard_midplane</code> ahead of the ordinary docs pools (the
+    family-harmonization mark step already does this for an accepted member),
+    and name acceptance for
+    <code>radial_separatrix_distance_at_outboard_midplane</code> &mdash; its
+    current name score is below threshold, so that is a review/refine decision,
+    not a docs one. A subsequent <code>sn run --docs-only</code> over the two
+    names can then regenerate and re-score them.
+  </p>
+</main>
+</body>
+</html>
