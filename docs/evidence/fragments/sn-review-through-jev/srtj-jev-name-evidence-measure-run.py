@@ -47,6 +47,7 @@ FIELDS = (
     "owner_segment",
 )
 SPLITS = ("calibration", "validation")
+PRESENCE_CODES = {"nonempty": "N", "empty": "E", "unobserved": "U", "missing": "M"}
 CEILING = 2.0
 RESERVE = 0.10
 SOURCE_QUERY = """
@@ -178,7 +179,7 @@ def prepare(run):
     assert before_counts["dd_source_docs"]["empty"] == 406
     assert before_counts["parent_path"]["unobserved"] == 411
     assert before_counts["derived_children"]["unobserved"] == 701
-    assert before_counts["sibling_names"]["empty"] == 701
+    assert before_counts["sibling_fields"]["unobserved"] == 701
     print("frozen reproduction:", json.dumps(before_counts), flush=True)
     graph = ReadOnlyGraph()
     try:
@@ -196,6 +197,22 @@ def prepare(run):
         assert count["names"] == sum(bool(row["found"]) for row in live.values())
         assert count["sources"] == sum(len(row["sources"]) for row in live.values())
         assert count["documented"] > 0
+        sibling_control = graph.query(
+            """MATCH (node:IMASNode {id:$path})-[:HAS_PARENT]->(parent:IMASNode)
+            OPTIONAL MATCH (parent)-[:HAS_CHILD]->(forward:IMASNode)
+            OPTIONAL MATCH (inverse:IMASNode)-[:HAS_PARENT]->(parent)
+            RETURN parent.id AS parent, count(DISTINCT forward) AS forward_count,
+                   count(DISTINCT inverse) AS inverse_count""",
+            path="core_profiles/global_quantities/ip",
+        )[0]
+        assert sibling_control["inverse_count"] > 1
+        print("DD sibling traversal control:", json.dumps(sibling_control), flush=True)
+        # The live DD stores child-to-parent edges without reciprocal child edges.
+        assert _DD_CONTEXT_QUERY.count("(parent)-[:HAS_CHILD]->(sibling:IMASNode)") == 1
+        context_query = _DD_CONTEXT_QUERY.replace(
+            "(parent)-[:HAS_CHILD]->(sibling:IMASNode)",
+            "(sibling:IMASNode)-[:HAS_PARENT]->(parent)",
+        )
         paths = sorted(
             {
                 (source.get("dd_path") or source["source_id"]).removeprefix("dd:")
@@ -206,10 +223,15 @@ def prepare(run):
         )
         dd = {}
         for path in paths:
-            rows = graph.query(_DD_CONTEXT_QUERY, path=path)
+            rows = graph.query(context_query, path=path)
             assert len(rows) == 1, (path, len(rows))
             dd[path] = rows[0]
         assert any(row["node_documentation"] for row in dd.values())
+        assert any(
+            sibling.get("path")
+            for row in dd.values()
+            for sibling in row["sibling_fields"]
+        )
         items, metadata = {}, {}
         for name in matched:
             item = unflatten(frozen[name]["state"])
@@ -255,6 +277,18 @@ def prepare(run):
                         siblings[sibling["path"]] = sibling
             family = fetch_sibling_family(name, gc=graph)
             assert not graph.errors, graph.errors
+            name_siblings = {
+                sibling["id"]: sibling for sibling in item.get("sibling_names") or []
+            }
+            name_siblings.update(
+                {
+                    sibling["name"]: {
+                        "id": sibling["name"],
+                        "description": sibling["description"],
+                    }
+                    for sibling in (family or {}).get("siblings", [])
+                }
+            )
             children = (
                 graph.query(_DOCS_GEN_PARENT_CHILDREN_QUERY, sn_id=name)
                 if row["origin"] == "derived"
@@ -264,11 +298,9 @@ def prepare(run):
                 dd_source_docs=source_docs,
                 source_paths=sorted({doc["id"] for doc in source_docs}),
                 parent_path=next(iter(dict.fromkeys(parent_paths)), ""),
+                owner_segment=None,
                 sibling_fields=[siblings[key] for key in sorted(siblings)],
-                sibling_names=[
-                    {"id": s["name"], "description": s["description"]}
-                    for s in (family or {}).get("siblings", [])
-                ],
+                sibling_names=list(name_siblings.values()),
                 derived_children=children,
             )
             state = jev.build_name_state(item)
@@ -296,6 +328,7 @@ def prepare(run):
             "source_rows": live,
             "dd_context": dd,
             "controls": count,
+            "sibling_traversal_control": sibling_control,
             "query_count": graph.calls,
             "before_counts": before_counts,
             "excluded": {
@@ -574,10 +607,13 @@ def summarize(run, resamples):
         "observed_at": snapshot["observed_at"],
         "exclusions": snapshot["excluded"],
         "controls": snapshot["controls"],
+        "sibling_traversal_control": snapshot["sibling_traversal_control"],
         "frozen_reproduction": snapshot["before_counts"],
         "tables": tables,
         "evidence_presence": presence_counts,
         "presence_fields": FIELDS,
+        "presence_codes": PRESENCE_CODES,
+        "changed_field_encoding": "zero-based indices into presence_fields",
         "item_columns": [
             "id",
             "split",
@@ -592,10 +628,16 @@ def summarize(run, resamples):
                 row["id"],
                 row["split"],
                 row["label"],
-                [presence(frozen[row["id"]]["state"], f) for f in FIELDS],
-                [presence(after[row["id"]]["state"], f) for f in FIELDS],
-                row["changed"],
-                row["added_nonempty"],
+                "".join(
+                    PRESENCE_CODES[presence(frozen[row["id"]]["state"], f)]
+                    for f in FIELDS
+                ),
+                "".join(
+                    PRESENCE_CODES[presence(after[row["id"]]["state"], f)]
+                    for f in FIELDS
+                ),
+                [FIELDS.index(f) for f in row["changed"]],
+                [FIELDS.index(f) for f in row["added_nonempty"]],
             ]
             for row in rows
         ],
@@ -648,12 +690,14 @@ def summarize(run, resamples):
 def render(report):
     parts = [
         f'<section id="{STEM}"><h2>Name review with live source and family evidence</h2>',
-        "<p>Candidate identities, descriptions, questions and fitted mappings are fixed. "
+        "<p>Candidate identities, descriptions, the physical-base roster, questions and fitted mappings are fixed. "
         "The supplied arm reads exact PRODUCED_NAME bindings, pinned DD documentation "
         "(live DD text only for unpinned sources), parent paths, DD sibling fields, "
-        "name families and derived children. The driver mirrors claim_review_names "
-        "and _enrich_name_review_items, reuses _DD_CONTEXT_QUERY, fetch_sibling_family "
-        "and _DOCS_GEN_PARENT_CHILDREN_QUERY. All transactions are read-only.</p>",
+        "name families and derived children. Existing frozen name comparators are retained; "
+        "live family members augment them. The driver mirrors claim_review_names "
+        "and _enrich_name_review_items, reuses fetch_sibling_family "
+        "and _DOCS_GEN_PARENT_CHILDREN_QUERY, and adapts _DD_CONTEXT_QUERY to read "
+        "siblings through incoming HAS_PARENT edges. All transactions are read-only.</p>",
         f"<p>{report['review_calls']} single review calls through review_names under sn-judge "
         f"({html.escape(report['model'])}); USD {report['spend_usd']:.8f} of USD 2.00. "
         "Sibling order is retained without the optional paid rerank. No product code "
@@ -747,6 +791,14 @@ def render(report):
         "were reproduced. Tables were checked against separately recomputed counts "
         "from golden identities and persisted receipts.</p></section>"
     )
+    parts[-1] = parts[-1].replace(
+        "</section>",
+        "<p>The production DD context reader traverses parent HAS_CHILD edges, "
+        "which returned no sibling fields over 932 source paths. A positive control "
+        "at core_profiles/global_quantities/ip finds zero outgoing HAS_CHILD edges "
+        "but 73 incoming HAS_PARENT children. The driver uses the latter direction; "
+        "the product reader repair remains outside this node's scope.</p></section>",
+    )
     text = "\n".join(parts)
     parsed_rows = [
         [html.unescape(cell) for cell in re.findall(r"<td>(.*?)</td>", row)]
@@ -767,12 +819,23 @@ def main():
     print("measurement_module=" + cascade.__file__, flush=True)
     print("measurement_cwd=" + str(Path.cwd().resolve()), flush=True)
     controls()
-    if args.action in {"prepare", "all"}:
-        prepare(args.run_dir)
-    if args.action in {"collect", "all"}:
-        asyncio.run(collect(args.run_dir))
-    if args.action in {"report", "all"}:
-        summarize(args.run_dir, args.resamples)
+    frozen = receipt_map(calibration.DEFAULT_NAME_RECEIPTS)
+    labels = calibration._labels(calibration.GOLDEN_NAME)
+    rosters = {
+        tuple(record["state"]["neighbourhood"]["physical_base_roster"]["value"])
+        for name, record in frozen.items()
+        if name in labels
+    }
+    assert len(rosters) == 1
+    roster = next(iter(rosters))
+    print("fixed roster size=" + str(len(roster)), flush=True)
+    with patch.object(jev, "_physical_base_roster", lambda: roster):
+        if args.action in {"prepare", "all"}:
+            prepare(args.run_dir)
+        if args.action in {"collect", "all"}:
+            asyncio.run(collect(args.run_dir))
+        if args.action in {"report", "all"}:
+            summarize(args.run_dir, args.resamples)
 
 
 if __name__ == "__main__":
