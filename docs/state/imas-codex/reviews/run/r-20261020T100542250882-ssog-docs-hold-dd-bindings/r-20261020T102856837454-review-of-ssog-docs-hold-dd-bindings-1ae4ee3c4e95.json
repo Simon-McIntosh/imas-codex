@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-20T10:35:31.355Z",
+  "dispatched_at": "2026-10-20T10:29:25Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": 10948,
+      "severity": "follow-on",
+      "text": "follow-on: the landed guard `_has_dd_source_reference` is called only when `_bound_docs_review_dd_paths` has already returned empty, and that owner returns bare `source_paths` whenever no `dd` binding exists \u2014 so an item whose only source path is a facility entry (e.g. `tcv:ip/measured`, no dd binding) still takes the hold note 'DD source text unavailable; claim comparison could not run' although it names no DD text. That is the same false hold the node exists to remove, reached by a different trigger; the node's own manifest evidence_inputs discloses the mechanism but the brief's 'What to change' named `_bound_docs_review_dd_paths` as the DD-source test, so the implementation follows the brief as written. Does not hold the node; a follow-on node should decide whether a facility-only source counts as a DD source for this hold."
+    },
+    {
+      "file": "tests/standard_names/test_docs_hold_dd_bindings.py",
+      "line": 71,
+      "severity": "follow-on",
+      "text": "follow-on: the expected value is built from `DD_PATH`, the same module constant used to construct the input binding at line 67, so the two sides move together: an implementation that returned the path it was handed regardless of which path it was handed (or that mis-derived the path) passes as long as the tests keep using the one constant. The assertion does redden on the fallback regression it is paired with, and the independent `is None` assertions at lines 45/60 carry the node's durability, so this weakens rather than voids the guard."
+    },
+    {
+      "file": "tests/standard_names/test_docs_hold_dd_bindings.py",
+      "line": 78,
+      "severity": "follow-on",
+      "text": "follow-on: same shape as line 71 \u2014 the note's expected path is the `DD_PATH` constant that also constitutes the `source_paths` entry passed in at line 76, so the assertion cannot distinguish a correctly reported path from the constant itself; it verifies the branch is still reached (it would redden if the missing-text branch stopped holding) but not that the reported path came from the item."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261020T102856837454-review-of-ssog-docs-hold-dd-bindings-1ae4ee3c4e95",
+  "reviewed_base_sha": "fe3c8b79e767850d02730b9a58eae6eb7eca6057",
+  "reviewed_head_sha": "1ae4ee3c4e95209ecbdc358e47d12ae899bb26ea",
+  "reviewed_run_id": "r-20261020T100542250882-ssog-docs-hold-dd-bindings",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T10:36:23.300229+00:00",
+  "total": 112
+}
