@@ -16,6 +16,11 @@
   "completed_at": "2026-10-20T11:32:52.480Z",
   "dispatched_at": "2026-10-20T11:27:06Z",
   "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the out-of-scope edits were the consequence of the coordinator's advice to fail closed and carry the flag through _row_to_member; each path is accepted with its reason at landing",
+      "recorded_at": "2026-10-20T11:37:36.758728+00:00"
+    },
     "1": {
       "kind": "folded",
       "node": "ssog-anchor-ab-rerun",
