@@ -328,8 +328,9 @@ def render_fragment(
         f"families, {len(heur_changed)} change heuristic anchor and "
         f"{len(jev_changed)} change judged anchor once a member needs a "
         "producing Data Dictionary source to be eligible; "
-        f"{len(changed_any)} change in at least one arm and {len(dropped)} are "
-        "left with no eligible anchor in either arm.</strong> The families and "
+        f"{len(changed_any)} change in at least one arm and {len(dropped)} "
+        f"{'is' if len(dropped) == 1 else 'are'} left with no eligible anchor in "
+        "either arm.</strong> The families and "
         "the adoption rule are the ones fixed in <code>selection.json</code>; "
         "only the two anchors per family are re-derived, from a scratch copy of "
         "the checked export. Both arms now refuse a member with no DD source: "
@@ -409,6 +410,37 @@ def render_fragment(
         )
     out.append("</ul>")
 
+    # Two different things moved a judged anchor, and they are not the same
+    # finding: the rule disqualified the anchor it had before, or the judge
+    # re-scored the family's eligible members and ranked a different one first.
+    # Only the first is the DD-source rule; the second is the judged arm being
+    # a fresh score, and the record must say which is which.
+    rule_caused = [
+        d
+        for d in derived
+        if (
+            d["heuristic_changed"] and d["heuristic_previous"] in d["unsourced_members"]
+        )
+        or (d["jev_changed"] and d["jev_previous"] in d["unsourced_members"])
+    ]
+    rescore_caused = [
+        d
+        for d in derived
+        if d["jev_changed"] and d["jev_previous"] not in d["unsourced_members"]
+    ]
+    out.append(
+        '<p id="ssog-anchor-reselect-attribution">Two different things moved an '
+        "anchor, and only one of them is the rule. "
+        f"In {len(rule_caused)} families the anchor that arm had before lost its "
+        "eligibility -- the member has no producing DD source in this export -- "
+        "so the rule replaces it. In "
+        f"{len(rescore_caused)} families a judged-arm anchor moved while the "
+        "previous anchor was still eligible: the judged arm is a fresh score "
+        "over the eligible members, so its choice can differ from the snapshot "
+        "for that reason alone, and those moves are not evidence about the "
+        "DD-source rule. Every heuristic-arm change is of the first kind.</p>"
+    )
+
     out.append(
         '<h3 id="ssog-anchor-reselect-flagged-heading">Families with no eligible '
         "anchor</h3>"
@@ -419,7 +451,11 @@ def render_fragment(
             out.append(
                 f'<li id="ssog-anchor-reselect-flagged-{i}">{code(d["seed"])} has '
                 "no DD-sourced member and therefore no eligible anchor in either "
-                "arm; it drops out of the re-run with this reason.</li>"
+                "arm; it drops out of the re-run with this reason. None of its "
+                f"{d['member_count']} members carries a producing DD source in "
+                "this export ("
+                + ", ".join(esc(u) for u in d["unsourced_members"])
+                + "); no other family was substituted for it.</li>"
             )
         out.append("</ul>")
     else:
@@ -428,6 +464,31 @@ def render_fragment(
             "an eligible anchor: every family keeps at least one DD-sourced "
             "member, so all ten remain in the re-run.</p>"
         )
+
+    out.append(
+        '<h3 id="ssog-anchor-reselect-verified-heading">The zero that drops a '
+        "family, checked</h3>"
+    )
+    out.append(
+        '<p id="ssog-anchor-reselect-verified">A family carrying no DD-sourced '
+        "member decides whether it drops out, so the zero was read a second way "
+        "-- through the raw <code>PRODUCED_NAME</code> edge, not the family "
+        "query's flag -- with a member known to be DD-sourced read through the "
+        "same statement as a positive control. On the checked export "
+        "<code>current_density_due_to_wave_driven_current_drive</code> and "
+        "<code>current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code> "
+        "carry only a <code>derived</code> source and "
+        "<code>parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code> "
+        "carries none at all, while the control "
+        "<code>upper_bound_wavelength_of_visible_camera</code> reads a live "
+        "<code>dd</code> source at "
+        "<code>dd:camera_visible/channel/detector/wavelength_upper</code>. The "
+        "instrument therefore reads a known-present value where one exists, and "
+        "the zero is a property of this export rather than of the projection: "
+        "the live-graph snapshot recorded in "
+        "<code>ssog-anchor-needs-dd-source</code> measured 1 of 3 DD-sourced "
+        "members for this family, and this export predates that edge.</p>"
+    )
 
     out.append(
         '<h3 id="ssog-anchor-reselect-runner-heading">The runner reads its anchors '
@@ -439,8 +500,10 @@ def render_fragment(
         "and each arm's target anchor is the corresponding key of that family's "
         "row -- "
         + "; ".join(f"<code>{esc(r)}</code>" for r in runner_check["anchor_reads"])
-        + ". No standard-name literal appears anywhere in the runner, so it pins "
-        "no anchor beside the file.</p>"
+        + ". Every family seed and member id in the selection ("
+        + f"{runner_check['selection_ids_checked']} ids) was then searched for in "
+        "the runner's source as a quoted literal: none appears, so the runner "
+        "pins no family or anchor beside the file.</p>"
     )
 
     out.append(
@@ -457,7 +520,68 @@ def render_fragment(
     return "\n".join(out) + "\n"
 
 
-async def run() -> dict:
+_DD_EDGES_QUERY = """
+MATCH (m:StandardName {id: $id})
+OPTIONAL MATCH (m)<-[e:PRODUCED_NAME]-(s:StandardNameSource)
+RETURN m.id AS id,
+       coalesce(m.name_stage, '') AS name_stage,
+       collect({source_id: s.id, source_type: s.source_type,
+                status: s.status}) AS sources
+"""
+
+_KNOWN_SOURCED = "upper_bound_wavelength_of_visible_camera"
+
+
+def verify_dd_sources(gc: GraphClient, family_seed: str, selection: dict) -> dict:
+    """Read one family's DD edges directly, and one known-sourced control.
+
+    A family measuring zero DD-sourced members decides whether it drops out,
+    and a zero is a claim about the instrument until the instrument is seen to
+    read a known-present value. This reads each of the family's members through
+    the raw producing edge -- no family query, no flag -- so "no DD source" can
+    be told from "the projection is broken", and reads a member known sourced
+    through the same statement as the positive control.
+    """
+    row = next(r for r in selection["selected"] if r["seed"] == family_seed)
+    members = []
+    for member_id in sorted(row["members"]):
+        record = gc.query(_DD_EDGES_QUERY, id=member_id)[0]
+        dd = [
+            s
+            for s in record["sources"]
+            if s.get("source_type") == "dd" and str(s.get("status") or "") != "stale"
+        ]
+        members.append(
+            {
+                "id": member_id,
+                "name_stage": record["name_stage"],
+                "sources": record["sources"],
+                "live_dd_sources": dd,
+            }
+        )
+    control = gc.query(_DD_EDGES_QUERY, id=_KNOWN_SOURCED)[0]
+    control_dd = [
+        s
+        for s in control["sources"]
+        if s.get("source_type") == "dd" and str(s.get("status") or "") != "stale"
+    ]
+    if not control_dd:
+        raise RuntimeError(
+            f"Positive control failed: {_KNOWN_SOURCED} reads no DD source "
+            f"through the raw producing edge, so a zero elsewhere is "
+            f"uninformative: {control['sources']}"
+        )
+    return {
+        "family": family_seed,
+        "members": members,
+        "controls": {
+            "known_sourced_member": _KNOWN_SOURCED,
+            "live_dd_sources": control_dd,
+        },
+    }
+
+
+async def run(verify_family: str | None = None) -> dict:
     selection = json.loads(SELECTION.read_text())
     runner_check = runner_anchor_source()
     print(f"runner anchor reads ok: {runner_check['anchor_reads']}", flush=True)
@@ -495,6 +619,10 @@ async def run() -> dict:
         derived: list[dict] = []
         spend = 0.0
         with GraphClient(uri=uri) as gc:
+            if verify_family:
+                summary["verify"] = verify_dd_sources(gc, verify_family, selection)
+                print(json.dumps(summary["verify"], indent=2), flush=True)
+                return summary
             for row in selection["selected"]:
                 d = await derive_one(gc, row)
                 spend += d["jev_cost"] or 0.0
@@ -583,12 +711,60 @@ def main() -> None:
         default=os.environ.get("SSOG_RESELECT_SUMMARY", ""),
         help="Path to write the run summary JSON to.",
     )
+    ap.add_argument(
+        "--verify-family",
+        default="",
+        help="Read one family's DD producing edges directly, with a known-sourced "
+        "member as positive control, and write no deliverable.",
+    )
+    ap.add_argument(
+        "--render-only",
+        default="",
+        help="Rewrite the evidence fragment from a saved derivation summary, "
+        "re-scoring nothing and touching no graph.",
+    )
     args = ap.parse_args()
-    summary = asyncio.run(run())
+    if args.render_only:
+        render_only(Path(args.render_only))
+        return
+    summary = asyncio.run(run(verify_family=args.verify_family))
     if args.summary:
         Path(args.summary).write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps({k: summary[k] for k in summary if k != "derived"}))
     print("summary written", flush=True)
+
+
+def render_only(summary_path: Path) -> None:
+    """Rebuild the fragment from a saved summary, deriving no anchors again.
+
+    The judged anchors are a fresh score, so re-running the derivation to
+    correct the fragment's prose could change the anchors the fragment exists
+    to report. Rendering from the recorded summary keeps the measurements and
+    changes only their presentation.
+    """
+    summary = json.loads(summary_path.read_text())
+    derived = []
+    for d in summary["derived"]:
+        row = dict(d)
+        row["heur_reason"] = change_reason(
+            "heuristic",
+            d["heuristic_previous"],
+            d["heuristic_new"],
+            d["unsourced_members"],
+        )
+        row["jev_reason_text"] = change_reason(
+            "jev", d["jev_previous"], d["jev_new"], d["unsourced_members"]
+        )
+        derived.append(row)
+    FRAGMENT.write_text(
+        render_fragment(
+            derived,
+            summary["runner_check"],
+            summary["spend_usd"],
+            summary["source_export"],
+        )
+    )
+    print(f"wrote {FRAGMENT} from {summary_path}", flush=True)
 
 
 if __name__ == "__main__":

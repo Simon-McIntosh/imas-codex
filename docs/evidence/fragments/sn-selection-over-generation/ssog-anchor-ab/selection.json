@@ -3,8 +3,35 @@
     "registered_at": "2026-10-18T10:45:18.869980+00:00",
     "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
   },
+  "reselect": {
+    "derived_at": "2026-10-20T13:45:53.849254+00:00",
+    "previous_anchors_fixed_at": "2026-10-19T04:05:25Z",
+    "previous_anchors_fixed_in": "5ba65454d",
+    "rule": "Both arms re-derived under the DD-source rule: a family anchor needs a producing Data Dictionary source.",
+    "runner_reads_anchors_from_selection": {
+      "anchor_reads": [
+        "target_anchor = row[\"heuristic_anchor\"] if arm == \"heuristic\" else row[\"jev_anchor\"]",
+        "\"heuristic_anchor\": row[\"heuristic_anchor\"],",
+        "\"jev_anchor\": row[\"jev_anchor\"],"
+      ],
+      "loads_selection": true,
+      "pinned_anchor_literals": [],
+      "runner": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-reselect/docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
+      "selection_ids_checked": 36
+    },
+    "spend_limit_usd": 0.5,
+    "spend_usd": 0.000906612
+  },
   "selected": [
     {
+      "anchor_change_reason": {
+        "heuristic": "heuristic unchanged: the previous anchor remains eligible",
+        "jev": "jev unchanged: the previous anchor remains eligible"
+      },
+      "anchor_changed": {
+        "heuristic": false,
+        "jev": false
+      },
       "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
       "jev_anchor": "y_coordinate_of_diagnostic_aperture",
       "jev_asked": [
@@ -21,12 +48,34 @@
         "x_coordinate_of_diagnostic_aperture",
         "y_coordinate_of_diagnostic_aperture"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+        "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+        "jev_asked": [
+          "vertical_coordinate_of_diagnostic_aperture",
+          "x_coordinate_of_diagnostic_aperture",
+          "y_coordinate_of_diagnostic_aperture"
+        ],
+        "jev_cost": 0.000103068,
+        "jev_scored": 3
+      },
       "seed": "vertical_coordinate_of_diagnostic_aperture"
     },
     {
+      "anchor_change_reason": {
+        "heuristic": "heuristic unchanged: the previous anchor remains eligible",
+        "jev": "jev changed vertical_angular_width_of_camera -> toroidal_angular_width_of_camera: the previous anchor vertical_angular_width_of_camera is out-ranked among eligible members"
+      },
+      "anchor_changed": {
+        "heuristic": false,
+        "jev": true
+      },
       "heuristic_anchor": "toroidal_angular_width_of_camera",
-      "jev_anchor": "vertical_angular_width_of_camera",
+      "jev_anchor": "toroidal_angular_width_of_camera",
       "jev_asked": [
         "vertical_angular_width_of_camera",
         "toroidal_angular_width_of_camera"
@@ -40,121 +89,241 @@
         "toroidal_angular_width_of_camera",
         "vertical_angular_width_of_camera"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "angular_width",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "toroidal_angular_width_of_camera",
+        "jev_anchor": "vertical_angular_width_of_camera",
+        "jev_asked": [
+          "vertical_angular_width_of_camera",
+          "toroidal_angular_width_of_camera"
+        ],
+        "jev_cost": 7.072799999999999e-05,
+        "jev_scored": 2
+      },
       "seed": "angular_width_of_camera"
     },
     {
+      "anchor_change_reason": {
+        "heuristic": "heuristic unchanged: the previous anchor remains eligible",
+        "jev": "jev changed length_of_passive_loop_element -> major_length_of_passive_loop_element: the previous anchor length_of_passive_loop_element has no DD source and is no longer eligible"
+      },
+      "anchor_changed": {
+        "heuristic": false,
+        "jev": true
+      },
       "heuristic_anchor": "major_length_of_passive_loop_element",
-      "jev_anchor": "length_of_passive_loop_element",
+      "jev_anchor": "major_length_of_passive_loop_element",
       "jev_asked": [
         "major_length_of_passive_loop_element",
-        "minor_length_of_passive_loop_element",
-        "length_of_passive_loop_element"
+        "minor_length_of_passive_loop_element"
       ],
-      "jev_cost": 0.000107772,
+      "jev_cost": 7.203e-05,
       "jev_reason": null,
-      "jev_scored": 3,
+      "jev_scored": 2,
       "kind": "unclassified",
       "members": [
         "length_of_passive_loop_element",
         "major_length_of_passive_loop_element",
         "minor_length_of_passive_loop_element"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "length",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "major_length_of_passive_loop_element",
+        "jev_anchor": "length_of_passive_loop_element",
+        "jev_asked": [
+          "major_length_of_passive_loop_element",
+          "minor_length_of_passive_loop_element",
+          "length_of_passive_loop_element"
+        ],
+        "jev_cost": 0.000107772,
+        "jev_scored": 3
+      },
       "seed": "length_of_passive_loop_element"
     },
     {
-      "heuristic_anchor": "power_of_divertor_due_to_recombination",
+      "anchor_change_reason": {
+        "heuristic": "heuristic changed power_of_divertor_due_to_recombination -> plasma_power_of_divertor_due_to_recombination: the previous anchor power_of_divertor_due_to_recombination has no DD source and is no longer eligible",
+        "jev": "jev unchanged: the previous anchor remains eligible"
+      },
+      "anchor_changed": {
+        "heuristic": true,
+        "jev": false
+      },
+      "heuristic_anchor": "plasma_power_of_divertor_due_to_recombination",
       "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
       "jev_asked": [
-        "power_of_divertor_due_to_recombination",
         "neutral_power_of_divertor_due_to_recombination",
         "plasma_power_of_divertor_due_to_recombination"
       ],
-      "jev_cost": 0.00012205199999999999,
+      "jev_cost": 8.148e-05,
       "jev_reason": null,
-      "jev_scored": 3,
+      "jev_scored": 2,
       "kind": "subject",
       "members": [
         "neutral_power_of_divertor_due_to_recombination",
         "plasma_power_of_divertor_due_to_recombination",
         "power_of_divertor_due_to_recombination"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "power",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "power_of_divertor_due_to_recombination",
+        "jev_anchor": "plasma_power_of_divertor_due_to_recombination",
+        "jev_asked": [
+          "power_of_divertor_due_to_recombination",
+          "neutral_power_of_divertor_due_to_recombination",
+          "plasma_power_of_divertor_due_to_recombination"
+        ],
+        "jev_cost": 0.00012205199999999999,
+        "jev_scored": 3
+      },
       "seed": "neutral_power_of_divertor_due_to_recombination"
     },
     {
-      "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
-      "jev_anchor": "current_density_due_to_wave_driven_current_drive",
-      "jev_asked": [
-        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
-        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
-        "current_density_due_to_wave_driven_current_drive"
-      ],
-      "jev_cost": 0.00013385399999999998,
-      "jev_reason": null,
-      "jev_scored": 3,
+      "anchor_change_reason": {
+        "heuristic": "heuristic changed to no anchor: the previous anchor current_density_per_toroidal_mode_due_to_wave_driven_current_drive has no DD source and is no longer eligible",
+        "jev": "jev changed to no anchor: the previous anchor current_density_due_to_wave_driven_current_drive has no DD source and is no longer eligible"
+      },
+      "anchor_changed": {
+        "heuristic": true,
+        "jev": true
+      },
+      "heuristic_anchor": null,
+      "jev_anchor": null,
+      "jev_asked": [],
+      "jev_cost": 0.0,
+      "jev_reason": "no member is eligible as the family's template",
+      "jev_scored": 0,
       "kind": "component",
       "members": [
         "current_density_due_to_wave_driven_current_drive",
         "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
         "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
       ],
+      "no_eligible_anchor_in_either_arm": true,
       "physical_base": "current_density",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "jev_anchor": "current_density_due_to_wave_driven_current_drive",
+        "jev_asked": [
+          "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+          "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+          "current_density_due_to_wave_driven_current_drive"
+        ],
+        "jev_cost": 0.00013385399999999998,
+        "jev_scored": 3
+      },
       "seed": "current_density_due_to_wave_driven_current_drive"
     },
     {
+      "anchor_change_reason": {
+        "heuristic": "heuristic unchanged: the previous anchor remains eligible",
+        "jev": "jev changed momentum_flux_normalized_due_to_e_cross_b_drift -> perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift: the previous anchor momentum_flux_normalized_due_to_e_cross_b_drift has no DD source and is no longer eligible"
+      },
+      "anchor_changed": {
+        "heuristic": false,
+        "jev": true
+      },
       "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
-      "jev_anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+      "jev_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
       "jev_asked": [
-        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
-        "momentum_flux_normalized_due_to_e_cross_b_drift",
-        "momentum_flux_due_to_e_cross_b_drift"
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
       ],
-      "jev_cost": 0.00015141000000000002,
+      "jev_cost": 5.4558e-05,
       "jev_reason": null,
-      "jev_scored": 3,
+      "jev_scored": 1,
       "kind": "component",
       "members": [
         "momentum_flux_due_to_e_cross_b_drift",
         "momentum_flux_normalized_due_to_e_cross_b_drift",
         "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "momentum",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "jev_anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
+        "jev_asked": [
+          "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+          "momentum_flux_normalized_due_to_e_cross_b_drift",
+          "momentum_flux_due_to_e_cross_b_drift"
+        ],
+        "jev_cost": 0.00015141000000000002,
+        "jev_scored": 3
+      },
       "seed": "momentum_flux_due_to_e_cross_b_drift"
     },
     {
-      "heuristic_anchor": "wavelength_of_visible_camera",
-      "jev_anchor": "lower_bound_wavelength_of_visible_camera",
+      "anchor_change_reason": {
+        "heuristic": "heuristic changed wavelength_of_visible_camera -> upper_bound_wavelength_of_visible_camera: the previous anchor wavelength_of_visible_camera has no DD source and is no longer eligible",
+        "jev": "jev changed lower_bound_wavelength_of_visible_camera -> upper_bound_wavelength_of_visible_camera: the previous anchor lower_bound_wavelength_of_visible_camera is out-ranked among eligible members"
+      },
+      "anchor_changed": {
+        "heuristic": true,
+        "jev": true
+      },
+      "heuristic_anchor": "upper_bound_wavelength_of_visible_camera",
+      "jev_anchor": "upper_bound_wavelength_of_visible_camera",
       "jev_asked": [
         "lower_bound_wavelength_of_visible_camera",
-        "upper_bound_wavelength_of_visible_camera",
-        "wavelength_of_visible_camera"
+        "upper_bound_wavelength_of_visible_camera"
       ],
-      "jev_cost": 0.00010281599999999999,
+      "jev_cost": 6.4722e-05,
       "jev_reason": null,
-      "jev_scored": 3,
+      "jev_scored": 2,
       "kind": "unclassified",
       "members": [
         "lower_bound_wavelength_of_visible_camera",
         "upper_bound_wavelength_of_visible_camera",
         "wavelength_of_visible_camera"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "wavelength",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "wavelength_of_visible_camera",
+        "jev_anchor": "lower_bound_wavelength_of_visible_camera",
+        "jev_asked": [
+          "lower_bound_wavelength_of_visible_camera",
+          "upper_bound_wavelength_of_visible_camera",
+          "wavelength_of_visible_camera"
+        ],
+        "jev_cost": 0.00010281599999999999,
+        "jev_scored": 3
+      },
       "seed": "lower_bound_wavelength_of_visible_camera"
     },
     {
-      "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
-      "jev_anchor": "source_rate_due_to_thermal_fusion",
+      "anchor_change_reason": {
+        "heuristic": "heuristic changed neutron_source_rate_due_to_thermal_fusion -> tritium_tritium_neutron_source_rate_due_to_thermal_fusion: the previous anchor neutron_source_rate_due_to_thermal_fusion has no DD source and is no longer eligible",
+        "jev": "jev changed source_rate_due_to_thermal_fusion -> tritium_tritium_neutron_source_rate_due_to_thermal_fusion: the previous anchor source_rate_due_to_thermal_fusion has no DD source and is no longer eligible"
+      },
+      "anchor_changed": {
+        "heuristic": true,
+        "jev": true
+      },
+      "heuristic_anchor": "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
+      "jev_anchor": "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
       "jev_asked": [
-        "neutron_source_rate_due_to_thermal_fusion",
-        "source_rate_due_to_thermal_fusion",
         "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
         "total_neutron_source_rate_due_to_thermal_fusion"
       ],
-      "jev_cost": 0.00017077199999999997,
+      "jev_cost": 9.1182e-05,
       "jev_reason": null,
-      "jev_scored": 4,
+      "jev_scored": 2,
       "kind": "subject",
       "members": [
         "neutron_source_rate_due_to_thermal_fusion",
@@ -162,22 +331,44 @@
         "total_neutron_source_rate_due_to_thermal_fusion",
         "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "source_rate",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "neutron_source_rate_due_to_thermal_fusion",
+        "jev_anchor": "source_rate_due_to_thermal_fusion",
+        "jev_asked": [
+          "neutron_source_rate_due_to_thermal_fusion",
+          "source_rate_due_to_thermal_fusion",
+          "tritium_tritium_neutron_source_rate_due_to_thermal_fusion",
+          "total_neutron_source_rate_due_to_thermal_fusion"
+        ],
+        "jev_cost": 0.00017077199999999997,
+        "jev_scored": 4
+      },
       "seed": "neutron_source_rate_due_to_thermal_fusion"
     },
     {
+      "anchor_change_reason": {
+        "heuristic": "heuristic unchanged: the previous anchor remains eligible",
+        "jev": "jev changed energy_flux_at_wall_due_to_recombination -> neutral_energy_flux_at_wall_due_to_recombination: the previous anchor energy_flux_at_wall_due_to_recombination has no DD source and is no longer eligible"
+      },
+      "anchor_changed": {
+        "heuristic": false,
+        "jev": true
+      },
       "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
-      "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+      "jev_anchor": "neutral_energy_flux_at_wall_due_to_recombination",
       "jev_asked": [
-        "energy_flux_at_wall_due_to_recombination",
         "ion_charge_state_energy_flux_at_wall_due_to_recombination",
         "ion_energy_flux_at_wall_due_to_recombination",
         "neutral_energy_flux_at_wall_due_to_recombination",
         "incident_ion_energy_flux_at_wall_due_to_recombination"
       ],
-      "jev_cost": 0.00023553600000000003,
+      "jev_cost": 0.000185598,
       "jev_reason": null,
-      "jev_scored": 5,
+      "jev_scored": 4,
       "kind": "subject",
       "members": [
         "energy_flux_at_wall_due_to_recombination",
@@ -186,23 +377,46 @@
         "ion_energy_flux_at_wall_due_to_recombination",
         "neutral_energy_flux_at_wall_due_to_recombination"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "energy",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "jev_anchor": "energy_flux_at_wall_due_to_recombination",
+        "jev_asked": [
+          "energy_flux_at_wall_due_to_recombination",
+          "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+          "ion_energy_flux_at_wall_due_to_recombination",
+          "neutral_energy_flux_at_wall_due_to_recombination",
+          "incident_ion_energy_flux_at_wall_due_to_recombination"
+        ],
+        "jev_cost": 0.00023553600000000003,
+        "jev_scored": 5
+      },
       "seed": "energy_flux_at_wall_due_to_recombination"
     },
     {
+      "anchor_change_reason": {
+        "heuristic": "heuristic unchanged: the previous anchor remains eligible",
+        "jev": "jev changed radial_current_density_due_to_anomalous_transport -> poloidal_current_density_due_to_anomalous_transport: the previous anchor radial_current_density_due_to_anomalous_transport is out-ranked among eligible members"
+      },
+      "anchor_changed": {
+        "heuristic": false,
+        "jev": true
+      },
       "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
-      "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+      "jev_anchor": "poloidal_current_density_due_to_anomalous_transport",
       "jev_asked": [
-        "current_density_due_to_anomalous_transport",
         "parallel_current_density_due_to_anomalous_transport",
         "radial_current_density_due_to_anomalous_transport",
         "toroidal_current_density_due_to_anomalous_transport",
         "vertical_current_density_due_to_anomalous_transport",
         "poloidal_current_density_due_to_anomalous_transport"
       ],
-      "jev_cost": 0.000220332,
+      "jev_cost": 0.000183246,
       "jev_reason": null,
-      "jev_scored": 6,
+      "jev_scored": 5,
       "kind": "component",
       "members": [
         "current_density_due_to_anomalous_transport",
@@ -212,7 +426,24 @@
         "toroidal_current_density_due_to_anomalous_transport",
         "vertical_current_density_due_to_anomalous_transport"
       ],
+      "no_eligible_anchor_in_either_arm": false,
       "physical_base": "current_density",
+      "previous_anchors": {
+        "fixed_at": "2026-10-19T04:05:25Z",
+        "fixed_in": "5ba65454d",
+        "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+        "jev_anchor": "radial_current_density_due_to_anomalous_transport",
+        "jev_asked": [
+          "current_density_due_to_anomalous_transport",
+          "parallel_current_density_due_to_anomalous_transport",
+          "radial_current_density_due_to_anomalous_transport",
+          "toroidal_current_density_due_to_anomalous_transport",
+          "vertical_current_density_due_to_anomalous_transport",
+          "poloidal_current_density_due_to_anomalous_transport"
+        ],
+        "jev_cost": 0.000220332,
+        "jev_scored": 6
+      },
       "seed": "current_density_due_to_anomalous_transport"
     }
   ],
