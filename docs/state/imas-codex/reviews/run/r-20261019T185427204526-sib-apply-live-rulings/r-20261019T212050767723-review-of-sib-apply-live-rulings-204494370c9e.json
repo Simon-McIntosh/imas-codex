@@ -1,0 +1,30 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-19T21:34:05.178Z",
+  "dispatched_at": "2026-10-19T21:21:55Z",
+  "findings": [
+    "blocking: docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py:1146 \u2014 the brief required calling the quiet-graph probe immediately before applying and refusing when the graph is not quiet, but the apply mode invokes _signed_call(True, args.digest) unconditionally: quiet_graph_check() is a separate recorded mode and nothing consults it before a write, so the guard is captured, not enforced. A busy apply would write; the node's own earlier sibling review treated the same unwired quiet check as blocking.",
+    "follow-on: docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py:701 \u2014 of the five checks verify() asserts, only no_name_entered_the_population is exercised by the falsify negative control; every_retirement_has_receipt, no_receipt_outside_retirements, retirements_are_superseded and restored_binding_is_held are read as true and never shown able to fail, so four of the five guards are unproven.",
+    "follow-on: docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py:1157 \u2014 the falsify negative control's gate log (gate-falsify.log) ends in a bare EXIT=0 because the falsified mode does not raise; the control's outcome rides the JSON field check_failed_as_expected rather than an exit status, so a reader must open the body to see the check fired.",
+    "follow-on: sib-apply-live-rulings.json:566 \u2014 the fourth ruled change is not reached: electron_temperature_at_separatrix still holds dd:summary/local/separatrix_average/t_e/value, the averaged path the lead moved it off, and bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface remains sourceless. The deferral is documented and the brief authorises stopping when no owner exists; confirmed retarget_standard_name_sources (provenance_lifecycle.py:505) cannot attach an unbound source, so the missing-owner finding holds.",
+    "follow-on: docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py:337 \u2014 _migration_row, _attachment_row and _preview_rows hand-roll signed-manifest row shapes whose contract the repository already owns (signed_manifest.py:783 _validate_ordinary_source_migration_program, and the test-local builder tests/standard_names/test_live_binding_migration.py:25); no production builder exists, so this is probe-side duplication of a shape rather than a fork of a writer."
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261019T212050767723-review-of-sib-apply-live-rulings-204494370c9e",
+  "reviewed_base_sha": "5682157531c0bad0443d13593ebf881a7ed74b25",
+  "reviewed_head_sha": "204494370c9e7f791357bf3372eae17152e25fce",
+  "reviewed_run_id": "r-20261019T185427204526-sib-apply-live-rulings",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T03:54:03.563241+00:00",
+  "total": 95
+}

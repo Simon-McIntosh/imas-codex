@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="235">
+<meta name="plan-version" content="236">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -864,6 +864,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-run-r-20261019T185151966581-sib-export-live-source-gate" data-who="reckon-build" data-when="2026-10-19T21:29:33Z">
     <div class="r-comment-body"><p>the export source gate counts live names only — an exhausted sourceless row is recorded on the report as dormant with its count instead of failing the cut, any other stage still blocks, and six live names whose quantity no Data Dictionary path measures are held from release through the existing hold path with reason release_hold_no_dd_source so the gate does not count them and they are not exported. The new tests fail when the live-only filter and the holds are reverted.</p></div>
+</div>
+<div class="r-comment" data-section="s38" data-id="c-run-r-20261019T212050767723-review-of-sib-apply-live-rulings-204494370c9e" data-who="reckon-build" data-when="2026-10-19T21:34:05.178Z">
+    <div class="r-comment-body"><p>review of r-20261019T185427204526-sib-apply-live-rulings stored parsed at its review-records/ path (base 5682157531c0bad0443d13593ebf881a7ed74b25 / head 204494370c9e7f791357bf3372eae17152e25fce); scores goal_fidelity 15, evidence 15, scope_discipline 20, durability 12, fit 17, reuse 16; one blocking finding (the quiet-graph check is recorded but never gates the apply) and four follow-on findings; added_failure_count 0.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
