@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-20T22:24:20.413Z",
+  "dispatched_at": "2026-10-20T22:04:57Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "line": "81",
+      "severity": "follow-on",
+      "text": "follow-on: _guidance re-reads imas_codex/definitions/physics/domains.yaml with its own yaml.safe_load(DOMAINS_SCHEMA.read_text(...)) and option_text composes from exactly load_domain_guidance()['domains'], duplicating the reader owned at imas_codex/definitions/physics/__init__.py:26 (_read_domains_file) and :36 (load_domain_guidance) rather than extending it; the band/umbrella accessor _bands is genuinely new and has no owner, so the duplication is partial."
+    },
+    {
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "line": "76",
+      "severity": "follow-on",
+      "text": "follow-on: _pretty is defined and never referenced anywhere in the module or the tree, dead code carried over from the measurement runner."
+    },
+    {
+      "file": "tests/standard_names/test_domain_decision.py",
+      "line": "183",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion params['source_domains'] == sorted(written.source_domains) compares a value against the same variable the writer returned, both deriving from the single local edge_domains, so it holds whatever the Cypher receives and cannot redden on a regression of the union logic; the independent guard is line 181, which checks the set against literal domains, and line 184 repeats the coupling for edge_domains."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to store a name's Jev domain decision and write physics_domain, source_domains and the HAS_PHYSICS_DOMAIN edges through one writer; imas_codex/standard_names/domain_decision.py:409 write_name_domain does exactly that in one Cypher statement (_WRITE_DOMAIN at :368), the seven StandardName slots are declared at imas_codex/schemas/standard_name.yaml:1112-1137, and the audit's check 2 is switched to the stored decision at imas_codex/standard_names/domain_audit.py:264 _decided_domain.\nVERDICT done_when: the done_when asks that the module, schema slots, audit change and tests be committed, the gate show no added failures, and the negative-control and disposable-Neo4j logs be kept; the manifest records all four and I re-derived the gate from the reviewed run's own logs, gate-base.log EXIT=0 81 passed and gate-head.log EXIT=0 91 passed with zero failures on either arm, and gate-head-graph.log EXIT=0 1 passed against a disposable Neo4j started empty.\nVERDICT write_paths: the manifest declares seven paths; git diff 86aa169..b69165e7f8ba touches exactly those seven files (domain_decision.py, domain_audit.py, standard_name.yaml, domains.yaml, test_domain_decision.py, test_domain_audit.py, scg-name-domain-writer.html) and nothing else.\nVERDICT manifest: read; status complete, the six gate files and the negative-control and disposable-graph logs it cites all exist on disk with the results it states; the tests: line (manifest.md:11) is a comma-separated path list rather than the literal command a shell was handed, so it is not the re-runnable form the contract asks for, though the gate logs' own command: header lines carry the invocation.\nVERDICT diff: read commit by commit against 86aa169 - f84b0e00 adds domain_decision.py plus the seven schema slots and the domains.yaml umbrellas, d8dcdfa8 switches domain_audit.py's check 2 to the stored decision and adds the undecided report, 41a34167 aligns the audit docstrings, b69165e7f lands the evidence fragment; all four inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: write_name_domain at imas_codex/standard_names/domain_decision.py:409 sets all three fields in the single statement _WRITE_DOMAIN (SET physics_domain, source_domains, decision slots) followed by the edge rewrite, and tests/standard_names/test_domain_decision.py:239 shows a stale general edge rewritten to source_domains against a disposable graph.\nSCORE evidence: 18\nJUSTIFICATION evidence: CONFIDENCE_FLOOR=0.68 at imas_codex/standard_names/domain_decision.py:73 reproduces from the reviewed run's results JSON (the highest calibration probability with at most 5% of 73 strictly below it = 0.68, below-fraction 3/73=4.1%) and the evidence fragment's accuracy table matches the JSON exactly (calibration 56/70=0.800, approved 12/18=0.667, validation 52/71=0.732, pooled 120/159=0.755).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 86aa169700ab8c47a1959414f9890825e1a95c1e..b69165e7f8ba93e32ae42879141594e63f03ec4e changes the seven declared paths and no other file, with no generated model and no out-of-scope source touched.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_domain_decision.py:239 fails when the writer's edge rewrite is reverted (logs/negative-control-edges-left-as-found.log EXIT=1, assert {'general'} == {'core_plasma_physics'}), so the central guard has a shown red arm, but two added assertions at lines 183-184 compare the write params against the same edge_domains-derived value the writer returned and cannot redden on a regression of the union logic.\nSCORE fit: 18\nJUSTIFICATION fit: the module follows the repository's dataclass and type-hint idiom and introduces no name the naming rules forbid, but imas_codex/standard_names/domain_decision.py:76 _pretty is dead code.\nSCORE reuse: 8\nJUSTIFICATION reuse: imas_codex/standard_names/domain_decision.py:81 _guidance re-implements the domains.yaml reader the repository owns at imas_codex/definitions/physics/__init__.py:26 _read_domains_file and exposes at :36 load_domain_guidance without extending it, while the band/umbrella accessor has no existing owner, a partial duplication scored between the rubric's 20 and 5 anchors.\nFINDING imas_codex/standard_names/domain_decision.py:81 follow-on: _guidance re-reads imas_codex/definitions/physics/domains.yaml with its own yaml.safe_load(DOMAINS_SCHEMA.read_text(...)) and option_text composes from exactly load_domain_guidance()['domains'], duplicating the reader owned at imas_codex/definitions/physics/__init__.py:26 and :36 rather than extending it; the band/umbrella accessor _bands is genuinely new and has no owner.\nFINDING imas_codex/standard_names/domain_decision.py:76 follow-on: _pretty is defined and never referenced anywhere in the module or the tree, dead code carried over from the measurement runner.\nFINDING tests/standard_names/test_domain_decision.py:183 follow-on: the assertion params['source_domains'] == sorted(written.source_domains) compares a value against the same variable the writer returned, both deriving from the single local edge_domains, so it holds whatever the Cypher receives and cannot redden on a regression of the union logic; the independent guard is line 181, which checks the set against literal domains, and line 184 repeats the coupling for edge_domains.\n",
+  "review_run_id": "r-20261020T220434840907-review-of-scg-name-domain-writer-b69165e7f8ba",
+  "reviewed_base_sha": "86aa169700ab8c47a1959414f9890825e1a95c1e",
+  "reviewed_head_sha": "b69165e7f8ba93e32ae42879141594e63f03ec4e",
+  "reviewed_run_id": "r-20261020T202606397921-scg-name-domain-writer",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 8,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T22:25:23.255800+00:00",
+  "total": 100
+}
