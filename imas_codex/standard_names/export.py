@@ -246,6 +246,32 @@ _RELEASE_IDENTITY_HOLDS: dict[str, tuple[str, str]] = {
         "release_hold_missing_reviewed_successor",
         "the intended successor has not been created and accepted through review",
     ),
+    # The active Data Dictionary measures none of these quantities, so no DD
+    # path can be bound and the names are held from release until one does.
+    "electrostatic_potential_at_outboard_midplane": (
+        "release_hold_no_dd_source",
+        "no Data Dictionary path measures the quantity",
+    ),
+    "electrostatic_potential_at_wall": (
+        "release_hold_no_dd_source",
+        "no Data Dictionary path measures the quantity",
+    ),
+    "root_mean_square_spectral_width_of_spectrometer_channel": (
+        "release_hold_no_dd_source",
+        "no Data Dictionary path measures the quantity",
+    ),
+    "count_normalized_at_detector_pixel": (
+        "release_hold_no_dd_source",
+        "no Data Dictionary path measures the quantity",
+    ),
+    "coolant_absorbed_energy_accumulated_of_plasma_facing_component": (
+        "release_hold_no_dd_source",
+        "no Data Dictionary path measures the quantity",
+    ),
+    "volume_averaged_electron_number_density_over_scrape_off_layer": (
+        "release_hold_no_dd_source",
+        "no Data Dictionary path measures the quantity",
+    ),
 }
 
 
@@ -382,6 +408,11 @@ class ExportReport:
     # was not given a manifest at all. A cut with no manifest carries no source
     # obligation and is not asserted generable.
     manifest_generability: dict[str, Any] | None = None
+    # Sourceless names at ``exhausted`` stage. They never reach the export
+    # population and are never released, so their missing source is dormant
+    # rather than a release blocker; they are listed here so the exclusion
+    # stays visible in the report.
+    dormant_sourceless_names: list[dict[str, Any]] = field(default_factory=list)
 
     def record_exclusions(self, records: list[ExclusionRecord]) -> None:
         """Append identity-bearing exclusions and refresh compatibility counts."""
@@ -460,6 +491,10 @@ class ExportReport:
                 ],
             },
             "manifest_generability": self.manifest_generability,
+            "dormant_sourceless": {
+                "count": len(self.dormant_sourceless_names),
+                "names": list(self.dormant_sourceless_names),
+            },
             "role_metadata": {
                 "entries": self.role_entry_count,
                 "counts": dict(sorted(self.role_counts.items())),
@@ -3025,10 +3060,30 @@ def run_export(
 
     with GraphClient() as gc:
         source_audit = classify_sourceless_standard_names(gc)
-    source_losses = [
+    # The gate counts live names only. An exhausted name never reaches the
+    # export population and is never released, so its missing source is
+    # dormant: it is listed on the report and left out of the gate. A name
+    # listed in _RELEASE_IDENTITY_HOLDS leaves through the release-hold path
+    # instead, so the gate does not count it either. Every other stage still
+    # blocks.
+    sourceless = [
         row
         for row in source_audit
         if row["population"] in {"dropped_edge", "never_bound"}
+    ]
+    dormant_sourceless = [row for row in sourceless if row["name_stage"] == "exhausted"]
+    source_losses = [
+        row
+        for row in sourceless
+        if row["name_stage"] != "exhausted" and row["id"] not in _RELEASE_IDENTITY_HOLDS
+    ]
+    report.dormant_sourceless_names = [
+        {
+            "name": row["id"],
+            "name_stage": row["name_stage"],
+            "population": row["population"],
+        }
+        for row in dormant_sourceless
     ]
     if source_losses:
         report.gate_results.append(

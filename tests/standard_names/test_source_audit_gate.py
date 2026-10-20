@@ -6,6 +6,7 @@ import asyncio
 import os
 from collections.abc import Iterator
 from contextlib import nullcontext
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -188,11 +189,16 @@ def test_recorded_identity_operations_link_transferred_sources(
 
 @pytest.mark.graph
 @pytest.mark.parametrize("skip_gate", [False, True])
-def test_export_refuses_losses_before_population(
+def test_export_refuses_live_losses_before_population(
     planted_graph: GraphClient, tmp_path, skip_gate: bool
 ) -> None:
     from imas_codex.standard_names.export import run_export
 
+    # A live-stage loss blocks the export; the exhausted loss stays dormant.
+    planted_graph.query(
+        "MATCH (name:StandardName {id:'audit_dropped'}) "
+        "SET name.name_stage = 'accepted'"
+    )
     with (
         patch(
             "imas_codex.graph.client.GraphClient",
@@ -208,10 +214,16 @@ def test_export_refuses_losses_before_population(
     assert not report.all_gates_passed
     assert not fetch.called
     gate = next(gate for gate in report.gate_results if gate.gate == "source_audit")
-    assert {issue["name"] for issue in gate.issues} == {"audit_dropped", "audit_never"}
+    assert {issue["name"] for issue in gate.issues} == {"audit_dropped"}
+    assert report.dormant_sourceless_names == [
+        {
+            "name": "audit_never",
+            "name_stage": "exhausted",
+            "population": "never_bound",
+        }
+    ]
     planted_graph.query(
-        "MATCH (name:StandardName) WHERE name.id IN ['audit_dropped', 'audit_never'] "
-        "DETACH DELETE name"
+        "MATCH (name:StandardName {id:'audit_dropped'}) DETACH DELETE name"
     )
     with (
         patch(
@@ -269,6 +281,160 @@ def test_probe_reports_exhausted_dropped_edge(planted_graph: GraphClient) -> Non
         "audit_never": "never_bound",
         "audit_unchained": "unchained_holder",
     }
+
+
+def _sourceless_row(name: str, stage: str, population: str = "dropped_edge") -> dict:
+    """One classifier row for a live name that has no producing source."""
+    return {
+        "id": name,
+        "name_stage": stage,
+        "docs_stage": None,
+        "validation_status": None,
+        "model": None,
+        "status": "draft",
+        "origin": "pipeline",
+        "population": population,
+        "recorded_source_ids": [],
+        "unresolved_tokens": [],
+        "unchained_holders": [],
+    }
+
+
+def _candidate(name: str) -> dict:
+    """An otherwise-eligible export candidate with a producing source."""
+    return {
+        "id": name,
+        "name_stage": "accepted",
+        "status": "draft",
+        "validation_status": "valid",
+        "_validation_observed_at": "2026-09-09T00:00:00Z",
+        "review_quorum_shortfall": None,
+        "docs_stage": "accepted",
+        "_has_docs_review": True,
+        "_has_winning_docs_review": True,
+        "docs_review_quorum_shortfall": None,
+        "reviewer_score_name": 0.95,
+        "description": f"Description for {name}.",
+        "documentation": f"Documentation for {name}.",
+        "kind": "scalar",
+        "unit": "1",
+        "physics_domain": "general",
+        "links": [],
+        "_has_dd_source_binding": True,
+        "_has_derived_producer": False,
+        "_has_non_derived_producer": True,
+        "_has_live_child": False,
+        "_is_parent": False,
+    }
+
+
+class _EmptyGraphClient:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def query(self, cypher: str, **params):
+        return []
+
+
+def _run_export_with_audit(
+    staging_dir: Path, population: list[dict], audit_rows: list[dict]
+):
+    """Run an export against a stubbed source audit and population."""
+    from imas_codex.standard_names.export import run_export
+
+    fetch = MagicMock(return_value=population)
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops.classify_sourceless_standard_names",
+            return_value=audit_rows,
+        ),
+        patch("imas_codex.standard_names.export._fetch_export_population", fetch),
+        patch(
+            "imas_codex.graph.client.GraphClient",
+            return_value=_EmptyGraphClient(),
+        ),
+        patch(
+            "imas_codex.standard_names.export._validate_entry",
+            side_effect=lambda entry: entry,
+        ),
+        patch(
+            "imas_codex.standard_names.export._fetch_deprecation_stubs",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+            return_value=([], set()),
+        ),
+        patch("imas_codex.standard_names.export._write_domain_yaml"),
+    ):
+        report = run_export(
+            staging_dir,
+            min_score=0.85,
+            skip_gate=True,
+            force=True,
+            include_sources=False,
+        )
+    return report, fetch
+
+
+def test_exhausted_sourceless_row_is_dormant_not_blocking(tmp_path: Path) -> None:
+    """An exhausted name never ships, so its missing source is dormant."""
+    report, fetch = _run_export_with_audit(
+        tmp_path,
+        [_candidate("live_sourced")],
+        [_sourceless_row("dormant_exhausted", "exhausted")],
+    )
+
+    assert fetch.called
+    assert report.all_gates_passed
+    assert "source_audit" not in {gate.gate for gate in report.gate_results}
+    assert report.to_dict()["dormant_sourceless"] == {
+        "count": 1,
+        "names": [
+            {
+                "name": "dormant_exhausted",
+                "name_stage": "exhausted",
+                "population": "dropped_edge",
+            }
+        ],
+    }
+
+
+def test_live_sourceless_row_blocks_the_export(tmp_path: Path) -> None:
+    """A live name without a producing source still stops the export."""
+    report, fetch = _run_export_with_audit(
+        tmp_path, [], [_sourceless_row("live_loss", "accepted")]
+    )
+
+    assert not fetch.called
+    assert not report.all_gates_passed
+    gate = next(gate for gate in report.gate_results if gate.gate == "source_audit")
+    assert {issue["name"] for issue in gate.issues} == {"live_loss"}
+    assert gate.issues[0]["detail"] == "live standard name has no producing source"
+
+
+def test_held_sourceless_identity_is_not_counted_and_not_exported(
+    tmp_path: Path,
+) -> None:
+    """A held identity leaves through the hold path, not the source gate."""
+    held = "electrostatic_potential_at_wall"
+    report, fetch = _run_export_with_audit(
+        tmp_path,
+        [_candidate(held), _candidate("live_sourced")],
+        [_sourceless_row(held, "accepted")],
+    )
+
+    assert fetch.called
+    assert report.all_gates_passed
+    assert "source_audit" not in {gate.gate for gate in report.gate_results}
+    assert held not in report.exported_names
+    assert report.to_dict()["dormant_sourceless"]["count"] == 0
+    records = {record.standard_name_id: record for record in report.exclusion_records}
+    assert records[held].reason == "release_hold_no_dd_source"
+    assert records[held].stage == "release_authority"
 
 
 def test_failed_probe_is_reported_as_not_run(caplog) -> None:
