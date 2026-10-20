@@ -46,6 +46,11 @@
       "kind": "exempted",
       "reason": "manifest formatting repaired before promotion, or a robustness note on a one-off evidence runner whose live write is complete and receipted",
       "recorded_at": "2026-10-20T06:26:22.865081+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "manifest formatting repaired before promotion, or a robustness note on a one-off evidence runner whose live write is complete and receipted",
+      "recorded_at": "2026-10-20T06:26:27.762956+00:00"
     }
   },
   "findings": [
