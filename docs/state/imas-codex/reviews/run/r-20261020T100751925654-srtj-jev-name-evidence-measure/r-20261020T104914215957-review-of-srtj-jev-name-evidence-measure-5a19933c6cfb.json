@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-10-20T10:58:19.418Z",
   "dispatched_at": "2026-10-20T10:50:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the fragment's nonempty-addition subset of 326 items is the changed-evidence cohort the brief asked for; the all-items duplicate is labelling, not a missing measurement",
+      "recorded_at": "2026-10-20T11:02:54.319145+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-name-evidence-measure-run.py",
