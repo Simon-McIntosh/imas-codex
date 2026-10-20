@@ -1,0 +1,252 @@
+{
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+  "applied": true,
+  "arm": "heuristic",
+  "budget_limit_usd": 2.0,
+  "calls": 16,
+  "code": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wave-current-heuristic-r2",
+    "git_head": "5cf53a7b6dbc546eaff940398fa0c5e88f9e35b1",
+    "module_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-wave-current-heuristic-r2/imas_codex/standard_names/harmonize.py",
+    "tree_digest_imas_codex": "d1e4f1e54323571aa16edb5da0c2bdc5775b2d73129db526d8a73bd7d5bf2bdd"
+  },
+  "containment": {
+    "at": "2026-10-20T07:04:19.351796+00:00",
+    "evidence": {
+      "live_family_rows": 0,
+      "live_scope_run_rows": 0,
+      "scratch_family_rows": 16,
+      "scratch_ledger_rows": 16,
+      "scratch_scope_run_rows": 0
+    },
+    "holds": true,
+    "live_signal": 0,
+    "reasons": [],
+    "scratch_signal": 32
+  },
+  "cost_limit_passed_usd": 1.98,
+  "decision": "apply",
+  "dump_bytes": 2643183686,
+  "ended_at": "2026-10-20T07:04:17.591962+00:00",
+  "family": "current_density_due_to_wave_driven_current_drive",
+  "harmonize_receipts": [
+    {
+      "anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+      "applied": true,
+      "batches": [
+        [
+          "current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+        ],
+        [
+          "current_density_due_to_wave_driven_current_drive",
+          "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+        ]
+      ],
+      "decision": "apply",
+      "group_signature": "49b08c2beaf9a12d245ffd0ae9d756ba243a3267a61316c8650da7f0dc8762b5",
+      "harmonized": false,
+      "invariant": [
+        "current_density",
+        "",
+        "",
+        "wave_driven_current_drive",
+        ""
+      ],
+      "member_scores": {
+        "current_density_due_to_wave_driven_current_drive": 0.9625,
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive": 0.9875,
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive": null
+      },
+      "members": [
+        "current_density_due_to_wave_driven_current_drive",
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+      ],
+      "n": 3,
+      "physical_base": "current_density",
+      "planned_calls": 3,
+      "result": {
+        "batches_run": 1,
+        "batches_total": 2,
+        "halt_reasons": [
+          "docs acceptance 0.00% < 90.00% (0/1 touched)"
+        ],
+        "halted": true,
+        "resume_from": 1,
+        "run_ids": [
+          "8922cd75-f283-49dd-985b-e023527bf43c"
+        ],
+        "spec": "harmonize-pattern-family",
+        "total_accepted": 0,
+        "total_audit_cleared": 0,
+        "total_audit_requarantined": 0,
+        "total_cost": 0.5406,
+        "total_quarantined": 0,
+        "total_selected": 3,
+        "total_touched": 1
+      },
+      "reverse_links": null,
+      "score_regressions": {
+        "below_threshold": [
+          {
+            "after": 0.849,
+            "before": 0.9875,
+            "id": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+          }
+        ],
+        "fell": [
+          {
+            "after": 0.849,
+            "before": 0.9875,
+            "id": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+          }
+        ]
+      },
+      "scores_after": {
+        "current_density_due_to_wave_driven_current_drive": 0.9625,
+        "current_density_per_toroidal_mode_due_to_wave_driven_current_drive": 0.849,
+        "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive": null
+      },
+      "stamped": false
+    }
+  ],
+  "harmonize_summary": {
+    "batches_run": 1,
+    "batches_total": 2,
+    "halt_reasons": [
+      "docs acceptance 0.00% < 90.00% (0/1 touched)"
+    ],
+    "halted": true,
+    "resume_from": 1,
+    "run_ids": [
+      "8922cd75-f283-49dd-985b-e023527bf43c"
+    ],
+    "spec": "harmonize-pattern-family",
+    "total_accepted": 0,
+    "total_audit_cleared": 0,
+    "total_audit_requarantined": 0,
+    "total_cost": 0.5406,
+    "total_quarantined": 0,
+    "total_selected": 3,
+    "total_touched": 1
+  },
+  "heuristic_anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+  "isolation": {
+    "at": "2026-10-20T06:49:06.976869+00:00",
+    "live_family_rows": 0,
+    "live_nodes": 1771165,
+    "live_nodes_after": 1771165,
+    "live_nodes_delta_observed": 0,
+    "live_probe": 0,
+    "live_scope_run_rows": 0,
+    "live_uri": "bolt://98dci4-gpu-0002:7687",
+    "live_window_rows_observed": 0,
+    "marked_scratch_nodes": 1770102,
+    "restored_scratch_nodes": 1770101,
+    "scratch_family_rows": 16,
+    "scratch_ledger_rows": 16,
+    "scratch_nodes": 1770101,
+    "scratch_probe": 1,
+    "scratch_scope_run_rows": 0,
+    "scratch_uri": "bolt://127.0.0.1:28000"
+  },
+  "jev_anchor": "current_density_due_to_wave_driven_current_drive",
+  "kind": "component",
+  "ledger_calls": 16,
+  "ledger_spend_usd": 0.54058,
+  "ledger_window": {
+    "ended": "2026-10-20T07:04:18.941353+00:00",
+    "started": "2026-10-20T06:49:11.092778+00:00"
+  },
+  "lint_after": 1,
+  "lint_after_classes": {
+    "link_missing_reverse": 1
+  },
+  "lint_before": 1,
+  "lint_before_classes": {
+    "link_missing_reverse": 1
+  },
+  "members": [
+    "current_density_due_to_wave_driven_current_drive",
+    "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+    "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive"
+  ],
+  "neo4j_log": "/tmp/reckon-crew-scratch/r-20261020T064039915025-ssog-anchor-wave-current-heuristic-r2/mcintos-1281970-2jefnopp/instance/logs/neo4j-temp.log",
+  "outcome_status": "complete",
+  "per_model": [
+    {
+      "calls": 1,
+      "model": "openrouter/anthropic/claude-fable-5",
+      "spend_usd": 0.208805
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "spend_usd": 0.145063
+    },
+    {
+      "calls": 2,
+      "model": "openrouter/openai/gpt-6-luna",
+      "spend_usd": 0.004887
+    },
+    {
+      "calls": 1,
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "spend_usd": 0.090391
+    },
+    {
+      "calls": 4,
+      "model": "openrouter/x-ai/grok-4.5",
+      "spend_usd": 0.09074200000000002
+    },
+    {
+      "calls": 4,
+      "model": "typesafe/jev-1.13",
+      "spend_usd": 0.000692
+    }
+  ],
+  "planned_calls": 3,
+  "port": 28000,
+  "port_lock": "/dev/shm/ssog-scratch-port-28000.lock",
+  "port_lock_released": {
+    "at": "2026-10-20T07:04:35.377223+00:00",
+    "lock": "/dev/shm/ssog-scratch-port-28000.lock"
+  },
+  "recorded_anchor_before": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+  "run_ids": [
+    "8922cd75-f283-49dd-985b-e023527bf43c"
+  ],
+  "scores_after": {
+    "current_density_due_to_wave_driven_current_drive": 0.9625,
+    "current_density_per_toroidal_mode_due_to_wave_driven_current_drive": 0.849,
+    "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive": null
+  },
+  "scores_before": {
+    "current_density_due_to_wave_driven_current_drive": 0.9625,
+    "current_density_per_toroidal_mode_due_to_wave_driven_current_drive": 0.9875,
+    "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive": null
+  },
+  "scratch_removed": {
+    "at": "2026-10-20T07:04:35.377147+00:00",
+    "removed_entries": [
+      "instance"
+    ],
+    "tree": "/tmp/reckon-crew-scratch/r-20261020T064039915025-ssog-anchor-wave-current-heuristic-r2/mcintos-1281970-2jefnopp"
+  },
+  "scratch_tree": "/tmp/reckon-crew-scratch/r-20261020T064039915025-ssog-anchor-wave-current-heuristic-r2/mcintos-1281970-2jefnopp",
+  "scratch_uri": "bolt://127.0.0.1:28000",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "spend_limit_usd": 2.0,
+  "spend_usd": 0.54058,
+  "stamped": false,
+  "started_at": "2026-10-20T06:43:55.396937+00:00",
+  "stopped_instance": {
+    "at": "2026-10-20T07:04:34.362431+00:00",
+    "tree": "/tmp/reckon-crew-scratch/r-20261020T064039915025-ssog-anchor-wave-current-heuristic-r2/mcintos-1281970-2jefnopp/instance"
+  },
+  "wall_seconds": 906.4991582129151
+}
