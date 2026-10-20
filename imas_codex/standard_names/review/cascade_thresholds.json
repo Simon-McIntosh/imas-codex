@@ -1,4 +1,5 @@
 {
+  "content_sha256": "792291e8ba6cef4581ecc4c7421b5b96ea3f1c7e135435ec0ad39b5c6644935d",
   "docs": {
     "accept_basis": "best-available-precision",
     "accept_threshold": 0.554122583888,
@@ -228,6 +229,17 @@
         }
       }
     },
+    "route_counts": {
+      "accept": 26,
+      "chat_review": 102,
+      "refine": 88
+    },
+    "route_shares": {
+      "accept": 0.12037,
+      "chat_review": 0.472222,
+      "refine": 0.407407
+    },
+    "source_receipts": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/documentation-score-frozen.json.xz",
     "unjudged_count": 0
   },
   "name": {
@@ -460,6 +472,18 @@
         }
       }
     },
+    "route_counts": {
+      "accept": 33,
+      "chat_below_reject": 5,
+      "chat_review": 237,
+      "refine": 88
+    },
+    "route_shares": {
+      "accept": 0.090909,
+      "chat_below_reject": 0.013774,
+      "chat_review": 0.652893,
+      "refine": 0.242424
+    },
     "score_intercept": -4.027030572986243,
     "score_weights": {
       "check:advisory_alias_collapsed": 1.1484935612070741,
@@ -495,6 +519,7 @@
       "dimension:grammar": -1.1361280308414912,
       "dimension:semantic": -0.5414076714156649
     },
+    "source_receipts": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl",
     "unjudged_count": 0
   },
   "policy": {

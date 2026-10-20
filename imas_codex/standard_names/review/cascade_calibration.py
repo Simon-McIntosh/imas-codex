@@ -18,6 +18,7 @@ the route file, or import :func:`build` to derive the same thresholds in memory.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import lzma
 import math
@@ -710,7 +711,14 @@ def build(
     name_block["dropped_checks"] = _dropped(name_items, name_block)
     docs_block["dropped_checks"] = _dropped(docs_items, docs_block)
 
-    return {
+    name_block["source_receipts"] = str(name_receipts)
+    docs_block["source_receipts"] = str(docs_receipts)
+    for block in (name_block, docs_block):
+        fitted = block["report"]["calibration"]
+        block["route_counts"] = dict(sorted(fitted["route_counts"].items()))
+        block["route_shares"] = dict(sorted(fitted["route_shares"].items()))
+
+    document = {
         "schema": SCHEMA,
         "source_split": "calibration",
         "policy": {
@@ -746,6 +754,20 @@ def build(
         "name": name_block,
         "docs": docs_block,
     }
+    document["content_sha256"] = _content_digest(document)
+    return document
+
+
+def _content_digest(document: Mapping[str, Any]) -> str:
+    """The digest of the artifact, over the serialised content minus the digest.
+
+    The route rule reads these cutoffs, so an edit that changes a cutoff without
+    re-deriving the document has to be visible: the digest is recomputed from
+    the content it protects and written beside it.
+    """
+    content = {key: value for key, value in document.items() if key != "content_sha256"}
+    encoded = json.dumps(content, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def _dropped(items: Sequence[Mapping[str, Any]], block: Mapping[str, Any]) -> list[str]:
