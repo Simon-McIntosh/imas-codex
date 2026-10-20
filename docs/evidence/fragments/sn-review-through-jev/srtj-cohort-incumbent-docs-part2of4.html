@@ -1,0 +1,21 @@
+<section id="srtj-cohort-incumbent-docs-part2of4">
+  <h2 id="srtj-cohort-incumbent-docs-part2of4-summary">The incumbent docs slice exhausts its ceiling two items short of completion</h2>
+  <p id="srtj-cohort-incumbent-docs-part2of4-outcome">Two runs of the fixed incumbent/docs part 2 of 4 piece both stopped with selected names still undecided, so the piece is not measurable</p>
+  <p id="srtj-cohort-incumbent-docs-part2of4-piece">The slice is the 55 documentation items the fixed cohort yields <em>after</em> the shared DD exclusions are removed: the docs axis holds 232 items, 13 are excluded, and the remaining 219 split into 54, 55, 55 and 55. The runner refused nothing at its USD 60 comparison check; USD 12.418443 of canonical piece spend was already recorded when the first attempt began. Neither attempt changed the runner, the exclusion file or the cohort.</p>
+  <table id="srtj-cohort-incumbent-docs-part2of4-attempts">
+    <caption>Both attempts ran the identical command at a USD 9.20 ceiling; both ended <code>EXIT=1</code></caption>
+  </table>
+  <table>
+    <thead>
+      <tr><th>attempt</th><th>stop reason</th><th>wall time</th><th>spend USD</th><th>receipts</th><th>resolved of 55</th><th>left drafted</th></tr>
+    </thead>
+    <tbody>
+      <tr><td id="srtj-cohort-incumbent-docs-part2of4-attempt-1">1</td><td><code>budget_exhausted</code></td><td>824 s</td><td>9.290224</td><td>277</td><td>49</td><td>6</td></tr>
+      <tr><td id="srtj-cohort-incumbent-docs-part2of4-attempt-2">2, the authorised re-run</td><td><code>time_limit_reached</code></td><td>2419 s</td><td>8.947706</td><td>297</td><td>48</td><td>7</td></tr>
+    </tbody>
+  </table>
+  <p id="srtj-cohort-incumbent-docs-part2of4-why">Both attempts refused reviewer seats rather than failing calls. Near the ceiling the pool could not reserve the pre-launch exposure of a quorum seat — between USD 0.055 and USD 0.062 per refused seat — so a name that needed a tie-breaker or a further cycle was deferred and never accepted on one review. Attempt 1 charged USD 0.104 and USD 0.159 beyond its reservation and its pool, reaching USD 9.290224 against a USD 9.200000 cap. Attempt 2 stayed under the cap but spent its 2400 s run limit cycling on those refusals.</p>
+  <p id="srtj-cohort-incumbent-docs-part2of4-cost">The measured cost of the slice is about USD 0.186 per resolved item, mean USD 0.173 for the 48 items attempt 2 did resolve. Finishing 55 items therefore needs roughly USD 10.2 to USD 10.5, about USD 1.0 to USD 1.3 more than the USD 9.20 the piece was given. That is a planning figure for whoever re-cuts the piece or raises its ceiling; it is not a defect in the runner.</p>
+  <p id="srtj-cohort-incumbent-docs-part2of4-integrity">Nothing escaped the scratch graph on either attempt. Containment passed both times: one run row and 297 cost rows in the scratch instance, zero run rows and zero cost rows in the live graph at <code>bolt://98dci4-gpu-0002:7687</code>. Each attempt stopped its scratch instance and removed its tree, and no run process survived. The record at <code>srtj-cohort/incumbent-docs-part2of4.json</code> is attempt 2's, and attempt 1's figures survive only in <code>piece.log</code>.</p>
+  <p id="srtj-cohort-incumbent-docs-part2of4-status">The piece is blocked rather than complete. Its record carries <code>status: failed</code>, no <code>measurement_complete</code>, and <code>containment_verdict: pass</code>; the reviewer never resolved <code>ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude</code>, <code>ion_charge_state_diamagnetic_momentum_convection_velocity</code>, <code>major_length_of_iron_core_segment</code>, <code>toroidal_lithium_velocity_at_internal_transport_barrier</code>, <code>poloidal_neutral_state_velocity_due_to_diamagnetic_drift</code>, <code>poloidal_ion_velocity</code> or <code>radial_particle_convection_velocity</code>. Both runs therefore fail the runner's own completion check, which refuses a paid piece that stopped with selected identities pending.</p>
+</section>
