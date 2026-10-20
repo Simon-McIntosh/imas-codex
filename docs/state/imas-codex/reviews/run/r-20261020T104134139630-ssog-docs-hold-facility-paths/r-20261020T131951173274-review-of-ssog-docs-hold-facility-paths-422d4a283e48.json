@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:_has_dd_source_reference:10417",
+    "imas_codex/standard_names/workers.py:prepare_docs_review_request:10815",
+    "imas_codex/standard_names/workers.py:_documentation_contradiction_note:10945",
+    "imas_codex/standard_names/workers.py:process_review_docs_batch:11148"
+  ],
+  "completed_at": "2026-10-20T13:29:59.622Z",
+  "dispatched_at": "2026-10-20T13:20:17Z",
+  "findings": [
+    {
+      "description": "negative_control_log names logs/repair_round2_negative_control.log, whose run applies the provenance mutation (pre-repair source 100a86a4d with post-repair tests; failing ids test_normalised_dd_source_path_still_holds, test_normalised_facility_source_path_is_not_held, test_veto_request_holds_a_dd_source_path_with_missing_text; 3 failed, EXIT=1). The node's declared mutation is 'let facility source paths count as required DD paths again; the facility-only test must then fail', whose log is logs/negative_control.log at revision 8fc4843c9 (2 failed including test_facility_only_source_path_is_not_held, EXIT=1). The named log does not demonstrate the declared mutation, so a reader comparing the two sees the declared control undischarged even though a log that does discharge it exists.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md",
+      "line": 18,
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md",
+      "severity": "follow-on",
+      "text": "negative_control_log names logs/repair_round2_negative_control.log, whose run applies the provenance mutation (pre-repair source 100a86a4d with post-repair tests; 3 failed, EXIT=1), not the node's declared mutation 'let facility source paths count as required DD paths again; the facility-only test must then fail', whose log is logs/negative_control.log at revision 8fc4843c9 (2 failed including test_facility_only_source_path_is_not_held, EXIT=1)."
+    },
+    {
+      "description": "The tests: line carries an unsubstituted <tree> placeholder, which the manifest contract forbids for the gate command; the literal command is recoverable only from each log's # command: header and from the baseline_suite/after_suite JSON, so the receipt cannot be re-run from this line alone.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md",
+      "line": 14,
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md",
+      "severity": "follow-on",
+      "text": "The tests: line carries an unsubstituted <tree> placeholder which the manifest contract forbids; the literal command survives only in the log headers and the baseline_suite/after_suite command fields."
+    }
+  ],
+  "justifications": {
+    "durability": "test_docs_hold_dd_bindings.py:82 fails when the filter is reverted (logs/negative_control.log, 2 failed at 8fc4843c9) and test_docs_hold_dd_bindings.py:93 fails when dd_source_paths provenance is dropped (logs/repair_negative_control_surgical.log, 1 failed).",
+    "evidence": "logs/gate_base_8fc4843c9.log and logs/gate_head_069bf7caa.log show 75 and 81 passed with EXIT=0 and are complete, but manifest.md:14 carries a literal <tree> placeholder so the gate command is not re-runned from the tests: line.",
+    "fit": "workers.py:10359-10414 follows the module helper and dedup style with the established DD_PREFIX and strip_dd_prefix primitives, though workers.py:10381-10382 repeats a str-to-list normalisation.",
+    "goal_fidelity": "workers.py:10390 filters the fallback to path.startswith(DD_PREFIX) so a facility path never becomes a required DD path, matching the reproduced defect and the goal.",
+    "reuse": "workers.py:10401 wraps the existing owner _bound_docs_review_dd_paths and reuses DD_PREFIX from source_paths.py; a search over imas_codex/standard_names found no second item-level DD-path resolver, so the addition extends the owner rather than duplicating it.",
+    "scope_discipline": "manifest.md:3 declares the write paths and the 8fc4843c9-to-422d4a283 diff touches only workers.py, the test file and the fragment."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261020T131951173274-review-of-ssog-docs-hold-facility-paths-422d4a283e48",
+  "review_text": "VERDICT goal: the node goal is to stop facility-only source paths triggering the documentation DD-text hold; workers.py:10383-10397 now keeps only dd:-prefixed source_paths in the fallback, and repro_base.log records required=['tcv:ip/measured'] note='DD source text unavailable at tcv:ip/measured' at base against repro_head.log required=[] note=None.\nVERDICT done_when: done_when requires a facility-only item to get no note, a DD binding with missing text to hold naming only the DD path, a caller audit, input-independent tests that fail when reverted, zero added failures and no LLM spend; the fragment ssog-docs-hold-facility-paths.html:99-112 records the three-caller audit and the two-arm gate, and the added cases at test_docs_hold_dd_bindings.py:82-172 carry literal expectations.\nVERDICT write_paths: the node declares workers.py, test_docs_hold_dd_bindings.py, the fragment and its figure directory; git diff --name-status 8fc4843c9 422d4a283 shows exactly those three, nothing outside.\nVERDICT manifest: manifest.md:5 reads complete and records base 8fc4843c9 75 passed EXIT=0, head 069bf7caa 81 passed EXIT=0, 0 added failures, and a 3 failed/EXIT=1 negative control; manifest.md:14 carries an unsubstituted <tree> placeholder.\nVERDICT diff: four commits against 8fc4843c9 - 100a86a4d adds the dd:-prefix filter and two tests, 4699d4f78 adds _set_docs_review_dd_source_paths provenance and two round-trip tests, 069bf7caa adds the end-to-end veto test, and 422d4a283 extends only the fragment; all paths inside scope.\nCALL_SITES: imas_codex/standard_names/workers.py:_has_dd_source_reference:10417, imas_codex/standard_names/workers.py:prepare_docs_review_request:10815, imas_codex/standard_names/workers.py:_documentation_contradiction_note:10945, imas_codex/standard_names/workers.py:process_review_docs_batch:11148\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: workers.py:10390 filters the fallback to path.startswith(DD_PREFIX) so a facility path never becomes a required DD path, matching the reproduced defect and the goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/gate_base_8fc4843c9.log and logs/gate_head_069bf7caa.log show 75 and 81 passed with EXIT=0 and are complete, but manifest.md:14 carries a literal <tree> placeholder so the gate command is not re-runnable from the tests: line.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: manifest.md:3 declares the write paths and the 8fc4843c9-to-422d4a283 diff touches only workers.py, the test file and the fragment.\nSCORE durability: 19\nJUSTIFICATION durability: test_docs_hold_dd_bindings.py:82 fails when the filter is reverted (logs/negative_control.log, 2 failed at 8fc4843c9) and test_docs_hold_dd_bindings.py:93 fails when dd_source_paths provenance is dropped (logs/repair_negative_control_surgical.log, 1 failed).\nSCORE fit: 19\nJUSTIFICATION fit: workers.py:10359-10414 follows the module helper and dedup style with the established DD_PREFIX and strip_dd_prefix primitives, though workers.py:10381-10382 repeats a str-to-list normalisation.\nSCORE reuse: 20\nJUSTIFICATION reuse: workers.py:10401 wraps the existing owner _bound_docs_review_dd_paths and reuses DD_PREFIX from source_paths.py; a search over imas_codex/standard_names found no second item-level DD-path resolver, so the addition extends the owner rather than duplicating it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md:18 follow-on: negative_control_log names logs/repair_round2_negative_control.log, whose run applies the provenance mutation (pre-repair source 100a86a4d with post-repair tests; 3 failed, EXIT=1), not the node's declared mutation 'let facility source paths count as required DD paths again; the facility-only test must then fail', whose log is logs/negative_control.log at revision 8fc4843c9 (2 failed including test_facility_only_source_path_is_not_held, EXIT=1).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/manifest.md:14 follow-on: the tests: line carries an unsubstituted <tree> placeholder which the manifest contract forbids; the literal command survives only in the log headers and the baseline_suite/after_suite command fields.",
+  "reviewed_base_sha": "8fc4843c9f843a669519a94a793d58854fd85146",
+  "reviewed_head_sha": "422d4a283e48aa21c9d1834423d5fa7ab2c4a431",
+  "reviewed_run_id": "r-20261020T104134139630-ssog-docs-hold-facility-paths",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T13:30:53.067757+00:00",
+  "total": 116,
+  "verdicts": {
+    "diff": "Read four commits against 8fc4843c9: 100a86a4d adds the dd:-prefix filter in _bound_docs_review_dd_paths and two tests, 4699d4f78 adds _set_docs_review_dd_source_paths provenance plus two prepared-item round-trip tests, 069bf7caa adds the end-to-end veto-request test, and 422d4a283 extends only the fragment; every changed path is inside the declared scope.",
+    "done_when": "The live node done_when requires a facility-only item to get no note, a DD binding with missing text to hold naming only the DD path, a caller audit of every _bound_docs_review_dd_paths caller, tests whose expectations are input-independent and that fail when the change is reverted, zero added failures against the base, and no LLM spend; the fragment ssog-docs-hold-facility-paths.html:99-112 records the three-caller audit and the two-arm gate, and the added cases at test_docs_hold_dd_bindings.py:82-172 carry literal expectations.",
+    "goal": "The live node goal (brief.md:1, prompt GOAL) is to stop facility-only source paths triggering the documentation DD-text hold; workers.py:10383-10397 now keeps only dd:-prefixed source_paths in the fallback, and the reproduction logs show required=['tcv:ip/measured'] note='DD source text unavailable at tcv:ip/measured' at base against required=[] note=None at head.",
+    "manifest": "manifest.md:5 reads complete and records the base arm at 8fc4843c9 (75 passed, EXIT=0), the head arm at 069bf7caa (81 passed, EXIT=0), 0 added failures, and the named negative control at 3 failed/EXIT=1; the tests: line at manifest.md:14 carries an unsubstituted <tree> placeholder.",
+    "write_paths": "The node declares workers.py, test_docs_hold_dd_bindings.py, the evidence fragment and its figure directory; git diff --name-status 8fc4843c9 422d4a283 shows exactly workers.py, tests/standard_names/test_docs_hold_dd_bindings.py and the fragment, nothing outside."
+  }
+}
