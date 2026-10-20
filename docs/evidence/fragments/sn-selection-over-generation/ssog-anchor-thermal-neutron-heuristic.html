@@ -1,0 +1,62 @@
+<!-- Heuristic-anchor arm of the neutron_source_rate_due_to_thermal_fusion family,
+     run against a scratch copy of the archived graph through the per-arm runner.
+     Runner: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py.
+     Record: ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json. -->
+<section id="ssog-anchor-thermal-neutron-heuristic" data-reckon="evidence">
+  <h2 id="ssog-anchor-thermal-neutron-heuristic-heading">Heuristic anchor arm of the thermal-fusion neutron source-rate family</h2>
+
+  <p id="ssog-anchor-thermal-neutron-heuristic-arm">
+    The heuristic arm harmonizes the four-member family seeded at
+    <code>neutron_source_rate_due_to_thermal_fusion</code> from its heuristic anchor
+    <code>neutron_source_rate_due_to_thermal_fusion</code> (the Jev anchor for this
+    family is <code>source_rate_due_to_thermal_fusion</code>). One detached
+    invocation of the per-arm runner, <code>--family
+    neutron_source_rate_due_to_thermal_fusion --arm heuristic</code>, ran against a
+    fresh scratch copy of the archived export and produced
+    <code>ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json</code>,
+    whose run log ends <code>EXIT=0</code>.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-heuristic-measure">
+    Lint falls <strong>5 &rarr; 4</strong> over the family
+    (<code>link_missing_reverse</code> 2 &rarr; 1, with <code>convention_violation</code>
+    held at 1 and <code>link_dead_link</code> at 2). The apply made
+    <strong>16 calls</strong> for <strong>16 LLMCost rows</strong>,
+    <strong>USD 0.5033</strong> against a USD 2.00 ceiling
+    (<code>apply_cap(4 planned calls) = 2.70</code> clamped to the arm budget, so
+    the smaller ceiling is USD 2.00 and the arm spent under it), in
+    <strong>1012.4 s</strong> wall time.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-heuristic-scores">
+    Documentation scores after the apply are recorded for every member, and three
+    are unchanged from before: <code>source_rate_due_to_thermal_fusion</code> 0.9875,
+    <code>total_neutron_source_rate_due_to_thermal_fusion</code> 0.93125 and
+    <code>tritium_tritium_neutron_source_rate_due_to_thermal_fusion</code> 0.94375.
+    The anchor member's own score falls 1.0 &rarr; 0.849.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-heuristic-halt">
+    The apply halted after batch 1 of 2 (<code>halted: true</code>,
+    <code>resume_from: 1</code>), <code>total_touched: 1</code> of four members; the receipt's halt
+    reason is <code>docs acceptance 0.00% &lt; 90.00% (0/1 touched)</code>, so the
+    three non-anchor members were not harmonized in this arm and their after-scores
+    equal their before-scores. The receipt is therefore not stamped
+    (<code>stamped: false</code>), unlike the first family's arm which ran both
+    batches and stamped. This is the arm's measured outcome, not a runner fault:
+    the invocation exited 0 and the record's <code>outcome_status</code> is
+    <code>complete</code>.
+  </p>
+
+  <p id="ssog-anchor-thermal-neutron-heuristic-containment">
+    Containment holds on both controls: the apply's 16 cost rows are present in the
+    scratch instance (<code>scratch_family_rows 16</code>, <code>scratch_ledger_rows
+    16, <code>scratch_signal 32</code>) and none is attributable to this apply in the
+    live graph (<code>live_family_rows 0</code>, <code>live_scope_run_rows 0</code>,
+    <code>live_signal 0</code>). The scratch instance was stopped and its tree
+    removed (<code>scratch_removed.removed_entries ['instance']</code>), and the
+    reserved port 28002 was released (<code>port_lock_released</code>). The code
+    digest is <code>git_head 5cf53a7b6</code>,
+    <code>tree_digest_imas_codex d1e4f1e5...</code>.
+  </p>
+</section>
