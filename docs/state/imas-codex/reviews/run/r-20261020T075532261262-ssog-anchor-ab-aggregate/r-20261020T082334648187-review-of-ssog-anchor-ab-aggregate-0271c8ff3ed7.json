@@ -30,6 +30,13 @@
     "FINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:383 follow-on: the figure text check omits the direct-label-over-data clause and has no negative control showing it refuse a bad figure.",
     "FINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:383 follow-on: the figure text check duplicates a capability seven sibling recorders already own, with no owner extended."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-rerun",
+      "recorded_at": "2026-10-20T08:44:19.975235+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
