@@ -1,4 +1,6 @@
 {
+ "arm_apply_logs_scanned": 25,
+ "arm_records_holding_a_held_member": 15,
  "held_members": 15,
  "lint_cap_firings_total": 0,
  "lint_cap_per_log": {},
@@ -7,6 +9,9 @@
   {
    "anchor": "vertical_current_density_due_to_anomalous_transport",
    "arm": "heuristic",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T211947135694-ssog-anchor-anomalous-current-heuristic/apply-heuristic-current_density_due_to_anomalous_transport.log"
+   ],
    "arm_record": "current_density_due_to_anomalous_transport-heuristic.json",
    "family": "current_density_due_to_anomalous_transport",
    "lint_after_classes": {
@@ -16,8 +21,9 @@
     "sign_convention": 5
    },
    "member": "current_density_due_to_anomalous_transport",
+   "node_name": "ssog-anchor-anomalous-current-heuristic",
    "recorded": {
-    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204530252833-ssog-anchor-anomalous-current-jev/apply-jev-current_density_due_to_anomalous_transport.log",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T211947135694-ssog-anchor-anomalous-current-heuristic/apply-heuristic-current_density_due_to_anomalous_transport.log",
     "note": "DD source text unavailable; claim comparison could not run",
     "persisted_score": 0.849
    },
@@ -49,6 +55,9 @@
   {
    "anchor": "radial_current_density_due_to_anomalous_transport",
    "arm": "jev",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204530252833-ssog-anchor-anomalous-current-jev/apply-jev-current_density_due_to_anomalous_transport.log"
+   ],
    "arm_record": "current_density_due_to_anomalous_transport-jev.json",
    "family": "current_density_due_to_anomalous_transport",
    "lint_after_classes": {
@@ -58,6 +67,7 @@
     "sign_convention": 5
    },
    "member": "current_density_due_to_anomalous_transport",
+   "node_name": "ssog-anchor-anomalous-current-jev",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204530252833-ssog-anchor-anomalous-current-jev/apply-jev-current_density_due_to_anomalous_transport.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -91,12 +101,16 @@
   {
    "anchor": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
    "arm": "heuristic",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T064039915025-ssog-anchor-wave-current-heuristic-r2/apply-heuristic-current_density_due_to_wave_driven_current_drive.log"
+   ],
    "arm_record": "current_density_due_to_wave_driven_current_drive-heuristic.json",
    "family": "current_density_due_to_wave_driven_current_drive",
    "lint_after_classes": {
     "link_missing_reverse": 1
    },
    "member": "current_density_per_toroidal_mode_due_to_wave_driven_current_drive",
+   "node_name": "ssog-anchor-wave-current-heuristic-r2",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T064039915025-ssog-anchor-wave-current-heuristic-r2/apply-heuristic-current_density_due_to_wave_driven_current_drive.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -129,12 +143,16 @@
   {
    "anchor": "current_density_due_to_wave_driven_current_drive",
    "arm": "jev",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195603274288-ssog-anchor-wave-current-jev/logs/apply-jev-current_density_due_to_wave_driven_current_drive.log"
+   ],
    "arm_record": "current_density_due_to_wave_driven_current_drive-jev.json",
    "family": "current_density_due_to_wave_driven_current_drive",
    "lint_after_classes": {
     "link_missing_reverse": 1
    },
    "member": "current_density_due_to_wave_driven_current_drive",
+   "node_name": "ssog-anchor-wave-current-jev",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195603274288-ssog-anchor-wave-current-jev/logs/apply-jev-current_density_due_to_wave_driven_current_drive.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -167,12 +185,16 @@
   {
    "anchor": "energy_flux_at_wall_due_to_recombination",
    "arm": "jev",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204040007775-ssog-anchor-wall-recomb-jev/apply-jev-energy_flux_at_wall_due_to_recombination.log"
+   ],
    "arm_record": "energy_flux_at_wall_due_to_recombination-jev.json",
    "family": "energy_flux_at_wall_due_to_recombination",
    "lint_after_classes": {
     "link_missing_reverse": 3
    },
    "member": "energy_flux_at_wall_due_to_recombination",
+   "node_name": "ssog-anchor-wall-recomb-jev",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204040007775-ssog-anchor-wall-recomb-jev/apply-jev-energy_flux_at_wall_due_to_recombination.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -205,12 +227,16 @@
   {
    "anchor": "major_length_of_passive_loop_element",
    "arm": "heuristic",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/apply-heuristic-length_of_passive_loop_element.log"
+   ],
    "arm_record": "length_of_passive_loop_element-heuristic.json",
    "family": "length_of_passive_loop_element",
    "lint_after_classes": {},
    "member": "length_of_passive_loop_element",
+   "node_name": "ssog-anchor-passive-loop-heuristic-r2",
    "recorded": {
-    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/apply-jev-length_of_passive_loop_element.log",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150029880139-ssog-anchor-passive-loop-heuristic-r2/apply-heuristic-length_of_passive_loop_element.log",
     "note": "DD source text unavailable; claim comparison could not run",
     "persisted_score": 0.849
    },
@@ -242,12 +268,16 @@
   {
    "anchor": "length_of_passive_loop_element",
    "arm": "jev",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/apply-jev-length_of_passive_loop_element.log"
+   ],
    "arm_record": "length_of_passive_loop_element-jev.json",
    "family": "length_of_passive_loop_element",
    "lint_after_classes": {
     "convention_violation": 2
    },
    "member": "length_of_passive_loop_element",
+   "node_name": "ssog-anchor-passive-loop-jev-r2",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145736717099-ssog-anchor-passive-loop-jev-r2/apply-jev-length_of_passive_loop_element.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -280,6 +310,9 @@
   {
    "anchor": "wavelength_of_visible_camera",
    "arm": "heuristic",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195818474423-ssog-anchor-visible-wavelength-heuristic/apply-heuristic-lower_bound_wavelength_of_visible_camera.log"
+   ],
    "arm_record": "lower_bound_wavelength_of_visible_camera-heuristic.json",
    "family": "lower_bound_wavelength_of_visible_camera",
    "lint_after_classes": {
@@ -289,6 +322,7 @@
     "relationship_link": 1
    },
    "member": "wavelength_of_visible_camera",
+   "node_name": "ssog-anchor-visible-wavelength-heuristic",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195818474423-ssog-anchor-visible-wavelength-heuristic/apply-heuristic-lower_bound_wavelength_of_visible_camera.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -321,14 +355,18 @@
   {
    "anchor": "lower_bound_wavelength_of_visible_camera",
    "arm": "jev",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195903034337-ssog-anchor-visible-wavelength-jev/apply-jev-lower_bound_wavelength_of_visible_camera.log"
+   ],
    "arm_record": "lower_bound_wavelength_of_visible_camera-jev.json",
    "family": "lower_bound_wavelength_of_visible_camera",
    "lint_after_classes": {
     "link_hygiene": 2
    },
    "member": "wavelength_of_visible_camera",
+   "node_name": "ssog-anchor-visible-wavelength-jev",
    "recorded": {
-    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195818474423-ssog-anchor-visible-wavelength-heuristic/apply-heuristic-lower_bound_wavelength_of_visible_camera.log",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T195903034337-ssog-anchor-visible-wavelength-jev/apply-jev-lower_bound_wavelength_of_visible_camera.log",
     "note": "DD source text unavailable; claim comparison could not run",
     "persisted_score": 0.849
    },
@@ -360,10 +398,14 @@
   {
    "anchor": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
    "arm": "heuristic",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T064117970364-ssog-anchor-exb-momentum-heuristic-r2/apply-heuristic-momentum_flux_due_to_e_cross_b_drift.log"
+   ],
    "arm_record": "momentum_flux_due_to_e_cross_b_drift-heuristic.json",
    "family": "momentum_flux_due_to_e_cross_b_drift",
    "lint_after_classes": {},
    "member": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+   "node_name": "ssog-anchor-exb-momentum-heuristic-r2",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T064117970364-ssog-anchor-exb-momentum-heuristic-r2/apply-heuristic-momentum_flux_due_to_e_cross_b_drift.log",
     "note": "contradicts source: gyrokinetics_local/non_linear/fluxes_1d/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; Rotating-frame values use momentum defined relative to the specified rotation and are distinct from laboratory-frame values; the transported momentum and its velocity-space decomposition must use the same frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_2d_k_x_k_y_sum/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_3d/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; Rotating-frame values use momentum defined relative to the specified rotation and are distinct from laboratory-frame values; the transported momentum and its velocity-space decomposition must use the same frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalised toroidal momentum flux",
@@ -439,10 +481,14 @@
   {
    "anchor": "momentum_flux_normalized_due_to_e_cross_b_drift",
    "arm": "jev",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/ssog-run/apply-jev-momentum_flux_due_to_e_cross_b_drift.log"
+   ],
    "arm_record": "momentum_flux_due_to_e_cross_b_drift-jev.json",
    "family": "momentum_flux_due_to_e_cross_b_drift",
    "lint_after_classes": {},
    "member": "momentum_flux_normalized_due_to_e_cross_b_drift",
+   "node_name": "ssog-anchor-exb-momentum-jev-r2",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T064157599111-ssog-anchor-exb-momentum-jev-r2/ssog-run/apply-jev-momentum_flux_due_to_e_cross_b_drift.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -475,10 +521,14 @@
   {
    "anchor": "power_of_divertor_due_to_recombination",
    "arm": "heuristic",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/ssog-run/apply-heuristic-neutral_power_of_divertor_due_to_recombination.log"
+   ],
    "arm_record": "neutral_power_of_divertor_due_to_recombination-heuristic.json",
    "family": "neutral_power_of_divertor_due_to_recombination",
    "lint_after_classes": {},
    "member": "power_of_divertor_due_to_recombination",
+   "node_name": "ssog-anchor-divertor-recomb-heuristic",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/ssog-run/apply-heuristic-neutral_power_of_divertor_due_to_recombination.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -511,12 +561,16 @@
   {
    "anchor": "plasma_power_of_divertor_due_to_recombination",
    "arm": "jev",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150026994505-ssog-anchor-divertor-recomb-jev/apply-jev-neutral_power_of_divertor_due_to_recombination.log"
+   ],
    "arm_record": "neutral_power_of_divertor_due_to_recombination-jev.json",
    "family": "neutral_power_of_divertor_due_to_recombination",
    "lint_after_classes": {},
    "member": "power_of_divertor_due_to_recombination",
+   "node_name": "ssog-anchor-divertor-recomb-jev",
    "recorded": {
-    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T145855055244-ssog-anchor-divertor-recomb-heuristic/ssog-run/apply-heuristic-neutral_power_of_divertor_due_to_recombination.log",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T150026994505-ssog-anchor-divertor-recomb-jev/apply-jev-neutral_power_of_divertor_due_to_recombination.log",
     "note": "DD source text unavailable; claim comparison could not run",
     "persisted_score": 0.849
    },
@@ -548,6 +602,9 @@
   {
    "anchor": "neutron_source_rate_due_to_thermal_fusion",
    "arm": "heuristic",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T203837258480-ssog-anchor-thermal-neutron-heuristic/apply-heuristic-neutron_source_rate_due_to_thermal_fusion.log"
+   ],
    "arm_record": "neutron_source_rate_due_to_thermal_fusion-heuristic.json",
    "family": "neutron_source_rate_due_to_thermal_fusion",
    "lint_after_classes": {
@@ -556,6 +613,7 @@
     "link_missing_reverse": 1
    },
    "member": "neutron_source_rate_due_to_thermal_fusion",
+   "node_name": "ssog-anchor-thermal-neutron-heuristic",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T203837258480-ssog-anchor-thermal-neutron-heuristic/apply-heuristic-neutron_source_rate_due_to_thermal_fusion.log",
     "note": "DD source text unavailable; claim comparison could not run",
@@ -588,6 +646,9 @@
   {
    "anchor": "source_rate_due_to_thermal_fusion",
    "arm": "jev",
+   "arm_apply_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/apply-jev-neutron_source_rate_due_to_thermal_fusion.log"
+   ],
    "arm_record": "neutron_source_rate_due_to_thermal_fusion-jev.json",
    "family": "neutron_source_rate_due_to_thermal_fusion",
    "lint_after_classes": {
@@ -596,6 +657,7 @@
     "link_missing_reverse": 2
    },
    "member": "source_rate_due_to_thermal_fusion",
+   "node_name": "ssog-anchor-thermal-neutron-jev",
    "recorded": {
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261019T204648455743-ssog-anchor-thermal-neutron-jev/apply-jev-neutron_source_rate_due_to_thermal_fusion.log",
     "note": "DD source text unavailable; claim comparison could not run",

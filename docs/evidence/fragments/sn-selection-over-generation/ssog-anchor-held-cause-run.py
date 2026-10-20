@@ -66,6 +66,9 @@ def held_members() -> list[dict]:
                         "score_after": score,
                         "lint_after_classes": rec.get("lint_after_classes"),
                         "run_ids": rec.get("run_ids"),
+                        "node_name": os.path.basename(
+                            (rec.get("code") or {}).get("cwd") or ""
+                        ),
                     }
                 )
     return out
@@ -77,6 +80,21 @@ def arm_logs() -> list[str]:
     for pattern in ("*ssog*/**/apply-*.log", "*ssog*/apply-*.log"):
         logs.extend(glob.glob(str(RUNS / pattern), recursive=True))
     return sorted(set(logs))
+
+
+def arm_logs_for(node_name: str) -> list[str]:
+    """The apply logs of the one run that produced this arm record.
+
+    The arm record names its worktree in ``code.cwd``; the run directory is
+    ``runs/r-<timestamp>-<same basename>``. Binding the logs this way keeps each
+    reported row on its own arm's evidence, so a sibling arm that happens to
+    hold the same member cannot supply the note.
+    """
+    if not node_name:
+        return []
+    return sorted(
+        glob.glob(str(RUNS / f"r-*-{node_name}" / "**" / "apply-*.log"), recursive=True)
+    )
 
 
 HELD_RE = re.compile(r"review_docs: (\S+) held from acceptance — (.*)")
@@ -204,13 +222,15 @@ def main() -> int:
     logs = arm_logs()
     cap = lint_cap_firings(logs)
     print(f"held members: {len(arms)}")
+    print(f"arm records holding a held member: {len({a['arm_record'] for a in arms})}")
     print(f"arm apply logs: {len(logs)}")
     print(f"lint-cap firings across all arms: {cap['total']}")
 
     rows = []
     for a in arms:
-        rec = recorded_note(logs, a["member"])
-        rows.append({**a, "recorded": rec})
+        own = arm_logs_for(a["node_name"])
+        rec = recorded_note(own, a["member"])
+        rows.append({**a, "arm_apply_logs": own, "recorded": rec})
 
     loop = asyncio.new_event_loop()
     try:
@@ -241,6 +261,8 @@ def main() -> int:
     payload = {
         "node": "ssog-anchor-held-cause",
         "held_members": len(arms),
+        "arm_records_holding_a_held_member": len({a["arm_record"] for a in arms}),
+        "arm_apply_logs_scanned": len(logs),
         "lint_cap_firings_total": cap["total"],
         "lint_cap_per_log": cap["per_log"],
         "rows": rows,
