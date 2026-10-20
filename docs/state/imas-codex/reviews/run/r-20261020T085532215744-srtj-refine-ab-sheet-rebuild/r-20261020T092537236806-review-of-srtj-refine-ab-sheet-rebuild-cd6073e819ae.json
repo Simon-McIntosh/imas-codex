@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest arms neither baseline_suite nor after_suite (both empty), so there is no base or head gate log to difference and the added-failure count is zero by derivation, not by absence of measurement; the reviewed run's own gate is a single driver invocation, not a test suite",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-20T09:34:15.188Z",
+  "dispatched_at": "2026-10-20T09:26:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py",
+      "line": "257",
+      "severity": "follow-on",
+      "text": "follow-on: `assert delivered == baseline or delivered == rows` admits the pre-rebuild 82-row sheet as a valid committed state, so a regression that reverted the label sheet to the baseline the node was dispatched to replace would still pass the driver unaltered; the disjunct lets the driver accept the very state the rebuild exists to move away from."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py",
+      "line": "73",
+      "severity": "follow-on",
+      "text": "follow-on: the driver reaches the private `self.client._driver.session(default_access_mode=READ_ACCESS)` rather than the public `GraphClient.session()` context manager at imas_codex/graph/client.py:274, which owns session acquisition and re-establishes a dead tunnel before raising, and bypasses the read owner `GraphClient.query` at imas_codex/graph/client.py:1004; the read-only guarantee the driver needs has no public accessor, so the divergence is justified today but the copy is left behind whenever that owner gains an access-mode parameter."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site found; the four changed paths are evidence artifacts under docs/evidence/fragments/ and a run script, and a repository-wide search over imas_codex/ and tests/ found no importer, and the html fragment is consumed by the reckon docs server by URL, not by repo code.",
+    "diff": "read the single commit cd6073e81 against 9bba70e2d; it adds the driver, the arm key and the html fragment and rewrites the label sheet; the committed sheet and key sha256 match the receipt's output_sha256 exactly (15072cdd... and 4cb8b510...), the sheet carries only the seven allowed fields with no arm key, and the row arithmetic is internally consistent (2x48 contributing outputs less 2 collapsed identical pairs = 94).",
+    "done_when": "the brief's done_when names a rebuilt sheet, an arm key at srtj-refine-ab-arm-key.json, a driver whose log ends EXIT=0, and an html fragment carrying the counts and the remaining sourceless cases; rebuild.log's last line is EXIT=0 and docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild.html lists all 67 remaining sourceless cases with a per-case reason and complete/incomplete flag.",
+    "goal": "the node's goal is to rebuild the refine A/B's blind sheet now that the lost DD sources are restored; docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-label-sheet.json now carries 94 blind rows from 48 of the same 104 complete pairs (was 82 from 42), and the arm key is a separate file at docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-arm-key.json.",
+    "manifest": "read; it records the summary (82->94 rows, 42->48 contributing cases, 62->56 sourceless complete cases), the driver command under its /test/ line, the EXIT=0 rebuild.log, and two scaffolding retries with their attributions.",
+    "write_paths": "the brief grants four fragment paths (label sheet, arm key, html fragment, driver); git diff --name-status 9bba70e2d cd6073e81 changes exactly those four files (one modified, three added) and no production file."
+  },
+  "justifications": {
+    "durability": "srtj-refine-ab-sheet-rebuild-run.py:157-186 plants a false arm credit, arm leakage, a blank source path and a blank name and asserts each detector refuses it, and srtj-refine-ab-sheet-rebuild-run.py:257 then admits the pre-rebuild baseline as a passing state, so a reverted sheet would not redden the run.",
+    "evidence": "the driver log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T085532215744-srtj-refine-ab-sheet-rebuild/rebuild.log ends EXIT=0 and prints 'REPRODUCTION: recorded context builds 82 rows, 42 contributing cases, 104 complete pairs, 62 complete cases without DD source.', so the gate measures the brief's counts against an independent recorded source.",
+    "fit": "srtj-refine-ab-sheet-rebuild-run.py:12-24 imports the recorded builder unchanged and mirrors its adapter shape, and names nothing after a plan label, but srtj-refine-ab-sheet-rebuild-run.py:73 reaches the client's private _driver instead of the public session() at imas_codex/graph/client.py:274.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-label-sheet.json holds 94 rows over 48 contributing cases with the six regained bindings live-resolved, and the arm key is written to a separate file, so the delivered state is the rebuilt blind sheet the goal names.",
+    "reuse": "srtj-refine-ab-sheet-rebuild-run.py:169-180 calls the builder's own sheet_key_findings, sheet_leaks, sheet_blank_paths and sheet_blank_names rather than re-deriving them, but srtj-refine-ab-sheet-rebuild-run.py:53-74 re-implements query execution that imas_codex/graph/client.py:1004 GraphClient.query already owns and does not extend it.",
+    "scope_discipline": "git diff --name-status 9bba70e2d697060adf3d56f98f06ae0c6bfeca27 cd6073e819ae5c9e0a92076a2cee0dd23b3e141b names only the four fragment paths the brief grants, with no production module and no path outside the declared write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to rebuild the refine A/B's blind sheet now that the lost DD sources are restored; docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-label-sheet.json now carries 94 blind rows from 48 of the same 104 complete pairs (was 82 from 42), and the arm key is a separate file at docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-arm-key.json.\nVERDICT done_when: the brief's done_when names a rebuilt sheet, an arm key at srtj-refine-ab-arm-key.json, a driver whose log ends EXIT=0, and an html fragment carrying the counts and the remaining sourceless cases; rebuild.log's last line is EXIT=0 and srtj-refine-ab-sheet-rebuild.html lists all 67 remaining sourceless cases with a per-case reason and complete/incomplete flag.\nVERDICT write_paths: the brief grants four fragment paths (label sheet, arm key, html fragment, driver); git diff --name-status 9bba70e2d cd6073e81 changes exactly those four files (one modified, three added) and no production file.\nVERDICT manifest: read; it records the summary (82->94 rows, 42->48 contributing cases, 62->56 sourceless complete cases), the driver command under its tests line, the EXIT=0 rebuild.log, and two scaffolding retries with their attributions.\nVERDICT diff: read the single commit cd6073e81 against 9bba70e2d; it adds the driver, the arm key and the html fragment and rewrites the label sheet; the committed sheet and key sha256 match the receipt's output_sha256 exactly (15072cdd... and 4cb8b510...), the sheet carries only the seven allowed fields with no arm key, and the row arithmetic is internally consistent (2x48 contributing outputs less 2 collapsed identical pairs = 94).\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-label-sheet.json holds 94 rows over 48 contributing cases with the six regained bindings live-resolved, and the arm key is written to a separate file, so the delivered state is the rebuilt blind sheet the goal names.\nSCORE evidence: 19\nJUSTIFICATION evidence: the driver log rebuild.log ends EXIT=0 and prints 'REPRODUCTION: recorded context builds 82 rows, 42 contributing cases, 104 complete pairs, 62 complete cases without DD source.', so the gate measures the brief's counts against an independent recorded source.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 9bba70e2d697060adf3d56f98f06ae0c6bfeca27 cd6073e819ae5c9e0a92076a2cee0dd23b3e141b names only the four fragment paths the brief grants, with no production module and no path outside the declared write scope.\nSCORE durability: 15\nJUSTIFICATION durability: srtj-refine-ab-sheet-rebuild-run.py:157-186 plants a false arm credit, arm leakage, a blank source path and a blank name and asserts each detector refuses it, and srtj-refine-ab-sheet-rebuild-run.py:257 then admits the pre-rebuild baseline as a passing state, so a reverted sheet would not redden the run.\nSCORE fit: 16\nJUSTIFICATION fit: srtj-refine-ab-sheet-rebuild-run.py:12-24 imports the recorded builder unchanged and mirrors its adapter shape, and names nothing after a plan label, but srtj-refine-ab-sheet-rebuild-run.py:73 reaches the client's private _driver instead of the public session() at imas_codex/graph/client.py:274.\nSCORE reuse: 13\nJUSTIFICATION reuse: srtj-refine-ab-sheet-rebuild-run.py:169-180 calls the builder's own sheet_key_findings, sheet_leaks, sheet_blank_paths and sheet_blank_names rather than re-deriving them, but srtj-refine-ab-sheet-rebuild-run.py:53-74 re-implements query execution that imas_codex/graph/client.py:1004 GraphClient.query already owns and does not extend it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py:257 follow-on: `assert delivered == baseline or delivered == rows` admits the pre-rebuild 82-row sheet as a valid committed state, so a regression that reverted the label sheet to the baseline the node was dispatched to replace would still pass the driver unaltered; the disjunct lets the driver accept the very state the rebuild exists to move away from.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py:73 follow-on: the driver reaches the private `self.client._driver.session(default_access_mode=READ_ACCESS)` rather than the public `GraphClient.session()` context manager at imas_codex/graph/client.py:274, which owns session acquisition and re-establishes a dead tunnel before raising, and bypasses the read owner `GraphClient.query` at imas_codex/graph/client.py:1004; the read-only guarantee the driver needs has no public accessor, so the divergence is justified today but the copy is left behind whenever that owner gains an access-mode parameter.\n",
+  "review_run_id": "r-20261020T092537236806-review-of-srtj-refine-ab-sheet-rebuild-cd6073e819ae",
+  "reviewed_base_sha": "9bba70e2d697060adf3d56f98f06ae0c6bfeca27",
+  "reviewed_commits": [
+    "cd6073e819ae5c9e0a92076a2cee0dd23b3e141b"
+  ],
+  "reviewed_head_sha": "cd6073e819ae5c9e0a92076a2cee0dd23b3e141b",
+  "reviewed_run_id": "r-20261020T085532215744-srtj-refine-ab-sheet-rebuild",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T09:45:00.000000+00:00",
+  "total": 112
+}
