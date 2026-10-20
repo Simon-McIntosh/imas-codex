@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="139">
+<meta name="plan-version" content="141">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -386,6 +386,9 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261020T085532215744-srtj-refine-ab-sheet-rebuild" data-who="reckon-build" data-when="2026-10-20T09:07:13Z">
     <div class="r-comment-body"><p>Rebuilt the blind sheet from recorded outputs with the unchanged builder and read-only live DD lookup: 82 to 94 rows, 42 to 48 contributing cases out of the same 104 complete pairs; 56 complete cases remain sourceless (67 across all 120 cases), each listed in docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild.html#srtj-refine-ab-sheet-rebuild; separate arm key delivered; EXIT=0, zero LLM calls, USD 0, no graph updates.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-s5-lead-ruling-lineage" data-who="reckon-build" data-when="2026-10-20T20:53:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-10-20, on the 56 refine cases left without a DD source after the rebuild.</p><p>Each case's ancestor is superseded, exhausted or derived, and holds no source of any kind. For 23 of them, a later name refined from that ancestor is still in the catalog and holds a DD source through <code>PRODUCED_NAME</code>. Those 23 enter the blind sheet with that descendant's source, flagged as lineage-recovered in the arm key and never on the sheet. That makes 71 of 104 cases. The other 33 stay excluded.</p><p>The score is reported with and without the recovered rows. Order: rebuild the sheet, then blind labels by a fresh worker, then the score, then the retirement of the keyword trigger.</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261017T104929813755-review-of-srtj-docs-planted-defects-11112a496e2e" data-who="reckon-build" data-when="2026-10-17T10:59:05Z">
     <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103622176117-srtj-docs-planted-defects/review-records/r-20261017T103622176117-srtj-docs-planted-defects.at-11112a496e2e9a06006dbdb6a0e7331f36adddba.json — six parsed scores, one blocking finding, revision pair verified</p></div>
 </div>
@@ -682,7 +685,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>review stored parsed with scores goal_fidelity 19, evidence 19, scope_discipline 20, durability 18, fit 16, reuse 20 for r-20261020T135935020217-srtj-jev-panel-audit-sample at base 5fc8638eafd90ae3de04d3fa25de773d99de2ba9 head 8f13c910f879770938948d1fe39cecb9dd4750e4; 0 added failures; three follow-on findings, no blocking finding</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261020T135935020217-srtj-jev-panel-audit-sample" data-who="reckon-build" data-when="2026-10-20T20:20:56Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-jev-panel-audit-sample.html#srtj-jev-panel-audit-sample — paid-panel audit sampled by sha256(run id, axis, item id) at [sn-review].panel-audit-rate (default 0.05, 0 off) and stored beside Jev as a non-deciding resolution_role=&quot;audit&quot; row that the existing shadow exclusion keeps out of the aggregates; refunded budget skips with a recorded reason instead of blocking; read-only report gives per-axis agreement, disagreement directions, skipped count and skip reasons, counting an unpaired or unreadable row as skipped rather than dropping it; the panel runs through the quorum&#x27;s non-persisting path so no canonical row and no aggregate change lands for an audited item. Validation pairs Jev 0.54/0.59 against panel 0.61/0.54 on names and, read from the pinned receipts, Jev 0.96 accept at precision 0.41 against the panel&#x27;s 0.98 at 0.40 on docs.</p></div>
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-jev-panel-audit-sample.html#srtj-jev-panel-audit-sample — paid-panel audit sampled by sha256(run id, axis, item id) at [sn-review].panel-audit-rate (default 0.05, 0 off) and stored beside Jev as a non-deciding resolution_role="audit" row that the existing shadow exclusion keeps out of the aggregates; refunded budget skips with a recorded reason instead of blocking; read-only report gives per-axis agreement, disagreement directions, skipped count and skip reasons, counting an unpaired or unreadable row as skipped rather than dropping it; the panel runs through the quorum's non-persisting path so no canonical row and no aggregate change lands for an audited item. Validation pairs Jev 0.54/0.59 against panel 0.61/0.54 on names and, read from the pinned receipts, Jev 0.96 accept at precision 0.41 against the panel's 0.98 at 0.40 on docs.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-panel-audit-landed" data-who="reckon-build" data-when="2026-10-20T20:52:00Z">
+    <div class="r-comment-body"><p>The paid-panel audit sample is on <code>main</code> (merge <code>f9de429a0</code>, review 112/120). It settles the documentation operating point: from the pinned receipts, Jev accepts 96% at precision 0.41 against the panel's 98% at 0.40. Its three follow-ons go to <code>srtj-audit-row-hardening</code> before the switch:</p><ul><li>bind the non-persisting seam to its contract, not to object identity;</li><li>give the audit row its <code>review_group_id</code> and prove the graph accepts it;</li><li>correct the docstring count.</li></ul><p>Then come the Jev-only dry run on the cohort (at most USD 3.31) and <code>cascade-deciding = true</code>. §6 stays open. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#s6-panel-audit-sample">evidence</a></p></div>
 </div>
 </section>
 </main>
