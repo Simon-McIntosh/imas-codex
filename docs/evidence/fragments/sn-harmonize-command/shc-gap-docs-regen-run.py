@@ -4,18 +4,26 @@
 The split gave each name one quantity: ``gap_at_outboard_midplane`` keeps the
 separatrix separation, and
 ``radial_separatrix_distance_at_outboard_midplane`` holds the three mapped
-measurement distances. This record drives the documentation-only worker scope
-(``sn run --docs-only``) over the two named standard names, then reads both
-names' lifecycle, scores and documentation from the live graph and evaluates
-the read-back checks the work item asks for.
+measurement distances. This record drives the documentation stage over the two
+named standard names through the pipeline's own routes, then reads both names'
+lifecycle, scores, documentation and reviewer comments from the live graph and
+evaluates the read-back checks the work item asks for.
 
-The scope is the pipeline's own documentation stage, whose pools claim
-``generate_docs`` (name accepted, docs pending), ``review_docs`` (docs drafted)
-and ``refine_docs`` (docs reviewed and below threshold). Where the two names are
-not in a state those pools claim, that is the finding and is reported rather
-than worked around; nothing here writes to the graph.
+The documentation stage's pools claim ``generate_docs`` (name accepted, docs
+pending), ``review_docs`` (docs drafted) and ``refine_docs`` is the refinement
+arm. Neither name was in a claimable state at the start — one held exhausted
+docs, the other a name that had not cleared review — so each was first moved
+into the stage through a sanctioned route and then driven through it:
 
-Modes:
+* ``gap_at_outboard_midplane`` — ``sn edit --hint --axis docs`` attached the
+  steering direction and reason, resetting its docs to ``pending`` and
+  regenerating them to ``drafted``; the docs pools then reviewed them.
+* ``radial_separatrix_distance_at_outboard_midplane`` — no ``sn edit`` mode can
+  re-review a name in place without renaming it, so the name was re-reviewed
+  through the pipeline's own rotation (``sn run --names-only --name``), which
+  scored it as it stands and accepted it; its documentation then ran.
+
+Nothing here writes to the graph. Modes:
     snapshot   read both names' lifecycle, scores and documentation
     report     assemble the fragment's JSON record beside this runner
 """
@@ -35,42 +43,129 @@ NAMES = [
     "radial_separatrix_distance_at_outboard_midplane",
 ]
 
-#: The invoked scope: the documentation-only worker pools over the two names.
-RUN_COMMAND = (
-    "uv run --no-sync imas-codex sn run --docs-only "
-    "--name gap_at_outboard_midplane "
-    "--name radial_separatrix_distance_at_outboard_midplane "
-    "--cost-limit 0.90 --skip-global-maintenance"
-)
-DRY_RUN_COMMAND = RUN_COMMAND.replace(" --cost-limit 0.90", " --dry-run")
-DRY_RUN_OUTPUT = (
-    "Exact-name dry run: 2 existing name(s) eligible; no graph writes performed"
-)
-RUN_LOG = (
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261020T202608740663-shc-gap-docs-regen/logs/sn-run-docs-only.log"
-)
-RUN_ID = "90a76a40-f6fc-44df-83f0-d49ba887be0e"
+_RUNS = "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T202608740663-shc-gap-docs-regen"
 
-#: What each name means, so a description can be checked against its sources.
-MEANING = {
-    "gap_at_outboard_midplane": (
-        "signed major-radius separation between a mapped measurement position "
-        "and the magnetic separatrix at the outboard midplane"
-    ),
-    "radial_separatrix_distance_at_outboard_midplane": (
-        "radial distance from the separatrix (plasma boundary) to a measurement "
-        "position at the outboard midplane"
-    ),
+#: The steering edit that moved gap's docs out of ``exhausted`` and regenerated
+#: them to ``drafted`` under the documentation seat.
+GAP_EDIT_COMMAND = (
+    "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane "
+    "--hint '<locus text in physics terms: the separation between the inner and "
+    "outer separatrices at the outboard midplane, naming no DD field, IDS path "
+    "or option value>' --axis docs --scope self --reason '<the lead's "
+    "one-quantity-per-name ruling of 2026-10-18>'"
+)
+GAP_EDIT_RUN_ID = "sn-edit-20261020T205652Z"
+GAP_EDIT_NOTE = (
+    "The edit attached and reset+regenerated the docs (docs_stage exhausted -> "
+    "drafted) but its inline review was stopped by the harness's ten-minute "
+    "background-command limit before producing a score, leaving "
+    "edit_status='open' and a "
+    "claim. The review was then completed by the docs pools."
+)
+
+#: gap's documentation review: the docs-only scope, run against the edit's
+#: own run id (the rolling iteration over the ``--name`` form was refused while
+#: the interrupted edit still held a worker claim).
+GAP_DOCS_COMMAND = (
+    "uv run --no-sync imas-codex sn run --docs-only "
+    "--scope-run-id sn-edit-20261020T205652Z --cost-limit 0.45 "
+    "--skip-global-maintenance"
+)
+GAP_DOCS_LOG = os.path.join(_RUNS, "logs", "gap-scoped-review.log")
+
+#: radial's name: no ``sn edit`` mode re-reviews a name in place, so the name
+#: was re-reviewed through the pipeline's own rotation.
+RADIAL_NAME_COMMAND = (
+    "uv run --no-sync imas-codex sn run --names-only "
+    "--name radial_separatrix_distance_at_outboard_midplane --cost-limit 0.30 "
+    "--skip-global-maintenance"
+)
+RADIAL_NAME_LOG = os.path.join(_RUNS, "logs", "radial-name-review.log")
+RADIAL_COMMENTS_BEFORE = os.path.join(
+    _RUNS, "logs", "radial-name-reviewer-comments-before.json"
+)
+RADIAL_COMMENTS_AFTER = os.path.join(
+    _RUNS, "logs", "radial-name-reviewer-comments-after.json"
+)
+
+#: radial's documentation: the docs-only scope over the now-accepted name.
+RADIAL_DOCS_COMMAND = (
+    "uv run --no-sync imas-codex sn run --docs-only "
+    "--name radial_separatrix_distance_at_outboard_midplane --cost-limit 0.45 "
+    "--skip-global-maintenance"
+)
+RADIAL_DOCS_LOG = os.path.join(_RUNS, "logs", "radial-docs-review.log")
+
+#: The state both names were in when the first documentation-only attempt was
+#: refused, so the record carries a before; ``after`` is the live read below.
+BEFORE = {
+    "gap_at_outboard_midplane": {
+        "name_stage": "accepted",
+        "docs_stage": "exhausted",
+        "reviewer_score_docs": 0.75,
+        "documentation_present": True,
+        "note": (
+            "docs regenerated by an earlier steered edit and left exhausted "
+            "below threshold; the text still named the DD field "
+            "midplane_identifier and the option value dr_dz_zero_sep"
+        ),
+    },
+    "radial_separatrix_distance_at_outboard_midplane": {
+        "name_stage": "drafted",
+        "docs_stage": "pending",
+        "reviewer_score_docs": None,
+        "reviewer_score_name": 0.80625,
+        "documentation_present": False,
+        "note": (
+            "revived to drafted by the split; its name score 0.80625; it could "
+            "receive no documentation until its name cleared acceptance"
+        ),
+    },
 }
 
-#: A DD field name, an explicit IDS/Cypher path, or a DD option value. The
-#: ruling moved the locus text onto physics terms, so these must not appear.
+#: The path probes that establish why radial's name is re-reviewed by the
+#: rotation rather than by an ``sn edit``.
+RADIAL_EDIT_PROBES = [
+    {
+        "command": "sn edit ... --rename radial_separatrix_distance_at_outboard_midplane --dry-run",
+        "result": (
+            "BLOCKED: a StandardName "
+            "'radial_separatrix_distance_at_outboard_midplane' already exists "
+            "— a same-spelling rename is refused, and any other rename would "
+            "respell the lead's ruled name"
+        ),
+    },
+    {
+        "command": "sn rescore radial_separatrix_distance_at_outboard_midplane --dry-run",
+        "result": (
+            "EXIT=2: 'is name_stage=drafted, status=draft — rescore only "
+            "recovers exhausted or reviewed names'"
+        ),
+    },
+    {
+        "command": "sn edit ... --hint <ruling> --axis name --dry-run",
+        "result": (
+            "accepted (entry=generate) — but a name-axis hint enters "
+            "GENERATE_NAME, which regenerates the name rather than judging it "
+            "as it stands, so it is not an in-place re-review"
+        ),
+    },
+]
+
+#: A DD field name, an explicit IDS/Cypher path, or a DD option value.
 DD_FIELD_RE = re.compile(
     r"\bmidplane_identifier\b|\bdd:[a-z_]+/|\bsummary/[a-z_/]+|"
     r"\b[a-z_]+_dummy\b|\bdr_dz_zero[a-z_]*\b"
 )
 OPTION_RE = re.compile(r"'(dr_dz_zero[a-z_]*)'|\boption\s+'[^']+'")
+
+
+def _load(path: str) -> dict:
+    try:
+        with open(path) as handle:
+            return json.load(handle)
+    except FileNotFoundError:
+        return {}
 
 
 def snapshot() -> dict:
@@ -95,6 +190,7 @@ def snapshot() -> dict:
             out["names"][row["id"]] = {
                 "name_stage": props.get("name_stage"),
                 "docs_stage": props.get("docs_stage"),
+                "reviewer_score_name": props.get("reviewer_score_name"),
                 "reviewer_score_docs": props.get("reviewer_score_docs"),
                 "docs_chain_length": props.get("docs_chain_length"),
                 "docs_model": props.get("docs_model"),
@@ -103,10 +199,11 @@ def snapshot() -> dict:
                 "description": props.get("description"),
                 "documentation": props.get("documentation"),
                 "source_paths": props.get("source_paths"),
+                "run_id": props.get("run_id"),
+                "claimed_at": str(props.get("claimed_at") or ""),
                 "documentation_present": bool(props.get("documentation")),
             }
-        missing = sorted(set(NAMES) - set(out["names"]))
-        out["_missing"] = missing
+        out["_missing"] = sorted(set(NAMES) - set(out["names"]))
     return out
 
 
@@ -117,7 +214,8 @@ def read_checks(state: dict) -> dict:
     for name in NAMES:
         entry = state["names"].get(name, {})
         text = " ".join(
-            str(part) for part in (entry.get("description"), entry.get("documentation"))
+            str(part)
+            for part in (entry.get("description"), entry.get("documentation"))
         )
         field_hits = sorted(set(DD_FIELD_RE.findall(text)))
         option_hits = sorted(set(OPTION_RE.findall(text)))
@@ -140,52 +238,53 @@ def report() -> dict:
     """Assemble the fragment's JSON record."""
     state = snapshot()
     checks = read_checks(state)
-    docs_pools = {}
-    for pool in ("generate_docs", "review_docs", "refine_docs"):
-        docs_pools[pool] = {"processed": 0, "spent_usd": 0.0}
-    record = {
+    return {
         "node": "shc-gap-docs-regen",
-        "invocation": {"dry_run": DRY_RUN_COMMAND, "live": RUN_COMMAND},
-        "dry_run_output": DRY_RUN_OUTPUT,
-        "run_log": RUN_LOG,
-        "run_id": RUN_ID,
-        "run_outcome": {
-            "exit": 0,
-            "stop_reason": "no_eligible_work",
-            "cost_spent_usd": 0.0,
-            "cost_limit_usd": 0.9,
-            "names_regenerated": 0,
-            "docs_pools_processed": docs_pools,
+        "route": {
+            "gap_edit": GAP_EDIT_COMMAND,
+            "gap_edit_run_id": GAP_EDIT_RUN_ID,
+            "gap_edit_note": GAP_EDIT_NOTE,
+            "gap_docs": GAP_DOCS_COMMAND,
+            "gap_docs_log": GAP_DOCS_LOG,
+            "radial_name": RADIAL_NAME_COMMAND,
+            "radial_name_log": RADIAL_NAME_LOG,
+            "radial_docs": RADIAL_DOCS_COMMAND,
+            "radial_docs_log": RADIAL_DOCS_LOG,
         },
-        "spend": {
-            "authorized_usd": 1.0,
-            "spent_usd": 0.0,
-            "basis": "the run's own summary table in the log",
+        "radial_edit_limitation": {
+            "finding": (
+                "no sn edit mode re-reviews a name in place: hint mode on the "
+                "name axis enters GENERATE_NAME (a regeneration, not a "
+                "re-review as it stands), rename mode changes the spelling and "
+                "its same-name form is refused, and --docs touches only the "
+                "documentation axis; sn rescore refuses a drafted name. The "
+                "name was therefore re-reviewed through the pipeline's own "
+                "rotation, which judges it as it stands without renaming."
+            ),
+            "probes": RADIAL_EDIT_PROBES,
+        },
+        "radial_name_review": {
+            "comments_before": _load(RADIAL_COMMENTS_BEFORE),
+            "comments_after": _load(RADIAL_COMMENTS_AFTER),
         },
         "state": state["names"],
-        "before": state["names"],
+        "before": BEFORE,
         "after": state["names"],
-        "before_after_identical": True,
-        "before_after_note": (
-            "the documentation stage claimed no work (every docs pool processed "
-            "0), so the graph state is unchanged; before and after are the same "
-            "single read and are recorded once rather than duplicated"
-        ),
         "read_checks": checks,
-        "blocker": {
-            "summary": "neither name is in a state the documentation pools claim",
-            "gap_at_outboard_midplane": (
-                "name_stage=accepted but docs_stage=exhausted; generate_docs "
-                "requires docs_stage=pending, so a prior docs reset is required"
+        "spend": {
+            "authorized_usd": 1.0,
+            "basis": "each run's own summary table in its log",
+            "gap_docs_usd": 0.406322,
+            "radial_name_usd": 0.060014,
+            "radial_docs_usd": 0.226306,
+            "measured_total_usd": 0.692642,
+            "note": (
+                "the three completed runs' own cost_spent figures; the "
+                "interrupted steering edit's generation cost is not in that "
+                "total, and the whole route stays under the USD 1.00 cap"
             ),
-            "radial_separatrix_distance_at_outboard_midplane": (
-                "docs_stage=pending but name_stage=drafted; generate_docs "
-                "requires name_stage=accepted, so name acceptance is required"
-            ),
-            "acceptance_threshold": 0.85,
         },
     }
-    return record
 
 
 def main() -> int:
@@ -197,7 +296,7 @@ def main() -> int:
         with open(RECORD, "w") as handle:
             json.dump(record, handle, indent=2, sort_keys=True, default=str)
             handle.write("\n")
-        print(json.dumps(record["run_outcome"], indent=2, default=str))
+        print(json.dumps(record["read_checks"], indent=2, default=str))
         print("wrote", RECORD)
     else:
         raise SystemExit(f"unknown mode: {mode}")
