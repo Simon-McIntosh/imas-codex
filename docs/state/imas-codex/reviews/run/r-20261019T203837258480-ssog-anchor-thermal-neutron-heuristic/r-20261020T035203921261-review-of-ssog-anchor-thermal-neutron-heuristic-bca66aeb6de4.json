@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-10-20T04:06:44.958Z",
   "dispatched_at": "2026-10-20T03:52:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ssog-anchor-ab-aggregate",
+      "recorded_at": "2026-10-20T04:13:43.867201+00:00"
+    }
+  },
   "findings": [
     "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:188 follow-on: outcome_status reads \"complete\" while the harmonization halted after 1 of 2 batches with stamped false (json lines 81, 127, 118, 256), because the unchanged runner docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:627-628 sets it on the containment gate alone (complete if containment holds else containment); an aggregator keying on the field alone reads a fully-harmonized four-member family, though the node discloses the halt in docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-thermal-neutron-heuristic.html:40-48 and in its manifest follow_ons.",
     "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/neutron_source_rate_due_to_thermal_fusion-heuristic.json:31 follow-on: cost_limit_passed_usd holds the 2.0 arm budget ceiling, not a pass/fail verdict, so a reader comparing spend_usd (json line 255, 0.503306) against a value stored under a name that asserts a verdict compares a spend to a cap; the value is copied verbatim from docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py:508-510 (ceiling = min(apply_cap(planned_calls), ARM_BUDGET_USD)).",
