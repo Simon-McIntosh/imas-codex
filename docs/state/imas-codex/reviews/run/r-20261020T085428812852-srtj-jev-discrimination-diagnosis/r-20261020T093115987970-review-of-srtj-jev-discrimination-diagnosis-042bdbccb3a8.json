@@ -14,6 +14,13 @@
     }
   },
   "dispatched_at": "2026-10-20T09:31:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-jev-evidence-supply-names",
+      "recorded_at": "2026-10-20T09:49:48.999230+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py",
