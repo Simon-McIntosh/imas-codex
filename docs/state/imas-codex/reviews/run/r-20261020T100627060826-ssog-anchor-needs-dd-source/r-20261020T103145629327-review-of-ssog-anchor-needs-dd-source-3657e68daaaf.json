@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:284",
+    "imas_codex/standard_names/harmonize.py:305",
+    "imas_codex/standard_names/harmonize.py:395",
+    "imas_codex/standard_names/harmonize.py:449",
+    "imas_codex/standard_names/harmonize.py:921",
+    "imas_codex/standard_names/context.py:924",
+    "imas_codex/cli/sn.py:3956"
+  ],
+  "completed_at": "2026-10-20T10:43:16.991Z",
+  "dispatched_at": "2026-10-20T10:32:25Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "147",
+      "severity": "follow-on",
+      "text": "follow-on: _row_to_member rebuilds each member as a seven-key dict literal that does not carry has_dd_source, so it strips the flag the node added to _PATTERN_FAMILY_MEMBERS_QUERY before the rows reach select_anchor; assemble_family (harmonize.py:194, reached from imas_codex/cli/sn.py:3956) calls it on both branches, and member_has_dd_source's absence default (families.py:514 returns True) then re-admits the unsourced member, so the guard fails open on the CLI docs-family path. This is outside the node's declared write paths, so it is not a defect in the landed change; but the fragment at ssog-anchor-needs-dd-source.html:'ssog-anchor-needs-dd-source-flag-default' states the default is reachable 'only from harmonize.py, whose parent-grouping rows are assembled inline', which is too narrow - the pattern branch also loses the flag through this function, and that branch is why the _PATTERN_FAMILY_MEMBERS_QUERY projection was added."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-needs-dd-source.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate paragraph cites 'Head bf9f77503: 168 passed, 0 failed, EXIT=0', but the head-gate.log it names as test_logs carries '# revision: 559f9fff654841f22bce9ce906697053c0cacb93' in its header, and the manifest's own after_suite revision field agrees with the log. The code under test is identical at both revisions (559f9fff6 is the docs commit on top of bf9f77503), so the gate result stands unchanged; the record nonetheless names a revision the log it cites does not."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit over fe3c8b79e..3657e68da; bf9f77503 adds dd_source_exists, member_has_dd_source and the call-site changes with the flag projected by three family queries, 559f9fff6 adds the fragment, and 3657e68da is a heading-id rename in the fragment only - three files, 243 insertions, 9 deletions, all inside the declared scope.",
+    "done_when": "The done_when requires both selectors to skip dd-less members, the new test file to fail when the change is reverted, the gate to add no failures against the base, and the fragment to list which comparison families change anchor; the base-gate.log and head-gate.log summaries, the negative-control.log failing ids, and the anchor-delta.log family table are each the gate the done_when names and each was read.",
+    "goal": "The node's goal is 'Exclude members without a DD source from family anchor candidacy in both anchor selectors'; families.py:549-556 adds member_has_dd_source(parent_row) to the accepted-parent rule and families.py:560 draws the ranked set as [m for m in members if member_has_dd_source(m)], and families.py:704-707 adds the same test to _eligible_anchor_candidate, so both selectors named by the goal now exclude the row.",
+    "manifest": "Read in full; it records status complete, the three commits bf9f77503/559f9fff6/3657e68da, baseline_suite 161 passed/0 failed and after_suite 168 passed/0 failed with completed:true and empty failure_ids, the negative control path, and its own follow-on naming harmonize.py's inline parent-grouping query.",
+    "write_paths": "The declared scope is imas_codex/standard_names/families.py, tests/standard_names/test_anchor_needs_dd_source.py, docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-needs-dd-source.html and the figures directory alongside it; the diff at 3657e68da touches exactly the first three files and nothing else, and no figure was drawn."
+  },
+  "justifications": {
+    "durability": "Seven assertions were added and each reddens under its own guard's removal - reinstating select_anchor's old body reddens four of them (negative-control.log: 4 failed, 3 passed, EXIT=1, including test_heuristic_skips_a_derived_parent_ranked_first), and reverting _eligible_anchor_candidate's test reddens test_jev_candidates_exclude_a_member_without_a_dd_source (tests/standard_names/test_anchor_needs_dd_source.py:130), which the single declared mutation did not exercise because it touched only select_anchor.",
+    "evidence": "The two gate logs corroborate the manifest exactly - base-gate.log ends '161 passed, 1 warning in 134.67s' with EXIT=0 and head-gate.log '168 passed, 1 warning in 139.37s' with EXIT=0 - and the anchor-delta.log rows I checked (neutral_power_of_divertor_due_to_recombination, neutron_source_rate_due_to_thermal_fusion, energy_flux_at_wall_due_to_recombination, current_density_due_to_anomalous_transport) match the fragment's table cell for cell, but the fragment's stated head revision disagrees with the log it cites and its reach claim is too narrow.",
+    "fit": "The added names state the mechanism with no plan label, deliverable id, ticket reference or version suffix (dd_source_exists and member_has_dd_source at imas_codex/standard_names/families.py:480 and :498, tests/standard_names/test_anchor_needs_dd_source.py), and the fragment follows the repository's plan-keyed docs/evidence/fragments layout the brief assigns.",
+    "goal_fidelity": "Both selectors named in the goal now test the flag (imas_codex/standard_names/families.py:560 and :704), and the landed definitions are the only mechanism added, so the change does what the goal states; the reader's absence default at families.py:514 leaves the guard inert on caller-supplied rows, which is the goal's reach rather than the goal's content and is carried as a finding.",
+    "reuse": "Searching the repository by capability for an owner of 'does a StandardName have a live dd producing source' found no single owner: source_invariant.py:46 counts ANY producer with a derived-parent exemption (the opposite answer for exactly the rows in question), and export.py:681 has_dd_source_binding tests the IMASNode HAS_STANDARD_NAME edge rather than the StandardNameSource PRODUCED_NAME edge - the two nearest mechanisms answer different questions, so families.py:480 adds a fourth inline spelling of the dd-producer predicate but consolidates it behind one builder inside its own module.",
+    "scope_discipline": "The diff at 3657e68da contains only imas_codex/standard_names/families.py, tests/standard_names/test_anchor_needs_dd_source.py and the evidence fragment, all three inside the manifest's declared write paths, and carries nothing the goal does not imply."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to exclude members without a DD source from family anchor candidacy in both selectors; families.py:560 draws the ranked set from member_has_dd_source and families.py:704 adds the same test to _eligible_anchor_candidate.\nVERDICT done_when: the done_when names both selectors, a revert-failing test file, a no-added-failure gate and a family list in the fragment; base-gate.log, head-gate.log, negative-control.log and anchor-delta.log are each that gate and were read.\nVERDICT write_paths: the declared scope is families.py, the new test file, the evidence fragment and a figures directory; the diff at 3657e68da touches the first three and nothing else.\nVERDICT manifest: read in full; it records 161 passed/0 failed at the base against 168 passed/0 failed at the head, the three commits, the negative control path and its own harmonize.py follow-on.\nVERDICT diff: read commit by commit over fe3c8b79e..3657e68da - the selector change, the fragment, and a heading-id rename, three files, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/harmonize.py:284, imas_codex/standard_names/harmonize.py:305, imas_codex/standard_names/harmonize.py:395, imas_codex/standard_names/harmonize.py:449, imas_codex/standard_names/harmonize.py:921, imas_codex/standard_names/context.py:924, imas_codex/cli/sn.py:3956\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: both selectors named in the goal test the flag at families.py:560 and families.py:704, and the absence default at families.py:514 is a question of reach rather than of content.\nSCORE evidence: 16\nJUSTIFICATION evidence: base-gate.log and head-gate.log corroborate the manifest's 161/0 and 168/0 counts with EXIT=0, and the delta log matches the fragment's table, but the fragment names a head revision its own cited log does not.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the fe3c8b79e..3657e68da diff is inside the manifest's declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: reinstating select_anchor's old body reddens four of the seven added assertions (negative-control.log, 4 failed, EXIT=1) and reverting _eligible_anchor_candidate reddens the candidate-filter assertion at test_anchor_needs_dd_source.py:130, which the declared mutation did not exercise.\nSCORE fit: 18\nJUSTIFICATION fit: dd_source_exists and member_has_dd_source at families.py:480 and :498 name the mechanism with no plan label or ticket reference.\nSCORE reuse: 16\nJUSTIFICATION reuse: no owner exists for 'has a live dd producing source' - source_invariant.py:46 counts any producer with a derived-parent exemption and export.py:681 tests a different edge - so families.py:480 is a new spelling consolidated behind one builder.\nFINDING imas_codex/standard_names/harmonize.py:147 follow-on: _row_to_member rebuilds each member as a seven-key dict literal that drops has_dd_source, so the flag the node projected into _PATTERN_FAMILY_MEMBERS_QUERY is stripped before select_anchor sees it on either assemble_family branch (reached from imas_codex/cli/sn.py:3956) and member_has_dd_source's absence default re-admits the unsourced member; outside the node's write scope, but it makes the fragment's 'reachable only from the parent-grouping rows' claim too narrow.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-needs-dd-source.html:1 follow-on: the gate paragraph cites head bf9f77503 while the head-gate.log it names carries '# revision: 559f9fff654841f22bce9ce906697053c0cacb93'; the code is identical at both revisions so the result stands, but the record names a revision the log it cites does not.\nREVIEWED_BASE_SHA: fe3c8b79e767850d02730b9a58eae6eb7eca6057\nREVIEWED_HEAD_SHA: 3657e68daaafe3988c8992dc454d3d11b82abb8f\n\nThe reviewed range is fe3c8b79e..3657e68da, three commits by one worker in its own detached worktree. I re-ran no test: the worker's head-gate.log and base-gate.log are on disk and each ends in a bare EXIT= line, and I reproduced only the single behavioural claim the diff's default rests on - that _row_to_member, which the diff does not touch and which is identical at base and head, strips a has_dd_source key from the row it is handed (its output key set is exactly description, docs_stage, documentation, id, operator, operator_kind, reviewer_score_docs). I also read the production call sites of select_anchor to see which of them carry the flag: plan_family_applies reaches it through fetch_pattern_families, whose query the node did extend, while assemble_family reaches it through _row_to_member on both branches and loses it.\n",
+  "review_run_id": "r-20261020T103145629327-review-of-ssog-anchor-needs-dd-source-3657e68daaaf",
+  "reviewed_base_sha": "fe3c8b79e767850d02730b9a58eae6eb7eca6057",
+  "reviewed_head_sha": "3657e68daaafe3988c8992dc454d3d11b82abb8f",
+  "reviewed_run_id": "r-20261020T100627060826-ssog-anchor-needs-dd-source",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-20T10:44:57.978505+00:00",
+  "total": 103
+}
