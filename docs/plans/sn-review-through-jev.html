@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="126">
+<meta name="plan-version" content="127">
 <meta name="plan-modified" content="2026-10-20">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -381,7 +381,10 @@
     <div class="r-comment-body"><p>The comparison run has landed (merge <code>078b20ea3</code>, USD 32.70). It produced 214 named outputs across both arms, and every name parses. The blind sheet holds 82 rows from 104 cases, because 62 cases had no reachable DD source. A labeller cannot judge a name without the data element it names, so labelling waits. The census shows most of the 62 are names whose sources were dropped, so the sheet is rebuilt after <code>sn-integrity-backlog</code> §38 restores them. Then come the blind labels, the score, and the retirement of the keyword trigger. §5 stays open. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#srtj-refine-ab-run">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261020T092537236806-review-of-srtj-refine-ab-sheet-rebuild-cd6073e819ae" data-who="reckon-build" data-when="2026-10-20T09:34:15.188Z">
-    <div class="r-comment-body"><p>Reviewed run r-20261020T085532215744-srtj-refine-ab-sheet-rebuild at base 9bba70e2d697060adf3d56f98f06ae0c6bfeca27, head cd6073e819ae5c9e0a92076a2cee0dd23b3e141b: goal_fidelity 19, evidence 19, scope_discipline 20, durability 15, fit 16, reuse 13 (total 112); no blocking findings, two follow-ons (the idempotence assertion at the driver&#x27;s line 257 admits the pre-rebuild baseline, and the read adapter reaches the private _driver instead of imas_codex/graph/client.py:274/1004); added_failure_count 0 because the reviewed manifest arms neither baseline_suite nor after_suite.</p></div>
+    <div class="r-comment-body"><p>Reviewed run r-20261020T085532215744-srtj-refine-ab-sheet-rebuild at base 9bba70e2d697060adf3d56f98f06ae0c6bfeca27, head cd6073e819ae5c9e0a92076a2cee0dd23b3e141b: goal_fidelity 19, evidence 19, scope_discipline 20, durability 15, fit 16, reuse 13 (total 112); no blocking findings, two follow-ons (the idempotence assertion at the driver's line 257 admits the pre-rebuild baseline, and the read adapter reaches the private _driver instead of imas_codex/graph/client.py:274/1004); added_failure_count 0 because the reviewed manifest arms neither baseline_suite nor after_suite.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261020T085532215744-srtj-refine-ab-sheet-rebuild" data-who="reckon-build" data-when="2026-10-20T09:07:13Z">
+    <div class="r-comment-body"><p>Rebuilt the blind sheet from recorded outputs with the unchanged builder and read-only live DD lookup: 82 to 94 rows, 42 to 48 contributing cases out of the same 104 complete pairs; 56 complete cases remain sourceless (67 across all 120 cases), each listed in docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild.html#srtj-refine-ab-sheet-rebuild; separate arm key delivered; EXIT=0, zero LLM calls, USD 0, no graph updates.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261017T104929813755-review-of-srtj-docs-planted-defects-11112a496e2e" data-who="reckon-build" data-when="2026-10-17T10:59:05Z">
     <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103622176117-srtj-docs-planted-defects/review-records/r-20261017T103622176117-srtj-docs-planted-defects.at-11112a496e2e9a06006dbdb6a0e7331f36adddba.json — six parsed scores, one blocking finding, revision pair verified</p></div>
