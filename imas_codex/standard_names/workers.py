@@ -10357,7 +10357,16 @@ def _canonical_docs_review_item(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def _bound_docs_review_dd_paths(item: dict[str, Any]) -> list[str]:
-    """List every DD path bound to the name, preserving source order."""
+    """List every DD path bound to the name, preserving source order.
+
+    Only DD paths are returned: the paths of ``dd`` source bindings, the
+    ``dd_source_paths`` a prepared review item carries, or ``source_paths``
+    entries carrying the ``dd:`` prefix. A facility signal path names no DD
+    text, so it never becomes a required DD path. ``dd_source_paths`` is this
+    function's own output for the item, kept beside the ``dd:``-stripped
+    ``source_paths`` a prepared review item is normalised to, so the DD
+    provenance survives that normalisation.
+    """
     bindings = item.get("source_bindings") or []
     paths = [
         binding.get("dd_path") or binding.get("source_id") or binding.get("id")
@@ -10365,12 +10374,21 @@ def _bound_docs_review_dd_paths(item: dict[str, Any]) -> list[str]:
         if binding and binding.get("source_type") == "dd"
     ]
     if not paths:
-        paths = item.get("source_paths") or []
-        if isinstance(paths, str):
-            try:
-                paths = json.loads(paths)
-            except (json.JSONDecodeError, TypeError):
+        paths = item.get("dd_source_paths")
+        if paths is None:
+            paths = item.get("source_paths") or []
+            if isinstance(paths, str):
+                try:
+                    paths = json.loads(paths)
+                except (json.JSONDecodeError, TypeError):
+                    paths = [paths]
+            if isinstance(paths, str):
                 paths = [paths]
+            paths = [
+                path
+                for path in paths
+                if isinstance(path, str) and path.startswith(DD_PREFIX)
+            ]
     if isinstance(paths, str):
         paths = [paths]
     return list(
@@ -10378,6 +10396,22 @@ def _bound_docs_review_dd_paths(item: dict[str, Any]) -> list[str]:
             strip_dd_prefix(path) for path in paths if isinstance(path, str) and path
         )
     )
+
+
+def _set_docs_review_dd_source_paths(item: dict[str, Any]) -> list[str]:
+    """Normalise an item's DD paths, keeping the DD provenance beside them.
+
+    ``source_paths`` is set to the bare DD paths so the DD-source read and the
+    review prompt see paths without the ``dd:`` prefix. ``dd_source_paths``
+    records the same list, so a later :func:`_bound_docs_review_dd_paths` call
+    on the normalised item still recognises the paths as DD rather than as
+    unlabelled ``source_paths`` entries. A facility signal path is dropped:
+    it names no DD text.
+    """
+    dd_paths = _bound_docs_review_dd_paths(item)
+    item["dd_source_paths"] = dd_paths
+    item["source_paths"] = dd_paths
+    return dd_paths
 
 
 def _has_dd_source_reference(item: dict[str, Any]) -> bool:
@@ -10778,7 +10812,7 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         "escalation_input_token_bound": escalation_input_token_bound,
     }
     veto_item = _canonical_docs_review_item(prepared_item)
-    veto_item["source_paths"] = _bound_docs_review_dd_paths(veto_item)
+    _set_docs_review_dd_source_paths(veto_item)
     if veto_item["source_paths"]:
         from imas_codex.standard_names.review.pipeline import _fetch_review_dd_context
 

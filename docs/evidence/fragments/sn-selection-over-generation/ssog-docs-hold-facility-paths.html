@@ -1,0 +1,143 @@
+<!-- The documentation hold's required DD paths, drawn from DD sources only. Gate
+     logs quoted here are under
+     ~/.config/reckon/crew/runs/r-20261020T104134139630-ssog-docs-hold-facility-paths/logs/. -->
+<section id="ssog-docs-hold-facility-paths" data-reckon="evidence">
+  <h2 id="ssog-docs-hold-facility-paths-heading">A facility-only source path does not require DD text</h2>
+
+  <p id="ssog-docs-hold-facility-paths-defect">
+    <strong>Defect.</strong> <code>_bound_docs_review_dd_paths</code> in
+    <code>imas_codex/standard_names/workers.py</code> returns the paths of the name's
+    <code>dd</code> source bindings, but when no <code>dd</code> binding exists it falls back to
+    the raw <code>source_paths</code> — including facility signal paths such as
+    <code>tcv:ip/measured</code>. <code>_documentation_contradiction_note</code> takes that list
+    as the DD paths whose text must be present. A name sourced only from facility signals
+    therefore demanded DD text at <code>tcv:ip/measured</code>, was held with
+    <code>DD source text unavailable at tcv:ip/measured</code>, and documentation review clamped
+    it below <code>DEFAULT_MIN_SCORE</code> — although no DD text exists to compare against. This
+    is the facility-path member of the hold's DD-source precondition; the derived- and
+    manual-only members were closed by <code>ssog-docs-hold-dd-bindings</code>, whose
+    <code>_has_dd_source_reference</code> fallback still read a facility path as a DD source
+    through this helper.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-reproduction">
+    <strong>Reproduction at the base revision</strong> (<code>8fc4843c9</code>), driven through
+    the helper and the note directly with the model stubbed, so the run spends nothing
+    (<code>logs/repro_base.log</code>):
+    <code>_bound_docs_review_dd_paths({'source_paths': ['tcv:ip/measured'], 'source_bindings': []})</code>
+    returned <code>['tcv:ip/measured']</code> and the note returned
+    <code>'DD source text unavailable at tcv:ip/measured'</code>. The same probe after the repair
+    (<code>logs/repro_head.log</code>) returns <code>[]</code> and <code>None</code>.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-change">
+    <strong>Change.</strong> The helper's fallback now keeps only <code>source_paths</code> entries
+    carrying the <code>dd:</code> prefix, so a required DD path comes either from a
+    <code>dd</code> binding or from a <code>dd:</code>-prefixed source path — never from a
+    facility path. Everything else is untouched: a <code>dd</code> binding whose text is missing
+    still holds, naming only the DD path, and a <code>dd:</code>-prefixed source path with no
+    binding is still held.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-roundtrip">
+    <strong>Repair — the prefix rule broke the prepared-item round trip.</strong> A review of the
+    first cut found that <code>prepare_docs_review_request</code> rewrites a veto item's
+    <code>source_paths</code> to this helper's output — the paths with the <code>dd:</code>
+    prefix stripped, so the DD-source read and the review prompt see bare paths — and
+    <code>process_review_docs_batch</code> then runs the note on that same item. For a name whose
+    DD path arrives only as a <code>dd:</code>-prefixed source path with no <code>dd</code>
+    binding, the second pass saw a bare path, the prefix rule dropped it, the required list went
+    empty and the hold was lost — the opposite of the brief's "a DD-bound item with missing text
+    still holds". Probed on the pre-repair tree
+    (<code>logs/repro_roundtrip_base.log</code>, <code>100a86a4d</code>): the helper returned
+    <code>['equilibrium/time_slice/profiles_1d/psi']</code> on the raw item and <code>[]</code> on
+    its normalised form, and the note returned <code>None</code>. The repair keeps the provenance
+    across that rewrite: <code>_set_docs_review_dd_source_paths</code> sets
+    <code>source_paths</code> to the bare DD paths and records the same list in
+    <code>dd_source_paths</code>, which the helper reads when present, ahead of the
+    <code>dd:</code>-prefix fallback. After the repair the same probe
+    (<code>logs/repro_roundtrip.log</code>) returns
+    <code>['equilibrium/time_slice/profiles_1d/psi']</code> on both passes and the note holds.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-veto-path">
+    <strong>End-to-end veto path.</strong> The round trip above was measured through
+    <code>prepare_docs_review_request</code> itself, on the shape that exercises it: a name
+    bound to DD text only by a <code>dd:</code>-prefixed source path, with no
+    <code>dd</code> binding, whose text is missing. A <code>dd</code> binding alone cannot
+    show the defect, because it short-circuits the source-path normalisation — the first
+    version of the test used one and passed on the pre-repair source. The request is now
+    driven with the DD-context read stubbed to return nothing — no graph read, no model
+    call — and the note is re-run on <code>request["veto_item"]</code>, which is the item
+    the claimed worker receives. On the pre-repair source
+    (<code>logs/repair_round2_negative_control.log</code>, <code>100a86a4d</code>) the
+    re-check returns <code>None</code> and the hold is lost; on the landed head it returns
+    <code>'DD source text unavailable at equilibrium/time_slice/profiles_1d/j_tor'</code>.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-caller-audit">
+    <strong>Caller audit.</strong> <code>_bound_docs_review_dd_paths</code> has three callers. Its
+    return is DD paths only, and its input may be a raw item or a prepared one:
+  </p>
+  <ul id="ssog-docs-hold-facility-paths-callers">
+    <li id="ssog-docs-hold-facility-paths-caller-predicate">
+      <code>_has_dd_source_reference</code> — expects a non-empty result to mean the name
+      <em>names DD text</em>. A facility path made this predicate answer <code>True</code> for a
+      name with no DD source, defeating the fallback the sibling node added. It now answers
+      <code>False</code>.
+    </li>
+    <li id="ssog-docs-hold-facility-paths-caller-veto">
+      <code>_set_docs_review_dd_source_paths</code>, called by the docs-review request builder —
+      expects the DD paths to normalise into <code>source_paths</code> for the DD-source read and
+      the prompt, and now records them in <code>dd_source_paths</code> so those paths stay DD
+      after the rewrite. A facility path was previously normalised in as a DD path and fetched as
+      DD context, a read that can only miss; it is now dropped.
+    </li>
+    <li id="ssog-docs-hold-facility-paths-caller-note">
+      <code>_documentation_contradiction_note</code> — the required DD paths whose text must be
+      present, and the site of the defect. A facility-only name carries no required DD path; a
+      prepared item with a DD path still carries it.
+    </li>
+  </ul>
+
+  <p id="ssog-docs-hold-facility-paths-measure">
+    <strong>Measure.</strong> Gate over <code>test_docs_hold_dd_bindings.py</code> and
+    <code>test_review_cascade.py</code> — every test file that imports
+    <code>_bound_docs_review_dd_paths</code> or <code>_documentation_contradiction_note</code> —
+    base arm at the run's base revision <code>8fc4843c9</code>, in its own checkout outside
+    the worktree (a <code>git archive</code> extract under <code>$TMPDIR</code>):
+    <code>75 passed</code>, <code>EXIT=0</code>; head arm at <code>069bf7caa</code>:
+    <code>81 passed</code>, <code>EXIT=0</code>
+    (<code>logs/gate_base_8fc4843c9.log</code>, <code>logs/gate_head_069bf7caa.log</code>).
+    Added failures <code>0</code>; the six added tests are the two veto-path cases of this
+    round and the four of the earlier rounds. Each log's source is hash-verified against the
+    revision it names and its header names the module under test. No LLM spend: every case
+    returns before a model call, and the veto-path cases stub the DD-context read so no
+    graph read happens either.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-negative-control">
+    <strong>Negative control.</strong> The two veto-path tests run against the source from
+    before the provenance fix (<code>100a86a4d</code>) fail —
+    <code>test_veto_request_holds_a_dd_source_path_with_missing_text</code> with
+    <code>AssertionError: assert None == 'DD source text unavailable at
+    equilibrium/time_slice/profiles_1d/j_tor'</code>, alongside the two round-trip cases
+    (<code>3 failed, 9 passed</code>, <code>EXIT=1</code>;
+    <code>logs/repair_round2_negative_control.log</code>) — and pass on the landed head.
+    Measured against the earlier head, dropping only the line recording
+    <code>dd_source_paths</code> failed <code>test_normalised_dd_source_path_still_holds</code>
+    (<code>1 failed, 78 passed</code>, <code>EXIT=1</code>;
+    <code>logs/repair_negative_control_surgical.log</code>), and reverting the answering
+    commit whole failed that test and
+    <code>test_normalised_facility_source_path_is_not_held</code> (<code>2 failed</code>,
+    <code>EXIT=1</code>; <code>logs/repair_negative_control.log</code>). Expectations are
+    literals built without the constant that fed their input: the held cases expect
+    <code>.../profiles_1d/j_tor</code> while their input path is prefixed <code>dd:</code>, so
+    echoing the input cannot satisfy them.
+  </p>
+
+  <p id="ssog-docs-hold-facility-paths-state">
+    <strong>State.</strong> The gate measures this node's own change only; verifying the merged
+    result is a separate node's work.
+  </p>
+</section>
