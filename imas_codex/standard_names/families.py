@@ -477,6 +477,42 @@ def is_placeholder_description(description: str | None) -> bool:
     )
 
 
+def dd_source_exists(alias: str) -> str:
+    """Cypher predicate: *alias* is bound to a live Data Dictionary source.
+
+    A name row carries the flag under ``has_dd_source``. The producing edge is
+    ``PRODUCED_NAME`` from a ``StandardNameSource`` of type ``dd``, and a source
+    the catalog has retired (``status = 'stale'``) no longer produces anything,
+    so it does not count. One definition, used by every family query that
+    reports the flag, so no two selectors can disagree about what "has a DD
+    source" means.
+    """
+    return (
+        f"EXISTS {{ MATCH ({alias})<-[:PRODUCED_NAME]-"
+        "(dd:StandardNameSource {source_type: 'dd'}) "
+        "WHERE coalesce(dd.status, '') <> 'stale' }"
+    )
+
+
+def member_has_dd_source(row: Mapping[str, Any]) -> bool:
+    """Whether *row* may anchor a family: it is entailed by a DD source.
+
+    A family takes its documentation template from its anchor, so the rewrite
+    the anchor sets for its members is only checkable against source text when
+    the anchor has a Data Dictionary source of its own. A name with none — a
+    derived parent folded from other evidence, or a name whose only binding is
+    a facility signal — has no source its template can be verified against, and
+    would then template members it holds no textual authority over.
+
+    The flag is projected by every family query in this module, so a row that
+    reached a selector through this module always states it. A row that carries
+    no ``has_dd_source`` key at all was built by a caller's own query; it is
+    read as DD-sourced, so a selector handed such rows ranks exactly as it did
+    before the flag existed rather than silently disqualifying the family.
+    """
+    return bool(row["has_dd_source"]) if "has_dd_source" in row else True
+
+
 def select_anchor(
     parent_id: str | None,
     parent_docs_stage: str | None,
@@ -497,6 +533,14 @@ def select_anchor(
          deterministically by id — NEVER by longest description, which
          propagates a verbose, non-canonical opening into the family.
 
+    Every candidate must also be entailed by a Data Dictionary source
+    (:func:`member_has_dd_source`): a member with none sets a template its
+    rewrite cannot be checked against, and would then template members it has
+    no textual authority over. The rule applies to the parent as well — when
+    the parent is one of ``members``, its own row is what decides whether the
+    accepted-parent rule fires. A family in which no member qualifies has no
+    anchor at all, and the caller records it ``deferred``.
+
     The anchor deliberately carries NO vocabulary or phrasing knowledge: the
     canonical opening a family should converge on is defined by the docs
     prompt/context, not hardcoded here. Score + determinism is the data-driven
@@ -505,16 +549,19 @@ def select_anchor(
     Returns ``None`` when no candidate qualifies (family is flagged
     ``deferred`` by the caller).
     """
+    parent_row = next((m for m in members if m.get("id") == parent_id), None)
     if (
         parent_id
+        and (parent_row is None or member_has_dd_source(parent_row))
         and parent_docs_stage == DOCS_STAGE_ACCEPTED
         and not is_placeholder_description(parent_description)
     ):
         return parent_id
 
+    eligible = [m for m in members if member_has_dd_source(m)]
     accepted = [
         m
-        for m in members
+        for m in eligible
         if m.get("docs_stage") == DOCS_STAGE_ACCEPTED
         and not is_placeholder_description(m.get("description"))
     ]
@@ -530,7 +577,7 @@ def select_anchor(
         return min(accepted, key=lambda m: m.get("id") or "").get("id")
 
     non_placeholder = [
-        m for m in members if not is_placeholder_description(m.get("description"))
+        m for m in eligible if not is_placeholder_description(m.get("description"))
     ]
     if non_placeholder:
         # Last resort — deterministic by id (NOT longest description); picking
@@ -650,11 +697,14 @@ def _eligible_anchor_candidate(row: Mapping[str, Any]) -> bool:
     """Whether a member is one :func:`select_anchor` would consider.
 
     The same rule ``select_anchor`` applies to a member — a real
-    (non-placeholder) description — plus the documentation a template needs: a
+    (non-placeholder) description, entailed by a DD source
+    (:func:`member_has_dd_source`) — plus the documentation a template needs: a
     member with no documentation has nothing to template from.
     """
-    return not is_placeholder_description(row.get("description")) and bool(
-        str(row.get("documentation") or "").strip()
+    return (
+        member_has_dd_source(row)
+        and not is_placeholder_description(row.get("description"))
+        and bool(str(row.get("documentation") or "").strip())
     )
 
 
@@ -878,6 +928,7 @@ RETURN m.id AS id,
        m.documentation AS documentation,
        coalesce(m.docs_stage, '') AS docs_stage,
        m.reviewer_score_docs AS reviewer_score_docs,
+       {dd_source_exists("m")} AS has_dd_source,
        coalesce(m.physical_base, '') AS physical_base,
        coalesce(m.subject, '') AS subject,
        coalesce(m.component, '') AS component,
@@ -979,6 +1030,7 @@ def _family_member_collect() -> str:
         documentation: m.documentation,
         docs_stage: m.docs_stage,
         reviewer_score_docs: m.reviewer_score_docs,
+        has_dd_source: """ + dd_source_exists("m") + """,
         harmonized_group_signature: m.harmonized_group_signature,
         harmonized_anchor: m.harmonized_anchor,
         unit: m.unit,
@@ -1088,14 +1140,15 @@ def fetch_pattern_families(
 # the family's ``physical_base``. It is a member of the family only when the
 # family's ``transformation`` is empty; an operator-reduced family
 # (``flux_surface_averaged`` …) therefore looks its base up separately.
-_FAMILY_BASE_QUERY = """
-MATCH (b:StandardName {id: $base_id})
+_FAMILY_BASE_QUERY = f"""
+MATCH (b:StandardName {{id: $base_id}})
 WHERE coalesce(b.name_stage, '') <> $superseded
 RETURN b.id AS id,
        b.description AS description,
        b.documentation AS documentation,
        coalesce(b.docs_stage, '') AS docs_stage,
-       b.reviewer_score_docs AS reviewer_score_docs
+       b.reviewer_score_docs AS reviewer_score_docs,
+       {dd_source_exists("b")} AS has_dd_source
 """
 
 
