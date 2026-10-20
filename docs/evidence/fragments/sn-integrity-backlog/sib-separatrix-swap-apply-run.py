@@ -42,8 +42,7 @@ SCRATCH = Path(
     "/tmp/reckon-crew-scratch/r-20261020T044913680539-sib-separatrix-swap-apply"
 )
 ARCHIVE = (
-    Path.home()
-    / ".local/share/imas-codex/exports/"
+    Path.home() / ".local/share/imas-codex/exports/"
     "imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 PYTHON = Path("/home/ITER/mcintos/Code/imas-codex/.venv/bin/python")
@@ -194,7 +193,9 @@ def check_preconditions(record: dict) -> list[str]:
     """Return the list of precondition failures (empty when the state matches)."""
     problems: list[str] = []
     if record.get("name_stage") != "accepted":
-        problems.append(f"giving name stage is {record.get('name_stage')!r}, not accepted")
+        problems.append(
+            f"giving name stage is {record.get('name_stage')!r}, not accepted"
+        )
     if not record.get("given_exists"):
         problems.append("given DD source node is absent")
     if sorted(record.get("given_holders") or []) != [GIVER]:
@@ -294,7 +295,9 @@ def check_readback(result: dict) -> list[str]:
         problems.append(
             f"{GIVER} producing edge is {giver.get('produced_paths')!r}, expected [{TAKEN_PATH!r}]"
         )
-    if sorted(giver.get("projected_paths") or []) != ["summary/local/separatrix/t_e/value"]:
+    if sorted(giver.get("projected_paths") or []) != [
+        "summary/local/separatrix/t_e/value"
+    ]:
         problems.append(
             f"{GIVER} HAS_STANDARD_NAME projection is {giver.get('projected_paths')!r}"
         )
@@ -313,7 +316,9 @@ def check_readback(result: dict) -> list[str]:
             f"{RECEIVER} HAS_STANDARD_NAME projection is {receiver.get('projected_paths')!r}"
         )
     if not result["source_invariant_ok"]:
-        problems.append(f"require_producing_sources failed: {result['source_invariant_error']}")
+        problems.append(
+            f"require_producing_sources failed: {result['source_invariant_error']}"
+        )
     return problems
 
 
@@ -554,13 +559,17 @@ def phase_scratch2() -> int:
             log.write(f"scratch_classifier_before={dict(before_counts)}")
             pre = read_preconditions(gc)
             problems = check_preconditions(pre)
-            log.write(f"scratch_preconditions={json.dumps(pre, sort_keys=True, default=str)}")
+            log.write(
+                f"scratch_preconditions={json.dumps(pre, sort_keys=True, default=str)}"
+            )
             log.write(f"scratch_precondition_problems={problems}")
             if problems:
                 raise RuntimeError(f"scratch preconditions failed: {problems}")
             digests = build_authority(SCRATCH / "authority.json")
             preview = run_exchange(gc, SCRATCH / "authority.json", digests)
-            log.write("scratch_preview=" + json.dumps(preview, sort_keys=True, default=str))
+            log.write(
+                "scratch_preview=" + json.dumps(preview, sort_keys=True, default=str)
+            )
             if preview["outcome"] != "would_apply":
                 raise RuntimeError("scratch preview did not report would_apply")
             applied = run_exchange(
@@ -570,12 +579,16 @@ def phase_scratch2() -> int:
                 apply=True,
                 manifest_sha256=preview["manifest_sha256"],
             )
-            log.write("scratch_apply=" + json.dumps(applied, sort_keys=True, default=str))
+            log.write(
+                "scratch_apply=" + json.dumps(applied, sort_keys=True, default=str)
+            )
             if applied["outcome"] != "applied":
                 raise RuntimeError("scratch apply did not report applied")
             result = read_back(gc)
             guard_readback(result)
-            log.write("scratch_readback=" + json.dumps(result, sort_keys=True, default=str))
+            log.write(
+                "scratch_readback=" + json.dumps(result, sort_keys=True, default=str)
+            )
             after_counts, after_ids = _classifier_counts(gc)
             log.write(f"scratch_classifier_after={dict(after_counts)}")
             log.write(f"scratch_left_sourceless={sorted(before_ids - after_ids)}")
@@ -617,14 +630,18 @@ def phase_preconditions() -> int:
     from imas_codex.graph.client import GraphClient
 
     log = Log(LOGS / "step3-live-preconditions.log")
-    log.write(f"# command: {sys.executable} {Path(__file__).name} --phase preconditions")
+    log.write(
+        f"# command: {sys.executable} {Path(__file__).name} --phase preconditions"
+    )
     log.write(f"# worktree: {WORKTREE}")
     log.write("# writes nothing: reads the live graph and reports")
     gc = GraphClient()
     rc = 0
     try:
         existence = gc.query(EXISTENCE_QUERY, given=GIVEN_PATH, taken=TAKEN_PATH)
-        log.write("live_existence=" + json.dumps(existence, sort_keys=True, default=str))
+        log.write(
+            "live_existence=" + json.dumps(existence, sort_keys=True, default=str)
+        )
         pre = read_preconditions(gc)
         log.write("live_preconditions=" + json.dumps(pre, sort_keys=True, default=str))
         problems = check_preconditions(pre)
@@ -655,9 +672,7 @@ def guarded_apply(gc, path: Path, digests, manifest_sha256: str, activity) -> di
             f"{activity.transactions_started} foreign transactions, "
             f"{len(activity.open_queries)} open queries"
         )
-    return run_exchange(
-        gc, path, digests, apply=True, manifest_sha256=manifest_sha256
-    )
+    return run_exchange(gc, path, digests, apply=True, manifest_sha256=manifest_sha256)
 
 
 def phase_live() -> int:
@@ -695,15 +710,21 @@ def phase_live() -> int:
         # ---- enforced quiet gate, shown refusing a simulated busy reading ----
         refusal_log = Log(LOGS / "step4-quiet-refusal.log")
         busy = GraphActivity(
-            window_seconds=30.0, transactions_started=1, open_queries=["MATCH (n) RETURN n"]
+            window_seconds=30.0,
+            transactions_started=1,
+            open_queries=["MATCH (n) RETURN n"],
         )
         try:
             guarded_apply(gc, AUTHORITY_JSON, digests, preview["manifest_sha256"], busy)
         except QuietGraphRequired as exc:
             refusal_log.write(
-                "simulated_busy_reading=" + json.dumps(
-                    {"transactions_started": busy.transactions_started,
-                     "open_queries": busy.open_queries}, sort_keys=True
+                "simulated_busy_reading="
+                + json.dumps(
+                    {
+                        "transactions_started": busy.transactions_started,
+                        "open_queries": busy.open_queries,
+                    },
+                    sort_keys=True,
                 )
             )
             refusal_log.write(f"refused={exc}")
@@ -922,36 +943,36 @@ a single transaction before seeding its own closure, which the temp instance's
 512&#160;MB transaction budget cannot hold for a 1.77M-node export: the JVM died
 mid-erase. Emptying the loaded export first was measured at about 460 nodes/s,
 roughly an hour. Log:
-<code>{LOGS / 'step1-graph-test.log'}</code>.</p>
+<code>{LOGS / "step1-graph-test.log"}</code>.</p>
 
 <h2 id="sib-separatrix-swap-apply-rehearsal">Scratch rehearsal</h2>
 <p id="sib-separatrix-swap-apply-rehearsal-p">The swap rows were re-derived on a
 fresh copy of the checked export (<code>{ARCHIVE.name}</code>), previewed,
 applied and read back with the same checks as the live read-back, and the
 sourceless classifier delta was taken there too. Log:
-<code>{LOGS / 'step2-scratch-rehearsal.log'}</code>.</p>
+<code>{LOGS / "step2-scratch-rehearsal.log"}</code>.</p>
 
 <h2 id="sib-separatrix-swap-apply-preconditions">Live preconditions</h2>
-<pre id="sib-separatrix-swap-apply-preconditions-pre">{json.dumps(summary['preconditions'], indent=2, sort_keys=True, default=str)}</pre>
+<pre id="sib-separatrix-swap-apply-preconditions-pre">{json.dumps(summary["preconditions"], indent=2, sort_keys=True, default=str)}</pre>
 
 <h2 id="sib-separatrix-swap-apply-quiet">Enforced quiet-graph gate</h2>
 <p id="sib-separatrix-swap-apply-quiet-p">The apply path refuses when the graph
 does not read quiet. Shown once on a simulated busy reading (refusal log
-<code>{LOGS / 'step4-quiet-refusal.log'}</code>, <code>EXIT=1</code>) and then
+<code>{LOGS / "step4-quiet-refusal.log"}</code>, <code>EXIT=1</code>) and then
 gated the real write.</p>
-<pre id="sib-separatrix-swap-apply-quiet-probe">{json.dumps(summary['quiet_probe'], indent=2, sort_keys=True)}</pre>
+<pre id="sib-separatrix-swap-apply-quiet-probe">{json.dumps(summary["quiet_probe"], indent=2, sort_keys=True)}</pre>
 
 <h2 id="sib-separatrix-swap-apply-receipt">Live receipt</h2>
 <pre id="sib-separatrix-swap-apply-receipt-pre">{receipt}</pre>
 
 <h2 id="sib-separatrix-swap-apply-readback">Read-back</h2>
 <p id="sib-separatrix-swap-apply-readback-p">{RECEIVER} left the sourceless set
-({summary['sourceless_before_count']} to {summary['sourceless_after_count']});
+({summary["sourceless_before_count"]} to {summary["sourceless_after_count"]});
 nothing entered it. <code>{GIVER}</code> holds only <code>{TAKEN_PATH}</code> and
 the bulk name only <code>{GIVEN_PATH}</code>, with <code>source_paths</code> and
 <code>HAS_STANDARD_NAME</code> matching and <code>require_producing_sources</code>
 holding. The read-back check was shown refusing on a doctored expectation
-(<code>{LOGS / 'step6-readback-doctored.log'}</code>).</p>
+(<code>{LOGS / "step6-readback-doctored.log"}</code>).</p>
 <table id="sib-separatrix-swap-apply-populations">
 <caption>Sourceless classifier populations before and after the swap</caption>
 <thead><tr><th>population</th><th>before</th><th>after</th></tr></thead>
@@ -960,8 +981,8 @@ holding. The read-back check was shown refusing on a doctored expectation
 </tbody>
 </table>
 <p id="sib-separatrix-swap-apply-readback-detail">Left sourceless:
-{', '.join(summary['left_sourceless']) or 'none'}. Entered:
-{', '.join(summary['entered_sourceless']) or 'none'}.</p>
+{", ".join(summary["left_sourceless"]) or "none"}. Entered:
+{", ".join(summary["entered_sourceless"]) or "none"}.</p>
 </main>
 </body>
 </html>
