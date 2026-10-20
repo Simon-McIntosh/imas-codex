@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="157">
+<meta name="plan-version" content="158">
 <meta name="plan-modified" content="2026-10-21">
 </head>
 <body>
@@ -555,6 +555,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261020T204942364841-shc-locus-remeasure" data-who="reckon-build" data-when="2026-10-20T22:33:29Z">
     <div class="r-comment-body"><p>shc-locus-remeasure: chose the non-WEST locus family electrostatic_potential (roster check 0 member matches, positive control 10) and applied it with sn harmonize --apply --cost-limit 4.00; the apply raised on a global maintenance guard (MissingStandardNameSource: vertical_coordinate_of_coil_conductor) before converging, spending USD 0.4055 of the USD 4.00 cap, leaving the family unstamped with the second dry run planning 5 calls; see docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure.html</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-locus-remeasure-halt" data-who="reckon-build" data-when="2026-10-21T01:41:00Z">
+    <div class="r-comment-body"><p>The locus re-measure halted on a global guard, not on its family (merge <code>26b0ce3a1</code>). Attachment reconciliation aborts the whole apply when a detach would leave <code>vertical_coordinate_of_coil_conductor</code> without a producer. That name's only source is a mismatched ICRF-antenna path composed onto it on 2026-10-19.</p><p>Next is <code>shc-reconcile-holds-stranding</code>, dispatched, at USD 0. It holds and reports a stranding detach, proceeds with the rest, and keeps the invariant as the backstop; no binding is written or removed. Then the family re-runs as <code>shc-locus-remeasure-rerun</code> within the USD 3.59 left of the USD 4 ceiling, with the costing fixes the review found.</p><p>The gap family split is half done:</p><ul><li><code>radial_separatrix_distance_at_outboard_midplane</code> is accepted, name 1.0 and documentation 0.906.</li><li><code>gap_at_outboard_midplane</code>'s second steered draft is unreviewed: the node's USD 1.00 ceiling ran out.</li></ul><p><a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s4-locus-remeasure-halt">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>

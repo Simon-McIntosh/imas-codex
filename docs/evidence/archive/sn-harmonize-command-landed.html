@@ -180,6 +180,11 @@
     <p><code>gap_at_outboard_midplane</code> now holds only the separatrix separation, <code>summary/boundary/distance_inner_outer_separatrices/value</code>. <code>radial_separatrix_distance_at_outboard_midplane</code> was revived to <code>drafted</code>, with docs pending. It parses under ISN 0.10.0 as component <code>radial</code>, base <code>separatrix_distance</code> and position <code>outboard_midplane</code>, and it holds the three <code>distance_separatrix_midplane</code> sources: the reciprocating and embedded Langmuir probes and the Thomson channel. Each of the four sources is bound to exactly one live name, before and after.</p><p>Fold-revival could not restore the tombstone: every donor was refused, and its recorded prior stage is terminal. The revive is therefore a signed <code>set_properties</code> transition under the lead's ruling, with its authority committed beside the fragment. The move used <code>retarget_standard_name_sources</code>, with its expected current bindings checked. No documentation changed and no LLM was called. Merge <code>f114daa47</code>; review 104. The coordinator's own graph read-back agrees. <a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-gap-family-split.html">fragment</a></p>
   </section>
 
+  <section id="s4-locus-remeasure-halt">
+    <h2>§4 — the locus re-measure halted on global maintenance</h2>
+    <p>The non-WEST locus family <code>electrostatic_potential</code> (0 roster matches) was applied under a USD 4.00 cap. It halted before converging (merge <code>26b0ce3a1</code>, reviews 79 and 91/120). <code>reconcile_attachment_consistency</code>, a global maintenance step, tried to detach <code>dd:ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z</code> from <code>vertical_coordinate_of_coil_conductor</code>, where it is that name's only producer. The source invariant refused, and the refusal aborted the apply.</p><p>The family is unstamped, and the second dry run plans 5 calls. The recorded spend attribution is unreliable: the runner matches its run by id prefix and keeps the highest-spend match. Every harmonize apply halts the same way until the reconcile holds a stranding detach. <a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-locus-remeasure.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>
