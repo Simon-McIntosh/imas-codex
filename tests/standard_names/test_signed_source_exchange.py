@@ -9,11 +9,16 @@ from typing import Any
 
 import pytest
 
+from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import signed_manifest as operator
 from imas_codex.standard_names.repair_authority import build_repair_authority
 from tests.standard_names.test_signed_recovery_unbind import (
     FakeGraph as _BaseGraph,
     _Transaction as _BaseTransaction,
+)
+from tests.standard_names.test_source_target_reconciliation import (
+    client,
+    disposable_neo4j,
 )
 
 
@@ -27,6 +32,7 @@ class _Transaction(_BaseTransaction):
         self.state.sources = deepcopy(self.before["sources"])
         self.state.bindings = deepcopy(self.before["bindings"])
         self.state.changes = deepcopy(self.before["changes"])
+        self.state.projections = set(self.before["projections"])
         super().rollback()
 
     def run(self, query: str, **params: Any) -> list[dict[str, Any]]:
@@ -92,25 +98,61 @@ class _Transaction(_BaseTransaction):
                 )
             return result
         if "SOURCE_EXCHANGE_MUTATION" in query:
-            old = self.state.sources[params["given_source_id"]]
             name_id = params["name_id"]
             binding = self._binding(params["given_source_id"], name_id)
             if not binding or binding["element_id"] != params["binding_element_id"]:
                 return [{"changed": 0}]
             new_id = params["taken_source_id"]
-            if new_id not in self.state.sources:
+            if new_id not in self.state.sources or any(
+                edge["source_id"] == new_id for edge in self.state.bindings
+            ):
                 return [{"changed": 0}]
-            self.state.sources[new_id]["properties"].update(
-                {"status": "attached", "produced_sn_id": name_id}
-            )
-            self.state.bindings.remove(binding)
-            self.state.bind(new_id, name_id)
-            receiver_id = params["receiving_name_id"]
-            old["properties"]["produced_sn_id"] = receiver_id
-            old["properties"]["status"] = "attached" if receiver_id else "extracted"
-            if receiver_id:
-                self.state.bind(params["given_source_id"], receiver_id)
             return [{"changed": 1}]
+        if "RETURN count(*) AS detached" in query and "UNWIND $items AS item" in query:
+            for item in params["items"]:
+                source_id, name_id, dd_path = (
+                    item["source_node_id"],
+                    item["sn_id"],
+                    item["dd_path"],
+                )
+                binding = self._binding(source_id, name_id)
+                if binding:
+                    self.state.bindings.remove(binding)
+                self.state.projections.discard((dd_path, name_id))
+                paths = self.state.names[name_id]["properties"].get("source_paths", [])
+                self.state.names[name_id]["properties"]["source_paths"] = [
+                    path for path in paths if path not in {f"dd:{dd_path}", dd_path}
+                ]
+                self.state.sources[source_id]["properties"].update(
+                    {"produced_sn_id": None, "status": "extracted"}
+                )
+            return [{"detached": len(params["items"])}]
+        if "RETURN count(*) AS attached" in query:
+            source_id, name_id, dd_path = (
+                params["source_node_id"],
+                params["sn_id"],
+                params["dd_path"],
+            )
+            if self._binding(source_id, name_id) is None:
+                self.state.bind(source_id, name_id)
+            if (
+                not self.state.omit_projection
+                and "MERGE (dd)-[:HAS_STANDARD_NAME]->(sn)" in query
+            ):
+                self.state.projections.add((dd_path, name_id))
+            source_paths = self.state.names[name_id]["properties"].setdefault(
+                "source_paths", []
+            )
+            if (
+                not self.state.omit_paths
+                and "SET sn.source_paths = CASE" in query
+                and f"dd:{dd_path}" not in source_paths
+            ):
+                source_paths.append(f"dd:{dd_path}")
+            self.state.sources[source_id]["properties"].update(
+                {"produced_sn_id": name_id, "status": "attached"}
+            )
+            return [{"attached": 1}]
         if "SOURCE_EXCHANGE_RECEIPT" in query:
             for row in params["rows"]:
                 self.state.changes[row["event_id"]] = {
@@ -146,8 +188,44 @@ class _Transaction(_BaseTransaction):
                         for binding in self.state.bindings
                         if binding["source_id"] == source_id
                     ],
+                    "scalar": self.state.sources[source_id]["properties"].get(
+                        "produced_sn_id"
+                    ),
+                    "status": self.state.sources[source_id]["properties"].get("status"),
                 }
                 for source_id in params["source_ids"]
+            ]
+        if "SOURCE_EXCHANGE_PROJECTION_POSTCONDITION" in query:
+            return [
+                {
+                    "name_id": row["name_id"],
+                    "given_projected_names": sorted(
+                        name_id
+                        for path, name_id in self.state.projections
+                        if path == row["given_source_id"][3:]
+                    ),
+                    "taken_projected_names": sorted(
+                        name_id
+                        for path, name_id in self.state.projections
+                        if path == row["taken_source_id"][3:]
+                    ),
+                }
+                for row in params["rows"]
+            ]
+        if "SOURCE_EXCHANGE_PATH_POSTCONDITION" in query:
+            return [
+                {
+                    "name_id": name_id,
+                    "source_paths": self.state.names[name_id]["properties"].get(
+                        "source_paths"
+                    ),
+                    "expected_paths": sorted(
+                        binding["source_id"]
+                        for binding in self.state.bindings
+                        if binding["name_id"] == name_id
+                    ),
+                }
+                for name_id in params["name_ids"]
             ]
         return super().run(query, **params)
 
@@ -156,7 +234,10 @@ class Graph(_BaseGraph):
     def __init__(self) -> None:
         super().__init__()
         self.dd_paths: dict[str, str] = {}
+        self.projections: set[tuple[str, str]] = set()
         self.report_missing_name: str | None = None
+        self.omit_projection = False
+        self.omit_paths = False
 
     def add_dd(self, path: str, lifecycle: str = "active") -> None:
         self.dd_paths[path] = lifecycle
@@ -177,6 +258,9 @@ class Graph(_BaseGraph):
         transaction = _Transaction(self)
         self.transactions.append(transaction)
         return _Session(transaction)
+
+    def snapshot(self) -> dict[str, Any]:
+        return {**super().snapshot(), "projections": sorted(self.projections)}
 
 
 def _authority(path: Path, *, receiver: str | None = None) -> tuple[str, str]:
@@ -219,6 +303,12 @@ def _graph(*, receiver: str | None = None) -> Graph:
     graph.add_source("dd:summary/local/value", status="extracted")
     graph.sources["dd:summary/local/value"]["properties"]["dd_version"] = "4.0.0"
     graph.bind("dd:summary/average/value", "local_temperature")
+    graph.projections.add(("summary/average/value", "local_temperature"))
+    graph.names["local_temperature"]["properties"]["source_paths"] = [
+        "dd:summary/average/value"
+    ]
+    if receiver:
+        graph.names[receiver]["properties"]["source_paths"] = []
     return graph
 
 
@@ -262,6 +352,17 @@ def test_signed_exchange_is_atomic_and_records_receipt(
         for binding in graph.bindings
     ) == bool(receiver)
     assert len(graph.changes) == 1
+    expected_projections = {("summary/local/value", "local_temperature")}
+    if receiver:
+        expected_projections.add(("summary/average/value", receiver))
+    assert graph.projections == expected_projections
+    assert graph.names["local_temperature"]["properties"]["source_paths"] == [
+        "dd:summary/local/value"
+    ]
+    if receiver:
+        assert graph.names[receiver]["properties"]["source_paths"] == [
+            "dd:summary/average/value"
+        ]
     assert (
         graph.sources["dd:summary/local/value"]["properties"]["dd_version"] == "4.0.0"
     )
@@ -387,6 +488,37 @@ def test_extra_taken_source_owner_rolls_back(
     assert graph.snapshot() == before
 
 
+@pytest.mark.parametrize(
+    "omitted,reason",
+    [
+        ("projection", "DD projection"),
+        ("paths", "source_paths"),
+    ],
+)
+def test_missing_attachment_projection_rolls_back(
+    tmp_path: Path, omitted: str, reason: str
+) -> None:
+    graph = _graph(receiver="average_temperature")
+    path = tmp_path / "authority.json"
+    digests = _authority(path, receiver="average_temperature")
+    preview = _run(graph, path, digests)
+    before = graph.snapshot()
+    if omitted == "projection":
+        graph.omit_projection = True
+    else:
+        graph.omit_paths = True
+    with pytest.raises(operator.SourceExchangeConflict, match=reason):
+        _run(
+            graph,
+            path,
+            digests,
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+        )
+    assert graph.transactions[-1].rolled_back
+    assert graph.snapshot() == before
+
+
 def test_authority_digest_and_guard_set_are_required(tmp_path: Path) -> None:
     graph = _graph()
     path = tmp_path / "authority.json"
@@ -395,3 +527,77 @@ def test_authority_digest_and_guard_set_are_required(tmp_path: Path) -> None:
         _run(graph, path, digests, guard_set=())
     with pytest.raises(operator.SignedManifestAuthorityError, match="file SHA-256"):
         _run(graph, path, ("0" * 64, digests[1]))
+
+
+@pytest.mark.graph
+def test_exchange_executes_its_cypher_on_disposable_neo4j(
+    client: GraphClient, tmp_path: Path
+) -> None:
+    client.query(
+        """
+        CREATE (version:DDVersion {id: 'exchange-test-dd', is_current: true})
+        CREATE (given_dd:IMASNode {id: 'summary/average/value'})
+        CREATE (taken_dd:IMASNode {id: 'summary/local/value'})
+        CREATE (name:StandardName {id: 'local_temperature', name_stage: 'accepted',
+                                   source_paths: ['dd:summary/average/value']})
+        CREATE (receiver:StandardName {id: 'average_temperature', name_stage: 'reviewed',
+                                       source_paths: []})
+        CREATE (given:StandardNameSource {id: 'dd:summary/average/value',
+             source_type: 'dd', source_id: 'summary/average/value',
+             dd_path: 'summary/average/value', status: 'attached',
+             produced_sn_id: 'local_temperature'})
+        CREATE (taken:StandardNameSource {id: 'dd:summary/local/value',
+             source_type: 'dd', source_id: 'summary/local/value',
+             dd_path: 'summary/local/value', status: 'extracted'})
+        CREATE (given)-[:FROM_DD_PATH]->(given_dd)
+        CREATE (taken)-[:FROM_DD_PATH]->(taken_dd)
+        CREATE (given)-[:PRODUCED_NAME]->(name)
+        CREATE (given_dd)-[:HAS_STANDARD_NAME]->(name)
+        """
+    )
+    path = tmp_path / "authority.json"
+    digests = _authority(path, receiver="average_temperature")
+    preview = _run(client, path, digests)
+    assert preview["outcome"] == "would_apply"
+    applied = _run(
+        client,
+        path,
+        digests,
+        apply=True,
+        manifest_sha256=preview["manifest_sha256"],
+    )
+    assert applied["outcome"] == "applied"
+    rows = client.query(
+        """
+        MATCH (source:StandardNameSource)-[:FROM_DD_PATH]->(dd:IMASNode)
+        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
+        OPTIONAL MATCH (dd)-[:HAS_STANDARD_NAME]->(projected:StandardName)
+        RETURN source.id AS source_id, source.status AS status,
+               source.produced_sn_id AS scalar, collect(DISTINCT name.id) AS owners,
+               collect(DISTINCT projected.id) AS projected
+        ORDER BY source_id
+        """
+    )
+    assert rows == [
+        {
+            "source_id": "dd:summary/average/value",
+            "status": "attached",
+            "scalar": "average_temperature",
+            "owners": ["average_temperature"],
+            "projected": ["average_temperature"],
+        },
+        {
+            "source_id": "dd:summary/local/value",
+            "status": "attached",
+            "scalar": "local_temperature",
+            "owners": ["local_temperature"],
+            "projected": ["local_temperature"],
+        },
+    ]
+    paths = client.query(
+        "MATCH (name:StandardName) RETURN name.id AS id, name.source_paths AS paths ORDER BY id"
+    )
+    assert paths == [
+        {"id": "average_temperature", "paths": ["dd:summary/average/value"]},
+        {"id": "local_temperature", "paths": ["dd:summary/local/value"]},
+    ]

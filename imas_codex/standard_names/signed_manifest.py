@@ -7134,7 +7134,8 @@ def _verify_source_exchange_postcondition(
         UNWIND $source_ids AS source_id
         MATCH (source:StandardNameSource {id: source_id})
         OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
-        RETURN source_id, count(name) AS producers, collect(name.id) AS names
+        RETURN source_id, count(name) AS producers, collect(name.id) AS names,
+               source.produced_sn_id AS scalar, source.status AS status
         ORDER BY source_id
         """,
         source_ids=sorted(
@@ -7156,9 +7157,75 @@ def _verify_source_exchange_postcondition(
     )
     if len(source_states) != len(expected) or any(
         sorted(state.get("names") or []) != expected[str(state["source_id"])]
+        or state.get("scalar")
+        != (
+            expected[str(state["source_id"])][0]
+            if expected[str(state["source_id"])]
+            else None
+        )
+        or state.get("status")
+        != ("attached" if expected[str(state["source_id"])] else "extracted")
         for state in source_states
     ):
         raise SourceExchangeConflict("touched source has the wrong producing name")
+    projections = query.query(
+        """
+        // SOURCE_EXCHANGE_PROJECTION_POSTCONDITION
+        UNWIND $rows AS expected
+        MATCH (given_dd:IMASNode {id: substring(expected.given_source_id, 3)})
+        MATCH (taken_dd:IMASNode {id: substring(expected.taken_source_id, 3)})
+        RETURN expected.name_id AS name_id,
+               [(given_dd)-[:HAS_STANDARD_NAME]->(projected:StandardName) | projected.id]
+                   AS given_projected_names,
+               [(taken_dd)-[:HAS_STANDARD_NAME]->(projected:StandardName) | projected.id]
+                   AS taken_projected_names
+        ORDER BY name_id
+        """,
+        rows=list(rows),
+    )
+    projection_by_name = {str(state["name_id"]): state for state in projections}
+    if len(projection_by_name) != len(rows) or any(
+        sorted(
+            projection_by_name[str(row["name_id"])].get("given_projected_names") or []
+        )
+        != (
+            [str(row["receiving_name_id"])]
+            if row["receiving_name_id"] is not None
+            else []
+        )
+        or sorted(
+            projection_by_name[str(row["name_id"])].get("taken_projected_names") or []
+        )
+        != [str(row["name_id"])]
+        for row in rows
+    ):
+        raise SourceExchangeConflict("DD projection does not match exchanged ownership")
+    path_states = query.query(
+        """
+        // SOURCE_EXCHANGE_PATH_POSTCONDITION
+        UNWIND $name_ids AS name_id
+        MATCH (name:StandardName {id: name_id})
+        OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(name)
+        OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+        OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+        WITH name, collect(DISTINCT CASE
+          WHEN source IS NULL THEN null
+          WHEN dd IS NOT NULL THEN 'dd:' + dd.id
+          WHEN signal IS NOT NULL THEN signal.id
+          WHEN source.source_type = 'derived' AND source.source_id STARTS WITH 'derived:'
+          THEN source.source_id ELSE source.id END) AS paths
+        RETURN name.id AS name_id, name.source_paths AS source_paths,
+               [path IN paths WHERE path IS NOT NULL] AS expected_paths
+        ORDER BY name_id
+        """,
+        name_ids=names,
+    )
+    if len(path_states) != len(names) or any(
+        sorted(state.get("source_paths") or [])
+        != sorted(state.get("expected_paths") or [])
+        for state in path_states
+    ):
+        raise SourceExchangeConflict("source_paths do not match producing sources")
     from imas_codex.standard_names.source_invariant import require_producing_sources
 
     require_producing_sources(query, names)
@@ -7176,6 +7243,12 @@ def _apply_source_exchange(
     run_id: str | None,
     gc: Any | None,
 ) -> dict[str, Any]:
+    from imas_codex.standard_names.attachment_audit import (
+        _ATTACH_QUERY,
+        _DETACH_QUERY,
+        _HISTORICAL_NAME_STAGES,
+    )
+
     if guard_set != _SOURCE_EXCHANGE_GUARDS:
         raise SignedManifestAuthorityError(
             "source exchange requires its exact guard set"
@@ -7289,22 +7362,12 @@ def _apply_source_exchange(
                         OPTIONAL MATCH (receiver:StandardName {id: $receiving_name_id})
                         OPTIONAL MATCH (given_dd:IMASNode {id: $given_path})
                         WITH name, given, binding, taken, taken_dd, receiver, given_dd
-                        WHERE $receiving_name_id IS NULL OR
+                        WHERE ($receiving_name_id IS NULL OR
                               (receiver IS NOT NULL AND
                                NOT (coalesce(receiver.name_stage, '') IN ['exhausted', 'superseded']) AND
                                elementId(given_dd) = $given_dd_element_id AND
-                               coalesce(given_dd.lifecycle_status, '') <> 'removed')
-                        SET taken.status = 'attached', taken.produced_sn_id = name.id,
-                            taken.composed_at = coalesce(taken.composed_at, datetime()),
-                            taken.claimed_at = null, taken.claim_token = null
-                        MERGE (taken)-[:FROM_DD_PATH]->(taken_dd)
-                        MERGE (taken)-[:PRODUCED_NAME]->(name)
-                        DELETE binding
-                        SET given.produced_sn_id = $receiving_name_id,
-                            given.status = CASE WHEN receiver IS NULL THEN 'extracted'
-                                                ELSE 'attached' END
-                        FOREACH (_ IN CASE WHEN receiver IS NULL THEN [] ELSE [1] END |
-                            MERGE (given)-[:PRODUCED_NAME]->(receiver))
+                               coalesce(given_dd.lifecycle_status, '') <> 'removed'))
+                          AND COUNT { (taken)-[:PRODUCED_NAME]->(:StandardName) } = 0
                         RETURN count(DISTINCT name) AS changed
                         """,
                         dd_version=current_versions[0]["dd_version"],
@@ -7325,6 +7388,39 @@ def _apply_source_exchange(
                         raise SourceExchangeConflict(
                             "source-exchange compare-and-set changed"
                         )
+                    detached = query.query(
+                        _DETACH_QUERY,
+                        items=[
+                            {
+                                "source_node_id": row["given_source_id"],
+                                "sn_id": row["name_id"],
+                                "dd_path": str(row["given_source_id"])[3:],
+                                "reroute": True,
+                            }
+                        ],
+                        historical=sorted(_HISTORICAL_NAME_STAGES),
+                    )
+                    if len(detached) != 1 or int(detached[0].get("detached") or 0) != 1:
+                        raise SourceExchangeConflict("given-source detach changed")
+                    attachments = [(row["taken_source_id"], row["name_id"])]
+                    if row["receiving_name_id"] is not None:
+                        attachments.append(
+                            (row["given_source_id"], row["receiving_name_id"])
+                        )
+                    for source_id, name_id in attachments:
+                        attached = query.query(
+                            _ATTACH_QUERY,
+                            source_node_id=source_id,
+                            dd_path=str(source_id)[3:],
+                            sn_id=name_id,
+                        )
+                        if (
+                            len(attached) != 1
+                            or int(attached[0].get("attached") or 0) != 1
+                        ):
+                            raise SourceExchangeConflict(
+                                "source-exchange attachment changed"
+                            )
                 receipt_rows = query.query(
                     """
                     // SOURCE_EXCHANGE_RECEIPT
