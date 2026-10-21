@@ -115,6 +115,16 @@
     <p>When the cascade decides, 5% of items are also reviewed by the paid panel (merge <code>f9de429a0</code>, review 112/120). The sample is chosen by a replayable hash of run, axis and item, at <code>[sn-review].panel-audit-rate</code>. The panel's verdict is stored as a non-canonical <code>resolution_role="audit"</code> row that the review aggregates exclude. It runs through the quorum's non-persisting path, so an audited item keeps Jev's stage, score and route. A read-only report gives per-axis agreement, disagreement directions and skip reasons. A refunded budget skips with a recorded reason.</p><p>On validation, from the pinned receipts: names, Jev 0.54 accept at precision 0.59 against the panel's 0.61 at 0.54; documentation, Jev 0.96 at 0.41 against the panel's 0.98 at 0.40. Gate 292 passed at head against 282 at base, both at EXIT=0. Two negative controls fail as designed. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-jev-panel-audit-sample.html">fragment</a></p>
   </section>
 
+  <section id="s6-audit-row-hardening">
+    <h2>§6 — the paid-panel audit fails closed, and its row is proven on a real graph</h2>
+    <p>Merge <code>ea8d492ee</code>, review 117/120.</p><ul><li>An incumbent the audit cannot prove non-persisting is refused and recorded as a skipped item, so a rewrapped incumbent can no longer restore the canonical-row write.</li><li>The audit row carries its cycle's <code>review_group_id</code>. A disposable-Neo4j test writes it through the real <code>write_reviews</code>, reads it back, and shows <code>update_review_aggregates</code> ignores it.</li></ul><p>Gate: 100 passed against 93 at base. Two negative controls each fail 2 tests. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-audit-row-hardening.html">fragment</a></p>
+  </section>
+
+  <section id="s5-sheet-lineage">
+    <h2>§5 — the blind refine sheet recovers cases through refined descendants</h2>
+    <p>Merge <code>0a9a7eb9d</code>, review 98/120. Under the lead's lineage ruling, a case with no DD source of its own takes the source of a live refined descendant. The sheet now holds 124 rows from 63 of the 104 complete pairs:</p><ul><li>19 cases recovered;</li><li>1 ambiguous and excluded;</li><li>41 still sourceless and excluded.</li></ul><p>Recovered rows are flagged in the arm key only. Where a case has both routes, the descendant's source agrees with the direct one in 24 of 32. The score must therefore be reported with and without the recovered rows. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>
