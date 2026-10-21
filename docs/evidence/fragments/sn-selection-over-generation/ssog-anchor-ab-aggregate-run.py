@@ -321,8 +321,9 @@ def build(records_dir: Path = RECORDS, selection_path: Path = SELECTION) -> dict
             if not conditions[key]["met"]
         ]
         verdict_sentence = (
-            f"{' and '.join(failed).capitalize()} not satisfied, so the Jev anchor "
-            "is not adopted."
+            f"{' and '.join(failed).capitalize()} "
+            f"{'is' if len(failed) == 1 else 'are'} not satisfied, so the Jev "
+            "anchor is not adopted."
         )
 
     holds = [

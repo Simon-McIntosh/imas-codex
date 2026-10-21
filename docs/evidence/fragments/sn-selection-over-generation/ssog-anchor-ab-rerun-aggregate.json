@@ -497,7 +497,7 @@
   },
   "verdict": {
     "adopt_jev": false,
-    "sentence": "The lint condition and the score condition not satisfied, so the Jev anchor is not adopted."
+    "sentence": "The lint condition and the score condition are not satisfied, so the Jev anchor is not adopted."
   },
   "documentation_holds": [
     {
