@@ -550,6 +550,7 @@ def disposable_graph_uri() -> Iterator[str]:
     """
     from neo4j import GraphDatabase
 
+    from imas_codex.graph.profiles import resolve_neo4j
     from imas_codex.settings import get_graph_uri
 
     uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
@@ -557,9 +558,20 @@ def disposable_graph_uri() -> Iterator[str]:
         pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
     if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
         pytest.fail("the panel-audit row contract requires a disposable graph")
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+
+    # The endpoint this checkout would reach if the disposable export were
+    # absent. NEO4J_URI is withheld for the resolution because the run's own
+    # export legitimately points it at the disposable instance, so reading it
+    # back would only ever compare the disposable URI against itself.
+    saved_uri = os.environ.pop("NEO4J_URI", None)
+    try:
+        project_uri = resolve_neo4j(auto_tunnel=False).uri
+    finally:
+        if saved_uri is not None:
+            os.environ["NEO4J_URI"] = saved_uri
     if uri.rstrip("/") == project_uri.rstrip("/"):
         pytest.fail("the panel-audit row contract refuses the project graph URI")
+
     resolved = get_graph_uri()
     if resolved.rstrip("/") != uri.rstrip("/"):
         pytest.fail(
