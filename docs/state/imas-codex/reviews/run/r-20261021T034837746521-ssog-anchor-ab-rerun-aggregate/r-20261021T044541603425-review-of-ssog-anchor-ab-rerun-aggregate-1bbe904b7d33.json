@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect-run.py:runner_anchor_source",
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis-run.py:main"
+  ],
+  "completed_at": "2026-10-21T05:11:37.209Z",
+  "dispatched_at": "2026-10-21T04:46:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "53",
+      "severity": "follow-on",
+      "text": "the landed change repurposes this file from the first aggregate to the re-run aggregate, so docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab.html:3 still carries the literal 'Neither condition is satisfied' that the brief's first named defect asked to fix, and no runner now produces that fragment. The file is in the granted write scope while the fragment that carries the defect is not, so the node could not have corrected it in place; the coordinator owns the follow-on."
+    },
+    {
+      "file": "tests/standard_names/test_anchor_ab_aggregate.py",
+      "line": "105",
+      "severity": "follow-on",
+      "text": "the assertion compares the classifier's batches_run against the same value the test handed in, and its fixture sets batches_total to 2 as well, so a regression that read the wrong batch key would still pass a green assertion."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "193",
+      "severity": "follow-on",
+      "text": "_score_lower_in_held skips a member whose jev score is not numeric, because classify_record (line 176) maps every member through scores_after.get; a record whose scores_after omits a member therefore yields None, _score_lower_in_held skips it, and the score condition passes on a member that was never measured. That is the same unreadable-read-as-absent failure the brief's fifth defect forbids, one level down from the top-level required-field check."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "746",
+      "severity": "follow-on",
+      "text": "the held-score section renders an absent hold reason as {} (line 731) and then asserts at line 752 that the 0.849 is 'a genuine documentation hold on the wall-recombination neutral member in both arms', although only one of the six compared records (the wall-recombination jev arm) carries a documentation_holds note at all. The heuristic arm's hold is inferred from a score rather than read from its apply log, and the fragment gives the reader no way to tell the two apart."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "661",
+      "severity": "follow-on",
+      "text": "the population paragraph tells the reader the compared records are cited with their code revision and their revisions named, but the fragment names only the fixed tree (284f17bcba6f17457c54d40527d5f1776f6fa0e9); the six per-record revisions live in the JSON and appear nowhere in the HTML, so the sentence overstates what the fragment shows."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
+      "line": "794",
+      "severity": "follow-on",
+      "text": "the figure caption and the score-condition prose rest on a comparison in which one compared arm did not finish: energy_flux_at_wall_due_to_recombination jev ran 1 of 2 batches and halted at 0.00 percent documentation acceptance. No sentence in the fragment says the failing score condition turns on an incomplete apply, which is the confound the fixed-tree ruling exists to avoid; the table records the halt but the verdict does not carry it."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "I read both commits against base 0a9a7eb9d: 78876bbfb rewrites ssog-anchor-ab-aggregate-run.py into the re-run aggregate (classify_record, _score_lower_in_held, _interval_notes, build, the direct-label figure clause, fragment, selftest), adds tests/standard_names/test_anchor_ab_aggregate.py, the fragment JSON and HTML, the SVG, and the three one-line reselect-runner and selection.json fixes; 1bbe904b7 only fixes the verdict sentence's verb.",
+    "done_when": "the done-when requires the re-run fragment and its JSON written by the aggregate runner with a log ending EXIT=0, stating the agreements, the three compared families per condition and the computed verdict, plus a passing test and a kept negative-control log. aggregate-build.log ends EXIT=0; the fragment states the agreements (6), the 3 compared families, both conditions per family and in total; gate-primary.log records 13 passed EXIT=0, which I reproduced at the reviewed head; negative-control.log is kept and red.",
+    "goal": "the node's goal is to compute the certificate-7 anchor verdict from the re-run arms; docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:309 computes adopt_jev as the conjunction of the two rule conditions, and the fragment, the JSON and the figure are all written by that runner.",
+    "manifest": "I read the reviewed run's manifest.md; it names the two commits, the literal gate command, four logs, a bare negative_control_log path and a landing line, but its baseline_suite and after_suite are both null and its gate log carries no revision header.",
+    "write_paths": "I read the source brief's write scope and the manifest's changed_paths; git diff --stat 0a9a7eb9d 1bbe904b7 lists exactly the seven granted paths and no other file."
+  },
+  "justifications": {
+    "durability": "ssog-anchor-ab-aggregate-run.py:121 refuses a record missing a required field, and negative-control.log shows four parametrised cases plus the field-set test reddening at EXIT=1 when that check is removed; but test_anchor_ab_aggregate.py:105 compares a value the test itself supplied against a fixture that sets the sibling key to the same number.",
+    "evidence": "I re-ran the gate the manifest names, at reviewed head 1bbe904b7, and got 13 passed EXIT=0, matching gate-primary.log; both control logs are red with EXIT=1. But the reviewed manifest's baseline_suite and after_suite are null, so the added-failure derivation rests on the single gate log rather than a before/after pair.",
+    "fit": "the module keeps the fragment-runner idiom of its base, extends the file's own _check_text at ssog-anchor-ab-aggregate-run.py:418 rather than adding a parallel helper, and the three changed code paths return no plan label or ticket reference to the naming checks.",
+    "goal_fidelity": "ssog-anchor-ab-aggregate-run.py:309 makes adopt_jev the conjunction of the brief's two rule conditions -- the lint condition over the compared families and the held-documentation condition over their members -- and the delivered fragment carries both, but the brief's first named defect is only half answered.",
+    "reuse": "_check_text is extended in the file that already owned it, and no repository owner exists for the aggregate's rule or for the git rev-parse shell-out outside the private helper at imas_codex/standard_names/catalog_release.py:228.",
+    "scope_discipline": "git diff --stat 0a9a7eb9d..1bbe904b7 lists only the seven granted paths and no other file, though ssog-anchor-ab-aggregate-run.py:53 silently repoints this module from the first aggregate's outputs to the re-run aggregate's."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to compute the certificate-7 anchor verdict from the re-run arms; ssog-anchor-ab-aggregate-run.py:309 computes adopt_jev as the conjunction of the two rule conditions, and the fragment, the JSON and the figure are all written by that runner.\nVERDICT done_when: the done-when requires the re-run fragment and its JSON written by the aggregate runner with a log ending EXIT=0, stating the agreements, the three compared families per condition and the computed verdict, plus a passing test and a kept negative-control log. aggregate-build.log ends EXIT=0; gate-primary.log records 13 passed EXIT=0, which I reproduced at the reviewed head; negative-control.log is kept and red.\nVERDICT write_paths: I read the source brief's write scope and the manifest's changed_paths; git diff --stat 0a9a7eb9d 1bbe904b7 lists exactly the seven granted paths and no other file.\nVERDICT manifest: I read the reviewed run's manifest.md; it names the two commits, the literal gate command, four logs, a bare negative_control_log path and a landing line, but its baseline_suite and after_suite are both null.\nVERDICT diff: I read both commits against base 0a9a7eb9d: 78876bbfb rewrites ssog-anchor-ab-aggregate-run.py into the re-run aggregate, adds tests/standard_names/test_* -- adds the test module, the fragment JSON and HTML, the SVG, and three one-line fixes; 1bbe904b7 only fixes the verdict sentence's verb.\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-reselect-run.py:runner_anchor_source, docs/evidence/fragments/sn-selection-over-generation/ssog-scratch-harmonize-diagnosis-run.py:main\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: ssog-anchor-ab-aggregate-run.py:309...\nSCORE evidence: 16\nJUSTIFICATION evidence: I re-ran the gate the manifest names at head 1bbe904b7 -- 13 passed, EXIT=0 -- and both control logs are red with EXIT=1; but baseline_suite and after_suite are null.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat lists only the seven granted paths, though ssog-anchor-ab-aggregate-run.py:53 repoints the module away from the first aggregate's outputs.\nSCORE durability: 17\nJUSTIFICATION durability: ssog-anchor-ab-aggregate-run.py:121 refuses a missing required field and the control log reddens at EXIT=1, but test_anchor_ab_aggregate.py:105 compares a supplied value against a fixture that sets the sibling key to the same number.\nSCORE fit: 18\nJUSTIFICATION fit: the module keeps the fragment-runner idiom of its base and extends the file's own _check_text at line 418; the changed paths return no plan label or ticket reference.\nSCORE reuse: 18\nJUSTIFICATION reuse: _check_text is extended in the file that already owned it; no repository owner exists for the aggregate's rule or for the git rev-parse shell-out.\nFINDING ssog-anchor-ab-aggregate-run.py:53 follow-on: the change repurposes this file from the first aggregate to the re-run aggregate, so ssog-anchor-ab.html:3 still carries the literal 'Neither condition is satisfied' that the brief's first defect asked to fix, and no runner now produces that fragment.\nFINDING tests/standard_names/test_anchor_ab_aggregate.py:105 follow-on: the assertion compares the classifier's batches_run against the same value the test supplied, with batches_total in the fixture set to the same 2.\nFINDING ssog-anchor-ab-aggregate-run.py:193 follow-on: _score_lower_in_held skips a member whose jev score is not numeric, so the score condition can pass on a member that was never measured.\nFINDING ssog-anchor-ab-aggregate-run.py:746 follow-on: the held-score section renders an absent hold reason as {} and then asserts the 0.849 is a genuine documentation hold in both arms, although only the wall-recombination jev record carries a documentation_holds note.\nFINDING ssog-anchor-ab-aggregate-run.py:661 follow-on: the population paragraph tells the reader the compared records are cited with their revisions named, but the fragment names only the fixed tree.\nFINDING ssog-anchor-ab-aggregate-run.py:794 follow-on: the caption and verdict rest on a comparison in which the wall-recombination jev arm ran 1 of 2 batches and halted at 0.00 percent acceptance, and no sentence says the failed score condition turns on an incomplete apply.\n",
+  "review_run_id": "r-20261021T044541603425-review-of-ssog-anchor-ab-rerun-aggregate-1bbe904b7d33",
+  "reviewed_base_sha": "0a9a7eb9d205b7eac55e714756670631544de250",
+  "reviewed_head_sha": "1bbe904b7d3314611a45b41891d5ca29fcba965e",
+  "reviewed_run_id": "r-20261021T034837746521-ssog-anchor-ab-rerun-aggregate",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T05:04:00+00:00",
+  "total": 104
+}
