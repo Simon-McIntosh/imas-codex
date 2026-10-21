@@ -6,7 +6,7 @@ runs the panel and its verdict is stored as a non-deciding audit row, so the
 two judges' drift is observable without either of them changing the other's
 outcome.
 
-Three things keep the audit from deciding anything:
+Four things keep the audit from deciding anything:
 
 * the sample is a stable hash of the item id and the run id, so a replay picks
   the same items and the same rate selects the same set;
@@ -33,6 +33,7 @@ import functools
 import hashlib
 import json
 import logging
+import uuid
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -48,6 +49,11 @@ REFINE_ROUTE = "refine"
 AUDIT_ROLE = "audit"
 AUDIT_METHOD = "panel_audit"
 AUDIT_SKIPPED_METHOD = "panel_audit_skipped"
+NON_PERSISTING_ATTRIBUTE = "non_persisting"
+
+
+class UnrecognisedIncumbent(RuntimeError):
+    """An audit incumbent whose non-persisting behaviour could not be proven."""
 
 
 def panel_audit_rate() -> float:
@@ -76,18 +82,28 @@ def audit_selected(axis: str, item_id: str, run_id: str, rate: float) -> bool:
 def quorum_without_persisting(
     incumbent: Callable[..., Awaitable[Any]],
 ) -> Callable[..., Awaitable[Any]]:
-    """*incumbent* with its record write removed, where the caller supplied one.
+    """*incumbent* with its record write removed, or a refusal.
 
     The deciding path hands the cascade a callable that persists the quorum's
     review rows before returning them. An audit must read the panel's verdict
     without those rows: they are canonical, so they reach
     ``update_review_aggregates`` and change the audited item's score, which is
-    the outcome the audit exists not to touch. Where the callable is that
-    persisting wrapper, rebinding it to the cycle runner keeps every argument and
-    drops only the write. Any other callable is returned unchanged, so a stub
-    still runs exactly as its caller gave it.
+    the outcome the audit exists not to touch.
+
+    The persisting wrapper is recognised structurally: a
+    :func:`functools.partial` of ``workers._persisting_quorum_cycles`` carrying
+    the quorum's keyword arguments is rebound to the cycle runner, which keeps
+    every argument and drops only the write. A callable that declares itself
+    non-persisting with a true ``non_persisting`` attribute — how a test stub
+    says so — is returned unchanged. Anything else cannot be proven free of the
+    canonical write, so it is refused with :class:`UnrecognisedIncumbent`
+    naming it rather than run: running it could write the very rows the audit
+    exists to avoid, and the caller records the refusal as a skipped audit.
     """
     from imas_codex.standard_names import workers
+
+    if getattr(incumbent, NON_PERSISTING_ATTRIBUTE, False) is True:
+        return incumbent
 
     keywords = getattr(incumbent, "keywords", None)
     if (
@@ -96,7 +112,10 @@ def quorum_without_persisting(
         and keywords
     ):
         return functools.partial(workers._run_rd_quorum_cycles, **keywords)
-    return incumbent
+    raise UnrecognisedIncumbent(
+        "the audit cannot prove this incumbent writes no canonical review "
+        f"rows, so it will not run it: {incumbent!r}"
+    )
 
 
 def panel_route(score: float, *, min_score: float) -> str:
@@ -112,6 +131,18 @@ def _panel_payload(route: str | None, score: float | None) -> dict[str, dict]:
             "confidence": None,
         }
     }
+
+
+def _audit_group_id(panel_result: Mapping[str, Any] | None) -> str:
+    """The review group the audit row belongs to.
+
+    The panel's cycle rows share one group id, returned with the quorum's
+    result, and the audit row carries the same one so the verdict names the run
+    it observed. A skipped audit ran no cycle at all; it still carries a group
+    id, its own, because the writer requires one on every review record.
+    """
+    group = (panel_result or {}).get("review_group_id")
+    return str(group) if group else str(uuid.uuid4())
 
 
 def _audit_record(
@@ -154,6 +185,7 @@ def _audit_record(
     record.update(
         review_axis=axis,
         cycle_index=-1,
+        review_group_id=_audit_group_id(panel_result),
         resolution_role=AUDIT_ROLE,
         resolution_method=(
             AUDIT_METHOD if skipped_reason is None else AUDIT_SKIPPED_METHOD

@@ -1,6 +1,8 @@
 """The paid-panel audit sample kept beside the deciding Jev route."""
 
 import json
+import os
+from collections.abc import Iterator
 from unittest.mock import MagicMock
 
 import pytest
@@ -56,7 +58,7 @@ class _AuditCapture:
         self.rows = []
         self.panel_calls = []
 
-    def install(self, monkeypatch, panel_result):
+    def install(self, monkeypatch, panel_result, *, declare=True):
         async def store(item, axis, **kwargs):
             self.rows.append(
                 {"item": item, "axis": axis, "skipped_reason": None, **kwargs}
@@ -66,6 +68,10 @@ class _AuditCapture:
             self.panel_calls.append(list(models))
             return panel_result
 
+        if declare:
+            # A stub declares itself non-persisting; the audit refuses any
+            # incumbent whose non-persisting behaviour it cannot prove.
+            incumbent.non_persisting = True
         monkeypatch.setattr(panel_audit, "store_panel_audit", store)
         return incumbent
 
@@ -110,11 +116,11 @@ class _AggregateGraph:
         return [{"id": "temperature"}]
 
 
-def _install_cascade(monkeypatch, *, axis, rate, panel_result):
+def _install_cascade(monkeypatch, *, axis, rate, panel_result, declare=True):
     from imas_codex import settings
 
     capture = _AuditCapture()
-    incumbent = capture.install(monkeypatch, panel_result)
+    incumbent = capture.install(monkeypatch, panel_result, declare=declare)
     routes = []
 
     async def judgment(_item, _model):
@@ -416,3 +422,262 @@ async def test_rate_zero_audits_nothing(monkeypatch):
     assert capture.panel_calls == []
     assert capture.rows == []
     assert not [phase for phase in manager.phases if phase.startswith("review_audit_")]
+
+
+def test_seam_refuses_an_incumbent_it_cannot_prove_non_persisting():
+    async def incumbent(**_kwargs):
+        return None
+
+    with pytest.raises(panel_audit.UnrecognisedIncumbent) as refusal:
+        panel_audit.quorum_without_persisting(incumbent)
+    assert repr(incumbent) in str(refusal.value)
+
+
+def test_seam_returns_a_declared_non_persisting_callable_unchanged():
+    async def incumbent(**_kwargs):
+        return None
+
+    incumbent.non_persisting = True
+    assert panel_audit.quorum_without_persisting(incumbent) is incumbent
+
+
+def _persisting_partial_construction_sites() -> list:
+    """Every expression in the workers module that builds the persisting partial.
+
+    The module is read through its import, so the check follows the code the
+    process would run rather than a path that may name another tree.
+    """
+    import ast
+    import inspect
+
+    from imas_codex.standard_names import workers
+
+    tree = ast.parse(inspect.getsource(workers))
+    return [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "partial"
+        and node.args
+        and isinstance(node.args[0], ast.Name)
+        and node.args[0].id == "_persisting_quorum_cycles"
+    ]
+
+
+def test_every_quorum_construction_site_builds_the_recognised_partial():
+    """A call site that stops building this exact partial must fail here.
+
+    The audit recognises the persisting wrapper by what it is: a partial of
+    ``_persisting_quorum_cycles`` carrying the quorum's arguments. A decorator
+    or a further partial layer around it at either construction site would
+    leave the audit unable to prove the callable writes no canonical rows, and
+    the audit refuses such a callable — so the loss of the seam is caught here
+    rather than only in production.
+    """
+    sites = _persisting_partial_construction_sites()
+    assert len(sites) == 2, (
+        "both quorum call sites must build partial(_persisting_quorum_cycles, "
+        f"**kwargs); found {len(sites)}"
+    )
+    for site in sites:
+        assert site.keywords, (
+            "the persisting partial must carry the quorum's keyword arguments: "
+            "the seam rebinds the callable by them"
+        )
+
+
+@pytest.mark.asyncio
+async def test_unprovable_incumbent_is_skipped_without_running_the_panel(monkeypatch):
+    """An incumbent the audit cannot prove non-persisting is never called."""
+    capture, incumbent, _routes = _install_cascade(
+        monkeypatch,
+        axis="name",
+        rate=1.0,
+        panel_result={"winning_score": _PANEL_SCORE},
+        declare=False,
+    )
+    result = await cascade.adjudicate_review(
+        "name",
+        {"id": "temperature"},
+        ["primary", "secondary"],
+        incumbent,
+        mgr=_Manager(),
+    )
+    assert result["winning_score"] == _JEV_DECISION_SCORE
+    assert result["resolution_method"] == "jev_cascade_accept", "Jev still decides"
+    assert capture.panel_calls == [], "an unprovable callable must not run"
+    assert len(capture.rows) == 1
+    skipped = capture.rows[0]
+    assert skipped["panel_result"] is None
+    assert "UnrecognisedIncumbent" in skipped["skipped_reason"]
+
+
+def test_audit_row_carries_the_panel_review_group_id():
+    group = "6f1f0c2e-0000-4000-8000-00000000beef"
+    record = panel_audit._audit_record(
+        {"id": "temperature"},
+        "name",
+        panel_result={"winning_score": _PANEL_SCORE, "review_group_id": group},
+        jev_route="accept",
+        skipped_reason=None,
+        min_score=0.85,
+    )
+    assert record["review_group_id"] == group
+
+
+def test_skipped_audit_row_carries_a_review_group_id():
+    record = panel_audit._audit_record(
+        {"id": "temperature"},
+        "name",
+        panel_result=None,
+        jev_route="accept",
+        skipped_reason="review audit lease refused",
+        min_score=0.85,
+    )
+    assert record["review_group_id"]
+    assert record["resolution_method"] == panel_audit.AUDIT_SKIPPED_METHOD
+
+
+@pytest.fixture(scope="module")
+def disposable_graph_uri() -> Iterator[str]:
+    """A loopback-only Neo4j this module may write to, or a refusal.
+
+    The audit row must land through the real ``write_reviews``, which builds
+    its own ``GraphClient()`` from the active profile, so the fixture refuses
+    unless that profile resolves to the disposable endpoint itself — otherwise
+    the write would reach the project graph.
+    """
+    from neo4j import GraphDatabase
+
+    from imas_codex.settings import get_graph_uri
+
+    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    if not uri:
+        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.fail("the panel-audit row contract requires a disposable graph")
+    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+    if uri.rstrip("/") == project_uri.rstrip("/"):
+        pytest.fail("the panel-audit row contract refuses the project graph URI")
+    resolved = get_graph_uri()
+    if resolved.rstrip("/") != uri.rstrip("/"):
+        pytest.fail(
+            f"write_reviews resolves the profile to {resolved}, not the "
+            f"disposable endpoint: export NEO4J_URI={uri} so the audit row "
+            "cannot be written to the project graph"
+        )
+    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    auth = ("neo4j", password) if password else None
+    with GraphDatabase.driver(uri, auth=auth) as driver:
+        driver.verify_connectivity()
+        driver.execute_query("MATCH (node) DETACH DELETE node")
+    yield uri
+
+
+@pytest.mark.graph
+def test_the_real_writer_stores_the_audit_row_and_the_aggregate_ignores_it(
+    disposable_graph_uri: str,
+):
+    """The audit row on a real graph, written unstubbed and read back whole."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import (
+        update_review_aggregates,
+        write_reviews,
+    )
+
+    sn_id = "electron_temperature"
+    group_id = "2c0e6a5e-0000-4000-8000-00000000fa11"
+    client = GraphClient(
+        uri=disposable_graph_uri,
+        username="neo4j",
+        password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
+        graph_name="panel-audit-row",
+    )
+    try:
+        _run_audit_row_contract(
+            client,
+            sn_id,
+            group_id,
+            write_reviews,
+            update_review_aggregates,
+        )
+    finally:
+        client.close()
+
+
+def _run_audit_row_contract(
+    client, sn_id, group_id, write_reviews, update_review_aggregates
+):
+    client.query(
+        "CREATE (:StandardName {id: $id, name_stage: 'accepted', status: 'draft'})",
+        id=sn_id,
+    )
+    canonical = {
+        "id": f"{sn_id}:rd-primary:canonical",
+        "standard_name_id": sn_id,
+        "model": "rd-primary",
+        "reviewer_model": "rd-primary",
+        "model_family": "other",
+        "is_canonical": True,
+        "judge_kind": "incumbent",
+        "score": 0.44,
+        "scores_json": "{}",
+        "tier": "inadequate",
+        "reviewed_at": "2026-10-20T00:00:00+00:00",
+        "review_axis": "name",
+        "cycle_index": 0,
+        "review_group_id": "1a2b3c4d-0000-4000-8000-000000000001",
+        "resolution_role": "primary",
+        "resolution_method": "quorum_consensus",
+    }
+    assert write_reviews([canonical]) == 1, "the canonical baseline landed"
+
+    record = panel_audit._audit_record(
+        {"id": sn_id},
+        "name",
+        panel_result={"winning_score": _PANEL_SCORE, "review_group_id": group_id},
+        jev_route="refine",
+        skipped_reason=None,
+        min_score=0.85,
+    )
+    assert write_reviews([record]) == 1, "the audit row was accepted"
+
+    rows = client.query(
+        """
+        MATCH (:StandardName {id: $id})-[:HAS_REVIEW]->(r:StandardNameReview)
+        RETURN r.review_group_id AS review_group_id,
+               r.is_canonical AS is_canonical,
+               r.judge_kind AS judge_kind,
+               r.resolution_role AS resolution_role,
+               r.review_axis AS review_axis,
+               r.cycle_index AS cycle_index,
+               r.comments AS comments
+        """,
+        id=sn_id,
+    )
+    assert len(rows) == 2, f"expected the baseline and the audit row, saw {rows}"
+    audit_rows = [row for row in rows if row["resolution_role"] == "audit"]
+    assert len(audit_rows) == 1
+    stored = audit_rows[0]
+    assert stored["review_group_id"] == group_id
+    assert stored["is_canonical"] is False
+    assert stored["judge_kind"] == "jev"
+    assert stored["review_axis"] == "name"
+    assert stored["cycle_index"] == -1
+    comments = json.loads(stored["comments"])
+    assert comments["jev_route"] == "refine"
+    assert comments["panel_route"] == "refine"
+
+    assert update_review_aggregates([sn_id]) == 1
+    aggregates = client.query(
+        """
+        MATCH (sn:StandardName {id: $id})
+        RETURN sn.review_count AS n, sn.review_mean_score AS mean,
+               sn.review_disagreement AS disagreement
+        """,
+        id=sn_id,
+    )[0]
+    assert aggregates["n"] == 1, "only the canonical row is aggregated"
+    assert aggregates["mean"] == pytest.approx(0.44)
+    assert aggregates["disagreement"] is False
