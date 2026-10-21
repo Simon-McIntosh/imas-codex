@@ -3,17 +3,17 @@
     "gap_at_outboard_midplane": {
       "claimed_at": "",
       "description": "Gap at the outboard midplane is the major-radius separation between the inner and outer separatrices in double-null or near-double-null equilibria.",
-      "docs_chain_length": 0,
-      "docs_model": "openrouter/openai/gpt-6.1-sol",
+      "docs_chain_length": 1,
+      "docs_model": "openrouter/openai/gpt-6-luna",
       "docs_stage": "drafted",
-      "documentation": "Gap at outboard midplane\n\nThe separation is defined by\n\n$$\ng = \\left|R_{\\mathrm{outer}}(Z_*)-R_{\\mathrm{inner}}(Z_*)\\right|\n$$\n\nwhere $g$ is the gap, $Z_*$ is the common evaluation height, $R_{\\mathrm{inner}}(Z_*)$ is the maximum major radius of the inner separatrix, and $R_{\\mathrm{outer}}(Z_*)$ is the major radius of the outer-separatrix intersection at that same height. In the right-handed cylindrical $(R,\\phi,Z)$ frame, $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height.\n\nThe quantity applies to double-null or near-double-null equilibria with distinct inner and outer separatrices. It is a local separation, not a spatial average or a minimum Euclidean distance between the contours, and vanishes when the selected intersections coincide.\n\nUnlike [gap at closest wall point](name:gap_at_closest_wall_point), it measures separatrix-to-separatrix spacing rather than plasma-to-wall clearance. It is also distinct from [radial separatrix distance at the outboard midplane](name:radial_separatrix_distance_at_outboard_midplane), which is a signed offset of a flux-surface-mapped position from a separatrix.\n\nThe low-field-side equatorial midplane: points at the midplane height with major radius greater than the magnetic-axis radius. The data's midplane identifier selects that height, or it is the magnetic-axis height when none is given. For a value at the separatrix intersection use outboard_midplane_separatrix. Where $Z = Z_{\\mathrm{mid}},\\quad R > R_{\\mathrm{axis}}$, $Z_{\\mathrm{mid}}$ is the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given; $R_{\\mathrm{axis}}$ is major radius of the magnetic axis.",
+      "documentation": "Gap at outboard midplane\n\nThe separation is defined by\n\n$$\ng = R_{\\mathrm{outer}}(Z_*) - R_{\\mathrm{inner}}(Z_*)\n$$\n\nwhere $g$ is the gap, $R_{\\mathrm{outer}}(Z_*)$ and $R_{\\mathrm{inner}}(Z_*)$ are the major-radius coordinates of the outer and inner separatrices at height $Z_*$, and $Z_*$ is the height at which the inner separatrix reaches its maximum major radius. These coordinates are expressed in the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height.\n\nThe outboard-midplane height for this quantity is the low-field-side height at which the inner separatrix reaches its maximum major radius, and this height is $Z_*$. The inner-branch maximum-R point's major-radius coordinate is the [radial coordinate of the dR/dZ zero point](name:radial_coordinate_of_dr_dz_zero_point).\n\nThe quantity applies to the inner and outer separatrices in double-null or near-double-null equilibria and compares their major-radius coordinates at one shared height; it is not an average over either separatrix or over heights. It is a branch-to-branch major-radius separation, not the shortest Euclidean distance between separatrix curves or the plasma-wall clearance represented by [gap at plasma boundary](name:gap_at_plasma_boundary).\n\nThe low-field-side equatorial midplane: points at the midplane height with major radius greater than the magnetic-axis radius. The data's midplane identifier selects that height, or it is the magnetic-axis height when none is given. For a value at the separatrix intersection use outboard_midplane_separatrix. Where $Z = Z_{\\mathrm{mid}},\\quad R > R_{\\mathrm{axis}}$, $Z_{\\mathrm{mid}}$ is the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given; $R_{\\mathrm{axis}}$ is major radius of the magnetic axis.",
       "documentation_present": true,
       "edit_mode": "hint",
       "edit_status": "open",
       "name_stage": "accepted",
       "reviewer_score_docs": null,
       "reviewer_score_name": 0.91875,
-      "run_id": "sn-edit-20261020T215855Z",
+      "run_id": "sn-edit-20261021T033930Z",
       "source_paths": [
         "dd:summary/boundary/distance_inner_outer_separatrices/value"
       ]
@@ -65,6 +65,30 @@
       "reviewer_score_docs": 0.5
     }
   },
+  "before_steer3": {
+    "gap_at_outboard_midplane": {
+      "docs_chain_length": 0,
+      "docs_stage": "drafted",
+      "name_stage": "accepted",
+      "note": "the second steered edit's candidate, generated but never scored; the third edit was staged onto it after the ceiling was raised",
+      "reviewer_score_docs": null,
+      "reviewer_score_name": 0.91875
+    }
+  },
+  "gap_docs_writer_mechanism": {
+    "appender": "imas_codex/standard_names/workers.py:9742 _documentation_with_registry_form",
+    "appender_callers": [
+      "imas_codex/standard_names/workers.py:10034",
+      "imas_codex/standard_names/workers.py:11528"
+    ],
+    "appender_loop": "imas_codex/standard_names/workers.py:9809-9816",
+    "appender_loop_code": "locus_tokens = _locus_registry_tokens()\nfor concept in applied.concepts:\n    if concept.token not in locus_tokens:\n        continue\n    sentence = locus_definition_sentence(concept)\n    if sentence and sentence not in written:\n        written = f\"{written.rstrip()}\\n\\n{sentence}\"\n    break",
+    "evidence": "the appended sentence is reproduced verbatim at the end of the regenerated documentation, and is character-for-character the registry entry: 'The low-field-side equatorial midplane: points at the midplane height with major radius greater than the magnetic-axis radius. The data's midplane identifier selects that height, or it is the magnetic-axis height when none is given. For a value at the separatrix intersection use outboard_midplane_separatrix.' followed by the registry equation clause.",
+    "registry": "imas_standard_names.grammar.vocab_loaders.load_locus_registry(), an external library (imas-standard-names), not this repository's source: imas_standard_names/grammar/vocabularies/locus_registry.yml, the outboard_midplane entry (definition at lines 681-686)",
+    "sentence_renderer": "imas_codex/standard_names/docs_gates.py:664 locus_definition_sentence",
+    "summary": "Generated documentation is post-processed before persistence. If a locus concept the name applies (here 'outboard_midplane') is in the locus registry and its registry defining sentence is not already present in the model's text, that sentence is appended to it. A steering hint that asks for the sentence to be deleted therefore cannot succeed: the model may drop it, and the writer puts it back. Removing it needs a change to the writer or to the registry entry, not another edit.",
+    "token_source": "imas_codex/standard_names/docs_gates.py:656 _locus_registry_tokens"
+  },
   "gap_steer2_outcome": {
     "generate_docs": {
       "processed": 1,
@@ -79,6 +103,68 @@
     "run_stop": "stopped deliberately after the budget wall proved permanent: the review pool's remaining lease was $0.0456 against a next-seat need of $0.0457, so no further cycle could ever succeed.",
     "run_total_usd": 0.253,
     "steer_effect": "the regenerated text keeps the trailing midplane sentence unchanged, still asserting the midplane height beside Z*, which is the defect both reviewers docked. The steer did not achieve the reconciliation it asked for, independently of the review not running."
+  },
+  "gap_steer3_outcome": {
+    "cost_limit_usd": 0.45,
+    "exit_code": 1,
+    "generate_docs": {
+      "processed": 1,
+      "spent_usd": 0.0897
+    },
+    "refine_docs": {
+      "processed": 1,
+      "spent_usd": 0.0042
+    },
+    "review_docs": {
+      "note": "one three-seat quorum ran: 0.5625 (claude-sonnet-5), 0.5 (grok-4.5) and 0.5625 (gpt-6.1-sol, the escalator). Persisted as score=0.562, chain=0/3, resolution=authoritative_escalation",
+      "processed": 1,
+      "spent_usd": 0.3922
+    },
+    "run_stop": "budget_exhausted",
+    "run_total_usd": 0.486138,
+    "score": 0.562,
+    "seat_findings": "all three seats name one defect \u2014 the trailing paragraph defines a second measurement height for the same quantity, contradicting the body's Z*. Each seat independently proposes the same remedy: replace that paragraph with a single sentence locating the outboard midplane at Z*. None docked the name, the equation, the frame or the cross-references.",
+    "steer_effect": "the steered hint quoted the paragraph verbatim and named its replacement, and the paragraph was still present in the regenerated text \u2014 so the hint cannot remove it. The writer, not the hint, puts the sentence in.",
+    "threshold": 0.85,
+    "verdict": "below the 0.85 acceptance threshold: the node stops here and leaves the decision to the lead"
+  },
+  "gap_steer3_reviewer_comments": {
+    "axis": "docs",
+    "chain": "0/3",
+    "edit_run_id": "sn-edit-20261021T033930Z",
+    "name": "gap_at_outboard_midplane",
+    "persisted_score": 0.562,
+    "persisted_score_note": "graph_ops logged 'score=0.562, chain=0/3, resolution=authoritative_escalation'; the three seat scores are 0.5625, 0.5 and 0.5625",
+    "resolution": "authoritative_escalation",
+    "review_cycle_id": "1ec167f8-b8ca-4e0f-b229-085fb6e535ea",
+    "reviewed_at": "2026-10-21T03:43:58Z",
+    "seats": [
+      {
+        "comments": "Description quality: concise, DD-aligned ('major-radius separation between the inner and outer separatrices... in double-null or near-double-null equilibria' matches the DD description's 'Distance between the inner and outer separatrices measured in the major radius direction... Relevant for double-null or near-double-null configurations'), opens consistently with the 'Gap {locus}' convention, no filler or units in prose \u2014 full marks. Documentation quality: the equation $g=|R_{outer}(Z_*)-R_{inner}(Z_*)|$, variable definitions, cylindrical-frame statement, and the two cross-references to `gap_at_closest_wall_point` and `radial_separatrix_distance_at_outboard_midplane` are all strong and correctly distinguish the quantity from its structural siblings without flattening per-member physics differences (matching the parallel-structure rule against the `gap_at_closest_wall_point` anchor). However, the final paragraph abandons the 'link to the concept' instruction and instead reproduces the `outboard_midplane` concept's full prose, which is both padding and, worse, physically wrong for this specific quantity. Completeness: core required fields (equation, symbols, frame, scope exclusions, cross-refs) are present, but the documentation never properly completes the locus definition \u2014 it needed one reconciling sentence tying $Z_*$ to the outboard-midplane concept, not the generic concept restatement that is supplied. Physics accuracy: this is the critical defect per the expert steering note \u2014 the body defines the measurement height twice, inconsistently (Z* at max-R-of-inner-separatrix vs. an arbitrary data-selected or axis-based midplane height), a direct self-contradiction that caps this dimension at the low band. A revision that keeps the name, equation, frame, and cross-references unchanged and replaces only the trailing paragraph with a single sentence stating that the outboard-midplane locus for this quantity coincides with $Z_*$ resolves the contradiction without re-describing the quantity.",
+        "llm_cost_usd": 0.1480575,
+        "resolution_role": "primary",
+        "reviewer_model": "openrouter/anthropic/claude-sonnet-5",
+        "score": 0.5625,
+        "tier": "inadequate"
+      },
+      {
+        "comments": "Description is a clear single-line physical definition aligned with the DD (inner\u2013outer separatrix major-radius separation in double-null/near-DN) and with the gap-family opening used by gap_at_closest_wall_point, but it omits the defining height Z* that distinguishes this locus. Documentation follows the accepted gap sibling template (opening, defining equation with g, frame, nonnegative scope, cross-refs to gap_at_closest_wall_point and radial_separatrix_distance_at_outboard_midplane) and keeps the correct equation and frame, yet ends with a pasted generic outboard_midplane concept block that reintroduces Z_mid / R_axis and the midplane-identifier rule, so the body asserts two measurement heights for one quantity. Completeness is reduced by that unresolved dual-locus ending and by the missing single-sentence Z* locus statement the quantity requires. Physics accuracy fails the contradiction rule: DD ground truth fixes the height at the maximum-R point of the inner separatrix (Z*), while the trailing paragraph claims the data midplane-identifier height Z_mid, which is a definitional conflict even though the rest of the body matches DD.",
+        "llm_cost_usd": 0.0420844,
+        "resolution_role": "secondary",
+        "reviewer_model": "openrouter/x-ai/grok-4.5",
+        "score": 0.5,
+        "tier": "inadequate"
+      },
+      {
+        "comments": "Description quality: the concise physical definition identifies the major-radius separation, the two separatrices, and the relevant equilibrium configurations, while following the selected Gap opening convention. Documentation quality: the canonical symbol g, defining equation, variable definitions, coordinate frame, and nonnegative-separation statement are clear; its structure appropriately parallels gap_at_closest_wall_point without copying that sibling's minimum-clearance physics. The trailing generic concept paragraph is unnecessary duplication and introduces a competing height-selection rule. Completeness: the cross-references correctly distinguish this quantity from gap_at_closest_wall_point and radial_separatrix_distance_at_outboard_midplane, but the essential relationship between the named locus and Z_* remains unresolved. Physics accuracy: the major-radius difference at the inner separatrix's maximum-R height agrees with the supplied ground truth, and the equation is dimensionally consistent. However, the additional identifier-selected or magnetic-axis height is not generally identical to Z_*, so the unresolved definitional conflict requires the contradiction cap. The supplied expert clarification supports replacing only the final paragraph with one sentence locating this quantity's outboard midplane at Z_*; the description, equation, frame, and existing cross-references need no changes.",
+        "llm_cost_usd": 0.0435635,
+        "resolution_role": "escalator",
+        "reviewer_model": "openrouter/openai/gpt-6.1-sol",
+        "score": 0.5625,
+        "tier": "inadequate"
+      }
+    ],
+    "verdict": "reviewed, below the 0.85 acceptance threshold"
   },
   "node": "shc-gap-docs-regen",
   "radial_edit_limitation": {
@@ -151,19 +237,27 @@
     "gap_steer2_edit": "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane --hint '<reconcile the locus sentence: Z* is how the outboard midplane is located for this quantity, so the trailing midplane sentence describes that same height and never a second one; keep the opening, equation and cross-references; name no DD field, IDS path or option value>' --axis docs --scope self --reason '<both reviewers found the body asserting a midplane height beside Z*>' --stage-only",
     "gap_steer2_edit_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T202608740663-shc-gap-docs-regen/logs/gap-steer2-edit-stage.log",
     "gap_steer2_run_id": "sn-edit-20261020T215855Z",
+    "gap_steer3_comments": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T202608740663-shc-gap-docs-regen/logs/gap-docs-reviewer-comments-steer3.json",
+    "gap_steer3_docs": "uv run --no-sync imas-codex sn run --docs-only --scope-run-id sn-edit-20261021T033930Z --cost-limit 0.45 --skip-global-maintenance",
+    "gap_steer3_docs_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T202608740663-shc-gap-docs-regen/logs/gap-steer3-docs-review.log",
+    "gap_steer3_edit": "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane --hint '<delete the quoted trailing paragraph in full; replace it with one sentence locating the outboard midplane for this quantity at Z*, the height where the inner separatrix reaches its maximum major radius on the low-field side; change nothing else; name no DD field, IDS path or option value>' --axis docs --scope self --reason '<both reviewers found the body defining the gap at Z* and then asserting the identifier-selected midplane height as a second one>' --stage-only",
+    "gap_steer3_edit_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T202608740663-shc-gap-docs-regen/logs/gap-steer3-edit-stage.log",
+    "gap_steer3_edit_note": "Staged with --stage-only, which performs no LLM work and so spends nothing; it reset the docs for regeneration and stamped run_id=sn-edit-20261021T033930Z.",
+    "gap_steer3_run_id": "sn-edit-20261021T033930Z",
     "radial_docs": "uv run --no-sync imas-codex sn run --docs-only --name radial_separatrix_distance_at_outboard_midplane --cost-limit 0.45 --skip-global-maintenance",
     "radial_docs_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T202608740663-shc-gap-docs-regen/logs/radial-docs-review.log",
     "radial_name": "uv run --no-sync imas-codex sn run --names-only --name radial_separatrix_distance_at_outboard_midplane --cost-limit 0.30 --skip-global-maintenance",
     "radial_name_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T202608740663-shc-gap-docs-regen/logs/radial-name-review.log"
   },
   "spend": {
-    "authorized_usd": 1.0,
+    "authorized_usd": 1.5,
     "basis": "each run's own summary table in its log",
     "gap_docs_usd": 0.406322,
     "gap_steer2_run_usd": 0.253,
-    "node_remaining_usd": 0.054358,
-    "node_total_usd": 0.945642,
-    "note": "the node's measured spend across both attempts. The interrupted steering edit's generation cost is not in the first attempt's total. The second attempt's review quorum needed roughly $0.20 against $0.054 left, so the cap bound the verdict: the ceiling is the reason the name is unreviewed, not the pipeline.",
+    "gap_steer3_run_usd": 0.486138,
+    "node_remaining_usd": 0.06822,
+    "node_total_usd": 1.43178,
+    "note": "the node's measured spend across both attempts, against a ceiling raised from $1.00 to $1.50 for the third steering edit and its review. The third edit was staged with --stage-only, which performs no LLM work and spent nothing; its review run is the whole of the increase. That run was given $0.45 and spent $0.486138, overshooting its own cap by $0.036138 on a single seat whose cost exceeded its reservation, while still failing to fund the quorum's last seat \u2014 the limit was set with the three-seat need in mind, and even so the run ended budget_exhausted with the verdict below threshold rather than withheld.",
     "radial_docs_usd": 0.226306,
     "radial_name_usd": 0.060014
   },
@@ -171,17 +265,17 @@
     "gap_at_outboard_midplane": {
       "claimed_at": "",
       "description": "Gap at the outboard midplane is the major-radius separation between the inner and outer separatrices in double-null or near-double-null equilibria.",
-      "docs_chain_length": 0,
-      "docs_model": "openrouter/openai/gpt-6.1-sol",
+      "docs_chain_length": 1,
+      "docs_model": "openrouter/openai/gpt-6-luna",
       "docs_stage": "drafted",
-      "documentation": "Gap at outboard midplane\n\nThe separation is defined by\n\n$$\ng = \\left|R_{\\mathrm{outer}}(Z_*)-R_{\\mathrm{inner}}(Z_*)\\right|\n$$\n\nwhere $g$ is the gap, $Z_*$ is the common evaluation height, $R_{\\mathrm{inner}}(Z_*)$ is the maximum major radius of the inner separatrix, and $R_{\\mathrm{outer}}(Z_*)$ is the major radius of the outer-separatrix intersection at that same height. In the right-handed cylindrical $(R,\\phi,Z)$ frame, $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height.\n\nThe quantity applies to double-null or near-double-null equilibria with distinct inner and outer separatrices. It is a local separation, not a spatial average or a minimum Euclidean distance between the contours, and vanishes when the selected intersections coincide.\n\nUnlike [gap at closest wall point](name:gap_at_closest_wall_point), it measures separatrix-to-separatrix spacing rather than plasma-to-wall clearance. It is also distinct from [radial separatrix distance at the outboard midplane](name:radial_separatrix_distance_at_outboard_midplane), which is a signed offset of a flux-surface-mapped position from a separatrix.\n\nThe low-field-side equatorial midplane: points at the midplane height with major radius greater than the magnetic-axis radius. The data's midplane identifier selects that height, or it is the magnetic-axis height when none is given. For a value at the separatrix intersection use outboard_midplane_separatrix. Where $Z = Z_{\\mathrm{mid}},\\quad R > R_{\\mathrm{axis}}$, $Z_{\\mathrm{mid}}$ is the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given; $R_{\\mathrm{axis}}$ is major radius of the magnetic axis.",
+      "documentation": "Gap at outboard midplane\n\nThe separation is defined by\n\n$$\ng = R_{\\mathrm{outer}}(Z_*) - R_{\\mathrm{inner}}(Z_*)\n$$\n\nwhere $g$ is the gap, $R_{\\mathrm{outer}}(Z_*)$ and $R_{\\mathrm{inner}}(Z_*)$ are the major-radius coordinates of the outer and inner separatrices at height $Z_*$, and $Z_*$ is the height at which the inner separatrix reaches its maximum major radius. These coordinates are expressed in the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height.\n\nThe outboard-midplane height for this quantity is the low-field-side height at which the inner separatrix reaches its maximum major radius, and this height is $Z_*$. The inner-branch maximum-R point's major-radius coordinate is the [radial coordinate of the dR/dZ zero point](name:radial_coordinate_of_dr_dz_zero_point).\n\nThe quantity applies to the inner and outer separatrices in double-null or near-double-null equilibria and compares their major-radius coordinates at one shared height; it is not an average over either separatrix or over heights. It is a branch-to-branch major-radius separation, not the shortest Euclidean distance between separatrix curves or the plasma-wall clearance represented by [gap at plasma boundary](name:gap_at_plasma_boundary).\n\nThe low-field-side equatorial midplane: points at the midplane height with major radius greater than the magnetic-axis radius. The data's midplane identifier selects that height, or it is the magnetic-axis height when none is given. For a value at the separatrix intersection use outboard_midplane_separatrix. Where $Z = Z_{\\mathrm{mid}},\\quad R > R_{\\mathrm{axis}}$, $Z_{\\mathrm{mid}}$ is the midplane height the data's midplane identifier selects, the magnetic-axis height when none is given; $R_{\\mathrm{axis}}$ is major radius of the magnetic axis.",
       "documentation_present": true,
       "edit_mode": "hint",
       "edit_status": "open",
       "name_stage": "accepted",
       "reviewer_score_docs": null,
       "reviewer_score_name": 0.91875,
-      "run_id": "sn-edit-20261020T215855Z",
+      "run_id": "sn-edit-20261021T033930Z",
       "source_paths": [
         "dd:summary/boundary/distance_inner_outer_separatrices/value"
       ]

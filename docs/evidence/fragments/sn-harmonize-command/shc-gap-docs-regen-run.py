@@ -19,7 +19,11 @@ through it:
 * ``gap_at_outboard_midplane`` — ``sn edit --hint --axis docs`` attached a
   steering direction and reason, resetting its docs out of ``exhausted`` and
   regenerating them; the documentation pools then reviewed them below the
-  acceptance threshold, so a second steered edit re-attempted it.
+  acceptance threshold, so a second and then a third steered edit re-attempted
+  it. The third edit named the offending paragraph verbatim; the paragraph came
+  back anyway, because the writer appends the locus registry's defining
+  sentence to generated documentation after the model has dropped it. That
+  mechanism is recorded here rather than steered around a fourth time.
 * ``radial_separatrix_distance_at_outboard_midplane`` — no ``sn edit`` mode can
   re-review a name in place
   without renaming it, so the name was re-reviewed through the pipeline's own
@@ -142,6 +146,136 @@ GAP_STEER2_OUTCOME = {
     ),
 }
 
+#: The third steering edit. It quotes the offending paragraph verbatim and
+#: names the replacement sentence, so the direction is unambiguous about which
+#: text must go; the writer restores that paragraph regardless, which is what
+#: makes this the last edit this node attempts.
+GAP_STEER3_EDIT_COMMAND = (
+    "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane "
+    "--hint '<delete the quoted trailing paragraph in full; replace it with one "
+    "sentence locating the outboard midplane for this quantity at Z*, the height "
+    "where the inner separatrix reaches its maximum major radius on the "
+    "low-field side; change nothing else; name no DD field, IDS path or option "
+    "value>' "
+    "--axis docs --scope self --reason '<both reviewers found the body defining "
+    "the gap at Z* and then asserting the identifier-selected midplane height "
+    "as a second one>' --stage-only"
+)
+GAP_STEER3_EDIT_LOG = os.path.join(_LOGS, "gap-steer3-edit-stage.log")
+GAP_STEER3_RUN_ID = "sn-edit-20261021T033930Z"
+
+#: gap's state between the second and third steering edits: the second edit's
+#: candidate had been generated but never scored, so the third edit's own
+#: review is the first verdict on the reconciliation.
+GAP_STEER3_EDIT_NOTE = (
+    "Staged with --stage-only, which performs no LLM work and so spends "
+    "nothing; it reset the docs for regeneration and stamped "
+    "run_id=sn-edit-20261021T033930Z."
+)
+
+#: gap's third steering edit's review: the docs-only scope over the re-edit's
+#: run id, with the cost limit set from the three-seat quorum's per-seat need
+#: rather than from the whole-run estimate.
+GAP_STEER3_DOCS_COMMAND = (
+    "uv run --no-sync imas-codex sn run --docs-only "
+    "--scope-run-id sn-edit-20261021T033930Z --cost-limit 0.45 "
+    "--skip-global-maintenance"
+)
+GAP_STEER3_DOCS_LOG = os.path.join(_LOGS, "gap-steer3-docs-review.log")
+GAP_STEER3_COMMENTS = os.path.join(_LOGS, "gap-docs-reviewer-comments-steer3.json")
+
+#: What the third review found. All three seats docked the same paragraph, so
+#: the finding is not a wording disagreement but the same defect the previous
+#: two reviews named, and the score stayed below the acceptance threshold.
+GAP_STEER3_OUTCOME = {
+    "generate_docs": {"processed": 1, "spent_usd": 0.0897},
+    "review_docs": {
+        "processed": 1,
+        "spent_usd": 0.3922,
+        "note": (
+            "one three-seat quorum ran: 0.5625 (claude-sonnet-5), 0.5 "
+            "(grok-4.5) and 0.5625 (gpt-6.1-sol, the escalator). Persisted as "
+            "score=0.562, chain=0/3, resolution=authoritative_escalation"
+        ),
+    },
+    "refine_docs": {"processed": 1, "spent_usd": 0.0042},
+    "run_total_usd": 0.486138,
+    "cost_limit_usd": 0.45,
+    "run_stop": "budget_exhausted",
+    "exit_code": 1,
+    "score": 0.562,
+    "threshold": 0.85,
+    "verdict": (
+        "below the 0.85 acceptance threshold: the node stops here and leaves "
+        "the decision to the lead"
+    ),
+    "seat_findings": (
+        "all three seats name one defect — the trailing paragraph defines a "
+        "second measurement height for the same quantity, contradicting the "
+        "body's Z*. Each seat independently proposes the same remedy: replace "
+        "that paragraph with a single sentence locating the outboard midplane "
+        "at Z*. None docked the name, the equation, the frame or the "
+        "cross-references."
+    ),
+    "steer_effect": (
+        "the steered hint quoted the paragraph verbatim and named its "
+        "replacement, and the paragraph was still present in the regenerated "
+        "text — so the hint cannot remove it. The writer, not the hint, puts "
+        "the sentence in."
+    ),
+}
+
+#: The writer mechanism behind the steer not landing: the locus registry's
+#: defining sentence is appended to generated documentation by code, after the
+#: model has produced its text and independently of what any hint asked for.
+WRITER_MECHANISM = {
+    "summary": (
+        "Generated documentation is post-processed before persistence. If a "
+        "locus concept the name applies (here 'outboard_midplane') is in the "
+        "locus registry and its registry defining sentence is not already "
+        "present in the model's text, that sentence is appended to it. A "
+        "steering hint that asks for the sentence to be deleted therefore "
+        "cannot succeed: the model may drop it, and the writer puts it back. "
+        "Removing it needs a change to the writer or to the registry entry, "
+        "not another edit."
+    ),
+    "appender": "imas_codex/standard_names/workers.py:9742 _documentation_with_registry_form",
+    "appender_loop": "imas_codex/standard_names/workers.py:9809-9816",
+    "appender_loop_code": (
+        "locus_tokens = _locus_registry_tokens()\n"
+        "for concept in applied.concepts:\n"
+        "    if concept.token not in locus_tokens:\n"
+        "        continue\n"
+        "    sentence = locus_definition_sentence(concept)\n"
+        "    if sentence and sentence not in written:\n"
+        '        written = f"{written.rstrip()}\\n\\n{sentence}"\n'
+        "    break"
+    ),
+    "appender_callers": [
+        "imas_codex/standard_names/workers.py:10034",
+        "imas_codex/standard_names/workers.py:11528",
+    ],
+    "token_source": "imas_codex/standard_names/docs_gates.py:656 _locus_registry_tokens",
+    "sentence_renderer": "imas_codex/standard_names/docs_gates.py:664 locus_definition_sentence",
+    "registry": (
+        "imas_standard_names.grammar.vocab_loaders.load_locus_registry(), an "
+        "external library (imas-standard-names), not this repository's source: "
+        "imas_standard_names/grammar/vocabularies/locus_registry.yml, the "
+        "outboard_midplane entry"
+        " (definition at lines 681-686)"
+    ),
+    "evidence": (
+        "the appended sentence is reproduced verbatim at the end of the "
+        "regenerated documentation, and is character-for-character the "
+        "registry entry: 'The low-field-side equatorial midplane: points at "
+        "the midplane height with major radius greater than the magnetic-axis "
+        "radius. The data's midplane identifier selects that height, or it is "
+        "the magnetic-axis height when none is given. For a value at the "
+        "separatrix intersection use outboard_midplane_separatrix.' followed "
+        "by the registry equation clause."
+    ),
+}
+
 #: radial's name: no ``sn edit`` mode re-reviews a name in place, so the name
 #: was re-reviewed through the pipeline's own rotation.
 RADIAL_NAME_COMMAND = (
@@ -150,7 +284,9 @@ RADIAL_NAME_COMMAND = (
     "--skip-global-maintenance"
 )
 RADIAL_NAME_LOG = os.path.join(_LOGS, "radial-name-review.log")
-RADIAL_COMMENTS_BEFORE = os.path.join(_LOGS, "radial-name-reviewer-comments-before.json")
+RADIAL_COMMENTS_BEFORE = os.path.join(
+    _LOGS, "radial-name-reviewer-comments-before.json"
+)
 RADIAL_COMMENTS_AFTER = os.path.join(_LOGS, "radial-name-reviewer-comments-after.json")
 
 #: radial's documentation: the docs-only scope over the now-accepted name.
@@ -200,6 +336,23 @@ BEFORE_STEER2 = {
             "at 0.5625 and then 0.500, below the 0.85 threshold; the refinement "
             "that followed claimed the name and died, leaving docs_stage "
             "'refining' until the orphan sweep reverted it"
+        ),
+    }
+}
+
+#: gap's state between the second and third steering edits: the second edit's
+#: candidate was regenerated but never scored, so it sat at 'drafted' with no
+#: claim and no score when the third edit attached.
+BEFORE_STEER3 = {
+    "gap_at_outboard_midplane": {
+        "name_stage": "accepted",
+        "reviewer_score_name": 0.91875,
+        "docs_stage": "drafted",
+        "reviewer_score_docs": None,
+        "docs_chain_length": 0,
+        "note": (
+            "the second steered edit's candidate, generated but never scored; "
+            "the third edit was staged onto it after the ceiling was raised"
         ),
     }
 }
@@ -300,8 +453,7 @@ def read_checks(state: dict) -> dict:
     for name in NAMES:
         entry = state["names"].get(name, {})
         text = " ".join(
-            str(part)
-            for part in (entry.get("description"), entry.get("documentation"))
+            str(part) for part in (entry.get("description"), entry.get("documentation"))
         )
         field_hits = sorted(set(DD_FIELD_RE.findall(text)))
         option_hits = sorted(set(OPTION_RE.findall(text)))
@@ -339,6 +491,13 @@ def report() -> dict:
             "gap_steer2_run_id": GAP_STEER2_RUN_ID,
             "gap_steer2_docs": GAP_STEER2_DOCS_COMMAND,
             "gap_steer2_docs_log": GAP_STEER2_DOCS_LOG,
+            "gap_steer3_edit": GAP_STEER3_EDIT_COMMAND,
+            "gap_steer3_edit_log": GAP_STEER3_EDIT_LOG,
+            "gap_steer3_edit_note": GAP_STEER3_EDIT_NOTE,
+            "gap_steer3_run_id": GAP_STEER3_RUN_ID,
+            "gap_steer3_docs": GAP_STEER3_DOCS_COMMAND,
+            "gap_steer3_docs_log": GAP_STEER3_DOCS_LOG,
+            "gap_steer3_comments": GAP_STEER3_COMMENTS,
             "radial_name": RADIAL_NAME_COMMAND,
             "radial_name_log": RADIAL_NAME_LOG,
             "radial_docs": RADIAL_DOCS_COMMAND,
@@ -357,6 +516,9 @@ def report() -> dict:
             "probes": RADIAL_EDIT_PROBES,
         },
         "gap_steer2_outcome": GAP_STEER2_OUTCOME,
+        "gap_steer3_outcome": GAP_STEER3_OUTCOME,
+        "gap_steer3_reviewer_comments": _load(GAP_STEER3_COMMENTS),
+        "gap_docs_writer_mechanism": WRITER_MECHANISM,
         "radial_name_review": {
             "comments_before": _load(RADIAL_COMMENTS_BEFORE),
             "comments_after": _load(RADIAL_COMMENTS_AFTER),
@@ -364,24 +526,31 @@ def report() -> dict:
         "state": state["names"],
         "before": BEFORE,
         "before_steer2": BEFORE_STEER2,
+        "before_steer3": BEFORE_STEER3,
         "after": state["names"],
         "read_checks": checks,
         "spend": {
-            "authorized_usd": 1.0,
+            "authorized_usd": 1.50,
             "basis": "each run's own summary table in its log",
             "gap_docs_usd": 0.406322,
             "radial_name_usd": 0.060014,
             "radial_docs_usd": 0.226306,
             "gap_steer2_run_usd": 0.2530,
-            "node_total_usd": 0.945642,
-            "node_remaining_usd": 0.054358,
+            "gap_steer3_run_usd": 0.486138,
+            "node_total_usd": 1.431780,
+            "node_remaining_usd": 0.068220,
             "note": (
-                "the node's measured spend across both attempts. The "
-                "interrupted steering edit's generation cost is not in the "
-                "first attempt's total. The second attempt's review quorum "
-                "needed roughly $0.20 against $0.054 left, so the cap bound "
-                "the verdict: the ceiling is the reason the name is "
-                "unreviewed, not the pipeline."
+                "the node's measured spend across both attempts, against a "
+                "ceiling raised from $1.00 to $1.50 for the third steering "
+                "edit and its review. The third edit was staged with "
+                "--stage-only, which performs no LLM work and spent nothing; "
+                "its review run is the whole of the increase. That run was "
+                "given $0.45 and spent $0.486138, overshooting its own cap by "
+                "$0.036138 on a single seat whose cost exceeded its "
+                "reservation, while still failing to fund the quorum's last "
+                "seat — the limit was set with the three-seat need in mind, "
+                "and even so the run ended budget_exhausted with the verdict "
+                "below threshold rather than withheld."
             ),
         },
     }

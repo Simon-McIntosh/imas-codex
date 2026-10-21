@@ -9,7 +9,7 @@
 </head>
 <body>
 <main>
-  <h1 id="shc-gap-docs-regen-title">The two split gap names are driven through their own stages: radial accepted, gap's steered candidate left unreviewed at the node's spend ceiling</h1>
+  <h1 id="shc-gap-docs-regen-title">The two split gap names are driven through their own stages: radial accepted, and gap's documentation blocked by the writer that re-inserts its locus sentence</h1>
 
   <p id="shc-gap-docs-regen-invocation">
     The documentation stage could not claim either name at the start — its
@@ -114,9 +114,70 @@
     a next-seat need of <code>$0.0457</code> — so 107 cycles deferred, one seat
     ran and was discarded for want of a quorum, and no score was persisted
     (<code>$0.1572</code> for no accepted verdict). The node's measured spend
-    reached <code>$0.945642</code> of the <code>$1.00</code> ceiling, leaving
-    <code>$0.054</code> against a quorum that costs roughly
-    <code>$0.20</code>. The ceiling bound the verdict, not the pipeline.
+    reached <code>$0.945642</code> of its then <code>$1.00</code> ceiling,
+    leaving <code>$0.054</code> against a quorum that costs roughly
+    <code>$0.20</code>, so that ceiling bound the verdict rather than the
+    pipeline — and the ceiling was subsequently raised to <code>$1.50</code>
+    to buy the review the next section describes.
+  </p>
+
+  <p id="shc-gap-docs-regen-steer3">
+    <strong>The third steering edit named the offending paragraph verbatim,
+    and the paragraph came back anyway — because a writer re-inserts it.</strong>
+    The quote was exact: the hint reproduced the trailing paragraph sentence
+    for sentence and named the single replacement sentence to write in its
+    place. The regeneration that followed carries that paragraph unchanged.
+    The mechanism is in the code, not the model — generated documentation is
+    post-processed before persistence, and where a name applies a locus
+    concept whose registry defining sentence is absent from the model's text,
+    the writer appends it. For this name the concept is
+    <code>outboard_midplane</code>, and the appended text is character for
+    character the paragraph the hint asked to delete. The appendix, at
+    <code>imas_codex/standard_names/workers.py:9809-9816</code> inside
+    <code>_documentation_with_registry_form</code> (line 9742, called at lines
+    10034 and 11528), reads:
+  </p>
+
+  <pre id="shc-gap-docs-regen-mechanism"><code>locus_tokens = _locus_registry_tokens()
+for concept in applied.concepts:
+    if concept.token not in locus_tokens:
+        continue
+    sentence = locus_definition_sentence(concept)
+    if sentence and sentence not in written:
+        written = f"{written.rstrip()}\n\n{sentence}"
+    break</code></pre>
+
+  <p id="shc-gap-docs-regen-mechanism-note">
+    The token set comes from
+    <code>imas_codex/standard_names/docs_gates.py:656</code> and the rendered
+    sentence from <code>docs_gates.py:664</code>, both reading
+    <code>imas_standard_names.grammar.vocab_loaders.load_locus_registry()</code>
+    — an external library, not this repository's source. The sentence's own
+    text lives in <code>imas_standard_names/grammar/vocabularies/locus_registry.yml</code>
+    under the <code>outboard_midplane</code> entry (definition at lines
+    681–686). So no hint can remove it: the model may drop the sentence, and
+    the writer puts it back. Removing it is a change to the writer or to the
+    registry entry, and is therefore a question for the writer's owner rather
+    than for another steering edit.
+  </p>
+
+  <p id="shc-gap-docs-regen-steer3-review">
+    <strong>The funded review scored it <code>0.562</code>, below the
+    <code>0.85</code> threshold, with all three seats naming that same
+    paragraph.</strong> The run was given <code>$0.45</code> against a
+    three-seat quorum's per-seat need and spent <code>$0.486138</code>,
+    ending <code>budget_exhausted</code>; the quorum still could not fund its
+    last seat, and the deferred seat was a
+    <code>$0.0459</code> call that never ran. What did run was unanimous:
+    <code>0.5625</code> (claude-sonnet-5), <code>0.5</code> (grok-4.5) and
+    <code>0.5625</code> (gpt-6.1-sol, the escalating seat). None of the three
+    docked the name, the equation, the frame or either cross-reference; each
+    docked the trailing paragraph for defining a second measurement height
+    beside <code>Z*</code>, and each independently proposed the same remedy —
+    replace that paragraph with one sentence locating the outboard midplane at
+    <code>Z*</code>. The comments are recorded verbatim in the JSON record and
+    in <code>logs/gap-docs-reviewer-comments-steer3.json</code>. By the work
+    item's own rule the node stops here and leaves the decision to the lead.
   </p>
 
   <p id="shc-gap-docs-regen-record">
@@ -125,24 +186,29 @@
     <code>shc-gap-docs-regen-run.py</code>; the record carries each run's
     invocation, log path, the before and after state, both names' reviewer
     comments, the read-back checks and the spend. The runner performs no graph
-    write. Gap's first reviewed documentation came back below the
-    <code>0.85</code> acceptance threshold and its steered re-attempt could not
-    be reviewed within the node's spend ceiling, so by the work item's own rule
-    it stops there and leaves the decision to the lead; radial's clears it.
+    write. All three of gap's documentation reviews came back below the
+    <code>0.85</code> acceptance threshold — the last one at
+    <code>0.562</code> — and the third attempt established that the sentence
+    each review docks is restored by the writer after generation, so no
+    further steering edit can fix it. By the work item's own rule the node
+    stops there and leaves the decision to the lead; radial's clears the
+    threshold.
   </p>
 
   <p id="shc-gap-docs-regen-next">
-    Next, on the sanctioned paths only: gap_at_outboard_midplane holds a fresh
-    candidate at <code>docs_stage='drafted'</code> with no claim, which the next
-    funded review rotation scores without any further edit. Two things decide
-    what to give it: the node's spend ceiling needs raising by roughly
-    <code>$0.20</code> for one three-seat quorum, and the steer itself must land
-    — the regeneration reproduced the trailing midplane sentence, so a further
-    edit must reconcile it with <code>Z*</code> rather than re-describe the
-    quantity, or the lead accepts the below-threshold reviewed result as the
-    outcome. radial_separatrix_distance_at_outboard_midplane needs no further
-    action: name accepted at <code>1.0</code>, documentation accepted at
-    <code>0.90625</code>.
+    Next, and this is no longer a matter for a steering edit:
+    gap_at_outboard_midplane's documentation cannot clear review while the
+    writer appends the <code>outboard_midplane</code> registry sentence to it,
+    because every reviewer reads that sentence as a second measurement height
+    for a quantity whose body defines one. Two routes out, both the lead's
+    call — narrow the locus registry entry for <code>outboard_midplane</code>
+    or the writer's append rule so a quantity that defines its own height is
+    not also given the generic locus prose, and re-run the docs review; or
+    accept the reviewed result as the name's outcome. gap's name itself is
+    settled at <code>0.91875</code> accepted, and its candidate sits at
+    <code>docs_stage='drafted'</code> with no claim; radial_separatrix_distance_at_outboard_midplane
+    needs no further action — name accepted at <code>1.0</code>,
+    documentation accepted at <code>0.90625</code>.
   </p>
 </main>
 </body>
