@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-10-21T00:54:56.195Z",
   "dispatched_at": "2026-10-21T00:41:22Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-cascade-deciding-switch",
+      "recorded_at": "2026-10-21T03:56:27.034915+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_panel_audit_sample.py",
