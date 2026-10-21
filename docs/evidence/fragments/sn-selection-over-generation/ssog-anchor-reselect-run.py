@@ -48,6 +48,9 @@ from imas_codex.standard_names.families import (
 )
 
 FRAGMENT_DIR = Path(__file__).resolve().parent
+#: The repository root, so every path this runner records is repo-relative and
+#: survives the worktree it was produced in being removed.
+REPO = FRAGMENT_DIR.parents[3]
 SELECTION = FRAGMENT_DIR / "ssog-anchor-ab" / "selection.json"
 RUNNER = FRAGMENT_DIR / "ssog-anchor-ab-run.py"
 FRAGMENT = FRAGMENT_DIR / "ssog-anchor-reselect.html"
@@ -145,7 +148,7 @@ def runner_anchor_source() -> dict:
             f"{SELECTION}."
         )
     return {
-        "runner": str(RUNNER),
+        "runner": str(RUNNER.relative_to(REPO)),
         "loads_selection": loads_selection,
         "anchor_reads": reads,
         "selection_ids_checked": len(ids),
@@ -677,7 +680,7 @@ async def run(verify_family: str | None = None) -> dict:
             dropped=[
                 d["seed"]
                 for d in derived
-                if d["heuristic_new"] is None and d["jev_changed"] is None
+                if d["heuristic_new"] is None and d["jev_new"] is None
             ],
             out_of_anchor=[
                 d["seed"]
