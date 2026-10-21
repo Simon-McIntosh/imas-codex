@@ -90,13 +90,14 @@ written, none removed — and named loudly as an operator worklist, the way
 ``names_misnamed`` is. The ``require_producing_sources`` call after the detach
 is unchanged and still runs: it is the backstop, and it now sees only the
 surviving names, so a genuine stranding the hold did not anticipate still
-refuses the write. The ``would strand`` test reuses the invariant's own
-predicate (``find_sourceless_live_names``), evaluating it against the state the
-detach would produce: a name is held when every one of its non-stale producers
-is in the detach set, unless the invariant itself exempts the name (a
-superseded name, or a derived parent with a live child). ``names_orphaned`` is
-computed on the names that remain actionable, so the held names never appear
-there — the hold is reported in its own bucket instead.
+refuses the write. The ``would strand`` test applies the invariant's own rule to
+the state the detach would produce: a name is held when every one of its
+non-stale producers is in the detach set, unless the invariant itself exempts
+the name (a superseded name, or a derived parent with a live child). The test
+reads the producers and the exemptions from the verdicts' own audit pass, so it
+costs no second query. ``names_orphaned`` is computed on the names that remain
+actionable, so the held names never appear there — the hold is reported in its
+own bucket instead.
 
 Idempotent: a detached attachment no longer matches the selector, and an
 attachment the guard accepts is never touched, so a second pass acts on nothing.
@@ -180,6 +181,14 @@ _MIN_WIPEOUT_ATTACHMENTS = 2
 #: source that also backs a live name has already been re-composed correctly;
 #: only the stale extra edge should go, and the source must NOT be rewound to
 #: ``extracted`` — that would strand the good name it already produced.
+#:
+#: It also carries what the stranding hold needs, so the hold costs no second
+#: read: each row's ``source_status`` (a producer is a ``PRODUCED_NAME`` source
+#: whose status is not ``stale``, the invariant's own rule) and the name's
+#: ``sn_status`` and derived-parent-with-live-child flag, which are exactly the
+#: exemptions ``require_producing_sources`` applies. The derived-parent clause is
+#: composed in at call time from the invariant so there is only one definition of
+#: a name the invariant excuses.
 _ATTACHMENTS_QUERY = """
 MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
 {scope}
@@ -220,8 +229,21 @@ RETURN src.id            AS source_node_id,
        END AS sn_unit,
        sn_relationship_units,
        other_live_names,
+       src.status        AS source_status,
+       sn.status         AS sn_status,
+       {live_child} AS sn_has_live_child,
        dd.documentation  AS dd_documentation
 """
+
+
+def _attachments_query(scope: str = "") -> str:
+    """Return the attachments read, composing the invariant's live-child clause."""
+    from imas_codex.standard_names.source_invariant import _live_child_cypher
+
+    return _ATTACHMENTS_QUERY.replace("{live_child}", _live_child_cypher()).replace(
+        "{scope}", scope
+    )
+
 
 #: Scope clause narrowing the read to one name. Used by the write-time gate on
 #: paths that migrate a historical source set onto a NEW name, where a full
@@ -287,38 +309,6 @@ SET src.produced_sn_id = CASE WHEN size(remaining_ids) > 0
     src.claim_token = CASE WHEN item.reroute THEN null ELSE src.claim_token END
 RETURN count(*) AS detached
 """
-
-
-#: Names a pending detach would leave with no producing source. The invariant's
-#: derived-parent clause is composed in at call time (``_stranding_hold_query``)
-#: so the exempt set is the one ``require_producing_sources`` applies rather than
-#: a second copy of it. Producers are counted with the invariant's own rule:
-#: distinct ``PRODUCED_NAME`` sources whose status is not ``stale``.
-_STRANDING_HOLD_QUERY_TEMPLATE = """
-// STRANDING_HOLD
-UNWIND $items AS item
-WITH item.sn_id AS sn_id, collect(DISTINCT item.source_node_id) AS detaching
-MATCH (sn:StandardName {{id: sn_id}})
-OPTIONAL MATCH (producer:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-WHERE producer.status <> 'stale'
-WITH sn, detaching,
-     [p IN collect(DISTINCT producer.id) WHERE p IS NOT NULL] AS producers
-WHERE size(producers) > 0
-  AND size([p IN producers WHERE NOT p IN detaching]) = 0
-  AND coalesce(sn.name_stage, '') <> 'superseded'
-  AND coalesce(sn.status, '') <> 'superseded'
-  AND NOT ({derived_parent})
-RETURN sn.id AS sn_id
-"""
-
-
-def _stranding_hold_query() -> str:
-    """Return the stranding-hold query, composing the invariant's exemption."""
-    from imas_codex.standard_names.source_invariant import _derived_parent_cypher
-
-    return _STRANDING_HOLD_QUERY_TEMPLATE.format(
-        derived_parent=_derived_parent_cypher()
-    )
 
 
 #: Remove a DD-side realization that has no provenance node behind it. There is
@@ -934,6 +924,12 @@ class AttachmentAuditResult:
     names_misnamed: list[NameLevelDefect] = field(default_factory=list)
     names_orphaned: list[str] = field(default_factory=list)
     dd_gap_evidence: list[dict[str, Any]] = field(default_factory=list)
+    #: Live producer source ids per name, and the names the invariant excuses
+    #: from the producing-source requirement. Internal plumbing for the hold:
+    #: they carry its inputs out of the audit's single read, and are not part of
+    #: the reported outcome.
+    name_producers: dict[str, list[str]] = field(default_factory=dict)
+    stranding_exempt_names: set[str] = field(default_factory=set)
 
     def by_rule(self) -> dict[str, int]:
         counts: dict[str, int] = {}
@@ -1039,9 +1035,7 @@ def audit_attachments(
             params["sn_id"] = sn_id
         rows = list(
             client.query(
-                _ATTACHMENTS_QUERY.format(
-                    scope="" if sn_id is None else _ONE_NAME_SCOPE
-                ),
+                _attachments_query("" if sn_id is None else _ONE_NAME_SCOPE),
                 **params,
             )
         )
@@ -1066,6 +1060,28 @@ def audit_attachments(
             by_name[sn_id],
             key=lambda r: (r["dd_path"] or "", r["source_node_id"] or ""),
         )
+        # The stranding hold's inputs, taken from this same read: the name's
+        # non-stale producers (the invariant counts exactly these) and whether
+        # the invariant excuses it. Both are per-name, so any row of the group
+        # carries them.
+        result.name_producers[sn_id] = sorted(
+            {
+                r["source_node_id"]
+                for r in group
+                if isinstance(r.get("source_status"), str)
+                and r["source_status"] != "stale"
+            }
+        )
+        head = group[0]
+        if (
+            (head.get("name_stage") or "") == "superseded"
+            or (head.get("sn_status") or "") == "superseded"
+            or (
+                (head.get("origin") or "") == "derived"
+                and bool(head.get("sn_has_live_child"))
+            )
+        ):
+            result.stranding_exempt_names.add(sn_id)
         accepted_paths: list[str] = []
         group_rejected: list[AttachmentVerdict] = []
         for r in group:
@@ -1212,7 +1228,7 @@ def reconcile_attachment_consistency(
         # transaction; the name is not one the pass can repair, so it becomes an
         # operator worklist instead. Exemptions match the invariant's own.
         if actionable:
-            stranded = _names_stranded_by_detach(client, actionable)
+            stranded = _names_stranded_by_detach(result, actionable)
             if stranded:
                 retained: list[AttachmentVerdict] = []
                 for v in actionable:
@@ -2933,19 +2949,27 @@ def count_unattributed_detachments(gc: Any | None = None) -> int:
     return int(rows[0]["n"]) if rows else 0
 
 
-def _names_stranded_by_detach(gc: Any, actionable: list[AttachmentVerdict]) -> set[str]:
+def _names_stranded_by_detach(
+    result: AttachmentAuditResult, actionable: list[AttachmentVerdict]
+) -> set[str]:
     """Names whose every non-stale producer is in *actionable*'s detach set.
 
-    The predicate is the invariant's: a name is stranded once it has no
+    The predicate is the invariant's own: a name is stranded once it has no
     remaining non-stale producer, unless the invariant exempts it (superseded,
-    or a derived parent with a live child). Read-only, so it runs for a dry run
-    too — the held list is the outcome the operator needs.
+    or a derived parent with a live child). Both the producer sets and the
+    exemptions come from the audit's single read, so the hold costs no second
+    query and runs for a dry run too — the held list is the operator's worklist.
     """
-    items = [{"sn_id": v.sn_id, "source_node_id": v.source_node_id} for v in actionable]
-    if not items:
-        return set()
-    rows = gc.query(_stranding_hold_query(), items=items)
-    return {str(row["sn_id"]) for row in rows}
+    detaching: dict[str, set[str]] = {}
+    for v in actionable:
+        detaching.setdefault(v.sn_id, set()).add(v.source_node_id)
+    return {
+        sn_id
+        for sn_id, dropping in detaching.items()
+        if result.name_producers.get(sn_id)
+        and set(result.name_producers[sn_id]) <= dropping
+        and sn_id not in result.stranding_exempt_names
+    }
 
 
 def _find_orphaned_names(gc: Any, sn_ids: list[str]) -> list[str]:
