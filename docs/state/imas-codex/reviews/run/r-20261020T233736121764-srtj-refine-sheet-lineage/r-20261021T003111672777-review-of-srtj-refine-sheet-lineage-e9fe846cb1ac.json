@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-21T00:46:42.953Z",
+  "dispatched_at": "2026-10-21T00:31:36Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py",
+      "line": 428,
+      "severity": "follow-on",
+      "summary": "assert sum(1 for r in routes.values() if r['source_route']=='lineage') == len(recovered) is not independent of the value under test: `recovered` is built at line ~300 as {sn_id: descendant_sources[r['descendant']] for ... if r['source_route']=='lineage'} from the same `routes` mapping, so the two sides move together and the assertion holds whatever the lineage code does."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py",
+      "line": 427,
+      "severity": "follow-on",
+      "summary": "assert set(key['case_source_routes']) == {c['sn_id'] for c, _ in contributing} also cannot catch a lineage regression: if the fallback recovered nothing, both the route set and the contributing set shrink together, nothing asserts lineage_recovered_cases > 0, and the gate would still exit 0."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py",
+      "line": 43,
+      "severity": "follow-on",
+      "summary": "WHERE NOT desc.name_stage IN ['superseded','exhausted'] drops a descendant whose name_stage is NULL (Cypher three-valued logic makes the predicate NULL, which WHERE treats as false), contradicting the stated rule that only superseded/exhausted descendants are skipped; the repository idiom at imas_codex/standard_names/search.py:92 uses coalesce(sn.name_stage,'') for exactly this reason."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal is 'Rebuild the blind refine label sheet with sourceless cases recovered through their refined descendants'; the landed diff adds LINEAGE_QUERY (srtj-refine-ab-sheet-rebuild-run.py:40) and lineage_candidates/lineage_route (:91,:110), and the delivered sheet at docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-label-sheet.json carries 124 rows produced with, against 86 from the direct route alone.\nVERDICT done_when: the done_when names the runner rewriting srtj-refine-ab-label-sheet.json and srtj-refine-ab-arm-key.json with a log ending EXIT=0, and states the fragment must name rows/cases before and after, the recovered count, the ambiguous and excluded cases with reasons, and the agreement control; logs/rebuild.log ends EXIT=0 and the four statements are present in srtj-refine-ab-sheet-rebuild.html at srtj-refine-ab-sheet-rebuild-lineage/-ambiguous/-control and the 'Every remaining sourceless case' table.\nVERDICT write_paths: the manifest's declared paths are docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py, ...-sheet-rebuild.html, ...-label-sheet.json, ...-ab-arm-key.json and ...-refine-sheet-lineage.html plus docs/figures/sn-review-through-jev/srtj-refine-sheet-lineage; every path in the diff is inside that set.\nVERDICT manifest: read; it records tests as the exact uv run of srtj-refine-ab-sheet-rebuild-run.py --receipt ..., names logs/rebuild.log and logs/rebuild-rerun.log, states the gate result EXIT=0, and leaves baseline_suite/after_suite empty because no suite was armed on this node.\nVERDICT diff: read commit by commit against the base 26b0ce3a1; e9fe846cb touches five files (the runner, the rebuild fragment, the label sheet, the arm key, and a new srtj-refine-sheet-lineage.html), all inside the declared write paths, and imports the existing builder srtj-refine-ab-run.py unchanged rather than writing a second sheet builder.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: srtj-refine-ab-sheet-rebuild-run.py:295 injects the recovered descendant source into the live cohort so the imported builder writes the row, and the arm key's 19 lineage routes (docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-arm-key.json) carry the descendant id.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/rebuild.log ends 'EXIT=0' with its SUMMARY naming lineage_recovered_cases 19, lineage_ambiguous_cases 1, contributing_cases 63 and rows 124, though the log's own header names the base revision 26b0ce3a1 rather than the code revision it exercised.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all five changed paths (git show --stat e9fe846cb) lie inside the declared write paths recorded in the manifest's orientation_write_paths.\nSCORE durability: 9\nJUSTIFICATION durability: the new planted source_route refusal (srtj-refine-ab-sheet-rebuild-run.py:346) genuinely reddens if sheet_leaks stops rejecting extra fields, but no assertion fails if the lineage fallback silently recovers nothing, since :427 and :428 compare the lineage state against values derived from that same state.\nSCORE fit: 16\nJUSTIFICATION fit: the added definitions at srtj-refine-ab-sheet-rebuild-run.py:91 and :110 follow the driver's typed, docstringed style, but the stage predicate at :43 omits the coalesce idiom used at imas_codex/standard_names/search.py:92 and so treats a NULL stage differently from the rest of the repository.\nSCORE reuse: 19\nJUSTIFICATION reuse: the sheet builder and source resolver are the existing srtj-refine-ab-run.py, and a search over imas_codex/standard_names for REFINED_FROM/descendant/name_stage (opening chain_history.name_chain_history:19, graph_ops._rewire_has_parent_off_superseded:3549 and cascade.cascade_descendants_of:1087) found no owner enumerating live sourced descendants of an ancestor.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py:428 follow-on: assert sum(1 for r in routes.values() if r['source_route']=='lineage') == len(recovered) compares two views of the same routes mapping (recovered is built from its lineage entries), so it holds whatever the lineage code does and cannot catch a regression in the fallback.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py:427 follow-on: assert set(key['case_source_routes']) == {c['sn_id'] for c, _ in contributing} shrinks both sides together when the fallback recovers nothing, so the gate still exits 0 with no case recovered and no assertion pinning lineage_recovered_cases above zero.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild-run.py:43 follow-on: WHERE NOT desc.name_stage IN ['superseded','exhausted'] excludes a descendant whose name_stage is NULL, narrowing the candidate set below the stated 'stage is neither superseded nor exhausted' rule and deviating from the coalesce idiom of imas_codex/standard_names/search.py:92.",
+  "review_run_id": "r-20261021T003111672777-review-of-srtj-refine-sheet-lineage-e9fe846cb1ac",
+  "reviewed_base_sha": "26b0ce3a172fc9cfb2736e870ac327978f7e6f46",
+  "reviewed_head_sha": "e9fe846cb1acff00f383f017ca8729b3ee710d59",
+  "reviewed_run_id": "r-20261020T233736121764-srtj-refine-sheet-lineage",
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T03:43:13.192120+00:00",
+  "total": 98
+}
