@@ -30,6 +30,11 @@
       "kind": "exempted",
       "reason": "presentation caveat carried into the section 7 close comment: the heuristic wall-recombination hold is inferred from its score, the per-record revisions are in the JSON, and the Jev wall-recombination arm halted after batch 1 because its own anchor was held for a source contradiction",
       "recorded_at": "2026-10-21T05:39:18.497128+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "presentation caveat carried into the section 7 close comment: the heuristic wall-recombination hold is inferred from its score, the per-record revisions are in the JSON, and the Jev wall-recombination arm halted after batch 1 because its own anchor was held for a source contradiction",
+      "recorded_at": "2026-10-21T05:39:21.948019+00:00"
     }
   },
   "findings": [
