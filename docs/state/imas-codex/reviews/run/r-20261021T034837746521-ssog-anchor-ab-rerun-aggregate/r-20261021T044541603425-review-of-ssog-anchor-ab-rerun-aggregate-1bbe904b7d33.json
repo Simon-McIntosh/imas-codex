@@ -25,6 +25,11 @@
       "kind": "exempted",
       "reason": "cannot change this verdict: both conditions already fail on measured members, and a skipped or self-fed value can only make a condition pass falsely; recorded as a caveat on the section 7 close",
       "recorded_at": "2026-10-21T05:39:15.302271+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "presentation caveat carried into the section 7 close comment: the heuristic wall-recombination hold is inferred from its score, the per-record revisions are in the JSON, and the Jev wall-recombination arm halted after batch 1 because its own anchor was held for a source contradiction",
+      "recorded_at": "2026-10-21T05:39:18.497128+00:00"
     }
   },
   "findings": [
