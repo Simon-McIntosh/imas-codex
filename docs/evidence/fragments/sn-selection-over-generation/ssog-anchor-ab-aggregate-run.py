@@ -1,377 +1,381 @@
-"""Apply the registered anchor-adoption rule over the ten recorded anchor families.
+"""Apply the registered anchor-adoption rule over the re-run arm records.
 
-Reads the per-family arm records written by the family runner (``<family>-heuristic.json``
-and ``<family>-jev.json`` under ``ssog-anchor-ab/``) plus the fixed family selection, and
-applies the rule registered before any apply:
+The rule was registered before any apply and is re-read, never re-chosen
+(``ssog-anchor-ab/selection.json``): *adopt the Jev anchor only if its arm has
+fewer total lint findings after harmonization across the families and no
+member's documentation review score is lower than that same member's score in
+the heuristic arm.* The re-selection on the fixed tree left nine of ten
+families; ``current_density_due_to_wave_driven_current_drive`` dropped out
+because no member carries a producing DD source. Of the nine, six share one
+anchor across both arms -- *agreements*, derived here from ``selection.json``,
+never hard-coded, because the two arms apply the same anchor and a shared
+anchor is not a win for either. The three whose anchors differ were re-run on
+the fixed tree and are the ones the rule compares.
 
-    Adopt the Jev anchor only if its arm has fewer total lint findings after
-    harmonization across the families and no member's documentation review score
-    is lower than that same member's score in the heuristic arm.
+No harmonize run and no model call happens here: every number below is read
+from a record already on disk.
 
-No harmonize run and no model call happens here: every number below is read from a
-record already on disk.
+Reading the records
+    Scores come from each record's ``scores_after``, never from a receipt's
+    ``member_scores`` (that carries a member's pre-apply value). Completion
+    comes from ``batches_run``, ``batches_total``, ``halted`` and ``stamped``,
+    never from ``outcome_status`` alone, which says only that the scratch
+    instance stayed contained. A documentation score of exactly 0.849 that was
+    held from acceptance is reported as that score, with its hold reason and
+    whether refinement later cleared it. A record is told apart from a
+    first-round one by its own ``code.git_head``: the re-runs name the fixed
+    tree, and a record naming any other revision is refused rather than read.
 
-Completeness classes. ``outcome_status: complete`` in a record means only that the
-scratch instance stayed contained; it says nothing about how far the harmonize apply
-got. An arm is ``full`` when it ran every planned batch, ``partial`` when it halted
-part way (carrying the halt reason), and ``incomplete`` when no completed record
-exists at all. Two arms are compared on lint only when they stopped at the same
-batch, so a family whose arms ran different batch counts is reported as not
-like-for-like rather than scored.
-
-Member scores are read from ``scores_after``; a receipt's ``member_scores`` carries a
-member's pre-apply value. A null score is missing, never zero. Per-member score falls
-within one arm are also recorded, and an arm's own anchor counts when its score fell.
+Required fields
+    A record missing ``scores_after``, ``lint_after`` or its
+    ``harmonize_summary`` batch counts is refused by name, never read as an
+    absent arm: an unreadable record and a record that measured nothing are
+    different facts, and the rule must not treat the first as the second.
 
 Subcommands:
     build     write the JSON, the figure and the fragment
-    selftest  drive the classifier and the rule over synthetic records whose
-              verdicts are known, so a broken comparison shows red
+    selftest  drive the classifier, the refusal and the rule over synthetic
+              records whose verdicts are known, so a broken comparison shows red
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import re
+import subprocess
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = Path(__file__).resolve().parents[4]
+REPO = HERE.parents[3]
 RECORDS = HERE / "ssog-anchor-ab"
+SELECTION = RECORDS / "selection.json"
 
-RESULTS = HERE / "ssog-anchor-ab-results.json"
-FRAGMENT = HERE / "ssog-anchor-ab.html"
-FIGURE_DIR = REPO / "docs/figures/sn-selection-over-generation/ssog-anchor-ab-aggregate"
-FIGURE = FIGURE_DIR / "lint-before-after.svg"
+RESULTS = HERE / "ssog-anchor-ab-rerun-aggregate.json"
+FRAGMENT = HERE / "ssog-anchor-ab-rerun-aggregate.html"
+FIGURE_DIR = (
+    REPO / "docs/figures/sn-selection-over-generation/ssog-anchor-ab-rerun-aggregate"
+)
+FIGURE = FIGURE_DIR / "lint-and-scores.svg"
 
 ARMS = ("heuristic", "jev")
-NODE = "ssog-anchor-ab-aggregate"
-EARLIER_ID = "ssog-anchor-ab-earlier-blocked"
-CEILING_USD = 50.0
+NODE = "ssog-anchor-ab-rerun-aggregate"
 
-# Colour names the arm; the two states of one arm are lightness steps of its hue.
+#: The fixed tree every re-run arm was measured on. A record whose own code
+#: revision is anything else is a first-round record and is refused.
+FIXED_TREE = "284f17bcba6f17457c54d40527d5f1776f6fa0e9"
+
+#: Fields an arm record must carry to be compared at all.
+REQUIRED_TOP = ("scores_after", "lint_after")
+REQUIRED_SUMMARY = ("batches_run", "batches_total")
+
+#: The score a held documentation review lands on; reported, never dropped.
+HELD_SCORE = 0.849
+
 COLOURS = {
     ("heuristic", "before"): "#a9c9cd",
     ("heuristic", "after"): "#246c78",
     ("jev", "before"): "#e2c39a",
     ("jev", "after"): "#b06a12",
 }
-BAR_H = 0.18
+LOWER_COLOUR = "#c0392b"
+NEUTRAL = "#929292"
+BAR_H = 0.34
+
+
+class AggregateRefusal(RuntimeError):
+    """A record the rule cannot be applied over, named rather than assumed away."""
 
 
 def _load(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
-def _classify(record: dict) -> dict:
-    """Score one arm record's completeness, its lint and its per-member score moves."""
-    summary = record.get("harmonize_summary") or {}
-    ran = summary.get("batches_run")
-    total = summary.get("batches_total")
-    after = record.get("scores_after") or {}
-    before = record.get("scores_before") or {}
+def _rel(path: Path) -> str:
+    """Repo-relative when the path is inside the repo, else as given."""
+    try:
+        return str(path.resolve().relative_to(REPO))
+    except ValueError:
+        return str(path)
+
+
+def git_commit(path: Path) -> str | None:
+    """The newest commit that touched *path*, read from git rather than assumed."""
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(REPO), "log", "-1", "--format=%H", "--", str(path)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+    sha = out.stdout.strip()
+    return sha or None
+
+
+def classify_record(record: dict, family: str, arm: str, path: Path) -> dict:
+    """Validate and read one arm record; refuse a record missing a required field."""
+    summary = record.get("harmonize_summary")
+    for field in REQUIRED_TOP:
+        if field not in record or record[field] is None:
+            raise AggregateRefusal(
+                f"{family} {arm}: record {path.name} has no readable {field!r} "
+                f"(a missing field is not an absent arm)"
+            )
+    if not isinstance(summary, dict):
+        raise AggregateRefusal(
+            f"{family} {arm}: record {path.name} has no harmonize_summary, so its "
+            "completion cannot be read"
+        )
+    for field in REQUIRED_SUMMARY:
+        if field not in summary or summary[field] is None:
+            raise AggregateRefusal(
+                f"{family} {arm}: record {path.name} has no readable "
+                f"harmonize_summary.{field!r}"
+            )
+
+    header = record.get("code") or {}
+    git_head = header.get("git_head")
+    if not isinstance(git_head, str) or not git_head.startswith(FIXED_TREE[:10]):
+        raise AggregateRefusal(
+            f"{family} {arm}: record {path.name} names code revision {git_head!r}, "
+            f"not the fixed tree {FIXED_TREE[:10]}; it is a first-round record and is "
+            "not comparable"
+        )
+
     members = record.get("members") or []
-
-    if record.get("lint_after") is None or not summary:
-        completeness = "incomplete"
-    elif ran == total:
-        completeness = "full"
-    else:
-        completeness = "partial"
-
-    falls = [
-        {"member": member, "before": before.get(member), "after": after.get(member)}
+    scores_before = record.get("scores_before") or {}
+    scores_after = record.get("scores_after") or {}
+    held = sorted(
+        member
         for member in members
-        if isinstance(before.get(member), (int, float))
-        and isinstance(after.get(member), (int, float))
-        and after.get(member) < before.get(member)
-    ]
-
-    receipts = record.get("harmonize_receipts") or []
-    receipt_total = (
-        receipts[0]["result"].get("total_cost")
-        if receipts and "result" in receipts[0]
-        else None
+        if isinstance(scores_after.get(member), (int, float))
+        and abs(scores_after[member] - HELD_SCORE) < 1e-9
     )
-    anchor = record.get("anchor")
-
     return {
-        "family": record.get("family"),
-        "arm": record.get("arm"),
-        "anchor": anchor,
+        "family": record.get("family") or family,
+        "arm": record.get("arm") or arm,
+        "record": _rel(path),
+        "commit": git_commit(path),
+        "git_head": git_head,
+        "anchor": record.get("anchor"),
         "heuristic_anchor": record.get("heuristic_anchor"),
         "jev_anchor": record.get("jev_anchor"),
-        "kind": record.get("kind"),
         "members": members,
-        "completeness": completeness,
-        "batches_run": ran,
-        "batches_total": total,
+        "batches_run": summary["batches_run"],
+        "batches_total": summary["batches_total"],
+        "halted": bool(summary.get("halted")),
         "halt_reasons": summary.get("halt_reasons") or [],
-        "outcome_status": record.get("outcome_status"),
-        "applied": record.get("applied"),
         "stamped": bool(record.get("stamped")),
-        "containment_holds": (record.get("containment") or {}).get("holds"),
+        "outcome_status": record.get("outcome_status"),
         "lint_before": record.get("lint_before"),
         "lint_after": record.get("lint_after"),
         "lint_before_classes": record.get("lint_before_classes") or {},
         "lint_after_classes": record.get("lint_after_classes") or {},
-        "scores_before": {m: before.get(m) for m in members},
-        "scores_after": {m: after.get(m) for m in members},
-        "score_falls": falls,
-        "anchor_score_fell": any(f["member"] == anchor for f in falls),
+        "scores_before": {m: scores_before.get(m) for m in members},
+        "scores_after": {m: scores_after.get(m) for m in members},
+        "held_members": held,
+        "documentation_holds": record.get("documentation_holds"),
         "calls": record.get("calls"),
-        "planned_calls": record.get("planned_calls"),
-        "ledger_calls": record.get("ledger_calls"),
         "spend_usd_ledger": record.get("ledger_spend_usd"),
-        "spend_usd_receipt": receipt_total,
         "wall_seconds": record.get("wall_seconds"),
-        "run_ids": record.get("run_ids"),
-        "attempt_outcome": record.get("attempt_outcome"),
+        "started_at": record.get("started_at"),
+        "ended_at": record.get("ended_at"),
+        "isolation_at": (record.get("isolation") or {}).get("at"),
+        "ledger_window": record.get("ledger_window"),
     }
 
 
-def _score_check(heuristic: dict, jev: dict) -> dict:
-    """Per member, is any Jev-arm after-score below the heuristic arm's for that member?"""
+def _score_lower_in_held(heur: dict, jev: dict, family: str) -> list[dict]:
     lower = []
-    for member in heuristic["members"]:
-        h = heuristic["scores_after"].get(member)
+    for member in heur["members"]:
+        h = heur["scores_after"].get(member)
         j = jev["scores_after"].get(member)
         if isinstance(h, (int, float)) and isinstance(j, (int, float)) and j < h:
-            lower.append({"member": member, "heuristic": h, "jev": j})
-    return {
-        "admissible": (
-            heuristic["completeness"] == "full" and jev["completeness"] == "full"
-        ),
-        "members_lower_in_jev": lower,
-        "passes": not lower,
-    }
+            lower.append({"family": family, "member": member, "heuristic": h, "jev": j})
+    return lower
 
 
-def _family_verdict(heuristic: dict, jev: dict) -> dict:
-    both_measured = (
-        heuristic["lint_after"] is not None and jev["lint_after"] is not None
-    )
-    like_for_like = both_measured and heuristic["batches_run"] == jev["batches_run"]
-    scores = _score_check(heuristic, jev)
+def _interval_notes(records: list[dict]) -> list[dict]:
+    """Name, per record, the isolation stamp and the apply-only wall interval.
 
-    if not both_measured:
-        verdict = "incomparable"
-        reason = "one arm has no completed record, so no lint comparison can be formed"
-    elif not like_for_like:
-        verdict = "not-like-for-like"
-        reason = (
-            f"arms stopped at different batches (heuristic {heuristic['batches_run']}/"
-            f"{heuristic['batches_total']}, Jev {jev['batches_run']}/{jev['batches_total']}); "
-            "the lint difference tracks the batch count, not the anchor"
-        )
-    elif jev["lint_after"] < heuristic["lint_after"]:
-        verdict, reason = "jev-fewer", "the Jev arm ends with fewer lint findings"
-    elif jev["lint_after"] > heuristic["lint_after"]:
-        verdict, reason = "heuristic-fewer", "the Jev arm ends with more lint findings"
-    else:
-        verdict, reason = "equal", "both arms end with the same lint count"
-
-    return {
-        "verdict": verdict,
-        "reason": reason,
-        "like_for_like": like_for_like,
-        "lint_advantage_jev": (
-            heuristic["lint_after"] - jev["lint_after"] if both_measured else None
-        ),
-        "score_check": scores,
-    }
-
-
-def _totals(rows: list[dict]) -> dict:
-    both = [
-        (r["heuristic"], r["jev"])
-        for r in rows
-        if r["heuristic"]["lint_after"] is not None
-        and r["jev"]["lint_after"] is not None
-    ]
-    lfl = [(h, j) for h, j in both if h["batches_run"] == j["batches_run"]]
-    anomalous = "current_density_due_to_anomalous_transport"
-    lfl_clean = [(h, j) for h, j in lfl if h["family"] != anomalous]
-
-    def count(predicate) -> int:
-        return sum(1 for r in rows if predicate(r["verdict"]["verdict"]))
-
-    return {
-        "families_recorded": len(rows),
-        "families_with_both_arms_measured": len(both),
-        "lint_after_heuristic_both_measured": sum(h["lint_after"] for h, _ in both),
-        "lint_after_jev_both_measured": sum(j["lint_after"] for _, j in both),
-        "families_like_for_like": len(lfl),
-        "lint_after_heuristic_like_for_like": sum(h["lint_after"] for h, _ in lfl),
-        "lint_after_jev_like_for_like": sum(j["lint_after"] for _, j in lfl),
-        "families_like_for_like_excluding_worsened": len(lfl_clean),
-        "lint_after_heuristic_like_for_like_excluding_worsened": sum(
-            h["lint_after"] for h, _ in lfl_clean
-        ),
-        "lint_after_jev_like_for_like_excluding_worsened": sum(
-            j["lint_after"] for _, j in lfl_clean
-        ),
-        "families_equal": count(lambda v: v == "equal"),
-        "families_jev_fewer": count(lambda v: v == "jev-fewer"),
-        "families_heuristic_fewer": count(lambda v: v == "heuristic-fewer"),
-        "families_not_like_for_like": count(lambda v: v == "not-like-for-like"),
-        "families_incomparable": count(lambda v: v == "incomparable"),
-        "families_with_a_lower_jev_member_score": sum(
-            1 for r in rows if not r["verdict"]["score_check"]["passes"]
-        ),
-        "families_both_full_for_scores": sum(
-            1 for r in rows if r["verdict"]["score_check"]["admissible"]
-        ),
-    }
-
-
-def _prior_cut_usd() -> float | None:
-    """Confirmed spend the earlier cut of this A/B booked before this node ran.
-
-    Read once, from the results file the earlier cut left at this path, and then
-    carried forward inside this node's own payload so a re-run still finds it.
+    A record's isolation check is written before the apply it guards, so its
+    timestamp predates the post-apply counts it might be read as attesting; and
+    its ``wall_seconds`` reports the apply window alone, not the record's whole
+    life. Both intervals are named here rather than left for a reader to guess.
     """
-    if not RESULTS.exists():
-        return None
-    try:
-        existing = _load(RESULTS)
-    except json.JSONDecodeError:
-        return None
-    if isinstance(existing.get("confirmed_spend_usd"), (int, float)):
-        return float(existing["confirmed_spend_usd"])
-    prior = (existing.get("spend") or {}).get("prior_cut_usd")
-    return float(prior) if isinstance(prior, (int, float)) else None
+    notes = []
+    for rec in records:
+        window = rec.get("ledger_window") or {}
+        notes.append(
+            {
+                "record": rec["record"],
+                "family": rec["family"],
+                "arm": rec["arm"],
+                "isolation_at": rec["isolation_at"],
+                "apply_started": window.get("started"),
+                "apply_ended": window.get("ended"),
+                "apply_wall_seconds": rec["wall_seconds"],
+                "record_span_started": rec["started_at"],
+                "record_span_ended": rec["ended_at"],
+            }
+        )
+    return notes
 
 
-def build() -> dict:
-    selection = _load(RECORDS / "selection.json")
+def build(records_dir: Path = RECORDS, selection_path: Path = SELECTION) -> dict:
+    selection = _load(selection_path)
     selected = selection["selected"]
-    prior_cut_usd = _prior_cut_usd()
 
-    rows = []
-    for entry in selected:
-        family = entry["seed"]
-        row = {
-            "family_seed": family,
-            "kind": entry["kind"],
-            "physical_base": entry["physical_base"],
+    agreements = [
+        row["seed"]
+        for row in selected
+        if row["heuristic_anchor"] is not None
+        and row["heuristic_anchor"] == row["jev_anchor"]
+    ]
+    dropped = [
+        row["seed"]
+        for row in selected
+        if row["heuristic_anchor"] is None and row["jev_anchor"] is None
+    ]
+    compared_rows = [
+        row for row in selected if row["heuristic_anchor"] != row["jev_anchor"]
+    ]
+
+    compared = []
+    for row in compared_rows:
+        family = row["seed"]
+        arms = {
+            arm: classify_record(
+                _load(records_dir / f"{family}-{arm}.json"),
+                family,
+                arm,
+                records_dir / f"{family}-{arm}.json",
+            )
+            for arm in ARMS
         }
-        for arm in ARMS:
-            row[arm] = _classify(_load(RECORDS / f"{family}-{arm}.json"))
-        row["verdict"] = _family_verdict(row["heuristic"], row["jev"])
-        rows.append(row)
+        compared.append(
+            {
+                "family_seed": family,
+                "kind": row["kind"],
+                "physical_base": row["physical_base"],
+                "selection_heuristic_anchor": row["heuristic_anchor"],
+                "selection_jev_anchor": row["jev_anchor"],
+                "heuristic": arms["heuristic"],
+                "jev": arms["jev"],
+                "lint_after_heuristic": arms["heuristic"]["lint_after"],
+                "lint_after_jev": arms["jev"]["lint_after"],
+                "lower_in_jev": _score_lower_in_held(
+                    arms["heuristic"], arms["jev"], family
+                ),
+            }
+        )
 
-    totals = _totals(rows)
+    lint_heur_total = sum(c["lint_after_heuristic"] for c in compared)
+    lint_jev_total = sum(c["lint_after_jev"] for c in compared)
+    lint_met = lint_jev_total < lint_heur_total
 
-    ledger = sum((r[arm]["spend_usd_ledger"] or 0.0) for r in rows for arm in ARMS)
-    halt_cost = 0.0
-    for r in rows:
-        text = r["heuristic"].get("attempt_outcome") or ""
-        match = re.search(r"cost_spent=([0-9.]+)", text)
-        if match:
-            halt_cost = float(match.group(1))
-    scorer = sum(entry["jev_cost"] for entry in selected)
-    arms_and_scorer = ledger + halt_cost + scorer
-    spend = {
-        "arms_ledger_usd": round(ledger, 6),
-        "wall_recombination_heuristic_halt_usd": halt_cost,
-        "scorer_usd": round(scorer, 6),
-        "prior_cut_usd": round(prior_cut_usd, 6) if prior_cut_usd is not None else None,
-        "total_usd": round(arms_and_scorer + (prior_cut_usd or 0.0), 6),
-        "ceiling_usd": CEILING_USD,
-        "note": (
-            "Per-arm ledger figures are the LLMCost window totals and are what the sums use. "
-            "The harmonize receipts carry a CLI total as well; the two agree everywhere except "
-            "the visible-wavelength Jev arm, whose receipt reads USD 1.0162 against its ledger's "
-            "USD 0.841339 (the receipt spans both batches while the ledger window closed after "
-            "the second). The wall-recombination heuristic arm has no ledger total because its "
-            "apply died on its own cap; its halt reason records cost_spent USD 1.50578, which is "
-            "the figure used here. The prior-cut figure is the confirmed spend the first cut of "
-            "this A/B booked before it stopped on its worker deadline."
-        ),
-    }
+    lower_in_jev = [entry for c in compared for entry in c["lower_in_jev"]]
+    score_met = not lower_in_jev
 
-    lint_ok_total = (
-        totals["lint_after_jev_both_measured"]
-        < totals["lint_after_heuristic_both_measured"]
-    )
-    like_for_like_ok = (
-        totals["lint_after_jev_like_for_like"]
-        < totals["lint_after_heuristic_like_for_like"]
-    )
-    score_ok = totals["families_with_a_lower_jev_member_score"] == 0
+    upheld_lint_heur = sum(c["heuristic"]["stamped"] for c in compared)
+    upheld_lint_jev = sum(c["jev"]["stamped"] for c in compared)
 
-    overall = {
-        "adopt_jev": False,
-        "condition_fewer_total_lint_across_families": {
-            "met_on_both_measured_subset": lint_ok_total,
-            "met_like_for_like": like_for_like_ok,
+    conditions = {
+        "fewer_lint_total": {
+            "met": lint_met,
+            "lint_after_heuristic_total": lint_heur_total,
+            "lint_after_jev_total": lint_jev_total,
             "detail": (
-                f"over the {totals['families_with_both_arms_measured']} families where both arms "
-                f"completed, heuristic {totals['lint_after_heuristic_both_measured']} against Jev "
-                f"{totals['lint_after_jev_both_measured']}, but the tenth family "
-                "(energy_flux_at_wall_due_to_recombination) has no heuristic measurement, so the "
-                "ten-family total the rule names cannot be formed; over the "
-                f"{totals['families_like_for_like']} families whose arms reached the same batch "
-                f"the totals are equal at {totals['lint_after_heuristic_like_for_like']}"
+                f"over the {len(compared)} compared families the Jev arm ends with "
+                f"{lint_jev_total} lint findings against the heuristic arm's "
+                f"{lint_heur_total}, so the Jev arm does "
+                f"{'show' if lint_met else 'not show'} strictly fewer"
             ),
         },
-        "condition_no_lower_member_scores": {
-            "met": score_ok,
+        "no_lower_member_scores": {
+            "met": score_met,
+            "members_lower_in_jev": lower_in_jev,
+            "lower_count": len(lower_in_jev),
             "detail": (
-                "a Jev-arm member scores below the same member's heuristic-arm value in "
-                f"{totals['families_with_a_lower_jev_member_score']} of "
-                f"{totals['families_recorded']} families"
+                f"{len(lower_in_jev)} member/arm scores end lower under the Jev "
+                f"anchor than the same member under the heuristic anchor"
+                if lower_in_jev
+                else "no member ends lower under the Jev anchor"
             ),
         },
-        "verdict": "do not adopt the Jev anchor",
-        "reason": (
-            "the second condition fails outright on complete, like-for-like evidence - every "
-            "family carrying after-scores in both arms has at least one member scoring lower "
-            "under the Jev anchor - and the first is not established, since on the families "
-            "where both arms reached the same batch the lint counts are identical and the "
-            "tenth family has no heuristic measurement"
-        ),
     }
 
-    recommendation = (
-        "Keep the heuristic anchor rather than adopting the Jev scorer: the Jev arm fails the "
-        "rule's score condition in nine of ten families and shows no like-for-like lint "
-        "advantage, so the evidence that would change the call is a re-run holding both arms to "
-        "the same batch count (or forcing both to a full two of two under a raised per-arm "
-        "budget) in which the Jev arm ends with strictly fewer lint findings and no member's "
-        "after-score falls below that member's heuristic-arm value."
-    )
+    adopt = lint_met and score_met
+    if adopt:
+        verdict_sentence = (
+            "Both conditions are satisfied, so the Jev anchor is adopted."
+        )
+    else:
+        failed = [
+            name
+            for name, key in (
+                ("the lint condition", "fewer_lint_total"),
+                ("the score condition", "no_lower_member_scores"),
+            )
+            if not conditions[key]["met"]
+        ]
+        verdict_sentence = (
+            f"{' and '.join(failed).capitalize()} not satisfied, so the Jev anchor "
+            "is not adopted."
+        )
+
+    holds = [
+        {"family": c["family_seed"], "arm": arm, **entry}
+        for c in compared
+        for arm in ARMS
+        for entry in (
+            [
+                {
+                    "member": member,
+                    "score": c[arm]["scores_after"][member],
+                    "note": c[arm]["documentation_holds"],
+                }
+                for member in c[arm]["held_members"]
+            ]
+            if c[arm]["held_members"]
+            else []
+        )
+    ]
+
+    all_compared_records = [c[arm] for c in compared for arm in ARMS]
+
+    ledger = sum((c[arm]["spend_usd_ledger"] or 0.0) for c in compared for arm in ARMS)
+    scorer = sum(float(row.get("jev_cost") or 0.0) for row in selected)
 
     return {
         "node": NODE,
         "adoption_rule": selection["adoption_rule"],
         "source_records": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/",
         "source_export": selection.get("source_export"),
-        "arm_records_read": len(rows) * 2,
-        "rows": [
-            {"family_seed": r["family_seed"], "kind": r["kind"], "arm": arm, **r[arm]}
-            for r in rows
-            for arm in ARMS
-        ],
-        "families": [
-            {
-                "family_seed": r["family_seed"],
-                "kind": r["kind"],
-                "physical_base": r["physical_base"],
-                "heuristic_anchor": r["heuristic"]["heuristic_anchor"],
-                "jev_anchor": r["jev"]["jev_anchor"],
-                "heuristic": r["heuristic"],
-                "jev": r["jev"],
-                "verdict": r["verdict"],
-            }
-            for r in rows
-        ],
-        "totals": totals,
-        "spend": spend,
-        "overall_verdict": overall,
-        "recommendation": recommendation,
+        "fixed_tree": FIXED_TREE,
+        "population": {
+            "families_in_selection": len(selected),
+            "agreements": agreements,
+            "dropped": dropped,
+            "compared": [c["family_seed"] for c in compared],
+        },
+        "compared": compared,
+        "conditions": conditions,
+        "verdict": {"adopt_jev": adopt, "sentence": verdict_sentence},
+        "documentation_holds": holds,
+        "held_score": HELD_SCORE,
+        "interval_notes": _interval_notes(all_compared_records),
+        "spend": {
+            "arms_ledger_usd": round(ledger, 6),
+            "scorer_usd": round(scorer, 6),
+            "ceiling_usd": 50.0,
+        },
+        "stamped_counts": {
+            "heuristic": upheld_lint_heur,
+            "jev": upheld_lint_jev,
+            "families": len(compared),
+        },
     }
 
 
@@ -380,8 +384,38 @@ def build() -> dict:
 # --------------------------------------------------------------------------
 
 
+def _data_artists(fig) -> list:
+    """Every plotted mark a direct label must not sit on top of."""
+    artists = []
+    for ax in fig.axes:
+        artists.extend(p for p in ax.patches if p.get_visible())
+        for line in ax.lines:
+            if line.get_visible() and line.get_xydata() is not None:
+                artists.append(line)
+    return artists
+
+
+def _tick_out_of_view(fig, artist) -> bool:
+    """True for a tick label whose tick lies outside its axis' view interval.
+
+    The axes clips such a tick away before drawing, so its label is not text a
+    reader can see and a canvas-edge test on its box would refuse a figure the
+    reader reads cleanly.
+    """
+    for ax in fig.axes:
+        for axis, view in ((ax.xaxis, ax.get_xlim()), (ax.yaxis, ax.get_ylim())):
+            low, high = min(view), max(view)
+            for tick in list(axis.get_major_ticks()) + list(axis.get_minor_ticks()):
+                if tick.label1 is not artist:
+                    continue
+                loc = tick.get_loc()
+                if loc < low - 1e-9 or loc > high + 1e-9:
+                    return True
+    return False
+
+
 def _check_text(fig) -> None:
-    """Refuse to write a figure whose text leaves the canvas or collides with other text."""
+    """Refuse a figure whose text is clipped, collides, or sits over plotted data."""
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     canvas = fig.bbox
@@ -391,7 +425,11 @@ def _check_text(fig) -> None:
     for artist in fig.findobj():
         if not hasattr(artist, "get_window_extent") or not hasattr(artist, "get_text"):
             continue
-        if not artist.get_text().strip() or id(artist) in seen:
+        if not artist.get_text().strip():
+            continue
+        if _tick_out_of_view(fig, artist):
+            continue
+        if id(artist) in seen:
             continue
         seen.add(id(artist))
         box = artist.get_window_extent(renderer)
@@ -406,13 +444,13 @@ def _check_text(fig) -> None:
             round(box.x1),
             round(box.y1),
         )
-        # The same string at the same place is one visible label found twice.
         if key in seen_text:
             continue
         seen_text.add(key)
-        boxes.append((artist.get_text(), box))
+        boxes.append((artist.get_text(), box, artist))
+
     problems = []
-    for text, box in boxes:
+    for text, box, _ in boxes:
         if box.x0 < canvas.x0 - 1 or box.y0 < canvas.y0 - 1:
             problems.append(f"clipped at the canvas edge: {text!r}")
         if box.x1 > canvas.x1 + 1 or box.y1 > canvas.y1 + 1:
@@ -423,6 +461,17 @@ def _check_text(fig) -> None:
                 problems.append(
                     f"overlapping text: {boxes[i][0]!r} and {boxes[j][0]!r}"
                 )
+    # A direct label must not sit over the data it names: a reader cannot read
+    # the mark beneath it, and cannot tell the label from the mark.
+    data = _data_artists(fig)
+    for text, box, artist in boxes:
+        for mark in data:
+            if artist.axes is not None and artist.axes is not mark.axes:
+                continue
+            mark_box = mark.get_window_extent(renderer)
+            if box.overlaps(mark_box):
+                problems.append(f"direct label over plotted data: {text!r}")
+                break
     if problems:
         raise SystemExit("figure text check failed:\n  " + "\n  ".join(problems))
 
@@ -432,94 +481,112 @@ def figure(payload: dict, render_check: Path | None = None) -> None:
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
     from matplotlib.patches import Patch
 
     plt.style.use("data-ink")
 
-    families = payload["families"]
-    labels = [f["family_seed"].replace("x_", "x ").replace("_", " ") for f in families]
-    ys = list(range(len(families)))
+    compared = payload["compared"]
+    families = [c["family_seed"] for c in compared]
+    short = [f.replace("due_to", "due to").replace("_", " ") for f in families]
+    ys = list(range(len(compared)))
 
-    fig, ax = plt.subplots(figsize=(14, 8))
+    fig, (ax_lint, ax_score) = plt.subplots(
+        1, 2, figsize=(14, 5.2), gridspec_kw={"width_ratios": (1, 1.15)}
+    )
+    for ax in (ax_lint, ax_score):
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+
+    # Left panel: lint findings before and after, two arms per family.
     for arm, offsets in (("heuristic", (-1.5, -0.5)), ("jev", (0.5, 1.5))):
         for state, offset in zip(("before", "after"), offsets, strict=True):
             centres = [y + offset * BAR_H for y in ys]
             values = [
-                f[arm]["lint_before"] if state == "before" else f[arm]["lint_after"]
-                for f in families
+                c[arm]["lint_before"] if state == "before" else c[arm]["lint_after"]
+                for c in compared
             ]
-            ax.barh(
+            ax_lint.barh(
                 centres,
-                [v if v is not None else 0.0 for v in values],
-                height=BAR_H * 0.9,
+                values,
+                height=BAR_H * 0.8,
                 color=COLOURS[(arm, state)],
                 zorder=3,
             )
+            # A measured zero would draw no bar; a mark on the axis keeps the
+            # row readable as a measured zero rather than a missing state.
             for centre, value in zip(centres, values, strict=True):
-                if value is None:
-                    ax.plot(
-                        [0.18],
-                        [centre],
-                        marker="x",
-                        color="#929292",
-                        markersize=9,
-                        zorder=4,
-                    )
-                    ax.text(
-                        0.55,
-                        centre,
-                        "no completed heuristic arm",
-                        va="center",
-                        fontsize=12,
-                        color="#52514e",
-                    )
-                    continue
                 if value == 0:
-                    # A zero drawn as a five-hundredths sliver would misstate the
-                    # count; a mark on the axis keeps the row readable as a
-                    # measured zero rather than a missing state.
-                    ax.plot(
+                    ax_lint.plot(
                         [0.0],
                         [centre],
                         marker="o",
-                        markersize=4,
+                        markersize=5,
                         color=COLOURS[(arm, state)],
                         zorder=5,
                     )
-                    continue
+    ax_lint.set_yticks(ys)
+    ax_lint.set_yticklabels(short)
+    ax_lint.set_ylim(len(compared) - 0.4, -0.6)
+    ax_lint.set_xlabel("lint findings [count]")
+    ax_lint.set_xlim(0, 7)
+    ax_lint.set_xticks(range(0, 7))
 
-    ax.set_yticks(ys)
-    ax.set_yticklabels(labels)
-    ax.invert_yaxis()
-    ax.set_xlabel("lint findings [count]")
-    ax.set_ylabel("family")
-    ax.set_xlim(0, 14.5)
-    ax.set_xticks(range(0, 15, 2))
-    for side in ("top", "right"):
-        ax.spines[side].set_visible(False)
+    # Right panel: per-member score change, Jev arm minus heuristic arm, after
+    rows = []
+    for i, c in enumerate(compared):
+        for member in c["heuristic"]["members"]:
+            h = c["heuristic"]["scores_after"].get(member)
+            j = c["jev"]["scores_after"].get(member)
+            if isinstance(h, (int, float)) and isinstance(j, (int, float)):
+                rows.append((i, member, j - h))
+    ax_score.axvline(0.0, color=NEUTRAL, linewidth=1.2, linestyle=":", zorder=2)
+    for i, _member, delta in rows:
+        colour = LOWER_COLOUR if delta < 0 else NEUTRAL
+        ax_score.scatter(
+            [delta],
+            [i],
+            s=46,
+            color=colour,
+            zorder=4,
+            edgecolor="white",
+            linewidth=0.6,
+        )
+    ax_score.set_yticks(ys)
+    ax_score.set_yticklabels([])
+    ax_score.set_ylim(len(compared) - 0.4, -0.6)
+    ax_score.set_xlabel("documentation score, Jev minus heuristic")
+    lo = min([d for _, _, d in rows] + [0.0]) - 0.04
+    hi = max([d for _, _, d in rows] + [0.0]) + 0.04
+    ax_score.set_xlim(lo, hi)
+    ax_score.set_xticks([-0.15, -0.10, -0.05, 0.0, 0.05])
 
     handles = [
         Patch(facecolor=COLOURS[(arm, state)])
         for arm in ARMS
         for state in ("before", "after")
-    ]
+    ] + [Line2D([], [], marker="o", linestyle="none", color=LOWER_COLOUR)]
     fig.legend(
         handles,
-        ["heuristic before", "heuristic after", "Jev before", "Jev after"],
+        [
+            "heuristic before",
+            "heuristic after",
+            "Jev before",
+            "Jev after",
+            "member lower under Jev",
+        ],
         loc="upper center",
-        bbox_to_anchor=(0.5, 1.02),
-        ncol=4,
+        bbox_to_anchor=(0.5, 1.03),
+        ncol=5,
     )
-    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    fig.tight_layout(rect=(0, 0, 1, 0.9), w_pad=3.5)
     _check_text(fig)
     FIGURE_DIR.mkdir(parents=True, exist_ok=True)
-    # A fixed salt keeps matplotlib's generated SVG element ids stable across
-    # runs, so a re-run rewrites identical bytes instead of churning the diff.
     matplotlib.rcParams["svg.hashsalt"] = NODE
     fig.savefig(FIGURE, format="svg", metadata={"Date": None})
     if render_check is not None:
         render_check.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(render_check, format="png", dpi=100, metadata={"Date": None})
+        fig.savefig(render_check, format="png", dpi=100)
     plt.close(fig)
 
 
@@ -532,204 +599,261 @@ def _cell(value) -> str:
     return "missing" if value is None else str(value)
 
 
+def esc(text: object) -> str:
+    return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
 def _table(payload: dict) -> str:
     head = (
-        "<thead><tr>"
-        "<th>Family seed</th><th>Arm</th><th>Anchor</th><th>Completeness</th>"
-        "<th>Batches</th><th>Lint before &rarr; after</th>"
-        "<th>Member scores after</th><th>Calls</th><th>Spend ledger [USD]</th>"
-        "<th>Stamped</th></tr></thead>"
+        "<thead><tr><th>Family seed</th><th>Arm</th><th>Anchor</th><th>Lint "
+        "before &rarr; after</th><th>Batches</th><th>Halt reason</th>"
+        "<th>Member scores after</th><th>Stamped</th></tr></thead>"
     )
     body = []
-    for f in payload["families"]:
+    for c in payload["compared"]:
         for arm in ARMS:
-            rec = f[arm]
-            classes = ", ".join(
-                f"{k} {v}" for k, v in sorted((rec["lint_after_classes"] or {}).items())
-            )
+            rec = c[arm]
             score_txt = "; ".join(
                 f"{m} {_cell(rec['scores_after'].get(m))}" for m in rec["members"]
             )
-            completeness = rec["completeness"]
-            if completeness == "incomplete" and rec["attempt_outcome"]:
-                completeness += " (stopped on budget, exit 1)"
-            elif completeness == "partial" and rec["halt_reasons"]:
-                completeness += f" ({rec['halt_reasons'][0]})"
-            lint_txt = (
-                f"{_cell(rec['lint_before'])} &rarr; {_cell(rec['lint_after'])}"
-                + (f" ({classes})" if classes else "")
-            )
+            halt = "; ".join(rec["halt_reasons"]) if rec["halt_reasons"] else "none"
             body.append(
-                "<tr>"
-                f"<td>{f['family_seed']}</td><td>{arm}</td>"
-                f"<td><code>{rec['anchor']}</code></td>"
-                f"<td>{completeness}</td>"
-                f"<td>{_cell(rec['batches_run'])}/{_cell(rec['batches_total'])}</td>"
-                f"<td>{lint_txt}</td>"
-                f"<td>{score_txt}</td>"
-                f"<td>{_cell(rec['calls'])}</td>"
-                f"<td>{_cell(rec['spend_usd_ledger'])}</td>"
+                f'<tr id="{NODE}-row-{c["family_seed"]}-{arm}">'
+                f"<td><code>{esc(c['family_seed'])}</code></td><td>{arm}</td>"
+                f"<td><code>{esc(rec['anchor'])}</code></td>"
+                f"<td>{_cell(rec['lint_before'])} &rarr; {_cell(rec['lint_after'])}</td>"
+                f"<td>{_cell(rec['batches_run'])} of {_cell(rec['batches_total'])}</td>"
+                f"<td>{esc(halt)}</td>"
+                f"<td>{esc(score_txt)}</td>"
                 f"<td>{'yes' if rec['stamped'] else 'no'}</td>"
                 "</tr>"
             )
-    return (
-        f'<table id="{NODE}-table">{head}<tbody>' + "".join(body) + "</tbody></table>"
-    )
-
-
-def _earlier_body(existing: str) -> str:
-    """Keep the earlier record the fragment already holds, under its own heading."""
-    if f'id="{EARLIER_ID}"' in existing:
-        match = re.search(rf'<section id="{EARLIER_ID}".*?</section>', existing, re.S)
-        return match.group(0) if match else ""
-    inner = re.sub(r"^\s*<section[^>]*>", "", existing, count=1)
-    inner = re.sub(r"</section>\s*$", "", inner).strip()
-    return (
-        f'<section id="{EARLIER_ID}" data-reckon="evidence">\n'
-        f'  <h3 id="{EARLIER_ID}-heading">Earlier record: the first cut of this A/B, '
-        "blocked at the fixed worker deadline</h3>\n"
-        f"  {inner}\n</section>".replace("\n  ", "\n")
-    )
+    return f'<table id="{NODE}-table">{head}<tbody>{"".join(body)}</tbody></table>'
 
 
 def fragment(payload: dict) -> None:
-    totals = payload["totals"]
-    spend = payload["spend"]
+    pop = payload["population"]
+    cond = payload["conditions"]
+    lint = cond["fewer_lint_total"]
+    score = cond["no_lower_member_scores"]
+    verdict = payload["verdict"]
 
-    incomplete = [
-        f["family_seed"]
-        for f in payload["families"]
-        if f["heuristic"]["lint_after"] is None
-    ]
-    nll = [
-        f for f in payload["families"] if f["verdict"]["verdict"] == "not-like-for-like"
-    ]
-    nll_txt = "; ".join(
-        f"<code>{f['family_seed']}</code> (heuristic {f['heuristic']['batches_run']} of "
-        f"{f['heuristic']['batches_total']} batches against Jev {f['jev']['batches_run']} of "
-        f"{f['jev']['batches_total']})"
-        for f in nll
+    parts: list[str] = []
+    parts.append(f'<section id="{NODE}" data-reckon="evidence">')
+    parts.append(
+        f'<h2 id="{NODE}-heading">The Jev anchor over the re-run arms: the rule '
+        "computed</h2>"
     )
-    equal_lfl = [
-        f["family_seed"]
-        for f in payload["families"]
-        if f["verdict"]["verdict"] == "equal"
-    ]
 
-    parts = [
-        f'<section id="{NODE}" data-reckon="evidence">',
-        f'  <h2 id="{NODE}-heading">Anchor A/B over ten families: the Jev anchor is not adopted</h2>',
-        f'  <p id="{NODE}-verdict"><strong>Verdict: do not adopt the Jev anchor.</strong> '
-        f"The rule registered at <code>{payload['adoption_rule']['registered_at']}</code> "
-        "requires the Jev arm to show fewer lint findings across the families with no member's "
-        "documentation score lower than that same member's in the heuristic arm. "
-        f"<strong>The score condition fails in "
-        f"{totals['families_with_a_lower_jev_member_score']} of {totals['families_recorded']} "
-        "families</strong> — every family that carries after-scores in both arms has at least one "
-        "member scoring lower under the Jev anchor. <strong>The lint condition is not "
-        "established:</strong> over the "
-        f"{totals['families_like_for_like']} families whose arms reached the same batch the lint "
-        f"totals are identical ({totals['lint_after_heuristic_like_for_like']} each), and the "
-        f"tenth family ("
-        f"<code>{incomplete[0] if incomplete else 'none'}</code>) has no heuristic measurement at "
-        "all, so the ten-family total the rule names cannot be formed. Neither condition is "
-        "satisfied, so the anchor reverts to the heuristic.</p>",
-        f'  <h3 id="{NODE}-totals">What the rule reads</h3>',
-        f'  <p id="{NODE}-totals-body">Across the '
-        f"{totals['families_with_both_arms_measured']} families where both arms completed, lint "
-        f"after harmonization is <strong>heuristic "
-        f"{totals['lint_after_heuristic_both_measured']} against Jev "
-        f"{totals['lint_after_jev_both_measured']}</strong>. Across the "
-        f"{totals['families_like_for_like']} families whose arms stopped at the same batch it is "
-        f"<strong>{totals['lint_after_heuristic_like_for_like']} against "
-        f"{totals['lint_after_jev_like_for_like']}</strong>, and excluding the anomalous-transport "
-        f"family, where harmonization made both arms worse, it is "
-        f"{totals['lint_after_heuristic_like_for_like_excluding_worsened']} against "
-        f"{totals['lint_after_jev_like_for_like_excluding_worsened']}. Family by family: "
-        f"{totals['families_equal']} equal ({', '.join(equal_lfl)}), "
-        f"{totals['families_jev_fewer']} with the Jev arm fewer, "
-        f"{totals['families_heuristic_fewer']} with the heuristic arm fewer, "
-        f"{totals['families_not_like_for_like']} not like-for-like and "
-        f"{totals['families_incomparable']} incomparable.</p>",
-        f'  <p id="{NODE}-anomalous"><strong>current_density_due_to_anomalous_transport is worse '
-        "under both anchors.</strong> Both arms begin at 5 findings and end at 12, identically "
-        "for both anchors and stamped in neither, and their halt reasons agree "
-        "(<code>docs acceptance 80.00% &lt; 90.00% (4/5 touched)</code>). The rise is a property "
-        "of harmonization on this family and not of the anchor chosen, so it is reported as "
-        "harmonization making the family worse under either anchor.</p>",
-        f'  <h3 id="{NODE}-table-heading">One row per family and arm</h3>',
-        f"  {_table(payload)}",
-        f'  <h3 id="{NODE}-partials">What the partial applies mean for the verdict</h3>',
-        f'  <p id="{NODE}-partials-body"><code>outcome_status: complete</code> on nearly every '
-        "record means only that the containment check held — the scratch instance stayed "
-        "contained and the live graph saw nothing. It says nothing about how far the apply "
-        "reached. Most arms halted after batch 1 of 2, several at 0% documentation acceptance, "
-        f"which is why only {totals['families_equal'] + totals['families_jev_fewer'] + totals['families_heuristic_fewer']} "
-        "families compare their arms at the same batch and just two arms are stamped at all. "
-        f"<strong>Not like for like:</strong> {nll_txt}. In each of these the arm that ran the "
-        "second batch ends with the lower count, which is the batch count rather than the "
-        "anchor — the visible-wavelength Jev arm ran two batches where the heuristic arm ran one, "
-        "and the passive-loop heuristic arm ran two where the Jev arm ran one. Where the arms did "
-        "stop together the counts are identical. <strong>Incomplete:</strong> the "
-        f"wall-recombination heuristic arm stopped on its internal budget at USD "
-        f"{spend['wall_recombination_heuristic_halt_usd']} before writing any completed record, "
-        "so it is recorded as heuristic-incomplete and never as a Jev win by default. "
-        "<strong>Consequence for the verdict:</strong> the lint half of the rule is left unable "
-        "to discriminate by the partial applies, so the verdict rests on the score condition, "
-        "which fails on complete, like-for-like evidence in nine families. A re-run holding both "
-        "arms to the same batch count is what would give the lint half a reading.</p>",
-        f'  <p id="{NODE}-spend">Ledger spend across the twenty arm records read here is '
-        f"<strong>USD {spend['arms_ledger_usd']}</strong>, plus USD "
-        f"{spend['wall_recombination_heuristic_halt_usd']} recorded as the wall-recombination "
-        f"heuristic arm's halt cost and USD {spend['scorer_usd']} for the Jev anchor scorer, "
-        f"giving <strong>USD "
-        f"{round(spend['arms_ledger_usd'] + spend['wall_recombination_heuristic_halt_usd'] + spend['scorer_usd'], 6)}"
-        f" for this cut</strong> and <strong>USD {spend['total_usd']} in total</strong> once the "
-        f"USD {spend['prior_cut_usd']} the first cut booked is included, against the USD "
-        f"{spend['ceiling_usd']:.0f} ceiling. {spend['note']}</p>",
-        f'  <figure id="{NODE}-figure"><img src="/imas-codex/figures/sn-selection-over-generation/'
-        f'{NODE}/lint-before-after.svg" alt="Per family, lint findings before and after '
-        'harmonization for the heuristic and Jev anchor arms, as four bars per family row.">'
-        "<figcaption>Lint findings before and after harmonization, one row per family, four bars "
-        "per row: the heuristic arm's before and after, then the Jev arm's. A grey cross marks a "
-        "state no completed record holds, on the wall-recombination heuristic arm, which stopped "
-        "on its budget before an after-count was taken, and a small round mark on the axis is a "
-        "measured zero rather than a missing state. Anomalous transport rises from 5 to 12 "
-        "in both arms; where the arms stopped at the same batch they end level, and the two rows "
-        "whose bars differ are the two whose arms ran different batch counts.</figcaption>"
-        "</figure>",
-        f'  <p id="{NODE}-recommendation"><strong>Recommendation for the lead.</strong> '
-        f"{payload['recommendation']}</p>",
-        _earlier_body(FRAGMENT.read_text() if FRAGMENT.exists() else ""),
-        "</section>",
-    ]
+    parts.append(
+        f'<p id="{NODE}-population">The re-selection on the fixed tree '
+        f"(<code>{esc(payload['fixed_tree'])}</code>) kept "
+        f"<strong>{pop['families_in_selection']}</strong> families in hand. "
+        f"<strong>{len(pop['agreements'])} are agreements</strong>, derived from "
+        "<code>selection.json</code> and not hard-coded: their two arms carry the "
+        "same anchor, so the same apply runs twice and neither arm can win. "
+        f"<strong>{len(pop['dropped'])} dropped out</strong> "
+        f"({esc(', '.join(pop['dropped']))}) with no eligible anchor in either arm. "
+        f"<strong>{len(pop['compared'])} differ and were re-run on both arms</strong>: "
+        f"{esc(', '.join(pop['compared']))}. Only those {len(pop['compared'])} are "
+        "compared; every number below is read from their arm records, on the same "
+        "code revision, with their commits named.</p>"
+    )
+
+    parts.append(f'<h3 id="{NODE}-agreements-heading">The agreements</h3>')
+    parts.append(
+        f'<p id="{NODE}-agreements">Both arms of each agreement family carry one '
+        "anchor, so they contribute an agreement and never a lint or score win "
+        "for either arm. The six seeds are read straight from the selection: "
+        + "; ".join(f"<code>{esc(s)}</code>" for s in pop["agreements"])
+        + ".</p>"
+    )
+    if pop["dropped"]:
+        parts.append(
+            f'<p id="{NODE}-dropped">Out of the comparison: '
+            + "; ".join(f"<code>{esc(s)}</code>" for s in pop["dropped"])
+            + " — no member carries a producing DD source, so neither arm has an "
+            "eligible anchor and the family leaves the re-run.</p>"
+        )
+
+    parts.append(
+        f'<h3 id="{NODE}-conditions-heading">The two conditions, computed</h3>'
+    )
+    parts.append(
+        f'<p id="{NODE}-condition-lint"><strong>Lint condition (fewer total lint '
+        f"findings): {'met' if lint['met'] else 'not met'}.</strong> "
+        f"{esc(lint['detail'])}. Per family, after-harmonization lint is "
+        + "; ".join(
+            f"<code>{esc(c['family_seed'])}</code> heuristic "
+            f"{c['lint_after_heuristic']} against Jev {c['lint_after_jev']}"
+            for c in payload["compared"]
+        )
+        + ".</p>"
+    )
+    if score["members_lower_in_jev"]:
+        lower_txt = "; ".join(
+            f"<code>{esc(e['member'])}</code> under <code>{esc(e['family'])}</code> "
+            f"{e['jev']} against {e['heuristic']}"
+            for e in score["members_lower_in_jev"]
+        )
+    else:
+        lower_txt = "none"
+    parts.append(
+        f'<p id="{NODE}-condition-score"><strong>Score condition (no member lower '
+        f"under Jev): {'met' if score['met'] else 'not met'}.</strong> "
+        f"{esc(score['detail'])}"
+        + (
+            f" Members lower under the Jev arm: {lower_txt}."
+            if score["members_lower_in_jev"]
+            else ""
+        )
+        + "</p>"
+    )
+
+    parts.append(
+        f'<p id="{NODE}-verdict"><strong>Verdict: '
+        f"{'adopt the Jev anchor' if verdict['adopt_jev'] else 'do not adopt the Jev anchor'}"
+        f"</strong> — {esc(verdict['sentence'])} "
+        "The rule is adopted only when both conditions are met, so the two "
+        "conditions above are the whole verdict.</p>".replace("  ", " ")
+    )
+
+    parts.append(
+        f'<h3 id="{NODE}-table-heading">One row per compared family and arm</h3>'
+    )
+    parts.append("  " + _table(payload))
+
+    parts.append(f'<h3 id="{NODE}-holds-heading">The held documentation scores</h3>')
+    if payload["documentation_holds"]:
+        items = []
+        for h in payload["documentation_holds"]:
+            note = h.get("note") or {}
+            note_txt = note if isinstance(note, str) else esc(json.dumps(note))
+            items.append(
+                f'<li id="{NODE}-hold-{esc(h["family"])}-{h["arm"]}">'
+                f"<code>{esc(h['family'])}</code> {h['arm']}: "
+                f"<code>{esc(h['member'])}</code> scores <code>{h['score']}</code>, "
+                f"a held score, reported as measured. Hold note: {note_txt}</li>"
+            )
+        parts.append("<ul id=" + '"' + NODE + '-holds">' + "".join(items) + "</ul>")
+    else:
+        parts.append(
+            f'<p id="{NODE}-holds-none">No compared arm after-score is exactly '
+            f"{payload['held_score']}: the held score does not appear in any "
+            "compared record's after-scores.</p>"
+        )
+    parts.append(
+        f'<p id="{NODE}-holds-cleared">The transient hold that dominated the '
+        "inconclusive first round no longer moves a compared after-score: the "
+        "aperture heuristic arm holds one member at 0.849 during review and "
+        "refinement clears it within the same apply, so its recorded after-score "
+        "is 1.0, and the anomalous-transport arm no longer reaches 0.849 at all. "
+        "The 0.849 that survives is a genuine documentation hold on the "
+        "wall-recombination neutral member in both arms.</p>"
+    )
+
+    parts.append(
+        f'<h3 id="{NODE}-intervals-heading">Each record\'s two intervals, named</h3>'
+    )
+    parts.append(
+        f'<p id="{NODE}-intervals">Each record\'s isolation check is written '
+        "before the apply it guards, so its timestamp predates the post-apply "
+        "counts it might be read as attesting, and its <code>wall_seconds</code> "
+        "reports the apply window alone rather than the record's whole life. "
+        "Both are named per record below.</p>"
+    )
+    parts.append(
+        f'<table id="{NODE}-intervals-table"><thead><tr><th>Record</th>'
+        "<th>Isolation stamp</th><th>Apply window</th><th>Apply wall [s]</th>"
+        "<th>Record span</th></tr></thead><tbody>"
+        + "".join(
+            f"<tr><td><code>{esc(n['record'])}</code></td>"
+            f"<td>{esc(n['isolation_at'])}</td>"
+            f"<td>{esc(n['apply_started'])} &rarr; {esc(n['apply_ended'])}</td>"
+            f"<td>{_cell(n['apply_wall_seconds'])}</td>"
+            f"<td>{esc(n['record_span_started'])} &rarr; "
+            f"{esc(n['record_span_ended'])}</td></tr>"
+            for n in payload["interval_notes"]
+        )
+        + "</tbody></table>"
+    )
+
+    parts.append(
+        f'<figure id="{NODE}-figure"><img src="/imas-codex/figures/'
+        f'sn-selection-over-generation/{NODE}/lint-and-scores.svg" '
+        'alt="Left: lint findings before and after harmonization, four bars per '
+        "compared family. Right: per member, the left documentation score minus "
+        'the right documentation score after harmonization.">'
+        "<figcaption>Left panel: lint findings before and after harmonization, one "
+        "row per compared family, four bars per row (heuristic before and after, "
+        "then Jev before and after). Right panel: for each member, its after-score "
+        "under the Jev anchor minus its after-score under the heuristic anchor; a "
+        "mark to the left of the dotted zero line is a member scoring lower under "
+        "the Jev anchor, drawn in red, and those are the members that fail the "
+        "score condition. Every compared family ends with equal lint under both "
+        "anchors, and the lower members sit in the wall-recombination and "
+        "anomalous members.</figcaption></figure>"
+    )
+
+    parts.append(
+        f'<p id="{NODE}-measure">Compared families: {len(payload["compared"])}; '
+        f"agreements: {len(pop['agreements'])}; dropped: {len(pop['dropped'])}. "
+        f"Condition 1 met: {lint['met']}; condition 2 met: {score['met']}; "
+        f"adopt_jev: {verdict['adopt_jev']}. Ledger spend across the "
+        f"{len(payload['compared']) * 2} compared arm records: USD "
+        f"{payload['spend']['arms_ledger_usd']}, plus USD "
+        f"{payload['spend']['scorer_usd']} for the Jev anchor scorer, against the "
+        f"USD {payload['spend']['ceiling_usd']:.0f} ceiling. The runner writes this "
+        "fragment and its JSON, and its log ends <code>EXIT=0</code>.</p>"
+    )
+    parts.append("</section>")
+
     FRAGMENT.write_text("\n".join(parts) + "\n")
 
 
 # --------------------------------------------------------------------------
-# Self-test: drive the classifier and the rule over records whose verdicts are known
+# Self-test: drive the classifier, the refusal and the rule over known inputs
 # --------------------------------------------------------------------------
 
 
 def _synthetic(
-    lint_after, batches=None, scores_after=None, members=("m1", "m2")
+    lint_after=0,
+    batches=2,
+    scores_after=None,
+    members=("m1", "m2"),
+    git_head=FIXED_TREE,
+    drop: tuple[str, ...] = (),
 ) -> dict:
     record = {
         "family": "synthetic",
         "arm": "x",
         "anchor": "a",
         "members": list(members),
-        "harmonize_summary": {"batches_run": batches, "batches_total": 2}
-        if batches
-        else None,
+        "kind": "component",
+        "harmonize_summary": (
+            {
+                "batches_run": batches,
+                "batches_total": 2,
+                "halted": False,
+                "halt_reasons": [],
+            }
+            if batches is not None
+            else None
+        ),
+        "code": {"git_head": git_head},
         "lint_before": 1,
         "lint_after": lint_after,
         "scores_before": dict.fromkeys(members, 0.9),
         "scores_after": scores_after or dict.fromkeys(members, 0.95),
-        "harmonize_receipts": [],
-        "containment": {"holds": True},
+        "stamped": True,
+        "outcome_status": "complete",
     }
-    return _classify(record)
+    for field in drop:
+        if field in ("batches_run", "batches_total"):
+            record["harmonize_summary"].pop(field, None)
+        else:
+            record.pop(field, None)
+    return record
 
 
 def selftest() -> int:
@@ -743,88 +867,139 @@ def selftest() -> int:
             failures.append(f"{name}: got {got!r}, want {want!r}")
 
     same = {"m1": 0.95, "m2": 0.95}
+    path = Path("synthetic-m1.json")
 
-    # Completeness classification, including the record whose apply died.
-    check(
-        "class-full",
-        _synthetic(0, batches=2, scores_after=same)["completeness"],
-        "full",
-    )
-    check(
-        "class-partial",
-        _synthetic(1, batches=1, scores_after=same)["completeness"],
-        "partial",
-    )
-    check(
-        "class-incomplete", _synthetic(None, batches=None)["completeness"], "incomplete"
-    )
+    # A complete record reads.
+    rec = classify_record(_synthetic(0, 2, same), "f", "h", path)
+    check("reads-batches", rec["batches_run"], 2)
 
-    # The rule's lint half.
-    verdict = _family_verdict(
-        _synthetic(0, batches=2, scores_after=same),
-        _synthetic(3, batches=2, scores_after=same),
-    )
-    check("heuristic-fewerh", verdict["verdict"], "heuristic-fewer")
+    # The guarded thing made to happen: a record missing a required field refuses.
+    for missing in ("scores_after", "lint_after", "batches_run", "batches_total"):
+        try:
+            classify_record(_synthetic(0, 2, same, drop=(missing,)), "f", "h", path)
+        except AggregateRefusal as exc:
+            check(f"refuse-{missing}", missing in str(exc), True)
+        else:
+            check(f"refuse-{missing}", "no refusal", "refusal")
 
-    verdict = _family_verdict(
-        _synthetic(4, batches=2, scores_after=same),
-        _synthetic(1, batches=2, scores_after=same),
-    )
-    check("jev-fewer", verdict["verdict"], "jev-fewer")
-    check("jev-fewer-scores-pass", verdict["score_check"]["passes"], True)
+    # A first-round record (a revision other than the fixed tree) refuses.
+    try:
+        classify_record(_synthetic(0, 2, same, git_head="deadbeef"), "f", "h", path)
+    except AggregateRefusal:
+        check("refuse-first-round", True, True)
+    else:
+        check("refuse-first-round", False, True)
 
-    # The guarded thing made to happen: a Jev member lower must refuse.
-    verdict = _family_verdict(
-        _synthetic(4, batches=2, scores_after=same),
-        _synthetic(1, batches=2, scores_after={"m1": 0.5, "m2": 0.95}),
-    )
-    check("score-refusal", verdict["score_check"]["passes"], False)
-    check(
-        "score-refusal-names-member",
-        verdict["score_check"]["members_lower_in_jev"],
-        [{"member": "m1", "heuristic": 0.95, "jev": 0.5}],
-    )
+    # The rule, over two synthetic compared families built through build().
+    import tempfile
 
-    # A null score is missing, never lower.
-    verdict = _family_verdict(
-        _synthetic(4, batches=2, scores_after=same),
-        _synthetic(1, batches=2, scores_after={"m1": None, "m2": 0.95}),
-    )
-    check("null-not-lower", verdict["score_check"]["passes"], True)
+    with tempfile.TemporaryDirectory() as tmp:
+        tmpd = Path(tmp)
+        selection = {
+            "adoption_rule": {"registered_at": "t", "text": "rule"},
+            "source_export": "x",
+            "selected": [
+                {
+                    "seed": "agree",
+                    "kind": "k",
+                    "physical_base": "",
+                    "members": ["a", "b"],
+                    "heuristic_anchor": "a",
+                    "jev_anchor": "a",
+                    "jev_cost": 0.0,
+                },
+                {
+                    "seed": "diff",
+                    "kind": "k",
+                    "physical_base": "",
+                    "members": ["m1", "m2"],
+                    "heuristic_anchor": "h",
+                    "jev_anchor": "j",
+                    "jev_cost": 0.0,
+                },
+            ],
+        }
+        (tmpd / "selection.json").write_text(json.dumps(selection))
 
-    # Different batches is not like for like, however the lint reads.
-    verdict = _family_verdict(
-        _synthetic(7, batches=1, scores_after=same),
-        _synthetic(2, batches=2, scores_after=same),
-    )
-    check("not-like-for-like", verdict["verdict"], "not-like-for-like")
+        def write(family, arm, lint, scores):
+            rec = _synthetic(lint, 2, scores)
+            rec["family"] = family
+            rec["arm"] = arm
+            rec["heuristic_anchor"] = "h"
+            rec["jev_anchor"] = "j"
+            (tmpd / f"{family}-{arm}.json").write_text(json.dumps(rec))
 
-    # An arm with no completed record is incomparable.
-    verdict = _family_verdict(
-        _synthetic(None, batches=None), _synthetic(2, batches=1, scores_after=same)
-    )
-    check("incomparable", verdict["verdict"], "incomparable")
+        write("diff", "heuristic", 2, same)
+        write("diff", "jev", 2, same)
+        payload = build(tmpd, tmpd / "selection.json")
+        check("agreements-derived", payload["population"]["agreements"], ["agree"])
+        check("compared-derived", payload["population"]["compared"], ["diff"])
+        check(
+            "equal-lint-not-met",
+            payload["conditions"]["fewer_lint_total"]["met"],
+            False,
+        )
+        check(
+            "no-lower-met", payload["conditions"]["no_lower_member_scores"]["met"], True
+        )
+        check("verdict-not-adopt", payload["verdict"]["adopt_jev"], False)
 
-    # A fall in an arm's own anchor is recorded.
-    record = _synthetic(1, batches=1, scores_after={"m1": 0.4, "m2": 0.95})
-    check(
-        "score-fall-recorded",
-        record["score_falls"],
-        [{"member": "m1", "before": 0.9, "after": 0.4}],
-    )
+        # Jev fewer with no lower score: both conditions met, adopted.
+        write("diff", "jev", 0, same)
+        payload = build(tmpd, tmpd / "selection.json")
+        check("fewer-met", payload["conditions"]["fewer_lint_total"]["met"], True)
+        check("verdict-adopt", payload["verdict"]["adopt_jev"], True)
+
+        # A member lower under Jev must refuse adoption.
+        write("diff", "jev", 0, {"m1": 0.5, "m2": 0.95})
+        payload = build(tmpd, tmpd / "selection.json")
+        check(
+            "lower-not-met",
+            payload["conditions"]["no_lower_member_scores"]["met"],
+            False,
+        )
+        check("verdict-not-adopt-lower", payload["verdict"]["adopt_jev"], False)
+        check(
+            "lower-names-member",
+            payload["conditions"]["no_lower_member_scores"]["members_lower_in_jev"],
+            [{"family": "diff", "member": "m1", "heuristic": 0.95, "jev": 0.5}],
+        )
 
     if failures:
         for line in failures:
             print("FAIL", line)
+        print(f"selftest: {len(failures)} of {checks} checks failed")
         return 1
     print(f"selftest: {checks} checks passed")
     return 0
 
 
+def _planted_bad_figure() -> None:
+    """A direct label planted over plotted data, so the check must refuse it."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(5, 3))
+    ax.barh([0], [5], height=0.5, color="#246c78")
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    ax.text(2.5, 0.0, "planted label", ha="center", va="center")
+    fig.tight_layout(pad=2.0)
+    try:
+        _check_text(fig)
+    finally:
+        plt.close(fig)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "command", nargs="?", default="build", choices=("build", "selftest", "figure")
+        "command",
+        nargs="?",
+        default="build",
+        choices=("build", "selftest", "figure", "refuse-bad-figure"),
     )
     parser.add_argument(
         "--render-check",
@@ -835,6 +1010,11 @@ def main() -> int:
 
     if args.command == "selftest":
         return selftest()
+    if args.command == "refuse-bad-figure":
+        # Show the figure check refusing a planted direct label over data.
+        _planted_bad_figure()
+        print("UNEXPECTED: the planted bad figure was not refused")
+        return 1
 
     payload = build()
     if args.command == "build":
@@ -845,9 +1025,13 @@ def main() -> int:
     if args.command == "build":
         fragment(payload)
         print(f"wrote {FRAGMENT.relative_to(REPO)}")
-    print(f"overall verdict: {payload['overall_verdict']['verdict']}")
+    print(
+        f"condition1={payload['conditions']['fewer_lint_total']['met']} "
+        f"condition2={payload['conditions']['no_lower_member_scores']['met']} "
+        f"adopt_jev={payload['verdict']['adopt_jev']}"
+    )
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

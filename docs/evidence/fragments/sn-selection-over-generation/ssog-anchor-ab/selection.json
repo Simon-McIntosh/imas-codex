@@ -16,7 +16,7 @@
       ],
       "loads_selection": true,
       "pinned_anchor_literals": [],
-      "runner": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-anchor-reselect/docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
+      "runner": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-run.py",
       "selection_ids_checked": 36
     },
     "spend_limit_usd": 0.5,

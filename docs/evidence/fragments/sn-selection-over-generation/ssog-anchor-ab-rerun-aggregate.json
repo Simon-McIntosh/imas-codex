@@ -1,0 +1,623 @@
+{
+  "node": "ssog-anchor-ab-rerun-aggregate",
+  "adoption_rule": {
+    "registered_at": "2026-10-18T10:45:18.869980+00:00",
+    "text": "Adopt the Jev anchor only if its arm has fewer total lint findings after harmonization across the families and no member's documentation review score is lower than that same member's score in the heuristic arm."
+  },
+  "source_records": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/",
+  "source_export": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "fixed_tree": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+  "population": {
+    "families_in_selection": 10,
+    "agreements": [
+      "angular_width_of_camera",
+      "length_of_passive_loop_element",
+      "neutral_power_of_divertor_due_to_recombination",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "lower_bound_wavelength_of_visible_camera",
+      "neutron_source_rate_due_to_thermal_fusion"
+    ],
+    "dropped": [
+      "current_density_due_to_wave_driven_current_drive"
+    ],
+    "compared": [
+      "vertical_coordinate_of_diagnostic_aperture",
+      "energy_flux_at_wall_due_to_recombination",
+      "current_density_due_to_anomalous_transport"
+    ]
+  },
+  "compared": [
+    {
+      "family_seed": "vertical_coordinate_of_diagnostic_aperture",
+      "kind": "coordinate",
+      "physical_base": "",
+      "selection_heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+      "selection_jev_anchor": "y_coordinate_of_diagnostic_aperture",
+      "heuristic": {
+        "family": "vertical_coordinate_of_diagnostic_aperture",
+        "arm": "heuristic",
+        "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json",
+        "commit": "4faa767bed7bc0212f91ef1b1f73b6e294b1902a",
+        "git_head": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+        "anchor": "x_coordinate_of_diagnostic_aperture",
+        "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+        "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+        "members": [
+          "vertical_coordinate_of_diagnostic_aperture",
+          "x_coordinate_of_diagnostic_aperture",
+          "y_coordinate_of_diagnostic_aperture"
+        ],
+        "batches_run": 2,
+        "batches_total": 2,
+        "halted": false,
+        "halt_reasons": [],
+        "stamped": true,
+        "outcome_status": "complete",
+        "lint_before": 2,
+        "lint_after": 0,
+        "lint_before_classes": {
+          "convention_violation": 1,
+          "link_missing_reverse": 1
+        },
+        "lint_after_classes": {},
+        "scores_before": {
+          "vertical_coordinate_of_diagnostic_aperture": 0.875,
+          "x_coordinate_of_diagnostic_aperture": 0.91875,
+          "y_coordinate_of_diagnostic_aperture": 0.89375
+        },
+        "scores_after": {
+          "vertical_coordinate_of_diagnostic_aperture": 0.9375,
+          "x_coordinate_of_diagnostic_aperture": 1.0,
+          "y_coordinate_of_diagnostic_aperture": 1.0
+        },
+        "held_members": [],
+        "documentation_holds": null,
+        "calls": 49,
+        "spend_usd_ledger": 0.7573960000000003,
+        "wall_seconds": 1828.372392824851,
+        "started_at": "2026-10-20T14:27:02.865198+00:00",
+        "ended_at": "2026-10-20T15:00:04.469410+00:00",
+        "isolation_at": "2026-10-20T14:29:27.842135+00:00",
+        "ledger_window": {
+          "ended": "2026-10-20T15:00:06.449923+00:00",
+          "started": "2026-10-20T14:29:36.096974+00:00"
+        }
+      },
+      "jev": {
+        "family": "vertical_coordinate_of_diagnostic_aperture",
+        "arm": "jev",
+        "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json",
+        "commit": "19a113e42fc2c2e3ca1595c937cc6848d79ccda1",
+        "git_head": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+        "anchor": "y_coordinate_of_diagnostic_aperture",
+        "heuristic_anchor": "x_coordinate_of_diagnostic_aperture",
+        "jev_anchor": "y_coordinate_of_diagnostic_aperture",
+        "members": [
+          "vertical_coordinate_of_diagnostic_aperture",
+          "x_coordinate_of_diagnostic_aperture",
+          "y_coordinate_of_diagnostic_aperture"
+        ],
+        "batches_run": 2,
+        "batches_total": 2,
+        "halted": false,
+        "halt_reasons": [],
+        "stamped": true,
+        "outcome_status": "complete",
+        "lint_before": 2,
+        "lint_after": 0,
+        "lint_before_classes": {
+          "convention_violation": 1,
+          "link_missing_reverse": 1
+        },
+        "lint_after_classes": {},
+        "scores_before": {
+          "vertical_coordinate_of_diagnostic_aperture": 0.875,
+          "x_coordinate_of_diagnostic_aperture": 0.91875,
+          "y_coordinate_of_diagnostic_aperture": 0.89375
+        },
+        "scores_after": {
+          "vertical_coordinate_of_diagnostic_aperture": 1.0,
+          "x_coordinate_of_diagnostic_aperture": 1.0,
+          "y_coordinate_of_diagnostic_aperture": 1.0
+        },
+        "held_members": [],
+        "documentation_holds": null,
+        "calls": 44,
+        "spend_usd_ledger": 0.6409789999999999,
+        "wall_seconds": 1832.5434188842773,
+        "started_at": "2026-10-20T14:29:28.899337+00:00",
+        "ended_at": "2026-10-20T15:04:42.936421+00:00",
+        "isolation_at": "2026-10-20T14:34:03.718020+00:00",
+        "ledger_window": {
+          "ended": "2026-10-20T15:04:44.924330+00:00",
+          "started": "2026-10-20T14:34:10.392973+00:00"
+        }
+      },
+      "lint_after_heuristic": 0,
+      "lint_after_jev": 0,
+      "lower_in_jev": []
+    },
+    {
+      "family_seed": "energy_flux_at_wall_due_to_recombination",
+      "kind": "subject",
+      "physical_base": "energy",
+      "selection_heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+      "selection_jev_anchor": "neutral_energy_flux_at_wall_due_to_recombination",
+      "heuristic": {
+        "family": "energy_flux_at_wall_due_to_recombination",
+        "arm": "heuristic",
+        "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json",
+        "commit": "9c84af0aa489c24ec1ddcae313677cc0f5ee63c6",
+        "git_head": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+        "anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "jev_anchor": "neutral_energy_flux_at_wall_due_to_recombination",
+        "members": [
+          "energy_flux_at_wall_due_to_recombination",
+          "incident_ion_energy_flux_at_wall_due_to_recombination",
+          "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+          "ion_energy_flux_at_wall_due_to_recombination",
+          "neutral_energy_flux_at_wall_due_to_recombination"
+        ],
+        "batches_run": 2,
+        "batches_total": 2,
+        "halted": true,
+        "halt_reasons": [
+          "docs acceptance 75.00% < 90.00% (3/4 touched)"
+        ],
+        "stamped": false,
+        "outcome_status": "complete",
+        "lint_before": 3,
+        "lint_after": 2,
+        "lint_before_classes": {
+          "link_missing_reverse": 3
+        },
+        "lint_after_classes": {
+          "link_missing_reverse": 2
+        },
+        "scores_before": {
+          "energy_flux_at_wall_due_to_recombination": 0.95625,
+          "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
+          "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
+          "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
+          "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+        },
+        "scores_after": {
+          "energy_flux_at_wall_due_to_recombination": 1.0,
+          "incident_ion_energy_flux_at_wall_due_to_recombination": 0.9375,
+          "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.98125,
+          "ion_energy_flux_at_wall_due_to_recombination": 1.0,
+          "neutral_energy_flux_at_wall_due_to_recombination": 0.849
+        },
+        "held_members": [
+          "neutral_energy_flux_at_wall_due_to_recombination"
+        ],
+        "documentation_holds": null,
+        "calls": 43,
+        "spend_usd_ledger": 1.9479440000000001,
+        "wall_seconds": 2447.627306558192,
+        "started_at": "2026-10-20T19:54:07.777902+00:00",
+        "ended_at": "2026-10-20T20:37:10.338284+00:00",
+        "isolation_at": "2026-10-20T19:56:19.127787+00:00",
+        "ledger_window": {
+          "ended": "2026-10-20T20:37:11.832280+00:00",
+          "started": "2026-10-20T19:56:22.710956+00:00"
+        }
+      },
+      "jev": {
+        "family": "energy_flux_at_wall_due_to_recombination",
+        "arm": "jev",
+        "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-jev.json",
+        "commit": "366d0e7c483e1510241b265e905577f27ec92bc0",
+        "git_head": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+        "anchor": "neutral_energy_flux_at_wall_due_to_recombination",
+        "heuristic_anchor": "incident_ion_energy_flux_at_wall_due_to_recombination",
+        "jev_anchor": "neutral_energy_flux_at_wall_due_to_recombination",
+        "members": [
+          "energy_flux_at_wall_due_to_recombination",
+          "incident_ion_energy_flux_at_wall_due_to_recombination",
+          "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+          "ion_energy_flux_at_wall_due_to_recombination",
+          "neutral_energy_flux_at_wall_due_to_recombination"
+        ],
+        "batches_run": 1,
+        "batches_total": 2,
+        "halted": true,
+        "halt_reasons": [
+          "docs acceptance 0.00% < 90.00% (0/1 touched)"
+        ],
+        "stamped": false,
+        "outcome_status": "complete",
+        "lint_before": 3,
+        "lint_after": 2,
+        "lint_before_classes": {
+          "link_missing_reverse": 3
+        },
+        "lint_after_classes": {
+          "link_missing_reverse": 2
+        },
+        "scores_before": {
+          "energy_flux_at_wall_due_to_recombination": 0.95625,
+          "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
+          "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
+          "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
+          "neutral_energy_flux_at_wall_due_to_recombination": 0.96875
+        },
+        "scores_after": {
+          "energy_flux_at_wall_due_to_recombination": 0.95625,
+          "incident_ion_energy_flux_at_wall_due_to_recombination": 1.0,
+          "ion_charge_state_energy_flux_at_wall_due_to_recombination": 0.95,
+          "ion_energy_flux_at_wall_due_to_recombination": 0.85625,
+          "neutral_energy_flux_at_wall_due_to_recombination": 0.849
+        },
+        "held_members": [
+          "neutral_energy_flux_at_wall_due_to_recombination"
+        ],
+        "documentation_holds": {
+          "annotation": "added post-hoc by the repairing review round; the runner does not emit this key",
+          "contradicted_source": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+          "dd_clause": "One scalar value is provided per element in the grid subset.",
+          "member": "neutral_energy_flux_at_wall_due_to_recombination",
+          "note_text": "review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance \u2014 contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: \u2026 DD: One scalar value is provided per element in the grid subset.",
+          "passes": [
+            {
+              "chain": "0/3",
+              "line": 525
+            },
+            {
+              "chain": "1/3",
+              "line": 631
+            },
+            {
+              "chain": "2/3",
+              "line": 744
+            },
+            {
+              "chain": "3/3",
+              "line": 828
+            }
+          ],
+          "score": 0.849,
+          "source_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev/apply-jev-energy_flux_at_wall_due_to_recombination.log"
+        },
+        "calls": 20,
+        "spend_usd_ledger": 1.177209,
+        "wall_seconds": 1789.058486961294,
+        "started_at": "2026-10-20T19:51:45.080786+00:00",
+        "ended_at": "2026-10-20T20:23:48.896334+00:00",
+        "isolation_at": "2026-10-20T19:53:55.657263+00:00",
+        "ledger_window": {
+          "ended": "2026-10-20T20:23:50.303268+00:00",
+          "started": "2026-10-20T19:53:59.837826+00:00"
+        }
+      },
+      "lint_after_heuristic": 2,
+      "lint_after_jev": 2,
+      "lower_in_jev": [
+        {
+          "family": "energy_flux_at_wall_due_to_recombination",
+          "member": "energy_flux_at_wall_due_to_recombination",
+          "heuristic": 1.0,
+          "jev": 0.95625
+        },
+        {
+          "family": "energy_flux_at_wall_due_to_recombination",
+          "member": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+          "heuristic": 0.98125,
+          "jev": 0.95
+        },
+        {
+          "family": "energy_flux_at_wall_due_to_recombination",
+          "member": "ion_energy_flux_at_wall_due_to_recombination",
+          "heuristic": 1.0,
+          "jev": 0.85625
+        }
+      ]
+    },
+    {
+      "family_seed": "current_density_due_to_anomalous_transport",
+      "kind": "component",
+      "physical_base": "current_density",
+      "selection_heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+      "selection_jev_anchor": "poloidal_current_density_due_to_anomalous_transport",
+      "heuristic": {
+        "family": "current_density_due_to_anomalous_transport",
+        "arm": "heuristic",
+        "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-heuristic.json",
+        "commit": "29db877a43b549adc1caa0cd63b34b5951f4dbf4",
+        "git_head": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+        "anchor": "vertical_current_density_due_to_anomalous_transport",
+        "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+        "jev_anchor": "poloidal_current_density_due_to_anomalous_transport",
+        "members": [
+          "current_density_due_to_anomalous_transport",
+          "parallel_current_density_due_to_anomalous_transport",
+          "poloidal_current_density_due_to_anomalous_transport",
+          "radial_current_density_due_to_anomalous_transport",
+          "toroidal_current_density_due_to_anomalous_transport",
+          "vertical_current_density_due_to_anomalous_transport"
+        ],
+        "batches_run": 2,
+        "batches_total": 2,
+        "halted": false,
+        "halt_reasons": [],
+        "stamped": true,
+        "outcome_status": "complete",
+        "lint_before": 5,
+        "lint_after": 6,
+        "lint_before_classes": {
+          "defining_equation": 1,
+          "link_missing_reverse": 3,
+          "sign_convention": 1
+        },
+        "lint_after_classes": {
+          "sign_convention": 6
+        },
+        "scores_before": {
+          "current_density_due_to_anomalous_transport": 0.875,
+          "parallel_current_density_due_to_anomalous_transport": 0.91875,
+          "poloidal_current_density_due_to_anomalous_transport": 0.89375,
+          "radial_current_density_due_to_anomalous_transport": 0.9375,
+          "toroidal_current_density_due_to_anomalous_transport": 0.94375,
+          "vertical_current_density_due_to_anomalous_transport": 1.0
+        },
+        "scores_after": {
+          "current_density_due_to_anomalous_transport": 1.0,
+          "parallel_current_density_due_to_anomalous_transport": 1.0,
+          "poloidal_current_density_due_to_anomalous_transport": 0.9875,
+          "radial_current_density_due_to_anomalous_transport": 1.0,
+          "toroidal_current_density_due_to_anomalous_transport": 1.0,
+          "vertical_current_density_due_to_anomalous_transport": 0.9375
+        },
+        "held_members": [],
+        "documentation_holds": null,
+        "calls": 38,
+        "spend_usd_ledger": 0.888126,
+        "wall_seconds": 1305.2237172010355,
+        "started_at": "2026-10-20T20:23:07.703205+00:00",
+        "ended_at": "2026-10-20T20:47:09.398726+00:00",
+        "isolation_at": "2026-10-20T20:25:20.165739+00:00",
+        "ledger_window": {
+          "ended": "2026-10-20T20:47:10.813864+00:00",
+          "started": "2026-10-20T20:25:24.174988+00:00"
+        }
+      },
+      "jev": {
+        "family": "current_density_due_to_anomalous_transport",
+        "arm": "jev",
+        "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-jev.json",
+        "commit": "1373fd6b303036f1bea62b793b10d3c040fde3ba",
+        "git_head": "284f17bcba6f17457c54d40527d5f1776f6fa0e9",
+        "anchor": "poloidal_current_density_due_to_anomalous_transport",
+        "heuristic_anchor": "vertical_current_density_due_to_anomalous_transport",
+        "jev_anchor": "poloidal_current_density_due_to_anomalous_transport",
+        "members": [
+          "current_density_due_to_anomalous_transport",
+          "parallel_current_density_due_to_anomalous_transport",
+          "poloidal_current_density_due_to_anomalous_transport",
+          "radial_current_density_due_to_anomalous_transport",
+          "toroidal_current_density_due_to_anomalous_transport",
+          "vertical_current_density_due_to_anomalous_transport"
+        ],
+        "batches_run": 2,
+        "batches_total": 2,
+        "halted": false,
+        "halt_reasons": [],
+        "stamped": true,
+        "outcome_status": "complete",
+        "lint_before": 5,
+        "lint_after": 6,
+        "lint_before_classes": {
+          "defining_equation": 1,
+          "link_missing_reverse": 3,
+          "sign_convention": 1
+        },
+        "lint_after_classes": {
+          "sign_convention": 6
+        },
+        "scores_before": {
+          "current_density_due_to_anomalous_transport": 0.875,
+          "parallel_current_density_due_to_anomalous_transport": 0.91875,
+          "poloidal_current_density_due_to_anomalous_transport": 0.89375,
+          "radial_current_density_due_to_anomalous_transport": 0.9375,
+          "toroidal_current_density_due_to_anomalous_transport": 0.94375,
+          "vertical_current_density_due_to_anomalous_transport": 1.0
+        },
+        "scores_after": {
+          "current_density_due_to_anomalous_transport": 1.0,
+          "parallel_current_density_due_to_anomalous_transport": 1.0,
+          "poloidal_current_density_due_to_anomalous_transport": 0.9375,
+          "radial_current_density_due_to_anomalous_transport": 1.0,
+          "toroidal_current_density_due_to_anomalous_transport": 1.0,
+          "vertical_current_density_due_to_anomalous_transport": 1.0
+        },
+        "held_members": [],
+        "documentation_holds": null,
+        "calls": 36,
+        "spend_usd_ledger": 0.7895669999999999,
+        "wall_seconds": 1341.5419077603146,
+        "started_at": "2026-10-20T22:35:52.387139+00:00",
+        "ended_at": "2026-10-20T23:00:20.077491+00:00",
+        "isolation_at": "2026-10-20T22:37:52.686202+00:00",
+        "ledger_window": {
+          "ended": "2026-10-20T23:00:21.938224+00:00",
+          "started": "2026-10-20T22:37:58.535548+00:00"
+        }
+      },
+      "lint_after_heuristic": 6,
+      "lint_after_jev": 6,
+      "lower_in_jev": [
+        {
+          "family": "current_density_due_to_anomalous_transport",
+          "member": "poloidal_current_density_due_to_anomalous_transport",
+          "heuristic": 0.9875,
+          "jev": 0.9375
+        }
+      ]
+    }
+  ],
+  "conditions": {
+    "fewer_lint_total": {
+      "met": false,
+      "lint_after_heuristic_total": 8,
+      "lint_after_jev_total": 8,
+      "detail": "over the 3 compared families the Jev arm ends with 8 lint findings against the heuristic arm's 8, so the Jev arm does not show strictly fewer"
+    },
+    "no_lower_member_scores": {
+      "met": false,
+      "members_lower_in_jev": [
+        {
+          "family": "energy_flux_at_wall_due_to_recombination",
+          "member": "energy_flux_at_wall_due_to_recombination",
+          "heuristic": 1.0,
+          "jev": 0.95625
+        },
+        {
+          "family": "energy_flux_at_wall_due_to_recombination",
+          "member": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+          "heuristic": 0.98125,
+          "jev": 0.95
+        },
+        {
+          "family": "energy_flux_at_wall_due_to_recombination",
+          "member": "ion_energy_flux_at_wall_due_to_recombination",
+          "heuristic": 1.0,
+          "jev": 0.85625
+        },
+        {
+          "family": "current_density_due_to_anomalous_transport",
+          "member": "poloidal_current_density_due_to_anomalous_transport",
+          "heuristic": 0.9875,
+          "jev": 0.9375
+        }
+      ],
+      "lower_count": 4,
+      "detail": "4 member/arm scores end lower under the Jev anchor than the same member under the heuristic anchor"
+    }
+  },
+  "verdict": {
+    "adopt_jev": false,
+    "sentence": "The lint condition and the score condition not satisfied, so the Jev anchor is not adopted."
+  },
+  "documentation_holds": [
+    {
+      "family": "energy_flux_at_wall_due_to_recombination",
+      "arm": "heuristic",
+      "member": "neutral_energy_flux_at_wall_due_to_recombination",
+      "score": 0.849,
+      "note": null
+    },
+    {
+      "family": "energy_flux_at_wall_due_to_recombination",
+      "arm": "jev",
+      "member": "neutral_energy_flux_at_wall_due_to_recombination",
+      "score": 0.849,
+      "note": {
+        "annotation": "added post-hoc by the repairing review round; the runner does not emit this key",
+        "contradicted_source": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+        "dd_clause": "One scalar value is provided per element in the grid subset.",
+        "member": "neutral_energy_flux_at_wall_due_to_recombination",
+        "note_text": "review_docs: neutral_energy_flux_at_wall_due_to_recombination held from acceptance \u2014 contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: \u2026 DD: One scalar value is provided per element in the grid subset.",
+        "passes": [
+          {
+            "chain": "0/3",
+            "line": 525
+          },
+          {
+            "chain": "1/3",
+            "line": 631
+          },
+          {
+            "chain": "2/3",
+            "line": 744
+          },
+          {
+            "chain": "3/3",
+            "line": 828
+          }
+        ],
+        "score": 0.849,
+        "source_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T151937473568-ssog-anchor-rerun-wall-recomb-jev/apply-jev-energy_flux_at_wall_due_to_recombination.log"
+      }
+    }
+  ],
+  "held_score": 0.849,
+  "interval_notes": [
+    {
+      "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-heuristic.json",
+      "family": "vertical_coordinate_of_diagnostic_aperture",
+      "arm": "heuristic",
+      "isolation_at": "2026-10-20T14:29:27.842135+00:00",
+      "apply_started": "2026-10-20T14:29:36.096974+00:00",
+      "apply_ended": "2026-10-20T15:00:06.449923+00:00",
+      "apply_wall_seconds": 1828.372392824851,
+      "record_span_started": "2026-10-20T14:27:02.865198+00:00",
+      "record_span_ended": "2026-10-20T15:00:04.469410+00:00"
+    },
+    {
+      "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/vertical_coordinate_of_diagnostic_aperture-jev.json",
+      "family": "vertical_coordinate_of_diagnostic_aperture",
+      "arm": "jev",
+      "isolation_at": "2026-10-20T14:34:03.718020+00:00",
+      "apply_started": "2026-10-20T14:34:10.392973+00:00",
+      "apply_ended": "2026-10-20T15:04:44.924330+00:00",
+      "apply_wall_seconds": 1832.5434188842773,
+      "record_span_started": "2026-10-20T14:29:28.899337+00:00",
+      "record_span_ended": "2026-10-20T15:04:42.936421+00:00"
+    },
+    {
+      "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-heuristic.json",
+      "family": "energy_flux_at_wall_due_to_recombination",
+      "arm": "heuristic",
+      "isolation_at": "2026-10-20T19:56:19.127787+00:00",
+      "apply_started": "2026-10-20T19:56:22.710956+00:00",
+      "apply_ended": "2026-10-20T20:37:11.832280+00:00",
+      "apply_wall_seconds": 2447.627306558192,
+      "record_span_started": "2026-10-20T19:54:07.777902+00:00",
+      "record_span_ended": "2026-10-20T20:37:10.338284+00:00"
+    },
+    {
+      "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/energy_flux_at_wall_due_to_recombination-jev.json",
+      "family": "energy_flux_at_wall_due_to_recombination",
+      "arm": "jev",
+      "isolation_at": "2026-10-20T19:53:55.657263+00:00",
+      "apply_started": "2026-10-20T19:53:59.837826+00:00",
+      "apply_ended": "2026-10-20T20:23:50.303268+00:00",
+      "apply_wall_seconds": 1789.058486961294,
+      "record_span_started": "2026-10-20T19:51:45.080786+00:00",
+      "record_span_ended": "2026-10-20T20:23:48.896334+00:00"
+    },
+    {
+      "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-heuristic.json",
+      "family": "current_density_due_to_anomalous_transport",
+      "arm": "heuristic",
+      "isolation_at": "2026-10-20T20:25:20.165739+00:00",
+      "apply_started": "2026-10-20T20:25:24.174988+00:00",
+      "apply_ended": "2026-10-20T20:47:10.813864+00:00",
+      "apply_wall_seconds": 1305.2237172010355,
+      "record_span_started": "2026-10-20T20:23:07.703205+00:00",
+      "record_span_ended": "2026-10-20T20:47:09.398726+00:00"
+    },
+    {
+      "record": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab/current_density_due_to_anomalous_transport-jev.json",
+      "family": "current_density_due_to_anomalous_transport",
+      "arm": "jev",
+      "isolation_at": "2026-10-20T22:37:52.686202+00:00",
+      "apply_started": "2026-10-20T22:37:58.535548+00:00",
+      "apply_ended": "2026-10-20T23:00:21.938224+00:00",
+      "apply_wall_seconds": 1341.5419077603146,
+      "record_span_started": "2026-10-20T22:35:52.387139+00:00",
+      "record_span_ended": "2026-10-20T23:00:20.077491+00:00"
+    }
+  ],
+  "spend": {
+    "arms_ledger_usd": 6.201221,
+    "scorer_usd": 0.000907,
+    "ceiling_usd": 50.0
+  },
+  "stamped_counts": {
+    "heuristic": 2,
+    "jev": 2,
+    "families": 3
+  }
+}
