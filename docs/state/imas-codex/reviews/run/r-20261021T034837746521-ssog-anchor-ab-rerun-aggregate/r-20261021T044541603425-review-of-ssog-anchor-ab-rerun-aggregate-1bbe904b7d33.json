@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-10-21T05:11:37.209Z",
   "dispatched_at": "2026-10-21T04:46:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "ssog-anchor-ab.html is the record of the round the lead ruled inconclusive; the re-run aggregate supersedes its verdict, and the plan's section 7 record names the re-run aggregate as the verdict",
+      "recorded_at": "2026-10-21T05:39:09.302407+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py",
