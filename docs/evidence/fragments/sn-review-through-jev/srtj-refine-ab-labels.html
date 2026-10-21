@@ -101,6 +101,72 @@ spectrum to detector count rate"). Had the refine written
 <code>spectral_calibration_factor_of_spectrometer_channel</code> — which another
 row's refine did — the same source would have been accepted.</p>
 
+<h3 id="srtj-refine-ab-labels-consistency">One criterion per source</h3>
+<p>Two rows that share a DD <code>source_path</code> carry the same quantity, so
+their labels must follow one criterion rather than two. The sheet holds
+<strong>56 distinct source paths</strong>. Every one was checked: <strong>48
+groups are homogeneous</strong> (all rows share a label) and <strong>8 groups
+carry mixed labels</strong>. Each of the 8 is resolved under a single criterion,
+stated here once, and each row's reason records it.</p>
+<table>
+  <thead><tr><th>Source path</th><th>Rows and labels</th><th>The one criterion</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>dd:equilibrium/time_slice/boundary_secondary_separatrix/distance_inner_outer</code> (6 rows)</td>
+      <td>034 <code>0</code>, 048 <code>1</code>, 054 <code>1</code>, 047 <code>1</code>, 053 <code>0</code>, 035 <code>1</code></td>
+      <td>The source measures a separation <em>in the major-radius direction</em>, so a name is acceptable only if it states the radial direction of the quantity it owns on the separatrix. <code>radial_distance_…</code>, <code>radial_extent_of_separatrix</code> and <code>radial_gap_of_separatrix</code> state it; <code>radial_coordinate_…</code> names a location instead of a separation, and <code>gap_at_separatrix</code> states no radial direction and only <em>locates</em> an undirected gap at the separatrix.</td>
+    </tr>
+    <tr>
+      <td><code>edge_profiles/ggd/ion/state/ionization_potential</code></td>
+      <td>099 <code>0</code>, 100 <code>1</code></td>
+      <td>The name must be the quantity the source carries: an undirected charge name is not the per-state ionization potential.</td>
+    </tr>
+    <tr>
+      <td><code>equilibrium/time_slice/profiles_1d/gm9</code></td>
+      <td>005 <code>0</code>, 006 <code>1</code></td>
+      <td>The name must state the metric coefficient gm9 = ⟨1/R⟩ itself: a generic radial metric does not distinguish it from the family's other coefficients.</td>
+    </tr>
+    <tr>
+      <td><code>gyrokinetics/fluxes_integrated_norm/energy_phi_potential</code></td>
+      <td>059 <code>0</code>, 060 <code>1</code></td>
+      <td>The name must name the source's cause. The potential's energy-flux contribution is the E×B drift flux, which is stated; naming the perturbed parallel magnetic field names a different cause.</td>
+    </tr>
+    <tr>
+      <td><code>magnetics/b_field_pol_probe/non_linear_response/b_field_non_linear</code></td>
+      <td>090 <code>0</code>, 089 <code>1</code></td>
+      <td>The name must carry the source's owner, the poloidal field probe, so it does not read as any field at any measurement position.</td>
+    </tr>
+    <tr>
+      <td><code>spectrometer_visible/…/wavelength_calibration/gain</code> (4 rows)</td>
+      <td>017 <code>0</code>, 074 <code>0</code>, 073 <code>1</code>, 018 <code>0</code></td>
+      <td>The name must be the pixel-to-wavelength calibration factor the source is: a spectral response factor or an etendue names another quantity at the same path.</td>
+    </tr>
+    <tr>
+      <td><code>wall/global_quantities/electrons/gas_puff</code></td>
+      <td>085 <code>0</code>, 086 <code>1</code></td>
+      <td>The name must count the species the source counts, equivalent electrons; the neutral-particle spelling names another count.</td>
+    </tr>
+    <tr>
+      <td><code>wall/global_quantities/neutral/particle_flux_from_plasma</code></td>
+      <td>055 <code>0</code>, 056 <code>1</code></td>
+      <td>The name must not add a cause the source does not state: a convective cause is added by one spelling and not by the other.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The flagged pair the review raised is the first row of that table.
+<code>row-035</code> (<code>radial_gap_of_separatrix</code>, accepted) and
+<code>row-053</code> (<code>gap_at_separatrix</code>, rejected) share the source
+<code>…/boundary_secondary_separatrix/distance_inner_outer</code>, and the first
+version of this fragment rejected <code>row-053</code> with a reason that applied
+equally to <code>row-035</code> — neither names the inner and outer branches.
+The criterion has been restated once for the whole six-row group: it is the
+<em>radial direction</em> that must be stated, not the branches. Both labels are
+unchanged by that restatement, because <code>radial_gap_of_separatrix</code>
+states the radial direction and <code>gap_at_separatrix</code> does not; the
+reasons now say so, and the catalogue's existing boundary-gap quantity is why an
+undirected gap at the separatrix is a different quantity rather than a loose
+paraphrase.</p>
+
 <h3 id="srtj-refine-ab-labels-reads">What was read</h3>
 <p>I opened <strong>none</strong> of the forbidden files. During this node no read
 was made of <code>srtj-refine-ab-arm-key.json</code>,

@@ -33,7 +33,7 @@
     "sheet_id": "row-034",
     "refined_name": "radial_coordinate_of_outboard_midplane_separatrix",
     "label": 0,
-    "reason": "meaning: names a radial coordinate of the outboard separatrix, not the inner-to-outer separatrix separation the DD distance carries."
+    "reason": "meaning: a radial coordinate of the outboard separatrix is a location, not the radial separation the source measures."
   },
   {
     "sheet_id": "row-010",
@@ -57,7 +57,7 @@
     "sheet_id": "row-048",
     "refined_name": "radial_distance_at_outboard_midplane_separatrix",
     "label": 1,
-    "reason": "expresses the inner-outer distance as a radial distance at the outboard separatrix, as the source measures it."
+    "reason": "states the source's radial distance at the bounded outboard-midplane separatrix position; the radial direction is what the criterion rests on."
   },
   {
     "sheet_id": "row-116",
@@ -297,7 +297,7 @@
     "sheet_id": "row-054",
     "refined_name": "radial_extent_of_separatrix",
     "label": 1,
-    "reason": "radial extent between the separatrix radial extrema states the inner-outer secondary separatrix distance."
+    "reason": "radial_extent_of_separatrix states the radial direction and the separatrix owner, which is the criterion this source group is labelled by."
   },
   {
     "sheet_id": "row-033",
@@ -393,7 +393,7 @@
     "sheet_id": "row-047",
     "refined_name": "radial_distance_at_outboard_midplane_separatrix",
     "label": 1,
-    "reason": "radial distance at the outboard separatrix midplane expresses the inner-outer secondary separatrix distance."
+    "reason": "states the source's radial distance at the bounded outboard-midplane separatrix position; the radial direction is what the criterion rests on."
   },
   {
     "sheet_id": "row-006",
@@ -525,7 +525,7 @@
     "sheet_id": "row-053",
     "refined_name": "gap_at_separatrix",
     "label": 0,
-    "reason": "meaning: gap_at_separatrix does not say which separatrix branches or that the gap is the inner-outer separation."
+    "reason": "meaning: 'gap_at_separatrix' states no radial direction, naming an undirected gap merely located at the separatrix, where the source measures a radial separation."
   },
   {
     "sheet_id": "row-060",
@@ -537,7 +537,7 @@
     "sheet_id": "row-035",
     "refined_name": "radial_gap_of_separatrix",
     "label": 1,
-    "reason": "radial gap of the separatrix names the radial separation of the inner and outer secondary separatrix branches."
+    "reason": "names the source's radial separation and owns it on the separatrix (radial_gap_of_separatrix); weighed most that the radial direction is stated."
   },
   {
     "sheet_id": "row-015",
