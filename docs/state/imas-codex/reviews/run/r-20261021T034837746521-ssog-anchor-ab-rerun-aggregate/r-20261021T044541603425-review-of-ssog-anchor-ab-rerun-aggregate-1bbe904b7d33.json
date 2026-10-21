@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "cannot change this verdict: both conditions already fail on measured members, and a skipped or self-fed value can only make a condition pass falsely; recorded as a caveat on the section 7 close",
       "recorded_at": "2026-10-21T05:39:12.518838+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "cannot change this verdict: both conditions already fail on measured members, and a skipped or self-fed value can only make a condition pass falsely; recorded as a caveat on the section 7 close",
+      "recorded_at": "2026-10-21T05:39:15.302271+00:00"
     }
   },
   "findings": [
