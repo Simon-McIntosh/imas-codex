@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/review/cascade.py:593",
+    "imas_codex/standard_names/workers.py:8987",
+    "imas_codex/standard_names/workers.py:11113",
+    "imas_codex/standard_names/review/projection.py:162"
+  ],
+  "completed_at": "2026-10-21T00:54:56.195Z",
+  "dispatched_at": "2026-10-21T00:41:22Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_panel_audit_sample.py",
+      "line": "479",
+      "severity": "follow-on",
+      "text": "the construction-site guard cannot fail on the wrapper case it exists to catch: a decorator or a further partial layer around functools.partial(_persisting_quorum_cycles, **kwargs) at either workers.py call site (8987, 11113) leaves the inner partial(...) Call intact in the module's AST, so _persisting_partial_construction_sites still returns two keyword-carrying Call nodes and 'assert len(sites) == 2' passes while the site no longer builds the callable the seam recognises. The runtime loss is a refused incumbent recorded as a skipped audit (cascade.py:593 catches it and stores the reason), not a canonical write, so this is a lost review-time signal rather than a safety hole."
+    },
+    {
+      "file": "tests/standard_names/test_panel_audit_sample.py",
+      "line": "526",
+      "severity": "follow-on",
+      "text": "the group-id assertion is not independent of the value under test: the test injects review_group_id into a fabricated panel_result and reads the same value back off the record, so it reddens on the declared control (dropping the field from record.update) but cannot detect the regression fix 2 exists to prevent at its source - a quorum verdict that stops returning review_group_id, in which case panel_audit.py:136 _audit_group_id silently mints an unrelated uuid and the row no longer names the cycle it observed. No test drives the real _run_rd_quorum_cycles (workers.py:8016, whose return at workers.py:8513 is where the id comes from) and asserts the row's group id equals the id its cycle rows carry; the graph test at :621 feeds the id in from above for the same reason, and :538 asserts only that a skipped row's id is truthy, which any uuid satisfies."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is three changes in imas_codex/standard_names/review/panel_audit.py - a non-persisting seam that refuses a callable it cannot prove, an audit row carrying its cycle's review_group_id, and a corrected module docstring count; the diff lands all three at panel_audit.py:82 (refusal at :115), :136 _audit_group_id with the row's field at :188, and :9 ('Four things'), with the tests in tests/standard_names/test_panel_audit_sample.py:427-:660.\nVERDICT done_when: the done-when requires the three changes and their tests committed, a gate with no added failures, and both controls logged; the manifest records gate-base.log at 93 passed EXIT=0 and gate-head.log at 100 passed EXIT=0, both completed true with failure_ids [], so the delta is zero added failures, and the disposable-graph log (17 passed, EXIT=0, no skip) and negctl-fail-closed.log (2 failed, EXIT=1) are kept; docs/evidence/fragments/sn-review-through-jev/srtj-audit-row-hardening.html records each change, its test and its control.\nVERDICT write_paths: the brief's write scope is panel_audit.py, test_panel_audit_sample.py and the evidence fragment; the three-commit diff against 26b0ce3a1 touches exactly those three paths and nothing else.\nVERDICT manifest: read; it states status complete, commits cc575ddbe, 769dd307a and 066de210c4, both suite arms completed true with failure_count 0 and failure_ids [], names negctl-fail-closed.log as the declared control with negctl-review-group-id.log as the second, and its own follow_ons record the projection-path risk and the construction-site test's review-time-only guarantee.\nVERDICT diff: read commit by commit against 26b0ce3a172fc9cfb2736e870ac327978f7e6f46; cc575ddbe is the seam and the row change with the tests, 769dd307a resolves the disposable-graph endpoint for the test fixture, 066de210c4 is the evidence fragment alone, so the gated revision 769dd307a is the code revision and the commit that follows it is documentation only.\nCALL_SITES: imas_codex/standard_names/review/cascade.py:593 _run_panel_audit is the seam's only caller and wraps the call in try/except so the refusal lands as a skipped audit row rather than failing the decision; imas_codex/standard_names/workers.py:8987 (name axis) and imas_codex/standard_names/workers.py:11113 (docs axis) are the two production construction sites, each building partial(_persisting_quorum_cycles, **kwargs), which the seam recognises, so the refusal cannot fire on either today; imas_codex/standard_names/review/projection.py:162 is the production reader of the review_group_id field the audit row now carries.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: panel_audit.py:82 raises UnrecognisedIncumbent at :115 for anything not provably non-persisting, :188 gives the row its cycle's group id, and :9 now reads 'Four things', matching the three changes the brief names.\nSCORE evidence: 19\nJUSTIFICATION evidence: gate-base.log ends '93 passed' at EXIT=0 and gate-head.log '100 passed' at EXIT=0, the graph contract runs 17 passed at EXIT=0 in head-panelaudit-full.log, and the fragment records each change, its test and its control; the manifest's tests line quotes the head arm without the NEO4J_URI and IMAS_CODEX_TEST_NEO4J_* exports its own log header carries.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the three-commit diff against 26b0ce3a1 changes only imas_codex/standard_names/review/panel_audit.py, tests/standard_names/test_panel_audit_sample.py and docs/evidence/fragments/sn-review-through-jev/srtj-audit-row-hardening.html, the exact declared scope, and carries nothing the goal does not imply.\nSCORE durability: 15\nJUSTIFICATION durability: negctl-fail-closed.log (2 failed, EXIT=1) shows test_seam_refuses_an_incumbent_it_cannot_prove_non_persisting and test_unprovable_incumbent_is_skipped_without_running_the_panel reddening on the declared mutation, and negctl-review-group-id.log reddens both group-id tests, but test_panel_audit_sample.py:526 and :621 supply review_group_id themselves so neither can catch the source regression, and :479 cannot fail on the decorator case it names.\nSCORE fit: 19\nJUSTIFICATION fit: the new UnrecognisedIncumbent(RuntimeError) at panel_audit.py:55 and the row built through _build_review_record match the package idiom, since review/audits.py:38 and review/cascade_calibration.py:46 each define a module-scoped RuntimeError subclass, and no plan label, version or ticket identifier appears in the added names.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the owners of each capability it touches - workers.py:8016 _run_rd_quorum_cycles with _persisting_quorum_cycles rebound rather than reimplemented, and pipeline.py _build_review_record for the row - and a capability search over imas_codex/ for an existing non-persisting declaration or a shared group-id owner found only the inline default at workers.py:8082, no helper to extend.\nFINDING tests/standard_names/test_panel_audit_sample.py:479 follow-on: the construction-site guard cannot fail on the wrapper case it exists to catch, because a decorator or further partial layer around partial(_persisting_quorum_cycles, **kwargs) leaves the inner Call intact in the workers AST, so len(sites) stays 2 and the assertion passes while the site no longer builds the callable the seam recognises.\nFINDING tests/standard_names/test_panel_audit_sample.py:526 follow-on: the group-id assertion compares a value the test itself injected into a fabricated panel_result against the record built from it, so it cannot detect the regression the fix targets - a quorum verdict that stops returning review_group_id, where panel_audit.py:136 would mint an unrelated uuid and the row would stop naming the cycle it observed.\n",
+  "review_run_id": "r-20261021T004101899214-review-of-srtj-audit-row-hardening-066de210c408",
+  "reviewed_base_sha": "26b0ce3a172fc9cfb2736e870ac327978f7e6f46",
+  "reviewed_head_sha": "066de210c408aed5c7ae4567bc3525285ac86541",
+  "reviewed_run_id": "r-20261020T233706707140-srtj-audit-row-hardening",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T03:48:13.862015+00:00",
+  "total": 111
+}
