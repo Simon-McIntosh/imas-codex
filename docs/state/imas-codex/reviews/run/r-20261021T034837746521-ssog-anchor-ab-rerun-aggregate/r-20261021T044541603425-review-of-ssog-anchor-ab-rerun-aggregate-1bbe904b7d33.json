@@ -15,6 +15,11 @@
       "kind": "exempted",
       "reason": "ssog-anchor-ab.html is the record of the round the lead ruled inconclusive; the re-run aggregate supersedes its verdict, and the plan's section 7 record names the re-run aggregate as the verdict",
       "recorded_at": "2026-10-21T05:39:09.302407+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "cannot change this verdict: both conditions already fail on measured members, and a skipped or self-fed value can only make a condition pass falsely; recorded as a caveat on the section 7 close",
+      "recorded_at": "2026-10-21T05:39:12.518838+00:00"
     }
   },
   "findings": [
