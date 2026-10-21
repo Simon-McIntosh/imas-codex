@@ -37,6 +37,19 @@ RETURN nid, sn.id AS name_id, sn.status AS status,
 """
 
 
+LINEAGE_QUERY = """
+UNWIND $ids AS ancestor_id
+MATCH (desc:StandardName)-[:REFINED_FROM*1..6]->(anc:StandardName {id: ancestor_id})
+WHERE NOT desc.name_stage IN ['superseded', 'exhausted']
+MATCH (desc)<-[:PRODUCED_NAME]-(src:StandardNameSource)
+WHERE src.id STARTS WITH 'dd:'
+WITH anc.id AS ancestor, desc.id AS descendant, desc.name_stage AS name_stage,
+     collect(DISTINCT src.id) AS source_ids
+RETURN ancestor, descendant, name_stage, source_ids
+ORDER BY ancestor, descendant
+"""
+
+
 class ReadOnlySources:
     """Only the enumerated source reads can reach a read transaction."""
 
@@ -47,6 +60,7 @@ class ReadOnlySources:
             builder.DD_PROJECTION_QUERY,
             PATH_QUERY,
             IDENTITY_QUERY,
+            LINEAGE_QUERY,
         }
         self.receipts = []
 
@@ -72,6 +86,58 @@ class ReadOnlySources:
 
         with self.client._driver.session(default_access_mode=READ_ACCESS) as session:
             return session.execute_read(read)
+
+
+def lineage_candidates(reader, ancestors: list[str]) -> dict[str, list[dict]]:
+    """Live, sourced descendants of each ancestor, up to six refinement hops.
+
+    A case whose ancestor holds no DD source of any kind can still be labelled
+    when a later name refined from that ancestor survives in the catalogue and
+    carries one. ``REFINED_FROM`` runs successor -> predecessor, so a descendant
+    is read by walking the edge from it onto the ancestor. The descendant must
+    hold the source itself: a descendant with no ``PRODUCED_NAME`` binding is
+    not a candidate, and one whose stage is superseded or exhausted is skipped
+    by the query rather than filtered here.
+    """
+    by_ancestor: dict[str, list[dict]] = {}
+    if not ancestors:
+        return by_ancestor
+    for row in reader.query(LINEAGE_QUERY, ids=sorted(set(ancestors))):
+        by_ancestor.setdefault(row["ancestor"], []).append(row)
+    return by_ancestor
+
+
+def lineage_route(
+    case: dict, candidates: dict[str, list[dict]], sources: dict[str, dict]
+):
+    """The DD route a case's ancestor recovers through, or why it does not.
+
+    Returns ``("recovered", descendant_id, source)``, ``("ambiguous", None,
+    candidates)``, or ``("none", None, None)``. The source is the descendant's
+    own, resolved exactly as the runner resolves one for a bound name, so a
+    descendant carrying several DD sources contributes the same one here as it
+    would on a row of its own. Two candidates resolving to different sources
+    leave the case ambiguous: neither is preferred.
+    """
+    picks = {}
+    for row in candidates.get(case["prior_name"], []):
+        source = sources.get(row["descendant"])
+        if source and source.get("source_path"):
+            picks[row["descendant"]] = source
+    if not picks:
+        return "none", None, None
+    paths = {source["source_path"] for source in picks.values()}
+    if len(paths) > 1:
+        return (
+            "ambiguous",
+            None,
+            [
+                {"descendant": d, "source_path": s["source_path"]}
+                for d, s in sorted(picks.items())
+            ],
+        )
+    descendant = min(picks)
+    return "recovered", descendant, picks[descendant]
 
 
 def main():
@@ -151,11 +217,76 @@ def main():
             f"POSITIVE CONTROL: {control_name} -> {control_source['source_path']}",
             flush=True,
         )
+        complete_ids = {
+            case["sn_id"]
+            for case in cohort
+            if all(
+                receipts.get((case["sn_id"], arm), {}).get("refined_name")
+                for arm in builder.ARMS
+            )
+        }
+        candidates = lineage_candidates(reader, [case["prior_name"] for case in cohort])
+        descendant_sources, _ = builder.resolve_dd_sources(
+            reader,
+            sorted({row["descendant"] for rows in candidates.values() for row in rows}),
+        )
+        routes: dict[str, dict] = {}
+        ambiguous: list[dict] = []
+        control: list[dict] = []
+        for case in cohort:
+            if case["sn_id"] not in complete_ids:
+                continue
+            direct = builder.case_dd_source(case, sources)
+            verdict, descendant, payload = lineage_route(
+                case, candidates, descendant_sources
+            )
+            if direct:
+                if verdict != "none":
+                    control.append(
+                        {
+                            "case": case["sn_id"],
+                            "ancestor": case["prior_name"],
+                            "direct_path": direct["source_path"],
+                            "lineage_paths": sorted(
+                                {payload["source_path"]}
+                                if verdict == "recovered"
+                                else {row["source_path"] for row in payload}
+                            ),
+                            "agrees": verdict == "recovered"
+                            and payload["source_path"] == direct["source_path"],
+                        }
+                    )
+                routes[case["sn_id"]] = {"source_route": "direct"}
+                continue
+            if verdict == "ambiguous":
+                ambiguous.append(
+                    {
+                        "case": case["sn_id"],
+                        "ancestor": case["prior_name"],
+                        "candidates": payload,
+                    }
+                )
+                continue
+            if verdict == "recovered":
+                routes[case["sn_id"]] = {
+                    "source_route": "lineage",
+                    "descendant": descendant,
+                }
+
+        recovered = {
+            sn_id: descendant_sources[route["descendant"]]
+            for sn_id, route in routes.items()
+            if route["source_route"] == "lineage"
+        }
         paths = sorted(
             {
                 source["source_path"].removeprefix("dd:")
                 for c in cohort
                 if (source := builder.case_dd_source(c, sources))
+            }
+            | {
+                source["source_path"].removeprefix("dd:")
+                for source in recovered.values()
             }
         )
         path_rows = reader.query(PATH_QUERY, ids=paths)
@@ -164,7 +295,9 @@ def main():
         assert all(row["description"] or row["documentation"] for row in path_rows)
         live_cohort = []
         for case in cohort:
-            source = builder.case_dd_source(case, sources)
+            source = builder.case_dd_source(case, sources) or recovered.get(
+                case["sn_id"]
+            )
             if source:
                 node = by_path[source["source_path"].removeprefix("dd:")]
                 case = {
@@ -210,6 +343,14 @@ def main():
         assert findings
         print(f"REFUSAL: {findings[0]}", flush=True)
 
+    route_findings = builder.sheet_leaks([{**rows[0], "source_route": "lineage"}])
+    assert route_findings, "a planted source_route field passed the sheet check"
+    assert all("source_route" not in row for row in rows)
+    print(
+        f"REFUSAL: planted source_route on the sheet: {route_findings[0]}", flush=True
+    )
+
+    ambiguous_by_case = {row["case"]: row for row in ambiguous}
     missing_report = []
     for case in missing:
         bindings = [identities[case[f]] for f in ("sn_id", "prior_name")]
@@ -220,6 +361,16 @@ def main():
             reason += f"; projection-only {projection['source_path']} is not provenance"
         else:
             reason += "; neither identity has a DD projection"
+        ambiguous_case = ambiguous_by_case.get(case["sn_id"])
+        if ambiguous_case:
+            reason += (
+                "; lineage route ambiguous between "
+                f"{len(ambiguous_case['candidates'])} sourced descendants"
+            )
+        elif case["sn_id"] in complete_ids:
+            reason += "; no live sourced descendant within six refinement hops"
+        else:
+            reason += "; the pair is empty in one arm, so it contributes no row"
         missing_report.append(
             {
                 "case": case["sn_id"],
@@ -233,6 +384,20 @@ def main():
     # The builder's cases_in_sheet field counts complete pairs before source exclusion.
     key["contributing_cases"] = sorted(c["sn_id"] for c, _ in contributing)
     key["source_lookup_missing_cases"] = missing_report
+    key["case_source_routes"] = {sn_id: routes[sn_id] for sn_id in sorted(routes)}
+    lineage_ids = {
+        sn_id for sn_id, route in routes.items() if route["source_route"] == "lineage"
+    }
+    lineage_rows = {
+        "only_direct": sum(
+            1 for e in key["rows"].values() if not set(e["cases"]) & lineage_ids
+        ),
+        "with_lineage": sum(
+            1 for e in key["rows"].values() if set(e["cases"]) & lineage_ids
+        ),
+    }
+    key["lineage_ambiguous_cases"] = sorted(ambiguous, key=lambda row: row["case"])
+    key["lineage_control"] = sorted(control, key=lambda row: row["case"])
     key["input_sha256"] = inputs
     summary = {
         "baseline_rows": 82,
@@ -248,13 +413,32 @@ def main():
         "identical_output_pairs": identical,
         "recorded_named_outputs": 214,
         "credited_outputs": len(produced),
+        "rows_crediting_only_direct_cases": lineage_rows["only_direct"],
+        "rows_crediting_a_lineage_case": lineage_rows["with_lineage"],
+        "lineage_recovered_cases": len(recovered),
+        "lineage_ambiguous_cases": len(ambiguous),
+        "lineage_control_cases": len(control),
+        "lineage_control_agreements": sum(1 for row in control if row["agrees"]),
         "llm_calls": 0,
         "spend_usd": 0,
         "graph_updates": 0,
         "dd_paths_verified": len(paths),
     }
-    # Re-execution accepts only an untouched baseline or this exact rebuilt sheet.
-    assert delivered == baseline or delivered == rows
+    assert set(key["case_source_routes"]) == {c["sn_id"] for c, _ in contributing}
+    assert sum(1 for r in routes.values() if r["source_route"] == "lineage") == len(
+        recovered
+    )
+    # Re-execution rewrites a sheet this contract could have written, so a
+    # foreign file is never clobbered silently; a sheet from an earlier rebuild
+    # is superseded and reported rather than silently accepted.
+    assert builder.sheet_leaks(delivered) == []
+    assert all(set(row) == builder.ALLOWED_ROW_FIELDS for row in delivered)
+    if delivered not in (baseline, rows):
+        print(
+            f"SUPERSEDED: delivered sheet carries {len(delivered)} rows; "
+            f"this rebuild writes {len(rows)}",
+            flush=True,
+        )
     for path, value in ((SHEET, rows), (KEY, key)):
         payload = json.dumps(value, ensure_ascii=False, indent=1) + "\n"
         assert len(payload.encode()) <= 300_000
@@ -278,6 +462,32 @@ def main():
         )
         + "\n"
     )
+    recovered_html = "\n".join(
+        f"<tr><td><code>{html.escape(sn_id)}</code></td>"
+        f"<td><code>{html.escape(route['descendant'])}</code></td>"
+        f"<td><code>{html.escape(recovered[sn_id]['source_path'])}</code></td></tr>"
+        for sn_id, route in sorted(routes.items())
+        if route["source_route"] == "lineage"
+    )
+    ambiguous_html = "\n".join(
+        f"<tr><td><code>{html.escape(row['case'])}</code></td>"
+        f"<td><code>{html.escape(row['ancestor'])}</code></td>"
+        "<td>"
+        + html.escape(
+            "; ".join(
+                f"{c['descendant']} -> {c['source_path']}" for c in row["candidates"]
+            )
+        )
+        + "</td></tr>"
+        for row in sorted(ambiguous, key=lambda r: r["case"])
+    )
+    control_html = "\n".join(
+        f"<tr><td><code>{html.escape(row['case'])}</code></td>"
+        f"<td><code>{html.escape(row['direct_path'])}</code></td>"
+        f"<td>{html.escape(', '.join(row['lineage_paths']) or '-')}</td>"
+        f"<td>{'agrees' if row['agrees'] else 'differs'}</td></tr>"
+        for row in sorted(control, key=lambda r: r["case"])
+    )
     missing_html = "\n".join(
         f"<tr><td><code>{html.escape(r['case'])}</code></td>"
         f"<td><code>{html.escape(r['ancestor'])}</code></td>"
@@ -290,12 +500,23 @@ def main():
         "<p>The original builder reproduced 82 rows from 42 contributing cases, "
         "with 104 complete pairs and 62 complete cases excluded for missing DD sources. "
         "The 104 count is the paired population, not the number represented on the sheet.</p>\n"
+        f"<p>The first rebuild, which resolved a source only through each case's own two "
+        "recorded identities, carried 94 rows from 48 contributing cases. This rebuild "
+        "adds the lineage route: a sourceless case falls back to a live descendant of "
+        "its ancestor that still holds a DD <code>PRODUCED_NAME</code> source, reached "
+        "by up to six <code>REFINED_FROM</code> hops.</p>\n"
         f"<p>The rebuilt sheet has <strong>{len(rows)} rows</strong> "
-        f"({len(rows) - 82:+d}), representing <strong>{len(contributing)} cases</strong> "
-        f"({len(contributing) - 42:+d}) of the same 104 complete pairs. "
-        f"{len(no_source)} complete cases remain sourceless. "
-        f"The original 16 incomplete cases remain excluded; {identical} identical "
-        f"output pairs collapse. {len(produced)} recorded outputs are credited.</p>\n"
+        f"({len(rows) - 82:+d} against the recorded 82, {len(rows) - 94:+d} against the "
+        f"first rebuild's 94), representing <strong>{len(contributing)} cases</strong> "
+        f"({len(contributing) - 42:+d} against 42, {len(contributing) - 48:+d} against 48) "
+        f"of the same 104 complete pairs. <strong>{len(recovered)} cases</strong> enter by "
+        f"lineage, and under this run's own graph state the direct route alone yields "
+        f"{lineage_rows['only_direct']} rows against {len(rows)} with it, so the "
+        f"lineage route adds {lineage_rows['with_lineage']} rows. "
+        f"{len(no_source)} complete cases remain sourceless and excluded, "
+        f"{len(ambiguous)} of them ambiguous. The {len(incomplete)} incomplete cases "
+        f"remain excluded; {identical} identical output pairs collapse. "
+        f"{len(produced)} recorded outputs are credited.</p>\n"
         "<p>Only recorded case outputs were used. The original source resolver and "
         "sheet builder were imported unchanged. DD paths were verified against live "
         f"IMASNode descriptions and units ({len(paths)} distinct paths). "
@@ -304,8 +525,32 @@ def main():
         "<p>The sheet contains only its seven allowed fields. The separate arm key "
         "must not be given to the blind labeller. The driver checks every output credit, "
         "refuses a planted false arm credit, and refuses planted arm leakage, blank "
-        "source path and blank name. Its read adapter refuses a write query before "
-        "execution. A known bound case serves as the live lookup positive control.</p>\n"
+        "source path, blank name and a planted <code>source_route</code> field. Its read "
+        "adapter refuses a write query before execution. A known bound case serves as "
+        "the live lookup positive control.</p>\n"
+        f'<h3 id="{ANCHOR}-lineage">Cases recovered through a refined descendant</h3>\n'
+        f"<p>{len(recovered)} cases carry a DD source from a descendant of their "
+        'ancestor. The descendant is flagged as <code>source_route: "lineage"</code> '
+        "with its id in the arm key only; on the sheet a recovered row is "
+        "indistinguishable from a direct case, so the labeller cannot see the route. "
+        'Every other case carries <code>source_route: "direct"</code>.</p>\n'
+        "<table><thead><tr><th>Case</th><th>Descendant</th><th>DD source</th>"
+        f"</tr></thead><tbody>{recovered_html}</tbody></table>\n"
+        f'<h3 id="{ANCHOR}-ambiguous">Ambiguous cases, left out</h3>\n'
+        f"<p>{len(ambiguous)} sourceless case(s) have two or more sourced descendants "
+        "resolving to different DD sources. Neither is preferred, so the case stays "
+        "out with both candidates recorded.</p>\n"
+        "<table><thead><tr><th>Case</th><th>Ancestor</th><th>Candidates</th>"
+        f"</tr></thead><tbody>{ambiguous_html}</tbody></table>\n"
+        f'<h3 id="{ANCHOR}-control">Control: would the lineage route have agreed?</h3>\n'
+        f"<p>{len(control)} direct cases also have a live sourced descendant. Their own "
+        "source and the lineage route agree for "
+        f"<strong>{sum(1 for row in control if row['agrees'])} of {len(control)}</strong>. "
+        "An agreement is the two routes naming the same DD path; a difference is "
+        "reported rather than repaired, because the direct source is the case's own "
+        "binding and keeps precedence.</p>\n"
+        "<table><thead><tr><th>Case</th><th>Direct path</th><th>Lineage path(s)</th>"
+        f"<th>Verdict</th></tr></thead><tbody>{control_html}</tbody></table>\n"
         f'<h3 id="{ANCHOR}-missing">Every remaining sourceless case</h3>\n'
         "<table><thead><tr><th>Case</th><th>Ancestor</th><th>Pair</th><th>Reason</th>"
         f"</tr></thead><tbody>{missing_html}</tbody></table>\n"

@@ -1,0 +1,45 @@
+<h2 id="srtj-refine-sheet-lineage">Lineage-recovered cases added to the blind refine sheet</h2>
+<p>The rebuild driver now falls back to a refined descendant when a case's own two
+recorded identities hold no DD source. The measured detail is in
+<a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-refine-ab-sheet-rebuild.html#srtj-refine-ab-sheet-rebuild">the rebuild fragment</a>,
+which the same run rewrites.</p>
+<h3 id="srtj-refine-sheet-lineage-what-changed">What changed</h3>
+<ul>
+  <li>The driver gains one bounded lineage read:
+  <code>(descendant)-[:REFINED_FROM*1..6]-&gt;(ancestor)</code>, restricted to a
+  descendant whose <code>name_stage</code> is neither <code>superseded</code> nor
+  <code>exhausted</code> and that holds a DD <code>PRODUCED_NAME</code> source. It
+  is added to the read adapter's allowlist, so the refusal of an unlisted query
+  still holds.</li>
+  <li>The descendant's source is taken exactly as the existing resolver picks one
+  for a bound name, and the case is injected with it, so the sheet builder runs
+  unchanged and writes a row indistinguishable from a recovered or a direct one.</li>
+  <li>Two sourced descendants resolving to different DD paths leave the case
+  ambiguous: it stays out and both candidates are recorded. No choice is made.</li>
+  <li>The arm key carries <code>case_source_routes</code>
+  (<code>lineage</code> with the descendant id, else <code>direct</code>), the
+  ambiguous cases with both candidates, and the agreement control.</li>
+  <li>A planted <code>source_route</code> on the sheet is refused.</li>
+</ul>
+<h3 id="srtj-refine-sheet-lineage-measure">The measure</h3>
+<table>
+  <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>Rows</td><td>124, from 86 with the direct route alone (+38)</td></tr>
+    <tr><td>Contributing cases</td><td>63 of 104 complete pairs</td></tr>
+    <tr><td>Recovered by lineage</td><td>19</td></tr>
+    <tr><td>Ambiguous, left out</td><td>1</td></tr>
+    <tr><td>Complete cases still sourceless</td><td>41</td></tr>
+    <tr><td>Control: direct cases with a sourced descendant</td><td>32, agreeing on 24</td></tr>
+    <tr><td>Gate</td><td>EXIT=0, 0 LLM calls, USD 0, no graph updates</td></tr>
+  </tbody>
+</table>
+<h3 id="srtj-refine-sheet-lineage-rederivation">Re-derivation of the ruled count</h3>
+<p>The lead's ruling named 23 cases recoverable by lineage. Re-derived against the
+live catalogue in this run, the count is <strong>19</strong>: 20 sourceless
+complete cases have a sourced descendant, and one of those is ambiguous, so 19
+enter. The difference is the graph rather than the rule: the previous rebuild
+resolved 56 complete cases as sourceless against 60 today, and the direct-route
+population has since moved too (86 rows from the direct route alone against the
+94 the first rebuild wrote). Each run states its own graph state, so the ruled
+23 is not reproducible today and no attempt was made to force it.</p>
