@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="164">
+<meta name="plan-version" content="165">
 <meta name="plan-modified" content="2026-10-21">
 </head>
 <body>
@@ -163,7 +163,7 @@
     </p>
 
     <h2 id="s7">§7 — The family template chosen, not defaulted</h2>
-<section data-reckon="section" data-id="s7" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s7" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>When <code>sn harmonize</code> rewrites a family from its anchor, the anchor sets every member's template, so a weak anchor spreads its weaknesses. Today <code>select_anchor</code> in <code>imas_codex/standard_names/harmonize.py</code> picks it by heuristic. Jev asks one Score per member: how well would this member's documentation serve as the template for the whole family? It reads the member's documentation, the family's pattern and the house-style template. The highest-scoring member is the candidate anchor.</p><p><strong>Done when:</strong> on ten families, each is harmonized twice in a scratch graph, once from the heuristic anchor and once from the Jev anchor. The fragment reports the lint findings after each and the documentation review scores of the members, and the Jev anchor is adopted only if its families show fewer findings with no lower scores.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -617,7 +617,10 @@
     <div class="r-comment-body"><p>All six re-run arms have landed, on the fixed tree. The false 0.849 halts are gone. The holds that remain are genuine source contradictions, on the wall-recombination anchor in both arms. The re-selection leaves nine families, six of which share an anchor and count as agreements.</p><p>The verdict is now <code>ssog-anchor-ab-rerun-aggregate</code>'s to compute, and it is dispatched. It applies the rule over the three differing families from the records, with no literal verdict. It reads <code>scores_after</code> and the halt fields, never <code>outcome_status</code>, and refuses any incomplete record. It also takes every runner and record finding the arm reviews folded into it. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s7-rerun-arms">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261021T044541603425-review-of-ssog-anchor-ab-rerun-aggregate-1bbe904b7d33" data-who="reckon-build" data-when="2026-10-21T05:11:37.209Z">
-    <div class="r-comment-body"><p>the review record for r-20261021T034837746521-ssog-anchor-ab-rerun-aggregate, status parsed, all six dimensions scored, stored at both declared write paths under review-records/ in that run&#x27;s directory and nowhere in the worktree</p></div>
+    <div class="r-comment-body"><p>the review record for r-20261021T034837746521-ssog-anchor-ab-rerun-aggregate, status parsed, all six dimensions scored, stored at both declared write paths under review-records/ in that run's directory and nowhere in the worktree</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-build" data-when="2026-10-21T05:45:00Z">
+    <div class="r-comment-body"><p>§7 closed: the heuristic anchor stays. Re-run on the fixed tree, the Jev anchor ties on lint (8 against 8) and lowers four member scores across two of the three differing families. It wins only the aperture coordinates. Six families agree. Spend over both rounds stayed inside the USD 50 ceiling. The verdict is computed from the records, and its caveats are in the evidence. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s7-anchor-verdict">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
     <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
