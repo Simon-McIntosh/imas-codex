@@ -12,6 +12,11 @@
       "kind": "exempted",
       "reason": "a 45 against 46 count in a classification the node marks as its own; the conclusion that no firing is a true contradiction does not move",
       "recorded_at": "2026-10-22T22:44:53.787812+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "srtj-review-holds-channel",
+      "recorded_at": "2026-10-22T22:45:20.345913+00:00"
     }
   },
   "findings": [
