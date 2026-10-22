@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="166">
+<meta name="plan-version" content="167">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -772,7 +772,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>review record for r-20261022T124348526060-srtj-cascade-deciding-names naming reviewed_base_sha 7d3acbc7fd503fc064c274cc857b87a2d4e1b8e8 and reviewed_head_sha 1cd51a86966140bad47d1d0ca4c2103c23451a01, scored on all six dimensions (goal_fidelity 19, evidence 18, scope_discipline 20, durability 16, fit 18, reuse 20), added_failure_count 0 with an empty added_failure_ids, derived from the reviewed run's baseline_suite and after_suite gate logs, and one follow-on finding that the fragment's named head-arm log is stamped at 7d3acbc7 rather than the reviewed head</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261022T124348526060-srtj-cascade-deciding-names" data-who="reckon-build" data-when="2026-10-22T14:30:42Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html — deciding_enabled takes the axis (true/false/list of &quot;name&quot;/&quot;docs&quot;, anything else refused), pyproject sets cascade-deciding = [&quot;name&quot;] so Jev decides names while documentation stays with the paid panel and the 5% audit samples names only, a name item is decided by Jev while a docs item returns the incumbent&#x27;s verdict unchanged, the two audit test follow-ons are repaired (construction-site guard asserts the site&#x27;s own expression; group-id test drives the real quorum return path), and the five named cascade test files show 0 added failures.</p></div>
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html — deciding_enabled takes the axis (true/false/list of "name"/"docs", anything else refused), pyproject sets cascade-deciding = ["name"] so Jev decides names while documentation stays with the paid panel and the 5% audit samples names only, a name item is decided by Jev while a docs item returns the incumbent's verdict unchanged, the two audit test follow-ons are repaired (construction-site guard asserts the site's own expression; group-id test drives the real quorum return path), and the five named cascade test files show 0 added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261022T143453621312-review-of-srtj-docs-disagreement-sheet-2f2f3ec69038" data-who="reckon-build" data-when="2026-10-22T15:02:38.924Z">
+    <div class="r-comment-body"><p>review-of-srtj-docs-disagreement-sheet at 2f2f3ec69 — parsed, three follow-on findings and no blocking finding; scores goal_fidelity 18, evidence 16, scope_discipline 20, durability 12, fit 17, reuse 16; the sheet, key and html reproduce the authority dry-run table exactly (164 shared, 49 jev-accept/panel-refine, 0 the other way, 38 both-accept, 14 both-refine), which my own independent re-derivation from the cohort piece files confirmed; the three findings are follow-on: TABLE_REFERENCE is printed but never asserted against (srtj-docs-disagreement-sheet-run.py:63), the gate log&#x27;s revision stamp and the artefacts&#x27; code_revision name 7ab8ca309 rather than the landed 2f2f3ec69 (:401), and the panel is decided by score at 0.85 where the coordinator&#x27;s pinned definition says both routes, so a literal route reading gives 64 disagreements not 49 (:132); added_failure_count 0 because the reviewed run carries no baseline_suite or after_suite key.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-10-22T15:02:38.924Z",
+  "dispatched_at": "2026-10-22T14:35:42Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-sheet-run.py",
+      "line": "63",
+      "severity": "follow-on",
+      "text": "TABLE_REFERENCE is declared to be the cross-tabulation the derivation is checked against, is copied into the payload at :454 and printed side by side by render_html, but is never compared with the derivation by any assertion or raise, so the html's claim at :578 that the sheet reproduces the dry-run table exactly is prose rather than a check: a regression in derive() (a changed PANEL_MIN_SCORE, a dropped unjudged filter) would still write a sheet and still print the claim. It matters because the authority the node is judged against is a printed number a reader must compare by eye; the numbers do match, verified independently against the piece files and against docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-sheet-run.py",
+      "line": "401",
+      "severity": "follow-on",
+      "text": "the gate log's own header line (srtj-docs-disagreement-sheet.log:1, '# revision: 7ab8ca309570a263c7efb4231f782d9d252cbda9'), the artefacts' record.code_revision and created_at, and the revision this line stamps into the payload all name 7ab8ca309 and a 14:27Z run, while the landed head is 2f2f3ec69 and was committed at 16:32Z: the run was executed in a worktree carrying uncommitted runner edits, so nothing in the committed evidence ties the recorded run to the revision it landed at. The link is inferable rather than stated \u2014 the 7ab8ca309 artefacts carry score_reading/targets, which this revision deleted, and the landed artefacts carry definition/table_reference/panel_route_reading/controls, which only this revision writes \u2014 so the run provably used the landed script, but a promotion or audit reading the stamp alone cannot see that."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-sheet-run.py",
+      "line": "132",
+      "severity": "follow-on",
+      "text": "the coordinator's pinned definition (run r-20261022T124534566075 resume-1-advice.txt:3, 'A decided item is a shared item where both routes are accept or refine') reads both judges from the stored route, but the panel's decision here is read from its score at the 0.85 cutoff; a literal route reading of the panel gives 64 disagreements and 3 both-accept, not the 49 and 38 the dry-run table carries, because 34 shared items are routed 'band'. The landed reading is the one that reproduces the table and the alternative is reported (record.panel_route_reading 64/3/14, html), so the count is right, but the definition the sheet prints and the definition the coordinator supplied are not the same sentence and only the comment above PANEL_MIN_SCORE explains why; a labeller or a later node reading the pinned definition literally would re-derive 64."
+    }
+  ],
+  "justifications": {
+    "durability": "srtj-docs-disagreement-sheet-run.py:222-247 raises unless assert_sheet_row refuses both planted rows, so the refusal control is exercised on every run, but no test under tests/ covers the runner and a derive() regression would still write a sheet and exit 0 \u2014 verified from the repository scan that found no caller and no test of the module.",
+    "evidence": "srtj-docs-disagreement-sheet.log ends EXIT=0 at line 40 and every count in it reproduces independently from the cohort piece files, but TABLE_REFERENCE at srtj-docs-disagreement-sheet-run.py:63 is never asserted against the derivation it names.",
+    "fit": "the runner follows the sibling evidence idiom of srtj-cohort-run.py:57-66 (a payload carrying schema, created_at and code_revision, and a log() helper), and its names stay inside the established srtj- fragment convention with no plan, sprint or ticket label in any symbol, comment or filename.",
+    "goal_fidelity": "srtj-docs-disagreement-sheet-run.py:136-173 derives 49 jev-accept/panel-refine, 0 the other way, 38 both-accept and 14 both-refine, and the 77 committed rows reproduce them, matching the authority row at docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html (docs 164/38/49/0/14/16/58).",
+    "reuse": "the added definitions extend the repository's owners rather than forking them \u2014 imas_codex.graph.client.GraphClient for the read and imas_codex.graph.temp_neo4j.start_temp_neo4j/stop_temp_neo4j for the scratch instance \u2014 though srtj-cohort-run.py:928-975 derives the same score-based incumbent cross-tabulation in a sibling fragment, and the brief explicitly required this runner to re-derive rather than trust it.",
+    "scope_discipline": "git diff --stat 5e8ea3b8ed9115402ec403e8659047a82ddaa967 2f2f3ec69038c871620ea68e1005251afa43dbb2 lists only the four declared write paths, and the diff carries no change the goal does not imply."
+  },
+  "notes": [
+    "added_failure_count 0 and added_failure_ids [] are derived, not adopted: the reviewed run's manifest carries no baseline_suite and no after_suite key, and its four declared write paths contain no test file, so the reviewed run recorded no gate logs to compare arms over and there are no added failure ids to name. Absence of those keys is not a measured zero of added failures and no such claim is made here.",
+    "the added assertions are read against the defect each guards. assert_sheet_row (:208-219) reddens if the row built at :375 gains any key outside ALLOWED_ROW_FIELDS or loses one of the seven, and if a forbidden key (route, jev_route, panel_route, score, rubric_total, comment) is present; the two plantings at :226 and :234 exercise the forbidden-key branch and the extra-field branch separately, and the else branches at :232 and :245 make the run itself fail if the guard ever stops refusing \u2014 a negative control the run performs, not merely a passing assertion, and none of them compares a value against a variable the run itself supplied.",
+    "the empty source_path on one of the 77 rows was checked rather than accepted: the item's StandardNameSource carries no dd_path in the archived export, and the payload's own export_probe exists so :487 raises had any row gone empty, and 164 of 164 shared items resolved, so it is a data fact of the archive and not a query fault."
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261022T143453621312-review-of-srtj-docs-disagreement-sheet-2f2f3ec69038",
+  "reviewed_base_sha": "5e8ea3b8ed9115402ec403e8659047a82ddaa967",
+  "reviewed_head_sha": "2f2f3ec69038c871620ea68e1005251afa43dbb2",
+  "reviewed_run_id": "r-20261022T124534566075-srtj-docs-disagreement-sheet",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T15:07:08.311274+00:00",
+  "total": 99,
+  "verdicts": {
+    "call_sites": "no production call site: the runner is a standalone evidence script under docs/evidence, nothing under imas_codex/ or tests/ imports it, and it is invoked only as a file path from the manifest's tests line.",
+    "diff": "read commit by commit against 5e8ea3b8e; 7ab8ca309 lands the runner and its three outputs under the route-only reading, and 2f2f3ec69 rewrites the runner to the score-based panel decision, adds TABLE_REFERENCE and choose_controls, fills the key's route columns and regenerates all three artefacts \u2014 four files, all inside the declared scope.",
+    "done_when": "the done_when asks for the sheet and key written by srtj-docs-disagreement-sheet-run.py with a log ending in a real EXIT=0, the scratch instance stopped and removed, and the html stating counts by class, seeds and the refusal check; srtj-docs-disagreement-sheet.log:40 ends EXIT=0, the payload records scratch_stopped true and scratch_removed.exists_after false, and srtj-docs-disagreement-sheet.html states all three.",
+    "goal": "the node's goal is a blind documentation-disagreement sheet with a separate key and a fragment stating the counts; docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-sheet.json carries 77 rows of exactly the seven allowed fields and srtj-docs-disagreement-key.json maps each of the same 77 sheet_ids to its item, class and both judges' decisions, so the deliverable the goal names exists.",
+    "manifest": "read; it records the coordinator's pinned definition and every count (49 disagreement / 28 control, pools 38 and 14), names the EXIT=0 log, and it discloses that the plan comment the brief cites as authority, c-s6-lead-ruling-names-first, is absent from docs/plans/sn-review-through-jev.html at this revision \u2014 I confirmed that absence and that srtj-docs-dry-run-diagnosis.html does not exist under docs/plans either.",
+    "write_paths": "the manifest declares four paths under docs/evidence/fragments/sn-review-through-jev/; git diff --stat 5e8ea3b8e..2f2f3ec69 names exactly the runner, the sheet, the key and the html and no fifth path."
+  }
+}
