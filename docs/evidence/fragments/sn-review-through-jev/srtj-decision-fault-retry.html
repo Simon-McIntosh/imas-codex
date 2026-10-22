@@ -131,9 +131,12 @@ rather than on the words.</p>
 <h3 id="srtj-decision-fault-retry-artifacts">Artifacts and commits</h3>
 
 <ul>
-  <li><code>477601907</code> — the fault's description in
-    <code>judgment.py</code> and <code>llm.py</code>.</li>
-  <li><code>f8a9be00b</code> — the type-based retry policy and
+  <li><code>477601907</code> — <code>judgment.py</code> alone: the fault text
+    as a field of the outcome <code>_settle_call</code> records, and the two
+    entry points' warnings reading it.</li>
+  <li><code>f8a9be00b</code> — <code>llm.py</code>: <code>fault_text</code>,
+    which names the type and <code>repr</code> when the message is empty, and
+    the type-first <code>_decisions_retryable</code>; with
     <code>tests/discovery/test_decision_fault_retry.py</code>.</li>
   <li>Logs in the run directory, beside this record:
     <code>head-newtests.log</code>, <code>gate-after.log</code>,
@@ -141,5 +144,10 @@ rather than on the words.</p>
     <code>empty-fault-probe.py</code> with its two outputs
     <code>probe-base.log</code> and <code>probe-head.log</code>.</li>
 </ul>
+
+<p>The two source commits were staged as one and split by a pathspec-scoped
+commit, so <code>477601907</code>'s message also describes the retry-policy half
+that landed in <code>f8a9be00b</code>; the mapping above is what each commit
+actually contains, checked with <code>git show</code> against both diffs.</p>
 
 <p><small>No live call and no graph write. The whole node's spend is USD 0.</small></p>
