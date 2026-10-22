@@ -2,14 +2,23 @@
   <h2 id="isn-pin-0-10-1-pin-0-10-1">imas-codex pins the released IMAS Standard Names 0.10.1</h2>
   <p>
     Both <code>imas-standard-names</code> pins in <code>pyproject.toml</code> now
-    read <code>==0.10.1</code>: the one in <code>[build-system] requires</code>
-    and the one in the <code>serve</code> extra of
-    <code>[project.optional-dependencies]</code>. No other dependency moved.
+    read <code>==0.10.1</code>: the one in the <code>requires</code> list of
+    <code>[build-system]</code>, and the one in the <code>dev</code> group under
+    <code>[dependency-groups]</code>. No other dependency moved.
     <code>grep -c 'imas-standard-names==0.10.1' pyproject.toml</code> prints
     <code>2</code> and <code>grep -c 'imas-standard-names==0.10.0'</code> prints
     <code>0</code>. The released tag is the upstream <code>v0.10.1</code>, the
     single midplane definition taken by maximum major radius on each flux
     surface.
+  </p>
+  <p>
+    The second pin is not in an extra. The <code>serve</code> extra holds
+    <code>fastapi</code>, <code>uvicorn</code> and <code>uvloop</code> and no
+    <code>imas-standard-names</code> requirement; the catalog-preview tooling
+    sits with the rest of the developer dependencies. The commit that carries
+    the bump states the wrong group in its message and is already the base of
+    this repair, so the correction lives here and in the note attached to it
+    rather than in a rewritten message.
   </p>
 
   <h3 id="isn-pin-0-10-1-lock-unchanged">The lock is byte-identical after regeneration</h3>
