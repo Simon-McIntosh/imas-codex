@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="163">
+<meta name="plan-version" content="164">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -573,6 +573,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-reconcile-hold-landed" data-who="reckon-build" data-when="2026-10-22T12:49:00Z">
     <div class="r-comment-body"><p>Attachment reconciliation now holds a detach that would strand its name, instead of aborting the whole apply (merge <code>90e12efa4</code>, reviews 97 and 103/120). The first review's blocking template regression is fixed. Graph-marked tests run against a disposable Neo4j and stay flat against base. Two follow-ons go to <code>shc-reconcile-predicate-owner</code>; both make the hold more conservative, never less:</p><ul><li>compose the producer test from the invariant's owner;</li><li>add the invariant's status-superseded exemption.</li></ul><p>The ISN midplane change is merged in imas-standard-names (<code>9130410</code>), and imas-codex reads it through the editable sibling checkout. Next, the locus family re-runs within the remaining USD 3.59. <code>gap_at_outboard_midplane</code>'s documentation is reviewed once more under the single midplane definition. The release and pin follow the upstream pull request.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261022T144644635170-review-of-shc-gap-docs-regen-a13db1e78502" data-who="reckon-build" data-when="2026-10-22T15:25:29.013Z">
+    <div class="r-comment-body"><p>independent review recorded for r-20261020T202608740663-shc-gap-docs-regen over commit a13db1e78502bc155d1c110b16635b4429650469 from base 86aa169700ab8c47a1959414f9890825e1a95c1e; status parsed, scores goal_fidelity 18, evidence 15, scope_discipline 20, durability 7, fit 17, reuse 19, added_failure_count 0, added_failure_ids []; the node regenerates both split names&#x27; documentation and the fragment records both accepted above 0.85, with four follow-on findings and no blocker</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>

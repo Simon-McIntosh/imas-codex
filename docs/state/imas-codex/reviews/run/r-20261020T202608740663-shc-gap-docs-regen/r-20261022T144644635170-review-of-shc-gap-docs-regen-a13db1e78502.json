@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run declares no suite: manifest.md lines 14-15 carry baseline_suite and after_suite empty, and its gate is a docs-evidence check (ruff plus a record regeneration) rather than a test suite. Nothing is derivable from absent gate logs, so the added-failure count is 0 with an empty id list.",
+  "call_sites": "none",
+  "completed_at": "2026-10-22T15:25:29.013Z",
+  "dispatched_at": "2026-10-22T15:03:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen-run.py",
+      "line": 302,
+      "severity": "follow-on",
+      "text": "LOCUS_DEFINITION_CHECK's significance reads the second-height defect as gone for the node, but the record's own after-state shows radial_separatrix_distance_at_outboard_midplane still carrying the pre-merge locus sentence ('The data's midplane identifier selects that height, or it is the magnetic-axis height when none is given'); radial's documentation was generated 2026-10-20 under run_id b5eb53cc and never regenerated after the registry was merged, so the fragment's headline that both names were accepted after the locus registry stopped naming a second height holds for gap_at_outboard_midplane only. The record states the divergence nowhere, so the read is left to the reader."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen-run.py",
+      "line": 505,
+      "severity": "follow-on",
+      "text": "DD_FIELD_RE matches only the underscore spelling \\bmidplane_identifier\\b, so radial's accepted documentation naming the same DD field in prose ('The data's midplane identifier selects that height') is reported as names_dd_field_or_path: false; the read-back check is narrower than the property the record and the fragment state, and whether a prose reference counts as naming a DD field is a judgement neither records."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen-run.py",
+      "line": 585,
+      "severity": "follow-on",
+      "text": "report() writes the record from a live-graph read and the gate prints read_checks without asserting them, so the gate cannot fail on a graph drift or on a false read-back: it silently rewrites the record instead, and the gate log records only its own EXIT=0 line, leaving nothing that reddens if the recorded claims regress."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen.html",
+      "line": 28,
+      "severity": "follow-on",
+      "text": "the invocation block attributes gap's regenerated documentation to docs_model=openrouter/openai/gpt-6-luna, while the record's own live read at shc-gap-docs-regen.json after.gap_at_outboard_midplane reports docs_model openrouter/openai/gpt-6.1-sol for the same name; the two may describe different regenerations, but the fragment never reconciles them and a reader cannot tell which seat produced the accepted text."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the six commits 373c35fd5..a13db1e78 against base 86aa169700ab8c47a1959414f9890825e1a95c1e commit by commit; every subject is docs(evidence) and the net change is the fragment, its JSON record and the runner, all new files.",
+    "done_when": "the brief's done_when names the fragment shc-gap-docs-regen.html and its JSON record; both exist at the fragment path and the record carries the invocation, the dry run, the log paths, the before/after scores, the read-back checks and the spend, but the gate the node ran (uv run --no-sync python docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen-run.py report) asserts none of those conditions, it writes the record and prints the checks.",
+    "goal": "the node's goal is to regenerate both split names' documentation through the pipeline's own documentation stage; shc-gap-docs-regen.json after.gap_at_outboard_midplane and after.radial_separatrix_distance_at_outboard_midplane show both at docs_stage=accepted with reviewer_score_docs 0.95625 and 0.90625.",
+    "manifest": "read the reviewed run's manifest.md; it records both names accepted on both axes, the gate command on the tests line, the gate log path on the test_logs line, and it leaves baseline_suite and after_suite empty because no suite ran.",
+    "write_paths": "the reviewed manifest declares three paths under docs/evidence/fragments/sn-harmonize-command/; git diff --stat 86aa1697..a13db1e78 reports exactly those three files, 1301 insertions, 0 deletions."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to regenerate both split names' documentation through the pipeline's own documentation stage; shc-gap-docs-regen.json after.gap_at_outboard_midplane and after.radial_separatrix_distance_at_outboard_midplane show both at docs_stage=accepted with reviewer_score_docs 0.95625 and 0.90625.\nVERDICT done_when: the brief's done_when names the fragment shc-gap-docs-regen.html and its JSON record; both exist at the fragment path and the record carries the invocation, the dry run, the log paths, the before/after scores, the read-back checks and the spend, but the gate the node ran (uv run --no-sync python docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen-run.py report) asserts none of those conditions, it writes the record and prints the checks.\nVERDICT write_paths: the reviewed manifest declares three paths under docs/evidence/fragments/sn-harmonize-command/; git diff --stat 86aa1697..a13db1e78 reports exactly those three files, 1301 insertions, 0 deletions.\nVERDICT manifest: read the reviewed run's manifest.md; it records both names accepted on both axes, the gate command on the tests line, the gate log path on the test_logs line, and it leaves baseline_suite and after_suite empty because no suite ran.\nVERDICT diff: read the six commits 373c35fd5..a13db1e78 against base 86aa169700ab8c47a1959414f9890825e1a95c1e commit by commit; every subject is docs(evidence) and the net change is the fragment, its JSON record and the runner, all new files.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: shc-gap-docs-regen.json after.radial_separatrix_distance_at_outboard_midplane shows docs_stage=accepted at reviewer_score_docs 0.90625.\nSCORE evidence: 15\nJUSTIFICATION evidence: shc-gap-docs-regen.json route and spend carry the invocation, the dry run, the log paths, before/after and the spend, but the read-back check at shc-gap-docs-regen-run.py:505 is narrower than the claim it supports.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 86aa169700ab8c47a1959414f9890825e1a95c1e a13db1e78502bc155d1c110b16635b4429650469 names only the three declared paths and no product source.\nSCORE durability: 7\nJUSTIFICATION durability: no test file lies in the write paths and the gate at shc-gap-docs-regen-run.py:585 rewrites the record rather than asserting it, so nothing reddens on a regression.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the docs/evidence/fragments/<plan>/ convention and the runner reads the graph through imas_codex.graph.client.GraphClient as the surrounding evidence runners do.\nSCORE reuse: 19\nJUSTIFICATION reuse: a search of imas_codex for a DD-field/IDS-path/option-value detector and for a per-name state read-back found no owner, and the writer mechanism is cited at imas_codex/standard_names/workers.py:9742 rather than reimplemented.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen-run.py:302 follow-on: LOCUS_DEFINITION_CHECK's significance reads the second-height defect as gone for the node, but the record's own after-state shows radial_separatrix_distance_at_outboard_midplane still carrying the pre-merge locus sentence ('The data's midplane identifier selects that height, or it is the magnetic-axis height when none is given'); radial's documentation was generated 2026-10-20 under run_id b5eb53cc and never regenerated after the registry was merged, so the fragment's headline that both names were accepted after the locus registry stopped naming a second height holds for gap_at_outboard_midplane only. The record states the divergence nowhere, so the read is left to the reader.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen-run.py:505 follow-on: DD_FIELD_RE matches only the underscore spelling \\bmidplane_identifier\\b, so radial's accepted documentation naming the same DD field in prose ('The data's midplane identifier selects that height') is reported as names_dd_field_or_path: false; the read-back check is narrower than the property the record and the fragment state, and whether a prose reference counts as naming a DD field is a judgement neither records.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen-run.py:585 follow-on: report() writes the record from a live-graph read and the gate prints read_checks without asserting them, so the gate cannot fail on a graph drift or on a false read-back: it silently rewrites the record instead, and the gate log records only its own EXIT=0 line, leaving nothing that reddens if the recorded claims regress.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen.html:28 follow-on: the invocation block attributes gap's regenerated documentation to docs_model=openrouter/openai/gpt-6-luna, while the record's own live read at shc-gap-docs-regen.json after.gap_at_outboard_midplane reports docs_model openrouter/openai/gpt-6.1-sol for the same name; the two may describe different regenerations, but the fragment never reconciles them and a reader cannot tell which seat produced the accepted text.\n",
+  "review_run_id": "r-20261022T144644635170-review-of-shc-gap-docs-regen-a13db1e78502",
+  "reviewed_base_sha": "86aa169700ab8c47a1959414f9890825e1a95c1e",
+  "reviewed_head_sha": "a13db1e78502bc155d1c110b16635b4429650469",
+  "reviewed_run_id": "r-20261020T202608740663-shc-gap-docs-regen",
+  "rubric": "landed-node",
+  "scores": {
+    "durability": 7,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T15:26:16.906774+00:00",
+  "total": 96
+}
