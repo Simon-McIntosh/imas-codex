@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-apply-drift-scope">
+  <title>Why a family-scoped harmonize apply redrafted two names outside its family</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-apply-drift-scope-title">Why a family-scoped harmonize apply redrafted two names outside its family</h1>
+
+  <p id="shc-apply-drift-scope-summary">
+    The apply
+    <code>sn harmonize --family electrostatic_potential --apply --cost-limit 3.59</code>
+    ran one family batch through the ordinary documentation pools. That drain
+    reaches <code>run_sn_pools</code>, which runs the graph-wide DD-source-drift
+    refresh. The refresh is not family-scoped, its steering is not family-scoped,
+    and the run id it hands back is attached to every name it steers, so the
+    names it steered were claimed by the family's own drain and regenerated
+    under the family's cost ceiling. Twelve model calls, all charging to
+    <code>$0.59457</code> of the family's <code>$3.59</code>, went to
+    <code>electron_temperature_at_separatrix</code> and
+    <code>gap_at_outboard_midplane</code>; the family's one member did not move
+    (<code>0.849</code> before and after, apply log lines 2862&#8211;2867).
+  </p>
+
+  <h2 id="shc-apply-drift-scope-q1">1. Why the family scope does not bind the refresh</h2>
+
+  <p id="shc-apply-drift-scope-q1-path">
+    The call path, read from the worktree source (base
+    <code>20a162d65</code>):
+  </p>
+  <ol id="shc-apply-drift-scope-q1-list">
+    <li id="shc-apply-drift-scope-q1-entry">
+      <code>sn harmonize --apply</code> calls
+      <code>apply_families(&#8230;)</code> with the family plan
+      (<code>imas_codex/cli/sn.py:6240</code>).
+    </li>
+    <li id="shc-apply-drift-scope-q1-applyfam">
+      <code>apply_families</code> runs
+      <code>CampaignRunner.run(&#8230;, drain_fn=family_drain, batch_plan=fam_plan["batches"])</code>
+      (<code>imas_codex/standard_names/harmonize.py:1776&#8211;1782</code>); the
+      runner calls the drain per batch as
+      <code>drain_fn(run_id, self.budget.per_batch_cost_cap)</code>
+      (<code>imas_codex/standard_names/campaign.py:1026&#8211;1032</code>).
+    </li>
+    <li id="shc-apply-drift-scope-q1-drain">
+      The drain is <code>_docs_drain_factory</code>'s inner
+      <code>_drain</code>, which issues a docs-only flush carrying the batch's
+      run id:
+      <code>_run_sn_cmd(&#8230;, skip_generate=True, docs_only=True, flush=True,
+      source="dd", scope_run_id=run_id, &#8230;)</code>
+      (<code>imas_codex/cli/sn.py:815&#8211;843</code>).
+    </li>
+    <li id="shc-apply-drift-scope-q1-loop">
+      That flush runs <code>run_sn_pools</code>, which calls the refresh before
+      any pool:
+      <code>sr = await _global_maintenance_call(refresh_drifted_sources,
+      scope_run_id=run_id, default={})</code>
+      (<code>imas_codex/standard_names/loop.py:2064&#8211;2068</code>,
+      <code>refresh_drifted_sources</code> at line 2065 and
+      <code>scope_run_id=run_id</code> at line 2066).
+      <strong>Only the run id is passed.</strong> No target set, no name list,
+      no family filter.
+    </li>
+    <li id="shc-apply-drift-scope-q1-refresh">
+      <code>refresh_drifted_sources(*, dry_run=False, include_accepted=True,
+      scope_run_id=None, gc=None)</code>
+      (<code>imas_codex/standard_names/source_refresh.py:334</code>) calls
+      <code>detect_source_drift(include_accepted=&#8230;)</code>
+      (line 361), whose signature has no id or family parameter at all
+      (line 157) and whose query scans every
+      <code>(src:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn:StandardName)</code>
+      row with <code>sn.name_stage &lt;&gt; 'superseded' AND sn.source_path IS
+      NOT NULL</code> (lines 179&#8211;197), <code>ORDER BY sn.id</code> &#8212;
+      the whole graph.
+    </li>
+    <li id="shc-apply-drift-scope-q1-inject">
+      For each drifted name that needs steering, the refresh attaches it to the
+      drain's run id:
+      <code>MATCH (sn:StandardName {id: $id}) SET sn.run_id = $scope_run_id,
+      sn.updated_at = datetime()</code>
+      (<code>imas_codex/standard_names/source_refresh.py:413&#8211;421</code>,
+      the <code>SET sn.run_id = $scope_run_id</code> at line 417). The docs pools
+      then claim only names whose <code>sn.run_id</code> matches the scope
+      (<code>imas_codex/standard_names/graph_ops.py:16178</code>,
+      <code>18421</code>, <code>26332</code>: <code>AND sn.run_id =
+      $scope_run_id</code>). So the attach is exactly what grants the pool
+      access to the two outsiders.
+    </li>
+    <li id="shc-apply-drift-scope-q1-charge">
+      The batch's measured spend is charged to the family ceiling:
+      <code>_family_budget_drain</code> gives each batch
+      <code>min(batch_cost_cap, ceiling - spent)</code> and accumulates
+      <code>spent += float(cost)</code>
+      (<code>imas_codex/standard_names/harmonize.py:1638&#8211;1679</code>), with
+      the ceiling set from the CLI's <code>--cost-limit</code>
+      (<code>imas_codex/cli/sn.py</code>, <code>per_batch_cost_cap=cost_limit</code>
+      and <code>campaign_cost_ceiling=cost_limit</code>). The runners'
+      per-name accounting is the receipt:
+      <code>{"calls_total": 12, "per_name_usd":
+      {"electron_temperature_at_separatrix": 0.256174,
+      "gap_at_outboard_midplane": 0.338396}, "spend_usd": 0.59457}</code>
+      (<code>runner-pipeline.log</code>).
+    </li>
+  </ol>
+
+  <p id="shc-apply-drift-scope-q1-missing">
+    The missing argument is a <strong>target scope</strong>: neither
+    <code>refresh_drifted_sources</code> nor <code>detect_source_drift</code>
+    accepts an <code>sn_ids</code> (or family) filter, although the sibling
+    <code>stamp_source_snapshots(sn_ids=None, *, only_unstamped=False, gc=None)</code>
+    does (<code>source_refresh.py:71&#8211;72</code>). <code>scope_run_id</code>
+    is not a restriction &#8212; it is the opposite: it is the mechanism that
+    pulls an outsider <em>into</em> the family's drain.
+  </p>
+
+  <h2 id="shc-apply-drift-scope-q2">2. Why these two names, and from what</h2>
+
+  <p id="shc-apply-drift-scope-q2-method">
+    Both names' deltas survive on the graph in
+    <code>sn.edit_reason</code>, written by
+    <code>apply_edit</code> at the moment of steering. Read back per name
+    (read-only, bounded to the one id):
+  </p>
+
+  <h3 id="shc-apply-drift-scope-q2-gap">gap_at_outboard_midplane</h3>
+  <ul id="shc-apply-drift-scope-q2-gap-list">
+    <li id="shc-apply-drift-scope-q2-gap-reason">
+      Persisted reason (verbatim): <em>&#8220;DD source drift &#8212; the
+      anchoring Data Dictionary path changed (path renamed:
+      &#8216;langmuir_probes/embedded/distance_separatrix_midplane&#8217; &#8594;
+      &#8216;summary/boundary/distance_inner_outer_separatrices/value&#8217;;
+      documentation: &#8216;Distance between the measurement position and the
+      separatrix, mapped along flux surfaces to the outboard midplane, in the
+      major radius direction. Positive value&#8230;&#8217; &#8594;
+      &#8216;Value&#8217;; raw_documentation: &#8216;&#8230;&#8217; &#8594;
+      &#8216;Value&#8217;)&#8221;</em>.
+    </li>
+    <li id="shc-apply-drift-scope-q2-gap-snapshot">
+      Stored snapshot compared against: <code>source_path</code> now
+      <code>summary/boundary/distance_inner_outer_separatrices/value</code>,
+      <code>source_unit</code> <code>m</code>, <code>source_documentation</code>
+      <code>Value</code>, marker <code>resolved-dd-context</code>, manifest
+      digest <code>sha256:02dd37c7&#8230;4361d</code>, resolution ids
+      <code>[]</code>. Its producing source was composed
+      <strong>2026-07-23</strong> (<code>src.composed_at</code>), and its docs
+      were last regenerated on <code>2026-10-20</code> (the sibling fragment
+      <code>shc-gap-docs-regen</code>, run
+      <code>sn-edit-20261020T205652Z</code>).
+    </li>
+    <li id="shc-apply-drift-scope-q2-gap-src">
+      What changed: the name's anchoring DD path moved from
+      <code>langmuir_probes/embedded/distance_separatrix_midplane</code> to
+      <code>summary/boundary/distance_inner_outer_separatrices/value</code>, and
+      the live node's documentation collapsed from the long flux-surface
+      sentence to <code>Value</code>. This is a <strong>real source change</strong>
+      &#8212; the midplane-release re-anchor &#8212; not a missing stamp.
+    </li>
+    <li id="shc-apply-drift-scope-q2-gap-idem">
+      Not a per-run re-fire: the refresh re-stamps after steering
+      (<code>source_refresh.py:422&#8211;423</code>, &#8220;Re-stamp so this exact
+      change is not re-detected next run&#8221;), and the name's
+      <code>sn.updated_at</code> moved to <code>2026-10-22T18:43:15.931Z</code>
+      when its own docs accept landed. It is no longer among the drifted set
+      (see &#167;3).
+    </li>
+  </ul>
+
+  <h3 id="shc-apply-drift-scope-q2-ete">electron_temperature_at_separatrix</h3>
+  <ul id="shc-apply-drift-scope-q2-ete-list">
+    <li id="shc-apply-drift-scope-q2-ete-reason">
+      Persisted reason (verbatim): <em>&#8220;DD source drift &#8212; the
+      anchoring Data Dictionary path changed (path renamed:
+      &#8216;summary/local/separatrix_average/t_e/value&#8217; &#8594;
+      &#8216;summary/local/separatrix/t_e/value&#8217;)&#8221;</em>.
+    </li>
+    <li id="shc-apply-drift-scope-q2-ete-snapshot">
+      Stored snapshot compared against: <code>source_path</code>
+      <code>summary/local/separatrix/t_e/value</code>, unit <code>eV</code>,
+      documentation <code>Value</code>, marker <code>resolved-dd-context</code>,
+      same manifest digest, resolution ids <code>[]</code>; its source was
+      composed <strong>2026-10-20</strong>.
+    </li>
+    <li id="shc-apply-drift-scope-q2-ete-src">
+      What changed: the snapshot named the pre-rename leaf
+      <code>summary/local/separatrix_average/t_e/value</code> while the live
+      source had already settled at <code>summary/local/separatrix/t_e/value</code>.
+      Again a <strong>real DD path change</strong>; the snapshot was simply
+      behind it.
+    </li>
+    <li id="shc-apply-drift-scope-q2-ete-idem">
+      Not a re-fire: re-stamped by the refresh, then rewritten to
+      <code>2026-10-22T18:40:35.122Z</code> by its docs accept; it is not in the
+      restamped window of &#167;3.
+    </li>
+  </ul>
+
+  <p id="shc-apply-drift-scope-q2-rename">
+    <strong>No <code>RENAMED_TO</code> edge was traversed for either name.</strong>
+    The readback's resolved-path field is <code>None</code> for both, i.e. the
+    source's <code>source_id</code> is its own terminal node with no outgoing
+    <code>RENAMED_TO</code> lineage, so
+    <code>_repoint_source</code> (<code>source_refresh.py:321&#8211;331</code>,
+    which requires a <code>RENAMED_TO*1..12</code> path) was a silent no-op on
+    both. The word &#8220;renamed&#8221; in both reasons is cosmetic:
+    <code>_format_reason</code> renders the label
+    <code>"path renamed"</code> for <em>any</em> <code>source_path</code> delta
+    (<code>source_refresh.py:311</code>: <code>label = "path renamed" if
+    d["field"] == "source_path" else d["field"]</code>). The log line
+    &#8220;80 name(s) drifted (2 renamed)&#8221; (apply log line 58) counts those
+    same two path deltas; the refresh's
+    <code>renamed</code>/<code>RENAMED_TO</code> sense is a different quantity.
+  </p>
+
+  <h2 id="shc-apply-drift-scope-q3">3. The 80: classes, counts, and why only two steered</h2>
+
+  <p id="shc-apply-drift-scope-q3-method">
+    The refresh's re-stamp writes each drifted name with
+    <code>sn.updated_at = datetime()</code> one id at a time, so they cluster in
+    a single second. A bounded window scan
+    (<code>sn.updated_at &ge; 2026-10-22T18:35:40 AND &lt; 18:35:45</code>)
+    enumerates them. Grouping by name (three names carry more than one producing
+    source, so the raw row count is 81) yields <strong>78 distinct names</strong>
+    &#8212; the two steered names sit outside the window because their own docs
+    accepts rewrote <code>updated_at</code> later
+    (<code>18:40:35Z</code>, <code>18:43:15Z</code>). 78 + 2 = 80, matching the
+    log exactly (line 58, line 141).
+  </p>
+
+  <table id="shc-apply-drift-scope-q3-table">
+    <caption id="shc-apply-drift-scope-q3-caption">
+      The 80 names the refresh reported, classified by cause. The detector sets
+      <code>requires_steering</code> from content fields only
+      (<code>source_path</code>, <code>units</code>, <code>documentation</code>;
+      <code>source_refresh.py:280&#8211;283</code>), so a class is decided by
+      whether the delta touches a content field.
+    </caption>
+    <thead>
+      <tr><th>Class</th><th>Count</th><th>What the delta was</th><th>Examples</th></tr>
+    </thead>
+    <tbody>
+      <tr id="shc-apply-drift-scope-q3-row-a">
+        <td>(a) a real DD or source change</td>
+        <td>2</td>
+        <td><code>source_path</code> (and, for the gap name, documentation) differ
+        between the stored snapshot and the live resolved node &#8212; a genuine
+        re-anchor</td>
+        <td><code>gap_at_outboard_midplane</code>,
+        <code>electron_temperature_at_separatrix</code></td>
+      </tr>
+      <tr id="shc-apply-drift-scope-q3-row-b">
+        <td>(b) a snapshot never re-stamped after an earlier regeneration</td>
+        <td>78</td>
+        <td>content matched; only provenance differed (marker + manifest digest)
+        &#8212; re-stamped without steering</td>
+        <td><code>alpha_parameter</code>, <code>fast_electron_energy</code>,
+        <code>neutral_beam_mass</code>, <code>radiated_power_density</code>,
+        <code>total_plasma_energy</code> (full list in the JSON)</td>
+      </tr>
+      <tr id="shc-apply-drift-scope-q3-row-c">
+        <td>(c) a rename</td><td>0</td>
+        <td>no name was found by following a <code>RENAMED_TO</code> edge; the
+        &#8220;2 renamed&#8221; in the log is the path-delta label, not a graph
+        rename</td>
+        <td>&#8212;</td>
+      </tr>
+      <tr id="shc-apply-drift-scope-q3-row-d">
+        <td>(d) other</td><td>0</td>
+        <td>every detected name fell into (a) or (b)</td><td>&#8212;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="shc-apply-drift-scope-q3-b-signature">
+    The 78 share one fingerprint: <code>source_dd_resolution_marker =
+    'resolved-dd-context'</code> with <code>size(source_dd_resolution_ids) = 0</code>
+    and the identical manifest digest
+    <code>sha256:02dd37c7&#8230;4361d</code>. Their producing sources were composed
+    overwhelmingly on <strong>2026-10-19</strong> (the marker/digest provenance
+    fields post-date some of those snapshots, which is what the refresh's first
+    pass after the fields were introduced is clearing out). <strong>77 of the 78
+    are <code>name_stage='exhausted'</code></strong>, against 150 of 2466 in the
+    live population &#8212; the provenance-only class is concentrated in names
+    the documentation pipeline had already exhausted, i.e. names an earlier
+    regeneration wrote without touching <code>source_*</code>.
+  </p>
+
+  <p id="shc-apply-drift-scope-q3-next">
+    <strong>How many would be steered next run: 0.</strong> The proof is a
+    read-only re-run of the detector itself at the current head &#8212;
+    <code>detect_source_drift(gc=gc)</code>, which stamps nothing:
+  </p>
+  <pre id="shc-apply-drift-scope-q3-receipt"><code>drifted_now: 1   steered_now: 1   renamed_now: 1
+residual_ids: ["radial_separatrix_distance_at_outboard_midplane"]
+  delta: source_path  thomson_scattering/channel/distance_separatrix_midplane
+                   -&gt; langmuir_probes/embedded/distance_separatrix_midplane
+residual_is_subset_of_80: []</code></pre>
+  <p id="shc-apply-drift-scope-q3-next-why">
+    The single remaining drifted name is <em>not</em> one of the 80, so none of
+    the 80 would be steered again: the 2 were re-stamped after steering and the
+    78 were re-stamped as provenance-only. The reason only two steered on this
+    run is the same property: the 80 were partitioned by content, and only 2 had
+    a content delta.
+  </p>
+
+  <p id="shc-apply-drift-scope-q3-adjacent">
+    <strong>Two adjacent populations the detector cannot see</strong> (counted
+    read-only, both excluded from the 80 and from the next-run receipt):
+  </p>
+  <ul id="shc-apply-drift-scope-q3-adjacent-list">
+    <li id="shc-apply-drift-scope-q3-adjacent-invisible">
+      <strong>46 names</strong> carry
+      <code>source_dd_resolution_marker IS NULL</code> and their source's
+      <code>source_id</code> is the name's own id, not a DD path, so
+      <code>detect_source_drift</code>'s inner
+      <code>MATCH (o:IMASNode {id: src.source_id})</code>
+      (<code>source_refresh.py:180</code>) matches nothing and the row is
+      silently skipped &#8212; a missing node returns zero rows, not an error.
+    </li>
+    <li id="shc-apply-drift-scope-q3-adjacent-multi">
+      <strong>3 names</strong> have more than one producing
+      <code>StandardNameSource</code>; the resolver collapses them with
+      <code>head(collect(n))</code>
+      (<code>source_refresh.py:39</code>), so which source is compared is
+      arbitrary and only one of them is re-anchored.
+    </li>
+  </ul>
+
+  <h2 id="shc-apply-drift-scope-fixes">Confirmed defects and their fixes</h2>
+  <ol id="shc-apply-drift-scope-fixes-list">
+    <li id="shc-apply-drift-scope-fix-scope">
+      <strong>Family apply leaks a graph-wide refresh.</strong> Thread a target
+      scope through the docs drain so <code>refresh_drifted_sources</code> and
+      <code>detect_source_drift</code> accept an <code>sn_ids</code> filter (as
+      <code>stamp_source_snapshots</code> already does) and have
+      <code>_docs_drain_factory</code> pass the batch's member ids, so a
+      family-scoped apply can only steer its own members.
+    </li>
+    <li id="shc-apply-drift-scope-fix-reason">
+      <strong>&#8220;path renamed&#8221; mislabels every path delta.</strong> In
+      <code>_format_reason</code>, label a <code>source_path</code> delta
+      &#8220;source path changed&#8221; and reserve &#8220;renamed&#8221; for the
+      case where the refresh actually followed a <code>RENAMED_TO</code> edge,
+      since a stale-snapshot path delta is the common case and is not a rename.
+    </li>
+    <li id="shc-apply-drift-scope-fix-stamp">
+      <strong>Docs regeneration never re-stamps the source snapshot.</strong>
+      When the docs pools rewrite a name, have them re-stamp its
+      <code>source_*</code> snapshot too, so a real source re-anchor that landed
+      before the regeneration is not deferred to the next global refresh (78 of
+      the 80 were exactly this backlog).
+    </li>
+    <li id="shc-apply-drift-scope-fix-invisible">
+      <strong>46 source-linked names are invisible to the detector.</strong>
+      Make the drift query left-join the <code>IMASNode</code> (or assert
+      <code>src.source_id</code> before the refresh) so a source that does not
+      resolve is reported rather than silently skipped.
+    </li>
+    <li id="shc-apply-drift-scope-fix-multi">
+      <strong>Multi-source names are compared against one arbitrary source.</strong>
+      Compare every producing source of a name in
+      <code>detect_source_drift</code> instead of collapsing with
+      <code>head(collect(n))</code>, and re-anchor each renamed source.
+    </li>
+  </ol>
+
+  <p id="shc-apply-drift-scope-artifacts">
+    Readbacks and class counts: <code>shc-apply-drift-scope.json</code>, written
+    by <code>shc-apply-drift-scope-run.py</code> (read-only; no graph write, no
+    model call, no <code>sn</code> command), log ending in
+    <code>EXIT=0</code>. Source citations were read from the same revision the
+    runner reported (<code>imas_codex.standard_names.source_refresh.__file__</code>
+    in the JSON).
+  </p>
+</main>
+</body>
+</html>
