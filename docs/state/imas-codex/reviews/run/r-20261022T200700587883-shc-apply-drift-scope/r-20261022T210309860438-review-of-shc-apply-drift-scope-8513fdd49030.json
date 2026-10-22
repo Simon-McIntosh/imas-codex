@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-10-22T21:18:54.593Z",
   "dispatched_at": "2026-10-22T21:04:02Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "hygiene of a finished one-shot evidence runner; the recorded result does not depend on it",
+      "recorded_at": "2026-10-22T22:46:15.253310+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope.html",
