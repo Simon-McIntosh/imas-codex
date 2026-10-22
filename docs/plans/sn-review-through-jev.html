@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="177">
+<meta name="plan-version" content="178">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -811,7 +811,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>Lead ruling: "the vetos should come through a different channel than the score so that they are visible as a different dimension and so that we can act on them (triage etc)." It was prompted by <code>electrostatic_potential</code>, which stores docs score 0.849, the <code>DEFAULT_MIN_SCORE - 0.001</code> clamp. Its panel passed it at 0.875 (15/20/15/20). Jev's contradiction note then judged the generic sentence "no mandatory locus or aggregation" to contradict a flux-surface-averaged DD source, and the name was never refined. Of the 36 documents below threshold, it is the only one whose panel scores pass.</p><p>The design that follows:</p><ul><li>A veto becomes a <code>ReviewHold</code> record linked by <code>HAS_HOLD</code>, carrying axis, kind, finding, evidence, raised-by and status (open, cleared or dismissed).</li><li>The score keeps the judged value.</li><li>A document is accepted when its score passes and no docs hold is open.</li><li>Refine claims a document whose score fails or that has an open hold.</li><li>A hold can be dismissed with a reason, and a dismissed finding is not raised again.</li></ul><p>The work runs in four nodes:</p><ol><li><code>srtj-review-holds-channel</code>: the record, its owner, the graph-ops and workers sites.</li><li>Route the lint cap and the cascade veto.</li><li>A triage command.</li><li>Move the live clamped documents onto the record.</li></ol><p>The documentation switch to Jev waits for this. <code>srtj-contradiction-veto-hold</code> measures the veto's firing history and precision.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261022T205924764153-review-of-srtj-contradiction-veto-hold-0c3992cb8739" data-who="reckon-build" data-when="2026-10-22T21:12:20.482Z">
-    <div class="r-comment-body"><p>review-of-srtj-contradiction-veto-hold — read the source node&#x27;s goal, done_when, write paths, manifest and the full 66f4eca6..0c3992cb diff commit by commit; verified every code citation it makes against the source revision and all resolve; scored goal_fidelity 15, evidence 13, scope_discipline 20, durability 11, fit 18, reuse 17, with four follow-on findings (45-vs-46 triple count disagreeing with the artifact, an unrecorded &quot;eligible NOW: 1&quot; backlog count, pre-clamp panel score supplied for one of ten names, no figure) and no blocking finding.</p></div>
+    <div class="r-comment-body"><p>review-of-srtj-contradiction-veto-hold — read the source node's goal, done_when, write paths, manifest and the full 66f4eca6..0c3992cb diff commit by commit; verified every code citation it makes against the source revision and all resolve; scored goal_fidelity 15, evidence 13, scope_discipline 20, durability 11, fit 18, reuse 17, with four follow-on findings (45-vs-46 triple count disagreeing with the artifact, an unrecorded "eligible NOW: 1" backlog count, pre-clamp panel score supplied for one of ten names, no figure) and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261022T210127783591-review-of-srtj-docs-lint-replay-722bd843c083" data-who="reckon-build" data-when="2026-10-22T21:18:32.198Z">
+    <div class="r-comment-body"><p>no plan text to land; the review is stored at the two declared record paths (r-20261022T185056036830-srtj-docs-lint-replay.json and its .at-722bd843c0839fbbbaddcf6530181abcb9eebe26.json twin), scoring goal_fidelity 19, evidence 12, scope_discipline 20, durability 14, fit 15, reuse 5, with one blocking and three follow-on findings on the reviewed node</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-22T21:18:32.198Z",
+  "dispatched_at": "2026-10-22T21:02:42Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T185056036830-srtj-docs-lint-replay/srtj-docs-lint-replay.log",
+      "line": 1,
+      "severity": "blocking",
+      "text": "the gate log the manifest names as both test_logs and negative_control_log is a killed run's partial output: its header line 3 names rev 722bd843c0839fbbbaddcf6530181abcb9eebe26 and its last line is the positive-control line stamped 20:59:29, with no EXIT line anywhere in the file, because the worker's final re-run of the gate was terminated -- the run's own stream records that command's tool result as 'Exit code 144' with is_error true, and the supervisor stopped the worker at 21:01:05Z. So the manifest's 'gate: exit 0' and the HTML's 'last line EXIT=0' cite a receipt that does not exist, and a promotion reading the gate's exit status from that log's last line reads nothing. The underlying measurement is corroborated (a complete EXIT=0 run at a7f985d6d produced rows identical to the committed JSON), so the repair is to re-run the runner at the head revision so its log ends in a real EXIT=0, or to point test_logs at a log that does."
+    },
+    {
+      "file": "/tmp/reckon-crew-scratch/r-20261022T185056036830-srtj-docs-lint-replay/srtj-docs-lint-replay-19x6xj2h",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "the terminated gate run left its scratch tree behind (2.6 GB dump plus instance/), because the runner's finally block never ran, so the done_when's 'the scratch instance is stopped and removed' holds for the run whose JSON was kept but not for the last one executed; no neo4j process survives it, and this review is fenced out of deleting it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay.html",
+      "line": 145,
+      "severity": "follow-on",
+      "text": "the reproduce section states the log is at revision a9ff6a562 with last line EXIT=0, which was true when the HTML was written and is false of the file now on disk (rev 722bd843c, no EXIT line), so a reader following the pointer is misled about which revision the cited receipt proves; repair it with the log."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay-run.py",
+      "line": 131,
+      "severity": "follow-on",
+      "text": "_doc_link_targets re-implements, with a narrower and image-unguarded pattern, the link parsing the repository already owns at imas_codex/standard_names/doc_links.py:110 (find_name_links) and :22 (_NAME_LINK_RE), which docs_gates.py:21, graph_ops.py:38 and harmonize.py:33 already use; the same owner also provides find_self_links for the self-referential link defect the report classes as 'no check reads', which is true only in the sense that no gate calls it."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to measure whether the deterministic lint that exists today would catch the 19 labelled documentation link defects, writing no product code; docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay-run.py:442-491 reduces the 77 rows to the 19 defect and 30 acceptable arms and records bar.meets_bar false, and no file outside docs/evidence/ appears in the diff.\nVERDICT done_when: the done_when asks for srtj-docs-lint-replay.json written by the runner with a log ending in a real EXIT=0, the scratch instance stopped and removed, and srtj-docs-lint-replay.html answering both questions; the JSON is the head revision's runner output (code_revision a7f985d6d with module_path naming the runner) and the HTML answers all four items, but the named log ends at its positive-control line with no EXIT line and the killed run's scratch tree srtj-docs-lint-replay-19x6xj2h (2.6 GB) survives under the run's TMPDIR.\nVERDICT write_paths: the declared scope is docs/evidence/fragments/sn-review-through-jev/{srtj-docs-lint-replay.html,srtj-docs-lint-replay.json,srtj-docs-lint-replay-run.py}; git diff --stat a9ff6a56200b389f27e5dc4d0aae66aa6f6f96fa 722bd843c lists exactly those three files with 3381 insertions and no deletions.\nVERDICT manifest: read at the run's manifest.md; it reports status complete, two commits, the gate line \"exit 0, the JSON loads under a strict parse, and every positive control fires\", and cites srtj-docs-lint-replay.log as both test_logs and negative_control_log; the log it names no longer supports that claim (blocking finding below).\nVERDICT diff: read commit by commit against a9ff6a56200b389f27e5dc4d0aae66aa6f6f96fa; a7f985d6d adds all three files and 722bd843c replaces the JSON with the 20:48 run's own serialization, and the two revisions' rows, per_class, bar, positive_controls and cap_sites compare identical once the run-metadata keys are set aside, so the replacement is a genuine second run rather than a reformat.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay-run.py:442-491 derives the bar verdict and the misses and false flags from the labelled rows, and the diff touches no product code.\nSCORE evidence: 12\nJUSTIFICATION evidence: the numbers are recorded and independently reproducible -- the 20:34 and 20:48 runs produced identical rows, and srtj-docs-lint-replay-run.py:345-351 refuses to publish without its positive controls firing -- but the gate receipt the manifest names, srtj-docs-lint-replay.log, carries no EXIT line, so the recorded status cannot be read from the log it cites.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is one of the three paths the source brief's Write scope declares, and the diff adds nothing the measurement goal does not imply.\nSCORE durability: 14\nJUSTIFICATION durability: srtj-docs-lint-replay-run.py:345-351 raises unless its positive controls fire, so weakening the link_hygiene gate or run_link_integrity would redden it, but no repository test covers the artifact and the last execution of the gate was killed before reaching its own guard.\nSCORE fit: 15\nJUSTIFICATION fit: the runner follows the idiom of its sibling fragment (docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-sheet-run.py:255-282 carries the same free_port and neo4j_process_count helpers) and its module docstring states the mechanism, though the filename derives from the plan label \"srtj\".\nSCORE reuse: 5\nJUSTIFICATION reuse: _doc_link_targets at docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay-run.py:131 re-implements the capability imas_codex/standard_names/doc_links.py:110 find_name_links already owns, even though every other capability is imported (run.py:42-48).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T185056036830-srtj-docs-lint-replay/srtj-docs-lint-replay.log:1 blocking: the gate log the manifest names as both test_logs and negative_control_log is a killed run's partial output -- its header line 3 reads \"# rev 722bd843c0839fbbbaddcf6530181abcb9eebe26\" and its last line is the positive-control line at 20:59:29, with no EXIT line -- because the worker's final re-run of the gate was terminated (the run's stream records that command's tool result as \"Exit code 144\" with is_error true, and the supervisor stopped the worker at 21:01:05Z), so the manifest's \"gate: exit 0\" and the HTML's \"last line EXIT=0\" cite a receipt that does not exist and a promotion reading the exit status from that last line reads nothing; the underlying measurement is corroborated (a complete EXIT=0 run at a7f985d6d wrote the identical rows), so the repair is to re-run the runner at the head revision and let the log end in a real EXIT=0, or to point test_logs at a log that does.\nFINDING /tmp/reckon-crew-scratch/r-20261022T185056036830-srtj-docs-lint-replay/srtj-docs-lint-replay-19x6xj2h:1 follow-on: the terminated gate run left its scratch tree behind -- 2.6 GB of dump plus an instance/ directory, created 20:57 and untouched since -- because the runner's finally block (srtj-docs-lint-replay-run.py:535-547) never ran, so the done_when's \"the scratch instance is stopped and removed\" holds for the run whose JSON was kept but not for the last one executed; no neo4j process survives it, and this review is fenced out of deleting it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay.html:145 follow-on: the reproduce section states the log is at \"revision a9ff6a562\" with \"last line EXIT=0\", which was true of the file when the HTML was written and is false of the file now on disk (rev 722bd843c, no EXIT line), so a reader following the pointer is misled about which revision the cited receipt proves; repair it in the same pass as the log.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay-run.py:131 follow-on: _doc_link_targets re-implements, with a narrower and unguarded pattern, the link parsing the repository already owns at imas_codex/standard_names/doc_links.py:110 (find_name_links) and :22 (_NAME_LINK_RE), used by docs_gates.py:21, graph_ops.py:38 and harmonize.py:33; the same module's find_self_links covers the self-referential link defect the report classes as \"no check reads\", which is true only in the sense that no gate calls it.\n",
+  "review_run_id": "r-20261022T210127783591-review-of-srtj-docs-lint-replay-722bd843c083",
+  "reviewed_base_sha": "a9ff6a56200b389f27e5dc4d0aae66aa6f6f96fa",
+  "reviewed_head_sha": "722bd843c0839fbbbaddcf6530181abcb9eebe26",
+  "reviewed_run_id": "r-20261022T185056036830-srtj-docs-lint-replay",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T21:13:14.830116+00:00",
+  "total": 85
+}
