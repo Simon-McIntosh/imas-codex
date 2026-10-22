@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "the measurement JSON was written by the completed run; the later partial log is from a killed re-run of the gate, noted in the landing",
       "recorded_at": "2026-10-22T22:43:32.126756+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "srtj-docs-prose-link-check",
+      "recorded_at": "2026-10-22T22:44:01.365179+00:00"
     }
   },
   "findings": [
