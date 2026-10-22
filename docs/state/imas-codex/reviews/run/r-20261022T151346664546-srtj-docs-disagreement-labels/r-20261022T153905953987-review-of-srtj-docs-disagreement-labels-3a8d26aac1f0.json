@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-22T16:09:52.091Z",
+  "dispatched_at": "2026-10-22T15:49:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.html",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the failure-class breakdown states 27 fail on links, 2 on subject and 1 on physics with two rows carrying a second failing criterion, but the fragment's own reasons are 26 links-first, 3 subject-first and 1 physics-first - S0070 reads 'subject: the source is the thermal-only node ... so the source measures a narrower quantity' - and exactly one row, S0074, notes a second criterion, so a reader taking the breakdown at face value misreads which criterion the rejections turn on."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T151346664546-srtj-docs-disagreement-labels/verify_labels.py",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "follow-on: the needles '47' and '30' are satisfied unconditionally by the fragment's own zero-row id list at html:18 (S0047, S0030), so moving the HTML's stated counts while the id list stands passes the line 46 check unchanged."
+    },
+    {
+      "file": "tests/standard_names/test_refine_ab_labels.py",
+      "line": "49",
+      "severity": "follow-on",
+      "text": "follow-on: the capability that validates a blind-labels fragment against its sheet and against the fragment's stated counts already lives here, and the reviewed node duplicated it in a run-directory script instead of extending the owner, leaving the landed fragment uncovered by the suite; the node's fence excluded this path, so a follow-on node should generalise the owner over both fragments."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T151346664546-srtj-docs-disagreement-labels/gate_labels.log",
+    "baseline_suite": null
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "searched production code for a reader of srtj-docs-disagreement-labels.json or .html; the fragment family's only production reader, imas_codex/standard_names/review/cascade_calibration.py:373, names the sibling srtj-jev-vs-panel-operating-point.json, so none reaches this change.",
+    "diff": "Read commit 3a8d26aac1f06026bdba40dc778f25a100c47206 against base a8061c1ece24639b49d902d00e92cffa60e073dc; a single commit adding the two declared files, +486 lines, no other path touched.",
+    "done_when": "The source EVIDENCE fence asks for a label and reason on each of the 77 rows plus an HTML stating the counts, the rubric criteria as applied, three worked examples and the no-forbidden-file statement; gate_labels.log records rows=77 labelled=77 one=47 zero=30 FAILS=0 EXIT=0, the HTML carries all four prose items, but the gate asserts the HTML only through four substring needles.",
+    "goal": "prompt.txt:30 states the goal as labelling every row of the documentation disagreement sheet blind against the documentation rubric; the landed docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.json carries 77 entries, every one labelled, and I recomputed 47 one / 30 zero from the file itself.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T151346664546-srtj-docs-disagreement-labels/manifest.md: status complete, commits 3a8d26aac1f06026bdba40dc778f25a100c47206, gate_labels.log and gate_labels_negative.log named, and neither baseline_suite nor after_suite is armed (classification.json records both as null).",
+    "write_paths": "The source manifest declares docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.json and .html; git show --stat 3a8d26aac lists exactly those two paths and no other file."
+  },
+  "justifications": {
+    "durability": "Nothing in the repository re-runs verify_labels.py, which lives in the run directory and not in the tree, and the fragment is not covered by the repository's owner for this artefact shape at tests/standard_names/test_refine_ab_labels.py:49.",
+    "evidence": "gate_labels_negative.log shows the JSON contract checks genuinely refuse (entry count, sheet_id coverage, label 7 out of {0,1}, counts block, EXIT=1), but verify_labels.py:45 checks the HTML only by four substrings, so the three worked examples and the criteria list are asserted by nothing.",
+    "fit": "The filenames extend the sibling fragment family, but srtj-docs-disagreement-labels.json is a dict carrying a counts block and its .html presents counts in a <ul>, where the tested sibling srtj-refine-ab-labels.json is a bare list and srtj-refine-ab-labels.html presents counts in a <table> at line 15.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.json carries 77 entries of {sheet_id,label,reason} covering S0001..S0077, and the sibling .html states the counts, the six rubric criteria as applied, three worked examples (S0003 and S0058 at label 0, S0002 at 1) and the blinding statement.",
+    "reuse": "The node's verification re-implements label_domain_findings and the counts-versus-fragment check the repository already owns at tests/standard_names/test_refine_ab_labels.py:49 and :66 rather than extending that owner, and the divergence of the new fragment from the sibling's shape is what forces the second implementation; the node's fence excluded the test path, so the extension belongs to a follow-on node.",
+    "scope_discipline": "git show --stat 3a8d26aac against base a8061c1ece24639b49d902d00e92cffa60e073dc adds exactly the two declared write paths, both docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.json and .html."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: prompt.txt:30 states the goal as labelling every row of the documentation disagreement sheet blind against the documentation rubric; the landed docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.json carries 77 entries, every one labelled, and I recomputed 47 one / 30 zero from the file itself.\nVERDICT done_when: the source EVIDENCE fence asks for a label and reason on each of the 77 rows plus an HTML stating the counts, the rubric criteria as applied, three worked examples and the no-forbidden-file statement; gate_labels.log records rows=77 labelled=77 one=47 zero=30 FAILS=0 EXIT=0, the HTML carries all four prose items, but the gate asserts the HTML only through four substring needles.\nVERDICT write_paths: the source manifest declares docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.json and .html; git show --stat 3a8d26aac lists exactly those two paths and no other file.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T151346664546-srtj-docs-disagreement-labels/manifest.md: status complete, commits 3a8d26aac1f06026bdba40dc778f25a100c47206, gate_labels.log and gate_labels_negative.log named, and neither baseline_suite nor after_suite is armed (classification.json records both as null).\nVERDICT diff: read commit 3a8d26aac1f06026bdba40dc778f25a100c47206 against base a8061c1ece24639b49d902d00e92cffa60e073dc; a single commit adding the two declared files, +486 lines, no other path touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.json carries 77 entries of {sheet_id,label,reason} covering S0001..S0077, and the sibling .html states the counts, the six rubric criteria as applied, three worked examples (S0003 and S0058 at label 0, S0002 at 1) and the blinding statement.\nSCORE evidence: 13\nJUSTIFICATION evidence: gate_labels_negative.log shows the JSON contract checks genuinely refuse (entry count, sheet_id coverage, label 7 out of {0,1}, counts block, EXIT=1), but verify_labels.py:45 checks the HTML only by four substrings, so the three worked examples and the criteria list are asserted by nothing.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 3a8d26aac against base a8061c1ece24639b49d902d00e92cffa60e073dc adds exactly the two declared write paths, both docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.json and .html.\nSCORE durability: 10\nJUSTIFICATION durability: nothing in the repository re-runs verify_labels.py, which lives in the run directory and not in the tree, and the fragment is not covered by the repository's owner for this artefact shape at tests/standard_names/test_refine_ab_labels.py:49.\nSCORE fit: 13\nJUSTIFICATION fit: the filenames extend the sibling fragment family, but srtj-docs-disagreement-labels.json is a dict carrying a counts block and its .html presents counts in a <ul>, where the tested sibling srtj-refine-ab-labels.json is a bare list and srtj-refine-ab-labels.html presents counts in a <table> at line 15.\nSCORE reuse: 5\nJUSTIFICATION reuse: the node's verification re-implements label_domain_findings and the counts-versus-fragment check the repository already owns at tests/standard_names/test_refine_ab_labels.py:49 and :66 rather than extending that owner, and the divergence of the new fragment from the sibling's shape is what forces the second implementation; the node's fence excluded the test path, so the extension belongs to a follow-on node.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.html:16 follow-on: the failure-class breakdown states 27 fail on links, 2 on subject and 1 on physics with two rows carrying a second failing criterion, but the fragment's own reasons are 26 links-first, 3 subject-first and 1 physics-first - S0070 reads 'subject: the source is the thermal-only node ... so the source measures a narrower quantity' - and exactly one row, S0074, notes a second criterion, so a reader taking the breakdown at face value misreads which criterion the rejections turn on.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T151346664546-srtj-docs-disagreement-labels/verify_labels.py:45 follow-on: the needles '47' and '30' are satisfied unconditionally by the fragment's own zero-row id list at html:18 (S0047, S0030), so moving the HTML's stated counts while the id list stands passes the line 46 check unchanged.\nFINDING tests/standard_names/test_refine_ab_labels.py:49 follow-on: the capability that validates a blind-labels fragment against its sheet and against the fragment's stated counts already lives here, and the reviewed node duplicated it in a run-directory script instead of extending the owner, leaving the landed fragment uncovered by the suite; the node's fence excluded this path, so a follow-on node should generalise the owner over both fragments.\n",
+  "review_run_id": "r-20261022T153905953987-review-of-srtj-docs-disagreement-labels-3a8d26aac1f0",
+  "reviewed_base_sha": "a8061c1ece24639b49d902d00e92cffa60e073dc",
+  "reviewed_head_sha": "3a8d26aac1f06026bdba40dc778f25a100c47206",
+  "reviewed_run_id": "r-20261022T151346664546-srtj-docs-disagreement-labels",
+  "scores": {
+    "durability": 10,
+    "evidence": 13,
+    "fit": 13,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T16:10:00+00:00",
+  "total": 79
+}
