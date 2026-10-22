@@ -1,0 +1,84 @@
+<section>
+  <h2 id="isn-pin-0-10-1-pin-0-10-1">imas-codex pins the released IMAS Standard Names 0.10.1</h2>
+  <p>
+    Both <code>imas-standard-names</code> pins in <code>pyproject.toml</code> now
+    read <code>==0.10.1</code>: the one in <code>[build-system] requires</code>
+    and the one in the <code>serve</code> extra of
+    <code>[project.optional-dependencies]</code>. No other dependency moved.
+    <code>grep -c 'imas-standard-names==0.10.1' pyproject.toml</code> prints
+    <code>2</code> and <code>grep -c 'imas-standard-names==0.10.0'</code> prints
+    <code>0</code>. The released tag is the upstream <code>v0.10.1</code>, the
+    single midplane definition taken by maximum major radius on each flux
+    surface.
+  </p>
+
+  <h3 id="isn-pin-0-10-1-lock-unchanged">The lock is byte-identical after regeneration</h3>
+  <p>
+    <code>uv.lock</code> records no version for this package at all, so the pin
+    bump cannot reach it. <code>[tool.uv.sources]</code> points
+    <code>imas-standard-names</code> at the sibling editable checkout, and uv
+    records that source in place of a version specifier — the metadata row reads
+    <code>{ name = "imas-standard-names", editable = "../imas-standard-names" }</code>
+    and the package entry carries <code>source = { editable = ... }</code> with
+    no <code>version</code> line. The string <code>0.10.0</code> does not occur
+    anywhere in the lock, and neither does <code>0.10.1</code>.
+  </p>
+  <p>
+    Regenerating the lock against the bumped <code>pyproject.toml</code> produced
+    a file with sha256
+    <code>5d6d2e0bcec967a55e7372f2ffd6b8412c603e7393596844b73f1960f404629d</code>
+    — the same digest as the committed <code>uv.lock</code>. The change is
+    therefore one file, not two: <code>git diff --stat</code> shows
+    <code>pyproject.toml | 4 ++--</code> alone. The brief anticipated that the
+    lock records the path rather than a version and required the override to be
+    left in place; this is that expectation carried to its conclusion.
+  </p>
+
+  <h3 id="isn-pin-0-10-1-method">How the lock was regenerated from a worktree</h3>
+  <p>
+    <code>uv lock</code> run in this worktree fails before resolving:
+    <code>Failed to generate package metadata for imas-standard-names @
+    editable+../imas-standard-names ... Distribution not found at
+    &lt;worktree-parent&gt;/imas-standard-names</code>. The relative source path
+    resolves against the project root, and the sibling exists only beside the
+    main checkout at <code>~/Code/imas-standard-names</code>. The fence refuses
+    the symlink that would bridge it, so the regeneration ran in a scratch
+    project under <code>$TMPDIR</code>: a directory holding a copy of the edited
+    <code>pyproject.toml</code> and the committed <code>uv.lock</code>, with
+    <code>../imas-standard-names</code> pointing at the real checkout (which is
+    at <code>v0.10.1</code>). The relative path uv writes into a lock is the same
+    string in either root, which is why the two files compare byte for byte.
+  </p>
+
+  <h3 id="isn-pin-0-10-1-control">The lock check was shown able to fail</h3>
+  <p>
+    <code>uv lock --check</code> exits <code>0</code> against the bumped
+    <code>pyproject.toml</code>. That result is only worth quoting once the
+    instrument has been seen to refuse, so two controls were run in the same
+    scratch arrangement:
+  </p>
+  <ul>
+    <li>
+      A synthetic project whose <code>idna</code> requirement is tightened
+      <em>after</em> its lock is written. <code>uv lock --check</code> exits
+      <code>1</code> and prints <code>The lockfile at `uv.lock` needs to be
+      updated, but `--check` was provided.</code> A stale lock is therefore
+      reported, not passed through.
+    </li>
+    <li>
+      The pinned requirement restored to <code>==0.10.0</code> against the same
+      unchanged lock. The check still exits <code>0</code>. The check cannot
+      witness this pin either way, which is the whole reason the lock digest
+      above is the evidence rather than the exit status.
+    </li>
+  </ul>
+
+  <h3 id="isn-pin-0-10-1-scope">What this node did not do</h3>
+  <p>
+    The new grammar is not active anywhere yet. The shared environment resolves
+    the main checkout's <code>pyproject.toml</code>, so nothing measured through
+    it can see this pin — no grammar sync was run, the graph was not touched, and
+    no claim is made here that the 0.10.1 grammar is loaded. Activating it is a
+    later node's work, after this lands.
+  </p>
+</section>
