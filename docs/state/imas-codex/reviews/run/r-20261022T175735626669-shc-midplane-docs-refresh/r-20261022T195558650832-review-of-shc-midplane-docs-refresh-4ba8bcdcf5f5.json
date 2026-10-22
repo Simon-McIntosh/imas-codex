@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-22T20:21:33.444Z",
+  "dispatched_at": "2026-10-22T20:06:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh.html",
+      "line": "114",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment and the manifest report name 2's review round as 'persisted as 0.562' (also in the H1 at line 12), but the node's own record computes that round's mean as 0.516667 at shc-midplane-docs-refresh.json review_verdicts name 2 last_round_score (0.425, 0.5625, 0.5625), and no score was persisted at all (review_checks gives reviewer_score_docs null for that name), so the cited figure cannot be reconciled against the record the fragment points a reader to; the below-threshold conclusion is unaffected."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh-run.py",
+      "line": "338",
+      "severity": "follow-on",
+      "text": "follow-on: _graph_comments() is defined and never called - report() takes its comments from comments() at line 330 reading the captured logs/reviewer-comments.json - and it re-expresses the docs-axis reviewer-feedback read the repository already owns at imas_codex/standard_names/graph_ops.py:2480 (StandardNameReview history) and :2635 (reviewer_comments_docs) without extending either."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh-run.py",
+      "line": "231",
+      "severity": "follow-on",
+      "text": "follow-on: MIDPLANE_IDENTIFIER_RE is reported only through its empty result - read_checks at line 398 records names_the_midplane_identifier false with midplane_identifier_hits [] for both names (shc-midplane-docs-refresh.json read_checks) - while nothing in the runner demonstrates the regex firing on text known to contain the phrase, so the absence rests on an instrument whose refusal is never shown; the before-state text that does contain it is present in the record as superseded_locus_sentence (run.py:206) but is never run through the pattern."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh-run.py",
+      "line": "561",
+      "severity": "follow-on",
+      "text": "follow-on: report()'s branch returns 0 unconditionally, and the manifest pairs its 'tests:' line (the consistency command) with test_logs logs/node-gate.log, whose own '# command:' header records the report command instead, so the gate receipt's declared command and its listed log are two different commands; the green run of the declared consistency check (logs/consistency-check.json) carries a '# command:' header and no EXIT= line, and node-gate.log's header names 'base: f43739c65' rather than the revision the gate ran at."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to bring two accepted outboard-midplane names' documentation onto the catalog's single midplane definition; the landed change is three files under docs/evidence/fragments/sn-harmonize-command/ - shc-midplane-docs-refresh-run.py, .html and .json - and the fragment's scope paragraph now states the outcome the node reached (shc-midplane-docs-refresh.html:27-29, 'Of the two, one was brought in line and accepted and one was stopped below the acceptance threshold'), which answers the prior review's blocking finding at line 21: radial_separatrix_distance_at_outboard_midplane is accepted at 0.94375 with the merged locus sentence, and radial_coordinate_at_outboard_midplane stopped below the 0.85 threshold exactly as the brief's method permits ('Otherwise record the reviewers' comments verbatim and stop for that name', brief.md:29-30).\nVERDICT done_when: the done_when names the fragment, its JSON record and the runner written by it; report() at shc-midplane-docs-refresh-run.py:534-549 assembles locus check, route/invocations, before, after, read_checks, fragment_consistency, review_verdicts, reviewer_comments and spend, and logs/node-gate.log ends a real EXIT=0 - but that log's own header records the report command while the manifest's tests: line names the consistency command, and the report branch at line 561 cannot go red, so the declared gate's green run is not the one the manifest's test_logs names.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh.{html,json}, shc-midplane-docs-refresh-run.py plus a figures directory; git diff --stat 96aab3e62..4ba8bcdcf changes exactly those three files (1280 insertions), the figures path is untouched, and no product source or test file appears in the diff.\nVERDICT manifest: read; status complete, commits f43739c65 and 4ba8bcdcf recorded, the two review runs and their stop reasons disclosed, spend stated at USD 1.492952 of the USD 1.50 ceiling with the remaining USD 0.007048 as an explicit spend-authority blocker rather than an unfinished step, and the below-threshold stop disclosed as a non-substitution; baseline_suite and after_suite are 'none: ...' because the write paths hold no test file, so added_failure_count=0 with no ids to derive.\nVERDICT diff: read commit by commit against 96aab3e62 - f43739c65 adds the three files (runner 511 lines, fragment 169 lines, record 513 lines, no graph write), and 4ba8bcdcf re-words the fragment's scope paragraph (12 lines changed), adds OUTCOME_SENTENCE/_scope_text/fragment_consistency and a consistency mode to the runner (70 lines) and embeds fragment_consistency into the record; the repair is inside the node's declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the fragment's scope paragraph now states the reached outcome at shc-midplane-docs-refresh.html:27-29 and one name is accepted with the merged locus sentence (shc-midplane-docs-refresh.json read_checks radial_separatrix_distance_at_outboard_midplane score 0.94375, docs_stage accepted), the second stopped per brief.md:29-30.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate re-derives the record from the live graph and its red arm is recorded (logs/negative-control.log ends EXIT=1 on the reverted fragment), but the manifest's tests: line names the consistency command while its test_logs names logs/node-gate.log whose header records the report command, and logs/consistency-check.json carries no EXIT= line for the green run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 96aab3e62..4ba8bcdcf touches only the three declared docs/evidence/fragments/sn-harmonize-command paths, with no product source, test, baseline or tolerance file changed.\nSCORE durability: 15\nJUSTIFICATION durability: fragment_consistency at shc-midplane-docs-refresh-run.py:502-531 reddens on the pre-repair paragraph (logs/negative-control.log ok false, EXIT=1 on the reverted fragment) so the regression it guards is shown to fail, but the guard covers one paragraph, report() at line 561 still returns 0 regardless of read_checks, and the read-back assertions at line 398 have no positive control.\nSCORE fit: 17\nJUSTIFICATION fit: the runner and fragment follow the evidence-fragment idiom of the sibling gap node, carry node-prefixed element ids (shc-midplane-docs-refresh-scope, -locus, -name1), and introduce no plan, sprint or version label in any symbol, filename or comment.\nSCORE reuse: 5\nJUSTIFICATION reuse: locus_sentence at shc-midplane-docs-refresh-run.py:254 extends its owner (imas_codex/standard_names/docs_gates.py locus_definition_sentence), but the added _graph_comments at line 338 re-implements the docs-axis reviewer-feedback read the repository already owns at imas_codex/standard_names/graph_ops.py:2480 and :2635 without extending either.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh.html:114 follow-on: the fragment and the manifest report name 2's review round as 'persisted as 0.562' (also in the H1 at line 12), but the node's own record computes that round's mean as 0.516667 at shc-midplane-docs-refresh.json review_verdicts name 2 last_round_score (0.425, 0.5625, 0.5625), and no score was persisted at all (read_checks gives reviewer_score_docs null for that name), so the cited figure cannot be reconciled against the record the fragment points a reader to; the below-threshold conclusion is unaffected.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh-run.py:338 follow-on: _graph_comments() is defined and never called - report() takes its comments from comments() at line 330 reading the captured logs/reviewer-comments.json - and it re-expresses the docs-axis reviewer-feedback read the repository already owns at imas_codex/standard_names/graph_ops.py:2480 and :2635 without extending either.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh-run.py:231 follow-on: MIDPLANE_IDENTIFIER_RE is reported only through its empty result - read_checks at line 398 records names_the_midplane_identifier false with midplane_identifier_hits [] for both names - while nothing in the runner demonstrates the regex firing on text known to contain the phrase, so the absence rests on an instrument whose refusal is never shown; the before-state text that does contain it is carried as superseded_locus_sentence (run.py:206) but is never run through the pattern.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh-run.py:561 follow-on: report()'s branch returns 0 unconditionally, and the manifest pairs its 'tests:' line (the consistency command) with test_logs logs/node-gate.log, whose own '# command:' header records the report command instead, so the gate receipt's declared command and its listed log are two different commands; the green run of the declared consistency check (logs/consistency-check.json) carries a '# command:' header and no EXIT= line, and node-gate.log's header names 'base: f43739c65' rather than the revision the gate ran at.\n",
+  "review_run_id": "r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5",
+  "reviewed_base_sha": "96aab3e62012c1892988f5c12093641764c2241b",
+  "reviewed_head_sha": "4ba8bcdcf5f59cda2287a26d3d225ed4ca70f1e8",
+  "reviewed_run_id": "r-20261022T175735626669-shc-midplane-docs-refresh",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "sources": {
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175735626669-shc-midplane-docs-refresh/brief.md",
+    "gate_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175735626669-shc-midplane-docs-refresh/logs/node-gate.log",
+    "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175735626669-shc-midplane-docs-refresh/manifest.md",
+    "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175735626669-shc-midplane-docs-refresh/logs/negative-control.log",
+    "plan": "imas-codex:sn-harmonize-command \u00a74",
+    "prior_review": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175735626669-shc-midplane-docs-refresh/review-records/r-20261022T175735626669-shc-midplane-docs-refresh.at-f43739c65b1868b9c47e111b848eebf90ef67beb.json"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T20:26:32.224426+00:00",
+  "total": 89
+}

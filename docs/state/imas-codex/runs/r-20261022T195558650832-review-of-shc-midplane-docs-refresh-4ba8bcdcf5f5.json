@@ -1,0 +1,381 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "20a162d65fff0c6885b40c59d7c879679603b175",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5/brief.md",
+    "sha256": "2685692c6392bfc1511b6859aba0533a88927710c31035203f7f7f5cc9b99173"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2521502,
+      "input_tokens_cumulative": 2521502,
+      "output_tokens": 25710,
+      "output_tokens_cumulative": 25710,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-22T20:21:33.444Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-22T20:06:13Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests:/test_logs:"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9380952380952381,
+    "plan": "sn-harmonize-command",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-22T21:04:22.592360+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-22T20:04:22Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 16,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 11,
+    "headroom": 1,
+    "mean_context": 127273,
+    "observed_at": "2026-10-22T20:04:06Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 16,
+      "aggregate_tokens_per_second": 417.011,
+      "detail": "",
+      "mean_tokens_per_second": 42.552,
+      "observed_at": "2026-10-22T20:04:06Z",
+      "runs": 9.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-22T20:21:33.444Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5/manifest.md",
+  "member": "disposable-r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run: writes only its records under the reviewed run's review-records directory",
+  "node": "review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175735626669-shc-midplane-docs-refresh/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5/brief.md",
+    "brief_sha256": "2685692c6392bfc1511b6859aba0533a88927710c31035203f7f7f5cc9b99173",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "the review for r-20261022T175735626669-shc-midplane-docs-refresh stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261022T175735626669-shc-midplane-docs-refresh, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261022T175735626669-shc-midplane-docs-refresh",
+    "id": "review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-22T20:04:22Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 16,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 11,
+      "headroom": 1,
+      "mean_context": 127273,
+      "observed_at": "2026-10-22T20:04:06Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 16,
+        "aggregate_tokens_per_second": 417.011,
+        "detail": "",
+        "mean_tokens_per_second": 42.552,
+        "observed_at": "2026-10-22T20:04:06Z",
+        "runs": 9.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5/manifest.md",
+    "negative_control": "",
+    "plan": "sn-harmonize-command",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175735626669-shc-midplane-docs-refresh/review-records/r-20261022T175735626669-shc-midplane-docs-refresh.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175735626669-shc-midplane-docs-refresh/review-records/r-20261022T175735626669-shc-midplane-docs-refresh.at-4ba8bcdcf5f59cda2287a26d3d225ed4ca70f1e8.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1520249.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-22T20:05:46.332605+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.498,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 968.04,
+      "context-estimate": 652.424,
+      "records": 520.471,
+      "verdict-inputs": 220.139
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.9380952380952381,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "20a162d65fff0c6885b40c59d7c879679603b175",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5",
+    "reviewed_base_sha": "96aab3e62012c1892988f5c12093641764c2241b",
+    "reviewed_head_sha": "4ba8bcdcf5f59cda2287a26d3d225ed4ca70f1e8",
+    "scores": {
+      "durability": 15,
+      "evidence": 14,
+      "fit": 17,
+      "goal_fidelity": 18,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 89
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "ba439d75-9836-4afe-b4d8-40b04bca29d5",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 2521502,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 855.335,
+    "generated_tokens": 25710,
+    "generation_seconds": 663.272,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 49.4,
+    "machine_seconds": 192.063,
+    "peak_input_tokens": 113609,
+    "tokens_per_second": 38.76,
+    "wall_tokens_per_second": 30.06
+  },
+  "time_budget": "60m",
+  "tool_steps": 27.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 920,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-22T20:21:47Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-22T20:07:20Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261022T195558650832-review-of-shc-midplane-docs-refresh-4ba8bcdcf5f5",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 5604,
+    "worker_pid": 2892137
+  },
+  "worker_seconds": 806,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
