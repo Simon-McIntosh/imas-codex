@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-21T04:48:12.362Z",
+  "dispatched_at": "2026-10-21T04:33:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json",
+      "line": "525",
+      "severity": "follow-on",
+      "text": "follow-on: row-053 rejects `gap_at_separatrix` on the criterion that the name \"does not say which separatrix branches or that the gap is the inner-outer separation\", while row-035 at :537 accepts `radial_gap_of_separatrix` for the same DD source (dd:equilibrium/time_slice/boundary_secondary_separatrix/distance_inner_outer) and the same quantity \u2014 neither name says which branches, so the recorded criterion that decided the 0 does not distinguish the row that was accepted, and one of the two labels is wrong whichever way it is read."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T041023726002-srtj-refine-ab-labels/manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the node's only guard is gate_labels.py in its run directory, outside the repository, so nothing in-tree reddens if the labels regress \u2014 the shape, coverage and counts it asserts are exactly the facts a later edit to the JSON or the HTML would break, and the repository already carries the precedent of a fragment asserted in-tree by tests/standard_names/test_rerank_label_sheet.py:22."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T041023726002-srtj-refine-ab-labels/gate_labels.py",
+      "line": "62",
+      "severity": "follow-on",
+      "text": "follow-on: the HTML half of the gate asserts token presence alone \u2014 \"criteria as applied\", \"Worked examples\", \"opened <strong>none</strong>\" and the two count cells \u2014 so an HTML that names the sections while carrying no worked example, or one instead of the three the done-when requires, still exits 0."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "two commits read against base 47531e18e: 02faf1393 adds the 124-entry labels JSON, 7545153d8 adds the 124-line fragment HTML; no other path is touched, and no code, prompt or config is changed.",
+    "done_when": "the source brief's done-when names the labels JSON with sheet_id, label and reason per row plus the counts/criteria/examples/reads-statement HTML; gate_labels.log records rows=124 ones=99 zeros=25 and EXIT=0, and I read all four demanded HTML sections in the landed file.",
+    "goal": "The node's goal is to label all 124 rows of the refine comparison's blind sheet, one label and one reason per row, as the ground truth the two refine arms are scored against; docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json holds 124 entries, one per sheet row.",
+    "manifest": "read; it names commit 7545153d8, the gate command and log, a controls log, and evidence_inputs claiming 99/25, four plasma_duration zeros, per-row keys and no forbidden read \u2014 each of which I reproduced or corroborated independently.",
+    "write_paths": "the brief granted docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json and .../srtj-refine-ab-labels.html (plus a figures directory the diff never uses); git diff --stat 47531e18e 7545153d8 lists exactly those two files."
+  },
+  "justifications": {
+    "durability": "the landed diff adds no assertion and no test, and the only guard, gate_labels.py, lives in the run directory rather than the repository, so a reverted label or a count that no longer matches the HTML fails nothing in-tree.",
+    "evidence": "gate_labels.log records the gate command, rows=124 ones=99 zeros=25, PASS and a bare EXIT=0, and its three mutations each exit 1 in gate_labels_controls.log, but the HTML clause is only token presence at gate_labels.py:62-71 and no in-tree artefact records the run; I independently reproduced 124/124 strict parses of the refined names with the pinned imas_standard_names parser and 46 source-stream tool calls containing no read of any forbidden file.",
+    "fit": "the fragment follows the established evidence convention of its directory \u2014 a slug-prefixed <h2 id> with element ids all carrying the node prefix and a project-absolute link to the sibling JSON \u2014 and both commits carry conventional subjects with bodies and no plan or ticket identifiers.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json:1 holds 124 entries whose sheet_ids equal the sheet's in its order (99 label 1, 25 label 0, no blank reason), so the blind ground truth the goal asks for is delivered for every row, though the row-053/row-035 pair shows the criterion applied inconsistently.",
+    "reuse": "no owner of a label-sheet format exists to extend: a search over imas_codex/ for sheet_id and label_sheet readers finds only the per-experiment artefacts (docs/evidence/fragments/sn-selection-over-generation/ssog-link-label-sheet.json, docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet.json) that each carry their own shape, so the addition forks nothing, and it copies `refined_name` from its own sheet instead of naming the row alone.",
+    "scope_discipline": "git diff --stat 47531e18e 7545153d8 lists only the two granted deliverable paths, and the sole widening is the extra `refined_name` key in each JSON entry beyond the sheet_id/label/reason the brief names."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal is to label all 124 rows of the refine comparison's blind sheet, one label and one reason per row, as the ground truth the two refine arms are scored against; docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json:1 holds 124 entries, one per sheet row, each judged from that row's own DD source.\nVERDICT done_when: the source brief's done-when names the labels JSON with sheet_id, label and reason per row plus the counts, criteria, three worked examples and reads statement in the HTML; gate_labels.log records rows=124 ones=99 zeros=25 and EXIT=0, and I read all four demanded HTML sections in the landed file.\nVERDICT write_paths: the brief granted docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json and .../srtj-refine-ab-labels.html plus a figures directory the diff never uses; git diff --stat 47531e18e 7545153d8 lists exactly those two files and no other path.\nVERDICT manifest: read; it names commit 7545153d8, the gate command and its log, a controls log, and evidence_inputs claiming 99/25, four plasma_duration zeros, per-row keys and no forbidden read -- each of which I reproduced or corroborated independently.\nVERDICT diff: two commits read against base 47531e18e: 02faf1393 adds the 124-entry labels JSON and 7545153d8 adds the 124-line fragment HTML; no other path is touched and no code, prompt or config changes.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json:1 holds 124 entries whose sheet_ids equal the sheet's in its order (99 label 1, 25 label 0, no blank reason), so the blind ground truth the goal asks for is delivered for every row, though the row-053/row-035 pair shows the criterion applied inconsistently.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate_labels.log records the gate command, rows=124 ones=99 zeros=25, PASS and a bare EXIT=0 with three mutations each exiting 1 in gate_labels_controls.log, but the HTML clause is token presence only at gate_labels.py:62-71 and no in-tree artefact records the run; I independently reproduced 124/124 strict parses of the refined names with the pinned imas_standard_names parser and found no read of any forbidden file across the source stream's 46 tool calls.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat 47531e18e 7545153d8 lists only the two granted deliverable paths, the sole widening being the extra `refined_name` key each entry carries beyond the sheet_id/label/reason the brief names.\nSCORE durability: 8\nJUSTIFICATION durability: the landed diff adds no assertion and no test, and the only guard, gate_labels.py, lives in the run directory rather than the repository, so a reverted label or a count no longer matching the HTML fails nothing in-tree.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.html:1 follows its directory's evidence convention -- a slug-prefixed h2 id, element ids all carrying the node prefix, and a project-absolute link to the sibling JSON.\nSCORE reuse: 19\nJUSTIFICATION reuse: no owner of a label-sheet format exists to extend -- a search over imas_codex/ for sheet_id and label_sheet readers finds only per-experiment artefacts such as docs/evidence/fragments/sn-selection-over-generation/ssog-link-label-sheet.json, each with its own shape -- so the addition forks nothing.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json:525 follow-on: row-053 rejects `gap_at_separatrix` because the name \"does not say which separatrix branches or that the gap is the inner-outer separation\", while row-035 at :537 accepts `radial_gap_of_separatrix` for the same DD source and quantity; neither name says which branches, so the recorded criterion does not distinguish the accepted row and one of the two labels is wrong.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T041023726002-srtj-refine-ab-labels/manifest.md:11 follow-on: the node's only guard is gate_labels.py in its run directory, outside the repository, so nothing in-tree reddens if the labels regress, though tests/standard_names/test_rerank_label_sheet.py:22 shows the repository asserting a fragment of exactly this kind in-tree.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T041023726002-srtj-refine-ab-labels/gate_labels.py:62 follow-on: the HTML half of the gate asserts token presence alone (\"Worked examples\", \"opened <strong>none</strong>\", the two count cells), so an HTML naming the sections without any worked example, or with one, still passes.",
+  "review_run_id": "r-20261021T043219020232-review-of-srtj-refine-ab-labels-7545153d8191",
+  "reviewed_base_sha": "47531e18eb94af3a2ec4a04fa35c3f4aba57e4c6",
+  "reviewed_head_sha": "7545153d81916f1b4fa87adddbf7a40392dd61cc",
+  "reviewed_run_id": "r-20261021T041023726002-srtj-refine-ab-labels",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T09:29:24.932904+00:00",
+  "total": 97
+}

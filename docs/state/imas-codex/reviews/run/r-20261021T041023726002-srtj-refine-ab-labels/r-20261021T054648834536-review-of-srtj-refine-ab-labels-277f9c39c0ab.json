@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-21T05:47:08Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.html",
+      "line": "117",
+      "severity": "follow-on",
+      "text": "follow-on: the separatrix group's stated criterion (\"a name is acceptable only if it states the radial direction of the quantity it owns on the separatrix\") does not decide row-034, because radial_coordinate_of_outboard_midplane_separatrix does state a radial direction; the rejection rests on a second condition that only the following sentence supplies (a name must own the separation, not a location), so the 'one criterion' for the group is a conjunction stated across two sentences and a reader taking the headline sentence as the criterion finds the row it was applied to undecided. The label itself is not wrong; the recorded criterion does not stand alone."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.html",
+      "line": "111",
+      "severity": "follow-on",
+      "text": "follow-on: the new table states each of the 8 mixed source groups' per-row labels and its single criterion for the source, but nothing compares those cells to srtj-refine-ab-labels.json \u2014 the gate asserts only that the heading token \"One criterion per source\" is present (gate_labels.py:100) and that the set of mixed groups is declared \u2014 so a cell that disagrees with the labels, or a criterion silently rewritten while the labels hold, lands with nothing failing."
+    }
+  ],
+  "item_verdicts": {
+    "done_when": "the source brief's done-when names the labels JSON with sheet_id, label and reason per row plus the label counts, the criteria, three worked examples and the reads statement in the HTML; gate_labels.log's header names revision 277f9c39c and its last line is EXIT=0; the fragment carries the counts and the new criteria section; and I reproduced 124 rows, 99 ones, 25 zeros, 56 distinct source paths, 48 homogeneous and 8 mixed directly from the sheet and the labels.",
+    "goal": "the node's goal is to label all 124 rows of the refine comparison's blind sheet as the ground truth the two refine arms are scored against; the reviewed commit 277f9c39c leaves every one of the 124 labels in docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json unchanged and restates one criterion for the six-row separatrix group, so the deliverable goal is intact at this head."
+  },
+  "justifications": {
+    "durability": "the only enforcement of the one-criterion-per-source invariant is gate_labels.py, and its MIXED_GROUPS set at gate_labels.py:70 and its group computation at gate_labels.py:83 live in the run directory outside the repository, so the manifest's claim that the gate carries the invariant durably holds for that one out-of-tree file alone and nothing in the repository reddens if a label, or the new table, regresses.",
+    "evidence": "gate_labels.log's header records revision 277f9c39c, the tree and the command, its body records source_paths=56 homogeneous=48 mixed=8 and rows=124 ones=99 zeros=25, and its last line is EXIT=0, with gate_labels_controls.log showing four mutations each at exit 1 on the same revision; I reproduced every figure independently from the sheet and the labels, but the new table's per-cell content at srtj-refine-ab-labels.html:111-155 is compared to nothing.",
+    "fit": "the added section at srtj-refine-ab-labels.html:104 follows the fragment's evidence convention with the slug-prefixed h3 id srtj-refine-ab-labels-consistency, and 277f9c39c carries a conventional subject with a body naming no plan, sprint or ticket identifier.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.html:104 documents one criterion per source for all 56 source paths without changing any of the 124 labels, so the blind ground truth the goal asks for survives the change intact and the inconsistency the previous review raised for row-053/row-035 is answered.",
+    "reuse": "the commit adds no function, class or module; a search over imas_codex/standard_names and tests/standard_names for a reader that groups label rows by source_path and requires one criterion per group finds no owner \u2014 the nearest in-tree artefact, tests/standard_names/test_rerank_label_sheet.py:22, drives a different fragment's builder \u2014 so nothing is forked.",
+    "scope_discipline": "git diff --stat 7545153d8 277f9c39c lists only the two granted deliverable paths, the sole widening being the fragment's new consistency section, which the node's own commit subject covers."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to label all 124 rows of the refine comparison's blind sheet as the ground truth the two refine arms are scored against; the reviewed commit 277f9c39c leaves every one of the 124 labels in docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json unchanged and restates one criterion for the six-row separatrix group, so the deliverable goal is intact at this head.\nVERDICT done_when: the source brief's done-when names the labels JSON with sheet_id, label and reason per row plus the label counts, the criteria, three worked examples and the reads statement in the HTML; gate_labels.log's header names revision 277f9c39c and its last line is EXIT=0, the fragment carries the counts and the new criteria section, and I reproduced 124 rows, 99 ones, 25 zeros, 56 distinct source paths, 48 homogeneous and 8 mixed directly from the sheet and the labels.\nVERDICT write_paths: the brief granted docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json and .../srtj-refine-ab-labels.html; git diff --stat 7545153d8 277f9c39c lists exactly those two files and no other path.\nVERDICT manifest: read the manifest at the source run directory; it carries status complete, commits 02faf1393, 7545153d8 and 277f9c39c, the gate command and its log, a four-mutation controls log, and the claim that the criterion restatement changed no label, which I verified by comparing the labels and the refined names across the two revisions.\nVERDICT diff: one commit read against base 7545153d8: 277f9c39c rewrites six reasons (row-034, row-048, row-054, row-047, row-053, row-035) in the labels JSON and adds a 'One criterion per source' section to the fragment; no label and no refined name changes and no other path is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.html:104 documents one criterion per source for all 56 source paths without changing any of the 124 labels, so the blind ground truth the goal asks for survives the change intact.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate_labels.log's header records revision 277f9c39c, the tree and the command, its body records source_paths=56 homogeneous=48 mixed=8 and rows=124 ones=99 zeros=25, and its last line is EXIT=0, with four control mutations each exiting 1 on the same revision; I reproduced every figure independently, but the new table's per-cell content at srtj-refine-ab-labels.html:111-155 is compared to nothing.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: gate_labels.log aside, git diff --stat 7545153d8 277f9c39c lists only the two granted deliverable paths at docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json and .html.\nSCORE durability: 8\nJUSTIFICATION durability: the only enforcement of the one-criterion-per-source invariant is gate_labels.py, whose MIXED_GROUPS set at gate_labels.py:70 and group computation at gate_labels.py:83 live in the run directory outside the repository, so nothing in the repository reddens if a label, or the new table, regresses.\nSCORE fit: 18\nJUSTIFICATION fit: the added section at srtj-refine-ab-labels.html:104 follows the fragment's evidence convention with the slug-prefixed h3 id srtj-refine-ab-labels-consistency, and 277f9c39c carries a conventional subject with a body naming no plan or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the commit adds no function, class or module, and a search over imas_codex/standard_names and tests/standard_names for a reader that groups label rows by source_path finds no owner, the nearest artefact being tests/standard_names/test_rerank_label_sheet.py:22 which drives a different fragment's builder.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.html:117 follow-on: the group's stated criterion (\"a name is acceptable only if it states the radial direction of the quantity it owns on the separatrix\") does not decide row-034, because radial_coordinate_of_outboard_midplane_separatrix does state a reader-visible radial direction; the rejection rests on a second condition supplied only by the following sentence, so a reader taking the headline sentence as the criterion finds the row it was applied to undecided.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.html:111 follow-on: the new table states each of the 8 mixed source groups' per-row labels and its single criterion, but nothing compares those cells to srtj-refine-ab-labels.json, since the gate asserts only that the heading token is present (gate_labels.py:100), so a cell that disagrees with the labels or a criterion silently rewritten lands with nothing failing.",
+  "review_run_id": "r-20261021T054648834536-review-of-srtj-refine-ab-labels-277f9c39c0ab",
+  "reviewed_base_sha": "7545153d81916f1b4fa87adddbf7a40392dd61cc",
+  "reviewed_head_sha": "277f9c39c0abb65c748727a3ed1f4971a90012ea",
+  "reviewed_run_id": "r-20261021T041023726002-srtj-refine-ab-labels",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T09:29:24.916198+00:00",
+  "total": 101
+}
