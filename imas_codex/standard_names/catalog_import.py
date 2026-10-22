@@ -505,24 +505,16 @@ def check_catalog(
     if not catalog_entries:
         return result
 
-    # Fetch graph entries.  An identity's domain is resolved the way the
-    # exporter resolves it: the node's stored value is authoritative where it
-    # is set, and a node storing none takes the producing sources' stored
-    # domain.  A scalar mirroring the PRODUCED_NAME edge is never written —
-    # the comparison reads the same rule the export reads, not a snapshot of
-    # it, so the stored field stays authoritative wherever it is set.
-    from imas_codex.standard_names.domain_ranking import select_primary_domain
-
+    # Fetch graph entries.  An identity's domain is the node's stored
+    # ``physics_domain`` — the value :func:`write_name_domain` wrote — so the
+    # comparison reads that scalar directly rather than re-deriving one from
+    # the sources.  A node storing none compares with no domain, and the
+    # difference is counted, not resolved by a second selector.
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (sn:StandardName)
             WHERE sn.name_stage IN ['accepted', 'approved']
-            OPTIONAL MATCH (sn)<-[:PRODUCED_NAME]-(src:StandardNameSource)
-            WITH sn,
-                 sn.physics_domain AS stored_domain,
-                 [d IN collect(DISTINCT src.physics_domain)
-                  WHERE d IS NOT NULL AND toString(d) <> ''] AS source_domains
             RETURN sn.id AS id,
                    sn.description AS description,
                    sn.documentation AS documentation,
@@ -532,12 +524,7 @@ def check_catalog(
                    sn.validity_domain AS validity_domain,
                    sn.constraints AS constraints,
                    sn.catalog_commit_sha AS catalog_commit_sha,
-                   CASE
-                     WHEN stored_domain IS NOT NULL
-                          AND toString(stored_domain) <> ''
-                     THEN [stored_domain]
-                     ELSE source_domains
-                   END AS resolved_physics_domains
+                   sn.physics_domain AS physics_domain
             """
         )
 
@@ -545,17 +532,9 @@ def check_catalog(
     graph_sha: str | None = None
     for row in rows:
         entry = dict(row)
-        resolved = row.get("resolved_physics_domains")
-        if not resolved:
-            # Legacy row shape: a directly-supplied stored domain is the node
-            # value, authoritative where set — the same as a resolved
-            # single-value list, so both row shapes compare on equal terms.
-            legacy = row.get("physics_domain")
-            resolved = [legacy] if legacy else []
-        if not isinstance(resolved, list):
-            resolved = [resolved] if resolved else []
+        stored = row.get("physics_domain")
         entry["physics_domain"] = (
-            select_primary_domain([str(d) for d in resolved]) if resolved else None
+            str(stored) if stored is not None and str(stored) else None
         )
         graph_entries[row["id"]] = entry
         if row.get("catalog_commit_sha") and not graph_sha:

@@ -36,7 +36,6 @@ from imas_codex.standard_names.canonical import (
     reorder_entry_dict,
 )
 from imas_codex.standard_names.catalog_ordering import order_entries_by_hierarchy
-from imas_codex.standard_names.domain_ranking import select_primary_domain
 from imas_codex.standard_names.protection import PROTECTED_FIELDS
 from imas_codex.standard_names.provenance_lifecycle import (
     fetch_public_semantic_sources,
@@ -1534,44 +1533,23 @@ def detect_divergence(
 # =============================================================================
 
 
-def _resolve_source_domains(gc: Any, name: str) -> list[str]:
-    """Return the physics domains recorded on a name's producing sources.
+def _candidate_physics_domains(cand: dict[str, Any]) -> list[str]:
+    """Return the stored ``physics_domain`` of one export candidate.
 
-    Mirrors how a derived parent inherits its children's domains in
-    graph_ops.py: a name with no stored domain takes its domain from the
-    sources that produced it, so an accepted identity is never minted into a
-    synthetic bucket the catalog model refuses. An empty result means no
-    domain is recorded anywhere; the caller reports the name rather than
-    emitting it.
+    The node's stored scalar — the value
+    :func:`imas_codex.standard_names.domain_decision.write_name_domain` wrote —
+    is the entry's domain.  Nothing is derived from the producing sources, so a
+    name the writer has not decided publishes no domain, and the caller counts
+    it rather than minting a bucket the catalog model does not define.  An
+    empty result means the node carries no stored domain.
     """
-    rows = gc.query(
-        """
-        MATCH (sn:StandardName {id: $name})<-[:PRODUCED_NAME]-
-              (src:StandardNameSource)
-        WHERE src.physics_domain IS NOT NULL
-        RETURN DISTINCT src.physics_domain AS domain
-        """,
-        name=name,
-    )
-    return sorted({str(row["domain"]) for row in rows or [] if row.get("domain")})
-
-
-def _candidate_physics_domains(gc: Any, cand: dict[str, Any]) -> list[str]:
-    """Resolve the physics domains for one export candidate.
-
-    The graph node's stored domains take precedence; when the node carries
-    none, the producing sources' stored domains are used. An empty result
-    means no domain is recorded anywhere.
-    """
-    stored = cand.get("physics_domain") or []
+    stored = cand.get("physics_domain")
     if isinstance(stored, str):
-        stored = [stored]
-    stored = [
-        value.strip() for value in stored if isinstance(value, str) and value.strip()
-    ]
-    if stored:
-        return stored
-    return _resolve_source_domains(gc, cand["id"])
+        value = stored.strip()
+        return [value] if value else []
+    if isinstance(stored, list):
+        return [str(v).strip() for v in stored if isinstance(v, str) and v.strip()]
+    return []
 
 
 def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
@@ -1580,16 +1558,10 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
     Maps graph property names to ISN StandardNameEntry field names,
     and excludes all graph-only / pipeline-only fields.
     """
-    physics_domains = node.get("physics_domain") or []
-    if isinstance(physics_domains, str):
-        physics_domains = [physics_domains]
-    if not physics_domains:
-        raise ValueError(
-            f"cannot map {node['id']}: no physics domain on the node or its "
-            "producing sources; callers must resolve one before entry "
-            "conversion rather than minting a bucket the catalog refuses"
-        )
-    primary_physics_domain = select_primary_domain(physics_domains)
+    stored_domain = node.get("physics_domain")
+    if isinstance(stored_domain, list):
+        stored_domain = stored_domain[0] if stored_domain else None
+    primary_physics_domain = str(stored_domain) if stored_domain else None
 
     from imas_codex.standard_names.kind_derivation import derive_kind
 
@@ -3381,20 +3353,19 @@ def run_export(
 
     with GraphClient() as gc:
         for cand in candidates:
-            domains = _candidate_physics_domains(gc, cand)
+            domains = _candidate_physics_domains(cand)
             if not domains:
-                # No stored domain and none on the producing sources: report
-                # the identity rather than emit a synthetic bucket the catalog
-                # model refuses and drops silently.
+                # No stored domain: the writer has not decided this name.
+                # Report the identity rather than emit a synthetic bucket the
+                # catalog model refuses and drops silently.
                 missing_domain_exclusions.append(
                     ExclusionRecord(
                         standard_name_id=cand["id"],
                         stage="catalog_validation",
                         reason="missing_physics_domain",
                         detail=(
-                            "no physics domain on the identity or its "
-                            "producing sources; refusing to emit a bucket the "
-                            "catalog model does not define"
+                            "the identity stores no physics domain; refusing "
+                            "to emit a bucket the catalog model does not define"
                         ),
                     )
                 )

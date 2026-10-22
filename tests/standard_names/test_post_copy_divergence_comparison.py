@@ -1,11 +1,14 @@
 """The post-copy guard compares meaning, not rendering.
 
 The byte-level comparison refused every publish whose prose was folded by the
-catalog YAML writer and every identity whose domain was derived from its
-producing sources at export time.  Both are the guard reading the wrong side
-of what it asserts: prose lives in the graph flat with single spaces while
-the writer folds lines, and a domain is a resolution rule (stored value,
-else producing-source value), not a stored scalar.
+catalog YAML writer.  That is the guard reading the wrong side of what it
+asserts: prose lives in the graph flat with single spaces while the writer
+folds lines.
+
+A domain is a stored decision, not a resolution rule.  The node's
+``physics_domain`` is the value the one writer set, so the guard compares it
+directly and never re-derives one from the producing sources; a node the
+writer has not decided stores none, and compares as undecided.
 
 Four directions are pinned, because a guard that stops refusing is worse than
 one that refuses too much — it is the last check between the graph and a
@@ -13,7 +16,9 @@ published catalog:
 
 * prose that differs only by line folding PASSES;
 * prose that genuinely differs STILL REFUSES;
-* a node storing no domain whose producing source carries one PASSES;
+* a node storing no domain STILL REFUSES against a published one, rather than
+  resolving one from its sources — a name the writer has not decided cannot
+  back a published bucket;
 * a genuine domain disagreement STILL REFUSES.
 """
 
@@ -64,9 +69,7 @@ def _write_catalog(
     """Write ``<root>/standard_names/<domain>.yml`` plus the sidecar manifest."""
     sn_dir = tmp_path / "standard_names"
     sn_dir.mkdir(parents=True, exist_ok=True)
-    (sn_dir / f"{domain}.yml").write_text(
-        yaml.safe_dump(entries), encoding="utf-8"
-    )
+    (sn_dir / f"{domain}.yml").write_text(yaml.safe_dump(entries), encoding="utf-8")
     names: dict[str, dict] = {}
     for entry in entries:
         block: dict[str, object] = {
@@ -94,9 +97,7 @@ def _write_catalog(
         "domains_included": [domain],
         "names": names,
     }
-    (tmp_path / "catalog.yml").write_text(
-        yaml.safe_dump(manifest), encoding="utf-8"
-    )
+    (tmp_path / "catalog.yml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
     return tmp_path
 
 
@@ -104,9 +105,16 @@ def _graph_rows(
     *,
     description: str,
     documentation: str = "A temperature measurement.",
-    resolved_physics_domains: list[str] | None = None,
+    physics_domain: str | None = "equilibrium",
+    producing_source_domains: list[str] | None = None,
 ) -> list[dict]:
-    """Graph rows shaped like the guard's fetch query after domain resolution."""
+    """Graph rows shaped like the guard's fetch query.
+
+    ``physics_domain`` is the node's stored decision.  ``producing_source_domains``
+    is a decoy: the sources' own domains reach the row, and the guard must not
+    read them, because a name's domain is the stored decision and not something
+    re-derived from where the name came from.
+    """
     return [
         {
             "id": "electron_temperature",
@@ -117,9 +125,9 @@ def _graph_rows(
             "source_paths": None,
             "validity_domain": None,
             "constraints": None,
+            "physics_domain": physics_domain,
             "catalog_commit_sha": None,
-            "resolved_physics_domains": resolved_physics_domains
-            or ["equilibrium"],
+            "resolved_physics_domains": producing_source_domains or [],
         }
     ]
 
@@ -170,13 +178,14 @@ def test_genuinely_different_prose_still_refuses(tmp_path: Path) -> None:
     assert result.describe_divergence() is not None
 
 
-def test_node_without_domain_but_sourced_domain_passes(tmp_path: Path) -> None:
-    """Half 3: the graph resolves a missing stored domain from its source.
+def test_node_without_stored_domain_refuses_a_published_one(tmp_path: Path) -> None:
+    """Half 3: a node the writer has not decided cannot back a published bucket.
 
-    The published tree carries the derived domain (the exporter's resolution
-    written into the sidecar); the graph node stores none, so the guard must
-    resolve the domain the way the exporter does — from the producing
-    sources — rather than compare a stored scalar against a resolved value.
+    The graph node stores no ``physics_domain`` while its producing sources
+    carry one, and the catalog publishes that source's domain.  The guard must
+    read the node's stored decision — none — and report the divergence, rather
+    than resolve the source's domain for it.  A resolution here would be a
+    second writer, and would publish a bucket the graph does not hold.
     """
     catalog = _write_catalog(
         tmp_path,
@@ -185,21 +194,28 @@ def test_node_without_domain_but_sourced_domain_passes(tmp_path: Path) -> None:
         sidecar_domain="equilibrium",
     )
     with _mock_graph(
-        _graph_rows(description=_FLAT, resolved_physics_domains=["equilibrium"])
+        _graph_rows(
+            description=_FLAT,
+            physics_domain=None,
+            producing_source_domains=["equilibrium"],
+        )
     ):
         result = check_catalog(catalog)
 
-    assert result.diverged == []
-    assert result.in_sync == 1
-    assert result.describe_divergence() is None
+    assert len(result.diverged) == 1
+    assert result.diverged[0]["fields"]["physics_domain"] == {
+        "catalog": "equilibrium",
+        "graph": None,
+    }
+    assert result.describe_divergence() is not None
 
 
 def test_genuine_domain_disagreement_still_refuses(tmp_path: Path) -> None:
-    """Half 4: an entry whose stored-only domain contradicts the resolution.
+    """Half 4: a stored domain that contradicts the published one refuses.
 
-    The stored field stays authoritative wherever it is set: a published
-    domain that disagrees with the node-or-source resolution still refuses,
-    even when every other field agrees.
+    The stored field is authoritative wherever it is set: a published domain
+    that disagrees with the node's decision still refuses, even when every
+    other field agrees.
     """
     catalog = _write_catalog(
         tmp_path,
@@ -207,9 +223,7 @@ def test_genuine_domain_disagreement_still_refuses(tmp_path: Path) -> None:
         entries=[_entry()],
         sidecar_domain="equilibrium",
     )
-    with _mock_graph(
-        _graph_rows(description=_FLAT, resolved_physics_domains=["transport"])
-    ):
+    with _mock_graph(_graph_rows(description=_FLAT, physics_domain="transport")):
         result = check_catalog(catalog)
 
     assert len(result.diverged) == 1

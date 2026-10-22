@@ -1,14 +1,12 @@
-"""Physics-domain resolution for export when the graph node stores none.
+"""Physics domain for export when the graph node stores none.
 
-The export never fabricates a synthetic bucket: when the graph node carries
-no physics_domain, the domain is derived from the identity's producing
-sources, and a name with genuinely no resolvable domain is reported in the
-exclusion ledger rather than silently emitted.
+A name's domain is the stored decision the one writer set, so the export never
+derives one from the identity's producing sources and never fabricates a
+synthetic bucket. An identity that stores none is reported in the exclusion
+ledger rather than silently emitted under a source-derived bucket.
 """
 
 from __future__ import annotations
-
-import pytest
 
 from imas_codex.standard_names.export import (
     _graph_node_to_entry_dict,
@@ -127,7 +125,12 @@ def _run_fixture_export(tmp_path, population, graph, validate) -> dict:
 def test_accepted_name_with_source_domain_never_resolves_to_the_bucket(
     tmp_path,
 ) -> None:
-    """A name whose sources carry a domain emits with that real domain."""
+    """A producing source's domain never becomes the entry's domain.
+
+    The name stores none, so it is excluded even though a source carries a
+    domain: the domain is the stored decision, never re-derived from where the
+    name came from.
+    """
     name = "etendue_of_soft_xray_detector"
     graph = _SourceDomainGraph({name: ["radiation_measurement_diagnostics"]})
     validate = _RecordingValidate()
@@ -139,12 +142,12 @@ def test_accepted_name_with_source_domain_never_resolves_to_the_bucket(
         validate,
     )
 
-    assert report.exported_names == [name]
-    assert validate.entries, "the entry was built and validated"
-    emitted = validate.entries[0]
-    assert emitted["physics_domain"] == "radiation_measurement_diagnostics"
-    assert "unscoped" not in str(emitted.get("physics_domain"))
-    assert not [row for row in report.exclusion_records if row.standard_name_id == name]
+    assert report.exported_names == []
+    assert not validate.entries, "the source's domain reached no emitted entry"
+    matching = [row for row in report.exclusion_records if row.standard_name_id == name]
+    assert len(matching) == 1
+    assert matching[0].reason == "missing_physics_domain"
+    assert "radiation_measurement_diagnostics" not in str(matching[0].detail)
 
 
 def test_name_with_no_resolvable_domain_is_reported_not_emitted(
@@ -164,15 +167,17 @@ def test_name_with_no_resolvable_domain_is_reported_not_emitted(
     assert matching[0].reason == "missing_physics_domain"
 
 
-def test_entry_converter_refuses_a_domainless_node() -> None:
-    """The synthetic bucket is gone: conversion refuses rather than fabricates."""
-    with pytest.raises(ValueError, match="physics domain"):
-        _graph_node_to_entry_dict(
-            {
-                "id": "no_domain_name",
-                "status": "draft",
-            }
-        )
+def test_entry_converter_carries_no_domain_for_a_domainless_node() -> None:
+    """A node storing no domain yields an entry carrying none, not a bucket."""
+    entry = _graph_node_to_entry_dict(
+        {
+            "id": "no_domain_name",
+            "status": "draft",
+        }
+    )
+
+    assert entry["physics_domain"] is None
+    assert "unscoped" not in str(entry.get("physics_domain"))
 
 
 def test_entry_converter_still_picks_primary_from_stored_domains() -> None:

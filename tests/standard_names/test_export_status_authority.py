@@ -77,10 +77,6 @@ def _run_fixture_export(staging_dir: Path, population: list[dict]):
             "imas_codex.standard_names.export._manifest_iso_timestamp",
             return_value="2026-09-04T00:00:00Z",
         ),
-        patch(
-            "imas_codex.standard_names.export.select_primary_domain",
-            side_effect=lambda domains: sorted(domains)[0],
-        ),
     ):
         return run_export(
             staging_dir,

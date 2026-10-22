@@ -49,21 +49,22 @@ class ConsolidationResult:
 def _resolve_physics_domains(
     domain_lists: list[list[str] | str | None],
 ) -> tuple[str | None, list[str]]:
-    """Merge physics_domain values from all candidates in a merge group.
+    """Merge the source domain sets of a merge group.
 
-    Returns ``(primary_scalar, source_domains_list)`` where
-    *primary_scalar* is the highest-ranked domain in the declared order and
-    *source_domains_list* is the sorted, deduplicated union.
+    Returns ``(None, source_domains_list)`` where *source_domains_list* is the
+    sorted, deduplicated union.  No scalar primary is chosen here: a name's
+    ``physics_domain`` is its stored decision, written by
+    :func:`imas_codex.standard_names.domain_decision.write_name_domain`, whose
+    undecided rule owns a name with no decision.  Consolidation therefore
+    carries the source set only and never ranks one itself.
 
     Args:
         domain_lists: physics_domain values from all candidates.  Each
             may be a list (legacy), a scalar string, or None.
 
     Returns:
-        Tuple ``(primary, sources)``.  Empty inputs → ``(None, [])``.
+        Tuple ``(None, sources)``.  Empty inputs → ``(None, [])``.
     """
-    from imas_codex.standard_names import domain_ranking
-
     all_domains: set[str] = set()
     for item in domain_lists:
         if item is None:
@@ -74,8 +75,7 @@ def _resolve_physics_domains(
         else:
             all_domains.update(d for d in item if d)
 
-    sources = sorted(all_domains)
-    return domain_ranking.select_primary_domain(sources), sources
+    return None, sorted(all_domains)
 
 
 def _merge_duplicates(group: list[dict]) -> dict:
@@ -85,7 +85,8 @@ def _merge_duplicates(group: list[dict]) -> dict:
     unit and kind, they are merged:
     - Keep the entry with the longest documentation, then shortest name as tiebreaker
     - Union the dd_paths from all duplicates
-    - Resolve physics_domain deterministically across sources
+    - Carry the union of the candidates' source domain sets; the scalar
+      primary is left to the one writer rather than ranked here
     """
     # Sort by documentation length (longest first), then name length (shortest first)
     group.sort(
@@ -109,7 +110,7 @@ def _merge_duplicates(group: list[dict]) -> dict:
         all_source_types.update(c.get("source_types") or [])
     merged["source_types"] = sorted(all_source_types)
 
-    # Resolve physics_domain across sources: scalar primary + source list.
+    # Carry the union of sources; the scalar primary is the stored decision's.
     primary, sources = _resolve_physics_domains(
         [c.get("physics_domain") for c in group]
     )
