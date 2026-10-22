@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-10-22T10:57:53.557Z",
+  "dispatched_at": "2026-10-22T10:43:23Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_refine_ab_labels.py",
+      "line": 218,
+      "severity": "follow-on",
+      "text": "the criterion row's text is asserted only to be non-empty, and test_each_mixed_source_follows_its_recorded_criterion applies predicates hardcoded in _CRITERIA (line 140) rather than the fragment's recorded criterion, so the fragment's criterion sentence can be rewritten with the labels untouched and the suite stays green; the brief's 'follows the criterion the labels fragment records for it' coupling is only partially tested"
+    }
+  ],
+  "justifications": {
+    "durability": "test_labels_are_one_per_sheet_row_with_a_reason reddens on a planted out-of-domain label (labels-negative-control.log: 'row-112: label 2 outside {0, 1}'), but the labels test binds to a hardcoded predicate at tests/standard_names/test_refine_ab_labels.py:140 rather than the fragment's recorded criterion, so that coupling is untested",
+    "evidence": "score.log ends EXIT=0 with a SUMMARY line and labels-test.log and labels-negative-control.log record the pytest result, so the gate result is recorded on disk rather than merely claimed",
+    "fit": "the test loads its fragments with the Path(__file__).resolve().parents[2] / 'docs/evidence/fragments' idiom that tests/standard_names/test_anchor_ab_aggregate.py:25 and tests/standard_names/test_anti_patterns_yaml.py:20 already use, and no name carries a plan or phase label",
+    "goal_fidelity": "srtj-refine-ab-score-run.py:157-197 reports both arms' acceptance over all/direct/lineage with the paired interval and srtj-refine-ab-score.json:axes holds the three-route figures, the cost per accepted name and the comparison block",
+    "reuse": "srtj-refine-ab-score-run.py:89,106 call imas_codex/discovery/base/evaluation.py:144 bootstrap_interval rather than writing a second bootstrap, and no existing owner parses the labels fragment (searched tests/standard_names and imas_codex for the fragment names and for parents[2] fragment loaders)",
+    "scope_discipline": "git diff --stat 7d82df99d..f0b2a27 lists exactly the four declared paths and no other file"
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261022T101748206586-review-of-srtj-refine-ab-score-f0b2a27aa6ab",
+  "review_text": "VERDICT goal: the node goal is to score the two refine arms against the 124 blind labels and land an in-tree guard; the diff adds docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-score-run.py, its .json and .html figures, and tests/standard_names/test_refine_ab_labels.py.\nVERDICT done_when: the done_when names srtj-refine-ab-score.html/.json written by srtj-refine-ab-score-run.py with a log ending EXIT=0 and the labels test passing with a kept negative-control log; score.log ends EXIT=0, labels-test.log records 4 passed, labels-negative-control.log records 4 failed.\nVERDICT write_paths: the declared scope is the four fragment/test paths in brief.md; the commit f0b2a27 adds exactly those four files and nothing else.\nVERDICT manifest: read; it states status complete, commits f0b2a27, both gates green (runner EXIT=0, pytest 4 passed) and the negative control red (EXIT=1, 4 failed) with the log paths named.\nVERDICT diff: read commit by commit against base 7d82df99d; one commit, f0b2a27, adding 4 files (869 insertions, 0 deletions), all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: srtj-refine-ab-score-run.py:157-197 reports both arms' acceptance over all/direct/lineage with the paired interval and srtj-refine-ab-score.json:axes holds the three-route figures, the cost per accepted name and the comparison block.\nSCORE evidence: 19\nJUSTIFICATION evidence: score.log ends EXIT=0 with a SUMMARY line and labels-test.log and labels-negative-control.log record the pytest result, so the gate result is recorded on disk rather than merely claimed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 7d82df99d..f0b2a27 lists exactly the four declared paths and no other file.\nSCORE durability: 15\nJUSTIFICATION durability: test_labels_are_one_per_sheet_row_with_a_reason reddens on a planted out-of-domain label (labels-negative-control.log: 'row-112: label 2 outside {0, 1}'), but the labels test binds to a side predicate at tests/standard_names/test_refine_ab_labels.py:140 rather than the fragment's recorded criterion, so that coupling is untested.\nSCORE fit: 18\nJUSTIFICATION fit: the test loads its fragments with the Path(__file__).resolve().parents[2] / 'docs/evidence/fragments' idiom that tests/standard_names/test_anchor_ab_aggregate.py:25 and tests/standard_names/test_anti_patterns_yaml.py:20 already use, and no name carries a plan or phase label.\nSCORE reuse: 19\nJUSTIFICATION reuse: srtj-refine-ab-score-run.py:89,106 call imas_codex/discovery/base/evaluation.py:144 bootstrap_interval rather than writing a second bootstrap, and no existing owner parses the labels fragment (searched tests/standard_names and imas_codex for the fragment names and for parents[2] fragment loaders).\nFINDING tests/standard_names/test_refine_ab_labels.py:218 follow-on: the criterion row's text is asserted only to be non-empty, and test_each_mixed_source_follows_its_recorded_criterion applies predicates hardcoded in _CRITERIA (line 140) rather than the fragment's recorded criterion, so the fragment's criterion sentence can be rewritten with the labels untouched and the suite stays green; the brief's 'follows the criterion the labels fragment records for it' coupling is only partially tested.",
+  "reviewed_base_sha": "7d82df99dcb516269d839927e4330e99683085da",
+  "reviewed_head_sha": "f0b2a27aa6ab3e006892749cc5d17add8959465f",
+  "reviewed_run_id": "r-20261022T093932759595-srtj-refine-ab-score",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T10:58:47.186497+00:00",
+  "total": 109,
+  "verdicts": {
+    "diff": "read commit by commit against base 7d82df99d; one commit, f0b2a27, adding 4 files (869 insertions, 0 deletions), all inside the declared scope",
+    "done_when": "the done_when names srtj-refine-ab-score.html/.json written by srtj-refine-ab-score-run.py with a log ending EXIT=0 and the labels test passing with a kept negative-control log; score.log ends EXIT=0, labels-test.log records 4 passed, labels-negative-control.log records 4 failed",
+    "goal": "the node goal is to score the two refine arms against the 124 blind labels and land an in-tree guard; the diff adds docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-score-run.py, its .json and .html figures, and tests/standard_names/test_refine_ab_labels.py",
+    "manifest": "read; it states status complete, commits f0b2a27, both gates green (runner EXIT=0, pytest 4 passed) and the negative control red (EXIT=1, 4 failed) with the log paths named",
+    "write_paths": "the declared scope is the four fragment/test paths in brief.md; the commit f0b2a27 adds exactly those four files and nothing else"
+  }
+}

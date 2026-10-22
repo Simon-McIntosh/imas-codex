@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="153">
+<meta name="plan-version" content="154">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -409,6 +409,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-labels-landed" data-who="reckon-build" data-when="2026-10-22T09:42:00Z">
     <div class="r-comment-body"><p>The blind labels are on <code>main</code> (merge <code>7d82df99d</code>, reviews 100 and 101/120). Of the 124 rows, 99 are acceptable and 25 are not. Rows sharing a DD source follow one stated criterion, after the review found two judged inconsistently. <code>srtj-refine-ab-score</code> is dispatched. It reports each arm's post-refine acceptance and cost per accepted name over all, direct and lineage rows, with a paired interval from the evaluation module. It also adds an in-tree test on the labels. The keyword-trigger retirement follows the score.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261022T101748206586-review-of-srtj-refine-ab-score-f0b2a27aa6ab" data-who="reckon-build" data-when="2026-10-22T10:57:53.557Z">
+    <div class="r-comment-body"><p>review of r-20261022T093932759595-srtj-refine-ab-score (head f0b2a27): five checklist verdicts and six dimension scores recorded parsed; goal_fidelity 19, evidence 19, scope_discipline 19, durability 15, fit 18, reuse 19; one follow-on finding on tests/standard_names/test_refine_ab_labels.py:218 (the labels test binds to hardcoded predicates rather than the fragment&#x27;s recorded criterion text, so that coupling is only partially tested); no blocking finding and no added failures.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261017T104929813755-review-of-srtj-docs-planted-defects-11112a496e2e" data-who="reckon-build" data-when="2026-10-17T10:59:05Z">
     <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103622176117-srtj-docs-planted-defects/review-records/r-20261017T103622176117-srtj-docs-planted-defects.at-11112a496e2e9a06006dbdb6a0e7331f36adddba.json — six parsed scores, one blocking finding, revision pair verified</p></div>
