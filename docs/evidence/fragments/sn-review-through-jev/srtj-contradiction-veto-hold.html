@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>srtj-contradiction-veto-hold — does the Jev contradiction veto hold documents the panel passed?</title>
+</head>
+<body>
+<section id="srtj-contradiction-veto-hold" class="r-fragment"
+         data-node="srtj-contradiction-veto-hold"
+         data-plan="imas-codex:sn-review-through-jev">
+<h2>srtj-contradiction-veto-hold — the contradiction veto, its precision, and why a held name never refines</h2>
+
+<p>
+  Diagnosis only: this node writes no product code. Evidence is
+  <code>srtj-contradiction-veto-hold.json</code>, produced by
+  <code>srtj-contradiction-veto-hold-run.py</code> under the run log named in the
+  manifest, whose last line is a bare <code>EXIT=0</code>. The veto mechanism is
+  <code>_documentation_contradiction_note</code>
+  (<code>imas_codex/standard_names/workers.py:11029</code>), invoked at
+  <code>workers.py:11232</code>, clamped at <code>workers.py:11242</code>
+  (<code>score = min(score, DEFAULT_MIN_SCORE - 0.001)</code>), and recorded per
+  dimension at <code>workers.py:11255</code> as
+  <code>comments_per_dim["contradicts_source"]</code>.
+</p>
+
+<h3 id="srtj-contradiction-veto-hold-q1">Q1 — every recorded firing, with pre-clamp panel score and outcome</h3>
+
+<p>
+  Two durable sources. The log line <code>review_docs: &lt;name&gt; held from acceptance — …</code>
+  is emitted once per hold at <code>workers.py:11256</code> and carries the note text
+  verbatim. The graph carries the panel's own scores on the per-group
+  <code>StandardNameReview</code> rows, which the clamp does <em>not</em> rewrite:
+  the clamp overwrites the node's <code>reviewer_score_docs</code> only
+  (<code>graph_ops.py:17928</code>, via <code>persist_reviewed_docs</code>), so the
+  review rows keep the score the panel returned.
+</p>
+
+<p>
+  The scan covered every <code>sn_sn-compose*.log*</code> file under
+  <code>~/.local/share/imas-codex/logs/</code> (4 files, current plus three
+  rotations capped at 10 MB each). <strong>Readback:</strong> 118
+  <code>held from acceptance</code> lines in total, of which <strong>29</strong> carry
+  a <code>contradicts source:</code> note, over <strong>10 distinct names</strong>,
+  yielding <strong>45 (name, claim, DD text)</strong> triples. The other 89 holds
+  are the conformance and banned-prose notes, which is the right shape for the
+  scan: the marker discriminates, it does not match everything.
+</p>
+
+<p>
+  <strong>Instrument check.</strong> The scan's own bound is the log retention
+  window, so its counts are a lower bound for the graph's lifetime and I report
+  them as such. The absence leg was controlled: a deliberately absent id
+  (<code>__no_such_standard_name__</code>) returns <code>present=0</code> while the
+  ten named ids return <code>names_present_in_graph=10</code>, so a zero from this
+  query is a real absence and not a broken predicate.
+</p>
+
+<table>
+<caption>Every recorded contradiction firing. <em>Panel score</em> is the pre-clamp score of the
+  group's authoritative (escalator) review row, where one exists; <em>held at</em> is the
+  clamped node score the hold wrote. Classification is the node's judgement, not a
+  measurement.</caption>
+<thead>
+<tr><th>Name</th><th>Firing (UTC)</th><th>Claim (abridged)</th><th>DD text (abridged)</th><th>Panel score before clamp</th><th>Held at</th><th>Outcome</th><th>Class</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>electrostatic_potential</code></td>
+  <td>2026-10-17 22:50:23 and 23:14:39</td>
+  <td>“The quantity has no mandatory locus or aggregation.” (23:14); an earlier draft: “The unqualified physical quantity imposes no intrinsic spatial averaging…” (22:50)</td>
+  <td>“Electrostatic potential, averaged on the magnetic flux surface” — <code>plasma_profiles/profiles_1d/phi_potential</code>, <code>edge_profiles/…</code>, <code>core_profiles/…</code></td>
+  <td><strong>0.875</strong> (gpt-5.5 escalated, group <code>062b1dec…</code>, dims 15/20/15/20); panel also claude-sonnet-5 0.6875, grok-4.5 0.875</td>
+  <td>0.849</td>
+  <td>Still held. <code>docs_stage=reviewed</code>, <code>docs_chain_length=0</code>, <code>reviewed_docs_at=2026-10-17T21:14:39Z</code></td>
+  <td>generic-against-specialised (mine)</td>
+</tr>
+<tr>
+  <td><code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code></td>
+  <td>2026-10-20 09:07–09:18 (18 triples)</td>
+  <td>“It does not prescribe a wavenumber sum or time or flux-surface average.”; “The channel name does not prescribe spectral summation…”</td>
+  <td>“Contribution of the perturbed electrostatic potential to the perpendicular momentum flux…” at each <code>gyrokinetics_local/non_linear/fluxes_*</code> channel</td>
+  <td>see note below</td>
+  <td>clamped</td>
+  <td>refined and re-held across the morning; the claim text is rewritten between firings</td>
+  <td>generic-against-specialised (mine)</td>
+</tr>
+<tr>
+  <td><code>neutral_energy_flux_at_wall_due_to_recombination</code></td>
+  <td>2026-10-20 00:10 and 17:07–22:35 (12 triples)</td>
+  <td>“The incident neutral energy flux is the sum of incident particle fluxes weighted by their mean recombination-associated energy…”</td>
+  <td>“One scalar value is provided per element in the grid subset.” — <code>wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values</code></td>
+  <td>see note below</td>
+  <td>clamped</td>
+  <td>refined repeatedly; the claim was reworded eight times and the veto returned each time</td>
+  <td>other — DD text carries no definition (mine)</td>
+</tr>
+<tr>
+  <td><code>gap_at_outboard_midplane</code></td>
+  <td>2026-10-17 23:32–23:43 and 2026-10-20 23:22</td>
+  <td>“where [equation] is the gap at the outboard midplane, [equation] is the major-radius coordinate…”</td>
+  <td>“Value” (10-20); “Value”/“Gap at the outboard midplane…” (10-17) — <code>summary/boundary/distance_inner_outer_separatrices/value</code></td>
+  <td>see note below</td>
+  <td>clamped</td>
+  <td>re-held; the 10-20 firing compares a prose definition against the literal field text “Value”</td>
+  <td>mixed: 3 generic-against-specialised, 1 other/DD-empty (mine)</td>
+</tr>
+<tr>
+  <td><code>radial_coordinate_at_outboard_midplane</code>, <code>radial_separatrix_distance_at_outboard_midplane</code>, <code>toroidal_angle_of_control_surface</code></td>
+  <td>2026-10-18 15:18, 2026-10-22 20:15 and 20:24</td>
+  <td>locus/aggregation disclaimers of the same shape</td>
+  <td>a locus-specialised DD sentence (<code>equilibrium/time_slice/profiles_1d/r_outboard</code>, <code>thomson_scattering/channel/distance_separatrix_midplane</code>, <code>b_field_non_axisymmetric/…/control_surface/phi</code>)</td>
+  <td>see note below</td>
+  <td>clamped</td>
+  <td>held</td>
+  <td>generic-against-specialised (mine)</td>
+</tr>
+<tr>
+  <td><code>x_coordinate_of_diagnostic_aperture</code>, <code>y_coordinate_of_diagnostic_aperture</code>, <code>ion_charge_state_energy_flux_at_wall_due_to_recombination</code></td>
+  <td>2026-10-19 10:13 and 14:54; 2026-10-20 00:08</td>
+  <td>an equation-definition restatement</td>
+  <td>“Component along Y axis” / “Component along X axis” / “One scalar value is provided per element in the grid subset.”</td>
+  <td>see note below</td>
+  <td>clamped</td>
+  <td>held</td>
+  <td>other — the DD text is a field label, not a claim (mine)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+  <strong>Counts.</strong> 29 hold lines, 45 triples, 10 distinct names.
+  By my classification (explicitly mine, not measured): <strong>28
+  generic-against-specialised</strong> and <strong>17 other</strong>, where the DD
+  text is a placeholder or a field label carrying no definition to contradict
+  (<code>Value</code>, <code>Component along Y axis</code>, <code>One scalar value is
+  provided per element in the grid subset.</code>). Read together, no firing in the
+  sample is a <em>true</em> contradiction of the kind §4 defines — an authored claim
+  that the DD source denies by statement. The first class is the false positive the
+  brief suspected: a generic name that states it imposes no locus, checked against a
+  DD source that is a locus-specialised instance of that generic quantity, which is
+  a specialisation relation and not a contradiction. The second is a distinct
+  false-positive mode: the check fires on the <em>absence</em> of DD prose, because a
+  thin DD source cannot support the claim, and “cannot support” is being reported
+  through the same <code>contradicts_source</code> channel as “denies”.
+</p>
+
+<p>
+  <strong>A scoring note, and a caveat on the column.</strong> The pre-clamp panel
+  score is read from the group's escalated row, which exists only for a group whose
+  second cycle disagreed with its first. For the firings after 2026-10-17 the graph
+  rows are present but I did not read a pre-clamp score per firing; the column reads
+  <em>see note below</em> rather than carrying a number I did not measure. The one
+  score this node was asked about, <code>electrostatic_potential</code>, is read in
+  full: the group <code>062b1dec-273e-4446-959a-5ce184b58d26</code> holds
+  claude-sonnet-5 0.6875, grok-4.5 0.875 and gpt-5.5 0.875 with
+  <code>resolution_method=authoritative_escalation</code>, so the panel score before
+  the clamp was 0.875 and the stored 0.849 is the clamp value, exactly as the brief
+  states. The four groups on the node (<code>5366049f</code>, <code>93bccd14</code>,
+  <code>ea4f6b92</code>, <code>062b1dec</code>) show that score is not a judged
+  quantity: <code>ea4f6b92</code> at 20:55 scored 0.95 and was still overwritten to
+  0.849 by the veto, so the clamp is a display value the node's score no longer
+  distinguishes from a panel's own.
+</p>
+
+<h3 id="srtj-contradiction-veto-hold-q2">Q2 — why <code>electrostatic_potential</code> never reached docs refine</h3>
+
+<p>
+  <strong>No predicate fails.</strong> The brief's premise was that a field value
+  keeps this name out of the refine claim. It does not. The claim is
+  <code>claim_refine_docs_batch</code> (<code>graph_ops.py:25607</code>), whose
+  conjunction is at <code>graph_ops.py:25649–25657</code>. I evaluated each clause
+  separately, read-only and bounded to this id, and every one is true:
+</p>
+
+<table>
+<caption>Per-predicate readback for <code>electrostatic_potential</code> (<code>claim_refine_docs_batch</code>).</caption>
+<thead><tr><th>Clause</th><th>Source</th><th>Value on this node</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td><code>sn.docs_stage = 'reviewed'</code></td><td>graph_ops.py:25650</td><td><code>docs_stage='reviewed'</code></td><td>true</td></tr>
+<tr><td><code>sn.reviewer_score_docs IS NOT NULL</code></td><td>25651</td><td><code>0.849</code></td><td>true</td></tr>
+<tr><td><code>sn.reviewer_score_docs &lt; $min_score</code></td><td>25652</td><td><code>0.849 &lt; 0.85</code> (min_score = <code>regen_score</code> = <code>DEFAULT_MIN_SCORE</code>, loop.py:517, 868)</td><td>true</td></tr>
+<tr><td><code>coalesce(sn.docs_chain_length,0) &lt; $rotation_cap</code></td><td>25653</td><td><code>0 &lt; 3</code></td><td>true</td></tr>
+<tr><td><code>NOT (sn.name_stage IN [...])</code></td><td>25654</td><td><code>name_stage='accepted'</code></td><td>true</td></tr>
+<tr><td><code>{docs_review_eligibility_where()}</code></td><td>25655 / 6712</td><td>true — group <code>062b1dec…</code> has <code>resolution_method='authoritative_escalation'</code>, which is in the schema's winning set</td><td>true</td></tr>
+<tr><td><code>sn.docs_review_quorum_shortfall IS NULL</code></td><td>25656</td><td><code>null</code></td><td>true</td></tr>
+<tr><td>score gate (<code>reviewer_score_name IS NOT NULL</code> …)</td><td>25638–25648</td><td><code>reviewer_score_name=0.9125</code></td><td>true</td></tr>
+</tbody>
+</table>
+
+<p>
+  Run against the whole graph, the same conjunction returns <strong>exactly one
+  eligible name, and it is this one</strong> (<code>eligible NOW: 1</code>; the
+  <code>reviewer_score_docs = 0.849</code> population is also exactly 1). So the
+  backlog is not a long queue in which this name waits: it is the only name in the
+  queue.
+</p>
+
+<p>
+  <strong>The clause that actually excludes it is the scope, not a field.</strong>
+  <code>claim_refine_docs_batch</code> computes <code>scope_where</code> at
+  <code>graph_ops.py:16176–16184</code>; when the run supplies a scope,
+  <code>_claim_sn_atomic</code> ANDs <code>AND sn.run_id = $scope_run_id</code> into
+  every seed and expand step (<code>graph_ops.py:16192–16198</code>). This node's
+  <code>sn.run_id</code> is <code>08fd6942-…</code>. Every pool run since the
+  2026-10-17 hold has been a focused or scoped run with some other id — the
+  <code>sn_sn-compose.log</code> for 2026-10-22 records
+  <code>focus (run_id=sn-edit-… ) mode — skipping auto-seed</code> at 20:32:35,
+  <code>scoped run (sn-edit-20261022T180925Z): 1 names — every pool capped at
+  cardinality</code> at 20:32:35, and
+  <code>run_sn_pools: pool=refine_docs processed=0 spent=$0.0000</code> at 20:43:51.
+  The refine pool was correctly empty: it was asked for one other name. No unscoped
+  docs pass has run since the hold.
+</p>
+
+<p>
+  The census agrees and does <em>not</em> strand it: <code>identity_state_groups</code>
+  (<code>pools.py:371</code>) computes <code>docs_score_state</code> at
+  <code>pools.py:402</code> against the same <code>$min_score</code>, and the
+  <code>refine_docs</code> predicate (<code>pools.py:343</code>) reads
+  <code>reviewed</code> + <code>below</code> + under-cap + vetted, all of which hold.
+  So it is admissible work that nobody has asked for.
+</p>
+
+<p>
+  <strong>The family apply touched 0 of 1 for a different and harder reason.</strong>
+  <code>plan_family_applies(seeds=['electrostatic_potential'])</code> returns one
+  family, <code>physical_base='electrostatic_potential'</code>, five members:
+  <code>electrostatic_potential</code>,
+  <code>electrostatic_potential_at_langmuir_probe_position</code>,
+  <code>electrostatic_potential_at_outboard_midplane</code>,
+  <code>electrostatic_potential_at_wall</code>,
+  <code>floating_electrostatic_potential</code>; decision <code>apply</code>, anchor
+  <code>electrostatic_potential_at_langmuir_probe_position</code>, and batches
+  <code>[anchor]</code> then <code>[the other four]</code>. The apply is anchor-gated:
+  <code>apply_families</code> (<code>harmonize.py:1682</code>) documents and implements
+  that “the runner's convergence gate halts the family before the member batch is
+  ever marked or drained when the anchor was not accepted — the members are then
+  never reset and no DocsRevision snapshot is taken”
+  (<code>harmonize.py:1700–1706</code>). The anchor's own state is
+  <code>docs_stage='pending'</code>, <code>reviewer_score_docs=None</code>,
+  <code>docs_chain_length=2</code> — it has not reached acceptance, so the family
+  halts after the anchor batch and the second batch, which holds
+  <code>electrostatic_potential</code>, is never marked. The name's
+  <code>docs_stage='reviewed'</code> (not <code>pending</code>) is the readback that the
+  reset never ran on it; <code>reset_standard_name_docs</code> would have accepted it
+  (<code>name_stage='accepted'</code>, <code>docs_stage</code> in
+  <code>['accepted','exhausted','reviewed','drafted']</code>,
+  <code>graph_ops.py:25913–25919</code>). The anchor is at chain 2 of a cap of 3.
+  <strong>A single non-converging anchor therefore strands its whole family behind
+  it</strong>, and the veto's hold is one way an anchor stops converging.
+</p>
+
+<h3 id="srtj-contradiction-veto-hold-q3">Q3 — can refine clear it? (code and stored text only; no LLM call)</h3>
+
+<p>
+  <strong>Yes the refiner receives the note; yes a refined text without the claim
+  passes the same check; and the note for this name is in the branch of the prompt
+  that is no longer rendered.</strong>
+</p>
+
+<ul>
+  <li>
+    <strong>The note reaches the refiner through the per-dimension channel.</strong>
+    The clamp writes it to <code>comments_per_dim_docs["contradicts_source"]</code>
+    (<code>workers.py:11255</code>), and <code>claim_refine_docs_batch</code> reads
+    that property back and folds it into <code>prior_docs_reviews</code>
+    (<code>graph_ops.py:25709–25720</code>). The prompt renders it at
+    <code>imas_codex/llm/prompts/sn/refine_docs_user.md:118</code>
+    (<code>{% set _cur_comments_docs = reviewer_comments_per_dim_docs %}</code>) and
+    iterates every key at lines 131–136, so an unknown key such as
+    <code>contradicts_source</code> is printed alongside the four real dimension
+    names. The note is therefore delivered, keyed as if it were a scoring dimension.
+  </li>
+  <li>
+    <strong>It is delivered only when <code>failed_checks</code> is undefined.</strong>
+    The same block is guarded at <code>refine_docs_user.md:119–131</code> by
+    <code>{% if failed_checks is defined %}</code>, which takes precedence over the
+    per-dimension <code>else</code> branch. On the §5 check-driven path the refiner
+    is told the failed checks and <em>not</em> the per-dimension comments, so a
+    contradiction note carried only in <code>comments_per_dim_docs</code> is dropped
+    from the prompt exactly when the check-driven path is active. The two paths
+    carry the same finding through mutually exclusive slots.
+  </li>
+  <li>
+    <strong>A refined text without the claim passes.</strong> The veto is recomputed
+    from scratch on the new text: <code>_documentation_contradiction_note</code>
+    re-splits the documentation into claims
+    (<code>jev_review.build_docs_state</code>, <code>workers.py:11072</code>) and
+    re-asks <code>check:claim_contradicts_source:</code> for each
+    (<code>workers.py:11078–11084</code>). Nothing in the check consults the previous
+    text or the stored note. So a refined text that no longer asserts “The quantity
+    has no mandatory locus or aggregation.” yields no contradiction answer and no
+    veto. The stored text shows this is what the system is asking for: the two
+    2026-10-17 firings for this name carry <em>different</em> claim sentences — an
+    earlier wording that already concedes the point (“the applicable locus and
+    aggregation convention are specified by a more specific realization”) and a
+    later one that returns to the bare disclaimer — and both were vetoed against the
+    same DD sentence.
+  </li>
+  <li>
+    <strong>What the note does not give the refiner is the distinction it needs.</strong>
+    The rendered note is the claim and the DD text only
+    (<code>workers.py:11119–11122</code>): “&lt;path&gt;: &lt;reason&gt;; DD: &lt;text&gt;”.
+    It does not say whether the DD sentence is a specialisation of the generic name or
+    a denial of it. For <code>electrostatic_potential</code> the same note is emitted
+    against <code>plasma_profiles</code>, <code>edge_profiles</code> and
+    <code>core_profiles</code> paths in succession, each pairing the same disclaimer
+    with the same sentence, so a refiner that satisfies one source re-barely-phrases
+    and trips the next. The stored history is consistent with that: the wording moves
+    between firings while the veto stands.
+  </li>
+</ul>
+
+<h3 id="srtj-contradiction-veto-hold-verdicts">What is defective, and the fix I recommend for each</h3>
+
+<ol>
+  <li>
+    <strong>Confirmed defect — the veto reports a generic name's silence as a
+    contradiction of a specialised source.</strong> Classification of the 45 triples
+    puts 28 in this class (mine, not measured): a claim that the generic quantity
+    imposes no locus or aggregation, checked against a DD source that is a
+    locus-specialised instance of it, which is a specialisation relation rather than
+    a denial. Recommended fix: distinguish the two relations in
+    <code>aggregate_docs_review</code> / the <code>claim_contradicts_source</code>
+    question — a source that is a strict specialisation of the claimed quantity must
+    answer <code>supports</code> or <code>says nothing</code>, and only a source that
+    <em>denies</em> the claim may set <code>contradiction_veto</code>.
+  </li>
+  <li>
+    <strong>Confirmed defect — the same veto channel carries an unavailable
+    comparison.</strong> 17 triples pair a prose claim with DD text that states
+    nothing to contradict (<code>Value</code>, <code>Component along Y axis</code>,
+    <code>One scalar value is provided per element in the grid subset.</code>).
+    <code>_documentation_contradiction_note</code> already has an
+    <code>unavailable</code> branch for a missing answer
+    (<code>workers.py:11123–11137</code>) but routes a thin-but-present source
+    through <code>contradiction_veto</code>. Recommended fix: treat a DD source whose
+    text carries no definitional content as <code>unavailable</code> for the claim
+    check — report “claim comparison unavailable”, do not clamp the score.
+  </li>
+  <li>
+    <strong>Confirmed defect — the anchor gate strands a whole family behind one
+    non-converging member.</strong> <code>electrostatic_potential</code> has never been
+    reset by a family apply, though it is eligible for reset, because the batch that
+    holds it is never reached when the anchor does not converge
+    (<code>harmonize.py:1696–1706</code>), and the anchor is stuck at
+    <code>docs_stage='pending'</code> with no accepted score. Recommended fix: let the
+    apply proceed with a family whose anchor fails to converge, or demote a
+    non-converging anchor and re-select one, so a single stuck member cannot strand
+    its siblings; report the stranded family so the hold is visible where it is
+    taken.
+  </li>
+  <li>
+    <strong>Confirmed defect — the refiner receives the veto note through mutually
+    exclusive prompt slots.</strong> The per-dimension branch that renders
+    <code>contradicts_source</code> is only taken when <code>failed_checks</code> is
+    undefined (<code>refine_docs_user.md:119–131</code>), so the check-driven path
+    cannot show the refiner the hold's own note. Recommended fix: render the stored
+    <code>comments_per_dim_docs</code> findings on both paths, or carry the
+    contradiction finding as a failed check so the two channels cannot disagree about
+    what the refiner was told.
+  </li>
+</ol>
+
+<h3 id="srtj-contradiction-veto-hold-limits">Limits of this reading</h3>
+
+  <ul>
+    <li>
+      The log scan is bounded by the four retained rotation files; firings older than
+      that window are absent from the 29-line count and would have to be recovered from
+      the graph's stored <code>contradicts_source</code> comments.
+    </li>
+    <li>
+      The classification of the 45 triples is mine, from the claim and DD text quoted
+      above; it is not a measurement and no panel was called to adjudicate it.
+    </li>
+    <li>
+      Q2's conclusion is a negative one — no predicate fails — and it rests on a
+      read-only re-evaluation of the clauses I transcribed from
+      <code>graph_ops.py:25649–25657</code> plus the production
+      <code>docs_review_eligibility_where()</code> string taken from the module itself.
+      The alternative that a clause I did not transcribe excludes the name is not
+      excluded by this readback, but the pool's own <code>processed=0</code> for a run
+      of one other name is consistent with the scope explanation and not with a
+      field-value one.
+    </li>
+    <li>
+      No LLM was called, no graph write was made, and no <code>sn</code> command that
+      claims or resets anything was run.
+    </li>
+  </ul>
+</section>
+</body>
+</html>
