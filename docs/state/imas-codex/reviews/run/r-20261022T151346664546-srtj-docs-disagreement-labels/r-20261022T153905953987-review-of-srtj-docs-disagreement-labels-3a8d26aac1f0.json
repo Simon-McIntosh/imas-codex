@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-10-22T16:09:52.091Z",
   "dispatched_at": "2026-10-22T15:49:32Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-docs-disagreement-score",
+      "recorded_at": "2026-10-22T17:44:48.830123+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-labels.html",
