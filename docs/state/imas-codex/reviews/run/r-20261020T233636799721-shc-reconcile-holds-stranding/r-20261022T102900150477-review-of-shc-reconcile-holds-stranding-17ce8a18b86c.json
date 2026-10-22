@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:1304 _run_attachment_audit_for_pool_run calls reconcile_attachment_consistency",
+    "imas_codex/standard_names/loop.py:1956 the global-maintenance step calls reconcile_attachment_consistency",
+    "imas_codex/standard_names/provenance_rebuild.py:531 recovery adjudication",
+    "imas_codex/standard_names/attachment_audit.py:2767 gate_migrated_attachments calls reconcile_attachment_consistency"
+  ],
+  "completed_at": "2026-10-22T11:15:41.552Z",
+  "dispatched_at": "2026-10-22T10:42:47Z",
+  "findings": [
+    {
+      "file": "logs/gate-head-graph.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the head graph arm's header declares revision=2066467588a80f4a9c0df302ccc23714a3b62fe8 while the arm measured the reworked module committed at 33981d6e5; the in-log probe printing _ATTACHMENTS_QUERY.format(scope=\"\") can only succeed on the reworked template, whose sole placeholder is {scope}, so the declared revision is one commit behind the module the 9 failed / 22 passed figure describes and a reader comparing revisions cannot tie the evidence to the code the probe proves was imported."
+    },
+    {
+      "file": "imas_codex/standard_names/attachment_audit.py",
+      "line": "209",
+      "severity": "follow-on",
+      "text": "follow-on: the new read restates the invariant's producer predicate (live_producer.status <> 'stale') rather than composing it from its owner imas_codex/standard_names/source_invariant.py:42, so the hold can drift from find_sourceless_live_names if that predicate gains another excluded status. The derived-parent half is composed (attachment_audit.py:179 wraps _derived_parent_cypher), so only the producer half is duplicated; composing it would have needed a helper in source_invariant.py, outside this node's write scope."
+    },
+    {
+      "file": "imas_codex/standard_names/attachment_audit.py",
+      "line": "1086",
+      "severity": "follow-on",
+      "text": "follow-on: the hold's exemption set is populated only from the derived-parent clause (sn_stranding_exempt), omitting the status='superseded' half of the invariant's retired_is_exempt clause (source_invariant.py:53-56), so a name with status='superseded' and a non-superseded name_stage would be held and reported as an operator worklist item where require_producing_sources would release it, diverging from the brief's 'superseded names ... exempt exactly as the invariant exempts them'. Latent rather than reachable: every writer that sets status='superseded' sets name_stage='superseded' in the same statement (graph_ops.py:23038, graph_ops.py:23751, signed_manifest.py:4878, signed_manifest.py:5457)."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T233636799721-shc-reconcile-holds-stranding/logs/gate-head-graph.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261020T233636799721-shc-reconcile-holds-stranding/logs/gate-base-graph.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s): loop.py:1304, loop.py:1956, provenance_rebuild.py:531 and attachment_audit.py:2767 all reach reconcile_attachment_consistency.",
+    "diff": "Read all five commits 93e04a526..17ce8a18b against base 26b0ce3a; two touch imas_codex/standard_names/attachment_audit.py (93e04a526 adds the hold, 33981d6e5 composes the derived-parent clause and reads producers name-side), one adds tests/standard_names/test_attachment_stranding_hold.py, two record the fragment.",
+    "done_when": "The source brief's done-when names the committed change and tests, no added failures, the kept negative-control and disposable-graph logs and the recorded fragment; logs/gate-base-graph.log and logs/gate-head-graph.log carry the gate, logs/stranding-hold-negative.log the red arm, logs/stranding-hold.log the passing disposable-graph run and the fragment records the live dry run.",
+    "goal": "The source brief asks that a rejected attachment which is its name's sole non-stale producer be held rather than detached, counted in a new bucket, logged loudly by name and path, with require_producing_sources kept as backstop; imas_codex/standard_names/attachment_audit.py:1233-1245 holds and counts it and require_producing_sources still runs at :1322.",
+    "manifest": "Read; the source manifest records the base and head graph arms as 9 identical failing ids and 0 added, the three passing stranding tests at exit 0, the 1 failed / 2 passed negative control and the live read-only dry run holding one name, and it names each log path.",
+    "write_paths": "The source brief grants imas_codex/standard_names/attachment_audit.py, tests/standard_names/test_attachment_stranding_hold.py and docs/evidence/fragments/sn-harmonize-command/shc-reconcile-holds-stranding.html; git diff 26b0ce3a..17ce8a18b changes exactly those three paths."
+  },
+  "justifications": {
+    "durability": "logs/stranding-hold-negative.log ends '1 failed, 2 passed ... EXIT=1' with test_sole_producer_rejected_attachment_is_held reddening on the removed hold, and the green assertions read producer and projection counts straight from the graph (tests/standard_names/test_attachment_stranding_hold.py:85-96), not from the value the test passed in; test_invariant_refuses_a_detach_forced_past_the_hold guards only the pre-existing invariant, not the new hold.",
+    "evidence": "logs/gate-base-graph.log ends '9 failed, 19 passed ... EXIT=1' and logs/gate-head-graph.log '9 failed, 22 passed ... EXIT=1' with byte-identical failure ids, so added_failure_count is 0; the head arm's declared revision is nonetheless stale (logs/gate-head-graph.log:1) and the manifest's after_suite.revision names a third revision, so the figure cannot be tied to the module from the record alone.",
+    "fit": "imas_codex/standard_names/attachment_audit.py:1176-1205 follows the module's existing docstring style and reuses the AttachmentAuditResult.as_dict idiom at :916, and every added name (skipped_stranding, held_stranding, _names_stranded_by_detach) names its mechanism with no plan or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/attachment_audit.py:1233-1245 classifies the stranding verdict into skipped_stranding and leaves it attached, :1267-1278 logs it by name and path, :1322 keeps require_producing_sources as the backstop, and the live read-only run reproduced exactly one held name, ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z -> vertical_coordinate_of_coil_conductor.",
+    "reuse": "the derived-parent exemption is composed from its owner imas_codex/standard_names/source_invariant.py via _derived_parent_cypher at attachment_audit.py:179, but the producer predicate is restated at attachment_audit.py:209 rather than shared with find_sourceless_live_names, which source_invariant.py:42 owns.",
+    "scope_discipline": "git diff 26b0ce3a172fc9cfb2736e870ac327978f7e6f46 17ce8a18b86c7be688bf90649d91532e65eb5242 --stat lists only the three paths the source brief grants, 460 insertions across attachment_audit.py, its test file and the fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks that a rejected attachment which is its name's sole non-stale producer be held rather than detached, counted in a new bucket, logged loudly by name and path, with require_producing_sources kept as backstop; imas_codex/standard_names/attachment_audit.py:1233-1245 holds and counts it, :1267-1278 logs it by name and path, and require_producing_sources still runs at :1322.\nVERDICT done_when: The source brief's done-when names the committed change and tests, no added failures, the kept negative-control and disposable-graph logs and the recorded fragment; logs/gate-base-graph.log and logs/gate-head-graph.log carry the gate, logs/stranding-hold-negative.log the red arm, logs/stranding-hold.log the passing disposable-graph run and the fragment records the live dry run.\nVERDICT write_paths: The source brief grants imas_codex/standard_names/attachment_audit.py, tests/standard_names/test_attachment_stranding_hold.py and docs/evidence/fragments/sn-harmonize-command/shc-reconcile-holds-stranding.html; git diff 26b0ce3a..17ce8a18b changes exactly those three paths.\nVERDICT manifest: Read; the source manifest records the base and head graph arms as 9 identical failing ids and 0 added, the three passing stranding tests at exit 0, the 1 failed / 2 passed negative control and the live read-only dry run holding one name, and it names each log path.\nVERDICT diff: Read all five commits 93e04a526..17ce8a18b against base 26b0ce3a; two touch imas_codex/standard_names/attachment_audit.py (93e04a526 adds the hold, 33981d6e5 composes the derived-parent clause and reads producers name-side), one adds tests/standard_names/test_attachment_stranding_hold.py, two record the fragment.\nCALL_SITES: imas_codex/standard_names/loop.py:1304 _run_attachment_audit_for_pool_run calls reconcile_attachment_consistency, imas_codex/standard_names/loop.py:1956 the global-maintenance step calls reconcile_attachment_consistency, imas_codex/standard_names/provenance_rebuild.py:531 recovery adjudication calls reconcile_attachment_consistency, imas_codex/standard_names/attachment_audit.py:2767 gate_migrated_attachments calls reconcile_attachment_consistency\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/attachment_audit.py:1233-1245 classifies the stranding verdict into skipped_stranding and leaves it attached, :1267-1278 logs it by name and path, :1322 keeps require_producing_sources as the backstop, and the live read-only run reproduced exactly one held name, ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z -> vertical_coordinate_of_coil_conductor.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate-base-graph.log ends '9 failed, 19 passed ... EXIT=1' and logs/gate-head-graph.log '9 failed, 22 passed ... EXIT=1' with byte-identical failure ids, so added_failure_count is 0; the head arm's declared revision is nonetheless stale (logs/gate-head-graph.log:1) and the manifest's after_suite.revision names a third revision, so the figure cannot be tied to the module from the record alone.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 26b0ce3a172fc9cfb2736e870ac327978f7e6f46 17ce8a18b86c7be688bf90649d91532e65eb5242 --stat lists only the three paths the source brief grants, 460 insertions across attachment_audit.py, its test file and the fragment.\nSCORE durability: 18\nJUSTIFICATION durability: logs/stranding-hold-negative.log ends '1 failed, 2 passed ... EXIT=1' with test_sole_producer_rejected_attachment_is_held reddening on the removed hold, and the green assertions read producer and projection counts straight from the graph (tests/standard_names/test_attachment_stranding_hold.py:85-96), not from the value the test passed in; test_invariant_refuses_a_detach_forced_past_the_hold guards only the pre-existing invariant, not the new hold.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/attachment_audit.py:1176-1205 follows the module's existing docstring style and reuses the AttachmentAuditResult.as_dict idiom at :916, and every added name (skipped_stranding, held_stranding, _names_stranded_by_detach) names its mechanism with no plan or ticket label.\nSCORE reuse: 13\nJUSTIFICATION reuse: the derived-parent exemption is composed from its owner imas_codex/standard_names/source_invariant.py via _derived_parent_cypher at attachment_audit.py:179, but the producer predicate is restated at attachment_audit.py:209 rather than shared with find_sourceless_live_names, which source_invariant.py:42 owns.\nFINDING logs/gate-head-graph.log:1 follow-on: the head graph arm's header declares revision=2066467588a80f4a9c0df302ccc23714a3b62fe8 while the arm measured the reworked module committed at 33981d6e5, so the declared revision is one commit behind the module the 9 failed / 22 passed figure describes; a reader comparing revisions cannot tie the evidence to the code the in-log probe proves was imported.\nFINDING imas_codex/standard_names/attachment_audit.py:209 follow-on: the new read restates the invariant's producer predicate (live_producer.status <> 'stale') rather than composing it from its owner imas_codex/standard_names/source_invariant.py:42, so the hold can drift from find_sourceless_live_names if that predicate gains another excluded status.\nFINDING imas_codex/standard_names/attachment_audit.py:1086 follow-on: the hold's exemption set is populated only from the derived-parent clause (sn_stranding_exempt), omitting the status='superseded' half of the invariant's retired_is_exempt clause (source_invariant.py:53-56), so a name with status='superseded' and a non-superseded name_stage would be held where require_producing_sources would release it; every writer sets both superseded axes together, so the divergence is latent rather than reachable.\n",
+  "review_run_id": "r-20261022T102900150477-review-of-shc-reconcile-holds-stranding-17ce8a18b86c",
+  "reviewed_base_sha": "26b0ce3a172fc9cfb2736e870ac327978f7e6f46",
+  "reviewed_head_sha": "17ce8a18b86c7be688bf90649d91532e65eb5242",
+  "reviewed_run_id": "r-20261020T233636799721-shc-reconcile-holds-stranding",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T11:00:00+00:00",
+  "total": 103
+}

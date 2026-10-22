@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="160">
+<meta name="plan-version" content="161">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -563,7 +563,10 @@
     <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-22.</strong> The catalog records one outboard-midplane definition and uses it everywhere: the point on the low-field side where the flux surface reaches its maximum major radius. On the separatrix, that is its outboard maximum-R point.</p><p>It replaces the per-dataset midplane-identifier wording. That wording is what made <code>gap_at_outboard_midplane</code>'s documentation fail review three times, at 0.50 to 0.56: the docs writer re-appends the locus sentence after generation (<code>_documentation_with_registry_form</code>), and reviewers read it as a second height beside the quantity's own Z*. <code>poloidal_angle</code> keeps its axis-plane zero, which coincides with the midplane only for up-down-symmetric equilibria.</p><p>The change is ISN plan <code>concept-and-notation-registry</code> §10, node <code>isn-one-midplane</code>, dispatched. Then come an ISN release and the imas-codex pin bump, and after that one documentation review of gap within that node's remaining ceiling.</p><p><code>radial_coordinate_at_outboard_midplane</code>, from <code>r_outboard</code> at the magnetic-axis height, agrees only for up-down-symmetric equilibria. Its documentation will say so.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261022T092738779034-review-of-shc-reconcile-holds-stranding-2066467588a8" data-who="reckon-build" data-when="2026-10-22T09:49:04.372Z">
-    <div class="r-comment-body"><p>none — a review lands as a review of a completed node, not as a plan edit. This review of r-20261020T233636799721-shc-reconcile-holds-stranding scores goal_fidelity 18, evidence 13, scope_discipline 20, durability 18, fit 18, reuse 10; it reports one blocking finding (the shared _ATTACHMENTS_QUERY template now raises KeyError &#x27;live_child&#x27; in the graph-marked tests of tests/standard_names/test_attachment_audit.py) and two follow-ons.</p></div>
+    <div class="r-comment-body"><p>none — a review lands as a review of a completed node, not as a plan edit. This review of r-20261020T233636799721-shc-reconcile-holds-stranding scores goal_fidelity 18, evidence 13, scope_discipline 20, durability 18, fit 18, reuse 10; it reports one blocking finding (the shared _ATTACHMENTS_QUERY template now raises KeyError 'live_child' in the graph-marked tests of tests/standard_names/test_attachment_audit.py) and two follow-ons.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261022T102900150477-review-of-shc-reconcile-holds-stranding-17ce8a18b86c" data-who="reckon-build" data-when="2026-10-22T11:15:41.552Z">
+    <div class="r-comment-body"><p>review attached to run r-20261020T233636799721-shc-reconcile-holds-stranding at head 17ce8a18b86c7be688bf90649d91532e65eb5242; scores goal_fidelity 19, evidence 15, scope_discipline 20, durability 18, fit 18, reuse 13; added_failure_count 0; three follow-on findings</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
