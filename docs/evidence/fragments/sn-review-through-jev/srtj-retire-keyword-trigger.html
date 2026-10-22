@@ -65,7 +65,9 @@
     <code>test_refine_scope_continuity.py</code>, <code>test_dup_guard_integration.py</code>,
     <code>test_fanout_trigger.py</code>) and the confinement lint. Base arm
     <code>187 passed</code>, EXIT=0; head arm <code>178 passed</code>, EXIT=0 — no added
-    failures.
+    failures. The review repairs re-ran the same gate at their head
+    (<code>576a5a01f</code>): <code>179 passed</code>, EXIT=0, the added case being the
+    settings guard below.
   </p>
   <p>
     The declared negative control restores the keyword setting and its reader. Applied, the
