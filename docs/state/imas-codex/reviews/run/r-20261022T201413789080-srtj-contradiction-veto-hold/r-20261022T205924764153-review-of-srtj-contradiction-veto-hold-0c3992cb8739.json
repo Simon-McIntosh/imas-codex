@@ -22,6 +22,11 @@
       "kind": "folded",
       "node": "srtj-review-holds-channel",
       "recorded_at": "2026-10-22T22:45:34.725452+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the table carries the result; no figure is needed to act on it",
+      "recorded_at": "2026-10-22T22:45:45.136748+00:00"
     }
   },
   "findings": [
