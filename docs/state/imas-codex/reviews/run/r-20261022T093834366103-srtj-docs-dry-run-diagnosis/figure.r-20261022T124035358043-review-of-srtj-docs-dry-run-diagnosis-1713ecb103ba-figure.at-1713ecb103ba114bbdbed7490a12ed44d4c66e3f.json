@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_findings": [
+    "The caption does not merely repeat a figure title: the figure carries no title and the caption describes both panels ('Left: the undecided documentation items of the dry run, split by the mechanism that left them undecided. Right: the difference between the two routes' accept rates over the items both judged, item-paired'), which is what the style rules ask for."
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-22T12:40:59Z",
+  "figures_reviewed": [
+    {
+      "attachment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T124035358043-review-of-srtj-docs-dry-run-diagnosis-1713ecb103ba-figure/image-0.png",
+      "canvas": "1008 x 518.4 pt (14 x 7.2 in, 1.94:1), rendered attachment 1400 x 720 px",
+      "caption_source": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html",
+      "rendered_check": "The attachment image-0.png was opened with the Read tool and again as two half-panel crops (700x720+0+0, 700x720+700+0) written under $TMPDIR, plus a pixel scan of the canvas border and of the band between the panels. The SVG at the reviewed head was read from git (git show 1713ecb...:docs/figures/.../srtj-docs-dry-run-diagnosis.svg) and its element geometry cross-checked against the pixels, so the verdicts rest on both the artifact and its source.",
+      "source": "docs/figures/sn-review-through-jev/srtj-docs-dry-run-diagnosis/srtj-docs-dry-run-diagnosis.svg"
+    }
+  ],
+  "findings": [],
+  "prior_findings_resolved": [
+    "The two follow-on findings recorded against the previous head (e6868944717610e8dd84998cbb568037927e100f) are both repaired at 1713ecb103ba114bbdbed7490a12ed44d4c66e3f and neither is repeated here. (1) The zero reference is now a horizontal rule on the value axis: the SVG's only dashed path, line2d_18, runs from (564.568421, 387.94062) to (907.2, 387.94062), and 387.94062 is exactly the 0.00 tick of the right panel (its '0.00' label is centred at y=393.259, half a label height above the tick at 387.94, on a 47.055 pt pitch per 0.05). The rule now sits where the plotted difference crosses zero and spans the panel width. (2) The caption renders as a plain string: the head HTML emits 'Left: the undecided documentation items of the dry run, ...' with no tuple parentheses or quoted commas."
+  ],
+  "project": "imas-codex",
+  "review_method_notes": [
+    "Read-only: no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes were the two declared review records and the manifest. Crops and the extracted SVG copy were written under $TMPDIR and are scratch.",
+    "The gate note in the dispatch states no suite runs for a figure review, so added_failure_count is 0 and added_failure_ids is empty, and no scores are carried."
+  ],
+  "review_run_id": "r-20261022T124035358043-review-of-srtj-docs-dry-run-diagnosis-1713ecb103ba-figure",
+  "reviewed_base_sha": "7d82df99dcb516269d839927e4330e99683085da",
+  "reviewed_head_sha": "1713ecb103ba114bbdbed7490a12ed44d4c66e3f",
+  "reviewed_run_id": "r-20261022T093834366103-srtj-docs-dry-run-diagnosis",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    "RUBRIC legibility: pass - both panels read at a glance. Left: two horizontal bars, 'deciding path' 4 and 'cohort runner' 16-pt category labels, values 4 and 72 labelled directly at the bar ends, x-axis 'undecided documentation items' with ticks 0/20/40/60/80. Right: two point-with-interval marks 14-pt category ticks 'names' and 'documentation', y-axis 'Jev minus incumbent accept rate' with ticks -0.05 to 0.30 in 0.05 steps, values +0.043 and +0.220 labelled directly. Nothing is small or crowded; every number a reader needs is on the figure.",
+    "RUBRIC data_ink: pass - the ink is the data. The four counts are flat solid fills (teal #246c78 for the 72-item 'cohort runner' bar, grey #929292 for the 4-item 'deciding path' bar) and the two differences are a flat 2.6 pt marker-plus-interval in the same teal. A colour census of the 1400x720 render counts 64,784 teal and 3,432 grey pixels against 921,428 white: no gradient, no ghosted layer, no duplicated encoding, and the 1.2 pt dotted grey zero rule (line2d_18) is a single reference stroke, not fill.",
+    "RUBRIC decoration: pass - no gradient, no background fill and no decorative styling. The axes carry only a left and a bottom spine and no top or right spine: the SVG declares exactly four spine paths (patch_3, patch_4 on the left panel; patch_8, patch_9 on the right) and a scan of rows y=100..102 across x=180..640 finds every pixel pure white where the left panel's top edge would be. There are no gridlines and no shaded bands; the one dotted element is the zero reference on the value axis, which is an axis cue rather than ornament.",
+    "RUBRIC contrast: pass - all text clears its background. Tick, category and axis labels are near-black (#52514E, about 7.7:1 on white) with the direct value labels in teal #246c78 (about 6:1). The mid grey #929292 (about 3.1:1) is used only for a filled bar mark and for the dotted zero rule, never for small text, which is the role the style sheet reserves it for.",
+    "RUBRIC table_form: pass - neither panel depicts what is naturally a table. The left panel compares two magnitudes (4 and 72 undecided documentation items) as bars, and the right panel shows two paired accept-rate differences with 95% intervals as points with ranges; a table could hold the numbers but would not show the ratio in the left panel or the position relative to zero in the right. The numbers are additionally given as direct labels rather than left to be read off the axes.",
+    "RUBRIC label_collision: pass - no label is clipped, overlaps another label, or sits over data. A scan of the outer 3 px of the 1400x720 canvas finds no non-white pixel, so nothing is cut at the edge; a scan of the 40 px band between the panels (x=655..695) finds about 55 non-white pixels, all the rotated right-panel y-axis label, which clears the left panel's marks (left axes end at x=650). Within the right panel the direct labels '+0.043' (top of its interval 0.140) and '+0.220' (top of its interval 0.315) sit above and to the right of their intervals in clear space, and neither touches the dotted zero rule or the other label."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T13:05:00Z",
+  "total": null
+}

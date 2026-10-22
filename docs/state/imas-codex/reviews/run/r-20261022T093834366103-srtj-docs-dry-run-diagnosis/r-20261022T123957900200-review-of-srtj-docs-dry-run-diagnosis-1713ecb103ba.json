@@ -1,0 +1,49 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-22T13:07:45.289Z",
+  "dispatched_at": "2026-10-22T12:40:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html",
+      "line": "74",
+      "severity": "follow-on",
+      "text": "the caption, which this commit makes render for the first time, states the paired difference is 'over the items both judged', but the denominator it is drawn from is the 164 shared items \u2014 which include the 58 items Jev left undecided and the 16 the incumbent left undecided, each counted as a non-accept (srtj-docs-dry-run-diagnosis.json:355,380-381, shared_items 164 with incumbent_unjudged_on_shared 16 and jev_unjudged_on_shared 58). The fragment's own table calls the same 164 'shared items' and the dry run's agreement table reports a separate both-decided population, so a reader comparing the caption against the table finds two different definitions of the same denominator."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis-run.py",
+      "line": "537",
+      "severity": "follow-on",
+      "text": "the caption defect this commit repairs was a type mismatch \u2014 draw_figures returned a one-element tuple where render_html interpolates a string \u2014 and the repair adds no check on the figures_rendered contract, so the same defect can reach a committed fragment again silently; a single isinstance(cap, str) refusal in draw_figures, or a save-path check, would make the regression fail rather than render."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no runtime module imports srtj-docs-dry-run-diagnosis-run.py or reads its output; the fragment's artefacts are static evidence consumed by the reckon docs renderer, and the only in-file consumer of figures_rendered is render_html at run.py:596-600, which unpacks the three-element list and interpolates the caption.",
+    "diff": "read commit by commit against base e6868944717610e8dd84998cbb568037927e100f: 1713ecb103ba114bbdbed7490a12ed44d4c66e3f changes 26 insertions and 26 deletions across run.py (axvline->axhline at 0.0, and the figure caption tuple corrected to a plain string), .html (the figcaption's Python repr replaced by the sentence), .json (the figures_rendered caption entry, plus generated_at) and the .svg (the zero reference redrawn as a horizontal rule and the regenerated coordinate set). No production module is touched.",
+    "done_when": "read; the done_when asks the html and json, both written by srtj-docs-dry-run-diagnosis-run.py with a log ending in a real EXIT=0, to hold the three answers with counts summing to their populations and to end with what each finding implies for the switch. /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093834366103-srtj-docs-dry-run-diagnosis/runner.log:10 ends `EXIT=0 srtj-docs-dry-run-diagnosis.json srtj-docs-dry-run-diagnosis.html`; the increment's own gate is `runpy.run_path('...srtj-docs-dry-run-diagnosis-run.py', run_name='__main__')` against the reviewed tooltip head, run at the reviewed revision.",
+    "goal": "the node's goal is to diagnose why the Jev documentation review failed its dry run on the fixed cohort, read-only; the increment under review is commit 1713ecb1, which repairs two presentation defects the landed fragment carried, so the diagnosis is delivered as written.",
+    "manifest": "read; manifest.md reports status complete, commits e6868944717610e8dd84998cbb568037927e100f and 1713ecb103ba114bbdbed7490a12ed44d4c66e3f, the four changed paths, runner.log as ending EXIT=0, three follow-ons and no blockers. Its tests: line at manifest.md:20 is still a template carrying a literal `<worktree>` placeholder rather than the command a shell was handed, and runner.log opens with INFO lines rather than the revision/tree/command header, so the increment's gate cannot be re-run from the manifest alone.",
+    "write_paths": "read the manifest's declared write paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093834366103-srtj-docs-dry-run-diagnosis/manifest.md:3-8 \u2014 the runner, the json, the html and the figures directory docs/figures/sn-review-through-jev/srtj-docs-dry-run-diagnosis; `git diff --stat e6868944 1713ecb1` lists exactly four files, all inside that set."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to diagnose why the Jev documentation review failed its dry run on the fixed cohort, read-only; the increment under review is commit 1713ecb1, which repairs two presentation defects the landed fragment carried, so the diagnosis is delivered as written.\nVERDICT done_when: the done_when asks the html and json, both written by srtj-docs-dry-run-diagnosis-run.py with a log ending in a real EXIT=0, to hold the three answers with counts summing to their populations and to end with what each finding implies for the switch; runner.log:10 ends `EXIT=0 srtj-docs-dry-run-diagnosis.json srtj-docs-dry-run-diagnosis.html`.\nVERDICT write_paths: read the manifest's declared write paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093834366103-srtj-docs-dry-run-diagnosis/manifest.md:3-8; `git diff --stat e6868944 1713ecb1` lists exactly four files, all inside that set.\nVERDICT manifest: read; manifest.md reports status complete, both commits, the four changed paths and runner.log ending EXIT=0; its tests: line at manifest.md:20 is a template carrying a literal `<worktree>` placeholder, so the increment's gate cannot be re-run from the manifest alone.\nVERDICT diff: read commit by commit against base e6868944717610e8dd84998cbb568037927e100f; 1713ecb1 changes 26/26 lines across run.py, .html, .json and the .svg, all inside the declared write paths, and touches no production module.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the increment restores the diagnosis fragment's intended caption text and a correct zero reference, so docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html now reads as the node goal intends.\nSCORE evidence: 15\nJUSTIFICATION evidence: the increment's gate re-ran the runner to EXIT=0 and its artefacts carry the run's own regenerated stamps (srtj-docs-dry-run-diagnosis.json generated_at 2026-10-22T12:35:55+00:00), but manifest.md:20's tests line carries an unsubstituted `<worktree>` placeholder so the gate is not re-runnable from the manifest.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in `git diff --stat e6868944 1713ecb1` is one of the four declared write paths in manifest.md:3-8.\nSCORE durability: 8\nJUSTIFICATION durability: no assertion guards the repair \u2014 draw_figures at srtj-docs-dry-run-diagnosis-run.py:537 can return a non-string caption again and render_html at run.py:596-600 would interpolate its repr exactly as before, and no test file is in the node's write paths.\nSCORE fit: 19\nJUSTIFICATION fit: `right.axhline(0.0, color=grey, linewidth=1.2, linestyle=(0, (1, 2)), zorder=2)` at srtj-docs-dry-run-diagnosis-run.py:498 keeps the grey/dotted reference convention the figure already used and puts the zero of a difference on the axis that carries the value.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module \u2014 it calls matplotlib's axhline and the existing data-ink style sheet \u2014 and a search over docs/figures and docs/evidence/fragments found no shared reference-line owner, since each fragment runner draws its own figures.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html:74 follow-on: the caption this commit makes render for the first time states the paired difference is 'over the items both judged', but its denominator is the 164 shared items including 58 Jev-undecided and 16 incumbent-undecided counted as non-accept (srtj-docs-dry-run-diagnosis.json:355,380-381), which the fragment's own table calls 'shared items'.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis-run.py:537 follow-on: the caption defect this commit repairs was a tuple/string type mismatch and the repair adds no check on the figures_rendered contract, so the same defect can reach a committed fragment again silently.\n",
+  "review_run_id": "r-20261022T123957900200-review-of-srtj-docs-dry-run-diagnosis-1713ecb103ba",
+  "reviewed_base_sha": "e6868944717610e8dd84998cbb568037927e100f",
+  "reviewed_head_sha": "1713ecb103ba114bbdbed7490a12ed44d4c66e3f",
+  "reviewed_run_id": "r-20261022T093834366103-srtj-docs-dry-run-diagnosis",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T13:05:00Z",
+  "total": 100
+}
