@@ -13,6 +13,11 @@
       "kind": "folded",
       "node": "shc-apply-drift-scope",
       "recorded_at": "2026-10-22T20:00:09.726991+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "shc-calls-per-phase-test",
+      "recorded_at": "2026-10-22T20:00:16.338598+00:00"
     }
   },
   "findings": [
