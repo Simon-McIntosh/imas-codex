@@ -3,6 +3,11 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-22T21:18:32.198Z",
   "dimension_dispositions": {
+    "evidence": {
+      "kind": "exempted",
+      "reason": "the counts are in the committed JSON from the completed run",
+      "recorded_at": "2026-10-22T22:44:38.417337+00:00"
+    },
     "reuse": {
       "kind": "folded",
       "node": "srtj-docs-prose-link-check",
