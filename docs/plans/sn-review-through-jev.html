@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="163">
+<meta name="plan-version" content="164">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -763,7 +763,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>coordinator merges e6868944 and 1713ecb1 and closes the node</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261022T124111677789-srtj-decision-fault-retry" data-who="reckon-build" data-when="2026-10-22T13:34:02.085Z">
-    <div class="r-comment-body"><p>srtj-decision-fault-retry record - a failed decision call now names its fault (the exception&#x27;s type and repr when its message is empty) in decide_batch&#x27;s warning and in the text _settle_call records on the outcome, and _decisions_retryable decides a transport fault by its type before it reads any message; base arm 1 failed, 404 passed, 8 skipped, 4 deselected at 5e8ea3b8e and head arm 1 failed, 418 passed, 8 skipped, 4 deselected at f8a9be00b, both failing tests/discovery/test_judgment.py::test_judgment_imports_nothing_from_the_search_llm_package, so 0 added failures; the negative control restores message-only retry classification and scores 10 failed, 4 passed, EXIT=1. The judgment half is 477601907 and the llm.py half with the tests is f8a9be00b.</p></div>
+    <div class="r-comment-body"><p>srtj-decision-fault-retry record - a failed decision call now names its fault (the exception's type and repr when its message is empty) in decide_batch's warning and in the text _settle_call records on the outcome, and _decisions_retryable decides a transport fault by its type before it reads any message; base arm 1 failed, 404 passed, 8 skipped, 4 deselected at 5e8ea3b8e and head arm 1 failed, 418 passed, 8 skipped, 4 deselected at f8a9be00b, both failing tests/discovery/test_judgment.py::test_judgment_imports_nothing_from_the_search_llm_package, so 0 added failures; the negative control restores message-only retry classification and scores 10 failed, 4 passed, EXIT=1. The judgment half is 477601907 and the llm.py half with the tests is f8a9be00b.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261022T133334407884-review-of-srtj-cascade-deciding-names-7d3acbc7fd50" data-who="reckon-build" data-when="2026-10-22T14:10:45.349Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T124348526060-srtj-cascade-deciding-names/review-records/r-20261022T124348526060-srtj-cascade-deciding-names.json</p></div>
 </div>
 </section>
 </main>
