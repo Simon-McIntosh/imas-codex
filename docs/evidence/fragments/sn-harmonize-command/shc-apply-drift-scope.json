@@ -1,0 +1,982 @@
+{
+ "elapsed_s": 49.6,
+ "imports": {
+  "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-apply-drift-scope",
+  "imas_codex.__file__": "/home/ITER/mcintos/Code/imas-codex/imas_codex/__init__.py",
+  "imas_codex.standard_names.source_refresh.__file__": "/home/ITER/mcintos/Code/imas-codex/imas_codex/standard_names/source_refresh.py"
+ },
+ "log_evidence": {
+  "apply_log": [
+   {
+    "line": 10,
+    "text": "20:30:13 - INFO - run_sn_pools: model=local/deepseek-v4.1-flash supports_cache=False route=proxy api_key_source=OPENROUTER_API_KEY_IMAS_CODEX"
+   },
+   {
+    "line": 11,
+    "text": "20:30:13 - INFO - run_sn_pools: reconciling sources (source=dd)\u2026"
+   },
+   {
+    "line": 12,
+    "text": "20:30:13 - INFO - run_sn_pools: reconcile complete \u2014 0 actions ({'stale_marked': 0, 'revived': 0, 'relinked': 0})"
+   },
+   {
+    "line": 14,
+    "text": "20:32:00 - INFO - run_sn_pools: VocabGap reconcile \u2014 567 checked, 0 deleted, 0 reclassified, 567 remaining"
+   },
+   {
+    "line": 49,
+    "text": "20:34:51 - INFO - run_sn_pools: attachment-consistency reconcile \u2014 25 of 5078 attachment(s) rejected, 8 detached, 8 source(s) rerouted (by rule: {'locus/source device mismatch': 15, 'distinct-vector conflict': 6, 'state-resolution mismatch'"
+   },
+   {
+    "line": 51,
+    "text": "20:34:51 - INFO - run_sn_pools: DD-edge reconcile \u2014 4 HAS_STANDARD_NAME edge(s) materialized, 0 pair(s) dropped on unit disagreement"
+   },
+   {
+    "line": 53,
+    "text": "20:34:51 - INFO - run_sn_pools: source_paths reconcile \u2014 12 name(s) materialized from live edges"
+   },
+   {
+    "line": 54,
+    "text": "20:34:53 - WARNING - run_sn_pools: source-loss probe found 123 live name(s) without a source; first few: absorbed_coolant_power_of_plant_component_port, acceleration_of_passive_structure, beam_cross_sectional_area_of_aperture, co_passing_fa"
+   },
+   {
+    "line": 55,
+    "text": "20:34:56 - WARNING - run_sn_pools: 7 live name(s) still fed by DD paths absent from the current DD \u2014 re-anchor (renamed_to) or retire. First few: deuterium_tritium_flux, flux_surface_average_magnetic_field_magnitude, radial_coordinate_of_fl"
+   },
+   {
+    "line": 56,
+    "text": "20:34:56 - INFO - stamp_source_snapshots: stamped 6 name(s) (unstamped baseline)"
+   },
+   {
+    "line": 58,
+    "text": "20:35:41 - INFO - refresh_drifted_sources: 80 name(s) drifted (2 renamed)"
+   },
+   {
+    "line": 59,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 60,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 61,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 62,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 63,
+    "text": "20:35:41 - INFO - reset_standard_name_docs: 1/1 reset to docs pending (run_id=sn-edit-20261022T183541Z)"
+   },
+   {
+    "line": 64,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 65,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 66,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 67,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 68,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 69,
+    "text": "20:35:41 - INFO - reset_standard_name_docs: 1/1 reset to docs pending (run_id=sn-edit-20261022T183541Z)"
+   },
+   {
+    "line": 70,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 71,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 72,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 73,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 74,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 75,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 76,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 77,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 78,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 79,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 80,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 81,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 82,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 83,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 84,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 85,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 86,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 87,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 88,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 89,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 90,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 91,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 92,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 93,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 94,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 95,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 96,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 97,
+    "text": "20:35:41 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 98,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 99,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 100,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 101,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 102,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 103,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 104,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 105,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 106,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 107,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 108,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 109,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 110,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 111,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 112,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 113,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 114,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 115,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 116,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 117,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 118,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 119,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 120,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 121,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 122,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 123,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 124,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 125,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 126,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 127,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 128,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 129,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 130,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 131,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 132,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 133,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 134,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 135,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 136,
+    "text": "20:35:42 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 137,
+    "text": "20:35:43 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 138,
+    "text": "20:35:43 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 139,
+    "text": "20:35:43 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 140,
+    "text": "20:35:43 - INFO - stamp_source_snapshots: stamped 1 name(s)"
+   },
+   {
+    "line": 141,
+    "text": "20:35:43 - INFO - run_sn_pools: source-drift refresh \u2014 6 baselined, 80 drifted, 2 steered, 0 blocked"
+   },
+   {
+    "line": 142,
+    "text": "20:35:43 - INFO - run_sn_pools: focus (run_id=ff879bed\u2026) mode \u2014 skipping auto-seed"
+   },
+   {
+    "line": 2488,
+    "text": "20:43:51 - INFO - run_sn_pools: all pools exited \u2014 {'generate_docs': PoolHealth(pool='generate_docs', last_progress_at=1792694294.970005, pending_count=0, in_flight=0, error_count=0, last_error=None, consecutive_empty_claims=512, total_proc"
+   },
+   {
+    "line": 2489,
+    "text": "20:43:51 - INFO - run_sn_pools: pool=generate_docs processed=2 spent=$0.1250 mean_cost=$0.062493"
+   },
+   {
+    "line": 2490,
+    "text": "20:43:51 - INFO - run_sn_pools: pool=review_docs processed=2 spent=$0.4696 mean_cost=$0.234793"
+   },
+   {
+    "line": 2491,
+    "text": "20:43:51 - INFO - run_sn_pools: pool=refine_docs processed=0 spent=$0.0000 mean_cost=$0.000000"
+   },
+   {
+    "line": 2492,
+    "text": "20:43:52 - INFO - run_sn_pools: stranded identities=168 by_state={\"name_stage=accepted, docs_stage=pending, validation_status=valid, status=draft, origin=derived, description_state=placeholder, name_score_state=missing, docs_score_state=mis"
+   },
+   {
+    "line": 2493,
+    "text": "20:43:52 - INFO - run_sn_pools: async counters match authoritative counts"
+   },
+   {
+    "line": 2494,
+    "text": "20:43:53 - INFO - run_sn_pools: scoped StandardName embedding drain wrote 0 row(s); no accepted described embedding gaps remain (run_id=ff879bed-2519-4892-b1c2-38512e01ead8)"
+   },
+   {
+    "line": 2848,
+    "text": "20:45:18 - INFO - run_sn_pools: resolved 3 doc links (0 rewritten, 3 removed)"
+   }
+  ],
+  "pipeline_log": [
+   {
+    "line": 2,
+    "text": "{\"calls_total\": 12, \"per_name_usd\": {\"electron_temperature_at_separatrix\": 0.256174, \"gap_at_outboard_midplane\": 0.338396}, \"phases\": {\"generate_docs\": {\"calls\": 2, \"usd\": 0.124986}, \"review_docs\": {\"calls\": 10, \"usd\": 0.469584}}, \"run_ids\""
+   }
+  ]
+ },
+ "node": "shc-apply-drift-scope",
+ "q1_call_path": {
+  "budget_charge": {
+   "label": "the batch drain's measured spend is charged to the family cap",
+   "lines": [
+    {
+     "line": 1638,
+     "text": "def _family_budget_drain("
+    },
+    {
+     "line": 1670,
+     "text": "def drain(run_id: str, batch_cost_cap: float) -> float | None:"
+    },
+    {
+     "line": 1676,
+     "text": "spent += float(cost)"
+    }
+   ],
+   "path": "imas_codex/standard_names/harmonize.py"
+  },
+  "drain_call_in_pools": {
+   "label": "run_sn_pools runs the refresh, passing only scope_run_id",
+   "lines": [
+    {
+     "line": 1638,
+     "text": "async def _global_maintenance_call("
+    },
+    {
+     "line": 1658,
+     "text": "await _global_maintenance_call("
+    },
+    {
+     "line": 1712,
+     "text": "recon_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1726,
+     "text": "vg_result = await _global_maintenance_call(reconcile_vocab_gaps, default={})"
+    },
+    {
+     "line": 1753,
+     "text": "unit_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1772,
+     "text": "gap_retry = await _global_maintenance_call("
+    },
+    {
+     "line": 1798,
+     "text": "prov_result = await _global_maintenance_call(reconcile_provenance, default={})"
+    },
+    {
+     "line": 1813,
+     "text": "source_status = await _global_maintenance_call("
+    },
+    {
+     "line": 1826,
+     "text": "retired_hints = await _global_maintenance_call("
+    },
+    {
+     "line": 1839,
+     "text": "seg_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1861,
+     "text": "catalog_status = await _global_maintenance_call("
+    },
+    {
+     "line": 1873,
+     "text": "entry_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1891,
+     "text": "cocos_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1911,
+     "text": "dd_unit_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1931,
+     "text": "unit_edge_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1958,
+     "text": "attachment_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1975,
+     "text": "dd_edge_result = await _global_maintenance_call("
+    },
+    {
+     "line": 1995,
+     "text": "sp_result = await _global_maintenance_call("
+    },
+    {
+     "line": 2064,
+     "text": "sr = await _global_maintenance_call("
+    },
+    {
+     "line": 2066,
+     "text": "scope_run_id=run_id,"
+    },
+    {
+     "line": 2092,
+     "text": "promoted = await _global_maintenance_call("
+    },
+    {
+     "line": 2181,
+     "text": "edge_result = await _global_maintenance_call("
+    },
+    {
+     "line": 2194,
+     "text": "parent_count = await _global_maintenance_call(seed_parent_sources, default=0)"
+    },
+    {
+     "line": 2197,
+     "text": "repaired_parent_count = await _global_maintenance_call("
+    },
+    {
+     "line": 2210,
+     "text": "_structural_accepted = await _global_maintenance_call("
+    },
+    {
+     "line": 2230,
+     "text": "_parent_sources = await _global_maintenance_call("
+    },
+    {
+     "line": 2745,
+     "text": "_global_maintenance_call("
+    },
+    {
+     "line": 2782,
+     "text": "await _global_maintenance_call("
+    },
+    {
+     "line": 2786,
+     "text": "_normalized_parents = await _global_maintenance_call("
+    },
+    {
+     "line": 2790,
+     "text": "_reconciled_parent_sources = await _global_maintenance_call("
+    },
+    {
+     "line": 2811,
+     "text": "_global_maintenance_call(resolve_doc_links, default={}),"
+    },
+    {
+     "line": 2841,
+     "text": "_global_maintenance_call("
+    }
+   ],
+   "path": "imas_codex/standard_names/loop.py"
+  },
+  "drain_factory": {
+   "label": "the drain builds a docs-only flush scoped by run_id",
+   "lines": [
+    {
+     "line": 815,
+     "text": "def _docs_drain_factory(**run_kwargs: Any) -> Callable[[str, float], float | None]:"
+    },
+    {
+     "line": 828,
+     "text": "skip_generate=True,"
+    },
+    {
+     "line": 832,
+     "text": "scope_run_id=run_id,"
+    }
+   ],
+   "path": "imas_codex/cli/sn.py"
+  },
+  "focus_scope": {
+   "label": "the docs pools claim only names whose run_id matches the drain scope",
+   "lines": [
+    {
+     "line": 16178,
+     "text": "scope_where += \" AND sn.run_id = $scope_run_id\""
+    },
+    {
+     "line": 18421,
+     "text": "scope_where = \"AND sn.run_id = $scope_run_id\""
+    },
+    {
+     "line": 26332,
+     "text": "name_scope += \" AND sn.run_id = $scope_run_id\""
+    }
+   ],
+   "path": "imas_codex/standard_names/graph_ops.py"
+  },
+  "harmonize_apply_entry": {
+   "label": "sn harmonize --apply calls apply_families",
+   "lines": [
+    {
+     "line": 6240,
+     "text": "outcome = apply_families("
+    }
+   ],
+   "path": "imas_codex/cli/sn.py"
+  },
+  "refresh_signature": {
+   "label": "the refresh has no id filter; scope_run_id only tags names INTO the run",
+   "lines": [
+    {
+     "line": 71,
+     "text": "def stamp_source_snapshots("
+    },
+    {
+     "line": 72,
+     "text": "sn_ids: list[str] | None = None,"
+    },
+    {
+     "line": 157,
+     "text": "def detect_source_drift("
+    },
+    {
+     "line": 334,
+     "text": "def refresh_drifted_sources("
+    },
+    {
+     "line": 338,
+     "text": "scope_run_id: str | None = None,"
+    },
+    {
+     "line": 417,
+     "text": "SET sn.run_id = $scope_run_id, sn.updated_at = datetime()"
+    }
+   ],
+   "path": "imas_codex/standard_names/source_refresh.py"
+  }
+ },
+ "q2_names": {
+  "electron_temperature_at_separatrix": {
+   "docs_revisions": [
+    {
+     "created_at": "2026-10-22T18:35:41.324000000+00:00",
+     "rev_id": "electron_temperature_at_separatrix#rev-0"
+    }
+   ],
+   "snapshot_and_source": [
+    {
+     "docs_score": "None",
+     "docs_stage": "accepted",
+     "edit_mode": "hint",
+     "edit_reason": "DD source drift \u2014 the anchoring Data Dictionary path changed (path renamed: 'summary/local/separatrix_average/t_e/value' \u2192 'summary/local/separatrix/t_e/value'). Refresh this name's documentation to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh, not a rewrite.",
+     "edit_status": "applied",
+     "harmonized_placeholder": "None",
+     "live_doc": "None",
+     "live_unit": "None",
+     "name_stage": "accepted",
+     "resolved_path": "None",
+     "run_id": "1805a6c5-df25-4fe2-b685-ffb1a496063e",
+     "sn_id": "electron_temperature_at_separatrix",
+     "snap_digest": "sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d",
+     "snap_ids": "0",
+     "snap_marker": "resolved-dd-context",
+     "snap_path": "summary/local/separatrix/t_e/value",
+     "snap_raw_doc": "Value",
+     "snap_raw_unit": "eV",
+     "snap_unit": "eV",
+     "snap_unit_doc": "Value",
+     "snapshot_written_at": "2026-10-22T18:40:35.122000000+00:00",
+     "source_composed_at": "2026-10-20T05:45:29.917000000+00:00",
+     "source_dd_version": "4.1.0",
+     "source_source_id": "summary/local/separatrix/t_e/value",
+     "source_status": "attached"
+    }
+   ]
+  },
+  "gap_at_outboard_midplane": {
+   "docs_revisions": [
+    {
+     "created_at": "2026-10-22T18:35:41.452000000+00:00",
+     "rev_id": "gap_at_outboard_midplane#rev-10"
+    },
+    {
+     "created_at": "2026-10-22T14:20:02.880000000+00:00",
+     "rev_id": "gap_at_outboard_midplane#rev-9"
+    },
+    {
+     "created_at": "2026-10-21T03:39:30.860000000+00:00",
+     "rev_id": "gap_at_outboard_midplane#rev-8"
+    },
+    {
+     "created_at": "2026-10-20T21:58:55.379000000+00:00",
+     "rev_id": "gap_at_outboard_midplane#rev-7"
+    }
+   ],
+   "snapshot_and_source": [
+    {
+     "docs_score": "None",
+     "docs_stage": "accepted",
+     "edit_mode": "hint",
+     "edit_reason": "DD source drift \u2014 the anchoring Data Dictionary path changed (path renamed: 'langmuir_probes/embedded/distance_separatrix_midplane' \u2192 'summary/boundary/distance_inner_outer_separatrices/value'; documentation: 'Distance between the measurement position and the separatrix, mapped along flux surfaces to the outboard midplane, in the major radius direction. Positive value\u2026' \u2192 'Value'; raw_documentation: 'Distance between the measurement position and the separatrix, mapped along flux surfaces to the outboard midplane, in the major radius direction. Positive value means the measurement is outside of the separatrix.' \u2192 'Value'). Refresh this name's documentation to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh, not a rewrite.",
+     "edit_status": "applied",
+     "harmonized_placeholder": "None",
+     "live_doc": "None",
+     "live_unit": "None",
+     "name_stage": "accepted",
+     "resolved_path": "None",
+     "run_id": "1805a6c5-df25-4fe2-b685-ffb1a496063e",
+     "sn_id": "gap_at_outboard_midplane",
+     "snap_digest": "sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d",
+     "snap_ids": "0",
+     "snap_marker": "resolved-dd-context",
+     "snap_path": "summary/boundary/distance_inner_outer_separatrices/value",
+     "snap_raw_doc": "Value",
+     "snap_raw_unit": "m",
+     "snap_unit": "m",
+     "snap_unit_doc": "Value",
+     "snapshot_written_at": "2026-10-22T18:43:15.931000000+00:00",
+     "source_composed_at": "2026-07-23T19:34:45.348000000+00:00",
+     "source_dd_version": "4.1.0",
+     "source_source_id": "summary/boundary/distance_inner_outer_separatrices/value",
+     "source_status": "attached"
+    }
+   ]
+  }
+ },
+ "q3_classification": {
+  "a_real_source_change": {
+   "count": 2,
+   "evidence": [
+    {
+     "live_source_id": "summary/local/separatrix/t_e/value",
+     "reason": "DD source drift \u2014 the anchoring Data Dictionary path changed (path renamed: 'summary/local/separatrix_average/t_e/value' \u2192 'summary/local/separatrix/t_e/value'). Refresh this name's documentation to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh, not a rewrite.",
+     "resolved_path": "None",
+     "sn_id": "electron_temperature_at_separatrix",
+     "stored_path": "summary/local/separatrix/t_e/value"
+    },
+    {
+     "live_source_id": "summary/boundary/distance_inner_outer_separatrices/value",
+     "reason": "DD source drift \u2014 the anchoring Data Dictionary path changed (path renamed: 'langmuir_probes/embedded/distance_separatrix_midplane' \u2192 'summary/boundary/distance_inner_outer_separatrices/value'; documentation: 'Distance between the measurement position and the separatrix, mapped along flux surfaces to the outboard midplane, in the major radius direction. Positive value\u2026' \u2192 'Value'; raw_documentation: 'Distance between the measurement position and the separatrix, mapped along flux surfaces to the outboard midplane, in the major radius direction. Positive value means the measurement is outside of the separatrix.' \u2192 'Value'). Refresh this name's documentation to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh, not a rewrite.",
+     "resolved_path": "None",
+     "sn_id": "gap_at_outboard_midplane",
+     "stored_path": "summary/boundary/distance_inner_outer_separatrices/value"
+    }
+   ],
+   "names": [
+    "electron_temperature_at_separatrix",
+    "gap_at_outboard_midplane"
+   ]
+  },
+  "b_unstamped_after_regeneration": {
+   "count": 78,
+   "distinguishing_marker": "resolved-dd-context",
+   "distinguishing_n_ids": 0,
+   "name_stages": {
+    "accepted": 1,
+    "exhausted": 77
+   },
+   "names": [
+    "alpha_parameter",
+    "angle_of_antenna_strap",
+    "core_density_of_pellet",
+    "critical_momentum_due_to_avalanche",
+    "equilibrium_weight_of_interferometer_beam",
+    "extent_of_detector_pixel",
+    "fast_electron_energy",
+    "fast_electron_source_rate_due_to_dreicer",
+    "gradient_of_electron_pressure",
+    "gradient_of_radial_electron_density",
+    "height_of_optical_element",
+    "inertial_current_density_due_to_diamagnetic_drift",
+    "ion_charge_state_diamagnetic_velocity_due_to_diamagnetic_drift",
+    "ion_cyclotron_heating_antenna_phase",
+    "left_hand_circularly_polarized_electric_field",
+    "lower_bound_energy_of_neutron_detector",
+    "magnetic_shear_at_sawtooth_inversion_radius",
+    "measured_voltage_of_spectrometer_channel",
+    "neutral_beam_mass",
+    "neutral_diffusivity",
+    "neutral_power_at_wall_due_to_recombination",
+    "outer_atomic_count_of_pellet",
+    "parallel_neutral_momentum_diffusivity",
+    "parallel_neutral_species_energy_convection_velocity",
+    "parallel_normalized_particle_perturbed_pressure",
+    "parallel_normalized_perturbed_magnetic_field_amplitude",
+    "parallel_normalized_perturbed_vector_potential_amplitude",
+    "parallel_normalized_wave_vector",
+    "parallel_per_toroidal_mode_electric_field",
+    "parallel_wave_electric_field_amplitude",
+    "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field",
+    "perpendicular_normalized_gyrocenter_perturbed_pressure",
+    "plasma_velocity_due_to_diamagnetic_drift",
+    "poloidal_current_density_due_to_collisions",
+    "poloidal_current_density_due_to_viscosity",
+    "poloidal_electron_energy_diffusion_coefficient",
+    "poloidal_ion_charge_state_momentum_diffusivity",
+    "poloidal_turn_count",
+    "power_of_neutral_beam_injector",
+    "pressure_of_lower_hybrid_antenna",
+    "radial_angle_of_poloidal_field_coil",
+    "radial_centroid_of_electron_cyclotron_launcher_mirror",
+    "radial_coordinate_of_pellet_path",
+    "radial_ion_energy_convection_velocity",
+    "radial_ion_energy_diffusion_coefficient",
+    "radial_ion_state_energy_flux",
+    "radial_total_neutral_momentum_diffusivity",
+    "radiated_power_density",
+    "ratio_of_critical_alpha_parameter_to_alpha_parameter_at_pedestal",
+    "runaway_electron_critical_electric_field",
+    "safety_factor_at_pedestal",
+    "silane_prefill_count",
+    "spectral_calibration_factor_of_spectrometer",
+    "spectral_width_of_filter",
+    "surface_area_of_optical_element",
+    "thermal_electron_decay_length_over_scrape_off_layer",
+    "tilt_angle_of_antenna_strap",
+    "toroidal_ion_momentum_diffusion_coefficient",
+    "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+    "total_diamagnetic_current_density",
+    "total_ion_power_density",
+    "total_ion_pressure",
+    "total_neutron_power",
+    "total_plasma_energy",
+    "total_power_due_to_fusion",
+    "tritium_prefill_count",
+    "vertical_centroid_of_coil_conductor_element",
+    "vertical_coordinate_of_closest_wall_point",
+    "vertical_coordinate_of_coil_conductor",
+    "vertical_current_density",
+    "vertical_magnetic_field_at_wall",
+    "voltage_of_spectrometer",
+    "voltage_of_temperature_sensor",
+    "volume_averaged_runaway_electron_source_rate",
+    "wavelength",
+    "width_of_diagnostic_aperture",
+    "width_of_filter",
+    "width_of_optical_element"
+   ],
+   "source_composed_dates": [
+    " ",
+    "'",
+    ",",
+    "-",
+    "0",
+    "1",
+    "2",
+    "3",
+    "6",
+    "7",
+    "9",
+    "[",
+    "]"
+   ]
+  },
+  "c_rename": {
+   "count": 0,
+   "names": []
+  },
+  "d_other": {
+   "count": 0,
+   "names": []
+  },
+  "total_classified": 80
+ },
+ "q3_invisible_names": {
+  "count": 46,
+  "examples": [
+   {
+    "id": "co_passing_fast_current_density",
+    "snap_path": "distributions/distribution",
+    "source_id": "co_passing_fast_current_density",
+    "source_node_exists": "False"
+   },
+   {
+    "id": "co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+    "snap_path": "distributions/distribution",
+    "source_id": "co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+    "source_node_exists": "False"
+   },
+   {
+    "id": "co_passing_fast_ion_torque_density_due_to_collisions",
+    "snap_path": "distributions/distribution",
+    "source_id": "co_passing_fast_ion_torque_density_due_to_collisions",
+    "source_node_exists": "False"
+   },
+   {
+    "id": "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "snap_path": "distributions/distribution",
+    "source_id": "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "source_node_exists": "False"
+   },
+   {
+    "id": "co_passing_thermal_ion_torque_density_due_to_collisions",
+    "snap_path": "distributions/distribution",
+    "source_id": "co_passing_thermal_ion_torque_density_due_to_collisions",
+    "source_node_exists": "False"
+   },
+   {
+    "id": "co_passing_torque_density_due_to_j_cross_b_force",
+    "snap_path": "distributions/distribution",
+    "source_id": "co_passing_torque_density_due_to_j_cross_b_force",
+    "source_node_exists": "False"
+   }
+  ],
+  "source_node_missing": 46
+ },
+ "q3_multi_source_names": {
+  "inertial_current_density_due_to_diamagnetic_drift": "['edge_profiles/ggd/j_inertial/diamagnetic', 'plasma_profiles/ggd/j_inertial/diamagnetic']",
+  "vertical_centroid_of_coil_conductor_element": "['pf_plasma/element/geometry/annulus/z', 'pf_passive/loop/element/geometry/oblique/z', 'pf_active/coil/geometry/oblique/z']"
+ },
+ "q3_next_run_receipt": {
+  "detector_call": "detect_source_drift(gc=gc)  # read-only, no stamp",
+  "drifted_now": 1,
+  "elapsed_s": 39.2,
+  "per_name": [
+   {
+    "deltas": [
+     {
+      "field": "source_path",
+      "new": "langmuir_probes/embedded/distance_separatrix_midplane",
+      "old": "thomson_scattering/channel/distance_separatrix_midplane"
+     }
+    ],
+    "new_path": "langmuir_probes/embedded/distance_separatrix_midplane",
+    "renamed": true,
+    "requires_steering": true,
+    "sn_id": "radial_separatrix_distance_at_outboard_midplane"
+   }
+  ],
+  "renamed_now": 1,
+  "residual_ids": [
+   "radial_separatrix_distance_at_outboard_midplane"
+  ],
+  "residual_is_subset_of_80": [],
+  "steered_now": 1
+ },
+ "q3_next_run_steering": {
+  "restamped_count": 78,
+  "steered_this_run": 2,
+  "why_only_two_steered": "the detector split the 80 by requires_steering: the 2 whose content field (source_path) differed were steered and re-stamped; the 78 whose content matched were re-stamped only, which clears the provenance drift so the next run does not report them",
+  "would_steer_next_run": 1
+ },
+ "q3_population": {
+  "baseline_window_distinct_names": 5,
+  "baselined_from_log": 6,
+  "detected_from_log": 80,
+  "renamed_from_log": 2,
+  "restamp_window_distinct_names": 78,
+  "restamp_window_excluding_steered": 78,
+  "restamp_window_source_rows": 81,
+  "steered_from_log": 2,
+  "steered_names_from_log": [
+   "electron_temperature_at_separatrix",
+   "gap_at_outboard_midplane"
+  ],
+  "total_matched_to_log_80": 80
+ },
+ "runner": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-apply-drift-scope/docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope-run.py",
+ "started": "2026-10-22T20:58:08Z"
+}
