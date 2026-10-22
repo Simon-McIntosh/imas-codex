@@ -120,14 +120,38 @@ def _calibration() -> dict[str, Any]:
     return json.loads(_THRESHOLDS.read_text())
 
 
-def deciding_enabled() -> bool:
-    """Read the review-stage switch; absent means shadow mode."""
+DECIDING_AXES = ("name", "docs")
+"""The review axes the deciding switch may name."""
+
+
+def deciding_enabled(axis: str) -> bool:
+    """Whether Jev decides *axis*; absent means shadow mode for both axes.
+
+    ``[sn-review].cascade-deciding`` accepts ``true`` (both axes), ``false``
+    (neither) or a list of axes drawn from ``name`` and ``docs`` (Jev decides
+    those, the incumbent keeps the rest). Any other value is refused, so a
+    typo cannot silently leave an axis deciding or shadowing.
+    """
     from imas_codex.settings import _get_section
 
     value = _get_section("sn-review").get("cascade-deciding", False)
-    if not isinstance(value, bool):
-        raise ValueError("[sn-review].cascade-deciding must be a boolean")
-    return value
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (list, tuple)) and all(
+        isinstance(axis_name, str) for axis_name in value
+    ):
+        unknown = [name for name in value if name not in (DECIDING_AXES)]
+        if unknown:
+            raise ValueError(
+                "[sn-review].cascade-deciding names unknown review "
+                f"axes {unknown}; accepted values are true, false or a list "
+                f"drawn from {list(DECIDING_AXES)}"
+            )
+        return axis in value
+    raise ValueError(
+        "[sn-review].cascade-deciding must be a boolean or a list of axes "
+        f"drawn from {list(DECIDING_AXES)}"
+    )
 
 
 def _failure_probability(record: Mapping[str, Any]) -> float | None:
@@ -686,7 +710,7 @@ async def adjudicate_review(
             lease.release_unused()
         except Exception:
             logger.exception("Jev cascade lease release failed for %s", item.get("id"))
-    if deciding_enabled():
+    if deciding_enabled(axis):
         try:
             await _store_route(item, axis, model, route, answers, spent)
         except Exception:

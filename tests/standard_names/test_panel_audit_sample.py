@@ -137,7 +137,7 @@ def _install_cascade(monkeypatch, *, axis, rate, panel_result, declare=True):
         cascade, "_name_judgment" if axis == "name" else "_docs_judgment", judgment
     )
     monkeypatch.setattr(cascade, "_store_route", store)
-    monkeypatch.setattr(cascade, "deciding_enabled", lambda: True)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: True)
     monkeypatch.setattr(panel_audit, "panel_audit_rate", lambda: rate)
     return capture, incumbent, routes
 
@@ -315,7 +315,7 @@ async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
     )
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
     monkeypatch.setattr(cascade, "_store_route", store)
-    monkeypatch.setattr(cascade, "deciding_enabled", lambda: True)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: True)
     monkeypatch.setattr(panel_audit, "panel_audit_rate", lambda: 1.0)
 
     incumbent = partial(
@@ -441,21 +441,51 @@ def test_seam_returns_a_declared_non_persisting_callable_unchanged():
     assert panel_audit.quorum_without_persisting(incumbent) is incumbent
 
 
-def _persisting_partial_construction_sites() -> list:
-    """Every expression in the workers module that builds the persisting partial.
+def _incumbent_arguments_in(source: str) -> list:
+    """The expression each ``adjudicate_review`` call in *source* passes.
+
+    The site is the call, so an argument that wraps the partial in anything
+    appears here as that wrapper rather than as the partial.
+    """
+    import ast
+
+    arguments = []
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node, ast.Call):
+            continue
+        if not (
+            isinstance(node.func, ast.Name) and node.func.id == "adjudicate_review"
+        ):
+            continue
+        arguments.append(node.args[3] if len(node.args) > 3 else None)
+    return arguments
+
+
+def _quorum_incumbent_arguments() -> list:
+    """The incumbent expression at each quorum call site in the workers module.
 
     The module is read through its import, so the check follows the code the
     process would run rather than a path that may name another tree.
     """
-    import ast
     import inspect
 
     from imas_codex.standard_names import workers
 
-    tree = ast.parse(inspect.getsource(workers))
+    return _incumbent_arguments_in(inspect.getsource(workers))
+
+
+def _nested_persisting_partials(source: str) -> list:
+    """Every persisting partial in *source*, at any nesting depth.
+
+    This is the count-based expression the construction-site guard used to
+    accept: it finds the inner partial even under a wrapper, which is why it
+    could not fail on the wrapper case the guard exists to catch.
+    """
+    import ast
+
     return [
         node
-        for node in ast.walk(tree)
+        for node in ast.walk(ast.parse(source))
         if isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
         and node.func.id == "partial"
@@ -463,6 +493,52 @@ def _persisting_partial_construction_sites() -> list:
         and isinstance(node.args[0], ast.Name)
         and node.args[0].id == "_persisting_quorum_cycles"
     ]
+
+
+def _is_persisting_partial(node) -> bool:
+    """Whether this expression is exactly ``partial(_persisting_quorum_cycles, …)``.
+
+    A decorator or a further ``partial`` layer makes this false, which is the
+    case the audit's seam refuses.
+    """
+    import ast
+
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "partial"
+        and bool(node.args)
+        and isinstance(node.args[0], ast.Name)
+        and node.args[0].id == "_persisting_quorum_cycles"
+        and bool(node.keywords)
+    )
+
+
+def test_the_site_guard_rejects_a_wrapped_partial():
+    """The wrapper case the guard exists to catch must fail it.
+
+    A count-based expression still finds the inner partial under a wrapper and
+    reports the site as sound; the guard asserts the site's own expression, so
+    a wrapped site is rejected here.
+    """
+    wrapped = (
+        "async def review(item):\n"
+        "    return await adjudicate_review(\n"
+        "        'name',\n"
+        "        item,\n"
+        "        models,\n"
+        "        _traced(partial(_persisting_quorum_cycles, sn_id=item['id'])),\n"
+        "    )\n"
+    )
+    assert len(_nested_persisting_partials(wrapped)) == 1, (
+        "the inner partial stays findable under a wrapper, which is why a "
+        "count-based guard cannot fail on this case"
+    )
+    sites = _incumbent_arguments_in(wrapped)
+    assert len(sites) == 1
+    assert not _is_persisting_partial(sites[0]), (
+        "a site whose argument wraps the partial must be rejected"
+    )
 
 
 def test_every_quorum_construction_site_builds_the_recognised_partial():
@@ -473,17 +549,22 @@ def test_every_quorum_construction_site_builds_the_recognised_partial():
     or a further partial layer around it at either construction site would
     leave the audit unable to prove the callable writes no canonical rows, and
     the audit refuses such a callable — so the loss of the seam is caught here
-    rather than only in production.
+    rather than only in production. The assertion is on the site's own
+    expression, not on any partial nested inside one.
     """
-    sites = _persisting_partial_construction_sites()
+    import ast
+
+    sites = _quorum_incumbent_arguments()
     assert len(sites) == 2, (
         "both quorum call sites must build partial(_persisting_quorum_cycles, "
         f"**kwargs); found {len(sites)}"
     )
     for site in sites:
-        assert site.keywords, (
-            "the persisting partial must carry the quorum's keyword arguments: "
-            "the seam rebinds the callable by them"
+        assert _is_persisting_partial(site), (
+            "each quorum call site must pass partial(_persisting_quorum_cycles, "
+            "**kwargs) as the incumbent argument itself: a decorator or a "
+            "further partial layer breaks the audit's seam, which is read by "
+            f"the partial's keywords; found {ast.dump(site) if site else None}"
         )
 
 
@@ -513,8 +594,88 @@ async def test_unprovable_incumbent_is_skipped_without_running_the_panel(monkeyp
     assert "UnrecognisedIncumbent" in skipped["skipped_reason"]
 
 
-def test_audit_row_carries_the_panel_review_group_id():
+class _Scores:
+    def __init__(self, score):
+        self.score = score
+
+    def model_dump(self):
+        return {"grammar": self.score}
+
+
+class _ReviewItem:
+    """The reviewer response shape the quorum's cycle parses."""
+
+    def __init__(self, score):
+        self.scores = _Scores(score)
+        self.reasoning = "reads as a temperature"
+        self.comments = None
+        self.dd_gaps = []
+
+
+class _Batch:
+    def __init__(self, item):
+        self.reviews = [item]
+
+
+@pytest.mark.asyncio
+async def test_audit_row_carries_the_group_id_its_own_cycle_rows_carry(
+    monkeypatch,
+):
+    """The audit row's group id is the one its cycle's rows carry.
+
+    Only the model call is stubbed: the real ``_run_rd_quorum_cycles`` builds
+    the rows and returns the group id the audit row must join them under.
+    """
+    from imas_codex.standard_names import workers
+
+    async def stub_call(**_kwargs):
+        return _Batch(_ReviewItem(0.44)), 0.0, (0, 0)
+
+    result = await workers._run_rd_quorum_cycles(
+        sn_id="temperature",
+        review_axis="name",
+        response_model=object,
+        user_prompt="review this name",
+        system_prompt="you are a reviewer",
+        models=["rd-primary"],
+        disagreement_threshold=0.20,
+        rubric_dims=("grammar",),
+        phase="review_name",
+        acall_llm_structured=stub_call,
+        budget_manager=None,
+        run_id="run-audit",
+    )
+
+    group = result["review_group_id"]
+    assert group, "the quorum's result must carry the group its rows share"
+    assert [row["review_group_id"] for row in result["records"]] == [group]
+
+    record = panel_audit._audit_record(
+        {"id": "temperature"},
+        "name",
+        panel_result=result,
+        jev_route="accept",
+        skipped_reason=None,
+        min_score=0.85,
+    )
+    assert record["review_group_id"] == group
+    assert record["review_group_id"] == result["records"][0]["review_group_id"]
+
+
+def test_the_group_id_assertion_detects_a_row_that_invents_its_own_group(
+    monkeypatch,
+):
+    """The equality is falsifiable: a row ignoring its cycle's group differs.
+
+    Without this the assertion could be satisfied by the row minting a group
+    id of its own, which is exactly the defect it exists to catch.
+    """
+    import uuid
+
     group = "6f1f0c2e-0000-4000-8000-00000000beef"
+    monkeypatch.setattr(
+        panel_audit, "_audit_group_id", lambda _result: str(uuid.uuid4())
+    )
     record = panel_audit._audit_record(
         {"id": "temperature"},
         "name",
@@ -523,7 +684,7 @@ def test_audit_row_carries_the_panel_review_group_id():
         skipped_reason=None,
         min_score=0.85,
     )
-    assert record["review_group_id"] == group
+    assert record["review_group_id"] != group
 
 
 def test_skipped_audit_row_carries_a_review_group_id():
