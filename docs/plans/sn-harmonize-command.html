@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="174">
+<meta name="plan-version" content="175">
 <meta name="plan-modified" content="2026-10-23">
 </head>
 <body>
@@ -608,7 +608,10 @@
     <div class="r-comment-body"><p>none — this node stores a review record and does not edit the plan. Independent review of r-20261022T185704097236-isn-pin-0-10-1 at head 526870857155faa8dab5ea61c958f13180e3fcba from base ef7ee1a0c145a29462bbfaaf3f9bbbf23ee837fa: scored goal_fidelity 18, evidence 16, scope_discipline 20, durability 6, fit 18, reuse 20, added_failure_count 0, one blocking and one follow-on finding, reviewed_base_sha ef7ee1a0c145a29462bbfaaf3f9bbbf23ee837fa / reviewed_head_sha 526870857155faa8dab5ea61c958f13180e3fcba.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261022T213639289633-review-of-isn-pin-0-10-1-1cac2a4c0c57" data-who="reckon-build" data-when="2026-10-22T21:46:05.052Z">
-    <div class="r-comment-body"><p>Reviewed the two commits run r-20261022T185704097236-isn-pin-0-10-1 gained since its first review (4a181b69f, 1cac2a4c0 between base 526870857 and head 1cac2a4c0) - the repair of the fragment&#x27;s second-pin locator and the repointing of its trailing reference - and stored a parsed record scoring goal_fidelity 18, evidence 17, scope_discipline 20, durability 7, fit 18, reuse 20 with added_failure_count 0; the prior blocking finding (the fragment naming the serve extra) is resolved, and two follow-on findings remain: the repair commit&#x27;s message still points at a git note that does not exist, and the prose is guarded by no test.</p></div>
+    <div class="r-comment-body"><p>Reviewed the two commits run r-20261022T185704097236-isn-pin-0-10-1 gained since its first review (4a181b69f, 1cac2a4c0 between base 526870857 and head 1cac2a4c0) - the repair of the fragment's second-pin locator and the repointing of its trailing reference - and stored a parsed record scoring goal_fidelity 18, evidence 17, scope_discipline 20, durability 7, fit 18, reuse 20 with added_failure_count 0; the prior blocking finding (the fragment naming the serve extra) is resolved, and two follow-on findings remain: the repair commit's message still points at a git note that does not exist, and the prose is guarded by no test.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261022T185704097236-isn-pin-0-10-1" data-who="reckon-build" data-when="2026-10-22T21:34:10Z">
+    <div class="r-comment-body"><p>Pinned both imas-standard-names requirements in pyproject.toml from ==0.10.0 to ==0.10.1 - [build-system] requires and the dev group under [dependency-groups] - and regenerated uv.lock, which came back byte-identical because the tool.uv.sources editable override records the sibling path in place of a version; the gate `uv lock --check` exits 0 and the committed diff is pyproject.toml alone.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
