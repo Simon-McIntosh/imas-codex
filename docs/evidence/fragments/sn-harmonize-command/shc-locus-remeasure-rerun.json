@@ -1,5 +1,62 @@
 {
 "acceptance_threshold": 0.85,
+"applies": [
+{
+"anchor": "electrostatic_potential_at_langmuir_probe_position",
+"applied": null,
+"batches_run": 1,
+"cost": {
+"calls_total": 12,
+"per_name_usd": {
+"electron_temperature_at_separatrix": 0.256174,
+"gap_at_outboard_midplane": 0.338396
+},
+"phases": {
+"generate_docs": {
+"calls": 2,
+"usd": 0.124986
+},
+"review_docs": {
+"calls": 10,
+"usd": 0.469584
+}
+},
+"run_ids": [
+"1805a6c5-df25-4fe2-b685-ffb1a496063e"
+],
+"spend_usd": 0.59457
+},
+"cost_limit_unspent_usd": 2.9954,
+"cost_limit_usd": 3.59,
+"decision": null,
+"dry_run_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T180138781883-shc-locus-remeasure-rerun/dryrun-rerun.log",
+"error_line": null,
+"exit_line": "EXIT=0",
+"families_applied": 1,
+"halt_reasons": "docs acceptance 0.00% < 90.00% (0/1 touched) below threshold electrostatic_potential  before=0.849  after=0.849",
+"halted": true,
+"held_attachments": [
+{
+"dd_path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z",
+"reason": "locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z' shares no device token with it",
+"sn_id": "vertical_coordinate_of_coil_conductor"
+}
+],
+"log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T180138781883-shc-locus-remeasure-rerun/apply-rerun-1.log",
+"members_accepted": 0,
+"members_touched": 1,
+"physical_base": "electrostatic_potential",
+"produced_summary": false,
+"run_ids": [
+"1805a6c5-df25-4fe2-b685-ffb1a496063e"
+],
+"run_ids_source": "named by the operator from the run's own rows: the exact id, never a prefix",
+"score_regressions": null,
+"stamped": false,
+"summary": null,
+"wall_seconds": 907.0
+}
+],
 "family": {
 "members": [
 "electrostatic_potential",
@@ -41,6 +98,85 @@
 "threshold": 0.85
 },
 "phases": {
+"after": {
+"anchor": "electrostatic_potential_at_langmuir_probe_position",
+"decision": "apply",
+"documentation_scores": {
+"electrostatic_potential": 0.849,
+"electrostatic_potential_at_langmuir_probe_position": null,
+"electrostatic_potential_at_outboard_midplane": null,
+"electrostatic_potential_at_wall": 0.8625,
+"floating_electrostatic_potential": 0.9375
+},
+"drift": 0.8,
+"estimate_basis": {
+"calls": 39,
+"mean_usd_per_call": 0.7103,
+"runs": 31,
+"total_usd": 27.6998
+},
+"estimate_usd": 3.5513,
+"harmonized": false,
+"invariant": [
+"electrostatic_potential",
+"",
+"",
+"",
+""
+],
+"lint": {
+"link_missing_reverse": 2
+},
+"lint_total": 2,
+"member_status": {
+"electrostatic_potential": {
+"docs_stage": "reviewed",
+"id": "electrostatic_potential",
+"name_stage": "accepted",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_langmuir_probe_position": {
+"docs_stage": "pending",
+"id": "electrostatic_potential_at_langmuir_probe_position",
+"name_stage": "accepted",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_outboard_midplane": {
+"docs_stage": "pending",
+"id": "electrostatic_potential_at_outboard_midplane",
+"name_stage": "reviewed",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_wall": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_wall",
+"name_stage": "reviewed",
+"validation_status": "valid"
+},
+"floating_electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "floating_electrostatic_potential",
+"name_stage": "accepted",
+"validation_status": "valid"
+}
+},
+"members": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_outboard_midplane",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"phase": "after",
+"physical_base": "electrostatic_potential",
+"planned_calls": 5,
+"refusals": {},
+"seed": "electrostatic_potential",
+"status_counts": {
+"accepted": 2,
+"other": 3
+}
+},
 "before": {
 "anchor": "electrostatic_potential_at_langmuir_probe_position",
 "decision": "apply",

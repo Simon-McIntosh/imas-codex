@@ -47,6 +47,18 @@ COST_CAP_USD = 3.59
 # One held attachment as the reconciliation pass reports it: the DD path, the
 # name it would have stranded, and the pass's reason.
 HELD_ATTACHMENT = re.compile(r"(\S+) → (\S+) \(([^)]*)\)")
+# The human apply summary the CLI prints without ``--json``: one status line
+# per family, then the scope totals.  The CLI wraps the family line across
+# whichever lines fit the terminal, so both are matched against the log's
+# lines joined into one whitespace-normalised string.
+FAMILY_STATUS = re.compile(
+    r"family (?P<base>\S+)\s+anchor=(?P<anchor>\S+)\s+batches=(?P<batches>\d+)\s+"
+    r"accepted=(?P<accepted>\d+)/(?P<touched>\d+)\s+"
+    r"(?P<status>converged|halted)(?:: (?P<reasons>.*?))?(?=\s+apply:|$)"
+)
+SCOPE_TOTALS = re.compile(
+    r"apply: (?P<applied>\d+) family\(ies\) applied, (?P<stamped>\d+) stamped\."
+)
 
 
 def read_results() -> dict:
@@ -214,14 +226,19 @@ def record_apply(
     wall_seconds: float,
     cost_limit: float,
     dry_run_log: str | None = None,
+    run_ids: list[str] | None = None,
 ) -> None:
     """Ingest one apply's captured log into the record.
 
-    The log's last JSON array line is the CLI's machine summary: per family
-    its decision, anchor, applied and stamped flags, the campaign summary and
-    the documentation-score regressions.  Its ``result.run_ids`` are the exact
-    scope run ids that ``record-cost`` selects the run's LLMCost rows on, so no
-    dollar figure is parsed from the summary text.
+    Two summary shapes are read.  With ``--json`` the log's last JSON array
+    line carries per-family decision, anchor, applied and stamped flags, the
+    campaign summary and the documentation-score regressions, and its
+    ``result.run_ids`` are the exact ids ``record-cost`` selects the run's
+    LLMCost rows on.  Without it the human summary is parsed instead -- the
+    per-family status line and the ``apply: N family(ies) applied, M
+    stamped.`` totals -- and the run id is supplied by the caller, because
+    that summary prints none.  No dollar figure is parsed from the log either
+    way; spend comes from the graph-ops cost owners in ``record-cost``.
     """
     log = Path(log_path)
     lines = log.read_text().splitlines()
@@ -249,6 +266,12 @@ def record_apply(
         None,
     )
     entry = summary[0] if summary else {}
+    joined = " ".join(ln.strip() for ln in lines)
+    family = next((m.groupdict() for m in map(FAMILY_STATUS.search, [joined]) if m), {})
+    totals = next((m.groupdict() for m in map(SCOPE_TOTALS.search, [joined]) if m), {})
+    chosen_ids = [rid for rid in (run_ids or []) if rid]
+    if summary is not None:
+        chosen_ids = (entry.get("result") or {}).get("run_ids") or chosen_ids
     payload = read_results()
     payload.setdefault("applies", []).append(
         {
@@ -259,13 +282,32 @@ def record_apply(
             "exit_line": exit_line,
             "produced_summary": summary is not None,
             "error_line": error_line,
-            "physical_base": entry.get("physical_base"),
-            "anchor": entry.get("anchor"),
+            "physical_base": entry.get("physical_base") or family.get("base"),
+            "anchor": entry.get("anchor") or family.get("anchor"),
             "decision": entry.get("decision"),
             "applied": entry.get("applied"),
-            "stamped": entry.get("stamped"),
+            "stamped": entry.get("stamped")
+            if summary is not None
+            else (totals.get("stamped") == "1" if totals else None),
+            "batches_run": int(family["batches"]) if family.get("batches") else None,
+            "halted": family.get("status") == "halted",
+            "halt_reasons": family.get("reasons"),
+            "members_touched": int(family["touched"])
+            if family.get("touched")
+            else None,
+            "members_accepted": int(family["accepted"])
+            if family.get("accepted")
+            else None,
+            "families_applied": int(totals["applied"])
+            if totals.get("applied")
+            else None,
             "summary": entry.get("result"),
-            "run_ids": (entry.get("result") or {}).get("run_ids") or [],
+            "run_ids": chosen_ids,
+            "run_ids_source": (
+                "the apply's own --json summary"
+                if summary is not None
+                else "named by the operator from the run's own rows: the exact id, never a prefix"
+            ),
             "held_attachments": held_attachments(lines),
             "score_regressions": entry.get("score_regressions"),
         }
@@ -397,9 +439,14 @@ def render() -> None:
     calls_total = cost.get("calls_total")
     touched = summary.get("total_touched")
     stamped = apply_entry.get("stamped")
-    crash = not apply_entry.get("produced_summary", True)
+    # A run was raised only if the log carries an error line; running without
+    # --json costs the machine summary but is not a crash.
+    crash = bool(apply_entry.get("error_line"))
     verdict = "converged" if stamped else ("raised" if crash else "halted")
-    halt_reasons = "; ".join(summary.get("halt_reasons") or [])
+    halt_reasons = apply_entry.get("halt_reasons") or "; ".join(
+        summary.get("halt_reasons") or []
+    )
+    halt_reasons = halt_reasons.split(" below threshold", 1)[0].strip()
     halt_clause = f" on {halt_reasons}" if halt_reasons else ""
     lint_before = json.dumps(initial.get("lint") or {}, sort_keys=True)
     lint_after = json.dumps((after or {}).get("lint") or {}, sort_keys=True)
@@ -460,9 +507,16 @@ def render() -> None:
     )
     if crash:
         lines.append(
-            "    The apply reached no summary line: it raised <code>"
+            "    The apply raised <code>"
             + str(apply_entry.get("error_line"))
             + "</code>, so the family is unstamped."
+        )
+    elif not apply_entry.get("produced_summary", True):
+        lines.append(
+            "    The apply was run without <code>--json</code>, so no machine "
+            "summary line exists to read a result object from: the family's "
+            "status and every cost figure here come from the apply's own "
+            "human summary and from the graph-ops cost owners instead."
         )
     lines.append("  </p>")
     lines.append(
@@ -568,6 +622,13 @@ def main() -> None:
         "--cost-limit", dest="cost_limit", type=float, default=COST_CAP_USD
     )
     rec.add_argument("--dry-run-log", dest="dry_run_log", default=None)
+    rec.add_argument(
+        "--run-id",
+        dest="run_ids",
+        action="append",
+        default=None,
+        help="the exact run id whose LLMCost rows this apply wrote; repeatable",
+    )
     subcommands.add_parser("record-cost")
     subcommands.add_parser("render")
     args = parser.parse_args()
@@ -586,7 +647,13 @@ def main() -> None:
     elif args.command == "snapshot":
         snapshot(args.phase)
     elif args.command == "record-apply":
-        record_apply(args.log, args.wall_seconds, args.cost_limit, args.dry_run_log)
+        record_apply(
+            args.log,
+            args.wall_seconds,
+            args.cost_limit,
+            args.dry_run_log,
+            args.run_ids,
+        )
     elif args.command == "record-cost":
         record_cost()
     elif args.command == "render":
