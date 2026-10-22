@@ -1,0 +1,20 @@
+<h2 id="srtj-refine-ab-score">Scoring the refine arms against the blind labels</h2>
+<p>The two refine arms were scored on the 124 rows of the blind sheet, which the key assigns to 63 of the 104 complete pairs. The comment-driven arm is accepted on 48 of its outputs and the check-driven arm on 53. 44 cases reach the sheet directly and 19 by lineage recovery; 2 identical output pairs collapse into one row credited to both arms. A collapsed row is credited to each arm, never split. The arm of a row is read from the arm key alone — never from the sheet's order or a row's position.</p>
+<h3 id="srtj-refine-ab-score-acceptance">Post-refine acceptance and cost per accepted name</h3>
+<p>Acceptance is the share of an arm's outputs the blind labels accept. Row and case figures coincide here: each contributing case reaches the sheet once per arm, so an accepted count is the same per row and per case. The interval is the 95% percentile bootstrap over cases (10000 seeded draws, <code>imas_codex.discovery.base.evaluation.bootstrap_interval</code>).</p>
+<table><thead><tr><th>Route</th><th>Arm</th><th>Rows</th><th>Accepted</th><th>Acceptance</th><th>95% interval</th><th>Arm spend [USD]</th><th>Cost per accepted</th></tr></thead><tbody><tr><td>all</td><td>comments</td><td>63</td><td>48</td><td>76.2%</td><td>[65.1%, 85.7%]</td><td>16.2837</td><td>0.3392</td></tr>
+<tr><td>all</td><td>checks</td><td>63</td><td>53</td><td>84.1%</td><td>[74.6%, 92.1%]</td><td>16.3774</td><td>0.3090</td></tr>
+<tr><td>direct</td><td>comments</td><td>44</td><td>33</td><td>75.0%</td><td>[61.4%, 86.4%]</td><td>16.2837</td><td>0.4934</td></tr>
+<tr><td>direct</td><td>checks</td><td>44</td><td>39</td><td>88.6%</td><td>[79.5%, 97.7%]</td><td>16.3774</td><td>0.4199</td></tr>
+<tr><td>lineage</td><td>comments</td><td>19</td><td>15</td><td>78.9%</td><td>[57.9%, 94.7%]</td><td>16.2837</td><td>1.0856</td></tr>
+<tr><td>lineage</td><td>checks</td><td>19</td><td>14</td><td>73.7%</td><td>[52.6%, 89.5%]</td><td>16.3774</td><td>1.1698</td></tr></tbody></table>
+<p>Cost per accepted name is the arm's whole refine spend divided by the accepted outputs on the route; the spend is metered once for the arm and repeated across the routes, so a route's figure is that arm spend over the route's accepted outputs, not a separately metered cost.</p>
+<h3 id="srtj-refine-ab-score-paired">Paired difference between the arms</h3>
+<p>Over the cases where both arms produced an output, the paired difference is acceptance(checks) minus acceptance(comments), one observation per case, resampled by the same bootstrap with the pairing held. The interval is in percentage points of acceptance.</p>
+<table><thead><tr><th>Route</th><th>Cases</th><th>Difference</th><th>95% interval</th></tr></thead><tbody><tr><td>all</td><td>63</td><td>+7.9 pp</td><td>[-1.6, +17.5] pp</td></tr>
+<tr><td>direct</td><td>44</td><td>+13.6 pp</td><td>[+4.5, +25.0] pp</td></tr>
+<tr><td>lineage</td><td>19</td><td>-5.3 pp</td><td>[-21.1, +10.5] pp</td></tr></tbody></table>
+<h3 id="srtj-refine-ab-score-comparison">Comparison statement</h3>
+<p>The check-driven arm's acceptance is <strong>at least</strong> the comment-driven arm's: 84.1% (53/63) against 76.2% (48/63), a gap of +7.9 percentage points. The paired 95% interval for that difference has point +7.9 pp and bounds [-1.6, +17.5] pp, including zero. At that acceptance the check-driven arm costs USD 0.3090 per accepted name against USD 0.3392 for the comment-driven arm, on arm spends of USD 16.3774 and USD 16.2837.</p>
+<p>The keyword trigger is not retired here; that is the next node. Nothing in the repository is written except this record, its JSON and the labels test.</p>
+<p>Driver: <code>srtj-refine-ab-score-run.py</code>; receipt: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093932759595-srtj-refine-ab-score/srtj-refine-ab-score-receipt.json</code>. No graph read or write, no model call, USD 0.</p>
