@@ -1,0 +1,89 @@
+<!doctype html>
+<html><head><meta charset='utf-8'>
+<title>Blind labels for the documentation disagreement sheet</title></head><body>
+<h1 id="srtj-docs-disagreement-labels">Blind labels for the documentation disagreement sheet</h1>
+
+<p>Fresh blind labeller. Every label below is my own reading of the row against the rubric
+<code>golden-documentation-acceptable-rubric.md</code>. No model was called; USD 0. The machine-readable
+labels are in the sibling <code>srtj-docs-disagreement-labels.json</code>.</p>
+
+<h2 id="srtj-docs-disagreement-labels-counts">Label counts</h2>
+<ul>
+<li>rows labelled, one per sheet row: <strong>77</strong></li>
+<li>label <strong>1</strong> (acceptable for the catalog under the rubric): <strong>47</strong></li>
+<li>label <strong>0</strong> (not acceptable): <strong>30</strong></li>
+</ul>
+<p>Of the 30 rejections, 27 fail on <code>links</code>, 2 on <code>subject</code> and 1 on
+<code>physics</code>; two rows carry a second failing criterion noted beside the first. The row ids labelled
+0, in sheet order: S0003, S0006, S0007, S0011, S0016, S0023, S0025, S0027, S0029, S0030, S0033, S0036,
+S0037, S0038, S0040, S0043, S0044, S0045, S0047, S0048, S0049, S0050, S0058, S0059, S0060, S0063, S0064,
+S0070, S0071, S0074.</p>
+
+<h2 id="srtj-docs-disagreement-labels-criteria">The rubric criteria as I applied them</h2>
+<p>A documentation is acceptable only when every check passes, and the failing label records the first check
+that fails. I applied the six checks as the sheet allowed:</p>
+<ol>
+<li><code>subject</code> &mdash; the text documents the quantity the name denotes, and the DD
+<code>source_path</code>/<code>source_unit</code> measure that quantity. A provenance mismatch fails even
+when the prose reads well.</li>
+<li><code>physics</code> &mdash; definitions, equations and statements are correct; the dimensions agree
+with the unit symbol.</li>
+<li><code>scope</code> &mdash; the text claims no more and no less than the name (it is not narrowed to one
+machine or widened into a general quantity).</li>
+<li><code>house_style</code> &mdash; applied only where the sheet lets it be: the rubric's house-style
+checks (a conventions-registry entry, a forbidden spelling, a COCOS number) key on the row's
+<code>conventions</code> field, which the sheet's pinned seven-field shape does not carry, so no row was
+failed on this check alone. The catalog's <em>template_opening</em> rule compares the first line against a
+template held in the conventions registry; that registry is not in the sheet and I did not reach it, so I
+did not fail a row on template opening either. I flag both as unapplied rather than guess.</li>
+<li><code>links</code> &mdash; every <code>name:</code> link points at a name whose meaning matches its link
+text, and a bracketed phrase with no link target fails because the published entry shows the reader a
+reference that leads nowhere. A link to the row's own name presented as an example of something else also
+fails. This is the check most of the disagreements trip.</li>
+<li><code>complete</code> &mdash; nothing is truncated, a placeholder, unresolved or self-contradictory.
+No row was failed on this check: no placeholders or truncations were found.</li>
+</ol>
+
+<h2 id="srtj-docs-disagreement-labels-examples">Three worked examples</h2>
+
+<h3 id="srtj-docs-disagreement-labels-ex1">Example 1 &mdash; S0003, label 0 (<code>links</code>)</h3>
+<p>Name <code>ion_charge_state_energy_flux_at_wall_due_to_recombination</code>, source
+<code>wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/incident/values</code>. The prose is
+well-formed and the two leading links (<code>ion energy flux at the wall due to recombination</code>,
+<code>energy flux at the wall due to recombination</code>) resolve. The last sentence reads:</p>
+<blockquote>It is the energy-weighted counterpart of [particle flux at the wall due to recombination] for the
+same surface recombination source.</blockquote>
+<p>The bracketed phrase <code>[particle flux at the wall due to recombination]</code> carries no
+<code>(name:&hellip;)</code> target. A published entry would show the reader a reference that leads nowhere,
+which the rubric names explicitly as a <code>links</code> failure. Label <strong>0</strong>.</p>
+
+<h3 id="srtj-docs-disagreement-labels-ex2">Example 2 &mdash; S0058, label 0 (<code>subject</code>)</h3>
+<p>Name <code>tilt_angle_of_passive_loop</code>, source
+<code>pf_passive/loop/element/geometry/oblique/beta</code>, whose DD description is
+&ldquo;Inclination of second angle&rdquo;. Its sibling for the same geometry,
+<code>alpha_angle_of_plasma_filament</code>, is generated from <code>&hellip;/geometry/oblique/alpha</code> and
+described as the first-angle inclination of an oblique cross-section. The text for S0058 instead defines an
+element reference-axis orientation and states it &ldquo;is analogous to the orientation defined for a tilt
+angle of a plasma filament&rdquo; and &ldquo;not an inclination parameter defining the shape of an oblique
+cross-section&rdquo;. The source node is exactly that oblique second angle, so the source does not measure the
+quantity the text describes. Provenance mismatch &rarr; <code>subject</code>. Label <strong>0</strong>.</p>
+
+<h3 id="srtj-docs-disagreement-labels-ex3">Example 3 &mdash; S0002, label 1 (acceptable)</h3>
+<p>Name <code>helium_4_density_at_pedestal_top</code>, source
+<code>summary/local/pedestal/n_i/helium_4/value</code>. The text defines the charge-state-summed helium-4
+density with a correct equation, its symbols all defined, sums over the two ionized states and excludes
+neutral helium, and locates the quantity at the pedestal top. Every link
+(<code>normalized_poloidal_flux_coordinate_of_pedestal</code>,
+<code>density_at_pedestal_top</code>, <code>helium_4_density_at_plasma_boundary</code>,
+<code>helium_3_density_at_pedestal_top</code>) resolves. Subject matches the source, dimensions agree with
+m^-3 and the scope is neither narrowed nor widened. Label <strong>1</strong>.</p>
+
+<h2 id="srtj-docs-disagreement-labels-blinding">Blinding statement</h2>
+<p>I opened none of the forbidden files. I did not open <code>srtj-docs-disagreement-key.json</code>; I did
+not open any <code>srtj-cohort/</code> piece file; I did not open any dry-run or diagnosis fragment or JSON;
+and I did not consult any review score, route or reviewer comment for these names in the graph. The files I
+read were the sheet <code>srtj-docs-disagreement-sheet.json</code>, the rubric
+<code>golden-documentation-acceptable-rubric.md</code>, and the catalog's own link and template rules in
+<code>imas_codex/standard_names/docs_gates.py</code>. Every label is my own reading of the row.</p>
+
+</body></html>

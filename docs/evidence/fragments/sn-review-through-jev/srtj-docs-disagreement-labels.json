@@ -1,0 +1,397 @@
+{
+  "schema": "srtj-docs-disagreement-labels",
+  "source_sheet": "srtj-docs-disagreement-sheet.json",
+  "rubric": "golden-documentation-acceptable-rubric.md",
+  "counts": {
+    "acceptable": 47,
+    "not_acceptable": 30,
+    "total": 77
+  },
+  "labels": [
+    {
+      "sheet_id": "S0001",
+      "label": 1,
+      "reason": "acceptable: documents the line-averaged charge-state-summed tungsten-ion density named, source summary/line_average/n_i/tungsten matches, links resolve and dimensions agree."
+    },
+    {
+      "sheet_id": "S0002",
+      "label": 1,
+      "reason": "acceptable: documents the helium-4 pedestal-top density named, source summary/local/pedestal/n_i/helium_4 matches, every link resolves."
+    },
+    {
+      "sheet_id": "S0003",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[particle flux at the wall due to recombination]' has no name: link target, so the reference leads nowhere."
+    },
+    {
+      "sheet_id": "S0004",
+      "label": 1,
+      "reason": "acceptable: documents the hydrogen pedestal-top density named, source summary/local/pedestal/n_i/hydrogen matches, every link resolves."
+    },
+    {
+      "sheet_id": "S0005",
+      "label": 1,
+      "reason": "acceptable: documents the parallel fast-neutral pressure named, source plasma_profiles/.../pressure_fast_parallel matches, links resolve."
+    },
+    {
+      "sheet_id": "S0006",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[flux-surface-averaged lithium density at the plasma boundary]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0007",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[plasma current due to ohmic induction]' has no target, and the link text 'plasma current due to non-inductive current drive' targets this row's own name while being presented as a separate plasma-specific realization."
+    },
+    {
+      "sheet_id": "S0008",
+      "label": 1,
+      "reason": "acceptable: documents the divertor-target incident current named, source divertors/.../current_incident matches, links resolve and the sign convention is consistent."
+    },
+    {
+      "sheet_id": "S0009",
+      "label": 1,
+      "reason": "acceptable: documents the second local tangential back-surface radius named, source camera_visible/.../x2_curvature matches, links resolve."
+    },
+    {
+      "sheet_id": "S0010",
+      "label": 1,
+      "reason": "acceptable: documents the flux-surface- and time-averaged normalized perturbed parallel field magnitude named, source gyrokinetics_local/.../b_field_parallel_perturbed_norm matches, links resolve."
+    },
+    {
+      "sheet_id": "S0011",
+      "label": 0,
+      "reason": "links: the bracketed phrases '[wave current of an antenna strap]' and '[wave current of an antenna strap amplitude]' have no name: link target."
+    },
+    {
+      "sheet_id": "S0012",
+      "label": 1,
+      "reason": "acceptable: documents the imaginary part of the radial perturbed plasma magnetic field named, source mhd_linear/.../coordinate1/imaginary matches, links resolve."
+    },
+    {
+      "sheet_id": "S0013",
+      "label": 1,
+      "reason": "acceptable: documents the normal coordinate of a correction coil named, source coils_non_axisymmetric/.../outline/normal matches, links resolve."
+    },
+    {
+      "sheet_id": "S0014",
+      "label": 1,
+      "reason": "acceptable: documents the krypton gas-injection source rate named, source summary/gas_injection_rates/krypton matches, links resolve and the equivalent-electron definition is consistent."
+    },
+    {
+      "sheet_id": "S0015",
+      "label": 1,
+      "reason": "acceptable: documents the fusion-attributed heating power named, source balance_of_plant/.../total_heat_supplied matches, links resolve."
+    },
+    {
+      "sheet_id": "S0016",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[angle of electron-cyclotron launcher mirror]' has no name: link target in either of its two occurrences."
+    },
+    {
+      "sheet_id": "S0017",
+      "label": 1,
+      "reason": "acceptable: documents the major-radius-scaled vertical vorticity named, source edge_profiles/.../vorticity_over_r/z matches, links resolve."
+    },
+    {
+      "sheet_id": "S0018",
+      "label": 1,
+      "reason": "acceptable: documents the per-toroidal-mode fast-ion charge-state power named, source waves/.../power_fast_n_phi matches, links resolve."
+    },
+    {
+      "sheet_id": "S0019",
+      "label": 1,
+      "reason": "acceptable: documents the shunt resistance named, source magnetics/shunt/resistance matches, links resolve."
+    },
+    {
+      "sheet_id": "S0020",
+      "label": 1,
+      "reason": "acceptable: documents the second local tangential coordinate of the EC launcher mirror named, source ec_launchers/mirror/geometry/outline/x2 matches, links resolve."
+    },
+    {
+      "sheet_id": "S0021",
+      "label": 1,
+      "reason": "acceptable: documents the plasma-filament first-side inclination named, source pf_plasma/.../oblique/alpha matches, links resolve."
+    },
+    {
+      "sheet_id": "S0022",
+      "label": 1,
+      "reason": "acceptable: documents the trapped-orbit collisional fast-ion power density named, source distributions/.../trapped/collisions/ion/power_fast matches, links resolve."
+    },
+    {
+      "sheet_id": "S0023",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[power density of a limiter tile]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0024",
+      "label": 1,
+      "reason": "acceptable: documents the divertor-tile incident current named, source divertors/.../tile/current_incident matches, links resolve."
+    },
+    {
+      "sheet_id": "S0025",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[parallel normalized beam power]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0026",
+      "label": 1,
+      "reason": "acceptable: documents the iron-core segment width named, source iron_core/.../rectangle/width matches, links resolve."
+    },
+    {
+      "sheet_id": "S0027",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[ion density at a limiter]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0028",
+      "label": 1,
+      "reason": "acceptable: documents the ion charge-state particle flux limiter coefficient named, source plasma_transport/.../flux_limiter/values matches, links resolve."
+    },
+    {
+      "sheet_id": "S0029",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[viewing etendue of a spectrometer channel]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0030",
+      "label": 0,
+      "reason": "links: the bracketed phrases '[effective thermal ion charge-state energy velocity due to convection]' and '[ion heat convection velocity]' have no name: link target."
+    },
+    {
+      "sheet_id": "S0031",
+      "label": 1,
+      "reason": "acceptable: documents the toroidal ion charge-state momentum convection velocity named, source edge_profiles/.../velocity/phi matches, links resolve."
+    },
+    {
+      "sheet_id": "S0032",
+      "label": 1,
+      "reason": "acceptable: documents the maximum back-surface neutron flux named, source breeding_blanket/.../escape_flux_max matches, links resolve."
+    },
+    {
+      "sheet_id": "S0033",
+      "label": 0,
+      "reason": "links: the bracketed phrases '[Radial ion energy diffusion coefficient]', '[poloidal ion energy diffusion coefficient]' and '[energy diffusivity]' have no name: link target."
+    },
+    {
+      "sheet_id": "S0034",
+      "label": 1,
+      "reason": "acceptable: documents the electron-equivalent wall pumping rate named, source wall/global_quantities/electrons/pumping_speed matches, links resolve."
+    },
+    {
+      "sheet_id": "S0035",
+      "label": 1,
+      "reason": "acceptable: documents the background electron density along the pellet path named, source pellets/.../path_profiles/n_e matches, links resolve."
+    },
+    {
+      "sheet_id": "S0036",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[heating power of a breeder-blanket layer]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0037",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[radius of a poloidal-field-coil arc]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0038",
+      "label": 0,
+      "reason": "links: the bracketed phrases '[optical-element curvature]' and '[back-surface curvature]' have no name: link target."
+    },
+    {
+      "sheet_id": "S0039",
+      "label": 1,
+      "reason": "acceptable: documents the imaginary part of the radial perturbed plasma magnetic vector potential named, source mhd_linear/.../a_field_perturbed/coordinate1/imaginary matches, the link resolves."
+    },
+    {
+      "sheet_id": "S0040",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[power of divertor]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0041",
+      "label": 1,
+      "reason": "acceptable: documents the accumulated deuterated-methane prefill count named, source summary/gas_injection_prefill/methane_deuterated matches, links resolve and the electron-count factor is consistent."
+    },
+    {
+      "sheet_id": "S0042",
+      "label": 1,
+      "reason": "acceptable: documents the toroidal conductivity tensor coefficient named, source plasma_transport/.../conductivity/phi matches, links resolve."
+    },
+    {
+      "sheet_id": "S0043",
+      "label": 0,
+      "reason": "links: the bracketed phrases '[total current density]' and '[vertical current density]' have no name: link target."
+    },
+    {
+      "sheet_id": "S0044",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[first local tangential coordinate of a hard X-ray detector]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0045",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[particle mass]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0046",
+      "label": 1,
+      "reason": "acceptable: documents the vertical conductivity tensor coefficient named, source edge_transport/.../conductivity/z matches, links resolve."
+    },
+    {
+      "sheet_id": "S0047",
+      "label": 0,
+      "reason": "subject: the source path lies in the DD energy_fluxes group with unit W.m^-2 (an energy flux) while the name and text document a particle flux in m^-2.s^-1, so the source does not measure the documented quantity."
+    },
+    {
+      "sheet_id": "S0048",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[co-passing torque density due to the J cross B force]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0049",
+      "label": 0,
+      "reason": "links: the bracketed phrases '[total plasma energy]' and '[total particle energy]' have no name: link target."
+    },
+    {
+      "sheet_id": "S0050",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[co-passing fast ion torque density due to collisions]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0051",
+      "label": 1,
+      "reason": "acceptable: documents the charge-state-averaged post-crash ion temperature named, source sawteeth/profiles_1d/t_i_average matches, links resolve."
+    },
+    {
+      "sheet_id": "S0052",
+      "label": 1,
+      "reason": "acceptable: documents the soft X-ray detector first-direction aperture width named, source soft_x_rays/.../x1_width matches, links resolve."
+    },
+    {
+      "sheet_id": "S0053",
+      "label": 1,
+      "reason": "acceptable: documents the radial electromagnetic body-force density projection named, source wall/.../em_force_density/r matches, links resolve."
+    },
+    {
+      "sheet_id": "S0054",
+      "label": 1,
+      "reason": "acceptable: documents the flux-surface-averaged toroidal nitrogen velocity named, source summary/local/separatrix_average/velocity_phi/nitrogen matches, links resolve."
+    },
+    {
+      "sheet_id": "S0055",
+      "label": 1,
+      "reason": "acceptable: documents the volume-integrated particle source rate named, source distributions/.../thermalization/particles matches, links resolve."
+    },
+    {
+      "sheet_id": "S0056",
+      "label": 1,
+      "reason": "acceptable: documents the implicit ion energy source coefficient named, source plasma_sources/.../implicit_part matches, links resolve."
+    },
+    {
+      "sheet_id": "S0057",
+      "label": 1,
+      "reason": "acceptable: documents the vertical vorticity component named, source plasma_profiles/.../vorticity/z matches, links resolve."
+    },
+    {
+      "sheet_id": "S0058",
+      "label": 0,
+      "reason": "subject: the source is the oblique cross-section second-angle node (pf_passive/.../geometry/oblique/beta, 'Inclination of second angle'), yet the text defines an element reference-axis orientation and explicitly denies being an oblique-shape inclination."
+    },
+    {
+      "sheet_id": "S0059",
+      "label": 0,
+      "reason": "physics: the text defines a dimensionless direction cosine of a unit vector while the unit symbol is m (a length), so the dimensions disagree with the unit."
+    },
+    {
+      "sheet_id": "S0060",
+      "label": 0,
+      "reason": "links: the link text 'tungsten density at the plasma boundary' targets this row's own name while being presented as the distinct 'local' quantity, a self-link used as an example of something else."
+    },
+    {
+      "sheet_id": "S0061",
+      "label": 1,
+      "reason": "acceptable: documents the toroidal helium-4 velocity at the magnetic axis named, source summary/local/magnetic_axis/velocity_phi/helium_4 matches, links resolve."
+    },
+    {
+      "sheet_id": "S0062",
+      "label": 1,
+      "reason": "acceptable: documents the vertical coordinate of the antenna strap named, source ic_antennas/.../annulus/z matches, links resolve."
+    },
+    {
+      "sheet_id": "S0063",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[accumulated total gas count at midplane due to gas injection]' has no name: link target."
+    },
+    {
+      "sheet_id": "S0064",
+      "label": 0,
+      "reason": "links: the bracketed phrases '[poloidal magnetic field at a flux surface]', '[radial magnetic field at a flux surface]', '[vertical magnetic field at a flux surface]' and '[magnetic-field magnitude at a flux surface]' all have no name: link target."
+    },
+    {
+      "sheet_id": "S0065",
+      "label": 1,
+      "reason": "acceptable: documents the normalized Bessel-weighted parallel gyrocenter current-density moment named, source gyrokinetics_local/.../j_parallel matches, links resolve."
+    },
+    {
+      "sheet_id": "S0066",
+      "label": 1,
+      "reason": "acceptable: documents the accumulated oxygen gas-injection count named, source summary/gas_injection_accumulated/oxygen matches, links resolve and the eight-electron weighting is consistent."
+    },
+    {
+      "sheet_id": "S0067",
+      "label": 1,
+      "reason": "acceptable: documents the filter-window first-direction width named, source soft_x_rays/.../x1_width matches, links resolve."
+    },
+    {
+      "sheet_id": "S0068",
+      "label": 1,
+      "reason": "acceptable: documents the line-averaged helium-4 density named, source summary/line_average/n_i/helium_4 matches, links resolve."
+    },
+    {
+      "sheet_id": "S0069",
+      "label": 1,
+      "reason": "acceptable: documents the accumulated deuterium gas-injection count named, source summary/gas_injection_accumulated/deuterium matches, links resolve and the unit weighting is consistent."
+    },
+    {
+      "sheet_id": "S0070",
+      "label": 0,
+      "reason": "subject: the source is the thermal-only node (waves/.../electrons/power_thermal, 'Wave power absorbed by the thermal particle population') while the text documents total electron power including fast non-thermal electrons, so the source measures a narrower quantity."
+    },
+    {
+      "sheet_id": "S0071",
+      "label": 0,
+      "reason": "links: the link text 'polarization_angle' targets this row's own name while being presented as the corresponding reconstructed generic quantity, a self-link used as an example of something else."
+    },
+    {
+      "sheet_id": "S0072",
+      "label": 1,
+      "reason": "acceptable: documents the poloidal neutral energy diffusivity named, source edge_transport/.../d_pol/values matches, links resolve."
+    },
+    {
+      "sheet_id": "S0073",
+      "label": 1,
+      "reason": "acceptable: documents the external loop voltage named, source equilibrium/.../v_external matches, links resolve and the Faraday sign is consistent."
+    },
+    {
+      "sheet_id": "S0074",
+      "label": 0,
+      "reason": "links: the bracketed phrase '[neutral particle flux at the wall]' has no name: link target; the text also calls the quantity an incident flux although the source node is the emitted-neutral flux."
+    },
+    {
+      "sheet_id": "S0075",
+      "label": 1,
+      "reason": "acceptable: documents the toroidal carbon velocity at the pedestal top named, source summary/local/pedestal/velocity_phi/carbon matches, links resolve."
+    },
+    {
+      "sheet_id": "S0076",
+      "label": 1,
+      "reason": "acceptable: documents the real part of the Alfven frequency named, source mhd_linear/.../alfven_frequency_spectrum/real matches, links resolve."
+    },
+    {
+      "sheet_id": "S0077",
+      "label": 1,
+      "reason": "acceptable: documents the vertical ion-inertia current density named, source plasma_profiles/ggd/j_inertial/z matches, links resolve."
+    }
+  ]
+}
