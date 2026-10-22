@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: logs/gate-base.log EXIT=0 152 passed / 28 deselected; logs/gate-head.log EXIT=0 156 passed / 31 deselected, no FAILED lines, and failure_ids [] in both manifest arms. The gate's marker set excludes the graph-marked tests, so an added failure introduced in tests/standard_names/test_attachment_audit.py's graph tests is not in this figure; see findings.",
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:_run_attachment_audit_for_pool_run",
+    "imas_codex/standard_names/loop.py:run_sn_pools",
+    "imas_codex/standard_names/provenance_rebuild.py:531",
+    "imas_codex/standard_names/attachment_audit.py:gate_migrated_attachments"
+  ],
+  "completed_at": "2026-10-22T09:49:04.372Z",
+  "dispatched_at": "2026-10-22T09:27:59Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/attachment_audit.py",
+      "line": 234,
+      "severity": "blocking",
+      "text": "imas_codex/standard_names/attachment_audit.py:234 adds a second {live_child} placeholder to the shared _ATTACHMENTS_QUERY template, so the existing calls mod._ATTACHMENTS_QUERY.format(scope=...) at tests/standard_names/test_attachment_audit.py:690, 707, 1017 and 1018 now raise KeyError: 'live_child' \u2014 breaking every graph-marked test that uses _scoped/_ScopedClient in a file the node's own gate enumerates. Verified by import: mod._ATTACHMENTS_QUERY.format(scope='') raises KeyError 'live_child'. The gate's default marker set deselected those tests (31 deselected in gate-head), so the regression was not measured; reproduce with 'uv run pytest tests/standard_names/test_attachment_audit.py -m graph'. Repairable inside the node's scope by not putting the live-child clause behind a .format placeholder in the shared constant."
+    },
+    {
+      "file": "imas_codex/standard_names/attachment_audit.py",
+      "line": 2969,
+      "severity": "follow-on",
+      "text": "imas_codex/standard_names/attachment_audit.py:2969 _names_stranded_by_detach re-expresses the invariant's own 'live, sourceless' predicate in Python (non-stale-producer test at lines 2969-2971, superseded/derived-parent exemption at lines 1076-1084) rather than calling find_sourceless_live_names or its Cypher, which the node brief required ('Use the invariant's own predicate or its Cypher; write no second definition of a live, sourceless name'). It composes _live_child_cypher() from imas_codex/standard_names/source_invariant.py but duplicates the non-stale and superseded clauses, so the hold and the backstop can drift; the audit read also requires FROM_DD_PATH, so a producer without that edge is invisible to the hold and it over-holds relative to the invariant."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-reconcile-holds-stranding.html",
+      "line": 68,
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/sn-harmonize-command/shc-reconcile-holds-stranding.html:68 names the second test test_other_rejected_attachments_are_detached_in_the_pass, but the test landed as test_other_rejected_attachments_are_detached_in_the_same_pass (tests/standard_names/test_attachment_stranding_hold.py:137). A landing fragment that names a test which does not exist cannot be followed back to its evidence."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against 26b0ce3a1: 93e04a526 adds the hold, 3bed4813e moves its inputs into the audit read, 206646758 adds the fragment.",
+    "done_when": "the done_when asks the gate to show no added failures and the negative-control and disposable-graph logs to be kept; logs/gate-base.log and logs/gate-head.log record 0 failures on the enumerated files and both logs are on disk, but the gate's marker set excludes the graph-marked tests the change breaks.",
+    "goal": "the node's goal is to hold rather than detach an attachment whose removal would strand its name; imas_codex/standard_names/attachment_audit.py:1225-1240 classifies such verdicts into skipped_stranding before the detach and leaves them in place.",
+    "manifest": "read; it states status complete, the three commits, the gate arms, the negative control (1 failed) and the disposable-graph run (3 passed), with logs named.",
+    "write_paths": "read the manifest's declared paths; every path in the diff (attachment_audit.py, the new stranding test, the fragment) is inside them."
+  },
+  "notes": "Independent review of the landed node. Read: the reviewed node's goal/done_when/write_paths from its brief and manifest, the manifest, the diff of 93e04a526..206646758 against 26b0ce3a1, the production call sites, the new test file, the gate/base/negative/disposable-graph/live-dry-run logs and the evidence fragment. One added-definition reuse search performed and recorded above. Not re-derived: the implementation itself.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to hold, not detach, an attachment whose removal would leave its name with no non-stale producer; imas_codex/standard_names/attachment_audit.py:1225-1240 does exactly that before the detach and keeps require_producing_sources at line 1319 as the backstop.\nVERDICT done_when: the done_when asks for a gate with no added failures plus kept negative-control and disposable-graph logs; logs/gate-base.log (EXIT=0, 152 passed/28 deselected) and logs/gate-head.log (EXIT=0, 156 passed/31 deselected) record 0 failures and logs/stranding-hold.log (3 passed) and logs/stranding-hold-negative.log (1 failed, EXIT=1) exist. The gate's marker set excludes the graph-marked tests this change breaks, so 'no added failures' is asserted only over the non-graph selection.\nVERDICT write_paths: the manifest declares attachment_audit.py, tests/standard_names/test_attachment_stranding_hold.py and the sn-harmonize-command fragment; every path in the diff is inside them, with no out-of-scope write.\nVERDICT manifest: read at .../runs/r-20261020T233636799721-shc-reconcile-holds-stranding/manifest.md; status complete, commits 93e04a526/3bed4813e/206646758, gate arms, the negative control and the disposable-graph run all named with logs.\nVERDICT diff: read commit by commit against 26b0ce3a1: 3bed4813e derives its inputs from the audit's single read and 206646758 adds the evidence fragment, on top of 93e04a526 which adds the skipped_stranding hold.\nCALL_SITES: imas_codex/standard_names/loop.py:_run_attachment_audit_for_pool_run, imas_codex/standard_names/loop.py:run_sn_pools, imas_codex/standard_names/provenance_rebuild.py:531, imas_codex/standard_names/attachment_audit.py:gate_migrated_attachments\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/attachment_audit.py:1230-1240 holds rather than detaches a verdict whose removal would strand its name, counted in skipped_stranding and logged loudly at line 1264, matching the node goal.\nSCORE evidence: 13\nJUSTIFICATION evidence: logs/gate-head.log records EXIT=0 with 0 failures, but its marker set deselected the 31 graph tests, so the gate does not measure the added failures the change introduces in tests/standard_names/test_attachment_audit.py.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the three changed files are exactly the manifest's declared write paths, with no extra path touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_attachment_stranding_hold.py:111-174 fails if the hold is removed \u2014 the negative control (logs/stranding-hold-negative.log) shows test_sole_producer_rejected_attachment_is_held reddening with no hold.\nSCORE fit: 18\nJUSTIFICATION fit: the new skipped_stranding/held_stranding fields and the warning follow the existing bucket idiom and message shape at imas_codex/standard_names/attachment_audit.py:1250-1295, with no plan or ticket identifier.\nSCORE reuse: 10\nJUSTIFICATION reuse: imas_codex/standard_names/attachment_audit.py:2969 re-expresses source_invariant.py:27 find_sourceless_live_names's producer-and-exemption predicate in Python instead of calling it or its Cypher, so the owner of the 'live, sourceless' capability is duplicated rather than extended.\nFINDING imas_codex/standard_names/attachment_audit.py:234 blocking: a second {live_child} placeholder in the shared _ATTACHMENTS_QUERY template makes mod._ATTACHMENTS_QUERY.format(scope=...) raise KeyError 'live_child' at tests/standard_names/test_attachment_audit.py:690,707,1017,1018, breaking that file's graph-marked tests, which the gate's marker set deselected so the regression went unmeasured.\nFINDING imas_codex/standard_names/attachment_audit.py:2969 follow-on: _names_stranded_by_detach duplicates the invariant's non-stale-producer and superseded exemptions in Python rather than using find_sourceless_live_names or its Cypher, contrary to the node brief, so the hold and the backstop can drift and the hold over-holds for a producer lacking FROM_DD_PATH.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-reconcile-holds-stranding.html:68 follow-on: the fragment names test_other_rejected_attachments_are_detached_in_the_pass, but the landed test is test_other_rejected_attachments_are_detached_in_the_same_pass.\n",
+  "reuse_search": "searched imas_codex/standard_names for an existing owner of the would-strand/stranding decision: imas_codex/standard_names/source_invariant.py find_sourceless_live_names and require_producing_sources own the live-sourceless rule; imas_codex/standard_names/attachment_audit.py:2949 _find_orphaned_names wraps the same predicate for post-detach reporting.",
+  "review_run_id": "r-20261022T092738779034-review-of-shc-reconcile-holds-stranding-2066467588a8",
+  "reviewed_base_sha": "26b0ce3a172fc9cfb2736e870ac327978f7e6f46",
+  "reviewed_head_sha": "2066467588a80f4a9c0df302ccc23714a3b62fe8",
+  "reviewed_node": "shc-reconcile-holds-stranding",
+  "reviewed_run_id": "r-20261020T233636799721-shc-reconcile-holds-stranding",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 10,
+    "scope_discipline": 20,
+    "total": 97
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T09:49:58.570261+00:00",
+  "total": 97
+}
