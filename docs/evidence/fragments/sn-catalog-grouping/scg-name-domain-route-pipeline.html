@@ -1,0 +1,188 @@
+<h2 id="scg-name-domain-route-pipeline">The pipeline's own domain writers route through the one writer</h2>
+
+<p>Four paths outside the graph-ops module authored a name's domain. Each now
+sets none of its own: the composing path asks the stored Jev decision for every
+name it persisted and writes it through
+<code>imas_codex.standard_names.domain_decision.write_name_domain</code>, and the
+three read paths read the stored value rather than deriving one.</p>
+
+<h3 id="scg-name-domain-route-pipeline-functions">Each routed function, before and after</h3>
+
+<table>
+  <tr><th>Function</th><th>Before</th><th>After</th></tr>
+  <tr>
+    <td><code>workers.compose_worker</code></td>
+    <td>Set <code>physics_domain = raw_domain</code> and
+      <code>source_domains = [raw_domain]</code> from the DD source item
+      (<code>workers.py:4421-4425</code>), a second writer of the scalar.</td>
+    <td>Injects no DD domain. After the batch is persisted it hands the
+      winners to <code>_write_composed_name_domains</code>.</td>
+  </tr>
+  <tr>
+    <td><code>workers.compose_batch</code></td>
+    <td>Same raw-domain injection (<code>workers.py:6311-6313</code>).</td>
+    <td>Injects no DD domain; hands its persisted winners to
+      <code>_write_composed_name_domains</code>.</td>
+  </tr>
+  <tr>
+    <td><code>workers._write_composed_name_domains</code> (new)</td>
+    <td>—</td>
+    <td>Reads each persisted name's description and its source paths' stored
+      domains, asks <code>domain_decision.decide_domain</code> for the Choice
+      (concurrency <code>domain_decision.CONCURRENCY</code>, seat
+      <code>sn-domain-tree</code>), then writes each through
+      <code>write_name_domain</code>. A failed or below-floor call leaves the
+      name undecided, per the writer's rule.</td>
+  </tr>
+  <tr>
+    <td><code>consolidation._resolve_physics_domains</code></td>
+    <td><code>select_primary_domain(sources)</code> returned the highest-ranked
+      domain (<code>consolidation.py:78</code>).</td>
+    <td>Returns <code>(None, sorted(sources))</code>: no scalar is chosen, the
+      source union is kept. <code>_merge_duplicates</code> therefore leaves
+      <code>physics_domain</code> at <code>None</code> for the writer.</td>
+  </tr>
+  <tr>
+    <td><code>consolidation.consolidate_candidates</code></td>
+    <td>Reached the selector through <code>_merge_duplicates</code>; runs before
+      graph writes and holds no client, so it cannot call the writer itself.</td>
+    <td>Calls no selector. Carries the merged source union and no scalar.</td>
+  </tr>
+  <tr>
+    <td><code>catalog_import.check_catalog</code></td>
+    <td>Re-selected a primary from the node's stored-or-source domains with
+      <code>select_primary_domain</code> (<code>catalog_import.py:514</code>).</td>
+    <td>Compares the catalog entry's domain against the node's stored
+      <code>physics_domain</code> directly; no selector. The unused
+      source-domain collection was removed with it.</td>
+  </tr>
+  <tr>
+    <td><code>export._graph_node_to_entry_dict</code></td>
+    <td>Ranked the node's domain list with <code>select_primary_domain</code>
+      (<code>export.py:1592</code>).</td>
+    <td>Publishes the node's stored <code>physics_domain</code>. A node with no
+      stored domain carries <code>None</code> and is not given a guessed
+      bucket.</td>
+  </tr>
+  <tr>
+    <td><code>export._candidate_physics_domains</code></td>
+    <td>Fell back to the producing sources' stored domains when the node
+      carried none, then the caller excluded only names with no domain
+      anywhere.</td>
+    <td>Returns the node's stored domain only. The
+      <code>_resolve_source_domains</code> fallback is removed, so a name the
+      writer has not decided is counted by the existing
+      <code>excluded_missing_domain</code> accounting rather than emitted with
+      a source-derived bucket.</td>
+  </tr>
+</table>
+
+<h3 id="scg-name-domain-route-pipeline-unchanged">Verified, not changed</h3>
+
+<ul>
+  <li><code>catalog_import.record_catalog_import_provenance</code> — writes only
+  <code>sn.imported_at</code> and <code>sn.catalog_commit_sha</code>; it holds no
+  domain code, so it needed no change.</li>
+  <li><code>catalog_release.py</code> — holds no domain code; it orchestrates a
+  <code>release</code> and delegates the entry projection to
+  <code>export.run_export</code>. No change.</li>
+  <li><code>workers.consolidate_worker</code> — a thin caller of
+  <code>consolidation.consolidate_candidates</code>; it sets no domain itself.</li>
+</ul>
+
+<h3 id="scg-name-domain-route-pipeline-projections">One projection had to keep
+the node property's own name</h3>
+
+<p>The first cut of <code>check_catalog</code> projected the stored value
+through a <code>WITH sn, sn.physics_domain AS stored_domain</code> and returned
+<code>stored_domain AS stored_domain</code>. The value read fine against the
+graph and read as absent everywhere else: the comparison consumes a row whose
+domain key is <code>physics_domain</code>, so every entry compared as
+domain-diverged — <code>catalog: 'equilibrium'</code> against
+<code>graph: None</code> even when the node stored the domain. A test double
+cannot rewrite the projection it stands in for, which is what made the rename
+visible. The query now returns <code>sn.physics_domain AS physics_domain</code>
+and the three tests that had gone red
+(<code>TestFoldBackReadsTheSidecar</code> twice, plus the folded-prose half of
+the post-copy guard) pass again.</p>
+
+<h3 id="scg-name-domain-route-pipeline-blocked">Blocked: four assertions still encode the superseded contract, outside the fence</h3>
+
+<p>Four assertions in three test files state the behaviour this node removed.
+They are not regressions of the change — each asserts the removed fallback —
+and repairing them is a scope request rather than an edit this node may make:
+the three files are outside the granted write fence.</p>
+
+<ul>
+  <li><code>tests/standard_names/test_domain_selector.py</code> —
+  <code>test_pure_callers_use_selector</code> asserts
+  <code>_resolve_physics_domains(["general", "transport"]) == ("sentinel",
+  [...])</code> and expects the sentinel among the recorded calls;
+  <code>test_pure_callers_ignore_arrival_order</code> asserts
+  <code>_resolve_physics_domains(domains) == ("transport", domains)</code>. Both
+  assert the selector is reached from <code>_resolve_physics_domains</code>,
+  which now returns <code>(None, sources)</code>. The same file's
+  <code>domain_priority.domain_key</code> assertions are untouched and still
+  pass — <code>domain_key</code> legitimately keeps the selector. The repair is
+  to drop the <code>_resolve_physics_domains</code> assertion from each test
+  (and the third entry of the call list in the first).</li>
+  <li><code>tests/standard_names/test_post_copy_divergence_comparison.py</code>
+  — <code>_graph_rows</code> supplies
+  <code>resolved_physics_domains: ["equilibrium"]</code>, a key the query no
+  longer returns, so <code>test_folded_prose_passes_while_content_is_identical</code>
+  sees a domain divergence that is an artifact of the fixture. The repair is to
+  supply <code>physics_domain: "equilibrium"</code> in that helper.</li>
+  <li><code>test_node_without_domain_but_sourced_domain_passes</code> is the
+  removed fallback stated as a contract: "the guard must resolve the domain the
+  way the exporter does — from the producing sources". Under the settled
+  contract a node storing no domain compares with no domain, so this test
+  should be rewritten to assert the divergence is reported (or retitled to
+  match), never deleted.</li>
+</ul>
+
+<p>Nothing else in the gate is red. The remaining two files' failures are the
+base's: <code>test_review_release_checkout.py</code> fails identically at the
+base revision, and <code>test_release_rehearsal_writes_nothing.py</code> reaches
+a live git remote from a default-tier test.</p>
+
+<h3 id="scg-name-domain-route-pipeline-next">Left for the next node</h3>
+
+<p>The graph-ops module is the next node's and is referred to only by its import
+path <code>imas_codex.standard_names.graph_ops</code>:</p>
+
+<ul>
+  <li><code>reclassify_standard_name_domain</code> writes the scalar,
+  <code>source_domains</code> and the edge in one statement of its own.</li>
+  <li>The derived-parent writers
+  (<code>_materialize_derived_parent_rows</code> and the
+  <code>parent.source_domains = CASE</code> promotions beside it,
+  <code>_bootstrap_missing_derived_parent_targets</code>,
+  <code>_validate_derived_parent_identity</code>).</li>
+  <li><code>write_standard_names</code>,
+  <code>_write_standard_name_edges</code> (the
+  <code>HAS_PHYSICS_DOMAIN</code> edges) and the batch sync at
+  <code>sn.physics_domain = coalesce(b.physics_domain, ...)</code>.</li>
+  <li><code>persist_generated_name_batch</code> still writes a candidate's
+  <code>physics_domain</code> and <code>source_domains</code> payload. The
+  composing path now passes <code>None</code> and <code>[]</code> there, so the
+  write is inert, but the field is still written by that module and must be
+  removed when the graph-ops sites are routed.</li>
+</ul>
+
+<h3 id="scg-name-domain-route-pipeline-evidence">Evidence</h3>
+
+<ul>
+  <li>Routing test
+  (<code>tests/standard_names/test_domain_writer_routing.py</code>, 16 tests):
+  reads each routed module's source through its import, asserts no routed
+  function calls <code>select_primary_domain</code> or
+  <code>maybe_promote_domain</code>, and that the composing path calls
+  <code>write_name_domain</code>. Green at the head revision.</li>
+  <li>Negative control: the routing test run against a tree whose routed
+  functions still carry their selector calls — 8 failed, 8 passed. The log is
+  <code>negative-control.log</code> in the run directory.</li>
+  <li>Gate at the head revision (18 files, 172 selected) and the base arm over
+  the same failing files, by delta. Logs <code>gate-head.log</code>,
+  <code>gate-base.log</code>, <code>gate-fix-a.log</code>,
+  <code>gate-release-head.log</code> in the run directory.</li>
+</ul>
