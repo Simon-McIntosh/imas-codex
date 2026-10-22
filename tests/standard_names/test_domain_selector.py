@@ -1,4 +1,11 @@
-"""Contract for the declared physics-domain selector and its pure callers."""
+"""Contract for the declared physics-domain selector and its pure callers.
+
+``domain_priority.domain_key`` ranks a set of domains without touching the
+graph, and it reaches the selector.  ``consolidation._resolve_physics_domains``
+is checked here as a *non*-caller: it keeps the union of the candidates'
+source domains and leaves the name's scalar to the one writer, so it must not
+reach the selector at all.
+"""
 
 from itertools import permutations
 from unittest.mock import patch
@@ -56,18 +63,22 @@ def test_pure_callers_use_selector(monkeypatch):
     monkeypatch.setattr(domain_ranking, "select_primary_domain", sentinel)
     assert domain_priority.domain_key(["transport", "general"]) == "sentinel"
     assert domain_priority.domain_key("transport") == "sentinel"
+    # _resolve_physics_domains is not a selector caller: it keeps the source
+    # union and leaves the scalar to the one writer, so the sentinel must not
+    # be reached from it and no call is recorded for it.
     assert _resolve_physics_domains(["general", "transport"]) == (
-        "sentinel",
+        None,
         ["general", "transport"],
     )
     assert calls == [
         {"transport", "general"},
         {"transport"},
-        {"transport", "general"},
     ]
 
 
 def test_pure_callers_ignore_arrival_order():
     domains = ["general", "transport"]
     assert domain_priority.domain_key(domains) == "transport"
-    assert _resolve_physics_domains(domains) == ("transport", domains)
+    assert domain_priority.domain_key(domains[::-1]) == "transport"
+    assert _resolve_physics_domains(domains) == (None, sorted(domains))
+    assert _resolve_physics_domains(domains[::-1]) == (None, sorted(domains))

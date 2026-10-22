@@ -1533,7 +1533,7 @@ def detect_divergence(
 # =============================================================================
 
 
-def _candidate_physics_domains(gc: Any, cand: dict[str, Any]) -> list[str]:
+def _candidate_physics_domains(cand: dict[str, Any]) -> list[str]:
     """Return the stored ``physics_domain`` of one export candidate.
 
     The node's stored scalar — the value
@@ -3353,20 +3353,19 @@ def run_export(
 
     with GraphClient() as gc:
         for cand in candidates:
-            domains = _candidate_physics_domains(gc, cand)
+            domains = _candidate_physics_domains(cand)
             if not domains:
-                # No stored domain and none on the producing sources: report
-                # the identity rather than emit a synthetic bucket the catalog
-                # model refuses and drops silently.
+                # No stored domain: the writer has not decided this name.
+                # Report the identity rather than emit a synthetic bucket the
+                # catalog model refuses and drops silently.
                 missing_domain_exclusions.append(
                     ExclusionRecord(
                         standard_name_id=cand["id"],
                         stage="catalog_validation",
                         reason="missing_physics_domain",
                         detail=(
-                            "no physics domain on the identity or its "
-                            "producing sources; refusing to emit a bucket the "
-                            "catalog model does not define"
+                            "the identity stores no physics domain; refusing "
+                            "to emit a bucket the catalog model does not define"
                         ),
                     )
                 )
