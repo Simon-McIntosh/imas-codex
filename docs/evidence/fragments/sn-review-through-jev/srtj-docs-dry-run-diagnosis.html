@@ -1,0 +1,100 @@
+<h2>The documentation axis: what failed, and what the accept-rate
+check should have been compared against</h2>
+
+<p>The documentation arm of the inverse switch dry run left 76 of
+its 219 eligible items undecided, and that is what fails the
+check. 72 of those items carry no route row at all, and
+4 carry a shadow row whose failure reason is the deciding call's
+own text. Neither cause is a defect in the item and neither is the cascade
+choosing to abstain: the first is the run's budget cutting the batch short
+before those items were reached, and the second is a deciding call failing once
+with no retry. The accept-rate shortfall against the calibration-matched target
+is a separate question, and the accept-rate check is comparing against the
+wrong baseline for it.</p>
+
+<h3>1. The 76 undecided items, by cause</h3>
+<table><tr><th>count</th><th>owner</th><th>cause</th></tr><tr><td>4</td><td>deciding path</td><td>deciding path: no usable judgment</td></tr><tr><td>72</td><td>cohort runner (the run's own budget and time ceiling)</td><td>cohort runner: no route row at all</td></tr></table> 
+<p><b>deciding path: no usable judgment &mdash; 4 of 76, owner
+deciding path.</b> The documentation judging batch returned no result for the item, so _docs_judgment raised. The item fell back to the incumbent, and because that fallback produced a result an unjudged shadow row was written carrying the exception's text -- which is why only these items carry a reason at all.</p>
+<p>decide_batch reports a failed call as None rather than raising. The one line it writes for that is 'decision batch item 0 failed: ' with an empty fault string, and the call layer's retry policy is a substring match over that message -- an empty message matches no pattern, so the fault is classified non-retryable and the call raises on its first attempt. The absence of any 'decisions error (attempt' line in the run log is what proves the retry never fired.</p>
+<p><b>Where.</b> imas_codex/standard_names/review/cascade.py -- _docs_judgment raises ValueError('no usable judgment for documentation review'), which adjudicate_review catches and records as the fallback's reason</p>
+<pre>argon_density_at_internal_transport_barrier: route=unjudged failure_reason='ValueError: no usable judgment for documentation review' calls=3 docs_stage_at_draw='accepted' score=0.849</pre><pre>bandwidth_of_ece_channel: route=unjudged failure_reason='ValueError: no usable judgment for documentation review' calls=3 docs_stage_at_draw='accepted' score=1.0</pre>
+<p><b>cohort runner: no route row at all &mdash; 72 of 76, owner
+cohort runner (the run's own budget and time ceiling).</b> The item carries route unjudged and an empty failure reason. The composition writes a shadow row carrying a reason only when the incumbent fallback returned a result; when the fallback also returned nothing, no row is written at all and the runner reports the empty reason as 'no route row'.</p>
+<p>The fallback is the paid panel quorum, whose seats this run's budget refused: the log reads 'rd_quorum docs cycle 0 unfunded for <id> (model=...): the run budget could not reserve $0.05xx of pre-launch exposure -- the reviewer was never called', followed by 'rd_quorum docs incomplete: 0/3 reviews succeeded for <id> -- deferring, NOT accepting on a single review (budget refused 1 seat(s))'. The dry run's own stop reason is time_limit_reached with cost_spent 1.84 against a cost_limit of 1.90, so the batch was cut short before these items were reached: almost all carry calls == 0, i.e. no Jev call was ever made for them.</p>
+<p><b>Where.</b> docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py -- the runner falls back to the literal string 'no route row' when an unjudged item carries no failure reason</p>
+<pre>accumulated_ethane_count: route=unjudged decision='drafted' calls=0 failure_reason=None -> runner reports 'no route row'</pre><pre>argon_density_at_limiter: route=unjudged decision='drafted' calls=0 failure_reason=None -> runner reports 'no route row'</pre>
+<p>A drafted decision with zero calls is an item the run never reached, not one the cascade routed away from. Neither cause is a defect in the item.
+69 of the 72 carry zero
+calls and 72 are still at
+<code>drafted</code>, which is what a run cut short looks like rather than
+a routing policy.</p>
+
+<h3>2. The 49 items Jev accepted and the incumbent refined</h3>
+
+<p>These are read at one cutoff: Jev's route against the incumbent's own stored
+score at <code>panel_min_score</code> 0.85, over the
+164 documentation items both arms judged.</p>
+<table><tr><th>count</th><th>class</th><th>owner</th></tr><tr><td>15</td><td>mechanical hold: score lands on the cutoff</td><td>the incumbent's recorded score, not a substantive judgment</td></tr><tr><td>34</td><td>not readable from the record: incumbent reason line absent</td><td>the collector's record, not the incumbent's judgment</td></tr></table> 
+<p><b>mechanical hold: score lands on the cutoff &mdash; 15 of 49.</b>
+The incumbent's stored score sits at or a thousandth below the min_score the pair is scored against (0.85), so the pair is counted as disagreement on the score's own arithmetic edge rather than on a difference in judgment. The value is the incumbent row's aggregate over its own dimension scores, not Jev's: across these items only a minority of scores coincide between the two arms.</p>
+<pre>plasma_energy: incumbent score=0.849 decision='reviewed' calls=3 against cutoff 0.85; incumbent route=refine; Jev route accept at score=0.9605207267162039 rubric_total=0.8390019359902027 failed_checks=['Which conflict, if any, does this claim have with its DD source definition?']</pre><pre>toroidal_co_passing_fast_ion_torque_density_due_to_collisions: incumbent score=0.849 decision='reviewed' calls=6 against cutoff 0.85; incumbent route=refine; Jev route accept at score=0.9496794127601935 rubric_total=0.7947906217217493 failed_checks=['Which conflict, if any, does this claim have with its DD source definition?', 'Does the documentation cite a raw DD path or IDS name as storage context?']</pre>
+<p><b>not readable from the record: incumbent reason line absent &mdash; 34 of 49.</b>
+The incumbent arm's piece files persist summary fields only (axis, calls, chat_reviewer_called, decision, docs_stage_at_draw, failure_reason, id, name_stage_at_draw, route, score, spend_usd, wall_time_s). No comment, hold note or cap note survives in any artifact, so whether these items were refined for a defect in the text or for a mechanical reason cannot be settled from what is on the branch.</p>
+<p>The review rows the incumbent wrote went into each piece's own scratch graph, which the pieces record as removed, and the arm's run logs carry neither item ids nor comment text. The live graph's stored documentation reviews predate the cohort dump and disagree with the score the pieces persist, so they are not a substitute for the missing rows. Reporting these as substantive would be a guess.</p>
+<pre>vertical_back_surface_curvature_of_optical_element: incumbent score=0.4375 decision='reviewed' route=refine calls=5 -- no reason line persisted; Jev accept at score=0.875 with failed_checks=['Which conflict, if any, does this claim have with its DD source definition?', 'Does the documentation cite a raw DD path or IDS name as storage context?', 'relationship_link']</pre><pre>radial_perturbed_plasma_magnetic_field_imaginary_part: incumbent score=0.5 decision='reviewed' route=accept calls=5 -- no reason line persisted; Jev accept at score=0.849 with failed_checks=['Which conflict, if any, does this claim have with its DD source definition?', 'Does the documentation cite a raw DD path or IDS name as storage context?']</pre>
+<p>The incumbent arm persisted only these fields:
+<code>axis, calls, chat_reviewer_called, decision, docs_stage_at_draw, failure_reason, id, name_stage_at_draw, route, score, spend_usd, wall_time_s</code>. No comment or hold note is among them, and the run logs
+of that arm carry neither item ids nor comment text, so a substantive-defect
+count for the remaining 34 is not recoverable from the branch.
+the collector's record, not the incumbent's judgment is where that gap sits, not the incumbent reviewer.</p>
+
+<h3>3. The name check's baseline</h3>
+
+<p>The check compares each axis's accept rate against the panel's accept rate at
+the cutoff matched to the panel's own operating point. For documentation that
+target is 0.9905, measured on the panel's own pool
+(208 accepts of
+210 at cutoff
+0.38829396813183875) &mdash; not on this cohort. The
+like-for-like reading is the two routes over the items both judged, item to
+item, which is what the table below gives. The interval comes from
+<code>paired_bootstrap</code> in
+<code>srtj-jev-vs-panel-operating-point-run.py</code> unchanged, with each item
+its own copy group so the draws stay paired.</p>
+<table><tr><th>axis</th><th>shared</th><th>Jev accept</th><th>incumbent accept</th><th>difference</th><th>95 percent interval</th><th>matched target</th></tr><tr><td>names</td><td>115</td><td>0.8696</td><td>0.8261</td><td>+0.0435</td><td>[-0.0435, +0.1391]</td><td>0.6148</td></tr><tr><td>documentation</td><td>164</td><td>0.5610</td><td>0.3415</td><td>+0.2195</td><td>[+0.1220, +0.3171]</td><td>0.9905</td></tr></table> 
+<p>On documentation the two routes' accept rates over the
+164 shared items differ by +0.2195, with a 95
+percent interval of [+0.1220,
++0.3171] from 10000 valid resamples.
+For the comparison with the incumbent on identical items, the gap is
++0.2195, not the shortfall the 219-item headline rate
+shows against the matched target. Two comparisons are the wrong ones here:
+against the calibration-matched target (0.9905), measured on the panel's own pool: 208 accepts of 210 at cutoff 0.38829396813183875 &mdash; The target is the panel's accept rate on the pool it was calibrated on, not on this cohort, so it carries that pool's difficulty into the gate. A cohort drawn to a different mix can produce the whole shortfall against it.; against the dry run's rate over eligible items &mdash; An undecided item counts against that rate, so the documentation figure is dominated by the items the run never reached. It measures the run's budget alongside the route.</p>
+<figure><img src="/imas-codex/figures/sn-review-through-jev/srtj-docs-dry-run-diagnosis/srtj-docs-dry-run-diagnosis.svg" alt="undecided documents by cause, and the paired accept-rate difference"><figcaption>Left: the undecided documentation items of the dry run, split by the mechanism that left them undecided. Right: the difference between the two routes' accept rates over the items both judged, item-paired</figcaption></figure>
+<h3>What each finding implies for the switch</h3>
+<ol>
+<li><b>The undecided count is a run fault before it is a routing fact.</b> On
+this cohort 72 of 76 undecided items were never
+offered to Jev at all and 4 failed once and were not retried,
+because an empty fault message is classified non-retryable. Turning the switch
+on with the deciding path as it stands makes an item whose call fails take no
+route silently; give the fault an honest message and a retry, and give the run a
+budget that reaches every item, before the switch is flipped.</li>
+<li><b>Do not read the accept-rate check as a statement about Jev's operating
+point.</b> Over the items both routes judged the two accept rates differ by
++0.2195, with an interval spanning
+[+0.1220, +0.3171]
+&mdash; a different question from the one the check asks against a target
+measured on the panel's own pool. Recompute the target on the cohort, or gate on
+the paired difference instead.</li>
+<li><b>The refine-versus-accept set is not yet evidence either way.</b>
+15 of the 49
+sit on the cutoff, and the remaining 34 cannot be classified
+without the incumbent's reason line, which that arm did not persist. Until it
+does, the set cannot distinguish a real defect caught from a mechanical hold,
+and the switch should not be classified on it.</li>
+</ol>
+<p><small>Generated by <code>srtj-docs-dry-run-diagnosis-run.py</code> read-only: no graph write and
+no model call. Source digests and every count above are in
+<code>srtj-docs-dry-run-diagnosis.json</code>.</small></p>
