@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run's own baseline_suite and after_suite both read 'not applicable - no test suite is the gate on this node', so no gate logs exist to derive added failure ids from; the count is a measured zero over the two gate logs present (name.log and docs.log), each a single-run census rather than a before/after suite pair.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-21T04:09:59Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "the new paragraph says 'the rate over decided items alone would be higher, and both are given where they differ', but only the documentation axis's decided-only rate (124 of 143 = 0.8671 at :57) is given; the name axis's decided-only rate is stated nowhere in the fragment and it does differ (205 of 230 = 0.8913 against the stated 205 of 231 = 0.8874), so the sentence asserts a coverage the fragment does not provide."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T040906172109-srtj-jev-only-dry-run/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "the negative_control_log line carries the path followed by ' - the repair round's control, three arms: ARM1_EXIT=0; ...' rather than the bare path alone, the shape the manifest contract says has refused promotions, so the field does not read as the single openable value a reader expects."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read against a00e60013a3b: exactly one commit, 7a101fed8, touching one file with 2 insertions and 1 deletion - a new basis paragraph at srtj-jev-only-dry-run.html:17 and a rewritten caveat at :57, both inside the declared write paths.",
+    "done_when": "read the reviewed run's brief (brief.md, 'Done when'): the fragment and its JSON hold the per-axis figures and the check, written from the two piece files and their logs each ending in a real EXIT=; the gained commit changes only the fragment, and the rates it now states (205 of 231 = 0.8874, 124 of 219 = 0.5662, 124 of 143 = 0.8671) reconcile with the assembled record's axis_check for both axes.",
+    "goal": "the reviewed node's goal is a Jev-only cascade dry run over the fixed cohort producing docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html and its JSON; this review covers only the commit gained since the prior review (a00e60013a3b..7a101fed8a3f), which corrects the fragment's accept-rate prose and leaves the recorded figures unchanged.",
+    "manifest": "read manifest.md; it records the repair round, the finding acted in 7a101fed8, and a negative control, but its negative_control_log line at manifest.md:21 is a path followed by ' - the repair round's control, three arms: ...' rather than the bare path the contract requires.",
+    "write_paths": "the reviewed run declared five paths at manifest.md:3; the gained commit's single path, docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html, is the fourth of the five, so this commit stays inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the guard is the three-arm control recorded at the run directory's negctl-accept-rate-basis.log (ARM1_EXIT=0, ARM2_EXIT=1 on the reverted fragment, ARM3_EXIT=0), but its script check-accept-rate-basis.py is committed nowhere in the tree at 7a101fed8, so nothing in the repository reddens if this prose regresses again.",
+    "evidence": "the new rates match the assembled record's axis_check (205/231 = 0.887446, 124/219 = 0.566210, 124/143 = 0.867133 in docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.json), but srtj-jev-only-dry-run.html:17 claims both bases are given where they differ while the name axis's decided-only rate is stated nowhere in the fragment.",
+    "fit": "the new paragraph's id srtj-jev-only-dry-run-axes-basis and its <code> elements follow the surrounding paragraph style of docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html:15-18, and no plan or ticket label is introduced.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html:17,57 now binds every accept rate it states to the denominator the runner uses, which is the correction the prior review's blocking finding named, so the gained change serves the node's record.",
+    "reuse": "the gained commit adds no function, class or module; it restates the runner's accepts/eligible formula at srtj-jev-only-dry-run.html:17 rather than introducing a second implementation of it, so there is no capability to extend or duplicate.",
+    "scope_discipline": "the single path in a00e60013a3b..7a101fed8a3f, docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html, is the fourth of the five write paths declared at manifest.md:3."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is a Jev-only cascade dry run over the fixed cohort producing docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html and its JSON; this review covers only the commit gained since the prior review (a00e60013a3b..7a101fed8a3f), which corrects the fragment's accept-rate prose and leaves the recorded figures unchanged.\nVERDICT done_when: read the reviewed run's brief (brief.md, 'Done when'): the fragment and its JSON hold the per-axis figures and the check, written from the two piece files and their logs each ending in a real EXIT=; the gained commit changes only the fragment, and the rates it now states (205 of 231 = 0.8874, 124 of 219 = 0.5662, 124 of 143 = 0.8671) reconcile with the assembled record's axis_check for both axes.\nVERDICT write_paths: the reviewed run declared five paths at manifest.md:3; the gained commit's single path, docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html, is the fourth of the five, so this commit stays inside the declared scope.\nVERDICT manifest: read manifest.md; it records the repair round, the finding acted in 7a101fed8, and a negative control, but its negative_control_log line at manifest.md:21 is a path followed by ' - the repair round's control, three arms: ...' rather than the bare path the contract requires.\nVERDICT diff: read against a00e60013a3b: exactly one commit, 7a101fed8, touching one file with 2 insertions and 1 deletion - a new basis paragraph at srtj-jev-only-dry-run.html:17 and a rewritten caveat at :57, both inside the declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html:17,57 now binds every accept rate it states to the denominator the prior review found misdescribed, so the gained change serves the node's record.\nSCORE evidence: 15\nJUSTIFICATION evidence: the new rates match the assembled record's axis_check (205/231 = 0.887446, 124/219 = 0.566210, 124/143 = 0.867133 in docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.json), but srtj-jev-only-dry-run.html:17 claims both bases are given where they differ while the name axis's decided-only rate is stated nowhere in the fragment.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single path in a00e60013a3b..7a101fed8a3f, docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html, is the fourth of the five write paths declared at manifest.md:3.\nSCORE durability: 10\nJUSTIFICATION durability: the guard is the three-arm control recorded at negctl-accept-rate-basis.log (ARM1_EXIT=0, ARM2_EXIT=1 on the reverted fragment, ARM3_EXIT=0), but its script is committed nowhere in the tree at 7a101fed8, so nothing in the repository reddens if this prose regresses again.\nSCORE fit: 18\nJUSTIFICATION fit: the new paragraph's id srtj-jev-only-dry-run-axes-basis and its <code> elements follow the surrounding paragraph style of docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html:15-18.\nSCORE reuse: 20\nJUSTIFICATION reuse: the gained commit adds no function, class or module; docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html:17 restates the runner's accepts/eligible formula rather than adding a second implementation of it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html:17 follow-on: the new paragraph says 'the rate over decided items alone would be higher, and both are given where they differ', but only the documentation axis's decided-only rate (124 of 143 = 0.8671 at :57) is given; the name axis's decided-only rate is stated nowhere in the fragment and it does differ (205 of 230 = 0.8913 against the stated 205 of 231 = 0.8874), so the sentence asserts a coverage the fragment does not provide.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261021T040906172109-srtj-jev-only-dry-run/manifest.md:21 follow-on: the negative_control_log line carries the path followed by a description rather than the bare path alone, the shape the manifest contract says has refused promotions.\n",
+  "review_run_id": "r-...-srtj-jev-only-dry-run-7a101fed8a3f",
+  "reviewed_base_sha": "a00e60013a3b680abd53783779bce55e40367a39",
+  "reviewed_head_sha": "7a101fed8a3f9b17283499f599b2f9571dc9b70d",
+  "reviewed_run_id": "r-20261021T040906172109-srtj-jev-only-dry-run",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-21T06:18:26Z",
+  "total": 101
+}
