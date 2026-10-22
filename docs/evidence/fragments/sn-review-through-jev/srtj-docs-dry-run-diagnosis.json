@@ -1,6 +1,6 @@
 {
   "node": "srtj-docs-dry-run-diagnosis",
-  "generated_at": "2026-10-22T10:27:55+00:00",
+  "generated_at": "2026-10-22T12:35:55+00:00",
   "read_only": true,
   "llm_calls": 0,
   "graph_writes": 0,
@@ -423,9 +423,7 @@
     [
       "srtj-docs-dry-run-diagnosis.svg",
       "undecided documents by cause, and the paired accept-rate difference",
-      [
-        "Left: the undecided documentation items of the dry run, split by the mechanism that left them undecided. Right: the difference between the two routes' accept rates over the items both judged, item-paired"
-      ]
+      "Left: the undecided documentation items of the dry run, split by the mechanism that left them undecided. Right: the difference between the two routes' accept rates over the items both judged, item-paired"
     ]
   ]
 }

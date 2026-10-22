@@ -495,7 +495,9 @@ def draw_figures(payload: dict) -> list[list[str]]:
     pts = np.array([q3v[a]["difference"]["point"] for a in q3v])
     los = np.array([q3v[a]["difference"]["interval_95"][0] for a in q3v])
     his = np.array([q3v[a]["difference"]["interval_95"][1] for a in q3v])
-    right.axvline(0.0, color=grey, linewidth=1.2, linestyle=(0, (1, 2)), zorder=2)
+    right.axhline(
+        0.0, color=grey, linewidth=1.2, linestyle=(0, (1, 2)), zorder=2
+    )
     right.errorbar(
         xs,
         pts,
@@ -532,7 +534,7 @@ def draw_figures(payload: dict) -> list[list[str]]:
             (
                 "Left: the undecided documentation items of the dry run, split by the "
                 "mechanism that left them undecided. Right: the difference between the "
-                "two routes' accept rates over the items both judged, item-paired",
+                "two routes' accept rates over the items both judged, item-paired"
             ),
         ]
     ]
