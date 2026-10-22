@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "",
   "dispatched_at": "2026-10-21T04:09:59Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-docs-dry-run-diagnosis",
+      "recorded_at": "2026-10-22T09:29:07.367267+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html",
