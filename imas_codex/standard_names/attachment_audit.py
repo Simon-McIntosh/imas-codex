@@ -76,6 +76,29 @@ ended up with no source at all is still surfaced for a human decision rather
 than auto-superseded. The two sets cannot overlap, since a misnamed name's
 attachments are never detached.
 
+**A detach that would strand its name is held, not performed.** Detaching a
+name's LAST consistent-looking-but-rejected producer would leave a live,
+non-derived name with no source at all. That is precisely the state the
+``require_producing_sources`` invariant exists to refuse, so performing the
+detach would raise ``MissingStandardNameSource`` inside the reconcile
+transaction and abort the whole pass — including the family apply that runs
+after it — for one name the pass was never going to fix. Worse, the halt is
+self-sustaining: the next pass detaches the same set and raises again.  So a
+verdict whose detach would leave its name sourceless is classified into
+``skipped_stranding`` and its attachment is LEFT EXACTLY AS FOUND — no binding
+written, none removed — and named loudly as an operator worklist, the way
+``names_misnamed`` is. The ``require_producing_sources`` call after the detach
+is unchanged and still runs: it is the backstop, and it now sees only the
+surviving names, so a genuine stranding the hold did not anticipate still
+refuses the write. The ``would strand`` test applies the invariant's own rule to
+the state the detach would produce: a name is held when every one of its
+non-stale producers is in the detach set, unless the invariant itself exempts
+the name (a superseded name, or a derived parent with a live child). The test
+reads the producers and the exemptions from the verdicts' own audit pass, so it
+costs no second query. ``names_orphaned`` is computed on the names that remain
+actionable, so the held names never appear there — the hold is reported in its
+own bucket instead.
+
 Idempotent: a detached attachment no longer matches the selector, and an
 attachment the guard accepts is never touched, so a second pass acts on nothing.
 """
@@ -148,6 +171,18 @@ _HISTORICAL_NAME_STAGES: frozenset[str] = frozenset({"superseded"})
 #: wrong, and rewinding it costs a single re-compose.
 _MIN_WIPEOUT_ATTACHMENTS = 2
 
+
+#: The invariant's own derived-parent exemption, escaped for ``str.format``: the
+#: hold must excuse exactly the names ``require_producing_sources`` excuses, so
+#: the clause is composed in from the invariant rather than restated. Braces are
+#: doubled because the read it lands in is a ``str.format`` template.
+def _stranding_exemption_column() -> str:
+    """Return the invariant's derived-parent exemption clause, ``format``-escaped."""
+    from imas_codex.standard_names.source_invariant import _derived_parent_cypher
+
+    return _derived_parent_cypher().replace("{", "{{").replace("}", "}}")
+
+
 #: Every attachment the graph asserts, with the unit context the dimensionality
 #: rule needs on both sides. Sibling source paths are NOT collected here: the
 #: pairwise rule must see only the siblings already ACCEPTED (compose semantics,
@@ -158,23 +193,37 @@ _MIN_WIPEOUT_ATTACHMENTS = 2
 #: source that also backs a live name has already been re-composed correctly;
 #: only the stale extra edge should go, and the source must NOT be rewound to
 #: ``extracted`` — that would strand the good name it already produced.
-_ATTACHMENTS_QUERY = """
+#:
+#: It also carries what the stranding hold needs, so the hold costs no second
+#: read: the name's live producers and the invariant's own exemption for the
+#: name. ``live_producers`` is collected from the name side, so a producer that
+#: has no ``FROM_DD_PATH`` edge is still counted — the hold must never read such
+#: a name as sourceless. ``sn_stranding_exempt`` is the invariant's derived-parent
+#: test itself, composed in here, so the read reports which names
+#: ``require_producing_sources`` excuses rather than restating the rule.
+_ATTACHMENTS_QUERY = (
+    """
 MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
 {scope}
+OPTIONAL MATCH (live_producer:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+  WHERE live_producer.status <> 'stale'
+WITH src, sn,
+     [p IN collect(DISTINCT live_producer.id) WHERE p IS NOT NULL] AS live_producers
 MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
 OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
-WITH src, sn, dd, collect(DISTINCT du.id) AS dd_relationship_units
+WITH src, sn, dd, live_producers,
+     collect(DISTINCT du.id) AS dd_relationship_units
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(nu:Unit)
-WITH src, sn, dd, dd_relationship_units,
+WITH src, sn, dd, live_producers, dd_relationship_units,
      collect(DISTINCT nu.id) AS sn_relationship_units
 OPTIONAL MATCH (dd)-[:IN_IDS]->(ids:IDS)
-WITH src, sn, dd, dd_relationship_units, sn_relationship_units,
+WITH src, sn, dd, live_producers, dd_relationship_units, sn_relationship_units,
      collect(DISTINCT ids.dd_version) AS dd_versions
 OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
 WHERE other.id <> sn.id
   AND NOT (coalesce(other.name_stage, '') IN $historical)
-WITH src, sn, dd, dd_relationship_units, sn_relationship_units, dd_versions,
-     count(DISTINCT other) AS other_live_names
+WITH src, sn, dd, live_producers, dd_relationship_units, sn_relationship_units,
+     dd_versions, count(DISTINCT other) AS other_live_names
 RETURN src.id            AS source_node_id,
        dd.id             AS dd_path,
        sn.id             AS sn_id,
@@ -198,8 +247,19 @@ RETURN src.id            AS source_node_id,
        END AS sn_unit,
        sn_relationship_units,
        other_live_names,
+       live_producers,
+       """
+    + _stranding_exemption_column()
+    + """ AS sn_stranding_exempt,
        dd.documentation  AS dd_documentation
 """
+)
+
+
+def _attachments_query(scope: str = "") -> str:
+    """Return the attachments read with its scope clause filled in."""
+    return _ATTACHMENTS_QUERY.format(scope=scope)
+
 
 #: Scope clause narrowing the read to one name. Used by the write-time gate on
 #: paths that migrate a historical source set onto a NEW name, where a full
@@ -655,6 +715,15 @@ class AttachmentVerdict:
         """Whether detaching leaves the source with no live name to realize."""
         return self.other_live_names == 0
 
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "source_node_id": self.source_node_id,
+            "dd_path": self.dd_path,
+            "sn_id": self.sn_id,
+            "name_stage": self.name_stage,
+            "reason": self.reason,
+        }
+
 
 @dataclass(frozen=True)
 class AttachmentPairingGuardResult:
@@ -866,9 +935,17 @@ class AttachmentAuditResult:
     skipped_protected: int = 0
     skipped_historical: int = 0
     skipped_misnamed: int = 0
+    skipped_stranding: int = 0
+    held_stranding: list[AttachmentVerdict] = field(default_factory=list)
     names_misnamed: list[NameLevelDefect] = field(default_factory=list)
     names_orphaned: list[str] = field(default_factory=list)
     dd_gap_evidence: list[dict[str, Any]] = field(default_factory=list)
+    #: Live producer source ids per name, and the names the invariant excuses
+    #: from the producing-source requirement. Internal plumbing for the hold:
+    #: they carry its inputs out of the audit's single read, and are not part of
+    #: the reported outcome.
+    name_producers: dict[str, list[str]] = field(default_factory=dict)
+    stranding_exempt_names: set[str] = field(default_factory=set)
 
     def by_rule(self) -> dict[str, int]:
         counts: dict[str, int] = {}
@@ -886,6 +963,11 @@ class AttachmentAuditResult:
             "skipped_protected": self.skipped_protected,
             "skipped_historical": self.skipped_historical,
             "skipped_misnamed": self.skipped_misnamed,
+            "skipped_stranding": self.skipped_stranding,
+            # The attach-or-retire worklist itself, not just its size — the
+            # operator acts on it directly, so it is reported in full.
+            "held_stranding": len(self.held_stranding),
+            "stranding": [v.as_dict() for v in self.held_stranding],
             "names_misnamed": len(self.names_misnamed),
             # The rename worklist itself, not just its size — it is the whole
             # point of the classification and the operator acts on it directly.
@@ -969,9 +1051,7 @@ def audit_attachments(
             params["sn_id"] = sn_id
         rows = list(
             client.query(
-                _ATTACHMENTS_QUERY.format(
-                    scope="" if sn_id is None else _ONE_NAME_SCOPE
-                ),
+                _attachments_query("" if sn_id is None else _ONE_NAME_SCOPE),
                 **params,
             )
         )
@@ -996,6 +1076,15 @@ def audit_attachments(
             by_name[sn_id],
             key=lambda r: (r["dd_path"] or "", r["source_node_id"] or ""),
         )
+        # The stranding hold's inputs, taken from this same read: the name's
+        # live producers and the invariant's own exemption for the name. Both
+        # are per-name, so any row of the group carries them, and neither rule
+        # is restated here.
+        result.name_producers[sn_id] = sorted(
+            {str(p) for p in (group[0].get("live_producers") or [])}
+        )
+        if bool(group[0].get("sn_stranding_exempt")):
+            result.stranding_exempt_names.add(sn_id)
         accepted_paths: list[str] = []
         group_rejected: list[AttachmentVerdict] = []
         for r in group:
@@ -1136,6 +1225,23 @@ def reconcile_attachment_consistency(
             else:
                 actionable.append(v)
 
+        # Hold, before any detach, every verdict whose removal would leave its
+        # name with no non-stale producer. Detaching it would trip the
+        # ``require_producing_sources`` backstop below and abort the whole
+        # transaction; the name is not one the pass can repair, so it becomes an
+        # operator worklist instead. Exemptions match the invariant's own.
+        if actionable:
+            stranded = _names_stranded_by_detach(result, actionable)
+            if stranded:
+                retained: list[AttachmentVerdict] = []
+                for v in actionable:
+                    if v.sn_id in stranded:
+                        result.skipped_stranding += 1
+                        result.held_stranding.append(v)
+                    else:
+                        retained.append(v)
+                actionable = retained
+
         if result.rejected:
             logger.warning(
                 "reconcile_attachment_consistency: %d of %d attachment(s) fail "
@@ -1157,6 +1263,21 @@ def reconcile_attachment_consistency(
                     for v in result.rejected
                     if v.protected and v.sn_id not in misnamed
                 )[:1200],
+            )
+        if result.skipped_stranding:
+            # Loud: this is a worklist the operator must act on. The pass
+            # declines to detach because doing so would strand the name and
+            # abort every apply that runs after it.
+            logger.warning(
+                "reconcile_attachment_consistency: %d attachment(s) held — "
+                "detaching would leave these live names with no producing "
+                "source, so the pass left them exactly as found. Attach a "
+                "correct source or retire the name: %s",
+                result.skipped_stranding,
+                "; ".join(
+                    f"{v.dd_path} → {v.sn_id} ({v.reason})"
+                    for v in result.held_stranding
+                )[:2000],
             )
         if result.names_misnamed:
             # Loud: this is a worklist the operator must act on, and the audit
@@ -2829,6 +2950,30 @@ def count_unattributed_detachments(gc: Any | None = None) -> int:
         if own:
             client.close()
     return int(rows[0]["n"]) if rows else 0
+
+
+def _names_stranded_by_detach(
+    result: AttachmentAuditResult, actionable: list[AttachmentVerdict]
+) -> set[str]:
+    """Names the pending detach would leave with no producer the invariant counts.
+
+    The audit read supplies both halves of the test, so nothing about what makes
+    a name live and sourceless is restated here: ``live_producers`` is the
+    invariant's own producer set, and ``sn_stranding_exempt`` is the invariant's
+    own derived-parent exemption. All this adds is the arithmetic the read cannot
+    do — remove the producers the detach set would remove and see whether any
+    survives.
+    """
+    detaching: dict[str, set[str]] = {}
+    for v in actionable:
+        detaching.setdefault(v.sn_id, set()).add(v.source_node_id)
+    return {
+        sn_id
+        for sn_id, dropping in detaching.items()
+        if result.name_producers.get(sn_id)
+        and not (set(result.name_producers[sn_id]) - dropping)
+        and sn_id not in result.stranding_exempt_names
+    }
 
 
 def _find_orphaned_names(gc: Any, sn_ids: list[str]) -> list[str]:

@@ -1,0 +1,132 @@
+<section id="shc-reconcile-holds-stranding">
+  <h2 id="shc-reconcile-holds-stranding-title">Attachment reconcile holds a stranding detach instead of aborting the pass</h2>
+
+  <h3 id="shc-reconcile-holds-stranding-defect">Defect</h3>
+  <p>
+    <code>reconcile_attachment_consistency</code>
+    (<code>imas_codex/standard_names/attachment_audit.py</code>) detached every
+    attachment the consistency guard rejected, then called
+    <code>require_producing_sources</code> over the touched names inside one
+    transaction. A rejected attachment that was its name's sole producer left the
+    name sourceless, so the invariant raised
+    <code>MissingStandardNameSource</code> inside the transaction and rolled the
+    attach → every attachment was restored and the pass aborted, taking the
+    family apply that runs after it with it. The halt was self-sustaining: the
+    next pass computed the same detach set and raised again, so one name the pass
+    could never repair blocked <code>sn harmonize --apply</code> indefinitely.
+  </p>
+  <p>
+    Reproduced live (read-only, <code>dry_run</code>). The name
+    <code>vertical_coordinate_of_coil_conductor</code> (stage
+    <code>exhausted</code>, status <code>draft</code>, documentation accepted) has
+    one producer, <code>dd:ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z</code>
+    (status <code>extracted</code>). The guard rejects the pair — hardware locus
+    <code>coil_conductor</code> shares no device token with the DD path:
+  </p>
+  <pre id="shc-reconcile-holds-stranding-defect-verdict">locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware
+locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z'
+shares no device token with it</pre>
+
+  <h3 id="shc-reconcile-holds-stranding-change">Change</h3>
+  <p>
+    In <code>reconcile_attachment_consistency</code>, before any detach: an
+    actionable verdict whose removal would leave its name with no non-stale
+    producer is not detached. It is counted in a new
+    <code>skipped_stranding</code> bucket beside <code>skipped_protected</code>
+    and <code>skipped_misnamed</code>, kept in <code>held_stranding</code>, and
+    logged loudly by name and path as an operator worklist the way
+    <code>names_misnamed</code> is. The attachment is left exactly as found — no
+    binding written, none removed. The remaining verdicts are detached as before
+    and <code>require_producing_sources</code> still runs after the detach, so a
+    stranding the hold did not anticipate is still refused.
+  </p>
+  <p>
+    The would-strand test is the invariant's own rule, not a second definition,
+    and Python performs no part of it. The audit's single attachments read also
+    returns, per name, the set of its non-stale producers
+    (<code>live_producers</code>, collected from the name side so a producer
+    without a <code>FROM_DD_PATH</code> edge is still counted) and the invariant's
+    own derived-parent exemption (<code>sn_stranding_exempt</code>, composed from
+    <code>source_invariant._derived_parent_cypher()</code> over
+    <code>sn.origin</code> and the live-child block, its braces doubled because
+    the read is a <code>str.format</code> template). The hold then does only the
+    arithmetic the read cannot — subtract the strings the detach set would remove
+    from a name's producer set and see whether any survives — so the hold and the
+    <code>require_producing_sources</code> backstop cannot drift. The template's
+    call contract is unchanged: <code>scope</code> remains its only placeholder,
+    so the <code>.format(scope=…)</code> calls at
+    <code>tests/standard_names/test_attachment_audit.py:690,707,1017,1018</code>
+    still work, and no query is added to the pass.
+  </p>
+
+  <h3 id="shc-reconcile-holds-stranding-tests">Tests</h3>
+  <p>
+    <code>tests/standard_names/test_attachment_stranding_hold.py</code> runs the
+    reconcile's own Cypher against an empty disposable Neo4j (started by
+    <code>imas_codex.graph.temp_neo4j</code> helpers, no export dump loaded) that
+    the test plants its own fixtures in.
+  </p>
+  <ul>
+    <li id="shc-reconcile-holds-stranding-test-sole">
+      <code>test_sole_producer_rejected_attachment_is_held</code> — a sole-producer
+      rejected attachment is held and counted, and its edge, DD projection and
+      mirror are untouched.
+    </li>
+    <li id="shc-reconcile-holds-stranding-test-rest">
+      <code>test_other_rejected_attachments_are_detached_in_the_same_pass</code> — a
+      rejected attachment on a name with another producer is detached in the
+      same pass, with the accepted one and the surviving producer left intact.
+    </li>
+    <li id="shc-reconcile-holds-stranding-test-backstop">
+      <code>test_invariant_refuses_a_detach_forced_past_the_hold</code> — forcing
+      the held detach past the hold leaves the name sourceless and
+      <code>require_producing_sources</code> raises, so the backstop still holds.
+    </li>
+  </ul>
+  <p>
+    Negative control: disabling the hold so the stranding detach is attempted
+    makes <code>test_sole_producer_rejected_attachment_is_held</code> fail
+    (<code>1 failed, 2 passed</code>, exit 1), while the unmodified head passes
+    all three.
+  </p>
+
+  <h3 id="shc-reconcile-holds-stranding-dry-run">Live dry run</h3>
+  <p>
+    One read-only <code>reconcile_attachment_consistency(dry_run=True)</code> on the
+    live graph; no write, no LLM call, USD 0. Of 5078 attachments it holds
+    exactly one:
+  </p>
+  <pre id="shc-reconcile-holds-stranding-dry-run-result">checked 5078, rejected 25,
+  skipped_protected 10, skipped_historical 6, skipped_misnamed 0, detached 0,
+  skipped_stranding 1
+held: ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z
+        → vertical_coordinate_of_coil_conductor (locus/source device mismatch)</pre>
+  <p>
+    The held name is the one that halted the pass, so the hold converts the
+    aborting case into a named worklist entry: attach a correct source or retire
+    the name.
+  </p>
+
+  <h3 id="shc-reconcile-holds-stranding-gate">Gate</h3>
+  <p>
+    Default arm: base <code>26b0ce3a1</code> 152 passed, exit 0; head 156 passed,
+    0 failed, exit 0 (the base files plus the new stranding test and
+    <code>tests/graph/test_cypher_property_check.py</code>) — no added failures.
+    Graph arm, both revisions against the same empty disposable Neo4j, the exact
+    condition that makes the template's call contract live:
+  </p>
+  <pre id="shc-reconcile-holds-stranding-gate-graph">base 26b0ce3a1  -m graph, 9 files:   9 failed, 19 passed  EXIT=1
+head            -m graph, 10 files:  9 failed, 22 passed  EXIT=1
+added failure ids: none   fixed: none   (the two failure sets are identical)
+call-contract probe: <code>_ATTACHMENTS_QUERY.format(scope="")</code> returns 2250 chars, no
+  residual braces, on head  — the template still takes one placeholder</pre>
+  <p>
+    Those nine ids are byte-for-byte the base set, so they measure this empty
+    disposable instance rather than the change, and neither arm raises
+    <code>KeyError</code> — the failure the template's second placeholder would
+    have produced. The head arm carries three more passes: the stranding tests
+    themselves. Both arms also run the same read the fixture tests scope
+    (<code>_ATTACHMENTS_QUERY.format(scope=…)</code>), so the four call sites that
+    were broken before are exercised here, not deselected.
+  </p>
+</section>
