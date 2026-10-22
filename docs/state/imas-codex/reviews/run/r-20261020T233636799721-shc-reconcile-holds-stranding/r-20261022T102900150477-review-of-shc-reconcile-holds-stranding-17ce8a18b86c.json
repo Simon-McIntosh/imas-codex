@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-10-22T11:15:41.552Z",
   "dispatched_at": "2026-10-22T10:42:47Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "shc-reconcile-predicate-owner",
+      "recorded_at": "2026-10-22T12:34:28.421237+00:00"
+    }
+  },
   "findings": [
     {
       "file": "logs/gate-head-graph.log",
