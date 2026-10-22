@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-22T19:37:49.602Z",
   "dispatched_at": "2026-10-22T19:23:56Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-shc-midplane-docs-refresh-f43739c65b18",
+      "recorded_at": "2026-10-22T19:58:38.416612+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh.html",
