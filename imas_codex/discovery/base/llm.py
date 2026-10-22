@@ -1217,6 +1217,21 @@ def _parse_structured_content(
 # ---------------------------------------------------------------------------
 
 
+def fault_text(fault: BaseException) -> str:
+    """Describe a fault for a log line or a record, never as an empty string.
+
+    An exception raised with a bare message — an HTTP read timeout, for
+    instance — would otherwise render as nothing after a fault label, leaving
+    a log line and a recorded reason that cannot be told from a missing value.
+    The exception's own type and its ``repr`` stand in whenever the message
+    carries nothing, so a fault is always identifiable from what was written.
+    """
+    message = str(fault).strip()
+    if message:
+        return message
+    return f"{type(fault).__name__}: {fault!r}"
+
+
 def _is_retryable(error_msg: str) -> bool:
     """Check if an error message indicates a retryable condition.
 
@@ -3304,17 +3319,47 @@ class DecisionsValidationError(ValueError):
     """
 
 
+@lru_cache(maxsize=1)
+def _transient_transport_errors() -> tuple[type[BaseException], ...]:
+    """The exception types a transport fault arrives as at the decisions seam.
+
+    Read from the HTTP client the seam itself posts with, so the classes are
+    the installed client's rather than a second list of names typed here. The
+    builtin timeout and connection errors are included because the same seam
+    is exercised through both the synchronous and the asynchronous client.
+    """
+    import httpx
+
+    return (
+        TimeoutError,
+        ConnectionError,
+        httpx.TimeoutException,
+        httpx.NetworkError,
+        httpx.RemoteProtocolError,
+    )
+
+
 def _decisions_retryable(error: BaseException) -> bool:
     """Return True when a decisions attempt should be retried.
 
-    429 and 5xx are retryable by HTTP status; everything else is judged by the
-    shared ``_is_retryable`` patterns rather than a second copy of that policy.
+    A transport fault is decided by its type before its text is read, so a
+    timeout, a dropped connection or a truncated read is retried however bare
+    its message is — classification by substring alone would read a
+    message-less transient fault as permanent and give it one attempt. A
+    contract violation is deterministic and is refused ahead of that test,
+    whatever words its message happens to carry. 429 and 5xx are retryable by
+    HTTP status; everything else is judged by the shared ``_is_retryable``
+    patterns rather than a second copy of that policy.
     """
+    if isinstance(error, DecisionsValidationError):
+        return False
+    if isinstance(error, _transient_transport_errors()):
+        return True
     status = getattr(error, "status", None)
     if isinstance(status, int) and not isinstance(status, bool):
         if status == 429 or status >= 500:
             return True
-    return _is_retryable(str(error))
+    return _is_retryable(fault_text(error))
 
 
 def _validate_distribution(
@@ -3561,7 +3606,7 @@ def call_decisions(
                     "decisions error (attempt %d/%d): %s. Retrying in %.1fs...",
                     attempt + 1,
                     max_retries,
-                    str(exc)[:100],
+                    fault_text(exc)[:100],
                     delay,
                 )
                 time.sleep(delay)
@@ -3606,7 +3651,7 @@ async def acall_decisions(
                     "decisions error (attempt %d/%d): %s. Retrying in %.1fs...",
                     attempt + 1,
                     max_retries,
-                    str(exc)[:100],
+                    fault_text(exc)[:100],
                     delay,
                 )
                 await asyncio.sleep(delay)
