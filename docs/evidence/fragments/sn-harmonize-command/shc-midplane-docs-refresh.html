@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-midplane-docs-refresh">
+  <title>One name's documentation moved onto the single midplane definition; the second could not be made to state its symmetry condition above threshold</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-midplane-docs-refresh-title">One name's documentation moved onto the
+  single midplane definition and was accepted at 0.94375; the second was steered to
+  state its symmetry condition and every seat read the result as self-contradictory,
+  scoring it 0.562</h1>
+
+  <p id="shc-midplane-docs-refresh-scope">
+    The catalog records one outboard-midplane definition and uses it everywhere:
+    the point on the low-field side where the flux surface reaches its maximum
+    major radius (imas-standard-names <code>9130410</code>, read here through the
+    runner's editable sibling checkout). Two accepted names were brought to it:
+    <code>radial_separatrix_distance_at_outboard_midplane</code>, whose stored
+    text still carried the superseded midplane-identifier wording, and
+    <code>radial_coordinate_at_outboard_midplane</code>, whose source
+    <code>equilibrium/time_slice/profiles_1d/r_outboard</code> is taken at the
+    magnetic-axis height and matches the maximum-R point only for an
+    up-down-symmetric equilibrium. Of the two, one was brought in line and
+    accepted and one was stopped below the acceptance threshold. This record
+    states what the node reached, not what it set out to reach.
+  </p>
+
+  <p id="shc-midplane-docs-refresh-locus">
+    <strong>The locus definition was rendered before either edit, not
+    assumed.</strong> <code>locus_definition_sentence()</code>
+    (<code>imas_codex/standard_names/docs_gates.py</code>) was called for the
+    <code>outboard_midplane</code> concept the writer appends, obtained through
+    <code>select_conventions(name).concepts</code>, and it renders the merged
+    single-midplane definition:
+  </p>
+  <pre id="shc-midplane-docs-refresh-locus-sentence"><code>The low-field-side equatorial midplane: the point of maximum major radius on
+the flux surface in question. For a value at the separatrix intersection use
+outboard_midplane_separatrix. Where $R = \max_{S} R,\quad R > R_{\mathrm{axis}}$,
+$S$ is the magnetic flux surface the point lies on; $R_{\mathrm{axis}}$ is major
+radius of the magnetic axis.</code></pre>
+  <p id="shc-midplane-docs-refresh-locus-note">
+    It names no second height and no midplane identifier, which is what makes the
+    regeneration of the first name a replacement of the appended sentence rather
+    than another attempt to delete it. Method and the two names' renders are in
+    the JSON record under <code>locus_definition_check</code>.
+  </p>
+
+  <h2 id="shc-midplane-docs-refresh-method">Method: one generation and one funded
+  review per name</h2>
+  <p id="shc-midplane-docs-refresh-method-text">
+    Each name took the same route: <code>sn edit --hint --axis docs --scope self
+    --reason</code> previewed with <code>--dry-run</code>, attached with
+    <code>--stage-only</code> so it spent nothing and stamped a fresh scope run
+    id, then a single <code>sn run --docs-only --scope-run-id</code> generated the
+    documentation and funded one review quorum. Each reason cites the lead's
+    single-midplane ruling of 2026-10-22. The invocations, their logs and each
+    run's own summary table are in the JSON record beside this fragment, written
+    by <code>shc-midplane-docs-refresh-run.py</code>; the runner performs no graph
+    write.
+  </p>
+
+  <h2 id="shc-midplane-docs-refresh-name1">radial_separatrix_distance_at_outboard_midplane:
+  the superseded sentence is gone and the name was accepted</h2>
+  <p id="shc-midplane-docs-refresh-name1-before">
+    <strong>Before.</strong>
+    <code>docs_stage=accepted</code>, docs score <code>0.90625</code>, generated
+    under <code>openrouter/openai/gpt-6.1-sol</code>, with three bound
+    <code>distance_separatrix...</code> sources. Its stored text still ended with
+    the superseded locus sentence, appended by the writer because that sentence
+    was in the registry when it was generated:
+  </p>
+  <pre id="shc-midplane-docs-refresh-name1-before-text"><code>The low-field-side equatorial midplane: points at the midplane height with major
+radius greater than the magnetic-axis radius. The data's midplane identifier
+selects that height, or it is the magnetic-axis height when none is given. For a
+value at the separatrix intersection use outboard_midplane_separatrix. Where
+$Z = Z_{\mathrm{mid}},\quad R > R_{\mathrm{axis}}$, $Z_{\mathrm{mid}}$ is the
+midplane height the data's midplane identifier selects, the magnetic-axis height
+when none is given; $R_{\mathrm{axis}}$ is major radius of the magnetic axis.</code></pre>
+  <p id="shc-midplane-docs-refresh-name1-after">
+    <strong>After.</strong> The steered regeneration kept the opening sentence,
+    the defining equation, the mapping statement, the sign convention and the
+    cross-reference, and the appended sentence is now the merged definition above.
+    The review quorum accepted it: <code>0.95</code>
+    (openrouter/anthropic/claude-sonnet-5) and <code>0.9375</code>
+    (openrouter/x-ai/grok-4.5), persisted as
+    <code>reviewer_score_docs=0.94375</code>, <code>chain 1/3</code>,
+    <code>docs_stage=accepted</code>. The before and after text and scores are in
+    the JSON record under <code>before</code> and <code>after</code>.
+  </p>
+
+  <h2 id="shc-midplane-docs-refresh-name2">radial_coordinate_at_outboard_midplane:
+  every seat read the steered text as self-contradictory, and the name stopped
+  below threshold</h2>
+  <p id="shc-midplane-docs-refresh-name2-before">
+    <strong>Before.</strong> <code>docs_stage=accepted</code>, docs score
+    <code>0.9625</code>, generated under
+    <code>openrouter/openai/gpt-5.6-luna</code>, source
+    <code>dd:equilibrium/time_slice/profiles_1d/r_outboard</code>. The text
+    described the major-radius coordinate of the outboard intersection and said
+    nothing about the magnetic-axis height or any symmetry condition.
+  </p>
+  <p id="shc-midplane-docs-refresh-name2-after">
+    <strong>After.</strong> The steer asked the text to state, in physics terms,
+    that the magnetic-axis height coincides with the point of maximum major
+    radius on the flux surface only for an up-down-symmetric equilibrium. The
+    caveat landed in the description, but the three seats agreed the
+    documentation's normative body never develops the axis-height locus and the
+    writer's appended <code>outboard_midplane</code> paragraph re-asserts
+    <code>$R = \max_{S} R$</code> unconditionally, so the text contradicts its own
+    description. Scores <code>0.425</code> (claude-sonnet-5), <code>0.5625</code>
+    (grok-4.5) and <code>0.5625</code> (gpt-6.1-sol, the escalating seat),
+    persisted as <code>0.562</code>, below the <code>0.85</code> threshold. The
+    reviewers' comments are recorded verbatim in the JSON record under
+    <code>reviewer_comments</code> and in
+    <code>logs/reviewer-comments.json</code>. By the work item's own rule the node
+    stopped there.
+  </p>
+  <p id="shc-midplane-docs-refresh-name2-refine">
+    After the 0.562 verdict the pipeline's own refine rotation regenerated the
+    documentation again, so the name's live state is <code>docs_stage=drafted</code>
+    with <code>chain 2</code> and no persisted score: the regeneration has not been
+    reviewed. Its live text still names no midplane identifier, DD field, IDS path
+    or option value.
+  </p>
+
+  <h2 id="shc-midplane-docs-refresh-readback">Read-back</h2>
+  <p id="shc-midplane-docs-refresh-readback-text">
+    Neither name's documentation nor description names the data's midplane
+    identifier: the read-back searches both for <code>midplane identifier</code>,
+    <code>midplane_identifier</code>, an <code>equilibrium/...</code> or
+    <code>summary/...</code> path, a <code>dd:</code> path, a
+    <code>dr_dz_zero*</code> option value or a <code>*_dummy</code> field, and
+    finds none in either name. The check is in the JSON record under
+    <code>read_checks</code>. The read-back is a live check; every element of it is
+    evaluated on the text the graph holds now.
+  </p>
+
+  <h2 id="shc-midplane-docs-refresh-spend">Spend</h2>
+  <p id="shc-midplane-docs-refresh-spend-text">
+    The node spent <code>$1.492952</code> of the <code>$1.50</code> ceiling, read
+    from each run's own summary table in its log: name 1's review run
+    <code>$0.478394</code>; name 2's first review run <code>$0.540045</code>, which
+    ran out of its own budget ($0.06 left against a <code>$0.0634</code>
+    tie-breaker seat) and persisted no score; and name 2's funded intervention run
+    <code>$0.474513</code>. The two <code>--stage-only</code> edits spent nothing.
+    The per-run figures, their stop reasons and their exit codes are in the JSON
+    record under <code>spend</code>.
+  </p>
+
+  <h2 id="shc-midplane-docs-refresh-next">What is left</h2>
+  <p id="shc-midplane-docs-refresh-next-text">
+    Nothing further is required of the first name: it reads on the single
+    midplane definition and is accepted. The second is not brought in line — its
+    documentation is left unreviewed at <code>drafted</code> and the node's ceiling
+    is exhausted, which two findings explain. A steered hint cannot make the body
+    of this name carry the symmetry condition while the writer appends the
+    <code>outboard_midplane</code> paragraph, whose equation
+    <code>$R = \max_{S} R$</code> reads as the surface identity the caveat denies; the
+    same writer mechanism the split gap name's regeneration recorded. And a run's
+    cost limit must carry headroom above the quorum's summed reservation rather
+    than its per-seat need: name 2's first run was given <code>0.60</code> and
+    deferred its tie-breaker seat, and the run that did produce a verdict was given
+    <code>0.46</code> and overshot to <code>0.474513</code>.
+  </p>
+</main>
+</body>
+</html>
