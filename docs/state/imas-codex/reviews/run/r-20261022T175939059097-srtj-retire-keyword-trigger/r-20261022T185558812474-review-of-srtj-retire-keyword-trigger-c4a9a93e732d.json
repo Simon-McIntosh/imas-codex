@@ -1,0 +1,114 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:7409",
+    "imas_codex/standard_names/workers.py:7448",
+    "imas_codex/standard_names/fanout/dispatcher.py:92",
+    "imas_codex/standard_names/fanout/__init__.py:50"
+  ],
+  "completed_at": "2026-10-22T19:50:24.282Z",
+  "dispatched_at": "2026-10-22T19:26:06Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "a line count in the evidence table is off by six (46 against 40); the deletion itself is verified by the diff and the gate",
+      "recorded_at": "2026-10-22T19:51:49.336683+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "srtj-fanout-excerpt-retire",
+      "recorded_at": "2026-10-22T19:52:01.099279+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "srtj-fanout-excerpt-retire",
+      "recorded_at": "2026-10-22T19:52:12.574936+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the literal gate command is recorded in after_suite and promotion uses it",
+      "recorded_at": "2026-10-22T19:52:33.091458+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "srtj-fanout-excerpt-retire",
+      "recorded_at": "2026-10-22T19:52:22.997480+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "the five out-of-scope paths are importers of the deleted symbols, accepted by the coordinator at promotion",
+      "recorded_at": "2026-10-22T19:52:44.704807+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-retire-keyword-trigger.html",
+      "line": "21",
+      "text": "follow-on: the table records tests/standard_names/fanout/test_trigger_dims_align_with_review.py as 46 deleted lines while git diff --numstat against 96aab3e62 gives 40, so one of the line counts the done_when requires is wrong."
+    },
+    {
+      "file": "tests/standard_names/test_fanout_trigger.py",
+      "line": "115",
+      "text": "follow-on: test_should_trigger_fanout_matches_the_check_predicate compares the wrapper against the predicate it delegates to on an input both classify as firing, so both sides are True together and the assertion cannot redden on a wrapper regression; the independent negative is carried by :97."
+    },
+    {
+      "file": "tests/standard_names/test_refine_scope_continuity.py",
+      "line": "110",
+      "text": "follow-on: the patched SimpleNamespace still fabricates refine_trigger_keywords, refine_trigger_comment_dims and refine_trigger_comment_chars, a settings shape this change removed, so the fixture no longer mirrors production and passes only because SimpleNamespace accepts any attribute."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/manifest.md",
+      "line": "11",
+      "text": "follow-on: the tests: line carries an unsubstituted <worktree> placeholder, so promotion cannot re-run the gate command from it; the literal command is recoverable from after_suite.command, which names the tree in full."
+    },
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "7448",
+      "text": "follow-on: reviewer_excerpt is now always the empty string and is still threaded into the fan-out prompt, where imas_codex/standard_names/fanout/dispatcher.py:92 renders it as (none), so the proposer prompt keeps a slot that can never carry signal."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/prompt.txt",
+      "line": "126",
+      "text": "follow-on: the write fence did not bound this node - the manifest's blockers record that a Bash write and a Write to an out-of-scope test path both succeeded - so the coordinator must close the five paths the manifest check reports, and a coordinator reading the fence as an enforced bound would be reading a protection that is not there."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base 96aab3e62; the single commit c4a9a93e7 rewrites imas_codex/standard_names/fanout/trigger.py to the check path alone, drops four config fields and three pyproject keys, updates the call site at imas_codex/standard_names/workers.py:7409, and adds the guard module, five test-file edits and the evidence fragment.",
+    "done_when": "the done_when asks for committed change and tests, no added failures, a comment-free trigger and the fragment; the manifest records head-gate-committed.log at c4a9a93e7 with 178 passed / EXIT=0 against base-gate.log's 187 passed / EXIT=0, the guards are in tests/standard_names/test_fanout_trigger.py, and docs/evidence/fragments/sn-review-through-jev/srtj-retire-keyword-trigger.html lists the deletions and the threshold, so the measure is asserted.",
+    "goal": "the node goal is to retire the comment-keyword refine trigger; imas_codex/standard_names/fanout/trigger.py:58 keeps only the check path, and no production module under imas_codex/ names keywords, dims, char_cap, trigger_source or extract_reviewer_excerpt at c4a9a93e7.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/manifest.md; status complete, 0 added failures with baseline_suite and after_suite both recorded as completed with exit_status 0, the negative control at 3 failed / EXIT=1, and the five out-of-scope paths disclosed as a scope deviation.",
+    "write_paths": "the dispatched fence (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/prompt.txt:126-133) declares seven paths; the diff changes eleven, and the five outside the fence (imas_codex/standard_names/fanout/__init__.py, tests/standard_names/fanout/test_trigger_dims_align_with_review.py, tests/standard_names/fanout/test_trigger_predicate.py, tests/standard_names/test_refine_failed_checks.py, tests/standard_names/test_review_cascade.py) are disclosed in the manifest's blockers."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_fanout_trigger.py:80 and :137 redden under the manifest's own control (3 failed / EXIT=1), while :115's equality holds whatever the wrapper does on a firing input.",
+    "evidence": "logs/head-gate-committed.log re-runs the gate at the reviewed head c4a9a93e7 with 178 passed / EXIT=0 against base-gate.log's 187 passed / EXIT=0, so added_failure_count is 0, though docs/evidence/fragments/sn-review-through-jev/srtj-retire-keyword-trigger.html:21 misreports one deletion's line count.",
+    "fit": "imas_codex/standard_names/fanout/trigger.py:1 states the trigger's mechanism in plain terms and the added identifiers (RETIRED_TRIGGER_IDENTIFIERS, _question_check) carry no plan, sprint or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/fanout/trigger.py:78 returns (fire, \"\") from the surviving check predicate, and a grep of imas_codex/ at c4a9a93e7 finds no reader of any retired setting.",
+    "reuse": "imas_codex/standard_names/fanout/trigger.py:78 delegates to the existing should_trigger_fanout_from_checks owner instead of forking it, and a capability search over imas_codex/ found no other fan-out trigger predicate.",
+    "scope_discipline": "five of the eleven changed paths (imas_codex/standard_names/fanout/__init__.py and four test files) lie outside the seven fenced paths named in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/prompt.txt:126-133, and the manifest's blockers disclose them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to retire the comment-keyword refine trigger; imas_codex/standard_names/fanout/trigger.py:58 keeps only the check path, and no production module under imas_codex/ names keywords, dims, char_cap, trigger_source or extract_reviewer_excerpt at c4a9a93e7.\nVERDICT done_when: the done_when asks for committed change and tests, no added failures, a comment-free trigger and the fragment; the manifest records head-gate-committed.log at c4a9a93e7 with 178 passed / EXIT=0 against base-gate.log's 187 passed / EXIT=0, the guards are in tests/standard_names/test_fanout_trigger.py, and docs/evidence/fragments/sn-review-through-jev/srtj-retire-keyword-trigger.html lists the deletions and the threshold, so the measure is asserted.\nVERDICT write_paths: the dispatched fence (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/prompt.txt:126-133) declares seven paths; the diff changes eleven, and the five outside the fence (imas_codex/standard_names/fanout/__init__.py, tests/standard_names/fanout/test_trigger_dims_align_with_review.py, tests/standard_names/fanout/test_trigger_predicate.py, tests/standard_names/test_refine_failed_checks.py, tests/standard_names/test_review_cascade.py) are disclosed in the manifest's blockers.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/manifest.md; status complete, 0 added failures with baseline_suite and after_suite both recorded as completed with exit_status 0, the negative control at 3 failed / EXIT=1, and the five out-of-scope paths disclosed as a scope deviation.\nVERDICT diff: read commit by commit against base 96aab3e62; the single commit c4a9a93e7 rewrites imas_codex/standard_names/fanout/trigger.py to the check path alone, drops four config fields and three pyproject keys, updates the call site at imas_codex/standard_names/workers.py:7409, and adds the guard module, five test-file edits and the evidence fragment.\nCALL_SITES: imas_codex/standard_names/workers.py:7409, imas_codex/standard_names/workers.py:7448, imas_codex/standard_names/fanout/dispatcher.py:92, imas_codex/standard_names/fanout/__init__.py:50\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/fanout/trigger.py:78 returns (fire, \"\") from the surviving check predicate, and a grep of imas_codex/ at c4a9a93e7 finds no reader of any retired setting.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/head-gate-committed.log re-runs the gate at the reviewed head c4a9a93e7 with 178 passed / EXIT=0 against base-gate.log's 187 passed / EXIT=0, so added_failure_count is 0, though docs/evidence/fragments/sn-review-through-jev/srtj-retire-keyword-trigger.html:21 misreports one deletion's line count.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: five of the eleven changed paths (imas_codex/standard_names/fanout/__init__.py and four test files) lie outside the seven fenced paths named in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/prompt.txt:126-133, and the manifest's blockers disclose them.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_fanout_trigger.py:80 and :137 redden under the manifest's own control (3 failed / EXIT=1), while :115's equality holds whatever the wrapper does on a firing input.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/fanout/trigger.py:1 states the trigger's mechanism in plain terms and the added identifiers (RETIRED_TRIGGER_IDENTIFIERS, _question_check) carry no plan, sprint or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/standard_names/fanout/trigger.py:78 delegates to the existing should_trigger_fanout_from_checks owner instead of forking it, and a capability search over imas_codex/ found no other fan-out trigger predicate.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-retire-keyword-trigger.html:21 follow-on: the table records tests/standard_names/fanout/test_trigger_dims_align_with_review.py as 46 deleted lines while git diff --numstat against 96aab3e62 gives 40, so one of the line counts the done_when requires is wrong.\nFINDING tests/standard_names/test_fanout_trigger.py:115 follow-on: test_should_trigger_fanout_matches_the_check_predicate compares the wrapper against the predicate it delegates to on an input both classify as firing, so both sides are True together and the assertion cannot redden on a wrapper regression; the independent negative is carried by :97.\nFINDING tests/standard_names/test_refine_scope_continuity.py:110 follow-on: the patched SimpleNamespace still fabricates refine_trigger_keywords, refine_trigger_comment_dims and refine_trigger_comment_chars, a settings shape this change removed, so the fixture no longer mirrors production and passes only because SimpleNamespace accepts any attribute.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/manifest.md:11 follow-on: the tests: line carries an unsubstituted <worktree> placeholder, so promotion cannot re-run the gate command from it; the literal command is recoverable from after_suite.command, which names the tree in full.\nFINDING imas_codex/standard_names/workers.py:7448 follow-on: reviewer_excerpt is now always the empty string and is still threaded into the fan-out prompt, where imas_codex/standard_names/fanout/dispatcher.py:92 renders it as (none), so the proposer prompt keeps a slot that can never carry signal.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T175939059097-srtj-retire-keyword-trigger/prompt.txt:126 follow-on: the write fence did not bound this node - the manifest's blockers record that a Bash write and a Write to an out-of-scope test path both succeeded - so the coordinator must close the five paths the manifest check reports, and a coordinator reading the fence as an enforced bound would be reading a protection that is not there.\n",
+  "review_run_id": "r-20261022T185558812474-review-of-srtj-retire-keyword-trigger-c4a9a93e732d",
+  "reviewed_base_sha": "96aab3e62012c1892988f5c12093641764c2241b",
+  "reviewed_head_sha": "c4a9a93e732d4948f904d0fdfe1b20cd1117b8f7",
+  "reviewed_run_id": "r-20261022T175939059097-srtj-retire-keyword-trigger",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T19:54:14.284553+00:00",
+  "total": 103
+}
