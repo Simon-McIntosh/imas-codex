@@ -1,5 +1,5 @@
 {
- "elapsed_s": 49.0,
+ "elapsed_s": 49.6,
  "imports": {
   "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-apply-drift-scope",
   "imas_codex.__file__": "/home/ITER/mcintos/Code/imas-codex/imas_codex/__init__.py",
@@ -933,7 +933,7 @@
  "q3_next_run_receipt": {
   "detector_call": "detect_source_drift(gc=gc)  # read-only, no stamp",
   "drifted_now": 1,
-  "elapsed_s": 38.6,
+  "elapsed_s": 39.2,
   "per_name": [
    {
     "deltas": [
@@ -978,5 +978,5 @@
   "total_matched_to_log_80": 80
  },
  "runner": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-apply-drift-scope/docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope-run.py",
- "started": "2026-10-22T20:55:21Z"
+ "started": "2026-10-22T20:58:08Z"
 }
