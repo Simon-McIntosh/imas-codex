@@ -910,6 +910,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "88fc4bce1e205fcd37332bc0399fa5e7efdc1267",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 0,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261021T061113140632-review-of-srtj-jev-only-dry-run-7a101fed8a3f",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261021T061113140632-review-of-srtj-jev-only-dry-run-7a101fed8a3f"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "88fc4bce1e205fcd37332bc0399fa5e7efdc1267",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-srtj-jev-only-dry-run-7a101fed8a3f",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-21T06:19:27.430Z",
+            "session_id": "d8bb97c9-9d5d-4666-af9a-577ad72ea024",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-srtj-jev-only-dry-run-7a101fed8a3f"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session d8bb97c9-9d5d-4666-af9a-577ad72ea024"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-21T06:19:27.430Z",
+      "session_id": "d8bb97c9-9d5d-4666-af9a-577ad72ea024",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-srtj-jev-only-dry-run-7a101fed8a3f"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session d8bb97c9-9d5d-4666-af9a-577ad72ea024"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
