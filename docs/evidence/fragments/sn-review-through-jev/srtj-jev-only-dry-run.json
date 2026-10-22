@@ -1,0 +1,329 @@
+{
+  "axes": {
+    "docs": {
+      "audit": {
+        "agreement": 0,
+        "agreement_rate": 0.0,
+        "jev_routes": {
+          "accept": 0,
+          "refine": 1
+        },
+        "paired": 1,
+        "panel_routes": {
+          "accept": 1,
+          "refine": 0
+        },
+        "rows_written": 5,
+        "skip_reasons": [
+          "panel produced no verdict",
+          "review audit lease refused"
+        ],
+        "skipped": 4
+      },
+      "axis": "docs",
+      "axis_check": {
+        "accept_rate": 0.56621,
+        "accepts": 124,
+        "audit_rows_read_as_route": [],
+        "audited_items": 5,
+        "axis": "docs",
+        "checks": {
+          "accept_rate_in_matched_interval": false,
+          "every_audit_row_excluded": true,
+          "undecided_within_2pct": false
+        },
+        "decided": 143,
+        "eligible": 219,
+        "matched_target": 0.990476,
+        "matched_target_interval": [
+          0.966721,
+          0.997321
+        ],
+        "matched_target_source": {
+          "cutoff": 0.38829396813183875,
+          "n": 210,
+          "panel_accepts": 208,
+          "panel_min_score": 0.85,
+          "pre_veto_accepts": 208
+        },
+        "pass": false,
+        "undecided": 76,
+        "undecided_ids": [
+          "resistivity_of_plasma_facing_component",
+          "argon_density_at_limiter",
+          "parallel_electron_diffusivity",
+          "toroidal_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+          "radial_outline_of_divertor_tile",
+          "neutral_internal_state_pressure",
+          "radial_total_current_density",
+          "vertical_neutral_velocity",
+          "outer_radius_of_plasma_filament",
+          "vertical_coordinate_of_electron_cyclotron_launcher_mirror",
+          "radial_outline_of_coil_conductor_element",
+          "toroidal_carbon_velocity_at_magnetic_axis",
+          "fast_particle_density",
+          "parallel_net_ion_momentum_source",
+          "neutron_emissivity_due_to_fusion",
+          "carbon_prefill_count_due_to_gas_injection",
+          "parallel_neutral_state_momentum_flux_limiter_coefficient",
+          "radial_center_of_mass_velocity",
+          "neutral_particle_flux_limiter_coefficient",
+          "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+          "vertical_neutral_species_center_of_mass_velocity",
+          "vertical_coordinate_of_filter_window",
+          "ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude",
+          "thermal_ion_charge_state_power_density_due_to_collisions",
+          "toroidal_ion_charge_state_momentum_flux_limiter_coefficient",
+          "magnetic_shear_at_internal_transport_barrier",
+          "major_length_of_iron_core_segment",
+          "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+          "poloidal_ion_velocity_at_charge_exchange_channel",
+          "parallel_ion_charge_state_momentum_flux",
+          "toroidal_trapped_current_density",
+          "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+          "silane_source_rate",
+          "ethylene_prefill_count",
+          "current_of_plasma_filament",
+          "bandwidth_of_ece_channel",
+          "poloidal_neutral_state_momentum_source",
+          "toroidal_lithium_velocity_at_internal_transport_barrier",
+          "radial_total_momentum_source",
+          "poloidal_ion_velocity",
+          "radial_particle_convection_velocity",
+          "toroidal_hydrogen_velocity_at_plasma_boundary",
+          "ratio_of_particle_count_to_particle_simulated_count",
+          "z_coordinate_of_divertor_target",
+          "launched_power_of_ion_cyclotron_heating_antenna",
+          "parallel_counter_passing_fast_particle_pressure",
+          "line_averaged_boron_density",
+          "ion_diamagnetic_momentum_convection_velocity",
+          "vertical_ion_charge_state_velocity",
+          "toroidal_ion_rotation_frequency",
+          "radial_electron_energy_diffusion_coefficient",
+          "toroidal_argon_velocity_at_internal_transport_barrier",
+          "poloidal_linear_neutral_internal_state_momentum_flux",
+          "trapped_thermal_electron_power_density_due_to_collisions",
+          "poloidal_magnetic_flux_at_internal_transport_barrier",
+          "radial_total_thermal_ion_energy_diffusion_coefficient",
+          "electron_diffusion_coefficient",
+          "net_efficiency_of_plant_system",
+          "accumulated_ethane_count",
+          "momentum_source_due_to_diamagnetic_drift",
+          "wave_curvature_of_electron_cyclotron_beam",
+          "parallel_pfirsch_schlueter_current_density",
+          "toroidal_deuterium_velocity_at_internal_transport_barrier",
+          "extent_of_soft_xray_detector",
+          "argon_density_at_internal_transport_barrier",
+          "coulomb_logarithm",
+          "poloidal_current_density_due_to_heat_viscosity",
+          "total_ion_density_at_limiter",
+          "x_coordinate_of_divertor_target",
+          "diamagnetic_momentum_diffusivity",
+          "toroidal_current_density_due_to_anomalous_transport",
+          "volume_averaged_helium_4_density",
+          "parallel_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+          "vertical_pfirsch_schlueter_current_density",
+          "binormal_coordinate_of_toroidal_field_coil",
+          "ion_momentum_flux_due_to_diamagnetic_drift"
+        ],
+        "undecided_reasons": [
+          "ValueError: no usable judgment for documentation review",
+          "no route row"
+        ],
+        "undecided_share": 0.347032
+      },
+      "calls": 323,
+      "code_revision": "c607f163ba4466032c1e7fa3335c9ec323405720",
+      "containment": {
+        "live_cost_rows": 0,
+        "live_run_rows": 0,
+        "live_uri": "bolt://98dci4-gpu-0002:7687",
+        "scratch_cost_rows": 323,
+        "scratch_run_rows": 1,
+        "scratch_uri": "bolt://127.0.0.1:40717"
+      },
+      "containment_verdict": "pass",
+      "decided_routes": {
+        "accept": 124,
+        "refine": 19,
+        "unjudged": 76
+      },
+      "eligible": 219,
+      "incumbent_agreement": {
+        "cohort_items": 219,
+        "incumbent_unjudged_on_shared": 16,
+        "jev_unjudged_on_shared": 58,
+        "shared_items": 164,
+        "table": {
+          "jev_accept_inc_accept": 38,
+          "jev_accept_inc_refine": 49,
+          "jev_refine_inc_accept": 0,
+          "jev_refine_inc_refine": 14
+        }
+      },
+      "not_run_over_whole_cohort": true,
+      "per_model_spend_usd": {
+        "openrouter/anthropic/claude-sonnet-5": 1.253593,
+        "openrouter/openai/gpt-6-luna": 0.000173,
+        "openrouter/openai/gpt-6.1-sol": 0.050596,
+        "openrouter/x-ai/grok-4.5": 0.381616,
+        "typesafe/jev-1.13": 0.05285
+      },
+      "piece": "jev-only",
+      "piece_spend_total_usd": 1.738828,
+      "receipt_count": 323,
+      "route_counts": {
+        "accept": 124,
+        "band": 0,
+        "chat_below_reject": 0,
+        "refine": 19,
+        "unjudged": 76
+      },
+      "run_id": "5059d333-cf52-4d28-9c65-aa66b49ffec6",
+      "scratch_removed": {
+        "exists_after": false,
+        "path": "/tmp/reckon-crew-scratch/r-20261021T040906172109-srtj-jev-only-dry-run/review-cohort-8cvi4p0t"
+      },
+      "scratch_stopped": true,
+      "spend_usd": 1.738828,
+      "wall_time_s": 2508.6834860960953
+    },
+    "name": {
+      "audit": {
+        "agreement": 5,
+        "agreement_rate": 0.714286,
+        "jev_routes": {
+          "accept": 5,
+          "refine": 2
+        },
+        "paired": 7,
+        "panel_routes": {
+          "accept": 7,
+          "refine": 0
+        },
+        "rows_written": 8,
+        "skip_reasons": [
+          "panel produced no verdict"
+        ],
+        "skipped": 1
+      },
+      "axis": "name",
+      "axis_check": {
+        "accept_rate": 0.887446,
+        "accepts": 205,
+        "audit_rows_read_as_route": [],
+        "audited_items": 8,
+        "axis": "name",
+        "checks": {
+          "accept_rate_in_matched_interval": false,
+          "every_audit_row_excluded": true,
+          "undecided_within_2pct": true
+        },
+        "decided": 230,
+        "eligible": 231,
+        "matched_target": 0.614841,
+        "matched_target_interval": [
+          0.550695,
+          0.67523
+        ],
+        "matched_target_source": {
+          "cutoff": 0.32447569396775017,
+          "n": 283,
+          "panel_accepts": 174,
+          "panel_min_score": 0.85,
+          "pre_veto_accepts": 174
+        },
+        "pass": false,
+        "undecided": 1,
+        "undecided_ids": [
+          "upper_inner_squareness_of_plasma_boundary"
+        ],
+        "undecided_reasons": [
+          "ValueError: no usable judgment for name review"
+        ],
+        "undecided_share": 0.004329
+      },
+      "calls": 247,
+      "code_revision": "47531e18eb94af3a2ec4a04fa35c3f4aba57e4c6",
+      "containment": {
+        "live_cost_rows": 0,
+        "live_run_rows": 0,
+        "live_uri": "bolt://98dci4-gpu-0002:7687",
+        "scratch_cost_rows": 247,
+        "scratch_run_rows": 1,
+        "scratch_uri": "bolt://127.0.0.1:38027"
+      },
+      "containment_verdict": "pass",
+      "decided_routes": {
+        "accept": 205,
+        "refine": 25,
+        "unjudged": 1
+      },
+      "eligible": 231,
+      "incumbent_agreement": {
+        "cohort_items": 231,
+        "incumbent_unjudged_on_shared": 0,
+        "jev_unjudged_on_shared": 1,
+        "shared_items": 115,
+        "table": {
+          "jev_accept_inc_accept": 83,
+          "jev_accept_inc_refine": 17,
+          "jev_refine_inc_accept": 11,
+          "jev_refine_inc_refine": 3
+        }
+      },
+      "not_run_over_whole_cohort": true,
+      "per_model_spend_usd": {
+        "openrouter/anthropic/claude-sonnet-5": 0.044808,
+        "openrouter/openai/gpt-6-luna": 0.014793,
+        "openrouter/x-ai/grok-4.5": 0.37212,
+        "typesafe/jev-1.13": 0.033431
+      },
+      "piece": "jev-only",
+      "piece_spend_total_usd": 0.46544,
+      "receipt_count": 247,
+      "route_counts": {
+        "accept": 205,
+        "band": 0,
+        "chat_below_reject": 0,
+        "refine": 25,
+        "unjudged": 1
+      },
+      "run_id": "bc852ca4-bd01-4d4f-b948-ed309711ed08",
+      "scratch_removed": {
+        "exists_after": false,
+        "path": "/tmp/reckon-crew-scratch/r-20261021T040906172109-srtj-jev-only-dry-run/review-cohort-rdwp6v6x"
+      },
+      "scratch_stopped": true,
+      "spend_usd": 0.465152,
+      "wall_time_s": 523.3832676438615
+    }
+  },
+  "check": {
+    "pass": false,
+    "per_axis": {
+      "docs": {
+        "accept_rate_in_matched_interval": false,
+        "every_audit_row_excluded": true,
+        "pass": false,
+        "undecided_within_2pct": false
+      },
+      "name": {
+        "accept_rate_in_matched_interval": false,
+        "every_audit_row_excluded": true,
+        "pass": false,
+        "undecided_within_2pct": true
+      }
+    },
+    "total_spend_usd": 2.20398,
+    "total_within_3_31": true
+  },
+  "created_at": "2026-10-21T05:27:19.075984+00:00",
+  "label": "jev-only",
+  "node": "srtj-jev-only-dry-run",
+  "pieces": {
+    "docs": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort/cascade-docs-jev-only.json",
+    "name": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort/cascade-name-jev-only.json"
+  },
+  "plan_section": "sn-review-through-jev s6"
+}

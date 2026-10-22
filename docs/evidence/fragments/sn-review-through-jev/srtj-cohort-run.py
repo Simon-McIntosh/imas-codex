@@ -34,11 +34,18 @@ from imas_codex.standard_names.loop import run_sn_pools
 
 HERE = Path(__file__).resolve().parent
 COHORT = HERE / "srtj-cohort-estimate.json"
+THRESHOLDS = (
+    Path(__file__).resolve().parents[4]
+    / "imas_codex/standard_names/review/cascade_thresholds.json"
+)
+ZE = 1.959963984540054
+AUDIT_ROLE = "audit"
 ARCHIVE = (
     Path.home()
     / ".local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 RESULTS = HERE / "srtj-cohort"
+DRY_RUN_RECORD = HERE / "srtj-jev-only-dry-run.json"
 EXCLUSIONS = RESULTS / "excluded.json"
 PIECE_CEILING_USD = 3.5
 COMPARISON_CEILING_USD = Decimal("60.00")
@@ -98,6 +105,72 @@ def verify_completion(record: dict) -> None:
         raise RuntimeError(f"review piece stopped without completion: {reason}")
     if record.get("receipt_count", 0) <= 0:
         raise RuntimeError("review piece has no cost receipts")
+
+
+def matched_target(axis: str) -> tuple[float, dict]:
+    """The panel accept rate the cascade cutoffs were matched to, per axis."""
+    calibration = json.loads(THRESHOLDS.read_text())[axis]["matched_calibration"]
+    return calibration["panel_accepts"] / calibration["n"], calibration
+
+
+def wilson_interval(p: float, n: int, z: float = ZE) -> tuple[float, float]:
+    """The 95% interval of a proportion *p* observed over *n* items."""
+    if n <= 0:
+        return (0.0, 1.0)
+    denominator = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / denominator
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denominator
+    return (max(0.0, centre - half), min(1.0, centre + half))
+
+
+def axis_check(record: dict, axis: str) -> dict:
+    """The switch gate for one axis, computed from the piece's own items."""
+    items = record["items"]
+    eligible = len(items)
+    undecided = [item for item in items if item["route"] == "unjudged"]
+    decided = eligible - len(undecided)
+    accepts = sum(item["route"] == "accept" for item in items)
+    accept_rate = accepts / eligible if eligible else 0.0
+    target, calibration = matched_target(axis)
+    low, high = wilson_interval(target, eligible)
+    audited = [item for item in items if item.get("audit_present")]
+    mismatched = [
+        item["id"]
+        for item in items
+        # An audit row must never be the row a route is read from: the audit is
+        # a non-deciding comparison, so the aggregate's route comes from the
+        # cascade's own shadow row alone.
+        if item.get("route_row_role") == AUDIT_ROLE
+    ]
+    return {
+        "axis": axis,
+        "eligible": eligible,
+        "decided": decided,
+        "undecided": len(undecided),
+        "undecided_share": round(len(undecided) / eligible, 6) if eligible else None,
+        "undecided_ids": [item["id"] for item in undecided],
+        "undecided_reasons": sorted(
+            {item.get("failure_reason") or "unknown" for item in undecided}
+        ),
+        "accepts": accepts,
+        "accept_rate": round(accept_rate, 6),
+        "matched_target": round(target, 6),
+        "matched_target_source": calibration,
+        "matched_target_interval": [round(low, 6), round(high, 6)],
+        "audited_items": len(audited),
+        "audit_rows_read_as_route": mismatched,
+        "checks": {
+            "undecided_within_2pct": len(undecided) / eligible <= 0.02
+            if eligible
+            else False,
+            "accept_rate_in_matched_interval": low <= accept_rate <= high,
+            "every_audit_row_excluded": not mismatched,
+        },
+        "pass": bool(eligible)
+        and len(undecided) / eligible <= 0.02
+        and low <= accept_rate <= high
+        and not mismatched,
+    }
 
 
 def free_port() -> int:
@@ -429,6 +502,7 @@ def review_rows(gc: GraphClient, ids: list[str], started: str, axis: str) -> lis
         "WHERE r.review_axis=$axis AND r.reviewed_at >= datetime($started) "
         "RETURN r.standard_name_id AS id, r.judge_kind AS kind, "
         "r.comments AS comments, r.resolution_method AS method, "
+        "r.resolution_role AS role, "
         "r.model AS model, r.reviewed_at AS at LIMIT 3001",
         ids=ids,
         axis=axis,
@@ -641,21 +715,37 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
                 for name in cost["names"] or []:
                     by_name[name].append(cost)
             routes = defaultdict(list)
+            audits = defaultdict(list)
             for row in rows:
-                if row["kind"] == "jev":
-                    routes[row["id"]].append(row)
+                if row["kind"] != "jev":
+                    continue
+                # The panel audit stores its verdict as a non-deciding judge
+                # row beside the cascade's own. It carries no ``route`` and its
+                # verdict must never be read as the item's route, so the two
+                # are partitioned here rather than picked by position.
+                (audits if row.get("role") == AUDIT_ROLE else routes)[row["id"]].append(
+                    row
+                )
             states = {row["id"]: row for row in state}
             for item in record["items"]:
                 name = item["id"]
                 route_rows = routes[name]
-                route_data = (
-                    json.loads(route_rows[-1]["comments"]) if route_rows else {}
+                route_row = route_rows[-1] if route_rows else None
+                route_data = json.loads(route_row["comments"]) if route_row else {}
+                audit_row = audits[name][-1] if audits[name] else None
+                audit_data = (
+                    json.loads(audit_row["comments"] or "{}") if audit_row else {}
                 )
                 route = route_data.get("route", "unjudged")
                 if route == "chat_review":
                     route = "band"
                 item.update(
                     route=route,
+                    route_row_role=route_row.get("role") if route_row else None,
+                    audit_present=audit_row is not None,
+                    audit_panel_route=audit_data.get("panel_route"),
+                    audit_jev_route=audit_data.get("jev_route"),
+                    audit_skipped=audit_data.get("audit_skipped"),
                     failure_reason=(route_data.get("failure_reason") or "no route row")
                     if route == "unjudged"
                     else None,
@@ -713,6 +803,58 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
             record["incomplete_ids"] = [
                 item["id"] for item in record["items"] if item["decision"] == "drafted"
             ]
+            audited = [item for item in record["items"] if item.get("audit_present")]
+            pairs = [
+                item
+                for item in audited
+                if item.get("audit_panel_route") and item.get("audit_jev_route")
+            ]
+            consistent = pairs
+            agreed = sum(
+                item["audit_panel_route"] == item["audit_jev_route"]
+                for item in consistent
+            )
+            record["audit"] = {
+                "rows_written": len(audited),
+                "skipped": sum(1 for item in audited if item.get("audit_skipped")),
+                "skip_reasons": sorted(
+                    {
+                        item["audit_skipped"]
+                        for item in audited
+                        if item.get("audit_skipped")
+                    }
+                ),
+                "paired": len(consistent),
+                "agreement": agreed,
+                "agreement_rate": round(agreed / len(consistent), 6)
+                if consistent
+                else None,
+                "panel_routes": {
+                    route: sum(
+                        item["audit_panel_route"] == route for item in consistent
+                    )
+                    for route in ("accept", "refine")
+                },
+                "jev_routes": {
+                    route: sum(item["audit_jev_route"] == route for item in consistent)
+                    for route in ("accept", "refine")
+                },
+            }
+            record["decided_routes"] = {
+                collapsed: sum(
+                    (
+                        "accept"
+                        if item["route"] == "accept"
+                        else "refine"
+                        if item["route"] in {"refine", "band", "chat_below_reject"}
+                        else "unjudged"
+                    )
+                    == collapsed
+                    for item in record["items"]
+                )
+                for collapsed in ("accept", "refine", "unjudged")
+            }
+            record["axis_check"] = axis_check(record, args.axis)
             record["scratch_evidence"] = count_run(gc, summary.run_id)
         # Preserve every paid item and receipt total before checking containment.
         save(path, record)
@@ -783,6 +925,133 @@ async def measure(args: argparse.Namespace, record: dict, path: Path) -> None:
             save(combined_path, combined)
 
 
+def _incumbent_routes(axis: str) -> dict[str, str]:
+    """The incumbent arm's own accept/refine route per item, from its pieces.
+
+    The incumbent decides on the score mirror against the panel's ``min_score``,
+    so its route is read from ``score`` rather than from the piece's ``route``
+    field, which records the cascade's shadow route beside it. An item the
+    incumbent left unjudged carries no score and no incumbent route.
+    """
+    min_score = json.loads(THRESHOLDS.read_text())[axis]["matched_calibration"][
+        "panel_min_score"
+    ]
+    routes: dict[str, str] = {}
+    for path in sorted(RESULTS.glob(f"incumbent-{axis}*.json")):
+        for item in json.loads(path.read_text())["items"]:
+            score = item.get("score")
+            if score is None or item.get("decision") in {None, "drafted"}:
+                routes[item["id"]] = "unjudged"
+            else:
+                routes[item["id"]] = "accept" if float(score) >= min_score else "refine"
+    return routes
+
+
+def _axis_report(piece: dict, axis: str) -> dict:
+    incumbent = _incumbent_routes(axis)
+    collapsed = {
+        item["id"]: (
+            "accept"
+            if item["route"] == "accept"
+            else "refine"
+            if item["route"] in {"accept", "refine", "band", "chat_below_reject"}
+            else "unjudged"
+        )
+        for item in piece["items"]
+    }
+    shared = [i for i in collapsed if i in incumbent]
+    table = dict.fromkeys(
+        (
+            "jev_accept_inc_accept",
+            "jev_accept_inc_refine",
+            "jev_refine_inc_accept",
+            "jev_refine_inc_refine",
+        ),
+        0,
+    )
+    for item_id in shared:
+        if collapsed[item_id] == "unjudged" or incumbent[item_id] == "unjudged":
+            continue
+        table[f"jev_{collapsed[item_id]}_inc_{incumbent[item_id]}"] += 1
+    return {
+        "axis": axis,
+        "piece": piece.get("label"),
+        "eligible": len(piece["items"]),
+        "route_counts": piece["route_counts"],
+        "decided_routes": piece.get("decided_routes"),
+        "axis_check": piece.get("axis_check"),
+        "audit": piece.get("audit"),
+        "calls": sum(item.get("calls") or 0 for item in piece["items"]),
+        "wall_time_s": piece.get("wall_time_s"),
+        "not_run_over_whole_cohort": piece.get("run_summary", {}).get("stop_reason")
+        not in {"completed", "no_eligible_work"},
+        "receipt_count": piece.get("receipt_count"),
+        "spend_usd": piece.get("spend_usd"),
+        "piece_spend_total_usd": piece.get("piece_spend_total_usd"),
+        "per_model_spend_usd": piece.get("per_model_spend_usd"),
+        "run_id": piece.get("run_id"),
+        "code_revision": piece.get("code_revision"),
+        "containment": piece.get("containment"),
+        "containment_verdict": piece.get("containment_verdict"),
+        "scratch_stopped": piece.get("scratch_stopped"),
+        "scratch_removed": piece.get("scratch_removed"),
+        "incumbent_agreement": {
+            "shared_items": len(shared),
+            "cohort_items": len(collapsed),
+            "table": table,
+            "jev_unjudged_on_shared": sum(collapsed[i] == "unjudged" for i in shared),
+            "incumbent_unjudged_on_shared": sum(
+                incumbent[i] == "unjudged" for i in shared
+            ),
+        },
+    }
+
+
+def assemble(name_path: Path, docs_path: Path, out: Path) -> None:
+    """Write the deciding dry run's record from its two labelled pieces."""
+    pieces = {
+        "name": json.loads(name_path.read_text()),
+        "docs": json.loads(docs_path.read_text()),
+    }
+    axes = {axis: _axis_report(pieces[axis], axis) for axis in ("name", "docs")}
+    total = sum(
+        float(pieces[axis].get("spend_usd") or 0.0) for axis in ("name", "docs")
+    )
+    per_axis = {}
+    for axis in ("name", "docs"):
+        checks = (axes[axis]["axis_check"] or {}).get("checks", {})
+        per_axis[axis] = {
+            "undecided_within_2pct": bool(checks.get("undecided_within_2pct")),
+            "accept_rate_in_matched_interval": bool(
+                checks.get("accept_rate_in_matched_interval")
+            ),
+            "every_audit_row_excluded": bool(checks.get("every_audit_row_excluded")),
+            "pass": bool((axes[axis]["axis_check"] or {}).get("pass")),
+        }
+    check = {
+        "per_axis": per_axis,
+        "total_spend_usd": round(total, 6),
+        "total_within_3_31": total <= 3.31,
+    }
+    check["pass"] = (
+        all(check["per_axis"][axis]["pass"] for axis in ("name", "docs"))
+        and check["total_within_3_31"]
+    )
+    record = {
+        "node": "srtj-jev-only-dry-run",
+        "plan_section": "sn-review-through-jev s6",
+        "label": pieces["name"].get("label"),
+        "pieces": {
+            "name": str(name_path) if name_path else None,
+            "docs": str(docs_path) if docs_path else None,
+        },
+        "axes": axes,
+        "check": check,
+        "created_at": stamp(),
+    }
+    save(out, record)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm", choices=("incumbent", "cascade"))
@@ -794,7 +1063,13 @@ def main() -> None:
     parser.add_argument("--retry-pending", action="store_true")
     parser.add_argument("--check-containment", type=Path)
     parser.add_argument("--check-record", type=Path)
+    parser.add_argument("--label")
+    parser.add_argument("--assemble", nargs=2, type=Path, metavar=("NAME", "DOCS"))
+    parser.add_argument("--out", type=Path)
     args = parser.parse_args()
+    if args.assemble:
+        assemble(args.assemble[0], args.assemble[1], args.out or DRY_RUN_RECORD)
+        return
     if args.check_containment:
         verify_containment(json.loads(args.check_containment.read_text()))
         return
@@ -817,6 +1092,7 @@ def main() -> None:
         "part": args.part,
         "parts": args.parts,
         "ceiling_usd": args.ceiling_usd,
+        "label": args.label,
         "comparison_spent_before_usd": float(spent_usd),
         "code_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], text=True
@@ -827,11 +1103,18 @@ def main() -> None:
         "status": "running",
     }
     suffix = f"-part{args.part}of{args.parts}" if args.parts > 1 else ""
-    path = RESULTS / (
-        "cascade-name-recovery.json"
+    stem = (
+        "cascade-name-recovery"
         if args.retry_pending
-        else f"{args.arm}-{args.axis}{suffix}.json"
+        else f"{args.arm}-{args.axis}{suffix}"
     )
+    if args.label:
+        stem = f"{stem}-{args.label}"
+    path = RESULTS / f"{stem}.json"
+    if args.label and path.exists():
+        # A labelled piece is the record of one run of this code; overwriting it
+        # would erase the run that produced it.
+        raise SystemExit(f"refusing to overwrite an existing piece: {path}")
     save(path, record)
     try:
         asyncio.run(measure(args, record, path))
