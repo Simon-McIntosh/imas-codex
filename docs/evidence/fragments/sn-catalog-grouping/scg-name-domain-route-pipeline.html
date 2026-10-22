@@ -106,7 +106,54 @@ and the three tests that had gone red
 (<code>TestFoldBackReadsTheSidecar</code> twice, plus the folded-prose half of
 the post-copy guard) pass again.</p>
 
-<h3 id="scg-name-domain-route-pipeline-blocked">Repaired under the granted fence</h3>
+<h3 id="scg-name-domain-route-pipeline-export-tests">The export fixtures, repaired
+under the second fence grant</h3>
+
+<p>Widening the gate from the brief's fifteen files to every test file that
+reaches a routed symbol found one more cluster, and it was a single defect in
+seven test items: all three files monkeypatched a module attribute this node
+removed from <code>export.py</code>.</p>
+
+<pre>patch(
+    "imas_codex.standard_names.export.select_primary_domain",
+    side_effect=lambda domains: sorted(domains)[0],
+)</pre>
+
+<p>Each repair is test-only and each test kept its subject; none was
+deleted.</p>
+
+<ul>
+  <li><code>tests/standard_names/test_export_status_authority.py</code> (two
+  failures) and <code>tests/standard_names/test_export_deprecation.py</code>
+  (three setup errors): the patch is dropped from each export fixture. The
+  export no longer ranks a domain, so the stored
+  <code>physics_domain</code> the fixture candidate already carries is what
+  reaches the entry.</li>
+  <li><code>tests/standard_names/test_export_domain_resolution.py</code> (two
+  failures) carried assertions as well as the missing patch, and its module
+  docstring stated the resolution rule. The docstring now states the
+  stored-decision contract. In
+  <code>test_accepted_name_with_source_domain_never_resolves_to_the_bucket</code>
+  the direction of the assertion is inverted — the name still has a producing
+  source carrying
+  <code>radiation_measurement_diagnostics</code>, and the test now asserts that
+  domain reaches <em>no</em> emitted entry and the undecided name is counted
+  instead. The subject is the one it always carried: a source's domain never
+  becomes the entry's domain.</li>
+  <li>The converter test is retitled from
+  <code>test_entry_converter_refuses_a_domainless_node</code> to
+  <code>test_entry_converter_carries_no_domain_for_a_domainless_node</code>,
+  and asserts the settled behaviour. The distinction is what a domainless node
+  produces: the retired name and its <code>pytest.raises(ValueError)</code>
+  encoded a converter that refused such a node, while the converter now
+  projects it with <code>physics_domain: None</code> and leaves the refusing to
+  the export's accounting. The test stopped expecting an exception and is
+  asserting the entry instead; it keeps its subject, and the name states what
+  it now checks.</li>
+</ul>
+
+<h3 id="scg-name-domain-route-pipeline-guards">The guard tests, repaired under the
+first fence grant</h3>
 
 <p>The coordinator extended the fence to
 <code>tests/standard_names/test_domain_selector.py</code> and
@@ -134,45 +181,6 @@ now state the stored-decision contract.</p>
   decided cannot back a published bucket.</li>
 </ul>
 
-<h3 id="scg-name-domain-route-pipeline-request">Requested: a second fence grant, three export test files</h3>
-
-<p>The brief named fifteen files to gate. Widening that to every test file that
-reaches a routed symbol found one more cluster, and it is a single defect in
-seven test items: all three files monkeypatch a module attribute this node
-removed from <code>export.py</code>.</p>
-
-<pre>patch(
-    "imas_codex.standard_names.export.select_primary_domain",
-    side_effect=lambda domains: sorted(domains)[0],
-)</pre>
-
-<ul>
-  <li><code>tests/standard_names/test_export_status_authority.py</code> — two
-  failures from that patch in its export fixture
-  (<code>test_draft_graph_status_is_exported_as_draft</code>,
-  <code>test_null_graph_status_refuses_the_whole_cut</code>).</li>
-  <li><code>tests/standard_names/test_export_deprecation.py</code> — three
-  setup errors from the same patch in its fixture.</li>
-  <li><code>tests/standard_names/test_export_domain_resolution.py</code> — two
-  failures, and these carry assertions as well.
-  <code>test_accepted_name_with_source_domain_never_resolves_to_the_bucket</code>
-  asserts an entry emits its producing source's domain, which is the removed
-  fallback; <code>test_entry_converter_refuses_a_domainless_node</code> expects
-  <code>ValueError</code>, which the converter no longer raises, because a node
-  storing no domain now yields an entry carrying none. That file's module
-  docstring states the resolution rule and belongs with them.</li>
-</ul>
-
-<p>Each repair is test-only. Drop the patch — the export no longer ranks a
-domain, so the fixture's stored <code>physics_domain</code> is what reaches the
-entry — and in <code>test_export_domain_resolution.py</code> retitle and invert
-the two assertions to the settled contract, never delete them.</p>
-
-<p>The rest of the gate is the base's. On the same file set the base arm is
-<code>4 failed, 394 passed</code> and the head is <code>8 failed, 403 passed</code>:
-<code>test_vocab_gaps.py</code>'s three and
-<code>test_catalog_layout_hierarchy.py::test_export_ledgers_cycle_and_writes_packet</code>
-fail identically at base, and the delta is exactly the seven items above.</p>
 <h3 id="scg-name-domain-route-pipeline-next">Left for the next node</h3>
 
 <p>The graph-ops module is the next node's and is referred to only by its import
@@ -211,9 +219,28 @@ path <code>imas_codex.standard_names.graph_ops</code>:</p>
   <code>negative-control.log</code> in the run directory.</li>
   <li>Gate, by delta against the base, over every test file that reaches a
   routed symbol (28 files at head, 27 at base — the head adds this node's
-  routing test): head <code>8 failed, 403 passed</code>, base
-  <code>4 failed, 394 passed</code>. Logs <code>gate-after.log</code> and
-  <code>gate-base.log</code> in the run directory.</li>
+  routing test). Before the export fixtures were repaired, the head carried
+  exactly the seven items and nothing else: head <code>8 failed, 403 passed</code>
+  against base <code>4 failed, 394 passed</code>. With them repaired, head is
+  <code>4 failed, 410 passed, 2 skipped</code> and the repaired tests are all
+  green. Logs <code>gate-after.log</code>, <code>gate-base.log</code> and
+  <code>gate-head-repair.log</code>.</li>
+  <li>The head run's four remaining failures are not this node's, and the
+  instrument that shows it is the base arm under the same load. Three are
+  <code>TestPublishRefusesDivergedTree</code> in
+  <code>test_catalog_import_divergence.py</code>, each a
+  <code>pytest-timeout</code> at a <code>subprocess.run</code> call — no
+  assertion about the routed code is reached. Re-run alone they still time out
+  at the head, and re-run on the base arm the same three time out too
+  (<code>gate-divergence-base-recheck.log</code>: 2 failed, 4 passed of the
+  same file). The fourth,
+  <code>test_catalog_layout_hierarchy.py::test_export_ledgers_cycle_and_writes_packet</code>,
+  fails identically at base with the same <code>IndexError</code> from
+  <code>classify_sourceless_standard_names</code>. The node ran at a load
+  average near 61 for the whole gate, which is also why the trio in
+  <code>test_vocab_gaps.py</code> that failed in both earlier runs passed in
+  this one: the failure set moves with the load, and the base arm is what
+  separates a real delta from it.</li>
   <li>The base arm is a <code>git archive</code> of the base revision extracted
   to <code>$TMPDIR</code>, run with <code>PYTHONPATH</code> pointing at it and
   its own test files, because <code>git worktree add</code> is unavailable
