@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:7409 (process_refine_name_batch)"
+  ],
+  "completed_at": "2026-10-22T20:51:28.797Z",
+  "dispatched_at": "2026-10-22T20:29:29Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/fanout/__init__.py",
+      "line": "50",
+      "severity": "blocking",
+      "text": "the diff changes six paths outside the node's declared write paths (imas_codex/standard_names/fanout/__init__.py, tests/standard_names/fanout/test_trigger_dims_align_with_review.py, tests/standard_names/fanout/test_trigger_predicate.py, tests/standard_names/test_refine_failed_checks.py, tests/standard_names/test_refine_scope_continuity.py, tests/standard_names/test_review_cascade.py), each importing or asserting the deleted surface; reckon crew check --manifest returns ok:false for exactly these paths, so the run cannot land until the coordinator widens the scope for all six."
+    },
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "7448",
+      "severity": "follow-on",
+      "text": "the refine call site still threads the always-empty reviewer_excerpt into run_fanout, so fanout/dispatcher.py:92 renders a proposer-prompt Review feedback section that always reads (none); the dead slot's repair lives in imas_codex/standard_names/fanout/dispatcher.py, outside this node's write scope, and the node records it as its first follow-on."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit from 96aab3e62 to b8d1fdc6e; five commits, all inside the deletion of the comment path plus the call-site update.",
+    "done_when": "the done_when asks for a gate with no added failures, no comment read by should_trigger_fanout, and a fragment listing the deletions with line counts plus the threshold with its source; the manifest's tests line runs that gate and the fragment carries all three.",
+    "goal": "the node's goal is to retire the comment-keyword refine trigger so fan-out fires only on failed retrieval checks; imas_codex/standard_names/fanout/trigger.py:58 should_trigger_fanout now takes checks/check_results/check_threshold only and returns the verdict of should_trigger_fanout_from_checks.",
+    "manifest": "read; records the base and head gate runs (187 and 179 passed, both EXIT=0), the negative controls, and the six out-of-scope paths in blockers.",
+    "write_paths": "the source brief declares six write paths; the diff also changes six paths outside that set."
+  },
+  "justifications": {
+    "durability": "logs/negative-control.log shows the signature, module-text and settings guards reddening (3 failed) when the keyword setting and comment parameter are restored, and logs/negative-control-repair.log shows the agreement test reddening at threshold 0.95 on a wrapper that ignores its inputs.",
+    "evidence": "the manifest's tests line and logs/repair-gate.log record 179 passed EXIT=0 at b8d1fdc6e against logs/base-gate.log 187 passed EXIT=0, and the fragment's per-file counts match git diff --numstat.",
+    "fit": "the retained wrapper at imas_codex/standard_names/fanout/trigger.py:58 keeps the call-site shape and documents the always-empty excerpt, matching the module's existing idiom.",
+    "goal_fidelity": "imas_codex/standard_names/workers.py:7409 calls should_trigger_fanout with check inputs only, so the fan-out fires on failed retrieval checks and reads no comment text.",
+    "reuse": "should_trigger_fanout delegates to the pre-existing owner should_trigger_fanout_from_checks at imas_codex/standard_names/fanout/trigger.py:41 rather than re-implementing the retrieval-check predicate.",
+    "scope_discipline": "the diff changes six paths outside the brief's declared write scope (fanout/__init__.py, test_trigger_dims_align_with_review.py, test_trigger_predicate.py, test_refine_failed_checks.py, test_refine_scope_continuity.py, test_review_cascade.py), which reckon crew check --manifest reports as ok:false."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to retire the comment-keyword refine trigger so fan-out fires only on failed retrieval checks; imas_codex/standard_names/fanout/trigger.py:58 should_trigger_fanout now takes checks/check_results/check_threshold only and returns the verdict of should_trigger_fanout_from_checks.\nVERDICT done_when: the done_when asks for a gate with no added failures, no comment read by should_trigger_fanout, and a fragment listing the deletions with line counts plus the threshold with its source; the manifest's tests line runs that gate and the fragment carries all three.\nVERDICT write_paths: the source brief declares six write paths (imas_codex/standard_names/fanout/trigger.py, fanout/config.py, workers.py, pyproject.toml, tests/standard_names/test_fanout_trigger.py, docs/evidence/fragments/sn-review-through-jev/srtj-retire-keyword-trigger.html); the diff also changes six paths outside that set.\nVERDICT manifest: read; it records the base and head gate runs (187 passed and 179 passed, both EXIT=0), the negative controls, and lists the six out-of-scope paths in blockers.\nVERDICT diff: read commit by commit from 96aab3e62 to b8d1fdc6e (five commits: the refactor plus two test repairs and two fragment records); every production change is the deletion of the comment path and the call-site update.\nCALL_SITES: imas_codex/standard_names/workers.py:7409 (process_refine_name_batch)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/workers.py:7409 calls should_trigger_fanout with check inputs only, so the fan-out fires on failed retrieval checks and reads no comment text.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest's tests line and logs/repair-gate.log record 179 passed EXIT=0 at b8d1fdc6e against logs/base-gate.log 187 passed EXIT=0, and the fragment's per-file counts match git diff --numstat.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: the diff changes six paths outside the brief's declared write scope (imas_codex/standard_names/fanout/__init__.py, tests/standard_names/fanout/test_trigger_dims_align_with_review.py, tests/standard_names/fanout/test_trigger_predicate.py, tests/standard_names/test_refine_failed_checks.py, tests/standard_names/test_refine_scope_continuity.py, tests/standard_names/test_review_cascade.py), which reckon crew check --manifest reports as ok:false.\nSCORE durability: 18\nJUSTIFICATION durability: logs/negative-control.log shows the signature, module-text and settings guards reddening (3 failed) when the keyword setting and comment parameter are restored, and logs/negative-control-repair.log shows the agreement test reddening at threshold 0.95 on a wrapper that ignores its inputs.\nSCORE fit: 18\nJUSTIFICATION fit: the retained (bool, str) wrapper at imas_codex/standard_names/fanout/trigger.py:58 keeps the call-site shape and documents the always-empty excerpt, matching the module's existing idiom.\nSCORE reuse: 19\nJUSTIFICATION reuse: should_trigger_fanout delegates to the pre-existing owner should_trigger_fanout_from_checks at imas_codex/standard_names/fanout/trigger.py:41 rather than re-implementing the retrieval-check predicate.\nFINDING imas_codex/standard_names/fanout/__init__.py:50 blocking: the diff changes six paths outside the node's declared write paths (fanout/__init__.py, test_trigger_dims_align_with_review.py, test_trigger_predicate.py, test_refine_failed_checks.py, test_refine_scope_continuity.py, test_review_cascade.py), each importing or asserting the deleted surface; reckon crew check --manifest returns ok:false for exactly these, so the run cannot land until the coordinator widens the scope for all six.\nFINDING imas_codex/standard_names/workers.py:7448 follow-on: the refine call site still threads the always-empty reviewer_excerpt into run_fanout, so fanout/dispatcher.py:92 renders a proposer-prompt Review feedback section that always reads (none); the dead slot's repair lives in imas_codex/standard_names/fanout/dispatcher.py, outside this node's write scope, and the node records it as its first follow-on.\n",
+  "review_run_id": "r-20261022T202324093215-review-of-srtj-retire-keyword-trigger-b8d1fdc6ebc9",
+  "reviewed_base_sha": "96aab3e62012c1892988f5c12093641764c2241b",
+  "reviewed_head_sha": "b8d1fdc6ebc926d0c94afe9c5f51669f31827d9b",
+  "reviewed_run_id": "r-20261022T175939059097-srtj-retire-keyword-trigger",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T20:54:40.920037+00:00",
+  "total": 104
+}
