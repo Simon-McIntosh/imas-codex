@@ -18,7 +18,7 @@
       <tr><td><code>imas_codex/standard_names/workers.py</code></td><td>14</td><td>4</td><td>the comment excerpt read and the commented trigger call at the refine call site</td></tr>
       <tr><td><code>pyproject.toml</code></td><td>11</td><td>0</td><td><code>refine-trigger-keywords</code>, <code>refine-trigger-comment-dims</code>, <code>refine-trigger-comment-chars</code> and their comments</td></tr>
       <tr><td><code>imas_codex/standard_names/fanout/__init__.py</code></td><td>2</td><td>0</td><td>the <code>extract_reviewer_excerpt</code> re-export</td></tr>
-      <tr><td><code>tests/standard_names/fanout/test_trigger_dims_align_with_review.py</code></td><td>46</td><td>0</td><td>the file, which tested only the retired dim allow-list</td></tr>
+      <tr><td><code>tests/standard_names/fanout/test_trigger_dims_align_with_review.py</code></td><td>40</td><td>0</td><td>the file, which tested only the retired dim allow-list</td></tr>
       <tr><td><code>tests/standard_names/fanout/test_trigger_predicate.py</code></td><td>127</td><td>3</td><td>the comment-excerpt and comment-trigger tests; arm assignment tests kept</td></tr>
       <tr><td><code>tests/standard_names/test_refine_failed_checks.py</code></td><td>10</td><td>2</td><td>two tests rewritten to the check-only signature</td></tr>
       <tr><td><code>tests/standard_names/test_review_cascade.py</code></td><td>8</td><td>1</td><td>the trigger call and its <code>trigger_source</code> assertion updated</td></tr>
@@ -73,4 +73,39 @@
     <code>test_no_keyword_trigger_setting_by_import_and_settings_load</code>. The mutation
     was then removed and the source restored.
   </p>
+<h3 id="srtj-retire-keyword-trigger-corrections">Corrections after review</h3>
+  <p>
+    A review of this node found four defects in the record and the tests it landed, all
+    repaired here:
+  </p>
+  <ul>
+    <li>
+      The deleted-line count for
+      <code>tests/standard_names/fanout/test_trigger_dims_align_with_review.py</code> read 46
+      where <code>git diff --numstat</code> gives 40. Corrected above, and every row of the
+      table was then re-checked against the same command. This is the failure mode a
+      hand-typed count invites: the number was transcribed from a table rather than read
+      back from the diff, so nothing could have caught it.
+    </li>
+    <li>
+      The wrapper/predicate agreement test compared the two on one input that both classify
+      as firing, so it held for a wrapper that ignored its arguments. It now compares three
+      thresholds straddling the measured probability and an unanswered check, and asserts
+      the case set contains both a firing and a non-firing outcome.
+    </li>
+    <li>
+      The scope-continuity fixture patched in a stand-in settings object that fabricated
+      three fields this change deleted — a shape that stays and passes because a namespace
+      accepts any attribute. It now stubs the production settings model, with a guard that
+      the stubbed object is that model.
+    </li>
+    <li>
+      The refine call site threads a reviewer-comment excerpt that this change made
+      permanently empty, so the proposer prompt keeps a feedback section that always
+      renders <code>(none)</code>. Not repaired here: the slot is built in the fan-out
+      dispatcher's prompt builder, outside this node's write scope, and is recorded as an
+      open item instead.
+    </li>
+  </ul>
+
 </section>
