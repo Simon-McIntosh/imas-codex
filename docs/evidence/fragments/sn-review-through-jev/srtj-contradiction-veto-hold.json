@@ -1,0 +1,2192 @@
+{
+  "target": "electrostatic_potential",
+  "default_min_score": 0.85,
+  "default_rotation_cap": 3,
+  "hold_scan": {
+    "log_files": [
+      "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log",
+      "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.1",
+      "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2",
+      "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.3"
+    ],
+    "total_hold_lines": 118,
+    "contradiction_hold_lines": 29,
+    "other_hold_lines": 89,
+    "distinct_contradiction_names": [
+      "electrostatic_potential",
+      "gap_at_outboard_midplane",
+      "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+      "neutral_energy_flux_at_wall_due_to_recombination",
+      "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+      "radial_coordinate_at_outboard_midplane",
+      "radial_separatrix_distance_at_outboard_midplane",
+      "toroidal_angle_of_control_surface",
+      "x_coordinate_of_diagnostic_aperture",
+      "y_coordinate_of_diagnostic_aperture"
+    ],
+    "firings": [
+      {
+        "name": "electrostatic_potential",
+        "ts": "2026-10-17 22:50:23",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.3:66596",
+        "is_contradiction": true,
+        "note": "contradicts source: edge_profiles/profiles_1d/phi_potential: The unqualified physical quantity imposes no intrinsic spatial averaging; the applicable locus and aggregation convention are specified by a more specific realization.; DD: Electrostatic potential, averaged on the magnetic flux surface | core_profiles/profiles_1d/phi_potential: The unqualified physical quantity imposes no intrinsic spatial averaging; the applicable locus and aggregation convention are specified by a more specific realization.; DD: Electrostatic potential, averaged on the magnetic flux surface",
+        "entries": [
+          {
+            "source_path": "edge_profiles/profiles_1d/phi_potential",
+            "claim": "The unqualified physical quantity imposes no intrinsic spatial averaging; the applicable locus and aggregation convention are specified by a more specific realization.",
+            "dd_text": "Electrostatic potential, averaged on the magnetic flux surface"
+          },
+          {
+            "source_path": "core_profiles/profiles_1d/phi_potential",
+            "claim": "The unqualified physical quantity imposes no intrinsic spatial averaging; the applicable locus and aggregation convention are specified by a more specific realization.",
+            "dd_text": "Electrostatic potential, averaged on the magnetic flux surface"
+          }
+        ]
+      },
+      {
+        "name": "electrostatic_potential",
+        "ts": "2026-10-17 23:14:39",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.3:67640",
+        "is_contradiction": true,
+        "note": "contradicts source: plasma_profiles/profiles_1d/phi_potential: The quantity has no mandatory locus or aggregation.; DD: Electrostatic potential, averaged on the magnetic flux surface | edge_profiles/profiles_1d/phi_potential: The quantity has no mandatory locus or aggregation.; DD: Electrostatic potential, averaged on the magnetic flux surface",
+        "entries": [
+          {
+            "source_path": "plasma_profiles/profiles_1d/phi_potential",
+            "claim": "The quantity has no mandatory locus or aggregation.",
+            "dd_text": "Electrostatic potential, averaged on the magnetic flux surface"
+          },
+          {
+            "source_path": "edge_profiles/profiles_1d/phi_potential",
+            "claim": "The quantity has no mandatory locus or aggregation.",
+            "dd_text": "Electrostatic potential, averaged on the magnetic flux surface"
+          }
+        ]
+      },
+      {
+        "name": "gap_at_outboard_midplane",
+        "ts": "2026-10-17 23:32:28",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.3:68696",
+        "is_contradiction": true,
+        "note": "documentation does not conform to the conventions registry \u2014 correct each finding: locus_definition: a sentence defining 'outboard midplane' does not carry the locus registry definition 'Low-field-side (outboard) equatorial midplane. The outer-midplane reference follows the DD midplane_identifier (default option 'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a value at the separatrix intersection use outboard_midplane_separatrix.' [concept:outboard_midplane]; contradicts source: summary/boundary/distance_inner_outer_separatrices/value: where [equation] is the gap at the outboard midplane, [equation] is the major-radius coordinate of the measurement position's mapped flux-surface intersection with the outboard midplane, and [equation] is the major-radius coordinate of the outboard-midplane separatrix.; The quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation.; DD: Value",
+        "entries": [
+          {
+            "source_path": "summary/boundary/distance_inner_outer_separatrices/value",
+            "claim": "where [equation] is the gap at the outboard midplane, [equation] is the major-radius coordinate of the measurement position's mapped flux-surface intersection with the outboard midplane, and [equation] is the major-radius coordinate of the outboard-midplane separatrix.; The quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation.",
+            "dd_text": "Value"
+          }
+        ]
+      },
+      {
+        "name": "gap_at_outboard_midplane",
+        "ts": "2026-10-17 23:38:30",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.3:68818",
+        "is_contradiction": true,
+        "note": "documentation does not conform to the conventions registry \u2014 correct each finding: locus_definition: a sentence defining 'outboard midplane' does not carry the locus registry definition 'Low-field-side (outboard) equatorial midplane. The outer-midplane reference follows the DD midplane_identifier (default option 'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a value at the separatrix intersection use outboard_midplane_separatrix.' [concept:outboard_midplane]; contradicts source: summary/boundary/distance_inner_outer_separatrices/value: where [equation] is the gap at the outboard midplane, [equation] is the radial coordinate at outboard midplane of the mapped measurement position, and [equation] is the corresponding radial coordinate at outboard midplane of the magnetic separatrix.; The quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation.; DD: Value",
+        "entries": [
+          {
+            "source_path": "summary/boundary/distance_inner_outer_separatrices/value",
+            "claim": "where [equation] is the gap at the outboard midplane, [equation] is the radial coordinate at outboard midplane of the mapped measurement position, and [equation] is the corresponding radial coordinate at outboard midplane of the magnetic separatrix.; The quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation.",
+            "dd_text": "Value"
+          }
+        ]
+      },
+      {
+        "name": "gap_at_outboard_midplane",
+        "ts": "2026-10-17 23:43:27",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.3:68925",
+        "is_contradiction": true,
+        "note": "documentation does not conform to the conventions registry \u2014 correct each finding: locus_definition: a sentence defining 'outboard midplane' does not carry the locus registry definition 'Low-field-side (outboard) equatorial midplane. The outer-midplane reference follows the DD midplane_identifier (default option 'dr_dz_zero_sep': the outboard separatrix point where dr/dz = 0). For a value at the separatrix intersection use outboard_midplane_separatrix.' [concept:outboard_midplane]; contradicts source: summary/boundary/distance_inner_outer_separatrices/value: where [equation] is the gap at the outboard midplane, [equation] is the major-radius coordinate of the mapped measurement position at the outboard midplane, and [equation] is the major-radius coordinate of the magnetic separatrix there.; The quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation.; It is a signed major-radius projection at the outboard midplane, not a shortest Euclidean clearance such as the gap at plasma boundary or the gap at closest wall point, not a plasma-wall clearance, and not the separation between inner and outer separatrices.; DD: Value",
+        "entries": [
+          {
+            "source_path": "summary/boundary/distance_inner_outer_separatrices/value",
+            "claim": "where [equation] is the gap at the outboard midplane, [equation] is the major-radius coordinate of the mapped measurement position at the outboard midplane, and [equation] is the major-radius coordinate of the magnetic separatrix there.; The quantity applies pointwise to one measurement position, its assigned magnetic flux surface, and one selected magnetic separatrix, with no flux-surface, spatial, species, or time aggregation.; It is a signed major-radius projection at the outboard midplane, not a shortest Euclidean clearance such as the gap at plasma boundary or the gap at closest wall point, not a plasma-wall clearance, and not the separation between inner and outer separatrices.",
+            "dd_text": "Value"
+          }
+        ]
+      },
+      {
+        "name": "toroidal_angle_of_control_surface",
+        "ts": "2026-10-18 15:18:32",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.3:71093",
+        "is_contradiction": true,
+        "note": "contradicts source: b_field_non_axisymmetric/time_slice/control_surface/phi: This quantity applies to each individual control-surface member and represents toroidal location only.; DD: Toroidal angle array, on which the Fourier decomposition is carried out",
+        "entries": [
+          {
+            "source_path": "b_field_non_axisymmetric/time_slice/control_surface/phi",
+            "claim": "This quantity applies to each individual control-surface member and represents toroidal location only.",
+            "dd_text": "Toroidal angle array, on which the Fourier decomposition is carried out"
+          }
+        ]
+      },
+      {
+        "name": "y_coordinate_of_diagnostic_aperture",
+        "ts": "2026-10-19 10:13:43",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:8369",
+        "is_contradiction": true,
+        "note": "contradicts source: camera_ir/channel/camera/pinhole/y: contradicts source: where [equation] is the signed aperture-center coordinate, the axis label [equation] selects the camera y axis, [equation] is the aperture-center position vector relative to the camera-frame origin, and [equation] is the positive y-axis unit vector.; DD: Component along Y axis",
+        "entries": [
+          {
+            "source_path": "camera_ir/channel/camera/pinhole/y",
+            "claim": "where [equation] is the signed aperture-center coordinate, the axis label [equation] selects the camera y axis, [equation] is the aperture-center position vector relative to the camera-frame origin, and [equation] is the positive y-axis unit vector.",
+            "dd_text": "Component along Y axis"
+          }
+        ]
+      },
+      {
+        "name": "x_coordinate_of_diagnostic_aperture",
+        "ts": "2026-10-19 14:54:17",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:10199",
+        "is_contradiction": true,
+        "note": "contradicts source: camera_ir/channel/camera/pinhole/x: contradicts source: where [equation] is the aperture's x coordinate, [equation] is the position of its center, [equation] is the camera-frame origin, and [equation] is the unit vector along the camera x axis.; DD: Component along X axis",
+        "entries": [
+          {
+            "source_path": "camera_ir/channel/camera/pinhole/x",
+            "claim": "where [equation] is the aperture's x coordinate, [equation] is the position of its center, [equation] is the camera-frame origin, and [equation] is the unit vector along the camera x axis.",
+            "dd_text": "Component along X axis"
+          }
+        ]
+      },
+      {
+        "name": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 00:08:54",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:32893",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/incident/values: contradicts source: where [equation] is the outgoing ion-associated energy flux due to recombination, [equation] is a wall location, [equation] is the emitted recombination-associated energy assigned to the selected ion contribution, [equation] is surface area, and [equation] is time.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/incident/values",
+            "claim": "where [equation] is the outgoing ion-associated energy flux due to recombination, [equation] is a wall location, [equation] is the emitted recombination-associated energy assigned to the selected ion contribution, [equation] is surface area, and [equation] is time.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 00:10:49",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:32986",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The local incident energy flux is defined as:; where [equation] is the incident neutral energy flux due to recombination, [equation] is a wall location, [equation] is the recombination-associated energy carried by arriving neutral particles, [equation] is surface area, and [equation] is time.; The subscript [equation] identifies neutral particles, [equation] identifies the recombination association, and [equation] identifies the incident direction.; Unlike the incident neutral particle flux at the wall due to recombination, which counts arriving particles, this quantity accounts for their recombination-associated energy.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The local incident energy flux is defined as:; where [equation] is the incident neutral energy flux due to recombination, [equation] is a wall location, [equation] is the recombination-associated energy carried by arriving neutral particles, [equation] is surface area, and [equation] is time.; The subscript [equation] identifies neutral particles, [equation] identifies the recombination association, and [equation] identifies the incident direction.; Unlike the incident neutral particle flux at the wall due to recombination, which counts arriving particles, this quantity accounts for their recombination-associated energy.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "ts": "2026-10-20 09:07:19",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:35739",
+        "is_contradiction": true,
+        "note": "contradicts source: gyrokinetics_local/non_linear/fluxes_1d/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; Rotating-frame values use momentum defined relative to the specified rotation and are distinct from laboratory-frame values; the transported momentum and its velocity-space decomposition must use the same frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_2d_k_x_k_y_sum/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_3d/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; Rotating-frame values use momentum defined relative to the specified rotation and are distinct from laboratory-frame values; the transported momentum and its velocity-space decomposition must use the same frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_phi_potential: contradicts source: It does not prescribe a wavenumber sum or time or flux-surface average.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalised toroidal momentum flux",
+        "entries": [
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_1d/momentum_phi_perpendicular_phi_potential",
+            "claim": "It does not prescribe a wavenumber sum or time or flux-surface average.; Rotating-frame values use momentum defined relative to the specified rotation and are distinct from laboratory-frame values; the transported momentum and its velocity-space decomposition must use the same frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "It does not prescribe a wavenumber sum or time or flux-surface average.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_2d_k_x_k_y_sum/momentum_phi_perpendicular_phi_potential",
+            "claim": "It does not prescribe a wavenumber sum or time or flux-surface average.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/momentum_phi_perpendicular_phi_potential",
+            "claim": "It does not prescribe a wavenumber sum or time or flux-surface average.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_3d/momentum_phi_perpendicular_phi_potential",
+            "claim": "It does not prescribe a wavenumber sum or time or flux-surface average.; Rotating-frame values use momentum defined relative to the specified rotation and are distinct from laboratory-frame values; the transported momentum and its velocity-space decomposition must use the same frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_phi_potential",
+            "claim": "It does not prescribe a wavenumber sum or time or flux-surface average.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalised toroidal momentum flux"
+          }
+        ]
+      },
+      {
+        "name": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "ts": "2026-10-20 09:10:57",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:36233",
+        "is_contradiction": true,
+        "note": "contradicts source: gyrokinetics_local/non_linear/fluxes_4d_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_3d_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_1d/momentum_phi_perpendicular_phi_potential: contradicts source: It also does not prescribe a wavenumber sum, temporal average, or flux-surface average; those aggregation choices belong to the encompassing flux quantity.; In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_3d_k_x_sum_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalised toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_2d_k_x_k_y_sum/momentum_phi_perpendicular_phi_potential: contradicts source: In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_5d_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_3d/momentum_phi_perpendicular_phi_potential: contradicts source: It also does not prescribe a wavenumber sum, temporal average, or flux-surface average; those aggregation choices belong to the encompassing flux quantity.; In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_phi_potential: contradicts source: In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalised toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_2d_k_x_sum_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux",
+        "entries": [
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_4d_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_3d_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_1d/momentum_phi_perpendicular_phi_potential",
+            "claim": "It also does not prescribe a wavenumber sum, temporal average, or flux-surface average; those aggregation choices belong to the encompassing flux quantity.; In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalised toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_2d_k_x_k_y_sum/momentum_phi_perpendicular_phi_potential",
+            "claim": "In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_5d_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_3d/momentum_phi_perpendicular_phi_potential",
+            "claim": "It also does not prescribe a wavenumber sum, temporal average, or flux-surface average; those aggregation choices belong to the encompassing flux quantity.; In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_phi_potential",
+            "claim": "In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalised toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "In the linear eigenmode-weight interpretation, this quantity gives the contribution of the perturbed electrostatic potential to the perpendicular toroidal momentum flux and is expressed in the laboratory frame.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          }
+        ]
+      },
+      {
+        "name": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "ts": "2026-10-20 09:15:25",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:36351",
+        "is_contradiction": true,
+        "note": "contradicts source: gyrokinetics_local/non_linear/fluxes_1d/momentum_phi_perpendicular_phi_potential: contradicts source: The channel name does not prescribe spectral summation, temporal or flux-surface averaging, or species aggregation; these belong to the particular momentum-flux quantity being decomposed.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux | gyrokinetics_local/non_linear/fluxes_2d_k_x_sum_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: It excludes the parallel velocity-space component and contributions due to the perturbed parallel vector potential or perturbed parallel magnetic field; it is a channel contribution, not the complete normalized toroidal momentum flux.; The corresponding electromagnetic-channel distinction is perpendicular normalized momentum flux due to perturbed parallel vector potential.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux",
+        "entries": [
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_1d/momentum_phi_perpendicular_phi_potential",
+            "claim": "The channel name does not prescribe spectral summation, temporal or flux-surface averaging, or species aggregation; these belong to the particular momentum-flux quantity being decomposed.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          },
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "It excludes the parallel velocity-space component and contributions due to the perturbed parallel vector potential or perturbed parallel magnetic field; it is a channel contribution, not the complete normalized toroidal momentum flux.; The corresponding electromagnetic-channel distinction is perpendicular normalized momentum flux due to perturbed parallel vector potential.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          }
+        ]
+      },
+      {
+        "name": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "ts": "2026-10-20 09:18:53",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:36428",
+        "is_contradiction": true,
+        "note": "contradicts source: gyrokinetics_local/non_linear/fluxes_2d_k_x_sum_rotating_frame/momentum_phi_perpendicular_phi_potential: contradicts source: Within the field decomposition of turbulent momentum transport, this quantity selects the perturbed-electrostatic-potential drive and the perpendicular velocity-space component.; It excludes the parallel velocity-space component and the companion contribution driven by the perturbed parallel vector potential, and it is one channel contribution rather than the complete normalized toroidal momentum flux.; Spectral resolution in perpendicular wavenumbers, summation over wavenumber components, time and flux-surface averaging, species resolution, and evaluation in the laboratory or rotating frame are properties of the particular momentum-flux realization being decomposed; this channel selection neither adds nor removes them.; DD: Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux",
+        "entries": [
+          {
+            "source_path": "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum_rotating_frame/momentum_phi_perpendicular_phi_potential",
+            "claim": "Within the field decomposition of turbulent momentum transport, this quantity selects the perturbed-electrostatic-potential drive and the perpendicular velocity-space component.; It excludes the parallel velocity-space component and the companion contribution driven by the perturbed parallel vector potential, and it is one channel contribution rather than the complete normalized toroidal momentum flux.; Spectral resolution in perpendicular wavenumbers, summation over wavenumber components, time and flux-surface averaging, species resolution, and evaluation in the laboratory or rotating frame are properties of the particular momentum-flux realization being decomposed; this channel selection neither adds nor removes them.",
+            "dd_text": "Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux"
+          }
+        ]
+      },
+      {
+        "name": "y_coordinate_of_diagnostic_aperture",
+        "ts": "2026-10-20 16:53:43",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:40508",
+        "is_contradiction": true,
+        "note": "contradicts source: camera_ir/channel/camera/pinhole/y: contradicts source: where [equation] is the coordinate value with axis label [equation], [equation] is the aperture-center position vector relative to the camera-frame origin, and [equation] is the positive camera-frame y-axis unit vector.; DD: Component along Y axis",
+        "entries": [
+          {
+            "source_path": "camera_ir/channel/camera/pinhole/y",
+            "claim": "where [equation] is the coordinate value with axis label [equation], [equation] is the aperture-center position vector relative to the camera-frame origin, and [equation] is the positive camera-frame y-axis unit vector.",
+            "dd_text": "Component along Y axis"
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 17:07:14",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:42165",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The local incident energy flux is defined by; where [equation] is the incident neutral recombination energy flux, [equation] is the recombination-associated energy arriving through the neutral channel over wall area [equation] during time interval [equation], [equation] denotes energy, [equation] denotes the neutral channel, [equation] denotes recombination, and [equation] denotes incidence toward the wall.; It excludes the separate incident ion recombination energy flux and is not the total incident neutral energy flux, which can include energy contributions unrelated to recombination.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The local incident energy flux is defined by; where [equation] is the incident neutral recombination energy flux, [equation] is the recombination-associated energy arriving through the neutral channel over wall area [equation] during time interval [equation], [equation] denotes energy, [equation] denotes the neutral channel, [equation] denotes recombination, and [equation] denotes incidence toward the wall.; It excludes the separate incident ion recombination energy flux and is not the total incident neutral energy flux, which can include energy contributions unrelated to recombination.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 17:12:37",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:42306",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The local incident energy flux is defined by; where [equation] is the incident neutral recombination energy flux, [equation] is a point at the wall, [equation] is the recombination-associated energy arriving through the neutral channel over wall area [equation] during time interval [equation], [equation] denotes energy, [equation] denotes recombination, [equation] denotes the neutral-particle channel, and [equation] denotes incidence toward the wall.; It is local rather than integrated over wall area, and is summed over neutral species and internal states.; It is the energy-weighted counterpart of incident neutral particle flux at the wall due to recombination, which counts the same incident neutral population without energy weighting.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross toward the material.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The local incident energy flux is defined by; where [equation] is the incident neutral recombination energy flux, [equation] is a point at the wall, [equation] is the recombination-associated energy arriving through the neutral channel over wall area [equation] during time interval [equation], [equation] denotes energy, [equation] denotes recombination, [equation] denotes the neutral-particle channel, and [equation] denotes incidence toward the wall.; It is local rather than integrated over wall area, and is summed over neutral species and internal states.; It is the energy-weighted counterpart of incident neutral particle flux at the wall due to recombination, which counts the same incident neutral population without energy weighting.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross toward the material.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 17:17:18",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:42417",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The local incident energy flux is defined by; Here, [equation] is the incident neutral recombination energy flux, [equation] is a point on the wall, [equation] is the recombination-associated energy arriving through the neutral channel across wall area [equation] during time interval [equation], [equation] denotes energy, [equation] denotes recombination, the subscript [equation] denotes the neutral-particle channel, and the superscript [equation] denotes incidence toward the material.; It excludes the ion-associated channel and outgoing neutral recombination products, and is distinct from a net balance of incoming and outgoing fluxes.; It is the energy-weighted counterpart of incident neutral particle flux at the wall due to recombination, which counts the same incident neutral population without energy weighting.; It is directionally distinct from neutral particle flux at the wall due to recombination, which describes outgoing neutral recombination products, and more specific than neutral energy flux at the wall, which is not restricted to the incident recombination-associated contribution.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross toward the material.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The local incident energy flux is defined by; Here, [equation] is the incident neutral recombination energy flux, [equation] is a point on the wall, [equation] is the recombination-associated energy arriving through the neutral channel across wall area [equation] during time interval [equation], [equation] denotes energy, [equation] denotes recombination, the subscript [equation] denotes the neutral-particle channel, and the superscript [equation] denotes incidence toward the material.; It excludes the ion-associated channel and outgoing neutral recombination products, and is distinct from a net balance of incoming and outgoing fluxes.; It is the energy-weighted counterpart of incident neutral particle flux at the wall due to recombination, which counts the same incident neutral population without energy weighting.; It is directionally distinct from neutral particle flux at the wall due to recombination, which describes outgoing neutral recombination products, and more specific than neutral energy flux at the wall, which is not restricted to the incident recombination-associated contribution.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross toward the material.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 22:08:42",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log.2:44204",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The quantity is defined by the energy-weighted particle-flux sum:; where [equation] is the incident neutral recombination-energy flux, the subscript [equation] denotes neutral particles, [equation] indexes neutral species, and [equation] indexes their internal states.; The quantity [equation] is the incident particle flux for that species and state in the recombination channel, and [equation] is its particle-flux-weighted mean recombination-associated energy per arriving neutral.; The incident neutral particle flux at the wall due to recombination counts the corresponding arriving neutral population without energy weighting.; For matching population and channel scopes, the net energy flux received by the wall equals incident minus emitted; this quantity supplies only the incident-neutral term.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The quantity is defined by the energy-weighted particle-flux sum:; where [equation] is the incident neutral recombination-energy flux, the subscript [equation] denotes neutral particles, [equation] indexes neutral species, and [equation] indexes their internal states.; The quantity [equation] is the incident particle flux for that species and state in the recombination channel, and [equation] is its particle-flux-weighted mean recombination-associated energy per arriving neutral.; The incident neutral particle flux at the wall due to recombination counts the corresponding arriving neutral population without energy weighting.; For matching population and channel scopes, the net energy flux received by the wall equals incident minus emitted; this quantity supplies only the incident-neutral term.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 22:13:02",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:72",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The incident neutral energy flux is the sum of incident particle fluxes weighted by their mean recombination-associated energy:; where [equation] is this incident neutral energy flux, [equation] denotes neutral particles, [equation] indexes neutral species, and [equation] indexes neutral internal states.; The quantity [equation] is the incident particle flux for species [equation] and state [equation] in the recombination channel; the superscripts [equation] and [equation] denote the incident direction and recombination-associated channel, respectively.; The quantity [equation] is the particle-flux-weighted mean recombination-associated energy per arriving neutral of species [equation] and state [equation].; This is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the corresponding arriving neutral population without energy weighting.; For matching population and channel scopes, the net energy flux received by the wall is the incident contribution minus the emitted contribution; this quantity supplies only the incident-neutral term.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The incident neutral energy flux is the sum of incident particle fluxes weighted by their mean recombination-associated energy:; where [equation] is this incident neutral energy flux, [equation] denotes neutral particles, [equation] indexes neutral species, and [equation] indexes neutral internal states.; The quantity [equation] is the incident particle flux for species [equation] and state [equation] in the recombination channel; the superscripts [equation] and [equation] denote the incident direction and recombination-associated channel, respectively.; The quantity [equation] is the particle-flux-weighted mean recombination-associated energy per arriving neutral of species [equation] and state [equation].; This is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the corresponding arriving neutral population without energy weighting.; For matching population and channel scopes, the net energy flux received by the wall is the incident contribution minus the emitted contribution; this quantity supplies only the incident-neutral term.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 22:18:18",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:696",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The incident neutral energy flux is the sum over neutral species and internal states of incident particle flux weighted by the mean recombination-associated energy per arriving neutral:; where [equation] is the incident neutral energy flux due to recombination, [equation] denotes neutral particles, [equation] indexes neutral species, and [equation] indexes neutral internal states.; The quantity [equation] is the incident particle flux of recombination-channel neutrals of species [equation] and state [equation], with \u201cinc\u201d denoting the incident direction and \u201crec\u201d denoting the recombination-associated channel.; The quantity [equation] is the particle-flux-weighted mean recombination-associated energy per arriving neutral of species [equation] and state [equation].; It excludes emitted neutral contributions, ion-carried energy, and other energy-transfer channels.; This is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the corresponding arriving neutral population without energy weighting.; For matching population and channel scopes, the net energy flux received by the wall is the incident contribution minus the emitted contribution; this quantity supplies only the incident-neutral term.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material surface.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The incident neutral energy flux is the sum over neutral species and internal states of incident particle flux weighted by the mean recombination-associated energy per arriving neutral:; where [equation] is the incident neutral energy flux due to recombination, [equation] denotes neutral particles, [equation] indexes neutral species, and [equation] indexes neutral internal states.; The quantity [equation] is the incident particle flux of recombination-channel neutrals of species [equation] and state [equation], with \u201cinc\u201d denoting the incident direction and \u201crec\u201d denoting the recombination-associated channel.; The quantity [equation] is the particle-flux-weighted mean recombination-associated energy per arriving neutral of species [equation] and state [equation].; It excludes emitted neutral contributions, ion-carried energy, and other energy-transfer channels.; This is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the corresponding arriving neutral population without energy weighting.; For matching population and channel scopes, the net energy flux received by the wall is the incident contribution minus the emitted contribution; this quantity supplies only the incident-neutral term.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material surface.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 22:21:44",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:872",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The incident neutral energy flux is the sum over neutral species and internal states of the incident particle flux weighted by the mean recombination-associated energy per arriving neutral:; where [equation] is the neutral energy flux at the wall due to recombination, the subscript [equation] denotes the neutral-particle channel, [equation] indexes neutral species, and [equation] indexes neutral internal states.; The quantity [equation] is the incident particle flux of recombination-channel neutrals of species [equation] and state [equation], with \"inc\" denoting the incident wall-crossing direction and \"rec\" denoting the recombination-associated channel.; The quantity [equation] is the particle-flux-weighted mean recombination-associated energy per arriving neutral of species [equation] and state [equation].; It excludes emitted neutral contributions, ion-carried energy flux, photon or radiation energy flux, and the subsequent partition of incident energy into wall heating, reflection, or re-emission.; This quantity is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the corresponding arriving neutral population without energy weighting.; It is the neutral-channel parallel of the incident ion energy flux at the wall due to recombination, which carries the recombination-associated energy of incident ions rather than incident neutrals.; For matching population and channel scopes, the net energy flux received by the wall is the incident contribution minus the emitted contribution; this quantity supplies only the incident-neutral term.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material surface.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The incident neutral energy flux is the sum over neutral species and internal states of the incident particle flux weighted by the mean recombination-associated energy per arriving neutral:; where [equation] is the neutral energy flux at the wall due to recombination, the subscript [equation] denotes the neutral-particle channel, [equation] indexes neutral species, and [equation] indexes neutral internal states.; The quantity [equation] is the incident particle flux of recombination-channel neutrals of species [equation] and state [equation], with \"inc\" denoting the incident wall-crossing direction and \"rec\" denoting the recombination-associated channel.; The quantity [equation] is the particle-flux-weighted mean recombination-associated energy per arriving neutral of species [equation] and state [equation].; It excludes emitted neutral contributions, ion-carried energy flux, photon or radiation energy flux, and the subsequent partition of incident energy into wall heating, reflection, or re-emission.; This quantity is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the corresponding arriving neutral population without energy weighting.; It is the neutral-channel parallel of the incident ion energy flux at the wall due to recombination, which carries the recombination-associated energy of incident ions rather than incident neutrals.; For matching population and channel scopes, the net energy flux received by the wall is the incident contribution minus the emitted contribution; this quantity supplies only the incident-neutral term.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material surface.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 22:22:23",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:946",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The local incident energy flux is defined by:; where [equation] is the incident neutral energy flux attributed to recombination, [equation] is the cumulative incoming energy attributed to that channel, [equation] is wall area, and [equation] is time.; The subscript [equation] denotes the neutral channel, while the superscripts [equation] and [equation] denote incidence and recombination attribution.; It is a local energy flux, not a wall-integrated power, and excludes ion-carried and radiative contributions.; Unlike the incident neutral particle flux due to recombination, it accounts for the energy carried by incoming particles rather than their number; it does not denote the total kinetic-energy flux of incident neutrals.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The local incident energy flux is defined by:; where [equation] is the incident neutral energy flux attributed to recombination, [equation] is the cumulative incoming energy attributed to that channel, [equation] is wall area, and [equation] is time.; The subscript [equation] denotes the neutral channel, while the superscripts [equation] and [equation] denote incidence and recombination attribution.; It is a local energy flux, not a wall-integrated power, and excludes ion-carried and radiative contributions.; Unlike the incident neutral particle flux due to recombination, it accounts for the energy carried by incoming particles rather than their number; it does not denote the total kinetic-energy flux of incident neutrals.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 22:26:55",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:1410",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The local incident energy flux is defined by:; where [equation] is the incident neutral energy flux attributed to recombination, [equation] is the cumulative incoming energy attributed to that channel, [equation] is wall area, and [equation] is time.; The subscript [equation] denotes the neutral channel; the superscripts [equation] and [equation] denote incidence and recombination attribution.; The quantity applies to incoming neutral particles carrying recombination-associated energy and is summed over neutral species and internal states, with neither resolution retained.; It is a local flux, not a wall-integrated power, and excludes ion-carried and radiative contributions, as well as outgoing neutral energy.; It is not the total kinetic-energy flux of all incident neutrals; only the recombination-attributed contribution is represented.; This is the energy-weighted counterpart of incident neutral particle flux at the wall due to recombination, which counts the incoming particles in the same channel without weighting by their carried energy.; It is directionally distinct from neutral particle flux at the wall due to recombination, which describes outgoing neutral products, and is restricted to recombination attribution unlike neutral energy flux at the wall.; This neutral-carried incident contribution is part of the broader energy flux at the wall due to recombination, which covers incident and outgoing contributions without selecting a direction; incident ion energy flux at the wall due to recombination describes the corresponding ion-carried incident channel.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The local incident energy flux is defined by:; where [equation] is the incident neutral energy flux attributed to recombination, [equation] is the cumulative incoming energy attributed to that channel, [equation] is wall area, and [equation] is time.; The subscript [equation] denotes the neutral channel; the superscripts [equation] and [equation] denote incidence and recombination attribution.; The quantity applies to incoming neutral particles carrying recombination-associated energy and is summed over neutral species and internal states, with neither resolution retained.; It is a local flux, not a wall-integrated power, and excludes ion-carried and radiative contributions, as well as outgoing neutral energy.; It is not the total kinetic-energy flux of all incident neutrals; only the recombination-attributed contribution is represented.; This is the energy-weighted counterpart of incident neutral particle flux at the wall due to recombination, which counts the incoming particles in the same channel without weighting by their carried energy.; It is directionally distinct from neutral particle flux at the wall due to recombination, which describes outgoing neutral products, and is restricted to recombination attribution unlike neutral energy flux at the wall.; This neutral-carried incident contribution is part of the broader energy flux at the wall due to recombination, which covers incident and outgoing contributions without selecting a direction; incident ion energy flux at the wall due to recombination describes the corresponding ion-carried incident channel.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 22:31:14",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:1884",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The local incident energy flux is defined by:; where [equation] is the incident neutral energy flux attributed to recombination, [equation] is the cumulative incoming energy attributed to recombination in the neutral channel, the subscript [equation] identifies the neutral channel, the superscript [equation] denotes incidence, and [equation] denotes recombination attribution.; The position [equation] is a location on the wall, [equation] is wall area, and [equation] is time.; It is not the total kinetic-energy flux of all incident neutrals; only the recombination-attributed contribution is represented.; This is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the same incoming neutral population without weighting by its carried energy.; It is directionally distinct from the neutral particle flux at the wall due to recombination, which describes outgoing neutral products, and narrower than neutral energy flux at the wall, because it selects only the incident, recombination-attributed contribution.; This neutral-carried incident contribution is part of the broader energy flux at the wall due to recombination, which covers incident and outgoing contributions without selecting a direction; the incident ion energy flux at the wall due to recombination describes the corresponding ion-carried incident channel.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material surface.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The local incident energy flux is defined by:; where [equation] is the incident neutral energy flux attributed to recombination, [equation] is the cumulative incoming energy attributed to recombination in the neutral channel, the subscript [equation] identifies the neutral channel, the superscript [equation] denotes incidence, and [equation] denotes recombination attribution.; The position [equation] is a location on the wall, [equation] is wall area, and [equation] is time.; It is not the total kinetic-energy flux of all incident neutrals; only the recombination-attributed contribution is represented.; This is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the same incoming neutral population without weighting by its carried energy.; It is directionally distinct from the neutral particle flux at the wall due to recombination, which describes outgoing neutral products, and narrower than neutral energy flux at the wall, because it selects only the incident, recombination-attributed contribution.; This neutral-carried incident contribution is part of the broader energy flux at the wall due to recombination, which covers incident and outgoing contributions without selecting a direction; the incident ion energy flux at the wall due to recombination describes the corresponding ion-carried incident channel.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material surface.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "neutral_energy_flux_at_wall_due_to_recombination",
+        "ts": "2026-10-20 22:35:14",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:2214",
+        "is_contradiction": true,
+        "note": "contradicts source: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values: contradicts source: The local incident energy flux is defined by:; where [equation] is the incident neutral energy flux attributed to recombination, [equation] is the cumulative incoming energy carried by recombination-associated neutral particles, [equation] is wall area, and [equation] is time.; It represents only the recombination-attributed contribution, not the total kinetic-energy flux of all incident neutrals, and it excludes ion-carried energy flux, photon or radiation energy flux, outgoing neutral recombination products, and the subsequent partition of the incident energy into wall heating, reflection, or re-emission.; This quantity is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the same incoming neutral population without weighting by the energy each particle carries.; It is directionally distinct from the neutral particle flux at the wall due to recombination, which describes outgoing neutral products, and narrower than the neutral energy flux at the wall, because it selects only the recombination-attributed contribution.; It is the neutral-carried incident component of the broader energy flux at the wall due to recombination, which covers incident and outgoing contributions without selecting a direction; the incident ion energy flux at the wall due to recombination describes the corresponding ion-carried incident channel, and the ion energy flux at the wall due to recombination describes the outgoing ion-associated channel.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material surface.; DD: One scalar value is provided per element in the grid subset.",
+        "entries": [
+          {
+            "source_path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+            "claim": "The local incident energy flux is defined by:; where [equation] is the incident neutral energy flux attributed to recombination, [equation] is the cumulative incoming energy carried by recombination-associated neutral particles, [equation] is wall area, and [equation] is time.; It represents only the recombination-attributed contribution, not the total kinetic-energy flux of all incident neutrals, and it excludes ion-carried energy flux, photon or radiation energy flux, outgoing neutral recombination products, and the subsequent partition of the incident energy into wall heating, reflection, or re-emission.; This quantity is the energy-weighted counterpart of the incident neutral particle flux at the wall due to recombination, which counts the same incoming neutral population without weighting by the energy each particle carries.; It is directionally distinct from the neutral particle flux at the wall due to recombination, which describes outgoing neutral products, and narrower than the neutral energy flux at the wall, because it selects only the recombination-attributed contribution.; It is the neutral-carried incident component of the broader energy flux at the wall due to recombination, which covers incident and outgoing contributions without selecting a direction; the incident ion energy flux at the wall due to recombination describes the corresponding ion-carried incident channel, and the ion energy flux at the wall due to recombination describes the outgoing ion-associated channel.; Sign convention: Positive when neutral particles carrying recombination-associated energy cross the plasma-facing surface from the plasma-facing volume toward the material surface.",
+            "dd_text": "One scalar value is provided per element in the grid subset."
+          }
+        ]
+      },
+      {
+        "name": "gap_at_outboard_midplane",
+        "ts": "2026-10-20 23:22:43",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:4805",
+        "is_contradiction": true,
+        "note": "contradicts source: summary/boundary/distance_inner_outer_separatrices/value: contradicts source: where [equation] is the gap, [equation] and [equation] are the major-radius coordinates of the outer and inner separatrix intersections at this locus, respectively.; The intersections are represented by the outboard-midplane separatrix.; DD: Value",
+        "entries": [
+          {
+            "source_path": "summary/boundary/distance_inner_outer_separatrices/value",
+            "claim": "where [equation] is the gap, [equation] and [equation] are the major-radius coordinates of the outer and inner separatrix intersections at this locus, respectively.; The intersections are represented by the outboard-midplane separatrix.",
+            "dd_text": "Value"
+          }
+        ]
+      },
+      {
+        "name": "radial_separatrix_distance_at_outboard_midplane",
+        "ts": "2026-10-22 20:15:19",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:8752",
+        "is_contradiction": true,
+        "note": "contradicts source: thomson_scattering/channel/distance_separatrix_midplane: contradicts source: The offset vanishes on the separatrix and is negative inside it.; DD: Distance between the measurement position and the separatrix, mapped along flux surfaces to the outboard midplane, in the major radius direction. Positive value means the measurement is outside of the separatrix.",
+        "entries": [
+          {
+            "source_path": "thomson_scattering/channel/distance_separatrix_midplane",
+            "claim": "The offset vanishes on the separatrix and is negative inside it.",
+            "dd_text": "Distance between the measurement position and the separatrix, mapped along flux surfaces to the outboard midplane, in the major radius direction. Positive value means the measurement is outside of the separatrix."
+          }
+        ]
+      },
+      {
+        "name": "radial_coordinate_at_outboard_midplane",
+        "ts": "2026-10-22 20:24:35",
+        "log": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log:9016",
+        "is_contradiction": true,
+        "note": "contradicts source: equilibrium/time_slice/profiles_1d/r_outboard: contradicts source: Without that symmetry, the surface's maximum-major-radius point may lie at a different height; when it does, the value at magnetic-axis height is not the outboard-midplane value.; DD: Radial coordinate (major radius) on the outboard side of the magnetic axis",
+        "entries": [
+          {
+            "source_path": "equilibrium/time_slice/profiles_1d/r_outboard",
+            "claim": "Without that symmetry, the surface's maximum-major-radius point may lie at a different height; when it does, the value at magnetic-axis height is not the outboard-midplane value.",
+            "dd_text": "Radial coordinate (major radius) on the outboard side of the magnetic axis"
+          }
+        ]
+      }
+    ],
+    "names_present_in_graph": 10
+  },
+  "control_absent_name_present": 0,
+  "per_name": {
+    "electrostatic_potential": {
+      "node": {
+        "id": "electrostatic_potential",
+        "docs_stage": "reviewed",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 0.849,
+        "docs_chain_length": 0,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 0.9125,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-10-17T21:14:39.155Z",
+        "harmonized_group_signature": "b1bcdfe53efc602529617a773520c9f3620cf984dba9a0f2bab910f0b64ecc6a",
+        "comments_per_dim_docs": "{\"description_quality\": \"The trailing phrase \\u201cincluding ... floating ... representations\\u201d blurs the distinct zero-net-current specialization of `floating_electrostatic_potential` with ordinary locus, aggregation, or complex-representation variants.\", \"documentation_quality\": null, \"completeness\": \"The body discusses wall and probe loci but omits explicit `name:` cross-references to accepted family members `electrostatic_potential_at_wall` and `electrostatic_potential_at_langmuir_probe_position`, despite using explicit links for `floating_electrostatic_potential` and `electrostatic_potential_real_part`.\", \"physics_accuracy\": null, \"contradicts_source\": \"contradicts source: plasma_profiles/profiles_1d/phi_potential: The quantity has no mandatory locus or aggregation.; DD: Electrostatic potential, averaged on the magnetic flux surface | edge_profiles/profiles_1d/phi_potential: The quantity has no mandatory locus or aggregation.; DD: Electrostatic potential, averaged on the magnetic flux surface\"}"
+      },
+      "review_groups": [
+        {
+          "group_id": "5366049f-c385-4065-a733-9102d4fdf208",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 17, \"documentation_quality\": 18, \"completeness\": 16, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.8375,
+              "dims": "{\"description_quality\": 17, \"documentation_quality\": 16, \"completeness\": 15, \"physics_accuracy\": 19}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.875,
+          "reviewed_at": "2026-07-20T11:28:21.745912Z"
+        },
+        {
+          "group_id": "93bccd14-c1b5-4725-bc49-b24a254ac4d5",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.8875,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 18, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 15, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.8125,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.8125,
+          "primary_score": 0.8875,
+          "reviewed_at": "2026-10-17T20:50:15.882907Z"
+        },
+        {
+          "group_id": "ea4f6b92-1905-4990-ad1d-c3cdeae7432e",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.95,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 20, \"completeness\": 16, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 20, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 20, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.9375,
+          "primary_score": 0.95,
+          "reviewed_at": "2026-10-17T20:55:22.879776Z"
+        },
+        {
+          "group_id": "062b1dec-273e-4446-959a-5ce184b58d26",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.6875,
+              "dims": "{\"description_quality\": 10, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 15}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 20, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 20, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.875,
+          "primary_score": 0.6875,
+          "reviewed_at": "2026-10-17T21:14:32.339227Z"
+        }
+      ]
+    },
+    "gap_at_outboard_midplane": {
+      "node": {
+        "id": "gap_at_outboard_midplane",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 0.875,
+        "docs_chain_length": 0,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 0.91875,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-10-22T18:43:15.903Z",
+        "harmonized_group_signature": null,
+        "comments_per_dim_docs": "{\"description_quality\": null, \"documentation_quality\": \"The opening, equation-first structure, and symbol g parallel `gap_at_closest_wall_point`, but the closing paragraph repeats the locus definition and includes the editorial instruction \\u201cFor a value at the separatrix intersection use\\u2026\\u201d rather than quantity-specific normative prose.\", \"completeness\": \"The selected convention requires a link to the outboard-midplane concept, which is missing despite correctly formatted links to `gap_at_closest_wall_point` and `radial_separatrix_distance_at_outboard_midplane`.\", \"physics_accuracy\": null}"
+      },
+      "review_groups": [
+        {
+          "group_id": "d6617553-5232-441e-bb7d-500014121bb5",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.775,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 9, \"completeness\": 16, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.8375,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 13, \"completeness\": 17, \"physics_accuracy\": 19}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.775,
+          "reviewed_at": "2026-08-11T11:00:40.765523Z"
+        },
+        {
+          "group_id": "af927e4e-68b9-4790-9c26-521bad2399e9",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.6375,
+              "dims": "{\"description_quality\": 17, \"documentation_quality\": 13, \"completeness\": 16, \"physics_accuracy\": 5}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.825,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 16, \"completeness\": 18, \"physics_accuracy\": 17}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.5875,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 13, \"completeness\": 14, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.5875,
+          "primary_score": 0.6375,
+          "reviewed_at": "2026-08-11T14:28:50.647347Z"
+        },
+        {
+          "group_id": "4386f25e-790d-4429-ab37-c108524bf7b6",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.8625,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 17, \"completeness\": 16, \"physics_accuracy\": 18}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9625,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 20, \"completeness\": 19, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.8625,
+          "reviewed_at": "2026-08-11T14:43:04.567619Z"
+        },
+        {
+          "group_id": "6125326a-e348-465d-bb64-eb2c73460641",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.8875,
+              "dims": "{\"description_quality\": 19, \"documentation_quality\": 18, \"completeness\": 15, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 19, \"documentation_quality\": 19, \"completeness\": 17, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.8875,
+          "reviewed_at": "2026-08-22T12:19:49.793219Z"
+        },
+        {
+          "group_id": "db8734cc-606a-40f5-aaca-115de3873c08",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.975,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 19, \"completeness\": 19, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 1.0,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 20, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.975,
+          "reviewed_at": "2026-08-24T21:14:30.327608Z"
+        },
+        {
+          "group_id": "1d4e97d0-a8c1-447a-9604-5d3b77b2d095",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.65,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 12, \"physics_accuracy\": 10}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.75,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 15}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.75,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 15}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.75,
+          "primary_score": 0.65,
+          "reviewed_at": "2026-10-17T21:27:17.30771Z"
+        },
+        {
+          "group_id": "d23dbe25-d830-49fb-ad8f-9df5e978a9ce",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.775,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 14, \"completeness\": 18, \"physics_accuracy\": 10}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.75,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 15}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.8125,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 15}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.8125,
+          "primary_score": 0.775,
+          "reviewed_at": "2026-10-17T21:32:24.012719Z"
+        },
+        {
+          "group_id": "4338bc5a-680b-4889-804c-d3fee2c747f2",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.7875,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 18, \"physics_accuracy\": 10}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.8125,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 15}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.8125,
+          "primary_score": 0.7875,
+          "reviewed_at": "2026-10-17T21:38:26.21611Z"
+        },
+        {
+          "group_id": "891210ff-1173-4b32-9ef8-33a1a05d0234",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.6625,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 10}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.8125,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.75,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 15}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.75,
+          "primary_score": 0.6625,
+          "reviewed_at": "2026-10-17T21:43:23.126626Z"
+        },
+        {
+          "group_id": "d223053f-170a-4ca2-b5d7-82dc8e56cb2f",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 20, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.375,
+              "dims": "{\"description_quality\": 5, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "score": 0.375,
+              "dims": "{\"description_quality\": 5, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.375,
+          "primary_score": 0.9375,
+          "reviewed_at": "2026-10-20T21:04:42.618794Z"
+        },
+        {
+          "group_id": null,
+          "panels": [
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            },
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            },
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            },
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            },
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            },
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            }
+          ],
+          "resolution_method": "cascade_route",
+          "authoritative_score": null,
+          "primary_score": null,
+          "reviewed_at": "2026-10-20T21:04:42.896763Z"
+        },
+        {
+          "group_id": "6d4fb1a7-1400-430b-b4df-683be6b4cfb6",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 18, \"completeness\": 17, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.6875,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 15}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "score": 0.5625,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.5625,
+          "primary_score": 0.9375,
+          "reviewed_at": "2026-10-20T21:22:40.88014Z"
+        },
+        {
+          "group_id": "b3346bc9-a2a9-4a69-a9cf-afda7df6ab1f",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.5,
+              "dims": "{\"description_quality\": 17, \"documentation_quality\": 8, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.5,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.5,
+          "reviewed_at": "2026-10-20T21:26:35.912732Z"
+        },
+        {
+          "group_id": "1ec167f8-b8ca-4e0f-b229-085fb6e535ea",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.5625,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.5,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "score": 0.5625,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.5625,
+          "primary_score": 0.5625,
+          "reviewed_at": "2026-10-21T03:43:58.478283Z"
+        },
+        {
+          "group_id": "b7e8c615-d3b0-49eb-bfd3-93db8705f1ff",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.975,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 18, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.975,
+          "reviewed_at": "2026-10-22T14:27:08.60953Z"
+        },
+        {
+          "group_id": "72d6fc03-04ed-46ff-a297-fcfa6e8c46db",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.95,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 16, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.75,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.875,
+          "primary_score": 0.95,
+          "reviewed_at": "2026-10-22T18:43:13.093744Z"
+        }
+      ]
+    },
+    "ion_charge_state_energy_flux_at_wall_due_to_recombination": {
+      "node": {
+        "id": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 0.95,
+        "docs_chain_length": 1,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 0.89375,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-07-21T12:19:09.59Z",
+        "harmonized_group_signature": "f36271598ee3e229ab091e59d021b5689a5b3d86f127c6331730c6ad086e43bd",
+        "comments_per_dim_docs": "{\"description_quality\": null, \"documentation_quality\": \"Slightly loose counterpart claim pairs this charge-state-resolved flux with unresolved particle_flux_at_wall_due_to_recombination; otherwise equation style and section structure match accepted sibling ion_energy_flux_at_wall_due_to_recombination.\", \"completeness\": \"Hierarchy links to ion_energy_flux_at_wall_due_to_recombination and energy_flux_at_wall_due_to_recombination are present; the particle-flux cross-ref targets the unresolved parent rather than a charge-state-resolved twin.\", \"physics_accuracy\": null}"
+      },
+      "review_groups": [
+        {
+          "group_id": "5e3f5b61-4ffa-4317-8a05-d261c17c1aba",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.8875,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 17, \"completeness\": 17, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.6375,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 13, \"completeness\": 16, \"physics_accuracy\": 7}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.6375,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 14, \"completeness\": 14, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.6375,
+          "primary_score": 0.8875,
+          "reviewed_at": "2026-07-21T12:15:04.499479Z"
+        },
+        {
+          "group_id": "9ab3b6f5-5d8f-42fc-b332-50cb082a4411",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.925,
+              "dims": "{\"description_quality\": 19, \"documentation_quality\": 18, \"completeness\": 18, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.975,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 19, \"completeness\": 19, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.925,
+          "reviewed_at": "2026-07-21T12:19:09.573124Z"
+        }
+      ]
+    },
+    "neutral_energy_flux_at_wall_due_to_recombination": {
+      "node": {
+        "id": "neutral_energy_flux_at_wall_due_to_recombination",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 0.96875,
+        "docs_chain_length": 1,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 0.925,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-08-25T02:38:30.955Z",
+        "harmonized_group_signature": "f36271598ee3e229ab091e59d021b5689a5b3d86f127c6331730c6ad086e43bd",
+        "comments_per_dim_docs": "{\"description_quality\": \"Slight verb-phrase drift from the accepted ion-family template on ion_energy_flux_at_wall_due_to_recombination ('produced when\\u2026 recombine' vs 'carried by\\u2026 associated with'), though justified by the incident-neutral physics.\", \"documentation_quality\": null, \"completeness\": \"Omits an explicit contrast link to the broader kinetic neighbour neutral_energy_flux_at_wall that vector-similar wall energy-flux names often supply.\", \"physics_accuracy\": null}"
+      },
+      "review_groups": [
+        {
+          "group_id": "ff90fbe4-67db-4d54-82ed-f7436e619708",
+          "panels": [
+            {
+              "model": "openrouter/qwen/qwen3.7-max",
+              "score": 0.4875,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 8, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/minimax/minimax-m3",
+              "score": 0.7,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 14, \"completeness\": 14, \"physics_accuracy\": 12}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.3625,
+              "dims": "{\"description_quality\": 11, \"documentation_quality\": 6, \"completeness\": 8, \"physics_accuracy\": 4}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.3625,
+          "primary_score": 0.4875,
+          "reviewed_at": "2026-06-22T23:24:28.123663Z"
+        },
+        {
+          "group_id": "5b071dae-c6d8-4b7d-8c7a-a907087ca7d4",
+          "panels": [
+            {
+              "model": "openrouter/qwen/qwen3.7-max",
+              "score": 0.9625,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 19, \"completeness\": 18, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/minimax/minimax-m3",
+              "score": 0.75,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 16, \"completeness\": 16, \"physics_accuracy\": 12}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.9,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 18, \"completeness\": 17, \"physics_accuracy\": 17}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.9,
+          "primary_score": 0.9625,
+          "reviewed_at": "2026-06-23T00:33:38.23997Z"
+        },
+        {
+          "group_id": "fc63acae-47b4-48fb-8e5a-a1699747c576",
+          "panels": [
+            {
+              "model": "openrouter/qwen/qwen3.7-max",
+              "score": 0.2375,
+              "dims": "{\"description_quality\": 4, \"documentation_quality\": 3, \"completeness\": 10, \"physics_accuracy\": 2}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/minimax/minimax-m3",
+              "score": 0.5875,
+              "dims": "{\"description_quality\": 14, \"documentation_quality\": 12, \"completeness\": 13, \"physics_accuracy\": 8}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.4625,
+              "dims": "{\"description_quality\": 12, \"documentation_quality\": 9, \"completeness\": 12, \"physics_accuracy\": 4}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.4625,
+          "primary_score": 0.2375,
+          "reviewed_at": "2026-07-03T04:04:24.441857Z"
+        },
+        {
+          "group_id": "a7cbce8a-0746-4d6d-8c13-26cd40dd4f6b",
+          "panels": [
+            {
+              "model": "openrouter/qwen/qwen3.7-max",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 18, \"completeness\": 18, \"physics_accuracy\": 16}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/minimax/minimax-m3",
+              "score": 0.7125,
+              "dims": "{\"description_quality\": 13, \"documentation_quality\": 14, \"completeness\": 16, \"physics_accuracy\": 14}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.9125,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 18, \"completeness\": 18, \"physics_accuracy\": 19}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.9125,
+          "primary_score": 0.875,
+          "reviewed_at": "2026-07-03T04:08:18.196938Z"
+        },
+        {
+          "group_id": "e0ba00e4-da83-47a8-a830-5a2d5afac34d",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.125,
+              "dims": "{\"description_quality\": 2, \"documentation_quality\": 2, \"completeness\": 4, \"physics_accuracy\": 2}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.2125,
+              "dims": "{\"description_quality\": 4, \"documentation_quality\": 3, \"completeness\": 8, \"physics_accuracy\": 2}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.125,
+          "reviewed_at": "2026-08-11T10:35:29.520627Z"
+        },
+        {
+          "group_id": "3a63754f-5158-4725-b4a6-f50f3bc302f7",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.9125,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 17, \"completeness\": 16, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 17, \"completeness\": 18, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.9125,
+          "reviewed_at": "2026-08-11T14:42:44.838329Z"
+        },
+        {
+          "group_id": "8366f43a-5c65-4e89-a603-26e050cb26c4",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.7125,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 14, \"completeness\": 13, \"physics_accuracy\": 14}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.825,
+              "dims": "{\"description_quality\": 17, \"documentation_quality\": 16, \"completeness\": 15, \"physics_accuracy\": 18}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.7625,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 15, \"completeness\": 14, \"physics_accuracy\": 16}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.7625,
+          "primary_score": 0.7125,
+          "reviewed_at": "2026-08-25T02:34:58.209078Z"
+        },
+        {
+          "group_id": "cbaa8c75-dcc4-44ea-bb50-9e413ba46ee7",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.9625,
+              "dims": "{\"description_quality\": 19, \"documentation_quality\": 19, \"completeness\": 20, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.975,
+              "dims": "{\"description_quality\": 19, \"documentation_quality\": 20, \"completeness\": 19, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.9625,
+          "reviewed_at": "2026-08-25T02:38:30.933104Z"
+        }
+      ]
+    },
+    "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift": {
+      "node": {
+        "id": "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 1.0,
+        "docs_chain_length": 2,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 0.95,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-09-14T19:33:00.061Z",
+        "harmonized_group_signature": null,
+        "comments_per_dim_docs": "{\"description_quality\": null, \"documentation_quality\": null, \"completeness\": null, \"physics_accuracy\": null}"
+      },
+      "review_groups": [
+        {
+          "group_id": "95dd5dfe-9963-41cb-9d1f-74c97c1f6394",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.925,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 16, \"completeness\": 18, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.625,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 15}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.875,
+          "primary_score": 0.925,
+          "reviewed_at": "2026-09-10T04:50:19.454711Z"
+        },
+        {
+          "group_id": "87faaab2-a161-44d4-be74-e5c333e7ce70",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.7875,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 15, \"completeness\": 16, \"physics_accuracy\": 16}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.5,
+              "dims": "{\"description_quality\": 10, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-5.5",
+              "score": 0.5,
+              "dims": "{\"description_quality\": 10, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.5,
+          "primary_score": 0.7875,
+          "reviewed_at": "2026-09-14T10:02:07.298559Z"
+        },
+        {
+          "group_id": "2e3ea670-7363-4546-861a-6b9397a3e26c",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.975,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 20, \"completeness\": 18, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 1.0,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 20, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.975,
+          "reviewed_at": "2026-09-14T19:29:36.946121Z"
+        },
+        {
+          "group_id": "3122ab8d-1b38-442e-9c2b-72a2a93c0563",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 1.0,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 20, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 1.0,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 20, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 1.0,
+          "reviewed_at": "2026-09-14T19:33:00.030576Z"
+        }
+      ]
+    },
+    "radial_coordinate_at_outboard_midplane": {
+      "node": {
+        "id": "radial_coordinate_at_outboard_midplane",
+        "docs_stage": "drafted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": null,
+        "docs_chain_length": 2,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 0.9875,
+        "origin": "pipeline",
+        "reviewed_docs_at": null,
+        "harmonized_group_signature": null,
+        "comments_per_dim_docs": null
+      },
+      "review_groups": [
+        {
+          "group_id": "7e1f6478-a6a4-49f8-85c4-b1485e9054d8",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.8625,
+              "dims": "{\"description_quality\": 17, \"documentation_quality\": 17, \"completeness\": 18, \"physics_accuracy\": 17}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.8875,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 17, \"completeness\": 18, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.8625,
+          "reviewed_at": "2026-08-11T11:14:10.823182Z"
+        },
+        {
+          "group_id": "5941a0d1-ed53-4d4c-bb39-2f57e58af06f",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.9625,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 18, \"completeness\": 19, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9625,
+              "dims": "{\"description_quality\": 19, \"documentation_quality\": 19, \"completeness\": 19, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.9625,
+          "reviewed_at": "2026-08-24T21:16:37.958874Z"
+        },
+        {
+          "group_id": "2a3b3186-f33d-4f13-b9b8-4e331ff94a1c",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.8375,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 14, \"completeness\": 16, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.5625,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 10}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.875,
+          "primary_score": 0.8375,
+          "reviewed_at": "2026-10-22T18:24:31.151207Z"
+        },
+        {
+          "group_id": null,
+          "panels": [
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            },
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            }
+          ],
+          "resolution_method": "cascade_route",
+          "authoritative_score": null,
+          "primary_score": null,
+          "reviewed_at": "2026-10-22T18:24:31.238975Z"
+        },
+        {
+          "group_id": "8b2fd0f5-cab1-45ad-8ef1-57edfa42b126",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.425,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 6, \"completeness\": 8, \"physics_accuracy\": 5}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.5625,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 10}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "score": 0.5625,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 10, \"physics_accuracy\": 5}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.5625,
+          "primary_score": 0.425,
+          "reviewed_at": "2026-10-22T18:36:30.132048Z"
+        }
+      ]
+    },
+    "radial_separatrix_distance_at_outboard_midplane": {
+      "node": {
+        "id": "radial_separatrix_distance_at_outboard_midplane",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 0.94375,
+        "docs_chain_length": 1,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 1.0,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-10-22T18:18:39.504Z",
+        "harmonized_group_signature": null,
+        "comments_per_dim_docs": "{\"description_quality\": null, \"documentation_quality\": \"Trailing paragraph restates the full outboard_midplane concept definition and max-R equation after the body already links name:outboard_midplane, violating the selected concept equation-placement convention (link, do not re-define).\", \"completeness\": null, \"physics_accuracy\": null}"
+      },
+      "review_groups": [
+        {
+          "group_id": "05418c3d-73df-4bcf-90c4-3588b91ad994",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 18, \"completeness\": 19, \"physics_accuracy\": 18}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.9375,
+          "reviewed_at": "2026-10-20T21:21:50.961729Z"
+        },
+        {
+          "group_id": null,
+          "panels": [
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            },
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            },
+            {
+              "model": "typesafe/jev-1.13",
+              "score": null,
+              "dims": "{}",
+              "canonical": false,
+              "cycle": -1
+            }
+          ],
+          "resolution_method": "cascade_route",
+          "authoritative_score": null,
+          "primary_score": null,
+          "reviewed_at": "2026-10-20T21:21:50.98414Z"
+        },
+        {
+          "group_id": "b17c289a-a93b-48f0-a593-c5890adaec4a",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.8125,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 10, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            },
+            {
+              "model": "openrouter/openai/gpt-6.1-sol",
+              "score": 0.875,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 15, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 2
+            }
+          ],
+          "resolution_method": "authoritative_escalation",
+          "authoritative_score": 0.875,
+          "primary_score": 0.875,
+          "reviewed_at": "2026-10-22T18:15:13.880235Z"
+        },
+        {
+          "group_id": "a6d7848c-60a2-467e-9c1b-e412da96145e",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.95,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 16, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9375,
+              "dims": "{\"description_quality\": 20, \"documentation_quality\": 15, \"completeness\": 20, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.95,
+          "reviewed_at": "2026-10-22T18:18:33.655497Z"
+        }
+      ]
+    },
+    "toroidal_angle_of_control_surface": {
+      "node": {
+        "id": "toroidal_angle_of_control_surface",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 0.85625,
+        "docs_chain_length": 0,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 1.0,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-07-20T06:21:32.919Z",
+        "harmonized_group_signature": "3a3a40ddd6f0856a0f2470ef992d8b475ff5746e36422d3818b2893c902b309a",
+        "comments_per_dim_docs": "{\"description_quality\": \"Opening omits the (\\u03c6) symbol and explicit (R, \\u03c6, Z) frame token that accepted neighbours toroidal_angle and toroidal_coordinate_of_measurement_position use consistently.\", \"documentation_quality\": \"Post-equation prose assigns meanings to R and Z although neither appears in \\u03c6 = atan2(y,x); the negative 'distinct from vertical_coordinate_of_control_surface' framing is weaker than the complementary-coordinate style used by related locus quantities.\", \"completeness\": \"Equation, sign convention, and cross-refs present; could more clearly name the complementary R and Z locus coordinates of the same control surface rather than only the negative distinct-from clause.\", \"physics_accuracy\": null}"
+      },
+      "review_groups": [
+        {
+          "group_id": "16338678-c33f-456d-a01e-bbcc71391a8f",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.8875,
+              "dims": "{\"description_quality\": 17, \"documentation_quality\": 18, \"completeness\": 17, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.825,
+              "dims": "{\"description_quality\": 15, \"documentation_quality\": 15, \"completeness\": 17, \"physics_accuracy\": 19}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.8875,
+          "reviewed_at": "2026-07-20T06:21:32.898995Z"
+        }
+      ]
+    },
+    "x_coordinate_of_diagnostic_aperture": {
+      "node": {
+        "id": "x_coordinate_of_diagnostic_aperture",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 0.91875,
+        "docs_chain_length": 0,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 1.0,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-07-20T12:17:47.158Z",
+        "harmonized_group_signature": null,
+        "comments_per_dim_docs": "{\"description_quality\": \"Opening phrasing diverges from the accepted sibling template of y_coordinate_of_diagnostic_aperture ('Y coordinate of the center of a diagnostic aperture in the camera right-handed Cartesian... along its y axis') by leading with 'Signed x coordinate of the geometric center' and dropping the trailing axis clause.\", \"documentation_quality\": \"Near-publishable defining equation and sign convention; only minor gap is the cylindrical distinction remaining prose-only rather than name-linked to radial_coordinate_of_aperture / vertical_coordinate_of_diagnostic_aperture.\", \"completeness\": \"Correctly cross-references y_coordinate_of_diagnostic_aperture but omits explicit name-links to the cylindrical counterparts radial_coordinate_of_aperture and vertical_coordinate_of_diagnostic_aperture that same-path neighbours commonly surface.\", \"physics_accuracy\": null}"
+      },
+      "review_groups": [
+        {
+          "group_id": "9bbaf73b-ea5c-45b7-bb24-54118d391fff",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.8125,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 17, \"completeness\": 14, \"physics_accuracy\": 18}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.8875,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 18, \"completeness\": 17, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.8125,
+          "reviewed_at": "2026-07-20T11:54:47.576547Z"
+        },
+        {
+          "group_id": "71894fc0-5e1b-42c7-9f42-626e5e440716",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.925,
+              "dims": "{\"description_quality\": 19, \"documentation_quality\": 19, \"completeness\": 17, \"physics_accuracy\": 19}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.9125,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 19, \"completeness\": 18, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.925,
+          "reviewed_at": "2026-07-20T12:17:47.136538Z"
+        }
+      ]
+    },
+    "y_coordinate_of_diagnostic_aperture": {
+      "node": {
+        "id": "y_coordinate_of_diagnostic_aperture",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "reviewer_score_docs": 0.89375,
+        "docs_chain_length": 0,
+        "quorum_shortfall": null,
+        "reviewer_score_name": 0.99375,
+        "origin": "pipeline",
+        "reviewed_docs_at": "2026-07-20T12:56:10.942Z",
+        "harmonized_group_signature": null,
+        "comments_per_dim_docs": "{\"description_quality\": \"Opening template drifts from accepted sibling x_coordinate_of_diagnostic_aperture, which uses 'measured from the origin of its right-handed camera Cartesian (x, y, z) frame' rather than 'in the right-handed camera Cartesian (x, y, z) frame'.\", \"documentation_quality\": \"Minor prose polish only; equation, symbols, units, and sign convention are sound and align with the camera-frame sibling family.\", \"completeness\": \"Cross-ref to x_coordinate_of_diagnostic_aperture is good; omit nothing required, but family navigation would be slightly stronger with an explicit (x,y,z) triad note.\", \"physics_accuracy\": null}"
+      },
+      "review_groups": [
+        {
+          "group_id": "09b09359-d94c-402f-8a3e-660c6974a1d0",
+          "panels": [
+            {
+              "model": "openrouter/anthropic/claude-sonnet-5",
+              "score": 0.9,
+              "dims": "{\"description_quality\": 18, \"documentation_quality\": 18, \"completeness\": 16, \"physics_accuracy\": 20}",
+              "canonical": true,
+              "cycle": 0
+            },
+            {
+              "model": "openrouter/x-ai/grok-4.5",
+              "score": 0.8875,
+              "dims": "{\"description_quality\": 16, \"documentation_quality\": 18, \"completeness\": 17, \"physics_accuracy\": 20}",
+              "canonical": false,
+              "cycle": 1
+            }
+          ],
+          "resolution_method": "quorum_consensus",
+          "authoritative_score": null,
+          "primary_score": 0.9,
+          "reviewed_at": "2026-07-20T12:56:10.922301Z"
+        }
+      ]
+    }
+  },
+  "refine_predicate_readback": {
+    "c_docs_stage": true,
+    "c_score_present": true,
+    "c_score_below": true,
+    "c_chain_below": true,
+    "c_name_stage_ok": true,
+    "c_no_shortfall": true,
+    "c_score_gate": true,
+    "v_docs_stage": "reviewed",
+    "v_score": 0.849,
+    "v_chain": 0,
+    "v_shortfall": null,
+    "v_name_stage": "accepted",
+    "v_score_name": 0.9125,
+    "v_origin": "pipeline",
+    "c_docs_review_eligibility": true,
+    "eligibility_winner": [
+      {
+        "group_id": "062b1dec-273e-4446-959a-5ce184b58d26",
+        "method": null,
+        "score": 0.875,
+        "canonical": false
+      },
+      {
+        "group_id": "062b1dec-273e-4446-959a-5ce184b58d26",
+        "method": "authoritative_escalation",
+        "score": 0.875,
+        "canonical": false
+      },
+      {
+        "group_id": "062b1dec-273e-4446-959a-5ce184b58d26",
+        "method": null,
+        "score": 0.6875,
+        "canonical": true
+      },
+      {
+        "group_id": "ea4f6b92-1905-4990-ad1d-c3cdeae7432e",
+        "method": null,
+        "score": 0.95,
+        "canonical": true
+      },
+      {
+        "group_id": "ea4f6b92-1905-4990-ad1d-c3cdeae7432e",
+        "method": "authoritative_escalation",
+        "score": 0.9375,
+        "canonical": false
+      },
+      {
+        "group_id": "ea4f6b92-1905-4990-ad1d-c3cdeae7432e",
+        "method": null,
+        "score": 0.9375,
+        "canonical": false
+      },
+      {
+        "group_id": "93bccd14-c1b5-4725-bc49-b24a254ac4d5",
+        "method": null,
+        "score": 0.875,
+        "canonical": false
+      },
+      {
+        "group_id": "93bccd14-c1b5-4725-bc49-b24a254ac4d5",
+        "method": null,
+        "score": 0.8875,
+        "canonical": true
+      },
+      {
+        "group_id": "93bccd14-c1b5-4725-bc49-b24a254ac4d5",
+        "method": "authoritative_escalation",
+        "score": 0.8125,
+        "canonical": false
+      },
+      {
+        "group_id": "5366049f-c385-4065-a733-9102d4fdf208",
+        "method": null,
+        "score": 0.875,
+        "canonical": true
+      },
+      {
+        "group_id": "5366049f-c385-4065-a733-9102d4fdf208",
+        "method": "quorum_consensus",
+        "score": 0.8375,
+        "canonical": false
+      }
+    ],
+    "params": {
+      "docs_review_winning_methods": [
+        "authoritative_escalation",
+        "quorum_consensus",
+        "single_review"
+      ],
+      "docs_review_non_winning_methods": [
+        "max_cycles_reached",
+        "retry_item",
+        "semantic_similarity_gate"
+      ]
+    },
+    "min_score": 0.85,
+    "rotation_cap": 3
+  },
+  "family_plan": {
+    "physical_base": "electrostatic_potential",
+    "invariant": [
+      "electrostatic_potential",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "anchor": "electrostatic_potential_at_langmuir_probe_position",
+    "members": [
+      "electrostatic_potential",
+      "electrostatic_potential_at_langmuir_probe_position",
+      "electrostatic_potential_at_outboard_midplane",
+      "electrostatic_potential_at_wall",
+      "floating_electrostatic_potential"
+    ],
+    "n": 5,
+    "group_signature": "140b664ae8bd8cc58c0d25f8987cd18df93f7fb2a7a119be949fc751cbc3282c",
+    "harmonized": false,
+    "decision": "apply",
+    "batches": [
+      [
+        "electrostatic_potential_at_langmuir_probe_position"
+      ],
+      [
+        "electrostatic_potential",
+        "electrostatic_potential_at_outboard_midplane",
+        "electrostatic_potential_at_wall",
+        "floating_electrostatic_potential"
+      ]
+    ],
+    "planned_calls": 5,
+    "member_scores": {
+      "electrostatic_potential": 0.849,
+      "electrostatic_potential_at_wall": 0.8625,
+      "floating_electrostatic_potential": 0.9375,
+      "electrostatic_potential_at_outboard_midplane": null,
+      "electrostatic_potential_at_langmuir_probe_position": null
+    }
+  },
+  "family_anchor_state": {
+    "id": "electrostatic_potential_at_langmuir_probe_position",
+    "docs_stage": "pending",
+    "name_stage": "accepted",
+    "reviewer_score_docs": null,
+    "docs_chain_length": 2,
+    "quorum_shortfall": null,
+    "reviewer_score_name": 0.99375,
+    "origin": "pipeline",
+    "reviewed_docs_at": null,
+    "harmonized_group_signature": null,
+    "comments_per_dim_docs": null
+  },
+  "family_member_states": {
+    "electrostatic_potential": {
+      "id": "electrostatic_potential",
+      "docs_stage": "reviewed",
+      "name_stage": "accepted",
+      "reviewer_score_docs": 0.849,
+      "docs_chain_length": 0,
+      "quorum_shortfall": null,
+      "reviewer_score_name": 0.9125,
+      "origin": "pipeline",
+      "reviewed_docs_at": "2026-10-17T21:14:39.155Z",
+      "harmonized_group_signature": "b1bcdfe53efc602529617a773520c9f3620cf984dba9a0f2bab910f0b64ecc6a",
+      "comments_per_dim_docs": "{\"description_quality\": \"The trailing phrase \\u201cincluding ... floating ... representations\\u201d blurs the distinct zero-net-current specialization of `floating_electrostatic_potential` with ordinary locus, aggregation, or complex-representation variants.\", \"documentation_quality\": null, \"completeness\": \"The body discusses wall and probe loci but omits explicit `name:` cross-references to accepted family members `electrostatic_potential_at_wall` and `electrostatic_potential_at_langmuir_probe_position`, despite using explicit links for `floating_electrostatic_potential` and `electrostatic_potential_real_part`.\", \"physics_accuracy\": null, \"contradicts_source\": \"contradicts source: plasma_profiles/profiles_1d/phi_potential: The quantity has no mandatory locus or aggregation.; DD: Electrostatic potential, averaged on the magnetic flux surface | edge_profiles/profiles_1d/phi_potential: The quantity has no mandatory locus or aggregation.; DD: Electrostatic potential, averaged on the magnetic flux surface\"}"
+    },
+    "electrostatic_potential_at_langmuir_probe_position": {
+      "id": "electrostatic_potential_at_langmuir_probe_position",
+      "docs_stage": "pending",
+      "name_stage": "accepted",
+      "reviewer_score_docs": null,
+      "docs_chain_length": 2,
+      "quorum_shortfall": null,
+      "reviewer_score_name": 0.99375,
+      "origin": "pipeline",
+      "reviewed_docs_at": null,
+      "harmonized_group_signature": null,
+      "comments_per_dim_docs": null
+    },
+    "electrostatic_potential_at_outboard_midplane": {
+      "id": "electrostatic_potential_at_outboard_midplane",
+      "docs_stage": "pending",
+      "name_stage": "reviewed",
+      "reviewer_score_docs": null,
+      "docs_chain_length": 0,
+      "quorum_shortfall": null,
+      "reviewer_score_name": 0.6125,
+      "origin": "pipeline",
+      "reviewed_docs_at": null,
+      "harmonized_group_signature": null,
+      "comments_per_dim_docs": null
+    },
+    "electrostatic_potential_at_wall": {
+      "id": "electrostatic_potential_at_wall",
+      "docs_stage": "accepted",
+      "name_stage": "reviewed",
+      "reviewer_score_docs": 0.8625,
+      "docs_chain_length": 0,
+      "quorum_shortfall": null,
+      "reviewer_score_name": 0.825,
+      "origin": null,
+      "reviewed_docs_at": "2026-07-20T11:54:59.129Z",
+      "harmonized_group_signature": "6a34602a002f69682a735937a7329313b6fc7a28137040b6dc16289ec8bf8362",
+      "comments_per_dim_docs": "{\"description_quality\": \"Slightly thinner than accepted electrostatic_potential_at_midplane and electron_temperature_at_wall: missing the one-line material-vs-plasma and floating distinctions those siblings pack into the description.\", \"documentation_quality\": \"Equation variables \\u03a6 and E_es lack explicit units; nexus phrasing is a touch less parallel to electrostatic_potential_at_midplane's 'midplane restriction' template.\", \"completeness\": \"Omits a see-also to electrostatic_potential_at_midplane, which already disclaims near-wall plasma potential in its accepted description.\", \"physics_accuracy\": null}"
+    },
+    "floating_electrostatic_potential": {
+      "id": "floating_electrostatic_potential",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_docs": 0.9375,
+      "docs_chain_length": 0,
+      "quorum_shortfall": null,
+      "reviewer_score_name": 0.96875,
+      "origin": "pipeline",
+      "reviewed_docs_at": "2026-10-17T20:51:39.631Z",
+      "harmonized_group_signature": "b1bcdfe53efc602529617a773520c9f3620cf984dba9a0f2bab910f0b64ecc6a",
+      "comments_per_dim_docs": "{\"description_quality\": \"The description uses \\u201cElectrical potential\\u201d rather than the family-standard \\u201celectrostatic potential\\u201d phrasing used by `electrostatic_potential_at_langmuir_probe_position` and `electrostatic_potential_at_wall`, although the definition is otherwise precise.\", \"documentation_quality\": null, \"completeness\": null, \"physics_accuracy\": null}"
+    }
+  }
+}
