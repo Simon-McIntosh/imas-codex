@@ -213,7 +213,10 @@ path <code>imas_codex.standard_names.graph_ops</code>:</p>
   reads each routed module's source through its import, asserts no routed
   function calls <code>select_primary_domain</code> or
   <code>maybe_promote_domain</code>, and that the composing path calls
-  <code>write_name_domain</code>. Green at the head revision.</li>
+  <code>write_name_domain</code>. Green at the head revision. Its module
+  docstring named the second selector <code>maybe_preserve_domain</code>; no
+  such function exists in the ranking module, and the docstring now names
+  <code>maybe_promote_domain</code>, which the assertion already used.</li>
   <li>Negative control: the routing test run against a tree whose routed
   functions still carry their selector calls — 8 failed, 8 passed. The log is
   <code>negative-control.log</code> in the run directory.</li>
@@ -230,17 +233,28 @@ path <code>imas_codex.standard_names.graph_ops</code>:</p>
   <code>TestPublishRefusesDivergedTree</code> in
   <code>test_catalog_import_divergence.py</code>, each a
   <code>pytest-timeout</code> at a <code>subprocess.run</code> call — no
-  assertion about the routed code is reached. Re-run alone they still time out
-  at the head, and re-run on the base arm the same three time out too
-  (<code>gate-divergence-base-recheck.log</code>: 2 failed, 4 passed of the
-  same file). The fourth,
+  assertion about the routed code is reached. Measured cleanly: that file run
+  alone, base arm then head arm sequentially and never concurrently, with the
+  repository's default 30 s per-test bound, gives <strong>3 failed, 3 passed on
+  the base and 3 failed, 3 passed at the head</strong> — the same three tests
+  with the same timeout signature (<code>gate-divergence-base-seq.log</code>,
+  <code>gate-divergence-head-seq.log</code>). The fourth,
   <code>test_catalog_layout_hierarchy.py::test_export_ledgers_cycle_and_writes_packet</code>,
   fails identically at base with the same <code>IndexError</code> from
-  <code>classify_sourceless_standard_names</code>. The node ran at a load
-  average near 61 for the whole gate, which is also why the trio in
-  <code>test_vocab_gaps.py</code> that failed in both earlier runs passed in
-  this one: the failure set moves with the load, and the base arm is what
-  separates a real delta from it.</li>
+  <code>classify_sourceless_standard_names</code>.</li>
+  <li>The same protocol applied to
+  <code>test_post_copy_divergence_comparison.py</code> — the file this node
+  edited under the first fence grant, and so the one a defect of ours would
+  surface in — is green at both arms:
+  <strong>4 passed on the base, 4 passed at the head</strong>
+  (<code>gate-postcopy-base.log</code>, <code>gate-postcopy-head.log</code>).
+  The load average at each of those four run starts is recorded in its log
+  (85 to 99 across the four); the head arm is the slower of the two pairs by a
+  few seconds and still well inside the default bound, so nothing here is
+  attributed to the load. The trio in <code>test_vocab_gaps.py</code> that
+  failed in both earlier gate runs also passed in the last one: the failure set
+  moves with the load, and the base arm is what separates a real delta from
+  it.</li>
   <li>The base arm is a <code>git archive</code> of the base revision extracted
   to <code>$TMPDIR</code>, run with <code>PYTHONPATH</code> pointing at it and
   its own test files, because <code>git worktree add</code> is unavailable
