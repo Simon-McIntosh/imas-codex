@@ -1,0 +1,113 @@
+<section id="srtj-retire-keyword-trigger-section">
+  <h2 id="srtj-retire-keyword-trigger-title">Retiring the comment-keyword refine trigger</h2>
+  <p>
+    The refine fan-out now fires on failed checks alone. <code>should_trigger_fanout</code>
+    takes check results and a threshold, and nothing else: the comment path, its
+    <code>keywords</code>, <code>dims</code> and <code>char_cap</code> parameters, and the
+    <code>trigger_source</code> selector are gone. The free-text comment field stays on
+    the node for people, and the refine-chain history reader in
+    <code>imas_codex/standard_names/chain_history.py</code> is untouched.
+  </p>
+
+  <h3 id="srtj-retire-keyword-trigger-deleted">What was deleted</h3>
+  <table>
+    <thead><tr><th>Path</th><th>Deleted</th><th>Added</th><th>What left</th></tr></thead>
+    <tbody>
+      <tr><td><code>imas_codex/standard_names/fanout/trigger.py</code></td><td>126</td><td>18</td><td>the comment trigger branch, <code>extract_reviewer_excerpt</code>, <code>_parse_comments</code>, and the <code>keywords</code>, <code>dims</code>, <code>char_cap</code>, <code>trigger_source</code>, <code>chain_length</code>, <code>chain_history</code> inputs</td></tr>
+      <tr><td><code>imas_codex/standard_names/fanout/config.py</code></td><td>38</td><td>0</td><td><code>refine_trigger_keywords</code>, <code>refine_trigger_comment_dims</code>, <code>refine_trigger_comment_chars</code>, <code>refine_trigger_source</code></td></tr>
+      <tr><td><code>imas_codex/standard_names/workers.py</code></td><td>14</td><td>4</td><td>the comment excerpt read and the commented trigger call at the refine call site</td></tr>
+      <tr><td><code>pyproject.toml</code></td><td>11</td><td>0</td><td><code>refine-trigger-keywords</code>, <code>refine-trigger-comment-dims</code>, <code>refine-trigger-comment-chars</code> and their comments</td></tr>
+      <tr><td><code>imas_codex/standard_names/fanout/__init__.py</code></td><td>2</td><td>0</td><td>the <code>extract_reviewer_excerpt</code> re-export</td></tr>
+      <tr><td><code>tests/standard_names/fanout/test_trigger_dims_align_with_review.py</code></td><td>40</td><td>0</td><td>the file, which tested only the retired dim allow-list</td></tr>
+      <tr><td><code>tests/standard_names/fanout/test_trigger_predicate.py</code></td><td>127</td><td>3</td><td>the comment-excerpt and comment-trigger tests; arm assignment tests kept</td></tr>
+      <tr><td><code>tests/standard_names/test_refine_failed_checks.py</code></td><td>10</td><td>2</td><td>two tests rewritten to the check-only signature</td></tr>
+      <tr><td><code>tests/standard_names/test_review_cascade.py</code></td><td>8</td><td>1</td><td>the trigger call and its <code>trigger_source</code> assertion updated</td></tr>
+    </tbody>
+  </table>
+  <p>
+      Line counts are <code>git diff --numstat</code> against base
+      <code>96aab3e62</code>. The retired code path read reviewer comment text and no
+      longer runs anywhere; <code>should_trigger_fanout</code> acquires no comment input.
+    </p>
+
+
+  <h3 id="srtj-retire-keyword-trigger-threshold">The threshold, and where it came from</h3>
+  <p>
+    The check arm runs at a failure probability of <strong>0.5</strong>. That value is
+    read from the A/B run's own record, not chosen here. In
+    <code>r-20261018T101616902704-srtj-refine-ab-run</code> the per-check record carries
+    <code>failure_probability</code> and a <code>failed</code> flag: across the 120 cases
+    the checks the run failed have a minimum probability of 0.50 and a maximum of 1.00
+    (362 checks), and the run's passed checks top out at 0.49 (3478 checks). So 0.50 is the
+    cut the arm classified failures at. It is the same constant the review module applies
+    (<code>CHECK_FAIL_PROBABILITY = 0.5</code>, <code>jev_review.py:98</code>) and the same
+    default the one surviving setting carries
+    (<code>refine_trigger_check_threshold = 0.5</code>).
+  </p>
+  <p>
+    Nothing was recalibrated: the retired keyword path is replaced by the exact value the
+    measured arm used.
+  </p>
+
+  <h3 id="srtj-retire-keyword-trigger-tests">Tests and the gate</h3>
+  <p>
+    <code>tests/standard_names/test_fanout_trigger.py</code> holds the two guards the plan
+    asks for. The first fails if <code>should_trigger_fanout</code> acquires any comment
+    input, by signature and by the trigger module's source. The second fails if a
+    keyword-list setting is reintroduced, checked by both import
+    (<code>FanoutSettings.model_fields</code>) and settings load
+    (<code>load_settings()</code>), with <code>pyproject.toml</code> checked for the retired
+    keys.
+  </p>
+  <p>
+    The gate ran the fanout package tests, the refine call-site tests
+    (<code>test_refine_failed_checks.py</code>, <code>test_review_cascade.py</code>,
+    <code>test_refine_scope_continuity.py</code>, <code>test_dup_guard_integration.py</code>,
+    <code>test_fanout_trigger.py</code>) and the confinement lint. Base arm
+    <code>187 passed</code>, EXIT=0; head arm <code>178 passed</code>, EXIT=0 — no added
+    failures. The review repairs re-ran the same gate at their head
+    (<code>576a5a01f</code>): <code>179 passed</code>, EXIT=0, the added case being the
+    settings guard below.
+  </p>
+  <p>
+    The declared negative control restores the keyword setting and its reader. Applied, the
+    new test module is <strong>3 failed, 3 passed, EXIT=1</strong> — including
+    <code>test_no_keyword_trigger_setting_by_import_and_settings_load</code>. The mutation
+    was then removed and the source restored.
+  </p>
+<h3 id="srtj-retire-keyword-trigger-corrections">Corrections after review</h3>
+  <p>
+    A review of this node found four defects in the record and the tests it landed, all
+    repaired here:
+  </p>
+  <ul>
+    <li>
+      The deleted-line count for
+      <code>tests/standard_names/fanout/test_trigger_dims_align_with_review.py</code> read 46
+      where <code>git diff --numstat</code> gives 40. Corrected above, and every row of the
+      table was then re-checked against the same command. This is the failure mode a
+      hand-typed count invites: the number was transcribed from a table rather than read
+      back from the diff, so nothing could have caught it.
+    </li>
+    <li>
+      The wrapper/predicate agreement test compared the two on one input that both classify
+      as firing, so it held for a wrapper that ignored its arguments. It now compares three
+      thresholds straddling the measured probability and an unanswered check, and asserts
+      the case set contains both a firing and a non-firing outcome.
+    </li>
+    <li>
+      The scope-continuity fixture patched in a stand-in settings object that fabricated
+      three fields this change deleted — a shape that stays and passes because a namespace
+      accepts any attribute. It now stubs the production settings model, with a guard that
+      the stubbed object is that model.
+    </li>
+    <li>
+      The refine call site threads a reviewer-comment excerpt that this change made
+      permanently empty, so the proposer prompt keeps a feedback section that always
+      renders <code>(none)</code>. Not repaired here: the slot is built in the fan-out
+      dispatcher's prompt builder, outside this node's write scope, and is recorded as an
+      open item instead.
+    </li>
+  </ul>
+
+</section>

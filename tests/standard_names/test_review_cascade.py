@@ -153,13 +153,6 @@ def test_failed_checks_feed_existing_refine_trigger():
     checks = cascade.failed_check_instructions(item, "name")
     assert checks[0]["id"] == "source_fidelity_unsupported_qualifier"
     fires, _ = should_trigger_fanout(
-        reviewer_comments_per_dim=None,
-        chain_length=1,
-        chain_history=[{}],
-        keywords=(),
-        dims=(),
-        char_cap=0,
-        trigger_source="checks",
         checks=[check for check in load_review_checks()[0] if check.axis == "name"],
         check_results={
             check["id"]: {"answered": True, "failure_probability": 1.0}
@@ -833,7 +826,7 @@ async def test_refine_worker_receives_named_checks(monkeypatch):
     )
     await workers.process_refine_name_batch([item], manager, asyncio.Event())
     assert context["failed_checks"][0]["id"] == "source_fidelity_unsupported_qualifier"
-    assert trigger_calls[0]["trigger_source"] == "checks"
+    assert set(trigger_calls[0]) == {"checks", "check_results", "check_threshold"}
     assert (
         trigger_calls[0]["check_results"]["source_fidelity_unsupported_qualifier"][
             "failure_probability"
