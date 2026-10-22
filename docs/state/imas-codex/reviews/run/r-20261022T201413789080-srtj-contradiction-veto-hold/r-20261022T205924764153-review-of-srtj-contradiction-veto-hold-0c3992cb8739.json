@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-10-22T21:12:20.482Z",
   "dispatched_at": "2026-10-22T21:00:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "a 45 against 46 count in a classification the node marks as its own; the conclusion that no firing is a true contradiction does not move",
+      "recorded_at": "2026-10-22T22:44:53.787812+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html",
