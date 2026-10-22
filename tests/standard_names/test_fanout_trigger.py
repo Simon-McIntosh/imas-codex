@@ -115,12 +115,35 @@ def test_should_trigger_fanout_fires_only_on_a_retrieval_check() -> None:
 def test_should_trigger_fanout_matches_the_check_predicate() -> None:
     check = _question_check(check_id="bound_to_wrong_object", retrieval=True)
     results = {check.id: {"answered": True, "failure_probability": 0.7}}
-    expected = should_trigger_fanout_from_checks([check], results, threshold=0.5)
-    fires, excerpt = should_trigger_fanout(
-        checks=[check], check_results=results, check_threshold=0.5
+    outcomes: set[bool] = set()
+    for threshold in (0.5, 0.7, 0.95):
+        expected = should_trigger_fanout_from_checks(
+            [check], results, threshold=threshold
+        )
+        fires, excerpt = should_trigger_fanout(
+            checks=[check], check_results=results, check_threshold=threshold
+        )
+        assert fires is expected, (
+            "the wrapper must agree with the predicate it delegates to at every "
+            f"threshold; it disagreed at {threshold}"
+        )
+        assert excerpt == ""
+        outcomes.add(fires)
+    assert outcomes == {True, False}, (
+        "the compared thresholds must straddle the measured probability, or the "
+        "assertion holds even for a wrapper that always returns one value"
     )
-    assert expected is True and fires is True
-    assert excerpt == ""
+
+    unanswered = {check.id: {"answered": False, "failure_probability": 0.99}}
+    assert (
+        should_trigger_fanout_from_checks([check], unanswered, threshold=0.5) is False
+    )
+    assert (
+        should_trigger_fanout(
+            checks=[check], check_results=unanswered, check_threshold=0.5
+        )[0]
+        is False
+    )
 
 
 # ---------------------------------------------------------------------
