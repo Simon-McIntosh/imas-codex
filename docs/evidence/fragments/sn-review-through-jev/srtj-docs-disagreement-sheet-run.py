@@ -2,13 +2,13 @@
 
 The paid panel and the in-process cascade each judged the same fixed cohort of
 documentation items. This runner re-derives, from the cohort's piece files, the
-items where the two judges' routes disagree, draws seeded agreement controls,
+items where the two judges' decisions differ, draws seeded agreement controls,
 loads the archived graph export into a disposable Neo4j instance, and writes a
 blind sheet whose rows carry only the item's name, unit, DD source path with its
 description and unit, and the stored documentation text.
 
-The mapping from a sheet row back to the item, its class and both judges' routes
-is written to a separate key file that the labeller never sees.
+The mapping from a sheet row back to the item, its class and both judges'
+decisions is written to a separate key file that the labeller never sees.
 
 Read-only with respect to the live graph: the archive is loaded into a scratch
 instance and removed on exit. No graph write and no model call.
@@ -51,7 +51,25 @@ HTML = HERE / "srtj-docs-disagreement-sheet.html"
 
 SHUFFLE_SEED = 20261022
 CONTROL_SEED = 20261022
-TARGET_CONTROLS_PER_CLASS = 18
+# The panel's own accept cutoff, its matched calibration minimum score. Both the
+# panel's binary decision and its calibration read against this figure.
+PANEL_MIN_SCORE = 0.85
+# The two agreement classes are matched to each other: every item both judges
+# refined is taken, and the same number are drawn by seed from the items both
+# accepted.
+CONTROL_PER_CLASS = 14
+
+# The dry-run cross-tabulation this sheet's derivation is checked against.
+TABLE_REFERENCE = {
+    "source": "srtj-jev-only-dry-run.html",
+    "shared": 164,
+    "both_accept": 38,
+    "jev_accept_panel_refine": 49,
+    "panel_accept_jev_refine": 0,
+    "both_refine": 14,
+    "panel_unjudged": 16,
+    "jev_unjudged": 58,
+}
 
 # The seven fields a sheet row may carry. Anything else is a leak.
 ALLOWED_ROW_FIELDS = (
@@ -96,78 +114,85 @@ def load_routes() -> tuple[dict[str, dict], dict[str, dict]]:
     return jev, incumbent
 
 
-def derive(jev: dict[str, dict], incumbent: dict[str, dict]) -> dict:
-    """Split the shared items into disagreement and agreement classes.
+def decision(jev_item: dict, part_item: dict) -> tuple[str | None, str | None]:
+    """Each judge's decision on one shared item, or None where it gave none.
 
-    Both judges' recorded route fields are used unchanged; no threshold is
-    invented here. `refine` is the non-accept route a reviewer sends to the
-    refinement pool.
+    A judge decides an item when it produced a route. `unjudged` means the
+    judge left no route row, and that item is excluded from the sheet. The
+    cascade records `accept` or `refine` directly; the panel records a score,
+    and its decision is accept at or above its own matched minimum score.
     """
+    route = jev_item.get("route")
+    if route not in ("accept", "refine"):
+        return None, None
+    panel_route = part_item.get("route")
+    if panel_route is None or panel_route == "unjudged":
+        return None, None
+    score = part_item.get("score")
+    panel = "accept" if score is not None and score >= PANEL_MIN_SCORE else "refine"
+    return route, panel
+
+
+def derive(jev: dict[str, dict], incumbent: dict[str, dict]) -> dict:
+    """Split the shared items into disagreement and agreement classes."""
     shared = sorted(set(jev) & set(incumbent))
 
-    def route(item: dict) -> str:
-        return item.get("route") or "unjudged"
+    classes: dict[str, list[str]] = {
+        "disagreement_jev_accept_panel_refine": [],
+        "disagreement_panel_accept_jev_refine": [],
+        "control_both_accept": [],
+        "control_both_refine": [],
+    }
+    undecided: list[str] = []
+    for item_id in shared:
+        jev_decision, panel_decision = decision(jev[item_id], incumbent[item_id])
+        if jev_decision is None:
+            undecided.append(item_id)
+            continue
+        if (jev_decision, panel_decision) == ("accept", "refine"):
+            classes["disagreement_jev_accept_panel_refine"].append(item_id)
+        elif (jev_decision, panel_decision) == ("refine", "accept"):
+            classes["disagreement_panel_accept_jev_refine"].append(item_id)
+        elif (jev_decision, panel_decision) == ("accept", "accept"):
+            classes["control_both_accept"].append(item_id)
+        else:
+            classes["control_both_refine"].append(item_id)
 
-    jev_accept_panel_refine = [
-        i
-        for i in shared
-        if route(jev[i]) == "accept" and route(incumbent[i]) == "refine"
-    ]
-    panel_accept_jev_refine = [
-        i
-        for i in shared
-        if route(incumbent[i]) == "accept" and route(jev[i]) == "refine"
-    ]
-    both_accept = [
-        i
-        for i in shared
-        if route(jev[i]) == "accept" and route(incumbent[i]) == "accept"
-    ]
-    both_refine = [
-        i
-        for i in shared
-        if route(jev[i]) == "refine" and route(incumbent[i]) == "refine"
-    ]
-
-    disagreement = sorted(jev_accept_panel_refine + panel_accept_jev_refine)
-
+    disagreement = sorted(
+        classes["disagreement_jev_accept_panel_refine"]
+        + classes["disagreement_panel_accept_jev_refine"]
+    )
+    counts = {name: len(ids) for name, ids in classes.items()}
     return {
         "shared_ids": shared,
-        "classes": {
-            "disagreement_jev_accept_panel_refine": jev_accept_panel_refine,
-            "disagreement_panel_accept_jev_refine": panel_accept_jev_refine,
-            "control_both_accept": both_accept,
-            "control_both_refine": both_refine,
-        },
+        "classes": classes,
         "disagreement": disagreement,
+        "undecided": undecided,
+        "counts": counts,
+        "decided": sum(counts.values()),
     }
 
 
-def score_counts(
-    jev: dict[str, dict], incumbent: dict[str, dict], threshold: float = 0.85
-) -> dict:
-    """The same split read from each arm's stored score at the consumer cutoff.
+def panel_route_reading(jev: dict[str, dict], incumbent: dict[str, dict]) -> dict:
+    """The same split read from the panel's stored route instead of its score.
 
-    Reported beside the route split so a reader can see how much the choice of
-    reading moves each count.
+    Reported beside the sheet's derivation so a reader can see how much the
+    choice of reading moves each count: the panel routes 34 of the shared
+    items to `band`, and those resolve by score here and by route there.
     """
     shared = sorted(set(jev) & set(incumbent))
-
-    def acc(item: dict) -> bool:
-        return (item.get("score") or 0.0) >= threshold
-
+    counts: Counter[tuple[str, str]] = Counter()
+    for item_id in shared:
+        jev_route = jev[item_id].get("route")
+        panel_route = incumbent[item_id].get("route")
+        if jev_route in ("accept", "refine") and panel_route in ("accept", "refine"):
+            counts[(jev_route, panel_route)] += 1
     return {
-        "threshold": threshold,
-        "jev_accept_panel_refine": sum(
-            1 for i in shared if acc(jev[i]) and not acc(incumbent[i])
-        ),
-        "panel_accept_jev_refine": sum(
-            1 for i in shared if acc(incumbent[i]) and not acc(jev[i])
-        ),
-        "both_accept": sum(1 for i in shared if acc(jev[i]) and acc(incumbent[i])),
-        "both_refine": sum(
-            1 for i in shared if not acc(jev[i]) and not acc(incumbent[i])
-        ),
+        "both_accept": counts[("accept", "accept")],
+        "jev_accept_panel_refine": counts[("accept", "refine")],
+        "panel_accept_jev_refine": counts[("refine", "accept")],
+        "both_refine": counts[("refine", "refine")],
+        "disagreements": counts[("accept", "refine")] + counts[("refine", "accept")],
     }
 
 
@@ -181,14 +206,14 @@ class SheetLeakError(ValueError):
 
 
 def assert_sheet_row(row: dict) -> None:
-    extra = set(row) - set(ALLOWED_ROW_FIELDS)
-    if extra:
-        raise SheetLeakError(f"row carries fields outside the seven: {sorted(extra)}")
     present = [key for key in FORBIDDEN_ROW_KEYS if key in row]
     if present:
         raise SheetLeakError(
             f"row carries a judge's route, score or comment: {present}"
         )
+    extra = set(row) - set(ALLOWED_ROW_FIELDS)
+    if extra:
+        raise SheetLeakError(f"row carries fields outside the seven: {sorted(extra)}")
     missing = [key for key in ALLOWED_ROW_FIELDS if key not in row]
     if missing:
         raise SheetLeakError(f"row is missing required fields: {missing}")
@@ -207,7 +232,9 @@ def refusal_demonstration(sample_row: dict) -> dict:
         raise RuntimeError("planted row carrying a judge's route was accepted")
 
     extra_field = dict(sample_row)
-    extra_field["jev_route"] = "refine"
+    extra_field["labeller_note"] = (
+        "an eighth field carrying neither a route nor a score"
+    )
     try:
         assert_sheet_row(extra_field)
     except SheetLeakError as exc:
@@ -301,28 +328,37 @@ def fetch_items(gc: GraphClient, ids: list[str]) -> dict[str, dict]:
 # ---------------------------------------------------------------------------
 
 
-def build_sheet(
-    derived: dict, fields: dict[str, dict]
-) -> tuple[list[dict], list[dict]]:
-    rng = random.Random(CONTROL_SEED)
-
-    disagreement_ids = list(
-        derived["classes"]["disagreement_jev_accept_panel_refine"]
-    ) + list(derived["classes"]["disagreement_panel_accept_jev_refine"])
+def choose_controls(derived: dict) -> dict:
+    """Every agreement item of the smaller class, and the same count by seed."""
     both_accept = list(derived["classes"]["control_both_accept"])
     both_refine = list(derived["classes"]["control_both_refine"])
-
-    rng.shuffle(disagreement_ids)
+    rng = random.Random(CONTROL_SEED)
     rng.shuffle(both_accept)
     rng.shuffle(both_refine)
 
-    chosen_controls = (
-        both_accept[:TARGET_CONTROLS_PER_CLASS]
-        + both_refine[:TARGET_CONTROLS_PER_CLASS]
+    # Every item both judges refined is taken, and the both-accept side is
+    # matched to it, up to the pool the pieces actually hold.
+    wanted = (
+        max(CONTROL_PER_CLASS, len(both_refine)) if both_refine else CONTROL_PER_CLASS
     )
+    drawn_refine = both_refine
+    drawn_accept = both_accept[: min(wanted, len(both_accept))]
+    return {
+        "both_accept": drawn_accept,
+        "both_refine": drawn_refine,
+        "both_accept_pool": len(both_accept),
+        "both_refine_pool": len(both_refine),
+        "per_class": len(drawn_accept),
+        "shortfall": wanted - len(drawn_accept),
+    }
 
-    selected = [(item_id, "disagreement") for item_id in disagreement_ids] + [
-        (item_id, "control") for item_id in chosen_controls
+
+def build_sheet(
+    derived: dict, controls: dict, fields: dict[str, dict], decisions: dict
+) -> tuple[list[dict], list[dict]]:
+    selected = [(item_id, "disagreement") for item_id in derived["disagreement"]] + [
+        (item_id, "control")
+        for item_id in controls["both_accept"] + controls["both_refine"]
     ]
 
     shuffle = random.Random(SHUFFLE_SEED)
@@ -347,13 +383,14 @@ def build_sheet(
         }
         assert_sheet_row(row)
         sheet_rows.append(row)
+        jev_decision, panel_decision = decisions[item_id]
         key_rows.append(
             {
                 "sheet_id": sheet_id,
                 "item_id": item_id,
                 "class": klass,
-                "jev_route": None,
-                "panel_route": None,
+                "jev_route": jev_decision,
+                "panel_route": panel_decision,
             }
         )
     return sheet_rows, key_rows
@@ -366,10 +403,23 @@ def main() -> int:
 
     jev, incumbent = load_routes()
     derived = derive(jev, incumbent)
-    counts = {name: len(ids) for name, ids in derived["classes"].items()}
+    decisions = {
+        item_id: decision(jev[item_id], incumbent[item_id])
+        for item_id in derived["shared_ids"]
+    }
     log(f"shared documentation items: {len(derived['shared_ids'])}")
-    for name, count in counts.items():
+    log(f"decided items: {derived['decided']}")
+    for name, count in derived["counts"].items():
         log(f"  {name}: {count}")
+    controls = choose_controls(derived)
+    log(
+        "controls: both-accept pool "
+        f"{controls['both_accept_pool']} -> drawn {len(controls['both_accept'])}; "
+        f"both-refine pool {controls['both_refine_pool']} -> drawn "
+        f"{len(controls['both_refine'])}"
+    )
+    alternative = panel_route_reading(jev, incumbent)
+    log(f"panel-route reading: {alternative}")
 
     scratch = Path(
         tempfile.mkdtemp(prefix="disagreement-sheet-", dir=os.environ["TMPDIR"])
@@ -386,11 +436,28 @@ def main() -> int:
         "source_pieces": [JEV_PIECE.name, *[p.name for p in INCUMBENT_PIECES]],
         "archive": str(ARCHIVE),
         "seeds": {"shuffle": SHUFFLE_SEED, "control": CONTROL_SEED},
-        "derivation": counts,
-        "score_reading": score_counts(jev, incumbent),
-        "targets": {
-            "disagreement": 72,
-            "controls_per_class": TARGET_CONTROLS_PER_CLASS,
+        "definition": {
+            "shared": "an item present in both the cascade documentation piece and an incumbent documentation piece",
+            "decided": "a shared item that neither judge left unjudged; an item either judge left with no route is excluded from the sheet",
+            "cascade_decision": "the judge's stored route, accept or refine",
+            "panel_decision": f"accept when the panel's stored score is at or above its matched cutoff {PANEL_MIN_SCORE}, refine below it",
+            "disagreement": "a decided item whose two decisions differ",
+            "control": "a decided item whose two decisions agree",
+        },
+        "panel_min_score": PANEL_MIN_SCORE,
+        "derivation": {
+            "shared": len(derived["shared_ids"]),
+            "decided": derived["decided"],
+            "undecided": len(derived["undecided"]),
+            **derived["counts"],
+        },
+        "table_reference": TABLE_REFERENCE,
+        "panel_route_reading": alternative,
+        "controls": {
+            "per_class": controls["per_class"],
+            "both_accept_pool": controls["both_accept_pool"],
+            "both_refine_pool": controls["both_refine_pool"],
+            "shortfall": controls["shortfall"],
         },
     }
     try:
@@ -425,7 +492,7 @@ def main() -> int:
         sample_id = next(iter(fields))
         payload["export_probe"] = {"item_id": sample_id, **fields[sample_id]}
 
-        sheet_rows, key_rows = build_sheet(derived, fields)
+        sheet_rows, key_rows = build_sheet(derived, controls, fields, decisions)
         payload["row_counts"] = {
             "total": len(sheet_rows),
             "disagreement": sum(
@@ -460,7 +527,7 @@ def main() -> int:
         json.dumps({"record": payload, "rows": sheet_rows}, indent=2) + "\n"
     )
     KEY.write_text(json.dumps({"record": payload, "key": key_rows}, indent=2) + "\n")
-    (HERE / "srtj-docs-disagreement-sheet.html").write_text(render_html(payload))
+    HTML.write_text(render_html(payload))
     log(f"wrote {SHEET.name}, {KEY.name}, {HTML.name}")
     log("EXIT=0")
     return 0
@@ -470,20 +537,56 @@ def render_html(payload: dict) -> str:
     counts = payload["derivation"]
     rows = payload["row_counts"]
     refusal = payload["refusal"]
-    return (
-        "<!doctype html>\n<html><head><meta charset='utf-8'>"
-        "<title>Documentation disagreement sheet</title></head><body>\n"
-        "<h1>Documentation disagreement sheet</h1>\n"
-        f"<p>Rows: {rows['total']} total, {rows['disagreement']} disagreement, "
-        f"{rows['control']} control.</p>\n"
-        f"<p>Disagreement classes: Jev accept / panel refine {counts['disagreement_jev_accept_panel_refine']}, "
-        f"panel accept / Jev refine {counts['disagreement_panel_accept_jev_refine']}.</p>\n"
-        f"<p>Agreement classes available: both accept {counts['control_both_accept']}, "
-        f"both refine {counts['control_both_refine']}.</p>\n"
-        f"<p>Seeds: shuffle {payload['seeds']['shuffle']}, control {payload['seeds']['control']}.</p>\n"
-        f"<p>Refusal check: {refusal['all_refused']} on {len(refusal['checks'])} planted rows.</p>\n"
-        "</body></html>\n"
-    )
+    definition = payload["definition"]
+    table = payload["table_reference"]
+    alternative = payload["panel_route_reading"]
+    controls = payload["controls"]
+    lines = [
+        "<!doctype html>",
+        "<html><head><meta charset='utf-8'>",
+        "<title>Documentation disagreement sheet</title></head><body>",
+        "<h1>Documentation disagreement sheet</h1>",
+        "<h2>Definition</h2>",
+        "<ul>",
+    ]
+    lines += [f"<li>{key}: {value}</li>" for key, value in definition.items()]
+    lines += [
+        "</ul>",
+        "<h2>Counts</h2>",
+        "<ul>",
+        f"<li>shared documentation items: {counts['shared']}</li>",
+        f"<li>decided items: {counts['decided']}; excluded as unjudged by a judge: {counts['undecided']}</li>",
+        f"<li>disagreements: {counts['disagreement_jev_accept_panel_refine']} cascade accept / panel refine, "
+        f"{counts['disagreement_panel_accept_jev_refine']} panel accept / cascade refine "
+        f"(total {rows['disagreement']})</li>",
+        f"<li>agreement controls: {controls['per_class']} drawn by seed from "
+        f"{controls['both_accept_pool']} both-accept items, and {controls['both_refine_pool']} both-refine items "
+        f"(total {rows['control']})</li>",
+        f"<li>sheet rows: {rows['total']}</li>",
+        "</ul>",
+        "<h2>Re-derivation beside the dry-run table</h2>",
+        f"<p>Re-derived disagreements: {rows['disagreement']} "
+        f"(dry-run table: {table['jev_accept_panel_refine']} cascade accept / panel refine, "
+        f"{table['panel_accept_jev_refine']} the other way). Re-derived both-accept pool "
+        f"{controls['both_accept_pool']} against the table's {table['both_accept']}; both-refine "
+        f"{controls['both_refine_pool']} against {table['both_refine']}; shared "
+        f"{counts['shared']} against {table['shared']}.</p>",
+        f"<p>Reading the panel's decision from its stored route instead of its score gives "
+        f"{alternative['disagreements']} disagreements ({alternative['jev_accept_panel_refine']} "
+        f"cascade accept / panel refine, {alternative['panel_accept_jev_refine']} the other way), "
+        f"{alternative['both_accept']} both-accept and {alternative['both_refine']} both-refine. "
+        f"The sheet uses the panel's score at its matched cutoff {payload['panel_min_score']}, "
+        f"which reproduces the dry-run table's cross-tabulation exactly.</p>",
+        "<h2>Blinding</h2>",
+        f"<p>Seeds: shuffle {payload['seeds']['shuffle']}, control {payload['seeds']['control']}. "
+        f"Each sheet row carries only the seven fields: {', '.join(ALLOWED_ROW_FIELDS)}.</p>",
+        f"<p>Refusal check: {refusal['all_refused']} on {len(refusal['checks'])} planted rows "
+        f"({', '.join(check['planted'] for check in refusal['checks'])}).</p>",
+        "<p>The key file maps each sheet_id to its item, class and both judges' decisions, and is not shown to the labeller.</p>",
+        "</body></html>",
+        "",
+    ]
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
