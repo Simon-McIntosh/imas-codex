@@ -14,6 +14,11 @@
       "kind": "exempted",
       "reason": "each out-of-scope path imports or asserts a deleted symbol; accepted at promotion",
       "recorded_at": "2026-10-22T20:55:31.675967+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "srtj-fanout-excerpt-retire",
+      "recorded_at": "2026-10-22T20:55:42.389488+00:00"
     }
   },
   "findings": [
