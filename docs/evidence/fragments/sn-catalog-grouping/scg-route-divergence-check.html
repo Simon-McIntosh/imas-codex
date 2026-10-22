@@ -1,0 +1,116 @@
+<article id="scg-route-divergence-check">
+  <h2>Are the three catalog-import divergence failures added by the routing change?</h2>
+
+  <p>
+    The route node <code>scg-name-domain-route-pipeline</code> edits
+    <code>check_catalog</code> in <code>imas_codex/standard_names/catalog_import.py</code>: the
+    comparison previously re-derived each name's domain from its <code>PRODUCED_NAME</code> sources
+    via <code>select_primary_domain</code>, and now reads the stored <code>physics_domain</code>
+    scalar that <code>write_name_domain</code> wrote. Its review counted three added failures in
+    <code>tests/standard_names/test_catalog_import_divergence.py::TestPublishRefusesDivergedTree</code>.
+    This measures whether they are added by that change or present at base.
+  </p>
+
+  <h3>Method</h3>
+  <p>
+    Two clean trees were extracted with <code>git archive</code> into node-local
+    <code>TMPDIR=/tmp/reckon-crew-scratch/r-20261022T150223442727-scg-route-divergence-check</code>,
+    each given the same five generated files copied from the shared main checkout. In each tree the
+    one test file was run alone, in sequence, with <code>PYTHONPATH</code> set to the tree and
+    <code>UV_PROJECT_ENVIRONMENT</code> the shared project environment, under the repository's
+    default per-test timeout of 30&nbsp;s. Each log's first line names the revision, the tree and the
+    command; its header also records the load average at start and the path each arm's
+    <code>catalog_import</code> module was imported from. That last value lies inside the tree the arm
+    claims, so neither arm loaded the other's code.
+  </p>
+  <table>
+    <thead><tr><th>Arm</th><th>Revision</th><th><code>catalog_import.__file__</code></th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>base</td><td><code>efb8f7f3c5f2c89845e824f0e4f5b5616972f853</code></td><td>.../base/imas_codex/standard_names/catalog_import.py</td><td>2 failed, 4 passed in 102.56&nbsp;s</td></tr>
+      <tr><td>head</td><td><code>087cb9356711281253814203f92a75dfc4a4b64b</code></td><td>.../head/imas_codex/standard_names/catalog_import.py</td><td>2 failed, 4 passed in 93.78&nbsp;s</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Per-test result</h3>
+  <table>
+    <thead><tr><th>Test</th><th>Base</th><th>Head</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>test_diverged_tree_is_refused_with_an_error</code></td>
+        <td>pass</td><td>pass</td>
+        <td>Not a failure at either arm &mdash; <strong>not added</strong>. (The review counted it as added; it passes at base.)</td>
+      </tr>
+      <tr>
+        <td><code>test_in_sync_tree_still_publishes</code></td>
+        <td><strong>fail</strong></td><td><strong>fail</strong></td>
+        <td><strong>Present at base</strong> &mdash; not added. Fails at base in both pairs; fails at head in one pair and passes in the other.</td>
+      </tr>
+      <tr>
+        <td><code>test_uncomparable_tree_still_publishes</code></td>
+        <td><strong>fail</strong></td><td><strong>fail</strong></td>
+        <td><strong>Present at base</strong> &mdash; not added. Fails at both arms in every pair.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    <strong>Verdict: none of the three is added by the routing change.</strong> Two of the three fail
+    at base; the third passes at both arms. Across the three head runs, one passed every test, so the
+    head is not strictly worse on this file.
+  </p>
+
+  <h3>The failure text</h3>
+  <p>
+    Every failure in both arms is the same one: the repository's 30&nbsp;s per-test timeout firing
+    inside <code>run_publish</code>, not an assertion.
+  </p>
+  <pre>
+tests/standard_names/test_catalog_import_divergence.py:203: in test_uncomparable_tree_still_publishes
+    report = run_publish(staging_dir, isnc_repo)
+imas_codex/standard_names/publish.py:572: in run_publish
+    sha_result = subprocess.run(
+...
+E   Failed: Timeout (&gt;30.0s) from pytest-timeout.
+  </pre>
+  <p>
+    The durations are the whole story: every failing case sums to almost exactly the bound. In the
+    base arm, <code>test_in_sync</code> spent 17.01&nbsp;s in setup plus 13.03&nbsp;s in call, and
+    <code>test_uncomparable</code> 15.32&nbsp;s plus 14.68&nbsp;s &mdash; 30.04&nbsp;s and
+    30.00&nbsp;s against a 30&nbsp;s per-test bound. In the head arm they were 20.97&nbsp;+&nbsp;9.03
+    and 17.79&nbsp;+&nbsp;12.22 &mdash; again 30.00&nbsp;s and 30.01&nbsp;s. The node was loaded
+    throughout (load average 43&ndash;62 at arm starts), and the pass/fail line for these two cases is
+    decided by load.
+  </p>
+
+  <h3>Why the routing change cannot cause these</h3>
+  <p>
+    All three tests replace the function the routing change edits.
+    <code>publish.py:523</code> imports <code>check_catalog</code> inside the function, so the tests'
+    patch of <code>imas_codex.standard_names.catalog_import.check_catalog</code> binds, and the
+    <code>check_catalog</code> the routing node rewrote never runs in any of the three. The behaviour
+    the tests assert is set by the patched stub, not by the changed code; the only variable left
+    between the arms is wall-clock.
+  </p>
+
+  <h3>Stability</h3>
+  <p id="scg-route-divergence-check-stability">
+    A second sequential pair was run to separate these timeouts from any arm difference. The failing
+    cases move around the file while the routing code stays patched out of them:
+  </p>
+  <table>
+    <thead><tr><th>Run</th><th>Base</th><th>Head</th></tr></thead>
+    <tbody>
+      <tr><td>pair 1</td><td>2 failed, 4 passed (load 43.01) &mdash; <code>in_sync</code>, <code>uncomparable</code></td><td>2 failed, 4 passed (load 54.48) &mdash; <code>in_sync</code>, <code>uncomparable</code></td></tr>
+      <tr><td>pair 2</td><td>2 failed, 4 passed (load 51.66) &mdash; <code>in_sync</code>, <code>uncomparable</code></td><td><strong>6 passed</strong> (load 61.85)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Across the four arm-runs: <code>test_diverged_tree_is_refused_with_an_error</code> passed 4/4;
+    <code>test_in_sync_tree_still_publishes</code> failed 2/2 at base and 1/2 at head;
+    <code>test_uncomparable_tree_still_publishes</code> failed 2/2 at base and 2/2 at head. No run of
+    either arm produced an assertion failure &mdash; every failure is the 30&nbsp;s timeout, and the
+    one head run that passed all six shows the two slow cases are marginal against that bound on a
+    loaded node. The verdict is unchanged by the second pair: none of the three is added by the
+    routing change.
+  </p>
+</article>
