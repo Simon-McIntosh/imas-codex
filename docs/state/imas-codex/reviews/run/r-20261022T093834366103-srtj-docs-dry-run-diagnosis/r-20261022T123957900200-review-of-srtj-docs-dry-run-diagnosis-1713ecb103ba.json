@@ -11,6 +11,11 @@
       "kind": "exempted",
       "reason": "recorded on section 6: the paired difference's denominator is the 164 shared items, counting each judge's unjudged items as non-accepts; over the 101 items both decided, Jev accepts 86% against the panel's 38%, so the gap stands either way",
       "recorded_at": "2026-10-22T14:16:20.873023+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the diagnosis runner is a one-shot evidence script that no later node re-renders",
+      "recorded_at": "2026-10-22T14:16:27.733943+00:00"
     }
   },
   "findings": [
