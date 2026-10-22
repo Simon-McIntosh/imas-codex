@@ -15916,6 +15916,23 @@ def aggregate_spend_per_phase(run_id: str) -> dict[str, float]:
         return {r["phase"]: float(r["total"]) for r in rows}
 
 
+def aggregate_calls_per_phase(run_id: str) -> dict[str, int]:
+    """Return ``{phase: call_count}`` for a run, the spend owner's own rows.
+
+    The call count is the row count behind
+    :func:`aggregate_spend_per_phase`, so a run's calls and its per-phase
+    spend are read from one row set under the same exact-run-id predicate.
+    """
+    with GraphClient() as gc:
+        rows = gc.query(
+            "MATCH (c:LLMCost {run_id: $run_id}) "
+            "RETURN c.phase AS phase, count(*) AS calls "
+            "ORDER BY phase",
+            run_id=run_id,
+        )
+        return {r["phase"]: int(r["calls"]) for r in rows}
+
+
 def aggregate_spend_per_name(run_id: str) -> dict[str, float]:
     """Return ``{sn_id: apportioned_cost}`` for a run.
 
