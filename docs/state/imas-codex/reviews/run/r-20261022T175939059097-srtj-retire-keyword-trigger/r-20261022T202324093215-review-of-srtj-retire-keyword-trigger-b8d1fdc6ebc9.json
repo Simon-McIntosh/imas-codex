@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-10-22T20:51:28.797Z",
   "dispatched_at": "2026-10-22T20:29:29Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "each out-of-scope path imports or asserts a deleted symbol; accepted at promotion",
+      "recorded_at": "2026-10-22T20:55:31.675967+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/fanout/__init__.py",
