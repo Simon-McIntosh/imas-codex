@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-22T21:18:54.593Z",
+  "dispatched_at": "2026-10-22T21:04:02Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope.html",
+      "line": "225",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states three names carry more than one producing StandardNameSource, but the runner's own record q3_multi_source_names holds two (inertial_current_density_due_to_diamagnetic_drift with 2 sources and vertical_centroid_of_coil_conductor_element with 3), so the 81-vs-78 gap is three extra source rows, not three extra names; the prose at html:324 repeats it and fix 5 rests on the mis-stated population."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope-run.py",
+      "line": "342",
+      "severity": "follow-on",
+      "text": "follow-on: source_composed_dates is built by iterating the stringified composed-date list (r[\"composed_dates\"] is a str after the str() conversion at :143), so the record holds a set of characters rather than dates; the fragment's \"composed overwhelmingly on 2026-10-19\" claim at html:282 has no readback behind it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T200700587883-shc-apply-drift-scope/shc-apply-drift-scope-run.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log records that source_refresh was imported from /home/ITER/mcintos/Code/imas-codex/ rather than the node's worktree, and the manifest names no measurement_module/measurement_cwd, so a reader cannot tell which tree produced the readbacks; the two trees are byte-identical here, so no readback is affected."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "searched for runtime code that reaches the landed change; the change is a documentation fragment and a read-only evidence runner under docs/evidence, which no production module imports, so none exists.",
+    "diff": "read commit by commit; 91dd9560e adds the three files and 8513fdd49 regenerates the JSON (elapsed/started fields only), with no product code, no test file and no figure.",
+    "done_when": "the done_when names the HTML fragment, the JSON the runner writes and a log ending EXIT=0; shc-apply-drift-scope-run.log ends with a bare EXIT=0 and the committed JSON holds q2_names readbacks and q3_classification counts (a=2, b=78, c=0, d=0, total 80).",
+    "goal": "the source goal asks why a family-scoped `sn harmonize --apply` redrafts names outside its family; the fragment answers all three questions and every code reference it makes resolves at the reviewed base.",
+    "manifest": "read; it reports status complete, names the runner command as its gate and the run log as its log, and carries baseline_suite/after_suite as null because the node's write paths hold no test file.",
+    "write_paths": "the manifest declares three paths under docs/evidence/fragments/sn-harmonize-command/; the range diff 20a162d65..8513fdd49030 changes exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "shc-apply-drift-scope-run.py contains no assertion and the node adds no test file, so nothing reddens if the readbacks or the classification regress.",
+    "evidence": "the gate log shc-apply-drift-scope-run.log ends EXIT=0 and every log citation verifies, but the record's class-b provenance readback is unreadable (runner:342) and the readbacks' module __file__ resolved to the main checkout, not the worktree.",
+    "fit": "the fragment follows the sibling evidence-fragment convention used by docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen.html, and the commits are conventional with bodies.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope.html answers Q1-Q3 with citations I re-read at the base, the only false notes being the multi-source count at html:225/324 and the unstamped-source date at html:282.",
+    "reuse": "the runner imports the repository's own detect_source_drift and GraphClient rather than reimplementing drift detection; its cite/note/read_log_lines helpers have no owner, and a search over docs/evidence runners and imas_codex/*.py found none.",
+    "scope_discipline": "git diff --stat over 20a162d65..8513fdd49 lists only the three declared fragment paths, all inside the manifest's declared write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal asks why a family-scoped `sn harmonize --apply` redrafts names outside its family; the fragment answers all three questions and every code reference it makes resolves at the reviewed base \u2014 sn.py:6240 (apply_families), campaign.py:1032 (drain_fn(run_id, cap)), sn.py:815-843 (_docs_drain_factory, scope_run_id=run_id at 832), loop.py:2064-2068 (refresh_docs_sources with only scope_run_id), source_refresh.py:334/157/179-197 (no id filter, whole-graph scan), source_refresh.py:417 (SET sn.run_id = $scope_run_id), graph_ops.py:16178/18421/26332 (pools claim by scope run_id), harmonize.py:1638-1679 (_family_budget_drain).\nVERDICT done_when: the done_when names the HTML fragment, the JSON the runner writes and a log ending EXIT=0; shc-apply-drift-scope-run.log ends with a bare EXIT=0 and the committed JSON holds q2_names readbacks and q3_classification counts (a=2, b=78, c=0, d=0, total 80).\nVERDICT write_paths: the manifest declares three paths under docs/evidence/fragments/sn-harmonize-command/; the range diff 20a162d65..8513fdd49 changes exactly those three files and nothing else.\nVERDICT manifest: read; it reports status complete, names the runner command as its gate and the run log as its log, and carries baseline_suite/after_suite as null because the node's write paths hold no test file.\nVERDICT diff: read commit by commit; 91dd9560e adds the three files (runner 391 lines, fragment 380, JSON 982) and 8513fdd49 regenerates the JSON (elapsed/started fields only), with no product code, no test file and no figure.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope.html answers Q1-Q3 with citations I re-read at the base, the only false notes being the multi-source count at html:225/324 and the unstamped-source date at html:282.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate log shc-apply-drift-scope-run.log ends EXIT=0 and every log citation (apply-rerun-1.log:58, :141, :2862-2867; runner-pipeline.log calls_total=12, spend_usd=0.59457) verifies, but the record's class-b provenance readback is unreadable (runner:342 splits the windowed runner's composed-date list character by character) and the readbacks' module__file__ resolved to the main checkout, not the worktree.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat over 20a162d65..8513fdd49 lists only the three declared fragment paths, all inside the manifest's declared write scope.\nSCORE durability: 7\nJUSTIFICATION durability: shc-apply-drift-scope-run.py contains no assertion (grep for \"assert\" finds none) and the node adds no test file, so nothing reddens if the readbacks or the classification regress.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the sibling evidence-fragment convention (meta plan-slug/node-id, section-anchored h2/h3, per-question ids) used by docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen.html, and the commits are conventional with bodies.\nSCORE reuse: 18\nJUSTIFICATION reuse: the runner imports the repository's own detect_source_drift and GraphClient (imas_codex/standard_names/source_refresh.py:157) rather than reimplementing drift detection; its cite/note/read_log_lines helpers have no owner \u2014 a search over docs/evidence runners and imas_codex/*.py found none.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope.html:225 follow-on: the fragment states three names carry more than one producing StandardNameSource, but the runner's own record q3_multi_source_names holds two (inertial_current_density_due_to_diamagnetic_drift with 2 sources and vertical_centroid_of_coil_conductor_element with 3), so the 81-vs-78 gap is three extra source rows, not three extra names; the prose at html:324 repeats it and fix 5 rests on the mis-stated population.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope-run.py:342 follow-on: source_composed_dates is built by iterating the stringified composed-date list (r[\"composed_dates\"] is a str after the str() conversion at :143), so the record holds a set of characters rather than dates; the fragment's \"composed overwhelmingly on 2026-10-19\" claim at html:282 has no readback behind it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T200700587883-shc-apply-drift-scope/shc-apply-drift-scope-run.log:2 follow-on: the gate log records that source_refresh was imported from /home/ITER/mcintos/Code/imas-codex/ rather than the node's worktree, and the manifest names no measurement_module/measurement_cwd, so a reader cannot tell which tree produced the readbacks; the two trees are byte-identical here, so no readback is affected.\n",
+  "review_run_id": "r-20261022T210309860438-review-of-shc-apply-drift-scope-8513fdd49030",
+  "reviewed_base_sha": "20a162d65fff0c6885b40c59d7c879679603b175",
+  "reviewed_head_sha": "8513fdd49030a67a41a115f5e7c1bc6334fdbffa",
+  "reviewed_run_id": "r-20261022T200700587883-shc-apply-drift-scope",
+  "scores": {
+    "durability": 7,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T21:28:10.593130+00:00",
+  "total": 96
+}
