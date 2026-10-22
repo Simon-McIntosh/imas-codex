@@ -28,6 +28,7 @@ from imas_codex.discovery.base.llm import (
     DecisionsValidationError,
     acall_decisions,
     call_decisions,
+    fault_text,
     get_api_key,
 )
 
@@ -76,13 +77,16 @@ class CallOutcome(NamedTuple):
 
     ``fault`` carries the exception a non-OK call raised, so a caller that
     rejects a malformed answer re-raises the error the call layer produced
-    rather than a freshly built one.
+    rather than a freshly built one. ``fault_text`` is that fault's own
+    description, always non-empty, so a log line or a recorded reason built
+    from an outcome never reads as a missing value.
     """
 
     status: CallStatus
     answers: dict[str, Any] | None
     spent: float
     fault: BaseException | None
+    fault_text: str
 
 
 def _settle_call(
@@ -103,15 +107,18 @@ def _settle_call(
     failed call books nothing. Each entry point applies its own policy to the
     returned status: the batch maps both faults to ``None``, the single-state
     caller raises the malformed answer and maps the transport fault to ``None``.
+    A fault's text is recorded with the same care as the fault itself, so an
+    exception raised with a bare message still leaves a reason a reader can
+    act on.
     """
     try:
         answers, spent = call()
     except DecisionsValidationError as exc:
-        return CallOutcome(CallStatus.MALFORMED, None, 0.0, exc)
+        return CallOutcome(CallStatus.MALFORMED, None, 0.0, exc, fault_text(exc))
     except Exception as exc:  # noqa: BLE001 - a failed judgement is data
-        return CallOutcome(CallStatus.TRANSPORT, None, 0.0, exc)
+        return CallOutcome(CallStatus.TRANSPORT, None, 0.0, exc, fault_text(exc))
     _book_cost(cost, step, spent)
-    return CallOutcome(CallStatus.OK, answers, spent, None)
+    return CallOutcome(CallStatus.OK, answers, spent, None, "")
 
 
 def decide_one(
@@ -158,7 +165,7 @@ def decide_one(
         assert outcome.fault is not None
         raise outcome.fault
     if outcome.status is CallStatus.TRANSPORT:
-        logger.warning("decision call failed: %s", outcome.fault)
+        logger.warning("decision call failed: %s", outcome.fault_text)
         return None
     return outcome.answers
 
@@ -290,7 +297,9 @@ async def decide_batch(
             continue
         outcome = task.result()
         if outcome.status is not CallStatus.OK:
-            logger.warning("decision batch item %d failed: %s", index, outcome.fault)
+            logger.warning(
+                "decision batch item %d failed: %s", index, outcome.fault_text
+            )
             continue
         assert outcome.answers is not None
         results[index] = (outcome.answers, outcome.spent)
