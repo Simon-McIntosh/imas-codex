@@ -19,6 +19,13 @@
   ],
   "completed_at": "2026-10-22T14:11:02.234Z",
   "dispatched_at": "2026-10-22T13:36:22Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the retry half's control is shown; the fault-text assertion pins a log message whose absence the diagnosis measured directly, and a missing control there leaves no route unguarded",
+      "recorded_at": "2026-10-22T14:16:45.551073+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/discovery/test_decision_fault_retry.py",
