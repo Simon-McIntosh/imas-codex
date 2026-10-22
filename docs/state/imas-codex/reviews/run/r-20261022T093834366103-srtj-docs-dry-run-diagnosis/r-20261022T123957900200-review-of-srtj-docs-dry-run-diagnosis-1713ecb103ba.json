@@ -6,6 +6,13 @@
   "call_sites": [],
   "completed_at": "2026-10-22T13:07:45.289Z",
   "dispatched_at": "2026-10-22T12:40:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "recorded on section 6: the paired difference's denominator is the 164 shared items, counting each judge's unjudged items as non-accepts; over the 101 items both decided, Jev accepts 86% against the panel's 38%, so the gap stands either way",
+      "recorded_at": "2026-10-22T14:16:20.873023+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html",
