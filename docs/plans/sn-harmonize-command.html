@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="165">
+<meta name="plan-version" content="166">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -579,6 +579,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261020T202608740663-shc-gap-docs-regen" data-who="reckon-build" data-when="2026-10-22T14:45:08Z">
     <div class="r-comment-body"><p>both names of the split are fully documented and accepted — gap_at_outboard_midplane at name 0.91875 and documentation 0.95625, radial_separatrix_distance_at_outboard_midplane at name 1.0 and documentation 0.90625, neither naming a DD field, IDS path or option value; fragment docs/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen.html</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-gap-docs-landed" data-who="reckon-build" data-when="2026-10-22T19:05:00Z">
+    <div class="r-comment-body"><p>Both gap-split names had their documentation regenerated on the live graph (merge <code>f65e371a5</code>): <code>gap_at_outboard_midplane</code> scores 0.956 and <code>radial_separatrix_distance_at_outboard_midplane</code> 0.906. <a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-gap-docs-regen.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-isn-one-midplane-released" data-who="reckon-build" data-when="2026-10-22T19:05:00Z">
+    <div class="r-comment-body"><p>The single midplane definition (maximum major radius on each flux surface) merged upstream as ISN PR #39 (<code>4c59393cb</code>). With CI green it was released as <code>v0.10.1</code>. Node <code>isn-pin-0-10-1</code> moves both imas-codex pins; a grammar-sync node follows it.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
