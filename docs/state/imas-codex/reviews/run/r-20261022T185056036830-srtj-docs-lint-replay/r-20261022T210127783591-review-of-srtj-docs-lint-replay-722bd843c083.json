@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-22T21:18:32.198Z",
   "dispatched_at": "2026-10-22T21:02:42Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the measurement JSON was written by the completed run; the later partial log is from a killed re-run of the gate, noted in the landing",
+      "recorded_at": "2026-10-22T22:43:12.364783+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T185056036830-srtj-docs-lint-replay/srtj-docs-lint-replay.log",
