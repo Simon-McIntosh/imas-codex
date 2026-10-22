@@ -6,6 +6,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-22T21:18:54.593Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "shc-drift-refresh-scope-fix",
+      "recorded_at": "2026-10-22T22:46:39.146833+00:00"
+    }
+  },
   "dispatched_at": "2026-10-22T21:04:02Z",
   "finding_dispositions": {
     "0": {
