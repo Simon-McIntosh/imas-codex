@@ -542,7 +542,7 @@ async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
     monkeypatch.setattr(cascade, "_store_route", store)
-    monkeypatch.setattr(cascade, "deciding_enabled", lambda: False)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)
     result = await cascade.adjudicate_review(
         "name",
         {"id": "temperature"},
@@ -587,7 +587,7 @@ async def test_deciding_never_calls_chat(
         cascade, "_name_judgment" if axis == "name" else "_docs_judgment", judgment
     )
     monkeypatch.setattr(cascade, "_store_route", store)
-    monkeypatch.setattr(cascade, "deciding_enabled", lambda: True)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: True)
     result = await cascade.adjudicate_review(
         axis, {"id": "temperature"}, ["primary", "secondary"], incumbent, mgr=Manager()
     )
@@ -661,7 +661,7 @@ async def test_unjudged_review_keeps_full_incumbent(monkeypatch, failure, decidi
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(cascade, "_name_judgment", fail_judgment)
     monkeypatch.setattr(cascade, "_store_route", store)
-    monkeypatch.setattr(cascade, "deciding_enabled", lambda: deciding)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: deciding)
     await cascade.adjudicate_review(
         "name",
         {"id": "temperature"},
@@ -712,7 +712,7 @@ async def test_unjudged_shadow_row_preserves_incumbent_and_aggregate(
     monkeypatch.setattr(
         cascade, "_name_judgment" if axis == "name" else "_docs_judgment", fail_judgment
     )
-    monkeypatch.setattr(cascade, "deciding_enabled", lambda: False)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)
     graph_ops.update_review_aggregates(["temperature"])
     before = graph.aggregate
     result = await cascade.adjudicate_review(
@@ -881,7 +881,7 @@ async def test_shadow_row_is_written_after_the_incumbents_rows(monkeypatch):
         "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
-    monkeypatch.setattr(cascade, "deciding_enabled", lambda: False)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)
     monkeypatch.setattr(
         graph_ops, "write_reviews", lambda rows, **_: writes.append(list(rows))
     )
@@ -914,7 +914,7 @@ async def test_failed_incumbent_cycle_writes_no_shadow_row(monkeypatch):
         "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
-    monkeypatch.setattr(cascade, "deciding_enabled", lambda: False)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)
     monkeypatch.setattr(
         graph_ops, "write_reviews", lambda rows, **_: writes.append(list(rows))
     )
