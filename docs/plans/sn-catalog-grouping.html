@@ -25,8 +25,8 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="125">
-<meta name="plan-modified" content="2026-10-21">
+<meta name="plan-version" content="126">
+<meta name="plan-modified" content="2026-10-22">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab,c5e94c099ff238c7925e506686016698bdb04b64,178cfa68ba0e7aae45c0b76ea3ccc0511eb8c07d,02a113fb8754bf9a57a279726afbdf1d85fc57f8">
 </head>
 <body>
@@ -634,6 +634,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s3-name-domain-writer-landed" data-who="reckon-build" data-when="2026-10-21T01:40:00Z">
     <div class="r-comment-body"><p>The name-domain writer is on <code>main</code> (merge <code>393c7d836</code>, review 100/120). It stores each name's Jev domain decision and writes the domain, the source domains and the edges together, at a confidence floor of 0.68. §3 stays open for two nodes:</p><ul><li><code>scg-name-domain-route</code> routes every other domain writer through it: compose, consolidation, catalog import, export, <code>sn reclassify</code>, derived parents and the graph-ops sites. It also takes the review's reuse follow-ons: read the guidance through <code>load_domain_guidance</code>, drop the dead <code>_pretty</code>, and decouple a self-comparing assertion.</li><li>The repair of the live names follows.</li></ul><p><a href="/imas-codex/evidence/archive/sn-catalog-grouping-landed.html#s3-name-domain-writer">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261022T130605976765-review-of-scg-name-domain-route-pipeline-1d5d46ddf5ff" data-who="reckon-build" data-when="2026-10-22T13:36:59.002Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T094223817875-scg-name-domain-route-pipeline/review-records/r-20261022T094223817875-scg-name-domain-route-pipeline.json</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261014T182748718064-review-of-scg-domain-precedence-0faae66faa2c" data-who="reckon-build" data-when="2026-10-14T18:38:07.927Z">
     <div class="r-comment-body"><p>review of run r-20261014T180703200185-scg-domain-precedence (head 0faae66faa2ccd151b485115b287dd21cb5a16ff, base bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85) stored as a parsed six-dimension record — goal_fidelity 19, evidence 17, scope_discipline 20, durability 16, fit 18, reuse 17, total 107; one follow-on finding (the chat prompt's category list is not reordered by the precedence it claims to follow)</p></div>

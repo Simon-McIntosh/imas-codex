@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 3,
+  "added_failure_ids": [
+    "tests/standard_names/test_catalog_import_divergence.py::TestPublishRefusesDivergedTree::test_diverged_tree_is_refused_with_an_error",
+    "tests/standard_names/test_catalog_import_divergence.py::TestPublishRefusesDivergedTree::test_in_sync_tree_still_publishes",
+    "tests/standard_names/test_catalog_import_divergence.py::TestPublishRefusesDivergedTree::test_uncomparable_tree_still_publishes"
+  ],
+  "completed_at": "2026-10-22T13:36:59.002Z",
+  "dispatched_at": "2026-10-22T13:16:52Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html",
+      "line": 234,
+      "severity": "follow-on",
+      "text": "The landing fragment states the base recheck shows 'the same three time out too', but the log it cites (logs/gate-divergence-base-recheck.log) records 2 failed, 4 passed: test_diverged_tree_is_refused_with_an_error passed on the base arm, so only two of the three added failures are shown load-driven and the third is un-reproduced at base."
+    },
+    {
+      "file": "tests/standard_names/test_catalog_import_divergence.py",
+      "line": 171,
+      "severity": "follow-on",
+      "text": "The three added failures (head 3 vs base 0 on the divergence file) are each a pytest-timeout at subprocess.run and reach no assertion about the routed code, so done_when's 'no added failures' is not cleanly demonstrated: the gate ran at load average near 61 and the same timeouts recur on the base arm for two of the three, but the word 'no added failures' overstates the arm delta of three."
+    },
+    {
+      "file": "tests/standard_names/test_domain_writer_routing.py",
+      "line": 8,
+      "severity": "follow-on",
+      "text": "The module docstring cites `maybe_preserve_domain`, a function that does not exist; the banned selector the tuple checks is `maybe_promote_domain` (domain_ranking.py:32), so the comment names a non-existent anchor."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against efb8f7f3c5f2c89845e824f0e4f5b5616972f853; twelve files, all inside the declared-or-granted scope.",
+    "done_when": "done_when names a gate with no added failures plus the kept negative-control log and the fragment; logs/negative-control.log is present and reproduces, but the head arm carries three added failures against the base arm, so that clause is not met as stated.",
+    "goal": "The node goal is to route the pipeline's domain writers through the one writer; workers.py:3868 adds _write_composed_name_domains which calls domain_decision.write_name_domain, and the four routed read paths stop selecting a domain.",
+    "manifest": "Read; it records status complete, the seven commits, head 4 failed 410 passed 2 skipped, and negative control 8 failed 8 passed.",
+    "write_paths": "The manifest's declared paths list export.py and the five test files, reached under the two fence grants the fragment records; the graph-ops module is untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to route the pipeline's domain writers through the one writer; workers.py:3868 adds _write_composed_name_domains calling domain_decision.write_name_domain and the four routed read paths stop selecting a domain.\nVERDICT done_when: done_when names a gate with no added failures plus the kept negative-control log and the fragment; logs/negative-control.log is present but the head arm carries three added failures against the base arm.\nVERDICT write_paths: the manifest's declared paths list export.py and the five test files, reached under the two fence grants the fragment records; the graph-ops module is untouched.\nVERDICT manifest: read; it records status complete, the seven commits, head 4 failed 410 passed 2 skipped, and negative control 8 failed 8 passed.\nVERDICT diff: read commit by commit against the base; twelve files, all inside the declared-or-granted scope.\nCALL_SITES: imas_codex/standard_names/export.py:3356, imas_codex/standard_names/export.py:3374, imas_codex/standard_names/consolidation.py:114, imas_codex/standard_names/consolidation.py:322, imas_codex/standard_names/workers.py:4837, imas_codex/standard_names/workers.py:6843, imas_codex/standard_names/publish.py:525\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: workers.py:3868 routes the composing path through domain_decision.write_name_domain and consolidation.py:75, catalog_import.py:525 and export.py:1561 stop choosing a domain themselves.\nSCORE evidence: 12\nJUSTIFICATION evidence: the arm delta from logs/gate-base.log and logs/gate-head-repair.log is three added failures, so the gate does not show done_when's 'no added failures', though the negative control at logs/negative-control.log does reproduce.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: export.py and five test files sit outside the brief's literal list but inside the two grants the fragment at docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html records, and graph_ops.py is untouched.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_domain_writer_routing.py fails on the restored selector call (logs/negative-control.log, 8 failed) and the consolidation assertions would redden if _resolve_physics_domains returned a primary, though the helper's behaviour is untested and the guard is textual.\nSCORE fit: 15\nJUSTIFICATION fit: the new helper follows workers.py's in-function import idiom but tests/standard_names/test_domain_writer_routing.py:8 cites maybe_preserve_domain, a name that does not exist.\nSCORE reuse: 19\nJUSTIFICATION reuse: workers.py:3868 extends the existing one writer at domain_decision.py:409 rather than duplicating it, removing the selector capability from four modules.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html:234 follow-on: the fragment claims the base recheck shows the same three timeouts while its cited log records two.\nFINDING tests/standard_names/test_catalog_import_divergence.py:171 follow-on: three head-vs-base added failures are pytest-timeouts reaching no routed assertion, so done_when's no-added-failures clause is not cleanly demonstrated.\nFINDING tests/standard_names/test_domain_writer_routing.py:8 follow-on: the docstring cites maybe_preserve_domain, which does not exist.",
+  "review_run_id": "r-20261022T130605976765-review-of-scg-name-domain-route-pipeline-1d5d46ddf5ff",
+  "reviewed_base_sha": "efb8f7f3c5f2c89845e824f0e4f5b5616972f853",
+  "reviewed_head_sha": "1d5d46ddf5ff4251295406f91d5584a62119c59f",
+  "reviewed_run_id": "r-20261022T094223817875-scg-name-domain-route-pipeline",
+  "rubric": "landed_node",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T14:29:14.655182+00:00",
+  "total": 96
+}
