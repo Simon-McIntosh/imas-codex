@@ -276,6 +276,64 @@ WRITER_MECHANISM = {
     ),
 }
 
+#: The merged locus registry entry, checked before the fourth edit rather than
+#: assumed: if it still named a second height there would be nothing to steer.
+LOCUS_DEFINITION_CHECK = {
+    "concept": "outboard_midplane",
+    "library": "imas_standard_names (editable sibling checkout)",
+    "registry_file": ("imas_standard_names/grammar/vocabularies/locus_registry.yml"),
+    "rendered_sentence": (
+        "The low-field-side equatorial midplane: the point of maximum major "
+        "radius on the flux surface in question. For a value at the "
+        "separatrix intersection use outboard_midplane_separatrix."
+    ),
+    "names_a_second_height": False,
+    "names_the_midplane_identifier": False,
+    "method": (
+        "locus_definition_sentence() was called for the outboard_midplane "
+        "concept read from load_locus_registry(), rendering the definition the "
+        "writer appends; the rendered string was then searched for the terms "
+        "the earlier definition used."
+    ),
+    "significance": (
+        "the definition is now the point of maximum major radius on the flux "
+        "surface in question. For this quantity the flux surface in question "
+        "is the inner separatrix, whose maximum major radius is the height the "
+        "body already calls Z*, so the appended sentence and the body describe "
+        "one height and the defect every earlier review docked no longer "
+        "exists. The steer can therefore be a regeneration that keeps Z* and "
+        "drops nothing, rather than a further attempt to delete the sentence."
+    ),
+}
+
+#: The fourth steering edit: the registry has changed, so this regenerates the
+#: text so the current sentence is the one that lands, and changes nothing else.
+GAP_STEER4_EDIT_COMMAND = (
+    "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane "
+    "--hint '<keep Z* as the measurement height, the inner separatrix maximum-R "
+    "height; preserve the opening, equation, definitions, frame and both "
+    "cross-references exactly, dropping nothing; the appended locus sentence "
+    "now names that same height, so leave it in place and add no further "
+    "midplane statement; name no DD field, IDS path or option value>' "
+    "--axis docs --scope self --reason '<the merged registry definition makes "
+    "the locus sentence agree with the body, so one regeneration is needed to "
+    "land it and nothing else changes>' --stage-only"
+)
+GAP_STEER4_EDIT_LOG = os.path.join(_LOGS, "gap-steer4-edit-stage.log")
+GAP_STEER4_EDIT_DRYRUN_LOG = os.path.join(_LOGS, "gap-steer4-edit-dryrun.log")
+GAP_STEER4_RUN_ID = "sn-edit-20261022T142002Z"
+
+#: The fourth review: one scope over the re-edit's run id, with the cost limit
+#: carrying headroom above the summed three-seat reservation so that no seat is
+#: deferred for want of budget.
+GAP_STEER4_DOCS_COMMAND = (
+    "uv run --no-sync imas-codex sn run --docs-only "
+    "--scope-run-id sn-edit-20261022T142002Z --cost-limit 0.60 "
+    "--skip-global-maintenance"
+)
+GAP_STEER4_DOCS_LOG = os.path.join(_LOGS, "gap-steer4-docs-review.log")
+GAP_STEER4_COMMENTS = os.path.join(_LOGS, "gap-docs-reviewer-comments-steer4.json")
+
 #: radial's name: no ``sn edit`` mode re-reviews a name in place, so the name
 #: was re-reviewed through the pipeline's own rotation.
 RADIAL_NAME_COMMAND = (
