@@ -41,14 +41,22 @@ shares no device token with it</pre>
     stranding the hold did not anticipate is still refused.
   </p>
   <p>
-    The would-strand test is the invariant's own rule, not a second definition:
-    a name is held when every one of its non-stale producers is in the detach
-    set, unless the invariant exempts the name (a superseded name, or a derived
-    parent with a live child). Producer sets and exemptions are read from the
-    audit's single attachments read — it now also returns each row's source
-    status, the name status, and a derived-parent-with-live-child flag composed
-    from the invariant's own <code>_live_child_cypher()</code> — so the hold adds
-    no query to the pass.
+    The would-strand test is the invariant's own rule, not a second definition,
+    and Python performs no part of it. The audit's single attachments read also
+    returns, per name, the set of its non-stale producers
+    (<code>live_producers</code>, collected from the name side so a producer
+    without a <code>FROM_DD_PATH</code> edge is still counted) and the invariant's
+    own derived-parent exemption (<code>sn_stranding_exempt</code>, composed from
+    <code>source_invariant._derived_parent_cypher()</code> over
+    <code>sn.origin</code> and the live-child block, its braces doubled because
+    the read is a <code>str.format</code> template). The hold then does only the
+    arithmetic the read cannot — subtract the strings the detach set would remove
+    from a name's producer set and see whether any survives — so the hold and the
+    <code>require_producing_sources</code> backstop cannot drift. The template's
+    call contract is unchanged: <code>scope</code> remains its only placeholder,
+    so the <code>.format(scope=…)</code> calls at
+    <code>tests/standard_names/test_attachment_audit.py:690,707,1017,1018</code>
+    still work, and no query is added to the pass.
   </p>
 
   <h3 id="shc-reconcile-holds-stranding-tests">Tests</h3>
@@ -65,7 +73,7 @@ shares no device token with it</pre>
       mirror are untouched.
     </li>
     <li id="shc-reconcile-holds-stranding-test-rest">
-      <code>test_other_rejected_attachments_are_detached_in_the_pass</code> — a
+      <code>test_other_rejected_attachments_are_detached_in_the_same_pass</code> — a
       rejected attachment on a name with another producer is detached in the
       same pass, with the accepted one and the surviving producer left intact.
     </li>
@@ -101,10 +109,20 @@ held: ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z
 
   <h3 id="shc-reconcile-holds-stranding-gate">Gate</h3>
   <p>
-    Base <code>26b0ce3a1</code> on the eight touched-code test files:
-    152 passed, exit 0. Head on the same files plus the new stranding test and
-    <code>tests/graph/test_cypher_property_check.py</code>: 156 passed, 0 failed,
-    exit 0 — no added failures. The graph-marked stranding tests run explicitly
-    under <code>-m graph</code> against the disposable instance: 3 passed, exit 0.
+    Default arm: base <code>26b0ce3a1</code> 152 passed, exit 0; head 156 passed,
+    0 failed, exit 0 (the base files plus the new stranding test and
+    <code>tests/graph/test_cypher_property_check.py</code>) — no added failures.
+    Graph arm, both revisions against the same empty disposable Neo4j, the exact
+    condition that makes the template's call contract live:
+  </p>
+  <pre id="shc-reconcile-holds-stranding-gate-graph">base 26b0ce3a1  -m graph, 9 files:   9 failed, 19 passed  EXIT=1
+head            -m graph, 10 files:  9 failed, 22 passed  EXIT=1
+added failure ids: none   fixed: none   (the two failure sets are identical)
+call-contract probe: <code>_ATTACHMENTS_QUERY.format(scope="")</code> returns 2250 chars, no
+  residual braces, on head  — the template still takes one placeholder</pre>
+  <p>
+    The nine graph failures are the empty-graph fixture failures that are present
+    at base; they are flat, and neither arm raises <code>KeyError</code>. The head
+    arm carries three more passes: the stranding tests themselves.
   </p>
 </section>

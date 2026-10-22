@@ -171,6 +171,18 @@ _HISTORICAL_NAME_STAGES: frozenset[str] = frozenset({"superseded"})
 #: wrong, and rewinding it costs a single re-compose.
 _MIN_WIPEOUT_ATTACHMENTS = 2
 
+
+#: The invariant's own derived-parent exemption, escaped for ``str.format``: the
+#: hold must excuse exactly the names ``require_producing_sources`` excuses, so
+#: the clause is composed in from the invariant rather than restated. Braces are
+#: doubled because the read it lands in is a ``str.format`` template.
+def _stranding_exemption_column() -> str:
+    """Return the invariant's derived-parent exemption clause, ``format``-escaped."""
+    from imas_codex.standard_names.source_invariant import _derived_parent_cypher
+
+    return _derived_parent_cypher().replace("{", "{{").replace("}", "}}")
+
+
 #: Every attachment the graph asserts, with the unit context the dimensionality
 #: rule needs on both sides. Sibling source paths are NOT collected here: the
 #: pairwise rule must see only the siblings already ACCEPTED (compose semantics,
@@ -183,29 +195,35 @@ _MIN_WIPEOUT_ATTACHMENTS = 2
 #: ``extracted`` — that would strand the good name it already produced.
 #:
 #: It also carries what the stranding hold needs, so the hold costs no second
-#: read: each row's ``source_status`` (a producer is a ``PRODUCED_NAME`` source
-#: whose status is not ``stale``, the invariant's own rule) and the name's
-#: ``sn_status`` and derived-parent-with-live-child flag, which are exactly the
-#: exemptions ``require_producing_sources`` applies. The derived-parent clause is
-#: composed in at call time from the invariant so there is only one definition of
-#: a name the invariant excuses.
-_ATTACHMENTS_QUERY = """
+#: read: the name's live producers and the invariant's own exemption for the
+#: name. ``live_producers`` is collected from the name side, so a producer that
+#: has no ``FROM_DD_PATH`` edge is still counted — the hold must never read such
+#: a name as sourceless. ``sn_stranding_exempt`` is the invariant's derived-parent
+#: test itself, composed in here, so the read reports which names
+#: ``require_producing_sources`` excuses rather than restating the rule.
+_ATTACHMENTS_QUERY = (
+    """
 MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
 {scope}
+OPTIONAL MATCH (live_producer:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+  WHERE live_producer.status <> 'stale'
+WITH src, sn,
+     [p IN collect(DISTINCT live_producer.id) WHERE p IS NOT NULL] AS live_producers
 MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
 OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
-WITH src, sn, dd, collect(DISTINCT du.id) AS dd_relationship_units
+WITH src, sn, dd, live_producers,
+     collect(DISTINCT du.id) AS dd_relationship_units
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(nu:Unit)
-WITH src, sn, dd, dd_relationship_units,
+WITH src, sn, dd, live_producers, dd_relationship_units,
      collect(DISTINCT nu.id) AS sn_relationship_units
 OPTIONAL MATCH (dd)-[:IN_IDS]->(ids:IDS)
-WITH src, sn, dd, dd_relationship_units, sn_relationship_units,
+WITH src, sn, dd, live_producers, dd_relationship_units, sn_relationship_units,
      collect(DISTINCT ids.dd_version) AS dd_versions
 OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
 WHERE other.id <> sn.id
   AND NOT (coalesce(other.name_stage, '') IN $historical)
-WITH src, sn, dd, dd_relationship_units, sn_relationship_units, dd_versions,
-     count(DISTINCT other) AS other_live_names
+WITH src, sn, dd, live_producers, dd_relationship_units, sn_relationship_units,
+     dd_versions, count(DISTINCT other) AS other_live_names
 RETURN src.id            AS source_node_id,
        dd.id             AS dd_path,
        sn.id             AS sn_id,
@@ -229,20 +247,18 @@ RETURN src.id            AS source_node_id,
        END AS sn_unit,
        sn_relationship_units,
        other_live_names,
-       src.status        AS source_status,
-       sn.status         AS sn_status,
-       {live_child} AS sn_has_live_child,
+       live_producers,
+       """
+    + _stranding_exemption_column()
+    + """ AS sn_stranding_exempt,
        dd.documentation  AS dd_documentation
 """
+)
 
 
 def _attachments_query(scope: str = "") -> str:
-    """Return the attachments read, composing the invariant's live-child clause."""
-    from imas_codex.standard_names.source_invariant import _live_child_cypher
-
-    return _ATTACHMENTS_QUERY.replace("{live_child}", _live_child_cypher()).replace(
-        "{scope}", scope
-    )
+    """Return the attachments read with its scope clause filled in."""
+    return _ATTACHMENTS_QUERY.format(scope=scope)
 
 
 #: Scope clause narrowing the read to one name. Used by the write-time gate on
@@ -1061,26 +1077,13 @@ def audit_attachments(
             key=lambda r: (r["dd_path"] or "", r["source_node_id"] or ""),
         )
         # The stranding hold's inputs, taken from this same read: the name's
-        # non-stale producers (the invariant counts exactly these) and whether
-        # the invariant excuses it. Both are per-name, so any row of the group
-        # carries them.
+        # live producers and the invariant's own exemption for the name. Both
+        # are per-name, so any row of the group carries them, and neither rule
+        # is restated here.
         result.name_producers[sn_id] = sorted(
-            {
-                r["source_node_id"]
-                for r in group
-                if isinstance(r.get("source_status"), str)
-                and r["source_status"] != "stale"
-            }
+            {str(p) for p in (group[0].get("live_producers") or [])}
         )
-        head = group[0]
-        if (
-            (head.get("name_stage") or "") == "superseded"
-            or (head.get("sn_status") or "") == "superseded"
-            or (
-                (head.get("origin") or "") == "derived"
-                and bool(head.get("sn_has_live_child"))
-            )
-        ):
+        if bool(group[0].get("sn_stranding_exempt")):
             result.stranding_exempt_names.add(sn_id)
         accepted_paths: list[str] = []
         group_rejected: list[AttachmentVerdict] = []
@@ -2952,13 +2955,14 @@ def count_unattributed_detachments(gc: Any | None = None) -> int:
 def _names_stranded_by_detach(
     result: AttachmentAuditResult, actionable: list[AttachmentVerdict]
 ) -> set[str]:
-    """Names whose every non-stale producer is in *actionable*'s detach set.
+    """Names the pending detach would leave with no producer the invariant counts.
 
-    The predicate is the invariant's own: a name is stranded once it has no
-    remaining non-stale producer, unless the invariant exempts it (superseded,
-    or a derived parent with a live child). Both the producer sets and the
-    exemptions come from the audit's single read, so the hold costs no second
-    query and runs for a dry run too — the held list is the operator's worklist.
+    The audit read supplies both halves of the test, so nothing about what makes
+    a name live and sourceless is restated here: ``live_producers`` is the
+    invariant's own producer set, and ``sn_stranding_exempt`` is the invariant's
+    own derived-parent exemption. All this adds is the arithmetic the read cannot
+    do — remove the producers the detach set would remove and see whether any
+    survives.
     """
     detaching: dict[str, set[str]] = {}
     for v in actionable:
@@ -2967,7 +2971,7 @@ def _names_stranded_by_detach(
         sn_id
         for sn_id, dropping in detaching.items()
         if result.name_producers.get(sn_id)
-        and set(result.name_producers[sn_id]) <= dropping
+        and not (set(result.name_producers[sn_id]) - dropping)
         and sn_id not in result.stranding_exempt_names
     }
 
