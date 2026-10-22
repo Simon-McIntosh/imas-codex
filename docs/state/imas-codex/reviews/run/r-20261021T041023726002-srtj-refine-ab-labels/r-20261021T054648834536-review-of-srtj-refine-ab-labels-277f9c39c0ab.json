@@ -5,7 +5,7 @@
   "added_failure_ids": [],
   "call_site_count": 0,
   "call_sites": [],
-  "completed_at": "",
+  "completed_at": "2026-10-21T06:06:40.270Z",
   "dispatched_at": "2026-10-21T05:47:08Z",
   "findings": [
     {
@@ -49,6 +49,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-22T09:29:24.916198+00:00",
+  "timestamp": "2026-10-22T09:30:41.674175+00:00",
   "total": 101
 }
