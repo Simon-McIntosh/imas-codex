@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="175">
+<meta name="plan-version" content="176">
 <meta name="plan-modified" content="2026-10-23">
 </head>
 <body>
@@ -612,6 +612,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261022T185704097236-isn-pin-0-10-1" data-who="reckon-build" data-when="2026-10-22T21:34:10Z">
     <div class="r-comment-body"><p>Pinned both imas-standard-names requirements in pyproject.toml from ==0.10.0 to ==0.10.1 - [build-system] requires and the dev group under [dependency-groups] - and regenerated uv.lock, which came back byte-identical because the tool.uv.sources editable override records the sibling path in place of a version; the gate `uv lock --check` exits 0 and the committed diff is pyproject.toml alone.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261022T200700587883-shc-apply-drift-scope" data-who="reckon-build" data-when="2026-10-22T21:01:33.028Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope.html</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
