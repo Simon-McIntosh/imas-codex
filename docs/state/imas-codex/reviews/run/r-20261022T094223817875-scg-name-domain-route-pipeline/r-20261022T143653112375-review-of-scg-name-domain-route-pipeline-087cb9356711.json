@@ -7,6 +7,13 @@
   ],
   "completed_at": "2026-10-22T14:56:53.552Z",
   "dispatched_at": "2026-10-22T14:37:44Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "settled by scg-route-divergence-check (merge f99ea4aa7): the three divergence-test failures are per-test timeouts present at base, never assertions, with check_catalog patched out",
+      "recorded_at": "2026-10-22T17:52:09.489878+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html",
