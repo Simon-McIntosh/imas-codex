@@ -1,0 +1,646 @@
+{
+  "record": {
+    "schema": "srtj-docs-disagreement-sheet",
+    "created_at": "2026-10-22T14:27:01.537564+00:00",
+    "code_revision": "7ab8ca309570a263c7efb4231f782d9d252cbda9",
+    "module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-disagreement-sheet/docs/evidence/fragments/sn-review-through-jev/srtj-docs-disagreement-sheet-run.py",
+    "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-disagreement-sheet",
+    "source_pieces": [
+      "cascade-docs-jev-only.json",
+      "incumbent-docs-part1of4.json",
+      "incumbent-docs-part2of4.json",
+      "incumbent-docs-part3of4.json"
+    ],
+    "archive": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+    "seeds": {
+      "shuffle": 20261022,
+      "control": 20261022
+    },
+    "definition": {
+      "shared": "an item present in both the cascade documentation piece and an incumbent documentation piece",
+      "decided": "a shared item that neither judge left unjudged; an item either judge left with no route is excluded from the sheet",
+      "cascade_decision": "the judge's stored route, accept or refine",
+      "panel_decision": "accept when the panel's stored score is at or above its matched cutoff 0.85, refine below it",
+      "disagreement": "a decided item whose two decisions differ",
+      "control": "a decided item whose two decisions agree"
+    },
+    "panel_min_score": 0.85,
+    "derivation": {
+      "shared": 164,
+      "decided": 101,
+      "undecided": 63,
+      "disagreement_jev_accept_panel_refine": 49,
+      "disagreement_panel_accept_jev_refine": 0,
+      "control_both_accept": 38,
+      "control_both_refine": 14
+    },
+    "table_reference": {
+      "source": "srtj-jev-only-dry-run.html",
+      "shared": 164,
+      "both_accept": 38,
+      "jev_accept_panel_refine": 49,
+      "panel_accept_jev_refine": 0,
+      "both_refine": 14,
+      "panel_unjudged": 16,
+      "jev_unjudged": 58
+    },
+    "panel_route_reading": {
+      "both_accept": 3,
+      "jev_accept_panel_refine": 64,
+      "panel_accept_jev_refine": 0,
+      "both_refine": 14,
+      "disagreements": 64
+    },
+    "controls": {
+      "per_class": 14,
+      "both_accept_pool": 38,
+      "both_refine_pool": 14,
+      "shortfall": 0
+    },
+    "scratch_instance": {
+      "path": "/tmp/reckon-crew-scratch/r-20261022T124534566075-srtj-docs-disagreement-sheet/disagreement-sheet-1rk7074d/instance",
+      "uri": "bolt://127.0.0.1:48043",
+      "log": "/tmp/reckon-crew-scratch/r-20261022T124534566075-srtj-docs-disagreement-sheet/disagreement-sheet-1rk7074d/instance/logs/neo4j-temp.log"
+    },
+    "export_probe": {
+      "item_id": "accumulated_deuterated_methane_prefill_count",
+      "name": "accumulated_deuterated_methane_prefill_count",
+      "unit": "1",
+      "source_path": "summary/gas_injection_prefill/methane_deuterated/value",
+      "source_description": "Value",
+      "source_unit": "1",
+      "documentation": "This quantity is the cumulative amount of deuterated methane introduced during the plasma prefill phase, expressed as an equivalent-electron inventory. It represents neutral CD4 molecules before plasma breakdown, not the post-breakdown gas-injection inventory.\n\nThe equivalent-electron count is defined by\n\n$$\nN_{e,\\rm eq}^{\\rm prefill} = \\int_{t_0}^{t_b} \\dot{N}_{e,\\rm eq}^{\\rm CD_4}(t)\\,dt = 10N_{\\rm CD_4}^{\\rm prefill}\n$$\n\nwhere $N_{e,\\rm eq}^{\\rm prefill}$ is the accumulated equivalent-electron inventory, $\\dot{N}_{e,\\rm eq}^{\\rm CD_4}$ is the [deuterated methane source rate](name:deuterated_methane_source_rate), $t_0$ and $t_b$ delimit prefill before breakdown, and $N_{\\rm CD_4}^{\\rm prefill}$ is the accumulated number of CD4 molecules. The factor ten is the total electron count of one fully ionizable CD4 molecule. The species-resolved quantity contributes to the [accumulated total prefill gas count](name:accumulated_total_prefill_gas_count), which sums equivalent-electron inventories across gas species."
+    },
+    "row_counts": {
+      "total": 77,
+      "disagreement": 49,
+      "control": 28
+    },
+    "refusal": {
+      "checks": [
+        {
+          "planted": "judge route",
+          "refused": true,
+          "message": "row carries a judge's route, score or comment: ['route']"
+        },
+        {
+          "planted": "field outside the seven",
+          "refused": true,
+          "message": "row carries fields outside the seven: ['labeller_note']"
+        }
+      ],
+      "all_refused": true
+    },
+    "class_counts": {
+      "disagreement": 49,
+      "control": 28
+    },
+    "scratch_stopped": true,
+    "scratch_removed": {
+      "path": "/tmp/reckon-crew-scratch/r-20261022T124534566075-srtj-docs-disagreement-sheet/disagreement-sheet-1rk7074d",
+      "exists_after": false
+    },
+    "status": "accepted"
+  },
+  "key": [
+    {
+      "sheet_id": "S0001",
+      "item_id": "line_averaged_tungsten_density",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0002",
+      "item_id": "helium_4_density_at_pedestal_top",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0003",
+      "item_id": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0004",
+      "item_id": "hydrogen_density_at_pedestal_top",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0005",
+      "item_id": "parallel_fast_neutral_pressure",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0006",
+      "item_id": "line_averaged_lithium_density",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0007",
+      "item_id": "current_due_to_non_inductive_current_drive",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0008",
+      "item_id": "current_at_divertor_target",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0009",
+      "item_id": "second_local_tangential_back_surface_radius_of_optical_element",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0010",
+      "item_id": "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0011",
+      "item_id": "surface_current_per_toroidal_and_poloidal_mode_number_of_ion_cyclotron_heating_antenna",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0012",
+      "item_id": "radial_perturbed_plasma_magnetic_field_imaginary_part",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0013",
+      "item_id": "normal_coordinate_of_correction_coil",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0014",
+      "item_id": "krypton_source_rate_due_to_gas_injection",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0015",
+      "item_id": "total_heating_power_due_to_fusion_reactions",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0016",
+      "item_id": "maximum_angle_of_electron_cyclotron_launcher_mirror",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0017",
+      "item_id": "ratio_of_vertical_vorticity_to_major_radius",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0018",
+      "item_id": "per_toroidal_mode_fast_ion_charge_state_power",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0019",
+      "item_id": "resistance_of_shunt",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0020",
+      "item_id": "second_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0021",
+      "item_id": "alpha_angle_of_plasma_filament",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0022",
+      "item_id": "trapped_fast_ion_power_density_due_to_collisions",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0023",
+      "item_id": "nuclear_power_density_of_limiter_tile",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0024",
+      "item_id": "current_of_divertor_tile",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0025",
+      "item_id": "perpendicular_power_normalized_of_beam_tracing_beam",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0026",
+      "item_id": "width_of_iron_core_segment",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0027",
+      "item_id": "lithium_density_at_limiter",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0028",
+      "item_id": "ion_charge_state_particle_flux_limiter_coefficient",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0029",
+      "item_id": "etendue_of_spectrometer",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0030",
+      "item_id": "parallel_ion_heat_convection_velocity",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0031",
+      "item_id": "toroidal_ion_charge_state_momentum_convection_velocity",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0032",
+      "item_id": "maximum_of_back_surface_neutron_flux",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0033",
+      "item_id": "ion_energy_diffusion_coefficient",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0034",
+      "item_id": "electron_particle_flux_at_wall_due_to_pumping",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0035",
+      "item_id": "electron_density_at_pellet_path",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0036",
+      "item_id": "nuclear_heating_power_of_breeder_blanket_layer",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0037",
+      "item_id": "outer_radius_of_poloidal_field_coil",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0038",
+      "item_id": "vertical_back_surface_curvature_of_optical_element",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0039",
+      "item_id": "radial_perturbed_plasma_magnetic_vector_potential_imaginary_part",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0040",
+      "item_id": "deposited_power_at_divertor_target_due_to_halo_current",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0041",
+      "item_id": "accumulated_deuterated_methane_prefill_count",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0042",
+      "item_id": "toroidal_conductivity",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0043",
+      "item_id": "vertical_total_current_density",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0044",
+      "item_id": "second_local_tangential_coordinate_of_hard_xray_detector",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0045",
+      "item_id": "normalized_particle_mass",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0046",
+      "item_id": "vertical_conductivity",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0047",
+      "item_id": "neutral_particle_flux_at_wall_due_to_recombination",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0048",
+      "item_id": "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0049",
+      "item_id": "plasma_energy",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0050",
+      "item_id": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0051",
+      "item_id": "ion_average_temperature_at_post_sawtooth_crash",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0052",
+      "item_id": "first_local_tangential_width_of_soft_xray_detector",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0053",
+      "item_id": "radial_volumetric_force",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0054",
+      "item_id": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0055",
+      "item_id": "volume_integrated_particle_source_rate",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0056",
+      "item_id": "implicit_ion_energy_source_rate",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0057",
+      "item_id": "vertical_vorticity",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0058",
+      "item_id": "tilt_angle_of_passive_loop",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0059",
+      "item_id": "y_direction_unit_vector_of_neutron_detector",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0060",
+      "item_id": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0061",
+      "item_id": "toroidal_helium_4_velocity_at_magnetic_axis",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept"
+    },
+    {
+      "sheet_id": "S0062",
+      "item_id": "vertical_coordinate_of_antenna_strap",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0063",
+      "item_id": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0064",
+      "item_id": "toroidal_magnetic_field_at_flux_surface",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0065",
+      "item_id": "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0066",
+      "item_id": "oxygen_count_accumulated_due_to_gas_injection",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0067",
+      "item_id": "first_local_tangential_width_of_filter_window",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0068",
+      "item_id": "line_averaged_helium_4_density",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0069",
+      "item_id": "accumulated_deuterium_count_due_to_gas_injection",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0070",
+      "item_id": "electron_absorbed_wave_power",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0071",
+      "item_id": "polarization_angle_at_constraint_position",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0072",
+      "item_id": "poloidal_neutral_energy_diffusivity",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0073",
+      "item_id": "external_loop_voltage",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0074",
+      "item_id": "neutral_internal_state_particle_flux_at_wall",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0075",
+      "item_id": "toroidal_carbon_velocity_at_pedestal_top",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0076",
+      "item_id": "alfven_frequency_real_part",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine"
+    },
+    {
+      "sheet_id": "S0077",
+      "item_id": "vertical_current_density_due_to_ion_inertia",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine"
+    }
+  ]
+}
