@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-22T11:17:54.663Z",
+  "dispatched_at": "2026-10-22T10:53:01Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.json",
+      "line": "129",
+      "severity": "follow-on",
+      "text": "the second-cause example quote prints `failure_reason=None`, but the piece it is labelled a quote of stores the literal string \"no route row\" (docs/evidence/fragments/sn-review-through-jev/srtj-cohort/cascade-docs-jev-only.json, item accumulated_ethane_count), because srtj-cohort-run.py:749 substitutes that string for an empty reason; the quote misstates the field it quotes, so a reader checking the exemplar against the piece finds a different value."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html",
+      "line": "60",
+      "severity": "follow-on",
+      "text": "the paired accept-rate comparison is described as being \"over the items both judged\", but the 164 shared items include 58 that Jev left undecided and 16 that the incumbent left undecided, which the rate counts as non-accept; the denominator differs from the 101 both-decided items the dry run's own agreement table (reproduced at srtj-docs-dry-run-diagnosis.json:150-161) uses, and the wording hides that difference from a reader comparing the two tables."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093834366103-srtj-docs-dry-run-diagnosis/manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "the tests: line carries an unsubstituted `<worktree>` placeholder rather than the literal command a shell was handed, and the referenced runner.log opens with INFO lines rather than the revision, tree and command header the contract names, so the gate cannot be re-run from the manifest alone even though its recorded result (EXIT=0) is on disk and `reckon crew check --manifest` returns ok."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the single commit e6868944717610e8dd84998cbb568037927e100f against base 7d82df99dcb516269d839927e4330e99683085da: it adds 2464 lines, all insertions, across srtj-docs-dry-run-diagnosis-run.py (789), .html (100), .json (431) and docs/figures/sn-review-through-jev/srtj-docs-dry-run-diagnosis/srtj-docs-dry-run-diagnosis.svg (1144). The runner loads the two cascade pieces, the incumbent piece files, the dry run's json and thresholds, imports paired_bootstrap from the existing operating-point helper, and writes the json/html/figure read-only; no production module is touched.",
+    "done_when": "read; the done_when asks srtj-docs-dry-run... the json, written by its runner with a log ending EXIT=0, to classify the 76 by cause and the 49 by the incumbent's reason with counts summing to their populations and quoted examples and a name accept rate against the incumbent with an interval. srtj-docs-dry-run-diagnosis.json holds q1 (76 = 4 + 72), q2 (49 = 15 + 34) and q3 for both axes with intervals; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093834366103-srtj-docs-dry-run-diagnosis/runner.log:18 ends `EXIT=0 srtj-docs-dry-run-diagnosis.json srtj-docs-dry-run-diagnosis.html`.",
+    "goal": "the node's goal is to diagnose why the Jev documentation review failed its dry run on the fixed cohort; the landed change is the read-only runner docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis-run.py and its json/html landing fragment, which classify the 76 undecided documentation items by cause (4 deciding-path, 72 no-route-row), the 49 Jev-accept/incumbent-refine items (15 on the cutoff, 34 unreadable), and restate the accept-rate check as a paired difference.",
+    "manifest": "read; manifest.md reports status complete, commit e6868944717610e8dd84998cbb568037927e100f, the four changed paths, runner.log as ending EXIT=0, three follow-ons (empty-fault retry policy, persisting the incumbent's reason line, recomputing the target on the cohort) and no blockers. Its tests: line at manifest.md:20 is a template with a literal `<worktree>` placeholder and the runner.log it names has no command/header line, so the tests line alone cannot be re-run. `reckon crew check --manifest --run r-20261022T093834366103-srtj-docs-dry-run-diagnosis` returns ok:true with no findings.",
+    "write_paths": "read the manifest's declared write paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093834366103-srtj-docs-dry-run-diagnosis/manifest.md:3-8 - the runner, the json, the html and docs/figures/sn-review-through-jev/srtj-docs-dry-run-diagnosis; git show --stat e6868944 lists exactly those four files and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to diagnose why the Jev documentation review failed its dry run on the fixed cohort; the landed change is the read-only runner docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis-run.py and its json/html, which classify the 76 undecided documentation items by cause (4 deciding-path + 72 no-route-row), the 49 Jev-accept/incumbent-refine items (15 on the cutoff + 34 unreadable), and give the paired name and documentation accept-rate difference.\nVERDICT done_when: the done_when asks the json, written by its runner with a log ending EXIT=0, to classify the 76 by cause and the 49 by reason with counts summing to their populations and quoted examples and a name accept rate with interval; runner.log:18 is a bare `EXIT=0 srtj-docs-dry-run-diagnosis.json srtj-docs-dry-run-diagnosis.html`, the json's counts sum (76 = 4 + 72 at srtj-docs-dry-run-diagnosis.json:8-9, 49 = 15 + 34 at :148 and the two classes), and q3 carries both axes' intervals, so the gate asserts the measure.\nVERDICT write_paths: the manifest declares four paths - the runner, the json, the html and the figure directory docs/figures/sn-review-through-jev/srtj-docs-dry-run-diagnosis - and the diff adds exactly those four files and nothing else.\nVERDICT manifest: read; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093834366103-srtj-docs-dry-run-diagnosis/manifest.md reports status complete, commit e6868944, the four changed paths, runner.log as ending EXIT=0, `reckon crew check --manifest` ok, and three follow-ons; but its tests: line at manifest.md:20 carries a literal `<worktree>` placeholder rather than the path a shell was handed.\nVERDICT diff: read the single commit e6868944717610e8dd84998cbb568037927e100f against base 7d82df99dcb516269d839927e4330e99683085da; it adds 2464 lines across the runner (789), the html (100), the json (431) and the svg (1144), all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.json:7-400 holds all three answers the goal names, with the 76 split 4/72 and the 49 split 15/34 and the paired difference for both axes.\nSCORE evidence: 17\nJUSTIFICATION evidence: runner.log:3-6 records each answer's counts and the json reconciles with the pieces I re-read (76 undecided = 4 startswith-ValueError + 72 'no route row'; 49 = 15 at score 0.849 + 34), but srtj-docs-dry-run-diagnosis.json:129 quotes a field value that the piece does not hold.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in `git show --stat e6868944` is inside the four declared write paths in manifest.md:3-7.\nSCORE durability: 9\nJUSTIFICATION durability: srtj-docs-dry-run-diagnosis-run.py carries no assertion (grep -c assert = 0) that its two buckets cover the undecided set or that the counts sum, so a classification regression would emit a non-summing artifact with EXIT=0 and nothing reddens.\nSCORE fit: 18\nJUSTIFICATION fit: the runner follows the sibling evidence-runner idiom (HERE/STEM/digest/draw_figures) of docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py:928 and names nothing a plan or ticket identifier.\nSCORE reuse: 18\nJUSTIFICATION reuse: it imports paired_bootstrap from docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point-run.py:191 unchanged rather than writing a new interval, and derives the incumbent route the way srtj-cohort-run.py:928 _incumbent_routes does (score at panel_min_score, not the piece's shadow route field), so no owner is forked.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.json:129 follow-on: the second-cause example quote prints `failure_reason=None`, but the piece it is labelled a quote of stores the literal string \"no route row\" (srtj-cohort/srtj-cohort/cascade-docs-jev-only.json, item accumulated_ethane_count), because srtj-cohort-run.py:749 substitutes that string for an empty reason; the quote misstates the field it quotes, and the runner only prints the raw value for the first cause.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html:60 follow-on: the paired comparison is described as being \"over the items both judged\", but the 164 shared items include 58 that Jev left undecided and 16 the incumbent left undecided, which the rate counts as non-accept; the denominator differs from the 101 both-decided items the dry run's own agreement table uses, and the wording hides that difference from a reader comparing the two tables.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T093834366103-srtj-docs-dry-run-diagnosis/manifest.md:20 follow-on: the tests: line carries an unsubstituted `<worktree>` placeholder rather than the literal command a shell was handed, and the referenced runner.log opens with INFO lines rather than the revision, tree and command header the contract names, so the gate cannot be re-run from the manifest alone even though the recorded result is on disk and `reckon crew check --manifest` returns ok.\n",
+  "review_run_id": "r-20261022T103226568745-review-of-srtj-docs-dry-run-diagnosis-e68689447176",
+  "reviewed_base_sha": "7d82df99dcb516269d839927e4330e99683085da",
+  "reviewed_head_sha": "e6868944717610e8dd84998cbb568037927e100f",
+  "reviewed_run_id": "r-20261022T093834366103-srtj-docs-dry-run-diagnosis",
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T11:20:00Z",
+  "total": 101
+}

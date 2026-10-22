@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_findings": [
+    "The caption does not merely repeat a figure title: the figure carries no title and the caption describes both panels ('Left: ... Right: ...'), which is what the style rules ask for."
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-22T10:54:34Z",
+  "figures_reviewed": [
+    {
+      "canvas": "1008 x 518.4 pt (14 x 7.2 in, 1.94:1)",
+      "caption_source": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html",
+      "rendered_check": "rendered from the reviewed head with ImageMagick (`convert -density 200`, 2800x1440 px) and inspected whole and in left/right/top-right crops; SVG geometry cross-checked against the path coordinates in the source, so the verdicts below rest on the source, not on the renderer alone",
+      "source": "docs/figures/sn-review-through-jev/srtj-docs-dry-run-diagnosis/srtj-docs-dry-run-diagnosis.svg"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis-run.py",
+      "line": 498,
+      "severity": "follow-on",
+      "summary": "The right panel's zero reference is drawn on the wrong axis: `right.axvline(0.0, color=grey, linewidth=1.2, linestyle=(0, (1, 2)))` rules a dotted grey line vertically at x=0, but the panel's x-axis is categorical - the two data points sit at x=1 (`names`) and x=2 (`documentation`) - so x=0 is an empty slot one category-space to the left of the first point. In the SVG the rule runs from y=445.824 to y=72.576 at x=580.142584, just inside the left spine at x=564.568421, while the `names` point is at x=735.884211 and `documentation` at x=891.625837: the rule stands in blank space and marks no data. Because the plotted quantity is a signed difference ('Jev minus incumbent accept rate'), the zero a reader needs is a horizontal line at y=0 (`axhline`), and the figure contains exactly one dashed path, so no such line is drawn. The reader cannot see where the accept-rate difference crosses zero; the y-axis ticks (which include 0.00) are the only cue. It does not hide any data point or interval, so it does not hold the node, but the render spends ink on an element that carries nothing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-dry-run-diagnosis.html",
+      "line": 74,
+      "severity": "follow-on",
+      "summary": "The figure's caption renders as a Python 1-tuple literal, so the reader sees the punctuation of an unformatted tuple instead of the sentence: `<figcaption>(\"Left: the undecided documentation items of the dry run, split by the mechanism that left them undecided. Right: the difference between the two routes' accept rates over the items both judged, item-paired\",)</figcaption>`. The caption text is emitted through `f'...<figcaption>{cap}</figcaption>...'` (script line 594) from `payload['figures_rendered']`, whose third element is the JSON array `[\"Left: ...\"]` - a one-element list, not a string - so the interpolation prints `('...',)`. The stray leading `(\"` and trailing `\",)` are visible to a reader and read as a defect in the page; the caption prose itself is fine and does not merely repeat a caption title."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261022T103235466782-review-of-srtj-docs-dry-run-diagnosis-e68689447176-figure",
+  "reviewed_base_sha": "7d82df99dcb516269d839927e4330e99683085da",
+  "reviewed_head_sha": "e6868944717610e8dd84998cbb568037927e100f",
+  "reviewed_run_id": "r-20261022T093834366103-srtj-docs-dry-run-diagnosis",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    "RUBRIC legibility: pass - both panels read at a glance; 16 pt axis labels, 14 pt tick/direct labels, a value labelled directly beside every bar and every point, and no crowding in either panel.",
+    "RUBRIC data_ink: pass - the four counts and the two intervals are drawn as flat solid marks (grey #929292 and teal #246c78) with no gradients or ghosted layers; the data carry the ink.",
+    "RUBRIC decoration: fail - the right panel draws a grey dotted vertical rule at x=0, inside the axes and one category-slot to the left of the 'names' point, where no data sits; it is the only dashed element in the figure and it marks nothing a reader can use (see finding 1).",
+    "RUBRIC contrast: pass - body, tick and direct labels are near-black (#0b0b0b / #1a1a1a) or teal (#246c78, about 6:1 on white); the mid grey #929292 (about 3.1:1) is used for a bar fill and the rule, not for small text.",
+    "RUBRIC table_form: pass - two cause counts and two paired accept-rate differences with 95% intervals are naturally a bar chart beside an interval plot, and the numbers are given as direct labels rather than left to be read off the axes.",
+    "RUBRIC label_collision: pass - '4', '72', '+0.043', '+0.220', both axis labels and all tick labels sit in clear space; nothing is clipped at the canvas edge and no two text artists overlap or sit over the data (verified in the 2800x1440 render and in crops of both panels and the top-right corner)."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T11:17:15.315308+00:00",
+  "total": null
+}
