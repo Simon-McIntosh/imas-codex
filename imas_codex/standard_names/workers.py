@@ -7388,15 +7388,13 @@ async def process_refine_name_batch(
                     )
 
             # ── Fan-out trigger gate ─────────────────────────────────
-            # A routed refine uses its named failures; the incumbent path
-            # retains the reviewer-comment trigger.
-            reviewer_comments = item.get("reviewer_comments_per_dim_name")
-            check_trigger = {}
+            # A routed refine fires only when one of its named failures is
+            # a retrieval check at or above the calibrated threshold.
+            check_trigger: dict[str, Any] = {}
             if failed_checks:
                 from imas_codex.standard_names.review.checks import load_review_checks
 
                 check_trigger = {
-                    "trigger_source": "checks",
                     "checks": [
                         check
                         for check in load_review_checks()[0]
@@ -7408,15 +7406,7 @@ async def process_refine_name_batch(
                     },
                     "check_threshold": fanout_settings.refine_trigger_check_threshold,
                 }
-            fanout_eligible, reviewer_excerpt = should_trigger_fanout(
-                reviewer_comments_per_dim=reviewer_comments,
-                chain_length=chain_length,
-                chain_history=chain_history,
-                keywords=fanout_settings.refine_trigger_keywords,
-                dims=fanout_settings.refine_trigger_comment_dims,
-                char_cap=fanout_settings.refine_trigger_comment_chars,
-                **check_trigger,
-            )
+            fanout_eligible, reviewer_excerpt = should_trigger_fanout(**check_trigger)
 
             # ── Optional fan-out ─────────────────────────────────────
             lease = None

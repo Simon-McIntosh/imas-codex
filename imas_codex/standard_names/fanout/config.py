@@ -28,7 +28,6 @@ from __future__ import annotations
 import hashlib
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -92,43 +91,6 @@ class FanoutSettings(BaseModel):
 
     fanout_max_charge_per_cycle_escalation: float = 0.10
     """Hard cap on cumulative fan-out sub-event spend (escalation)."""
-
-    refine_trigger_keywords: tuple[str, ...] = (
-        "unclear",
-        "ambiguous",
-        "duplicate",
-        "consider",
-        "compare",
-        "decomposition",
-        "absorbed",
-        "compound",
-        "awkward",
-    )
-    """Trigger keywords for refine-site fan-out.
-
-    Matched case-insensitively against the reviewer-comment excerpt
-    extracted from :attr:`refine_trigger_comment_dims`.  The default
-    list combines disambiguation cues (``unclear``, ``ambiguous``,
-    ``duplicate``) with grammar-decomposition cues actually written
-    by the rubric judge (``decomposition``, ``absorbed``, ``compound``,
-    ``awkward``)."""
-
-    refine_trigger_comment_dims: tuple[str, ...] = (
-        "grammar",
-        "semantic",
-    )
-    """Reviewer-comment dims used by the trigger predicate.
-
-    Must match the actual ``reviewer_comments_per_dim_name`` keys
-    written by ``review_names`` (rubric: grammar / semantic /
-    convention / completeness).  Defaults to the two dims most
-    likely to surface disambiguation/decomposition signal."""
-
-    refine_trigger_comment_chars: int = 800
-    """Total excerpt length cap."""
-
-    refine_trigger_source: Literal["comments", "checks"] = "comments"
-    """Select the active refine trigger; comments remain the A/B control."""
 
     refine_trigger_check_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
     """Minimum failure probability for a retrieval check to trigger fan-out."""

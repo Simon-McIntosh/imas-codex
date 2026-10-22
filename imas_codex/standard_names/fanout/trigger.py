@@ -1,19 +1,18 @@
 """Trigger predicate + arm assignment for refine-site fan-out.
 
 The trigger gate is the orthogonality knob between fan-out and the
-existing grammar-retry compose path: fan-out fires *only* when
-prior reviewer feedback shows the kind of ambiguity / disambiguation
-trouble that targeted DD context could plausibly resolve.
+existing grammar-retry compose path: fan-out fires when an answered
+retrieval check's failure probability reaches the calibrated threshold,
+so the targeted DD context it buys is spent only where a named check
+asks for retrieval.  Reviewer comment text is never read — the comments
+a person writes stay on the node for people.
 
 Public surface
 --------------
 
-- :func:`extract_reviewer_excerpt` — flatten the dim-allow-listed
-  values of ``reviewer_comments_per_dim_name`` (parsing the JSON-string
-  representation if necessary) into a single truncated excerpt.
-- :func:`should_trigger_fanout` — return ``(fire, excerpt)`` from the
-  selected trigger source. The default comment source retains its chain
-  history and keyword rules.
+- :func:`should_trigger_fanout` — return ``(fire, excerpt)`` for the
+  refine call site.  ``excerpt`` is always empty: the check path reads
+  no comments.
 - :func:`should_trigger_fanout_from_checks` — fire on the maximum failure
   probability among answered checks that request retrieval.
 - :func:`assign_arm` — deterministic 50/50 (or
@@ -27,7 +26,6 @@ the refine worker calls it once per item before any LLM spend.
 from __future__ import annotations
 
 import hashlib
-import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -35,7 +33,6 @@ from imas_codex.standard_names.review.checks import ReviewCheck
 
 __all__ = [
     "assign_arm",
-    "extract_reviewer_excerpt",
     "should_trigger_fanout",
     "should_trigger_fanout_from_checks",
 ]
@@ -58,129 +55,24 @@ def should_trigger_fanout_from_checks(
     return bool(probabilities) and max(probabilities) >= threshold
 
 
-def _parse_comments(raw: object) -> dict[str, str]:
-    """Parse the per-dim reviewer-comments field.
-
-    Accepts either a ``dict[str, str]`` (already decoded) or a JSON
-    string (legacy graph storage).  Returns ``{}`` for ``None`` or
-    invalid input — the trigger predicate then naturally evaluates to
-    ``False``.
-    """
-    if raw is None:
-        return {}
-    if isinstance(raw, dict):
-        return {str(k): str(v) for k, v in raw.items() if v is not None}
-    if isinstance(raw, str):
-        try:
-            parsed = json.loads(raw)
-        except json.JSONDecodeError:
-            return {}
-        if isinstance(parsed, dict):
-            return {str(k): str(v) for k, v in parsed.items() if v is not None}
-    return {}
-
-
-def extract_reviewer_excerpt(
-    reviewer_comments_per_dim: object,
-    *,
-    dims: tuple[str, ...] | list[str],
-    char_cap: int,
-) -> str:
-    """Concatenate allow-listed reviewer comments and truncate.
-
-    Parameters
-    ----------
-    reviewer_comments_per_dim:
-        The graph-stored field (dict, JSON string, or ``None``).
-    dims:
-        Allow-list of dim keys to include.  Other
-        dims (e.g. ``convention``, ``grammar``) are ignored — those
-        failure modes are not what fan-out is designed to address.
-    char_cap:
-        Total excerpt length cap.
-
-    Returns
-    -------
-    The concatenated excerpt (`"<dim>: <comment>\\n..."` for each
-    allow-listed dim with a non-empty value), truncated to
-    ``char_cap`` characters.  Empty string when no allow-listed dim
-    has a value.
-    """
-    parsed = _parse_comments(reviewer_comments_per_dim)
-    if not parsed:
-        return ""
-    parts: list[str] = []
-    for dim in dims:
-        value = parsed.get(dim)
-        if not value:
-            continue
-        parts.append(f"{dim}: {value}")
-    if not parts:
-        return ""
-    excerpt = "\n".join(parts)
-    if char_cap > 0 and len(excerpt) > char_cap:
-        excerpt = excerpt[:char_cap]
-    return excerpt
-
-
 def should_trigger_fanout(
     *,
-    reviewer_comments_per_dim: object,
-    chain_length: int,
-    chain_history: list[Any] | None,
-    keywords: tuple[str, ...] | list[str],
-    dims: tuple[str, ...] | list[str],
-    char_cap: int,
-    trigger_source: str = "comments",
     checks: Sequence[ReviewCheck] = (),
     check_results: Mapping[str, Mapping[str, Any]] | None = None,
     check_threshold: float = 0.5,
 ) -> tuple[bool, str]:
-    """Return ``(fire, excerpt)`` for the selected fan-out trigger.
+    """Return ``(fire, excerpt)`` for the refine-site fan-out trigger.
 
-    The comment path fires only when *all* of:
-
-    1. ``chain_length > 0`` — the candidate has been refined at least
-       once, so reviewer feedback exists to draw signal from.
-    2. ``chain_history`` is populated — deterministic enrichment
-       has been applied for the current cycle (the claim batch
-       attaches it; an empty list means the enrichment did not run).
-    3. At least one allow-listed reviewer-comment value contains a
-       trigger keyword (case-insensitive).
-
-    The returned ``excerpt`` on the comment path is the truncated allow-listed comment
-    block, suitable for direct injection into the proposer prompt.
-    The check path never reads comments and returns an empty excerpt.
-    When ``fire`` is ``False`` the excerpt is still returned so
-    callers can log it — but they must not pass it to ``run_fanout``.
+    The trigger fires when the maximum failure probability over the
+    answered retrieval checks reaches ``check_threshold``.  Comment text
+    is never read, so the returned ``excerpt`` is always the empty
+    string; it is returned so the call site keeps one shape, and callers
+    must not read it as review signal.
     """
-    if trigger_source == "checks":
-        return (
-            should_trigger_fanout_from_checks(
-                checks, check_results or {}, threshold=check_threshold
-            ),
-            "",
-        )
-    if trigger_source != "comments":
-        raise ValueError(f"unknown refine trigger source: {trigger_source}")
-    if chain_length <= 0:
-        return False, ""
-    if not chain_history:
-        return False, ""
-
-    excerpt = extract_reviewer_excerpt(
-        reviewer_comments_per_dim,
-        dims=dims,
-        char_cap=char_cap,
+    fire = should_trigger_fanout_from_checks(
+        checks, check_results or {}, threshold=check_threshold
     )
-    if not excerpt:
-        return False, ""
-
-    haystack = excerpt.casefold()
-    for kw in keywords:
-        if kw and kw.casefold() in haystack:
-            return True, excerpt
-    return False, excerpt
+    return fire, ""
 
 
 def assign_arm(

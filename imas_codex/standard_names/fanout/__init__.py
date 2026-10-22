@@ -47,7 +47,6 @@ from .schemas import (
 )
 from .trigger import (
     assign_arm,
-    extract_reviewer_excerpt,
     should_trigger_fanout,
 )
 
@@ -61,7 +60,6 @@ __all__ = [
     "FanoutScope",
     "FanoutSettings",
     "assign_arm",
-    "extract_reviewer_excerpt",
     "load_settings",
     "render_proposer_system_prompt",
     "run_fanout",

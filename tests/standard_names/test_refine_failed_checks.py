@@ -178,16 +178,9 @@ def test_check_trigger_reads_only_retrieval_failures():
     assert not should_trigger_fanout_from_checks([relevant], {}, threshold=0.0)
 
 
-def test_check_trigger_does_not_read_comments():
+def test_check_trigger_reads_only_check_results():
     check = _question_check(retrieval=True)
     fire, excerpt = should_trigger_fanout(
-        reviewer_comments_per_dim={"semantic": "no matching keyword"},
-        chain_length=0,
-        chain_history=None,
-        keywords=("ambiguous",),
-        dims=("semantic",),
-        char_cap=800,
-        trigger_source="checks",
         checks=[check],
         check_results={check.id: {"answered": True, "failure_probability": 0.9}},
         check_threshold=0.8,
@@ -196,9 +189,8 @@ def test_check_trigger_does_not_read_comments():
     assert excerpt == ""
 
 
-def test_comment_trigger_remains_the_default():
+def test_check_trigger_threshold_default_remains():
     settings = FanoutSettings()
-    assert settings.refine_trigger_source == "comments"
     assert settings.refine_trigger_check_threshold == 0.5
 
 

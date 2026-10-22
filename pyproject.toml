@@ -851,17 +851,6 @@ fanout-cost-estimate-escalation = 0.05
 # Per-cycle hard cap on cumulative fan-out sub-event spend.
 fanout-max-charge-per-cycle-baseline = 0.02
 fanout-max-charge-per-cycle-escalation = 0.10
-# Refine trigger predicate.
-# Keywords match the language reviewers actually use ("decomposition", "absorbed",
-# "compound", "awkward") plus disambiguation cues. Case-insensitive substring match.
-refine-trigger-keywords = ["unclear", "ambiguous", "duplicate", "consider", "compare", "decomposition", "absorbed", "compound", "awkward"]
-# Reviewer-comment dimension allow-list for the trigger predicate.
-# MUST match the actual review schema: ('grammar', 'semantic', 'convention', 'completeness').
-# We scan grammar + semantic because that is where decomposition/disambiguation
-# defects surface; dimensions absent from the rubric cannot trigger refinement.
-refine-trigger-comment-dims = ["grammar", "semantic"]
-# Comment excerpt total length cap.
-refine-trigger-comment-chars = 800
 
 [tool.imas-codex.sn-fanout.sites]
 # Per-site enable flags; the master `enabled` switch above gates everything.
