@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "the retry half's control is shown; the fault-text assertion pins a log message whose absence the diagnosis measured directly, and a missing control there leaves no route unguarded",
       "recorded_at": "2026-10-22T14:16:45.551073+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "wording in the manifest only: the transient transport tuple is new, built from httpx, and is now the one owner; no second set exists to drift from",
+      "recorded_at": "2026-10-22T14:16:54.011103+00:00"
     }
   },
   "findings": [
