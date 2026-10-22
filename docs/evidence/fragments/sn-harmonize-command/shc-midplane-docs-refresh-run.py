@@ -37,6 +37,19 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RECORD = os.path.join(HERE, "shc-midplane-docs-refresh.json")
+FRAGMENT = os.path.join(HERE, "shc-midplane-docs-refresh.html")
+SCOPE_ID = "shc-midplane-docs-refresh-scope"
+
+#: The fragment's scope paragraph must state the node's reachable outcome, not an
+#: intended one. The generator reads it against the record, so a paragraph that
+#: claims both names landed while the record shows one accepted is red.
+OUTCOME_SENTENCE = {
+    1: (
+        "Of the two, one was brought in line and accepted and one was stopped "
+        "below the acceptance threshold."
+    ),
+    2: "Of the two, both were brought in line and accepted.",
+}
 
 NAMES = [
     "radial_separatrix_distance_at_outboard_midplane",
@@ -469,6 +482,55 @@ def review_verdicts() -> dict:
     return out
 
 
+def _scope_text(path: str) -> str:
+    """The scope paragraph's text, tags stripped, from the fragment at ``path``.
+
+    Read from disk rather than from a copy in this module: the paragraph under
+    test must be the one the fragment ships.
+    """
+    try:
+        with open(path) as handle:
+            html = handle.read()
+    except FileNotFoundError:
+        return ""
+    match = re.search(rf'<p id="{SCOPE_ID}">(.*?)</p>', html, re.S)
+    if not match:
+        return ""
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", match.group(1))).strip()
+
+
+def fragment_consistency(fragment: str = FRAGMENT, record: str = RECORD) -> dict:
+    """Assert the fragment's scope paragraph states the outcome the record reached.
+
+    The scope paragraph's job is to say what the node did. A paragraph that
+    asserts both names were brought in line while the record shows one accepted
+    and one below threshold contradicts the fragment's own title, heading and
+    closing section, and reads as an outcome the node did not reach.
+    """
+    data = _load_json(record) or {}
+    checks = data.get("read_checks") or {}
+    landed = sorted(
+        name
+        for name, entry in checks.items()
+        if (entry.get("docs_stage") == "accepted")
+        and entry.get("score") is not None
+        and float(entry["score"]) >= 0.85
+    )
+    expected = OUTCOME_SENTENCE.get(len(landed), "")
+    scope = _scope_text(fragment)
+    stated = bool(expected) and expected.lower() in scope.lower()
+    return {
+        "fragment": fragment,
+        "record": record,
+        "names_in_record": sorted(checks),
+        "names_landed": landed,
+        "landed_count": len(landed),
+        "expected_sentence": expected,
+        "scope_states_expected_outcome": stated,
+        "ok": stated,
+    }
+
+
 def report() -> dict:
     state = snapshot()
     checks = read_checks(state)
@@ -480,6 +542,7 @@ def report() -> dict:
         "before": before(),
         "after": state["names"],
         "read_checks": checks,
+        "fragment_consistency": fragment_consistency(),
         "review_verdicts": review_verdicts(),
         "reviewer_comments": comments(),
         "spend": spend(),
@@ -502,6 +565,13 @@ def main() -> int:
             handle.write("\n")
         print(json.dumps(record["read_checks"], indent=2, default=str))
         print("wrote", RECORD)
+    elif mode == "consistency":
+        # Optional second argument: a fragment to test in place of the shipped
+        # one, so the check can be run red on a reverted copy.
+        fragment = sys.argv[2] if len(sys.argv) > 2 else FRAGMENT
+        verdict = fragment_consistency(fragment=fragment)
+        print(json.dumps(verdict, indent=2, default=str, sort_keys=True))
+        return 0 if verdict["ok"] else 1
     else:
         raise SystemExit(f"unknown mode: {mode}")
     return 0

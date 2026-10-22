@@ -73,6 +73,21 @@
       "superseded_locus_sentence": "The low-field-side equatorial midplane: points at the midplane height with major radius greater than the magnetic-axis radius. The data's midplane identifier selects that height, or it is the magnetic-axis height when none is given. For a value at the separatrix intersection use outboard_midplane_separatrix"
     }
   },
+  "fragment_consistency": {
+    "expected_sentence": "Of the two, one was brought in line and accepted and one was stopped below the acceptance threshold.",
+    "fragment": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-midplane-docs-refresh/docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh.html",
+    "landed_count": 1,
+    "names_in_record": [
+      "radial_coordinate_at_outboard_midplane",
+      "radial_separatrix_distance_at_outboard_midplane"
+    ],
+    "names_landed": [
+      "radial_separatrix_distance_at_outboard_midplane"
+    ],
+    "ok": true,
+    "record": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-midplane-docs-refresh/docs/evidence/fragments/sn-harmonize-command/shc-midplane-docs-refresh.json",
+    "scope_states_expected_outcome": true
+  },
   "graph_uri": "bolt://98dci4-gpu-0002:7687",
   "locus_definition_check": {
     "concept": "outboard_midplane",
