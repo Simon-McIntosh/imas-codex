@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-22T21:37:39Z",
+  "error": "",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment tells the reader the correction travels in 'the message of the repair commit that follows it', but that message (4a181b69f) itself states the correction is recorded 'in a note on that commit' (526870857); `git notes show 526870857` and `git notes show 4a181b69f` both report 'no note found', and a note would not travel with an ordinary push anyway, so the pointer chain ends at nothing and the bump commit's wrong locator is corrected by no note. The correction is nonetheless substantively present in 4a181b69f's message body, so a reader still learns the right group."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the corrected locator prose is guarded by no test. The node's own control (isn-pin-0-10-1-fix-locator-check.log) shows the arms flip on a revert (base 0 / head 1 for 'dev group under'; 1 / 0 for the old 'extra of' wording), but it is a one-off grep that no gate re-runs, so a later edit reintroducing the wrong group would not redden anything."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both gained commits against base 526870857 commit by commit: 4a181b69f rewrites the fragment's locator prose from the 'serve extra of [project.optional-dependencies]' to the 'dev group under [dependency-groups]' (+12/-3), and 1cac2a4c0 repoints one sentence from a git note to the fragment and the repair commit's message (+2/-2); both touch docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html alone.",
+    "done_when": "the done_when names both pins at ==0.10.1 and none at ==0.10.0 (re-measured 2/0 at reviewed head), `uv lock --check` exiting 0 in a log ending EXIT= (isn-pin-0-10-1-uvlock-check.log ends 'EXIT=0' after 'Resolved 306 packages in 4ms'), and a diff touching only pyproject.toml and the ISN entry of uv.lock; the delta's own diff (git diff --name-only 526870857..1cac2a4c0) lists only the evidence fragment, so it adds nothing outside the declared pair plus the landing fragment.",
+    "goal": "the node's goal is 'Pin imas-codex to the released ISN 0.10.1'; the gained commits 4a181b69f and 1cac2a4c0 add no pin change, and I re-measured at the reviewed head that pyproject.toml:18 and pyproject.toml:186 both read imas-standard-names==0.10.1 with grep -c 'imas-standard-names==0.10.1' printing 2 and grep -c 'imas-standard-names==0.10.0' printing 0.",
+    "manifest": "read the delivered manifest at r-20261022T204636142298-isn-pin-0-10-1/manifest.md: status complete, commits 526870857, 4a181b69f, 1cac2a4c0, tests 'uv lock --check --directory /tmp/reckon-crew-scratch/r-20261022T185704097236-isn-pin-0-10-1/isnpin/proj', negative_control_log isn-pin-0-10-1-negctl-stale-lock.log, and neither a baseline_suite nor an after_suite key.",
+    "write_paths": "the reviewed run's scope fence (prompt.txt) grants pyproject.toml, uv.lock, docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html and docs/figures/sn-harmonize-command/isn-pin-0-10-1; the delta touches only the fragment and nothing else."
+  },
+  "justifications": {
+    "durability": "the delta adds no test or assertion and nothing re-runs isn-pin-0-10-1-fix-locator-check.log, so an edit reintroducing the wrong group at docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html:15 would not redden any gate.",
+    "evidence": "isn-pin-0-10-1-fix-locator-check.log records base arm 0 vs head arm 1 for 'dev group under' and 1 vs 0 for the old 'extra of' wording, corroborated by my re-measurement of pyproject.toml:133-186, though the arms are greps over prose rather than a behavioural gate.",
+    "fit": "the fragment keeps the sibling evidence-fragment idiom and prefixes every element id with the node id, but its closing pointer sentence at line 20 names a commit message that itself points at a non-existent note.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html:6 now names the second pin's home as the dev group under [dependency-groups], matching pyproject.toml:186 measured at the reviewed head.",
+    "reuse": "the delta adds no definition, extending the existing docs/evidence/fragments/sn-harmonize-command owner; a search of the repository found no other prose owner for the pin's locator.",
+    "scope_discipline": "git diff --name-only 526870857..1cac2a4c0 lists only docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html, inside the fence at prompt.txt."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is 'Pin imas-codex to the released ISN 0.10.1'; the gained commits 4a181b69f and 1cac2a4c0 add no pin change, and I re-measured at the reviewed head that pyproject.toml:18 and pyproject.toml:186 both read imas-standard-names==0.10.1 with grep -c 'imas-standard-names==0.10.1' printing 2 and grep -c 'imas-standard-names==0.10.0' printing 0.\nVERDICT done_when: the done_when names both pins at ==0.10.1 and none at ==0.10.0 (re-measured 2/0 at reviewed head), `uv lock --check` exiting 0 in a log ending EXIT= (isn-pin-0-10-1-uvlock-check.log ends 'EXIT=0' after 'Resolved 306 packages in 4ms'), and a diff touching only pyproject.toml and the ISN entry of uv.lock; the delta's own diff (git diff --name-only 526870857..1cac2a4c0) lists only the evidence fragment, so it adds nothing outside the declared pair plus the landing fragment.\nVERDICT write_paths: the reviewed run's scope fence (prompt.txt) grants pyproject.toml, uv.lock, docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html and docs/figures/sn-harmonize-command/isn-pin-0-10-1; the delta touches only the fragment and nothing else.\nVERDICT manifest: read the delivered manifest at r-20261022T204636142298-isn-pin-0-10-1/manifest.md: status complete, commits 526870857, 4a181b69f, 1cac2a4c0, tests 'uv lock --check --directory /tmp/reckon-crew-scratch/r-20261022T185704097236-isn-pin-0-10-1/isnpin/proj', negative_control_log isn-pin-0-10-1-negctl-stale-lock.log, and neither a baseline_suite nor an after_suite key.\nVERDICT diff: read both gained commits against base 526870857 commit by commit: 4a181b69f rewrites the fragment's locator prose from the 'serve extra of [project.optional-dependencies]' to the 'dev group under [dependency-groups]' (+12/-3), and 1cac2a4c0 repoints one sentence from a git note to the fragment and the repair commit's message (+2/-2); both touch docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html alone.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html:6 now names the second pin's home as the dev group under [dependency-groups], matching pyproject.toml:186 measured at the reviewed head.\nSCORE evidence: 17\nJUSTIFICATION evidence: isn-pin-0-10-1-fix-locator-check.log records base arm 0 vs head arm 1 for 'dev group under' and 1 vs 0 for the old 'extra of' wording, corroborated by my re-measurement of pyproject.toml:133-186, though the arms are greps over prose rather than a behavioural gate.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 526870857..1cac2a4c0 lists only docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html, inside the fence at prompt.txt.\nSCORE durability: 7\nJUSTIFICATION durability: the delta adds no test or assertion and nothing re-runs isn-pin-0-10-1-fix-locator-check.log, so an edit reintroducing the wrong group at docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html:15 would not redden any gate.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment keeps the sibling evidence-fragment idiom and prefixes every element id with the node id, but its closing pointer sentence at line 20 names a commit message that itself points at a non-existent note.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no definition, extending the existing docs/evidence/fragments/sn-harmonize-command owner; a search of the repository found no other prose owner for the pin's locator.\nFINDING docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html:20 follow-on: the fragment tells the reader the correction travels in 'the message of the repair commit that follows it', but that message (4a181b69f) itself states the correction is recorded 'in a note on that commit' (526870857); `git notes show 526870857` and `git notes show 4a181b69f` both report 'no note found', and a note would not travel with an ordinary push anyway, so the pointer chain ends at nothing and the bump commit's wrong locator is corrected by no note. The correction is nonetheless substantively present in 4a181b69f's message body, so a reader still learns the right group.\nFINDING docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html:15 follow-on: the corrected locator prose is guarded by no test. The node's own control (isn-pin-0-10-1-fix-locator-check.log) shows the arms flip on a revert (base 0 / head 1 for 'dev group under'; 1 / 0 for the old 'extra of' wording), but it is a one-off grep that no gate re-runs, so a later edit reintroducing the wrong group would not redden anything.\n",
+  "review_run_id": "r-20261022T213639289633-review-of-isn-pin-0-10-1-1cac2a4c0c57",
+  "reviewed_base_sha": "526870857155faa8dab5ea61c958f13180e3fcba",
+  "reviewed_head_sha": "1cac2a4c0c57a4c6bd8ce75bd45bb6c3cc0ea013",
+  "reviewed_run_id": "r-20261022T185704097236-isn-pin-0-10-1",
+  "scores": {
+    "durability": 7,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T22:32:41.286889+00:00",
+  "total": 100
+}

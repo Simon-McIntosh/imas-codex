@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/pipeline_version.py:81",
+    "imas_codex/standard_names/graph_ops.py:400",
+    "imas_codex/standard_names/graph_ops.py:477",
+    "imas_codex/standard_names/grammar_adapter.py:15"
+  ],
+  "completed_at": "2026-10-22T21:26:10.266Z",
+  "dispatched_at": "2026-10-22T21:16:48Z",
+  "error": "",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html",
+      "line": "6",
+      "severity": "blocking",
+      "text": "blocking: the fragment states the second pin lives in 'the serve extra of [project.optional-dependencies]', but pyproject.toml:186 is inside `dev = [` opened at pyproject.toml:134 under `[dependency-groups]` (header at pyproject.toml:133); the `serve` extra (pyproject.toml:110-115) contains fastapi/uvicorn/uvloop and no imas-standard-names pin at all. A reader auditing the release or the following grammar-sync node is sent to the wrong extra. The same wrong locator is repeated in the head commit's message (526870857, body line 2, 'the one in the serve extra of the optional dependencies'); the fragment must be corrected to `dev` under `[dependency-groups]`."
+    },
+    {
+      "file": "pyproject.toml",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: nothing fails if the pin regresses. The node adds no test and its own recorded control (isn-pin-0-10-1-negctl-original-pin.log) shows `uv lock --check` exits 0 with the requirement put back to ==0.10.0 against the unchanged lock, so the gate the done_when names cannot witness this pin in either direction (the node states this honestly). A structural test asserting the pinned requirement in pyproject.toml is what would redden on a revert."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the single commit 526870857155faa8dab5ea61c958f13180e3fcba against its parent ef7ee1a0c145a29462bbfaaf3f9bbbf23ee837fa commit by commit: two hunks in pyproject.toml (line 18 build-system requires, line 186 dev group) moving ==0.10.0 to ==0.10.1, plus one new 84-line evidence fragment; no product source, no test file, no figure.",
+    "done_when": "the done_when requires both pins at ==0.10.1 and none at ==0.10.0 (re-measured 2/0), `uv lock --check` exiting 0 in a log ending EXIT= (isn-pin-0-10-1-uvlock-check.log ends 'EXIT=0' after 'Resolved 306 packages in 4ms'), and a diff touching only pyproject.toml and the ISN entry of uv.lock (git diff --name-only ef7ee1a0c..526870857 lists pyproject.toml and the in-scope evidence fragment; uv.lock is not in the diff, its sha256 5d6d2e0bcec967a55e7372f2ffd6b8412c603e7393596844b73f1960f404629d matches the manifest's claim).",
+    "goal": "the goal is 'Pin imas-codex to the released ISN 0.10.1'; the diff at 526870857 moves both imas-standard-names requirements in pyproject.toml to ==0.10.1, and in the reviewed worktree at head I re-measured `grep -c 'imas-standard-names==0.10.1' pyproject.toml` = 2 and `grep -c 'imas-standard-names==0.10.0'` = 0, so the pin itself is landed.",
+    "manifest": "read the delivered manifest (written to r-20261022T204636142298-isn-pin-0-10-1/manifest.md as its delivery fence directed); it records status complete, commit 526870857, changed_paths pyproject.toml + the fragment, tests 'uv lock --check --directory /tmp/reckon-crew-scratch/.../isnpin/proj', the four gate logs, baseline_suite and after_suite null, retry_failures uv-lock-worktree-missing-sibling and unilock-scratch-isn-build-refused both attributed 'scaffolding:', and the landing text that repeats the 'serve extra' misdescription.",
+    "write_paths": "the reviewed run's scope fence (prompt.txt:112-116) grants pyproject.toml, uv.lock, docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html and docs/figures/sn-harmonize-command/isn-pin-0-10-1; the diff touches the first and the third and nothing else, and uv.lock is left unmodified inside scope."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion and no test file, and isn-pin-0-10-1-negctl-original-pin.log shows uv lock --check still exits 0 with the pin put back to ==0.10.0, so nothing reddens if the pin regresses.",
+    "evidence": "isn-pin-0-10-1-uvlock-check.log ends EXIT=0 and I re-measured the pin counts 2/0 and the lock digest, but the gate ran in a scratch project rather than the worktree and the node's own control shows it is blind to this pin, so the recorded exit status is corroboration, not proof.",
+    "fit": "the fragment follows the sibling evidence-fragment idiom in docs/evidence/fragments/sn-harmonize-command/ (section-per-claim HTML beside shc-apply-mechanism.html) and uses the established node-id filename convention, though its prose misnames the second pin's home (see the blocking finding).",
+    "goal_fidelity": "pyproject.toml:18 and pyproject.toml:186 both read imas-standard-names==0.10.1 at the reviewed head, which is the whole of the stated goal.",
+    "reuse": "the change adds no definition: it is two version specifiers and one evidence fragment, and the fragment extends the existing docs/evidence/fragments/sn-harmonize-command owner rather than founding a new surface.",
+    "scope_discipline": "git diff --name-only ef7ee1a0c..526870857 lists only pyproject.toml and docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html, both inside the scope fence at prompt.txt:112-116."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is 'Pin imas-codex to the released ISN 0.10.1'; the diff at 526870857 moves both imas-standard-names requirements in pyproject.toml to ==0.10.1, and in the reviewed worktree at head I re-measured `grep -c 'imas-standard-names==0.10.1' pyproject.toml` = 2 and `grep -c 'imas-standard-names==0.10.0'` = 0, so the pin itself is landed.\nVERDICT done_when: the done_when requires both pins at ==0.10.1 and none at ==0.10.0 (re-measured 2/0), `uv lock --check` exiting 0 in a log ending EXIT= (isn-pin-0-10-1-uvlock-check.log ends 'EXIT=0' after 'Resolved 306 packages in 4ms'), and a diff touching only pyproject.toml and the ISN entry of uv.lock (git diff --name-only ef7ee1a0c..526870857 lists pyproject.toml and the in-scope evidence fragment; uv.lock is not in the diff, its sha256 5d6d2e0bcec967a55e7372f2ffd6b8412c603e7393596844b73f1960f404629d matches the manifest's claim).\nVERDICT write_paths: the reviewed run's scope fence (prompt.txt:112-116) grants pyproject.toml, uv.lock, docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html and docs/figures/sn-harmonize-command/isn-pin-0-10-1; the diff touches the first and the third and nothing else, and uv.lock is left unmodified inside scope.\nVERDICT manifest: read the delivered manifest (written to r-20261022T204636142298-isn-pin-0-10-1/manifest.md as its delivery fence directed); it records status complete, commit 526870857, changed_paths pyproject.toml + the fragment, tests 'uv lock --check --directory /tmp/reckon-crew-scratch/.../isnpin/proj', the four gate logs, baseline_suite and after_suite null, retry_failures uv-lock-worktree-missing-sibling and unilock-scratch-isn-build-refused both attributed 'scaffolding:', and the landing text that repeats the 'serve extra' misdescription.\nVERDICT diff: read the single commit 526870857155faa8dab5ea61c958f13180e3fcba against its parent ef7ee1a0c145a29462bbfaaf3f9bbbf23ee837fa commit by commit: two hunks in pyproject.toml (line 18 build-system requires, line 186 dev group) moving ==0.10.0 to ==0.10.1, plus one new 84-line evidence fragment; no product source, no test file, no figure.\nCALL_SITES: imas_codex/standard_names/pipeline_version.py:81, imas_codex/standard_names/graph_ops.py:400, imas_codex/standard_names/graph_ops.py:477, imas_codex/standard_names/grammar_adapter.py:15\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: pyproject.toml:18 and pyproject.toml:186 both read imas-standard-names==0.10.1 at the reviewed head, which is the whole of the stated goal.\nSCORE evidence: 16\nJUSTIFICATION evidence: isn-pin-0-10-1-uvlock-check.log ends EXIT=0 and I re-measured the pin counts 2/0 and the lock digest, but the gate ran in a scratch project rather than the worktree and the node's own control shows it is blind to this pin, so the recorded exit status is corroboration, not proof.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only ef7ee1a0c..526870857 lists only pyproject.toml and docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html, both inside the scope fence at prompt.txt:112-116.\nSCORE durability: 6\nJUSTIFICATION durability: the diff adds no assertion and no test file, and isn-pin-0-10-1-negctl-original-pin.log shows uv lock --check still exits 0 with the pin put back to ==0.10.0, so nothing reddens if the pin regresses.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the sibling evidence-fragment idiom in docs/evidence/fragments/sn-harmonize-command/ (section-per-claim HTML beside shc-apply-mechanism.html) and uses the established node-id filename convention, though its prose misnames the second pin's home (see the blocking finding).\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition: it is two version specifiers and one evidence fragment, and the fragment extends the existing docs/evidence/fragments/sn-harmonize-command owner rather than founding a new surface.\nFINDING docs/evidence/fragments/sn-harmonize-command/isn-pin-0-10-1.html:6 blocking: the fragment states the second pin lives in 'the serve extra of [project.optional-dependencies]', but pyproject.toml:186 is inside `dev = [` opened at pyproject.toml:134 under `[dependency-groups]` (header at pyproject.toml:133); the `serve` extra (pyproject.toml:110-115) contains fastapi/uvicorn/uvloop and no imas-standard-names pin at all. A reader auditing the release or the following grammar-sync node is sent to the wrong extra. The same wrong locator is repeated in the head commit's message (526870857, body line 2, 'the one in the serve extra of the optional dependencies'); the fragment must be corrected to `dev` under `[dependency-groups]`.\nFINDING pyproject.toml:18 follow-on: nothing fails if the pin regresses. The node adds no test and its own recorded control (isn-pin-0-10-1-negctl-original-pin.log) shows `uv lock --check` exits 0 with the requirement put back to ==0.10.0 against the unchanged lock, so the gate the done_when names cannot witness this pin in either direction (the node states this honestly). A structural test asserting the pinned requirement in pyproject.toml is what would redden on a revert.\n",
+  "review_run_id": "r-20261022T211533947511-review-of-isn-pin-0-10-1-526870857155",
+  "reviewed_base_sha": "ef7ee1a0c145a29462bbfaaf3f9bbbf23ee837fa",
+  "reviewed_head_sha": "526870857155faa8dab5ea61c958f13180e3fcba",
+  "reviewed_run_id": "r-20261022T185704097236-isn-pin-0-10-1",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T22:32:41.312691+00:00",
+  "total": 98
+}
