@@ -1,0 +1,746 @@
+[
+  {
+    "sheet_id": "row-112",
+    "refined_name": "nuclear_heating_power_of_breeder_blanket_module",
+    "label": 1,
+    "reason": "parses; nuclear heating power of the breeder blanket module is the catalog's reading of the DD neutron-power path, nothing dropped."
+  },
+  {
+    "sheet_id": "row-051",
+    "refined_name": "z_direction_unit_vector_of_sensor",
+    "label": 1,
+    "reason": "z_direction_unit_vector_of_sensor names the z component of the sensor direction unit vector, which is what the source is."
+  },
+  {
+    "sheet_id": "row-088",
+    "refined_name": "initial_launched_wave_frequency",
+    "label": 1,
+    "reason": "the pre-modulation carrier frequency is correctly named the initially launched wave frequency."
+  },
+  {
+    "sheet_id": "row-095",
+    "refined_name": "normalized_radial_wave_vector",
+    "label": 1,
+    "reason": "names the normalised radial wave-vector component the source carries; weighed most the grammar fit."
+  },
+  {
+    "sheet_id": "row-056",
+    "refined_name": "neutral_particle_source_rate_at_wall",
+    "label": 1,
+    "reason": "a rate of neutral particles arriving at the wall matches the wall neutral particle flux source."
+  },
+  {
+    "sheet_id": "row-034",
+    "refined_name": "radial_coordinate_of_outboard_midplane_separatrix",
+    "label": 0,
+    "reason": "meaning: a radial coordinate of the outboard separatrix is a location, not the radial separation the source measures."
+  },
+  {
+    "sheet_id": "row-010",
+    "refined_name": "vertical_angle_of_ferritic_element",
+    "label": 1,
+    "reason": "vertical_angle names an angle measured from upward vertical, which is exactly the source's beta definition."
+  },
+  {
+    "sheet_id": "row-049",
+    "refined_name": "plasma_pulse_confinement_time",
+    "label": 0,
+    "reason": "sibling conflict: confinement_time is the catalog's energy-confinement quantity; the source is plasma existence duration."
+  },
+  {
+    "sheet_id": "row-058",
+    "refined_name": "incident_neutron_power_of_breeder_blanket_module",
+    "label": 1,
+    "reason": "incident neutron power with the breeder blanket module owner, exactly the source quantity."
+  },
+  {
+    "sheet_id": "row-048",
+    "refined_name": "radial_distance_at_outboard_midplane_separatrix",
+    "label": 1,
+    "reason": "states the source's radial distance at the bounded outboard-midplane separatrix position; the radial direction is what the criterion rests on."
+  },
+  {
+    "sheet_id": "row-116",
+    "refined_name": "line_integrated_opacity_at_ece_channel_emission_position",
+    "label": 1,
+    "reason": "the DD optical depth at the channel is the line-integrated opacity at that position."
+  },
+  {
+    "sheet_id": "row-079",
+    "refined_name": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+    "label": 1,
+    "reason": "matches the catalog name for the flux-surface-averaged effective charge at the boundary."
+  },
+  {
+    "sheet_id": "row-091",
+    "refined_name": "thermal_radiated_power_at_wall_due_to_surface_emission",
+    "label": 1,
+    "reason": "thermal radiated power at the wall due to surface emission carries the source's emissivity-weighted wall emission."
+  },
+  {
+    "sheet_id": "row-104",
+    "refined_name": "tilt_angle_of_plasma_filament",
+    "label": 1,
+    "reason": "tilt_angle of the plasma filament names the beta-side inclination from +Z the source defines."
+  },
+  {
+    "sheet_id": "row-046",
+    "refined_name": "surface_integrated_flux_surface_normal_net_plasma_energy_flux_at_plasma_boundary",
+    "label": 1,
+    "reason": "verbose but exact: the net surface-integrated flux-surface-normal energy flux at the boundary is Psep."
+  },
+  {
+    "sheet_id": "row-004",
+    "refined_name": "difference_of_reflected_wave_frequency_and_launched_wave_frequency",
+    "label": 1,
+    "reason": "the beat frequency equals the difference of reflected and launched wave frequencies, which is the Doppler shift."
+  },
+  {
+    "sheet_id": "row-002",
+    "refined_name": "power_of_divertor_due_to_ohmic_dissipation",
+    "label": 0,
+    "reason": "meaning: drops the divertor target owner and the source's summed-over-targets scope, naming unqualified divertor power."
+  },
+  {
+    "sheet_id": "row-117",
+    "refined_name": "launched_reference_frequency",
+    "label": 1,
+    "reason": "launched_reference_frequency names the pre-shift reference carrier the source specifies."
+  },
+  {
+    "sheet_id": "row-052",
+    "refined_name": "z_direction_unit_vector_of_sensor",
+    "label": 1,
+    "reason": "z_direction_unit_vector_of_sensor names the z direction cosine of the sensor direction the source carries."
+  },
+  {
+    "sheet_id": "row-093",
+    "refined_name": "radial_ion_state_momentum_flux",
+    "label": 1,
+    "reason": "radial_ion_state_momentum_flux names the radial momentum-flux component of the source's ion state."
+  },
+  {
+    "sheet_id": "row-038",
+    "refined_name": "incident_neutral_energy_flux_at_wall_due_to_recombination",
+    "label": 1,
+    "reason": "incident neutral energy flux at the wall due to recombination is the source array's quantity and cause."
+  },
+  {
+    "sheet_id": "row-069",
+    "refined_name": "fast_ion_photon_radiance_of_spectral_line_due_to_charge_exchange",
+    "label": 1,
+    "reason": "photon radiance of the spectral line due to charge exchange is the sightline-integrated FICX radiance."
+  },
+  {
+    "sheet_id": "row-071",
+    "refined_name": "ion_particle_flux_at_wall",
+    "label": 0,
+    "reason": "meaning: drops the emitted/surface-emission direction, so the name reads as any ion flux at the wall."
+  },
+  {
+    "sheet_id": "row-092",
+    "refined_name": "thermal_radiated_power_at_wall_due_to_surface_emission",
+    "label": 1,
+    "reason": "emissivity-weighted thermal radiation power at the wall due to surface emission matches the source."
+  },
+  {
+    "sheet_id": "row-024",
+    "refined_name": "normalized_radial_gyrocenter_energy_flux_due_to_perturbed_parallel_magnetic_field",
+    "label": 1,
+    "reason": "the rotating-frame weight on the normalised energy flux is the radial gyrocenter flux; the cause is the source's."
+  },
+  {
+    "sheet_id": "row-003",
+    "refined_name": "difference_of_reflected_wave_spectral_peak_frequency_and_launched_wave_frequency",
+    "label": 1,
+    "reason": "the frequency difference between the reflected-wave spectral peak and the launched wave is the Doppler shift."
+  },
+  {
+    "sheet_id": "row-078",
+    "refined_name": "volume_averaged_linear_electron_decay_time_due_to_disruption",
+    "label": 1,
+    "reason": "volume-averaged linear electron decay time due to disruption states method, quantity and cause."
+  },
+  {
+    "sheet_id": "row-017",
+    "refined_name": "spectral_factor_of_spectrometer_channel",
+    "label": 0,
+    "reason": "meaning: names a generic spectral factor of the channel, not the pixel-to-wavelength calibration gain the source is."
+  },
+  {
+    "sheet_id": "row-039",
+    "refined_name": "total_plasma_radiated_power",
+    "label": 1,
+    "reason": "total plasma radiated power is the bolometer's total radiated power with the plasma owner made explicit."
+  },
+  {
+    "sheet_id": "row-074",
+    "refined_name": "spectral_etendue_of_spectrometer_channel",
+    "label": 0,
+    "reason": "meaning: etendue is the optical phase-space acceptance, not the wavelength-calibration gain the source carries."
+  },
+  {
+    "sheet_id": "row-085",
+    "refined_name": "total_neutral_particle_source_rate_at_wall_due_to_gas_injection",
+    "label": 0,
+    "reason": "meaning: the gas puff is counted in equivalent electrons, but the name says neutral particle source rate."
+  },
+  {
+    "sheet_id": "row-043",
+    "refined_name": "deposited_power_of_divertor_due_to_fusion",
+    "label": 1,
+    "reason": "power deposited in the divertor due to fusion reactions is the source's nuclear power Pnuc."
+  },
+  {
+    "sheet_id": "row-016",
+    "refined_name": "total_power_density_due_to_conductive_losses",
+    "label": 1,
+    "reason": "total power density due to conductive losses names the disruption conductive-loss power density."
+  },
+  {
+    "sheet_id": "row-124",
+    "refined_name": "coolant_delay_of_plant_component_port_due_to_convection",
+    "label": 1,
+    "reason": "coolant delay of the component port due to convection is the coolant transit time the source gives."
+  },
+  {
+    "sheet_id": "row-037",
+    "refined_name": "incident_neutral_energy_flux_at_wall_due_to_recombination",
+    "label": 1,
+    "reason": "incident neutral energy flux at the wall due to recombination is the source array's quantity and cause."
+  },
+  {
+    "sheet_id": "row-076",
+    "refined_name": "flux_surface_normal_gyrocenter_energy_flux_normalized_due_to_e_cross_b_drift",
+    "label": 1,
+    "reason": "the electrostatic-potential energy-flux contribution is physically the E-cross-B drift flux, which the name states."
+  },
+  {
+    "sheet_id": "row-030",
+    "refined_name": "stray_magnetic_field_magnitude",
+    "label": 1,
+    "reason": "stray_magnetic_field_magnitude is the catalog name for the plasma-initiation stray field."
+  },
+  {
+    "sheet_id": "row-023",
+    "refined_name": "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+    "label": 1,
+    "reason": "a dimensionless energy flux due to the perturbed parallel magnetic field is the source's rotating-frame weight."
+  },
+  {
+    "sheet_id": "row-031",
+    "refined_name": "stray_magnetic_field",
+    "label": 1,
+    "reason": "stray_magnetic_field names the stray field the initiation source carries."
+  },
+  {
+    "sheet_id": "row-114",
+    "refined_name": "flux_surface_normal_energy_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field",
+    "label": 1,
+    "reason": "long but exact: the eigenmode's flux-surface-normal energy flux due to the parallel magnetic perturbation."
+  },
+  {
+    "sheet_id": "row-097",
+    "refined_name": "neutron_flux_maximum_at_first_wall",
+    "label": 1,
+    "reason": "neutron flux maximum at the first wall names the blanket module's maximum first-wall neutron flux."
+  },
+  {
+    "sheet_id": "row-101",
+    "refined_name": "initial_polarization_ellipticity_of_wave_beam",
+    "label": 1,
+    "reason": "initial polarization ellipticity of the wave beam is the polarimeter's pre-plasma ellipticity."
+  },
+  {
+    "sheet_id": "row-014",
+    "refined_name": "fast_ion_radiance_at_spectral_line_due_to_charge_exchange",
+    "label": 1,
+    "reason": "fast-ion radiance at a spectral line due to charge exchange is the sightline-integrated FICX radiance."
+  },
+  {
+    "sheet_id": "row-073",
+    "refined_name": "spectral_calibration_factor_of_spectrometer_channel",
+    "label": 1,
+    "reason": "spectral_calibration_factor_of_spectrometer_channel does name the pixel-to-wavelength calibration gain."
+  },
+  {
+    "sheet_id": "row-050",
+    "refined_name": "plasma_pulse_confinement_time",
+    "label": 0,
+    "reason": "sibling conflict: confinement_time names energy confinement, not the plasma existence duration the source gives."
+  },
+  {
+    "sheet_id": "row-111",
+    "refined_name": "nuclear_heating_power_of_breeder_blanket_module",
+    "label": 1,
+    "reason": "nuclear heating power of the breeder blanket module names the neutron-deposited power the source carries."
+  },
+  {
+    "sheet_id": "row-063",
+    "refined_name": "breakdown_event_instant",
+    "label": 1,
+    "reason": "breakdown_event_instant names the pulse instant at which breakdown begins."
+  },
+  {
+    "sheet_id": "row-120",
+    "refined_name": "effective_turn_count_of_coil_conductor_element",
+    "label": 1,
+    "reason": "effective_turn_count_of_coil_conductor_element names the signed effective turns of the source coil element."
+  },
+  {
+    "sheet_id": "row-070",
+    "refined_name": "fast_ion_photon_radiance_of_spectral_line_due_to_charge_exchange",
+    "label": 1,
+    "reason": "photon radiance of the spectral line due to charge exchange along a sightline matches the source."
+  },
+  {
+    "sheet_id": "row-054",
+    "refined_name": "radial_extent_of_separatrix",
+    "label": 1,
+    "reason": "radial_extent_of_separatrix states the radial direction and the separatrix owner, which is the criterion this source group is labelled by."
+  },
+  {
+    "sheet_id": "row-033",
+    "refined_name": "curvature_inverse_of_arc_of_circle_center",
+    "label": 0,
+    "reason": "meaning: states an inverse curvature of the arc-of-circle centre, not the curvature radius of the arc the source gives."
+  },
+  {
+    "sheet_id": "row-083",
+    "refined_name": "poloidal_magnetic_flux_at_minimum_absolute_safety_factor",
+    "label": 0,
+    "reason": "meaning: adds 'absolute' to the safety factor, changing the source's plain minimum-safety-factor location."
+  },
+  {
+    "sheet_id": "row-090",
+    "refined_name": "poloidal_magnetic_field_at_measurement_position",
+    "label": 0,
+    "reason": "meaning: drops the probe owner and the non-linear correction the source path carries, reading as any field measurement."
+  },
+  {
+    "sheet_id": "row-061",
+    "refined_name": "toroidal_coordinate_of_diagnostic_aperture",
+    "label": 1,
+    "reason": "toroidal coordinate of the diagnostic aperture centre is the source's toroidal angle of centre."
+  },
+  {
+    "sheet_id": "row-107",
+    "refined_name": "volume_averaged_lithium_fraction",
+    "label": 1,
+    "reason": "volume_averaged_lithium_fraction names the lithium-to-electron density ratio the source carries."
+  },
+  {
+    "sheet_id": "row-087",
+    "refined_name": "initial_launched_frequency_of_wave_beam",
+    "label": 1,
+    "reason": "initial launched frequency of the wave beam names the pre-modulation carrier frequency."
+  },
+  {
+    "sheet_id": "row-001",
+    "refined_name": "power_of_divertor_due_to_ohmic_dissipation",
+    "label": 0,
+    "reason": "meaning: drops the divertor target owner and the summed-over-targets scope of the current-driven power."
+  },
+  {
+    "sheet_id": "row-077",
+    "refined_name": "volume_averaged_linear_electron_decay_time_due_to_disruption",
+    "label": 1,
+    "reason": "volume-averaged linear electron decay time due to disruption states quantity, method and cause."
+  },
+  {
+    "sheet_id": "row-103",
+    "refined_name": "tilt_angle_of_plasma_filament",
+    "label": 1,
+    "reason": "tilt_angle of the plasma filament names the beta-side inclination of the filament cross-section."
+  },
+  {
+    "sheet_id": "row-045",
+    "refined_name": "surface_integrated_flux_surface_normal_net_plasma_energy_flux_at_plasma_boundary",
+    "label": 1,
+    "reason": "the net surface-integrated flux-surface-normal energy flux at the boundary is exactly Psep."
+  },
+  {
+    "sheet_id": "row-026",
+    "refined_name": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+    "label": 1,
+    "reason": "flux-surface-averaged toroidal krypton velocity at the boundary matches the separatrix-average source."
+  },
+  {
+    "sheet_id": "row-067",
+    "refined_name": "change_in_vacuum_poloidal_current_function",
+    "label": 1,
+    "reason": "the vacuum field product B0R0 is the vacuum poloidal current function the name states."
+  },
+  {
+    "sheet_id": "row-044",
+    "refined_name": "deposited_power_of_divertor_due_to_fusion",
+    "label": 1,
+    "reason": "power deposited in the divertor due to fusion reactions is the source's nuclear power Pnuc."
+  },
+  {
+    "sheet_id": "row-025",
+    "refined_name": "ratio_of_deposited_power_at_divertor_target_to_total_incident_power_of_divertor",
+    "label": 1,
+    "reason": "the deposited-to-total incident power ratio is exactly the target incident power fraction."
+  },
+  {
+    "sheet_id": "row-013",
+    "refined_name": "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
+    "label": 1,
+    "reason": "fast-ion radiance of a spectral line due to charge exchange along a viewing path matches the source."
+  },
+  {
+    "sheet_id": "row-047",
+    "refined_name": "radial_distance_at_outboard_midplane_separatrix",
+    "label": 1,
+    "reason": "states the source's radial distance at the bounded outboard-midplane separatrix position; the radial direction is what the criterion rests on."
+  },
+  {
+    "sheet_id": "row-006",
+    "refined_name": "flux_surface_averaged_inverse_of_major_radius",
+    "label": 1,
+    "reason": "flux_surface_averaged_inverse_of_major_radius is exactly the metric coefficient gm9 = <1/R>."
+  },
+  {
+    "sheet_id": "row-099",
+    "refined_name": "ion_state_average_charge_number",
+    "label": 0,
+    "reason": "meaning: names an average charge number where the source values are ionization potentials."
+  },
+  {
+    "sheet_id": "row-018",
+    "refined_name": "spectral_factor_of_spectrometer_channel",
+    "label": 0,
+    "reason": "meaning: names the channel's spectral response, not the wavelength-calibration gain the source carries."
+  },
+  {
+    "sheet_id": "row-040",
+    "refined_name": "total_plasma_radiated_power",
+    "label": 1,
+    "reason": "total plasma radiated power names the volume-integrated bolometric radiated power."
+  },
+  {
+    "sheet_id": "row-022",
+    "refined_name": "ratio_of_electron_temperature_at_magnetic_axis_to_volume_averaged_electron_temperature",
+    "label": 1,
+    "reason": "the axis-to-volume-average electron temperature ratio is the source's peaking factor."
+  },
+  {
+    "sheet_id": "row-108",
+    "refined_name": "lithium_fraction",
+    "label": 1,
+    "reason": "lithium_fraction is the volume-averaged lithium-to-electron density ratio the source carries."
+  },
+  {
+    "sheet_id": "row-089",
+    "refined_name": "poloidal_magnetic_field_of_poloidal_magnetic_field_probe",
+    "label": 1,
+    "reason": "names the poloidal field of the poloidal field probe, which is the corrected probe measurement."
+  },
+  {
+    "sheet_id": "row-122",
+    "refined_name": "volume_averaged_runaway_electron_kinetic_energy_density",
+    "label": 1,
+    "reason": "volume-averaged runaway-electron kinetic energy density matches the source quantity exactly."
+  },
+  {
+    "sheet_id": "row-123",
+    "refined_name": "coolant_delay_of_plant_component_port_due_to_convection",
+    "label": 1,
+    "reason": "coolant delay of the component port due to convection is the coolant transit time the source gives."
+  },
+  {
+    "sheet_id": "row-082",
+    "refined_name": "poloidal_suprathermal_electron_angle_perturbed_at_measurement_position",
+    "label": 1,
+    "reason": "the poloidal suprathermal-electron angle perturbation at the measurement position is the source's theta shift."
+  },
+  {
+    "sheet_id": "row-065",
+    "refined_name": "turn_count_of_poloidal_magnetic_field_probe",
+    "label": 1,
+    "reason": "turn_count_of_poloidal_magnetic_field_probe names the signed probe winding count the source gives."
+  },
+  {
+    "sheet_id": "row-094",
+    "refined_name": "radial_ion_charge_state_momentum_flux",
+    "label": 1,
+    "reason": "radial ion charge-state momentum flux names the radial momentum-flux component for an ion state."
+  },
+  {
+    "sheet_id": "row-080",
+    "refined_name": "flux_surface_averaged_effective_ion_charge_at_plasma_boundary",
+    "label": 1,
+    "reason": "flux-surface-averaged effective ion charge at the boundary names the source's separatrix-average Zeff."
+  },
+  {
+    "sheet_id": "row-075",
+    "refined_name": "energy_flux_normalized_due_to_e_cross_b_drift",
+    "label": 1,
+    "reason": "the energy-flux contribution of the electrostatic potential is physically the E-cross-B drift flux, which the name states."
+  },
+  {
+    "sheet_id": "row-115",
+    "refined_name": "line_integrated_opacity_at_ece_channel_emission_position",
+    "label": 1,
+    "reason": "the DD optical depth at the channel is the line-integrated opacity at that position."
+  },
+  {
+    "sheet_id": "row-098",
+    "refined_name": "neutron_flux_maximum_at_first_wall",
+    "label": 1,
+    "reason": "neutron flux maximum at the first wall is the blanket module's maximum first-wall neutron flux."
+  },
+  {
+    "sheet_id": "row-119",
+    "refined_name": "effective_turn_count_of_coil_conductor_element",
+    "label": 1,
+    "reason": "effective signed turn count of the poloidal-field coil conductor element matches the source exactly."
+  },
+  {
+    "sheet_id": "row-113",
+    "refined_name": "energy_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+    "label": 1,
+    "reason": "a normalised energy flux due to the perturbed parallel magnetic field is the rotating-frame weight the source gives."
+  },
+  {
+    "sheet_id": "row-057",
+    "refined_name": "incident_neutron_power_of_breeder_blanket_module",
+    "label": 1,
+    "reason": "incident neutron power of the breeder blanket module matches the source quantity exactly."
+  },
+  {
+    "sheet_id": "row-106",
+    "refined_name": "toroidal_linear_mhd_mode_reference_phase",
+    "label": 1,
+    "reason": "toroidal linear MHD mode reference phase names the eigenfunction phase offset the source carries."
+  },
+  {
+    "sheet_id": "row-036",
+    "refined_name": "radial_coordinate_of_shatter_cone",
+    "label": 1,
+    "reason": "radial coordinate of the shatter cone names the R coordinate of the cone origin."
+  },
+  {
+    "sheet_id": "row-053",
+    "refined_name": "gap_at_separatrix",
+    "label": 0,
+    "reason": "meaning: 'gap_at_separatrix' states no radial direction, naming an undirected gap merely located at the separatrix, where the source measures a radial separation."
+  },
+  {
+    "sheet_id": "row-060",
+    "refined_name": "normalized_radial_gyrocenter_energy_flow_of_flux_surface_due_to_e_cross_b_drift",
+    "label": 1,
+    "reason": "the electrostatic-potential energy-flux contribution is physically the E-cross-B drift flux across the flux surface."
+  },
+  {
+    "sheet_id": "row-035",
+    "refined_name": "radial_gap_of_separatrix",
+    "label": 1,
+    "reason": "names the source's radial separation and owns it on the separatrix (radial_gap_of_separatrix); weighed most that the radial direction is stated."
+  },
+  {
+    "sheet_id": "row-015",
+    "refined_name": "total_thermal_power_density_due_to_conductive_losses",
+    "label": 1,
+    "reason": "total thermal power density due to conductive losses names the disruption conductive-loss power density."
+  },
+  {
+    "sheet_id": "row-021",
+    "refined_name": "ratio_of_electron_temperature_at_magnetic_axis_to_volume_averaged_electron_temperature",
+    "label": 1,
+    "reason": "the axis-to-volume-average electron temperature ratio is the source's peaking factor."
+  },
+  {
+    "sheet_id": "row-109",
+    "refined_name": "total_neutron_flux_due_to_fusion",
+    "label": 1,
+    "reason": "total neutron flux due to fusion matches the reconstructed neutron emission the source carries."
+  },
+  {
+    "sheet_id": "row-007",
+    "refined_name": "pulse_confinement_time",
+    "label": 0,
+    "reason": "sibling conflict: confinement_time names energy confinement, not the plasma existence duration the source gives."
+  },
+  {
+    "sheet_id": "row-020",
+    "refined_name": "nuclear_heating_power_of_limiter_tile",
+    "label": 1,
+    "reason": "nuclear heating power of the limiter tile names the neutron and gamma heating the source deposits there."
+  },
+  {
+    "sheet_id": "row-118",
+    "refined_name": "wave_reference_frequency",
+    "label": 1,
+    "reason": "wave_reference_frequency names the pre-modulation reference carrier the source specifies."
+  },
+  {
+    "sheet_id": "row-068",
+    "refined_name": "change_in_vacuum_poloidal_current_function",
+    "label": 1,
+    "reason": "the vacuum field product B0R0 is the vacuum poloidal current function the name states."
+  },
+  {
+    "sheet_id": "row-086",
+    "refined_name": "total_electron_source_rate_at_wall_due_to_gas_injection",
+    "label": 1,
+    "reason": "total electron source rate at the wall due to gas injection matches the electron-equivalent gas puff count."
+  },
+  {
+    "sheet_id": "row-081",
+    "refined_name": "poloidal_suprathermal_electron_angle_perturbed_at_measurement_position",
+    "label": 1,
+    "reason": "the poloidal suprathermal-electron angle shift at the measurement position is the source's theta perturbation."
+  },
+  {
+    "sheet_id": "row-029",
+    "refined_name": "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+    "label": 1,
+    "reason": "states the gm2 ratio exactly: squared toroidal flux coordinate gradient magnitude over squared major radius."
+  },
+  {
+    "sheet_id": "row-072",
+    "refined_name": "incident_ion_particle_flux_at_wall",
+    "label": 0,
+    "reason": "meaning: reversed - the source is the emitted ion flux, the name says incident ion particle flux at the wall."
+  },
+  {
+    "sheet_id": "row-012",
+    "refined_name": "field_aligned_power_over_halo_region_due_to_conduction",
+    "label": 1,
+    "reason": "field-aligned power over the halo region due to conduction names the parallel halo heat-flux power."
+  },
+  {
+    "sheet_id": "row-055",
+    "refined_name": "surface_integrated_neutral_particle_flux_at_wall_due_to_convection",
+    "label": 0,
+    "reason": "meaning: adds a convective cause the source does not state; the DD source is simply the wall particle flux from the plasma."
+  },
+  {
+    "sheet_id": "row-032",
+    "refined_name": "curvature_inverse_of_iron_core_segment",
+    "label": 0,
+    "reason": "meaning: states an inverse curvature of the iron-core segment, not the curvature radius of the passive-conductor arc."
+  },
+  {
+    "sheet_id": "row-009",
+    "refined_name": "vertical_angle_of_ferritic_element",
+    "label": 1,
+    "reason": "vertical_angle names an angle measured from upward vertical, which is the source's beta definition."
+  },
+  {
+    "sheet_id": "row-027",
+    "refined_name": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+    "label": 1,
+    "reason": "flux-surface-averaged toroidal krypton velocity at the plasma boundary matches the separatrix-average source."
+  },
+  {
+    "sheet_id": "row-066",
+    "refined_name": "turn_count_of_poloidal_magnetic_field_probe",
+    "label": 1,
+    "reason": "turn_count_of_poloidal_magnetic_field_probe names the signed winding count the source gives."
+  },
+  {
+    "sheet_id": "row-042",
+    "refined_name": "particle_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+    "label": 0,
+    "reason": "meaning: the source is the electrostatic-potential contribution; the name states a perturbed parallel magnetic field cause."
+  },
+  {
+    "sheet_id": "row-005",
+    "refined_name": "radial_flux_surface_averaged_metric",
+    "label": 0,
+    "reason": "meaning: a generic radial metric name that does not distinguish gm9 = <1/R> from the other metric coefficients."
+  },
+  {
+    "sheet_id": "row-019",
+    "refined_name": "nuclear_heating_power_of_limiter_tile",
+    "label": 1,
+    "reason": "nuclear heating power of the limiter tile names the neutron and gamma heating the source deposits there."
+  },
+  {
+    "sheet_id": "row-011",
+    "refined_name": "field_aligned_power_over_halo_region_due_to_conduction",
+    "label": 1,
+    "reason": "field-aligned power over the halo region due to conduction names the parallel halo heat-flux power."
+  },
+  {
+    "sheet_id": "row-064",
+    "refined_name": "breakdown_event_instant",
+    "label": 1,
+    "reason": "breakdown_event_instant names the pulse instant at which breakdown begins."
+  },
+  {
+    "sheet_id": "row-102",
+    "refined_name": "polarization_initial_ellipticity_of_wave_beam",
+    "label": 1,
+    "reason": "initial polarization ellipticity of the wave beam is the polarimeter's pre-plasma ellipticity."
+  },
+  {
+    "sheet_id": "row-110",
+    "refined_name": "total_neutron_source_rate_due_to_fusion_reactions",
+    "label": 1,
+    "reason": "total neutron production rate from fusion reactions matches the reconstructed neutron emission rate."
+  },
+  {
+    "sheet_id": "row-121",
+    "refined_name": "volume_averaged_runaway_electron_kinetic_energy_density",
+    "label": 1,
+    "reason": "volume-averaged runaway-electron kinetic energy density matches the source quantity exactly."
+  },
+  {
+    "sheet_id": "row-008",
+    "refined_name": "plasma_pulse_confinement_time",
+    "label": 0,
+    "reason": "sibling conflict: confinement_time names energy confinement, not the plasma existence duration the source gives."
+  },
+  {
+    "sheet_id": "row-062",
+    "refined_name": "toroidal_coordinate_of_aperture",
+    "label": 1,
+    "reason": "toroidal coordinate of the aperture centre is the source's toroidal angle of centre."
+  },
+  {
+    "sheet_id": "row-028",
+    "refined_name": "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+    "label": 1,
+    "reason": "states the gm2 ratio exactly: squared toroidal flux coordinate gradient magnitude over squared major radius."
+  },
+  {
+    "sheet_id": "row-041",
+    "refined_name": "particle_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+    "label": 0,
+    "reason": "meaning: the source is the electrostatic-potential contribution; the name states a perturbed parallel magnetic field cause."
+  },
+  {
+    "sheet_id": "row-105",
+    "refined_name": "toroidal_linear_mhd_mode_reference_phase",
+    "label": 1,
+    "reason": "toroidal linear MHD mode reference phase names the eigenfunction phase offset the source carries."
+  },
+  {
+    "sheet_id": "row-084",
+    "refined_name": "poloidal_magnetic_flux_at_minimum_absolute_safety_factor",
+    "label": 0,
+    "reason": "meaning: adds 'absolute' to the safety factor, changing the source's plain minimum-safety-factor flux location."
+  },
+  {
+    "sheet_id": "row-096",
+    "refined_name": "normalized_radial_wave_vector",
+    "label": 1,
+    "reason": "normalized_radial_wave_vector names the radial wave-vector component scaled by the reference gyroradius."
+  },
+  {
+    "sheet_id": "row-059",
+    "refined_name": "normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_magnetic_field",
+    "label": 0,
+    "reason": "meaning: the source is the electrostatic-potential contribution; the name states a perturbed parallel magnetic field cause."
+  },
+  {
+    "sheet_id": "row-100",
+    "refined_name": "ion_state_ionisation_potential",
+    "label": 1,
+    "reason": "ion_state_ionisation_potential names the per-state ionization potential the source array carries."
+  }
+]

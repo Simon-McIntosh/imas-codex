@@ -1,0 +1,190 @@
+<h2 id="srtj-refine-ab-labels">Blind labels for the refine comparison's sheet</h2>
+<p>One label and one reason for each of the 124 rows of the blind refine sheet
+(<code>srtj-refine-ab-label-sheet.json</code>), written by a fresh worker that never
+saw which arm produced a row or whether a row's source was recovered. The labels
+are the ground truth the two refine arms are scored against, so each row was
+judged alone from the row's own fields: the DD source path, its description and
+unit, the ancestor name, the refined name and its description.</p>
+<p>The full label set is at
+<a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json">srtj-refine-ab-labels.json</a>.</p>
+
+<h3 id="srtj-refine-ab-labels-counts">Label counts</h3>
+<table>
+  <thead><tr><th>Label</th><th>Meaning</th><th>Rows</th></tr></thead>
+  <tbody>
+    <tr><td><code>1</code></td><td>acceptable for the catalog as the standard name for the quantity its DD source carries</td><td>99</td></tr>
+    <tr><td><code>0</code></td><td>not acceptable</td><td>25</td></tr>
+    <tr><td colspan="2">Total</td><td>124</td></tr>
+  </tbody>
+</table>
+
+<h3 id="srtj-refine-ab-labels-criteria">The criteria as applied</h3>
+<p>Each refined name was judged against four criteria, in this order:</p>
+<ol>
+  <li><strong>It parses under the grammar.</strong> All 124 refined names were
+  parsed with the grammar package the repository pins
+  (<code>imas_standard_names.grammar.parser.parse(name, strict=True)</code>) against
+  the shipped vocabulary. <strong>All 124 parse</strong> — no row's label turns on
+  grammatical validity. This is a check that could have failed: the same oracle
+  rejects a name with an out-of-vocabulary token or segments in non-canonical
+  order, and had it rejected one, that row would be a <code>0</code> on this
+  criterion alone.</li>
+  <li><strong>It names exactly the quantity the source carries</strong> — nothing
+  missing and nothing added. This decided every <code>0</code> written. The
+  failure modes seen: the owner or zone changed (<code>at divertor targets</code>
+  → the whole divertor assembly); a distinguishing qualifier dropped so the name
+  collides with a sibling (the <code>emitted</code> wall flux named simply an
+  <code>ion_particle_flux_at_wall</code>); the direction reversed (the
+  <code>emitted</code> flux named <code>incident</code>); the cause swapped for a
+  different physical mechanism (a potential-<code>phi</code> contribution named
+  <code>due_to_perturbed_parallel_magnetic_field</code>); or a restriction added
+  that the source does not state (<code>minimum_absolute_safety_factor</code> for a
+  plain minimum safety factor).</li>
+  <li><strong>It follows the naming conventions.</strong> Segments in grammar
+  order, one quantity per name, the object carried through <code>of_</code>, the
+  location through <code>at_</code> and the cause through <code>due_to_</code>, and
+  a verbosity no greater than naming the quantity requires. Verbosity alone was
+  never a <code>0</code>: a long name that states the quantity exactly
+  (<code>surface_integrated_flux_surface_normal_net_plasma_energy_flux_at_plasma_boundary</code>)
+  was accepted.</li>
+  <li><strong>It agrees with how the catalog names its siblings.</strong> Where the
+  ancestor name is a catalog name for the same quantity, an unchanged or
+  equivalent refined name was accepted; where the refined name collides with a
+  distinct reserved quantity the catalog already names
+  (<code>confinement_time</code> is the catalog's energy-confinement quantity, not
+  the duration of plasma existence), the row was a <code>0</code>.</li>
+</ol>
+<p>A <code>1</code> means the name survived all four. Each reason names the
+criterion that decided a <code>0</code>, or the criterion weighed most for a
+<code>1</code>.</p>
+
+<h3 id="srtj-refine-ab-labels-examples">Worked examples</h3>
+
+<h4 id="srtj-refine-ab-labels-example-accept">Accepted — <code>row-058</code></h4>
+<p>Source <code>dd:breeding_blanket/module/time_slice/power_incident_neutron</code>,
+unit <code>W</code>: "Total incident neutron power on a single breeding blanket
+module." Refined name:
+<code>incident_neutron_power_of_breeder_blanket_module</code>. Label
+<strong>1</strong>. It parses (<code>incident</code> qualifier,
+<code>neutron_power</code>, <code>of_breeder_blanket_module</code>); it states the
+incident neutron power and its owner with nothing added or dropped; and it uses
+the same tokens as its siblings
+(<code>incident_neutron_power_of_breeder_blanket_module</code> beside
+<code>nuclear_heating_power_of_breeder_blanket_module</code>). The criterion
+weighed most was agreement with siblings, because the ancestor
+<code>incident_power_of_breeder_blanket_module</code> names the same physical
+quantity: naming the carrier (neutrons) is the refine's whole contribution and it
+is correct.</p>
+
+<h4 id="srtj-refine-ab-labels-example-rejected-meaning">Rejected on meaning — <code>row-072</code></h4>
+<p>Source <code>dd:wall/description_ggd/ggd/particle_fluxes/ion/emitted/values</code>,
+unit <code>m^-2.s^-1</code>: "Array of values for emitted." Refined name:
+<code>incident_ion_particle_flux_at_wall</code>. Label <strong>0</strong>. The
+source is the ion particle flux <em>emitted</em> from the wall through surface
+emission; the refined name states the flux <em>incident on</em> the wall, the
+opposite direction, and so names a different quantity — the criterion that
+decided it. Because <code>emitted</code> and <code>incident</code> wall fluxes are
+distinct DD quantities, the reversal is a defect and not a paraphrase, and the
+name as written would collide with whatever name the incident flux takes.</p>
+
+<h4 id="srtj-refine-ab-labels-example-rejected-convention">Rejected on conventions and meaning — <code>row-018</code></h4>
+<p>Source <code>dd:spectrometer_visible/channel/grating_spectrometer/wavelength_calibration/gain</code>,
+unit <code>m</code>: "Gain coefficient for the linear pixel-to-wavelength
+calibration of a grating spectrometer channel … <code>wavelength = k × gain + offset</code>."
+Refined name: <code>spectral_factor_of_spectrometer_channel</code>.</p>
+<p>Label <strong>0</strong>. The
+name parses, but the source is a calibration gain converting pixel index to
+wavelength; <code>spectral_factor_of_spectrometer_channel</code> names the
+channel's spectral response instead, a different quantity, and its own refined
+description makes that substitution explicit ("converting a channel input emission
+spectrum to detector count rate"). Had the refine written
+<code>spectral_calibration_factor_of_spectrometer_channel</code> — which another
+row's refine did — the same source would have been accepted.</p>
+
+<h3 id="srtj-refine-ab-labels-consistency">One criterion per source</h3>
+<p>Two rows that share a DD <code>source_path</code> carry the same quantity, so
+their labels must follow one criterion rather than two. The sheet holds
+<strong>56 distinct source paths</strong>. Every one was checked: <strong>48
+groups are homogeneous</strong> (all rows share a label) and <strong>8 groups
+carry mixed labels</strong>. Each of the 8 is resolved under a single criterion,
+stated here once, and each row's reason records it.</p>
+<table>
+  <thead><tr><th>Source path</th><th>Rows and labels</th><th>The one criterion</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>dd:equilibrium/time_slice/boundary_secondary_separatrix/distance_inner_outer</code> (6 rows)</td>
+      <td>034 <code>0</code>, 048 <code>1</code>, 054 <code>1</code>, 047 <code>1</code>, 053 <code>0</code>, 035 <code>1</code></td>
+      <td>The source measures a separation <em>in the major-radius direction</em>, so a name is acceptable only if it states the radial direction of the quantity it owns on the separatrix. <code>radial_distance_…</code>, <code>radial_extent_of_separatrix</code> and <code>radial_gap_of_separatrix</code> state it; <code>radial_coordinate_…</code> names a location instead of a separation, and <code>gap_at_separatrix</code> states no radial direction and only <em>locates</em> an undirected gap at the separatrix.</td>
+    </tr>
+    <tr>
+      <td><code>edge_profiles/ggd/ion/state/ionization_potential</code></td>
+      <td>099 <code>0</code>, 100 <code>1</code></td>
+      <td>The name must be the quantity the source carries: an undirected charge name is not the per-state ionization potential.</td>
+    </tr>
+    <tr>
+      <td><code>equilibrium/time_slice/profiles_1d/gm9</code></td>
+      <td>005 <code>0</code>, 006 <code>1</code></td>
+      <td>The name must state the metric coefficient gm9 = ⟨1/R⟩ itself: a generic radial metric does not distinguish it from the family's other coefficients.</td>
+    </tr>
+    <tr>
+      <td><code>gyrokinetics/fluxes_integrated_norm/energy_phi_potential</code></td>
+      <td>059 <code>0</code>, 060 <code>1</code></td>
+      <td>The name must name the source's cause. The potential's energy-flux contribution is the E×B drift flux, which is stated; naming the perturbed parallel magnetic field names a different cause.</td>
+    </tr>
+    <tr>
+      <td><code>magnetics/b_field_pol_probe/non_linear_response/b_field_non_linear</code></td>
+      <td>090 <code>0</code>, 089 <code>1</code></td>
+      <td>The name must carry the source's owner, the poloidal field probe, so it does not read as any field at any measurement position.</td>
+    </tr>
+    <tr>
+      <td><code>spectrometer_visible/…/wavelength_calibration/gain</code> (4 rows)</td>
+      <td>017 <code>0</code>, 074 <code>0</code>, 073 <code>1</code>, 018 <code>0</code></td>
+      <td>The name must be the pixel-to-wavelength calibration factor the source is: a spectral response factor or an etendue names another quantity at the same path.</td>
+    </tr>
+    <tr>
+      <td><code>wall/global_quantities/electrons/gas_puff</code></td>
+      <td>085 <code>0</code>, 086 <code>1</code></td>
+      <td>The name must count the species the source counts, equivalent electrons; the neutral-particle spelling names another count.</td>
+    </tr>
+    <tr>
+      <td><code>wall/global_quantities/neutral/particle_flux_from_plasma</code></td>
+      <td>055 <code>0</code>, 056 <code>1</code></td>
+      <td>The name must not add a cause the source does not state: a convective cause is added by one spelling and not by the other.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The flagged pair the review raised is the first row of that table.
+<code>row-035</code> (<code>radial_gap_of_separatrix</code>, accepted) and
+<code>row-053</code> (<code>gap_at_separatrix</code>, rejected) share the source
+<code>…/boundary_secondary_separatrix/distance_inner_outer</code>, and the first
+version of this fragment rejected <code>row-053</code> with a reason that applied
+equally to <code>row-035</code> — neither names the inner and outer branches.
+The criterion has been restated once for the whole six-row group: it is the
+<em>radial direction</em> that must be stated, not the branches. Both labels are
+unchanged by that restatement, because <code>radial_gap_of_separatrix</code>
+states the radial direction and <code>gap_at_separatrix</code> does not; the
+reasons now say so, and the catalogue's existing boundary-gap quantity is why an
+undirected gap at the separatrix is a different quantity rather than a loose
+paraphrase.</p>
+
+<h3 id="srtj-refine-ab-labels-reads">What was read</h3>
+<p>I opened <strong>none</strong> of the forbidden files. During this node no read
+was made of <code>srtj-refine-ab-arm-key.json</code>,
+<code>srtj-refine-ab-run-results.json</code>, <code>srtj-refine-ab-run.py</code>,
+<code>srtj-refine-ab-run.html</code>,
+<code>srtj-refine-ab-sheet-rebuild-run.py</code>, or of anything under the refine
+run's directory
+(<code>~/.config/reckon/crew/runs/r-20261018T101616902704-srtj-refine-ab-run/</code>),
+and no review score, Jev answer or reviewer comment on these names was read.
+Those names were read only as text inside the brief and the plan comments, never
+opened as files.</p>
+<p>The inputs actually read were: the plan section and its comments; the blind
+sheet's own 124 rows; the grammar vocabulary and the strict parser from the
+pinned <code>imas_standard_names</code> package; and the naming conventions in the
+repository's agent guides. Each row's label rests on that row's source description
+and name alone: identical refined names carried by different rows were judged
+separately, and where a name is shared the two rows also share a source, so they
+agree with each other while the gas-puff pair is split by name
+(<code>total_electron_source_rate_at_wall_due_to_gas_injection</code> accepted,
+<code>total_neutral_particle_source_rate_at_wall_due_to_gas_injection</code>
+rejected on the electron-counted source).</p>
