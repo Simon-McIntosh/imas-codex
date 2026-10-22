@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="157">
+<meta name="plan-version" content="158">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -416,6 +416,9 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261022T093932759595-srtj-refine-ab-score" data-who="reckon-build" data-when="2026-10-22T10:17:14.138Z">
     <div class="r-comment-body"><p>srtj-refine-ab-score — the check-driven refine arm accepts 53 of its 63 credited outputs (84.1%) against 48 of 63 (76.2%) for the comment-driven arm, a paired difference of +7.9 pp with a 95% interval of -1.6 pp to +17.5 pp that includes zero, at USD 0.3090 per accepted name against USD 0.3392; on the 44 direct-source cases the same gap is +13.6 pp with an interval excluding zero, while on the 19 lineage-recovered cases the comment arm leads by 5.3 pp, and the in-tree labels guard passes with its planted-label control failing.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-s5-score-landed" data-who="reckon-build" data-when="2026-10-22T12:48:00Z">
+    <div class="r-comment-body"><p>The refine A/B is scored against the blind labels (merge <code>35214991e</code>, review 109/120).</p><ul><li><strong>Overall:</strong> the check-driven arm accepts 84.1% of its outputs against 76.2% for the comment-driven arm. The paired difference is +7.9 pp, with a 95% interval of −1.6 to +17.5.</li><li><strong>The 44 direct-source cases:</strong> +13.6 pp, with an interval excluding zero.</li><li><strong>The 19 lineage-recovered cases:</strong> the comment arm leads by 5.3 pp. These rows' sources agreed with the direct route in only 24 of 32 cases, so they weigh least.</li><li><strong>Cost:</strong> USD 0.309 per accepted name against 0.339.</li></ul><p>The check-driven trigger is at least as good, for less. <code>srtj-retire-keyword-trigger</code> follows, once <code>workers.py</code> is free of the domain-routing node. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-refine-ab-score.html">fragment</a></p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261017T104929813755-review-of-srtj-docs-planted-defects-11112a496e2e" data-who="reckon-build" data-when="2026-10-17T10:59:05Z">
     <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103622176117-srtj-docs-planted-defects/review-records/r-20261017T103622176117-srtj-docs-planted-defects.at-11112a496e2e9a06006dbdb6a0e7331f36adddba.json — six parsed scores, one blocking finding, revision pair verified</p></div>
 </div>
@@ -743,6 +746,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261022T103235466782-review-of-srtj-docs-dry-run-diagnosis-e68689447176-figure" data-who="reckon-build" data-when="2026-10-22T11:17:09.488Z">
     <div class="r-comment-body"><p>figure review of r-20261022T093834366103-srtj-docs-dry-run-diagnosis at head e6868944717610e8dd84998cbb568037927e100f: all 6 rubric items verdicted on the single attached figure (docs/figures/sn-review-through-jev/srtj-docs-dry-run-diagnosis/srtj-docs-dry-run-diagnosis.svg), rubric parsed, 2 follow-on findings and 0 blocking; the dotted zero reference is drawn on the wrong axis and the caption leaks a Python tuple literal.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-names-first" data-who="reckon-build" data-when="2026-10-22T12:47:00Z">
+    <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-22.</strong> After the dry-run diagnosis (<code>srtj-docs-dry-run-diagnosis</code>), the switch splits by axis.</p><ul><li><strong>Names.</strong> Jev decides the name review, with the 5% paid audit kept, once a failed Jev call reports its fault and is retried. On the cohort's 115 shared items, Jev's accept rate is within noise of the panel's: 87.0% against 82.6%, a difference of +4.3 pp with a 95% interval of −4.3 to +13.9.</li><li><strong>Documentation.</strong> It stays with the paid panel. On 164 shared items Jev accepts 56% and the panel 34%, a difference of +22 pp with an interval of +12 to +32. The records cannot say which judge is right: 15 of the 49 Jev-only accepts sit on the panel's cutoff, and 34 carry no recorded panel reason. A fresh blind labeller judges the 72 disagreeing items, with seeded agreement controls, against the documentation rubric. The documentation switch is decided on who those labels favour.</li></ul><p>Of the dry run's 76 undecided documentation items, 72 were never offered to Jev before its time and budget ran out. The other 4 failed once and were not retried, because an empty fault message is classified non-retryable.</p><p>Nodes, in landing order:</p><ol><li><code>srtj-decision-fault-retry</code>;</li><li><code>srtj-cascade-deciding-names</code>, a per-axis switch set to names, which also takes the audit test follow-ons;</li><li><code>srtj-docs-disagreement-sheet</code>, then its blind labels.</li></ol></div>
 </div>
 </section>
 </main>
