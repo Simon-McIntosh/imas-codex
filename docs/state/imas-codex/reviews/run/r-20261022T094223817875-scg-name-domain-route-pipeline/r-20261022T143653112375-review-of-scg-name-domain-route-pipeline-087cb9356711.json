@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 3,
+  "added_failure_ids": [
+    "tests/standard_names/test_catalog_import_divergence.py::TestPublishRefusesDivergedTree::test_diverged_tree_is_refused_with_an_error",
+    "tests/standard_names/test_catalog_import_divergence.py::TestPublishRefusesDivergedTree::test_in_sync_tree_still_publishes",
+    "tests/standard_names/test_catalog_import_divergence.py::TestPublishRefusesDivergedTree::test_uncomparable_tree_still_publishes"
+  ],
+  "completed_at": "2026-10-22T14:56:53.552Z",
+  "dispatched_at": "2026-10-22T14:37:44Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html",
+      "line": 262,
+      "severity": "follow-on",
+      "text": "the base arm is asserted verified in prose ('the loaded module is the base tree's') but no log records it \u2014 gate-divergence-base-seq.log carries no module.__file__ or resolved-cwd header, so a scratch base arm that silently loaded the head revision would print the identical 3 failed, 3 passed and this evidence cannot tell the intended condition from the one it exists to rule out."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read over 1d5d46dd..087cb9356; two commits, two files, every changed line inside the node goal's named paths.",
+    "done_when": "done_when requires a gate with no added failures plus the kept negative-control log and the fragment; the negative-control log reproduces and the fragment lists each routed function before and after, but the logged head arm still carries three added failures against the base arm.",
+    "goal": "The node goal is to route the pipeline's domain writers through the one writer; the gained commits add no routing code and instead correct the routing test's docstring and record the base-arm measurement in the fragment.",
+    "manifest": "Read; status complete, nine commits, head arm 4 failed 410 passed 2 skipped, negative control 8 failed 8 passed.",
+    "write_paths": "The two gained commits touch only the evidence fragment and the routing test, both inside the reviewed run's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is to route the pipeline's domain writers through the one writer; the two commits gained since the prior review at 1d5d46dd add no routing code \u2014 they correct the routing test's module docstring and record the base-arm measurement in docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html.\nVERDICT done_when: done_when requires a gate with no added failures, the kept negative-control log and the fragment; logs/negative-control.log reproduces at 8 failed, 8 passed and the fragment lists each routed function before and after, but the logged head arm still carries three added failures against the base arm.\nVERDICT write_paths: The two gained commits touch only docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html and tests/standard_names/test_domain_writer_routing.py, both inside the reviewed run's declared write paths.\nVERDICT manifest: Read; status complete, nine commits, head arm 4 failed 410 passed 2 skipped and negative control 8 failed 8 passed.\nVERDICT diff: Read over 1d5d46ddf5ff4251295406f91d5584a62119c59f..087cb9356711281253814203f92a75dfc4a4b64b; two commits, two files, and every changed line is inside the node goal's named paths.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/test_domain_writer_routing.py:6 now names maybe_promote_domain, the selector BANNED_SELECTORS actually checks, closing the anchor the prior review flagged.\nSCORE evidence: 15\nJUSTIFICATION evidence: docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html:238-241 cites gate-divergence-base-seq.log and gate-divergence-head-seq.log, and both logs read 3 failed, 3 passed as recorded.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two gained commits touch only the fragment and the routing test, both inside the write paths the reviewed run's manifest declares.\nSCORE durability: 15\nJUSTIFICATION durability: the gained commits add no assertion; the guard they document, tests/standard_names/test_domain_writer_routing.py:60-68, is falsified by logs/negative-control.log at 8 failed, so the guard it describes reddens when a selector call is restored.\nSCORE fit: 19\nJUSTIFICATION fit: tests/standard_names/test_domain_writer_routing.py:6 names the real selector at imas_codex/standard_names/domain_ranking.py:32 and follows the module's surrounding docstring style.\nSCORE reuse: 20\nJUSTIFICATION reuse: the gained commits add no new definition, so nothing is forked; the search over imas_codex/standard_names found the selector owner already named by the touched docstring.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-pipeline.html:262 follow-on: the base arm is asserted verified in prose (\"the loaded module is the base tree's\") but no log records it \u2014 gate-divergence-base-seq.log carries no module.__file__ or resolved-cwd header, so a scratch base arm that silently loaded the head revision would print the identical 3 failed, 3 passed and this evidence cannot tell the intended condition from the one it exists to rule out.\n",
+  "review_run_id": "r-20261022T143653112375-review-of-scg-name-domain-route-pipeline-087cb9356711",
+  "reviewed_base_sha": "1d5d46ddf5ff4251295406f91d5584a62119c59f",
+  "reviewed_head_sha": "087cb9356711281253814203f92a75dfc4a4b64b",
+  "reviewed_run_id": "r-20261022T094223817875-scg-name-domain-route-pipeline",
+  "rubric": "landed_node",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T15:03:42.782122+00:00",
+  "total": 107
+}
