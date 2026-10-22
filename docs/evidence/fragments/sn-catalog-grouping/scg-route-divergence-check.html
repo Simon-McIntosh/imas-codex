@@ -98,7 +98,34 @@ E   Failed: Timeout (&gt;30.0s) from pytest-timeout.
 
   <h3>Stability</h3>
   <p id="scg-route-divergence-check-stability">
-    A second sequential pair was run to separate these timeouts from any arm difference; its results
-    are recorded below.
+    A second sequential pair was run to separate these timeouts from any arm difference. The
+    pattern is unchanged, and the failures move around the file while the routing code stays
+    patched out of them:
+  </p>
+  <table>
+    <thead><tr><th>Run</th><th>Base (load at start)</th><th>Head (load at start)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>pair 1</td>
+        <td>2 failed, 4 passed (load 85.70) &mdash; <code>test_in_sync</code>, <code>test_uncomparable</code></td>
+        <td>1 failed, 5 passed (load 58.08) &mdash; <code>test_uncomparable</code></td>
+      </tr>
+      <tr>
+        <td>pair 2</td>
+        <td>5 passed, 1 error (load 52.71) &mdash; <code>test_uncomparable</code>, setup timeout</td>
+        <td>1 failed, 5 passed (load 68.26) &mdash; <code>test_uncomparable</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    The pair-2 base arm did not even reach the test body: its <code>uncomparable</code> case errored
+    in the <code>isnc_repo</code> fixture, whose own <code>subprocess.run</code> timed out at
+    30.02&nbsp;s. So the real publish test's fixture setup alone costs 10&ndash;30&nbsp;s on this node
+    against a 30&nbsp;s per-test bound, and the pass/fail line for the two slow cases is decided by
+    load, not by code. <code>test_diverged_tree_is_refused_with_an_error</code> passed in all four
+    arm-runs; <code>test_in_sync_tree_still_publishes</code> failed once (base, pair 1) and passed
+    three times; <code>test_uncomparable_tree_still_publishes</code> failed or errored in all four.
+    No arm-run produced an assertion failure. The verdict is unchanged by the second pair: none of
+    the three is added by the routing change.
   </p>
 </article>
