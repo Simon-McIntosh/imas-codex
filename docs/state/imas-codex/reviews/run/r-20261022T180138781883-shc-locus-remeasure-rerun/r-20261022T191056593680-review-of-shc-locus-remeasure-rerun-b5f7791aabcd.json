@@ -14,6 +14,11 @@
       "node": "shc-apply-drift-scope",
       "recorded_at": "2026-10-22T20:00:09.726991+00:00"
     },
+    "1": {
+      "kind": "exempted",
+      "reason": "hygiene of a one-shot evidence runner whose run is finished; the recorded outcome (family unmoved, spend outside the family) is read directly from the apply log and does not depend on it",
+      "recorded_at": "2026-10-22T20:00:26.934526+00:00"
+    },
     "2": {
       "kind": "folded",
       "node": "shc-calls-per-phase-test",
