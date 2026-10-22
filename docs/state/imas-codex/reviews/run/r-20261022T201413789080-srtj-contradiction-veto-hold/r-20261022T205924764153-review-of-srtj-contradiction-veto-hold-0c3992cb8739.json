@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-22T21:12:20.482Z",
+  "dispatched_at": "2026-10-22T21:00:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html",
+      "line": "44",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment and the manifest both state 45 claim/DD triples, but the committed artifact's hold_scan.firings parses to 46 entries (srtj-contradiction-veto-hold.json:483-511), so the classification (28 generic-against-specialised + 17 other = 45) is taken over an unstated population; emit the count from the runner so the prose reconciles with the artifact."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html",
+      "line": "192",
+      "severity": "follow-on",
+      "text": "follow-on: Q2's central backlog claim (\"eligible NOW: 1\", a one-name 0.849 population) was measured only by an ad-hoc session query and appears in no committed artifact; reproducing the recorded gate cannot re-derive it, so move the count into the runner."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html",
+      "line": "82",
+      "severity": "follow-on",
+      "text": "follow-on: Q1 asked for the panel's pre-clamp score on each firing; the fragment supplies it for electrostatic_potential only and writes \"see note below\" for the other nine names, a disclosed but material gap against question 1."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html",
+      "line": "131",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest declares a figures write path yet no figure was drawn for a classification-and-count result a small chart would carry better than the prose table."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "searched the repository for runtime code that reaches the landed change; the change is documentation and an evidence runner under docs/evidence, which no production module imports, so none exists.",
+    "diff": "read commit by commit against the base; the single commit 0c3992cb adds 2929 lines across the runner (343), the fragment (394) and the JSON (2192), with no product code, no test file and no figure.",
+    "done_when": "the done_when names the HTML fragment, the JSON written by the runner, and a log ending EXIT=0; srtj-contradiction-veto-hold-run.log ends with a bare EXIT=0 reporting 118 hold lines / 29 contradiction lines / 10 names, and the committed JSON holds hold_scan.firings and refine_predicate_readback.",
+    "goal": "the source goal asks three questions about the Jev contradiction veto; every code reference the fragment makes (workers.py:11232/11242/11255, graph_ops.py:25607/25649-25657/6712, harmonize.py:1696-1706, refine_docs_user.md:119-131) resolves to the cited construct, and Q2 and Q3 are answered in full while Q1's pre-clamp score is supplied for one of ten names.",
+    "manifest": "read; it records status complete, commit 0c3992cb, the three changed paths, the literal runner command and its log path, and claims 45 claim/DD triples and a one-name docs-refine backlog.",
+    "write_paths": "the manifest declares three fragment paths plus a figures directory; git diff 66f4eca6..0c3992cb creates exactly those three fragment files and nothing else."
+  },
+  "justifications": {
+    "durability": "srtj-contradiction-veto-hold-run.py carries no assertion (a grep for \"assert\" finds none), so nothing reddens if the parse or the reported counts change; the runner's printed readbacks are not checks.",
+    "evidence": "srtj-contradiction-veto-hold-run.log ends EXIT=0 and the JSON carries the firing table and per-predicate readbacks, but the fragment's \"eligible NOW: 1\" at :192 and \"45 triples\" at :44 are not derivable from the committed artifact, whose hold_scan.firings parses to 46 entries.",
+    "fit": "the runner follows the sibling evidence-runner idiom (header comment lines and a bare EXIT sentinel, as in srtj-docs-measure-run.py) and uses the established srtj-* fragment prefix.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html:82,92,102,112,122 render \"see note below\" for the pre-clamp panel score the brief asked for on every firing, supplying a number only for electrostatic_potential.",
+    "reuse": "the runner imports graph_ops.docs_review_eligibility_where/params and harmonize.plan_family_applies rather than re-implementing in place, though its log-scan helper repeats the pattern in ssog-anchor-held-cause-run.py that no shared module owns.",
+    "scope_discipline": "git diff 66f4eca6..0c3992cb creates only the three fragment paths the manifest declares, with no product or test change."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal asks three questions about the Jev contradiction veto; every code reference the fragment makes (workers.py:11232/11242/11255, graph_ops.py:25607/25649-25657/6712, harmonize.py:1696-1706, refine_docs_user.md:119-131) resolves to the cited construct, and Q2 and Q3 are answered in full while Q1's pre-clamp score is supplied for one of ten names.\nVERDICT done_when: the done_when names the HTML fragment, the JSON written by the runner, and a log ending EXIT=0; srtj-contradiction-veto-hold-run.log ends with a bare EXIT=0 reporting 118 hold lines / 29 contradiction lines / 10 names, and the committed JSON holds hold_scan.firings and refine_predicate_readback.\nVERDICT write_paths: the manifest declares three fragment paths plus a figures directory; git diff 66f4eca6..0c3992cb creates exactly those three fragment files and nothing else.\nVERDICT manifest: read; it records status complete, commit 0c3992cb, the three changed paths, the literal runner command and its log path, and claims 45 claim/DD triples and a one-name docs-refine backlog.\nVERDICT diff: read commit by commit against the base; the single commit 0c3992cb adds 2929 lines across the runner (343), the fragment (394) and the JSON (2192), with no product code, no test file and no figure.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html:82,92,102,112,122 render \"see note below\" for the pre-clamp panel score the brief asked for on every firing, supplying a number only for electrostatic_potential.\nSCORE evidence: 13\nJUSTIFICATION evidence: srtj-contradiction-veto-hold-run.log ends EXIT=0 and the JSON carries the firing table and per-predicate readbacks, but the fragment's \"eligible NOW: 1\" at :192 and \"45 triples\" at :44 are not derivable from the committed artifact, whose hold_scan.firings parses to 46 entries.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 66f4eca6..0c3992cb creates only the three fragment paths the manifest declares, with no product or test change.\nSCORE durability: 11\nJUSTIFICATION durability: srtj-contradiction-veto-hold-run.py carries no assertion (a grep for \"assert\" finds none), so nothing reddens if the parse or the reported counts change; the runner's printed readbacks are not checks.\nSCORE fit: 18\nJUSTIFICATION fit: the runner follows the sibling evidence-runner idiom (header comment lines and a bare EXIT sentinel, as in srtj-docs-measure-run.py) and uses the established srtj-* fragment prefix.\nSCORE reuse: 17\nJUSTIFICATION reuse: the runner imports graph_ops.docs_review_eligibility_where/params and harmonize.plan_family_applies rather than re-implementing them, though its log-scan helper repeats the pattern in ssog-anchor-held-cause-run.py that no shared module owns.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html:44 follow-on: the fragment and the manifest both state 45 claim/DD triples, but the committed artifact's hold_scan.firings parses to 46 entries (srtj-contradiction-veto-hold.json:483-511), so the classification (28 generic-against-specialised + 17 other = 45) is taken over an unstated population; emit the count from the runner so the prose reconciles with the artifact.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html:192 follow-on: Q2's central backlog claim (\"eligible NOW: 1\", a one-name 0.849 population) was measured only by an ad-hoc session query and appears in no committed artifact; reproducing the recorded gate cannot re-derive it, so move the count into the runner.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html:82 follow-on: Q1 asked for the panel's pre-clamp score on each firing; the fragment supplies it for electrostatic_potential only and writes \"see note below\" for the other nine names, a disclosed but material gap against question 1.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html:131 follow-on: the manifest declares a figures write path yet no figure was drawn for a classification-and-count result a small chart would carry better than the prose table.\n",
+  "review_run_id": "r-20261022T205924764153-review-of-srtj-contradiction-veto-hold-0c3992cb8739",
+  "reviewed_base_sha": "66f4eca6943c3ad62b53242aa59a6bc7acf0cd8a",
+  "reviewed_head_sha": "0c3992cb8739df6a231a7009198211e44b1f75f6",
+  "reviewed_run_id": "r-20261022T201413789080-srtj-contradiction-veto-hold",
+  "scores": {
+    "durability": 11,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T21:09:03.526023+00:00",
+  "total": 94
+}
