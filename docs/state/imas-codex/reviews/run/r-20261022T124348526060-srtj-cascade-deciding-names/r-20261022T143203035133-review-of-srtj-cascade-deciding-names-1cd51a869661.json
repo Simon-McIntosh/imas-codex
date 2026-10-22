@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-22T14:54:59.079Z",
+  "dispatched_at": "2026-10-22T14:33:50Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html",
+      "line": 19,
+      "severity": "follow-on",
+      "text": "The fragment calls logs/after-cascade-deciding.log 'the head arm', but that log's own header reads '# revision: 7d3acbc7fd503fc064c274cc857b87a2d4e1b8e8' and the manifest's after_suite revision is the same 7d3acbc7 \u2014 the reviewed base, the parent of the reviewed head 1cd51a869 \u2014 so no gate ran at the reviewed head. The only delta since 7d3acbc7 is this docs-only fragment edit, which cannot change a test result, so the claim is imprecise about the revision it measured rather than wrong about the outcome."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit since the prior review's head 7d3acbc7; exactly one commit 1cd51a869 changes one file \u2014 the fragment's gate paragraph (line 19) \u2014 updating the head arm from 111 to 126 passed and naming logs/after-cascade-deciding.log as the head arm, inside the declared write paths.",
+    "done_when": "done_when (reviewed run prompt.txt:167) requires deciding_enabled to take the axis, pyproject to set cascade-deciding to name only, a name item decided by Jev while a docs item goes to the incumbent, the two audit test follow-ons repaired, and the five named cascade files to show no added failures; the manifest's after_suite now adds this node's own test file and logs/after-cascade-deciding.log ends '126 passed, 2 deselected, 1 warning' EXIT=0 against base logs/base-cascade-deciding.log '109 passed, 2 deselected' EXIT=0, a delta of 0 added failures.",
+    "goal": "The node goal is 'Let Jev decide the name review alone through a per-axis cascade switch set to names' (reviewed run prompt.txt:30); the delta this review covers (1cd51a869) edits only the evidence fragment, and the switch it documents is defined at imas_codex/standard_names/review/cascade.py:127 with its single call at cascade.py:713.",
+    "manifest": "Read; it records status complete, commits 56a17d042..1cd51a869, baseline_suite and after_suite both exit_status 0 with failure_count 0, and names three negative-control logs each at EXIT=1.",
+    "write_paths": "The delta touches only docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html, the sixth of the seven declared write paths (reviewed run prompt.txt:138-144), so the change is inside its exclusive scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is 'Let Jev decide the name review alone through a per-axis cascade switch set to names' (reviewed run prompt.txt:30); the delta this review covers (1cd51a869) edits only the evidence fragment, and the switch it documents is defined at imas_codex/standard_names/review/cascade.py:127 with its single call at cascade.py:713.\nVERDICT done_when: done_when (prompt.txt:167) requires deciding_enabled to take the axis, pyproject to set cascade-deciding to name only, a name item decided by Jev while a docs item goes to the incumbent, the two audit test follow-ons repaired, and the five named cascade files to show no added failures; the manifest's after_suite now adds this node's own test file and logs/after-cascade-deciding.log ends '126 passed, 2 deselected' EXIT=0 against base logs/base-cascade-deciding.log '109 passed, 2 deselected' EXIT=0, a delta of 0 added failures.\nVERDICT write_paths: the delta touches only docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html, the sixth of the seven declared write paths (prompt.txt:138-144), so the change is inside its exclusive scope.\nVERDICT manifest: read; it records status complete, commits 56a17d042..1cd51a869, baseline_suite and after_suite both exit_status 0 with failure_count 0 and failure_ids empty, and names three negative-control logs each at EXIT=1.\nVERDICT diff: read commit by commit since the prior review's head 7d3acbc7; exactly one commit 1cd51a869 changes one file \u2014 the fragment's gate paragraph at line 19 \u2014 updating the head arm from 111 to 126 passed and naming logs/after-cascade-deciding.log as the head arm, inside the declared write paths.\nCALL_SITES: imas_codex/standard_names/review/cascade.py:713, imas_codex/standard_names/workers.py:8987, imas_codex/standard_names/workers.py:11113\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the delta's only change, docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html:19, documents the switch defined at imas_codex/standard_names/review/cascade.py:127 accurately and leaves the code untouched.\nSCORE evidence: 18\nJUSTIFICATION evidence: the head arm it names, logs/after-cascade-deciding.log, carries a real '126 passed, 2 deselected' summary over the six files at EXIT=0, resolving the prior review's unrecorded-head-run finding, though its '# revision:' header names 7d3acbc7 rather than the reviewed head 1cd51a869.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single file in 7d3acbc7..1cd51a869, docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html, is inside the declared write paths and carries nothing the delta does not imply.\nSCORE durability: 16\nJUSTIFICATION durability: the delta is documentation and adds no test of its own; the node's protection against regression is tests/standard_names/test_cascade_deciding_axes.py, now folded into the gate, whose negative controls logs/negative-control-deciding-ignores-axis.log, -construction-site-guard.log and -audit-group-id.log each end EXIT=1.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the id/heading style of the file it edits at docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html:19, and the file still ends without a trailing newline (pre-existing, unchanged by the delta).\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no definition and reuses the existing gate logs, and the node's deciding_enabled extends the owner at imas_codex/standard_names/review/cascade.py:127 rather than forking a capability.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-cascade-deciding-names.html:19 follow-on: the fragment calls logs/after-cascade-deciding.log 'the head arm', but that log's header reads '# revision: 7d3acbc7fd503fc064c274cc857b87a2d4e1b8e8' (the reviewed base, parent of head 1cd51a869) and the manifest's after_suite revision is the same, so no gate ran at the reviewed head; the docs-only delta cannot change the result, but the claim is imprecise about the revision it measured.",
+  "review_run_id": "r-20261022T143203035133-review-of-srtj-cascade-deciding-names-1cd51a869661",
+  "reviewed_base_sha": "7d3acbc7fd503fc064c274cc857b87a2d4e1b8e8",
+  "reviewed_head_sha": "1cd51a86966140bad47d1d0ca4c2103c23451a01",
+  "reviewed_run_id": "r-20261022T124348526060-srtj-cascade-deciding-names",
+  "rubric": "landed_node",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T14:55:39.885247+00:00",
+  "total": 111
+}
