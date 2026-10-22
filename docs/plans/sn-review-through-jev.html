@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="159">
+<meta name="plan-version" content="160">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -752,6 +752,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261022T123957900200-review-of-srtj-docs-dry-run-diagnosis-1713ecb103ba" data-who="reckon-build" data-when="2026-10-22T13:07:45.289Z">
     <div class="r-comment-body"><p>attach the parsed review at reviewed_base_sha e6868944717610e8dd84998cbb568037927e100f / reviewed_head_sha 1713ecb103ba114bbdbed7490a12ed44d4c66e3f as a comment on the plan section for r-20261022T093834366103-srtj-docs-dry-run-diagnosis</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261022T133532723879-review-of-srtj-decision-fault-retry-810a064e1ddc" data-who="reckon-build" data-when="2026-10-22T14:11:02.234Z">
+    <div class="r-comment-body"><p>review of r-20261022T124111677789-srtj-decision-fault-retry at head 810a064e1 from base 5e8ea3b8e - scores goal_fidelity 20, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 18 (total 112), 0 added failures against the reviewed run&#x27;s own baseline_suite and after_suite (both end 1 failed, 404/418 passed, the shared pre-existing id tests/discovery/test_judgment.py::test_judgment_imports_nothing_from_the_search_llm_package); two follow-on findings: tests/discovery/test_decision_fault_retry.py:188 has no recorded negative control for the fault-text half, and llm.py:3323&#x27;s manifest reuse claim is unsupported. No blocking findings; the change correctly names a message-less fault and retries a transport fault by type. Record stored at the declared review-records path and verified with `crew check --review` (EXIT=0).</p></div>
 </div>
 </section>
 </main>

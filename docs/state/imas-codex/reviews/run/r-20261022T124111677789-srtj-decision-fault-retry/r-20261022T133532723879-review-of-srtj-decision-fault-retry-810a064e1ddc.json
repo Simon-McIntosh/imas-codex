@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 11,
+  "call_sites": [
+    "imas_codex/standard_names/review/jev_review.py:952 decide_batch",
+    "imas_codex/standard_names/review/cascade.py:503 jev_review.decide_batch",
+    "imas_codex/standard_names/review/judge_stage.py:272 decide_batch",
+    "imas_codex/standard_names/workers.py:11007 jev_review.decide_batch",
+    "imas_codex/standard_names/domain_decision.py:263 decide_batch",
+    "imas_codex/standard_names/near_duplicates.py:217 decide_batch",
+    "imas_codex/standard_names/families.py:884 decide_batch",
+    "imas_codex/standard_names/segment_selection.py:591 decide_batch",
+    "imas_codex/graph/dd_domain_classifier.py:1080 decide_batch",
+    "imas_codex/ids/candidates.py:373 decide_one",
+    "imas_codex/discovery/base/judgment.py:283 acall_decisions"
+  ],
+  "completed_at": "2026-10-22T14:11:02.234Z",
+  "dispatched_at": "2026-10-22T13:36:22Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_decision_fault_retry.py",
+      "line": "188",
+      "severity": "follow-on",
+      "text": "follow-on: the fault-text half of the change has no recorded negative control \u2014 the sole mutation in negative-control.log reverts _decisions_retryable only, so this test's assertion on the decide_one warning text is never shown red, and the brief's requirement that each new test fail when its guard is reverted is demonstrated for the retry half alone; add a second mutation that reverts decide_one/decide_batch to outcome.fault and record its red log."
+    },
+    {
+      "file": "imas_codex/discovery/base/llm.py",
+      "line": "3323",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's evidence_inputs states _transient_transport_errors reuses the transient HTTP classes the call layer already handled elsewhere, but base llm.py at 5e8ea3b8e contains no such set \u2014 the tuple is newly constructed here from httpx directly, so the reuse claim is unsupported and a reader would wrongly believe a canonical shared set already existed."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T124111677789-srtj-decision-fault-retry/gate-after.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T124111677789-srtj-decision-fault-retry/gate-base.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 11 production call site(s)",
+    "diff": "Read all four commits (477601907, f8a9be00b, 794707926, 810a064e1) from 5e8ea3b8e to 810a064e1; 477601907 adds CallOutcome.fault_text and reads it in decide_one/decide_batch, f8a9be00b adds fault_text and the type-first _decisions_retryable in llm.py with the 14-test file, and the two docs commits record the outcome.",
+    "done_when": "The reviewed done_when names no added failures, a kept negative-control log and a landed fragment; gate-base.log and gate-after.log each end their summary at 1 failed with the same pre-existing id tests/discovery/test_judgment.py::test_judgment_imports_nothing_from_the_search_llm_package, so the added-failure count is zero and both arms ran to their summary and EXIT lines.",
+    "goal": "The reviewed goal is that a failed Jev decision call says what failed and is retried; imas_codex/discovery/base/judgment.py:301 logs outcome.fault_text and imas_codex/discovery/base/llm.py:3342 makes _decisions_retryable decide a transport fault by its type, so the landed change does what the goal states.",
+    "manifest": "The reviewed manifest records status complete, both gate arms with their failure_ids, and the negative-control log, and its baseline_suite/after_suite blocks are readable, but its evidence_inputs claim that _transient_transport_errors reuses a set the call layer already handled is unsupported by base llm.py.",
+    "write_paths": "The brief grants four paths (judgment.py, llm.py, tests/discovery/test_decision_fault_retry.py, the landing fragment); git diff --stat 5e8ea3b8e 810a064e1 changes exactly those four and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_decision_fault_retry.py:124 and :182 assert independent call counts (calls[\"n\"] == 2 and == 3) that redden when the retry classification is reverted, and :205 asserts a literal warning string, but negative-control.log covers only the retry half.",
+    "evidence": "gate-base.log and gate-after.log each end at 1 failed (404 and 418 passed) naming the same pre-existing id, negative-control.log ends EXIT=1 with 10 failing ids, and the reviewed manifest's baseline_suite/after_suite blocks carry completed:true with matching failure_ids.",
+    "fit": "imas_codex/discovery/base/llm.py:1220 follows the module's small-helper idiom and imas_codex/discovery/base/judgment.py:89 records the text on the existing CallOutcome NamedTuple rather than adding a parallel field; no added name violates the naming rules.",
+    "goal_fidelity": "imas_codex/discovery/base/llm.py:1220 and :3342 name a bare fault and retry a transport fault by type, and imas_codex/discovery/base/judgment.py:168 and :301 read the description at both entry points.",
+    "reuse": "the capability search over imas_codex for an existing fault-description or transient-error-tuple owner found none, so fault_text is the first owner of that capability and _decisions_retryable extends the shared _is_retryable at llm.py:3362 rather than forking it.",
+    "scope_discipline": "git diff 5e8ea3b8e..810a064e1 changes only judgment.py, llm.py, the new test file and the landing fragment, all inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The reviewed goal is that a failed Jev decision call says what failed and is retried; imas_codex/discovery/base/judgment.py:301 logs outcome.fault_text and imas_codex/discovery/base/llm.py:3342 makes _decisions_retryable decide a transport fault by its type, so the landed change does what the goal states.\nVERDICT done_when: The reviewed done_when names no added failures, a kept negative-control log and a landed fragment; gate-base.log and gate-after.log each end their summary at 1 failed with the same pre-existing id tests/discovery/test_judgment.py::test_judgment_imports_nothing_from_the_search_llm_package, so the added-failure count is zero and both arms ran to their summary and EXIT lines.\nVERDICT write_paths: The brief grants four paths (judgment.py, llm.py, tests/discovery/test_decision_fault_retry.py, the landing fragment); git diff --stat 5e8ea3b8e 810a064e1 changes exactly those four and nothing else.\nVERDICT manifest: The reviewed manifest records status complete, both gate arms with their failure_ids, and the negative-control log, and its baseline_suite/after_suite blocks are readable, but its evidence_inputs claim that _transient_transport_errors reuses a set the call layer already handled is unsupported by base llm.py.\nVERDICT diff: Read all four commits (477601907, f8a9be00b, 794707926, 810a064e1) from 5e8ea3b8e to 810a064e1; 477601907 adds CallOutcome.fault_text and reads it in decide_one/decide_batch, f8a9be00b adds fault_text and the type-first _decisions_retryable in llm.py with the 14-test file, and the two docs commits record the outcome.\nCALL_SITES: imas_codex/standard_names/review/jev_review.py:952, imas_codex/standard_names/review/cascade.py:503, imas_codex/standard_names/review/judge_stage.py:272, imas_codex/standard_names/workers.py:11007, imas_codex/standard_names/domain_decision.py:263, imas_codex/standard_names/near_duplicates.py:217, imas_codex/standard_names/families.py:884, imas_codex/standard_names/segment_selection.py:591, imas_codex/graph/dd_domain_classifier.py:1080, imas_codex/ids/candidates.py:373, imas_codex/discovery/base/judgment.py:283\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/discovery/base/llm.py:1220 and :3342 name a bare fault and retry a transport fault by type, and imas_codex/discovery/base/judgment.py:168 and :301 read the description at both entry points.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-base.log and gate-after.log each end at 1 failed (404 and 418 passed) naming the same pre-existing id, negative-control.log ends EXIT=1 with 10 failing ids, and the reviewed manifest's baseline_suite/after_suite blocks carry completed:true with matching failure_ids.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 5e8ea3b8e..810a064e1 changes only judgment.py, llm.py, the new test file and the landing fragment, all inside the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/discovery/test_decision_fault_retry.py:124 and :182 assert independent call counts (calls[\"n\"] == 2 and == 3) that redden when the retry classification is reverted, and :205 asserts a literal warning string, but negative-control.log covers only the retry half.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/discovery/base/llm.py:1220 follows the module's small-helper idiom and imas_codex/discovery/base/judgment.py:89 records the text on the existing CallOutcome NamedTuple rather than adding a parallel field; no added name violates the naming rules.\nSCORE reuse: 18\nJUSTIFICATION reuse: the capability search over imas_codex for an existing fault-description or transient-error-tuple owner found none, so fault_text is the first owner of that capability and _decisions_retryable extends the shared _is_retryable at llm.py:3362 rather than forking it.\nFINDING tests/discovery/test_decision_fault_retry.py:188 follow-on: the fault-text half of the change has no recorded negative control \u2014 the sole mutation in negative-control.log reverts _decisions_retryable only, so this test's assertion on the decide_one warning text is never shown red, and the brief's rule that each new test fail when its guard is reverted is demonstrated for the retry half alone; add a second mutation that reverts decide_one/decide_batch to outcome.fault and record its red log.\nFINDING imas_codex/discovery/base/llm.py:3323 follow-on: the manifest's evidence_inputs states _transient_transport_errors reuses the transient HTTP classes the call layer already handled elsewhere, but base llm.py at 5e8ea3b8e contains no such set \u2014 the tuple is newly constructed here from httpx directly, so the reuse claim is unsupported and a reader would wrongly believe a canonical shared set already existed.\n",
+  "review_run_id": "r-20261022T133532723879-review-of-srtj-decision-fault-retry-810a064e1ddc",
+  "reviewed_base_sha": "5e8ea3b8ed9115402ec403e8659047a82ddaa967",
+  "reviewed_head_sha": "810a064e1ddc0741fc02f82225b97f5946744cc7",
+  "reviewed_run_id": "r-20261022T124111677789-srtj-decision-fault-retry",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T13:52:00+00:00",
+  "total": 112
+}
