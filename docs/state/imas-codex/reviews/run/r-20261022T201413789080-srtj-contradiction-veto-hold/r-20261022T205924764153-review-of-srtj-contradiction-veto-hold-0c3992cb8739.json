@@ -11,6 +11,11 @@
       "kind": "exempted",
       "reason": "a finished diagnosis; its result is acted on by the holds-channel node",
       "recorded_at": "2026-10-22T22:45:56.770672+00:00"
+    },
+    "evidence": {
+      "kind": "exempted",
+      "reason": "the missing pre-clamp scores are disclosed and do not change the classification",
+      "recorded_at": "2026-10-22T22:46:05.872742+00:00"
     }
   },
   "dispatched_at": "2026-10-22T21:00:13Z",
