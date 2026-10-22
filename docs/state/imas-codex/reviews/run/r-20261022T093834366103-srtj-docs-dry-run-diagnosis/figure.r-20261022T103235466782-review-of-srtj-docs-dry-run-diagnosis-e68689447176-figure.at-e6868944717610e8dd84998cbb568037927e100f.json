@@ -4,7 +4,7 @@
   "caption_findings": [
     "The caption does not merely repeat a figure title: the figure carries no title and the caption describes both panels ('Left: ... Right: ...'), which is what the style rules ask for."
   ],
-  "completed_at": "",
+  "completed_at": "2026-10-22T11:17:09.488Z",
   "dispatched_at": "2026-10-22T10:54:34Z",
   "figures_reviewed": [
     {
@@ -44,6 +44,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-22T11:17:15.315308+00:00",
+  "timestamp": "2026-10-22T12:36:20.385488+00:00",
   "total": null
 }
