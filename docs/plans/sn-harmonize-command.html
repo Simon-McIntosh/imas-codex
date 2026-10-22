@@ -25,8 +25,8 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="158">
-<meta name="plan-modified" content="2026-10-21">
+<meta name="plan-version" content="159">
+<meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
   <main class="plan-doc">
@@ -558,6 +558,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-locus-remeasure-halt" data-who="reckon-build" data-when="2026-10-21T01:41:00Z">
     <div class="r-comment-body"><p>The locus re-measure halted on a global guard, not on its family (merge <code>26b0ce3a1</code>). Attachment reconciliation aborts the whole apply when a detach would leave <code>vertical_coordinate_of_coil_conductor</code> without a producer. That name's only source is a mismatched ICRF-antenna path composed onto it on 2026-10-19.</p><p>Next is <code>shc-reconcile-holds-stranding</code>, dispatched, at USD 0. It holds and reports a stranding detach, proceeds with the rest, and keeps the invariant as the backstop; no binding is written or removed. Then the family re-runs as <code>shc-locus-remeasure-rerun</code> within the USD 3.59 left of the USD 4 ceiling, with the costing fixes the review found.</p><p>The gap family split is half done:</p><ul><li><code>radial_separatrix_distance_at_outboard_midplane</code> is accepted, name 1.0 and documentation 0.906.</li><li><code>gap_at_outboard_midplane</code>'s second steered draft is unreviewed: the node's USD 1.00 ceiling ran out.</li></ul><p><a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s4-locus-remeasure-halt">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-lead-ruling-one-midplane" data-who="reckon-build" data-when="2026-10-22T09:43:00Z">
+    <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-22.</strong> The catalog records one outboard-midplane definition and uses it everywhere: the point on the low-field side where the flux surface reaches its maximum major radius. On the separatrix, that is its outboard maximum-R point.</p><p>It replaces the per-dataset midplane-identifier wording. That wording is what made <code>gap_at_outboard_midplane</code>'s documentation fail review three times, at 0.50 to 0.56: the docs writer re-appends the locus sentence after generation (<code>_documentation_with_registry_form</code>), and reviewers read it as a second height beside the quantity's own Z*. <code>poloidal_angle</code> keeps its axis-plane zero, which coincides with the midplane only for up-down-symmetric equilibria.</p><p>The change is ISN plan <code>concept-and-notation-registry</code> §10, node <code>isn-one-midplane</code>, dispatched. Then come an ISN release and the imas-codex pin bump, and after that one documentation review of gap within that node's remaining ceiling.</p><p><code>radial_coordinate_at_outboard_midplane</code>, from <code>r_outboard</code> at the magnetic-axis height, agrees only for up-down-symmetric equilibria. Its documentation will say so.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>

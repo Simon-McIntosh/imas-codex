@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="152">
+<meta name="plan-version" content="153">
 <meta name="plan-modified" content="2026-10-22">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -405,7 +405,10 @@
     <div class="r-comment-body"><p>review-of-srtj-refine-ab-labels-277f9c39c — an independent review of the source run's increment 7545153d8..277f9c39c scored goal_fidelity 19, evidence 16, scope_discipline 20, durability 8, fit 18, reuse 20, with two follow-on findings (the separatrix group's headline criterion does not decide row-034; the new per-source table is compared to nothing).</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261021T041023726002-srtj-refine-ab-labels" data-who="reckon-build" data-when="2026-10-21T05:46:38Z">
-    <div class="r-comment-body"><p>srtj-refine-ab-labels — labelled all 124 rows of the refine comparison&#x27;s blind sheet (99 acceptable, 25 not) with a one-line reason each, judged from each row&#x27;s own DD source and name; the deliverable is docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json with its fragment srtj-refine-ab-labels.html carrying the counts, the four criteria, three worked examples and the statement that no forbidden arm or run file was opened.</p></div>
+    <div class="r-comment-body"><p>srtj-refine-ab-labels — labelled all 124 rows of the refine comparison's blind sheet (99 acceptable, 25 not) with a one-line reason each, judged from each row's own DD source and name; the deliverable is docs/evidence/fragments/sn-review-through-jev/srtj-refine-ab-labels.json with its fragment srtj-refine-ab-labels.html carrying the counts, the four criteria, three worked examples and the statement that no forbidden arm or run file was opened.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-s5-labels-landed" data-who="reckon-build" data-when="2026-10-22T09:42:00Z">
+    <div class="r-comment-body"><p>The blind labels are on <code>main</code> (merge <code>7d82df99d</code>, reviews 100 and 101/120). Of the 124 rows, 99 are acceptable and 25 are not. Rows sharing a DD source follow one stated criterion, after the review found two judged inconsistently. <code>srtj-refine-ab-score</code> is dispatched. It reports each arm's post-refine acceptance and cost per accepted name over all, direct and lineage rows, with a paired interval from the evaluation module. It also adds an in-tree test on the labels. The keyword-trigger retirement follows the score.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261017T104929813755-review-of-srtj-docs-planted-defects-11112a496e2e" data-who="reckon-build" data-when="2026-10-17T10:59:05Z">
     <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261017T103622176117-srtj-docs-planted-defects/review-records/r-20261017T103622176117-srtj-docs-planted-defects.at-11112a496e2e9a06006dbdb6a0e7331f36adddba.json — six parsed scores, one blocking finding, revision pair verified</p></div>
@@ -725,6 +728,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261021T040906172109-srtj-jev-only-dry-run" data-who="reckon-build" data-when="2026-10-21T06:09:19Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-jev-only-dry-run.html</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-dry-run-failed" data-who="reckon-build" data-when="2026-10-22T09:41:00Z">
+    <div class="r-comment-body"><p>The Jev-only dry run fails its check on both axes, so <code>cascade-deciding</code> stays off (merge <code>27fe0cb81</code>, USD 2.20).</p><p><strong>Names.</strong> Only 1 of 231 is undecided. The accept rate misses the calibration-matched target, but on shared items it is close to the incumbent's.</p><p><strong>Documentation.</strong> 76 of 219 are undecided on <code>no usable judgment</code> errors. Jev also accepts 49 shared items the incumbent refines, with 0 the other way.</p><p><code>srtj-docs-dry-run-diagnosis</code> is dispatched, read-only at USD 0. It classifies the 76 by cause, and the 49 by whether the incumbent's refine names a substantive defect or a mechanical cap or hold. It also restates the name check against the incumbent on shared items. The switch is re-decided on its findings. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#s6-jev-only-dry-run">evidence</a></p></div>
 </div>
 </section>
 </main>
