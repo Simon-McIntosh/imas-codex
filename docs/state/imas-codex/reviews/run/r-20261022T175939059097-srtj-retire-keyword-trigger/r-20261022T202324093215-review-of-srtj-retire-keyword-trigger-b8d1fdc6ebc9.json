@@ -8,6 +8,13 @@
     "imas_codex/standard_names/workers.py:7409 (process_refine_name_batch)"
   ],
   "completed_at": "2026-10-22T20:51:28.797Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "the out-of-scope paths are importers of the deleted symbols, accepted at promotion",
+      "recorded_at": "2026-10-22T20:55:57.652405+00:00"
+    }
+  },
   "dispatched_at": "2026-10-22T20:29:29Z",
   "finding_dispositions": {
     "0": {
