@@ -121,8 +121,12 @@ added failure ids: none   fixed: none   (the two failure sets are identical)
 call-contract probe: <code>_ATTACHMENTS_QUERY.format(scope="")</code> returns 2250 chars, no
   residual braces, on head  — the template still takes one placeholder</pre>
   <p>
-    The nine graph failures are the empty-graph fixture failures that are present
-    at base; they are flat, and neither arm raises <code>KeyError</code>. The head
-    arm carries three more passes: the stranding tests themselves.
+    Those nine ids are byte-for-byte the base set, so they measure this empty
+    disposable instance rather than the change, and neither arm raises
+    <code>KeyError</code> — the failure the template's second placeholder would
+    have produced. The head arm carries three more passes: the stranding tests
+    themselves. Both arms also run the same read the fixture tests scope
+    (<code>_ATTACHMENTS_QUERY.format(scope=…)</code>), so the four call sites that
+    were broken before are exercised here, not deselected.
   </p>
 </section>
