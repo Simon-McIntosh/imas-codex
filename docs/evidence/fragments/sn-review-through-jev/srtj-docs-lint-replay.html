@@ -1,0 +1,150 @@
+<!doctype html>
+<html><head><meta charset='utf-8'>
+<title>Does the incumbent deterministic lint catch the 19 documentation link defects?
+</title></head><body>
+<h1 id="srtj-docs-lint-replay">Does the incumbent deterministic lint catch the 19 documentation link defects?</h1>
+
+<p><strong>Verdict: no.</strong> The incumbent's error-severity lint cap flags <strong>6 of the 19</strong>
+link-defect rows and <strong>1 of the 30</strong> acceptable ones, so it does <strong>not</strong> meet the
+lead's bar (all 19 and none of the 30). It never flags a defect for a link reason: all 6 it catches carry a
+<code>relationship_link</code> error (the document has no <code>name:</code> link at all), while the 13 it
+misses carry a valid <code>name:</code> link that resolves and a bracketed prose phrase the
+<code>link_hygiene</code> gate cannot match. The measurement is <code>srtj-docs-lint-replay.json</code>,
+written by <code>srtj-docs-lint-replay-run.py</code> with a log ending in <code>EXIT=0</code>; no graph
+write and no model call, USD 0.</p>
+
+<h2 id="srtj-docs-lint-replay-method">What was run</h2>
+<p>The three deterministic checks the cascade's own documentation-audit path composes were run over each of
+the 77 labelled rows, fed the row's stored documentation text (matched to the export's own
+<code>documentation</code>, 0 mismatches) and the item's <code>unit</code>, <code>description</code>,
+<code>cocos_transformation_type</code> and structured <code>links</code> as the export holds them:</p>
+<ul>
+<li><code>run_house_style_checks</code>, <code>run_documentation_gate_checks</code>,
+<code>run_link_integrity</code> from <code>imas_codex/standard_names/review/audits.py</code>.</li>
+<li>Links resolved against the catalog the judges saw: the <strong>5,137</strong> <code>StandardName</code>
+ids in the cohort's archived export
+<code>imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz</code>, loaded into a disposable scratch Neo4j
+instance (stopped and removed on exit) with only the ids read.</li>
+<li>"Error-severity finding" is what the cap's selector uses: a <code>lint_findings</code> entry with
+<code>severity == "error"</code>. Link findings (<code>LinkFinding</code>) carry no severity and are never
+read by the cap.</li>
+</ul>
+<p>Three positive controls prove the instrument sees each defect kind before any absence is reported (all
+recorded in the JSON): the documentation gates fire a <code>link_hygiene</code> error on a
+<code>[snake_case]</code> bare bracket; the identical text of a real defect row passes
+<code>link_hygiene</code> and fails on that text with a snake_case bracket injected; and
+<code>run_link_integrity</code> reports <code>dead_link</code> for a structured link to a real catalog id
+held out of the known set, and nothing when the id is known.</p>
+
+<h2 id="srtj-docs-lint-replay-table">Per-class findings</h2>
+<table border='1' cellpadding='4' cellspacing='0'>
+<tr><th>class</th><th>Jev / panel</th><th>label</th><th>rows</th>
+<th>rows with an error-severity finding</th><th>rows with any finding</th><th>finding types</th></tr>
+<tr><td>disagreement</td><td>accept / refine</td><td>not acceptable (link defect)</td><td>19</td>
+<td><strong>6</strong></td><td>8</td>
+<td><code>relationship_link</code> 6 (error); <code>convention_violation</code> 4 (warning)</td></tr>
+<tr><td>disagreement</td><td>accept / refine</td><td>acceptable</td><td>30</td>
+<td><strong>1</strong></td><td>17</td>
+<td><code>defining_equation</code> 1 (error); <code>convention_violation</code> 20 (warning)</td></tr>
+<tr><td>control</td><td>accept / accept</td><td>acceptable</td><td>10</td><td>2</td><td>2</td>
+<td><code>link_hygiene</code> 1, <code>defining_equation</code> 1 (error)</td></tr>
+<tr><td>control</td><td>accept / accept</td><td>not acceptable</td><td>4</td><td>1</td><td>1</td>
+<td><code>relationship_link</code> 1 (error)</td></tr>
+<tr><td>control</td><td>refine / refine</td><td>acceptable</td><td>7</td><td>0</td><td>4</td>
+<td><code>convention_violation</code> 4 (warning)</td></tr>
+<tr><td>control</td><td>refine / refine</td><td>not acceptable</td><td>7</td><td>1</td><td>1</td>
+<td><code>relationship_link</code> 1 (error)</td></tr>
+</table>
+<p>Across the whole sheet only 11 of 77 rows carry any error-severity finding, and none of them carries a
+link-specific one for a documentation link defect: the <code>link_hygiene</code> gate never fired on a
+disagreement row, and <code>run_link_integrity</code> produced no finding on any of the 77.</p>
+
+<h2 id="srtj-docs-lint-replay-cap-sites">Where the incumbent's lint cap acts (question 1)</h2>
+<ul>
+<li><strong>The cap:</strong> <code>_cap_docs_scores_for_lint_errors</code> at
+<code>imas_codex/standard_names/review/pipeline.py:1963</code>, which
+holds any name carrying an error-severity lint finding below <code>DEFAULT_MIN_SCORE</code>.</li>
+<li><strong>Its selector:</strong> <code>_extract_error_lint_ids</code> at
+<code>imas_codex/standard_names/review/pipeline.py:1817</code>, reading
+<code>audit_report.lint_findings</code> with <code>severity == "error"</code> only. Link findings are
+rendered as <code>[warning:link:...]</code> (<code>pipeline.py:1801</code>) and are never seen by the cap.</li>
+<li><strong>Its only call site:</strong> <code>imas_codex/standard_names/review/pipeline.py:2184</code>,
+guarded by <code>target == "docs"</code>.</li>
+<li><strong>The docs path the cascade wraps applies no such cap.</strong>
+<code>process_review_docs_batch</code> (<code>imas_codex/standard_names/workers.py:11150</code>) calls
+<code>prepare_docs_review_request</code> (<code>workers.py:10712</code>) and then
+<code>adjudicate_review("docs", ...)</code> (<code>workers.py:11197</code>). Neither that function nor
+<code>workers.py</code> references an audit report or <code>_cap_docs_scores_for_lint_errors</code> at all.
+That path applies its own clamp at <code>workers.py:11242</code>, from the conformance, banned-prose and
+DD-contradiction notes — not from an error-severity lint report. So today the error-severity lint cap the
+lead's ruling refers to is <em>not</em> reached through the wrapped docs path.</li>
+<li><strong>The Jev route builds its own report.</strong> <code>_docs_judgment</code>
+(<code>imas_codex/standard_names/review/cascade.py:519</code>) calls
+<code>jev_review.build_docs_audit_report</code> (<code>jev_review.py:623</code>) with
+<code>catalog_names=[item]</code> and <code>known_ids = {item} &cup; siblings</code>
+(<code>cascade.py:535</code>). Its <code>run_link_integrity</code> therefore resolves a link target against
+the item and its siblings only: <strong>a link to a real catalog name that is not a sibling is reported as a
+<code>dead_link</code></strong> (proven by the out-of-scope control), even though that name exists. Its
+documentation gates (<code>link_hygiene</code>, <code>relationship_link</code>) are the same ones measured
+here.</li>
+<li><strong>Neither route reads the documentation text for links</strong> except through the
+<code>link_hygiene</code> gate: <code>run_link_integrity</code> reads the structured
+<code>name['links']</code> field (<code>audits.py:406</code>), never the prose, so it is structurally blind
+to a link defect written in the documentation.</li>
+</ul>
+
+<h2 id="srtj-docs-lint-replay-misses">The 13 misses and the 1 false flag (question 2)</h2>
+<p>Every miss is a <strong>missing check</strong>, not a check with the wrong severity: the link-aware gate
+that exists (<code>link_hygiene</code>) is already error-severity, but its bare-bracket pattern
+<code>\[([a-z][a-z0-9_]+)\]</code> (<code>doc_links.py:20</code>) matches a snake_case identity and not the
+prose phrase the defect actually is. Two of the misses (S0060, S0071) are a self-referential
+<code>name:</code> link whose target resolves, which no check reads.</p>
+<table border='1' cellpadding='4' style='margin-bottom:1em'>
+<tr><th>sheet</th><th>name</th><th>defect quoted from the label</th><th>miss kind</th></tr>
+<tr><td>S0006</td><td><code>line_averaged_lithium_density</code></td>
+<td>"the bracketed phrase '[flux-surface-averaged lithium density at the plasma boundary]' has no name: link target."</td>
+<td>missing check &mdash; prose bracket, no pattern match; the doc's <code>name:</code> link resolves</td></tr>
+<tr><td>S0025</td><td><code>perpendicular_power_normalized_of_beam_tracing_beam</code></td>
+<td>"the bracketed phrase '[parallel normalized beam power]' has no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0027</td><td><code>lithium_density_at_limiter</code></td>
+<td>"the bracketed phrase '[ion density at a limiter]' has no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0029</td><td><code>etendue_of_spectrometer</code></td>
+<td>"the bracketed phrase '[viewing etendue of a spectrometer channel]' has no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0030</td><td><code>parallel_ion_heat_convection_velocity</code></td>
+<td>"the bracketed phrases '[effective thermal ion charge-state energy velocity due to convection]' and '[ion heat convection velocity]' have no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0033</td><td><code>ion_energy_diffusion_coefficient</code></td>
+<td>"the bracketed phrases '[Radial ion energy diffusion coefficient]', '[poloidal ion energy diffusion coefficient]' and '[energy diffusivity]' have no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0040</td><td><code>deposited_power_at_divertor_target_due_to_halo_current</code></td>
+<td>"the bracketed phrase '[power of divertor]' has no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0049</td><td><code>plasma_energy</code></td>
+<td>"the bracketed phrases '[total plasma energy]' and '[total particle energy]' have no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0050</td><td><code>toroidal_co_passing_fast_ion_torque_density_due_to_collisions</code></td>
+<td>"the bracketed phrase '[co-passing fast ion torque density due to collisions]' has no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0060</td><td><code>tungsten_density_flux_surface_averaged_at_plasma_boundary</code></td>
+<td>"the link text 'tungsten density at the plasma boundary' targets this row's own name while being presented as the distinct 'local' quantity, a self-link..."</td>
+<td>missing check &mdash; self-referential <code>name:</code> link, target resolves</td></tr>
+<tr><td>S0064</td><td><code>toroidal_magnetic_field_at_flux_surface</code></td>
+<td>"the bracketed phrases '[poloidal magnetic field at a flux surface]', '[radial magnetic field at a flux surface]', '[vertical magnetic field at a flux surface]' and '[magnetic-field magnitude at a flux surface]' all have no name: link target."</td><td>missing check</td></tr>
+<tr><td>S0071</td><td><code>polarization_angle_at_constraint_position</code></td>
+<td>"the link text 'polarization_angle' targets this row's own name while being presented as the corresponding reconstructed generic quantity, a self-link..."</td>
+<td>missing check &mdash; self-referential <code>name:</code> link, target resolves</td></tr>
+<tr><td>S0074</td><td><code>neutral_internal_state_particle_flux_at_wall</code></td>
+<td>"the bracketed phrase '[neutral particle flux at the wall]' has no name: link target..."</td><td>missing check</td></tr>
+</table>
+<p>The 6 defect rows the cap <em>does</em> flag (S0011, S0016, S0038, S0043, S0045, S0063) are flagged for a
+different reason: each carries no <code>name:</code> link at all, so the <code>relationship_link</code> gate
+fails. That routes them to refinement, but it does not diagnose the link defect.</p>
+<p>The one acceptable row wrongly flagged is <strong>S0062</strong>
+(<code>vertical_coordinate_of_antenna_strap</code>): <code>defining_equation</code> (error) &mdash;
+"documentation lacks exactly one dimensionally checkable defining relation". This is an error-severity
+finding from a gate unrelated to links, so the cap would refine an acceptable document.</p>
+
+<h2 id="srtj-docs-lint-replay-reproduce">Reproduce</h2>
+<pre>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync python docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay-run.py</pre>
+<p>Log <code>srtj-docs-lint-replay.log</code> (revision a9ff6a562, this tree, that command; last line
+<code>EXIT=0</code>) is in the run directory
+<code>~/.config/reckon/crew/runs/r-20261022T185056036830-srtj-docs-lint-replay/</code>. The scratch instance
+was stopped and its directory removed (<code>exists_after: false</code>).</p>
+
+</body></html>
