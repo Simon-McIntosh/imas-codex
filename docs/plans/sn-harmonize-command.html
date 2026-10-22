@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="167">
+<meta name="plan-version" content="168">
 <meta name="plan-modified" content="2026-10-22">
 </head>
 <body>
@@ -587,7 +587,10 @@
     <div class="r-comment-body"><p>The single midplane definition (maximum major radius on each flux surface) merged upstream as ISN PR #39 (<code>4c59393cb</code>). With CI green it was released as <code>v0.10.1</code>. Node <code>isn-pin-0-10-1</code> moves both imas-codex pins; a grammar-sync node follows it.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261022T185527214002-review-of-shc-midplane-docs-refresh-f43739c65b18" data-who="reckon-build" data-when="2026-10-22T19:37:49.602Z">
-    <div class="r-comment-body"><p>review — independent review of r-20261022T175735626669-shc-midplane-docs-refresh at head f43739c65: scores goal_fidelity 15, evidence 12, scope_discipline 20, durability 9, fit 17, reuse 10; 1 blocking finding (the landing fragment&#x27;s scope paragraph claims both names were brought in line, which the fragment&#x27;s own title and &#x27;What is left&#x27; section contradict) and 4 follow-on findings; added_failure_count 0 against base 96aab3e62 (the node changes no product source and its write paths hold no test file, so its baseline_suite and after_suite are &#x27;none&#x27;)</p></div>
+    <div class="r-comment-body"><p>review — independent review of r-20261022T175735626669-shc-midplane-docs-refresh at head f43739c65: scores goal_fidelity 15, evidence 12, scope_discipline 20, durability 9, fit 17, reuse 10; 1 blocking finding (the landing fragment's scope paragraph claims both names were brought in line, which the fragment's own title and 'What is left' section contradict) and 4 follow-on findings; added_failure_count 0 against base 96aab3e62 (the node changes no product source and its write paths hold no test file, so its baseline_suite and after_suite are 'none')</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261022T191056593680-review-of-shc-locus-remeasure-rerun-b5f7791aabcd" data-who="reckon-build" data-when="2026-10-22T19:51:02.933Z">
+    <div class="r-comment-body"><p>independent review recorded for r-20261022T180138781883-shc-locus-remeasure-rerun over commit b5f7791aabcd1dcc3ba30ef1b1113f18967b1646 from base 96aab3e62012c1892988f5c12093641764c2241b; status parsed, scores goal_fidelity 16, evidence 16, scope_discipline 17, durability 6, fit 15, reuse 20, added_failure_count 0, added_failure_ids []; six follow-on findings and no blocker.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>

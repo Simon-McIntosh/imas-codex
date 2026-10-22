@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed node's write paths contain no test file, so it was not armed: its manifest records baseline_suite and after_suite as absent and no such gate logs exist in its run directory, so there were no added failures to derive and the zero is an unarmed absence rather than a measured zero.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-22T19:51:02.933Z",
+  "dispatched_at": "2026-10-22T19:27:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun.json",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: the apply's whole spend went to electron_temperature_at_separatrix and gap_at_outboard_midplane, two names outside the family, and the family's own members were never processed (0/1 accepted), so the node's guard 'touch no name outside the family' was not met and the re-measure produced no family-side evidence; the record reports this honestly, so it is a coordinator decision rather than a defect in the change."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py",
+      "line": "322",
+      "severity": "follow-on",
+      "text": "follow-on: the record_cost docstring says the cost is read 'against the exact run ids the apply's own summary reported', but the apply was run without --json so no summary exists and the record's own run_ids_source at shc-locus-remeasure-rerun.json:53 says the id was operator-named; the docstring contradicts the record the brief asked to make agree with the code."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "15919",
+      "severity": "follow-on",
+      "text": "follow-on: aggregate_calls_per_phase is landed with no test that exercises it, and tests/standard_names/test_cost_graph_ops.py:298-360 covers only its spend siblings, so a wrong call count would pass every recorded gate and be written into the record unchallenged."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "follow-on: POSITIVE_CONTROL_EXPECTED is declared at line 45 and recorded as positive_control_expected, but the observed match count is compared to it nowhere, so a roster search that silently matched nothing would still let the fragment assert 'a zero member count is a real absence' at shc-locus-remeasure-rerun.html:11."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py",
+      "line": "432",
+      "severity": "follow-on",
+      "text": "follow-on: the reset detector requires a doc-stage change as well as a score falling to null, so a member whose documentation score disappears while its stage stays the same is reported in no category and the fragment's 'Members reset back into the pipeline: none' can hide a regression."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py",
+      "line": "355",
+      "severity": "follow-on",
+      "text": "follow-on: record_cost stores cost.run_ids from the same entry.run_ids the record already carries, so the gate's assertion that the two are equal moves with its own input and cannot detect a cost read selected on a wrong or prefix-matched run id."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the added capability",
+    "diff": "read both commits against base 96aab3e62: 28793d1c9 adds one function imas_codex/standard_names/graph_ops.py:15919 and b5f7791a adds the 666-line runner, the 36-line fragment and the 277-line JSON, all inside the granted scope plus the sanctioned cost owner.",
+    "done_when": "the source prompt.txt:150-151 requires the JSON to hold the dry run, held detaches, calls, spend, wall time, lint and every member's documentation score before and after, the stamped status and per-name cost selected by exact run id under USD 3.59; the scratch gate assert_record.py:8-43 asserts each of those against the stored record and runner-pipeline.log ends EXIT=0.",
+    "goal": "the node goal is to re-apply the electrostatic_potential locus family now that attachment reconciliation no longer aborts; shc-locus-remeasure-rerun-run.py:224 ingests the apply and :383 renders it, and the record at shc-locus-remeasure-rerun.html:3-8 shows the apply ran and halted with the stranding detach held rather than aborting the family.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T180138781883-shc-locus-remeasure-rerun/manifest.md; status complete, two commits 28793d1c9 and b5f7791a, the graph_ops.py deviation declared at line 9, and ${...} resolved.",
+    "write_paths": "the source prompt.txt:127-131 grants the three fragment paths plus a figure directory; the diff from 96aab3e62 to b5f7791a changes those three plus imas_codex/standard_names/graph_ops.py, which brief.md:38 permits as the only product change, and no figure was added."
+  },
+  "justifications": {
+    "durability": "imas_codex/standard_names/graph_ops.py:15919 adds aggregate_calls_per_phase with no test in tests/standard_names/test_cost_graph_ops.py:298-360, so the landed product change has no assertion that reddens when it regresses.",
+    "evidence": "runner-pipeline.log:2-14 ends EXIT=0 with the asserted record and apply-rerun-1.log:2849 reports the same USD 0.59457 the graph-ops read returned, so the figures are corroborated rather than claimed.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:319-332 follows the sibling docstring style of imas_codex/standard_names/graph_ops.py:15907 and its names describe what they do, though the record_cost docstring contradicts the record's run_ids_source at shc-locus-remeasure-rerun.json:53.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:224-316 records the re-apply and shc-locus-remeasure-rerun.html:3-8 reports it halted with the stranding detach held rather than aborting, which is the goal, though the record at shc-locus-remeasure-rerun.json:10-11 shows no family member was processed.",
+    "reuse": "A search of imas_codex/standard_names for a per-phase call-count aggregation found none, and shc-locus-remeasure-rerun-run.py:328-332 extends the existing LLMCost owner rather than re-expressing its Cypher, as brief.md:30-32 requires.",
+    "scope_discipline": "The diff from 96aab3e62 to b5f7791a changes the three granted fragment paths plus imas_codex/standard_names/graph_ops.py, the call-count addition brief.md:38 sanctions, and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to re-apply the electrostatic_potential locus family now that attachment reconciliation no longer aborts; docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:224 ingests the apply and :383 renders it, and shc-locus-remeasure-rerun.html:3-8 records that it ran and halted with the stranding detach held rather than aborting.\nVERDICT done_when: the source prompt.txt:150-151 requires the JSON to hold the dry run, held detaches, calls, spend, wall time, lint and every member's documentation score before and after, the stamped status and per-name cost selected by exact run id under USD 3.59; the scratch gate assert_record.py:8-43 asserts each of those against the stored record and runner-pipeline.log ends EXIT=0.\nVERDICT write_paths: the source prompt.txt:127-131 grants the three fragment paths plus a figure directory; the diff from 96aab3e62 to b5f7791a changes those three plus imas_codex/standard_names/graph_ops.py, the only product change brief.md:38 permits, and adds no figure.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261022T180138781883-shc-locus-remeasure-rerun/manifest.md; status complete, two commits 28793d1c9 and b5f7791a, the out-of-fence graph_ops.py change declared at line 9, and the family recorded as halted with four follow-ons.\nVERDICT diff: read both commits against base 96aab3e62 commit by commit; 28793d1c9 adds aggregate_calls_per_phase at imas_codex/standard_names/graph_ops.py:15919 and b5f7791a adds the 666-line runner, the 36-line fragment and the 277-line JSON, all within the granted scope plus the sanctioned cost owner.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:224-316 records the re-apply and shc-locus-remeasure-rerun.html:3-8 reports it halted with the detach held rather than aborting, which is the goal, though shc-locus-remeasure-rerun.json:10-11 shows no family member was processed.\nSCORE evidence: 16\nJUSTIFICATION evidence: runner-pipeline.log:2-14 ends EXIT=0 with the asserted record and apply-rerun-1.log:2849 reports the same USD 0.59457 the graph-ops read returned, so the figures are corroborated rather than claimed.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: the diff from 96aab3e62 to b5f7791a changes the three granted fragment paths plus imas_codex/standard_names/graph_ops.py, the call-count addition brief.md:38 sanctions, and nothing else.\nSCORE durability: 6\nJUSTIFICATION durability: imas_codex/standard_names/graph_ops.py:15919 adds aggregate_calls_per_phase with no test exercising it in tests/standard_names/test_cost_graph_ops.py:298-360, so the landed product change has no assertion that reddens when it regresses.\nSCORE fit: 15\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:319-332 follows the sibling docstring style of imas_codex/standard_names/graph_ops.py:15907, though the record_cost docstring contradicts the record's run_ids_source at shc-locus-remeasure-rerun.json:53.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of imas_codex/standard_names for a per-phase call-count aggregation found none, and shc-locus-remeasure-rerun-run.py:328-332 extends the existing LLMCost owner rather than re-expressing its Cypher.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun.json:10 follow-on: the apply's whole spend went to electron_temperature_at_separatrix and gap_at_outboard_midplane, two names outside the family, and the family's own members were never processed (0/1 accepted), so the node's guard 'touch no name outside the family' was not met and the re-measure produced no family-side evidence; the record reports this honestly, so it is a coordinator decision rather than a defect in the change.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:322 follow-on: the record_cost docstring says the cost is read 'against the exact run ids the apply's own summary reported', but the apply was run without --json so no summary exists and the record's own run_ids_source at shc-locus-remeasure-rerun.json:53 says the id was operator-named; the docstring contradicts the record the brief asked to make agree with the code.\nFINDING imas_codex/standard_names/graph_ops.py:15919 follow-on: aggregate_calls_per_phase is landed with no test that exercises it, and tests/standard_names/test_cost_graph_ops.py:298-360 covers only its spend siblings, so a wrong call count would pass every recorded gate and be written into the record unchallenged.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:96 follow-on: POSITIVE_CONTROL_EXPECTED is declared at line 45 and recorded as positive_control_expected, but the observed match count is compared to it nowhere, so a roster search that silently matched nothing would still let the fragment assert 'a zero member count is a real absence' at shc-locus-remeasure-rerun.html:11.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:432 follow-on: the reset detector requires a doc-stage change as well as a score falling to null, so a member whose documentation score disappears while its stage stays the same is reported in no category and the fragment's 'Members reset back into the pipeline: none' can hide a regression.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py:355 follow-on: record_cost stores cost.run_ids from the same entry.run_ids the record already carries, so the gate's assertion that the two are equal moves with its own input and cannot detect a cost read selected on a wrong or prefix-matched run id.\n",
+  "review_run_id": "r-20261022T191056593680-review-of-shc-locus-remeasure-rerun-b5f7791aabcd",
+  "reviewed_base_sha": "96aab3e62012c1892988f5c12093641764c2241b",
+  "reviewed_commits": [
+    "28793d1c90a5bad04c8255a3f6275a9bfdc04470",
+    "b5f7791aabcd1dcc3ba30ef1b1113f18967b1646"
+  ],
+  "reviewed_head_sha": "b5f7791aabcd1dcc3ba30ef1b1113f18967b1646",
+  "reviewed_run_id": "r-20261022T180138781883-shc-locus-remeasure-rerun",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-22T19:57:42.227117+00:00",
+  "total": 90
+}
