@@ -1,0 +1,2674 @@
+{
+  "schema": "srtj-docs-lint-replay",
+  "created_at": "2026-10-22T20:48:26.485229+00:00",
+  "started_at": "2026-10-22T20:48:26.485401+00:00",
+  "code_revision": "a7f985d6d58173ec77db7f5b87211d5f05853e27",
+  "module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-lint-replay/docs/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay-run.py",
+  "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-lint-replay",
+  "archive": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
+  "scratch_instance": {
+    "path": "/tmp/reckon-crew-scratch/r-20261022T185056036830-srtj-docs-lint-replay/srtj-docs-lint-replay-gxqi3nyf/instance",
+    "uri": "bolt://127.0.0.1:45247",
+    "log": "/tmp/reckon-crew-scratch/r-20261022T185056036830-srtj-docs-lint-replay/srtj-docs-lint-replay-gxqi3nyf/instance/logs/neo4j-temp.log"
+  },
+  "positive_controls": {
+    "link_hygiene_bracket_fires": {
+      "purpose": "the documentation gates must fire an error-severity link_hygiene finding on a snake_case bare bracket",
+      "documentation": "This is the path-length average of lithium ion number density, summed over all ionization stages from Li$^+$ through fully stripped Li$^{3+}$, along a specified chord through the plasma.\n\nThe chord average is defined by\n\n$$\n\\langle n_{Li} \\rangle_L = \\frac{1}{L}\\int_0^L n_{Li}(s)\\,ds\n$$\n\nwhere $n_{Li}(s)$ is the local lithium ion number density in m$^{-3}$, $s$ is path length in meters along the chord, and $L$ is the total chord length in meters.\n\nThis quantity weights each path-length element equally and excludes neutral lithium. It differs from the [flux-surface-averaged lithium density at the plasma boundary], which averages over a separatrix, and from [volume-averaged lithium density](name:volume_averaged_lithium_density), which averages over confined plasma volume.\n\nSee [injected_bare_name] for the peer quantity.",
+      "lint_types": [
+        "link_hygiene"
+      ],
+      "error_types": [
+        "link_hygiene"
+      ],
+      "saw_link_hygiene_error": true
+    },
+    "defect_shape_not_seen": {
+      "purpose": "the same real defect-row documentation passes link_hygiene, while the identical text with a snake_case bracket injected fails it -- so a failure is reachable on this text and the real rows are not seen",
+      "documentation": "This is the path-length average of lithium ion number density, summed over all ionization stages from Li$^+$ through fully stripped Li$^{3+}$, along a specified chord through the plasma.\n\nThe chord average is defined by\n\n$$\n\\langle n_{Li} \\rangle_L = \\frac{1}{L}\\int_0^L n_{Li}(s)\\,ds\n$$\n\nwhere $n_{Li}(s)$ is the local lithium ion number density in m$^{-3}$, $s$ is path length in meters along the chord, and $L$ is the total chord length in meters.\n\nThis quantity weights each path-length element equally and excludes neutral lithium. It differs from the [flux-surface-averaged lithium density at the plasma boundary], which averages over a separatrix, and from [volume-averaged lithium density](name:volume_averaged_lithium_density), which averages over confined plasma volume.",
+      "real_error_types": [],
+      "injected_error_types": [
+        "link_hygiene"
+      ],
+      "real_saw_link_hygiene_error": false
+    },
+    "out_of_scope_structured_link_dead": {
+      "purpose": "the link-integrity check must report a dead_link for a structured link to a real catalog name held out of the known set",
+      "target": "absorbed_coolant_power_of_plant_component_port",
+      "target_in_catalog": true,
+      "link_types": [
+        "dead_link"
+      ],
+      "saw_dead_link": true
+    }
+  },
+  "documentation_match": {
+    "compared": 77,
+    "mismatches": []
+  },
+  "catalog_id_count": 5137,
+  "rows": [
+    {
+      "sheet_id": "S0001",
+      "item_id": "line_averaged_tungsten_density",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the line-averaged charge-state-summed tungsten-ion density named, source summary/line_average/n_i/tungsten matches, links resolve and dimensions agree.",
+      "documentation_chars": 1115,
+      "doc_link_targets": [
+        "tungsten_density",
+        "volume_averaged_tungsten_density"
+      ],
+      "stored_links": [
+        "name:tungsten_density",
+        "name:volume_averaged_tungsten_density"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity is the line-of-sight average of the charge-sta', which does not follow any selected template: Number density of {subject} [template:density]"
+        },
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "non_canonical_equation: a display equation for 'line average' is not written in its canonical form '\\bar{f} = \\frac{1}{L}\\int_0^L f\\,dl' [concept:line_averaged]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation",
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0002",
+      "item_id": "helium_4_density_at_pedestal_top",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the helium-4 pedestal-top density named, source summary/local/pedestal/n_i/helium_4 matches, every link resolves.",
+      "documentation_chars": 1281,
+      "doc_link_targets": [
+        "normalized_poloidal_flux_coordinate_of_pedestal",
+        "density_at_pedestal_top",
+        "helium_4_density_at_plasma_boundary",
+        "helium_3_density_at_pedestal_top"
+      ],
+      "stored_links": [
+        "name:normalized_poloidal_flux_coordinate_of_pedestal",
+        "name:density_at_pedestal_top",
+        "name:helium_4_density_at_plasma_boundary",
+        "name:helium_3_density_at_pedestal_top"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'Helium-4 ion number density at the top of the H-mode edge pe', which does not follow any selected template: Number density of {subject} [template:density]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0003",
+      "item_id": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[particle flux at the wall due to recombination]' has no name: link target, so the reference leads nowhere.",
+      "documentation_chars": 2016,
+      "doc_link_targets": [
+        "ion_energy_flux_at_wall_due_to_recombination",
+        "energy_flux_at_wall_due_to_recombination"
+      ],
+      "stored_links": [
+        "name:ion_energy_flux_at_wall_due_to_recombination",
+        "name:energy_flux_at_wall_due_to_recombination"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0004",
+      "item_id": "hydrogen_density_at_pedestal_top",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the hydrogen pedestal-top density named, source summary/local/pedestal/n_i/hydrogen matches, every link resolves.",
+      "documentation_chars": 1222,
+      "doc_link_targets": [
+        "normalized_poloidal_flux_coordinate_of_pedestal",
+        "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+        "hydrogen_density_at_plasma_boundary"
+      ],
+      "stored_links": [
+        "name:normalized_poloidal_flux_coordinate_of_pedestal",
+        "name:flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+        "name:hydrogen_density_at_plasma_boundary"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'Hydrogen ion number density at the top of the H-mode edge pe', which does not follow any selected template: Number density of {subject} [template:density]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0005",
+      "item_id": "parallel_fast_neutral_pressure",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the parallel fast-neutral pressure named, source plasma_profiles/.../pressure_fast_parallel matches, links resolve.",
+      "documentation_chars": 1022,
+      "doc_link_targets": [
+        "fast_neutral_pressure",
+        "perpendicular_fast_neutral_pressure",
+        "parallel_fast_neutral_internal_state_pressure"
+      ],
+      "stored_links": [
+        "name:fast_neutral_pressure",
+        "name:perpendicular_fast_neutral_pressure",
+        "name:parallel_fast_neutral_internal_state_pressure"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'Parallel fast neutral pressure is the scalar field-aligned c', which does not follow any selected template: Pressure of {subject} {locus} [template:pressure]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0006",
+      "item_id": "line_averaged_lithium_density",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[flux-surface-averaged lithium density at the plasma boundary]' has no name: link target.",
+      "documentation_chars": 780,
+      "doc_link_targets": [
+        "volume_averaged_lithium_density"
+      ],
+      "stored_links": [
+        "name:volume_averaged_lithium_density"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This is the path-length average of lithium ion number densit', which does not follow any selected template: Number density of {subject} [template:density]"
+        },
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "non_canonical_equation: a display equation for 'line average' is not written in its canonical form '\\bar{f} = \\frac{1}{L}\\int_0^L f\\,dl' [concept:line_averaged]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation",
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0007",
+      "item_id": "current_due_to_non_inductive_current_drive",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[plasma current due to ohmic induction]' has no target, and the link text 'plasma current due to non-inductive current drive' targets this row's own name while being presented as a separate plasma-specific realization.",
+      "documentation_chars": 1277,
+      "doc_link_targets": [
+        "current_due_to_non_inductive_current_drive",
+        "current_due_to_electron_cyclotron_current_drive",
+        "current_due_to_ion_cyclotron_current_drive"
+      ],
+      "stored_links": [
+        "name:current_due_to_electron_cyclotron_current_drive",
+        "name:current_due_to_ion_cyclotron_current_drive"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0008",
+      "item_id": "current_at_divertor_target",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the divertor-target incident current named, source divertors/.../current_incident matches, links resolve and the sign convention is consistent.",
+      "documentation_chars": 2121,
+      "doc_link_targets": [
+        "current_of_divertor",
+        "current_of_divertor_tile"
+      ],
+      "stored_links": [
+        "name:electron_density_at_divertor_target",
+        "name:electron_temperature_at_divertor_target",
+        "name:deposited_power_at_divertor_target_due_to_halo_current"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0009",
+      "item_id": "second_local_tangential_back_surface_radius_of_optical_element",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the second local tangential back-surface radius named, source camera_visible/.../x2_curvature matches, links resolve.",
+      "documentation_chars": 2229,
+      "doc_link_targets": [
+        "first_local_tangential_back_surface_radius_of_optical_element",
+        "second_local_tangential_front_surface_radius_of_optical_element",
+        "vertical_back_surface_curvature_of_optical_element",
+        "vertical_front_surface_radius_of_optical_element"
+      ],
+      "stored_links": [
+        "name:first_local_tangential_back_surface_radius_of_optical_element"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0010",
+      "item_id": "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the flux-surface- and time-averaged normalized perturbed parallel field magnitude named, source gyrokinetics_local/.../b_field_parallel_perturbed_norm matches, links resolve.",
+      "documentation_chars": 1551,
+      "doc_link_targets": [
+        "time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude"
+      ],
+      "stored_links": [
+        "name:time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity represents the normalized amplitude of the mag', which does not follow any selected template: {component} magnetic field {locus}; {operator} magnetic-field magnitude [template:magnetic_field]"
+        },
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "non_canonical_equation: a display equation for 'flux-surface average' is not written in its canonical form '\\langle f\\rangle = \\oint f\\,dS/|\\nabla\\psi| \\,/\\, \\oint dS/|\\nabla\\psi|' [concept:flux_surface_averaged]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation",
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0011",
+      "item_id": "surface_current_per_toroidal_and_poloidal_mode_number_of_ion_cyclotron_heating_antenna",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrases '[wave current of an antenna strap]' and '[wave current of an antenna strap amplitude]' have no name: link target.",
+      "documentation_chars": 1504,
+      "doc_link_targets": [],
+      "stored_links": [],
+      "error_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "relationship_link"
+      ],
+      "any_lint_types": [
+        "relationship_link"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0012",
+      "item_id": "radial_perturbed_plasma_magnetic_field_imaginary_part",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the imaginary part of the radial perturbed plasma magnetic field named, source mhd_linear/.../coordinate1/imaginary matches, links resolve.",
+      "documentation_chars": 2543,
+      "doc_link_targets": [
+        "radial_perturbed_plasma_magnetic_field_real_part",
+        "radial_perturbed_plasma_magnetic_field_real_part",
+        "poloidal_perturbed_plasma_magnetic_field_imaginary_part",
+        "toroidal_perturbed_plasma_magnetic_field_imaginary_part"
+      ],
+      "stored_links": [
+        "name:radial_perturbed_plasma_magnetic_field",
+        "name:radial_perturbed_plasma_magnetic_field_real_part"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0013",
+      "item_id": "normal_coordinate_of_correction_coil",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the normal coordinate of a correction coil named, source coils_non_axisymmetric/.../outline/normal matches, links resolve.",
+      "documentation_chars": 2227,
+      "doc_link_targets": [
+        "binormal_coordinate_of_correction_coil",
+        "area_of_correction_coil",
+        "normal_coordinate_of_toroidal_field_coil"
+      ],
+      "stored_links": [
+        "name:binormal_coordinate_of_correction_coil",
+        "name:normal_coordinate_of_toroidal_field_coil"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0014",
+      "item_id": "krypton_source_rate_due_to_gas_injection",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the krypton gas-injection source rate named, source summary/gas_injection_rates/krypton matches, links resolve and the equivalent-electron definition is consistent.",
+      "documentation_chars": 1587,
+      "doc_link_targets": [
+        "source_rate_due_to_gas_injection",
+        "accumulated_krypton_count",
+        "argon_source_rate_due_to_gas_injection"
+      ],
+      "stored_links": [
+        "name:source_rate_due_to_gas_injection",
+        "name:accumulated_krypton_count",
+        "name:argon_source_rate_due_to_gas_injection"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0015",
+      "item_id": "total_heating_power_due_to_fusion_reactions",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the fusion-attributed heating power named, source balance_of_plant/.../total_heat_supplied matches, links resolve.",
+      "documentation_chars": 1190,
+      "doc_link_targets": [
+        "power_at_inside_flux_surface"
+      ],
+      "stored_links": [
+        "name:power_at_inside_flux_surface"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0016",
+      "item_id": "maximum_angle_of_electron_cyclotron_launcher_mirror",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[angle of electron-cyclotron launcher mirror]' has no name: link target in either of its two occurrences.",
+      "documentation_chars": 788,
+      "doc_link_targets": [],
+      "stored_links": [],
+      "error_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "non_canonical_equation: a display equation for 'maximum' is not written in its canonical form 'f_{\\max} = \\max_{D} f' [concept:maximum]"
+        },
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "relationship_link"
+      ],
+      "any_lint_types": [
+        "convention_violation",
+        "relationship_link"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0017",
+      "item_id": "ratio_of_vertical_vorticity_to_major_radius",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the major-radius-scaled vertical vorticity named, source edge_profiles/.../vorticity_over_r/z matches, links resolve.",
+      "documentation_chars": 902,
+      "doc_link_targets": [
+        "vertical_vorticity",
+        "vorticity"
+      ],
+      "stored_links": [
+        "name:vertical_vorticity",
+        "name:vorticity"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity is the major-radius-scaled form of [vertical v', which does not follow any selected template: Ratio of {operand} to {operand} [template:ratio]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0018",
+      "item_id": "per_toroidal_mode_fast_ion_charge_state_power",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the per-toroidal-mode fast-ion charge-state power named, source waves/.../power_fast_n_phi matches, links resolve.",
+      "documentation_chars": 1097,
+      "doc_link_targets": [
+        "fast_ion_charge_state_absorbed_wave_power",
+        "per_toroidal_mode_fast_ion_power_density",
+        "per_toroidal_mode_thermal_ion_charge_state_power"
+      ],
+      "stored_links": [
+        "name:fast_ion_charge_state_absorbed_wave_power",
+        "name:per_toroidal_mode_fast_ion_power_density",
+        "name:per_toroidal_mode_thermal_ion_charge_state_power"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0019",
+      "item_id": "resistance_of_shunt",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the shunt resistance named, source magnetics/shunt/resistance matches, links resolve.",
+      "documentation_chars": 1020,
+      "doc_link_targets": [
+        "voltage_of_shunt",
+        "voltage_of_shunt"
+      ],
+      "stored_links": [
+        "name:voltage_of_shunt"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0020",
+      "item_id": "second_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the second local tangential coordinate of the EC launcher mirror named, source ec_launchers/mirror/geometry/outline/x2 matches, links resolve.",
+      "documentation_chars": 1611,
+      "doc_link_targets": [
+        "first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror"
+      ],
+      "stored_links": [
+        "name:first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0021",
+      "item_id": "alpha_angle_of_plasma_filament",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the plasma-filament first-side inclination named, source pf_plasma/.../oblique/alpha matches, links resolve.",
+      "documentation_chars": 1796,
+      "doc_link_targets": [
+        "tilt_angle_of_plasma_filament",
+        "major_length_of_plasma_filament",
+        "minor_length_of_plasma_filament"
+      ],
+      "stored_links": [
+        "name:tilt_angle_of_plasma_filament",
+        "name:major_length_of_plasma_filament",
+        "name:minor_length_of_plasma_filament"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity is the signed inclination of the first side of', which does not follow any selected template: {qualifier} angle [template:angle]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0022",
+      "item_id": "trapped_fast_ion_power_density_due_to_collisions",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the trapped-orbit collisional fast-ion power density named, source distributions/.../trapped/collisions/ion/power_fast matches, links resolve.",
+      "documentation_chars": 1471,
+      "doc_link_targets": [
+        "fast_ion_power_density_due_to_collisions",
+        "counter_passing_fast_ion_power_density_due_to_collisions"
+      ],
+      "stored_links": [
+        "name:fast_ion_power_density_due_to_collisions",
+        "name:counter_passing_fast_ion_power_density_due_to_collisions"
+      ],
+      "error_lint": [
+        {
+          "finding_type": "link_hygiene",
+          "severity": "error",
+          "detail": "link_hygiene: documentation contains malformed or bare name references"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "link_hygiene",
+          "severity": "error",
+          "detail": "link_hygiene: documentation contains malformed or bare name references"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "link_hygiene"
+      ],
+      "any_lint_types": [
+        "link_hygiene"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0023",
+      "item_id": "nuclear_power_density_of_limiter_tile",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[power density of a limiter tile]' has no name: link target.",
+      "documentation_chars": 942,
+      "doc_link_targets": [
+        "nuclear_heating_power_of_limiter_tile"
+      ],
+      "stored_links": [
+        "name:nuclear_heating_power_of_limiter_tile"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0024",
+      "item_id": "current_of_divertor_tile",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the divertor-tile incident current named, source divertors/.../tile/current_incident matches, links resolve.",
+      "documentation_chars": 1769,
+      "doc_link_targets": [
+        "current_at_divertor_target",
+        "current_of_divertor"
+      ],
+      "stored_links": [
+        "name:current_at_divertor_target",
+        "name:electron_temperature_at_divertor_target",
+        "name:surface_area_of_divertor_tile",
+        "name:current_of_divertor"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'Conventional electric current of a divertor tile is the net ', which does not follow any selected template: Current {locus} [template:current]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0025",
+      "item_id": "perpendicular_power_normalized_of_beam_tracing_beam",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[parallel normalized beam power]' has no name: link target.",
+      "documentation_chars": 873,
+      "doc_link_targets": [
+        "initial_power_of_beam_tracing_beam"
+      ],
+      "stored_links": [
+        "name:initial_power_of_beam_tracing_beam"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0026",
+      "item_id": "width_of_iron_core_segment",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the iron-core segment width named, source iron_core/.../rectangle/width matches, links resolve.",
+      "documentation_chars": 747,
+      "doc_link_targets": [
+        "height_of_iron_core_segment",
+        "outer_radius_of_iron_core_segment"
+      ],
+      "stored_links": [
+        "name:height_of_iron_core_segment",
+        "name:outer_radius_of_iron_core_segment"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'The iron core segment width is the complete radial span betw', which does not follow any selected template: Width {locus} [template:width]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0027",
+      "item_id": "lithium_density_at_limiter",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[ion density at a limiter]' has no name: link target.",
+      "documentation_chars": 944,
+      "doc_link_targets": [
+        "density_at_limiter"
+      ],
+      "stored_links": [
+        "name:density_at_limiter"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'Lithium density at a limiter is the local number density of ', which does not follow any selected template: Number density of {subject} [template:density]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0028",
+      "item_id": "ion_charge_state_particle_flux_limiter_coefficient",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the ion charge-state particle flux limiter coefficient named, source plasma_transport/.../flux_limiter/values matches, links resolve.",
+      "documentation_chars": 1146,
+      "doc_link_targets": [
+        "ion_charge_state_particle_flux",
+        "ion_momentum_flux_limiter_coefficient"
+      ],
+      "stored_links": [
+        "name:ion_charge_state_particle_flux",
+        "name:ion_momentum_flux_limiter_coefficient"
+      ],
+      "error_lint": [
+        {
+          "finding_type": "defining_equation",
+          "severity": "error",
+          "detail": "defining_equation: documentation lacks exactly one dimensionally checkable defining relation"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "defining_equation",
+          "severity": "error",
+          "detail": "defining_equation: documentation lacks exactly one dimensionally checkable defining relation"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "defining_equation"
+      ],
+      "any_lint_types": [
+        "defining_equation"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0029",
+      "item_id": "etendue_of_spectrometer",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[viewing etendue of a spectrometer channel]' has no name: link target.",
+      "documentation_chars": 636,
+      "doc_link_targets": [
+        "viewing_efficiency_of_spectrometer_channel"
+      ],
+      "stored_links": [
+        "name:viewing_efficiency_of_spectrometer_channel"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0030",
+      "item_id": "parallel_ion_heat_convection_velocity",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrases '[effective thermal ion charge-state energy velocity due to convection]' and '[ion heat convection velocity]' have no name: link target.",
+      "documentation_chars": 1814,
+      "doc_link_targets": [
+        "parallel_ion_energy_flux",
+        "parallel_total_ion_energy_convection_velocity"
+      ],
+      "stored_links": [
+        "name:parallel_ion_energy_flux",
+        "name:parallel_total_ion_energy_convection_velocity"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0031",
+      "item_id": "toroidal_ion_charge_state_momentum_convection_velocity",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the toroidal ion charge-state momentum convection velocity named, source edge_profiles/.../velocity/phi matches, links resolve.",
+      "documentation_chars": 1223,
+      "doc_link_targets": [
+        "toroidal_ion_momentum_convection_velocity",
+        "ion_charge_state_momentum_convection_velocity"
+      ],
+      "stored_links": [
+        "name:toroidal_ion_momentum_convection_velocity",
+        "name:ion_charge_state_momentum_convection_velocity"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0032",
+      "item_id": "maximum_of_back_surface_neutron_flux",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the maximum back-surface neutron flux named, source breeding_blanket/.../escape_flux_max matches, links resolve.",
+      "documentation_chars": 1471,
+      "doc_link_targets": [
+        "back_surface_neutron_flux",
+        "incident_neutron_power_of_breeder_blanket_module",
+        "nuclear_heating_power_of_breeder_blanket_module"
+      ],
+      "stored_links": [
+        "name:back_surface_neutron_flux",
+        "name:incident_neutron_power_of_breeder_blanket_module",
+        "name:nuclear_heating_power_of_breeder_blanket_module"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "non_canonical_equation: a display equation for 'maximum' is not written in its canonical form 'f_{\\max} = \\max_{D} f' [concept:maximum]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0033",
+      "item_id": "ion_energy_diffusion_coefficient",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrases '[Radial ion energy diffusion coefficient]', '[poloidal ion energy diffusion coefficient]' and '[energy diffusivity]' have no name: link target.",
+      "documentation_chars": 2199,
+      "doc_link_targets": [
+        "energy_diffusion_coefficient",
+        "ion_charge_state_energy_diffusion_coefficient"
+      ],
+      "stored_links": [
+        "name:energy_diffusion_coefficient",
+        "name:ion_charge_state_energy_diffusion_coefficient"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0034",
+      "item_id": "electron_particle_flux_at_wall_due_to_pumping",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the electron-equivalent wall pumping rate named, source wall/global_quantities/electrons/pumping_speed matches, links resolve.",
+      "documentation_chars": 1337,
+      "doc_link_targets": [
+        "particle_rate_at_wall_due_to_pumping",
+        "neutral_particle_flux_at_wall_due_to_pumping"
+      ],
+      "stored_links": [
+        "name:particle_rate_at_wall_due_to_pumping",
+        "name:neutral_particle_flux_at_wall_due_to_pumping"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0035",
+      "item_id": "electron_density_at_pellet_path",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the background electron density along the pellet path named, source pellets/.../path_profiles/n_e matches, links resolve.",
+      "documentation_chars": 1045,
+      "doc_link_targets": [
+        "electron_source_rate_at_pellet_path_due_to_pellet_injection",
+        "electron_density_at_launching_position"
+      ],
+      "stored_links": [
+        "name:electron_source_rate_at_pellet_path_due_to_pellet_injection",
+        "name:electron_density_at_launching_position"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'The quantity is the local number density of free electrons i', which does not follow any selected template: Number density of {subject} [template:density]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0036",
+      "item_id": "nuclear_heating_power_of_breeder_blanket_layer",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[heating power of a breeder-blanket layer]' has no name: link target.",
+      "documentation_chars": 1045,
+      "doc_link_targets": [
+        "nuclear_power_density_of_breeder_blanket_layer"
+      ],
+      "stored_links": [
+        "name:nuclear_power_density_of_breeder_blanket_layer"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0037",
+      "item_id": "outer_radius_of_poloidal_field_coil",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[radius of a poloidal-field-coil arc]' has no name: link target.",
+      "documentation_chars": 1293,
+      "doc_link_targets": [
+        "inner_radius_of_poloidal_field_coil"
+      ],
+      "stored_links": [
+        "name:inner_radius_of_poloidal_field_coil"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0038",
+      "item_id": "vertical_back_surface_curvature_of_optical_element",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrases '[optical-element curvature]' and '[back-surface curvature]' have no name: link target.",
+      "documentation_chars": 1601,
+      "doc_link_targets": [],
+      "stored_links": [],
+      "error_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "relationship_link"
+      ],
+      "any_lint_types": [
+        "relationship_link"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0039",
+      "item_id": "radial_perturbed_plasma_magnetic_vector_potential_imaginary_part",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the imaginary part of the radial perturbed plasma magnetic vector potential named, source mhd_linear/.../a_field_perturbed/coordinate1/imaginary matches, the link resolves.",
+      "documentation_chars": 987,
+      "doc_link_targets": [
+        "radial_perturbed_plasma_magnetic_vector_potential"
+      ],
+      "stored_links": [
+        "name:radial_perturbed_plasma_magnetic_vector_potential"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0040",
+      "item_id": "deposited_power_at_divertor_target_due_to_halo_current",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[power of divertor]' has no name: link target.",
+      "documentation_chars": 1923,
+      "doc_link_targets": [
+        "current_at_divertor_target",
+        "power_at_divertor_target"
+      ],
+      "stored_links": [
+        "name:current_at_divertor_target",
+        "name:power_at_divertor_target"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0041",
+      "item_id": "accumulated_deuterated_methane_prefill_count",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the accumulated deuterated-methane prefill count named, source summary/gas_injection_prefill/methane_deuterated matches, links resolve and the electron-count factor is consistent.",
+      "documentation_chars": 1022,
+      "doc_link_targets": [
+        "deuterated_methane_source_rate",
+        "accumulated_total_prefill_gas_count"
+      ],
+      "stored_links": [
+        "name:deuterated_methane_source_rate",
+        "name:accumulated_total_prefill_gas_count"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity is the cumulative amount of deuterated methane', which does not follow any selected template: {modifiers} count [template:count]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0042",
+      "item_id": "toroidal_conductivity",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the toroidal conductivity tensor coefficient named, source plasma_transport/.../conductivity/phi matches, links resolve.",
+      "documentation_chars": 1584,
+      "doc_link_targets": [
+        "plasma_electrical_conductivity",
+        "radial_conductivity",
+        "toroidal_electric_field"
+      ],
+      "stored_links": [
+        "name:plasma_electrical_conductivity",
+        "name:radial_conductivity",
+        "name:toroidal_electric_field"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0043",
+      "item_id": "vertical_total_current_density",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrases '[total current density]' and '[vertical current density]' have no name: link target.",
+      "documentation_chars": 967,
+      "doc_link_targets": [],
+      "stored_links": [],
+      "error_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "relationship_link"
+      ],
+      "any_lint_types": [
+        "relationship_link"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0044",
+      "item_id": "second_local_tangential_coordinate_of_hard_xray_detector",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[first local tangential coordinate of a hard X-ray detector]' has no name: link target.",
+      "documentation_chars": 1253,
+      "doc_link_targets": [],
+      "stored_links": [],
+      "error_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "relationship_link"
+      ],
+      "any_lint_types": [
+        "relationship_link"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0045",
+      "item_id": "normalized_particle_mass",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[particle mass]' has no name: link target.",
+      "documentation_chars": 818,
+      "doc_link_targets": [],
+      "stored_links": [],
+      "error_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "relationship_link"
+      ],
+      "any_lint_types": [
+        "relationship_link"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0046",
+      "item_id": "vertical_conductivity",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the vertical conductivity tensor coefficient named, source edge_transport/.../conductivity/z matches, links resolve.",
+      "documentation_chars": 1740,
+      "doc_link_targets": [
+        "plasma_electrical_conductivity",
+        "radial_conductivity",
+        "toroidal_conductivity"
+      ],
+      "stored_links": [
+        "name:plasma_electrical_conductivity",
+        "name:radial_conductivity",
+        "name:toroidal_conductivity"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0047",
+      "item_id": "neutral_particle_flux_at_wall_due_to_recombination",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": false,
+      "label_reason": "subject: the source path lies in the DD energy_fluxes group with unit W.m^-2 (an energy flux) while the name and text document a particle flux in m^-2.s^-1, so the source does not measure the documented quantity.",
+      "documentation_chars": 1702,
+      "doc_link_targets": [
+        "energy_flux_at_wall_due_to_recombination",
+        "incident_neutral_particle_flux_at_wall_due_to_recombination",
+        "neutral_internal_state_particle_flux_at_wall_due_to_recombination"
+      ],
+      "stored_links": [
+        "name:energy_flux_at_wall_due_to_recombination",
+        "name:incident_neutral_particle_flux_at_wall_due_to_recombination",
+        "name:neutral_internal_state_particle_flux_at_wall_due_to_recombination"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0048",
+      "item_id": "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[co-passing torque density due to the J cross B force]' has no name: link target.",
+      "documentation_chars": 1393,
+      "doc_link_targets": [
+        "toroidal_counter_passing_torque_density_due_to_j_cross_b_force",
+        "toroidal_trapped_torque_density_due_to_j_cross_b_force"
+      ],
+      "stored_links": [
+        "name:toroidal_counter_passing_torque_density_due_to_j_cross_b_force",
+        "name:toroidal_trapped_torque_density_due_to_j_cross_b_force"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0049",
+      "item_id": "plasma_energy",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrases '[total plasma energy]' and '[total particle energy]' have no name: link target.",
+      "documentation_chars": 1505,
+      "doc_link_targets": [
+        "electron_energy",
+        "thermal_plasma_energy",
+        "fast_particle_energy"
+      ],
+      "stored_links": [
+        "name:electron_energy",
+        "name:thermal_plasma_energy",
+        "name:fast_particle_energy"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0050",
+      "item_id": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[co-passing fast ion torque density due to collisions]' has no name: link target.",
+      "documentation_chars": 1335,
+      "doc_link_targets": [
+        "toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+        "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions"
+      ],
+      "stored_links": [
+        "name:toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+        "name:toroidal_counter_passing_fast_ion_torque_density_due_to_collisions"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0051",
+      "item_id": "ion_average_temperature_at_post_sawtooth_crash",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the charge-state-averaged post-crash ion temperature named, source sawteeth/profiles_1d/t_i_average matches, links resolve.",
+      "documentation_chars": 851,
+      "doc_link_targets": [
+        "ion_average_temperature",
+        "ion_average_temperature_at_internal_transport_barrier"
+      ],
+      "stored_links": [
+        "name:ion_average_temperature",
+        "name:ion_average_temperature_at_internal_transport_barrier"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0052",
+      "item_id": "first_local_tangential_width_of_soft_xray_detector",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the soft X-ray detector first-direction aperture width named, source soft_x_rays/.../x1_width matches, links resolve.",
+      "documentation_chars": 1310,
+      "doc_link_targets": [
+        "first_local_tangential_coordinate_of_soft_xray_detector",
+        "first_local_tangential_width_of_hard_xray_detector",
+        "extent_of_soft_xray_detector"
+      ],
+      "stored_links": [
+        "name:first_local_tangential_coordinate_of_soft_xray_detector",
+        "name:first_local_tangential_width_of_hard_xray_detector",
+        "name:extent_of_soft_xray_detector"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0053",
+      "item_id": "radial_volumetric_force",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the radial electromagnetic body-force density projection named, source wall/.../em_force_density/r matches, links resolve.",
+      "documentation_chars": 1436,
+      "doc_link_targets": [
+        "toroidal_volumetric_force",
+        "vertical_volumetric_force",
+        "volumetric_force"
+      ],
+      "stored_links": [
+        "name:toroidal_volumetric_force",
+        "name:vertical_volumetric_force",
+        "name:volumetric_force"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0054",
+      "item_id": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the flux-surface-averaged toroidal nitrogen velocity named, source summary/local/separatrix_average/velocity_phi/nitrogen matches, links resolve.",
+      "documentation_chars": 1484,
+      "doc_link_targets": [
+        "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+        "flux_surface_averaged_toroidal_ion_velocity_at_plasma_boundary"
+      ],
+      "stored_links": [
+        "name:flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+        "name:flux_surface_averaged_toroidal_ion_velocity_at_plasma_boundary"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "forbidden_locus_gloss: 'the separatrix' is a forbidden variant of 'plasma boundary' [concept:plasma_boundary]"
+        },
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "non_canonical_equation: a display equation for 'flux-surface average' is not written in its canonical form '\\langle f\\rangle = \\oint f\\,dS/|\\nabla\\psi| \\,/\\, \\oint dS/|\\nabla\\psi|' [concept:flux_surface_averaged]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation",
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0055",
+      "item_id": "volume_integrated_particle_source_rate",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the volume-integrated particle source rate named, source distributions/.../thermalization/particles matches, links resolve.",
+      "documentation_chars": 1518,
+      "doc_link_targets": [
+        "thermal_particle_source_rate",
+        "ion_state_source_rate"
+      ],
+      "stored_links": [
+        "name:thermal_particle_source_rate",
+        "name:ion_state_source_rate"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0056",
+      "item_id": "implicit_ion_energy_source_rate",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the implicit ion energy source coefficient named, source plasma_sources/.../implicit_part matches, links resolve.",
+      "documentation_chars": 1538,
+      "doc_link_targets": [
+        "implicit_electron_energy_source_rate",
+        "total_implicit_ion_particle_source_rate"
+      ],
+      "stored_links": [
+        "name:implicit_electron_energy_source_rate",
+        "name:total_implicit_ion_particle_source_rate"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity is the stiff implicit linear coefficient of th', which does not follow any selected template: {modifiers} source rate {locus} [template:source_rate]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0057",
+      "item_id": "vertical_vorticity",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the vertical vorticity component named, source plasma_profiles/.../vorticity/z matches, links resolve.",
+      "documentation_chars": 1252,
+      "doc_link_targets": [
+        "vorticity",
+        "toroidal_vorticity",
+        "ratio_of_vertical_vorticity_to_major_radius",
+        "radial_vorticity"
+      ],
+      "stored_links": [
+        "name:vorticity",
+        "name:toroidal_vorticity",
+        "name:ratio_of_vertical_vorticity_to_major_radius",
+        "name:radial_vorticity"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0058",
+      "item_id": "tilt_angle_of_passive_loop",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "subject: the source is the oblique cross-section second-angle node (pf_passive/.../geometry/oblique/beta, 'Inclination of second angle'), yet the text defines an element reference-axis orientation and explicitly denies being an oblique-shape inclination.",
+      "documentation_chars": 860,
+      "doc_link_targets": [
+        "tilt_angle_of_plasma_filament"
+      ],
+      "stored_links": [
+        "name:tilt_angle_of_plasma_filament"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0059",
+      "item_id": "y_direction_unit_vector_of_neutron_detector",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "physics: the text defines a dimensionless direction cosine of a unit vector while the unit symbol is m (a length), so the dimensions disagree with the unit.",
+      "documentation_chars": 1264,
+      "doc_link_targets": [],
+      "stored_links": [
+        "name:x_direction_unit_vector_of_neutron_detector",
+        "name:z_direction_unit_vector_of_neutron_detector"
+      ],
+      "error_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "relationship_link"
+      ],
+      "any_lint_types": [
+        "relationship_link"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0060",
+      "item_id": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the link text 'tungsten density at the plasma boundary' targets this row's own name while being presented as the distinct 'local' quantity, a self-link used as an example of something else.",
+      "documentation_chars": 911,
+      "doc_link_targets": [
+        "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+        "volume_averaged_tungsten_density"
+      ],
+      "stored_links": [
+        "name:volume_averaged_tungsten_density"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0061",
+      "item_id": "toroidal_helium_4_velocity_at_magnetic_axis",
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the toroidal helium-4 velocity at the magnetic axis named, source summary/local/magnetic_axis/velocity_phi/helium_4 matches, links resolve.",
+      "documentation_chars": 1059,
+      "doc_link_targets": [
+        "toroidal_helium_4_velocity_at_plasma_boundary",
+        "toroidal_helium_3_velocity_at_magnetic_axis"
+      ],
+      "stored_links": [
+        "name:toroidal_helium_4_velocity_at_plasma_boundary",
+        "name:toroidal_helium_3_velocity_at_magnetic_axis"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0062",
+      "item_id": "vertical_coordinate_of_antenna_strap",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the vertical coordinate of the antenna strap named, source ic_antennas/.../annulus/z matches, links resolve.",
+      "documentation_chars": 778,
+      "doc_link_targets": [
+        "vertical_coordinate_of_ion_cyclotron_heating_antenna"
+      ],
+      "stored_links": [
+        "name:vertical_coordinate_of_ion_cyclotron_heating_antenna"
+      ],
+      "error_lint": [
+        {
+          "finding_type": "defining_equation",
+          "severity": "error",
+          "detail": "defining_equation: documentation lacks exactly one dimensionally checkable defining relation"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "defining_equation",
+          "severity": "error",
+          "detail": "defining_equation: documentation lacks exactly one dimensionally checkable defining relation"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "defining_equation"
+      ],
+      "any_lint_types": [
+        "defining_equation"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0063",
+      "item_id": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[accumulated total gas count at midplane due to gas injection]' has no name: link target.",
+      "documentation_chars": 1278,
+      "doc_link_targets": [],
+      "stored_links": [],
+      "error_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "all_lint": [
+        {
+          "finding_type": "relationship_link",
+          "severity": "error",
+          "detail": "relationship_link: documentation contains no standard-name relationship link"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [
+        "relationship_link"
+      ],
+      "any_lint_types": [
+        "relationship_link"
+      ],
+      "has_error_lint": true,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0064",
+      "item_id": "toroidal_magnetic_field_at_flux_surface",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrases '[poloidal magnetic field at a flux surface]', '[radial magnetic field at a flux surface]', '[vertical magnetic field at a flux surface]' and '[magnetic-field magnitude at a flux surface]' all have no name: link target.",
+      "documentation_chars": 1296,
+      "doc_link_targets": [
+        "poloidal_magnetic_flux_at_flux_surface"
+      ],
+      "stored_links": [
+        "name:poloidal_magnetic_flux_at_flux_surface"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0065",
+      "item_id": "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the normalized Bessel-weighted parallel gyrocenter current-density moment named, source gyrokinetics_local/.../j_parallel matches, links resolve.",
+      "documentation_chars": 2036,
+      "doc_link_targets": [
+        "normalized_gyrocenter_perturbed_current_density",
+        "parallel_normalized_gyrocenter_perturbed_current_density"
+      ],
+      "stored_links": [
+        "name:normalized_gyrocenter_perturbed_current_density",
+        "name:parallel_normalized_gyrocenter_perturbed_current_density"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity is the first-order Bessel-weighted, field-para', which does not follow any selected template: {component} current density {locus} [template:current_density]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0066",
+      "item_id": "oxygen_count_accumulated_due_to_gas_injection",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the accumulated oxygen gas-injection count named, source summary/gas_injection_accumulated/oxygen matches, links resolve and the eight-electron weighting is consistent.",
+      "documentation_chars": 1094,
+      "doc_link_targets": [
+        "oxygen_source_rate_due_to_gas_injection"
+      ],
+      "stored_links": [
+        "name:oxygen_source_rate_due_to_gas_injection"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0067",
+      "item_id": "first_local_tangential_width_of_filter_window",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the filter-window first-direction width named, source soft_x_rays/.../x1_width matches, links resolve.",
+      "documentation_chars": 1429,
+      "doc_link_targets": [
+        "radius_of_filter_window",
+        "first_local_tangential_width_of_diagnostic_aperture"
+      ],
+      "stored_links": [
+        "name:radius_of_filter_window",
+        "name:first_local_tangential_width_of_diagnostic_aperture"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'The quantity is the complete physical aperture extent of a f', which does not follow any selected template: Width {locus}; {component} width {locus} [template:width]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0068",
+      "item_id": "line_averaged_helium_4_density",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the line-averaged helium-4 density named, source summary/line_average/n_i/helium_4 matches, links resolve.",
+      "documentation_chars": 837,
+      "doc_link_targets": [
+        "helium_4_density",
+        "volume_averaged_helium_4_density"
+      ],
+      "stored_links": [
+        "name:helium_4_density",
+        "name:volume_averaged_helium_4_density"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'The line-averaged helium-4 ion number density is the path av', which does not follow any selected template: Number density of {subject} [template:density]"
+        },
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "non_canonical_equation: a display equation for 'line average' is not written in its canonical form '\\bar{f} = \\frac{1}{L}\\int_0^L f\\,dl' [concept:line_averaged]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation",
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0069",
+      "item_id": "accumulated_deuterium_count_due_to_gas_injection",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the accumulated deuterium gas-injection count named, source summary/gas_injection_accumulated/deuterium matches, links resolve and the unit weighting is consistent.",
+      "documentation_chars": 1218,
+      "doc_link_targets": [
+        "accumulated_hydrogen_count_due_to_gas_injection",
+        "oxygen_count_accumulated_due_to_gas_injection"
+      ],
+      "stored_links": [
+        "name:accumulated_hydrogen_count_due_to_gas_injection",
+        "name:oxygen_count_accumulated_due_to_gas_injection"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity is the cumulative post-breakdown inventory of ', which does not follow any selected template: {modifiers} count [template:count]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0070",
+      "item_id": "electron_absorbed_wave_power",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "subject: the source is the thermal-only node (waves/.../electrons/power_thermal, 'Wave power absorbed by the thermal particle population') while the text documents total electron power including fast non-thermal electrons, so the source measures a narrower quantity.",
+      "documentation_chars": 1049,
+      "doc_link_targets": [
+        "fast_electron_absorbed_wave_power",
+        "thermal_electron_absorbed_wave_power",
+        "absorbed_wave_power",
+        "ion_absorbed_wave_power"
+      ],
+      "stored_links": [
+        "name:fast_electron_absorbed_wave_power",
+        "name:thermal_electron_absorbed_wave_power",
+        "name:absorbed_wave_power",
+        "name:ion_absorbed_wave_power"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0071",
+      "item_id": "polarization_angle_at_constraint_position",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the link text 'polarization_angle' targets this row's own name while being presented as the corresponding reconstructed generic quantity, a self-link used as an example of something else.",
+      "documentation_chars": 1491,
+      "doc_link_targets": [
+        "polarization_angle_at_constraint_position"
+      ],
+      "stored_links": [],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0072",
+      "item_id": "poloidal_neutral_energy_diffusivity",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the poloidal neutral energy diffusivity named, source edge_transport/.../d_pol/values matches, links resolve.",
+      "documentation_chars": 1043,
+      "doc_link_targets": [
+        "effective_neutral_energy_diffusion_coefficient",
+        "poloidal_neutral_internal_state_energy_diffusivity"
+      ],
+      "stored_links": [
+        "name:effective_neutral_energy_diffusion_coefficient",
+        "name:poloidal_neutral_internal_state_energy_diffusivity"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0073",
+      "item_id": "external_loop_voltage",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the external loop voltage named, source equilibrium/.../v_external matches, links resolve and the Faraday sign is consistent.",
+      "documentation_chars": 1049,
+      "doc_link_targets": [
+        "loop_voltage_at_plasma_boundary",
+        "current_of_passive_structure"
+      ],
+      "stored_links": [
+        "name:loop_voltage_at_plasma_boundary",
+        "name:current_of_passive_structure"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'This quantity is the inductive electromotive-force contribut', which does not follow any selected template: Loop voltage {locus} [template:loop_voltage]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0074",
+      "item_id": "neutral_internal_state_particle_flux_at_wall",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": false,
+      "label_reason": "links: the bracketed phrase '[neutral particle flux at the wall]' has no name: link target; the text also calls the quantity an incident flux although the source node is the emitted-neutral flux.",
+      "documentation_chars": 845,
+      "doc_link_targets": [
+        "incident_neutral_internal_state_particle_flux_at_wall_due_to_recombination"
+      ],
+      "stored_links": [
+        "name:incident_neutral_internal_state_particle_flux_at_wall_due_to_recombination"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0075",
+      "item_id": "toroidal_carbon_velocity_at_pedestal_top",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the toroidal carbon velocity at the pedestal top named, source summary/local/pedestal/velocity_phi/carbon matches, links resolve.",
+      "documentation_chars": 1107,
+      "doc_link_targets": [
+        "toroidal_carbon_velocity_at_plasma_boundary"
+      ],
+      "stored_links": [
+        "name:toroidal_carbon_velocity_at_plasma_boundary"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    },
+    {
+      "sheet_id": "S0076",
+      "item_id": "alfven_frequency_real_part",
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the real part of the Alfven frequency named, source mhd_linear/.../alfven_frequency_spectrum/real matches, links resolve.",
+      "documentation_chars": 2354,
+      "doc_link_targets": [
+        "alfven_frequency",
+        "alfven_frequency",
+        "alfven_frequency_imaginary_part"
+      ],
+      "stored_links": [
+        "name:alfven_frequency_imaginary_part",
+        "name:alfven_frequency",
+        "name:alfven_time"
+      ],
+      "error_lint": [],
+      "all_lint": [
+        {
+          "finding_type": "convention_violation",
+          "severity": "warning",
+          "detail": "template_opening: documentation opens as 'Oscillation angular frequency is the real part of the comple', which does not follow any selected template: Frequency {locus} [template:frequency]"
+        }
+      ],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [
+        "convention_violation"
+      ],
+      "has_error_lint": false,
+      "has_any_finding": true
+    },
+    {
+      "sheet_id": "S0077",
+      "item_id": "vertical_current_density_due_to_ion_inertia",
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label_acceptable": true,
+      "label_reason": "acceptable: documents the vertical ion-inertia current density named, source plasma_profiles/ggd/j_inertial/z matches, links resolve.",
+      "documentation_chars": 1927,
+      "doc_link_targets": [
+        "current_density_due_to_ion_inertia",
+        "radial_current_density_due_to_ion_inertia",
+        "toroidal_current_density_due_to_ion_inertia",
+        "parallel_current_density_due_to_ion_inertia",
+        "vertical_current_density_due_to_anomalous_transport"
+      ],
+      "stored_links": [
+        "name:current_density_due_to_ion_inertia",
+        "name:radial_current_density_due_to_ion_inertia",
+        "name:parallel_current_density_due_to_ion_inertia",
+        "name:vertical_current_density_due_to_anomalous_transport"
+      ],
+      "error_lint": [],
+      "all_lint": [],
+      "link_findings": [],
+      "error_lint_types": [],
+      "any_lint_types": [],
+      "has_error_lint": false,
+      "has_any_finding": false
+    }
+  ],
+  "per_class": [
+    {
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label": "acceptable",
+      "rows": 10,
+      "rows_with_error_lint": 2,
+      "rows_with_any_finding": 2,
+      "error_lint_types": {
+        "link_hygiene": 1,
+        "defining_equation": 1
+      },
+      "any_finding_types": {
+        "link_hygiene": 1,
+        "defining_equation": 1
+      }
+    },
+    {
+      "class": "control",
+      "jev_route": "accept",
+      "panel_route": "accept",
+      "label": "not-acceptable",
+      "rows": 4,
+      "rows_with_error_lint": 1,
+      "rows_with_any_finding": 1,
+      "error_lint_types": {
+        "relationship_link": 1
+      },
+      "any_finding_types": {
+        "relationship_link": 1
+      }
+    },
+    {
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label": "acceptable",
+      "rows": 7,
+      "rows_with_error_lint": 0,
+      "rows_with_any_finding": 4,
+      "error_lint_types": {},
+      "any_finding_types": {
+        "convention_violation": 4
+      }
+    },
+    {
+      "class": "control",
+      "jev_route": "refine",
+      "panel_route": "refine",
+      "label": "not-acceptable",
+      "rows": 7,
+      "rows_with_error_lint": 1,
+      "rows_with_any_finding": 1,
+      "error_lint_types": {
+        "relationship_link": 1
+      },
+      "any_finding_types": {
+        "relationship_link": 1
+      }
+    },
+    {
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label": "acceptable",
+      "rows": 30,
+      "rows_with_error_lint": 1,
+      "rows_with_any_finding": 17,
+      "error_lint_types": {
+        "defining_equation": 1
+      },
+      "any_finding_types": {
+        "convention_violation": 20,
+        "defining_equation": 1
+      }
+    },
+    {
+      "class": "disagreement",
+      "jev_route": "accept",
+      "panel_route": "refine",
+      "label": "not-acceptable",
+      "rows": 19,
+      "rows_with_error_lint": 6,
+      "rows_with_any_finding": 8,
+      "error_lint_types": {
+        "relationship_link": 6
+      },
+      "any_finding_types": {
+        "convention_violation": 4,
+        "relationship_link": 6
+      }
+    }
+  ],
+  "bar": {
+    "defect_rows": 19,
+    "defect_rows_flagged": 6,
+    "acceptable_rows": 30,
+    "acceptable_rows_flagged": 1,
+    "meets_bar": false,
+    "missed": [
+      {
+        "sheet_id": "S0006",
+        "item_id": "line_averaged_lithium_density",
+        "defect": "links: the bracketed phrase '[flux-surface-averaged lithium density at the plasma boundary]' has no name: link target.",
+        "has_any_finding": true,
+        "any_lint_types": [
+          "convention_violation",
+          "convention_violation"
+        ],
+        "link_findings": [],
+        "stored_links": [
+          "name:volume_averaged_lithium_density"
+        ],
+        "doc_link_targets": [
+          "volume_averaged_lithium_density"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0025",
+        "item_id": "perpendicular_power_normalized_of_beam_tracing_beam",
+        "defect": "links: the bracketed phrase '[parallel normalized beam power]' has no name: link target.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:initial_power_of_beam_tracing_beam"
+        ],
+        "doc_link_targets": [
+          "initial_power_of_beam_tracing_beam"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0027",
+        "item_id": "lithium_density_at_limiter",
+        "defect": "links: the bracketed phrase '[ion density at a limiter]' has no name: link target.",
+        "has_any_finding": true,
+        "any_lint_types": [
+          "convention_violation"
+        ],
+        "link_findings": [],
+        "stored_links": [
+          "name:density_at_limiter"
+        ],
+        "doc_link_targets": [
+          "density_at_limiter"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0029",
+        "item_id": "etendue_of_spectrometer",
+        "defect": "links: the bracketed phrase '[viewing etendue of a spectrometer channel]' has no name: link target.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:viewing_efficiency_of_spectrometer_channel"
+        ],
+        "doc_link_targets": [
+          "viewing_efficiency_of_spectrometer_channel"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0030",
+        "item_id": "parallel_ion_heat_convection_velocity",
+        "defect": "links: the bracketed phrases '[effective thermal ion charge-state energy velocity due to convection]' and '[ion heat convection velocity]' have no name: link target.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:parallel_ion_energy_flux",
+          "name:parallel_total_ion_energy_convection_velocity"
+        ],
+        "doc_link_targets": [
+          "parallel_ion_energy_flux",
+          "parallel_total_ion_energy_convection_velocity"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0033",
+        "item_id": "ion_energy_diffusion_coefficient",
+        "defect": "links: the bracketed phrases '[Radial ion energy diffusion coefficient]', '[poloidal ion energy diffusion coefficient]' and '[energy diffusivity]' have no name: link target.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:energy_diffusion_coefficient",
+          "name:ion_charge_state_energy_diffusion_coefficient"
+        ],
+        "doc_link_targets": [
+          "energy_diffusion_coefficient",
+          "ion_charge_state_energy_diffusion_coefficient"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0040",
+        "item_id": "deposited_power_at_divertor_target_due_to_halo_current",
+        "defect": "links: the bracketed phrase '[power of divertor]' has no name: link target.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:current_at_divertor_target",
+          "name:power_at_divertor_target"
+        ],
+        "doc_link_targets": [
+          "current_at_divertor_target",
+          "power_at_divertor_target"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0049",
+        "item_id": "plasma_energy",
+        "defect": "links: the bracketed phrases '[total plasma energy]' and '[total particle energy]' have no name: link target.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:electron_energy",
+          "name:thermal_plasma_energy",
+          "name:fast_particle_energy"
+        ],
+        "doc_link_targets": [
+          "electron_energy",
+          "thermal_plasma_energy",
+          "fast_particle_energy"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0050",
+        "item_id": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+        "defect": "links: the bracketed phrase '[co-passing fast ion torque density due to collisions]' has no name: link target.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+          "name:toroidal_counter_passing_fast_ion_torque_density_due_to_collisions"
+        ],
+        "doc_link_targets": [
+          "toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+          "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0060",
+        "item_id": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+        "defect": "links: the link text 'tungsten density at the plasma boundary' targets this row's own name while being presented as the distinct 'local' quantity, a self-link used as an example of something else.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:volume_averaged_tungsten_density"
+        ],
+        "doc_link_targets": [
+          "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+          "volume_averaged_tungsten_density"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0064",
+        "item_id": "toroidal_magnetic_field_at_flux_surface",
+        "defect": "links: the bracketed phrases '[poloidal magnetic field at a flux surface]', '[radial magnetic field at a flux surface]', '[vertical magnetic field at a flux surface]' and '[magnetic-field magnitude at a flux surface]' all have no name: link target.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:poloidal_magnetic_flux_at_flux_surface"
+        ],
+        "doc_link_targets": [
+          "poloidal_magnetic_flux_at_flux_surface"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0071",
+        "item_id": "polarization_angle_at_constraint_position",
+        "defect": "links: the link text 'polarization_angle' targets this row's own name while being presented as the corresponding reconstructed generic quantity, a self-link used as an example of something else.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [],
+        "doc_link_targets": [
+          "polarization_angle_at_constraint_position"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      },
+      {
+        "sheet_id": "S0074",
+        "item_id": "neutral_internal_state_particle_flux_at_wall",
+        "defect": "links: the bracketed phrase '[neutral particle flux at the wall]' has no name: link target; the text also calls the quantity an incident flux although the source node is the emitted-neutral flux.",
+        "has_any_finding": false,
+        "any_lint_types": [],
+        "link_findings": [],
+        "stored_links": [
+          "name:incident_neutral_internal_state_particle_flux_at_wall_due_to_recombination"
+        ],
+        "doc_link_targets": [
+          "incident_neutral_internal_state_particle_flux_at_wall_due_to_recombination"
+        ],
+        "miss_kind": "missing check: the link target resolves, so no gate reads the self-referential use"
+      }
+    ],
+    "false_flags": [
+      {
+        "sheet_id": "S0062",
+        "item_id": "vertical_coordinate_of_antenna_strap",
+        "finding": [
+          {
+            "finding_type": "defining_equation",
+            "severity": "error",
+            "detail": "defining_equation: documentation lacks exactly one dimensionally checkable defining relation"
+          }
+        ],
+        "label_reason": "acceptable: documents the vertical coordinate of the antenna strap named, source ic_antennas/.../annulus/z matches, links resolve."
+      }
+    ]
+  },
+  "cap_sites": {
+    "cap_function": "imas_codex/standard_names/review/pipeline.py:1963 _cap_docs_scores_for_lint_errors",
+    "cap_selector": "imas_codex/standard_names/review/pipeline.py:1817 _extract_error_lint_ids -- reads lint_findings with severity == 'error' only",
+    "cap_call_site": "imas_codex/standard_names/review/pipeline.py:2184 (only when target == 'docs')",
+    "incumbent_docs_path": "imas_codex/standard_names/workers.py:11150 process_review_docs_batch -> prepare_docs_review_request (workers.py:10712). No audit report and no _cap_docs_scores_for_lint_errors reference anywhere in workers.py, so this path applies no error-severity lint cap. It applies its own clamp at workers.py:11242 from the conformance/banned-prose/contradiction notes.",
+    "jev_docs_audit": "imas_codex/standard_names/review/cascade.py:519 _docs_judgment -> jev_review.build_docs_audit_report (jev_review.py:623) -> run_link_integrity with known_ids = {item} union siblings (cascade.py:535).",
+    "link_integrity_reads": "imas_codex/standard_names/review/audits.py:406 run_link_integrity reads name['links'], the structured link list, never the documentation text."
+  },
+  "status": "accepted",
+  "scratch_stopped": true,
+  "scratch_removed": {
+    "path": "/tmp/reckon-crew-scratch/r-20261022T185056036830-srtj-docs-lint-replay/srtj-docs-lint-replay-gxqi3nyf",
+    "exists_after": false
+  },
+  "finished_at": "2026-10-22T20:54:50.852275+00:00"
+}
