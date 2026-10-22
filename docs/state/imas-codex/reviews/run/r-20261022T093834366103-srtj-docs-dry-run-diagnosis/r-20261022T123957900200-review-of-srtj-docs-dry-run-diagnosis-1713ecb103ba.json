@@ -5,6 +5,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-22T13:07:45.289Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "read-only one-shot diagnosis: its durability is the committed record, and no product code depends on it",
+      "recorded_at": "2026-10-22T14:16:35.382163+00:00"
+    }
+  },
   "dispatched_at": "2026-10-22T12:40:21Z",
   "finding_dispositions": {
     "0": {
