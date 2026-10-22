@@ -1,0 +1,201 @@
+{
+ "node": "srtj-refine-ab-score",
+ "cohort": {
+  "complete_pairs": 104,
+  "contributing_cases": 63,
+  "sheet_rows": 124,
+  "direct_cases": 44,
+  "lineage_recovered_cases": 19,
+  "lineage_ambiguous_cases": 1,
+  "identical_output_pairs": 2,
+  "lineage_control_cases": 32,
+  "lineage_control_agreements": 24
+ },
+ "labels": {
+  "acceptable": 99,
+  "not_acceptable": 25,
+  "total": 124
+ },
+ "spend_usd": {
+  "comments": 16.283688,
+  "checks": 16.37738,
+  "refine_total_usd": 32.661068
+ },
+ "axes": {
+  "all": {
+   "cases": 63,
+   "comments": {
+    "rows": 63,
+    "cases": 63,
+    "accepted_rows": 48,
+    "accepted_cases": 48,
+    "acceptance_rows": 0.7619047619047619,
+    "acceptance_cases": 0.7619047619047619,
+    "acceptance_interval": {
+     "point": 0.7619047619047619,
+     "lower": 0.6507936507936508,
+     "upper": 0.8571428571428571,
+     "level": 0.95,
+     "n_resamples": 10000,
+     "seed": 20261022
+    },
+    "spend_usd": 16.283688,
+    "cost_per_accepted_usd": 0.33924350000000003
+   },
+   "checks": {
+    "rows": 63,
+    "cases": 63,
+    "accepted_rows": 53,
+    "accepted_cases": 53,
+    "acceptance_rows": 0.8412698412698413,
+    "acceptance_cases": 0.8412698412698413,
+    "acceptance_interval": {
+     "point": 0.8412698412698413,
+     "lower": 0.746031746031746,
+     "upper": 0.9206349206349206,
+     "level": 0.95,
+     "n_resamples": 10000,
+     "seed": 20261022
+    },
+    "spend_usd": 16.37738,
+    "cost_per_accepted_usd": 0.3090071698113207
+   }
+  },
+  "direct": {
+   "cases": 44,
+   "comments": {
+    "rows": 44,
+    "cases": 44,
+    "accepted_rows": 33,
+    "accepted_cases": 33,
+    "acceptance_rows": 0.75,
+    "acceptance_cases": 0.75,
+    "acceptance_interval": {
+     "point": 0.75,
+     "lower": 0.6136363636363636,
+     "upper": 0.8636363636363636,
+     "level": 0.95,
+     "n_resamples": 10000,
+     "seed": 20261022
+    },
+    "spend_usd": 16.283688,
+    "cost_per_accepted_usd": 0.49344509090909094
+   },
+   "checks": {
+    "rows": 44,
+    "cases": 44,
+    "accepted_rows": 39,
+    "accepted_cases": 39,
+    "acceptance_rows": 0.8863636363636364,
+    "acceptance_cases": 0.8863636363636364,
+    "acceptance_interval": {
+     "point": 0.8863636363636364,
+     "lower": 0.7954545454545454,
+     "upper": 0.9772727272727273,
+     "level": 0.95,
+     "n_resamples": 10000,
+     "seed": 20261022
+    },
+    "spend_usd": 16.37738,
+    "cost_per_accepted_usd": 0.4199328205128205
+   }
+  },
+  "lineage": {
+   "cases": 19,
+   "comments": {
+    "rows": 19,
+    "cases": 19,
+    "accepted_rows": 15,
+    "accepted_cases": 15,
+    "acceptance_rows": 0.7894736842105263,
+    "acceptance_cases": 0.7894736842105263,
+    "acceptance_interval": {
+     "point": 0.7894736842105263,
+     "lower": 0.5789473684210527,
+     "upper": 0.9473684210526315,
+     "level": 0.95,
+     "n_resamples": 10000,
+     "seed": 20261022
+    },
+    "spend_usd": 16.283688,
+    "cost_per_accepted_usd": 1.0855792000000002
+   },
+   "checks": {
+    "rows": 19,
+    "cases": 19,
+    "accepted_rows": 14,
+    "accepted_cases": 14,
+    "acceptance_rows": 0.7368421052631579,
+    "acceptance_cases": 0.7368421052631579,
+    "acceptance_interval": {
+     "point": 0.7368421052631579,
+     "lower": 0.5263157894736842,
+     "upper": 0.8947368421052632,
+     "level": 0.95,
+     "n_resamples": 10000,
+     "seed": 20261022
+    },
+    "spend_usd": 16.37738,
+    "cost_per_accepted_usd": 1.169812857142857
+   }
+  }
+ },
+ "paired_interval": {
+  "all": {
+   "cases": 63,
+   "difference": "checks - comments",
+   "point": 0.07936507936507942,
+   "lower": -0.015873015873015817,
+   "upper": 0.17460317460317454,
+   "level": 0.95,
+   "n_resamples": 10000,
+   "seed": 20261022
+  },
+  "direct": {
+   "cases": 44,
+   "difference": "checks - comments",
+   "point": 0.13636363636363635,
+   "lower": 0.045454545454545414,
+   "upper": 0.25,
+   "level": 0.95,
+   "n_resamples": 10000,
+   "seed": 20261022
+  },
+  "lineage": {
+   "cases": 19,
+   "difference": "checks - comments",
+   "point": -0.052631578947368474,
+   "lower": -0.21052631578947367,
+   "upper": 0.10526315789473684,
+   "level": 0.95,
+   "n_resamples": 10000,
+   "seed": 20261022
+  }
+ },
+ "comparison": {
+  "checks_at_least_comments": true,
+  "checks_acceptance": 0.8412698412698413,
+  "comments_acceptance": 0.7619047619047619,
+  "acceptance_gap": 0.07936507936507942,
+  "checks_accepted": 53,
+  "comments_accepted": 48,
+  "checks_cost_per_accepted_usd": 0.3090071698113207,
+  "comments_cost_per_accepted_usd": 0.33924350000000003,
+  "checks_spend_usd": 16.37738,
+  "comments_spend_usd": 16.283688,
+  "paired_interval_contains_zero": true
+ },
+ "guards": {
+  "llm_calls": 0,
+  "spend_usd": 0,
+  "graph_updates": 0,
+  "arm_read_from": "arm key only; no row position or sheet order read",
+  "bootstrap": "imas_codex.discovery.base.evaluation.bootstrap_interval, 10000 seeded paired draws"
+ },
+ "input_sha256": {
+  "srtj-refine-ab-label-sheet.json": "455ade0b25fcf389138e70d96b7bbcc51809fc5d151da365aa121275eb3c76f3",
+  "srtj-refine-ab-labels.json": "a4029d179f21eac599407eeec8483912f0cae8ecfeb7ccac4539a0e3b28fe695",
+  "srtj-refine-ab-arm-key.json": "277bb4d6d8de53c6e80553fe82d78c52a7632ea1a89a88393789ba0ae37f3f2d",
+  "srtj-refine-ab-run-results.json": "cab12260507bc541d17bd40b3b1afc4392f5d2f9a7176635c3a1cd2adc942f66"
+ }
+}
