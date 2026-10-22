@@ -515,7 +515,6 @@ def check_catalog(
             """
             MATCH (sn:StandardName)
             WHERE sn.name_stage IN ['accepted', 'approved']
-            WITH sn, sn.physics_domain AS stored_domain
             RETURN sn.id AS id,
                    sn.description AS description,
                    sn.documentation AS documentation,
@@ -525,7 +524,7 @@ def check_catalog(
                    sn.validity_domain AS validity_domain,
                    sn.constraints AS constraints,
                    sn.catalog_commit_sha AS catalog_commit_sha,
-                   stored_domain AS stored_domain
+                   sn.physics_domain AS physics_domain
             """
         )
 
@@ -533,7 +532,7 @@ def check_catalog(
     graph_sha: str | None = None
     for row in rows:
         entry = dict(row)
-        stored = row.get("stored_domain")
+        stored = row.get("physics_domain")
         entry["physics_domain"] = (
             str(stored) if stored is not None and str(stored) else None
         )
