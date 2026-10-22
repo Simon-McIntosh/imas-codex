@@ -23,7 +23,11 @@ through it:
   it. The third edit named the offending paragraph verbatim; the paragraph came
   back anyway, because the writer appends the locus registry's defining
   sentence to generated documentation after the model has dropped it. That
-  mechanism is recorded here rather than steered around a fourth time.
+  mechanism is recorded here. The registry entry was then merged so the
+  sentence defines the outboard midplane by maximum major radius, which for
+  this quantity is the height the body already calls Z*; a fourth steered edit
+  regenerated the documentation against the merged entry without deleting
+  anything, and both seats of its review accepted it at 0.95625.
 * ``radial_separatrix_distance_at_outboard_midplane`` — no ``sn edit`` mode can
   re-review a name in place
   without renaming it, so the name was re-reviewed through the pipeline's own
@@ -334,6 +338,54 @@ GAP_STEER4_DOCS_COMMAND = (
 GAP_STEER4_DOCS_LOG = os.path.join(_LOGS, "gap-steer4-docs-review.log")
 GAP_STEER4_COMMENTS = os.path.join(_LOGS, "gap-docs-reviewer-comments-steer4.json")
 
+#: What the fourth review found, now that the registry defines the outboard
+#: midplane by maximum major radius: both seats accept, and the defect the
+#: three earlier reviews docked no longer reads as two heights.
+GAP_STEER4_OUTCOME = {
+    "generate_docs": {"processed": 1, "spent_usd": 0.0918},
+    "review_docs": {
+        "processed": 1,
+        "spent_usd": 0.1943,
+        "note": (
+            "one three-seat quorum ran and closed on two: 0.975 "
+            "(claude-sonnet-5) and 0.9375 (grok-4.5), persisted as "
+            "score=0.95625, chain=0/3, resolution=quorum_consensus"
+        ),
+    },
+    "run_total_usd": 0.286077,
+    "cost_limit_usd": 0.60,
+    "run_stop": "no_eligible_work",
+    "exit_code": 0,
+    "score": 0.95625,
+    "threshold": 0.85,
+    "verdict": (
+        "accepted: the score is above the 0.85 threshold, so the documentation "
+        "reaches docs_stage=accepted and the node's condition is met"
+    ),
+    "seat_findings": (
+        "neither seat docks the measurement height. Both read the appended "
+        "locus paragraph as consistent with the body's Z* for this quantity, "
+        "and each leaves only a formatting note: the sentence's reference to "
+        "outboard_midplane_separatrix is not rendered as a name: link the way "
+        "the other two cross-references are, and the registry's equation "
+        "clause lands as a run-on 'Where ...' rather than display math. Both "
+        "are documentation_quality dockets, not physics or completeness "
+        "failures, and neither names a DD field, IDS path or option value."
+    ),
+    "steer_effect": (
+        "the steer that landed was a regeneration, not a deletion: it kept Z* "
+        "as the height, preserved the opening, equation, definitions, frame "
+        "and both cross-references, and left the locus sentence in place. "
+        "With the merged registry definition the same sentence that three "
+        "earlier reviews read as a second height now reads as the same one."
+    ),
+    "budget_note": (
+        "the 0.60 limit was set above the summed three-seat reservation plus "
+        "the required 0.15 headroom, and no seat was deferred: the run spent "
+        "0.286077 and stopped on no_eligible_work with budget to spare."
+    ),
+}
+
 #: radial's name: no ``sn edit`` mode re-reviews a name in place, so the name
 #: was re-reviewed through the pipeline's own rotation.
 RADIAL_NAME_COMMAND = (
@@ -556,6 +608,13 @@ def report() -> dict:
             "gap_steer3_docs": GAP_STEER3_DOCS_COMMAND,
             "gap_steer3_docs_log": GAP_STEER3_DOCS_LOG,
             "gap_steer3_comments": GAP_STEER3_COMMENTS,
+            "gap_steer4_edit": GAP_STEER4_EDIT_COMMAND,
+            "gap_steer4_edit_log": GAP_STEER4_EDIT_LOG,
+            "gap_steer4_edit_dryrun_log": GAP_STEER4_EDIT_DRYRUN_LOG,
+            "gap_steer4_run_id": GAP_STEER4_RUN_ID,
+            "gap_steer4_docs": GAP_STEER4_DOCS_COMMAND,
+            "gap_steer4_docs_log": GAP_STEER4_DOCS_LOG,
+            "gap_steer4_comments": GAP_STEER4_COMMENTS,
             "radial_name": RADIAL_NAME_COMMAND,
             "radial_name_log": RADIAL_NAME_LOG,
             "radial_docs": RADIAL_DOCS_COMMAND,
@@ -577,6 +636,9 @@ def report() -> dict:
         "gap_steer3_outcome": GAP_STEER3_OUTCOME,
         "gap_steer3_reviewer_comments": _load(GAP_STEER3_COMMENTS),
         "gap_docs_writer_mechanism": WRITER_MECHANISM,
+        "gap_locus_definition_check": LOCUS_DEFINITION_CHECK,
+        "gap_steer4_outcome": GAP_STEER4_OUTCOME,
+        "gap_steer4_reviewer_comments": _load(GAP_STEER4_COMMENTS),
         "radial_name_review": {
             "comments_before": _load(RADIAL_COMMENTS_BEFORE),
             "comments_after": _load(RADIAL_COMMENTS_AFTER),
@@ -588,27 +650,33 @@ def report() -> dict:
         "after": state["names"],
         "read_checks": checks,
         "spend": {
-            "authorized_usd": 1.50,
+            "authorized_usd": 2.10,
             "basis": "each run's own summary table in its log",
             "gap_docs_usd": 0.406322,
             "radial_name_usd": 0.060014,
             "radial_docs_usd": 0.226306,
             "gap_steer2_run_usd": 0.2530,
             "gap_steer3_run_usd": 0.486138,
-            "node_total_usd": 1.431780,
-            "node_remaining_usd": 0.068220,
+            "gap_steer4_run_usd": 0.286077,
+            "node_total_usd": 1.717857,
+            "node_remaining_usd": 0.382143,
             "note": (
-                "the node's measured spend across both attempts, against a "
-                "ceiling raised from $1.00 to $1.50 for the third steering "
-                "edit and its review. The third edit was staged with "
-                "--stage-only, which performs no LLM work and spent nothing; "
-                "its review run is the whole of the increase. That run was "
-                "given $0.45 and spent $0.486138, overshooting its own cap by "
-                "$0.036138 on a single seat whose cost exceeded its "
-                "reservation, while still failing to fund the quorum's last "
+                "the node's measured spend, against a ceiling raised from "
+                "$1.00 to $1.50 for the third steering edit and its review, "
+                "and again by $0.60 to $2.10 for the fourth. The third edit "
+                "was staged with --stage-only, which performs no LLM work and "
+                "spent nothing; its review run is the whole of that increase, "
+                "and it was given $0.45 and spent $0.486138, overshooting its "
+                "own cap by $0.036138 on a single seat whose cost exceeded its "
+                "reservation while still failing to fund the quorum's last "
                 "seat — the limit was set with the three-seat need in mind, "
-                "and even so the run ended budget_exhausted with the verdict "
-                "below threshold rather than withheld."
+                "and even so the run ended budget_exhausted. The fourth edit "
+                "was staged with --stage-only too, so its review run is the "
+                "whole of the last increase: given $0.60, which carries "
+                "headroom above the summed three-seat reservation, it spent "
+                "$0.286077, ran its quorum to a consensus on two seats and "
+                "stopped on no_eligible_work with budget to spare. No seat was "
+                "deferred for want of budget in that run."
             ),
         },
     }
