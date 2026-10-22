@@ -106,45 +106,73 @@ and the three tests that had gone red
 (<code>TestFoldBackReadsTheSidecar</code> twice, plus the folded-prose half of
 the post-copy guard) pass again.</p>
 
-<h3 id="scg-name-domain-route-pipeline-blocked">Blocked: four assertions still encode the superseded contract, outside the fence</h3>
+<h3 id="scg-name-domain-route-pipeline-blocked">Repaired under the granted fence</h3>
 
-<p>Four assertions in three test files state the behaviour this node removed.
-They are not regressions of the change — each asserts the removed fallback —
-and repairing them is a scope request rather than an edit this node may make:
-the three files are outside the granted write fence.</p>
+<p>The coordinator extended the fence to
+<code>tests/standard_names/test_domain_selector.py</code> and
+<code>tests/standard_names/test_post_copy_divergence_comparison.py</code>.
+Every test kept its subject and none was deleted; the four changed assertions
+now state the stored-decision contract.</p>
 
 <ul>
-  <li><code>tests/standard_names/test_domain_selector.py</code> —
-  <code>test_pure_callers_use_selector</code> asserts
-  <code>_resolve_physics_domains(["general", "transport"]) == ("sentinel",
-  [...])</code> and expects the sentinel among the recorded calls;
-  <code>test_pure_callers_ignore_arrival_order</code> asserts
-  <code>_resolve_physics_domains(domains) == ("transport", domains)</code>. Both
-  assert the selector is reached from <code>_resolve_physics_domains</code>,
-  which now returns <code>(None, sources)</code>. The same file's
-  <code>domain_priority.domain_key</code> assertions are untouched and still
-  pass — <code>domain_key</code> legitimately keeps the selector. The repair is
-  to drop the <code>_resolve_physics_domains</code> assertion from each test
-  (and the third entry of the call list in the first).</li>
-  <li><code>tests/standard_names/test_post_copy_divergence_comparison.py</code>
-  — <code>_graph_rows</code> supplies
-  <code>resolved_physics_domains: ["equilibrium"]</code>, a key the query no
-  longer returns, so <code>test_folded_prose_passes_while_content_is_identical</code>
-  sees a domain divergence that is an artifact of the fixture. The repair is to
-  supply <code>physics_domain: "equilibrium"</code> in that helper.</li>
-  <li><code>test_node_without_domain_but_sourced_domain_passes</code> is the
-  removed fallback stated as a contract: "the guard must resolve the domain the
-  way the exporter does — from the producing sources". Under the settled
-  contract a node storing no domain compares with no domain, so this test
-  should be rewritten to assert the divergence is reported (or retitled to
-  match), never deleted.</li>
+  <li><code>test_pure_callers_use_selector</code> and
+  <code>test_pure_callers_ignore_arrival_order</code> now pin the two callers
+  apart. <code>domain_priority.domain_key</code> still reaches the selector and
+  is asserted through the sentinel exactly as before, while
+  <code>_resolve_physics_domains</code> is asserted to return
+  <code>(None, sorted(sources))</code> and to record no call — the sentinel is
+  installed, so a re-selection would appear as an extra entry in the call list.
+  Only the assertion expecting that third call was retired.</li>
+  <li>The post-copy guard's fixture supplies the node's stored
+  <code>physics_domain</code>, and carries the producing sources' domains
+  beside it as a decoy under the retired key, so a re-derivation would be
+  visible. The undecided-node test is retitled
+  <code>test_node_without_stored_domain_refuses_a_published_one</code> and
+  asserts the divergence is reported (<code>catalog: 'equilibrium'</code>
+  against <code>graph: None</code>) — which is what "the entry carries none, and
+  that is counted, not guessed" means at the guard: a name the writer has not
+  decided cannot back a published bucket.</li>
 </ul>
 
-<p>Nothing else in the gate is red. The remaining two files' failures are the
-base's: <code>test_review_release_checkout.py</code> fails identically at the
-base revision, and <code>test_release_rehearsal_writes_nothing.py</code> reaches
-a live git remote from a default-tier test.</p>
+<h3 id="scg-name-domain-route-pipeline-request">Requested: a second fence grant, three export test files</h3>
 
+<p>The brief named fifteen files to gate. Widening that to every test file that
+reaches a routed symbol found one more cluster, and it is a single defect in
+seven test items: all three files monkeypatch a module attribute this node
+removed from <code>export.py</code>.</p>
+
+<pre>patch(
+    "imas_codex.standard_names.export.select_primary_domain",
+    side_effect=lambda domains: sorted(domains)[0],
+)</pre>
+
+<ul>
+  <li><code>tests/standard_names/test_export_status_authority.py</code> — two
+  failures from that patch in its export fixture
+  (<code>test_draft_graph_status_is_exported_as_draft</code>,
+  <code>test_null_graph_status_refuses_the_whole_cut</code>).</li>
+  <li><code>tests/standard_names/test_export_deprecation.py</code> — three
+  setup errors from the same patch in its fixture.</li>
+  <li><code>tests/standard_names/test_export_domain_resolution.py</code> — two
+  failures, and these carry assertions as well.
+  <code>test_accepted_name_with_source_domain_never_resolves_to_the_bucket</code>
+  asserts an entry emits its producing source's domain, which is the removed
+  fallback; <code>test_entry_converter_refuses_a_domainless_node</code> expects
+  <code>ValueError</code>, which the converter no longer raises, because a node
+  storing no domain now yields an entry carrying none. That file's module
+  docstring states the resolution rule and belongs with them.</li>
+</ul>
+
+<p>Each repair is test-only. Drop the patch — the export no longer ranks a
+domain, so the fixture's stored <code>physics_domain</code> is what reaches the
+entry — and in <code>test_export_domain_resolution.py</code> retitle and invert
+the two assertions to the settled contract, never delete them.</p>
+
+<p>The rest of the gate is the base's. On the same file set the base arm is
+<code>4 failed, 394 passed</code> and the head is <code>8 failed, 403 passed</code>:
+<code>test_vocab_gaps.py</code>'s three and
+<code>test_catalog_layout_hierarchy.py::test_export_ledgers_cycle_and_writes_packet</code>
+fail identically at base, and the delta is exactly the seven items above.</p>
 <h3 id="scg-name-domain-route-pipeline-next">Left for the next node</h3>
 
 <p>The graph-ops module is the next node's and is referred to only by its import
@@ -181,8 +209,15 @@ path <code>imas_codex.standard_names.graph_ops</code>:</p>
   <li>Negative control: the routing test run against a tree whose routed
   functions still carry their selector calls — 8 failed, 8 passed. The log is
   <code>negative-control.log</code> in the run directory.</li>
-  <li>Gate at the head revision (18 files, 172 selected) and the base arm over
-  the same failing files, by delta. Logs <code>gate-head.log</code>,
-  <code>gate-base.log</code>, <code>gate-fix-a.log</code>,
-  <code>gate-release-head.log</code> in the run directory.</li>
+  <li>Gate, by delta against the base, over every test file that reaches a
+  routed symbol (28 files at head, 27 at base — the head adds this node's
+  routing test): head <code>8 failed, 403 passed</code>, base
+  <code>4 failed, 394 passed</code>. Logs <code>gate-after.log</code> and
+  <code>gate-base.log</code> in the run directory.</li>
+  <li>The base arm is a <code>git archive</code> of the base revision extracted
+  to <code>$TMPDIR</code>, run with <code>PYTHONPATH</code> pointing at it and
+  its own test files, because <code>git worktree add</code> is unavailable
+  under the fence (the main repository's <code>.git</code> is read-only).
+  Verified before use: the loaded module is the base tree's, and
+  <code>_resolve_physics_domains</code> still calls the selector there.</li>
 </ul>
