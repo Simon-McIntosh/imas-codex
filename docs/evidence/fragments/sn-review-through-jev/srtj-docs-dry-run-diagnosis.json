@@ -1,0 +1,431 @@
+{
+  "node": "srtj-docs-dry-run-diagnosis",
+  "generated_at": "2026-10-22T10:27:55+00:00",
+  "read_only": true,
+  "llm_calls": 0,
+  "graph_writes": 0,
+  "q1": {
+    "eligible": 219,
+    "decided": 143,
+    "undecided": 76,
+    "causes": [
+      {
+        "cause": "deciding path: no usable judgment",
+        "owner": "deciding path",
+        "count": 4,
+        "where": "imas_codex/standard_names/review/cascade.py -- _docs_judgment raises ValueError('no usable judgment for documentation review'), which adjudicate_review catches and records as the fallback's reason",
+        "mechanism": "The documentation judging batch returned no result for the item, so _docs_judgment raised. The item fell back to the incumbent, and because that fallback produced a result an unjudged shadow row was written carrying the exception's text -- which is why only these items carry a reason at all.",
+        "root_cause": "decide_batch reports a failed call as None rather than raising. The one line it writes for that is 'decision batch item 0 failed: ' with an empty fault string, and the call layer's retry policy is a substring match over that message -- an empty message matches no pattern, so the fault is classified non-retryable and the call raises on its first attempt. The absence of any 'decisions error (attempt' line in the run log is what proves the retry never fired.",
+        "ids": [
+          "argon_density_at_internal_transport_barrier",
+          "bandwidth_of_ece_channel",
+          "momentum_source_due_to_diamagnetic_drift",
+          "wave_curvature_of_electron_cyclotron_beam"
+        ],
+        "examples": [
+          {
+            "id": "argon_density_at_internal_transport_barrier",
+            "calls": 3,
+            "score": 0.849,
+            "docs_stage_at_draw": "accepted",
+            "quote": "argon_density_at_internal_transport_barrier: route=unjudged failure_reason='ValueError: no usable judgment for documentation review' calls=3 docs_stage_at_draw='accepted' score=0.849"
+          },
+          {
+            "id": "bandwidth_of_ece_channel",
+            "calls": 3,
+            "score": 1.0,
+            "docs_stage_at_draw": "accepted",
+            "quote": "bandwidth_of_ece_channel: route=unjudged failure_reason='ValueError: no usable judgment for documentation review' calls=3 docs_stage_at_draw='accepted' score=1.0"
+          }
+        ]
+      },
+      {
+        "cause": "cohort runner: no route row at all",
+        "owner": "cohort runner (the run's own budget and time ceiling)",
+        "count": 72,
+        "where": "docs/evidence/fragments/sn-review-through-jev/srtj-cohort-run.py -- the runner falls back to the literal string 'no route row' when an unjudged item carries no failure reason",
+        "mechanism": "The item carries route unjudged and an empty failure reason. The composition writes a shadow row carrying a reason only when the incumbent fallback returned a result; when the fallback also returned nothing, no row is written at all and the runner reports the empty reason as 'no route row'.",
+        "root_cause": "The fallback is the paid panel quorum, whose seats this run's budget refused: the log reads 'rd_quorum docs cycle 0 unfunded for <id> (model=...): the run budget could not reserve $0.05xx of pre-launch exposure -- the reviewer was never called', followed by 'rd_quorum docs incomplete: 0/3 reviews succeeded for <id> -- deferring, NOT accepting on a single review (budget refused 1 seat(s))'. The dry run's own stop reason is time_limit_reached with cost_spent 1.84 against a cost_limit of 1.90, so the batch was cut short before these items were reached: almost all carry calls == 0, i.e. no Jev call was ever made for them.",
+        "ids": [
+          "accumulated_ethane_count",
+          "argon_density_at_limiter",
+          "binormal_coordinate_of_toroidal_field_coil",
+          "carbon_prefill_count_due_to_gas_injection",
+          "coulomb_logarithm",
+          "current_of_plasma_filament",
+          "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+          "diamagnetic_momentum_diffusivity",
+          "electron_diffusion_coefficient",
+          "ethylene_prefill_count",
+          "extent_of_soft_xray_detector",
+          "fast_particle_density",
+          "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+          "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+          "ion_diamagnetic_momentum_convection_velocity",
+          "ion_momentum_flux_due_to_diamagnetic_drift",
+          "launched_power_of_ion_cyclotron_heating_antenna",
+          "line_averaged_boron_density",
+          "magnetic_shear_at_internal_transport_barrier",
+          "major_length_of_iron_core_segment",
+          "net_efficiency_of_plant_system",
+          "neutral_internal_state_pressure",
+          "neutral_particle_flux_limiter_coefficient",
+          "neutron_emissivity_due_to_fusion",
+          "outer_radius_of_plasma_filament",
+          "parallel_counter_passing_fast_particle_pressure",
+          "parallel_electron_diffusivity",
+          "parallel_ion_charge_state_momentum_flux",
+          "parallel_net_ion_momentum_source",
+          "parallel_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+          "parallel_neutral_state_momentum_flux_limiter_coefficient",
+          "parallel_pfirsch_schlueter_current_density",
+          "poloidal_current_density_due_to_heat_viscosity",
+          "poloidal_ion_velocity",
+          "poloidal_ion_velocity_at_charge_exchange_channel",
+          "poloidal_linear_neutral_internal_state_momentum_flux",
+          "poloidal_magnetic_flux_at_internal_transport_barrier",
+          "poloidal_neutral_state_momentum_source",
+          "radial_center_of_mass_velocity",
+          "radial_electron_energy_diffusion_coefficient",
+          "radial_outline_of_coil_conductor_element",
+          "radial_outline_of_divertor_tile",
+          "radial_particle_convection_velocity",
+          "radial_total_current_density",
+          "radial_total_momentum_source",
+          "radial_total_thermal_ion_energy_diffusion_coefficient",
+          "ratio_of_particle_count_to_particle_simulated_count",
+          "ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude",
+          "resistivity_of_plasma_facing_component",
+          "silane_source_rate",
+          "thermal_ion_charge_state_power_density_due_to_collisions",
+          "toroidal_argon_velocity_at_internal_transport_barrier",
+          "toroidal_carbon_velocity_at_magnetic_axis",
+          "toroidal_current_density_due_to_anomalous_transport",
+          "toroidal_deuterium_velocity_at_internal_transport_barrier",
+          "toroidal_hydrogen_velocity_at_plasma_boundary",
+          "toroidal_ion_charge_state_momentum_flux_limiter_coefficient",
+          "toroidal_ion_rotation_frequency",
+          "toroidal_lithium_velocity_at_internal_transport_barrier",
+          "toroidal_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+          "toroidal_trapped_current_density",
+          "total_ion_density_at_limiter",
+          "trapped_thermal_electron_power_density_due_to_collisions",
+          "vertical_coordinate_of_electron_cyclotron_launcher_mirror",
+          "vertical_coordinate_of_filter_window",
+          "vertical_ion_charge_state_velocity",
+          "vertical_neutral_species_center_of_mass_velocity",
+          "vertical_neutral_velocity",
+          "vertical_pfirsch_schlueter_current_density",
+          "volume_averaged_helium_4_density",
+          "x_coordinate_of_divertor_target",
+          "z_coordinate_of_divertor_target"
+        ],
+        "examples": [
+          {
+            "id": "accumulated_ethane_count",
+            "calls": 0,
+            "score": 0.9125,
+            "decision": "drafted",
+            "quote": "accumulated_ethane_count: route=unjudged decision='drafted' calls=0 failure_reason=None -> runner reports 'no route row'"
+          },
+          {
+            "id": "argon_density_at_limiter",
+            "calls": 0,
+            "score": 0.95,
+            "decision": "drafted",
+            "quote": "argon_density_at_limiter: route=unjudged decision='drafted' calls=0 failure_reason=None -> runner reports 'no route row'"
+          }
+        ]
+      }
+    ],
+    "runner_detail": {
+      "items_with_no_jev_call": 69,
+      "items_still_drafted": 72,
+      "note": "A drafted decision with zero calls is an item the run never reached, not one the cascade routed away from. Neither cause is a defect in the item."
+    }
+  },
+  "q2": {
+    "population": 49,
+    "cutoff": 0.85,
+    "shared_items": 164,
+    "dry_run_table": {
+      "cohort_items": 219,
+      "incumbent_unjudged_on_shared": 16,
+      "jev_unjudged_on_shared": 58,
+      "shared_items": 164,
+      "table": {
+        "jev_accept_inc_accept": 38,
+        "jev_accept_inc_refine": 49,
+        "jev_refine_inc_accept": 0,
+        "jev_refine_inc_refine": 14
+      }
+    },
+    "classes": [
+      {
+        "class": "mechanical hold: score lands on the cutoff",
+        "owner": "the incumbent's recorded score, not a substantive judgment",
+        "count": 15,
+        "ids": [
+          "alpha_angle_of_plasma_filament",
+          "current_of_divertor_tile",
+          "electron_density_at_pellet_path",
+          "helium_4_density_at_pedestal_top",
+          "hydrogen_density_at_pedestal_top",
+          "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+          "oxygen_count_accumulated_due_to_gas_injection",
+          "parallel_ion_heat_convection_velocity",
+          "plasma_energy",
+          "ratio_of_vertical_vorticity_to_major_radius",
+          "second_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+          "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+          "toroidal_ion_charge_state_momentum_convection_velocity",
+          "toroidal_magnetic_field_at_flux_surface",
+          "vertical_coordinate_of_antenna_strap"
+        ],
+        "mechanism": "The incumbent's stored score sits at or a thousandth below the min_score the pair is scored against (0.85), so the pair is counted as disagreement on the score's own arithmetic edge rather than on a difference in judgment. The value is the incumbent row's aggregate over its own dimension scores, not Jev's: across these items only a minority of scores coincide between the two arms.",
+        "examples": [
+          {
+            "id": "plasma_energy",
+            "incumbent_score": 0.849,
+            "incumbent_decision": "reviewed",
+            "incumbent_calls": 3,
+            "jev_score": 0.9605207267162039,
+            "jev_rubric_total": 0.8390019359902027,
+            "jev_failed_checks": [
+              "Which conflict, if any, does this claim have with its DD source definition?"
+            ],
+            "quote": "plasma_energy: incumbent score=0.849 decision='reviewed' calls=3 against cutoff 0.85; incumbent route=refine; Jev route accept at score=0.9605207267162039 rubric_total=0.8390019359902027 failed_checks=['Which conflict, if any, does this claim have with its DD source definition?']"
+          },
+          {
+            "id": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+            "incumbent_score": 0.849,
+            "incumbent_decision": "reviewed",
+            "incumbent_calls": 6,
+            "jev_score": 0.9496794127601935,
+            "jev_rubric_total": 0.7947906217217493,
+            "jev_failed_checks": [
+              "Which conflict, if any, does this claim have with its DD source definition?",
+              "Does the documentation cite a raw DD path or IDS name as storage context?"
+            ],
+            "quote": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions: incumbent score=0.849 decision='reviewed' calls=6 against cutoff 0.85; incumbent route=refine; Jev route accept at score=0.9496794127601935 rubric_total=0.7947906217217493 failed_checks=['Which conflict, if any, does this claim have with its DD source definition?', 'Does the documentation cite a raw DD path or IDS name as storage context?']"
+          }
+        ]
+      },
+      {
+        "class": "not readable from the record: incumbent reason line absent",
+        "owner": "the collector's record, not the incumbent's judgment",
+        "count": 34,
+        "ids": [
+          "accumulated_deuterium_count_due_to_gas_injection",
+          "deposited_power_at_divertor_target_due_to_halo_current",
+          "etendue_of_spectrometer",
+          "external_loop_voltage",
+          "first_local_tangential_width_of_filter_window",
+          "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+          "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+          "implicit_ion_energy_source_rate",
+          "ion_average_temperature_at_post_sawtooth_crash",
+          "ion_energy_diffusion_coefficient",
+          "krypton_source_rate_due_to_gas_injection",
+          "line_averaged_helium_4_density",
+          "line_averaged_lithium_density",
+          "line_averaged_tungsten_density",
+          "lithium_density_at_limiter",
+          "maximum_angle_of_electron_cyclotron_launcher_mirror",
+          "maximum_of_back_surface_neutron_flux",
+          "neutral_internal_state_particle_flux_at_wall",
+          "normalized_particle_mass",
+          "perpendicular_power_normalized_of_beam_tracing_beam",
+          "polarization_angle_at_constraint_position",
+          "poloidal_neutral_energy_diffusivity",
+          "radial_perturbed_plasma_magnetic_field_imaginary_part",
+          "radial_volumetric_force",
+          "surface_current_per_toroidal_and_poloidal_mode_number_of_ion_cyclotron_heating_antenna",
+          "toroidal_carbon_velocity_at_pedestal_top",
+          "total_gas_source_rate_at_midplane_due_to_gas_injection",
+          "total_heating_power_due_to_fusion_reactions",
+          "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+          "vertical_back_surface_curvature_of_optical_element",
+          "vertical_current_density_due_to_ion_inertia",
+          "vertical_total_current_density",
+          "vertical_vorticity",
+          "volume_integrated_particle_source_rate"
+        ],
+        "mechanism": "The incumbent arm's piece files persist summary fields only (axis, calls, chat_reviewer_called, decision, docs_stage_at_draw, failure_reason, id, name_stage_at_draw, route, score, spend_usd, wall_time_s). No comment, hold note or cap note survives in any artifact, so whether these items were refined for a defect in the text or for a mechanical reason cannot be settled from what is on the branch.",
+        "missing_evidence": "The review rows the incumbent wrote went into each piece's own scratch graph, which the pieces record as removed, and the arm's run logs carry neither item ids nor comment text. The live graph's stored documentation reviews predate the cohort dump and disagree with the score the pieces persist, so they are not a substitute for the missing rows. Reporting these as substantive would be a guess.",
+        "examples": [
+          {
+            "id": "vertical_back_surface_curvature_of_optical_element",
+            "incumbent_score": 0.4375,
+            "incumbent_decision": "reviewed",
+            "incumbent_calls": 5,
+            "jev_score": 0.875,
+            "jev_failed_checks": [
+              "Which conflict, if any, does this claim have with its DD source definition?",
+              "Does the documentation cite a raw DD path or IDS name as storage context?",
+              "relationship_link"
+            ],
+            "quote": "vertical_back_surface_curvature_of_optical_element: incumbent score=0.4375 decision='reviewed' route=refine calls=5 -- no reason line persisted; Jev accept at score=0.875 with failed_checks=['Which conflict, if any, does this claim have with its DD source definition?', 'Does the documentation cite a raw DD path or IDS name as storage context?', 'relationship_link']"
+          },
+          {
+            "id": "radial_perturbed_plasma_magnetic_field_imaginary_part",
+            "incumbent_score": 0.5,
+            "incumbent_decision": "reviewed",
+            "incumbent_calls": 5,
+            "jev_score": 0.849,
+            "jev_failed_checks": [
+              "Which conflict, if any, does this claim have with its DD source definition?",
+              "Does the documentation cite a raw DD path or IDS name as storage context?"
+            ],
+            "quote": "radial_perturbed_plasma_magnetic_field_imaginary_part: incumbent score=0.5 decision='reviewed' route=accept calls=5 -- no reason line persisted; Jev accept at score=0.849 with failed_checks=['Which conflict, if any, does this claim have with its DD source definition?', 'Does the documentation cite a raw DD path or IDS name as storage context?']"
+          }
+        ]
+      }
+    ],
+    "incumbent_piece_fields": [
+      "axis",
+      "calls",
+      "chat_reviewer_called",
+      "decision",
+      "docs_stage_at_draw",
+      "failure_reason",
+      "id",
+      "name_stage_at_draw",
+      "route",
+      "score",
+      "spend_usd",
+      "wall_time_s"
+    ],
+    "incumbent_comment_fields_present": [],
+    "jev_side": {
+      "all_accept": true,
+      "with_failed_check": 49,
+      "note": "Every item in the set is a Jev accept, and the route table records none the other way, so over this cohort the disagreement is one-sided."
+    }
+  },
+  "q3": {
+    "name": {
+      "shared_items": 115,
+      "agree_accept": 83,
+      "jev_only": 17,
+      "incumbent_only": 12,
+      "agree_refine": 3,
+      "jev_accept_rate_shared": 0.8695652173913043,
+      "incumbent_accept_rate_shared": 0.8260869565217391,
+      "difference": {
+        "point": 0.04347826086956519,
+        "interval_95": [
+          -0.0434782608695653,
+          0.13913043478260867
+        ],
+        "valid_resamples": 10000
+      },
+      "matched_target": 0.614841,
+      "matched_target_source": {
+        "cutoff": 0.32447569396775017,
+        "n": 283,
+        "panel_accepts": 174,
+        "panel_min_score": 0.85,
+        "pre_veto_accepts": 174
+      },
+      "dry_run_table": {
+        "cohort_items": 231,
+        "incumbent_unjudged_on_shared": 0,
+        "jev_unjudged_on_shared": 1,
+        "shared_items": 115,
+        "table": {
+          "jev_accept_inc_accept": 83,
+          "jev_accept_inc_refine": 17,
+          "jev_refine_inc_accept": 11,
+          "jev_refine_inc_refine": 3
+        }
+      },
+      "rejections": [
+        {
+          "against": "the calibration-matched target (0.6148), measured on the panel's own pool: 174 accepts of 283 at cutoff 0.32447569396775017",
+          "why": "The target is the panel's accept rate on the pool it was calibrated on, not on this cohort, so it carries that pool's difficulty into the gate. A cohort drawn to a different mix can produce the whole shortfall against it."
+        },
+        {
+          "against": "the dry run's rate over eligible items",
+          "why": "An undecided item counts against that rate, so the documentation figure is dominated by the items the run never reached. It measures the run's budget alongside the route."
+        }
+      ]
+    },
+    "docs": {
+      "shared_items": 164,
+      "agree_accept": 38,
+      "jev_only": 54,
+      "incumbent_only": 18,
+      "agree_refine": 54,
+      "jev_accept_rate_shared": 0.5609756097560976,
+      "incumbent_accept_rate_shared": 0.34146341463414637,
+      "difference": {
+        "point": 0.21951219512195125,
+        "interval_95": [
+          0.12195121951219517,
+          0.3170731707317073
+        ],
+        "valid_resamples": 10000
+      },
+      "matched_target": 0.990476,
+      "matched_target_source": {
+        "cutoff": 0.38829396813183875,
+        "n": 210,
+        "panel_accepts": 208,
+        "panel_min_score": 0.85,
+        "pre_veto_accepts": 208
+      },
+      "dry_run_table": {
+        "cohort_items": 219,
+        "incumbent_unjudged_on_shared": 16,
+        "jev_unjudged_on_shared": 58,
+        "shared_items": 164,
+        "table": {
+          "jev_accept_inc_accept": 38,
+          "jev_accept_inc_refine": 49,
+          "jev_refine_inc_accept": 0,
+          "jev_refine_inc_refine": 14
+        }
+      },
+      "rejections": [
+        {
+          "against": "the calibration-matched target (0.9905), measured on the panel's own pool: 208 accepts of 210 at cutoff 0.38829396813183875",
+          "why": "The target is the panel's accept rate on the pool it was calibrated on, not on this cohort, so it carries that pool's difficulty into the gate. A cohort drawn to a different mix can produce the whole shortfall against it."
+        },
+        {
+          "against": "the dry run's rate over eligible items",
+          "why": "An undecided item counts against that rate, so the documentation figure is dominated by the items the run never reached. It measures the run's budget alongside the route."
+        }
+      ]
+    }
+  },
+  "sources": {
+    "dry_run_json": "42dbb67d5027908e4b74fefb3526cd43db1a630b6ddb995188b4bf325823c1ce",
+    "thresholds": "ffe351bf4ba3cdf6eddec2998005050efddf81095f9d3e10bea63d68637fdf53",
+    "interval_helper": "f3d1debd233ec2f2369804075603f144b6227d470f3c67e27d5488ae00cf674a",
+    "cascade_pieces": {
+      "name": "c82863fe4c61f92de742d671c88549770294c5e22f3939ad87e0913c432bf926",
+      "docs": "d9999e91a2065e132b03ad0f85711c3fa311d3fa616fb749128e4e5c6dc3b125"
+    },
+    "incumbent_pieces": {
+      "name": [
+        "dfc7719bf773cb4eb6814c4e30c2f77e1061c04e784c077d850152b690392d03",
+        "5643e4917d65aaf2ee40cbef0adabd9f7d1ec4480bf185ee8b521b1c55aaaa62"
+      ],
+      "docs": [
+        "b1d0e1fea41055680ff3da5a60c70f89e6b49520515f8b4a7b2b46ec553468bf",
+        "8c452263f82cb25affc4d71f76226e11c73d6f4d1c52c79afb3371aadcfe4e23",
+        "abfccfac450e39ce8eb1ad0212e8d2bd0415b747ac17b277636ec7776a962e0f"
+      ]
+    }
+  },
+  "figures_rendered": [
+    [
+      "srtj-docs-dry-run-diagnosis.svg",
+      "undecided documents by cause, and the paired accept-rate difference",
+      [
+        "Left: the undecided documentation items of the dry run, split by the mechanism that left them undecided. Right: the difference between the two routes' accept rates over the items both judged, item-paired"
+      ]
+    ]
+  ]
+}
