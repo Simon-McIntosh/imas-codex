@@ -4,7 +4,7 @@ A standard name's ``physics_domain`` is its stored Jev decision and its
 ``source_domains`` is the value the one writer sets with it. The compose,
 consolidation, catalog-import and export paths must therefore stop selecting a
 domain themselves: none of them calls the ranking selectors
-(``select_primary_domain``, ``maybe_preserve_domain``), and the path that
+(``select_primary_domain``, ``maybe_promote_domain``), and the path that
 writes a name's domain goes through
 :func:`imas_codex.standard_names.domain_decision.write_name_domain`.
 
