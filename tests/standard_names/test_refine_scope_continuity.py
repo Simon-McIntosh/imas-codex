@@ -9,6 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.fanout.config import FanoutSettings
+
 
 class _GraphClient:
     def __enter__(self):
@@ -64,6 +66,17 @@ def _item(name: str, scope_run_id: str | None, chain_length: int = 0) -> dict:
     }
 
 
+def _refine_fanout_settings() -> FanoutSettings:
+    """Return the settings the refine worker sees during these tests.
+
+    A real model rather than a stand-in: a namespace that accepts any
+    attribute keeps a fixture green after the settings it fabricates
+    have left production, which is how a retired trigger setting stayed
+    alive in this file unnoticed.
+    """
+    return FanoutSettings(enabled=False, sites={})
+
+
 @contextmanager
 def _worker_dependencies(candidate_names: list[str], persist_calls: list[dict]):
     candidates = iter(candidate_names)
@@ -104,13 +117,7 @@ def _worker_dependencies(candidate_names: list[str], persist_calls: list[dict]):
         ),
         patch(
             "imas_codex.standard_names.fanout.load_settings",
-            return_value=SimpleNamespace(
-                enabled=False,
-                sites={},
-                refine_trigger_keywords=(),
-                refine_trigger_comment_dims=(),
-                refine_trigger_comment_chars=0,
-            ),
+            side_effect=_refine_fanout_settings,
         ),
         patch("imas_codex.settings.get_model", return_value="test/refiner"),
         patch(
@@ -397,3 +404,20 @@ async def test_focused_successor_remains_claimable_by_same_scope() -> None:
 
     claimed = [row for row in available if row["run_id"] == scope]
     assert [row["id"] for row in claimed] == ["radial_outline"]
+
+
+def test_refine_fanout_settings_mirror_the_production_model() -> None:
+    """The stubbed settings must be the real model, with no field of its own.
+
+    Mutation that must turn this red: hand the worker a ``SimpleNamespace``
+    (or any stand-in) instead of :class:`FanoutSettings`.
+    """
+    settings = _refine_fanout_settings()
+    assert isinstance(settings, FanoutSettings), (
+        "the refine tests must patch in the production settings model, not a "
+        f"stand-in: {type(settings).__name__}"
+    )
+    extra = sorted(set(vars(settings)) - set(FanoutSettings.model_fields))
+    assert extra == [], (
+        f"the stubbed settings carry fields the model does not declare: {extra}"
+    )
