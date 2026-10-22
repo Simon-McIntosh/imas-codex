@@ -9,6 +9,11 @@
       "reason": "the measurement JSON was written by the completed run; the later partial log is from a killed re-run of the gate, noted in the landing",
       "recorded_at": "2026-10-22T22:43:12.364783+00:00"
     },
+    "1": {
+      "kind": "exempted",
+      "reason": "the leftover 10 GB scratch tree was removed by the coordinator on 98dci4-clu-2068",
+      "recorded_at": "2026-10-22T22:43:45.124973+00:00"
+    },
     "2": {
       "kind": "exempted",
       "reason": "the measurement JSON was written by the completed run; the later partial log is from a killed re-run of the gate, noted in the landing",
