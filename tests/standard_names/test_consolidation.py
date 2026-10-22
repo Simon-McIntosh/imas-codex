@@ -614,9 +614,10 @@ class TestCombinedScenarios:
 
 
 class TestResolvePhysicsDomains:
-    """Tests for _resolve_physics_domains -> (primary, source_domains).
+    """Tests for _resolve_physics_domains -> (None, source_domains).
 
-    Post-refactor: returns ``(primary_scalar, sorted_source_list)``.
+    No primary is chosen: a name's scalar domain is its stored Jev decision,
+    written by the one writer, so consolidation keeps the source union only.
     """
 
     def test_all_none(self):
@@ -627,7 +628,7 @@ class TestResolvePhysicsDomains:
 
     def test_unanimous_domain(self):
         primary, sources = _resolve_physics_domains(["transport", "transport"])
-        assert primary == "transport"
+        assert primary is None, "consolidation must not choose the scalar"
         assert sources == ["transport"]
 
     def test_general_kept_with_specific(self):
@@ -644,17 +645,17 @@ class TestResolvePhysicsDomains:
 
     def test_single_value(self):
         primary, sources = _resolve_physics_domains(["equilibrium"])
-        assert primary == "equilibrium"
+        assert primary is None, "consolidation must not choose the scalar"
         assert sources == ["equilibrium"]
 
     def test_none_mixed_with_value(self):
         primary, sources = _resolve_physics_domains([None, "transport", ""])
-        assert primary == "transport"
+        assert primary is None, "consolidation must not choose the scalar"
         assert sources == ["transport"]
 
     def test_all_general(self):
         primary, sources = _resolve_physics_domains(["general", "general"])
-        assert primary == "general"
+        assert primary is None, "consolidation must not choose the scalar"
         assert sources == ["general"]
 
     def test_list_inputs_merged(self):
@@ -673,7 +674,7 @@ class TestResolvePhysicsDomains:
 
 
 class TestMergeDuplicatesPhysicsDomain:
-    """Test that _merge_duplicates resolves physics_domain via promotion."""
+    """Test that _merge_duplicates carries sources and leaves the scalar alone."""
 
     def test_merge_same_domain(self):
         group = [
@@ -681,7 +682,7 @@ class TestMergeDuplicatesPhysicsDomain:
             _candidate("te", "eq/te", physics_domain="transport"),
         ]
         merged = _merge_duplicates(group)
-        assert merged["physics_domain"] == "transport"
+        assert merged["physics_domain"] is None, "the writer owns the scalar"
         assert merged["source_domains"] == ["transport"]
 
     def test_merge_general_vs_specific(self):
@@ -690,9 +691,9 @@ class TestMergeDuplicatesPhysicsDomain:
             _candidate("te", "eq/te", physics_domain="transport"),
         ]
         merged = _merge_duplicates(group)
-        # Both contributed sources; primary picked by rank
+        # Both contributed sources; no rank is applied to pick a scalar.
         assert sorted(merged["source_domains"]) == ["general", "transport"]
-        assert merged["physics_domain"] in ("general", "transport")
+        assert merged["physics_domain"] is None, "the writer owns the scalar"
 
     def test_merge_no_domain(self):
         group = [
@@ -709,5 +710,5 @@ class TestMergeDuplicatesPhysicsDomain:
             _candidate("te", "eq/te", physics_domain="equilibrium"),
         ]
         merged = _merge_duplicates(group)
-        assert merged["physics_domain"] == "equilibrium"
+        assert merged["physics_domain"] is None, "the writer owns the scalar"
         assert merged["source_domains"] == ["equilibrium"]

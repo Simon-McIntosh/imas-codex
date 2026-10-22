@@ -3853,6 +3853,79 @@ async def _self_refine_candidate(
     return new_name, (new_desc or description)
 
 
+_COMPOSE_DOMAIN_STATE_QUERY = """
+UNWIND $ids AS name_id
+MATCH (sn:StandardName {id: name_id})
+OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+OPTIONAL MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
+RETURN sn.id AS id,
+       sn.description AS description,
+       [p IN collect(DISTINCT {path: dd.id, domain: dd.physics_domain})
+        WHERE p.path IS NOT NULL] AS sources
+"""
+
+
+async def _write_composed_name_domains(
+    candidates: list[dict[str, Any]],
+    winner_ids: set[str],
+) -> int:
+    """Give each newly persisted name its domain through the one writer.
+
+    A composed name carries no domain of its own: its ``source_domains`` is the
+    one writer's, and its ``physics_domain`` is the Jev decision. Each name the
+    batch persisted is asked through ``domain_decision``'s Choice and then set
+    by :func:`imas_codex.standard_names.domain_decision.write_name_domain`; a
+    call that fails or a choice below the floor leaves the name undecided, per
+    the writer's rule. ``winner_ids`` are the persisted sources' ids, so a
+    composed name is one of *candidates* whose ``source_id`` is among them.
+
+    Returns the number of names written.
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.settings import get_model
+    from imas_codex.standard_names import domain_decision as _dd
+
+    names = sorted(
+        {
+            str(c["id"])
+            for c in candidates
+            if c.get("id") and c.get("source_id") in winner_ids
+        }
+    )
+    if not names:
+        return 0
+
+    ids_map = _dd.ids_domain_map()
+    model = get_model(_dd.SEAT)
+    with GraphClient() as gc:
+        rows = [dict(row) for row in gc.query(_COMPOSE_DOMAIN_STATE_QUERY, ids=names)]
+
+        semaphore = asyncio.Semaphore(_dd.CONCURRENCY)
+
+        async def _decide(row: dict[str, Any]) -> Any:
+            sources = {
+                str(p["path"]): (p.get("domain") or None)
+                for p in (row.get("sources") or [])
+                if p and p.get("path")
+            }
+            async with semaphore:
+                return await _dd.decide_domain(
+                    row["id"],
+                    row.get("description") or "",
+                    sources,
+                    ids_map,
+                    model=model,
+                )
+
+        decisions = await asyncio.gather(*(_decide(row) for row in rows))
+
+        written = 0
+        for row, decision in zip(rows, decisions, strict=True):
+            await asyncio.to_thread(_dd.write_name_domain, gc, row["id"], decision)
+            written += 1
+    return written
+
+
 async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
     """LLM-generate standard names from extracted batches.
 
@@ -4418,11 +4491,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 continue
             unit = raw_unit
 
-            # Inject physics_domain from DD (authoritative, like unit).
-            # Post-refactor: scalar primary + source_domains list.
-            raw_domain = source_item.get("physics_domain") if source_item else None
-            physics_domain = raw_domain or None
-            source_domains = [raw_domain] if raw_domain else []
+            # A name's domain is its stored Jev decision, set by the one writer
+            # after the batch is persisted. The DD source's own domain is not
+            # carried onto the name here.
+            physics_domain = None
+            source_domains: list[str] = []
 
             # Inject COCOS metadata from DD (authoritative, like unit)
             cocos_type = source_item.get("cocos_label") if source_item else None
@@ -4761,6 +4834,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     reporter="compose",
                     observed_dd_version=batch.dd_version,
                 )
+                await _write_composed_name_domains(candidates, winner_source_ids)
             written = len(winner_ids)
             wlog.debug("Persisted %d names from batch %s", written, batch.group_key)
 
@@ -6308,9 +6382,11 @@ async def compose_batch(
                 continue
             unit = raw_unit
 
-            raw_domain = source_item.get("physics_domain") if source_item else None
-            physics_domain = raw_domain or None
-            source_domains = [raw_domain] if raw_domain else []
+            # A name's domain is its stored Jev decision, set by the one writer
+            # after the batch is persisted; the DD source's own domain is not
+            # carried onto the name here.
+            physics_domain = None
+            source_domains: list[str] = []
 
             cocos_type = source_item.get("cocos_label") if source_item else None
 
@@ -6760,6 +6836,14 @@ async def compose_batch(
             else:
                 written = int(persisted)
             logger.debug("Pool %s: persisted %d candidates", phase_tag, written)
+
+            # A persisted name's domain is its stored Jev decision, set by the
+            # one writer rather than carried from the source item.
+            if isinstance(persisted, list) and candidates:
+                await _write_composed_name_domains(
+                    candidates,
+                    {str(c.get("source_id")) for c in candidates},
+                )
 
             # Derive auto-gaps only from finalized source winners. A losing
             # source cannot authorize a gap mutation.
