@@ -9638,7 +9638,7 @@ def _normalize_bare_doc_links(
         if sn_id is None:
             raise ValueError("documentation requires a scoped standard name id")
         if not documentation or "[" not in documentation:
-            return 0
+            return [] if dry_run else 0
         rows = [{"id": sn_id, "docs": documentation}]
     elif sn_id is not None:
         rows = list(

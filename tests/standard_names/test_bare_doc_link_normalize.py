@@ -217,6 +217,10 @@ def test_normalize_prose_against_disposable_graph(disposable_neo4j):
             == after
         )
         assert _normalize_bare_doc_links(graph, sn_id="documented_name") == 0
+        assert (
+            _normalize_bare_doc_links(graph, sn_id="documented_name", dry_run=True)
+            == []
+        )
 
 
 def _patch_persist_gc(gc):
