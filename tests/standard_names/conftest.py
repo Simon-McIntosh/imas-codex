@@ -303,18 +303,33 @@ _DISPOSABLE_ENV = (
 )
 
 
-def project_graph_uri() -> str:
-    """The address this checkout reaches when no override is in place.
+def project_graph_uris() -> set[str]:
+    """Every address this checkout reaches the project graph at.
 
-    Resolved without an automatic tunnel: opening one to read an address is a
-    side effect a test fixture must not have, and the loopback port the tunnel
-    would front is the same graph.
+    Two spellings, because two hosts reach the same graph by different routes:
+    the loopback port, which is what a login node's profile names and what an
+    SSH tunnel would front, and the address service discovery reports for the
+    scheduled instance, which is what a compute node actually connects to.
+    Naming only the loopback refuses nothing on a cluster whose graph runs on a
+    service node, and the port alone says nothing about which graph listens on
+    it, so both are collected.
+
+    Neither is resolved by opening a tunnel: discovery answers from the
+    scheduler, so reading an address stays a read.
     """
     from imas_codex.graph.profiles import resolve_neo4j
+    from imas_codex.remote.locations import resolve_service_url
 
     withheld = os.environ.pop("NEO4J_URI", None)
     try:
-        return resolve_neo4j(auto_tunnel=False).uri.rstrip("/")
+        profile = resolve_neo4j(auto_tunnel=False)
+        uris = {f"bolt://localhost:{profile.bolt_port}"}
+        discovered = resolve_service_url(
+            profile.location, profile.bolt_port, protocol="bolt"
+        )
+        if discovered:
+            uris.add(discovered)
+        return {uri.rstrip("/") for uri in uris}
     finally:
         if withheld is not None:
             os.environ["NEO4J_URI"] = withheld
@@ -327,11 +342,12 @@ def refuse_project_graph(uri: str) -> None:
     rather than skips: an endpoint that cannot be told apart from production is
     a broken test setup, not a test that is not applicable here.
     """
-    project_uri = project_graph_uri()
-    if uri.rstrip("/") == project_uri:
+    project_uris = project_graph_uris()
+    if uri.rstrip("/") in project_uris:
         pytest.fail(
-            f"refusing to run against the project graph URI ({project_uri}): "
-            "these tests need a disposable graph"
+            f"refusing to run against the project graph URI ({uri}): "
+            "these tests need a disposable graph; the project graph is at "
+            f"{', '.join(sorted(project_uris))}"
         )
 
 
@@ -442,12 +458,17 @@ def disposable_neo4j_uri() -> Iterator[str]:
         refuse_project_graph(uri)
         from imas_codex.graph.profiles import resolve_neo4j
 
+        # The profile obeys NEO4J_URI, so this compares the override with
+        # itself and is no evidence about the project graph -- the refusal
+        # above is what protects production. What it does prove is that the
+        # override is still honoured, which is the whole wiring: a test that
+        # builds a bare GraphClient() must land on the instance it was given.
         resolved = resolve_neo4j(auto_tunnel=False).uri
         if resolved.rstrip("/") != uri.rstrip("/"):
             pytest.fail(
-                f"the graph profile resolves to {resolved}, not the disposable "
-                f"endpoint {uri}: the tests would write outside the instance "
-                "they were given"
+                f"the graph profile ignores NEO4J_URI and resolves to "
+                f"{resolved}: a bare GraphClient() would reach past the "
+                f"disposable endpoint {uri}"
             )
         _wipe(uri)
         yield uri
