@@ -13,6 +13,11 @@
       "node": "srtj-docs-switch-causes",
       "recorded_at": "2026-10-23T18:05:59.895870+00:00"
     },
+    "1": {
+      "kind": "exempted",
+      "reason": "evidence presentation; the per-pass rows are in the JSON",
+      "recorded_at": "2026-10-23T18:06:13.995624+00:00"
+    },
     "3": {
       "kind": "folded",
       "node": "srtj-docs-switch-causes",
