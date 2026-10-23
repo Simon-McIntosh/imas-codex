@@ -12,6 +12,13 @@
   "completed_at": "2026-10-23T05:47:29.375Z",
   "dispatched_at": "2026-10-23T05:28:36Z",
   "error": "",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-docs-bracket-repair",
+      "recorded_at": "2026-10-23T07:53:54.563200+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/doc_links.py",
