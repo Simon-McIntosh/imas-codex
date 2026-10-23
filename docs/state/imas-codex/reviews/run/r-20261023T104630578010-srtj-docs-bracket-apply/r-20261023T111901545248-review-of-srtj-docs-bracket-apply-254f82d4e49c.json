@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "",
+  "baseline_suite_log": "",
+  "call_sites": [
+    "imas_codex/standard_names/graph_ops.py:9815",
+    "imas_codex/standard_names/graph_ops.py:18001"
+  ],
+  "completed_at": "2026-10-23T11:32:20.660Z",
+  "dispatched_at": "2026-10-23T11:19:41Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py",
+      "line": "294",
+      "severity": "non-blocking",
+      "text": "non-blocking: `other_class_failures_all_explained` cannot fail on the eight non-changed documents - line 294's planned_before.get(document_id, after) sets before == after, so lines 300-302 record text_unchanged_by_normaliser and same_failure_before_and_after as true by construction, and the all() at line 333 only discriminates the two documents in the changed set."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py",
+      "line": "338",
+      "severity": "non-blocking",
+      "text": "non-blocking: the examples_linked_at_least_three assertion counts choose_examples(dry_run) at line 311, a selection from the read-only plan rather than the graph after the write, and line 147's chooser takes linked rows first, so the assertion holds by construction of the chooser and would still pass had the write changed nothing."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Production call sites read: graph_ops.py:9815 (the pool's post-rotation reconcile, unscoped - the path this node exercised) and graph_ops.py:18001 (the scoped accept path).",
+    "diff": "Read commit by commit against 49926500; 68de868bf adds run.py and the restore record, 45bd92fae adds the html and apply record, 254f82d4e re-takes the JSON payloads.",
+    "done_when": "Read the brief's done-when; the three named artefacts are all in the diff and apply.log ends EXIT=0 with all seven checks true.",
+    "goal": "Read the source goal in brief.md; it landed - srtj-docs-bracket-apply-run.py:260 calls _normalize_bare_doc_links(graph) once unscoped and the restore record is committed.",
+    "manifest": "Read manifest.md; status complete, four changed paths named, the gate command and its logs recorded, and a self-recorded negative control (apply-first-attempt.log EXIT=1).",
+    "write_paths": "Read the brief's four declared paths plus the granted figures directory against git diff --name-only 49926500 254f82d4e; four files changed, all inside the declared set, no production file touched."
+  },
+  "justifications": {
+    "durability": "no test guards the applied state or the restore path - the guards live only in the one-shot runner (srtj-docs-bracket-apply-run.py:333) - though the checks are falsifiable and were seen to fail twice (apply-first-attempt.log EXIT=1).",
+    "evidence": "the prose-rule readback is re-derived from a fresh graph read via score_documentation at srtj-docs-bracket-apply-run.py:112 and recorded as prose_rule_failing_after=0 in apply.log, which ends EXIT=0.",
+    "fit": "the added fragment names srtj-docs-bracket-apply.*, matching the established srtj-* fragment namespace beside srtj-docs-bracket-repair.html, and the runner follows the committed dry-run runner's idiom.",
+    "goal_fidelity": "the goal is a single unscoped run of the fixed normaliser with a restore record, and srtj-docs-bracket-apply-run.py:260 is exactly that call, committed with srtj-docs-bracket-apply-restore.json.",
+    "reuse": "the runner reuses score_documentation and DocumentationGateOutcome from imas_codex/standard_names/docs_gates.py and the product _normalize_bare_doc_links; a search of docs_gates found no owner for a failing-document lister or a restore writer, so nothing is forked.",
+    "scope_discipline": "git diff --name-only 49926500 254f82d4e lists four files under docs/evidence/fragments/sn-review-through-jev/, all within the declared write paths, and no production code."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the source goal in brief.md - apply the fixed bare-link normaliser to the live catalogue once, under a restore record - and it landed: srtj-docs-bracket-apply-run.py:260 calls _normalize_bare_doc_links(graph) once unscoped, and srtj-docs-bracket-apply-restore.json holds every changed document's before/after text.\nVERDICT done_when: the done_when names three artefacts (restore.json, apply.json written by run.py with a log ending EXIT=0 holding every readback, and the html); all three are present in the diff and apply.log ends `EXIT=0` with all seven checks true.\nVERDICT write_paths: read the brief's four declared paths plus the granted figures directory against `git diff --stat 49926500 254f82d4e`; four files changed, every one inside the declared set, and no production file is touched.\nVERDICT manifest: read at r-20261023T104630578010-srtj-docs-bracket-apply/manifest.md; it declares status complete, names the four changed paths, records the gate command and its logs, and carries a self-recorded negative control (apply-first-attempt.log ended EXIT=1).\nVERDICT diff: read commit by commit against 49926500 - 68de868bf adds the runner and restore record, 45bd92fae adds the html and apply record, 254f82d4e re-takes both JSON payloads; four added files, all inside scope.\nCALL_SITES: imas_codex/standard_names/graph_ops.py:9815, imas_codex/standard_names/graph_ops.py:18001\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the goal is a single unscoped run of the fixed normaliser with a restore record, and srtj-docs-bracket-apply-run.py:260 is exactly that call, committed with srtj-docs-bracket-apply-restore.json.\nSCORE evidence: 18\nJUSTIFICATION evidence: the prose-rule readback is re-derived from a fresh graph read via score_documentation at srtj-docs-bracket-apply-run.py:112 and recorded as prose_rule_failing_after=0 in apply.log, which ends EXIT=0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: `git diff --name-only 49926500 254f82d4e` lists four files under docs/evidence/fragments/sn-review-through-jev/, all within the declared write paths, and no production code.\nSCORE durability: 14\nJUSTIFICATION durability: no test guards the applied state or the restore path - the guards live only in the one-shot runner (srtj-docs-bracket-apply-run.py:333) - though the checks are falsifiable and were seen to fail twice (apply-first-attempt.log EXIT=1).\nSCORE fit: 17\nJUSTIFICATION fit: the added fragment names srtj-docs-bracket-apply.*, matching the established srtj-* fragment namespace beside srtj-docs-bracket-repair.html, and the runner follows the committed dry-run runner's idiom.\nSCORE reuse: 19\nJUSTIFICATION reuse: the runner reuses score_documentation and DocumentationGateOutcome from imas_codex/standard_names/docs_gates.py and the product _normalize_bare_doc_links; a search of docs_gates found no owner for a failing-document lister or a restore writer, so nothing is forked.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py:294 non-blocking: `other_class_failures_all_explained` cannot fail on the eight non-changed documents - line 294's planned_before.get(document_id, after) sets before == after, so lines 300-302 record text_unchanged_by_normaliser and same_failure_before_and_after as true by construction, and the all() at line 333 only discriminates the two documents in the changed set.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py:338 non-blocking: the examples_linked_at_least_three assertion counts choose_examples(dry_run) at line 311, a selection from the read-only plan rather than the graph after the write, and line 147's chooser takes linked rows first, so the assertion holds by construction of the chooser and would still pass had the write changed nothing.",
+  "review_run_id": "r-20261023T111901545248-review-of-srtj-docs-bracket-apply-254f82d4e49c",
+  "reviewed_base_sha": "499265002b3823dd244caa4c2160e27e4589f37e",
+  "reviewed_commits": [
+    "68de868bfeb5f30599ff7a83fb84635f5d0af384",
+    "45bd92fae0baca43b894c5a5ad9ffef484744168",
+    "254f82d4e49c3ad693032c35726cc7395d969ee1"
+  ],
+  "reviewed_head_sha": "254f82d4e49c3ad693032c35726cc7395d969ee1",
+  "reviewed_run_id": "r-20261023T104630578010-srtj-docs-bracket-apply",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T11:29:08.317430+00:00",
+  "total": 106
+}
