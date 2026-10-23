@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-10-23T14:55:33.699Z",
   "dispatched_at": "2026-10-23T14:21:34Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-docs-switch-causes",
+      "recorded_at": "2026-10-23T18:05:59.895870+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py",
