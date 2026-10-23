@@ -1677,7 +1677,91 @@
       "recall_total": 60,
       "control_total": 20,
       "meets_bar": false,
-      "spend_usd": 0.018181
+      "spend_usd": 0.018181,
+      "recall_miss": {
+        "row": "contradicts-354",
+        "claim_index": 11,
+        "planted_sentence": "Calibration assumes a quadratic field-current relation instead of a linear one.",
+        "question": "the shipped claim-comparison question for claim 11, unchanged",
+        "observations": 6,
+        "answers": [
+          {
+            "choice": "says nothing",
+            "probabilities": {
+              "supports": 0.12,
+              "contradicts": 0.38,
+              "says nothing": 0.5
+            },
+            "former_rule_fires": true,
+            "shipped_rule_fires": false
+          },
+          {
+            "choice": "says nothing",
+            "probabilities": {
+              "supports": 0.25,
+              "contradicts": 0.32,
+              "says nothing": 0.43
+            },
+            "former_rule_fires": true,
+            "shipped_rule_fires": false
+          },
+          {
+            "choice": "says nothing",
+            "probabilities": {
+              "supports": 0.18,
+              "contradicts": 0.32,
+              "says nothing": 0.5
+            },
+            "former_rule_fires": true,
+            "shipped_rule_fires": false
+          },
+          {
+            "choice": "says nothing",
+            "probabilities": {
+              "supports": 0.15,
+              "contradicts": 0.33,
+              "says nothing": 0.52
+            },
+            "former_rule_fires": true,
+            "shipped_rule_fires": false
+          },
+          {
+            "choice": "says nothing",
+            "probabilities": {
+              "supports": 0.11,
+              "contradicts": 0.33,
+              "says nothing": 0.56
+            },
+            "former_rule_fires": true,
+            "shipped_rule_fires": false
+          },
+          {
+            "choice": "says nothing",
+            "probabilities": {
+              "supports": 0.33,
+              "contradicts": 0.25,
+              "says nothing": 0.42
+            },
+            "former_rule_fires": false,
+            "shipped_rule_fires": false
+          }
+        ],
+        "contradiction_mass_range": [
+          0.25,
+          0.38
+        ],
+        "silence_mass_range": [
+          0.42,
+          0.56
+        ],
+        "former_rule_fired": "5 of 6",
+        "shipped_rule_fired": "0 of 6",
+        "reading": "the judge reads this claim as one the sources do not deny: its leading mass is 'says nothing' in every sample, and the contradiction mass trails it in every sample. The former rule fired on the samples whose contradiction mass crossed 0.30, which is a third of a coin toss; the shipped rule fires on none of them, because the silence mass is the plurality each time.",
+        "why_no_threshold_meets_both": "the acceptable documents the switch must spare carry claims in the same band: S0055's definitional claim scores contradicts 0.34 against silence 0.43 and S0010's second claim scores 0.30 against 0.47. A threshold that fires on this row's 0.25-0.38 contradiction mass also fires on those, so no mass rule separates the missed contradiction from the acceptable documents it would re-veto.",
+        "consequence": "the recall bar is unmet: 59 of 60 planted contradictions fire on both passes, and the miss is the criterion's reading of this claim rather than the judge's alone. Meeting all 60 would re-veto acceptable rows, which is the over-refined behaviour this node exists to remove.",
+        "controls": [],
+        "spend_usd_upper_bound": 0.02
+      }
     },
     "negative_control": {
       "declared": "revert the veto fix; the over-refined veto rows must refine again",
@@ -1702,7 +1786,9 @@
       "veto_replay": 0.018181,
       "diagnosis_probes": 0.00015435,
       "total": 0.042401,
-      "ceiling": 1.0
+      "ceiling": 1.0,
+      "recall_sampling_upper_bound": 0.02,
+      "total_upper_bound": 0.062401
     },
     "outside_scope": [
       {

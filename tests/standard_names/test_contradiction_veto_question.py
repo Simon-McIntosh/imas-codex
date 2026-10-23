@@ -588,3 +588,25 @@ def test_a_direction_word_label_is_not_evidence() -> None:
         )
         is False
     )
+
+
+# The judge's own readings of one planted contradiction, sampled six times
+# through the shipped question. Every one answers "says nothing" with the
+# silence mass leading, so no reading here is a denial; the former 0.30
+# probability cutoff fired on the four whose contradiction mass reached it,
+# which is why the samples are pinned rather than described: they are the
+# evidence that the fixed rule's narrower reading, not the judge alone,
+# decides this row.
+SAMPLED_PLANTED_READINGS = [
+    {"supports": 0.12, "contradicts": 0.38, "says nothing": 0.50},
+    {"supports": 0.33, "contradicts": 0.25, "says nothing": 0.42},
+]
+
+
+@pytest.mark.parametrize("probabilities", SAMPLED_PLANTED_READINGS)
+def test_a_sampled_reading_whose_silence_mass_leads_does_not_veto(
+    probabilities: dict[str, float],
+) -> None:
+    answer = {"choice": "says nothing", "probabilities": probabilities}
+
+    assert jev_review.claim_contradicts(answer) is False

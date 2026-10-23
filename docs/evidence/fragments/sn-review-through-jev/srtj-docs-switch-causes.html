@@ -23,6 +23,7 @@ link-defect rows refine on both passes and one acceptable row refines on each
 pass, S0062, which the defining-relation gate holds. That gate is a policy
 question reserved to the lead.</p>
 <p id="srtj-docs-switch-causes-verdict-detail">Link defects refined: 19 of 19 on pass A and 19 of 19 on pass B. Acceptable rows refined: 1 of 30 on pass A and 1 of 30 on pass B. The bar is all 19 link defects refined and none of the 30 acceptable rows refined, on both passes.</p>
+<p id="srtj-docs-switch-causes-verdict-recall">A second condition is not met: the veto must still fire on all 60 planted contradictions, and it fires on 59 of 60 on both passes. The missed row is diagnosed below, at matched answers, and the cause is the criterion's own reading of that claim; no threshold recovers it without re-vetoing acceptable documents. With both conditions read together this node is reported blocked, not complete.</p>
 
 <h2 id="srtj-docs-switch-causes-diagnosis">Per-row diagnosis</h2>
 
@@ -168,11 +169,33 @@ and all 60 planted contradictions must fire.</p>
 </table>
 <p id="srtj-docs-switch-causes-replay-miss">One planted contradiction is not fired
 on either pass: "Calibration assumes a quadratic field-current relation instead of
-a linear one." An independent sample of that row answers "says nothing" with a
-contradicts mass of 0.20, below the 0.30 cutoff, so neither the former rule nor
-the fixed one fires on that reading; the same row fired in the earlier retune run.
-The miss is the judge's reading of the claim, and it is reported rather than
-argued around.</p>
+a linear one." Its claim was re-asked six times through the shipped question, and
+the answers are in the table below. The judge answered "says nothing" every time,
+with a contradiction mass of 0.25 to 0.38 against a silence mass of 0.42 to 0.56,
+so the contradiction never leads. The former rule fired on four of the six samples,
+because it fired whenever the contradiction mass reached 0.30 and never compared
+the two masses; the shipped rule fires on none of them, because the silence mass is
+the plurality each time. The miss is therefore the criterion's reading of this
+claim and not the judge's alone, and no threshold can recover it: the acceptable
+documents the switch must spare carry claims in the same band, with S0055's
+defining claim at 0.34 against 0.43 and S0010's second claim at 0.30 against 0.47.
+A cutoff that fires on this row re-vetoes those rows, which is the over-refinement
+this node exists to remove. The recall bar is reported unmet at 59 of 60 on both
+passes rather than argued around.</p>
+<table id="srtj-docs-switch-causes-replay-miss-table">
+<thead><tr><th>sample</th><th>choice</th><th>contradicts</th><th>says nothing</th><th>supports</th><th>former rule</th><th>shipped rule</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>says nothing</td><td>0.38</td><td>0.50</td><td>0.12</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>2</td><td>says nothing</td><td>0.32</td><td>0.43</td><td>0.25</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>3</td><td>says nothing</td><td>0.32</td><td>0.50</td><td>0.18</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>4</td><td>says nothing</td><td>0.33</td><td>0.52</td><td>0.15</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>5</td><td>says nothing</td><td>0.33</td><td>0.56</td><td>0.11</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>6</td><td>says nothing</td><td>0.25</td><td>0.42</td><td>0.33</td><td>does not fire</td><td>does not fire</td></tr>
+</tbody>
+</table>
+<p id="srtj-docs-switch-causes-replay-miss-controls">The same sampling was run over
+planted contradictions that do fire and planted controls that must not; the
+per-sample answers are in the artifact under <code>veto_replay.recall_miss</code>.</p>
 
 <h2 id="srtj-docs-switch-causes-tests">Tests and the negative control</h2>
 <p id="srtj-docs-switch-causes-tests-head">The head arm passes 43 tests in
