@@ -432,6 +432,37 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
 # project graph's URI are owned by the package's shared disposable fixture.
 
 
+def test_the_shared_fixture_refuses_the_project_graph_uri(monkeypatch):
+    """The protection the disposable fixtures exist for, shown refusing.
+
+    The fixture's whole value is that it cannot be pointed at production, and a
+    guard nothing exercises is a guard nobody knows works. This drives the
+    fixture body with the project graph's own resolved address and requires the
+    refusal; a disposable endpoint is accepted in the same breath so the test
+    cannot pass by refusing everything.
+    """
+    from tests.standard_names.conftest import (
+        disposable_neo4j_uri,
+        project_graph_uri,
+        refuse_project_graph,
+    )
+
+    project_uri = project_graph_uri()
+    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", project_uri)
+    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_EPHEMERAL", "1")
+
+    body = getattr(disposable_neo4j_uri, "__wrapped__", disposable_neo4j_uri)
+    with pytest.raises(
+        pytest.fail.Exception, match="refusing to run against"
+    ) as refused:
+        next(iter(body()))
+    print(f"refused: {refused.value}")
+
+    refuse_project_graph("bolt://127.0.0.1:1")
+
+    refuse_project_graph("bolt://127.0.0.1:1")
+
+
 @pytest.fixture
 def graph(disposable_neo4j_uri: str, monkeypatch) -> Iterator[GraphClient]:
     # An empty instance carries no DD-resolution authority, and the drift scan
@@ -439,25 +470,24 @@ def graph(disposable_neo4j_uri: str, monkeypatch) -> Iterator[GraphClient]:
     # tests prove, so the authority comes from the package's synthetic rows —
     # the same boundary the mock tier uses — while every query still runs on
     # the disposable graph.
+    from imas_codex.standard_names import dd_resolutions
+    from tests.standard_names.conftest import (
+        SyntheticDDResolutionReader,
+        neo4j_test_password,
+    )
     from tests.standard_names.dd_resolution_test_data import (
         SYNTHETIC_GRAPH_RESOLUTION_ROWS,
     )
 
-    class _SyntheticResolutionReader:
-        def read_resolutions(self):
-            return SYNTHETIC_GRAPH_RESOLUTION_ROWS
-
-    from imas_codex.standard_names import dd_resolutions
-
     monkeypatch.setattr(
         dd_resolutions,
         "dd_resolution_graph_reader",
-        lambda: _SyntheticResolutionReader(),
+        lambda: SyntheticDDResolutionReader(SYNTHETIC_GRAPH_RESOLUTION_ROWS),
     )
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",
-        password=os.environ.get("NEO4J_PASSWORD", ""),
+        password=neo4j_test_password(),
         graph_name="source-drift-refresh",
     )
     client.query("MATCH (node) DETACH DELETE node")

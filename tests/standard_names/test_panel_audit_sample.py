@@ -722,13 +722,14 @@ def test_the_real_writer_stores_the_audit_row_and_the_aggregate_ignores_it(
         update_review_aggregates,
         write_reviews,
     )
+    from tests.standard_names.conftest import neo4j_test_password
 
     sn_id = "electron_temperature"
     group_id = "2c0e6a5e-0000-4000-8000-00000000fa11"
     client = GraphClient(
         uri=disposable_graph_uri,
         username="neo4j",
-        password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
+        password=neo4j_test_password(),
         graph_name="panel-audit-row",
     )
     try:
