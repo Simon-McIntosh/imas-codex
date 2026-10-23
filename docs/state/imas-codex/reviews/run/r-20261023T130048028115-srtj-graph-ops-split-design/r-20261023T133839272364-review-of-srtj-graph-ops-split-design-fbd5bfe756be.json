@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T14:25:43.314Z",
+  "dispatched_at": "2026-10-23T14:03:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design-run.py",
+      "line": "298",
+      "severity": "non-blocking",
+      "text": "the node emits \"synthetic_claim_detected\": True as a literal beside the one control it computes, so the artifact's live_claims_positive_control reports two positive controls to a reader while the run exercised one (the computed known_current_run_seen at run.py:297)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T130048028115-srtj-graph-ops-split-design/split-measure-resumed.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the recorded gate log's header reads revision=2f1762ab1d01610576f4d8260e6a6a78a4965564, an ancestor of the reviewed head, so the node asks to land a revision at which its own cited gate never ran; re-running the named command at the head exits 0 with the same output, so the numbers are unaffected."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the node's two structural claims (25 modules all under 60,000 tokens, a 27-node acyclic import order) are carried by no figure, and the declared write path docs/figures/sn-review-through-jev/srtj-graph-ops-split-design holds nothing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design-run.py",
+      "line": "412",
+      "severity": "non-blocking",
+      "text": "a step's declared-set total is summed with tiktoken cl100k_base while the owner of that measurement, reckon/crew/routing.py:412-unrelated _context_file_inputs at routing.py:3160-3163 differs, so the design's per-step lane can disagree with the dispatch gate's own instrument."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a four-part split design for graph_ops.py and workers.py that writes no product code; all four answers are landed in docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.html (module tables at :10-36, cycle check at :38, patch rule at :39-41, ordered steps at :69-95) and git diff b26dece4b06..fbd5bfe756be touches only docs/.\nVERDICT done_when: the done_when asks for the fragment to hold the four answers and for srtj-graph-ops-split-design.json to be written by the named runner with a log ending in a real EXIT=0; the fragment carries all four sections and the manifest's tests: line is that runner, whose recorded log split-measure-resumed.log ends EXIT=0, which I reproduced at the reviewed head.\nVERDICT write_paths: the brief declares three paths (the fragment, the JSON and the runner); git diff b26dece4b062795f69001e4cc1900697431e259e..fbd5bfe756beebe8a5bd8fb5771a12cb0c01ed9e touches exactly those three files and nothing else.\nVERDICT manifest: read at the reviewed revision; status complete, changed_paths names the three files, tests: names srtj-graph-ops-split-design-run.py and test_logs: names split-measure-resumed.log, and baseline_suite/after_suite are both null so the node armed no test suite.\nVERDICT diff: read commit by commit against b26dece4b06; 2f1762ab1d01 adds the three artifacts (+5,404) and fbd5bfe756be revises the runner (+230/-44), the fragment (+65) and the JSON (+460) to assign measured lanes, all inside the declared scope and with no product source or test file touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the four answers the brief names are each present in docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.html:10-95 and the diff contains no product code, which is what the goal requires.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate the manifest names at tests: is the runner, and re-running it at the reviewed head exits 0 with every measured field of srtj-graph-ops-split-design.json reproduced (graph=241545, modules=25 max=34870, patch 728/727, step 3 = 335,704 leaving 161,024, step 4 = 168,329 local) except the live-envelope count.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff b26dece4b062795f69001e4cc1900697431e259e..fbd5bfe756beebe8a5bd8fb5771a12cb0c01ed9e changes three files, each one of the three the brief declares, and touches no file under imas_codex/ or tests/.\nSCORE durability: 17\nJUSTIFICATION durability: the runner reddens on a tampered fragment \u2014 changing the step-4 figure at srtj-graph-ops-split-design.html:75 to 168,000 makes it exit 1 with AssertionError at srtj-graph-ops-split-design-run.py:517 \u2014 but nothing in the suite or CI invokes it, so the guard fires only when a reader runs it by hand.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the prose-plus-table idiom and the srtj-* file convention of its siblings in docs/evidence/fragments/sn-review-through-jev/, and the runner's symbols (source_inventory, patch_targets, migration_steps) carry no plan, stage or version label.\nSCORE reuse: 13\nJUSTIFICATION reuse: the per-range module measurement has no owner, but each step's declared-set token total at srtj-graph-ops-split-design-run.py:412 duplicates the declared-file token sum the dispatch router already owns at /home/ITER/mcintos/Code/reckon/reckon/crew/routing.py:3160 with a different estimator, and the search over reckon/crew found no per-module-range owner.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design-run.py:298 non-blocking: the node emits \"synthetic_claim_detected\": True as a literal beside the one control it computes, so the artifact's live_claims_positive_control reports two positive controls to a reader while the run exercised one (the computed known_current_run_seen at run.py:297); a field named as a detection result that no envelope can change is the shape a zero-sized scan rests on and must be able to fail.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T130048028115-srtj-graph-ops-split-design/split-measure-resumed.log:1 non-blocking: the recorded gate log's header reads revision=2f1762ab1d01610576f4d8260e6a6a78a4965564, an ancestor of the reviewed head fbd5bfe756beebe8a5bd8fb5771a12cb0c01ed9e, so the node asks to land a revision at which its own cited gate never ran; the numbers are not in doubt because I re-ran the named command at the head and it exits 0 with the same output, but the receipt names a revision its command did not run at.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.html:1 non-blocking: the node exists to make two structural claims (25 modules all under 60,000 tokens, a 27-node acyclic import order) and carries neither as a figure, though an import DAG and a per-module token bar chart are exactly what the repository's graphics mandate asks for in a design document; the manifest declared the write path docs/figures/sn-review-through-jev/srtj-graph-ops-split-design and nothing landed there.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design-run.py:412 non-blocking: a step's declared-set total is summed here with tiktoken cl100k_base while the owner of that measurement, reckon/crew/routing.py:3160-3163 _context_file_inputs, sums byte-derived estimates, so a step this design calls local at 168,329 can still put the declared set over the same window at dispatch under the router's different instrument; the fragment discloses the recount, so the divergence is recorded rather than repaired here.\n",
+  "review_run_id": "r-20261023T133839272364-review-of-srtj-graph-ops-split-design-fbd5bfe756be",
+  "reviewed_base_sha": "b26dece4b062795f69001e4cc1900697431e259e",
+  "reviewed_head_sha": "fbd5bfe756beebe8a5bd8fb5771a12cb0c01ed9e",
+  "reviewed_run_id": "r-20261023T130048028115-srtj-graph-ops-split-design",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T18:16:11.075686+00:00",
+  "total": 104
+}
