@@ -555,11 +555,6 @@ def label_only_source(text: Any) -> bool:
     )
 
 
-def source_text(source: Mapping[str, Any]) -> str:
-    """Read a DD source's own words, however its reader filled the field."""
-    return str(source.get("documentation") or source.get("description") or "")
-
-
 _SOURCE_TEXT_FIELDS = ("documentation", "description")
 
 
@@ -902,8 +897,8 @@ def docs_score_components(
             )
     settled = settled_claim_answers(state)
     claims = [
-        answers.get(check_question_name(f"claim_contradicts_source:{index}"))
-        for index, _claim in enumerate(state["documentation_claims"])
+        answer
+        for index, answer in enumerate(effective_claim_answers(state, answers))
         if index not in settled
     ]
     if not claims or any(answer is None for answer in claims):
@@ -934,8 +929,8 @@ def score_docs_review(
         return None
     if veto_claims and any(
         claim_contradicts(answer)
-        for key, answer in answers.items()
-        if key.startswith("check:claim_contradicts_source:")
+        for answer in effective_claim_answers(state, answers)
+        if answer is not None
     ):
         return 0.0
     linear = selected_intercept + sum(
@@ -961,8 +956,8 @@ def settled_claim_answers(state: Mapping[str, Any]) -> dict[int, dict[str, Any]]
     """The answers code settles itself for one state, keyed by claim index.
 
     The determination reads a claim and the documented name, and the question
-    table is built without either, so it is applied here and in the score,
-    where the state and the answers meet.
+    table is built without either, so it meets the state here and each reader
+    takes it up through ``effective_claim_answers``.
     """
     return {
         index: {
@@ -974,6 +969,26 @@ def settled_claim_answers(state: Mapping[str, Any]) -> dict[int, dict[str, Any]]
             state["documentation_claims"], str(state.get("name_id") or "")
         ).items()
     }
+
+
+def effective_claim_answers(
+    state: Mapping[str, Any],
+    answers: Mapping[str, Mapping[str, Any]],
+) -> list[Mapping[str, Any] | None]:
+    """The claim answers a reader decides from, settled ones replacing the judge's.
+
+    The settlement is a property of the state rather than of any one reader, so
+    every reader that scores or vetoes a claim answer reads it through here: for
+    a settled claim the code's own answer stands whatever the judge returned for
+    the same index, and no reader can fail or veto a claim the code has settled.
+    """
+    settled = settled_claim_answers(state)
+    return [
+        settled[index]
+        if index in settled
+        else answers.get(check_question_name(f"claim_contradicts_source:{index}"))
+        for index, _claim in enumerate(state["documentation_claims"])
+    ]
 
 
 def aggregate_docs_review(
@@ -1009,11 +1024,13 @@ def aggregate_docs_review(
     contradicted_claims = []
     settled = settled_claim_answers(state)
     for index, (claim, answer) in enumerate(
-        zip(state["documentation_claims"], raw_claim_answers, strict=True)
+        zip(
+            state["documentation_claims"],
+            effective_claim_answers(state, answers),
+            strict=True,
+        )
     ):
-        if index in settled:
-            answer = settled[index]
-        elif answer is not None and claim_contradicts(answer):
+        if index not in settled and answer is not None and claim_contradicts(answer):
             contradicted_claims.append(claim)
             if answer.get("choice") != "contradicts":
                 answer = {

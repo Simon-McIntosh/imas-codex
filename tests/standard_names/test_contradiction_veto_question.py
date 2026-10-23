@@ -25,8 +25,43 @@ from typing import Any
 import pytest
 
 from imas_codex.standard_names.review import jev_review
+from imas_codex.standard_names.review.audits import AuditReport
+from imas_codex.standard_names.review.checks import load_review_checks
 
 CLAIM_KEY = "check:claim_contradicts_source:0"
+
+# The conforming option of every non-claim choice question, so a reader that
+# needs the whole table answered is given a clean sheet rather than a failing
+# one. The claim questions are answered by the test that reads them.
+CONFORMING_CHOICES = {
+    "dimension:description_quality": "precise_definition",
+    "dimension:documentation_quality": "normative_definition",
+    "dimension:completeness": "complete",
+    "check:description_false_of_some_binding": "true of all",
+}
+
+
+def _answers(checks: Any, claims: list[str]) -> dict[str, Any]:
+    """A clean answer set for every question, the claim questions included.
+
+    A claim is answered "supports" with full confidence, so a test that means to
+    read a different answer for one of them replaces that key rather than
+    composing the whole table.
+    """
+    answers: dict[str, Any] = {}
+    for key, question in jev_review.docs_question_table(checks, claims).items():
+        if question["type"] != "choice":
+            answers[key] = {"noul": 0.0}
+            continue
+        if key.startswith("check:claim_contradicts_source:"):
+            answers[key] = {"choice": "supports", "probabilities": {"supports": 1.0}}
+            continue
+        options = list(question["criteria"])
+        choice = CONFORMING_CHOICES.get(key, options[0])
+        assert choice in options, (key, choice)
+        answers[key] = {"choice": choice}
+    return answers
+
 
 # The terse DD texts the catalogue files for fields whose number lives in a
 # place rather than a physical quantity.
@@ -120,20 +155,100 @@ def test_a_label_source_keeps_the_field_path_that_can_deny_a_claim() -> None:
 
     state = jev_review.build_docs_state(item)
 
+    # The judge is mocked, but not on a fixed answer: it denies the claim only
+    # when the evidence it is handed still carries the field path. A regression
+    # that drops the path hands it nothing to deny, so the veto below depends on
+    # what the code sent rather than on what the mock was told to say.
+    verdict = jev_review.aggregate_docs_review(
+        state, jev_review._default_checks(), _answer_from_evidence(state)
+    )
+
     assert state["dd_source_docs"] == {
         "observed": True,
         "value": [{"id": "spi/injector/shatter_cone/unit_vector_major/y"}],
     }
-
-    verdict = jev_review.aggregate_docs_review(
-        state, jev_review._default_checks(), _claim_only("contradicts")
-    )
-
     assert verdict["contradiction_veto"] is True
+
+
+def _answer_from_evidence(state: dict[str, Any]) -> dict[str, Any]:
+    """Answer the claim from the evidence the state carries, as a reader would."""
+    paths = [
+        str(source.get("id") or "")
+        for source in (state["dd_source_docs"]["value"] or [])
+    ]
+    choice = (
+        "contradicts"
+        if any(path.endswith("/y") for path in paths)
+        else ("says nothing")
+    )
+    return {CLAIM_KEY: {"choice": choice, "probabilities": {choice: 1.0}}}
 
 
 def _claim_only(choice: str) -> dict[str, Any]:
     return {CLAIM_KEY: {"choice": choice, "probabilities": {choice: 1.0}}}
+
+
+def test_a_settled_claim_is_never_vetoed_or_failed_wherever_the_answers_are_read() -> (
+    None
+):
+    """All three readers take the settled answer, not the judge's for that claim.
+
+    The judge's answer for the settled claim is a contradiction, which is what
+    an unsettled reader would veto on and score to zero. One claim is settled
+    and one is not, so the mean the score reads separates the two readings: it
+    is the unsettled claim's support alone, not the pair's mean. An auditor that
+    scored or vetoed the judge's answer instead fails here.
+    """
+    state = jev_review.build_docs_state(
+        {
+            "id": "electrostatic_potential",
+            "documentation": (
+                "The quantity has no mandatory locus or aggregation. "
+                "The potential is measured at the boundary."
+            ),
+            "dd_source_docs": [
+                {
+                    "id": "edge_profiles/profiles_1d/phi_potential",
+                    "documentation": (
+                        "Electrostatic potential, averaged on the magnetic flux surface"
+                    ),
+                }
+            ],
+        }
+    )
+    claims = state["documentation_claims"]
+    assert len(claims) == 2
+    assert jev_review.settled_claim_answers(state) == {
+        0: {
+            "choice": "says nothing",
+            "probabilities": {"says nothing": 1.0},
+            "settled_by": "non_requirement_sentence",
+        }
+    }
+
+    checks, _ = load_review_checks()
+    answers = _answers(checks, claims)
+    answers[CLAIM_KEY] = {
+        "choice": "contradicts",
+        "probabilities": {"contradicts": 1.0},
+    }
+    report = AuditReport()
+
+    verdict = jev_review.aggregate_docs_review(
+        state, checks, answers, audit_report=report
+    )
+    assert verdict["contradiction_veto"] is False
+    assert verdict["claim_answers"][0]["settled_by"] == "non_requirement_sentence"
+
+    components = jev_review.docs_score_components(
+        state, checks, answers, audit_report=report
+    )
+    assert components is not None
+    assert components["claim:support"] == 1.0
+
+    score = jev_review.score_docs_review(state, checks, answers, audit_report=report)
+    assert score is not None
+    assert score > 0.0
 
 
 def test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial() -> None:

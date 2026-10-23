@@ -393,6 +393,8 @@ def main() -> int:
     result["spend_usd"] = round(result["spend_usd"], 6)
     result["spend_ceiling_usd"] = CEILING_USD
     result["base_revision"] = BASE_REVISION
+    result["questions_from"] = "jev_review.docs_question_table"
+    result["shipped_criterion"] = dict(jev_review._CLAIM_COMPARISON_CRITERIA)
     result["old_question_captured_from"] = (
         f"imas_codex/standard_names/review/jev_review.py at {BASE_REVISION}"
     )
