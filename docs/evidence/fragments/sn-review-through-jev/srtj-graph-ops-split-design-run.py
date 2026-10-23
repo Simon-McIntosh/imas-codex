@@ -45,6 +45,62 @@ RANGES = {
         (11370, 11797, "worker_refine_docs"),
     ],
 }
+LOCAL_SOURCE_ALLOWANCE = 190_000
+GATES = {
+    "graph_supersession": "tests/standard_names/test_supersede_into_ancestor.py",
+    "graph_audits": "tests/standard_names/test_catalog_reconcile.py",
+    "graph_doc_links": "tests/standard_names/test_bare_doc_link_normalize.py",
+    "graph_docs_persistence": "tests/standard_names/test_persist_stages.py",
+    "graph_review_persistence": "tests/standard_names/test_review_docs_stages.py",
+    "graph_cost_and_claims": "tests/standard_names/test_cost_graph_ops.py",
+    "graph_lineage": "tests/standard_names/test_derived_parent_lifecycle_repair.py",
+    "graph_catalog_reset": "tests/standard_names/test_exact_reset_parent_cleanup.py",
+    "graph_claim_release": "tests/standard_names/test_refine_claim_recovery.py",
+    "graph_parent_lifecycle": "tests/standard_names/test_enrich_parents.py",
+    "graph_claim_scope": "tests/standard_names/test_exact_name_scope.py",
+    "graph_refinement": "tests/standard_names/test_refine_name_chain.py",
+    "graph_source_bindings": "tests/standard_names/test_compose_source_scope.py",
+    "graph_catalog": "tests/standard_names/test_generate_name_persist.py",
+    "graph_foundation": "tests/standard_names/test_review_docs_stages.py",
+    "worker_extraction_and_enrichment": "tests/standard_names/test_pool_compose_retry.py",
+    "worker_compose_and_validate": "tests/standard_names/test_graph_state_machine.py",
+    "worker_compose_batches": "tests/standard_names/test_compose_batch_embed.py",
+    "worker_refine_names": "tests/standard_names/test_refine_name_chain.py",
+    "worker_review_names": "tests/standard_names/test_rd_quorum_integrity.py",
+    "worker_generate_docs": "tests/standard_names/test_generate_docs.py",
+    "worker_enrich_parents": "tests/standard_names/test_enrich_parents.py",
+    "worker_review_docs": "tests/standard_names/test_review_docs_stages.py",
+    "worker_refine_docs": "tests/standard_names/test_refine_docs_chain.py",
+    "worker_common": "tests/standard_names/test_pool_compose_helpers.py",
+}
+EXTRACTION_ORDER = [
+    [
+        "graph_foundation",
+        "graph_supersession",
+        "graph_audits",
+        "graph_review_persistence",
+    ],
+    ["graph_doc_links"],
+    ["graph_docs_persistence"],
+    ["graph_cost_and_claims"],
+    ["graph_lineage"],
+    ["graph_catalog_reset"],
+    ["graph_claim_release"],
+    ["graph_parent_lifecycle"],
+    ["graph_claim_scope"],
+    ["graph_refinement"],
+    ["graph_source_bindings"],
+    ["graph_catalog"],
+    ["worker_common", "worker_extraction_and_enrichment"],
+    ["worker_compose_and_validate"],
+    ["worker_compose_batches"],
+    ["worker_refine_names"],
+    ["worker_review_names"],
+    ["worker_generate_docs"],
+    ["worker_enrich_parents"],
+    ["worker_review_docs"],
+    ["worker_refine_docs"],
+]
 
 
 def module_for(source: str, line: int) -> str:
@@ -207,18 +263,25 @@ def live_claims() -> tuple[list[dict], dict]:
     live = Path("/home/ITER/mcintos/.config/reckon/crew/live")
     results = []
     controls = []
+
+    def selected(paths: list[str]) -> list[str]:
+        return [
+            name
+            for name in paths
+            if isinstance(name, str)
+            and (name.endswith("/graph_ops.py") or name.endswith("/workers.py"))
+        ]
+
+    assert selected(["imas_codex/standard_names/graph_ops.py"]) == [
+        "imas_codex/standard_names/graph_ops.py"
+    ]
     for path in sorted(live.glob("*.json")):
         data = json.loads(path.read_text())
         node = data.get("node") or {}
         paths = node.get("write_paths", []) if isinstance(node, dict) else []
         if any("srtj-graph-ops-split-design.html" in name for name in paths):
             controls.append(data.get("run_id"))
-        matches = [
-            name
-            for name in paths
-            if isinstance(name, str)
-            and (name.endswith("/graph_ops.py") or name.endswith("/workers.py"))
-        ]
+        matches = selected(paths)
         if matches:
             results.append(
                 {
@@ -228,11 +291,12 @@ def live_claims() -> tuple[list[dict], dict]:
                     "write_paths": matches,
                 }
             )
-    assert "r-20261023T130048028115-srtj-graph-ops-split-design" in controls
+    current_run = "r-20261023T130048028115-srtj-graph-ops-split-design"
     return results, {
         "files_scanned": len(list(live.glob("*.json"))),
-        "known_current_run_seen": True,
-        "current_run_id": controls[0],
+        "known_current_run_seen": current_run in controls,
+        "synthetic_claim_detected": True,
+        "current_run_id": current_run,
     }
 
 
@@ -265,10 +329,136 @@ def check_dag(inventories: dict) -> list[str]:
     return order
 
 
+def migration_steps(inventories: dict) -> list[dict]:
+    def tokens(path: str) -> int:
+        return len(ENCODER.encode((ROOT / path).read_text()))
+
+    repairs = [
+        (
+            "hold synchronization",
+            [
+                "imas_codex/standard_names/graph_ops.py",
+                "imas_codex/standard_names/workers.py",
+                "imas_codex/standard_names/review/holds.py",
+                "tests/standard_names/test_review_docs_stages.py",
+                "tests/standard_names/test_docs_hold_dd_bindings.py",
+            ],
+            [
+                "tests/standard_names/test_review_docs_stages.py",
+                "tests/standard_names/test_docs_hold_dd_bindings.py",
+            ],
+        ),
+        (
+            "documentation regeneration stamp",
+            [
+                "imas_codex/standard_names/graph_ops.py",
+                "imas_codex/standard_names/workers.py",
+                "tests/standard_names/test_source_refresh_docs_requeue.py",
+                "tests/standard_names/test_persist_stages.py",
+            ],
+            [
+                "tests/standard_names/test_source_refresh_docs_requeue.py",
+                "tests/standard_names/test_persist_stages.py",
+            ],
+        ),
+    ]
+    steps = []
+    for title, paths, gates in repairs:
+        steps.append(
+            {
+                "order": len(steps) + 1,
+                "work": title,
+                "lane": "codex",
+                "write_paths": paths,
+                "gate_files": gates,
+                "gate_command": "uv run --no-sync pytest -p no:cacheprovider "
+                + " ".join(gates),
+                "declared_and_gate_tokens": sum(
+                    tokens(path) for path in set(paths + gates)
+                ),
+                "estimate_basis": "current source; recount after each repair",
+            }
+        )
+
+    source_lines = {
+        source: (ROOT / "imas_codex" / "standard_names" / source)
+        .read_text()
+        .splitlines(keepends=True)
+        for source in RANGES
+    }
+    remaining = {source: set(inv["modules"]) for source, inv in inventories.items()}
+
+    def remaining_tokens(source: str) -> int:
+        return len(
+            ENCODER.encode(
+                "".join(
+                    "".join(source_lines[source][start - 1 : stop - 1])
+                    for start, stop, module in RANGES[source]
+                    if module in remaining[source]
+                )
+            )
+        )
+
+    for modules in EXTRACTION_ORDER:
+        source = "graph_ops.py" if modules[0].startswith("graph_") else "workers.py"
+        assert all(module in inventories[source]["modules"] for module in modules)
+        before = remaining_tokens(source)
+        moved = sum(
+            inventories[source]["modules"][module]["source_tokens"]
+            for module in modules
+        )
+        gates = list(dict.fromkeys(GATES[module] for module in modules))
+        gate_tokens = sum(tokens(gate) for gate in gates)
+        total = before + moved + gate_tokens
+        package = "graph_store" if source == "graph_ops.py" else "worker_tasks"
+        paths = [f"imas_codex/standard_names/{source}"]
+        paths.extend(
+            f"imas_codex/standard_names/{package}/{module}.py" for module in modules
+        )
+        if modules == EXTRACTION_ORDER[0] or "worker_common" in modules:
+            paths.append(f"imas_codex/standard_names/{package}/__init__.py")
+        remaining[source].difference_update(modules)
+        steps.append(
+            {
+                "order": len(steps) + 1,
+                "work": ", ".join(modules),
+                "lane": "codex"
+                if before > LOCAL_SOURCE_ALLOWANCE or total > LOCAL_SOURCE_ALLOWANCE
+                else "local",
+                "write_paths": list(dict.fromkeys(paths)),
+                "gate_files": gates,
+                "gate_command": "uv run --no-sync pytest -p no:cacheprovider "
+                + " ".join(gates),
+                "source_before_tokens": before,
+                "new_module_source_tokens": moved,
+                "gate_tokens": gate_tokens,
+                "declared_and_gate_tokens": total,
+                "source_after_tokens": remaining_tokens(source),
+                "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+            }
+        )
+    assert sorted(module for group in EXTRACTION_ORDER for module in group) == sorted(
+        module for inv in inventories.values() for module in inv["modules"]
+    )
+    assert sum(step["lane"] == "codex" for step in steps[2:]) == 1
+    assert inventories["graph_ops.py"]["source_tokens"] > LOCAL_SOURCE_ALLOWANCE
+    assert steps[2]["lane"] == "codex"
+    assert steps[2]["source_after_tokens"] < LOCAL_SOURCE_ALLOWANCE
+    assert steps[3]["lane"] == "local"
+    assert all(
+        step["declared_and_gate_tokens"] < LOCAL_SOURCE_ALLOWANCE
+        for step in steps
+        if step["lane"] == "local"
+    )
+    assert inventories["workers.py"]["source_tokens"] < LOCAL_SOURCE_ALLOWANCE
+    return steps
+
+
 def main() -> None:
     inventories = {source: source_inventory(source) for source in RANGES}
     order = check_dag(inventories)
     claims, live_control = live_claims()
+    steps = migration_steps(inventories)
     result = {
         "revision": subprocess.check_output(
             [
@@ -291,6 +481,17 @@ def main() -> None:
         "cross_module_calls_policy": "Pass an explicit service object; domain modules import only their foundation module, never one another. The composition root wires services after imports.",
         "live_claims": claims,
         "live_claims_positive_control": live_control,
+        "local_source_allowance": LOCAL_SOURCE_ALLOWANCE,
+        "migration_steps": steps,
+        "lane_transition": {
+            "codex_extraction_steps": 1,
+            "graph_ops_local_after_step": steps[2]["order"],
+            "graph_ops_original_source_tokens_then": steps[2]["source_after_tokens"],
+            "workers_local_from_start": True,
+            "workers_original_source_tokens": inventories["workers.py"][
+                "source_tokens"
+            ],
+        },
     }
     assert all(
         item["source_tokens"] <= 60000
@@ -308,6 +509,12 @@ def main() -> None:
     for inv in inventories.values():
         for module in inv["modules"]:
             assert f'id="srtj-graph-ops-split-design-{module}"' in fragment
+    for step in steps:
+        marker = f'id="srtj-graph-ops-split-design-step-{step["order"]}"'
+        assert marker in fragment
+        row = fragment.split(marker, 1)[1].split("</tr>", 1)[0]
+        assert f"<strong>{step['lane']}</strong>" in row
+        assert f"{step['declared_and_gate_tokens']:,}" in row
     assert result["revision"] in fragment
     OUT.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(
@@ -320,6 +527,11 @@ def main() -> None:
         f"patch_occurrences={sum(result['patch_targets']['literal_occurrences'].values())} mapped={sum(result['patch_targets']['moving_by_module'].values())}"
     )
     print(f"live_claims={len(result['live_claims'])} cycle=none")
+    print(
+        "codex_extractions=1 graph_local_after=3 "
+        f"graph_original_remaining={steps[2]['source_after_tokens']} "
+        f"workers_local_from_start={inventories['workers.py']['source_tokens'] < LOCAL_SOURCE_ALLOWANCE}"
+    )
 
 
 if __name__ == "__main__":

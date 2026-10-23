@@ -4302,13 +4302,469 @@
       }
     }
   },
+  "lane_transition": {
+    "codex_extraction_steps": 1,
+    "graph_ops_local_after_step": 3,
+    "graph_ops_original_source_tokens_then": 161024,
+    "workers_local_from_start": true,
+    "workers_original_source_tokens": 99014
+  },
   "live_claims": [],
   "live_claims_positive_control": {
     "current_run_id": "r-20261023T130048028115-srtj-graph-ops-split-design",
-    "files_scanned": 40,
-    "known_current_run_seen": true
+    "files_scanned": 49,
+    "known_current_run_seen": true,
+    "synthetic_claim_detected": true
   },
+  "local_source_allowance": 190000,
   "max_module_tokens": 60000,
+  "migration_steps": [
+    {
+      "declared_and_gate_tokens": 350644,
+      "estimate_basis": "current source; recount after each repair",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_review_docs_stages.py tests/standard_names/test_docs_hold_dd_bindings.py",
+      "gate_files": [
+        "tests/standard_names/test_review_docs_stages.py",
+        "tests/standard_names/test_docs_hold_dd_bindings.py"
+      ],
+      "lane": "codex",
+      "order": 1,
+      "work": "hold synchronization",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/review/holds.py",
+        "tests/standard_names/test_review_docs_stages.py",
+        "tests/standard_names/test_docs_hold_dd_bindings.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 346512,
+      "estimate_basis": "current source; recount after each repair",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_source_refresh_docs_requeue.py tests/standard_names/test_persist_stages.py",
+      "gate_files": [
+        "tests/standard_names/test_source_refresh_docs_requeue.py",
+        "tests/standard_names/test_persist_stages.py"
+      ],
+      "lane": "codex",
+      "order": 2,
+      "work": "documentation regeneration stamp",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/workers.py",
+        "tests/standard_names/test_source_refresh_docs_requeue.py",
+        "tests/standard_names/test_persist_stages.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 335704,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_review_docs_stages.py tests/standard_names/test_supersede_into_ancestor.py tests/standard_names/test_catalog_reconcile.py",
+      "gate_files": [
+        "tests/standard_names/test_review_docs_stages.py",
+        "tests/standard_names/test_supersede_into_ancestor.py",
+        "tests/standard_names/test_catalog_reconcile.py"
+      ],
+      "gate_tokens": 13637,
+      "lane": "codex",
+      "new_module_source_tokens": 80522,
+      "order": 3,
+      "source_after_tokens": 161024,
+      "source_before_tokens": 241545,
+      "work": "graph_foundation, graph_supersession, graph_audits, graph_review_persistence",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_foundation.py",
+        "imas_codex/standard_names/graph_store/graph_supersession.py",
+        "imas_codex/standard_names/graph_store/graph_audits.py",
+        "imas_codex/standard_names/graph_store/graph_review_persistence.py",
+        "imas_codex/standard_names/graph_store/__init__.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 168329,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_bare_doc_link_normalize.py",
+      "gate_files": [
+        "tests/standard_names/test_bare_doc_link_normalize.py"
+      ],
+      "gate_tokens": 2818,
+      "lane": "local",
+      "new_module_source_tokens": 4487,
+      "order": 4,
+      "source_after_tokens": 156537,
+      "source_before_tokens": 161024,
+      "work": "graph_doc_links",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_doc_links.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 170052,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_persist_stages.py",
+      "gate_files": [
+        "tests/standard_names/test_persist_stages.py"
+      ],
+      "gate_tokens": 5108,
+      "lane": "local",
+      "new_module_source_tokens": 8407,
+      "order": 5,
+      "source_after_tokens": 148130,
+      "source_before_tokens": 156537,
+      "work": "graph_docs_persistence",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_docs_persistence.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 162330,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_cost_graph_ops.py",
+      "gate_files": [
+        "tests/standard_names/test_cost_graph_ops.py"
+      ],
+      "gate_tokens": 3113,
+      "lane": "local",
+      "new_module_source_tokens": 11087,
+      "order": 6,
+      "source_after_tokens": 137043,
+      "source_before_tokens": 148130,
+      "work": "graph_cost_and_claims",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_cost_and_claims.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 174591,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_derived_parent_lifecycle_repair.py",
+      "gate_files": [
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      ],
+      "gate_tokens": 8552,
+      "lane": "local",
+      "new_module_source_tokens": 28996,
+      "order": 7,
+      "source_after_tokens": 108047,
+      "source_before_tokens": 137043,
+      "work": "graph_lineage",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_lineage.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 122484,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_exact_reset_parent_cleanup.py",
+      "gate_files": [
+        "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      ],
+      "gate_tokens": 2798,
+      "lane": "local",
+      "new_module_source_tokens": 11639,
+      "order": 8,
+      "source_after_tokens": 96408,
+      "source_before_tokens": 108047,
+      "work": "graph_catalog_reset",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_catalog_reset.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 111237,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_refine_claim_recovery.py",
+      "gate_files": [
+        "tests/standard_names/test_refine_claim_recovery.py"
+      ],
+      "gate_tokens": 2687,
+      "lane": "local",
+      "new_module_source_tokens": 12142,
+      "order": 9,
+      "source_after_tokens": 84266,
+      "source_before_tokens": 96408,
+      "work": "graph_claim_release",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_claim_release.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 99649,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_enrich_parents.py",
+      "gate_files": [
+        "tests/standard_names/test_enrich_parents.py"
+      ],
+      "gate_tokens": 2779,
+      "lane": "local",
+      "new_module_source_tokens": 12604,
+      "order": 10,
+      "source_after_tokens": 71662,
+      "source_before_tokens": 84266,
+      "work": "graph_parent_lifecycle",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_parent_lifecycle.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 90712,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_exact_name_scope.py",
+      "gate_files": [
+        "tests/standard_names/test_exact_name_scope.py"
+      ],
+      "gate_tokens": 5098,
+      "lane": "local",
+      "new_module_source_tokens": 13952,
+      "order": 11,
+      "source_after_tokens": 57710,
+      "source_before_tokens": 71662,
+      "work": "graph_claim_scope",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_claim_scope.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 82129,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_refine_name_chain.py",
+      "gate_files": [
+        "tests/standard_names/test_refine_name_chain.py"
+      ],
+      "gate_tokens": 10448,
+      "lane": "local",
+      "new_module_source_tokens": 13971,
+      "order": 12,
+      "source_after_tokens": 43739,
+      "source_before_tokens": 57710,
+      "work": "graph_refinement",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_refinement.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 65735,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_compose_source_scope.py",
+      "gate_files": [
+        "tests/standard_names/test_compose_source_scope.py"
+      ],
+      "gate_tokens": 1378,
+      "lane": "local",
+      "new_module_source_tokens": 20618,
+      "order": 13,
+      "source_after_tokens": 23121,
+      "source_before_tokens": 43739,
+      "work": "graph_source_bindings",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_source_bindings.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 62985,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_generate_name_persist.py",
+      "gate_files": [
+        "tests/standard_names/test_generate_name_persist.py"
+      ],
+      "gate_tokens": 16743,
+      "lane": "local",
+      "new_module_source_tokens": 23121,
+      "order": 14,
+      "source_after_tokens": 0,
+      "source_before_tokens": 23121,
+      "work": "graph_catalog",
+      "write_paths": [
+        "imas_codex/standard_names/graph_ops.py",
+        "imas_codex/standard_names/graph_store/graph_catalog.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 138358,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_pool_compose_helpers.py tests/standard_names/test_pool_compose_retry.py",
+      "gate_files": [
+        "tests/standard_names/test_pool_compose_helpers.py",
+        "tests/standard_names/test_pool_compose_retry.py"
+      ],
+      "gate_tokens": 5499,
+      "lane": "local",
+      "new_module_source_tokens": 33845,
+      "order": 15,
+      "source_after_tokens": 65169,
+      "source_before_tokens": 99014,
+      "work": "worker_common, worker_extraction_and_enrichment",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_common.py",
+        "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py",
+        "imas_codex/standard_names/worker_tasks/__init__.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 88729,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_graph_state_machine.py",
+      "gate_files": [
+        "tests/standard_names/test_graph_state_machine.py"
+      ],
+      "gate_tokens": 7655,
+      "lane": "local",
+      "new_module_source_tokens": 15905,
+      "order": 16,
+      "source_after_tokens": 49264,
+      "source_before_tokens": 65169,
+      "work": "worker_compose_and_validate",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 60503,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_compose_batch_embed.py",
+      "gate_files": [
+        "tests/standard_names/test_compose_batch_embed.py"
+      ],
+      "gate_tokens": 1792,
+      "lane": "local",
+      "new_module_source_tokens": 9447,
+      "order": 17,
+      "source_after_tokens": 39817,
+      "source_before_tokens": 49264,
+      "work": "worker_compose_batches",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_compose_batches.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 57443,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_refine_name_chain.py",
+      "gate_files": [
+        "tests/standard_names/test_refine_name_chain.py"
+      ],
+      "gate_tokens": 10448,
+      "lane": "local",
+      "new_module_source_tokens": 7178,
+      "order": 18,
+      "source_after_tokens": 32639,
+      "source_before_tokens": 39817,
+      "work": "worker_refine_names",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_refine_names.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 49971,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_rd_quorum_integrity.py",
+      "gate_files": [
+        "tests/standard_names/test_rd_quorum_integrity.py"
+      ],
+      "gate_tokens": 4768,
+      "lane": "local",
+      "new_module_source_tokens": 12564,
+      "order": 19,
+      "source_after_tokens": 20075,
+      "source_before_tokens": 32639,
+      "work": "worker_review_names",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_review_names.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 31938,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_generate_docs.py",
+      "gate_files": [
+        "tests/standard_names/test_generate_docs.py"
+      ],
+      "gate_tokens": 4523,
+      "lane": "local",
+      "new_module_source_tokens": 7340,
+      "order": 20,
+      "source_after_tokens": 12735,
+      "source_before_tokens": 20075,
+      "work": "worker_generate_docs",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_generate_docs.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 17324,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_enrich_parents.py",
+      "gate_files": [
+        "tests/standard_names/test_enrich_parents.py"
+      ],
+      "gate_tokens": 2779,
+      "lane": "local",
+      "new_module_source_tokens": 1810,
+      "order": 21,
+      "source_after_tokens": 10925,
+      "source_before_tokens": 12735,
+      "work": "worker_enrich_parents",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_enrich_parents.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 25007,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_review_docs_stages.py",
+      "gate_files": [
+        "tests/standard_names/test_review_docs_stages.py"
+      ],
+      "gate_tokens": 6574,
+      "lane": "local",
+      "new_module_source_tokens": 7508,
+      "order": 22,
+      "source_after_tokens": 3417,
+      "source_before_tokens": 10925,
+      "work": "worker_review_docs",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_review_docs.py"
+      ]
+    },
+    {
+      "declared_and_gate_tokens": 12431,
+      "estimate_basis": "source ranges; new imports, package scaffolds and forwarding wrappers require recount at dispatch",
+      "gate_command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_refine_docs_chain.py",
+      "gate_files": [
+        "tests/standard_names/test_refine_docs_chain.py"
+      ],
+      "gate_tokens": 5597,
+      "lane": "local",
+      "new_module_source_tokens": 3417,
+      "order": 23,
+      "source_after_tokens": 0,
+      "source_before_tokens": 3417,
+      "work": "worker_refine_docs",
+      "write_paths": [
+        "imas_codex/standard_names/workers.py",
+        "imas_codex/standard_names/worker_tasks/worker_refine_docs.py"
+      ]
+    }
+  ],
   "patch_targets": {
     "examples": {
       "graph_audits": [
