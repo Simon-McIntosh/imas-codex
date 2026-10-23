@@ -40,6 +40,17 @@ _RESOLVE_TERMINAL = """
     WITH sn, head(collect(n)) AS n
 """
 
+#: Resolve one producing source's anchor ``(o)`` to its current terminal node.
+#: Unlike :data:`_RESOLVE_TERMINAL` it keeps one row per source instead of
+#: collapsing a name's sources to one, so a name producing from several paths is
+#: compared against each of them. Leaves ``src``, ``sn``, ``o``, and ``n`` (the
+#: live node, null when the anchor is absent from the graph) bound.
+_RESOLVE_SOURCE_TERMINAL = """
+    OPTIONAL MATCH (o)-[:RENAMED_TO*1..12]->(t:IMASNode)
+    WHERE NOT exists { (t)-[:RENAMED_TO]->() }
+    WITH src, sn, o, coalesce(head(collect(t)), o) AS n
+"""
+
 
 def _norm(v: Any) -> str:
     """Normalise a value for comparison (None/empty collapse to '')."""
@@ -154,34 +165,129 @@ def stamp_source_snapshots(
             gc.close()
 
 
+def _source_deltas(r: dict[str, Any], resolved: dict[str, Any]) -> list[dict[str, Any]]:
+    """Compare one producing source's live node against the name's snapshot."""
+    deltas = []
+    if _norm(r["old_path"]) != _norm(r["new_path"]):
+        deltas.append(
+            {"field": "source_path", "old": r["old_path"], "new": r["new_path"]}
+        )
+    if _norm(r["old_unit"]) != _norm(resolved["unit"]):
+        deltas.append({"field": "units", "old": r["old_unit"], "new": resolved["unit"]})
+    if _norm(r["old_doc"]) != _norm(resolved["documentation"]):
+        deltas.append(
+            {
+                "field": "documentation",
+                "old": r["old_doc"],
+                "new": resolved["documentation"],
+            }
+        )
+    published = resolved["published_dd_context"]
+    if _norm(r.get("old_raw_unit")) != _norm(published.get("unit")):
+        deltas.append(
+            {
+                "field": "raw_unit",
+                "old": r.get("old_raw_unit"),
+                "new": published.get("unit"),
+            }
+        )
+    if _norm(r.get("old_raw_doc")) != _norm(published.get("documentation")):
+        deltas.append(
+            {
+                "field": "raw_documentation",
+                "old": r.get("old_raw_doc"),
+                "new": published.get("documentation"),
+            }
+        )
+    if _norm_ids(r.get("old_resolution_ids")) != _norm_ids(
+        resolved["dd_resolution_ids"]
+    ):
+        deltas.append(
+            {
+                "field": "resolution_ids",
+                "old": r.get("old_resolution_ids") or [],
+                "new": resolved["dd_resolution_ids"],
+            }
+        )
+    if _norm_ids(r.get("old_converged_ids")) != _norm_ids(
+        resolved["dd_resolution_converged_ids"]
+    ):
+        deltas.append(
+            {
+                "field": "converged_resolution_ids",
+                "old": r.get("old_converged_ids") or [],
+                "new": resolved["dd_resolution_converged_ids"],
+            }
+        )
+    if _norm(r.get("old_manifest_digest")) != _norm(
+        resolved["dd_resolution_manifest_digest"]
+    ):
+        deltas.append(
+            {
+                "field": "resolution_manifest_digest",
+                "old": r.get("old_manifest_digest"),
+                "new": resolved["dd_resolution_manifest_digest"],
+            }
+        )
+    if _norm(r.get("old_resolution_marker")) != _norm(
+        resolved["_dd_resolution_marker"]
+    ):
+        deltas.append(
+            {
+                "field": "resolution_marker",
+                "old": r.get("old_resolution_marker"),
+                "new": resolved["_dd_resolution_marker"],
+            }
+        )
+    return deltas
+
+
 def detect_source_drift(
-    *, include_accepted: bool = True, gc: GraphClient | None = None
+    *,
+    include_accepted: bool = True,
+    sn_ids: list[str] | None = None,
+    unchecked: list[dict[str, str]] | None = None,
+    gc: GraphClient | None = None,
 ) -> list[dict[str, Any]]:
     """Return live, source-linked names whose DD-source snapshot has drifted.
 
     A name has drifted when the live ``IMASNode`` it resolves to (following
     ``RENAMED_TO``) differs from the effective snapshot or when its raw DD
-    context, resolution identities, authority digest, or typed marker changes.
+    context, resolution identities, authority digest, or typed marker changes;
+    every producing source is compared, and one drifted source is enough.
     Names with no snapshot yet are NOT reported — they are baselined by
     :func:`stamp_source_snapshots` first, so a fresh install does not mass-refine.
 
+    *sn_ids* restricts the scan to those names (``None`` scans the whole graph,
+    an empty list scans nothing), which is how a scoped run keeps its drift
+    refresh to the names it owns.
+
+    A source whose ``source_id`` does not resolve to an ``IMASNode`` cannot be
+    compared at all; every such ``(sn_id, source_id)`` pair is appended to
+    *unchecked* when that list is supplied, rather than dropped in silence.
+
     Each result carries ``sn_id``, the pipeline stages, ``new_path`` (the resolved
     terminal id), whether documentation steering is required, and a ``deltas``
-    list of ``{field, old, new}`` entries. Provenance-only drift is visible but
-    does not require documentation steering.
+    list of ``{field, old, new}`` entries. ``renamed`` is true only when
+    ``RENAMED_TO`` lineage moved the source's anchor to a new path — a source
+    re-pointed to an unrelated path is a path change, not a rename.
+    Provenance-only drift is visible but does not require documentation steering.
     """
     owns = gc is None
     gc = gc or GraphClient()
     try:
         stage_filter = "" if include_accepted else "AND sn.docs_stage <> 'accepted'"
+        id_filter = "" if sn_ids is None else "AND sn.id IN $sn_ids"
         rows = gc.query(
             f"""
             MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
-            MATCH (o:IMASNode {{id: src.source_id}})
             WHERE sn.name_stage <> 'superseded' {stage_filter}
               AND sn.source_path IS NOT NULL
-            {_RESOLVE_TERMINAL}
-            RETURN sn.id AS sn_id, sn.name_stage AS name_stage,
+              {id_filter}
+            OPTIONAL MATCH (o:IMASNode {{id: src.source_id}})
+            {_RESOLVE_SOURCE_TERMINAL}
+            RETURN sn.id AS sn_id, src.id AS source_id, o.id AS anchor_id,
+                   sn.name_stage AS name_stage,
                    sn.docs_stage AS docs_stage,
                    sn.source_unit AS old_unit, n.unit AS new_unit,
                    sn.source_documentation AS old_doc, n.documentation AS new_doc,
@@ -192,115 +298,63 @@ def detect_source_drift(
                    sn.source_dd_resolution_converged_ids AS old_converged_ids,
                    sn.source_dd_resolution_manifest_digest AS old_manifest_digest,
                    sn.source_dd_resolution_marker AS old_resolution_marker
-            ORDER BY sn.id
+            ORDER BY sn.id, src.id
             """,
+            sn_ids=sn_ids,
         )
-        drifted: list[dict[str, Any]] = []
+        per_name: dict[str, list[dict[str, Any]]] = {}
         for r in rows:
-            resolved = _resolved_source_context(
-                r["new_path"], r.get("new_unit"), r.get("new_doc")
-            )
-            r = {
-                **r,
-                "new_unit": resolved["unit"],
-                "new_doc": resolved["documentation"],
-            }
-            deltas = []
-            if _norm(r["old_path"]) != _norm(r["new_path"]):
-                deltas.append(
-                    {"field": "source_path", "old": r["old_path"], "new": r["new_path"]}
+            per_name.setdefault(r["sn_id"], []).append(r)
+        drifted: list[dict[str, Any]] = []
+        for sn_id, name_rows in per_name.items():
+            drifted_here: dict[str, Any] | None = None
+            for r in name_rows:
+                if r["new_path"] is None:
+                    # The source's source_id is not a DD path in the graph, so
+                    # there is nothing to compare it against. Report it rather
+                    # than letting a zero-row match read as "no drift".
+                    if unchecked is not None:
+                        unchecked.append({"sn_id": sn_id, "source_id": r["source_id"]})
+                    continue
+                resolved = _resolved_source_context(
+                    r["new_path"], r.get("new_unit"), r.get("new_doc")
                 )
-            if _norm(r["old_unit"]) != _norm(r["new_unit"]):
-                deltas.append(
-                    {"field": "units", "old": r["old_unit"], "new": r["new_unit"]}
+                deltas = _source_deltas(r, resolved)
+                if not deltas:
+                    continue
+                requires_steering = any(
+                    delta["field"] in {"source_path", "units", "documentation"}
+                    for delta in deltas
                 )
-            if _norm(r["old_doc"]) != _norm(r["new_doc"]):
-                deltas.append(
-                    {"field": "documentation", "old": r["old_doc"], "new": r["new_doc"]}
-                )
-            published = resolved["published_dd_context"]
-            if _norm(r.get("old_raw_unit")) != _norm(published.get("unit")):
-                deltas.append(
-                    {
-                        "field": "raw_unit",
-                        "old": r.get("old_raw_unit"),
-                        "new": published.get("unit"),
-                    }
-                )
-            if _norm(r.get("old_raw_doc")) != _norm(published.get("documentation")):
-                deltas.append(
-                    {
-                        "field": "raw_documentation",
-                        "old": r.get("old_raw_doc"),
-                        "new": published.get("documentation"),
-                    }
-                )
-            if _norm_ids(r.get("old_resolution_ids")) != _norm_ids(
-                resolved["dd_resolution_ids"]
-            ):
-                deltas.append(
-                    {
-                        "field": "resolution_ids",
-                        "old": r.get("old_resolution_ids") or [],
-                        "new": resolved["dd_resolution_ids"],
-                    }
-                )
-            if _norm_ids(r.get("old_converged_ids")) != _norm_ids(
-                resolved["dd_resolution_converged_ids"]
-            ):
-                deltas.append(
-                    {
-                        "field": "converged_resolution_ids",
-                        "old": r.get("old_converged_ids") or [],
-                        "new": resolved["dd_resolution_converged_ids"],
-                    }
-                )
-            if _norm(r.get("old_manifest_digest")) != _norm(
-                resolved["dd_resolution_manifest_digest"]
-            ):
-                deltas.append(
-                    {
-                        "field": "resolution_manifest_digest",
-                        "old": r.get("old_manifest_digest"),
-                        "new": resolved["dd_resolution_manifest_digest"],
-                    }
-                )
-            if _norm(r.get("old_resolution_marker")) != _norm(
-                resolved["_dd_resolution_marker"]
-            ):
-                deltas.append(
-                    {
-                        "field": "resolution_marker",
-                        "old": r.get("old_resolution_marker"),
-                        "new": resolved["_dd_resolution_marker"],
-                    }
-                )
-            if not deltas:
-                continue
-            requires_steering = any(
-                delta["field"] in {"source_path", "units", "documentation"}
-                for delta in deltas
-            )
-            drifted.append(
-                {
+                drifted_here = {
                     "sn_id": r["sn_id"],
+                    "source_id": r["source_id"],
                     "name_stage": r["name_stage"],
                     "docs_stage": r["docs_stage"],
                     "new_path": r["new_path"],
                     "resolved_dd_context": resolved,
-                    "renamed": any(d["field"] == "source_path" for d in deltas),
+                    "renamed": _norm(r["new_path"]) != _norm(r["anchor_id"]),
                     "requires_steering": requires_steering,
                     "deltas": deltas,
                 }
-            )
+                break
+            if drifted_here is not None:
+                drifted.append(drifted_here)
         return drifted
     finally:
         if owns:
             gc.close()
 
 
-def _format_reason(sn_id: str, deltas: list[dict[str, Any]]) -> str:
-    """Human/LLM-readable steering reason describing the precise DD change."""
+def _format_reason(
+    sn_id: str, deltas: list[dict[str, Any]], *, renamed: bool = False
+) -> str:
+    """Human/LLM-readable steering reason describing the precise DD change.
+
+    *renamed* is the ``RENAMED_TO`` verdict from the detector: a ``source_path``
+    delta is a path change by default and is called a rename only when lineage
+    says the anchor moved to a new identity.
+    """
     parts = []
     for d in deltas:
         old = _norm(d["old"]) or "—"
@@ -308,7 +362,10 @@ def _format_reason(sn_id: str, deltas: list[dict[str, Any]]) -> str:
         if d["field"] == "documentation":
             old = (old[:160] + "…") if len(old) > 160 else old
             new = (new[:160] + "…") if len(new) > 160 else new
-        label = "path renamed" if d["field"] == "source_path" else d["field"]
+        if d["field"] == "source_path":
+            label = "path renamed" if renamed else "path changed"
+        else:
+            label = d["field"]
         parts.append(f"{label}: {old!r} → {new!r}")
     return (
         "DD source drift — the anchoring Data Dictionary path changed "
@@ -336,6 +393,7 @@ def refresh_drifted_sources(
     dry_run: bool = False,
     include_accepted: bool = True,
     scope_run_id: str | None = None,
+    sn_ids: list[str] | None = None,
     gc: GraphClient | None = None,
 ) -> dict[str, Any]:
     """Detect DD-source drift and steer a refine pass for each drifted name.
@@ -347,6 +405,10 @@ def refresh_drifted_sources(
     name is attached to that active run so its docs pools can prioritize the
     work without weakening the ordinary global claim gate. Returns a summary
     dict; an unchanged source is a no-op.
+
+    *sn_ids* binds the refresh to a target set: only those names are baselined,
+    detected or steered, so a family apply or focused run never takes on a
+    drifted name outside its scope. ``None`` keeps the graph-wide sweep.
     """
     # Local import avoids a module-load cycle (edit.py imports graph_ops heavily).
     from imas_codex.standard_names.edit import apply_edit
@@ -357,8 +419,16 @@ def refresh_drifted_sources(
         # Self-bootstrapping baseline: any name without a snapshot is stamped to
         # the current source first, so it is never reported as drifted on the run
         # that first sees it (no mass-refine on deploy). Skipped under dry-run.
-        baselined = 0 if dry_run else stamp_source_snapshots(only_unstamped=True, gc=gc)
-        drifted = detect_source_drift(include_accepted=include_accepted, gc=gc)
+        baselined = (
+            0 if dry_run else stamp_source_snapshots(sn_ids, only_unstamped=True, gc=gc)
+        )
+        unchecked: list[dict[str, str]] = []
+        drifted = detect_source_drift(
+            include_accepted=include_accepted,
+            sn_ids=sn_ids,
+            unchecked=unchecked,
+            gc=gc,
+        )
         summary: dict[str, Any] = {
             "baselined": baselined,
             "detected": len(drifted),
@@ -366,9 +436,18 @@ def refresh_drifted_sources(
             "steered": 0,
             "restamped": 0,
             "blocked": [],
+            "unchecked": unchecked,
+            "unchecked_count": len(unchecked),
             "names": [d["sn_id"] for d in drifted],
             "dry_run": dry_run,
         }
+        if unchecked:
+            logger.warning(
+                "refresh_drifted_sources: %d source(s) unchecked — their "
+                "source_id is not a DD path in the graph: %s",
+                len(unchecked),
+                ", ".join(f"{u['sn_id']}←{u['source_id']}" for u in unchecked[:5]),
+            )
         if not drifted:
             logger.info("refresh_drifted_sources: no DD-source drift detected")
             return summary
@@ -390,7 +469,7 @@ def refresh_drifted_sources(
                 stamp_source_snapshots([d["sn_id"]], gc=gc)
                 summary["restamped"] += 1
                 continue
-            reason = _format_reason(d["sn_id"], d["deltas"])
+            reason = _format_reason(d["sn_id"], d["deltas"], renamed=d["renamed"])
             # Re-anchor a renamed source before refining so the delta is coherent.
             if d["renamed"]:
                 _repoint_source(d["sn_id"], d["new_path"], gc=gc)

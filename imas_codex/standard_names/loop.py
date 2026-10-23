@@ -328,6 +328,40 @@ def _count_scope_names(
         return 0
 
 
+def _scope_name_ids(scope_run_id: str) -> list[str]:
+    """Return the ids of the standard names a scoped run owns.
+
+    A scoped run binds its target set two ways: the names it marks directly
+    (``sn.run_id``) and the sources it seeds (``StandardNameSource.run_id``),
+    whose produced names belong to the scope too. Both are returned so a
+    caller can confine itself to exactly the run's own names. Returns an empty
+    list on any query error — a scope whose size cannot be read must not fall
+    open into a graph-wide sweep.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    try:
+        with GraphClient() as gc:
+            rows = list(
+                gc.query(
+                    """
+                    MATCH (sn:StandardName)
+                    WHERE sn.run_id = $rid
+                       OR exists {
+                            (:StandardNameSource {run_id: $rid})-[:PRODUCED_NAME]->(sn)
+                          }
+                    RETURN DISTINCT sn.id AS id
+                    ORDER BY sn.id
+                    """,
+                    rid=scope_run_id,
+                )
+            )
+        return [row["id"] for row in rows]
+    except Exception as exc:  # noqa: BLE001 — best-effort scoping, never fatal
+        logger.warning("_scope_name_ids(%s) failed: %s", scope_run_id, exc)
+        return []
+
+
 async def _drain_scoped_standard_name_embeddings(
     scope_run_id: str,
     mgr: Any,
@@ -2061,19 +2095,31 @@ async def run_sn_pools(
                 refresh_drifted_sources,
             )
 
+            # A scoped run (family apply, focus, exact names) carries a target
+            # set: the refresh may baseline, detect and steer only those names,
+            # and must never attach a drifted outsider to this run, where the
+            # docs pools' priority claim would then spend the run's budget on
+            # it. An unscoped run keeps the graph-wide sweep.
+            _refresh_ids = (
+                await asyncio.to_thread(_scope_name_ids, scope_run_id)
+                if scope_run_id
+                else None
+            )
             sr = await _global_maintenance_call(
                 refresh_drifted_sources,
                 scope_run_id=run_id,
+                sn_ids=_refresh_ids,
                 default={},
             )
-            if sr.get("baselined") or sr.get("detected"):
+            if sr.get("baselined") or sr.get("detected") or sr.get("unchecked"):
                 logger.info(
                     "run_sn_pools: source-drift refresh — %d baselined, "
-                    "%d drifted, %d steered, %d blocked",
+                    "%d drifted, %d steered, %d blocked, %d unchecked",
                     sr.get("baselined", 0),
                     sr.get("detected", 0),
                     sr.get("steered", 0),
                     len(sr.get("blocked", [])),
+                    sr.get("unchecked_count", 0),
                 )
 
         # ── Stranded-reviewed promotion ───────────────────────────────
