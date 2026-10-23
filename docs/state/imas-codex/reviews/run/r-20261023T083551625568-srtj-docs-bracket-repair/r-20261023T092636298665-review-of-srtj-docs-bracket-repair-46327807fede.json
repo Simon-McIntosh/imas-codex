@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083551625568-srtj-docs-bracket-repair/head-gate-committed.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Reverting the multi-word prose-span branch or the exact-id linking makes tests/standard_names/test_bare_doc_link_normalize.py:201 fail on the missing [poloidal flux](name:poloidal_flux) link, as negative-control.log records.",
+      "lines": "176-210"
+    },
+    {
+      "failure_condition": "Making the dry-run write would fail the readback assertion that the stored documentation still equals the before text.",
+      "lines": "186-190"
+    },
+    {
+      "failure_condition": "Reverting the tightened unit predicate makes tests/standard_names/test_docs_gates.py:462 read the helium-3 brackets as a unit and stop failing the hygiene gate.",
+      "lines": "473-485"
+    },
+    {
+      "failure_condition": "Removing documenting_name from the run_documentation_gate_checks call drops the self-link finding, failing tests/standard_names/test_docs_gates.py:474.",
+      "lines": "462-480"
+    }
+  ],
+  "base_log_revision": "8e4327db0613216411dd244d1962fba2122496c6",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083551625568-srtj-docs-bracket-repair/base-gate-corrected.log",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/graph_ops.py:9815",
+    "imas_codex/standard_names/graph_ops.py:18001",
+    "imas_codex/standard_names/docs_gates.py:499",
+    "imas_codex/standard_names/review/audits.py:731",
+    "imas_codex/standard_names/review/jev_review.py:642"
+  ],
+  "completed_at": "2026-10-23T09:46:35.337Z",
+  "dispatched_at": "2026-10-23T09:27:10Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/doc_links.py",
+      "line": "145",
+      "severity": "non-blocking",
+      "text": "non-blocking: the rebuilt unit predicate requires every factor to begin with a letter, so numeric-magnitude unit brackets such as 10^20 m^-3, 0.1 s and 2 GeV now read as prose and the normaliser will strip their brackets in live documentation; a base/head probe of _is_prose_bracket returns False then True on all three and no test covers the change."
+    }
+  ],
+  "head_log_revision": "c315aa64ea826abae3574c911c91fe81a691abf5",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read all three commits against base 8e4327db: the normaliser gains a prose-span branch and dry-run mode, doc_links tightens the unit predicate, audits.py supplies documenting_name, and the two test files add disposable-graph, helium and self-link cases.",
+    "done_when": "The source prompt.txt evidence line names the disposable-Neo4j test, an EXIT=0 dry-run JSON and a no-added-failure delta over four files; head-gate-committed.log records 47 passed with EXIT=0, dryrun-final.log ends EXIT=0, and base-gate-corrected.log holds the only two base failures, absent at head.",
+    "goal": "The source run's brief.md asks the normaliser to link an exact live id and unbracket every other prose phrase; imas_codex/standard_names/graph_ops.py:9723 restricts linking to a phrase whose snake-cased form is a live id other than the documented one, and graph_ops.py:9724-9733 unbrackets everything else.",
+    "manifest": "Read the run's manifest.md; it names commits e4752d43, c315aa64, 46327807, the same eight changed paths, the negative-control log and readable baseline_suite/after_suite receipts with zero added failures.",
+    "write_paths": "The source brief.md grants graph_ops.py, doc_links.py, review/audits.py, two test files and three evidence-fragment files; git diff 8e4327db..46327807 changes exactly those eight paths."
+  },
+  "justifications": {
+    "durability": "the disposable-graph test at tests/standard_names/test_bare_doc_link_normalize.py:201 reddens on reverting the multi-word branch, as negative-control.log records with EXIT=1.",
+    "evidence": "head-gate-committed.log records 47 passed with EXIT=0 for the four named files and base-gate-corrected.log records the only two base failures, both absent at head.",
+    "fit": "tests/standard_names/test_docs_gates.py:462 and the doc_links predicate follow the module idiom and introduce no plan, version or author token.",
+    "goal_fidelity": "imas_codex/standard_names/graph_ops.py:9723 links only an exact live id other than the documented name and the else-branch unbrackets the rest.",
+    "reuse": "graph_ops.py:9618 reuses doc_links.find_name_links and find_prose_bracket_spans rather than re-parsing, and a capability search over imas_codex/standard_names found no owner for the local candidate_id slug helper.",
+    "scope_discipline": "git diff 8e4327db..46327807 touches only the eight paths the brief declares, with no stray edit to the concurrent node's jev_review.py."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source run's brief.md asks the normaliser to link an exact live id and unbracket every other prose phrase; imas_codex/standard_names/graph_ops.py:9723 restricts linking to a phrase whose snake-cased form is a live id other than the documented one, and graph_ops.py:9724-9733 unbrackets everything else.\nVERDICT done_when: The source prompt.txt evidence line names the disposable-Neo4j test, an EXIT=0 dry-run JSON and a no-added-failure delta over four files; head-gate-committed.log records 47 passed with EXIT=0, dryrun-final.log ends EXIT=0, and base-gate-corrected.log holds the only two base failures, absent at head.\nVERDICT write_paths: The source brief.md grants graph_ops.py, doc_links.py, review/audits.py, two test files and three evidence-fragment files; git diff 8e4327db..46327807 changes exactly those eight paths.\nVERDICT manifest: Read the run's manifest.md; it names commits e4752d43, c315aa64, 46327807, the same eight changed paths, the negative-control log and readable baseline_suite/after_suite receipts with zero added failures.\nVERDICT diff: Read all three commits against base 8e4327db: the normaliser gains a prose-span branch and dry-run mode, doc_links tightens the unit predicate, audits.py supplies documenting_name, and the two test files add disposable-graph, helium and self-link cases.\nCALL_SITES: imas_codex/standard_names/graph_ops.py:9815, imas_codex/standard_names/graph_ops.py:18001, imas_codex/standard_names/docs_gates.py:499, imas_codex/standard_names/review/audits.py:731, imas_codex/standard_names/review/jev_review.py:642\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_ops.py:9723 links only an exact live id other than the documented name and the else-branch unbrackets the rest.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-gate-committed.log records 47 passed with EXIT=0 for the four named files and base-gate-corrected.log records the only two base failures, both absent at head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 8e4327db..46327807 touches only the eight paths the brief declares, with no stray edit to the concurrent node's jev_review.py.\nSCORE durability: 18\nJUSTIFICATION durability: the disposable-graph test at tests/standard_names/test_bare_doc_link_normalize.py:201 reddens on reverting the multi-word branch, as negative-control.log records with EXIT=1.\nSCORE fit: 18\nJUSTIFICATION fit: tests/standard_names/test_docs_gates.py:462 and the doc_links predicate follow the module idiom and introduce no plan, version or author token.\nSCORE reuse: 19\nJUSTIFICATION reuse: graph_ops.py:9618 reuses doc_links.find_name_links and find_prose_bracket_spans rather than re-parsing, and a capability search over imas_codex/standard_names found no owner for the local candidate_id slug helper (only _kebab_to_snake and _tokenize_snake exist, for other purposes).\nFINDING imas_codex/standard_names/doc_links.py:145 non-blocking: the rebuilt unit predicate requires every factor to begin with a letter, so numeric-magnitude unit brackets such as 10^20 m^-3, 0.1 s and 2 GeV now read as prose and the normaliser will strip their brackets in live documentation; a base/head probe of _is_prose_bracket returns False then True on all three and no test covers the change.\n",
+  "review_run_id": "r-20261023T092636298665-review-of-srtj-docs-bracket-repair-46327807fede",
+  "reviewed_base_sha": "8e4327db0613216411dd244d1962fba2122496c6",
+  "reviewed_commits": [
+    "e4752d43cec71e03ee9944148c94f96f703c7cec",
+    "c315aa64ea826abae3574c911c91fe81a691abf5",
+    "46327807fede85127eafdab3e60141577b1ac87d"
+  ],
+  "reviewed_head_sha": "46327807fede85127eafdab3e60141577b1ac87d",
+  "reviewed_run_id": "r-20261023T083551625568-srtj-docs-bracket-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T09:48:58.303686+00:00",
+  "total": 112
+}
