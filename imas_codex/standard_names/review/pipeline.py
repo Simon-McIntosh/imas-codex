@@ -1994,9 +1994,29 @@ def _cap_docs_scores_for_lint_errors(
     error is gone clears the hold a previous pass raised for it, so the refusal
     tracks the check that produced it instead of outliving it. ``None`` means
     the checks did not run for this batch, and nothing is reconciled.
+
+    One client serves the whole batch: the reconciliation touches every scored
+    entry, and a client per raise or clear would open a graph session for each
+    of them. A caller that already holds one passes it as ``graph``.
     """
     if error_lint_findings is None:
         return
+    if graph is not None:
+        _reconcile_docs_lint_holds(scored, error_lint_findings, wlog, graph)
+        return
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as client:
+        _reconcile_docs_lint_holds(scored, error_lint_findings, wlog, client)
+
+
+def _reconcile_docs_lint_holds(
+    scored: list[dict],
+    error_lint_findings: dict[str, str],
+    wlog: logging.LoggerAdapter,
+    graph: Any,
+) -> None:
+    """Reconcile the lint hold of every scored entry against one graph client."""
     for entry in scored:
         entry_id = entry.get("id") or entry.get("_original_id") or ""
         if not entry_id:

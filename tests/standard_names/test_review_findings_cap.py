@@ -98,6 +98,24 @@ def _docs_review(
     )
 
 
+class _NullGraph:
+    """A stand-in for the graph client: it opens, closes and queries nothing.
+
+    The cap takes one client for the whole batch, so a pass that reaches it
+    opens one whether or not the stubbed writers use it. No test in this module
+    may reach a database, so this stands in for the client.
+    """
+
+    def __enter__(self) -> _NullGraph:
+        return self
+
+    def __exit__(self, *exc: object) -> bool:
+        return False
+
+    def query(self, *_args, **_kwargs) -> list[dict]:
+        return []
+
+
 async def _run_docs_review(
     monkeypatch,
     *,
@@ -144,6 +162,9 @@ async def _run_docs_review(
         "clear_holds_not_raised",
         lambda name_id, axis, kinds, raised_keys, *, graph=None: 0,
     )
+    import imas_codex.graph.client as graph_client
+
+    monkeypatch.setattr(graph_client, "GraphClient", _NullGraph)
 
     def fake_render_prompt(prompt_name: str, context: dict) -> str:
         return "stub"

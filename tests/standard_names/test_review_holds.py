@@ -438,7 +438,7 @@ def test_cascade_veto_raises_a_hold_and_keeps_the_decision_score(
     )
     assert route.failed_checks == ("claim_contradicts_source",)
 
-    raised = cascade.sync_route_holds(planted_name, route)
+    raised = cascade.sync_route_holds(planted_name, route, "docs")
     assert len(raised) == 1
     records = holds.open_holds(planted_name, "docs")
     assert [record["kind"] for record in records] == ["cascade_contradiction"]
@@ -484,13 +484,44 @@ def test_resolved_cascade_veto_clears_the_hold(planted_name: str, monkeypatch) -
     assert vetoed.holds
     assert clean.holds == ()
 
-    cascade.sync_route_holds(planted_name, vetoed)
+    cascade.sync_route_holds(planted_name, vetoed, "docs")
     assert [r["kind"] for r in holds.open_holds(planted_name, "docs")] == [
         "cascade_contradiction"
     ]
 
-    cascade.sync_route_holds(planted_name, clean)
+    cascade.sync_route_holds(planted_name, clean, "docs")
     assert holds.open_holds(planted_name, "docs") == []
+
+
+def test_a_name_axis_pass_leaves_a_documentation_contradiction_hold_open(
+    planted_name: str, monkeypatch
+) -> None:
+    """Only the axis these checks run on has a verdict about their holds.
+
+    A name-axis pass decides the name, not the documentation, so its route
+    carries no contradiction verdict at all — and a route that carries no holds
+    is indistinguishable from one that found none. Reconciling the
+    documentation holds against it would therefore clear an open
+    ``cascade_contradiction`` and release a document whose claim still
+    contradicts its source. The reconciliation is confined to the axis it ran
+    on, so the hold survives a pass on the other axis untouched.
+    """
+    from imas_codex.standard_names.review import cascade
+
+    _, clean_docs = _route_pair(monkeypatch)
+    hold = holds.raise_hold(
+        planted_name,
+        "docs",
+        "cascade_contradiction",
+        "claim contradicts its DD source",
+        "Jev contradiction veto on claim_contradicts_source",
+        "jev-cascade",
+    )
+
+    # A real name-axis route, and the pass that produced it.
+    cascade.sync_route_holds(planted_name, clean_docs, "name")
+
+    assert [r["id"] for r in holds.open_holds(planted_name, "docs")] == [hold["id"]]
 
 
 def test_resolved_lint_error_clears_the_hold_and_releases_the_document(
@@ -622,31 +653,32 @@ def test_a_skipped_audit_reports_no_lint_verdict_and_leaves_the_hold(
 
 
 def test_dismissal_does_not_accept_a_quarantined_document(
-    disposable_neo4j: str,
+    planted_name: str,
 ) -> None:
-    """A dismissed hold releases a document only through the canonical gate."""
-    name_id = "quarantined_document"
+    """A dismissed hold releases a document only through the canonical gate.
+
+    The row carries everything the gate otherwise requires: an accepted name
+    axis, a passing documentation score and a reachable winning documentation
+    review. The quarantine is therefore the only clause that can refuse it, so
+    the assertion is about the gate and not about review eligibility — a row
+    refused for want of a review would pass this test with the quarantine
+    clause deleted.
+    """
+    name_id = planted_name
+    # The hold is raised first so the documentation stays refused while it is
+    # reviewed, which is the state a dismissal starts from.
+    hold = _raise(name_id, "unsupported claim")
+    assert _review(name_id) == "reviewed"
     with GraphClient() as graph:
-        graph.query("MATCH (node) DETACH DELETE node")
         graph.query(
-            """
-            CREATE (sn:StandardName {id: $id, name_stage: 'accepted',
-                docs_stage: 'reviewed', reviewer_score_docs: 0.9,
-                validation_status: 'quarantined'})
-            """,
+            "MATCH (sn:StandardName {id: $id}) "
+            "SET sn.validation_status = 'quarantined'",
             id=name_id,
         )
-    hold = holds.raise_hold(
-        name_id,
-        "docs",
-        "documentation_contradiction",
-        "unsupported claim",
-        "claim and source disagree",
-        "tester",
-    )
+
     assert holds.dismiss_hold(hold["id"], "triager", "checked by hand")
     assert holds.open_holds(name_id, "docs") == []
-    assert _state(name_id) == {"stage": "reviewed", "score": 0.9}
+    assert _state(name_id) == {"stage": "reviewed", "score": 0.875}
 
 
 def test_dismissal_does_not_accept_a_document_without_a_winning_review(

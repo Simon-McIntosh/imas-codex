@@ -35,6 +35,13 @@ _THRESHOLDS = Path(__file__).with_name("cascade_thresholds.json")
 # holds.
 ROUTE_HOLD_KINDS = frozenset({"cascade_contradiction"})
 
+# The axis those kinds sit on. The checks that raise them run on this axis
+# alone: a pass deciding a different axis carries no verdict about them, so it
+# neither raises nor clears one. Without that, a name-axis pass — whose route
+# carries no holds and therefore nothing to re-raise — reads as a pass that
+# found none and clears an open documentation contradiction.
+ROUTE_HOLD_AXIS = "docs"
+
 
 @dataclass(frozen=True)
 class CascadeRoute:
@@ -350,7 +357,7 @@ def _judgment_payload(
 
 
 def sync_route_holds(
-    name_id: str, route: CascadeRoute, *, graph: Any | None = None
+    name_id: str, route: CascadeRoute, axis: str, *, graph: Any | None = None
 ) -> list[str]:
     """Reconcile the documentation holds a deciding route carries on its name.
 
@@ -364,7 +371,15 @@ def sync_route_holds(
     previously raised for it. Without the second direction a resolved
     contradiction would keep the document held for the life of the name — the
     hold would outlive the finding that produced it.
+
+    ``axis`` is the axis this pass decided. Only a pass on the axis these checks
+    run on has a verdict about their holds, so any other axis returns without
+    touching them: its route carries none of these holds, and an empty set of
+    raised holds is what a pass that found nothing looks like.
     """
+    if axis != ROUTE_HOLD_AXIS:
+        return []
+
     from imas_codex.standard_names.review.holds import (
         clear_holds_not_raised,
         finding_key,
@@ -376,7 +391,7 @@ def sync_route_holds(
     for hold in route.holds:
         record = raise_hold(
             name_id,
-            "docs",
+            ROUTE_HOLD_AXIS,
             hold["kind"],
             hold["finding"],
             hold["evidence"],
@@ -386,7 +401,7 @@ def sync_route_holds(
         raised.append(record["id"])
         raised_keys.add(finding_key(hold["kind"], hold["finding"]))
     clear_holds_not_raised(
-        name_id, "docs", set(ROUTE_HOLD_KINDS), raised_keys, graph=graph
+        name_id, ROUTE_HOLD_AXIS, set(ROUTE_HOLD_KINDS), raised_keys, graph=graph
     )
     return raised
 
@@ -782,8 +797,11 @@ async def adjudicate_review(
         try:
             # Run for every deciding pass, not only a vetoing one: a pass that
             # reports no contradiction is what clears the hold an earlier pass
-            # raised.
-            await asyncio.to_thread(sync_route_holds, str(item.get("id", "")), route)
+            # raised. The pass's own axis decides whether it may: only the axis
+            # these checks run on has a verdict about their holds.
+            await asyncio.to_thread(
+                sync_route_holds, str(item.get("id", "")), route, axis
+            )
         except Exception:
             logger.exception(
                 "Jev cascade holds could not be reconciled for %s", item.get("id")
