@@ -1,0 +1,219 @@
+<section>
+  <h2 id="isn-grammar-sync-0-10-1-goal">Serving the ISN 0.10.1 grammar from the graph — blocked before the sync</h2>
+  <p>
+    The node could not complete. Its first step rebuilds the editable
+    <code>imas_standard_names</code> metadata in the main checkout's shared
+    virtualenv, and this worker runs inside a write fence that mounts that
+    virtualenv, the main checkout and the sibling ISN checkout read-only. The
+    rebuild is therefore refused by the fence, no sync was run, and the graph
+    still serves <code>0.10.0</code>. Everything the fence does not block was
+    measured and is recorded below: the defect reproduces, the pending sync is
+    proven by a digest mismatch, and the 0.10.1 midplane definitions are quoted
+    from the installed package.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-defect">The defect reproduces: the shared environment reports 0.10.0</h3>
+  <p>
+    <code>/home/ITER/mcintos/Code/imas-codex/.venv/bin/python -c "import
+    imas_standard_names as m; print(m.__version__)"</code> prints
+    <code>0.10.0</code>. The package resolves to the editable sibling checkout at
+    <code>/home/ITER/mcintos/Code/imas-standard-names/imas_standard_names/__init__.py</code>,
+    whose git <code>HEAD</code> is <code>4c59393cb111f5f257570f6eb3e9c7e037cb2747</code>
+    — the merge of upstream pull request #39, tagged <code>v0.10.1</code>. The
+    installed distribution metadata disagrees with the source it points at:
+  </p>
+  <ul>
+    <li>
+      <code>site-packages/imas_standard_names-0.10.0.dist-info/METADATA</code> is
+      named for <code>0.10.0</code> and its <code>Version:</code> line reads
+      <code>Version: 0.10.0</code>.
+    </li>
+    <li>
+      <code>imas_standard_names.__version__</code> is
+      <code>importlib.metadata.version("imas-standard-names")</code>
+      (<code>imas_standard_names/__init__.py</code>, lines 16–22), so it reports
+      the frozen dist-info version, not the checkout's tag.
+    </li>
+  </ul>
+  <p>
+    <code>sync_isn_grammar_to_graph</code> binds
+    <code>from imas_standard_names import __version__ as isn_version</code> and
+    passes it as <code>active_version</code>
+    (<code>imas_codex/standard_names/grammar_sync.py</code>, lines 288 and 323),
+    so an unfixed sync would file the 0.10.1 grammar under the
+    <code>0.10.0</code> label.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-fence">Why the rebuild cannot run here: the fence's read-write set</h3>
+  <p>
+    The exact command the brief names was run from the main checkout:
+  </p>
+  <pre><code>uv --directory /home/ITER/mcintos/Code/imas-codex sync --extra test --reinstall-package imas-standard-names</code></pre>
+  <p>
+    It exits <code>1</code>. The editable build runs the ISN package's hatch
+    hook, which regenerates the grammar models and writes them back into the
+    sibling source tree; the write is refused:
+  </p>
+  <pre><code>OSError: [Errno 30] Read-only file system:
+  '/home/ITER/mcintos/Code/imas-standard-names/imas_standard_names/grammar/model_types.py'</code></pre>
+  <p>
+    The refusal is the fence, not the repository. Process id 1 in this worker's
+    namespace is <code>bwrap</code>, and the sandbox's read-write bind set is
+    exactly the run directory, the session scratch directory, the worktree, and
+    the git object store:
+  </p>
+  <pre><code>--bind /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/isn-grammar-sync-0-10-1
+--bind /home/ITER/mcintos/Code/imas-codex/.git/worktrees/isn-grammar-sync-0-10-1
+--bind /home/ITER/mcintos/Code/imas-codex/.git/objects
+--bind /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T043024850820-isn-grammar-sync-0-10-1
+--bind /tmp/reckon-crew-scratch/r-20261023T043024850820-isn-grammar-sync-0-10-1</code></pre>
+  <p>
+    Both paths the rebuild must write are bound read-only, and a direct write
+    probes them so:
+  </p>
+  <pre><code>touch /home/ITER/mcintos/Code/imas-codex/.venv/.write-probe
+  -> touch: cannot touch '.../.venv/.write-probe': Read-only file system
+touch /home/ITER/mcintos/Code/imas-standard-names/.write-probe
+  -> touch: cannot touch '.../.write-probe': Read-only file system</code></pre>
+  <p>
+    <code>findmnt</code> confirms the mount options:
+    <code>HPC_T2[.../imas-codex] /home/ITER/mcintos/Code/imas-codex ro,nosuid,nodev,relatime</code>
+    and the same for <code>imas-standard-names</code>. Nothing measured through
+    the shared environment can be changed from inside this worker, and the
+    fence's write grants are the node's scope contract, so no attempt was made
+    to work around it.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-before">The graph serves 0.10.0, and its content is already stale</h3>
+  <p>
+    A bounded read-only probe (<code>grammar-state-probe.py</code> in the run
+    directory) enumerated the version nodes. Property controls first: the query
+    is shown to see a populated graph before any absence is read from it —
+    <code>count(v:ISNGrammarVersion)</code> is <code>123</code> and
+    <code>count(t:GrammarToken)</code> is <code>81102</code>. Against that base,
+    the state of the active version is:
+  </p>
+  <pre><code>MATCH (v:ISNGrammarVersion) RETURN v.version, v.active, v.content_digest
+  0.10.0  active=true  sha256:39a54c92cd0adec53bc63d87603db741260a75d75571686cd60e4074cd5f4009
+
+MATCH (t:GrammarToken) RETURN t.version, count(*)
+  0.10.0  983          (total across all versions 81102)
+
+MATCH (s:GrammarSegment) RETURN s.version, count(*)
+  0.10.0  22
+
+MATCH (already present) (t:GrammarToken {value:'separatrix_distance'})
+  0.10.0  physical_base  0.10.0:physical_base:separatrix_distance
+
+active versions: ['0.10.0']  (count=1)</code></pre>
+  <p>
+    Exactly one version is active and it is <code>0.10.0</code>, with
+    <code>983</code> tokens and <code>22</code> segments. The
+    <code>separatrix_distance</code> <code>physical_base</code> token already
+    exists for <code>0.10.0</code>: the base arrived with 0.10.0, and 0.10.1's
+    change is the midplane wording, not the base. The token count
+    <code>983</code> sits above both figures the brief names — the 956-token
+    merge figure and the 781 floor — so the physical-base merge has not
+    regressed.
+  </p>
+  <p>
+    The graph's active version is stale against 0.10.1. The installed package's content
+    digest and the graph's active digest differ, which is the condition the
+    startup freshness check reads:
+  </p>
+  <pre><code>installed content_digest   sha256:320e8e2b89afa50d803c69ff3832b0feb42ceed19a12987456651c7cf1984e66
+graph active content_digest sha256:39a54c92cd0adec53bc63d87603db741260a75d75571686cd60e4074cd5f4009
+match: false</code></pre>
+  <p>
+    <code>_auto_sync_grammar</code> in <code>imas_codex/cli/sn.py</code> compares
+    the active node's <code>content_digest</code> against
+    <code>grammar_content_digest()</code> and syncs when they differ (lines
+    1369–1382). The digests differ, so the check will fire on the next
+    <code>sn run</code> — and, with the version still reading <code>0.10.0</code>,
+    that automatic sync is precisely the run the brief describes: it would file
+    the 0.10.1 grammar under the <code>0.10.0</code> label. This is the reason
+    no sync was run by hand: doing so unfixed would write the wrong label into
+    the shared graph, which is worse than the current mismatch because the
+    mismatch at least self-corrects once the version is fixed.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-midplane">The 0.10.1 midplane definitions</h3>
+  <p>
+    The graph holds no locus prose — a search for any node carrying a
+    definition-like property returns no rows, against the same populated-graph
+    control above — so the definitions are quoted from the installed
+    <code>imas_standard_names</code> (the editable sibling at tag
+    <code>v0.10.1</code>). The registry states the maximum-major-radius
+    definition for both the general and separatrix outboard loci
+    (<code>grammar/vocabularies/locus_registry.yml</code>, lines 676–689):
+  </p>
+  <blockquote>
+    <p id="isn-grammar-sync-0-10-1-def-outboard">
+      <strong>outboard_midplane</strong> (type position, relations at/of):
+      &ldquo;The low-field-side equatorial midplane: the point of maximum major
+      radius on the flux surface in question. For a value at the separatrix
+      intersection use outboard_midplane_separatrix.&rdquo;
+    </p>
+    <p id="isn-grammar-sync-0-10-1-def-outboard-sep">
+      <strong>outboard_midplane_separatrix</strong> (type position, relations
+      at/of): &ldquo;The point where the separatrix reaches its maximum major
+      radius, on the low-field side. A separatrix point value at the outboard
+      midplane is evaluated here.&rdquo;
+    </p>
+    <p id="isn-grammar-sync-0-10-1-def-inboard">
+      <strong>inboard_midplane</strong> (type position, relations at/of):
+      &ldquo;The high-field-side equatorial midplane: the point of minimum major
+      radius on the flux surface in question.&rdquo;
+    </p>
+  </blockquote>
+  <p>
+    The same definition is carried as an equation in the concept registry
+    (<code>grammar/vocabularies/conventions/concepts.yml</code>, lines 422–440),
+    which is the wording the docs writer restates:
+  </p>
+  <blockquote>
+    <p id="isn-grammar-sync-0-10-1-eq-outboard">
+      <strong>outboard_midplane</strong>: phrase &ldquo;outboard midplane&rdquo;,
+      equation <code>R = \max_{S} R,\quad R &gt; R_{\mathrm{axis}}</code>, where
+      <code>S</code> is the magnetic flux surface the point lies on and
+      <code>R_{\mathrm{axis}}</code> the major radius of the magnetic axis.
+    </p>
+    <p id="isn-grammar-sync-0-10-1-eq-inboard">
+      <strong>inboard_midplane</strong>: phrase &ldquo;inboard midplane&rdquo;,
+      equation <code>R = \min_{S} R,\quad R &lt; R_{\mathrm{axis}}</code>.
+    </p>
+  </blockquote>
+  <p>
+    Both halves state the maximum-major-radius (outboard) and
+    minimum-major-radius (inboard) definition, and neither names a data
+    dictionary field, an IDS path or an option value — the physics-terms rule
+    the upstream change was made to satisfy.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-remains">What remains, and the exact remedy</h3>
+  <p>
+    Everything after step 1 is ready to run and was not run, because step 1
+    requires a write this worker is fenced out of:
+  </p>
+  <ol>
+    <li>
+      Rebuild the editable metadata in the shared virtualenv — the command
+      above — from an unfenced context (the coordinator's own shell, or a
+      dispatch carrying <code>--no-fence</code>). Its own check is that
+      <code>.venv/bin/python -c "import imas_standard_names as m;
+      print(m.__version__)"</code> then prints <code>0.10.1</code>.
+    </li>
+    <li>
+      Run <code>sync_isn_grammar_to_graph()</code> and read back: exactly one
+      active <code>ISNGrammarVersion</code>, <code>0.10.1</code>; its
+      <code>GrammarToken</code> count at least the current <code>983</code>;
+      and a <code>physical_base</code> token <code>separatrix_distance</code>
+      for <code>0.10.1</code>. The comparisons above are the base arm for that
+      readback; versions must be ordered by PEP 440, as the probe does.
+    </li>
+  </ol>
+  <p>
+    The midplane definitions required by step 4 are quoted above and need no
+    graph read, since the graph holds no locus prose.
+  </p>
+</section>
