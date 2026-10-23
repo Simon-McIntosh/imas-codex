@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T07:16:06.804Z",
+  "dispatched_at": "2026-10-23T07:01:04Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/holds.py",
+      "line": 168,
+      "severity": "follow-on",
+      "text": "Promotion after a clear or dismissal sets docs_stage='accepted' at holds.py:155-173 without touching edit_status, while persist_reviewed_docs updates that companion lifecycle field when it accepts (graph_ops.py:17922-17931). A held edit dismissed later therefore keeps edit_status open or exhausted after acceptance and stays advertised as unfinished. Carried from the prior review as follow-on and still unaddressed at head."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": 12556,
+      "severity": "follow-on",
+      "text": "PROMOTE_STRANDED_DOCS_WHERE promotes any docs_stage='reviewed' row whose stored score clears the threshold, with no open-hold predicate, and promote_stranded_reviewed runs from the loop at loop.py:2093. A document held at reviewed with a passing judged score \u2014 the exact state this node now creates \u2014 can therefore be promoted to accepted while its ReviewHold is still open, bypassing the acceptance rule the node adds. The landing fragment names this reader as one that must adopt the predicate; the source brief deferred the change to a later node, so it is recorded rather than treated as a scope breach."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief requires a ReviewHold schema with a single owner, a judged score left unclamped, and hold-aware review and refinement eligibility, which the diff lands in imas_codex/schemas/standard_name.yaml:2262, review/holds.py:51 and graph_ops.py:17839, with two carry-forward follow-ons noted below.\nVERDICT done_when: the source brief requires the schema, owner and routes committed, no added gate failures, and kept negative-control and disposable-Neo4j logs; the manifest records existing-base-absolute.log at 5 failed against repair-mock-head.log at 0 failed, negative-control.log at 0.849 versus 0.875 EXIT=1, and repair-graph-head.log at 8 passed on an empty disposable Neo4j.\nVERDICT write_paths: read the source manifest's orientation_write_paths; every path the diff touched is inside that grant, which the resume-2-advice.txt scope line extends to the four existing test files.\nVERDICT manifest: read at runs/r-20261023T041800161321-srtj-review-holds-channel/manifest.md; it reports seven commits, the six graph tests, four Cypher tests, a red clamp mutation, the base and head arms, and names a log for each with its own summary line.\nVERDICT diff: read all seven commits against base c5b7f76ed429c79ee4797a2b202e3e9985a85e8e; 6a84159b adds the schema, owner, routes and tests, 7740180a/98ecc1e9/26cad85a write the fragment, 0e4a5151 updates four existing tests, and d1715d5b/ed9dbace repair the two prior blocking findings.\nCALL_SITES: imas_codex/standard_names/workers.py:11245, imas_codex/standard_names/workers.py:11273, imas_codex/standard_names/graph_ops.py:17820, imas_codex/standard_names/graph_ops.py:25661, imas_codex/standard_names/loop.py:867, imas_codex/standard_names/loop.py:2093, imas_codex/standard_names/promote.py:48\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: workers.py:11273 now forwards the unclamped judged score with hold intents, and graph_ops.py:17935 keeps a held passing document reviewed, but graph_ops.py:12556 still promotes a held document without reading holds.\nSCORE evidence: 18\nJUSTIFICATION evidence: existing-base-absolute.log ends 5 failed EXIT=1 and repair-mock-head.log ends 61 passed EXIT=0 over the same 60-test selection, so added_failure_count is 0, and negative-control.log shows the clamp mutation producing 0.849 against the literal 0.875.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the seven commits is inside manifest.md's orientation_write_paths, which resume-2-advice.txt extends to the four existing test files, and review/pipeline.py and review/cascade.py are left untouched for the next node.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control.log:16 reddens on a restored clamp, cap-parent-control.log reddens on a restored cap exhaustion at graph_ops.py:17939, and claim-parent-control.log reddens on holds written before the claim check at graph_ops.py:17842, though no test covers the edit_status promotion at review/holds.py:168.\nSCORE fit: 18\nJUSTIFICATION fit: review/holds.py:196 composes its open-hold predicate as a Cypher fragment the way graph_ops.py:6719 authors docs_review_eligibility_where, and no added symbol carries a plan, version or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search over imas_codex/standard_names found no earlier score-independent veto owner, and review/holds.py reuses graph_ops.py:95 _TransactionQuery, GraphClient and DEFAULT_MIN_SCORE rather than forking them.\nFINDING imas_codex/standard_names/review/holds.py:168 follow-on: Promotion after a clear or dismissal sets docs_stage='accepted' at holds.py:155-173 without touching edit_status, while persist_reviewed_docs updates that companion lifecycle field when it accepts (graph_ops.py:17922-17931); a held edit dismissed later keeps edit_status open or exhausted after acceptance.\nFINDING imas_codex/standard_names/graph_ops.py:12556 follow-on: PROMOTE_STRANDED_DOCS_WHERE has no open-hold predicate and promote_stranded_reviewed runs from loop.py:2093, so a held passing-score document can be promoted to accepted while its ReviewHold is open.\n",
+  "review_run_id": "r-20261023T064143969496-review-of-srtj-review-holds-channel-26cad85a0a6c",
+  "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "reviewed_head_sha": "26cad85a0a6cce1ab19ea802c2625dd3cbfb388d",
+  "reviewed_run_id": "r-20261023T041800161321-srtj-review-holds-channel",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T07:20:00+00:00",
+  "total": 110
+}
