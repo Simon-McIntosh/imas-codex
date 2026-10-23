@@ -196,16 +196,20 @@ def test_review_stage_decision(
 
     fn = getattr(graph_ops, fn_name)
 
-    # persist_reviewed_* first reads the current chain length, then writes the
-    # new stage. persist_reviewed_docs returns the written node id and treats an
-    # empty result as a concurrent-win no-op, so the write must yield a row
-    # (harmless for persist_reviewed_name).
-    gc = _mock_gc_query(
-        return_values=[
-            [{chain_key: chain_len}],  # Chain-length read succeeds.
-            [{"id": "test_sn"}],  # Stage write commits one row.
+    if fn_name == "persist_reviewed_docs":
+        # The docs preflight and final write share one claim-locked transaction.
+        gc, tx = _mock_gc_tx()
+        tx.run.side_effect = [
+            [{chain_key: chain_len, "documentation": None, "edit_status": None}],
+            [{"id": "test_sn"}],
         ]
-    )
+    else:
+        gc = _mock_gc_query(
+            return_values=[
+                [{chain_key: chain_len}],
+                [{"id": "test_sn"}],
+            ]
+        )
 
     # Name acceptance is quorum-gated, so a case exercising the score × chain
     # decision must declare that the reviewer chain actually reached a verdict;
@@ -224,7 +228,7 @@ def test_review_stage_decision(
         patch.object(
             graph_ops,
             "docs_accepted",
-            side_effect=lambda judged, minimum, _name: judged >= minimum,
+            side_effect=lambda judged, minimum, _name, **_kwargs: judged >= minimum,
         ),
     ):
         result = fn(

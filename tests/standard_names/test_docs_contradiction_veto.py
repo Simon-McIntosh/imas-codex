@@ -48,6 +48,13 @@ class _HoldRecorder:
     def open_holds(self):
         return [row for row in self.rows.values() if row["status"] == "open"]
 
+    def apply_review(self, name_id, review_holds, checked_kinds):
+        raised_keys = {
+            self.raise_hold(name_id, "docs", **hold)["finding_key"]
+            for hold in review_holds
+        }
+        self.clear_holds_not_raised(name_id, "docs", checked_kinds, raised_keys)
+
 
 @pytest.mark.parametrize(
     ("answer", "expected_stage"),
@@ -120,6 +127,9 @@ def test_claim_verdict_controls_acceptance(answer, expected_stage):
 
     def persist(**kwargs):
         persisted.update(kwargs)
+        hold_records.apply_review(
+            kwargs["sn_id"], kwargs["review_holds"], kwargs["checked_hold_kinds"]
+        )
         stage = (
             "accepted"
             if kwargs["score"] >= kwargs["min_score"] and not hold_records.open_holds()
@@ -256,6 +266,9 @@ def test_second_bound_dd_source_can_hold_documentation():
 
     def persist(**kwargs):
         persisted.update(kwargs)
+        hold_records.apply_review(
+            kwargs["sn_id"], kwargs["review_holds"], kwargs["checked_hold_kinds"]
+        )
         stage = (
             "accepted"
             if kwargs["score"] >= kwargs["min_score"] and not hold_records.open_holds()
@@ -320,3 +333,80 @@ def test_second_bound_dd_source_can_hold_documentation():
     assert source_docs[second] in hold_records.open_holds()[0]["evidence"]
     assert second in persisted["comments_per_dim"]["contradicts_source"]
     assert source_docs[second] in persisted["comments_per_dim"]["contradicts_source"]
+
+
+def test_stale_docs_claim_cannot_change_winning_holds() -> None:
+    """A no-op persistence must leave the graph owner's hold state untouched."""
+    import imas_codex.standard_names.graph_ops as graph_ops
+
+    item = {
+        "id": "magnetic_field",
+        "claim_token": "stale",
+        "claim_seq": 1,
+        "description": "Magnetic flux density.",
+        "documentation": "The field points inward.",
+    }
+    request = {
+        "models": ["test/model"],
+        "veto_item": item,
+        "response_model": MagicMock(),
+        "user_prompt": "review",
+        "system_prompt": "review",
+        "disagreement_threshold": 0.2,
+        "rubric_dims": ["documentation_quality"],
+        "reasoning_effort": None,
+        "escalation_reasoning_effort": None,
+    }
+    quorum = {
+        "records": [],
+        "winning_score": 1.0,
+        "winning_scores": {"documentation_quality": 20},
+        "winning_comments": "Clear.",
+        "winning_comments_per_dim": {},
+        "canonical_model": "test/model",
+        "total_cost": 0.0,
+        "total_tokens_in": 0,
+        "total_tokens_out": 0,
+        "resolution_method": "quorum_consensus",
+        "dd_gaps": [],
+    }
+    hold_records = _HoldRecorder()
+
+    async def prepare(_item):
+        return request
+
+    async def review(*_args, **_kwargs):
+        return quorum
+
+    async def prose_note(*_args):
+        return None
+
+    async def contradiction_note(*_args):
+        return "claim contradicts source"
+
+    manager = MagicMock()
+    manager.run_id = "run"
+    persist = MagicMock(return_value="")
+    with (
+        patch.object(workers, "prepare_docs_review_request", prepare),
+        patch.object(cascade, "adjudicate_review", review),
+        patch.object(workers, "_documentation_conformance_note", return_value=None),
+        patch.object(workers, "_documentation_banned_prose_note", prose_note),
+        patch.object(workers, "_documentation_contradiction_note", contradiction_note),
+        patch.object(holds, "raise_hold", hold_records.raise_hold),
+        patch.object(
+            holds, "clear_holds_not_raised", hold_records.clear_holds_not_raised
+        ),
+        patch.object(graph_ops, "persist_reviewed_docs", persist),
+        patch.object(graph_ops, "update_review_aggregates"),
+    ):
+        processed = asyncio.run(
+            workers.process_review_docs_batch([item], manager, asyncio.Event())
+        )
+
+    assert processed == 0
+    persist.assert_called_once()
+    assert persist.call_args.kwargs["review_holds"][0]["finding"] == (
+        "claim contradicts source"
+    )
+    assert hold_records.open_holds() == []

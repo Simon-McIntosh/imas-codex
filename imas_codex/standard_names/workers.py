@@ -11165,10 +11165,6 @@ async def process_review_docs_batch(
         persist_reviewed_docs,
         update_review_aggregates,
     )
-    from imas_codex.standard_names.review.holds import (
-        clear_holds_not_raised,
-        raise_hold,
-    )
 
     processed = 0
 
@@ -11235,7 +11231,7 @@ async def process_review_docs_batch(
                     "jev-contradiction",
                 ),
             )
-            raised_keys: set[str] = set()
+            review_holds: list[dict[str, str]] = []
             for kind, note, raised_by in checked_holds:
                 if note is None:
                     continue
@@ -11248,17 +11244,14 @@ async def process_review_docs_batch(
                     sort_keys=True,
                     default=str,
                 )
-                hold = await _asyncio.to_thread(
-                    raise_hold, sn_id, "docs", kind, note, evidence, raised_by
+                review_holds.append(
+                    {
+                        "kind": kind,
+                        "finding": note,
+                        "evidence": evidence,
+                        "raised_by": raised_by,
+                    }
                 )
-                raised_keys.add(hold["finding_key"])
-            await _asyncio.to_thread(
-                clear_holds_not_raised,
-                sn_id,
-                "docs",
-                {kind for kind, _, _ in checked_holds},
-                raised_keys,
-            )
             if any(note is not None for _, note, _ in checked_holds):
                 notes = [
                     note
@@ -11274,7 +11267,7 @@ async def process_review_docs_batch(
                 if contradiction_note is not None:
                     comments_per_dim["contradicts_source"] = contradiction_note
                 logger.info(
-                    "review_docs: %s held from acceptance — %s",
+                    "review_docs: %s found documentation veto — %s",
                     sn_id,
                     "; ".join(notes),
                 )
@@ -11287,6 +11280,8 @@ async def process_review_docs_batch(
                 scores=quorum["winning_scores"],
                 comments=comments,
                 comments_per_dim=comments_per_dim,
+                review_holds=review_holds,
+                checked_hold_kinds={kind for kind, _, _ in checked_holds},
                 model=quorum["canonical_model"],
                 min_score=DEFAULT_MIN_SCORE,
                 rotation_cap=DEFAULT_REFINE_ROTATIONS,

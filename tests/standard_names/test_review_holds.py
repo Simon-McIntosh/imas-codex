@@ -210,6 +210,72 @@ def test_cap_hold_can_be_dismissed_into_acceptance(planted_name: str) -> None:
     assert _state(planted_name) == {"stage": "accepted", "score": 0.875}
 
 
+def test_stale_claim_cannot_raise_or_clear_review_holds(planted_name: str) -> None:
+    """The hold set and judged score belong to the winning claim alone."""
+    winner_hold = _raise(planted_name)
+    with GraphClient() as graph:
+        graph.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            SET sn.claim_token = 'winner', sn.claim_seq = 2
+            """,
+            id=planted_name,
+        )
+    stale = graph_ops.persist_reviewed_docs(
+        sn_id=planted_name,
+        claim_token="stale",
+        claim_seq=1,
+        score=0.875,
+        model="test-reviewer",
+        min_score=0.85,
+        rotation_cap=3,
+        skip_review_node=True,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=2,
+        review_holds=[
+            {
+                "kind": "documentation_contradiction",
+                "finding": "A different unsupported claim",
+                "evidence": "Claim and source disagree",
+                "raised_by": "jev-contradiction",
+            }
+        ],
+        checked_hold_kinds={"documentation_contradiction"},
+    )
+    assert stale == ""
+    assert _state(planted_name) == {"stage": "drafted", "score": None}
+    assert [hold["id"] for hold in holds.open_holds(planted_name, "docs")] == [
+        winner_hold["id"]
+    ]
+
+    valid = graph_ops.persist_reviewed_docs(
+        sn_id=planted_name,
+        claim_token="winner",
+        claim_seq=2,
+        score=0.875,
+        model="test-reviewer",
+        min_score=0.85,
+        rotation_cap=3,
+        skip_review_node=True,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=2,
+        review_holds=[
+            {
+                "kind": "documentation_contradiction",
+                "finding": winner_hold["finding"],
+                "evidence": winner_hold["evidence"],
+                "raised_by": winner_hold["raised_by"],
+            }
+        ],
+        checked_hold_kinds={"documentation_contradiction"},
+    )
+    assert valid == "reviewed"
+    assert _state(planted_name) == {"stage": "reviewed", "score": 0.875}
+    assert [hold["id"] for hold in holds.open_holds(planted_name, "docs")] == [
+        winner_hold["id"]
+    ]
+
+
 def test_dismissed_finding_stays_dismissed_and_does_not_block(
     planted_name: str,
 ) -> None:
