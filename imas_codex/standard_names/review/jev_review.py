@@ -29,7 +29,13 @@ not reading a field it was shown to be absent.
 The documentation builder splits model-written prose into claims, excluding
 registry text and notation. Its question table asks one source-comparison Choice
 per claim and categorises three rubric dimensions. Code gives any contradictory
-claim a veto; a high dimension score cannot offset it.
+claim a veto; a high dimension score cannot offset it. Only a source that denies
+the claim is a contradiction: a source that names a different quantity, an
+opposite sign or direction, an incompatible unit or dimension, or a different
+definition. A source that merely specialises the claim's quantity — one locus,
+average or component instance of a generic quantity — is compatible with it, and
+a source whose wording carries no definition at all, only a field label, is
+dropped from the evidence rather than reported as a contradiction.
 
 The module writes no graph state. The documentation acceptance path calls its
 claim comparison and veto while leaving the holistic score in shadow.
@@ -483,7 +489,68 @@ _INLINE_MATH = re.compile(r"(?<!\$)\$(?!\$)[^$\n]*\$(?!\$)")
 _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 
 
-def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
+# Vocabulary a DD source uses to describe a field's storage shape or its place
+# in a vector, and nothing else. A text whose every word is drawn from this set
+# names no quantity, so no claim can be compared against it.
+_FIELD_PLACEMENT_WORDS = frozenset(
+    """
+    a an the
+    value values scalar component components axis axes
+    along one each per element elements grid subset
+    provided given is are be
+    of in on at for to
+    x y z
+    """.split()
+)
+
+_LABEL_ONLY_WORD = re.compile(r"[A-Za-z]+")
+
+
+def label_only_source(text: Any) -> bool:
+    """True when a DD source names no quantity, only the field's placement.
+
+    The DD catalogue holds many terse field texts — "Value", "Component along Y
+    axis", "One scalar value is provided per element in the grid subset." — that
+    label where the number lives rather than defining the quantity. Such a text
+    has no definitional content, so it cannot deny a claim and is not evidence.
+
+    The test is deterministic and reads the words, not a list of known strings:
+    a text is label-only when every word it carries belongs to the vocabulary of
+    field placement. A definition of any quantity keeps at least one content
+    word, so a terse but real definition ("Height", "Toroidal angle") is spared.
+    """
+    if text is None:
+        return True
+    normalised = " ".join(str(text).split()).strip(" .,;:").lower()
+    if not normalised:
+        return True
+    return all(
+        word in _FIELD_PLACEMENT_WORDS for word in _LABEL_ONLY_WORD.findall(normalised)
+    )
+
+
+def source_text(source: Mapping[str, Any]) -> str:
+    """Read a DD source's own words, however its reader filled the field."""
+    return str(source.get("documentation") or source.get("description") or "")
+
+
+def comparison_sources(
+    sources: Sequence[Mapping[str, Any]] | None,
+) -> list[Mapping[str, Any]]:
+    """Drop the DD sources that carry a field label instead of a definition.
+
+    The dropped source is absent from the returned list, never empty, so a claim
+    left with no source is compared against nothing and answers "says nothing"
+    rather than being held against a label.
+    """
+    return [
+        source
+        for source in (sources or ())
+        if not label_only_source(source_text(source))
+    ]
+
+
+def _registry_texts(item: Mapping[str,Any]) -> tuple[str, ...]:
     """Find exact registry text inserted into this documentation entry."""
     from imas_standard_names.grammar.terms import AppliedConventions
 
@@ -567,7 +634,12 @@ def build_docs_state(
     for evidence_field in sorted(
         evidence_fields - {"id", "documentation", "description"}
     ):
-        state[evidence_field] = _observed(item.get(evidence_field))
+        if evidence_field == "dd_source_docs":
+            state[evidence_field] = _observed(
+                comparison_sources(item.get("dd_source_docs")) or None
+            )
+        else:
+            state[evidence_field] = _observed(item.get(evidence_field))
     return state
 
 
@@ -600,16 +672,31 @@ def docs_question_table(
                 f"`documentation_claims[{index}]` with `dd_source_docs.value`, "
                 "`description`, `unit.value`, `links.value`, "
                 "`source_paths.value`, `sibling_names.value` and "
-                "`related_neighbours.value`. A contradiction in any part of "
-                "the sentence is a contradiction even when another part is "
+                "`related_neighbours.value`. Specialisation is compatible: a "
+                "claim about a generic quantity does not contradict a source "
+                "that is a locus-specialised, averaged or component instance of "
+                "it, and a generic documented name does not contradict a source "
+                "that specialises it. A source that carries only a field label "
+                "and no definition is not evidence. A contradiction in any part "
+                "of the sentence is a contradiction even when another part is "
                 "supported. If no observed source bears on the claim, choose "
                 "'says nothing'."
             ),
             "criteria": {
                 option: {
                     "supports": "The DD evidence directly supports this specific claim.",
-                    "contradicts": "Any part of this claim conflicts with an observed source, unit, link target, sibling meaning or source path.",
-                    "says nothing": "The observed evidence neither supports nor contradicts this claim.",
+                    "contradicts": (
+                        "A source denies this claim: it names a different "
+                        "quantity, an opposite sign or direction, an incompatible "
+                        "unit or dimension, or a different definition. A source "
+                        "that only specialises the quantity — one locus, average "
+                        "or component instance of it — does not deny it."
+                    ),
+                    "says nothing": (
+                        "The observed evidence neither supports nor contradicts "
+                        "this claim, including where no observed source carries a "
+                        "definition that bears on it."
+                    ),
                 }[option]
                 for option in options
             },
