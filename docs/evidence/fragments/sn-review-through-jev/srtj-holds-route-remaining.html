@@ -7,7 +7,9 @@
     reviewer's score is preserved exactly as written, and the refusal is a
     separate, triageable <code>ReviewHold</code> node on the name. Acceptance
     is decided by the existing predicate, which already reads open holds, so a
-    held document cannot be accepted by any path.
+    held document cannot be accepted by any path. Each hold is reconciled on every
+    pass by the check that raises it, so a resolved finding releases the
+    document and a check that did not run leaves the holds as they stand.
   </p>
 
   <h3 id="srtj-holds-route-remaining-lint-cap">Site 1 — the documentation lint cap</h3>
@@ -108,6 +110,39 @@
     </li>
   </ul>
 
+  <h3 id="srtj-holds-route-remaining-skip">A skipped audit is not a clean audit</h3>
+  <p id="srtj-holds-route-remaining-skip-finding">
+    The absent-check rule above was written at the cap and never reached it in
+    production. The enrich pass built each batch's lint mapping from the audit
+    report when one existed and from an <em>empty mapping</em> when the audit
+    had not run — so a skipped audit and an audit that ran and found nothing
+    arrived at the cap as the same value, and every lint hold on the names in
+    that batch was cleared. The gate that refuses a document for an unresolved
+    error finding then released it while the finding still stood, which is the
+    one fail-open direction the per-pass reconciliation was meant to remove.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-skip-fix">
+      <strong>Repair:</strong> the batch carries no lint verdict at all when
+      the audit did not run, and the consumers no longer default an absent key
+      to an empty mapping. The two states are now produced by the pass itself
+      rather than distinguished only by the callee.
+    </li>
+    <li id="srtj-holds-route-remaining-skip-test">
+      <strong>Tested through the real batch path.</strong> The covering test
+      drives the enrich pass over a batch with no audit report, reads the
+      verdict off the batch it produces, and puts that value through the cap:
+      the planted lint hold is still open afterwards. Handing the cap a
+      <code>None</code> would have tested the callee's branch and left the
+      defect — that the pass never produced one — in place.
+    </li>
+    <li id="srtj-holds-route-remaining-skip-graph">
+      The cap takes its graph injected, and the default-tier tests that drive
+      it pass a double rather than reaching a live client, so no unmarked test
+      opens a database.
+    </li>
+  </ul>
+
   <h3 id="srtj-holds-route-remaining-promotion">Site 3 — the release-by-dismissal path</h3>
   <p id="srtj-holds-route-remaining-promotion-site">
     <code>imas_codex/standard_names/review/holds.py</code>,
@@ -181,12 +216,17 @@
   <h3 id="srtj-holds-route-remaining-verification">Verification</h3>
   <ul>
     <li id="srtj-holds-route-remaining-verification-delta">
-      <strong>Gate by delta.</strong> The gate covers the holds, cascade, panel
-      and lint-cap test files. The base arm (revision before this change) shows
-      <code>9 failed</code>; the head arm shows the same <code>9 failed</code>,
-      <code>93 passed</code>. The delta is zero added failures. All nine are
-      the same pre-existing <code>test_consumer_predicates_agree_with_rubric_route</code>
-      documentation ids, present at base.
+      <strong>Gate by delta.</strong> The gate covers the holds, cascade, panel,
+      lint-cap and judge-stage test files. Each arm runs from its own
+      <code>git archive</code> tree with its own temporary directory and
+      <code>--basetemp</code>, so a deleted basetemp in one arm cannot put the
+      other's fixtures into setup error. The base arm (the revision before this
+      change) shows <code>9 failed, 95 passed, 1 skipped</code>; the head arm
+      shows the same <code>9 failed</code>, <code>102 passed, 1 skipped</code>.
+      The delta is zero added failures, and the seven extra passes are the hold
+      tests this work adds. All nine failures are the same pre-existing
+      <code>test_consumer_predicates_agree_with_rubric_route</code>
+      documentation ids in both arms.
     </li>
     <li id="srtj-holds-route-remaining-verification-holds">
       The documentation hold file passes at head, and passed at base (10
@@ -197,6 +237,12 @@
       <code>_cap_docs_scores_for_lint_errors</code> reddens three lint-cap
       tests, including the new hold test, and the source was restored byte-
       identical afterwards.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-skip">
+      <strong>Skipped-audit control.</strong> Restoring the empty mapping in
+      the audit-skipped branch reddens the covering hold test on its first
+      assertion; the same test passes with the source unmodified, and the
+      source was restored byte-identical afterwards.
     </li>
     <li id="srtj-holds-route-remaining-verification-reconcile">
       <strong>Reconciliation controls.</strong> Removing the clearing call from

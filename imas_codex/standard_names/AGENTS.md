@@ -454,6 +454,15 @@ the kinds that pass re-checks, or by the check reconciling its own kinds as both
 of these do. `clear_holds_not_raised` run by an unrelated re-check does not touch
 them, because it clears only the kinds it was told that check covers.
 
+**A check that did not run reports no verdict, never a clean one.** The enrich
+pass builds each batch's error-lint mapping from the audit report, and a batch
+whose audit did not run carries no mapping at all — distinct from an empty
+mapping, which means the audit ran and found nothing, which is what clears the
+hold. Recording a skipped audit as empty would clear every lint hold on the
+names in that batch, so a document with an unresolved error finding would be
+released by a pass that never looked for one. The distinction is produced by
+the pass, not only honoured by the consumer.
+
 The post-drain path is covered by the same flag as well: it suppresses
 `release_all_orphan_claims`, the repeated structural parent fixups,
 `resolve_doc_links`, and `restamp_harmonized_families` when they are invoked
