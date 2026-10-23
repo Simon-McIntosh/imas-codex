@@ -1688,7 +1688,10 @@
         "tests/standard_names/test_contradiction_veto_question.py::test_an_undecided_distribution_does_not_veto[answer1]",
         "tests/standard_names/test_contradiction_veto_question.py::test_an_undecided_distribution_does_not_veto[answer2]",
         "tests/standard_names/test_contradiction_veto_question.py::test_a_direction_word_label_is_not_evidence"
-      ]
+      ],
+      "failed": 10,
+      "passed": 33,
+      "note": "parameterised ids recorded once each in failing_test_ids"
     },
     "head_arm": {
       "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/test-veto-question-head.log",
