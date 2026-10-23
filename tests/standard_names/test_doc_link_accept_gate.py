@@ -35,6 +35,8 @@ def test_normalization_failure_refuses_docs_acceptance() -> None:
 
     with (
         patch.object(graph_ops, "GraphClient", return_value=client),
+        patch.object(graph_ops, "clear_holds_not_raised", return_value=0),
+        patch.object(graph_ops, "docs_accepted", return_value=True),
         patch.object(
             graph_ops,
             "_normalize_bare_doc_links",

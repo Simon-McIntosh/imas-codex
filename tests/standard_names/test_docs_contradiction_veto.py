@@ -8,7 +8,45 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names import workers
-from imas_codex.standard_names.review import jev_review
+from imas_codex.standard_names.review import cascade, holds, jev_review
+
+
+class _HoldRecorder:
+    """Record the worker's hold writes without reaching a live graph."""
+
+    def __init__(self) -> None:
+        self.rows: dict[str, dict] = {}
+
+    def raise_hold(self, name_id, axis, kind, finding, evidence, raised_by):
+        key = holds.finding_key(kind, finding)
+        row = {
+            "id": holds.hold_id(name_id, axis, kind, finding),
+            "axis": axis,
+            "kind": kind,
+            "finding": finding,
+            "evidence": evidence,
+            "raised_by": raised_by,
+            "finding_key": key,
+            "status": "open",
+        }
+        self.rows[key] = row
+        return row
+
+    def clear_holds_not_raised(self, name_id, axis, checked_kinds, raised_keys):
+        cleared = 0
+        for row in self.rows.values():
+            if (
+                row["id"].startswith(f"{name_id}:{axis}:")
+                and row["kind"] in checked_kinds
+                and row["finding_key"] not in raised_keys
+                and row["status"] == "open"
+            ):
+                row["status"] = "cleared"
+                cleared += 1
+        return cleared
+
+    def open_holds(self):
+        return [row for row in self.rows.values() if row["status"] == "open"]
 
 
 @pytest.mark.parametrize(
@@ -57,11 +95,13 @@ def test_claim_verdict_controls_acceptance(answer, expected_stage):
         "dd_gaps": [],
     }
     persisted = {}
+    persisted_stages: list[str] = []
+    hold_records = _HoldRecorder()
 
     async def prepare(_item):
         return request
 
-    async def review(**_kwargs):
+    async def review(*_args, **_kwargs):
         return quorum
 
     async def decide(states, questions, **kwargs):
@@ -80,7 +120,13 @@ def test_claim_verdict_controls_acceptance(answer, expected_stage):
 
     def persist(**kwargs):
         persisted.update(kwargs)
-        return "accepted" if kwargs["score"] >= kwargs["min_score"] else "reviewed"
+        stage = (
+            "accepted"
+            if kwargs["score"] >= kwargs["min_score"] and not hold_records.open_holds()
+            else "reviewed"
+        )
+        persisted_stages.append(stage)
+        return stage
 
     import imas_codex.standard_names.graph_ops as graph_ops
 
@@ -89,6 +135,11 @@ def test_claim_verdict_controls_acceptance(answer, expected_stage):
     with (
         patch.object(workers, "prepare_docs_review_request", prepare),
         patch.object(workers, "_run_rd_quorum_cycles", review),
+        patch.object(cascade, "adjudicate_review", review),
+        patch.object(holds, "raise_hold", hold_records.raise_hold),
+        patch.object(
+            holds, "clear_holds_not_raised", hold_records.clear_holds_not_raised
+        ),
         patch.object(workers, "_review_dd_source_bindings", return_value={}),
         patch.object(workers, "_persist_dd_gap_evidence"),
         patch.object(jev_review, "decide_batch", decide),
@@ -103,8 +154,14 @@ def test_claim_verdict_controls_acceptance(answer, expected_stage):
             == 1
         )
 
-    stage = "accepted" if persisted["score"] >= persisted["min_score"] else "reviewed"
-    assert stage == expected_stage
+    assert persisted_stages == [expected_stage]
+    assert persisted["score"] == 1.0
+    assert bool(hold_records.open_holds()) == (expected_stage == "reviewed")
+    if expected_stage == "reviewed":
+        hold = hold_records.open_holds()[0]
+        assert hold["kind"] == "documentation_contradiction"
+        assert "The field points inward." in hold["evidence"]
+        assert "The field points outward." in hold["evidence"]
     if answer == "contradicts":
         assert (
             "The field points inward."
@@ -147,6 +204,8 @@ def test_second_bound_dd_source_can_hold_documentation():
     }
     observed = []
     persisted = {}
+    persisted_stages: list[str] = []
+    hold_records = _HoldRecorder()
     graph = MagicMock()
 
     def query(cypher, **kwargs):
@@ -180,7 +239,7 @@ def test_second_bound_dd_source_can_hold_documentation():
             )
         return results, 0.0001 * len(results)
 
-    async def review(**_kwargs):
+    async def review(*_args, **_kwargs):
         return {
             "records": [],
             "winning_score": 1.0,
@@ -197,7 +256,13 @@ def test_second_bound_dd_source_can_hold_documentation():
 
     def persist(**kwargs):
         persisted.update(kwargs)
-        return "accepted" if kwargs["score"] >= kwargs["min_score"] else "reviewed"
+        stage = (
+            "accepted"
+            if kwargs["score"] >= kwargs["min_score"] and not hold_records.open_holds()
+            else "reviewed"
+        )
+        persisted_stages.append(stage)
+        return stage
 
     graph_context = MagicMock()
     graph_context.__enter__.return_value = graph
@@ -218,6 +283,11 @@ def test_second_bound_dd_source_can_hold_documentation():
         patch.object(workers, "model_provider_exposure", return_value=0.001),
         patch.object(workers, "_load_docs_review_examples", return_value=[]),
         patch.object(workers, "_run_rd_quorum_cycles", review),
+        patch.object(cascade, "adjudicate_review", review),
+        patch.object(holds, "raise_hold", hold_records.raise_hold),
+        patch.object(
+            holds, "clear_holds_not_raised", hold_records.clear_holds_not_raised
+        ),
         patch.object(workers, "_review_dd_source_bindings", return_value={}),
         patch.object(workers, "_persist_dd_gap_evidence"),
         patch("imas_codex.standard_names.workers._enrich_batch_items"),
@@ -242,6 +312,11 @@ def test_second_bound_dd_source_can_hold_documentation():
         )
 
     assert [source["id"] for source in observed] == [first, second]
-    assert persisted["score"] < persisted["min_score"]
+    assert persisted_stages == ["reviewed"]
+    assert persisted["score"] == 1.0
+    assert len(hold_records.open_holds()) == 1
+    assert hold_records.open_holds()[0]["kind"] == "documentation_contradiction"
+    assert second in hold_records.open_holds()[0]["evidence"]
+    assert source_docs[second] in hold_records.open_holds()[0]["evidence"]
     assert second in persisted["comments_per_dim"]["contradicts_source"]
     assert source_docs[second] in persisted["comments_per_dim"]["contradicts_source"]

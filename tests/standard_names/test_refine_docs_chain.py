@@ -1,4 +1,4 @@
-"""Tests for the refine_docs pipeline (P4.3: DocsRevision snapshot architecture).
+"""Tests for the refine_docs pipeline and DocsRevision snapshots.
 
 Covers:
 - Claim eligibility (reviewed + low docs score + chain < cap + verdict != accept)
@@ -68,6 +68,13 @@ def _patch_docs_chain_history(return_value=None):
         _CHAIN_HISTORY_PATH,
         return_value=return_value or [],
     ):
+        yield
+
+
+@contextmanager
+def _no_open_holds():
+    """The score-only claim fixtures carry no review vetoes."""
+    with patch("imas_codex.standard_names.graph_ops.open_holds", return_value=[]):
         yield
 
 
@@ -145,7 +152,7 @@ class TestClaimRefineDocsEligible:
             ]
         )
 
-        with _patch_gc(gc), _patch_docs_chain_history():
+        with _patch_gc(gc), _patch_docs_chain_history(), _no_open_holds():
             items = claim_refine_docs_batch(batch_size=1)
 
         assert len(items) == 1
@@ -155,6 +162,8 @@ class TestClaimRefineDocsEligible:
         seed_cypher = tx.run.call_args_list[0].args[0]
         assert "docs_stage = 'reviewed'" in seed_cypher
         assert "reviewer_score_docs" in seed_cypher
+        assert "HAS_HOLD" in seed_cypher
+        assert "hold.status = 'open'" in seed_cypher
 
     def test_claim_excludes_chain_at_cap(self):
         """docs_chain_length >= rotation_cap → not claimed."""
@@ -216,7 +225,11 @@ class TestClaimRefineDocsEligible:
             ]
         )
 
-        with _patch_gc(gc), _patch_docs_chain_history(return_value=chain):
+        with (
+            _patch_gc(gc),
+            _patch_docs_chain_history(return_value=chain),
+            _no_open_holds(),
+        ):
             items = claim_refine_docs_batch(batch_size=1)
 
         assert len(items) == 1

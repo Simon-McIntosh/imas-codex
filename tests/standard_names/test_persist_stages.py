@@ -215,7 +215,18 @@ def test_review_stage_decision(
         "reviewer_chain_size": 3,
     }
 
-    with _patch_gc(gc), _no_write_reviews():
+    # This table has no veto findings; keep that premise explicit while the
+    # independent hold lifecycle is exercised against a real graph elsewhere.
+    with (
+        _patch_gc(gc),
+        _no_write_reviews(),
+        patch.object(graph_ops, "clear_holds_not_raised", return_value=0),
+        patch.object(
+            graph_ops,
+            "docs_accepted",
+            side_effect=lambda judged, minimum, _name: judged >= minimum,
+        ),
+    ):
         result = fn(
             sn_id="test_sn",
             claim_token="tok-test-abc",
