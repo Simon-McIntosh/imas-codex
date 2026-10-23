@@ -7,6 +7,9 @@ import re
 from collections import Counter
 from pathlib import Path
 
+import pytest
+
+from imas_codex.standard_names.doc_links import _is_prose_bracket
 from imas_codex.standard_names.docs_gates import (
     DOCUMENTATION_GATE_NAMES,
     MIN_DOCUMENTATION_WORDS,
@@ -457,6 +460,49 @@ def test_unit_brackets_do_not_fail_hygiene() -> None:
             f"[density at a limiter](name:density_at_limiter) in {notation}",
         )
         assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS, notation
+
+
+@pytest.mark.parametrize(
+    "notation",
+    ("[10^20 m^-3]", "[0.1 s]", "[2 GeV]", "[m^-3]", "[K]"),
+)
+def test_numeric_magnitude_and_plain_unit_brackets_are_not_prose(
+    notation: str,
+) -> None:
+    assert not _is_prose_bracket(notation[1:-1])
+    text = _LIMITER_PROSE.replace(
+        "[ion density at a limiter]",
+        f"[density at a limiter](name:density_at_limiter) in {notation}",
+    )
+    assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS
+
+
+def test_helium_phrases_are_prose_despite_a_digit() -> None:
+    for phrase in (
+        "accumulated helium-3 count due to gas injection",
+        "toroidal flux-surface-averaged helium-3 velocity at the plasma boundary",
+    ):
+        text = _LIMITER_PROSE.replace("[ion density at a limiter]", f"[{phrase}]")
+        result = _hygiene_result(text)
+        assert result.outcome is DocumentationGateOutcome.FAIL
+        assert f"[{phrase}]" in result.reason
+
+
+def test_live_documentation_audit_rejects_a_self_link() -> None:
+    from imas_codex.standard_names.review.audits import run_documentation_gate_checks
+
+    text = _LIMITER_PROSE.replace(
+        "[ion density at a limiter]",
+        "[lithium density at a limiter](name:lithium_density_at_limiter)",
+    )
+    findings = run_documentation_gate_checks(
+        [{"id": "lithium_density_at_limiter", "documentation": text}]
+    )
+    assert any(
+        finding.finding_type == "link_hygiene"
+        and "name:lithium_density_at_limiter" in finding.detail
+        for finding in findings
+    )
 
 
 def test_numeric_interval_brackets_do_not_fail_hygiene() -> None:

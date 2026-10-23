@@ -757,7 +757,11 @@ def run_documentation_gate_checks(
             declared_unit=name.get("unit") or None,
             cocos_transformation_type=name.get("cocos_transformation_type") or None,
         )
-        score = score_documentation(documentation, physics_context=context)
+        score = score_documentation(
+            documentation,
+            physics_context=context,
+            documenting_name=name.get("id"),
+        )
         for gate, result in score.gate_vector.items():
             if result.outcome is DocumentationGateOutcome.FAIL:
                 findings.append(

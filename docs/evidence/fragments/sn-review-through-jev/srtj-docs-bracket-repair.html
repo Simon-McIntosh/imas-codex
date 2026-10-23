@@ -1,0 +1,203 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Documentation bracket normalisation preview</title></head><body>
+<h1 id="srtj-docs-bracket-repair">Documentation bracket normalisation preview</h1>
+<p><strong>Result:</strong> the read-only preview changes 814 documents in the pool, including 645 accepted documents. It leaves zero accepted-document failures under the tightened prose-bracket and self-link rule. No live graph text was changed and no model was called; spend USD 0. The runner reread every changed document from the graph and confirmed its stored text still equalled the before text.</p>
+<p>The <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-repair-dryrun.json">per-document action record</a> is written by <code>srtj-docs-bracket-repair-dryrun.py</code>; the final dry-run log ends in <code>EXIT=0</code>. Full before/after text for every changed document is in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083551625568-srtj-docs-bracket-repair/dryrun-full.json</code>, kept in the run directory because it exceeds the repository’s 300 KB data-file limit.</p>
+<h2 id="srtj-docs-bracket-repair-rule">Rule and proof</h2>
+<p>The normaliser reads the same unmasked prose bracket spans as the gate. A phrase becomes <code>[phrase](name:exact_snake_case_id)</code> only when that exact id belongs to a live standard name other than the documented one. Every other prose phrase loses its brackets; a <code>name:</code> link back to the documented name becomes plain text. Existing Markdown links, math, code, unit brackets and numeric intervals stay intact, including a numeric magnitude followed by unit factors. No DD target is inferred. The live documentation audit now supplies the documented id so its self-link refusal fires.</p>
+<p>The starting defect was reproduced at the base revision: <code>normalizer_result: 0</code> for <code>See [poloidal flux].</code>, <code>helium_is_prose: False</code> for <code>[accumulated helium-3 count due to gas injection]</code>, and <code>audit_findings: ['minimum_word_count']</code> for <code>[self](name:self)</code> (no link-hygiene finding). The first committed head passed 47 tests in the four-file gate; the base had two failing acceptance mocks. With the multi-word normaliser branch deliberately reverted, <code>test_normalize_prose_against_disposable_graph</code> failed on the missing <code>[poloidal flux](name:poloidal_flux)</code> link and the control log ended <code>EXIT=1</code>.</p>
+<p>Checkable logs in the run directory: <code>defect-reproduction-corrected.log</code> records the base module path and the three reproductions; <code>base-gate-corrected.log</code> records the 2-failure base; <code>head-gate-committed.log</code> records 47 passing tests before the numeric-unit review; <code>negative-control.log</code> records the deliberate one-test failure; and <code>dryrun-final.log</code> records the first read-only preview with <code>EXIT=0</code>. The current gate and replay logs are named below.</p>
+<h2 id="srtj-docs-bracket-repair-unit-repair">Numeric-magnitude unit repair</h2>
+<p>The review found that a numeric first factor made a unit bracket look like prose. With the faulty predicate, <code>[10^20 m^-3]</code>, <code>[0.1 s]</code> and <code>[2 GeV]</code> each failed the new unit check, and the disposable-graph normaliser stripped all three brackets. The plain <code>[m^-3]</code> and <code>[K]</code> controls passed. The predicate now accepts one leading number, optionally with an exponent, only when every remaining factor is a recognised unit. The helium-3 phrase cases still fail as prose. <code>unit-predicate-red.log</code> ends <code>EXIT=1</code> with those four test failures; <code>unit-predicate-green.log</code> ends <code>EXIT=0</code> with 7 passes, and <code>unit-gate-committed.log</code> ends <code>EXIT=0</code> with 52 passes across the four required files.</p>
+<p>The read-only replay compared the previous 870 unbracketed actions by document id, phrase and occurrence count with the new actions. It reread all 814 previously affected documents and confirmed their stored before text had not changed. <strong>Zero of the 870 unbracketed actions changed</strong>: 0 removed and 0 added. The full changed-action list is empty (<code>removed_unbracketed: []</code>, <code>added_unbracketed: []</code> in the JSON). This snapshot contains no numeric-leading bracket among those 870 actions; the disposable-graph test proves the repaired normaliser preserves one when it occurs. No live graph write was made.</p>
+<h2 id="srtj-docs-bracket-repair-counts">Read-only action counts</h2>
+<table border="1" cellpadding="4" cellspacing="0"><tr><th>scope</th><th>changed documents</th><th>exact links</th><th>unbracketed phrases</th><th>self-links removed</th></tr>
+<tr><td>all pool stages</td><td>814</td><td>124</td><td>870</td><td>66</td></tr>
+<tr><td>accepted / approved</td><td>645</td><td>107</td><td>684</td><td>33</td></tr></table>
+<p>Among 2530 accepted documents, the prior predicate fails 639 at the current snapshot and the tightened predicate fails 645 before normalisation. The preview clears all 639 current prior-rule failures and all 645 tightened-rule failures: <strong>zero left</strong>. The earlier census recorded 637 distinct failures. Its record has 613 bare-phrase documents and 24 self-link-only documents; the current prior-rule parser reads 615 bare-phrase documents and 32 self-link documents with 8 overlapping, hence 639 distinct. The two-document difference lies in the bare-phrase count. The census export does not contain all historical ids, so this is a full-population clearance at the current snapshot rather than a row-by-row join to that earlier snapshot.</p>
+<h2 id="srtj-docs-bracket-repair-newly-flagged">Phrases newly caught by the tighter unit test</h2>
+<table border="1" cellpadding="4" cellspacing="0"><tr><th>document</th><th>phrase</th></tr>
+<tr><td><code>accumulated_helium_4_count_due_to_gas_injection</code></td><td><code>[helium-4 count due to gas injection]</code></td></tr>
+<tr><td><code>accumulated_krypton_count</code></td><td><code>[accumulated helium-3 count due to gas injection]</code></td></tr>
+<tr><td><code>helium_4_density_at_plasma_boundary</code></td><td><code>[flux-surface-averaged helium-4 density at the plasma boundary]</code></td></tr>
+<tr><td><code>methane_carbon_13_source_rate</code></td><td><code>[accumulated methane carbon-13 count due to gas injection]</code></td></tr>
+<tr><td><code>radial_coordinate_of_dr_dz_zero_point</code></td><td><code>[vertical coordinate of the dR/dZ zero point]</code></td></tr>
+<tr><td><code>toroidal_helium_3_velocity_at_plasma_boundary</code></td><td><code>[flux-surface-averaged helium-3 boundary velocity]</code></td></tr>
+</table>
+<h2 id="srtj-docs-bracket-repair-linked">Every exact-name link proposed</h2>
+<p>Each row is one link action, including repeated occurrences. The target column is the exact live id, not a semantic guess. The coordinator reviews this list before applying any live write.</p>
+<table border="1" cellpadding="4" cellspacing="0"><tr><th>#</th><th>document</th><th>phrase</th><th>target id</th></tr>
+<tr><td>1</td><td><code>toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface</code></td><td>toroidal magnetic flux</td><td><code>toroidal_magnetic_flux</code></td></tr>
+<tr><td>2</td><td><code>magnetic_field</code></td><td>magnetic field magnitude</td><td><code>magnetic_field_magnitude</code></td></tr>
+<tr><td>3</td><td><code>momentum_source</code></td><td>radial momentum source</td><td><code>radial_momentum_source</code></td></tr>
+<tr><td>4</td><td><code>parallel_net_ion_momentum_source</code></td><td>net ion momentum source</td><td><code>net_ion_momentum_source</code></td></tr>
+<tr><td>5</td><td><code>fast_ion_pressure</code></td><td>ion pressure</td><td><code>ion_pressure</code></td></tr>
+<tr><td>6</td><td><code>neutral_velocity</code></td><td>bulk neutral internal-state velocity</td><td><code>bulk_neutral_internal_state_velocity</code></td></tr>
+<tr><td>7</td><td><code>ion_charge_state_power_density</code></td><td>ion power density</td><td><code>ion_power_density</code></td></tr>
+<tr><td>8</td><td><code>current_density_due_to_diamagnetic_drift</code></td><td>diamagnetic current density</td><td><code>diamagnetic_current_density</code></td></tr>
+<tr><td>9</td><td><code>ion_charge_state_rotation_frequency</code></td><td>ion rotation frequency</td><td><code>ion_rotation_frequency</code></td></tr>
+<tr><td>10</td><td><code>toroidal_ion_charge_state_torque_density</code></td><td>ion charge state torque density</td><td><code>ion_charge_state_torque_density</code></td></tr>
+<tr><td>11</td><td><code>volume_averaged_ion_charge_state_average_charge_number</code></td><td>ion charge state average charge number</td><td><code>ion_charge_state_average_charge_number</code></td></tr>
+<tr><td>12</td><td><code>root_mean_square_of_wave_current_of_antenna_strap</code></td><td>wave current of antenna strap</td><td><code>wave_current_of_antenna_strap</code></td></tr>
+<tr><td>13</td><td><code>toroidal_neutral_internal_state_torque_density</code></td><td>neutral torque density</td><td><code>neutral_torque_density</code></td></tr>
+<tr><td>14</td><td><code>radial_effective_neutral_internal_state_velocity_due_to_convection</code></td><td>effective neutral internal-state velocity due to convection</td><td><code>effective_neutral_internal_state_velocity_due_to_convection</code></td></tr>
+<tr><td>15</td><td><code>effective_neutral_internal_state_momentum_velocity_due_to_convection</code></td><td>effective neutral internal-state velocity due to convection</td><td><code>effective_neutral_internal_state_velocity_due_to_convection</code></td></tr>
+<tr><td>16</td><td><code>width_of_aperture</code></td><td>radius of aperture</td><td><code>radius_of_aperture</code></td></tr>
+<tr><td>17</td><td><code>fast_ion_power_density</code></td><td>ion power density</td><td><code>ion_power_density</code></td></tr>
+<tr><td>18</td><td><code>inner_radius_of_antenna_strap</code></td><td>toroidal width of antenna strap</td><td><code>toroidal_width_of_antenna_strap</code></td></tr>
+<tr><td>19</td><td><code>outer_radius_of_antenna_strap</code></td><td>toroidal width of antenna strap</td><td><code>toroidal_width_of_antenna_strap</code></td></tr>
+<tr><td>20</td><td><code>poloidal_particle_diffusivity</code></td><td>particle diffusivity</td><td><code>particle_diffusivity</code></td></tr>
+<tr><td>21</td><td><code>toroidal_total_momentum_flux</code></td><td>total momentum flux</td><td><code>total_momentum_flux</code></td></tr>
+<tr><td>22</td><td><code>parallel_diamagnetic_current_density</code></td><td>diamagnetic current density</td><td><code>diamagnetic_current_density</code></td></tr>
+<tr><td>23</td><td><code>parallel_diamagnetic_current_density</code></td><td>diamagnetic current density</td><td><code>diamagnetic_current_density</code></td></tr>
+<tr><td>24</td><td><code>poloidal_total_current_density</code></td><td>total current density</td><td><code>total_current_density</code></td></tr>
+<tr><td>25</td><td><code>radial_total_current_density</code></td><td>total current density</td><td><code>total_current_density</code></td></tr>
+<tr><td>26</td><td><code>vertical_total_current_density</code></td><td>total current density</td><td><code>total_current_density</code></td></tr>
+<tr><td>27</td><td><code>flux_surface_averaged_major_radius</code></td><td>major radius</td><td><code>major_radius</code></td></tr>
+<tr><td>28</td><td><code>flux_surface_averaged_major_radius</code></td><td>major radius</td><td><code>major_radius</code></td></tr>
+<tr><td>29</td><td><code>toroidal_total_current_density</code></td><td>total current density</td><td><code>total_current_density</code></td></tr>
+<tr><td>30</td><td><code>radial_perturbed_plasma_magnetic_field_real_part</code></td><td>radial perturbed plasma magnetic field imaginary part</td><td><code>radial_perturbed_plasma_magnetic_field_imaginary_part</code></td></tr>
+<tr><td>31</td><td><code>toroidal_total_runaway_electron_current</code></td><td>runaway electron current density</td><td><code>runaway_electron_current_density</code></td></tr>
+<tr><td>32</td><td><code>parallel_fluctuating_ion_current_density</code></td><td>fluctuating ion current density</td><td><code>fluctuating_ion_current_density</code></td></tr>
+<tr><td>33</td><td><code>accumulated_hydrogen_prefill_count</code></td><td>accumulated hydrogen count due to gas injection</td><td><code>accumulated_hydrogen_count_due_to_gas_injection</code></td></tr>
+<tr><td>34</td><td><code>accumulated_krypton_count</code></td><td>accumulated helium-3 count due to gas injection</td><td><code>accumulated_helium_3_count_due_to_gas_injection</code></td></tr>
+<tr><td>35</td><td><code>methane_carbon_13_source_rate</code></td><td>accumulated methane carbon-13 count due to gas injection</td><td><code>accumulated_methane_carbon_13_count_due_to_gas_injection</code></td></tr>
+<tr><td>36</td><td><code>helium_3_source_rate_due_to_gas_injection</code></td><td>accumulated helium-3 count due to gas injection</td><td><code>accumulated_helium_3_count_due_to_gas_injection</code></td></tr>
+<tr><td>37</td><td><code>hydrogen_source_rate_due_to_gas_injection</code></td><td>accumulated hydrogen count due to gas injection</td><td><code>accumulated_hydrogen_count_due_to_gas_injection</code></td></tr>
+<tr><td>38</td><td><code>deuterium_source_rate_due_to_injection</code></td><td>source rate due to injection</td><td><code>source_rate_due_to_injection</code></td></tr>
+<tr><td>39</td><td><code>electron_source_rate_due_to_injection</code></td><td>source rate due to injection</td><td><code>source_rate_due_to_injection</code></td></tr>
+<tr><td>40</td><td><code>tritium_source_rate_due_to_gas_injection</code></td><td>accumulated tritium count due to gas injection</td><td><code>accumulated_tritium_count_due_to_gas_injection</code></td></tr>
+<tr><td>41</td><td><code>maximum_surface_temperature</code></td><td>surface temperature</td><td><code>surface_temperature</code></td></tr>
+<tr><td>42</td><td><code>deuterium_deuterium_emissivity_due_to_fusion</code></td><td>neutron emissivity due to fusion</td><td><code>neutron_emissivity_due_to_fusion</code></td></tr>
+<tr><td>43</td><td><code>normalized_count_at_detector_pixel</code></td><td>count at detector pixel</td><td><code>count_at_detector_pixel</code></td></tr>
+<tr><td>44</td><td><code>thickness_of_vacuum_vessel</code></td><td>thickness of cryostat</td><td><code>thickness_of_cryostat</code></td></tr>
+<tr><td>45</td><td><code>co_passing_fast_particle_pressure</code></td><td>fast-particle pressure</td><td><code>fast_particle_pressure</code></td></tr>
+<tr><td>46</td><td><code>counter_passing_fast_particle_pressure</code></td><td>fast-particle pressure</td><td><code>fast_particle_pressure</code></td></tr>
+<tr><td>47</td><td><code>electron_diffusion_coefficient</code></td><td>electron number density</td><td><code>electron_number_density</code></td></tr>
+<tr><td>48</td><td><code>energy_density</code></td><td>plasma energy</td><td><code>plasma_energy</code></td></tr>
+<tr><td>49</td><td><code>helium_confinement_time</code></td><td>energy confinement time</td><td><code>energy_confinement_time</code></td></tr>
+<tr><td>50</td><td><code>momentum_convection_velocity</code></td><td>parallel momentum convection velocity</td><td><code>parallel_momentum_convection_velocity</code></td></tr>
+<tr><td>51</td><td><code>parallel_fast_particle_pressure</code></td><td>fast-particle pressure</td><td><code>fast_particle_pressure</code></td></tr>
+<tr><td>52</td><td><code>parallel_runaway_electron_current_density</code></td><td>runaway electron current density</td><td><code>runaway_electron_current_density</code></td></tr>
+<tr><td>53</td><td><code>parallel_runaway_electron_current_density</code></td><td>co-passing fast current density</td><td><code>co_passing_fast_current_density</code></td></tr>
+<tr><td>54</td><td><code>perpendicular_fast_particle_pressure</code></td><td>fast-particle pressure</td><td><code>fast_particle_pressure</code></td></tr>
+<tr><td>55</td><td><code>perpendicular_runaway_electron_convection_velocity</code></td><td>runaway-electron convection velocity</td><td><code>runaway_electron_convection_velocity</code></td></tr>
+<tr><td>56</td><td><code>perpendicular_runaway_electron_particle_flux</code></td><td>runaway electron particle flux</td><td><code>runaway_electron_particle_flux</code></td></tr>
+<tr><td>57</td><td><code>thermal_plasma_energy</code></td><td>plasma energy</td><td><code>plasma_energy</code></td></tr>
+<tr><td>58</td><td><code>toroidal_co_passing_fast_ion_torque_density_due_to_collisions</code></td><td>co-passing fast ion torque density due to collisions</td><td><code>co_passing_fast_ion_torque_density_due_to_collisions</code></td></tr>
+<tr><td>59</td><td><code>toroidal_co_passing_thermal_ion_torque_density_due_to_collisions</code></td><td>co-passing thermal-ion torque density due to collisions</td><td><code>co_passing_thermal_ion_torque_density_due_to_collisions</code></td></tr>
+<tr><td>60</td><td><code>toroidal_co_passing_torque_density</code></td><td>co-passing torque density</td><td><code>co_passing_torque_density</code></td></tr>
+<tr><td>61</td><td><code>toroidal_counter_passing_fast_ion_torque_density_due_to_collisions</code></td><td>counter-passing fast-ion torque density due to collisions</td><td><code>counter_passing_fast_ion_torque_density_due_to_collisions</code></td></tr>
+<tr><td>62</td><td><code>toroidal_counter_passing_thermal_ion_torque_density_due_to_collisions</code></td><td>counter-passing thermal ion torque density due to collisions</td><td><code>counter_passing_thermal_ion_torque_density_due_to_collisions</code></td></tr>
+<tr><td>63</td><td><code>toroidal_fast_electron_torque_density_due_to_collisions</code></td><td>fast-electron torque density due to collisions</td><td><code>fast_electron_torque_density_due_to_collisions</code></td></tr>
+<tr><td>64</td><td><code>toroidal_fast_electron_torque_density_due_to_collisions</code></td><td>thermal-electron torque density due to collisions</td><td><code>thermal_electron_torque_density_due_to_collisions</code></td></tr>
+<tr><td>65</td><td><code>toroidal_fast_ion_torque_density_due_to_collisions</code></td><td>fast-ion torque density due to collisions</td><td><code>fast_ion_torque_density_due_to_collisions</code></td></tr>
+<tr><td>66</td><td><code>toroidal_ion_rotation_frequency</code></td><td>ion rotation frequency</td><td><code>ion_rotation_frequency</code></td></tr>
+<tr><td>67</td><td><code>toroidal_ion_torque</code></td><td>ion torque</td><td><code>ion_torque</code></td></tr>
+<tr><td>68</td><td><code>toroidal_ion_torque_density</code></td><td>ion torque density</td><td><code>ion_torque_density</code></td></tr>
+<tr><td>69</td><td><code>toroidal_neutral_torque_density</code></td><td>neutral torque density</td><td><code>neutral_torque_density</code></td></tr>
+<tr><td>70</td><td><code>toroidal_thermal_electron_torque_density_due_to_collisions</code></td><td>thermal electron torque density due to collisions</td><td><code>thermal_electron_torque_density_due_to_collisions</code></td></tr>
+<tr><td>71</td><td><code>toroidal_torque_due_to_neutral_beam_shinethrough</code></td><td>torque due to neutral beam shinethrough</td><td><code>torque_due_to_neutral_beam_shinethrough</code></td></tr>
+<tr><td>72</td><td><code>toroidal_total_plasma_momentum</code></td><td>total plasma momentum</td><td><code>total_plasma_momentum</code></td></tr>
+<tr><td>73</td><td><code>toroidal_trapped_current_density</code></td><td>trapped current density</td><td><code>trapped_current_density</code></td></tr>
+<tr><td>74</td><td><code>toroidal_trapped_thermal_ion_torque_density_due_to_collisions</code></td><td>trapped thermal ion torque density due to collisions</td><td><code>trapped_thermal_ion_torque_density_due_to_collisions</code></td></tr>
+<tr><td>75</td><td><code>trapped_fast_particle_pressure</code></td><td>fast-particle pressure</td><td><code>fast_particle_pressure</code></td></tr>
+<tr><td>76</td><td><code>neutral_state_velocity_due_to_diamagnetic_drift</code></td><td>neutral velocity due to diamagnetic drift</td><td><code>neutral_velocity_due_to_diamagnetic_drift</code></td></tr>
+<tr><td>77</td><td><code>volume_averaged_neon_density</code></td><td>neon density</td><td><code>neon_density</code></td></tr>
+<tr><td>78</td><td><code>radial_diamagnetic_current_density</code></td><td>diamagnetic current density</td><td><code>diamagnetic_current_density</code></td></tr>
+<tr><td>79</td><td><code>vertical_diamagnetic_current_density</code></td><td>diamagnetic current density</td><td><code>diamagnetic_current_density</code></td></tr>
+<tr><td>80</td><td><code>ion_energy_diffusion_coefficient</code></td><td>poloidal ion energy diffusion coefficient</td><td><code>poloidal_ion_energy_diffusion_coefficient</code></td></tr>
+<tr><td>81</td><td><code>vertical_pfirsch_schlueter_current_density</code></td><td>diamagnetic current density</td><td><code>diamagnetic_current_density</code></td></tr>
+<tr><td>82</td><td><code>vertical_pfirsch_schlueter_current_density</code></td><td>diamagnetic current density</td><td><code>diamagnetic_current_density</code></td></tr>
+<tr><td>83</td><td><code>parallel_normalized_gyrocenter_perturbed_current_density</code></td><td>normalized gyrocenter perturbed current density</td><td><code>normalized_gyrocenter_perturbed_current_density</code></td></tr>
+<tr><td>84</td><td><code>parallel_normalized_perturbed_current_density_bessel_1</code></td><td>normalized gyrocenter perturbed current density</td><td><code>normalized_gyrocenter_perturbed_current_density</code></td></tr>
+<tr><td>85</td><td><code>perpendicular_normalized_particle_perturbed_energy</code></td><td>normalized particle perturbed energy</td><td><code>normalized_particle_perturbed_energy</code></td></tr>
+<tr><td>86</td><td><code>perpendicular_normalized_particle_perturbed_energy</code></td><td>normalized particle perturbed energy</td><td><code>normalized_particle_perturbed_energy</code></td></tr>
+<tr><td>87</td><td><code>perpendicular_normalized_perturbed_pressure</code></td><td>normalized perturbed pressure</td><td><code>normalized_perturbed_pressure</code></td></tr>
+<tr><td>88</td><td><code>ion_current_density</code></td><td>fluctuating ion current density</td><td><code>fluctuating_ion_current_density</code></td></tr>
+<tr><td>89</td><td><code>product_of_current_density_and_major_radius</code></td><td>toroidal current density</td><td><code>toroidal_current_density</code></td></tr>
+<tr><td>90</td><td><code>product_of_current_density_and_major_radius</code></td><td>major radius</td><td><code>major_radius</code></td></tr>
+<tr><td>91</td><td><code>ratio_of_hydrogen_density_to_total_hydrogenic_density</code></td><td>hydrogenic density</td><td><code>hydrogenic_density</code></td></tr>
+<tr><td>92</td><td><code>wave_phase_of_antenna_strap</code></td><td>wave current of antenna strap</td><td><code>wave_current_of_antenna_strap</code></td></tr>
+<tr><td>93</td><td><code>toroidal_neutral_momentum_convection_velocity</code></td><td>toroidal neutral momentum flux</td><td><code>toroidal_neutral_momentum_flux</code></td></tr>
+<tr><td>94</td><td><code>carbon_prefill_count_due_to_gas_injection</code></td><td>accumulated carbon count due to gas injection</td><td><code>accumulated_carbon_count_due_to_gas_injection</code></td></tr>
+<tr><td>95</td><td><code>accumulated_total_gas_count_at_midplane_due_to_gas_injection</code></td><td>accumulated nitrogen count due to gas injection</td><td><code>accumulated_nitrogen_count_due_to_gas_injection</code></td></tr>
+<tr><td>96</td><td><code>accumulated_total_gas_count_at_midplane_due_to_gas_injection</code></td><td>accumulated carbon count due to gas injection</td><td><code>accumulated_carbon_count_due_to_gas_injection</code></td></tr>
+<tr><td>97</td><td><code>parallel_ion_heat_convection_velocity</code></td><td>effective thermal ion charge-state energy velocity due to convection</td><td><code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code></td></tr>
+<tr><td>98</td><td><code>parallel_ion_heat_convection_velocity</code></td><td>ion heat convection velocity</td><td><code>ion_heat_convection_velocity</code></td></tr>
+<tr><td>99</td><td><code>total_gas_source_rate_at_midplane_due_to_gas_injection</code></td><td>accumulated total gas count at midplane due to gas injection</td><td><code>accumulated_total_gas_count_at_midplane_due_to_gas_injection</code></td></tr>
+<tr><td>100</td><td><code>carbon_source_rate_due_to_gas_injection</code></td><td>accumulated carbon count due to gas injection</td><td><code>accumulated_carbon_count_due_to_gas_injection</code></td></tr>
+<tr><td>101</td><td><code>electron_source_rate_at_pellet_path_due_to_pellet_injection</code></td><td>accumulated particle count at pellet path due to pellet injection</td><td><code>accumulated_particle_count_at_pellet_path_due_to_pellet_injection</code></td></tr>
+<tr><td>102</td><td><code>total_neutron_source_rate_due_to_thermal_fusion</code></td><td>tritium-tritium neutron source rate due to thermal fusion</td><td><code>tritium_tritium_neutron_source_rate_due_to_thermal_fusion</code></td></tr>
+<tr><td>103</td><td><code>ion_kinetic_energy_density</code></td><td>kinetic energy density</td><td><code>kinetic_energy_density</code></td></tr>
+<tr><td>104</td><td><code>ion_kinetic_energy_density</code></td><td>runaway-electron kinetic energy density</td><td><code>runaway_electron_kinetic_energy_density</code></td></tr>
+<tr><td>105</td><td><code>wave_current_of_antenna_strap_amplitude</code></td><td>wave current of antenna strap</td><td><code>wave_current_of_antenna_strap</code></td></tr>
+<tr><td>106</td><td><code>deuterated_methane_source_rate</code></td><td>accumulated deuterated methane count due to gas injection</td><td><code>accumulated_deuterated_methane_count_due_to_gas_injection</code></td></tr>
+<tr><td>107</td><td><code>major_length_of_antenna_strap</code></td><td>length of antenna strap</td><td><code>length_of_antenna_strap</code></td></tr>
+<tr><td>108</td><td><code>radial_effective_electron_diffusivity</code></td><td>electron number density</td><td><code>electron_number_density</code></td></tr>
+<tr><td>109</td><td><code>parallel_total_ion_energy_diffusion_coefficient</code></td><td>total ion energy diffusion coefficient</td><td><code>total_ion_energy_diffusion_coefficient</code></td></tr>
+<tr><td>110</td><td><code>flux_surface_averaged_magnetic_field_magnitude</code></td><td>magnetic-field magnitude</td><td><code>magnetic_field_magnitude</code></td></tr>
+<tr><td>111</td><td><code>counter_passing_current_density</code></td><td>toroidal current density</td><td><code>toroidal_current_density</code></td></tr>
+<tr><td>112</td><td><code>ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code></td><td>magnetic-field magnitude</td><td><code>magnetic_field_magnitude</code></td></tr>
+<tr><td>113</td><td><code>square_of_major_radius</code></td><td>major radius</td><td><code>major_radius</code></td></tr>
+<tr><td>114</td><td><code>inverse_of_major_radius</code></td><td>major radius</td><td><code>major_radius</code></td></tr>
+<tr><td>115</td><td><code>volume_averaged_time_derivative_of_electron_density</code></td><td>time derivative of electron density</td><td><code>time_derivative_of_electron_density</code></td></tr>
+<tr><td>116</td><td><code>total_neutral_source_rate_due_to_gas_injection</code></td><td>accumulated hydrogen count due to gas injection</td><td><code>accumulated_hydrogen_count_due_to_gas_injection</code></td></tr>
+<tr><td>117</td><td><code>total_gas_count_accumulated_at_midplane_due_to_gas_injection</code></td><td>accumulated nitrogen count due to gas injection</td><td><code>accumulated_nitrogen_count_due_to_gas_injection</code></td></tr>
+<tr><td>118</td><td><code>total_gas_count_accumulated_at_midplane_due_to_gas_injection</code></td><td>accumulated carbon count due to gas injection</td><td><code>accumulated_carbon_count_due_to_gas_injection</code></td></tr>
+<tr><td>119</td><td><code>poloidal_current_density_due_to_diamagnetic_drift</code></td><td>diamagnetic current density</td><td><code>diamagnetic_current_density</code></td></tr>
+<tr><td>120</td><td><code>kinetic_energy_density</code></td><td>energy density</td><td><code>energy_density</code></td></tr>
+<tr><td>121</td><td><code>radial_ion_momentum_diffusivity</code></td><td>ion-state momentum diffusivity</td><td><code>ion_state_momentum_diffusivity</code></td></tr>
+<tr><td>122</td><td><code>count_normalized_at_detector_pixel</code></td><td>count at detector pixel</td><td><code>count_at_detector_pixel</code></td></tr>
+<tr><td>123</td><td><code>parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code></td><td>toroidal current density</td><td><code>toroidal_current_density</code></td></tr>
+<tr><td>124</td><td><code>root_mean_square_wave_current_of_antenna_strap</code></td><td>wave current of antenna strap</td><td><code>wave_current_of_antenna_strap</code></td></tr>
+</table>
+<h2 id="srtj-docs-bracket-repair-unbracketed">Unbracketed prose: twenty examples</h2>
+<table border="1" cellpadding="4" cellspacing="0"><tr><th>document</th><th>phrase left as plain text</th></tr>
+<tr><td><code>magnetic_vector_potential</code></td><td>its normalized perturbed amplitude</td></tr>
+<tr><td><code>neutral_species_momentum_convection_velocity</code></td><td>momentum convection velocity</td></tr>
+<tr><td><code>plasma_pressure</code></td><td>Perturbed plasma pressure</td></tr>
+<tr><td><code>power_density_due_to_collisions</code></td><td>particle collisional power density</td></tr>
+<tr><td><code>power_density_due_to_collisions</code></td><td>internal-state collisional power density</td></tr>
+<tr><td><code>ion_power_due_to_collisions</code></td><td>electron power due to collisions</td></tr>
+<tr><td><code>poloidal_magnetic_flux_of_flux_loop</code></td><td>reconstructed poloidal magnetic flux of flux loop</td></tr>
+<tr><td><code>toroidal_flux_surface_averaged_current_density</code></td><td>parallel flux-surface-averaged current density</td></tr>
+<tr><td><code>toroidal_flux_surface_averaged_current_density</code></td><td>flux-surface-averaged current density</td></tr>
+<tr><td><code>area_of_diagnostic_aperture</code></td><td>width of a diagnostic aperture</td></tr>
+<tr><td><code>wavelength_of_filter</code></td><td>width of a filter</td></tr>
+<tr><td><code>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary</code></td><td>poloidal magnetic-field magnitude</td></tr>
+<tr><td><code>radial_derivative_of_poloidal_magnetic_flux</code></td><td>derivative with respect to toroidal flux coordinate of area of flux surface</td></tr>
+<tr><td><code>toroidal_flux_surface_averaged_lithium_velocity_at_plasma_boundary</code></td><td>flux-surface-averaged lithium density at the plasma boundary</td></tr>
+<tr><td><code>toroidal_flux_surface_averaged_krypton_velocity_at_plasma_boundary</code></td><td>toroidal flux-surface-averaged ion velocity at the plasma boundary</td></tr>
+<tr><td><code>toroidal_flux_surface_averaged_helium_4_velocity_at_plasma_boundary</code></td><td>toroidal flux-surface-averaged helium-3 velocity at the plasma boundary</td></tr>
+<tr><td><code>wave_electric_field</code></td><td>per-toroidal-mode electric field</td></tr>
+<tr><td><code>alfven_frequency</code></td><td>toroidal mode number</td></tr>
+<tr><td><code>right_hand_circularly_polarized_wave_electric_field</code></td><td>per-toroidal-mode right-hand circularly polarized wave electric field</td></tr>
+<tr><td><code>parallel_wave_electric_field</code></td><td>parallel wave electric field amplitude</td></tr>
+</table>
+<h2 id="srtj-docs-bracket-repair-self-link-removed">Self-links made plain: twenty examples</h2>
+<table border="1" cellpadding="4" cellspacing="0"><tr><th>document</th><th>phrase left as plain text</th></tr>
+<tr><td><code>poloidal_magnetic_flux_of_flux_loop</code></td><td>poloidal magnetic flux at a sensor attachment point</td></tr>
+<tr><td><code>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary</code></td><td>flux-surface-averaged deuterium-tritium density</td></tr>
+<tr><td><code>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary</code></td><td>deuterium-tritium density at the plasma boundary</td></tr>
+<tr><td><code>toroidal_plasma_current</code></td><td>toroidal_total_plasma_current</td></tr>
+<tr><td><code>polarization_angle_at_constraint_position</code></td><td>polarization_angle</td></tr>
+<tr><td><code>flux_surface_averaged_tungsten_density_at_plasma_boundary</code></td><td>tungsten density at the plasma boundary</td></tr>
+<tr><td><code>toroidal_flux_surface_averaged_helium_4_velocity_at_plasma_boundary</code></td><td>toroidal helium-4 velocity at the plasma boundary</td></tr>
+<tr><td><code>poloidal_current_weighted_average_external_magnetic_flux</code></td><td>poloidal_average_external_magnetic_flux</td></tr>
+<tr><td><code>parallel_flux_surface_averaged_current_density</code></td><td>flux-surface-averaged current density</td></tr>
+<tr><td><code>normalized_toroidal_plasma_beta</code></td><td>beta</td></tr>
+<tr><td><code>normalized_toroidal_plasma_beta</code></td><td>beta</td></tr>
+<tr><td><code>normalized_toroidal_plasma_beta</code></td><td>beta</td></tr>
+<tr><td><code>normalized_toroidal_plasma_beta</code></td><td>beta</td></tr>
+<tr><td><code>poloidal_angle_of_flux_surface</code></td><td>poloidal angle</td></tr>
+<tr><td><code>ion_charge_state_particle_flux</code></td><td>ion_state_particle_flux</td></tr>
+<tr><td><code>toroidal_momentum_convection_velocity</code></td><td>toroidal_momentum_velocity</td></tr>
+<tr><td><code>normalized_momentum_flux_due_to_perturbed_parallel_magnetic_field</code></td><td>momentum flux due to the perturbed parallel magnetic field</td></tr>
+<tr><td><code>parallel_fast_neutral_internal_state_pressure</code></td><td>fast-neutral internal-state pressure</td></tr>
+<tr><td><code>poloidal_neutral_internal_state_energy_convection_velocity</code></td><td>radial neutral internal-state energy convection velocity</td></tr>
+<tr><td><code>power_of_beam_tracing_beam</code></td><td>power_of_beam_tracing_beam</td></tr>
+</table>
+<h2 id="srtj-docs-bracket-repair-left">What remains</h2>
+<p>No accepted document retains a bare prose bracket or a self-link after the preview. The ten previously catalogued math-expression strings interpreted by the older unsupported-link-target check are outside this normaliser rule and remain for separate handling. <code>jev_review.build_docs_audit_report</code> still needs to pass the documented id into its audit; that file belongs to another live node and was not changed here. The live graph has not been updated; the coordinator applies the repair after reviewing the link list.</p>
+</body></html>
