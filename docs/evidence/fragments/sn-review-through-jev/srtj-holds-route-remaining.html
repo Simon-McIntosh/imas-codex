@@ -1,0 +1,157 @@
+<section id="srtj-holds-route-remaining">
+  <h2 id="srtj-holds-route-remaining-title">Documentation vetoes routed through review holds</h2>
+
+  <p id="srtj-holds-route-remaining-summary">
+    The two remaining places where a refusal to accept a documentation was
+    expressed by lowering a judged score now raise a review hold instead. The
+    reviewer's score is preserved exactly as written, and the refusal is a
+    separate, triageable <code>ReviewHold</code> node on the name. Acceptance
+    is decided by the existing predicate, which already reads open holds, so a
+    held document cannot be accepted by any path.
+  </p>
+
+  <h3 id="srtj-holds-route-remaining-lint-cap">Site 1 — the documentation lint cap</h3>
+  <p id="srtj-holds-route-remaining-lint-cap-site">
+    <code>imas_codex/standard_names/review/pipeline.py</code>,
+    <code>_cap_docs_scores_for_lint_errors</code>, called from
+    <code>_review_single_batch</code> in the <code>target == "docs"</code>
+    branch.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-lint-cap-before">
+      <strong>Before:</strong> an entry carrying an error-severity lint finding
+      had its <code>reviewer_score</code> driven below the acceptance
+      threshold. The judged score moved, so the refusal was indistinguishable
+      from the reviewer's own low opinion of the document.
+    </li>
+    <li id="srtj-holds-route-remaining-lint-cap-after">
+      <strong>After:</strong> the finding is recorded on the entry under
+      <code>audit_cap_finding</code> as before, and the name receives a
+      <code>docs_lint_error</code> hold through <code>raise_hold</code>. The
+      score is not touched. The pass log line states the kept score.
+    </li>
+    <li id="srtj-holds-route-remaining-lint-cap-persist">
+      <strong>Persistence check:</strong> the docs write
+      (<code>write_docs_review_results</code>) stores scores only and never sets
+      <code>docs_stage</code>; acceptance is decided later by
+      <code>persist_reviewed_docs</code> and <code>promote_stranded_reviewed</code>,
+      and both already read open holds. No write outside the review package was
+      required, so the stop-and-report condition did not apply.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-cascade-veto">Site 2 — the cascade contradiction veto</h3>
+  <p id="srtj-holds-route-remaining-cascade-veto-site">
+    <code>imas_codex/standard_names/review/cascade.py</code>, <code>_route</code>,
+    consumed by <code>adjudicate_review</code>'s deciding branch.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-cascade-veto-before">
+      <strong>Before:</strong> a failed <code>claim_contradicts_source</code>
+      check lowered <code>mapped</code>, which became both
+      <code>decision_score</code> and the score the route was judged on. The
+      route read <code>refine</code>, but the score itself had been moved by
+      the veto.
+    </li>
+    <li id="srtj-holds-route-remaining-cascade-veto-after">
+      <strong>After:</strong> <code>mapped</code> keeps its mapped value,
+      <code>decision_score</code> and <code>selected_score</code> keep the
+      judged values, and the route carries a
+      <code>cascade_contradiction</code> hold. <code>raise_route_holds</code>
+      raises it against the name in the deciding branch, beside the route
+      record. <code>jev_review.py</code> was not edited.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-promotion">Site 3 — the release-by-dismissal path</h3>
+  <p id="srtj-holds-route-remaining-promotion-site">
+    <code>imas_codex/standard_names/review/holds.py</code>,
+    <code>_promote_if_eligible</code>, run when the last open hold on a document
+    is cleared or dismissed.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-promotion-before">
+      <strong>Before:</strong> the release re-derived the acceptance rule from a
+      passing score alone. A row with a quarantined validation status, or with
+      no reachable winning documentation review, was accepted by dismissing its
+      last hold.
+    </li>
+    <li id="srtj-holds-route-remaining-promotion-after">
+      <strong>After:</strong> the release applies
+      <code>PROMOTE_STRANDED_DOCS_WHERE</code> — the predicate the stranded
+      promotion pass already uses — which requires an accepted name axis, a
+      non-quarantined row and a reachable winning documentation review, on top
+      of the acceptance score and an empty open-hold set. It is the same
+      predicate, imported, not a second copy of its terms. Two tests now plant
+      exactly those two excluded rows and assert dismissal leaves them at
+      <code>reviewed</code>.
+    </li>
+    <li id="srtj-holds-route-remaining-promotion-doc">
+      The <code>promote_stranded_reviewed</code> row in the standard-names
+      guide now names the open-hold requirement alongside the score.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-no-clamp">No documentation score is clamped</h3>
+  <p id="srtj-holds-route-remaining-no-clamp-claim">
+    No refusal to accept a documentation anywhere in <code>imas_codex/</code>
+    is expressed by lowering a documentation review score. The backing grep,
+    <code>clamp-grep.log</code>, searched every <code>.py</code> file under
+    <code>imas_codex/</code> for a <code>min(…)</code> applied to a review
+    score, for <code>audit_cap_finding</code>, and for every
+    <code>docs_lint_error</code> and <code>cascade_contradiction</code>
+    occurrence.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-no-clamp-hits">
+      <strong>The grep's score hits are all elsewhere.</strong> They are
+      discovery scorers bounding values into [0, 1], a vocabulary-promotion
+      statistic, a review-spread diagnostic, and
+      <code>map_decision_score</code>, which is a fixed calibration curve
+      mapping a rubric score below the accept cutoff into the range below the
+      threshold. It is driven by the rubric score, not by a hold or a veto, and
+      a veto at a passing score no longer moves it.
+    </li>
+    <li id="srtj-holds-route-remaining-no-clamp-writers">
+      <strong>The only writer of <code>audit_cap_finding</code> is the lint-cap
+      site</strong>, and it writes the finding without touching the score.
+    </li>
+    <li id="srtj-holds-route-remaining-no-clamp-kinds">
+      <strong>The two kinds are raised only at the two routed sites</strong> —
+      <code>docs_lint_error</code> from the pipeline and
+      <code>cascade_contradiction</code> from the cascade route.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-deviation">Deviation from the brief</h3>
+  <p id="srtj-holds-route-remaining-deviation-kind">
+    The brief names the hold kinds <code>lint_error</code> and
+    <code>contradicts_source</code>. Neither is in the hold owner's declared
+    kind set, so raising either would fail validation. The owner already
+    declared <code>docs_lint_error</code> and <code>cascade_contradiction</code>
+    unused, and both are in the generated schema's enumeration; those are the
+    kinds used. The declared kind set is unchanged.
+  </p>
+
+  <h3 id="srtj-holds-route-remaining-verification">Verification</h3>
+  <ul>
+    <li id="srtj-holds-route-remaining-verification-delta">
+      <strong>Gate by delta.</strong> The gate covers the holds, cascade, panel
+      and lint-cap test files. The base arm (revision before this change) shows
+      <code>9 failed</code>; the head arm shows the same <code>9 failed</code>,
+      <code>93 passed</code>. The delta is zero added failures. All nine are
+      the same pre-existing <code>test_consumer_predicates_agree_with_rubric_route</code>
+      documentation ids, present at base.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-holds">
+      The documentation hold file passes at head, and passed at base (10
+      passed), against a disposable Neo4j started by the test module.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-control">
+      <strong>Negative control.</strong> Restoring the score clamp in
+      <code>_cap_docs_scores_for_lint_errors</code> reddens three lint-cap
+      tests, including the new hold test, and the source was restored byte-
+      identical afterwards.
+    </li>
+  </ul>
+</section>

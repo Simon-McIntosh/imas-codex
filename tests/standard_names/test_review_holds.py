@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import socket
@@ -369,6 +370,136 @@ def test_refine_claims_passing_score_with_open_hold(planted_name: str) -> None:
     items = graph_ops.claim_refine_docs_batch(batch_size=1, min_score=0.85)
     assert [item["id"] for item in items] == [planted_name]
     assert _state(planted_name) == {"stage": "refining", "score": 0.875}
+
+
+LINT_FINDING = (
+    "[error:lint:round_trip_failure] plasma_current: "
+    "name does not survive parser round-trip"
+)
+
+
+def test_lint_error_raises_a_hold_and_keeps_the_judged_score(
+    planted_name: str,
+) -> None:
+    """An error-severity lint finding is a hold, not a score clamp.
+
+    The reviewer's own score survives so the refusal is visible and triageable
+    as its own dimension; a document with an unresolved lint error cannot be
+    accepted while the hold is open.
+    """
+    from imas_codex.standard_names.review import pipeline
+
+    entry = {"id": planted_name, "reviewer_score": 0.9}
+    wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
+    pipeline._cap_docs_scores_for_lint_errors(
+        [entry], {planted_name: LINT_FINDING}, wlog
+    )
+
+    assert entry["reviewer_score"] == 0.9, "the judged score must not be clamped"
+    assert entry["audit_cap_finding"] == LINT_FINDING
+    raised = holds.open_holds(planted_name, "docs")
+    assert [record["kind"] for record in raised] == ["docs_lint_error"]
+    assert raised[0]["finding"] == LINT_FINDING
+    assert not holds.docs_accepted(0.9, 0.85, planted_name)
+
+
+def test_cascade_veto_raises_a_hold_and_keeps_the_decision_score(
+    planted_name: str, monkeypatch
+) -> None:
+    """The documentation contradiction veto is a hold, not a lowered score.
+
+    The route still reads refine, but the judged decision score is the mapped
+    one rather than a value driven below ``min_score``.
+    """
+    from imas_codex.standard_names.review import cascade
+    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS
+
+    thresholds = {
+        "accept_threshold": 0.4,
+        "score_kind": "rubric",
+        "rubric": {},
+    }
+    monkeypatch.setattr(
+        cascade, "_calibration", lambda: {"name": thresholds, "docs": thresholds}
+    )
+    monkeypatch.setattr(
+        cascade,
+        "rubric_scores",
+        lambda axis, judgment, fit: dict.fromkeys(DOCS_DIMENSIONS, 0.96 * 20),
+    )
+
+    judgment = {"contradiction_veto": True, "checks": {}, "quality": 0.96}
+    route = cascade.route_docs(judgment, probability=0.96)
+
+    assert route.route == "refine"
+    assert route.decision_score is not None
+    assert route.decision_score >= 0.85, (
+        "a veto must not drive the judged decision score below min_score"
+    )
+    assert route.failed_checks == ("claim_contradicts_source",)
+
+    raised = cascade.raise_route_holds(planted_name, route)
+    assert len(raised) == 1
+    records = holds.open_holds(planted_name, "docs")
+    assert [record["kind"] for record in records] == ["cascade_contradiction"]
+
+
+def test_dismissal_does_not_accept_a_quarantined_document(
+    disposable_neo4j: str,
+) -> None:
+    """A dismissed hold releases a document only through the canonical gate."""
+    name_id = "quarantined_document"
+    with GraphClient() as graph:
+        graph.query("MATCH (node) DETACH DELETE node")
+        graph.query(
+            """
+            CREATE (sn:StandardName {id: $id, name_stage: 'accepted',
+                docs_stage: 'reviewed', reviewer_score_docs: 0.9,
+                validation_status: 'quarantined'})
+            """,
+            id=name_id,
+        )
+    hold = holds.raise_hold(
+        name_id,
+        "docs",
+        "documentation_contradiction",
+        "unsupported claim",
+        "claim and source disagree",
+        "tester",
+    )
+    assert holds.dismiss_hold(hold["id"], "triager", "checked by hand")
+    assert holds.open_holds(name_id, "docs") == []
+    assert _state(name_id) == {"stage": "reviewed", "score": 0.9}
+
+
+def test_dismissal_does_not_accept_a_document_without_a_winning_review(
+    disposable_neo4j: str,
+) -> None:
+    """A passing score and an empty hold set are not sufficient for acceptance.
+
+    A row with no reachable winning docs review never passes the canonical
+    gate, so clearing its last hold cannot accept it.
+    """
+    name_id = "no_winning_review_document"
+    with GraphClient() as graph:
+        graph.query("MATCH (node) DETACH DELETE node")
+        graph.query(
+            """
+            CREATE (sn:StandardName {id: $id, name_stage: 'accepted',
+                docs_stage: 'reviewed', reviewer_score_docs: 0.9})
+            """,
+            id=name_id,
+        )
+    hold = holds.raise_hold(
+        name_id,
+        "docs",
+        "documentation_contradiction",
+        "unsupported claim",
+        "claim and source disagree",
+        "tester",
+    )
+    assert holds.dismiss_hold(hold["id"], "triager", "checked by hand")
+    assert _state(name_id) == {"stage": "reviewed", "score": 0.9}
 
 
 def test_refiner_input_contains_open_hold_finding(planted_name: str) -> None:

@@ -3,8 +3,9 @@
 Cutoffs match the panel's calibration acceptance rate before the docs veto.
 The decision score is piecewise linear through (0, 0), (cutoff, min_score)
 and (1, 1); it is an operating-score mapping, not an acceptance probability.
-A contradiction caps only that scalar below min_score; rubric dimensions stay
-unchanged. The same mapping handles explicit consumer min_score values.
+A contradiction routes a document to refine while its judged scores stay
+unchanged; the refusal travels as a documentation review hold, not as a lowered
+score. The same mapping handles explicit consumer min_score values.
 Thresholds and name-score weights are fitted on frozen calibration judgments.
 Every Jev judgment is stored as a noncanonical review with no scalar score;
 only the explicit deciding switch may replace the incumbent.
@@ -40,6 +41,7 @@ class CascadeRoute:
 
     selected_score: float | None = None
     decision_score: float | None = None
+    holds: tuple[Mapping[str, str], ...] = ()
 
     @property
     def total(self) -> float | None:
@@ -219,9 +221,20 @@ def _route(
     if selected is None:
         raise ValueError("a decided review requires the selected Jev score")
     mapped = map_decision_score(selected, thresholds["accept_threshold"], min_score)
+    holds: tuple[Mapping[str, str], ...] = ()
     if failed:
-        mapped = min(mapped, math.nextafter(min_score, 0.0))
-    route = "accept" if mapped >= min_score else "refine"
+        detail = details.get("claim_contradicts_source", {})
+        holds = (
+            {
+                "kind": "cascade_contradiction",
+                "finding": str(
+                    detail.get("evidence") or "claim contradicts its DD source"
+                ),
+                "evidence": "Jev contradiction veto on claim_contradicts_source",
+                "raised_by": "jev-cascade",
+            },
+        )
+    route = "refine" if (failed or mapped < min_score) else "accept"
     return CascadeRoute(
         route,
         probability,
@@ -231,6 +244,7 @@ def _route(
         raw_scores,
         selected_score=selected,
         decision_score=mapped,
+        holds=holds,
     )
 
 
@@ -327,6 +341,32 @@ def _judgment_payload(
         "confidence": None,
     }
     return payload
+
+
+def raise_route_holds(
+    name_id: str, route: CascadeRoute, *, graph: Any | None = None
+) -> list[str]:
+    """Raise the documentation holds a deciding route carries on its name.
+
+    A veto reaches the graph as its own review hold rather than as a lowered
+    score: the judged score is unchanged, so the refusal is visible as a
+    distinct dimension a triager can act on and can dismiss.
+    """
+    from imas_codex.standard_names.review.holds import raise_hold
+
+    raised: list[str] = []
+    for hold in route.holds:
+        record = raise_hold(
+            name_id,
+            "docs",
+            hold["kind"],
+            hold["finding"],
+            hold["evidence"],
+            hold["raised_by"],
+            graph=graph,
+        )
+        raised.append(record["id"])
+    return raised
 
 
 async def _store_route(
@@ -717,6 +757,15 @@ async def adjudicate_review(
             logger.exception(
                 "Jev cascade route could not be stored for %s", item.get("id")
             )
+        if route.holds:
+            try:
+                await asyncio.to_thread(
+                    raise_route_holds, str(item.get("id", "")), route
+                )
+            except Exception:
+                logger.exception(
+                    "Jev cascade hold could not be raised for %s", item.get("id")
+                )
         try:
             await _run_panel_audit(axis, item, models, incumbent, route, mgr=mgr)
         except Exception:

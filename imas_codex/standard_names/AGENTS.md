@@ -433,7 +433,7 @@ source-only, DD-only, or read-only checks:
 | `reconcile_standard_name_source_paths` | `WHERE NOT (sn.name_stage IN $terminal)` before rebuilding the scalar | No terminal rows |
 | `find_provenance_orphans`, `find_flux_surface_reduction_violations`, `find_removed_dd_sources` | Diagnostic queries over live names; the orphan ledger uses `LIVE_NAME` | No; read-only |
 | `refresh_drifted_sources` | `detect_source_drift` selects `sn.name_stage <> 'superseded'` when `include_accepted=True` | **Yes:** exhausted/contested rows are not excluded from source snapshot or docs-steering work |
-| `promote_stranded_reviewed` | Name/docs rows at `reviewed` with score at or above the active threshold; docs also requires accepted name and a winning docs review | No terminal rows |
+| `promote_stranded_reviewed` | Name/docs rows at `reviewed` with score at or above the active threshold and no open documentation hold; docs also requires accepted name and a winning docs review | No terminal rows |
 | `rederive_structural_edges` | Initial name read requires non-null stage and `NOT (name_stage IN ['superseded', 'exhausted', 'contested'])`; cleanup only removes dead structural edges | No terminal properties |
 | `seed_parent_sources` | `parent.name_stage IS NULL` with seedable structural children | No terminal rows |
 | `normalize_derived_parent_lifecycle` | Null/pending parents, or accepted parents with missing documentation/unit data | No terminal rows |

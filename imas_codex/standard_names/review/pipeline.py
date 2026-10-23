@@ -26,8 +26,8 @@ from imas_codex.standard_names.budget import (
     charge_billable_exception,
     model_provider_exposure,
 )
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 from imas_codex.standard_names.review.audits import AuditReport, LintFinding
+from imas_codex.standard_names.review.holds import raise_hold
 from imas_codex.standard_names.review.judge_stage import judge_review_stage
 
 # Defense-in-depth: strict SN id pattern used to reject reviewer-hallucinated
@@ -1964,40 +1964,41 @@ def _cap_docs_scores_for_lint_errors(
     scored: list[dict],
     error_lint_findings: dict[str, str],
     wlog: logging.LoggerAdapter,
+    *,
+    graph: Any | None = None,
 ) -> None:
-    """Hold documentation scores of entries carrying an unresolved lint error below acceptance.
+    """Hold a documentation with an unresolved lint error through the veto channel.
 
     A documentation cannot be accepted while an error-severity lint finding
-    stands against its name. Each such entry records the finding, whether the
-    cap changed its score or the reviewer had already scored it below
-    acceptance; a score above the documentation acceptance threshold is
-    additionally clamped just below it.
+    stands against its name. The finding becomes a ``docs_lint_error`` review
+    hold on the name, so the refusal is a separate, triageable record rather
+    than a lowered score: the judged score is left exactly as the reviewer
+    wrote it. Each such entry also records the finding under
+    ``audit_cap_finding`` for the review row.
     """
     if not error_lint_findings:
         return
-    floor = DEFAULT_MIN_SCORE - 0.001
     for entry in scored:
         entry_id = entry.get("id") or entry.get("_original_id") or ""
         finding = error_lint_findings.get(entry_id)
         if finding is None:
             continue
         entry["audit_cap_finding"] = finding
-        score = entry.get("reviewer_score")
-        if score is not None and score >= DEFAULT_MIN_SCORE:
-            entry["audit_cap_applied"] = True
-            entry["reviewer_score"] = min(score, floor)
-            wlog.info(
-                "Docs score for %r capped at %.3f by lint error: %s",
-                entry_id,
-                entry["reviewer_score"],
-                finding,
-            )
-        else:
-            wlog.info(
-                "Docs entry %r already below acceptance with lint error: %s",
-                entry_id,
-                finding,
-            )
+        raise_hold(
+            entry_id,
+            "docs",
+            "docs_lint_error",
+            finding,
+            f"error-severity lint finding on {entry_id}",
+            "review-lint",
+            graph=graph,
+        )
+        wlog.info(
+            "Docs entry %r held by lint error (score kept at %r): %s",
+            entry_id,
+            entry.get("reviewer_score"),
+            finding,
+        )
 
 
 async def _review_single_batch(
