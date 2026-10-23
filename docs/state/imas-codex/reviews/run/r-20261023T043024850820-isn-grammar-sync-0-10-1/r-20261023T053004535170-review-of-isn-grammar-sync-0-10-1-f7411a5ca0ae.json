@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest.md declares no baseline_suite and no after_suite arm and the node ran no test suite, so the derived added-failure count is zero, taken from zero suite arms rather than from a measured pair; the node's gate is the graph readback log, not a pytest arm",
+  "assertion_analysis": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-23T06:04:47.122Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a one-shot sync of live graph state, not code",
+      "recorded_at": "2026-10-23T06:08:14.694929+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-23T05:33:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "a one-shot graph sync; the graph state is re-asserted by the grammar auto-sync at sn run startup and by the active-version readback, not by a committed runner",
+      "recorded_at": "2026-10-23T06:06:44.499425+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the manifest lists one of two commits; promotion reads both from the worktree",
+      "recorded_at": "2026-10-23T06:07:21.420647+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's re-runnable guard, run-grammar-sync.py with its EXIT=2 precondition and its four gates, was written into the run directory at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T043024850820-isn-grammar-sync-0-10-1/ and never committed, so nothing in the repository re-asserts the graph state the fragment reports and the guard is lost when the run directory is collected"
+    },
+    {
+      "file": "manifest.md",
+      "line": "7",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest.md:7 records commits: f7411a5ca0ae604d155233b1e631ad11c3575bf1 alone, while the change is two commits, the first being 599d22a630935a5a7d03995447770b163e585a0d, so a reader auditing the run's commits from the manifest sees one where there are two"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call site reaches the landed change; the fragment is documentation content under docs/evidence/fragments and a grep for its node id across docs/ and imas_codex/ returns nothing, so it is read by the plan once landed rather than by runtime code.",
+    "diff": "Read both commits against base c5b7f76ed; 599d22a63 and f7411a5ca together add 304 lines to docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html and touch no other file, with no deletion.",
+    "done_when": "The source prompt.txt:143 names the environment at 0.10.1, one active version at 0.10.1 at or above the previous token count with a separatrix_distance physical_base token, and the quoted loci; grammar-sync-after.log records GATE_PASS on all four gates and version-after.log records the environment at 0.10.1.",
+    "goal": "The source prompt.txt:30 states the goal as 'Serve the ISN 0.10.1 grammar from the graph'; the reviewer's own readback at independent-readback.log returns exactly one active ISNGrammarVersion, 0.10.1, digest 320e8e2b, so the goal state holds.",
+    "manifest": "The source manifest.md records status complete, commits f7411a5ca, changed_paths the fragment, four log paths and the readbacks; it carries no baseline_suite or after_suite key.",
+    "write_paths": "The source prompt.txt:121-122 grant docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html and the figures directory docs/figures/sn-harmonize-command/isn-grammar-sync-0-10-1; git diff c5b7f76ed..f7411a5ca adds exactly the first and no other path."
+  },
+  "justifications": {
+    "durability": "The diff adds no assertion, and the guard that does assert the done_when (run-grammar-sync.py with its 0.10.1 precondition, shown red at 0.10.0) lives in the run directory /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T043024850820-isn-grammar-sync-0-10-1/ rather than in the repository, so nothing committed re-runs it.",
+    "evidence": "grammar-sync-after.log carries the four gates and GATE_PASS with the before arm at grammar-sync-after.log's sibling grammar-state-probe2.log (123 versions, 81102 tokens, 0.10.0 active, digest mismatch), and the reviewer's own bounded readback reproduced every claimed value, though the gate's readback runs in the same process as the sync rather than against an independent writer.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html opens with a bare <section> and namespaced heading ids, the dominant idiom of docs/evidence/fragments (429 section-first files against 83 doctype-first) and that of its directory sibling isn-pin-0-10-1.html, though the identical-capability fragment isn-grammar-sync-0-10-0.html carries the full document head.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html records the goal state and independent-readback.log confirms it from outside the worker: one active ISNGrammarVersion, 0.10.1, 983 tokens, separatrix_distance at physical_base.",
+    "reuse": "The diff adds no function, class or module; a search over docs/evidence/fragments for the existing evidence-fragment mechanism found the established fragment form and its predecessor isn-grammar-sync-0-10-0.html, and the change extends that owner rather than forking a capability.",
+    "scope_discipline": "git diff c5b7f76ed429c79ee4797a2b202e3e9985a85e8e..f7411a5ca0ae604d155233b1e631ad11c3575bf1 adds only docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html, the first of the two paths the source brief.md grants, with no other file and no deletion."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source prompt.txt:30 states the goal as 'Serve the ISN 0.10.1 grammar from the graph'; the reviewer's own readback at independent-readback.log returns exactly one active ISNGrammarVersion, 0.10.1, digest 320e8e2b, so the goal state holds.\nVERDICT done_when: The source prompt.txt:143 names the environment at 0.10.1, one active version at 0.10.1 at or above the previous token count with a separatrix_distance physical_base token, and the quoted loci; grammar-sync-after.log records GATE_PASS on all four gates and version-after.log records the environment at 0.10.1.\nVERDICT write_paths: The source prompt.txt:121-122 grant docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html and docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1; git diff c5b7f76ed..f7411a5ca adds exactly the first and no other path.\nVERDICT manifest: The source manifest.md records status complete, commits f7411a5ca, changed_paths the fragment, four log paths and the readbacks; it carries no baseline_suite or after_suite key.\nVERDICT diff: Read both commits against base c5b7f76ed; 599d22a63 and f7411a5ca together add 304 lines to docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html and touch no other file, with no deletion.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html records the goal state and independent-readback.log confirms it from outside the worker: one active version, 0.10.1, 983 tokens, separatrix_distance at physical_base.\nSCORE evidence: 19\nJUSTIFICATION evidence: grammar-sync-after.log carries the four gates and GATE_PASS with the before arm at grammar-state-probe2.log (123 versions, 81102 tokens, 0.10.0 active, digest mismatch), and the reviewer's own bounded readback reproduced every claimed value, though the gate's readback runs in the same process as the sync rather than against an independent writer.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff c5b7f76ed429c79ee4797a2b202e3e9985a85e8e..f7411a5ca0ae604d155233b1e631ad11c3575bf1 adds only docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html, the first of the two paths the source brief.md grants, with no other file and no deletion.\nSCORE durability: 5\nJUSTIFICATION durability: the diff adds no assertion, and the guard that does assert the done_when, run-grammar-sync.py with its 0.10.1 precondition shown red at 0.10.0, lives in the run directory rather than in the repository, so nothing committed re-runs it.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html opens with a bare <section> and namespaced heading ids, the dominant idiom of docs/evidence/fragments (429 section-first files against 83 doctype-first) and that of its directory sibling isn-pin-0-10-1.html, though the identical-capability fragment isn-grammar-sync-0-10-0.html carries the full document head.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition; a search over docs/evidence/fragments found the established fragment form and its predecessor isn-grammar-sync-0-10-0.html, and the change extends that owner rather than forking a capability.\nFINDING docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html:1 follow-on: the fragment's re-runnable guard, run-grammar-sync.py with its EXIT=2 precondition and its four gates, was written into the run directory and never committed, so nothing in the repository re-asserts the graph state the fragment reports.\nFINDING docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html:1 follow-on: the reviewed manifest.md:7 records commits: f7411a5ca alone, while the change is two commits, the first being 599d22a63, so a reader auditing the run's commits from the manifest sees one where there are two.",
+  "review_run_id": "r-20261023T053004535170-review-of-isn-grammar-sync-0-10-1-f7411a5ca0ae",
+  "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "reviewed_commits": [
+    "599d22a630935a5a7d03995447770b163e585a0d",
+    "f7411a5ca0ae604d155233b1e631ad11c3575bf1"
+  ],
+  "reviewed_head_sha": "f7411a5ca0ae604d155233b1e631ad11c3575bf1",
+  "reviewed_run_id": "r-20261023T043024850820-isn-grammar-sync-0-10-1",
+  "scores": {
+    "durability": 5,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T06:10:13.361649+00:00",
+  "total": 101
+}

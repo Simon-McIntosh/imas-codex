@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="177">
+<meta name="plan-version" content="178">
 <meta name="plan-modified" content="2026-10-23">
 </head>
 <body>
@@ -627,6 +627,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-midplane-refresh-landed" data-who="reckon-build" data-when="2026-10-23T05:40:00Z">
     <div class="r-comment-body"><p>On the single midplane definition (merge <code>15c61212f</code>), <code>radial_separatrix_distance_at_outboard_midplane</code> is accepted at 0.944. <code>radial_coordinate_at_outboard_midplane</code> stopped below threshold, with a round mean of 0.517; the contradiction veto history lists it among the generic-against-specialised holds.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261023T053004535170-review-of-isn-grammar-sync-0-10-1-f7411a5ca0ae" data-who="reckon-build" data-when="2026-10-23T06:04:47.122Z">
+    <div class="r-comment-body"><p>The independent review of run r-20261023T043024850820-isn-grammar-sync-0-10-1 is stored and parsed: six dimensions scored 19 goal_fidelity, 19 evidence, 20 scope_discipline, 5 durability, 18 fit, 20 reuse (total 101) at reviewed_base_sha c5b7f76ed429c79ee4797a2b202e3e9985a85e8e and reviewed_head_sha f7411a5ca0ae604d155233b1e631ad11c3575bf1, added_failure_count 0 with no ids because the reviewed manifest declares no baseline_suite or after_suite arm, and two follow-on findings: the node&#x27;s gate run-grammar-sync.py (which asserts all four done_when conditions and whose 0.10.1 precondition was shown red at 0.10.0) was written into the run directory and never committed, and the source manifest.md:7 names only the head commit where the change is two.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
