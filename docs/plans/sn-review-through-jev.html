@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="190">
+<meta name="plan-version" content="191">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -859,7 +859,13 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>§6 srtj-docs-bracket-census — the 637 newly-failing accepted documents are 613 bare bracketed prose phrases and 24 name-links to the documented name itself; 0 is a future-name (dd:) placeholder, since 0 of 2,530 accepted documents contains a dd: token, and an independently written instrument confirms 0 of them is notation the exclusions should have spared, so the prose rule needs no change to spare that convention (evidence: docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census.html)</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T043609157082-srtj-docs-prose-link-check" data-who="reckon-build" data-when="2026-10-23T05:25:17.778Z">
-    <div class="r-comment-body"><p>srtj-docs-prose-link-check — link_hygiene now fails a bracketed prose phrase and a name: link to the documented name itself, naming the offender in its reason; measured over the 77 labelled rows it repairs all 13 misses, refines all 19 defect rows with the incumbent&#x27;s error findings, fails 0 of the 30 acceptable disagreement rows, and newly fails 637 of 2530 accepted documents live (unlabelled).</p></div>
+    <div class="r-comment-body"><p>srtj-docs-prose-link-check — link_hygiene now fails a bracketed prose phrase and a name: link to the documented name itself, naming the offender in its reason; measured over the 77 labelled rows it repairs all 13 misses, refines all 19 defect rows with the incumbent's error findings, fails 0 of the 30 acceptable disagreement rows, and newly fails 637 of 2530 accepted documents live (unlabelled).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-bracket-census-landed" data-who="reckon-build" data-when="2026-10-23T07:35:00Z">
+    <div class="r-comment-body"><p>The bracket census is robust after one rework (merge <code>a5ba76f1a</code>). None of the 637 accepted documents the prose rule fails uses the future-name <code>dd:</code> convention. 613 carry a bare bracketed phrase: 261 snake-case to an existing name id, 340 match nothing. 24 link to their own name. An independent span scan confirms the rule flagged no notation; its unit exclusion under-reports. The prose rule landed (merge <code>a35355fbc</code>). <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-bracket-repair" data-who="lead" data-when="2026-10-23T07:30:00Z">
+    <div class="r-comment-body"><p>Lead ruling: "Fix normaliser, re-run it." <code>_normalize_bare_doc_links</code> will handle a bracketed phrase three ways:</p><ul><li>An exact snake-case match to a live name becomes a <code>name:</code> link.</li><li>Anything else loses its brackets and stays prose; no guessed link is written.</li><li>A self-link becomes plain text.</li></ul><p>The rule's unit exclusion is tightened. The normaliser already runs over every document in the post-rotation reconcile, so the fix repairs the catalogue through the backing code. The dry-run list is read before the live apply. Node: <code>srtj-docs-bracket-repair</code>, on codex because the normaliser lives in <code>graph_ops.py</code>.</p></div>
 </div>
 </section>
 </main>
