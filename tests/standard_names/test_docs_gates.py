@@ -459,6 +459,34 @@ def test_unit_brackets_do_not_fail_hygiene() -> None:
         assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS, notation
 
 
+def test_helium_phrases_are_prose_despite_a_digit() -> None:
+    for phrase in (
+        "accumulated helium-3 count due to gas injection",
+        "toroidal flux-surface-averaged helium-3 velocity at the plasma boundary",
+    ):
+        text = _LIMITER_PROSE.replace("[ion density at a limiter]", f"[{phrase}]")
+        result = _hygiene_result(text)
+        assert result.outcome is DocumentationGateOutcome.FAIL
+        assert f"[{phrase}]" in result.reason
+
+
+def test_live_documentation_audit_rejects_a_self_link() -> None:
+    from imas_codex.standard_names.review.audits import run_documentation_gate_checks
+
+    text = _LIMITER_PROSE.replace(
+        "[ion density at a limiter]",
+        "[lithium density at a limiter](name:lithium_density_at_limiter)",
+    )
+    findings = run_documentation_gate_checks(
+        [{"id": "lithium_density_at_limiter", "documentation": text}]
+    )
+    assert any(
+        finding.finding_type == "link_hygiene"
+        and "name:lithium_density_at_limiter" in finding.detail
+        for finding in findings
+    )
+
+
 def test_numeric_interval_brackets_do_not_fail_hygiene() -> None:
     for notation in ("[0, 1]", "[0,1]", "[-1.5, 2.5]"):
         text = _LIMITER_PROSE.replace(

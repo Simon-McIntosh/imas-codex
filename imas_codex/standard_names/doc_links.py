@@ -22,7 +22,38 @@ _INLINE_NAME_RE = re.compile(r"(?<![A-Za-z0-9_])name:([a-z][a-z0-9_]+)\b")
 _NAME_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(name:([a-z][a-z0-9_]+)\)")
 _BRACKET_CONTENT_RE = re.compile(r"\[([^\[\]\n]+)\]")
 _NUMERIC_INTERVAL_RE = re.compile(r"-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?")
-_UNIT_TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9^\-\*\./]*")
+_UNIT_FACTOR_RE = re.compile(r"([A-Za-zµμ]+)(?:\^-?\d+)?")
+_UNIT_SYMBOLS = frozenset(
+    {
+        "m",
+        "s",
+        "g",
+        "kg",
+        "A",
+        "K",
+        "mol",
+        "cd",
+        "Hz",
+        "N",
+        "Pa",
+        "J",
+        "W",
+        "C",
+        "V",
+        "F",
+        "T",
+        "Wb",
+        "H",
+        "eV",
+        "rad",
+        "sr",
+        "Bq",
+        "Gy",
+        "Sv",
+        "L",
+    }
+)
+_UNIT_PREFIXES = frozenset("YZEPTGMkhdcmunpf") | {"µ", "μ"}
 
 
 @dataclass(frozen=True)
@@ -104,22 +135,32 @@ def _is_prose_bracket(content: str) -> bool:
     """
 
     stripped = content.strip()
-    if not re.search(r"[A-Za-z]", stripped):
-        return False
     if _NUMERIC_INTERVAL_RE.fullmatch(stripped):
+        return False
+    if not re.search(r"[A-Za-z]", stripped):
         return False
     tokens = stripped.split()
     if not tokens:
         return False
-    if all(_UNIT_TOKEN_RE.fullmatch(token) for token in tokens) and (
-        len(tokens) == 1 or re.search(r"[0-9^/*]", stripped)
+    factors = [factor for token in tokens for factor in re.split(r"[*/]", token)]
+    if factors and all(
+        (match := _UNIT_FACTOR_RE.fullmatch(factor))
+        and (
+            match.group(1) in _UNIT_SYMBOLS
+            or (
+                len(match.group(1)) > 1
+                and match.group(1)[0] in _UNIT_PREFIXES
+                and match.group(1)[1:] in _UNIT_SYMBOLS
+            )
+        )
+        for factor in factors
     ):
         return False
     return True
 
 
-def find_prose_bracket_phrases(text: str) -> tuple[str, ...]:
-    """Return the bracketed prose phrases in *text*.
+def find_prose_bracket_spans(text: str) -> tuple[tuple[str, int, int], ...]:
+    """Return prose phrase text and its complete bracket span in *text*.
 
     A bracketed phrase is prose when it is not inside mathematics or code and
     not the label of an already formed Markdown link — those brackets are
@@ -129,11 +170,17 @@ def find_prose_bracket_phrases(text: str) -> tuple[str, ...]:
 
     masked = _masked_spans(text)
     return tuple(
-        match.group(1)
+        (match.group(1), *match.span())
         for match in _BRACKET_CONTENT_RE.finditer(text)
         if not _inside_any_span(*match.span(), masked)
         and _is_prose_bracket(match.group(1))
     )
+
+
+def find_prose_bracket_phrases(text: str) -> tuple[str, ...]:
+    """Return the bracketed prose phrases in *text*."""
+
+    return tuple(phrase for phrase, _, _ in find_prose_bracket_spans(text))
 
 
 @dataclass(frozen=True)

@@ -35,7 +35,11 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
     DEFAULT_REFINE_ROTATIONS,
 )
-from imas_codex.standard_names.doc_links import find_name_references
+from imas_codex.standard_names.doc_links import (
+    find_name_links,
+    find_name_references,
+    find_prose_bracket_spans,
+)
 from imas_codex.standard_names.ledger import reattach_produced_name_edges
 from imas_codex.standard_names.protection import (
     ProtectedDeletionError,
@@ -9612,13 +9616,15 @@ def _normalize_bare_doc_links(
     gc: Any,
     sn_id: str | None = None,
     documentation: str | None | object = _DOC_TEXT_UNSET,
-) -> int:
-    """Convert bare ``[name]`` brackets in documentation to proper links or text.
+    *,
+    dry_run: bool = False,
+) -> int | list[dict[str, Any]]:
+    """Convert bare prose brackets to exact-name links or plain text.
 
-    For every StandardName documentation containing ``[``: each bare
-    ``[snake_case]`` (no ``(name:...)`` target) becomes ``[snake_case](name:snake_case)``
-    when ``snake_case`` is a real StandardName id, else the brackets are stripped
-    (leaving the plain word). Idempotent. Returns the number of docs updated.
+    A bare bracketed phrase links only when its snake-case form is an exact live
+    StandardName id other than the documented name. Otherwise its brackets are
+    stripped. A ``name:`` link to the documented name becomes plain text.
+    Idempotent. Return the number updated, or per-document changes in dry-run mode.
 
     When *sn_id* is given the pass is scoped to that single node (the cheap
     accept-path variant — see :func:`persist_reviewed_docs`): only the tokens
@@ -9652,15 +9658,26 @@ def _normalize_bare_doc_links(
             )
         )
     if not rows:
-        return 0
-    bare_references = {
+        return [] if dry_run else 0
+    bare_phrases = {
         row["id"]: tuple(
-            reference
-            for reference in find_name_references(row["docs"], known=None)
-            if reference.syntax == "bare_bracket"
+            dict.fromkeys(
+                (
+                    *find_prose_bracket_spans(row["docs"]),
+                    *(
+                        (reference.name, reference.start, reference.end)
+                        for reference in find_name_references(row["docs"], known=None)
+                        if reference.syntax == "bare_bracket"
+                    ),
+                )
+            )
         )
         for row in rows
     }
+
+    def candidate_id(phrase: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "_", phrase.strip().lower()).strip("_")
+
     # Only link to a NON-dead standard name (drafted/reviewed/accepted); a bare
     # token that is superseded/exhausted or not a name at all → strip brackets.
     if sn_id is not None:
@@ -9668,9 +9685,9 @@ def _normalize_bare_doc_links(
         # actually appear in this one doc — avoids a full-catalogue scan on
         # every accept.
         candidate_tokens = {
-            reference.name
-            for references in bare_references.values()
-            for reference in references
+            candidate_id(phrase)
+            for phrases in bare_phrases.values()
+            for phrase, _, _ in phrases
         }
         names = (
             {
@@ -9696,23 +9713,61 @@ def _normalize_bare_doc_links(
             )
         }
 
-    updates = []
+    updates: list[dict[str, Any]] = []
     for r in rows:
-        new = r["docs"]
-        for reference in reversed(bare_references[r["id"]]):
-            replacement = (
-                f"[{reference.name}](name:{reference.name})"
-                if reference.name in names
-                else reference.name
+        before = r["docs"]
+        new = before
+        changes: list[tuple[int, int, str, dict[str, str]]] = []
+        for phrase, start, end in bare_phrases[r["id"]]:
+            target = candidate_id(phrase)
+            linked = target in names and target != r["id"]
+            replacement = f"[{phrase}](name:{target})" if linked else phrase
+            changes.append(
+                (
+                    start,
+                    end,
+                    replacement,
+                    {
+                        "action": "linked" if linked else "unbracketed",
+                        "phrase": phrase,
+                        **({"target": target} if linked else {}),
+                    },
+                )
             )
-            new = new[: reference.start] + replacement + new[reference.end :]
+        for link in find_name_links(before):
+            if link.target == r["id"]:
+                changes.append(
+                    (
+                        link.start,
+                        link.end,
+                        link.label,
+                        {
+                            "action": "self-link removed",
+                            "phrase": link.label,
+                        },
+                    )
+                )
+        for start, end, replacement, _ in sorted(changes, reverse=True):
+            new = new[:start] + replacement + new[end:]
         if new != r["docs"]:
-            updates.append({"id": r["id"], "doc": new})
+            updates.append(
+                {
+                    "id": r["id"],
+                    "before": before,
+                    "after": new,
+                    "actions": [change[3] for change in sorted(changes)],
+                }
+            )
+    if dry_run:
+        return updates
     for i in range(0, len(updates), 200):
         gc.query(
             "UNWIND $items AS it MATCH (sn:StandardName {id: it.id}) "
             "SET sn.updated_at = datetime(), sn.documentation = it.doc",
-            items=updates[i : i + 200],
+            items=[
+                {"id": update["id"], "doc": update["after"]}
+                for update in updates[i : i + 200]
+            ],
         )
     if updates:
         logger.info(
