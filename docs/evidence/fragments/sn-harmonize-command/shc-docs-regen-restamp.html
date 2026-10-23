@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-docs-regen-restamp">
+  <title>Documentation regeneration refreshes its source snapshot</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-docs-regen-restamp-title">Documentation regeneration refreshes its source snapshot</h1>
+  <p id="shc-docs-regen-restamp-outcome">
+    Generated and refined documentation now call
+    <code>stamp_source_snapshots(sn_ids=[sn_id], gc=gc)</code> after a successful
+    guarded write. The stamp copies the current producing DD source's path,
+    unit, documentation, raw fields, and resolution provenance into the
+    name's <code>source_*</code> snapshot. A mismatched claim never reaches
+    the stamp. The change is commit <code>b4753226f34d98b817c0648e18f3c4d41f2e7cf3</code>.
+  </p>
+
+  <h2 id="shc-docs-regen-restamp-path">Write path</h2>
+  <table id="shc-docs-regen-restamp-path-table">
+    <thead><tr><th>Owner</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td><code>persist_generated_docs</code></td>
+        <td>Claim-guarded documentation write; embedding invalidation in a later query; source snapshot retained.</td>
+        <td>Claim-guarded documentation and embedding-hash write, followed by one named source stamp using the same graph client.</td></tr>
+      <tr><td><code>persist_refined_docs</code></td>
+        <td>Claim-guarded documentation revision transaction committed; source snapshot retained.</td>
+        <td>After that transaction commits and returns a revision, one named source stamp precedes embedding invalidation. A no-op return stamps nothing.</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-docs-regen-restamp-transaction-note">
+    The stamp follows the committed documentation mutation. It is a separate
+    graph query; a process failure between those queries can leave a snapshot
+    stale until a later refresh.
+  </p>
+
+  <h2 id="shc-docs-regen-restamp-controls">Disposable graph controls</h2>
+  <p id="shc-docs-regen-restamp-reproduction">
+    Before the repair, both generated and refined writes left the snapshot at
+    <code>Original source.</code> after the producing source had become
+    <code>Regeneration source.</code>. The graph test reported
+    <code>AssertionError: assert 'Original source.' == 'Regeneration source.'</code>
+    for each path. The fixture first confirms one real DD node and one detected
+    drift, so an empty detector result has a positive control.
+  </p>
+  <p id="shc-docs-regen-restamp-head-control">
+    At the repaired head, each path leaves no drift immediately after
+    regeneration. A stale claim leaves the just-stamped source snapshot and
+    claim state unchanged, and a later change to <code>Later source.</code>
+    produces a documentation delta. Both new graph cases passed.
+  </p>
+  <p id="shc-docs-regen-restamp-negative-control">
+    A scratch copy of the committed head removed both re-stamp calls while
+    retaining the tests. The generated and refined case IDs each failed on
+    the original snapshot value; the mutation log ends <code>EXIT=1</code>.
+  </p>
+
+  <h2 id="shc-docs-regen-restamp-gate">Archived base and head gate</h2>
+  <table id="shc-docs-regen-restamp-gate-table">
+    <thead><tr><th>Selection</th><th>Base</th><th>Head</th><th>Added failures</th></tr></thead>
+    <tbody>
+      <tr><td>Default markers</td><td>50 passed, 5 deselected</td><td>50 passed, 7 deselected</td><td>0</td></tr>
+      <tr><td><code>-m graph</code></td><td>5 passed, 50 deselected</td><td>7 passed, 50 deselected</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-docs-regen-restamp-gate-scope">
+    The four completed receipts use separate <code>git archive</code> trees
+    at base <code>728532beb0527023647ab734e32d4a1c50edf071</code> and head
+    <code>b4753226f34d98b817c0648e18f3c4d41f2e7cf3</code>, each with its own
+    pytest basetemp. The graph arms point the source-refresh graph tests to
+    an empty disposable Neo4j; the new documentation tests start a second
+    empty disposable instance. The selected files are
+    <code>test_source_refresh_docs_requeue.py</code>,
+    <code>test_persist_stages.py</code>, and <code>test_source_refresh.py</code>.
+    All four logs end <code>EXIT=0</code> and name their imported module paths.
+  </p>
+</main>
+</body>
+</html>
