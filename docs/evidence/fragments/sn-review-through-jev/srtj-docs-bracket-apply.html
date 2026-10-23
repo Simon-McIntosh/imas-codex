@@ -1,0 +1,114 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Bare-link normaliser applied to the live catalogue</title></head><body>
+<h1 id="srtj-docs-bracket-apply">Bare-link normaliser applied to the live catalogue</h1>
+<p><strong>Result:</strong> the fixed normaliser was applied to the live catalogue once, deliberately, against a fresh read-only dry run taken first. It rewrote <strong>814 documents</strong>, adding <strong>124</strong> exact-name links, removing <strong>870</strong> bracket pairs from phrases that name nothing, and making <strong>66</strong> self-links plain text. Every stored text equals the dry run's after text, a second call to the normaliser reports <strong>0</strong>, and <strong>0</strong> accepted documents now fail the prose-link rule. No LLM call was made; spend USD 0. The apply log ends in a real <code>EXIT=0</code>.</p>
+<p>This is the node the lead ruling of 2026-10-23 called for: <em>"Fix normaliser, re-run it."</em> The normaliser already runs unscoped from the pool's post-rotation reconcile, so the next pool run would have rewritten these documents anyway; this node applies it once, under a restore record, and reads the result back.</p>
+
+<h2 id="srtj-docs-bracket-apply-counts">Counts</h2>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr><th>measure</th><th>fresh dry run</th>
+<th><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-repair.html">repair head (merge 46327807f)</a></th><th>difference</th></tr>
+<tr><td>changed documents</td><td>814</td><td>814</td><td>0</td></tr>
+<tr><td>phrases linked</td><td>124</td><td>124</td><td>0</td></tr>
+<tr><td>brackets removed</td><td>870</td><td>870</td><td>0</td></tr>
+<tr><td>self-links made plain</td><td>66</td><td>66</td><td>0</td></tr>
+<tr><td>accepted documents read</td><td>2530</td><td>2530</td><td>0</td></tr>
+<tr><td>accepted documents changed</td><td>645</td><td>645</td><td>0</td></tr>
+</table>
+<p>The graph had not moved in the interval: live names 5137, accepted documents with documentation 2530, and every action identical. <strong>No difference to explain.</strong> The fresh dry run was produced by the committed runner <code>srtj-docs-bracket-repair-dryrun.py</code> (sha256 <code>7a930a9a…059d1f9</code>), run unmodified from a copy so its output landed in this node's own scope rather than overwriting the committed preview, with its full before/after text written to the run directory.</p>
+
+<h2 id="srtj-docs-bracket-apply-readback">Readbacks</h2>
+<p>Every readback below is read from the graph after the apply. The runner stops and applies nothing if the dry run's before text no longer matches the graph.</p>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr><th>readback</th><th>expected</th><th>measured</th><th>pass</th></tr>
+<tr><td>dry run still current at apply time</td><td>no drift</td><td>0 drifted documents</td><td>yes</td></tr>
+<tr><td>documents the call reports updated</td><td>814 (the dry run's count)</td><td>814</td><td>yes</td></tr>
+<tr><td>stored text equals its dry-run after text</td><td>814 of 814</td><td>0 mismatches</td><td>yes</td></tr>
+<tr><td>accepted documents failing the prose rule</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>second normaliser call returns 0</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>documents quoted before and after</td><td>10, at least 3 linked</td><td>10, 3 linked</td><td>yes</td></tr>
+</table>
+<p>The prose-rule readback is written against <code>docs_gates.link_hygiene</code> read fresh from the graph after the apply: 2530 accepted documents were re-read and put through the gate. It fails <strong>0</strong> of them in the prose class — a bracketed phrase standing where a link belongs, a bare bracket naming a standard name, or a <code>name:</code> link pointing back at the documented name.</p>
+
+<h2 id="srtj-docs-bracket-apply-other-class">The ten remaining <code>link_hygiene</code> failures, explained</h2>
+<p>Ten accepted documents still fail <code>link_hygiene</code>, all on its <strong>other</strong> branch: the gate's markdown-link pattern reads a bracketed symbol list followed by a parenthesised LaTeX argument as a link and rejects the argument as a target. <code>[f_s,f_i](\mathbf{x},\mathbf{v})</code> is notation, not a link. Every one of the ten is a power- or torque-density document in the collisional family.</p>
+<p>This is pre-existing and untouched by this node. Each of the ten was measured before and after the apply and gives the <strong>same reason verbatim</strong> in both; eight of the ten are not in the changed set at all, and the two that are (<code>counter_passing_fast_electron_power_density_due_to_collisions</code>, <code>counter_passing_fast_particle_power_density_due_to_collisions</code>) have the failing construct left exactly as the normaliser found it. The normaliser writes only <code>[phrase](name:exact_id)</code>, which is a valid target, so it can neither create nor repair this. The repair preview reached the same conclusion from the other direction: its tightened-rule failures were 0, because this construct is not the rule it tightens.</p>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr><th>document</th><th>reason, identical before and after</th></tr>
+<tr><td><code>co_passing_fast_ion_power_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_s,f_i](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>co_passing_thermal_electron_power_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_{f,\mathrm{co}}](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>co_passing_thermal_ion_torque_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_i](\mathbf{r},\mathbf{v})</code></td></tr>
+<tr><td><code>counter_passing_fast_electron_power_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_{e,\mathrm{fast}}, f_s](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>counter_passing_fast_particle_power_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_a,f_b](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>counter_passing_thermal_electron_power_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_{f,\mathrm{cp}}](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>fast_particle_power_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_s,f_e](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>thermal_ion_torque_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_i](\mathbf{r},\mathbf{v})</code></td></tr>
+<tr><td><code>trapped_fast_ion_power_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_{\mathrm{fast}}](\mathbf{x},\mathbf{v},t)</code></td></tr>
+<tr><td><code>trapped_thermal_ion_torque_density_due_to_collisions</code></td><td>link has an unsupported target or an empty label: <code>[f_i](\mathbf{r},\mathbf{v})</code></td></tr>
+</table>
+<p>Repairing the gate's link pattern is outside this node's write scope and is recorded as a follow-on.</p>
+
+<h2 id="srtj-docs-bracket-apply-examples">Ten documents quoted before and after</h2>
+<p>Each pair is the changed span, quoted verbatim with its surrounding text. Three documents take a new exact-name link; the rest lose brackets or have a self-link made plain.</p>
+
+<h3 id="srtj-docs-bracket-apply-ex-link-1">Linked: <code>toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface</code></h3>
+<p>before: <code>… contribution to the [toroidal magnetic flux] through the poloidal cross-section …</code></p>
+<p>after: <code>… contribution to the [toroidal magnetic flux](name:toroidal_magnetic_flux) through the poloidal cross-section …</code></p>
+
+<h3 id="srtj-docs-bracket-apply-ex-link-2">Linked: <code>magnetic_field</code></h3>
+<p>before: <code>… it is not the [magnetic field magnitude], a [flux-surface-average magnetic field], or an extremum such as the [maximum magnetic fi…</code></p>
+<p>after: <code>… it is not the [magnetic field magnitude](name:magnetic_field_magnitude), a flux-surface-average magnetic field, or an extremum suc…</code></p>
+<p>This document shows both actions at once: one phrase resolves to a live name and is linked, the neighbouring phrase names nothing and loses its brackets.</p>
+
+<h3 id="srtj-docs-bracket-apply-ex-link-3">Linked: <code>momentum_source</code></h3>
+<p>before: <code>… as in [radial momentum source] and [ion charge-state momentum source](name:ion_charge_state_momentum_source) …</code></p>
+<p>after: <code>… as in [radial momentum source](name:radial_momentum_source) and [ion charge-state momentum source](name:ion_charge_state…</code></p>
+
+<h3 id="srtj-docs-bracket-apply-ex-unbracket-1">Unbracketed: <code>magnetic_vector_potential</code></h3>
+<p>before: <code>… reduced-MHD formulations; [its normalized perturbed amplitude] is used in eigenmode studies.</code></p>
+<p>after: <code>… reduced-MHD formulations; its normalized perturbed amplitude is used in eigenmode studies.</code></p>
+
+<h3 id="srtj-docs-bracket-apply-ex-unbracket-2">Unbracketed: <code>neutral_species_momentum_convection_velocity</code></h3>
+<p>before: <code>… It is the neutral-species realization of [momentum convection velocity]. The [toroidal neutral-species form](name:toroidal_neutral_…</code></p>
+<p>after: <code>… It is the neutral-species realization of momentum convection velocity. The [toroidal neutral-species form](name:toroidal_neutral_sp…</code></p>
+
+<h3 id="srtj-docs-bracket-apply-ex-unbracket-3">Unbracketed: <code>plasma_pressure</code></h3>
+<p>before: <code>… bulk thermal electron and ion populations. [Perturbed plasma pressure] denotes a first-order variation …</code></p>
+<p>after: <code>… bulk thermal electron and ion populations. Perturbed plasma pressure denotes a first-order variation …</code></p>
+
+<h3 id="srtj-docs-bracket-apply-ex-unbracket-4">Unbracketed: <code>power_density_due_to_collisions</code></h3>
+<p>before: <code>… a broad population, as in [particle collisional power density], or a species, ion charge state …</code></p>
+<p>after: <code>… a broad population, as in particle collisional power density, or a species, ion charge state …</code></p>
+
+<h3 id="srtj-docs-bracket-apply-ex-unbracket-5">Unbracketed: <code>ion_power_due_to_collisions</code></h3>
+<p>before: <code>… including the complementary [electron power due to collisions]. Population-resolved components …</code></p>
+<p>after: <code>… including the complementary electron power due to collisions. Population-resolved components …</code></p>
+
+<h3 id="srtj-docs-bracket-apply-ex-self">Self-link made plain: <code>poloidal_magnetic_flux_of_flux_loop</code></h3>
+<p>before: <code>… a point-locus evaluation such as a [poloidal magnetic flux at a sensor attachment point](name:poloidal_magnetic_flux_of_flux…</code></p>
+<p>after: <code>… a point-locus evaluation such as poloidal magnetic flux at a sensor attachment point, which evaluates a flux function at a …</code></p>
+
+<h3 id="srtj-docs-bracket-apply-ex-unbracket-6">Unbracketed: <code>toroidal_flux_surface_averaged_current_density</code></h3>
+<p>before: <code>… It is the toroidal counterpart of the [parallel flux-surface-averaged current density] and a member of the [flux-surface-average…</code></p>
+<p>after: <code>… It is the toroidal counterpart of the parallel flux-surface-averaged current density and a member of the flux-surface-averaged c…</code></p>
+
+<h2 id="srtj-docs-bracket-apply-restore">How to restore</h2>
+<p>The restore record <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-restore.json">srtj-docs-bracket-apply-restore.json</a> holds every changed document's text <strong>before</strong> and <strong>after</strong>, keyed by id. Restoring means writing each document's <code>before</code> text back to the <code>StandardName.documentation</code> property of its <code>id</code>. The runner does it in one command, and verifies the write:</p>
+<pre><code>uv run --no-sync python docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py \
+  --restore-from docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-restore.json</code></pre>
+<p>It prints <code>restored=814 wrong=0</code> and exits 0. The path was exercised during this run: the catalogue was restored from the record and the normaliser re-applied, so the record is known to reproduce the pre-apply text rather than merely to hold it. Full before/after text also sits in the run directory at <code>dryrun-full.json</code>, and the apply record's own <code>restore_record_bytes</code> names the committed record's size.</p>
+<p>The committed restore record is <strong>2,426,870 bytes</strong>, above the landing contract's 300,000-byte guidance for a repository data file. It is committed because this node's done-when names it as the deliverable and a restore record without the text restores nothing. The coordinator may move it to the run directory if the size is judged not worth the repository cost; the run directory already carries the identical payload.</p>
+
+<h2 id="srtj-docs-bracket-apply-artifacts">Artifacts and logs</h2>
+<p>All logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T104630578010-srtj-docs-bracket-apply/</code>.</p>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr><th>artifact</th><th>what it records</th></tr>
+<tr><td><code>apply-restore-dryrun.log</code></td><td>the fresh read-only dry run (<code>EXIT=0</code>): 814 / 124 / 870 / 66, left 0</td></tr>
+<tr><td><code>apply-restore-build.log</code></td><td>building the restore record from that dry run (<code>EXIT=0</code>)</td></tr>
+<tr><td><code>apply-restore-verify.log</code></td><td>restoring the catalogue from the record (<code>EXIT=0</code>, <code>restored=814 wrong=0</code>)</td></tr>
+<tr><td><code>apply.log</code></td><td>the apply and every readback (<code>EXIT=0</code>)</td></tr>
+<tr><td><code>dryrun-full.json</code></td><td>the fresh dry run's full before/after text, in the run directory</td></tr>
+</table>
+<p>Committed: <code>srtj-docs-bracket-apply-restore.json</code> (the restore record), <code>srtj-docs-bracket-apply.json</code> (the apply record and readbacks), and <code>srtj-docs-bracket-apply-run.py</code> (the runner, which writes the restore record, applies the normaliser once, reads the result back, and restores from a record).</p>
+<p>Verifying the merged result belongs to a separately dispatched test node; this node's measure is its own change only.</p>
+</body></html>

@@ -86,8 +86,33 @@ def write_json(path: Path, payload: dict[str, Any]) -> int:
     return path.stat().st_size
 
 
-def prose_rule_failures(rows: list[dict[str, Any]]) -> list[dict[str, str]]:
-    """Accepted documents the prose-link rule still fails, with its own reason."""
+PROSE_CLASS_REASONS = (
+    "bracketed phrase names no standard name:",
+    "bare bracket names a standard name but carries no link:",
+)
+
+
+def classify_link_failure(reason: str) -> str:
+    """Which link_hygiene branch a failure comes from.
+
+    ``prose`` is the class the bare-link normaliser exists to clear: a
+    bracketed phrase standing where a link belongs, a bare bracket naming a
+    standard name, or a name link pointing back at the documented name.
+    ``markdown-target`` is the gate's other branch, where its link pattern
+    reads a bracketed symbol list followed by LaTeX as a link and rejects the
+    parenthesised group as a target.
+    """
+
+    if (
+        reason.startswith(PROSE_CLASS_REASONS)
+        or "targets the documented name itself" in reason
+    ):
+        return "prose"
+    return "markdown-target"
+
+
+def link_hygiene_failures(rows: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Accepted documents link_hygiene fails, each with its class and reason."""
 
     failing = []
     for row in rows:
@@ -99,6 +124,7 @@ def prose_rule_failures(rows: list[dict[str, Any]]) -> list[dict[str, str]]:
                 {
                     "document_id": row["id"],
                     "outcome": str(result.outcome),
+                    "failure_class": classify_link_failure(result.reason),
                     "reason": result.reason,
                 }
             )
@@ -138,7 +164,11 @@ def choose_examples(dry_run: dict[str, Any], count: int = 10, linked_min: int = 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry-run-json", type=Path, required=True)
+    parser.add_argument(
+        "--dry-run-json",
+        type=Path,
+        help="the fresh read-only dry run to apply",
+    )
     parser.add_argument(
         "--restore-out",
         type=Path,
@@ -146,12 +176,41 @@ def main() -> None:
     )
     parser.add_argument("--out", type=Path)
     parser.add_argument(
+        "--restore-from",
+        type=Path,
+        help="write each document's before text back from this restore record",
+    )
+    parser.add_argument(
         "--apply",
         action="store_true",
         help="run the apply and readback phases; without it, only write the restore record",
     )
     args = parser.parse_args()
 
+    if args.restore_from:
+        restore_docs = json.loads(args.restore_from.read_text())["documents"]
+        with GraphClient() as graph:
+            for start in range(0, len(restore_docs), CHUNK):
+                graph.query(
+                    "UNWIND $items AS it MATCH (sn:StandardName {id: it.id}) "
+                    "SET sn.updated_at = datetime(), sn.documentation = it.doc",
+                    items=[
+                        {"id": row["id"], "doc": row["before"]}
+                        for row in restore_docs[start : start + CHUNK]
+                    ],
+                )
+            back = read_docs(graph, sorted(row["id"] for row in restore_docs))
+        wrong = sorted(
+            row["id"] for row in restore_docs if back.get(row["id"]) != row["before"]
+        )
+        print(f"restored={len(restore_docs) - len(wrong)} wrong={len(wrong)}")
+        if wrong:
+            print(f"restore mismatches: {wrong[:5]}")
+            raise SystemExit(1)
+        return
+
+    if not args.dry_run_json:
+        parser.error("--dry-run-json is required unless --restore-from is given")
     dry_run = json.loads(args.dry_run_json.read_text())
     restore = build_restore(dry_run, str(args.dry_run_json))
     report: dict[str, Any] = {
@@ -215,10 +274,35 @@ def main() -> None:
         # Independent of the dry run: re-read the accepted documents and put
         # each through the prose-link rule as the gate implements it.
         accepted_after = graph.query(ACCEPTED_CYPHER)
-        failing = prose_rule_failures(accepted_after)
+        failing = link_hygiene_failures(accepted_after)
+        prose_class = [row for row in failing if row["failure_class"] == "prose"]
+        other_class = [row for row in failing if row["failure_class"] != "prose"]
         report["accepted_documents_read_after"] = len(accepted_after)
-        report["prose_rule_failing_after"] = len(failing)
-        report["prose_rule_failing_documents"] = failing
+        report["prose_rule_failing_after"] = len(prose_class)
+        report["prose_rule_failing_documents"] = prose_class
+        report["link_hygiene_failing_total"] = len(failing)
+
+        # Every failure outside the prose class must be one the normaliser never
+        # touched: the same construct is already there in the text it read. The
+        # pre-apply text of a document the normaliser did not rewrite is the
+        # text in hand; for the rest, it is the dry run's before field.
+        after_by_id = {row["id"]: row["docs"] for row in accepted_after}
+        other_reasons = {}
+        for row in other_class:
+            document_id = row["document_id"]
+            after = after_by_id[document_id]
+            before = planned_before.get(document_id, after)
+            prior = score_documentation(
+                before, documenting_name=document_id
+            ).gate_vector["link_hygiene"]
+            other_reasons[document_id] = {
+                "text_unchanged_by_normaliser": before == after,
+                "reason_before_apply": prior.reason,
+                "reason_after_apply": row["reason"],
+                "same_failure_before_and_after": prior.reason == row["reason"],
+            }
+        report["other_class_failures"] = other_reasons
+        report["other_class_failing_total"] = len(other_class)
 
         second = _normalize_bare_doc_links(graph)
         report["second_call_updated"] = second
@@ -246,6 +330,9 @@ def main() -> None:
         "updated_matches_dry_run": report["updated_matches_dry_run"],
         "stored_equals_dry_run_after": report["stored_equals_dry_run_after"],
         "prose_rule_zero_failing": report["prose_rule_failing_after"] == 0,
+        "other_class_failures_all_explained": all(
+            row["same_failure_before_and_after"] for row in other_reasons.values()
+        ),
         "second_call_zero": report["idempotent"],
         "examples_at_least_ten": len(report["examples"]) >= 10,
         "examples_linked_at_least_three": report["examples_linked"] >= 3,
@@ -259,6 +346,7 @@ def main() -> None:
         f"updated={report['updated_reported']} planned={report['dry_run_documents_changed']} "
         f"mismatches={len(report['stored_mismatches'])} "
         f"prose_failing={report['prose_rule_failing_after']} "
+        f"other_class_failing={report['other_class_failing_total']} "
         f"second={report['second_call_updated']} "
         f"examples={len(report['examples'])} linked={report['examples_linked']}"
     )
