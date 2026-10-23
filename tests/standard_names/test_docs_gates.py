@@ -427,3 +427,93 @@ def test_description_sentence_and_character_limits_remain_separate() -> None:
     assert "max 250 chars" in prompt
     assert "`description` — **1 concise sentence" in prompt
     assert "≤250 characters" in prompt
+
+
+def _hygiene_result(text: str, name: str | None = None) -> DocumentationGateResult:
+    return score_documentation(text, documenting_name=name).gate_vector["link_hygiene"]
+
+
+_LIMITER_PROSE = (
+    "Lithium density at a limiter is the local number density of lithium ions in "
+    "the boundary plasma immediately adjacent to a plasma-facing limiter surface, "
+    "and it differs from the broader [ion density at a limiter], which does not "
+    "select lithium. The evaluation point sits on the plasma side of the magnetic "
+    "presheath or sheath entrance, so the quantity is local rather than averaged "
+    "over any surface or volume of the boundary region it is taken in."
+)
+
+
+def test_bracketed_prose_phrase_fails_hygiene_naming_the_phrase() -> None:
+    result = _hygiene_result(_LIMITER_PROSE)
+
+    assert result.outcome is DocumentationGateOutcome.FAIL
+    assert "[ion density at a limiter]" in result.reason
+
+
+def test_unit_brackets_do_not_fail_hygiene() -> None:
+    for notation in ("[m^-3]", "[K]", "[m^2 s^-1]", "[m/s]"):
+        text = _LIMITER_PROSE.replace(
+            "[ion density at a limiter]",
+            f"[density at a limiter](name:density_at_limiter) in {notation}",
+        )
+        assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS, notation
+
+
+def test_numeric_interval_brackets_do_not_fail_hygiene() -> None:
+    for notation in ("[0, 1]", "[0,1]", "[-1.5, 2.5]"):
+        text = _LIMITER_PROSE.replace(
+            "[ion density at a limiter]",
+            f"[density at a limiter](name:density_at_limiter) over {notation}",
+        )
+        assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS, notation
+
+
+def test_math_brackets_do_not_fail_hygiene() -> None:
+    for notation in ("$[a b]$", "$$\\left[ a b \\right]$$", "\\([a b]\\)"):
+        text = _LIMITER_PROSE.replace(
+            "[ion density at a limiter]",
+            f"[density at a limiter](name:density_at_limiter) with {notation} inside",
+        )
+        assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS, notation
+
+
+def test_markdown_link_labels_are_not_prose_brackets() -> None:
+    text = _LIMITER_PROSE.replace(
+        "[ion density at a limiter]",
+        "[ion density at a limiter](name:density_at_limiter)",
+    )
+
+    assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS
+
+
+def test_link_to_the_documented_name_fails_hygiene_naming_the_link() -> None:
+    text = _LIMITER_PROSE.replace(
+        "[ion density at a limiter]",
+        "[lithium density at a limiter](name:lithium_density_at_limiter)",
+    )
+    result = _hygiene_result(text, "lithium_density_at_limiter")
+
+    assert result.outcome is DocumentationGateOutcome.FAIL
+    assert "lithium density at a limiter" in result.reason
+    assert "name:lithium_density_at_limiter" in result.reason
+
+
+def test_a_link_to_another_name_is_not_a_self_link() -> None:
+    text = _LIMITER_PROSE.replace(
+        "[ion density at a limiter]",
+        "[lithium density at a limiter](name:density_at_limiter)",
+    )
+
+    assert (
+        _hygiene_result(text, "lithium_density_at_limiter").outcome
+        is DocumentationGateOutcome.PASS
+    )
+
+
+def test_self_link_check_needs_the_documenting_name() -> None:
+    text = _LIMITER_PROSE.replace(
+        "[ion density at a limiter]",
+        "[lithium density at a limiter](name:lithium_density_at_limiter)",
+    )
+
+    assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS
