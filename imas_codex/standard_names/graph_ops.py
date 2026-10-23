@@ -25559,7 +25559,8 @@ def persist_generated_docs(
                 sn.claim_token      = null,
                 sn.claimed_at       = null,
                 sn.links            = $links,
-                sn.link_status      = $link_status
+                sn.link_status      = $link_status,
+                sn.embed_text_hash  = null
             RETURN sn.docs_stage AS docs_stage
             """,
             sn_id=sn_id,
@@ -25570,24 +25571,15 @@ def persist_generated_docs(
             links=links,
             link_status=link_status,
         )
-    if not result:
-        raise ValueError(
-            f"persist_generated_docs: token mismatch or node not found for {sn_id!r}"
-        )
+        if not result:
+            raise ValueError(
+                f"persist_generated_docs: token mismatch or node not found for {sn_id!r}"
+            )
+        from imas_codex.standard_names.source_refresh import stamp_source_snapshots
+
+        stamp_source_snapshots(sn_ids=[sn_id], gc=gc)
     new_stage: str = result[0]["docs_stage"]
     logger.debug("persist_generated_docs: %s → docs_stage=%s", sn_id, new_stage)
-
-    # Re-embed: docs generation sets/refines description, so the embedding
-    # should reflect the latest "name — description" text.
-    # Clear embed_text_hash so the dedicated embed worker picks it up.
-    with GraphClient() as gc:
-        gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            SET sn.updated_at = datetime(), sn.embed_text_hash = null
-            """,
-            id=sn_id,
-        )
 
     # Async counter bump — live progress visibility for ``sn status``
     bump_sn_run_counter(run_id, "names_enriched")
@@ -25943,6 +25935,9 @@ def persist_refined_docs(
         # embedding to reflect the latest "name — description" text.
         # Clear embed_text_hash so the dedicated embed worker picks it up.
         with GraphClient() as gc:
+            from imas_codex.standard_names.source_refresh import stamp_source_snapshots
+
+            stamp_source_snapshots(sn_ids=[sn_id], gc=gc)
             gc.query(
                 """
                 MATCH (sn:StandardName {id: $id})

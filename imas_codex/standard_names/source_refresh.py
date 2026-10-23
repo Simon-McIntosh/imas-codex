@@ -113,7 +113,7 @@ def stamp_source_snapshots(
                    n.documentation AS documentation
             """,
             sn_ids=sn_ids,
-        )
+        ) or []
         updates = []
         for row in rows:
             resolved = _resolved_source_context(
