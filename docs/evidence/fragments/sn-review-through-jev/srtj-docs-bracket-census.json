@@ -1,0 +1,560 @@
+{
+  "schema": "srtj-docs-bracket-census",
+  "created_at": "2026-10-23T06:42:34.824024+00:00",
+  "gate_module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-prose-link-check/imas_codex/standard_names/docs_gates.py",
+  "doc_links_module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-prose-link-check/imas_codex/standard_names/doc_links.py",
+  "gate_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-prose-link-check",
+  "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-bracket-census",
+  "documents_read": 2530,
+  "document_limit": 4000,
+  "catalogue": {
+    "standard_names": 5137,
+    "by_stage": {
+      "accepted": 2532,
+      "drafted": 23,
+      "exhausted": 266,
+      "pending": 10,
+      "reviewed": 115,
+      "superseded": 2191
+    },
+    "descriptions_indexed": 4874,
+    "imas_nodes_total": 61366,
+    "imas_nodes_with_documentation": 40000
+  },
+  "future_name_convention": {
+    "accepted_documents_containing_any_dd_token": 0,
+    "accepted_documents_containing_a_dd_link": 0
+  },
+  "offences_total": 647,
+  "offence_counts": {
+    "other": 10,
+    "prose_bracket": 613,
+    "self_link": 24
+  },
+  "class_counts": {
+    "future_name_dd_placeholder": 0,
+    "markdown_link_to_dd_path": 0,
+    "bare_prose_bracket": 613,
+    "notation_should_be_excluded": 0,
+    "self_link": 24,
+    "other": 10
+  },
+  "prose_resolution_counts": {
+    "dd_path_documentation": 12,
+    "existing_name_id": 261,
+    "none_of_these": 340
+  },
+  "prose_phrase_word_counts": {
+    "2": 101,
+    "3": 124,
+    "4": 90,
+    "5": 98,
+    "6": 70,
+    "7": 68,
+    "8": 32,
+    "9": 11,
+    "10": 9,
+    "11": 4,
+    "12": 4,
+    "13": 1,
+    "15": 1
+  },
+  "prose_phrases_all_contain_a_space": true,
+  "prose_phrases_linked_elsewhere_in_same_document": 0,
+  "prose_phrases_in_a_dd_target_link": 0,
+  "bare_snake_bracket_count": 0,
+  "independent_exclusion_census": {
+    "instrument": "raw bracket spans from _IND_BRACKET, masked by independently written math/code/link patterns, content classified by _IND_NUMBER_PAIR / _IND_UNITISH / _IND_LATEX / digit-only",
+    "raw_bracket_spans": 1859,
+    "spans_reported_as_prose_by_the_gate": 782,
+    "spans_masked_but_reported_prose_by_the_gate": 0,
+    "gate_exclusion_disagreements": [
+      {
+        "document_id": "counter_passing_fast_electron_power_density_due_to_collisions",
+        "span": "[co-passing]",
+        "independent_class": "prose_words",
+        "gate_prose": false
+      },
+      {
+        "document_id": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+        "span": "[toroidal flux-surface-averaged helium-3 velocity at the plasma boundary]",
+        "independent_class": "prose_words",
+        "gate_prose": false
+      },
+      {
+        "document_id": "helium_3_source_rate_due_to_gas_injection",
+        "span": "[accumulated helium-3 count due to gas injection]",
+        "independent_class": "prose_words",
+        "gate_prose": false
+      }
+    ],
+    "excluded_span_classes": {
+      "markdown_link_label": 1042,
+      "math": 31,
+      "prose_reported_by_gate": 782,
+      "prose_words": 3,
+      "unit_like": 1
+    },
+    "excluded_span_examples": {
+      "markdown_link_label": [
+        {
+          "document_id": "absorbed_power_due_to_neutral_beam_injection",
+          "span": "[launched neutral-beam injection power]"
+        },
+        {
+          "document_id": "absorbed_power_due_to_neutral_beam_injection",
+          "span": "[launched neutral-beam injection power]"
+        },
+        {
+          "document_id": "absorbed_wave_power",
+          "span": "[wave power]"
+        }
+      ],
+      "prose_reported_by_gate": [
+        {
+          "document_id": "absorbed_power_due_to_neutral_beam_injection",
+          "span": "[power due to neutral-beam injection]"
+        },
+        {
+          "document_id": "absorbed_radiated_power_at_divertor_target",
+          "span": "[power of the divertor due to radiation]"
+        },
+        {
+          "document_id": "absorbed_radiated_power_at_divertor_target",
+          "span": "[power due to radiation]"
+        }
+      ],
+      "math": [
+        {
+          "document_id": "brightness_of_visible_camera",
+          "span": "[\\lambda_1,\\lambda_2]"
+        },
+        {
+          "document_id": "co_passing_fast_ion_power_density_due_to_collisions",
+          "span": "[f_s,f_i]"
+        },
+        {
+          "document_id": "co_passing_fast_ion_power_density_due_to_collisions",
+          "span": "[f_s,f_i]"
+        }
+      ],
+      "prose_words": [
+        {
+          "document_id": "counter_passing_fast_electron_power_density_due_to_collisions",
+          "span": "[co-passing]"
+        },
+        {
+          "document_id": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+          "span": "[toroidal flux-surface-averaged helium-3 velocity at the plasma boundary]"
+        },
+        {
+          "document_id": "helium_3_source_rate_due_to_gas_injection",
+          "span": "[accumulated helium-3 count due to gas injection]"
+        }
+      ],
+      "unit_like": [
+        {
+          "document_id": "power_due_to_recombination",
+          "span": "[J]"
+        }
+      ]
+    }
+  },
+  "other_documents": [
+    {
+      "document_id": "co_passing_fast_ion_power_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_s,f_i](\\mathbf{x},\\mathbf{v})"
+    },
+    {
+      "document_id": "co_passing_thermal_electron_power_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_{f,\\mathrm{co}}](\\mathbf{x},\\mathbf{v})"
+    },
+    {
+      "document_id": "co_passing_thermal_ion_torque_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_i](\\mathbf{r},\\mathbf{v})"
+    },
+    {
+      "document_id": "counter_passing_fast_electron_power_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_{e,\\mathrm{fast}}, f_s](\\mathbf{x},\\mathbf{v})"
+    },
+    {
+      "document_id": "counter_passing_fast_particle_power_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_a,f_b](\\mathbf{x},\\mathbf{v})"
+    },
+    {
+      "document_id": "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_{f,\\mathrm{cp}}](\\mathbf{x},\\mathbf{v})"
+    },
+    {
+      "document_id": "fast_particle_power_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_s,f_e](\\mathbf{x},\\mathbf{v})"
+    },
+    {
+      "document_id": "thermal_ion_torque_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_i](\\mathbf{r},\\mathbf{v})"
+    },
+    {
+      "document_id": "trapped_fast_ion_power_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_{\\mathrm{fast}}](\\mathbf{x},\\mathbf{v},t)"
+    },
+    {
+      "document_id": "trapped_thermal_ion_torque_density_due_to_collisions",
+      "reason": "link has an unsupported target or an empty label: [f_i](\\mathbf{r},\\mathbf{v})"
+    }
+  ],
+  "examples": {
+    "bare_prose_bracket_resolving_to_existing_name_id": [
+      {
+        "document_id": "absorbed_power_due_to_neutral_beam_injection",
+        "reason": "bracketed phrase names no standard name: [power due to neutral-beam injection]",
+        "construct": "prose_bracket",
+        "phrase": "power due to neutral-beam injection",
+        "phrase_has_space": true,
+        "word_count": 5,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "existing_name_id",
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      },
+      {
+        "document_id": "alfven_frequency",
+        "reason": "bracketed phrase names no standard name: [toroidal mode number]",
+        "construct": "prose_bracket",
+        "phrase": "toroidal mode number",
+        "phrase_has_space": true,
+        "word_count": 3,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "existing_name_id",
+        "dd_doc_matches": 26,
+        "dd_doc_match_sample": [
+          "b_field_non_axisymmetric/time_slice/control_surface/n_phi",
+          "b_field_non_axisymmetric/time_slice/control_surface/n_tor",
+          "distribution_sources/source/markers/orbit_integrals/n_phi"
+        ]
+      },
+      {
+        "document_id": "alpha_angle_of_antenna_strap",
+        "reason": "bracketed phrase names no standard name: [angle of antenna strap]",
+        "construct": "prose_bracket",
+        "phrase": "angle of antenna strap",
+        "phrase_has_space": true,
+        "word_count": 4,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "existing_name_id",
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      },
+      {
+        "document_id": "argon_density_at_separatrix",
+        "reason": "bracketed phrase names no standard name: [density at separatrix]",
+        "construct": "prose_bracket",
+        "phrase": "density at separatrix",
+        "phrase_has_space": true,
+        "word_count": 3,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "existing_name_id",
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      },
+      {
+        "document_id": "argon_prefill_count",
+        "reason": "bracketed phrase names no standard name: [tritium prefill count]",
+        "construct": "prose_bracket",
+        "phrase": "tritium prefill count",
+        "phrase_has_space": true,
+        "word_count": 3,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "existing_name_id",
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      }
+    ],
+    "bare_prose_bracket_none_of_these": [
+      {
+        "document_id": "absorbed_radiated_power_at_divertor_target",
+        "reason": "bracketed phrase names no standard name: [power of the divertor due to radiation]",
+        "construct": "prose_bracket",
+        "phrase": "power of the divertor due to radiation",
+        "phrase_has_space": true,
+        "word_count": 7,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": null,
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      },
+      {
+        "document_id": "absorbed_wave_power",
+        "reason": "bracketed phrase names no standard name: [ion charge-state absorbed wave power]",
+        "construct": "prose_bracket",
+        "phrase": "ion charge-state absorbed wave power",
+        "phrase_has_space": true,
+        "word_count": 5,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": null,
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      },
+      {
+        "document_id": "accumulated_ammonia_count",
+        "reason": "bracketed phrase names no standard name: [ammonia count]",
+        "construct": "prose_bracket",
+        "phrase": "ammonia count",
+        "phrase_has_space": true,
+        "word_count": 2,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": null,
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      },
+      {
+        "document_id": "accumulated_carbon_count_due_to_gas_injection",
+        "reason": "bracketed phrase names no standard name: [carbon count due to gas injection]",
+        "construct": "prose_bracket",
+        "phrase": "carbon count due to gas injection",
+        "phrase_has_space": true,
+        "word_count": 6,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": null,
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      },
+      {
+        "document_id": "accumulated_ethane_count",
+        "reason": "bracketed phrase names no standard name: [ethane count]",
+        "construct": "prose_bracket",
+        "phrase": "ethane count",
+        "phrase_has_space": true,
+        "word_count": 2,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": null,
+        "dd_doc_matches": 0,
+        "dd_doc_match_sample": []
+      }
+    ],
+    "bare_prose_bracket_resolving_to_dd_documentation": [
+      {
+        "document_id": "factor_of_spectrometer_channel",
+        "reason": "bracketed phrase names no standard name: [solid angle]",
+        "construct": "prose_bracket",
+        "phrase": "solid angle",
+        "phrase_has_space": true,
+        "word_count": 2,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "dd_path_documentation",
+        "dd_doc_matches": 11,
+        "dd_doc_match_sample": [
+          "bolometer/camera/channel/etendue_method",
+          "bolometer/channel/etendue_method",
+          "charge_exchange/channel/etendue_method"
+        ]
+      },
+      {
+        "document_id": "first_local_tangential_coordinate_of_fibre_bundle",
+        "reason": "bracketed phrase names no standard name: [vertical coordinate]",
+        "construct": "prose_bracket",
+        "phrase": "vertical coordinate",
+        "phrase_has_space": true,
+        "word_count": 2,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "dd_path_documentation",
+        "dd_doc_matches": 1,
+        "dd_doc_match_sample": [
+          "edge_profiles/ggd/psi"
+        ]
+      },
+      {
+        "document_id": "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field",
+        "reason": "bracketed phrase names no standard name: [perturbed parallel magnetic field]",
+        "construct": "prose_bracket",
+        "phrase": "perturbed parallel magnetic field",
+        "phrase_has_space": true,
+        "word_count": 4,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "dd_path_documentation",
+        "dd_doc_matches": 133,
+        "dd_doc_match_sample": [
+          "gyrokinetics/fluxes_integrated_norm/energy_b_field_parallel",
+          "gyrokinetics/fluxes_integrated_norm/momentum_tor_parallel_b_field_parallel",
+          "gyrokinetics/fluxes_integrated_norm/momentum_tor_perpendicular_b_field_parallel"
+        ]
+      },
+      {
+        "document_id": "plasma_temperature",
+        "reason": "bracketed phrase names no standard name: [thermal pressure]",
+        "construct": "prose_bracket",
+        "phrase": "thermal pressure",
+        "phrase_has_space": true,
+        "word_count": 2,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "dd_path_documentation",
+        "dd_doc_matches": 10,
+        "dd_doc_match_sample": [
+          "core_instant_changes/change/profiles_1d/pressure_thermal",
+          "core_profiles/profiles_1d/pressure_thermal",
+          "core_profiles/profiles_2d/pressure_thermal"
+        ]
+      },
+      {
+        "document_id": "power_due_to_fusion",
+        "reason": "bracketed phrase names no standard name: [neutron power]",
+        "construct": "prose_bracket",
+        "phrase": "neutron power",
+        "phrase_has_space": true,
+        "word_count": 2,
+        "linked_anywhere_in_document": false,
+        "in_a_dd_target_link": false,
+        "gate_predicate_says_prose": true,
+        "resolves_to": "dd_path_documentation",
+        "dd_doc_matches": 2,
+        "dd_doc_match_sample": [
+          "breeding_blanket/module/time_slice/power_incident_neutron",
+          "breeding_blanket/module/time_slice/power_thermal_neutrons"
+        ]
+      }
+    ],
+    "self_link": [
+      {
+        "document_id": "cumulative_inside_flux_surface_electron_particle_source_rate",
+        "reason": "link 'electron source rate' targets the documented name itself: name:cumulative_inside_flux_surface_electron_particle_source_rate",
+        "construct": "self_link",
+        "target": "cumulative_inside_flux_surface_electron_particle_source_rate",
+        "asserted_equal_document": true
+      },
+      {
+        "document_id": "electrostatic_potential",
+        "reason": "link 'electrostatic potential' targets the documented name itself: name:electrostatic_potential",
+        "construct": "self_link",
+        "target": "electrostatic_potential",
+        "asserted_equal_document": true
+      },
+      {
+        "document_id": "fast_ion_atomic_number",
+        "reason": "link 'fast_ion_charge' targets the documented name itself: name:fast_ion_atomic_number",
+        "construct": "self_link",
+        "target": "fast_ion_atomic_number",
+        "asserted_equal_document": true
+      },
+      {
+        "document_id": "fast_ion_critical_energy",
+        "reason": "link 'fast_particle_critical_energy' targets the documented name itself: name:fast_ion_critical_energy",
+        "construct": "self_link",
+        "target": "fast_ion_critical_energy",
+        "asserted_equal_document": true
+      },
+      {
+        "document_id": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+        "reason": "link 'toroidal helium-4 velocity at the plasma boundary' targets the documented name itself: name:flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+        "construct": "self_link",
+        "target": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+        "asserted_equal_document": true
+      }
+    ],
+    "future_name_dd_placeholder": [],
+    "notation_should_be_excluded": []
+  },
+  "positive_controls": {
+    "prose_scanner_sees_a_phrase": {
+      "purpose": "the gate's scanner must return a prose phrase given one",
+      "input": "differs from the [ion density].",
+      "found": [
+        "ion density"
+      ],
+      "passed": true
+    },
+    "gate_predicate_agrees_on_a_unit": {
+      "purpose": "the gate predicate must reject a unit bracket",
+      "input": "[m^-3]",
+      "value": false,
+      "passed": true
+    },
+    "independent_scan_sees_each_excluded_kind": {
+      "purpose": "the independent instrument must classify a unit, an interval, mathematics and a link label into their own buckets",
+      "input": "[m^-3] and [0, 1] and $[a b]$ and [x](name:y)",
+      "span_classes": {
+        "[m^-3]": "unmasked",
+        "[0, 1]": "unmasked",
+        "[a b]": "math",
+        "[x]": "markdown_link_label"
+      },
+      "content_classes": {
+        "[m^-3]": "unit_like",
+        "[0, 1]": "numeric_interval",
+        "[12]": "citation",
+        "[ion density]": "prose_words"
+      },
+      "required_present": [
+        "math",
+        "markdown_link_label"
+      ],
+      "passed": true
+    },
+    "gate_fails_a_prose_bracket": {
+      "purpose": "the gate must fail a document holding a bare prose bracket",
+      "reason": "bracketed phrase names no standard name: [ion density]",
+      "passed": true
+    },
+    "gate_fails_a_self_link": {
+      "purpose": "the gate must fail a link to the documented name",
+      "reason": "link 'x' targets the documented name itself: name:lithium_density_at_limiter",
+      "passed": true
+    },
+    "catalogue_description_lookup_works": {
+      "purpose": "the description index must hold descriptions, so a zero match is interpretable",
+      "descriptions_indexed": 4874,
+      "passed": true
+    },
+    "dd_path_documentation_index_works": {
+      "purpose": "the DD-path documentation corpus must be non-empty, so a zero match is interpretable",
+      "nodes_with_documentation": 40000,
+      "nodes_total": 61366,
+      "passed": true
+    },
+    "dd_token_scan_positive_control": {
+      "purpose": "the same predicate the live dd: scan runs must find a dd: token in a document known to carry one",
+      "method": "plant in a disposable copy",
+      "graph_query": "MATCH (sn:StandardName) WHERE sn.documentation CONTAINS 'dd:' RETURN sn.id AS id, sn.name_stage AS stage LIMIT 5",
+      "any_stage_selection": [],
+      "planted_text": "[density](dd:equilibrium/time_slice/profiles_1d/electrons/density)",
+      "predicate_on_planted_text": true,
+      "dd_link_pattern_on_planted_text": true,
+      "passed": true
+    },
+    "dd_link_syntax_is_a_valid_gate_target": {
+      "purpose": "the dd: target syntax must be an accepted link target",
+      "input": "dd:equilibrium/time_slice/profiles_1d/electrons/density",
+      "valid": true
+    }
+  },
+  "elapsed_s": 11.5,
+  "classification_judgement": {
+    "note": "Syntax classes (future_name_dd_placeholder, markdown_link_to_dd_path, bare_prose_bracket, self_link) are read from the text by regex. The resolves_to sub-class of a bare phrase is a judgement: it says the phrase's snake-cased form or normalised text coincides with an existing catalogue string, which is evidence of what the writer meant, not proof."
+  }
+}

@@ -1,0 +1,271 @@
+<!doctype html>
+<html><head><meta charset='utf-8'>
+<title>What are the brackets in the 637 accepted documents the prose-link rule would fail?
+</title></head><body>
+<h1 id="srtj-docs-bracket-census">What are the brackets in the 637 accepted documents the prose-link rule would fail?</h1>
+
+<p><strong>Verdict: none of the 637 is a future-name placeholder.</strong> All
+<strong>2,530</strong> accepted documents were read from the live graph and the prose-link node's own
+rule run over each one. Classified by syntax: <strong>613</strong> hold a bare bracketed prose phrase
+carrying no target (<code>[neon count]</code>) and <strong>24</strong> hold a <code>name:</code> link
+pointing at the documented name itself. <strong>Zero</strong> documents hold a placeholder in the
+future-name (<code>dd:</code>) link convention, because <strong>no accepted document contains the token
+<code>dd:</code> at all</strong> — the convention lives in the structured <code>links</code> field and in
+link targets, not in documentation prose, and cannot render as a bare bracket at any stage (§1). The
+613 bare phrases are not notation the rule should have spared either: an independently written
+instrument, sharing no pattern with the gate, confirms every excluded span was a link label, mathematics
+or a unit, and <strong>0</strong> flagged phrase is one of these (§2).</p>
+
+<p>The measurement is <code>srtj-docs-bracket-census.json</code>, written by
+<code>srtj-docs-bracket-census-run.py</code> with a log ending in <code>EXIT=0</code>; read-only on the
+graph, no graph write, no model call, USD 0.</p>
+
+<p><strong>How to read the citations.</strong> The rule under test is unmerged, so
+<code>docs_gates.py</code> and <code>doc_links.py</code> are cited at the prose-link worktree's
+revision (<code>srtj-docs-prose-link-check</code>, recorded in the JSON as
+<code>gate_module_path</code> and <code>doc_links_module_path</code>); <code>graph_ops.py</code>,
+<code>models.py</code> and the prompts are cited at this run's own revision
+(<code>c5b7f76ed429c79ee4797a2b202e3e9985a85e8e</code>).</p>
+
+<h2 id="srtj-docs-bracket-census-q1">§1 — The future-name convention: syntax, writer, swapper, reader</h2>
+
+<p>The convention is a link whose target is a DD path, written so a name that does not exist yet can be
+cited and later repointed once it does. Four places define it:</p>
+<ul>
+<li><strong>Syntax.</strong> <code>[label](dd:&lt;dd-path&gt;)</code> in documentation, and
+<code>dd:&lt;path&gt;</code> as a value of the structured <code>links</code> field. The gate accepts the
+target form: <code>_VALID_LINK_TARGET_RE</code> (<code>docs_gates.py:65</code>) is
+<code>r"(?:name:[a-z0-9_]+|#[a-z0-9_]+|dd:[a-z0-9_/]+|https?://\S+)$"</code>, and the JSON's
+<code>dd_link_syntax_is_a_valid_gate_target</code> control records
+<code>fullmatch("dd:equilibrium/time_slice/profiles_1d/electrons/density")</code> as true.</li>
+<li><strong>Writer.</strong> The documentation pipeline writes it, and the schema names it: the
+<code>links</code> field is documented as "Related standard names (<code>name:xxx</code> or
+<code>dd:path</code> format)" (<code>imas_codex/standard_names/models.py:1905</code>). The docs prompts
+never ask for it — <code>grep -rn "dd:" imas_codex/llm/prompts/sn/</code> returns nothing — and the
+cross-reference rule they do carry permits only <code>[label](name:bare_id)</code> written "only to a
+name that EXISTS — do not invent a related-name to link"
+(<code>imas_codex/llm/prompts/sn/generate_docs_system.md:315-319</code>).</li>
+<li><strong>Swapper.</strong> <code>resolve_links_batch</code>
+(<code>imas_codex/standard_names/graph_ops.py:9426</code>): for each <code>dd:&lt;path&gt;</code> link it
+runs <code>MATCH (n:IMASNode {id: path})-[:HAS_STANDARD_NAME]-&gt;(sn:StandardName)</code> and replaces
+the link with <code>name:&lt;sn_id&gt;</code>; an unresolved path is retried
+(<code>graph_ops.py:9379</code>, <code>_MAX_LINK_RETRIES = 5</code>) and then marked
+<code>link_status = "failed"</code>. <code>_compute_link_status</code>
+(<code>graph_ops.py:492</code>) names the intermediate state: a node carrying any <code>dd:</code> link
+reads <code>"unresolved"</code> until the swap lands.</li>
+<li><strong>Reader.</strong> <code>_extract_links_from_docs</code>
+(<code>imas_codex/standard_names/graph_ops.py:522</code>) reads both forms with <code>_LINK_RE</code>
+(<code>graph_ops.py:505</code>) and <code>_DD_LINK_RE</code> (<code>graph_ops.py:513</code>) and writes
+the order-preserving deduplicated <code>links</code> index on the node.</li>
+</ul>
+
+<p><strong>Can that syntax ever render as a bare bracketed phrase with no target? No, at any of the four
+stages.</strong> As authored the <code>dd:</code> token always carries its target — either
+<code>[label](dd:path)</code>, or a bare <code>dd:path</code> with no brackets at all. As stored and as
+read by the rule, the whole link is masked before the prose scan runs: <code>_masked_spans</code>
+(<code>doc_links.py:38</code>) adds every <code>_MARKDOWN_LINK_RE</code> match
+(<code>doc_links.py:19</code>, <code>r"!?\[[^\]]*\]\([^)]+\)"</code>) to the spans
+<code>find_prose_bracket_phrases</code> (<code>doc_links.py:121</code>) skips. The bare-reference rule
+independently excludes a link label — <code>_BARE_BRACKET_RE</code> (<code>doc_links.py:20</code>) is
+
+<code>r"(?&lt;![!\\A-Za-z0-9_])\[([a-z][a-z0-9_]+)\](?!\()"</code>
+
+and both of its guards matter here: the lookbehind <code>(?&lt;![!\\A-Za-z0-9_])</code> refuses an image
+<code>!</code>, an escaped <code>\[</code>, and an identifier-adjacent bracket, while the lookahead
+<code>(?!\()</code> refuses a bracket immediately followed by a link target — which is exactly the shape
+of a <code>[label](dd:path)</code> label. Its content class <code>[a-z][a-z0-9_]+</code> is a single
+<code>snake_case</code> token and admits no space. After normalisation
+<code>_normalize_bare_doc_links</code> (<code>graph_ops.py:9602</code>) only rewrites or strips bare
+snake_case tokens and never touches a <code>dd:</code> link; after export the link-pruning pass
+(<code>tests/standard_names/test_export_link_pruning.py</code>) drops internal links to unpublished
+targets from the <code>links</code> field and never edits prose.</p>
+
+<p><strong>Empirically the form does not occur.</strong> Of the 2,530 accepted documents,
+<strong>0</strong> contain the token <code>dd:</code> and <strong>0</strong> contain a
+<code>(dd:</code> link. The scan's positive control (<code>dd_token_scan_positive_control</code> in the
+JSON) runs the same predicate against a document known to carry the token: a selection across
+<em>every</em> stage for <code>documentation CONTAINS 'dd:'</code> returned nothing, so the token was
+planted in a disposable copy as
+<code>[density](dd:equilibrium/time_slice/profiles_1d/electrons/density)</code>, and the same predicate
+found it (<code>predicate_on_planted_text: true</code>) and the <code>dd:</code> link pattern matched it,
+<code>passed: true</code>. So the zero is the scan seeing nothing, not the scan being blind.</p>
+
+<h2 id="srtj-docs-bracket-census-q2">§2 — Every one of the 637, classified</h2>
+
+<table border='1' cellpadding='4' cellspacing='0'>
+<tr><th>class</th><th>documents</th><th>how it is read from the text</th><th>judgement?</th></tr>
+<tr><td><strong>placeholder in the future-name convention</strong></td><td><strong>0</strong></td><td>the phrase is the label of a <code>[label](dd:...)</code> link, or the document holds a <code>dd:</code> target</td><td>syntax</td></tr>
+<tr><td><strong>markdown link whose target is a DD path</strong></td><td><strong>0</strong></td><td><code>^dd:[a-z0-9_/]+$</code> over the link target</td><td>syntax</td></tr>
+<tr><td><strong>bare bracketed phrase with no target</strong></td><td><strong>613</strong></td><td><code>find_prose_bracket_phrases</code> (<code>doc_links.py:121</code>); the bracket has no following <code>(target)</code></td><td>syntax</td></tr>
+<tr><td>bracketed phrase that is a unit, interval, citation or math the rule should have excluded</td><td><strong>0</strong></td><td>the gate's own predicate <code>_is_prose_bracket</code> (<code>doc_links.py:96</code>) re-run over each flagged phrase</td><td>syntax</td></tr>
+<tr><td><strong>self-link</strong></td><td><strong>24</strong></td><td><code>find_self_links</code> (<code>doc_links.py:169</code>): <code>name:</code> target equals the documented id</td><td>syntax</td></tr>
+<tr><td>other</td><td>10</td><td>a pre-existing rule, not the new one: <code>link has an unsupported target or an empty label</code></td><td>syntax</td></tr>
+</table>
+
+<p>Total offences <strong>647</strong> = 613 + 24 + 10; the rule's newly-failing set is the 637 that
+exclude the last row.</p>
+
+<h3 id="srtj-docs-bracket-census-exclusions">The exclusions, measured independently</h3>
+<p>The gate spares a bracket whose content its predicate reads as notation, and takes no credit for
+doing so in the fail counts. To show that sparing is real rather than assumed, every one of the
+<strong>1,859</strong> raw bracket spans in the 2,530 documents was classified a second time by an
+instrument written independently of the gate and sharing no pattern with it: its bracket, math, code
+and link patterns are its own, and its content classifier is its own
+(<code>_IND_NUMBER_PAIR</code>, <code>_IND_UNITISH</code>, <code>_IND_LATEX</code>, digit-only).</p>
+<table border='1' cellpadding='4' cellspacing='0'>
+<tr><th>what the span is</th><th>spans</th><th>an example</th></tr>
+<tr><td>the label of a markdown link</td><td><strong>1,042</strong></td><td><code>[launched neutral-beam injection power]</code> in <code>absorbed_power_due_to_neutral_beam_injection</code></td></tr>
+<tr><td>inside mathematics</td><td><strong>31</strong></td><td><code>[\lambda_1,\lambda_2]</code> in <code>brightness_of_visible_camera</code></td></tr>
+<tr><td>reported by the gate as prose</td><td><strong>782</strong></td><td><code>[power due to neutral-beam injection]</code> in <code>absorbed_power_due_to_neutral_beam_injection</code></td></tr>
+<tr><td>a unit</td><td><strong>1</strong></td><td><code>[J]</code> in <code>power_due_to_recombination</code></td></tr>
+<tr><td>prose the gate's unit predicate spared</td><td><strong>3</strong></td><td><code>[co-passing]</code> in <code>counter_passing_fast_electron_power_density_due_to_collisions</code></td></tr>
+<tr><td>numeric interval, citation, code span, latex, empty</td><td>0 each</td><td>—</td></tr>
+</table>
+<p>So the spans the predicate excludes are link labels (1,042), mathematics (31) and units (1): exactly
+the categories the exclusion exists to spare, and no flagged phrase falls into any of them —
+<code>notation_should_be_excluded</code> is 0. The instrument also found that the exclusion is
+<em>loose</em> in the opposite direction: 3 spans it reads as prose the gate treats as units, because
+<code>_is_prose_bracket</code> passes any multi-word bracket whose tokens all match
+<code>_UNIT_TOKEN_RE</code> (<code>doc_links.py:25</code>, <code>[A-Za-z0-9][A-Za-z0-9^\-\*\./]*</code>)
+when one of them holds a digit — <code>[co-passing]</code> (a single hyphenated token),
+<code>[toroidal flux-surface-averaged helium-3 velocity at the plasma boundary]</code> and
+<code>[accumulated helium-3 count due to gas injection]</code>. That is the rule under-reporting, not
+over-reporting, so it does not touch the 637; it is recorded as a follow-on.</p>
+
+<h3 id="srtj-docs-bracket-census-bare">The 613 bare bracketed phrases</h3>
+<p>Each phrase was resolved three ways: snake-cased against every <code>StandardName</code> id in the
+catalogue (5,137 ids, all stages); normalised against every stored description (4,874 indexed); and
+searched for in the DD-path documentation corpus (a bounded read of the 40,000 of 61,366
+<code>IMASNode</code> nodes that carry documentation).</p>
+<table border='1' cellpadding='4' cellspacing='0'>
+<tr><th>what the phrase names</th><th>phrases</th></tr>
+<tr><td>an existing standard name id, after snake-casing</td><td><strong>261</strong></td></tr>
+<tr><td>an existing standard name description</td><td>0</td></tr>
+<tr><td>a DD path's documentation</td><td>12</td></tr>
+<tr><td>none of these</td><td><strong>340</strong></td></tr>
+</table>
+<p>Every one of the 613 contains a space (word counts run 2–15, modal 3), and
+<strong>0</strong> of them is linked anywhere in its own document.</p>
+
+<p>Five verbatim examples per class, with document ids:</p>
+<table border='1' cellpadding='4' cellspacing='0'>
+<tr><th>document id</th><th>the bracketed phrase, verbatim</th><th>what the phrase resolves to</th></tr>
+<tr><td><code>absorbed_power_due_to_neutral_beam_injection</code></td><td><code>[power due to neutral-beam injection]</code></td><td><code>power_due_to_neutral_beam_injection</code></td></tr>
+<tr><td><code>alfven_frequency</code></td><td><code>[toroidal mode number]</code></td><td><code>toroidal_mode_number</code></td></tr>
+<tr><td><code>alpha_angle_of_antenna_strap</code></td><td><code>[angle of antenna strap]</code></td><td><code>angle_of_antenna_strap</code></td></tr>
+<tr><td><code>argon_density_at_separatrix</code></td><td><code>[density at separatrix]</code></td><td><code>density_at_separatrix</code></td></tr>
+<tr><td><code>argon_prefill_count</code></td><td><code>[tritium prefill count]</code></td><td><code>tritium_prefill_count</code></td></tr>
+<tr><td><code>absorbed_radiated_power_at_divertor_target</code></td><td><code>[power of the divertor due to radiation]</code></td><td>none of these</td></tr>
+<tr><td><code>absorbed_wave_power</code></td><td><code>[ion charge-state absorbed wave power]</code></td><td>none of these</td></tr>
+<tr><td><code>accumulated_ammonia_count</code></td><td><code>[ammonia count]</code></td><td>none of these</td></tr>
+<tr><td><code>accumulated_carbon_count_due_to_gas_injection</code></td><td><code>[carbon count due to gas injection]</code></td><td>none of these</td></tr>
+<tr><td><code>accumulated_ethane_count</code></td><td><code>[ethane count]</code></td><td>none of these</td></tr>
+<tr><td><code>factor_of_spectrometer_channel</code></td><td><code>[solid angle]</code></td><td>DD path documentation</td></tr>
+<tr><td><code>plasma_temperature</code></td><td><code>[thermal pressure]</code></td><td>DD path documentation</td></tr>
+<tr><td><code>power_due_to_fusion</code></td><td><code>[neutron power]</code></td><td>DD path documentation</td></tr>
+<tr><td><code>first_local_tangential_coordinate_of_fibre_bundle</code></td><td><code>[vertical coordinate]</code></td><td>DD path documentation</td></tr>
+<tr><td><code>parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field</code></td><td><code>[perturbed parallel magnetic field]</code></td><td>DD path documentation</td></tr>
+</table>
+<p><em>Marked judgement:</em> the last column is a judgement, not syntax. It says the phrase's
+snake-cased form or normalised text coincides with an existing catalogue string, which is evidence of
+what the writer meant and not proof of it; in the first five rows the value shown is that snake-cased
+form itself, which is the catalogue id the runner matched. The syntax classes — bare bracket, self-link,
+<code>dd:</code> placeholder, notation — are read from the text by regex and carry no judgement.</p>
+
+<h3 id="srtj-docs-bracket-census-self">The 24 self-links</h3>
+<p>Five verbatim: <code>cumulative_inside_flux_surface_electron_particle_source_rate</code>,
+<code>electrostatic_potential</code>, <code>fast_ion_atomic_number</code>,
+<code>fast_ion_critical_energy</code>,
+<code>flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary</code>. In each case the link
+target equals the document's own id. This is a real defect by construction: the structured
+<code>links</code> index drops a self-reference (<code>_extract_links_from_docs</code>,
+<code>graph_ops.py:536</code>: "a self-loop is meaningless"), and the ISNC catalog enforces
+<code>UNIQUE(name, link)</code>, so a self-reference that survived reached
+<code>validate_catalog</code>. The prompt already forbids it
+(<code>generate_docs_system.md:323</code>: "Do NOT link an entry to itself").</p>
+
+<h3 id="srtj-docs-bracket-census-other">The 10 "other" documents</h3>
+<p>These fail the gate's oldest check, not the two rules the prose-link node adds, so they are not part
+of the 637. Each carries a math bracket followed by a parenthesised argument — the distribution function
+evaluated at position and velocity — which parses as a malformed markdown link. Every id and the gate's
+reason string, verbatim:</p>
+<table border='1' cellpadding='4' cellspacing='0'>
+<tr><th>document id</th><th>gate reason</th></tr>
+<tr><td><code>co_passing_fast_ion_power_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_s,f_i](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>co_passing_thermal_electron_power_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_{f,\mathrm{co}}](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>co_passing_thermal_ion_torque_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_i](\mathbf{r},\mathbf{v})</code></td></tr>
+<tr><td><code>counter_passing_fast_electron_power_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_{e,\mathrm{fast}}, f_s](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>counter_passing_fast_particle_power_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_a,f_b](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>counter_passing_thermal_electron_power_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_{f,\mathrm{cp}}](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>fast_particle_power_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_s,f_e](\mathbf{x},\mathbf{v})</code></td></tr>
+<tr><td><code>thermal_ion_torque_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_i](\mathbf{r},\mathbf{v})</code></td></tr>
+<tr><td><code>trapped_fast_ion_power_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_{\mathrm{fast}}](\mathbf{x},\mathbf{v},t)</code></td></tr>
+<tr><td><code>trapped_thermal_ion_torque_density_due_to_collisions</code></td><td><code>link has an unsupported target or an empty label: [f_i](\mathbf{r},\mathbf{v})</code></td></tr>
+</table>
+
+<h3 id="srtj-docs-bracket-census-precision">The rule's precision as measured</h3>
+<p>Against the concern that motivated this census — that the check might fail a legitimate future-name
+link — the rule's precision is <strong>1.000</strong>: 0 of the 637 flagged documents is a
+<code>dd:</code> placeholder, and 0 is notation the exclusions should have spared. All 637 flag a
+construct that genuinely renders as literal <code>[text]</code> (613) or is a <code>name:</code>
+self-loop (24).</p>
+
+<p>Positive controls prove the instrument sees each construct before any zero is reported: the gate's
+scanner returns <code>["ion density"]</code> for a text holding one; the gate predicate rejects
+<code>[m^-3]</code> as a unit; the independent instrument classifies a planted
+<code>[m^-3] and [0, 1] and $[a b]$ and [x](name:y)</code> into unit, interval, math and link label; the
+gate fails a document holding a bare prose bracket and a document linking its own name; the description
+index holds 4,874 entries and the DD documentation corpus 40,000; and the <code>dd:</code> scan's own
+predicate finds a planted <code>dd:</code> link.</p>
+
+<h2 id="srtj-docs-bracket-census-q3">§3 — Where the bare phrases came from</h2>
+
+<p>One writer accounts for them: the documentation generation prompt, and the accept-path normaliser
+that cannot see this form.</p>
+<ul>
+<li><strong>The writer is the docs generation LLM.</strong>
+<code>imas_codex/llm/prompts/sn/generate_docs_system.md:315</code> carries the hard rule that forbids
+exactly this construct — "No bare brackets — every <code>[...]</code> MUST have a
+<code>(name:bare_id)</code> target (HARD)" — over the offending example at
+<code>:334</code>, <code>captured by [radial_derivative_of_elongation_of_flux_surface].</code>. The rule
+has been in the prompt since 2026-06-21 (<code>8319cc043</code>, <em>fix(sn): docs cross-refs — ban bare
+[name] brackets and self/mismatched links</em>), and the model writes them anyway. The refine prompt
+carries a weaker form of the same instruction
+(<code>imas_codex/llm/prompts/sn/refine_docs_user.md:185</code>, "preferring a
+<code>[label](name:id)</code> link").</li>
+<li><strong>The accept-path normaliser is blind to this form, which is why it survives to
+<code>accepted</code>.</strong> <code>_normalize_bare_doc_links</code>
+(<code>imas_codex/standard_names/graph_ops.py:9602</code>) is meant to repair exactly this defect — "each
+bare <code>[snake_case]</code> (no <code>(name:...)</code> target) becomes
+<code>[snake_case](name:snake_case)</code> when <code>snake_case</code> is a real StandardName id, else
+the brackets are stripped". It finds its candidates with
+<code>find_name_references(..., known=None)</code> (<code>doc_links.py:53</code>), whose bare-candidate
+pattern is <code>_BARE_BRACKET_RE</code> (<code>doc_links.py:20</code>) — a <em>single snake_case
+token</em>, <code>\[([a-z][a-z0-9_]+)\]</code>, admitting no space. All 613 phrases contain a space, so
+none is a candidate, and the sweep neither links nor strips them. The partition is clean at
+<strong>zero</strong>: no accepted document holds a bare single-token snake bracket
+(<code>bare_snake_bracket_count</code> is 0), so the form the sweep can see is the form that is
+already absent and the form that is present is the form it cannot see. The same gap explains the 261 that
+snake-case to an existing id: written <code>[neon_count]</code> the sweep would have linked it, written
+<code>[neon count]</code> it is invisible. The sweep runs on the accept path
+(<code>persist_reviewed_docs</code>) and again on every rotation's reconcile, so it is not that it never
+ran.</li>
+</ul>
+<p>No normaliser strips a link target to leave a bare bracket: the only bracket-stripping code path is
+that same <code>_normalize_bare_doc_links</code>, and it removes the brackets <em>and</em> the markup to
+leave the plain word, not a bracket.</p>
+
+<h2 id="srtj-docs-bracket-census-answer">The two answers</h2>
+<p><strong>Must the prose rule change to spare the future-name convention? No.</strong> The convention
+writes <code>[label](dd:path)</code> or a bare <code>dd:path</code>, both of which the rule already
+masks or accepts, and no accepted document contains a <code>dd:</code> token at all — 0 of the 637
+failures is a future-name placeholder, so nothing in this set needs the rule relaxed.</p>
+<p><strong>Which classes are real defects needing repair?</strong> Two: the <strong>24 self-links</strong>
+(a <code>name:</code> link to the documented name itself, already forbidden by the prompt and dropped by
+the <code>links</code> index) and the <strong>613 bare prose brackets</strong> (a bracketed phrase that
+renders as literal text, 613 of which no renaming of the catalogue can help: 261 name an existing
+identity the writer evidently meant to link, and the rest are phrases with no target at all). The 10
+documents failing the older unsupported-target rule sit beside these and are not part of the 10:
+they are counted, listed above, and left outside the 637.</p>
+
+</body></html>
