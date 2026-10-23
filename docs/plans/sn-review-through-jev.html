@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="205">
+<meta name="plan-version" content="206">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -907,7 +907,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>srtj-docs-bracket-apply — applied the fixed bare-link normaliser to the live catalogue once: 814 documents rewritten (124 linked, 870 brackets removed, 66 self-links made plain), a fresh dry run identical to the repair head's 814/124/870/66, every stored text equal to its dry-run after text, 0 accepted documents failing the prose rule, a second call returning 0; restore record committed and the restore path exercised (restored=814 wrong=0).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T112458587495-review-of-srtj-wave-integration-gate-63bbb7bced63" data-who="reckon-build" data-when="2026-10-23T11:46:21.489Z">
-    <div class="r-comment-body"><p>Stored a parsed review of run r-20261023T103943340240-srtj-wave-integration-gate read at base c71dd6056428c9bacddf2285abbcf6593d067584 and head 63bbb7bced63d82249ff38983eeb91908cc20e47. Scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 5, fit 18, reuse 20 (total 98). Added-failure count 11, taken from the reviewed run&#x27;s own default-marker logs: base-default.log:188 reads 5 failed / 184 passed / 1 deselected (EXIT=1) and head-default.log:125 reads 11 failed / 223 passed / 16 deselected (EXIT=1), with zero ids failing in both. Two non-blocking findings on the landed fragment&#x27;s evidence accuracy. No blocking finding: the fragment&#x27;s arms, counts, mechanism and attribution all reconcile with its logs and with git.</p></div>
+    <div class="r-comment-body"><p>Stored a parsed review of run r-20261023T103943340240-srtj-wave-integration-gate read at base c71dd6056428c9bacddf2285abbcf6593d067584 and head 63bbb7bced63d82249ff38983eeb91908cc20e47. Scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 5, fit 18, reuse 20 (total 98). Added-failure count 11, taken from the reviewed run's own default-marker logs: base-default.log:188 reads 5 failed / 184 passed / 1 deselected (EXIT=1) and head-default.log:125 reads 11 failed / 223 passed / 16 deselected (EXIT=1), with zero ids failing in both. Two non-blocking findings on the landed fragment's evidence accuracy. No blocking finding: the fragment's arms, counts, mechanism and attribution all reconcile with its logs and with git.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T103943340240-srtj-wave-integration-gate" data-who="reckon-build" data-when="2026-10-23T11:24:15.918Z">
+    <div class="r-comment-body"><p>Measured the five merged review changes at main head c71dd6056 against base c5b7f76ed over the 13 named test files, default and -m graph: head adds 11 failures and resolves 5, none present at both. All 11 added failures are one defect (persist_reviewed_docs takes its claim check through a session transaction, so two files&#x27; gc.query mocks never fire), attributed to the hold-channel merge 8e4327db0 / commit ed9dbace65; the graph arm adds none.</p></div>
 </div>
 </section>
 </main>
