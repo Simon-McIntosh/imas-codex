@@ -380,30 +380,11 @@ def sync_route_holds(
     if axis != ROUTE_HOLD_AXIS:
         return []
 
-    from imas_codex.standard_names.review.holds import (
-        clear_holds_not_raised,
-        finding_key,
-        raise_hold,
-    )
+    from imas_codex.standard_names.review.holds import sync_holds
 
-    raised: list[str] = []
-    raised_keys: set[str] = set()
-    for hold in route.holds:
-        record = raise_hold(
-            name_id,
-            ROUTE_HOLD_AXIS,
-            hold["kind"],
-            hold["finding"],
-            hold["evidence"],
-            hold["raised_by"],
-            graph=graph,
-        )
-        raised.append(record["id"])
-        raised_keys.add(finding_key(hold["kind"], hold["finding"]))
-    clear_holds_not_raised(
-        name_id, ROUTE_HOLD_AXIS, set(ROUTE_HOLD_KINDS), raised_keys, graph=graph
+    return sync_holds(
+        name_id, ROUTE_HOLD_AXIS, ROUTE_HOLD_KINDS, route.holds, graph=graph
     )
-    return raised
 
 
 async def _store_route(

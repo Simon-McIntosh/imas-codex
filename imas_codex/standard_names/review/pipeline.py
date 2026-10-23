@@ -27,11 +27,7 @@ from imas_codex.standard_names.budget import (
     model_provider_exposure,
 )
 from imas_codex.standard_names.review.audits import AuditReport, LintFinding
-from imas_codex.standard_names.review.holds import (
-    clear_holds_not_raised,
-    finding_key,
-    raise_hold,
-)
+from imas_codex.standard_names.review.holds import sync_holds
 from imas_codex.standard_names.review.judge_stage import judge_review_stage
 
 # The hold kinds the documentation lint check owns. A review pass reconciles
@@ -2022,28 +2018,24 @@ def _reconcile_docs_lint_holds(
         if not entry_id:
             continue
         finding = error_lint_findings.get(entry_id)
-        raised_keys: set[str] = set()
+        pending: list[dict[str, str]] = []
         if finding is not None:
             entry["audit_cap_finding"] = finding
-            raise_hold(
-                entry_id,
-                "docs",
-                "docs_lint_error",
-                finding,
-                f"error-severity lint finding on {entry_id}",
-                "review-lint",
-                graph=graph,
+            pending.append(
+                {
+                    "kind": "docs_lint_error",
+                    "finding": finding,
+                    "evidence": f"error-severity lint finding on {entry_id}",
+                    "raised_by": "review-lint",
+                }
             )
-            raised_keys.add(finding_key("docs_lint_error", finding))
             wlog.info(
                 "Docs entry %r held by lint error (score kept at %r): %s",
                 entry_id,
                 entry.get("reviewer_score"),
                 finding,
             )
-        clear_holds_not_raised(
-            entry_id, "docs", set(LINT_HOLD_KINDS), raised_keys, graph=graph
-        )
+        sync_holds(entry_id, "docs", LINT_HOLD_KINDS, pending, graph=graph)
 
 
 async def _review_single_batch(

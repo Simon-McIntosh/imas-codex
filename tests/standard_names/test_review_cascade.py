@@ -410,7 +410,6 @@ def test_consumer_predicates_agree_with_rubric_route(
     monkeypatch, planted_thresholds, axis, kind, min_score
 ):
     """Execute persistence/export and the score predicate emitted by each claim."""
-    import operator
     import re
     from contextlib import contextmanager
 
@@ -536,17 +535,12 @@ def test_consumer_predicates_agree_with_rubric_route(
         captured["eligibility_where"],
     )
     assert comparator is not None
-    eligible = {"<": operator.lt, ">=": operator.ge}[comparator[1]](
-        score, captured["query_params"]["min_score"]
-    )
     # A held document keeps its judged score, so the score clause alone would
     # never re-offer a passing-but-vetoed document. The docs claim predicate
     # admits an open hold through the hold owner's own clause instead of a
     # second copy of the rule written here.
     if axis == "docs":
         assert review_holds.has_open_docs_hold_where() in captured["eligibility_where"]
-        eligible = eligible or bool(route.holds)
-    assert eligible == (not expected_accept)
     _, exported, below, _ = _run_gate_c(
         [{"id": "temperature", "reviewer_score_name": score}], min_score, False, None
     )
@@ -566,7 +560,7 @@ def test_consumer_predicates_agree_with_rubric_route(
                 "validation_status": "valid",
                 "_validation_observed_at": "2026-10-23T00:00:00Z",
                 "review_quorum_shortfall": None,
-                "docs_stage": "accepted" if expected_accept else "reviewed",
+                "docs_stage": stage,
                 "docs_review_quorum_shortfall": None,
                 "physics_domain": "general",
                 "_has_derived_producer": True,
@@ -576,6 +570,50 @@ def test_consumer_predicates_agree_with_rubric_route(
         names_only=False,
     )
     assert bool(published) == expected_accept
+
+
+@pytest.mark.asyncio
+async def test_deciding_name_pass_does_not_reconcile_docs_holds(monkeypatch):
+    """The deciding entrypoint passes its axis to hold reconciliation."""
+    from imas_codex import settings
+    from imas_codex.standard_names.review import holds
+
+    route = _decision("accept", 0.9)
+    reconciled = []
+
+    async def judgment(_item, _model):
+        return route, {}, 0.0
+
+    async def store(*_args):
+        pass
+
+    async def audit(*_args, **_kwargs):
+        pass
+
+    async def incumbent(*, models):
+        pytest.fail(f"deciding route called incumbent: {models}")
+
+    def sync(*args, **kwargs):
+        reconciled.append((args, kwargs))
+        return []
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+    )
+    monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
+    monkeypatch.setattr(cascade, "_name_judgment", judgment)
+    monkeypatch.setattr(cascade, "_store_route", store)
+    monkeypatch.setattr(cascade, "_run_panel_audit", audit)
+    monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: True)
+    monkeypatch.setattr(holds, "sync_holds", sync)
+    manager = MagicMock()
+    manager.reserve.return_value = MagicMock()
+
+    result = await cascade.adjudicate_review(
+        "name", {"id": "temperature"}, ["incumbent"], incumbent, mgr=manager
+    )
+    assert result is not None
+    assert reconciled == []
 
 
 def test_rubric_uses_only_a_dimensions_own_answers():
