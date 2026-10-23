@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T05:50:50Z",
+  "dispatched_at": "2026-10-23T05:41:17Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": 17905,
+      "severity": "blocking",
+      "text": "A passing-score document with an open hold at the rotation cap becomes exhausted, while clear_holds_not_raised and dismiss_hold only promote docs_stage='reviewed' (review/holds.py:161). Clearing or dismissing its last hold therefore leaves the document exhausted even though its judged score passes and no hold remains; the link-gate comment at graph_ops.py:17854 explicitly says not to exhaust a document over a link finding. The graph test covers only docs_chain_length=0, so add the cap case and preserve a stage from which dismissal can accept it."
+    },
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": 11251,
+      "severity": "blocking",
+      "text": "The worker raises and clears ReviewHold nodes before persist_reviewed_docs checks claim_token and claim_seq at graph_ops.py:17942-17948. If a concurrent reviewer wins or the claim is stale, persistence returns a no-op but this worker has already changed the winner's holds; it can place an open veto on an accepted document or clear the winner's veto. Bind hold writes to the verified claim and stage in the same transaction as review persistence, with a stale-claim test."
+    },
+    {
+      "file": "imas_codex/standard_names/review/holds.py",
+      "line": 168,
+      "severity": "follow-on",
+      "text": "Promotion after a clear or dismissal changes docs_stage to accepted but leaves edit_status open or exhausted; persist_reviewed_docs updates that companion status when it accepts at graph_ops.py:17922-17931. A held edit dismissed later can therefore remain advertised as unfinished after acceptance; update the paired lifecycle state and add an assertion to the dismissal test."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief requires a ReviewHold schema and owner plus graph-ops and worker routes; imas_codex/schemas/standard_name.yaml:2265, review/holds.py:51, graph_ops.py:17885 and workers.py:11251 implement them, with two blocking lifecycle and ownership gaps below.\nVERDICT done_when: the source brief requires an empty disposable Neo4j gate, Cypher checks, no added focused failures, a red mutation and the inventory fragment; review-holds-committed.log ends 6 passed EXIT=0, cypher-property.log ends 4 passed EXIT=0, negative-control.log ends 1 failed EXIT=1, and existing-head-final.log ends 60 passed EXIT=0 against existing-base-absolute.log's 5 failed.\nVERDICT write_paths: the source manifest grants the ten paths listed in manifest.md:3; git diff --stat c5b7f76..98ecc1e9 lists exactly those ten paths and no ungranted path.\nVERDICT manifest: the source run's manifest.md reports four commits, the six graph tests, four Cypher tests, a failing clamp mutation and the final focused arm; the named logs contain matching summaries and EXIT lines.\nVERDICT diff: read 6a84159b05e8ab4d98dff22086fd2cd1ec9d2425, 7740180aaca9307ae226c744b6af3ea40958f3b8, 0e4a5151532b27a5507013c53650ceaceaa668c0 and 98ecc1e9130268675af8bfa2be65f07a985f7466 against c5b7f76ed429c79ee4797a2b202e3e9985a85e8e; the first adds the hold mechanism and six graph tests, the second and fourth write the fragment, and the third updates four existing tests.\nCALL_SITES: imas_codex/standard_names/workers.py:11251, imas_codex/standard_names/workers.py:11281, imas_codex/standard_names/graph_ops.py:17885, imas_codex/standard_names/graph_ops.py:17904, imas_codex/standard_names/graph_ops.py:25669, imas_codex/standard_names/loop.py:867\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: graph_ops.py:17905 and workers.py:11251 leave cap-bound held documents and stale-review holds outside the goal's acceptance and claim-ownership rules despite the implemented schema and owner.\nSCORE evidence: 18\nJUSTIFICATION evidence: the source run's existing-base-absolute.log and existing-head-final.log record complete 5-failed and 0-failed arms with no added failure IDs, while negative-control.log:16 shows the clamp mutation produced 0.849 against the literal expected 0.875.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the ten paths in git diff --stat c5b7f76..98ecc1e9 are all in the source manifest's orientation_write_paths and the fragment leaves pipeline.py and cascade.py for the next node.\nSCORE durability: 14\nJUSTIFICATION durability: test_review_holds.py:183-235 would fail on a restored score clamp, missing clear or dismissal promotion, a reopened dismissed key, a reused key for a different finding, no passing-score refinement claim, or absent refiner feedback; test_docs_contradiction_veto.py:157-164 would fail if the worker dropped its unchanged 1.0 score or contradiction hold, but neither test reaches the cap case or stale-claim writes and negative-control.log proves only the clamp arm.\nSCORE fit: 17\nJUSTIFICATION fit: review/holds.py:51-215 keeps hold graph reads and writes in one owner, and graph_ops.py:25669 composes its predicate into the existing claim query without a plan-labelled source symbol.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search over imas_codex/standard_names/review, graph_ops.py and standard_name.yaml found no earlier review-veto owner; standard_name.yaml:2860-2910 has a separate DDGap triage record for source-data gaps, and review/holds.py:51-215 is the first owner for score-independent review holds.\nFINDING imas_codex/standard_names/graph_ops.py:17905 blocking: A passing-score document with an open hold at the rotation cap becomes exhausted, while clear_holds_not_raised and dismiss_hold only promote docs_stage='reviewed' (review/holds.py:161). Clearing or dismissing its last hold therefore leaves the document exhausted even though its judged score passes and no hold remains; the link-gate comment at graph_ops.py:17854 explicitly says not to exhaust a document over a link finding. The graph test covers only docs_chain_length=0, so add the cap case and preserve a stage from which dismissal can accept it.\nFINDING imas_codex/standard_names/workers.py:11251 blocking: The worker raises and clears ReviewHold nodes before persist_reviewed_docs checks claim_token and claim_seq at graph_ops.py:17942-17948. If a concurrent reviewer wins or the claim is stale, persistence returns a no-op but this worker has already changed the winner's holds; it can place an open veto on an accepted document or clear the winner's veto. Bind hold writes to the verified claim and stage in the same transaction as review persistence, with a stale-claim test.\nFINDING imas_codex/standard_names/review/holds.py:168 follow-on: Promotion after a clear or dismissal changes docs_stage to accepted but leaves edit_status open or exhausted; persist_reviewed_docs updates that companion status when it accepts at graph_ops.py:17922-17931. A held edit dismissed later can therefore remain advertised as unfinished after acceptance; update the paired lifecycle state and add an assertion to the dismissal test.\n",
+  "review_run_id": "r-20261023T053858122829-review-of-srtj-review-holds-channel-98ecc1e91302",
+  "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "reviewed_head_sha": "98ecc1e9130268675af8bfa2be65f07a985f7466",
+  "reviewed_run_id": "r-20261023T041800161321-srtj-review-holds-channel",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T05:46:23.558224+00:00",
+  "total": 102
+}
