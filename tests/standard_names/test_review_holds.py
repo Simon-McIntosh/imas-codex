@@ -176,6 +176,14 @@ def _state(name_id: str) -> dict:
         )[0]
 
 
+def _edit_status(name_id: str) -> str | None:
+    with GraphClient() as graph:
+        return graph.query(
+            "MATCH (sn:StandardName {id: $id}) RETURN sn.edit_status AS status",
+            id=name_id,
+        )[0]["status"]
+
+
 def test_held_document_keeps_judged_score_and_is_not_accepted(
     planted_name: str,
 ) -> None:
@@ -187,12 +195,19 @@ def test_held_document_keeps_judged_score_and_is_not_accepted(
 
 
 def test_clearing_hold_accepts_passing_document(planted_name: str) -> None:
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (sn:StandardName {id: $id}) SET sn.edit_status = 'open'",
+            id=planted_name,
+        )
     hold = _raise(planted_name)
     _review(planted_name)
+    assert _edit_status(planted_name) == "open"
     assert (
         holds.clear_holds_not_raised(planted_name, "docs", {hold["kind"]}, set()) == 1
     )
     assert _state(planted_name) == {"stage": "accepted", "score": 0.875}
+    assert _edit_status(planted_name) == "applied"
     assert holds.docs_accepted(0.875, 0.85, planted_name)
 
 
@@ -200,7 +215,8 @@ def test_cap_hold_can_be_dismissed_into_acceptance(planted_name: str) -> None:
     """A terminal rotation must leave a held passing document triageable."""
     with GraphClient() as graph:
         graph.query(
-            "MATCH (sn:StandardName {id: $id}) SET sn.docs_chain_length = 3",
+            "MATCH (sn:StandardName {id: $id}) "
+            "SET sn.docs_chain_length = 3, sn.edit_status = 'open'",
             id=planted_name,
         )
     hold = _raise(planted_name)
@@ -208,6 +224,43 @@ def test_cap_hold_can_be_dismissed_into_acceptance(planted_name: str) -> None:
     assert _state(planted_name) == {"stage": "reviewed", "score": 0.875}
     assert holds.dismiss_hold(hold["id"], "triager", "Source confirms the claim")
     assert _state(planted_name) == {"stage": "accepted", "score": 0.875}
+    assert _edit_status(planted_name) == "applied"
+
+
+def test_stranded_promotion_respects_docs_holds(planted_name: str) -> None:
+    """A later pool pass cannot turn a held passing review into acceptance."""
+    _raise(planted_name)
+    assert _review(planted_name) == "reviewed"
+    unheld = "unheld_passing_document"
+    with GraphClient() as graph:
+        graph.query(
+            """
+            CREATE (sn:StandardName {id: $id, name_stage: 'accepted',
+                docs_stage: 'reviewed', reviewer_score_docs: 0.875,
+                edit_status: 'open', documentation: 'An unheld document.'})
+            CREATE (sn)-[:HAS_REVIEW]->(:StandardNameReview {
+                id: $review_id, review_axis: 'docs',
+                review_group_id: 'test-group', is_canonical: true,
+                resolution_method: 'quorum_consensus', score: 0.875,
+                reviewed_at: datetime()})
+            """,
+            id=unheld,
+            review_id=f"{unheld}:docs:test-group:0",
+        )
+        assert graph.query("MATCH (sn:StandardName) RETURN count(sn) AS n")[0]["n"] == 2
+
+    assert graph_ops.promote_stranded_reviewed(min_score=0.85, dry_run=True) == {
+        "name": 0,
+        "docs": 1,
+    }
+    assert _state(planted_name) == {"stage": "reviewed", "score": 0.875}
+    assert graph_ops.promote_stranded_reviewed(min_score=0.85) == {
+        "name": 0,
+        "docs": 1,
+    }
+    assert _state(planted_name) == {"stage": "reviewed", "score": 0.875}
+    assert _state(unheld) == {"stage": "accepted", "score": 0.875}
+    assert _edit_status(unheld) == "applied"
 
 
 def test_stale_claim_cannot_raise_or_clear_review_holds(planted_name: str) -> None:
