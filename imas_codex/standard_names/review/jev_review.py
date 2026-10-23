@@ -39,6 +39,16 @@ with its path, unit and links, because the path names the field and can deny a
 claim about a locus or an axis where the label alone could not. The decision is
 a property of the text, so code makes it and the judge is not shown the label.
 
+One kind of claim is settled the same way. A sentence that states a
+non-requirement — the quantity does not prescribe, impose, require or mandate a
+locus, an averaging or an aggregation — carries nothing the evidence can deny,
+so code answers it "says nothing" and the judge is not asked. The settlement is
+narrow on purpose. It is not applied to a claim about a name that already
+carries a locus or an average or a sum, and it is not applied to a sentence
+that asserts the quantity's own combination — that it is not averaged, that it
+holds at one place only, or that it excludes what the source states. Those
+sentences disagree with a source and the judge reads them.
+
 The module writes no graph state. The documentation acceptance path calls its
 claim comparison and veto while leaving the holistic score in shadow.
 Every call goes through the shared decisions owner
@@ -566,6 +576,110 @@ def comparison_sources(
     return kept
 
 
+# A documented name that carries a locus or an aggregation qualifier of its own
+# already fixes where the quantity lives or how it is combined, so a sentence
+# about it is not a statement about a generic quantity and the judge reads it.
+_NAME_LATTICE_QUALIFIER = re.compile(
+    r"(?:^|_)(?:averag\w*|mean|sum|summation|aggregat\w*|integrat\w*|"
+    r"flux_surface|midplane|outboard|inboard|profile|total|median|"
+    r"over|at|in|on|along|per)(?:_|$)"
+)
+
+# What a non-requirement sentence is about: a locus, a placement, or a way of
+# combining values — every term a source could otherwise be read against.
+_AGGREGATION_TERM = re.compile(
+    r"\b(?:locus|loci|location|placement|position|aggregat\w*|averag\w*|"
+    r"spatial\w*|sum|sums|summation|summed|spectral|wavenumber|"
+    r"flux[- ]surface|midplane|temporal\w*|time[-_ ]average)\b"
+)
+
+# The verbs by which a sentence says a quantity imposes something. A sentence
+# that negates one of these, or gives one a negative object, states a
+# non-requirement: the quantity does not mandate the locus or the combination.
+_REQUIREMENT_VERB = r"(?:prescrib\w*|impos\w*|requir\w*|mandat\w*|demand\w*|specif\w*)"
+_NEGATED_REQUIREMENT = re.compile(
+    rf"\b(?:does|do|did|is|are|was|were|need|needs)\s+not\s+"
+    rf"(?:\w+\s+){{0,2}}{_REQUIREMENT_VERB}"
+)
+_REQUIREMENT_WITH_NO_OBJECT = re.compile(
+    rf"\b{_REQUIREMENT_VERB}\s+(?:no|nothing|neither)\b"
+)
+_NO_MANDATORY_TERM = re.compile(
+    r"\bno\s+(?:mandatory|specific|particular|intrinsic|required|fixed|"
+    r"prescribed|implied|preferred)\s+\w*\s*"
+)
+
+# Sentences that assert the quantity's own combination rather than denying that
+# one is required: it is not averaged, it holds at one place only, or it
+# excludes what the source states. Those disagree with a source and are the
+# judge's to read, however they are phrased.
+_ASSERTED_COMBINATION = re.compile(
+    r"\b(?:is|are|was|were)\s+(?:not|never)\s+(?:averag|aggregat|summ|integrat)\w*"
+    r"|\bnot\s+an\s+average\b"
+    r"|\bwithout\s+(?:\w+\s+){0,2}(?:averag|aggregat|summation)\w*"
+    r"|\bpointwise\b"
+    r"|\bexcludes?\b|\bomits?\b|\bonly\s+(?:the|a|an|one|at|upstream|downstream)\b"
+)
+
+
+def states_non_requirement(sentence: str) -> bool:
+    """True when a sentence denies that its quantity requires a locus or a combination.
+
+    "The quantity has no mandatory locus or aggregation." and "It does not
+    prescribe a wavenumber sum or time or flux-surface average." state what the
+    quantity does not impose, so nothing in the evidence can deny it — a source
+    that names one locus of a generic quantity agrees with it.
+
+    A sentence that instead asserts the combination itself — that the quantity
+    is not averaged, holds at one place only, or excludes what the source
+    states — is a claim about the evidence and is left to the judge.
+    """
+    text = " ".join(str(sentence or "").split()).lower()
+    if not text or _ASSERTED_COMBINATION.search(text):
+        return False
+    if not _AGGREGATION_TERM.search(text):
+        return False
+    if _NEGATED_REQUIREMENT.search(text) or _REQUIREMENT_WITH_NO_OBJECT.search(text):
+        return True
+    return bool(_NO_MANDATORY_TERM.search(text))
+
+
+def name_fixes_locus_or_aggregation(name: str) -> bool:
+    """True when a documented name carries a locus or aggregation qualifier itself.
+
+    ``electron_field_line_average_temperature_over_scrape_off_layer`` already
+    fixes both the averaging and the region, so a sentence about it is not a
+    statement about a generic quantity and is left to the judge.
+    """
+    return bool(_NAME_LATTICE_QUALIFIER.search(str(name or "").lower()))
+
+
+def claim_settlement(claim: str, name: str) -> str | None:
+    """The category code settles for one claim without asking the judge.
+
+    A claim that states a non-requirement of a quantity whose name carries no
+    locus or aggregation qualifier of its own carries nothing the evidence can
+    deny, so it is answered "says nothing" in code. Every other claim goes to
+    the judge unchanged.
+    """
+    if name_fixes_locus_or_aggregation(name):
+        return None
+    if states_non_requirement(claim):
+        return "says nothing"
+    return None
+
+
+def deterministic_claim_determinations(
+    claims: Sequence[str], name: str
+) -> dict[int, str]:
+    """The claims code decides itself, keyed by their index in the claim list."""
+    return {
+        index: outcome
+        for index, claim in enumerate(claims)
+        if (outcome := claim_settlement(claim, name)) is not None
+    }
+
+
 def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
     """Find exact registry text inserted into this documentation entry."""
     from imas_standard_names.grammar.terms import AppliedConventions
@@ -777,9 +891,11 @@ def docs_score_components(
                 float(answer.get("probabilities", {}).get(option, 0.0))
                 for option in check.question.conforming
             )
+    settled = settled_claim_answers(state)
     claims = [
         answers.get(check_question_name(f"claim_contradicts_source:{index}"))
         for index, _claim in enumerate(state["documentation_claims"])
+        if index not in settled
     ]
     if not claims or any(answer is None for answer in claims):
         return None
@@ -832,6 +948,25 @@ def claim_contradicts(answer: Mapping[str, Any]) -> bool:
     )
 
 
+def settled_claim_answers(state: Mapping[str, Any]) -> dict[int, dict[str, Any]]:
+    """The answers code settles itself for one state, keyed by claim index.
+
+    The determination reads a claim and the documented name, and the question
+    table is built without either, so it is applied here and in the score,
+    where the state and the answers meet.
+    """
+    return {
+        index: {
+            "choice": outcome,
+            "probabilities": {outcome: 1.0},
+            "settled_by": "non_requirement_sentence",
+        }
+        for index, outcome in deterministic_claim_determinations(
+            state["documentation_claims"], str(state.get("name_id") or "")
+        ).items()
+    }
+
+
 def aggregate_docs_review(
     state: Mapping[str, Any],
     checks: Sequence[ReviewCheck],
@@ -863,10 +998,13 @@ def aggregate_docs_review(
     ]
     claim_answers = []
     contradicted_claims = []
-    for _index, (claim, answer) in enumerate(
+    settled = settled_claim_answers(state)
+    for index, (claim, answer) in enumerate(
         zip(state["documentation_claims"], raw_claim_answers, strict=True)
     ):
-        if answer is not None and claim_contradicts(answer):
+        if index in settled:
+            answer = settled[index]
+        elif answer is not None and claim_contradicts(answer):
             contradicted_claims.append(claim)
             if answer.get("choice") != "contradicts":
                 answer = {

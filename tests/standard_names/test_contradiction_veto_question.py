@@ -9,6 +9,13 @@ denies nothing leaves the veto clear.
 
 Jev is mocked: these tests measure the state handed to the judge, the question
 it is asked and the decision code derives, not the judge's own answer.
+
+Two more cases cover the settlement. A sentence that states a non-requirement of
+a quantity whose name fixes no locus or aggregation of its own is answered "says
+nothing" in code, so a source that names one locus of a generic quantity never
+vetoes it. A sentence that instead asserts the combination itself — that the
+quantity is not averaged, holds at one place only, or excludes what the source
+states — is left to the judge and vetoes on a denial.
 """
 
 from __future__ import annotations
@@ -212,3 +219,140 @@ def test_the_judge_never_sees_a_field_label(monkeypatch: pytest.MonkeyPatch) -> 
         "observed": True,
         "value": [{"id": "camera_ir/channel/camera/up/x"}],
     }
+
+
+# Sentences that state what the quantity does not require. Each is generic: the
+# quantity holds at any locus and under any combination, so a source that names
+# one locus of it agrees rather than denies.
+NON_REQUIREMENT_SENTENCES = [
+    "The quantity has no mandatory locus or aggregation.",
+    (
+        "The unqualified physical quantity imposes no intrinsic spatial "
+        "averaging; the applicable locus and aggregation convention are "
+        "specified by a more specific realization."
+    ),
+    "It does not prescribe a wavenumber sum or time or flux-surface average.",
+    (
+        "The channel name does not prescribe spectral summation, temporal or "
+        "flux-surface averaging, or species aggregation; these belong to the "
+        "particular momentum-flux quantity being decomposed."
+    ),
+]
+
+# Sentences that assert the quantity's own combination instead. Each disagrees
+# with a source that states the other combination, so the judge reads it.
+ASSERTED_COMBINATION_SENTENCES = [
+    "The temperature is only the upstream value without downstream averaging.",
+    (
+        "The quantity applies pointwise to one measurement position, its "
+        "assigned magnetic flux surface, and one selected magnetic separatrix, "
+        "with no flux-surface, spatial, species, or time aggregation."
+    ),
+    "The offset vanishes on the separatrix and is negative inside it.",
+    "It excludes the parallel velocity-space component.",
+]
+
+
+@pytest.mark.parametrize("sentence", NON_REQUIREMENT_SENTENCES)
+def test_a_non_requirement_sentence_is_settled(sentence: str) -> None:
+    assert jev_review.states_non_requirement(sentence) is True
+
+
+@pytest.mark.parametrize("sentence", ASSERTED_COMBINATION_SENTENCES)
+def test_a_sentence_that_asserts_the_combination_goes_to_the_judge(
+    sentence: str,
+) -> None:
+    assert jev_review.states_non_requirement(sentence) is False
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "electron_field_line_average_temperature_over_scrape_off_layer",
+        "gap_at_outboard_midplane",
+        "radial_separatrix_distance_at_outboard_midplane",
+        "temperature_over_scrape_off_layer",
+    ],
+)
+def test_a_name_that_fixes_a_locus_or_an_aggregation_is_not_settled(name: str) -> None:
+    assert jev_review.name_fixes_locus_or_aggregation(name) is True
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "electrostatic_potential",
+        "perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift",
+        "toroidal_angle_of_control_surface",
+    ],
+)
+def test_a_generic_name_carries_no_qualifier_of_its_own(name: str) -> None:
+    assert jev_review.name_fixes_locus_or_aggregation(name) is False
+
+
+def test_a_generic_claim_about_a_locus_is_settled_before_the_judge() -> None:
+    """A source naming one locus of a generic quantity cannot deny the claim."""
+    state = jev_review.build_docs_state(
+        {
+            "id": "electrostatic_potential",
+            "documentation": "The quantity has no mandatory locus or aggregation.",
+            "dd_source_docs": [
+                {
+                    "id": "edge_profiles/profiles_1d/phi_potential",
+                    "documentation": "Electrostatic potential, averaged on the magnetic flux surface",
+                }
+            ],
+        }
+    )
+
+    verdict = jev_review.aggregate_docs_review(
+        state, jev_review._default_checks(), _claim_only("contradicts")
+    )
+
+    assert verdict["contradiction_veto"] is False
+    assert verdict["claim_answers"][0]["settled_by"] == "non_requirement_sentence"
+
+
+def test_an_asserted_combination_still_vetoes_on_its_denial() -> None:
+    """The sentence denies the source's averaging, so the judge reads it.
+
+    The name is the one case that settles nothing twice over: it carries the
+    average itself, and the sentence asserts the quantity's own combination
+    rather than a non-requirement. The second check holds the name generic, so
+    the assertion guard alone is what keeps it from the settlement.
+    """
+    sentence = (
+        "The temperature is only the upstream value without downstream averaging."
+    )
+
+    assert (
+        jev_review.claim_settlement(
+            sentence, "electron_field_line_average_temperature_over_scrape_off_layer"
+        )
+        is None
+    )
+    assert jev_review.claim_settlement(sentence, "temperature") is None
+
+    state = jev_review.build_docs_state(
+        {
+            "id": "electron_field_line_average_temperature_over_scrape_off_layer",
+            "documentation": (
+                "This quantity is the mean electron temperature along one open "
+                "field line.\n\n" + sentence
+            ),
+            "dd_source_docs": [
+                {
+                    "id": "langmuir_probes/reciprocating/plunge/t_e_average",
+                    "documentation": "Electron temperature (upstream to downstream average)",
+                }
+            ],
+        }
+    )
+
+    assert jev_review.settled_claim_answers(state) == {}
+
+    verdict = jev_review.aggregate_docs_review(
+        state, jev_review._default_checks(), _claim_only("contradicts")
+    )
+
+    assert verdict["contradiction_veto"] is True
