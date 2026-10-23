@@ -1,12 +1,25 @@
 #!/usr/bin/env python3
-"""Replay the retuned documentation contradiction question against two sets.
+"""Replay three candidate contradiction questions against two sets.
+
+The arms differ in two independent ways: whether a DD source that carries only
+a field label is dropped from the claim's evidence (the ``label_only_source``
+predicate), and whether the question text states that specialisation is
+compatible (the rewritten criterion) or whether a claim that disclaims a locus
+or an aggregation is settled in code before the judge is asked.
+
+* Arm A is the base question text plus the label-only predicate.
+* Arm B is arm A plus the deterministic determination: a claim that denies
+  fixing a locus or an aggregation, compared against a source that specialises
+  the quantity, is answered "says nothing" in code and the judge is never asked
+  about that claim.
+* Arm C is the retuned question text, which states that rule to the judge
+  instead.
 
 Set A is the recorded firings: every (name, claim, DD text) triple the
 contradiction veto held on, read from the diagnosis
 ``srtj-contradiction-veto-hold.json``. Each state is rebuilt from the stored
-claim and its stored DD source text, so the question is asked exactly what the
-pipeline asked it and the count that still fires is the precision of the
-retune.
+claim and its stored DD source text, so the question is asked what the pipeline
+asked it and the count that still fires is the precision of each arm.
 
 Set B is the planted contradictions: the 60 rows of
 ``golden-documentation-planted.json`` labelled ``contradicts`` and the 20
@@ -16,10 +29,10 @@ documentation set itself carries no contradiction-labelled row (its label is a
 binary accept/reject, and its ``label_check`` values are subject and
 house-style checks), so the planted rows are the whole recall set.
 
-Both sets are asked the old question and the new one in one process through the
-same ``decide_batch`` the cascade uses under the ``sn-judge`` seat. The old arm
-restores the base revision's question text and its unfiltered evidence, both
-captured from revision c5b7f76ed.
+Every arm is asked on the same rows in one process through the same
+``decide_batch`` the cascade uses under the ``sn-judge`` seat, so the arms are
+comparable call for call. The base revision's question text is captured
+verbatim from c5b7f76ed.
 
 Read-only: no graph write, no LLM other than the named seat.
 """
@@ -47,9 +60,14 @@ GOLDEN = HERE.parent / "sn-judgment-evaluation/golden-documentation-acceptable.j
 OUT = HERE / "srtj-contradiction-veto-retune.json"
 
 CLAIM_KEY = "check:claim_contradicts_source:{index}"
-CLAIM_PREFIX = "check:claim_contradicts_source:"
 CEILING_USD = 1.00
 BASE_REVISION = "c5b7f76ed"
+ARMS = ("a", "b", "c")
+ARM_NOTES = {
+    "a": "base question text plus the label-only predicate",
+    "b": "arm A plus the locus/aggregation disclaimer settled in code before Jev",
+    "c": "retuned question text that states the specialisation rule to the judge",
+}
 
 # The base revision's source-comparison question, verbatim from
 # imas_codex/standard_names/review/jev_review.py at c5b7f76ed (lines 598-615).
@@ -74,18 +92,25 @@ OLD_CRITERIA = {
 
 
 def claim_questions(
-    checks: Any, claims: list[str], *, old: bool, index_floor: int
+    checks: Any,
+    claim_count: int,
+    *,
+    old: bool,
+    indices: tuple[int, ...] | None = None,
 ) -> dict[str, Any]:
-    """The claim-comparison questions of one arm, for ``index_floor`` claims.
+    """The claim-comparison questions of one arm for the given claim indices.
 
-    The new arm is the module's own table, so the measured question is the
-    shipped one. The old arm rebuilds the base revision's wording.
+    A claim question depends only on its index, not on the claim's words, so
+    the table is built over ``claim_count`` placeholders and any state in the
+    group can be asked from it.
     """
+    if indices is None:
+        indices = tuple(range(claim_count))
     if not old:
+        table = jev_review.docs_question_table(checks, [""] * claim_count)
         return {
-            key: question
-            for key, question in jev_review.docs_question_table(checks, claims).items()
-            if key.startswith(CLAIM_PREFIX)
+            CLAIM_KEY.format(index=index): table[CLAIM_KEY.format(index=index)]
+            for index in indices
         }
     claim_check = next(
         check
@@ -101,16 +126,112 @@ def claim_questions(
             ),
             "criteria": {option: OLD_CRITERIA[option] for option in options},
         }
-        for index in range(index_floor)
+        for index in indices
     }
 
 
-def _state(item: dict[str, Any], *, old: bool) -> dict[str, Any]:
-    """One claim's state, with the base revision's evidence on the old arm."""
-    state = jev_review.build_docs_state(item)
-    if old:
-        state["dd_source_docs"] = jev_review._observed(item.get("dd_source_docs"))
-    return state
+async def judge(
+    states: list[dict[str, Any]], *, arm: str
+) -> tuple[list[dict[str, Any] | None], float]:
+    """Ask one arm's question of every state through ``decide_batch``.
+
+    For arm B the settled claims are removed from the question set before the
+    call, so the judge is never asked about them; their answers are the settled
+    ones. Every other arm asks every claim.
+    """
+    checks = jev_review._default_checks()
+    built = [jev_review.build_docs_state(state["item"]) for state in states]
+    counts = [len(state["documentation_claims"]) for state in built]
+    settled: list[dict[int, str]] = [{} for _ in built]
+    if arm == "b":
+        for row, built_state in zip(settled, built, strict=True):
+            row.update(
+                jev_review.deterministic_claim_determinations(
+                    built_state["documentation_claims"],
+                    built_state["dd_source_docs"]["value"] or [],
+                )
+            )
+
+    groups: dict[tuple[int, ...], list[int]] = {}
+    for position, (row, count) in enumerate(zip(settled, counts, strict=True)):
+        asked = tuple(index for index in range(count) if index not in row)
+        groups.setdefault(asked, []).append(position)
+
+    answers: list[dict[str, Any]] = [{} for _ in built]
+    failed: set[int] = set()
+    cost = 0.0
+    for asked, positions in groups.items():
+        if not asked:
+            continue
+        questions = claim_questions(
+            checks,
+            max(asked) + 1,
+            old=arm in ("a", "b"),
+            indices=asked,
+        )
+        results, group_cost = await jev_review.decide_batch(
+            [built[position] for position in positions],
+            questions,
+            model=get_model("sn-judge"),
+            service=jev_review.SERVICE,
+            concurrency=8,
+        )
+        cost += group_cost
+        for position, result in zip(positions, results, strict=True):
+            if result is None:
+                failed.add(position)
+            else:
+                answers[position] = result[0]
+
+    out: list[dict[str, Any] | None] = []
+    for position, (state, built_state, count) in enumerate(
+        zip(states, built, counts, strict=True)
+    ):
+        if position in failed:
+            out.append(None)
+            continue
+        row = settled[position]
+        choices = {
+            CLAIM_KEY.format(index=index): (
+                "says nothing"
+                if index in row
+                else (answers[position].get(CLAIM_KEY.format(index=index)) or {}).get(
+                    "choice"
+                )
+            )
+            for index in range(count)
+        }
+        fired = [
+            index
+            for index in range(count)
+            if index not in row
+            and jev_review.claim_contradicts(
+                answers[position].get(CLAIM_KEY.format(index=index)) or {}
+            )
+        ]
+        out.append(
+            {
+                **state,
+                "claims": built_state["documentation_claims"],
+                "choices": choices,
+                "settled": sorted(row),
+                "fired": bool(fired),
+                "fired_indices": fired,
+                "sources_seen": [
+                    source.get("id")
+                    for source in (built_state["dd_source_docs"]["value"] or [])
+                ],
+            }
+        )
+    return out, cost
+
+
+def summarise(rows: list[dict[str, Any] | None]) -> dict[str, Any]:
+    return {
+        "rows": len(rows),
+        "unscored": sum(1 for row in rows if row is None),
+        "fired": sum(1 for row in rows if row and row["fired"]),
+    }
 
 
 def recorded_states() -> list[dict[str, Any]]:
@@ -179,67 +300,27 @@ def planted_states() -> list[dict[str, Any]]:
     return states
 
 
-async def judge(
-    states: list[dict[str, Any]], *, old: bool
-) -> tuple[list[dict[str, Any] | None], float]:
-    """Ask one arm's question of every state through ``decide_batch``."""
-    checks = jev_review._default_checks()
-    built = [_state(state["item"], old=old) for state in states]
-    index_floor = (
-        max((len(state["documentation_claims"]) for state in built), default=1) or 1
-    )
-    questions = claim_questions(
-        checks, built[0]["documentation_claims"], old=old, index_floor=index_floor
-    )
-    results, cost = await jev_review.decide_batch(
-        built,
-        questions,
-        model=get_model("sn-judge"),
-        service=jev_review.SERVICE,
-        concurrency=8,
-    )
-    out: list[dict[str, Any] | None] = []
-    for state, built_state, result in zip(states, built, results, strict=True):
-        if result is None:
-            out.append(None)
-            continue
-        answers, _spent = result
-        claim_count = len(built_state["documentation_claims"])
-        fired = [
-            index
-            for index in range(claim_count)
-            if jev_review.claim_contradicts(
-                answers.get(CLAIM_KEY.format(index=index)) or {}
-            )
-        ]
-        out.append(
-            {
-                **state,
-                "claims": built_state["documentation_claims"],
-                "choices": {
-                    CLAIM_KEY.format(index=index): (
-                        answers.get(CLAIM_KEY.format(index=index)) or {}
-                    ).get("choice")
-                    for index in range(claim_count)
-                },
-                "fired": bool(fired),
-                "fired_indices": fired,
-                "sources_seen": [
-                    source.get("id")
-                    for source in (built_state["dd_source_docs"]["value"] or [])
-                ],
-            }
+def keep_arm(arms: dict[str, Any], recall_total: int) -> tuple[str, str]:
+    """The arm to keep: the best that meets the bar, else the best recall."""
+    met = [
+        arm
+        for arm in ARMS
+        if arms[arm]["at_most_three_recorded_fire"]
+        and arms[arm]["recall"] >= recall_total
+    ]
+    if met:
+        return (
+            min(met, key=lambda arm: (arms[arm]["recorded_still_fire"], arm)),
+            "best arm that meets the bar",
         )
-    return out, cost
-
-
-def summarise(rows: list[dict[str, Any] | None]) -> dict[str, Any]:
-    fired = sum(1 for row in rows if row and row["fired"])
-    return {
-        "rows": len(rows),
-        "unscored": sum(1 for row in rows if row is None),
-        "fired": fired,
-    }
+    recall_floor = max(arms[arm]["recall"] for arm in ARMS)
+    if recall_floor >= recall_total:
+        candidates = [arm for arm in ARMS if arms[arm]["recall"] == recall_floor]
+        return (
+            min(candidates, key=lambda arm: (arms[arm]["recorded_still_fire"], arm)),
+            "no arm meets the bar; best recall that does not lower it",
+        )
+    return "", "no arm meets the bar and no arm preserves the old question's recall"
 
 
 def main() -> int:
@@ -261,52 +342,65 @@ def main() -> int:
             ("controls", controls),
         ):
             arms: dict[str, Any] = {}
-            for arm in ("old", "new"):
-                judged, cost = await judge(rows, old=(arm == "old"))
+            for arm in ARMS:
+                judged, cost = await judge(rows, arm=arm)
                 spend += cost
-                arms[arm] = {
-                    "summary": summarise(judged),
-                    "rows": list(judged),
-                }
+                arms[arm] = {"summary": summarise(judged), "rows": list(judged)}
             out[label] = arms
         out["spend_usd"] = spend
         return out
 
     result = asyncio.run(run())
 
-    recorded_old = result["recorded"]["old"]["summary"]["fired"]
-    recorded_new = result["recorded"]["new"]["summary"]["fired"]
-    recall_old = result["contradictions"]["old"]["summary"]["fired"]
-    recall_new = result["contradictions"]["new"]["summary"]["fired"]
-    control_old = result["controls"]["old"]["summary"]["fired"]
-    control_new = result["controls"]["new"]["summary"]["fired"]
+    arms_report: dict[str, Any] = {}
+    for arm in ARMS:
+        arms_report[arm] = {
+            "note": ARM_NOTES[arm],
+            "recorded_still_fire": result["recorded"][arm]["summary"]["fired"],
+            "recall": result["contradictions"][arm]["summary"]["fired"],
+            "false_alarms": result["controls"][arm]["summary"]["fired"],
+            "unscored": sum(
+                result[label][arm]["summary"]["unscored"]
+                for label in ("recorded", "contradictions", "controls")
+            ),
+        }
+        arms_report[arm]["at_most_three_recorded_fire"] = (
+            arms_report[arm]["recorded_still_fire"] <= 3
+        )
 
-    bar = {
+    recall_total = len(contradictions)
+    kept, because = keep_arm(arms_report, recall_total)
+
+    result["arms"] = arms_report
+    result["kept_arm"] = kept
+    result["kept_because"] = because
+    result["bar"] = {
         "recorded_total": len(recorded),
-        "recorded_still_fire_old": recorded_old,
-        "recorded_still_fire_new": recorded_new,
-        "at_most_three_recorded_fire": recorded_new <= 3,
-        "recall_total": len(contradictions),
-        "recall_old": recall_old,
-        "recall_new": recall_new,
-        "recall_not_lower": recall_new >= recall_old,
-        "met": recorded_new <= 3 and recall_new >= recall_old,
+        "recall_total": recall_total,
+        "control_total": len(controls),
+        "recorded_ceiling": 3,
+        "arms_meeting": [
+            arm
+            for arm in ARMS
+            if arms_report[arm]["at_most_three_recorded_fire"]
+            and arms_report[arm]["recall"] >= recall_total
+        ],
     }
-    result["bar"] = bar
     result["spend_usd"] = round(result["spend_usd"], 6)
+    result["spend_ceiling_usd"] = CEILING_USD
     result["base_revision"] = BASE_REVISION
     result["old_question_captured_from"] = (
         f"imas_codex/standard_names/review/jev_review.py at {BASE_REVISION}"
     )
-    result["false_alarms"] = {"old": control_old, "new": control_new}
-    result["spend_ceiling_usd"] = CEILING_USD
 
     args.out.write_text(json.dumps(result, indent=1) + "\n")
     print(
         json.dumps(
             {
-                "bar": bar,
-                "false_alarms": result["false_alarms"],
+                "arms": arms_report,
+                "kept_arm": kept,
+                "kept_because": because,
+                "bar": result["bar"],
                 "spend_usd": result["spend_usd"],
             },
             indent=1,

@@ -1,13 +1,15 @@
-"""The contradiction question fires only on a real contradiction.
+"""The contradiction veto fires only on a real contradiction.
 
-Two failure modes are covered here. A DD source that carries a field label
+Three failure modes are covered here. A DD source that carries a field label
 instead of a definition is not evidence, so it is dropped before the claim is
-compared and the claim answers "says nothing". A source that merely specialises
-the claim's quantity — one locus, average or component instance of it — is
-compatible with the claim, which the question text and its criteria must say.
+compared and the claim answers "says nothing". A claim that disclaims fixing a
+locus or an aggregation is settled in code as "says nothing" when the evidence
+specialises the quantity, because one locus, average or component instance of a
+generic quantity agrees with the claim rather than denying it. A source that
+denies the claim still vetoes it.
 
-Jev is mocked: these tests measure the state handed to the judge and the
-question it is asked, not the judge's answer.
+Jev is mocked: these tests measure the state handed to the judge, the question
+it is asked and the decision code derives, not the judge's own answer.
 """
 
 from __future__ import annotations
@@ -84,20 +86,100 @@ def test_a_definition_beside_a_label_is_kept() -> None:
     assert [source["id"] for source in kept["value"]] == ["b/r_outboard"]
 
 
-def test_question_names_the_specialisation_rule() -> None:
-    table = jev_review.docs_question_table(jev_review._default_checks(), ["a claim"])
-    question = table[CLAIM_KEY]
+DISCLAIMER_CLAIMS = [
+    "The quantity has no mandatory locus or aggregation.",
+    "The unqualified physical quantity imposes no intrinsic spatial averaging.",
+    "It does not prescribe a wavenumber sum or time or flux-surface average.",
+]
 
-    instructions = question["instructions"].lower()
-    assert "specialises" in instructions or "specialised" in instructions
-    assert "locus-specialised, averaged or component instance" in instructions
-    assert "is not evidence" in instructions
+# A claim that fixes its own locus or aggregation is not a disclaimer: the
+# source may then deny it, so the judge must be asked.
+DIRECT_CLAIMS = [
+    "The quantity is averaged on the magnetic flux surface.",
+    "The value is the component along the outboard midplane axis.",
+]
 
-    contradicts = question["criteria"]["contradicts"].lower()
-    assert "opposite sign or direction" in contradicts
-    assert "does not deny it" in contradicts
-    assert "specialises the quantity" in contradicts
-    assert "neither supports nor contradicts" in question["criteria"]["says nothing"]
+
+@pytest.mark.parametrize("claim", DISCLAIMER_CLAIMS)
+def test_a_disclaimer_of_locus_or_aggregation_is_recognised(claim: str) -> None:
+    assert jev_review.disclaims_locus_or_aggregation(claim) is True
+
+
+@pytest.mark.parametrize("claim", DIRECT_CLAIMS)
+def test_a_claim_that_fixes_its_locus_is_not_a_disclaimer(claim: str) -> None:
+    assert jev_review.disclaims_locus_or_aggregation(claim) is False
+
+
+@pytest.mark.parametrize("claim", DISCLAIMER_CLAIMS)
+def test_a_disclaimer_against_a_specialising_source_is_settled(claim: str) -> None:
+    sources = [
+        {
+            "id": "edge_profiles/profiles_1d/phi_potential",
+            "documentation": "Electrostatic potential, averaged on the magnetic flux surface",
+        }
+    ]
+    assert jev_review.claim_determination(claim, sources) == "says nothing"
+
+
+def test_a_disclaimer_against_a_source_with_no_specialisation_is_not_settled() -> None:
+    sources = [
+        {
+            "id": "a/rho",
+            "documentation": "Radial coordinate of the separatrix crossing",
+        }
+    ]
+    assert jev_review.claim_determination(DISCLAIMER_CLAIMS[0], sources) is None
+
+
+def _claim_only(choice: str) -> dict[str, Any]:
+    return {CLAIM_KEY: {"choice": choice, "probabilities": {choice: 1.0}}}
+
+
+def test_a_settled_disclaimer_is_not_vetoed_though_the_judge_says_contradicts() -> None:
+    state = jev_review.build_docs_state(
+        {
+            "id": "radial_separatrix_distance_at_outboard_midplane",
+            "documentation": "The quantity has no mandatory locus or aggregation.",
+            "dd_source_docs": [
+                {
+                    "id": "thomson_scattering/channel/distance_separatrix_midplane",
+                    "documentation": (
+                        "Distance between the measurement position and the separatrix, "
+                        "mapped along flux surfaces to the outboard midplane, in the "
+                        "major radius direction"
+                    ),
+                }
+            ],
+        }
+    )
+
+    verdict = jev_review.aggregate_docs_review(
+        state, jev_review._default_checks(), _claim_only("contradicts")
+    )
+
+    assert verdict["contradiction_veto"] is False
+    assert state["documentation_claims"], "the claim must still be compared"
+
+
+def test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial() -> None:
+    state = jev_review.build_docs_state(
+        {
+            "id": "distance_to_wall",
+            "documentation": "The quantity is averaged on the magnetic flux surface.",
+            "dd_source_docs": [
+                {
+                    "id": "a/y",
+                    "documentation": "Distance to the wall in the major radius direction",
+                }
+            ],
+        }
+    )
+
+    verdict = jev_review.aggregate_docs_review(
+        state, jev_review._default_checks(), _claim_only("contradicts")
+    )
+
+    assert verdict["contradiction_veto"] is True
 
 
 def test_the_judge_never_sees_a_field_label(monkeypatch: pytest.MonkeyPatch) -> None:
