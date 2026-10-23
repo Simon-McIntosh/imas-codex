@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="191">
+<meta name="plan-version" content="192">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -866,6 +866,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-bracket-repair" data-who="lead" data-when="2026-10-23T07:30:00Z">
     <div class="r-comment-body"><p>Lead ruling: "Fix normaliser, re-run it." <code>_normalize_bare_doc_links</code> will handle a bracketed phrase three ways:</p><ul><li>An exact snake-case match to a live name becomes a <code>name:</code> link.</li><li>Anything else loses its brackets and stays prose; no guessed link is written.</li><li>A self-link becomes plain text.</li></ul><p>The rule's unit exclusion is tightened. The normaliser already runs over every document in the post-rotation reconcile, so the fix repairs the catalogue through the backing code. The dry-run list is read before the live apply. Node: <code>srtj-docs-bracket-repair</code>, on codex because the normaliser lives in <code>graph_ops.py</code>.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T081120780504-review-of-srtj-review-holds-channel-70ce4bae1597" data-who="reckon-build" data-when="2026-10-23T08:30:00.374Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261023T041800161321-srtj-review-holds-channel at head 70ce4bae15973afe8bb3430e3aa444838f3756b1 - parsed record stores all six dimensions (goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 20), added_failure_count 0 against base c5b7f76ed429c79ee4797a2b202e3e9985a85e8e, and three non-blocking findings; no blocking finding.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T08:30:00.374Z",
+  "dispatched_at": "2026-10-23T08:11:50Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_docs_contradiction_veto.py",
+      "line": 135,
+      "severity": "non-blocking",
+      "text": "The mock persist helper re-derives the stage as `kwargs[\"score\"] >= kwargs[\"min_score\"] and not hold_records.open_holds()`, so the assertion at :167 compares the test's own copy of the acceptance rule against the test's own computation and would still pass if the product's hold-aware predicate were reverted. The acceptance logic is guarded for real against a disposable graph by tests/standard_names/test_review_holds.py."
+    },
+    {
+      "file": "imas_codex/standard_names/review/holds.py",
+      "line": 155,
+      "severity": "non-blocking",
+      "text": "_promote_if_eligible accepts on score-plus-no-open-hold alone, omitting the name_stage='accepted', quarantine exclusion and winning-review eligibility that PROMOTE_STRANDED_DOCS_WHERE applies, so dismissing the last hold on a quarantined or review-less docs_stage='reviewed' row accepts it outside the canonical gate."
+    },
+    {
+      "file": "imas_codex/standard_names/AGENTS.md",
+      "line": 436,
+      "severity": "non-blocking",
+      "text": "The promote_stranded_reviewed row still documents acceptance on the stored score alone, so the repository operator reference contradicts the open-hold requirement the landed predicate adds to graph_ops.py:12557."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief requires a ReviewHold schema class with one owner module, a judged score left unclamped, hold-aware acceptance and refinement eligibility, routed docs persistence and worker sites, refiner visibility, a threshold-reader inventory, and tests. The diff lands all of it: imas_codex/schemas/standard_name.yaml:2265 declares ReviewHold with HAS_HOLD, imas_codex/standard_names/review/holds.py:51 is the sole reader/writer, and graph_ops.py:17939 plus workers.py:11280 route the two sites; the two clamp sites in review/pipeline.py and review/cascade.py are correctly left to the next node and named in the fragment.\nVERDICT done_when: the source brief's done-when is a committed schema/owner/routes/tests with no added gate failures and kept negative-control and disposable-Neo4j logs. The manifest records existing-base-absolute.log at 5 failed EXIT=1 against promotion-four-absolute.log at 61 passed EXIT=0 over the same selection, negative-control.log at stored 0.849 against the literal 0.875 EXIT=1, promotion-negative-control.log counting docs 2 versus 1 EXIT=1, and promotion-head.log passing 10 tests on an empty disposable Neo4j reached through temp_neo4j.py.\nVERDICT write_paths: the source brief states six paths; the source manifest's orientation_write_paths declares eleven, and resume-3-advice.txt grants loop.py explicitly (\"loop.py is now in your scope\"), matching the prior review's citation of the test-file grant. Every path in the diff is inside that declared grant, and only the fragment and graph_ops/workers/holds/schema plus the four existing test files and loop.py are touched.\nVERDICT manifest: read at runs/r-20261023T041800161321-srtj-review-holds-channel/manifest.md; it reports ten commits, the disposable-graph gates, both negative controls, the base and head arms with their logs, the proof that head 70ce4bae adds only the evidence fragment over the gated code revision 173e843b, and no blockers.\nVERDICT diff: read all ten commits against base c5b7f76ed429c79ee4797a2b202e3e9985a85e8e; 6a84159b0 adds the schema, owner, routes and tests, 7740180a/98ecc1e9/26cad85a write the fragment, 0e4a5151 repairs four existing tests, d1715d5b/ed9dbace repair the two prior blocking findings, and 52645e1e/173e843b/70ce4bae close the stranded-promotion bypass prior review finding 1 and record it.\nCALL_SITES: imas_codex/standard_names/loop.py:2094, imas_codex/standard_names/promote.py:775, imas_codex/standard_names/graph_ops.py:17939, imas_codex/standard_names/graph_ops.py:25701, imas_codex/standard_names/graph_ops.py:25770, imas_codex/standard_names/workers.py:11280\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every brief item is landed and the two deferred clamp sites at review/pipeline.py:1978 and review/cascade.py:197 are left untouched and documented in the fragment, though the owner's own promotion at review/holds.py:155 applies a narrower gate than the stranded path.\nSCORE evidence: 18\nJUSTIFICATION evidence: evidence: the done-when's no-added-failures measure is asserted by existing-base-absolute.log (5 failed, EXIT=1) against promotion-four-absolute.log (61 passed, EXIT=0), so added_failure_count is 0, and both negative controls record a genuine red receipt at a revision the head arm passes.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path is inside manifest.md's orientation_write_paths, whose loop.py member resume-3-advice.txt grants explicitly, and no file outside the grant is modified; the original brief's six-path list was narrower, so the grant widened mid-run.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_review_holds.py:184 reddens on the restored clamp and :281 reddens on the restored score-only stranded predicate, both shown in logs, but tests/standard_names/test_docs_contradiction_veto.py:135 reimplements the acceptance decision and so its :167 stage assertion cannot fail on a product regression.\nSCORE fit: 18\nJUSTIFICATION fit: review/holds.py:192 composes its open-hold Cypher as a fragment the way graph_ops.py:6721 authors docs_review_eligibility_where, review/holds.py:_client mirrors the surrounding contextmanager idiom, and the naming scan over the added lines found no plan, version, ticket or changelog label.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over imas_codex/standard_names found no earlier score-independent veto owner (only export.py's unrelated release_hold_* vocabulary and promote.py:_comment_guard_holds are close), so review/holds.py:51 is the first owner and reuses GraphClient, graph_ops.py:97 _TransactionQuery and DEFAULT_MIN_SCORE rather than forking them.\nFINDING tests/standard_names/test_docs_contradiction_veto.py:135 non-blocking: the mock persist helper re-derives the stage as `kwargs[\"score\"] >= kwargs[\"min_score\"] and not hold_records.open_holds()`, so the assertion at :167 compares the test's own copy of the acceptance rule against the test's own computation and would still pass if the product's hold-aware predicate were reverted; the acceptance logic is nevertheless guarded for real against a disposable graph by tests/standard_names/test_review_holds.py.\nFINDING imas_codex/standard_names/review/holds.py:155 non-blocking: _promote_if_eligible accepts on score-plus-no-open-hold alone, omitting the name_stage='accepted', quarantine exclusion and winning-review eligibility that PROMOTE_STRANDED_DOCS_WHERE applies, so dismissing the last hold on a quarantined or review-less docs_stage='reviewed' row accepts it outside the canonical gate.\nFINDING imas_codex/standard_names/AGENTS.md:436 non-blocking: the promote_stranded_reviewed row still documents acceptance on the stored score alone, so the repository operator reference contradicts the open-hold requirement the landed predicate adds to graph_ops.py:12557.\n",
+  "review_run_id": "r-20261023T081120780504-review-of-srtj-review-holds-channel-70ce4bae1597",
+  "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "reviewed_head_sha": "70ce4bae15973afe8bb3430e3aa444838f3756b1",
+  "reviewed_run_id": "r-20261023T041800161321-srtj-review-holds-channel",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T08:35:00+00:00",
+  "total": 112
+}
