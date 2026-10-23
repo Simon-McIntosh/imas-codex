@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083739598887-srtj-holds-route-remaining/gate-head.log",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083739598887-srtj-holds-route-remaining/gate-base.log",
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:11222",
+    "imas_codex/standard_names/review/pipeline.py:2185",
+    "imas_codex/standard_names/graph_ops.py:17931",
+    "imas_codex/standard_names/promote.py:775"
+  ],
+  "completed_at": "2026-10-23T10:09:33.078Z",
+  "dispatched_at": "2026-10-23T09:40:59Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": "227",
+      "severity": "blocking",
+      "text": "blocking: the two holds added here and at pipeline.py:1987 are never cleared. clear_holds_not_raised is the only writer of status='cleared' (holds.py:118) and its sole caller passes checked_hold_kinds = {registry_conformance, banned_prose, documentation_contradiction} at workers.py:11284, so docs_lint_error and cascade_contradiction are absent from every re-check and stay open for the life of the name. A document whose contradiction veto or lint error is later resolved is then re-claimed by the refine predicate at graph_ops.py:25697 ('score < $min_score OR open docs hold'), is held again by the stale row on its next pass, and walks docs_chain_length to rotation_cap, ending 'exhausted'. The clamp this replaces recomputed on every pass and did not stick, so the change converts a per-pass refusal into a permanent one; either the two kinds belong in the checked set wherever those checks run, or a route's kind should be cleared when route.holds comes back empty."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": "473",
+      "severity": "non-blocking",
+      "text": "non-blocking: manifest.md:101-102 records test_consumer_predicates_agree_with_rubric_route as 'passed at base and at head', while gate-base.log and gate-head.log each end '9 failed' with that test's nine [*-docs] parameters listed as FAILED; the record's own after_suite and follow_ons say the nine still fail, so the tests[] entry overstates what the gate shows a reader."
+    },
+    {
+      "file": "tests/standard_names/test_review_holds.py",
+      "line": "456",
+      "severity": "non-blocking",
+      "text": "non-blocking: the quarantined-row test does not isolate the quarantine exclusion it names. Its planted row carries no HAS_REVIEW edge, so PROMOTE_STRANDED_DOCS_WHERE refuses it on docs_review_eligibility_where() alone; the quarantine clause can be deleted and this test still passes, so a regression that drops only the quarantine exclusion is not caught by any test in this change, so the exclusion this test names is taken on the owner's word (graph_ops.py:12558) rather than measured here."
+    },
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "1968",
+      "severity": "non-blocking",
+      "text": "non-blocking: the graph parameter added to _cap_docs_scores_for_lint_errors is never supplied by any caller (the only call site at pipeline.py:2185 omits it), and the call it guards is the one graph write in this change left outside try/except, unlike the cascade site's hold raise wrapped at cascade.py:762, so a transient graph fault aborts a whole docs review batch where the quarantined route only logs and continues."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified 4 production call sites: workers.py:11222 (docs review batch, which calls adjudicate_review and persist_reviewed_docs), pipeline.py:2185 (the lint-cap call site inside _review_single_batch), graph_ops.py:17931 (persist_reviewed_docs calls clear_holds_not_raised, which reaches _promote_if_eligible) and promote.py:775.",
+    "diff": "Read commit by commit against 0ef17240c; the single commit d93b086a1 changes eight files, being three runtime modules (pipeline.py, cascade.py, holds.py), the promotion row in standard_names/AGENTS.md, three test modules and the evidence fragment.",
+    "done_when": "The done-when is no added failures, each site recorded before and after, and the negative-control log kept; gate-head.log ends '9 failed, 93 passed' against gate-base.log's '9 failed, 79 passed' with the same nine pre-existing test_consumer_predicates_agree_with_rubric_route[*-docs] ids, negative-control.log shows the three red lint-cap tests, and the fragment records each site before and after.",
+    "goal": "The goal is to route the documentation lint cap and the Jev contradiction veto through review holds and to release a document by dismissal only through the canonical gate; pipeline.py:1987 raises docs_lint_error in place of the score clamp, cascade.py:225-236 attaches a cascade_contradiction hold while keeping decision_score at its mapped value, and holds.py:155 applies PROMOTE_STRANDED_DOCS_WHERE, so all three landed.",
+    "manifest": "Read; it reports the holds.py delegation, the two hold kinds and the self-declared widening with readable baseline_suite and after_suite receipts, but its tests[] entry at manifest.md:101-102 claims a pass for test_consumer_predicates_agree_with_rubric_route that both gate arms contradict.",
+    "write_paths": "The brief grants pipeline.py, cascade.py, holds.py, standard_names/AGENTS.md, test_review_holds.py and the evidence fragment; the d93b086a1 diff also writes tests/standard_names/test_review_cascade.py and tests/standard_names/test_review_findings_cap.py, which the brief requires to be updated but the declared write paths omit."
+  },
+  "justifications": {
+    "durability": "negative-control.log shows test_lint_error_raises_a_hold_and_keeps_the_judged_score reddening when the clamp is restored, and the dismissal test at test_review_holds.py:447 would redden under the predicate it replaced, but the quarantined row at test_review_holds.py:456 also lacks a winning review, so that test cannot isolate the quarantine exclusion it names.",
+    "evidence": "gate-head.log's summary '9 failed, 93 passed' against gate-base.log's '9 failed, 79 passed' is recorded on disk and supports the zero-delta claim, but the base four-file arm's 10 test_review_holds.py error records appear in neither baseline_suite nor the manifest analysis, and manifest.md:101-102 claims a pass the log contradicts.",
+    "fit": "raise_route_holds at cascade.py:346 and the CascadeRoute.holds field at cascade.py:44 follow the surrounding style, the module docstring at cascade.py:6-8 carries the change, and no plan, sprint or ticket identifier appears in any added name or comment.",
+    "goal_fidelity": "pipeline.py:1976-1997 raises docs_lint_error and no longer writes entry['reviewer_score'], and cascade.py:225-236 keeps mapped/decision_score at the judged value while attaching the added CascadeRoute.holds field, which is exactly the goal.",
+    "reuse": "holds.py:156-160 imports PROMOTE_STRANDED_DOCS_WHERE and docs_review_eligibility_params from their owner at graph_ops.py:12558 and graph_ops.py:6670 rather than restating the predicate, and every hold is raised through the holds.py:51 owner, so the release path extends the owner rather than forking it.",
+    "scope_discipline": "tests/standard_names/test_review_cascade.py and tests/standard_names/test_review_findings_cap.py were written outside the write paths declared at manifest.md:15-21, and pipeline.py:1968 adds a graph parameter no caller supplies."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is to route the documentation lint cap and the Jev contradiction veto through review holds and to release a document by dismissal only through the canonical gate; pipeline.py:1987 raises docs_lint_error in place of the score clamp, cascade.py:225-236 attaches a cascade_contradiction hold while keeping decision_score at its mapped value, and holds.py:155 applies PROMOTE_STRANDED_DOCS_WHERE, so all three landed.\nVERDICT done_when: The done-when is no added failures, each site recorded before and after, and the negative-control log kept; gate-head.log ends '9 failed, 93 passed' against gate-base.log's '9 failed, 79 passed' with the same nine pre-existing test_consumer_predicates_agree_with_rubric_route[*-docs] ids, negative-control.log shows the three red lint-cap tests, and the fragment records each site before and after.\nVERDICT write_paths: The brief grants pipeline.py, cascade.py, holds.py, standard_names/AGENTS.md, test_review_holds.py and the evidence fragment; the d93b086a1 diff also writes tests/standard_names/test_review_cascade.py and tests/standard_names/test_review_findings_cap.py, which the brief requires to be updated but the declared write paths omit.\nVERDICT manifest: Read; it reports the holds.py delegation, the two hold kinds and the self-declared widening with readable baseline_suite and after_suite receipts, but its tests[] entry at manifest.md:101-102 claims a pass for test_consumer_predicates_agree_with_rubric_route that both gate arms contradict.\nVERDICT diff: Read commit by commit against 0ef17240c; the single commit d93b086a1 changes eight files, being three runtime modules (pipeline.py, cascade.py, holds.py), the promotion row in standard_names/AGENTS.md, three test modules and the evidence fragment.\nCALL_SITES: imas_codex/standard_names/workers.py:11222, imas_codex/standard_names/review/pipeline.py:2185, imas_codex/standard_names/graph_ops.py:17931, imas_codex/standard_names/promote.py:775\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: pipeline.py:1976-1997 raises docs_lint_error and no longer writes entry['reviewer_score'], and cascade.py:225-236 keeps mapped/decision_score at the judged value while attaching the added CascadeRoute.holds field, which is exactly the goal.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate-head.log's summary '9 failed, 93 passed' against gate-base.log's '9 failed, 79 passed' is recorded on disk and supports the zero-delta claim, but the base four-file arm's 10 test_review_holds.py error records appear in neither baseline_suite nor the manifest analysis, and manifest.md:101-102 claims a pass the log contradicts.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: tests/standard_names/test_review_cascade.py and tests/standard_names/test_review_findings_cap.py were written outside the write paths declared at manifest.md:15-21, and pipeline.py:1968 adds a graph parameter no caller supplies.\nSCORE durability: 16\nJUSTIFICATION durability: negative-control.log shows test_lint_error_raises_a_hold_and_keeps_the_judged_score reddening when the clamp is restored, and the dismissal test at test_review_holds.py:447 would redden under the predicate it replaced, but the quarantined row at test_review_holds.py:456 also lacks a winning review, so that test cannot isolate the quarantine exclusion it names.\nSCORE fit: 18\nJUSTIFICATION fit: raise_route_holds at cascade.py:346 and the CascadeRoute.holds field at cascade.py:44 follow the surrounding style, the module docstring at cascade.py:6-8 carries the change, and no plan, sprint or ticket identifier appears in any added name or comment.\nSCORE reuse: 18\nJUSTIFICATION reuse: holds.py:156-160 imports PROMOTE_STRANDED_DOCS_WHERE and docs_review_eligibility_params from their owner at graph_ops.py:12558 and graph_ops.py:6670 rather than restating the predicate, and every hold is raised through the holds.py:51 owner, so the release path extends the owner rather than forking it.\nFINDING imas_codex/standard_names/review/cascade.py:227 blocking: the two holds added here and at pipeline.py:1987 are never cleared. clear_holds_not_raised is the only writer of status='cleared' (holds.py:118) and its sole caller passes checked_hold_kinds = {registry_conformance, banned_prose, documentation_contradiction} at workers.py:11284, so docs_lint_error and cascade_contradiction are absent from every re-check and stay open for the life of the name. A document whose contradiction veto or lint error is later resolved is then re-claimed by the refine predicate at graph_ops.py:25697 ('score < $min_score OR open docs hold'), is held again by the stale row on its next pass, and walks docs_chain_length to rotation_cap, ending 'exhausted'. The clamp this replaces recomputed on every pass and did not stick, so the change converts a per-pass refusal into a permanent one; either the two kinds belong in the checked set wherever those checks run, or a route's kind should be cleared when route.holds comes back empty.\nFINDING tests/standard_names/test_review_cascade.py:473 non-blocking: manifest.md:101-102 records test_consumer_predicates_agree_with_rubric_route as 'passed at base and at head', while gate-base.log and gate-head.log each end '9 failed' with that test's nine [*-docs] parameters listed as FAILED; the record's own after_suite and follow_ons say the nine still fail, so the tests[] entry overstates what the gate shows a reader.\nFINDING tests/standard_names/test_review_holds.py:456 non-blocking: the quarantined-row test does not isolate the quarantine exclusion it names. Its planted row carries no HAS_REVIEW edge, so PROMOTE_STRANDED_DOCS_WHERE refuses it on docs_review_eligibility_where() alone; the quarantine clause can be deleted and this test still passes, so a regression that drops only the quarantine exclusion is not caught by any test in this change, so the exclusion this test names is taken on the owner's word (graph_ops.py:12558) rather than measured here.\nFINDING imas_codex/standard_names/review/pipeline.py:1968 non-blocking: the graph parameter added to _cap_docs_scores_for_lint_errors is never supplied by any caller (the only call site at pipeline.py:2185 omits it), and the call it guards is the one graph write in this change left outside try/except, unlike the cascade site's hold raise wrapped at cascade.py:762, so a transient graph fault aborts a whole docs review batch where the quarantined route only logs and continues.",
+  "review_run_id": "r-20261023T094028906774-review-of-srtj-holds-route-remaining-d93b086a1d8a",
+  "reviewed_base_sha": "0ef17240c635d87d5dc506363ce147e0045fc00b",
+  "reviewed_commits": [
+    "d93b086a1d8a2661379b86e1ab5bf9a403f1b6f9"
+  ],
+  "reviewed_head_sha": "d93b086a1d8a2661379b86e1ab5bf9a403f1b6f9",
+  "reviewed_run_id": "r-20261023T083739598887-srtj-holds-route-remaining",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T10:10:25.969091+00:00",
+  "total": 98
+}
