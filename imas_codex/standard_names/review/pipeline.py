@@ -27,8 +27,17 @@ from imas_codex.standard_names.budget import (
     model_provider_exposure,
 )
 from imas_codex.standard_names.review.audits import AuditReport, LintFinding
-from imas_codex.standard_names.review.holds import raise_hold
+from imas_codex.standard_names.review.holds import (
+    clear_holds_not_raised,
+    finding_key,
+    raise_hold,
+)
 from imas_codex.standard_names.review.judge_stage import judge_review_stage
+
+# The hold kinds the documentation lint check owns. A review pass reconciles
+# exactly these on the names it scored, so the check's refusal is cleared by
+# the check itself and not by an unrelated re-check.
+LINT_HOLD_KINDS = frozenset({"docs_lint_error"})
 
 # Defense-in-depth: strict SN id pattern used to reject reviewer-hallucinated
 # revised_name values (e.g. multi-hundred-char stream-of-consciousness strings).
@@ -1962,7 +1971,7 @@ def _match_reviews_to_entries(
 
 def _cap_docs_scores_for_lint_errors(
     scored: list[dict],
-    error_lint_findings: dict[str, str],
+    error_lint_findings: dict[str, str] | None,
     wlog: logging.LoggerAdapter,
     *,
     graph: Any | None = None,
@@ -1975,29 +1984,40 @@ def _cap_docs_scores_for_lint_errors(
     than a lowered score: the judged score is left exactly as the reviewer
     wrote it. Each such entry also records the finding under
     ``audit_cap_finding`` for the review row.
+
+    The holds are reconciled on every pass, not only raised: a name whose lint
+    error is gone clears the hold a previous pass raised for it, so the refusal
+    tracks the check that produced it instead of outliving it. ``None`` means
+    the checks did not run for this batch, and nothing is reconciled.
     """
-    if not error_lint_findings:
+    if error_lint_findings is None:
         return
     for entry in scored:
         entry_id = entry.get("id") or entry.get("_original_id") or ""
-        finding = error_lint_findings.get(entry_id)
-        if finding is None:
+        if not entry_id:
             continue
-        entry["audit_cap_finding"] = finding
-        raise_hold(
-            entry_id,
-            "docs",
-            "docs_lint_error",
-            finding,
-            f"error-severity lint finding on {entry_id}",
-            "review-lint",
-            graph=graph,
-        )
-        wlog.info(
-            "Docs entry %r held by lint error (score kept at %r): %s",
-            entry_id,
-            entry.get("reviewer_score"),
-            finding,
+        finding = error_lint_findings.get(entry_id)
+        raised_keys: set[str] = set()
+        if finding is not None:
+            entry["audit_cap_finding"] = finding
+            raise_hold(
+                entry_id,
+                "docs",
+                "docs_lint_error",
+                finding,
+                f"error-severity lint finding on {entry_id}",
+                "review-lint",
+                graph=graph,
+            )
+            raised_keys.add(finding_key("docs_lint_error", finding))
+            wlog.info(
+                "Docs entry %r held by lint error (score kept at %r): %s",
+                entry_id,
+                entry.get("reviewer_score"),
+                finding,
+            )
+        clear_holds_not_raised(
+            entry_id, "docs", set(LINT_HOLD_KINDS), raised_keys, graph=graph
         )
 
 
@@ -2182,7 +2202,7 @@ async def _review_single_batch(
         result.reviews, names, wlog, name_only=name_only, target=target
     )
     if target == "docs":
-        _cap_docs_scores_for_lint_errors(scored, error_lint_findings or {}, wlog)
+        _cap_docs_scores_for_lint_errors(scored, error_lint_findings, wlog)
 
     total_cost = cost
     total_tokens = tokens
