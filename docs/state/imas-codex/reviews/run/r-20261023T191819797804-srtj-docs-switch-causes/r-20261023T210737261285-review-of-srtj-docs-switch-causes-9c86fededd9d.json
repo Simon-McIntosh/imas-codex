@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/review/cascade_calibration.py:286",
+    "imas_codex/standard_names/review/jev_review.py:976",
+    "imas_codex/standard_names/review/jev_review.py:1091"
+  ],
+  "completed_at": "2026-10-23T21:24:00.351Z",
+  "dispatched_at": "2026-10-23T21:09:18Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json",
+      "line": "1666",
+      "severity": "blocking",
+      "text": "the veto replay records recall 59 of 60 on both passes against the done-when's requirement of all 60 planted contradictions on two passes; both passes miss the same row, which the html attributes to the judge's reading without demonstrating it at a matched answer, so the recall bar the brief made a condition of the fix is measured unmet while the manifest reads complete."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html",
+      "line": "149",
+      "severity": "non-blocking",
+      "text": "the re-measured table renders per_class counts (30 not-acceptable, 47 acceptable) under the headers 'link-defect rows' and 'acceptable rows', but the bar's populations are 19 link-defect and 30 acceptable; the table's 30/28/47/6 cannot be reconciled with the verdict's 19/19 and 1/30 stated above it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py",
+      "line": "157",
+      "severity": "non-blocking",
+      "text": "documentation_error_lint re-implements the exact composition that audits.py:778 run_lint_checks already owns (lexical lint, house style and documentation gates); it should call the owner, whose own docstring says the composition lives in one place."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/manifest.md",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "the gate records only test_contradiction_veto_question.py and no baseline arm, while the brief required a delta against main on that file plus test_docs_gates.py and test_review_holds.py; the review-holds surface the jev_review changes can reach is therefore ungated."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against cd52b01cd; 040e16a16 changes the veto, the label vocabulary, the settlement and the runner, 24cabc997 adds the html and json evidence, and 9c86feded corrects the control count and the verdict, all inside the declared paths.",
+    "done_when": "The done-when at prompt.txt:178 requires two passes with all 19 link-defect rows refined, none of 30 acceptable, the replay at at most 3/46 and 60/60, and a test failing on revert; the measurement log records all 19 and 1/30 and EXIT=0, but the replay records 59/60 on both passes (srtj-docs-switch-causes.json:1666,1671), so the measure is recorded and not met.",
+    "goal": "The goal is 'Fix the veto and defining-relation causes of documentation over-refinement' (prompt.txt:36); the landed change fixes the veto cause across three sub-defects in jev_review.py, and deliberately does not change the defining-relation gate, recording that as the lead's policy call at srtj-docs-switch-causes.html:129-137, so half the stated goal remains open by design.",
+    "manifest": "Read; manifest.md:13 records only the test_contradiction_veto_question.py gate and manifest.md:15 the negative-control log, and the manifest carries no baseline_suite or after_suite arm, so the delta against main the brief asked for is not recorded.",
+    "write_paths": "Read manifest.md:3 and every path in the diff; jev_review.py, test_contradiction_veto_question.py, the runner, the html and the json are all inside the declared paths, and docs_gates.py and test_docs_gates.py were granted and not modified."
+  },
+  "justifications": {
+    "durability": "negative-control-revert.log fails 10 tests spanning the veto, settlement and label fixes when the commit is reverted, and each added assertion tests a hard-coded input against an independent expected value.",
+    "evidence": "The measurement log records EXIT=0 and the JSON records per-class and replay results, but srtj-docs-switch-causes.json:1666 records recall 59 against the done-when's 60, and no baseline arm is recorded.",
+    "fit": "states_scope_non_requirement at jev_review.py:683 follows the existing states_non_requirement family and reuses _NEGATED_REQUIREMENT and _REQUIREMENT_WITH_NO_OBJECT rather than restating them.",
+    "goal_fidelity": "jev_review.py:1013-1030 changes the probability veto and jev_review.py:717 settles scope disclaimers, fixing four of the five over-refined rows, while the defining-relation cause named in the goal is left to the lead at srtj-docs-switch-causes.html:129-137.",
+    "reuse": "The added run_lexical_lint at srtj-docs-switch-measure-run.py:160 completes a copy of audits.py:778 run_lint_checks, which already owns that exact composition, so the addition duplicates the owner rather than calling it.",
+    "scope_discipline": "Every path in 040e16a16, 24cabc997 and 9c86feded is inside the write paths declared at manifest.md:3."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is 'Fix the veto and defining-relation causes of documentation over-refinement' (prompt.txt:36); the landed change fixes the veto cause across three sub-defects in jev_review.py, and deliberately does not change the defining-relation gate, recording that as the lead's policy call at srtj-docs-switch-causes.html:129-137, so half the stated goal remains open by design.\nVERDICT done_when: The done-when at prompt.txt:178 requires two passes with all 19 link-defect rows refined, none of 30 acceptable, the replay at at most 3/46 and 60/60, and a test failing on revert; the measurement log records all 19 and 1/30 and EXIT=0, but the replay records 59/60 on both passes (srtj-docs-switch-causes.json:1666,1671), so the measure is recorded and not met.\nVERDICT write_paths: Read manifest.md:3 and every path in the diff; jev_review.py, test_contradiction_veto_question.py, the runner, the html and the json are all inside the declared paths, and docs_gates.py and test_docs_gates.py were granted and not modified.\nVERDICT manifest: Read; manifest.md:13 records only the test_contradiction_veto_question.py gate and manifest.md:15 the negative-control log, and the manifest carries no baseline_suite or after_suite arm, so the delta against main the brief asked for is not recorded.\nVERDICT diff: Read commit by commit against cd52b01cd; 040e16a16 changes the veto, the label vocabulary, the settlement and the runner, 24cabc997 adds the html and json evidence, and 9c86feded corrects the control count and the verdict, all inside the declared paths.\nCALL_SITES: imas_codex/standard_names/review/cascade_calibration.py:286, imas_codex/standard_names/review/jev_review.py:976, imas_codex/standard_names/review/jev_review.py:1091\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: jev_review.py:1013-1030 changes the probability veto and jev_review.py:717 settles scope disclaimers, fixing four of the five over-refined rows, while the defining-relation cause named in the goal is left to the lead at srtj-docs-switch-causes.html:129-137.\nSCORE evidence: 12\nJUSTIFICATION evidence: The measurement log records EXIT=0 and the JSON records per-class and replay results, but srtj-docs-switch-causes.json:1666 records recall 59 against the done-when's 60, and no baseline arm is recorded.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every path in 040e16a16, 24cabc997 and 9c86feded is inside the write paths declared at manifest.md:3.\nSCORE durability: 17\nJUSTIFICATION durability: negative-control-revert.log fails 10 tests spanning the veto, settlement and label fixes when the commit is reverted, and each added assertion tests a hard-coded input against an independent expected value.\nSCORE fit: 18\nJUSTIFICATION fit: states_scope_non_requirement at jev_review.py:683 follows the existing states_non_requirement family and reuses _NEGATED_REQUIREMENT and _REQUIREMENT_WITH_NO_OBJECT rather than restating them.\nSCORE reuse: 5\nJUSTIFICATION reuse: The added run_lexical_lint at srtj-docs-switch-measure-run.py:160 completes a copy of audits.py:778 run_lint_checks, which already owns that exact composition, so the addition duplicates the owner rather than calling it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json:1666 blocking: the veto replay records recall 59 of 60 on both passes against the done-when's requirement of all 60 planted contradictions on two passes; both passes miss the same row, which the html attributes to the judge's reading without demonstrating it at a matched answer, so the recall bar the brief made a condition of the fix is measured unmet while the manifest reads complete.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html:149 non-blocking: the re-measured table renders per_class counts (30 not-acceptable, 47 acceptable) under the headers 'link-defect rows' and 'acceptable rows', but the bar's populations are 19 link-defect and 30 acceptable; the table's 30/28/47/6 cannot be reconciled with the verdict's 19/19 and 1/30 stated above it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py:157 non-blocking: documentation_error_lint re-implements the exact composition that audits.py:778 run_lint_checks already owns (lexical lint, house style and documentation gates); it should call the owner, whose own docstring says the composition lives in one place.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/manifest.md:13 non-blocking: the gate records only test_contradiction_veto_question.py and no baseline arm, while the brief required a delta against main on that file plus test_docs_gates.py and test_review_holds.py; the review-holds surface the jev_review changes can reach is therefore ungated.",
+  "review_run_id": "r-20261023T210737261285-review-of-srtj-docs-switch-causes-9c86fededd9d",
+  "reviewed_base_sha": "cd52b01cd9c0de92742166f2a194b8173c92b6b4",
+  "reviewed_head_sha": "9c86fededd9d2b7b9abd841f94bd926d32d4fe06",
+  "reviewed_run_id": "r-20261023T191819797804-srtj-docs-switch-causes",
+  "scores": {
+    "durability": 17,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:32:38.585916+00:00",
+  "total": 85
+}
