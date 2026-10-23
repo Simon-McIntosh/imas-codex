@@ -32,17 +32,12 @@ per claim and categorises three rubric dimensions. Code gives any contradictory
 claim a veto; a high dimension score cannot offset it. Only a source that denies
 the claim is a contradiction: a source that names a different quantity, an
 opposite sign or direction, an incompatible unit or dimension, or a different
-definition. Two kinds of text are therefore removed before a claim is held
-against anything. A source whose wording carries no definition at all, only a
-field label, has that wording emptied out of the evidence; the source stays,
+definition. One kind of text is therefore removed before a claim is held
+against anything: a source whose wording carries no definition at all, only a
+field label, has that wording emptied out of the evidence. The source stays,
 with its path, unit and links, because the path names the field and can deny a
-claim about a locus or an axis where the label alone could not. A claim that
-disclaims fixing a locus or an aggregation — it
-asserts the quantity at any locus and under any averaging — is settled in code
-as "says nothing" when the evidence specialises the quantity, because one locus,
-average or component instance of a generic quantity agrees with it rather than
-denying it. Both decisions are properties of the texts, so code makes them and
-the judge is not asked.
+claim about a locus or an axis where the label alone could not. The decision is
+a property of the text, so code makes it and the judge is not shown the label.
 
 The module writes no graph state. The documentation acceptance path calls its
 claim comparison and veto while leaving the holistic score in shadow.
@@ -571,72 +566,6 @@ def comparison_sources(
     return kept
 
 
-# A claim that denies fixing a locus or an aggregation states that its quantity
-# is generic: it holds at any locus and under any averaging. The negation and
-# the term it denies are matched within one clause, so "the density is not
-# averaged" is a disclaimer while "the density is not zero, and the average is
-# positive" is not.
-_DENIAL = re.compile(r"\b(no|not|nor|neither|without|unqualified|non-?\w*)\b")
-_LOCUS_OR_AGGREGATION = re.compile(
-    r"\b(locus|loci|locuses|aggregat\w*|averag\w*|spatial\w*|sum|sums|summation|"
-    r"summed|spectral|flux[- ]surface|midplane)\b"
-)
-
-# A source specialises a quantity when it names one instance of it: a locus, an
-# averaged or summed form, a component, a profile, introduce a direction or a
-# per-element placement.
-_SPECIALISATION = re.compile(
-    r"\b(averag\w*|sum|sums|summed|summation|integrat\w*|component|components|"
-    r"profile|profiles|total|normalis\w*|normaliz\w*|flux[- ]surface|midplane|"
-    r"outboard|inboard|per element|per unit|along|at the|on the)\b"
-)
-
-
-def disclaims_locus_or_aggregation(claim: str, *, window: int = 80) -> bool:
-    """True when a claim denies that it fixes a locus or an aggregation.
-
-    Such a claim asserts the generic quantity and imposes no locus and no
-    averaging, so a source that names one locus, one average or one component
-    of that quantity agrees with it rather than denying it.
-    """
-    text = " ".join(str(claim or "").split()).lower()
-    for denial in _DENIAL.finditer(text):
-        if _LOCUS_OR_AGGREGATION.search(text[denial.end() : denial.end() + window]):
-            return True
-    return False
-
-
-def source_specialises(text: Any) -> bool:
-    """True when a DD source names one locus, average or component instance."""
-    return bool(_SPECIALISATION.search(" ".join(str(text or "").split()).lower()))
-
-
-def claim_determination(claim: str, sources: Sequence[Mapping[str, Any]]) -> str | None:
-    """The category code settles for a claim without asking the judge.
-
-    A disclaimer of locus and aggregation compared against a source that
-    specialises the quantity is "says nothing": there is no denial to report.
-    The decision is a property of the two texts, so code makes it and the judge
-    is not asked about that claim.
-    """
-    if not disclaims_locus_or_aggregation(claim):
-        return None
-    if any(source_specialises(source_text(source)) for source in sources):
-        return "says nothing"
-    return None
-
-
-def deterministic_claim_determinations(
-    claims: Sequence[str], sources: Sequence[Mapping[str, Any]]
-) -> dict[int, str]:
-    """The claims code decides itself, keyed by their index in the claim list."""
-    return {
-        index: outcome
-        for index, claim in enumerate(claims)
-        if (outcome := claim_determination(claim, sources)) is not None
-    }
-
-
 def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
     """Find exact registry text inserted into this documentation entry."""
     from imas_standard_names.grammar.terms import AppliedConventions
@@ -848,11 +777,9 @@ def docs_score_components(
                 float(answer.get("probabilities", {}).get(option, 0.0))
                 for option in check.question.conforming
             )
-    settled = settled_claim_answers(state)
     claims = [
         answers.get(check_question_name(f"claim_contradicts_source:{index}"))
         for index, _claim in enumerate(state["documentation_claims"])
-        if index not in settled
     ]
     if not claims or any(answer is None for answer in claims):
         return None
@@ -905,26 +832,6 @@ def claim_contradicts(answer: Mapping[str, Any]) -> bool:
     )
 
 
-def settled_claim_answers(state: Mapping[str, Any]) -> dict[int, dict[str, Any]]:
-    """The answers code settles itself for one state, keyed by claim index.
-
-    The determination needs the claim and its evidence, and the question table
-    is built without either, so it is applied here and in the score, where the
-    state and the answers meet.
-    """
-    sources = (state.get("dd_source_docs") or {}).get("value") or []
-    return {
-        index: {
-            "choice": outcome,
-            "probabilities": {outcome: 1.0},
-            "settled_by": "locus_or_aggregation_disclaimer",
-        }
-        for index, outcome in deterministic_claim_determinations(
-            state["documentation_claims"], sources
-        ).items()
-    }
-
-
 def aggregate_docs_review(
     state: Mapping[str, Any],
     checks: Sequence[ReviewCheck],
@@ -956,13 +863,10 @@ def aggregate_docs_review(
     ]
     claim_answers = []
     contradicted_claims = []
-    settled = settled_claim_answers(state)
-    for index, (claim, answer) in enumerate(
+    for _index, (claim, answer) in enumerate(
         zip(state["documentation_claims"], raw_claim_answers, strict=True)
     ):
-        if index in settled:
-            answer = settled[index]
-        elif answer is not None and claim_contradicts(answer):
+        if answer is not None and claim_contradicts(answer):
             contradicted_claims.append(claim)
             if answer.get("choice") != "contradicts":
                 answer = {

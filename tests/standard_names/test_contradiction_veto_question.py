@@ -4,11 +4,8 @@ Three failure modes are covered here. A DD source that carries a field label
 instead of a definition has that label emptied from the evidence before the
 claim is compared, while the source and its path stay, so the claim answers
 "says nothing" about a label and can still be denied by the field the path
-names. A claim that disclaims fixing a
-locus or an aggregation is settled in code as "says nothing" when the evidence
-specialises the quantity, because one locus, average or component instance of a
-generic quantity agrees with the claim rather than denying it. A source that
-denies the claim still vetoes it.
+names. A source that denies the claim still vetoes it, and a source that
+denies nothing leaves the veto clear.
 
 Jev is mocked: these tests measure the state handed to the judge, the question
 it is asked and the decision code derives, not the judge's own answer.
@@ -128,79 +125,8 @@ def test_a_label_source_keeps_the_field_path_that_can_deny_a_claim() -> None:
     assert verdict["contradiction_veto"] is True
 
 
-DISCLAIMER_CLAIMS = [
-    "The quantity has no mandatory locus or aggregation.",
-    "The unqualified physical quantity imposes no intrinsic spatial averaging.",
-    "It does not prescribe a wavenumber sum or time or flux-surface average.",
-]
-
-# A claim that fixes its own locus or aggregation is not a disclaimer: the
-# source may then deny it, so the judge must be asked.
-DIRECT_CLAIMS = [
-    "The quantity is averaged on the magnetic flux surface.",
-    "The value is the component along the outboard midplane axis.",
-]
-
-
-@pytest.mark.parametrize("claim", DISCLAIMER_CLAIMS)
-def test_a_disclaimer_of_locus_or_aggregation_is_recognised(claim: str) -> None:
-    assert jev_review.disclaims_locus_or_aggregation(claim) is True
-
-
-@pytest.mark.parametrize("claim", DIRECT_CLAIMS)
-def test_a_claim_that_fixes_its_locus_is_not_a_disclaimer(claim: str) -> None:
-    assert jev_review.disclaims_locus_or_aggregation(claim) is False
-
-
-@pytest.mark.parametrize("claim", DISCLAIMER_CLAIMS)
-def test_a_disclaimer_against_a_specialising_source_is_settled(claim: str) -> None:
-    sources = [
-        {
-            "id": "edge_profiles/profiles_1d/phi_potential",
-            "documentation": "Electrostatic potential, averaged on the magnetic flux surface",
-        }
-    ]
-    assert jev_review.claim_determination(claim, sources) == "says nothing"
-
-
-def test_a_disclaimer_against_a_source_with_no_specialisation_is_not_settled() -> None:
-    sources = [
-        {
-            "id": "a/rho",
-            "documentation": "Radial coordinate of the separatrix crossing",
-        }
-    ]
-    assert jev_review.claim_determination(DISCLAIMER_CLAIMS[0], sources) is None
-
-
 def _claim_only(choice: str) -> dict[str, Any]:
     return {CLAIM_KEY: {"choice": choice, "probabilities": {choice: 1.0}}}
-
-
-def test_a_settled_disclaimer_is_not_vetoed_though_the_judge_says_contradicts() -> None:
-    state = jev_review.build_docs_state(
-        {
-            "id": "radial_separatrix_distance_at_outboard_midplane",
-            "documentation": "The quantity has no mandatory locus or aggregation.",
-            "dd_source_docs": [
-                {
-                    "id": "thomson_scattering/channel/distance_separatrix_midplane",
-                    "documentation": (
-                        "Distance between the measurement position and the separatrix, "
-                        "mapped along flux surfaces to the outboard midplane, in the "
-                        "major radius direction"
-                    ),
-                }
-            ],
-        }
-    )
-
-    verdict = jev_review.aggregate_docs_review(
-        state, jev_review._default_checks(), _claim_only("contradicts")
-    )
-
-    assert verdict["contradiction_veto"] is False
-    assert state["documentation_claims"], "the claim must still be compared"
 
 
 def test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial() -> None:
