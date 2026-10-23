@@ -1,0 +1,304 @@
+<section>
+  <h2 id="isn-grammar-sync-0-10-1-goal">Serving the ISN 0.10.1 grammar from the graph</h2>
+  <p>
+    The graph now serves the <code>0.10.1</code> grammar. The shared
+    environment's <code>imas_standard_names</code> moved from
+    <code>0.10.0</code> to <code>0.10.1</code>, the grammar was synced through
+    <code>sync_isn_grammar_to_graph()</code>, and the readback shows exactly one
+    active <code>ISNGrammarVersion</code> — <code>0.10.1</code> — with a token
+    count of <code>983</code>, not below the previous active version's, and the
+    <code>physical_base</code> token <code>separatrix_distance</code> present
+    for it.
+  </p>
+  <p>
+    The first step of this node was refused inside the worker's write fence (the
+    rebuild of an editable install's metadata writes the shared virtualenv and
+    the sibling ISN checkout, both mounted read-only here), so it was run from
+    the coordinator's own unfenced shell and the result handed back. That
+    history is recorded below because the fence refusal is the interesting part
+    of the node: the sync itself is a few seconds of ordinary work, and the
+    ordering constraint on it — do not sync while the version still reads
+    <code>0.10.0</code> — is what made the refusal matter.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-defect">The defect, and why the sync had to wait</h3>
+  <p>
+    Before the metadata rebuild the environment was internally inconsistent. Its resolved
+    package was the editable sibling checkout at tag <code>v0.10.1</code>
+    (<code>4c59393cb111f5f257570f6eb3e9c7e037cb2747</code>), yet the version it
+    reported was <code>0.10.0</code>:
+  </p>
+  <pre><code>imas_standard_names.__version__  0.10.0
+imas_standard_names.__file__     /home/ITER/mcintos/Code/imas-standard-names/imas_standard_names/__init__.py</code></pre>
+  <p>
+    The gap is structural. <code>__version__</code> is
+    <code>importlib.metadata.version("imas-standard-names")</code>
+    (<code>imas_standard_names/__init__.py</code>, lines 16–22) — it reads the
+    installed distribution's frozen <code>dist-info</code>, not the checkout's
+    tag. <code>site-packages/imas_standard_names-0.10.0.dist-info/METADATA</code>
+    carried <code>Version: 0.10.0</code> while the source it pointed at was
+    already <code>0.10.1</code>.
+  </p>
+  <p>
+    <code>sync_isn_grammar_to_graph</code> binds
+    <code>from imas_standard_names import __version__ as isn_version</code> and
+    passes it as the target version
+    (<code>imas_codex/standard_names/grammar_sync.py</code>, lines 288 and 323).
+    A sync run in that state would have filed the 0.10.1 grammar under the
+    <code>0.10.0</code> label. The sync was therefore withheld until the
+    version read correctly, which is the whole reason the fence refusal was a
+    blocker rather than an inconvenience.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-before">Before: the graph served 0.10.0, on stale content</h3>
+  <p>
+    A bounded read-only probe (<code>grammar-state-probe.py</code> in the run
+    directory) enumerated the version nodes, with property controls first, so
+    that no absence would be read from an empty graph: the query is shown to see
+    a populated graph before any negative is taken from it —
+    <code>count(v:ISNGrammarVersion)</code> is <code>123</code> and
+    <code>count(t:GrammarToken)</code> is <code>81102</code>. Against that base,
+    the active version's state was:
+  </p>
+  <pre><code>MATCH (v:ISNGrammarVersion) RETURN v.version, v.active, v.content_digest
+  0.10.0  active=true  sha256:39a54c92cd0adec53bc63d87603db741260a75d75571686cd60e4074cd5f4009
+
+MATCH (t:GrammarToken) RETURN t.version, count(*)
+  0.10.0  983          (total across all versions 81102)
+
+MATCH (s:GrammarSegment) RETURN s.version, count(*)
+  0.10.0  22
+
+MATCH (already present) (t:GrammarToken {value:'separatrix_distance'})
+  0.10.0  physical_base  0.10.0:physical_base:separatrix_distance
+
+active versions: ['0.10.0']  (count=1)</code></pre>
+  <p>
+    Exactly one version was active, <code>0.10.0</code>, with <code>983</code>
+    tokens and <code>22</code> segments. The
+    <code>separatrix_distance</code> <code>physical_base</code> token already
+    existed for <code>0.10.0</code>: the base arrived with 0.10.0, and 0.10.1's
+    change is the midplane wording, not the base.
+  </p>
+  <p>
+    The content was stale even though the version count looked settled. The
+    installed package's content digest and the graph's active digest differed,
+    which is exactly the condition the startup freshness check reads:
+  </p>
+  <pre><code>installed content_digest    sha256:320e8e2b89afa50d803c69ff3832b0feb42ceed19a12987456651c7cf1984e66
+graph active content_digest sha256:39a54c92cd0adec53bc63d87603db741260a75d75571686cd60e4074cd5f4009
+match: false</code></pre>
+  <p>
+    <code>_auto_sync_grammar</code> in <code>imas_codex/cli/sn.py</code> compares
+    the active node's <code>content_digest</code> against
+    <code>grammar_content_digest()</code> and syncs when they differ (lines
+    1369–1382). The digests differed, so the next <code>sn run</code> would have
+    triggered the automatic sync — and with the version still reading
+    <code>0.10.0</code>, that automatic run is precisely the wrong-label write
+    the ordering constraint above prevents. This is why the sync was not run by
+    hand while the environment was unfixed: writing the wrong label into the
+    shared graph would have been worse than leaving the mismatch, because the
+    mismatch at least self-corrects once the version is right.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-fence">The metadata rebuild, and the write fence</h3>
+  <p>
+    The rebuild the brief names is:
+  </p>
+  <pre><code>uv --directory /home/ITER/mcintos/Code/imas-codex sync --extra test --reinstall-package imas-standard-names</code></pre>
+  <p>
+    Run from inside this worker it exits <code>1</code>. The editable build runs
+    the ISN package's hatch hook, which regenerates the grammar models and
+    writes them back into the sibling source tree; the write is refused:
+  </p>
+  <pre><code>OSError: [Errno 30] Read-only file system:
+  '/home/ITER/mcintos/Code/imas-standard-names/imas_standard_names/grammar/model_types.py'</code></pre>
+  <p>
+    The refusal is the write fence, not the repository. Process id 1 in this
+    worker's namespace is <code>bwrap</code>, and the sandbox's read-write bind
+    set is exactly the run directory, the session scratch directory, the
+    worktree, and the git object store:
+  </p>
+  <pre><code>--bind <worktree>
+--bind /home/ITER/mcintos/Code/imas-codex/.git/worktrees/isn-grammar-sync-0-10-1
+--bind /home/ITER/mcintos/Code/imas-codex/.git/objects
+--bind /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T043024850820-isn-grammar-sync-0-10-1
+--bind /tmp/reckon-crew-scratch/r-20261023T043024850820-isn-grammar-sync-0-10-1</code></pre>
+  <p>
+    Both paths the rebuild must write are bound read-only, and direct writes
+    probed them so:
+  </p>
+  <pre><code>touch /home/ITER/mcintos/Code/imas-codex/.venv/.write-probe
+  -> touch: cannot touch '.../.venv/.write-probe': Read-only file system
+touch /home/ITER/mcintos/Code/imas-standard-names/.write-probe
+  -> touch: cannot touch '.../.write-probe': Read-only file system</code></pre>
+  <p>
+    <code>findmnt</code> confirmed the mount options:
+    <code>HPC_T2[.../imas-codex] /home/ITER/mcintos/Code/imas-codex ro,nosuid,nodev,relatime</code>,
+    and the same for <code>imas-standard-names</code>. The fence's write grants
+    are the node's scope contract, so no attempt was made to work around it; the
+    blocker was reported and the command was run from the coordinator's own
+    unfenced shell, exiting <code>0</code>.
+  </p>
+  <p>
+    The rebuild's own check is the reported version. Before and after, from the
+    shared interpreter (<code>grammar-state-probe2.log</code> and
+    <code>version-after.log</code> in the run directory):
+  </p>
+  <pre><code>before                                after
+__version__            0.10.0         0.10.1
+dist-info directory    imas_standard_names-0.10.0.dist-info
+                                       imas_standard_names-0.10.1.dist-info
+METADATA Version:      0.10.0         0.10.1
+__file__               /home/ITER/mcintos/Code/imas-standard-names/imas_standard_names/__init__.py</code></pre>
+  <p>
+    The <code>__file__</code> path is unchanged, which is the point: the source
+    tree was already at <code>v0.10.1</code>, and the rebuild aligns the frozen
+    metadata with the source it resolves.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-sync">The sync</h3>
+  <p>
+    The sync was run through a guarded runner
+    (<code>run-grammar-sync.py</code>) whose first act is to read
+    <code>imas_standard_names.__version__</code> and refuse to proceed unless it
+    is <code>0.10.1</code>, so that the wrong-label write cannot happen by
+    accident. The guard was shown to fire: against the unfixed environment it
+    exits <code>2</code> with <code>PRECONDITION FAILED</code> and touches
+    nothing in the graph. With the version at <code>0.10.1</code> it ran and
+    exited <code>0</code> (<code>grammar-sync-after.log</code>):
+  </p>
+  <pre><code>isn_version       0.10.1
+content_digest    sha256:320e8e2b89afa50d803c69ff3832b0feb42ceed19a12987456651c7cf1984e66
+spec_version      0.10.1
+segments          22
+templates         7
+dry_run           false
+applied           true
+created_version   true
+segments_written  22
+tokens_written    803
+templates_written 7
+next_edges_written      21
+defines_edges_written   22
+has_token_edges_written 803
+elapsed_seconds   1.94</code></pre>
+  <p>
+    The digest written is the same digest the installed package reports and the
+    same one the before-state measured against the graph — the sync closed the
+    mismatch recorded above rather than replacing it with a third value.
+  </p>
+  <p>
+    The finalise pass, which rotates the active flag and stores the digest:
+  </p>
+  <pre><code>"rotate ISNGrammarVersion.active flag":  ok
+"store ISNGrammarVersion.content_digest": ok
+"public context tokens": {"rows": 983, "applied": true}</code></pre>
+  <p>
+    The segment pass writes <code>803</code> token rows and the finalise step
+    applies <code>983</code> public-context token rows; the graph readback below
+    counts the version's token nodes and returns the same <code>983</code>.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-readback">The readback, with property controls</h3>
+  <p>
+    The readback runs against the same populated graph the before-state
+    measured — <code>123</code> version nodes and <code>81102</code> token
+    nodes — so a zero-row or wrong-row result would be visibly wrong rather
+    than silently empty. Versions are compared by PEP 440 ordering, never as
+    strings.
+  </p>
+  <pre><code>active_versions            ['0.10.1']
+active_count               1
+tokens_expected_version    983      (GrammarToken where version = 0.10.1)
+tokens_previous_active     983      (GrammarToken where version = 0.10.0)
+previous_floor             983
+
+separatrix_distance tokens:
+  0.10.0  physical_base  0.10.0:physical_base:separatrix_distance
+  0.10.1  physical_base  0.10.1:physical_base:separatrix_distance
+
+gates:
+  exactly_one_active                 true
+  active_is_expected                 true
+  token_count_not_below_previous     true
+  separatrix_distance_physical_base  true
+GATE_PASS</code></pre>
+  <p>
+    Each of the four done-when conditions holds. Exactly one version is active
+    and it is <code>0.10.1</code>. Its token count <code>983</code> is not below
+    the previous active version's <code>983</code>. That figure sits above both
+    numbers the brief names for comparison — the <code>956</code>-token merge
+    figure and the <code>781</code> floor — so the physical-base merge has not
+    regressed; the count is unchanged from <code>0.10.0</code>, which is what
+    a wording change should produce, since the tokens themselves did not move.
+    And <code>separatrix_distance</code> exists as a
+    <code>physical_base</code> token for <code>0.10.1</code>, distinct from the
+    0.10.0 node that was already there.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-midplane">The 0.10.1 midplane locus definitions</h3>
+  <p>
+    The graph holds no locus prose — a search for any node carrying a
+    <code>definition</code>-like property returns no rows, against the same
+    populated-graph control above — so the definitions are quoted from
+    <code>imas_standard_names</code>, the editable sibling at tag
+    <code>v0.10.1</code>. The registry states the maximum-major-radius
+    definition for both the general and separatrix outboard loci
+    (<code>grammar/vocabularies/locus_registry.yml</code>, lines 676–689):
+  </p>
+  <blockquote>
+    <p id="isn-grammar-sync-0-10-1-def-outboard">
+      <strong>outboard_midplane</strong> (type position, relations at/of):
+      &ldquo;The low-field-side equatorial midplane: the point of maximum major
+      radius on the flux surface in question. For a value at the separatrix
+      intersection use outboard_midplane_separatrix.&rdquo;
+    </p>
+    <p id="isn-grammar-sync-0-10-1-def-outboard-sep">
+      <strong>outboard_midplane_separatrix</strong> (type position, relations
+      at/of): &ldquo;The point where the separatrix reaches its maximum major
+      radius, on the low-field side. A separatrix point value at the outboard
+      midplane is evaluated here.&rdquo;
+    </p>
+    <p id="isn-grammar-sync-0-10-1-def-inboard">
+      <strong>inboard_midplane</strong> (type position, relations at/of):
+      &ldquo;The high-field-side equatorial midplane: the point of minimum major
+      radius on the flux surface in question.&rdquo;
+    </p>
+  </blockquote>
+  <p>
+    The same definition is carried as an equation in the concept registry
+    (<code>grammar/vocabularies/conventions/concepts.yml</code>, lines 422–440),
+    which is the wording the docs writer restates:
+  </p>
+  <blockquote>
+    <p id="isn-grammar-sync-0-10-1-eq-outboard">
+      <strong>outboard_midplane</strong>: phrase &ldquo;outboard midplane&rdquo;,
+      equation <code>R = \max_{S} R,\quad R &gt; R_{\mathrm{axis}}</code>, where
+      <code>S</code> is the magnetic flux surface the point lies on and
+      <code>R_{\mathrm{axis}}</code> the major radius of the magnetic axis.
+    </p>
+    <p id="isn-grammar-sync-0-10-1-eq-inboard">
+      <strong>inboard_midplane</strong>: phrase &ldquo;inboard midplane&rdquo;,
+      equation <code>R = \min_{S} R,\quad R &lt; R_{\mathrm{axis}}</code>.
+    </p>
+  </blockquote>
+  <p>
+    Both halves state the maximum-major-radius (outboard) and
+    minimum-major-radius (inboard) definition, and neither names a data
+    dictionary field, an IDS path or an option value — the physics-terms rule
+    the upstream change was made to satisfy.
+  </p>
+
+  <h3 id="isn-grammar-sync-0-10-1-scope">What this node did not do</h3>
+  <p>
+    The node changed no code and no plan state; its only written artifact is
+    this fragment. The metadata rebuild was performed outside the worker because
+    the fence refuses it — that refusal, not the sync, is the node's interesting
+    finding, and it is the follow-on below. The graph write is a normal sync: it
+    added one version node (<code>0.10.1</code>), its segments, tokens and
+    templates, and rotated the single active flag from <code>0.10.0</code> to
+    <code>0.10.1</code>; the <code>0.10.0</code> node and its tokens remain in
+    the graph and are not deleted by a sync.
+  </p>
+</section>
