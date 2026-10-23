@@ -517,7 +517,12 @@ _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 
 # Vocabulary a DD source uses to describe a field's storage shape or its place
 # in a vector, and nothing else. A text whose every word is drawn from this set
-# names no quantity, so no claim can be compared against it.
+# names no quantity, so no claim can be compared against it. The direction words
+# are part of the placement: "Toroidal component, one scalar value is provided
+# per element in the grid subset." names which component of a vector is stored
+# and where, not what the quantity means, exactly as the bare axis coordinate
+# does. The source's own path keeps naming the component, so a claim that fixes
+# another one is still denied by it.
 _FIELD_PLACEMENT_WORDS = frozenset(
     """
     a an the
@@ -526,6 +531,7 @@ _FIELD_PLACEMENT_WORDS = frozenset(
     provided given is are be
     of in on at for to
     x y z
+    toroidal poloidal radial vertical horizontal parallel perpendicular axial
     """.split()
 )
 
@@ -618,6 +624,17 @@ _NO_MANDATORY_TERM = re.compile(
     r"prescribed|implied|preferred)\s+\w*\s*"
 )
 
+# The population a quantity could be restricted to. A sentence that denies such
+# a restriction is the scope form of a non-requirement: a generic quantity
+# stands for every species, charge state and thermal population, so a source
+# that names one specialisation agrees with the sentence rather than denying it.
+# The DD texts that specialise a generic quantity read as a denial to a reader
+# comparing sentence and source word by word, and this is the case that
+# distinguishes a generic document from a wrong one.
+_POPULATION_SCOPE_TERM = re.compile(
+    r"\b(?:species|charge[- ]state|charge states|population|populations)\b"
+)
+
 # Sentences that assert the quantity's own combination rather than denying that
 # one is required: it is not averaged, it holds at one place only, or it
 # excludes what the source states. Those disagree with a source and are the
@@ -663,14 +680,42 @@ def name_fixes_locus_or_aggregation(name: str) -> bool:
     return bool(_NAME_LATTICE_QUALIFIER.search(str(name or "").lower()))
 
 
+def states_scope_non_requirement(sentence: str) -> bool:
+    """True when a sentence denies a species, charge-state or population restriction.
+
+    "The quantity applies to the particular distribution represented and does
+    not impose a species, charge-state, or thermal-population restriction."
+    states that a generic quantity stands for every member of a family, so a DD
+    source that names one specialisation of it — a thermalisation source, an
+    electron-only source — agrees with the sentence rather than denying it. Read
+    word by word the pair looks like a conflict, which is why the judge returns
+    it as one, and this is the case that separates a generic document from a
+    wrong one.
+    """
+    text = " ".join(str(sentence or "").split()).lower()
+    if not text or _ASSERTED_COMBINATION.search(text):
+        return False
+    if not _POPULATION_SCOPE_TERM.search(text):
+        return False
+    return bool(
+        _NEGATED_REQUIREMENT.search(text) or _REQUIREMENT_WITH_NO_OBJECT.search(text)
+    )
+
+
 def claim_settlement(claim: str, name: str) -> str | None:
     """The category code settles for one claim without asking the judge.
 
-    A claim that states a non-requirement of a quantity whose name carries no
-    locus or aggregation qualifier of its own carries nothing the evidence can
-    deny, so it is answered "says nothing" in code. Every other claim goes to
-    the judge unchanged.
+    The claim is settled code-side in two families. A scope disclaimer settles
+    on its own: a name that fixes a locus or an aggregation says where the
+    quantity is taken or how it is combined, which is a different axis from the
+    population it is restricted to, so the name's qualifier cannot turn a scope
+    disclaimer into a claim a source denies. A locus or aggregation disclaimer
+    settles only under a name with no such qualifier, because there the name
+    itself fixes the locus the sentence is about. Every other claim goes to the
+    judge unchanged.
     """
+    if states_scope_non_requirement(claim):
+        return "says nothing"
     if name_fixes_locus_or_aggregation(name):
         return None
     if states_non_requirement(claim):
@@ -944,12 +989,25 @@ def claim_contradicts(answer: Mapping[str, Any]) -> bool:
 
     A low-confidence Choice can select support while still assigning material
     probability to contradiction. A hard safety veto should retain that signal.
+
+    The probability channel carries the judge's *reading*, not a tie: a judge
+    that answers "says nothing" and spreads the rest evenly has told us the
+    evidence does not bear on the claim, so a contradiction mass sitting at the
+    cutoff beside a larger "says nothing" mass is an undecided distribution
+    rather than a denied claim. The channel therefore fires only when the
+    contradiction mass reaches the cutoff *and* is at least the mass the judge
+    placed on "says nothing". A support-selected answer whose contradiction mass
+    leads the silence mass still vetoes, which is the signal the probability
+    channel exists to keep; the selected-choice channel is unchanged and carries
+    every explicit denial.
     """
-    return (
-        answer.get("choice") == "contradicts"
-        or float(answer.get("probabilities", {}).get("contradicts", 0.0))
-        >= CONTRADICTION_VETO_PROBABILITY
-    )
+    if answer.get("choice") == "contradicts":
+        return True
+    probabilities = answer.get("probabilities", {})
+    contradicts = float(probabilities.get("contradicts", 0.0))
+    if contradicts < CONTRADICTION_VETO_PROBABILITY:
+        return False
+    return contradicts >= float(probabilities.get("says nothing", 0.0))
 
 
 def settled_claim_answers(state: Mapping[str, Any]) -> dict[int, dict[str, Any]]:

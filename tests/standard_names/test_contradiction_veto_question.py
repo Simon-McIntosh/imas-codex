@@ -497,3 +497,94 @@ def test_an_asserted_combination_still_vetoes_on_its_denial() -> None:
     )
 
     assert verdict["contradiction_veto"] is True
+
+
+# A judge that answers "says nothing" and spreads the remainder evenly has told
+# us the evidence does not bear on the claim. Reading one point of that spread as
+# a denial turns an undecided distribution into a veto.
+UNDECIDED_ANSWERS = [
+    {
+        "choice": "says nothing",
+        "probabilities": {"contradicts": 0.32, "says nothing": 0.35, "supports": 0.33},
+    },
+    {
+        "choice": "says nothing",
+        "probabilities": {"contradicts": 0.30, "says nothing": 0.47, "supports": 0.23},
+    },
+    {
+        "choice": "says nothing",
+        "probabilities": {"contradicts": 0.36, "says nothing": 0.48, "supports": 0.16},
+    },
+]
+
+
+@pytest.mark.parametrize("answer", UNDECIDED_ANSWERS)
+def test_an_undecided_distribution_does_not_veto(answer: dict[str, Any]) -> None:
+    assert jev_review.claim_contradicts(answer) is False
+
+
+def test_a_contradiction_mass_that_leads_silence_still_vetoes() -> None:
+    """The probability channel keeps the denial signal a spread cannot explain."""
+    answer = {
+        "choice": "supports",
+        "probabilities": {"contradicts": 0.40, "says nothing": 0.25, "supports": 0.35},
+    }
+
+    assert jev_review.claim_contradicts(answer) is True
+
+
+def test_a_selected_contradiction_vetoes_whatever_the_probabilities_say() -> None:
+    assert (
+        jev_review.claim_contradicts({"choice": "contradicts", "probabilities": {}})
+        is True
+    )
+
+
+# A sentence that disclaims a population restriction, beside a name whose
+# qualifier fixes a locus or an aggregation. The qualifier is a different axis
+# from the population, so it cannot turn the disclaimer into a denial.
+SCOPE_DISCLAIMERS = [
+    "The quantity does not impose a species, charge-state, or thermal-population restriction.",
+    (
+        "The quantity imposes no species, charge-state, or thermal-population "
+        "restriction."
+    ),
+]
+
+POPULATION_RESTRICTIONS = [
+    "The quantity applies to thermal electrons only.",
+    "Only the deuterium species contributes to this quantity.",
+]
+
+
+@pytest.mark.parametrize("sentence", SCOPE_DISCLAIMERS)
+def test_a_population_scope_disclaimer_is_settled(sentence: str) -> None:
+    assert jev_review.states_scope_non_requirement(sentence) is True
+
+
+@pytest.mark.parametrize("sentence", POPULATION_RESTRICTIONS)
+def test_a_population_restriction_is_not_settled(sentence: str) -> None:
+    assert jev_review.states_scope_non_requirement(sentence) is False
+
+
+@pytest.mark.parametrize("sentence", SCOPE_DISCLAIMERS)
+def test_a_scope_disclaimer_settles_under_a_name_that_fixes_an_aggregation(
+    sentence: str,
+) -> None:
+    name = "volume_integrated_particle_source_rate"
+
+    assert jev_review.name_fixes_locus_or_aggregation(name) is True
+    assert jev_review.claim_settlement(sentence, name) == "says nothing"
+
+
+def test_a_direction_word_label_is_not_evidence() -> None:
+    """A component name places the value; the source path still names it."""
+    text = "Toroidal component, one scalar value is provided per element in the grid subset."
+
+    assert jev_review.label_only_source(text) is True
+    assert (
+        jev_review.label_only_source(
+            "Radial coordinate (major radius) on the outboard side"
+        )
+        is False
+    )

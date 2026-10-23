@@ -32,6 +32,7 @@ from imas_codex.standard_names.review import cascade as cascade_mod
 from imas_codex.standard_names.review.audits import (
     run_documentation_gate_checks,
     run_house_style_checks,
+    run_lexical_lint,
 )
 
 HERE = Path(__file__).resolve().parent
@@ -42,9 +43,11 @@ ARCHIVE = (
     Path.home()
     / ".local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
-OUT = HERE / "srtj-docs-switch-measure.json"
+DEFAULT_OUT = HERE / "srtj-docs-switch-measure.json"
+OUT = DEFAULT_OUT
 MAX_NEO4J_PROCESSES = 4
 JEV_CONCURRENCY = 8
+JEV_ATTEMPTS = 3
 SPEND_CEILING_USD = 1.00
 
 
@@ -152,7 +155,9 @@ def fetch_export_rows(ids):
 
 
 def documentation_error_lint(candidate):
+    """Every lint family the product's audit runs, so the hold set matches it."""
     findings = [
+        *run_lexical_lint([candidate]),
         *run_house_style_checks([candidate]),
         *run_documentation_gate_checks([candidate]),
     ]
@@ -182,29 +187,50 @@ async def jev_pass(items, model):
 
     async def one(item):
         async with semaphore:
-            try:
-                route, _answers, cost = await cascade_mod._docs_judgment(item, model)
-            except Exception as exc:
+            failure = None
+            for _attempt in range(JEV_ATTEMPTS):
+                try:
+                    route, _answers, cost = await cascade_mod._docs_judgment(
+                        item, model
+                    )
+                except Exception as exc:
+                    failure = f"{type(exc).__name__}: {exc}"
+                    continue
                 return {
-                    "route": "unjudged",
-                    "failed_checks": [],
-                    "holds": [],
-                    "cost": 0.0,
-                    "reason": f"{type(exc).__name__}: {exc}",
+                    "route": route.route,
+                    "failed_checks": list(route.failed_checks),
+                    "holds": [dict(h) for h in route.holds],
+                    "cost": float(cost or 0.0),
+                    "reason": None,
                 }
             return {
-                "route": route.route,
-                "failed_checks": list(route.failed_checks),
-                "holds": [dict(h) for h in route.holds],
-                "cost": float(cost or 0.0),
-                "reason": None,
+                "route": "judgment_failed",
+                "failed_checks": [],
+                "holds": [],
+                "cost": 0.0,
+                "reason": failure,
             }
 
     results = await asyncio.gather(*[one(item) for item in items])
     return list(results), sum(r["cost"] for r in results)
 
 
+DECIDED_ROUTES = frozenset({"accept", "refine"})
+
+
 def accepted(res, lint_hold):
+    """True when the route accepts and no hold is open.
+
+    A route outside the two decisions is an instrument failure and never a
+    refine. Counting it as one would report the instrument is silent as a
+    decision the judge never made, which is how a dead call reads as a good
+    outcome.
+    """
+    if res["route"] not in DECIDED_ROUTES:
+        raise RuntimeError(
+            f"Jev call did not decide: route {res['route']!r} "
+            f"({res.get('reason') or 'no reason recorded'})"
+        )
     reasons = [f"route hold {h.get('kind')}: {h.get('finding')}" for h in res["holds"]]
     if lint_hold:
         reasons.append(f"lint cap hold docs_lint_error: {lint_hold}")
@@ -212,9 +238,22 @@ def accepted(res, lint_hold):
 
 
 def main() -> int:
+    global OUT
     parser = argparse.ArgumentParser(description="measure the docs switch decision")
     parser.add_argument("--limit", type=int, default=0, help="first N rows only")
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=DEFAULT_OUT,
+        help="artifact path; each measuring node writes its own",
+    )
+    parser.add_argument(
+        "--node",
+        default="srtj-docs-switch-measure",
+        help="node name recorded in the artifact",
+    )
     args = parser.parse_args()
+    OUT = args.out
 
     sheet_by_id = {r["sheet_id"]: r for r in json.loads(SHEET.read_text())["rows"]}
     label_by_id = {r["sheet_id"]: r for r in json.loads(LABELS.read_text())["labels"]}
@@ -224,7 +263,8 @@ def main() -> int:
 
     payload = {
         "schema": "srtj-docs-switch-measure",
-        "node": "srtj-docs-switch-measure",
+        "node": args.node,
+        "artifact": OUT.name,
         "created_at": datetime.now(UTC).isoformat(),
         "code_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], text=True
@@ -359,6 +399,24 @@ def main() -> int:
             }
             OUT.write_text(json.dumps(payload, indent=2) + "\n")
             log(f"{pass_name} complete; cumulative spend {round(spend_total, 6)} USD")
+
+        failures = [
+            {
+                "sheet_id": row["sheet_id"],
+                "item_id": row["item_id"],
+                "pass": pass_name,
+                "reason": row[pass_name].get("reason"),
+            }
+            for pass_name in ("pass_a", "pass_b")
+            for row in rows
+            if row[pass_name]["route"] not in DECIDED_ROUTES
+        ]
+        payload["instrument_failures"] = failures
+        if failures:
+            raise RuntimeError(
+                f"{len(failures)} Jev calls failed to decide; the instrument, not "
+                f"the judge, is what did not answer: {failures[:4]}"
+            )
 
         report = {}
         wrong_by_pass = {}
