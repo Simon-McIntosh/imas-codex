@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 11,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.65-accept-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.65-low-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.65-veto-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.75-accept-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.75-low-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.75-veto-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.85-accept-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.85-low-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.85-veto-docs]",
+    "tests/standard_names/test_bare_doc_link_normalize.py::test_persist_reviewed_docs_normalizes_on_accept",
+    "tests/standard_names/test_bare_doc_link_normalize.py::test_persist_reviewed_docs_skips_normalize_when_not_accepted"
+  ],
+  "added_failures_note": "Derived from the reviewed run's own two default-marker gate logs, which stand in for the absent baseline_suite/after_suite manifest keys: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T103943340240-srtj-wave-integration-gate/logs/base-default.log reads '5 failed, 184 passed, 1 deselected' at line 188 with EXIT=1, its five failure ids being test_docs_contradiction_veto.py::test_claim_verdict_controls_acceptance[None|contradicts|error|missing-reviewed, supports-accepted]; head-default.log reads '11 failed, 223 passed, 16 deselected' at line 125 with EXIT=1. The head failures overlap the base failures in zero ids, so 11 failures are added at head and 5 are resolved.",
+  "assertion_analysis": {
+    "added_assertions": [],
+    "note": "The diff is a docs fragment and adds no assertion, so no assertion is read for independence and none is flagged as comparing a value against the variable the test itself passed in.",
+    "self_comparison_assertions": []
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-23T11:46:21.489Z",
+  "dispatched_at": "2026-10-23T11:27:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html",
+      "line": "86",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added-failure table's traceback column for test_persist_reviewed_docs_skips_normalize_when_not_accepted repeats the sibling test's traceback ('test_bare_doc_link_normalize.py:125: in test_persist_reviewed_docs_normalizes_on_accept / E AssertionError: assert \\'\\' == \\'accepted\\''), where head-default.log:90 records the correct one, ':164: in test_persist_reviewed_docs_skips_normalize_when_not_accepted / E AssertionError: assert \\'\\' == \\'reviewed\\''. The brief requires the traceback line for every added failure, and one of the eleven rows carries another test's."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html",
+      "line": "81",
+      "severity": "non-blocking",
+      "text": "non-blocking: the closing sentence calls 189 and 234 the ids each arm 'collected' and points at the summary lines as the receipt, but the logs it cites print 'collected 190 items / 1 deselected / 189 selected' (base-default.log:9) and 'collected 250 items / 16 deselected / 234 selected' (head-default.log:9). The figures are the selected counts, so the sentence names a number the log it calls its receipt does not print."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call site reaches the landed change; the fragment is documentation content under docs/evidence/fragments and no runtime module imports or reads it, so it is read by the plan and a reader rather than by code.",
+    "diff": "Read both commits against base c71dd6056: 000b883d5 adds the 127-line fragment and 63bbb7bce corrects one sentence in it, one file changed, no deletion.",
+    "done_when": "The source brief.md:50 names the fragment as the deliverable, recording per-arm commands, log paths, the per-test table and the added-failure count with attribution; all five are in the landed file, and its counts reconcile with the six gate logs.",
+    "goal": "The source brief.md:1 states the goal as measuring whether the five merged review changes hold together at main, writing no product code; the landed diff adds one evidence fragment, docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html, and no product code, so the goal holds.",
+    "manifest": "The source manifest.md records commits 000b883d5 and 63bbb7bce for the fragment only, with test_logs naming the six gate logs; it records no baseline_suite or after_suite key, so the logs are the receipt.",
+    "write_paths": "The source brief.md:55 declares the fragment path as the sole write scope; git diff c71dd6056..63bbb7bce adds that one file and touches nothing else, and the unused figures path in the manifest is carried beside it."
+  },
+  "justifications": {
+    "durability": "The diff adds no assertion and no repository test invariant on the fragment's numbers, so nothing committed reddens if the recorded counts or the attribution are later edited.",
+    "evidence": "The gate's numbers reconcile with its own logs (base-default.log:188 '5 failed, 184 passed', head-default.log:125 '11 failed, 223 passed'), but the added-failure table at srtj-wave-integration-gate.html:86 quotes a traceback line its log does not contain.",
+    "fit": "srtj-wave-integration-gate.html:1 opens with <article id=\"srtj-wave-integration-gate-record\"> and namespaced <h2>/<h3> ids, matching the sibling docs/evidence/fragments/sn-review-through-jev/srtj-review-holds-channel.html:1-4.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html records the six arms, the per-test table, the count and the single-defect attribution the goal names, at the file the brief's write scope gives, with no product code touched.",
+    "reuse": "The landed change adds no function, class or module and no definition at all; it is a single evidence fragment, so no capability the repository already owns is forked or duplicated.",
+    "scope_discipline": "git diff c71dd6056..63bbb7bce changes exactly docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html, the single path brief.md:55 grants, with no other file and no deletion."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief.md:1 directs this node to measure whether the five merged review changes hold together at main and write no product code; the landed diff adds one evidence fragment and no product code, so the goal holds.\nVERDICT done_when: brief.md:50 names the fragment as the deliverable, recording per-arm commands, log paths, the per-test table and the attributed added-failure count; all are present in docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html.\nVERDICT write_paths: brief.md:55 grants the fragment path alone; git diff c71dd6056..63bbb7bce adds exactly docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html and nothing else.\nVERDICT manifest: read the source manifest.md; it records status complete, commits 000b883d5 and 63bbb7bce, changed_paths the fragment, six test_logs, and no baseline_suite or after_suite key.\nVERDICT diff: read both commits commit by commit against base c71dd6056; 000b883d5 adds the 127-line new fragment and 63bbb7bce corrects one sentence in it, one file changed, no deletion.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html records the six arms, the per-test table, the count and the single-defect attribution the goal names, and touches no product code.\nSCORE evidence: 17\nJUSTIFICATION evidence: the counts reconcile with the run's own logs (base-default.log:188 and head-default.log:125), but srtj-wave-integration-gate.html:86 quotes at :125 a traceback the log records at :164.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff c71dd6056..63bbb7bce changes exactly docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html, the single path brief.md:55 grants.\nSCORE durability: 5\nJUSTIFICATION durability: the diff adds no assertion and no repository test over the fragment's numbers, so nothing committed reddens if the counts at srtj-wave-integration-gate.html:83 are later altered.\nSCORE fit: 18\nJUSTIFICATION fit: srtj-wave-integration-gate.html:1-2 uses <article id=\"srtj-wave-integration-gate-record\"> and namespaced heading ids, the idiom of docs/evidence/fragments/sn-review-through-jev/srtj-review-holds-channel.html:1-4.\nSCORE reuse: 20\nJUSTIFICATION reuse: the landed change adds no definition, so no capability the repository owns is forked; the search over docs/evidence/fragments and imas_codex for a wave-integration gate owner found none.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html:86 non-blocking: the traceback column for test_persist_reviewed_docs_skips_normalize_when_not_accepted repeats the sibling test's traceback (':125 ... assert '' == ''accepted'''), where head-default.log:90 records ':164 ... assert '' == ''reviewed'''; one of the eleven attributed rows carries another test's traceback.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html:81 non-blocking: the sentence calls 189 and 234 the ids each arm 'collected' and cites the summary lines as the receipt, but base-default.log:9 and head-default.log:9 print 'collected 190 items' and 'collected 250 items'; the figures are the selected counts.",
+  "review_run_id": "r-20261023T112458587495-review-of-srtj-wave-integration-gate-63bbb7bced63",
+  "reviewed_base_sha": "c71dd6056428c9bacddf2285abbcf6593d067584",
+  "reviewed_commits": [
+    "000b883d5f0248a9462ce9afaf92b6f9a759b529",
+    "63bbb7bced63d82249ff38983eeb91908cc20e47"
+  ],
+  "reviewed_head_sha": "63bbb7bced63d82249ff38983eeb91908cc20e47",
+  "reviewed_run_id": "r-20261023T103943340240-srtj-wave-integration-gate",
+  "scores": {
+    "durability": 5,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T11:48:41.428936+00:00",
+  "total": 98
+}
