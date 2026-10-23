@@ -98,20 +98,73 @@ def _docs_review(
     )
 
 
+class _NullGraph:
+    """A stand-in for the graph client: it opens, closes and queries nothing.
+
+    The cap takes one client for the whole batch, so a pass that reaches it
+    opens one whether or not the stubbed writers use it. No test in this module
+    may reach a database, so this stands in for the client.
+    """
+
+    def __enter__(self) -> _NullGraph:
+        return self
+
+    def __exit__(self, *exc: object) -> bool:
+        return False
+
+    def query(self, *_args, **_kwargs) -> list[dict]:
+        return []
+
+
 async def _run_docs_review(
     monkeypatch,
     *,
     error_lint_findings: dict[str, str],
     score_totals: dict[str, int] | None = None,
-) -> list[dict]:
+) -> tuple[list[dict], list[dict]]:
     """Drive ``_review_single_batch`` for a single docs candidate via a stub LLM.
 
     ``score_totals`` maps a source id to the reviewer's raw total out of 80,
-    defaulting to a full-marks review for both candidates.
+    defaulting to a full-marks review for both candidates. Returns the scored
+    items and the review holds the pass raised.
     """
     from imas_codex.standard_names.review import pipeline as pl
 
     totals = score_totals or {}
+    raised: list[dict] = []
+
+    def record_hold(
+        name_id: str,
+        axis: str,
+        kind: str,
+        finding: str,
+        evidence: str,
+        raised_by: str,
+        *,
+        graph=None,
+    ) -> dict:
+        raised.append(
+            {
+                "name_id": name_id,
+                "axis": axis,
+                "kind": kind,
+                "finding": finding,
+            }
+        )
+        return {"id": f"{name_id}:{axis}:{kind}", "finding_key": kind}
+
+    monkeypatch.setattr(pl, "raise_hold", record_hold)
+    # The cap reconciles as well as raises: a pass that finds no error clears a
+    # hold an earlier pass raised. Stub the writer so the pass runs without a
+    # graph and the clearing call is not an unrecorded graph write.
+    monkeypatch.setattr(
+        pl,
+        "clear_holds_not_raised",
+        lambda name_id, axis, kinds, raised_keys, *, graph=None: 0,
+    )
+    import imas_codex.graph.client as graph_client
+
+    monkeypatch.setattr(graph_client, "GraphClient", _NullGraph)
 
     def fake_render_prompt(prompt_name: str, context: dict) -> str:
         return "stub"
@@ -150,39 +203,49 @@ async def _run_docs_review(
         wlog=wlog,
         target="docs",
     )
-    return result["_items"]
+    return result["_items"], raised
 
 
 @pytest.mark.asyncio
-async def test_error_lint_finding_caps_docs_score_below_acceptance(monkeypatch) -> None:
-    """A document carrying an unresolved error lint error cannot be accepted."""
-    items = await _run_docs_review(
+async def test_error_lint_finding_raises_a_hold_and_keeps_the_judged_score(
+    monkeypatch,
+) -> None:
+    """A document carrying an unresolved error lint error cannot be accepted.
+
+    The finding is raised as a review hold and the reviewer's judged score is
+    left exactly as written, so the refusal is recorded as its own dimension
+    rather than as a lowered number.
+    """
+    items, raised = await _run_docs_review(
         monkeypatch,
         error_lint_findings={"plasma_current": ERROR_FINDING},
     )
     by_id = {item["id"]: item for item in items}
 
-    capped = by_id["plasma_current"]
-    assert capped["reviewer_score"] < DEFAULT_MIN_SCORE, (
-        "an unresolved lint error must hold the score below acceptance"
+    held = by_id["plasma_current"]
+    assert held["reviewer_score"] >= DEFAULT_MIN_SCORE, (
+        "the judged score must survive an unresolved lint error"
     )
-    assert capped["audit_cap_applied"] is True
-    assert capped["audit_cap_finding"] == ERROR_FINDING
+    assert held["audit_cap_finding"] == ERROR_FINDING
+    assert [(hold["name_id"], hold["kind"], hold["finding"]) for hold in raised] == [
+        ("plasma_current", "docs_lint_error", ERROR_FINDING)
+    ]
 
-    # The twin with no error finding keeps the reviewer's own score.
+    # The twin with no error finding keeps the reviewer's own score, unheld.
     untouched = by_id["electron_temperature"]
     assert untouched["reviewer_score"] >= DEFAULT_MIN_SCORE
-    assert "audit_cap_applied" not in untouched
+    assert "audit_cap_finding" not in untouched
 
 
 @pytest.mark.asyncio
 async def test_docs_document_without_error_finding_is_accepted(monkeypatch) -> None:
     """The same document is accepted once the error finding is absent."""
-    items = await _run_docs_review(monkeypatch, error_lint_findings={})
+    items, raised = await _run_docs_review(monkeypatch, error_lint_findings={})
     by_id = {item["id"]: item for item in items}
 
     assert by_id["plasma_current"]["reviewer_score"] >= DEFAULT_MIN_SCORE
-    assert "audit_cap_applied" not in by_id["plasma_current"]
+    assert "audit_cap_finding" not in by_id["plasma_current"]
+    assert raised == []
 
 
 @pytest.mark.asyncio
@@ -191,11 +254,11 @@ async def test_error_finding_is_recorded_on_already_below_acceptance_entry(
 ) -> None:
     """An entry already below acceptance still records its error finding.
 
-    The reviewer scored this document below the threshold itself, so the cap
-    moves nothing — but the finding stands against the name and the record must
-    name it, whether or not the cap changed the score.
+    The reviewer scored this document below the threshold itself, so the hold
+    changes no score — but the finding stands against the name and the record
+    must name it.
     """
-    items = await _run_docs_review(
+    items, raised = await _run_docs_review(
         monkeypatch,
         error_lint_findings={"plasma_current": ERROR_FINDING},
         score_totals={"plasma_current": 40, "electron_temperature": 40},
@@ -203,12 +266,10 @@ async def test_error_finding_is_recorded_on_already_below_acceptance_entry(
     by_id = {item["id"]: item for item in items}
 
     below = by_id["plasma_current"]
-    assert below["reviewer_score"] < DEFAULT_MIN_SCORE
+    assert below["reviewer_score"] == 40 / 80
     assert below["audit_cap_finding"] == ERROR_FINDING
-    # The cap did not change a score that was already below acceptance.
-    assert "audit_cap_applied" not in below
+    assert [hold["kind"] for hold in raised] == ["docs_lint_error"]
 
     # A twin below acceptance with no error finding records nothing.
     twin = by_id["electron_temperature"]
     assert "audit_cap_finding" not in twin
-    assert "audit_cap_applied" not in twin

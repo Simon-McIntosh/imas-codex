@@ -98,6 +98,19 @@ def _stub_decisions(monkeypatch):
     return seen
 
 
+class _NoGraph:
+    """A graph double that answers every query with an empty result.
+
+    The score cap reconciles the name's documentation lint holds on each pass,
+    which writes to the graph. A default-tier test injects this instead of
+    reaching a database: the cap's own behaviour is under test here, not the
+    hold store's.
+    """
+
+    def query(self, _cypher: str, **_params) -> list[dict]:
+        return []
+
+
 def _batch(names) -> dict:
     return {"names": names, "audit_findings": [], "error_lint_findings": {}}
 
@@ -190,12 +203,13 @@ async def test_report_only_result_leaves_the_score_uncapped(monkeypatch) -> None
     )
 
     assert any("[report-only:judge" in line for line in batch["audit_findings"])
-    # The report-only findings are absent from the cap's input mapping.
-    assert batch["error_lint_findings"] == {}
+    # No audit ran for this batch, so the cap's input map is absent rather than
+    # empty. The report-only findings are absent from it either way.
+    assert batch["error_lint_findings"] is None
 
     wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
     scored = [{"id": CARBON_ID, "reviewer_score": 0.9}]
-    pl._cap_docs_scores_for_lint_errors(scored, batch["error_lint_findings"], wlog)
+    pl._cap_docs_scores_for_lint_errors(scored, {}, wlog, graph=_NoGraph())
 
     assert scored[0]["reviewer_score"] == 0.9
     assert "audit_cap_applied" not in scored[0]

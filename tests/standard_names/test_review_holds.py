@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import socket
@@ -369,6 +370,345 @@ def test_refine_claims_passing_score_with_open_hold(planted_name: str) -> None:
     items = graph_ops.claim_refine_docs_batch(batch_size=1, min_score=0.85)
     assert [item["id"] for item in items] == [planted_name]
     assert _state(planted_name) == {"stage": "refining", "score": 0.875}
+
+
+LINT_FINDING = (
+    "[error:lint:round_trip_failure] plasma_current: "
+    "name does not survive parser round-trip"
+)
+
+
+def test_lint_error_raises_a_hold_and_keeps_the_judged_score(
+    planted_name: str,
+) -> None:
+    """An error-severity lint finding is a hold, not a score clamp.
+
+    The reviewer's own score survives so the refusal is visible and triageable
+    as its own dimension; a document with an unresolved lint error cannot be
+    accepted while the hold is open.
+    """
+    from imas_codex.standard_names.review import pipeline
+
+    entry = {"id": planted_name, "reviewer_score": 0.9}
+    wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
+    pipeline._cap_docs_scores_for_lint_errors(
+        [entry], {planted_name: LINT_FINDING}, wlog
+    )
+
+    assert entry["reviewer_score"] == 0.9, "the judged score must not be clamped"
+    assert entry["audit_cap_finding"] == LINT_FINDING
+    raised = holds.open_holds(planted_name, "docs")
+    assert [record["kind"] for record in raised] == ["docs_lint_error"]
+    assert raised[0]["finding"] == LINT_FINDING
+    assert not holds.docs_accepted(0.9, 0.85, planted_name)
+
+
+def test_cascade_veto_raises_a_hold_and_keeps_the_decision_score(
+    planted_name: str, monkeypatch
+) -> None:
+    """The documentation contradiction veto is a hold, not a lowered score.
+
+    The route still reads refine, but the judged decision score is the mapped
+    one rather than a value driven below ``min_score``.
+    """
+    from imas_codex.standard_names.review import cascade
+    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS
+
+    thresholds = {
+        "accept_threshold": 0.4,
+        "score_kind": "rubric",
+        "rubric": {},
+    }
+    monkeypatch.setattr(
+        cascade, "_calibration", lambda: {"name": thresholds, "docs": thresholds}
+    )
+    monkeypatch.setattr(
+        cascade,
+        "rubric_scores",
+        lambda axis, judgment, fit: dict.fromkeys(DOCS_DIMENSIONS, 0.96 * 20),
+    )
+
+    judgment = {"contradiction_veto": True, "checks": {}, "quality": 0.96}
+    route = cascade.route_docs(judgment, probability=0.96)
+
+    assert route.route == "refine"
+    assert route.decision_score is not None
+    assert route.decision_score >= 0.85, (
+        "a veto must not drive the judged decision score below min_score"
+    )
+    assert route.failed_checks == ("claim_contradicts_source",)
+
+    raised = cascade.sync_route_holds(planted_name, route, "docs")
+    assert len(raised) == 1
+    records = holds.open_holds(planted_name, "docs")
+    assert [record["kind"] for record in records] == ["cascade_contradiction"]
+
+
+def _route_pair(monkeypatch) -> tuple[object, object]:
+    """A vetoing docs route and a clean one, from the same stub calibration."""
+    from imas_codex.standard_names.review import cascade
+    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS
+
+    thresholds = {
+        "accept_threshold": 0.4,
+        "score_kind": "rubric",
+        "rubric": {},
+    }
+    monkeypatch.setattr(
+        cascade, "_calibration", lambda: {"name": thresholds, "docs": thresholds}
+    )
+    monkeypatch.setattr(
+        cascade,
+        "rubric_scores",
+        lambda axis, judgment, fit: dict.fromkeys(DOCS_DIMENSIONS, 0.96 * 20),
+    )
+    vetoed = cascade.route_docs(
+        {"contradiction_veto": True, "checks": {}, "quality": 0.96}, probability=0.96
+    )
+    clean = cascade.route_docs(
+        {"contradiction_veto": False, "checks": {}, "quality": 0.96}, probability=0.96
+    )
+    return vetoed, clean
+
+
+def test_resolved_cascade_veto_clears_the_hold(planted_name: str, monkeypatch) -> None:
+    """A later pass that reports no contradiction releases the document.
+
+    The veto is reconciled on every deciding pass, so the refusal ends with the
+    finding: a hold left open would re-claim the document on each pass and walk
+    it to the rotation cap.
+    """
+    from imas_codex.standard_names.review import cascade
+
+    vetoed, clean = _route_pair(monkeypatch)
+    assert vetoed.holds
+    assert clean.holds == ()
+
+    cascade.sync_route_holds(planted_name, vetoed, "docs")
+    assert [r["kind"] for r in holds.open_holds(planted_name, "docs")] == [
+        "cascade_contradiction"
+    ]
+
+    cascade.sync_route_holds(planted_name, clean, "docs")
+    assert holds.open_holds(planted_name, "docs") == []
+
+
+def test_a_name_axis_pass_leaves_a_documentation_contradiction_hold_open(
+    planted_name: str, monkeypatch
+) -> None:
+    """Only the axis these checks run on has a verdict about their holds.
+
+    A name-axis pass decides the name, not the documentation, so its route
+    carries no contradiction verdict at all — and a route that carries no holds
+    is indistinguishable from one that found none. Reconciling the
+    documentation holds against it would therefore clear an open
+    ``cascade_contradiction`` and release a document whose claim still
+    contradicts its source. The reconciliation is confined to the axis it ran
+    on, so the hold survives a pass on the other axis untouched.
+    """
+    from imas_codex.standard_names.review import cascade
+
+    _, clean_docs = _route_pair(monkeypatch)
+    hold = holds.raise_hold(
+        planted_name,
+        "docs",
+        "cascade_contradiction",
+        "claim contradicts its DD source",
+        "Jev contradiction veto on claim_contradicts_source",
+        "jev-cascade",
+    )
+
+    # A real name-axis route, and the pass that produced it.
+    cascade.sync_route_holds(planted_name, clean_docs, "name")
+
+    assert [r["id"] for r in holds.open_holds(planted_name, "docs")] == [hold["id"]]
+
+
+def test_resolved_lint_error_clears_the_hold_and_releases_the_document(
+    planted_name: str,
+) -> None:
+    """The lint check clears the hold its next pass no longer justifies.
+
+    A pass runs the lint check over every scored entry for the batch, so an
+    entry with no error finding reconciles: the hold is cleared and the
+    document is released through the canonical gate, at the score the reviewer
+    gave it. The refusal therefore lasts exactly as long as the finding does,
+    which is what the score clamp this replaces also did.
+    """
+    from imas_codex.standard_names.review import pipeline
+
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (sn:StandardName {id: $id}) SET sn.edit_status = 'open'",
+            id=planted_name,
+        )
+    holds.raise_hold(
+        planted_name,
+        "docs",
+        "docs_lint_error",
+        LINT_FINDING,
+        f"error-severity lint finding on {planted_name}",
+        "review-lint",
+    )
+    assert _review(planted_name) == "reviewed"
+    assert [r["kind"] for r in holds.open_holds(planted_name, "docs")] == [
+        "docs_lint_error"
+    ]
+
+    wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
+    pipeline._cap_docs_scores_for_lint_errors(
+        [{"id": planted_name, "reviewer_score": 0.875}], {}, wlog
+    )
+
+    assert holds.open_holds(planted_name, "docs") == []
+    assert _state(planted_name) == {"stage": "accepted", "score": 0.875}
+    assert _edit_status(planted_name) == "applied"
+
+
+def _enrich_batch(monkeypatch, names: list[dict]) -> dict:
+    """Drive the real enrich pass over one batch and return that batch.
+
+    The audit did not run for this batch, which is the case under test: the
+    pass maps that to an absent lint verdict rather than an empty one. The two
+    context lookups the pass also makes are neutralised, so the batch core runs
+    for real and nothing reaches a remote endpoint.
+    """
+    import asyncio
+    from types import SimpleNamespace
+
+    from imas_codex.discovery.base.progress import WorkerStats
+    from imas_codex.discovery.base.supervision import PipelinePhase
+    from imas_codex.standard_names.review import enrichment, pipeline
+
+    monkeypatch.setattr(
+        enrichment, "build_neighborhood_context", lambda *a, **k: [], raising=True
+    )
+    monkeypatch.setattr(pipeline, "_fetch_review_dd_context", lambda *a, **k: None)
+    monkeypatch.setattr(
+        pipeline, "_fetch_review_derived_children", lambda *a, **k: None
+    )
+
+    batch = {"names": names, "audit_findings": [], "error_lint_findings": {}}
+    state = SimpleNamespace(
+        review_batches=[batch],
+        all_names=[],
+        neighborhood_k=10,
+        audit_report=None,
+        skip_audit=False,
+        enrich_stats=WorkerStats(),
+        enrich_phase=PipelinePhase("enrich"),
+        should_stop=lambda: False,
+    )
+    asyncio.run(pipeline.enrich_review_worker(state))
+    return batch
+
+
+def test_a_skipped_audit_reports_no_lint_verdict_and_leaves_the_hold(
+    planted_name: str, monkeypatch
+) -> None:
+    """A batch whose audit did not run carries no lint verdict, not an empty one.
+
+    Driven through the real enrich pass rather than by handing the cap a
+    ``None``: the verdict is read off the batch the pass produces. A skipped
+    audit recorded as an empty mapping reads as a clean audit, and the cap then
+    clears every lint hold on the names it scored — so a document whose error
+    lint finding still stands is released. The companion test
+    ``test_resolved_lint_error_clears_the_hold_and_releases_the_document``
+    covers the other direction, where the audit ran and found nothing and the
+    hold is cleared.
+    """
+    from imas_codex.standard_names.review import pipeline
+
+    hold = holds.raise_hold(
+        planted_name,
+        "docs",
+        "docs_lint_error",
+        LINT_FINDING,
+        "error-severity lint finding",
+        "review-lint",
+    )
+    batch = _enrich_batch(
+        monkeypatch,
+        [
+            {
+                "id": planted_name,
+                "description": "plasma potential",
+                "documentation": "Electrostatic potential of the plasma.",
+            }
+        ],
+    )
+
+    assert batch["error_lint_findings"] is None, (
+        "a batch with no audit report must carry no lint verdict"
+    )
+
+    wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
+    pipeline._cap_docs_scores_for_lint_errors(
+        [{"id": planted_name, "reviewer_score": 0.875}],
+        batch["error_lint_findings"],
+        wlog,
+    )
+
+    assert [r["id"] for r in holds.open_holds(planted_name, "docs")] == [hold["id"]]
+
+
+def test_dismissal_does_not_accept_a_quarantined_document(
+    planted_name: str,
+) -> None:
+    """A dismissed hold releases a document only through the canonical gate.
+
+    The row carries everything the gate otherwise requires: an accepted name
+    axis, a passing documentation score and a reachable winning documentation
+    review. The quarantine is therefore the only clause that can refuse it, so
+    the assertion is about the gate and not about review eligibility — a row
+    refused for want of a review would pass this test with the quarantine
+    clause deleted.
+    """
+    name_id = planted_name
+    # The hold is raised first so the documentation stays refused while it is
+    # reviewed, which is the state a dismissal starts from.
+    hold = _raise(name_id, "unsupported claim")
+    assert _review(name_id) == "reviewed"
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (sn:StandardName {id: $id}) "
+            "SET sn.validation_status = 'quarantined'",
+            id=name_id,
+        )
+
+    assert holds.dismiss_hold(hold["id"], "triager", "checked by hand")
+    assert holds.open_holds(name_id, "docs") == []
+    assert _state(name_id) == {"stage": "reviewed", "score": 0.875}
+
+
+def test_dismissal_does_not_accept_a_document_without_a_winning_review(
+    disposable_neo4j: str,
+) -> None:
+    """A passing score and an empty hold set are not sufficient for acceptance.
+
+    A row with no reachable winning docs review never passes the canonical
+    gate, so clearing its last hold cannot accept it.
+    """
+    name_id = "no_winning_review_document"
+    with GraphClient() as graph:
+        graph.query("MATCH (node) DETACH DELETE node")
+        graph.query(
+            """
+            CREATE (sn:StandardName {id: $id, name_stage: 'accepted',
+                docs_stage: 'reviewed', reviewer_score_docs: 0.9})
+            """,
+            id=name_id,
+        )
+    hold = holds.raise_hold(
+        name_id,
+        "docs",
+        "documentation_contradiction",
+        "unsupported claim",
+        "claim and source disagree",
+        "tester",
+    )
+    assert holds.dismiss_hold(hold["id"], "triager", "checked by hand")
+    assert _state(name_id) == {"stage": "reviewed", "score": 0.9}
 
 
 def test_refiner_input_contains_open_hold_finding(planted_name: str) -> None:

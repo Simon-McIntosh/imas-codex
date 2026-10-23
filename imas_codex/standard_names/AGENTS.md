@@ -433,12 +433,35 @@ source-only, DD-only, or read-only checks:
 | `reconcile_standard_name_source_paths` | `WHERE NOT (sn.name_stage IN $terminal)` before rebuilding the scalar | No terminal rows |
 | `find_provenance_orphans`, `find_flux_surface_reduction_violations`, `find_removed_dd_sources` | Diagnostic queries over live names; the orphan ledger uses `LIVE_NAME` | No; read-only |
 | `refresh_drifted_sources` | `detect_source_drift` selects `sn.name_stage <> 'superseded'` when `include_accepted=True` | **Yes:** exhausted/contested rows are not excluded from source snapshot or docs-steering work |
-| `promote_stranded_reviewed` | Name/docs rows at `reviewed` with score at or above the active threshold; docs also requires accepted name and a winning docs review | No terminal rows |
+| `promote_stranded_reviewed` | Name/docs rows at `reviewed` with score at or above the active threshold and no open documentation hold; docs also requires accepted name and a winning docs review | No terminal rows |
 | `rederive_structural_edges` | Initial name read requires non-null stage and `NOT (name_stage IN ['superseded', 'exhausted', 'contested'])`; cleanup only removes dead structural edges | No terminal properties |
 | `seed_parent_sources` | `parent.name_stage IS NULL` with seedable structural children | No terminal rows |
 | `normalize_derived_parent_lifecycle` | Null/pending parents, or accepted parents with missing documentation/unit data | No terminal rows |
 | `structural_accept_derived_parents` | Derived/source-free parents with substantive descriptions and `name_stage IN ['drafted', 'reviewed', 'exhausted', 'refining']` | **Yes:** an exhausted derived parent can be promoted to accepted |
 | `reconcile_orphan_parent_sources` | Parent write requires `NOT coalesce(parent.name_stage, '') IN ['superseded', 'exhausted', 'contested']` | No terminal rows |
+
+**Every documentation hold kind is owned by the check that raises it, and that
+check reconciles it on every pass.** The lint cap raises `docs_lint_error` when
+an error-severity finding stands against a name and clears it on a later pass
+over the same names that finds none; a deciding cascade route raises
+`cascade_contradiction` when the contradiction veto fires and clears it when a
+later route reports no contradiction. A kind that is raised but never re-checked
+holds the document for the check's own reasons but for the life of the name: the
+refine pool re-claims a passing row with an open documentation hold, holds it
+again, and walks `docs_chain_length` to the rotation cap, ending `exhausted`.
+So a new hold kind ships with the pass that clears it — either by adding it to
+the kinds that pass re-checks, or by the check reconciling its own kinds as both
+of these do. `clear_holds_not_raised` run by an unrelated re-check does not touch
+them, because it clears only the kinds it was told that check covers.
+
+**A check that did not run reports no verdict, never a clean one.** The enrich
+pass builds each batch's error-lint mapping from the audit report, and a batch
+whose audit did not run carries no mapping at all — distinct from an empty
+mapping, which means the audit ran and found nothing, which is what clears the
+hold. Recording a skipped audit as empty would clear every lint hold on the
+names in that batch, so a document with an unresolved error finding would be
+released by a pass that never looked for one. The distinction is produced by
+the pass, not only honoured by the consumer.
 
 The post-drain path is covered by the same flag as well: it suppresses
 `release_all_orphan_claims`, the repeated structural parent fixups,

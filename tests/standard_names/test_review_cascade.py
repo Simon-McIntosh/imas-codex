@@ -348,7 +348,8 @@ def test_unsupported_claim_is_not_a_contradiction_veto(planted_thresholds):
     )
     decision = route_docs(judgment, probability=0.9)
     assert decision.route == "refine"
-    assert decision.decision_score < 0.85
+    assert decision.decision_score >= 0.85
+    assert [hold["kind"] for hold in decision.holds] == ["cascade_contradiction"]
     assert decision.scores == clear.scores == decision.raw_scores
     assert decision.check_details["claim_contradicts_source"]["probability"] == 0.3
     assert decision.check_details["claim_contradicts_source"]["cutoff"] == 0.3
@@ -387,7 +388,12 @@ def test_decided_review_preserves_rubric_and_failed_checks(
     dimensions = NAME_DIMENSIONS if axis == "name" else DOCS_DIMENSIONS
     assert result["winning_scores"] == dict.fromkeys(dimensions, quality * 20)
     assert route.scores == route.raw_scores
-    assert (result["winning_score"] >= 0.75) == (route.route == "accept")
+    # A decided route accepts on its judged score only with no veto hold: a
+    # contradiction veto refuses the item at any score, and the score it judged
+    # is kept.
+    assert (route.route == "accept") == (
+        result["winning_score"] >= 0.75 and not route.holds
+    )
     if veto:
         failures = {
             f["id"]: f for f in result["winning_comments_per_dim"]["failed_checks"]
@@ -411,13 +417,39 @@ def test_consumer_predicates_agree_with_rubric_route(
     from imas_codex.standard_names.export import _run_gate_c
 
     raw = 0.1 if kind == "low" else 0.4
-    judgment = {"quality": raw, "contradiction_veto": kind == "veto", "checks": {}}
+    judgment = {"quality": raw, "contradiction_veto": False, "checks": {}}
+    judgment["contradiction_veto"] = kind == "veto"
     route = cascade._route(axis, judgment, raw, min_score=min_score)
     result = cascade._direct_result(route, "mock", 0, {"id": "temperature"}, axis)
     score = result["winning_score"]
     expected_accept = kind == "accept" or (axis == "name" and kind == "veto")
     assert (route.route == "accept") == expected_accept
-    assert (score >= min_score) == expected_accept
+
+    # Acceptance is decided by the product predicate, never by a second copy of
+    # the rule written here: the docs axis only accepts a passing score with no
+    # open documentation hold, so a contradiction veto refuses the item however
+    # high its judged score is.
+    from imas_codex.standard_names.review import holds as review_holds
+
+    class _Holds:
+        def __init__(self, rows):
+            self._rows = rows
+
+        def query(self, *_args, **_kwargs):
+            return self._rows
+
+    open_rows = (
+        [{"hold": {"id": "hold", "axis": "docs", "status": "open"}}]
+        if route.holds
+        else []
+    )
+    if axis == "docs":
+        accepted = review_holds.docs_accepted(
+            score, min_score, "temperature", graph=_Holds(open_rows)
+        )
+    else:
+        accepted = score >= min_score
+    assert accepted == expected_accept
 
     gc = MagicMock()
     gc.__enter__.return_value = gc

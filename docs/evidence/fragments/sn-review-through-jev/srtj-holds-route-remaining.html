@@ -1,0 +1,297 @@
+<section id="srtj-holds-route-remaining">
+  <h2 id="srtj-holds-route-remaining-title">Documentation vetoes routed through review holds</h2>
+
+  <p id="srtj-holds-route-remaining-summary">
+    The two remaining places where a refusal to accept a documentation was
+    expressed by lowering a judged score now raise a review hold instead. The
+    reviewer's score is preserved exactly as written, and the refusal is a
+    separate, triageable <code>ReviewHold</code> node on the name. Acceptance
+    is decided by the existing predicate, which already reads open holds, so a
+    held document cannot be accepted by any path. Each hold is reconciled on every
+    pass by the check that raises it, so a resolved finding releases the
+    document and a check that did not run leaves the holds as they stand.
+  </p>
+
+  <h3 id="srtj-holds-route-remaining-lint-cap">Site 1 — the documentation lint cap</h3>
+  <p id="srtj-holds-route-remaining-lint-cap-site">
+    <code>imas_codex/standard_names/review/pipeline.py</code>,
+    <code>_cap_docs_scores_for_lint_errors</code>, called from
+    <code>_review_single_batch</code> in the <code>target == "docs"</code>
+    branch.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-lint-cap-before">
+      <strong>Before:</strong> an entry carrying an error-severity lint finding
+      had its <code>reviewer_score</code> driven below the acceptance
+      threshold. The judged score moved, so the refusal was indistinguishable
+      from the reviewer's own low opinion of the document.
+    </li>
+    <li id="srtj-holds-route-remaining-lint-cap-after">
+      <strong>After:</strong> the finding is recorded on the entry under
+      <code>audit_cap_finding</code> as before, and the name receives a
+      <code>docs_lint_error</code> hold through <code>raise_hold</code>. The
+      score is not touched. The pass log line states the kept score.
+    </li>
+    <li id="srtj-holds-route-remaining-lint-cap-persist">
+      <strong>Persistence check:</strong> the docs write
+      (<code>write_docs_review_results</code>) stores scores only and never sets
+      <code>docs_stage</code>; acceptance is decided later by
+      <code>persist_reviewed_docs</code> and <code>promote_stranded_reviewed</code>,
+      and both already read open holds. No write outside the review package was
+      required, so the stop-and-report condition did not apply.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-cascade-veto">Site 2 — the cascade contradiction veto</h3>
+  <p id="srtj-holds-route-remaining-cascade-veto-site">
+    <code>imas_codex/standard_names/review/cascade.py</code>, <code>_route</code>,
+    consumed by <code>adjudicate_review</code>'s deciding branch.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-cascade-veto-before">
+      <strong>Before:</strong> a failed <code>claim_contradicts_source</code>
+      check lowered <code>mapped</code>, which became both
+      <code>decision_score</code> and the score the route was judged on. The
+      route read <code>refine</code>, but the score itself had been moved by
+      the veto.
+    </li>
+    <li id="srtj-holds-route-remaining-cascade-veto-after">
+      <strong>After:</strong> <code>mapped</code> keeps its mapped value,
+      <code>decision_score</code> and <code>selected_score</code> keep the
+      judged values, and the route carries a
+      <code>cascade_contradiction</code> hold. <code>sync_route_holds</code>
+      reconciles it against the name in the deciding branch, beside the route
+      record. <code>jev_review.py</code> was not edited.
+    </li>
+    <li id="srtj-holds-route-remaining-cascade-veto-scope">
+      The hold is raised only for the contradiction veto itself. Every failed
+      check also routes to <code>refine</code>, so a nonconforming answer that
+      is not a contradiction refuses the document without raising a hold whose
+      finding text says the claim contradicts its source.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-reconcile">Every hold ends with the check that raised it</h3>
+  <p id="srtj-holds-route-remaining-reconcile-finding">
+    A review of the first revision found that both kinds added above were
+    raised and never cleared. <code>clear_holds_not_raised</code> is the only
+    writer of <code>status='cleared'</code>, and the documentation review's own
+    re-check passes the set <code>registry_conformance</code>,
+    <code>banned_prose</code>, <code>documentation_contradiction</code> — so
+    neither new kind appeared in any re-check. A hold would then outlive the
+    finding that produced it: the refine pool re-claims a passing row with an
+    open documentation hold, holds it again on its next pass, and walks
+    <code>docs_chain_length</code> to the rotation cap, ending
+    <code>exhausted</code>. That is a permanent refusal where the score clamp
+    it replaced recomputed on every pass.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-reconcile-fix">
+      <strong>Repair:</strong> each check now reconciles its own kinds on every
+      pass, in both directions. The lint cap raises <code>docs_lint_error</code>
+      when a finding stands and clears it on a later pass over the same names
+      that finds none; a deciding cascade route raises
+      <code>cascade_contradiction</code> when the veto fires and clears it when
+      a later route reports none. Both call
+      <code>clear_holds_not_raised</code> with exactly their own kind, so
+      neither asserts anything about another check's holds.
+    </li>
+    <li id="srtj-holds-route-remaining-reconcile-none">
+      <strong>An absent check is not a passing check.</strong> The lint map is
+      <code>None</code> when the checks did not run for a batch, distinct from
+      an empty mapping, which means the checks ran and found nothing. Only the
+      empty mapping reconciles; a caller that omits the map releases nothing.
+    </li>
+    <li id="srtj-holds-route-remaining-reconcile-dev">
+      The release runs through the same promotion the hold channel already
+      used, so a document whose only blocker was the resolved finding is
+      accepted at the score the reviewer gave it, and one that is quarantined
+      or has no winning review is still left at <code>reviewed</code>.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-skip">A skipped audit is not a clean audit</h3>
+  <p id="srtj-holds-route-remaining-skip-finding">
+    The absent-check rule above was written at the cap and never reached it in
+    production. The enrich pass built each batch's lint mapping from the audit
+    report when one existed and from an <em>empty mapping</em> when the audit
+    had not run — so a skipped audit and an audit that ran and found nothing
+    arrived at the cap as the same value, and every lint hold on the names in
+    that batch was cleared. The gate that refuses a document for an unresolved
+    error finding then released it while the finding still stood, which is the
+    one fail-open direction the per-pass reconciliation was meant to remove.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-skip-fix">
+      <strong>Repair:</strong> the batch carries no lint verdict at all when
+      the audit did not run, and the consumers no longer default an absent key
+      to an empty mapping. The two states are now produced by the pass itself
+      rather than distinguished only by the callee.
+    </li>
+    <li id="srtj-holds-route-remaining-skip-test">
+      <strong>Tested through the real batch path.</strong> The covering test
+      drives the enrich pass over a batch with no audit report, reads the
+      verdict off the batch it produces, and puts that value through the cap:
+      the planted lint hold is still open afterwards. Handing the cap a
+      <code>None</code> would have tested the callee's branch and left the
+      defect — that the pass never produced one — in place.
+    </li>
+    <li id="srtj-holds-route-remaining-skip-graph">
+      The cap takes its graph injected; otherwise one client serves the whole
+      batch. The reconciliation touches every scored entry, so a client per
+      raise or clear opened a graph session for each of them. The
+      default-tier tests that drive the cap stand in for that client, so no
+      unmarked test reaches a database.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-axis">Which axis may reconcile</h3>
+  <p id="srtj-holds-route-remaining-axis-finding">
+    The cascade reconciliation named the documentation axis in the callee and
+    ran on every deciding pass. A pass that decides the name axis carries no
+    documentation verdict at all — its route holds nothing about the document —
+    and a route that holds none is indistinguishable from a route that found none, so
+    the pass cleared every open <code>cascade_contradiction</code> it could
+    reach. A document whose claim still contradicts its source was released by a
+    pass that never looked at it.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-axis-fix">
+      <strong>Repair:</strong> the reconciliation takes the axis the pass
+      decided, and a pass on any other axis returns without touching these
+      holds. The axis those checks run on is declared once, beside the kinds
+      they raise.
+    </li>
+    <li id="srtj-holds-route-remaining-axis-test">
+      <strong>Test and control.</strong> A name-axis pass over a clean
+      documentation route leaves an open <code>cascade_contradiction</code> open
+      on the disposable graph; with the axis guard removed the same pass clears it
+      and the test reddens.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-promotion">Site 3 — the release-by-dismissal path</h3>
+  <p id="srtj-holds-route-remaining-promotion-site">
+    <code>imas_codex/standard_names/review/holds.py</code>,
+    <code>_promote_if_eligible</code>, run when the last open hold on a document
+    is cleared or dismissed.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-promotion-before">
+      <strong>Before:</strong> the release re-derived the acceptance rule from a
+      passing score alone. A row with a quarantined validation status, or with
+      no reachable winning documentation review, was accepted by dismissing its
+      last hold.
+    </li>
+    <li id="srtj-holds-route-remaining-promotion-after">
+      <strong>After:</strong> the release applies
+      <code>PROMOTE_STRANDED_DOCS_WHERE</code> — the predicate the stranded
+      promotion pass already uses — which requires an accepted name axis, a
+      non-quarantined row and a reachable winning documentation review, on top
+      of the acceptance score and an empty open-hold set. It is the same
+      predicate, imported, not a second copy of its terms. Two tests now plant
+      exactly those two excluded rows and assert dismissal leaves them at
+      <code>reviewed</code>.
+    </li>
+    <li id="srtj-holds-route-remaining-promotion-quarantine-test">
+      <strong>The quarantine case was not actually tested.</strong> The planted
+      row carried no <code>HAS_REVIEW</code> edge, so the gate refused it on
+      review eligibility and the quarantine clause was never reached — deleting
+      that clause left the test green. The row now carries a passing score and a
+      reachable winning documentation review, leaving the quarantine as the only
+      clause able to refuse it, and the test reddens when the clause is removed.
+    </li>
+    <li id="srtj-holds-route-remaining-promotion-doc">
+      The <code>promote_stranded_reviewed</code> row in the standard-names
+      guide now names the open-hold requirement alongside the score.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-no-clamp">No documentation score is clamped</h3>
+  <p id="srtj-holds-route-remaining-no-clamp-claim">
+    No refusal to accept a documentation anywhere in <code>imas_codex/</code>
+    is expressed by lowering a documentation review score. The backing grep,
+    <code>clamp-grep.log</code>, searched every <code>.py</code> file under
+    <code>imas_codex/</code> for a <code>min(…)</code> applied to a review
+    score, for <code>audit_cap_finding</code>, and for every
+    <code>docs_lint_error</code> and <code>cascade_contradiction</code>
+    occurrence.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-no-clamp-hits">
+      <strong>The grep's score hits are all elsewhere.</strong> They are
+      discovery scorers bounding values into [0, 1], a vocabulary-promotion
+      statistic, a review-spread diagnostic, and
+      <code>map_decision_score</code>, which is a fixed calibration curve
+      mapping a rubric score below the accept cutoff into the range below the
+      threshold. It is driven by the rubric score, not by a hold or a veto, and
+      a veto at a passing score no longer moves it.
+    </li>
+    <li id="srtj-holds-route-remaining-no-clamp-writers">
+      <strong>The only writer of <code>audit_cap_finding</code> is the lint-cap
+      site</strong>, and it writes the finding without touching the score.
+    </li>
+    <li id="srtj-holds-route-remaining-no-clamp-kinds">
+      <strong>The two kinds are raised only at the two routed sites</strong> —
+      <code>docs_lint_error</code> from the pipeline and
+      <code>cascade_contradiction</code> from the cascade route.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-deviation">Deviation from the brief</h3>
+  <p id="srtj-holds-route-remaining-deviation-kind">
+    The brief names the hold kinds <code>lint_error</code> and
+    <code>contradicts_source</code>. Neither is in the hold owner's declared
+    kind set, so raising either would fail validation. The owner already
+    declared <code>docs_lint_error</code> and <code>cascade_contradiction</code>
+    unused, and both are in the generated schema's enumeration; those are the
+    kinds used. The declared kind set is unchanged.
+  </p>
+
+  <h3 id="srtj-holds-route-remaining-verification">Verification</h3>
+  <ul>
+    <li id="srtj-holds-route-remaining-verification-delta">
+      <strong>Gate by delta.</strong> The gate covers the holds, cascade, panel,
+      lint-cap and judge-stage test files. Each arm runs from its own
+      <code>git archive</code> tree and its own temporary directory and
+      <code>--basetemp</code>, so a deleted basetemp in one arm cannot put the
+      other's fixtures into setup error. The base arm (the revision before this
+      change) shows <code>9 failed, 95 passed, 1 skipped</code>; the head arm
+      shows the same <code>9 failed</code>, <code>103 passed, 1 skipped</code>.
+      The delta is zero added failures, and the eight extra passes are the hold
+      tests this work adds — ten in that file at base, eighteen at head. The
+      two arms' failure id lists are identical. All nine are the same pre-existing
+      <code>test_consumer_predicates_agree_with_rubric_route</code>
+      documentation ids in both arms.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-holds">
+      The documentation hold file passes at head, and passed at base (10
+      passed), against a disposable Neo4j started by the test module.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-control">
+      <strong>Negative control.</strong> Restoring the score clamp in
+      <code>_cap_docs_scores_for_lint_errors</code> reddens three lint-cap
+      tests, including the new hold test, and the source was restored byte-
+      identical afterwards.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-skip">
+      <strong>Skipped-audit control.</strong> Restoring the empty mapping in
+      the audit-skipped branch reddens the covering hold test on its first
+      assertion; the same test passes with the source unmodified, and the
+      source was restored byte-identical afterwards.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-axis">
+      <strong>Axis and quarantine controls.</strong> Removing the axis guard
+      reddens the name-axis test, and deleting the quarantine clause from the
+      promotion predicate reddens the dismissal test — which the earlier
+      revision of that test could not do, because its row was refused on review
+      eligibility first. Both sources were restored byte-identical.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-reconcile">
+      <strong>Reconciliation controls.</strong> Removing the clearing call from
+      the cascade route reddens the cascade release test; removing it from the
+      lint cap reddens the lint release test. Each site's guard fails on its
+      own revert, and the sources were restored byte-identical.
+    </li>
+  </ul>
+</section>

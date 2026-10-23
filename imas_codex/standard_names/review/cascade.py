@@ -3,8 +3,9 @@
 Cutoffs match the panel's calibration acceptance rate before the docs veto.
 The decision score is piecewise linear through (0, 0), (cutoff, min_score)
 and (1, 1); it is an operating-score mapping, not an acceptance probability.
-A contradiction caps only that scalar below min_score; rubric dimensions stay
-unchanged. The same mapping handles explicit consumer min_score values.
+A contradiction routes a document to refine while its judged scores stay
+unchanged; the refusal travels as a documentation review hold, not as a lowered
+score. The same mapping handles explicit consumer min_score values.
 Thresholds and name-score weights are fitted on frozen calibration judgments.
 Every Jev judgment is stored as a noncanonical review with no scalar score;
 only the explicit deciding switch may replace the incumbent.
@@ -28,6 +29,19 @@ from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 logger = logging.getLogger(__name__)
 _THRESHOLDS = Path(__file__).with_name("cascade_thresholds.json")
 
+# The hold kinds this module's checks raise. A deciding pass reconciles exactly
+# these on the name it judged, so a failure it no longer reports stops holding
+# the document without this module asserting anything about another check's
+# holds.
+ROUTE_HOLD_KINDS = frozenset({"cascade_contradiction"})
+
+# The axis those kinds sit on. The checks that raise them run on this axis
+# alone: a pass deciding a different axis carries no verdict about them, so it
+# neither raises nor clears one. Without that, a name-axis pass — whose route
+# carries no holds and therefore nothing to re-raise — reads as a pass that
+# found none and clears an open documentation contradiction.
+ROUTE_HOLD_AXIS = "docs"
+
 
 @dataclass(frozen=True)
 class CascadeRoute:
@@ -40,6 +54,7 @@ class CascadeRoute:
 
     selected_score: float | None = None
     decision_score: float | None = None
+    holds: tuple[Mapping[str, str], ...] = ()
 
     @property
     def total(self) -> float | None:
@@ -219,9 +234,20 @@ def _route(
     if selected is None:
         raise ValueError("a decided review requires the selected Jev score")
     mapped = map_decision_score(selected, thresholds["accept_threshold"], min_score)
-    if failed:
-        mapped = min(mapped, math.nextafter(min_score, 0.0))
-    route = "accept" if mapped >= min_score else "refine"
+    holds: tuple[Mapping[str, str], ...] = ()
+    if "claim_contradicts_source" in failed:
+        detail = details.get("claim_contradicts_source", {})
+        holds = (
+            {
+                "kind": "cascade_contradiction",
+                "finding": str(
+                    detail.get("evidence") or "claim contradicts its DD source"
+                ),
+                "evidence": "Jev contradiction veto on claim_contradicts_source",
+                "raised_by": "jev-cascade",
+            },
+        )
+    route = "refine" if (failed or mapped < min_score) else "accept"
     return CascadeRoute(
         route,
         probability,
@@ -231,6 +257,7 @@ def _route(
         raw_scores,
         selected_score=selected,
         decision_score=mapped,
+        holds=holds,
     )
 
 
@@ -327,6 +354,56 @@ def _judgment_payload(
         "confidence": None,
     }
     return payload
+
+
+def sync_route_holds(
+    name_id: str, route: CascadeRoute, axis: str, *, graph: Any | None = None
+) -> list[str]:
+    """Reconcile the documentation holds a deciding route carries on its name.
+
+    A veto reaches the graph as its own review hold rather than as a lowered
+    score: the judged score is unchanged, so the refusal is visible as a
+    distinct dimension a triager can act on and can dismiss.
+
+    The reconciliation runs in both directions on every deciding pass, mirroring
+    the per-pass recomputation the score mapping used to do. A check the route
+    still fails raises its hold; a check it no longer fails clears the hold
+    previously raised for it. Without the second direction a resolved
+    contradiction would keep the document held for the life of the name — the
+    hold would outlive the finding that produced it.
+
+    ``axis`` is the axis this pass decided. Only a pass on the axis these checks
+    run on has a verdict about their holds, so any other axis returns without
+    touching them: its route carries none of these holds, and an empty set of
+    raised holds is what a pass that found nothing looks like.
+    """
+    if axis != ROUTE_HOLD_AXIS:
+        return []
+
+    from imas_codex.standard_names.review.holds import (
+        clear_holds_not_raised,
+        finding_key,
+        raise_hold,
+    )
+
+    raised: list[str] = []
+    raised_keys: set[str] = set()
+    for hold in route.holds:
+        record = raise_hold(
+            name_id,
+            ROUTE_HOLD_AXIS,
+            hold["kind"],
+            hold["finding"],
+            hold["evidence"],
+            hold["raised_by"],
+            graph=graph,
+        )
+        raised.append(record["id"])
+        raised_keys.add(finding_key(hold["kind"], hold["finding"]))
+    clear_holds_not_raised(
+        name_id, ROUTE_HOLD_AXIS, set(ROUTE_HOLD_KINDS), raised_keys, graph=graph
+    )
+    return raised
 
 
 async def _store_route(
@@ -716,6 +793,18 @@ async def adjudicate_review(
         except Exception:
             logger.exception(
                 "Jev cascade route could not be stored for %s", item.get("id")
+            )
+        try:
+            # Run for every deciding pass, not only a vetoing one: a pass that
+            # reports no contradiction is what clears the hold an earlier pass
+            # raised. The pass's own axis decides whether it may: only the axis
+            # these checks run on has a verdict about their holds.
+            await asyncio.to_thread(
+                sync_route_holds, str(item.get("id", "")), route, axis
+            )
+        except Exception:
+            logger.exception(
+                "Jev cascade holds could not be reconciled for %s", item.get("id")
             )
         try:
             await _run_panel_audit(axis, item, models, incumbent, route, mgr=mgr)

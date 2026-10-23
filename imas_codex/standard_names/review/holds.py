@@ -153,19 +153,31 @@ def dismiss_hold(
 
 
 def _promote_if_eligible(client: Any, name_id: str, axis: str) -> None:
+    """Release a cleared or dismissed document only through the canonical gate.
+
+    The same predicate, not a second copy of its terms: a document reached by
+    clearing its last hold must clear exactly the bar the stranded-promotion
+    pass applies, including an accepted name axis, an unquarantined row and a
+    reachable winning docs review. A row reachable only by score would accept a
+    document the normal gate never would.
+    """
     if axis != "docs":
         return
+    from imas_codex.standard_names.graph_ops import (
+        PROMOTE_STRANDED_DOCS_WHERE,
+        docs_review_eligibility_params,
+    )
+
     client.query(
         f"""
         MATCH (sn:StandardName {{id: $name_id}})
-        WHERE sn.docs_stage = 'reviewed'
-          AND sn.docs_review_quorum_shortfall IS NULL
-          AND {docs_acceptance_where()}
+        WHERE {PROMOTE_STRANDED_DOCS_WHERE}
         SET sn.updated_at = datetime(), {docs_acceptance_set()}
         RETURN sn.id AS id
         """,
         name_id=name_id,
         min_score=DEFAULT_MIN_SCORE,
+        **docs_review_eligibility_params(),
     )
 
 
