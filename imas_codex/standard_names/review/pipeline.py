@@ -591,7 +591,12 @@ async def enrich_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
             )
         else:
             batch["audit_findings"] = []
-            batch["error_lint_findings"] = {}
+            # The audit did not run, so the batch carries no lint verdict at
+            # all — distinct from running and finding nothing, which is an
+            # empty mapping. The cap reconciles a name's lint hold against this
+            # map: a skipped audit must leave every hold as it stands rather
+            # than read as a clean audit and clear the lot.
+            batch["error_lint_findings"] = None
 
         # Judge stage (report-only), beside the audit stage: the entries a
         # pattern cannot decide ask the judge one categorising Choice each. It
@@ -1133,7 +1138,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     neighborhood=batch.get("neighborhood", []),
                     existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
-                    error_lint_findings=batch.get("error_lint_findings", {}),
+                    error_lint_findings=batch.get("error_lint_findings"),
                     wlog=wlog,
                     name_only=state.name_only,
                     target=review_target,
@@ -1220,7 +1225,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     neighborhood=batch.get("neighborhood", []),
                     existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
-                    error_lint_findings=batch.get("error_lint_findings", {}),
+                    error_lint_findings=batch.get("error_lint_findings"),
                     wlog=wlog,
                     name_only=state.name_only,
                     target=review_target,
@@ -1397,7 +1402,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     neighborhood=batch.get("neighborhood", []),
                     existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
-                    error_lint_findings=batch.get("error_lint_findings", {}),
+                    error_lint_findings=batch.get("error_lint_findings"),
                     wlog=wlog,
                     name_only=state.name_only,
                     target=review_target,

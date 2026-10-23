@@ -534,13 +534,57 @@ def test_resolved_lint_error_clears_the_hold_and_releases_the_document(
     assert _edit_status(planted_name) == "applied"
 
 
-def test_a_lint_hold_is_not_cleared_when_the_checks_did_not_run(
-    planted_name: str,
-) -> None:
-    """A pass that ran no lint check reports ``None`` and reconciles nothing.
+def _enrich_batch(monkeypatch, names: list[dict]) -> dict:
+    """Drive the real enrich pass over one batch and return that batch.
 
-    Clearing on an absent check would release every held document the moment a
-    caller omitted the map, so the two cases are kept distinct.
+    The audit did not run for this batch, which is the case under test: the
+    pass maps that to an absent lint verdict rather than an empty one. The two
+    context lookups the pass also makes are neutralised, so the batch core runs
+    for real and nothing reaches a remote endpoint.
+    """
+    import asyncio
+    from types import SimpleNamespace
+
+    from imas_codex.discovery.base.progress import WorkerStats
+    from imas_codex.discovery.base.supervision import PipelinePhase
+    from imas_codex.standard_names.review import enrichment, pipeline
+
+    monkeypatch.setattr(
+        enrichment, "build_neighborhood_context", lambda *a, **k: [], raising=True
+    )
+    monkeypatch.setattr(pipeline, "_fetch_review_dd_context", lambda *a, **k: None)
+    monkeypatch.setattr(
+        pipeline, "_fetch_review_derived_children", lambda *a, **k: None
+    )
+
+    batch = {"names": names, "audit_findings": [], "error_lint_findings": {}}
+    state = SimpleNamespace(
+        review_batches=[batch],
+        all_names=[],
+        neighborhood_k=10,
+        audit_report=None,
+        skip_audit=False,
+        enrich_stats=WorkerStats(),
+        enrich_phase=PipelinePhase("enrich"),
+        should_stop=lambda: False,
+    )
+    asyncio.run(pipeline.enrich_review_worker(state))
+    return batch
+
+
+def test_a_skipped_audit_reports_no_lint_verdict_and_leaves_the_hold(
+    planted_name: str, monkeypatch
+) -> None:
+    """A batch whose audit did not run carries no lint verdict, not an empty one.
+
+    Driven through the real enrich pass rather than by handing the cap a
+    ``None``: the verdict is read off the batch the pass produces. A skipped
+    audit recorded as an empty mapping reads as a clean audit, and the cap then
+    clears every lint hold on the names it scored — so a document whose error
+    lint finding still stands is released. The companion test
+    ``test_resolved_lint_error_clears_the_hold_and_releases_the_document``
+    covers the other direction, where the audit ran and found nothing and the
+    hold is cleared.
     """
     from imas_codex.standard_names.review import pipeline
 
@@ -552,9 +596,26 @@ def test_a_lint_hold_is_not_cleared_when_the_checks_did_not_run(
         "error-severity lint finding",
         "review-lint",
     )
+    batch = _enrich_batch(
+        monkeypatch,
+        [
+            {
+                "id": planted_name,
+                "description": "plasma potential",
+                "documentation": "Electrostatic potential of the plasma.",
+            }
+        ],
+    )
+
+    assert batch["error_lint_findings"] is None, (
+        "a batch with no audit report must carry no lint verdict"
+    )
+
     wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
     pipeline._cap_docs_scores_for_lint_errors(
-        [{"id": planted_name, "reviewer_score": 0.875}], None, wlog
+        [{"id": planted_name, "reviewer_score": 0.875}],
+        batch["error_lint_findings"],
+        wlog,
     )
 
     assert [r["id"] for r in holds.open_holds(planted_name, "docs")] == [hold["id"]]
