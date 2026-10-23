@@ -290,6 +290,32 @@ def test_a_generic_name_carries_no_qualifier_of_its_own(name: str) -> None:
     assert jev_review.name_fixes_locus_or_aggregation(name) is False
 
 
+# The source-comparison criterion the judge is given. The precision and recall
+# bar was measured on this wording, so a criterion retuned here without a fresh
+# measurement makes the evidence describe a question the product does not ask.
+MEASURED_CRITERIA = {
+    "supports": "The DD evidence directly supports this specific claim.",
+    "contradicts": (
+        "Any part of this claim conflicts with an observed source, unit, link "
+        "target, sibling meaning or source path."
+    ),
+    "says nothing": (
+        "The observed evidence neither supports nor contradicts this claim."
+    ),
+}
+
+
+def test_the_shipped_comparison_criterion_is_the_measured_wording() -> None:
+    """The question the product asks is the question the counts were measured on."""
+    assert jev_review._CLAIM_COMPARISON_CRITERIA == MEASURED_CRITERIA
+
+    table = jev_review.docs_question_table(jev_review._default_checks(), ["a claim"])
+    key = next(
+        name for name in table if name.startswith("check:claim_contradicts_source")
+    )
+    assert table[key]["criteria"] == MEASURED_CRITERIA
+
+
 def test_a_generic_claim_about_a_locus_is_settled_before_the_judge() -> None:
     """A source naming one locus of a generic quantity cannot deny the claim."""
     state = jev_review.build_docs_state(

@@ -19699,7 +19699,7 @@
  "old_question_captured_from": "imas_codex/standard_names/review/jev_review.py at c5b7f76ed",
  "shipped": {
   "arm": "b2",
-  "note": "the label-only predicate plus the narrowed settlement of a claim that states a non-requirement, on the base question wording",
+  "note": "the label-only predicate, the narrowed settlement of a claim that states a non-requirement, and the source-comparison criterion pinned to the wording both arms were measured on",
   "settlement_kept": true,
   "because": "arm b2 holds both legs of the bar on both passes: 3 of the 46 recorded firings still fire and all 60 planted contradictions are recalled"
  },
@@ -19759,5 +19759,16 @@
    "a sentence asserting the combination is sent back to the judge",
    "each arm is scored twice in one process and both passes are reported"
   ]
+ },
+ "criterion_pin": {
+  "defect": "the shipped source-comparison criterion named a specialisation rule \u2014 a different quantity, an opposite sign or direction, an incompatible unit or dimension, or a different definition \u2014 while the arms were measured on the criterion that names the source, so 3 of 46 and 60 of 60 described a question the product did not ask",
+  "measured_wording": "Any part of this claim conflicts with an observed source, unit, link target, sibling meaning or source path.",
+  "removed_wording": "Any part of this claim conflicts with an observed source that denies it: a different quantity, an opposite sign or direction, an incompatible unit or dimension, or a different definition.",
+  "fix": "the criterion lives in one named constant, jev_review._CLAIM_COMPARISON_CRITERIA, holding the measured wording, and the replay builds its questions from the product's own docs_question_table rather than from a private copy, so the counts cover the question that ships",
+  "test": "tests/standard_names/test_contradiction_veto_question.py::test_the_shipped_comparison_criterion_is_the_measured_wording",
+  "control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/negative-control-retuned-criterion.log",
+  "control_note": "restoring the retuned criterion in memory fails that test and no other",
+  "evidence_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/evidence-runner-asks-shipped-question.log",
+  "evidence_note": "the criterion the runner hands the judge equals the pinned measured wording, and the runner's private copy of the base question is gone"
  }
 }

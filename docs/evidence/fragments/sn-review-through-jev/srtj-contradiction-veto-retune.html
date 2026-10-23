@@ -105,10 +105,31 @@ recorded firings from 9 to 10: the path that now denies a planted contradiction 
 deny a claim in the recorded set, which is the cost of keeping the evidence a claim is
 supposed to be weighed against.</p>
 
+<h3 id="srtj-contradiction-veto-retune-criterion">The question the counts were measured on</h3>
+
+<p id="srtj-contradiction-veto-retune-criterion-body">A count is evidence only for the
+question it was measured on, and the criterion the judge is given here had drifted from the
+one both arms were measured against. The shipped criterion named a specialisation rule — a
+different quantity, an opposite sign or direction, an incompatible unit or dimension, or a
+different definition — where the arms were measured on the criterion that names what a
+denying source can be: <em>an observed source, unit, link target, sibling meaning or source
+path</em>. So 3 of 46 and 60 of 60 described a question the product did not ask, and no test
+covered the question text at all, so nothing caught it.</p>
+
+<p id="srtj-contradiction-veto-retune-criterion-fix">The criterion now lives in one named
+constant, <code>jev_review._CLAIM_COMPARISON_CRITERIA</code>, holding the measured wording,
+and the replay asks the product's own <code>docs_question_table</code> instead of carrying a
+private copy of the question — the two are the same text, checked rather than assumed. One
+test asserts the shipped table emits exactly the measured wording, so a future retune of
+this criterion fails the gate rather than silently invalidating the measurement beside it;
+restoring the retuned wording in memory fails that test and no other.</p>
+
 <h3 id="srtj-contradiction-veto-retune-what">What changed in the product</h3>
 
 <p id="srtj-contradiction-veto-retune-changing">The question text is the base revision's,
-unchanged. <code>label_only_source</code> is true when a DD source's every word belongs to
+unchanged: <code>_CLAIM_COMPARISON_CRITERIA</code> holds the source-comparison criterion that
+both arms were measured on, and a test pins the shipped table to it.
+<code>label_only_source</code> is true when a DD source's every word belongs to
 the vocabulary of field placement, so the text names no quantity;
 <code>comparison_sources</code> empties that text and leaves the source in place, and a claim
 left with no evidence at all still answers "says nothing". <code>claim_settlement</code>
@@ -143,15 +164,17 @@ row-level record for every row, arm and pass is in the JSON beside this page.</p
 <h3 id="srtj-contradiction-veto-retune-tests">Tests and guards</h3>
 
 <p id="srtj-contradiction-veto-retune-tests-body"><code>tests/standard_names/test_contradiction_veto_question.py</code>
-holds 29 tests and all pass: the three mandated label strings, a definition that must stay
+holds 30 tests and all pass: the three mandated label strings, a definition that must stay
 evidence, a label emptied from the evidence, a definition beside a label kept, a label-only
-source whose path still denies a claim fixing the other axis, the four non-requirement
+source whose path still denies a claim fixing the other axis, the source-comparison criterion
+pinned to the measured wording, the four non-requirement
 sentences that settle, the four sentences that assert a combination and must reach the
 judge, the names that fix a locus or an aggregation of their own, and the veto and no-veto
-paths. Two negative controls run against a copy of the module patched in memory, so the
+paths. Three negative controls run against a copy of the module patched in memory, so the
 repository is never edited to make a test fail: forcing the non-requirement test to find
-nothing fails 5 tests, and reverting the label predicate failed 7 of the 12 tests then in the
-file. The gate over that file and the existing <code>jev_review</code> tests reads 65 passed
+nothing fails 5 tests, restoring the retuned comparison criterion fails the criterion test
+and no other, and reverting the label predicate failed 7 of the 12 tests then in the
+file. The gate over that file and the existing <code>jev_review</code> tests reads 66 passed
 and 5 failed, the same five <code>test_claim_verdict_controls_acceptance</code> ids that fail
 at the base revision, so the node adds no failure. The replay ran read-only: no graph write
 and no LLM other than the <code>sn-judge</code> seat.</p>

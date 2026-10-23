@@ -13,9 +13,9 @@ settled in code before the judge is asked.
   averaged, holds at one place only, or excludes what the source states — is
   left to the judge.
 
-Both arms carry the predicate and the base question text; the wording that
-states the specialisation rule to the judge was removed from the runner after it
-was ruled out.
+Both arms carry the predicate and the same source-comparison criterion. No arm
+is measured on the wording that states a specialisation rule to the judge, and
+that wording is no longer shipped: it is not a question these counts cover.
 
 Every arm is scored twice on the same rows in one process. The judge is not
 deterministic run to run, so an arm's recall is the pair of counts, and the arm
@@ -37,8 +37,11 @@ binary accept/reject, and its ``label_check`` values are subject and
 house-style checks), so the planted rows are the whole recall set.
 
 Every arm is asked through the same ``decide_batch`` the cascade uses under the
-``sn-judge`` seat, so the arms are comparable call for call. The base revision's
-question text is captured verbatim from c5b7f76ed.
+``sn-judge`` seat, so the arms are comparable call for call. Each arm's
+questions come from the product's own ``docs_question_table``, so the wording
+measured here is the wording the product ships; the source-comparison criterion
+is pinned to the base revision's wording at c5b7f76ed, which is what these
+counts were measured on.
 
 Read-only: no graph write, no LLM other than the named seat.
 """
@@ -80,63 +83,26 @@ ARM_NOTES = {
     ),
 }
 
-# The base revision's source-comparison question, verbatim from
-# imas_codex/standard_names/review/jev_review.py at c5b7f76ed (lines 598-615).
-OLD_INSTRUCTIONS = (
-    "{question} Compare only `documentation_claims[{index}]` with "
-    "`dd_source_docs.value`, `description`, `unit.value`, `links.value`, "
-    "`source_paths.value`, `sibling_names.value` and "
-    "`related_neighbours.value`. A contradiction in any part of the sentence "
-    "is a contradiction even when another part is supported. If no observed "
-    "source bears on the claim, choose 'says nothing'."
-)
-OLD_CRITERIA = {
-    "supports": "The DD evidence directly supports this specific claim.",
-    "contradicts": (
-        "Any part of this claim conflicts with an observed source, unit, link "
-        "target, sibling meaning or source path."
-    ),
-    "says nothing": (
-        "The observed evidence neither supports nor contradicts this claim."
-    ),
-}
-
 
 def claim_questions(
     checks: Any,
     claim_count: int,
     *,
-    old: bool,
     indices: tuple[int, ...] | None = None,
 ) -> dict[str, Any]:
     """The claim-comparison questions of one arm for the given claim indices.
 
-    A claim question depends only on its index, not on the claim's words, so
-    the table is built over ``claim_count`` placeholders and any state in the
-    group can be asked from it.
+    The questions come from the product's own table, so the arm is asked the
+    wording the product ships rather than a copy of it. A claim question
+    depends only on its index, not on the claim's words, so the table is built
+    over ``claim_count`` placeholders and any state in the group can be asked
+    from it.
     """
     if indices is None:
         indices = tuple(range(claim_count))
-    if not old:
-        table = jev_review.docs_question_table(checks, [""] * claim_count)
-        return {
-            CLAIM_KEY.format(index=index): table[CLAIM_KEY.format(index=index)]
-            for index in indices
-        }
-    claim_check = next(
-        check
-        for check in jev_review._docs_checks(checks)
-        if check.id == "claim_contradicts_source"
-    )
-    options = claim_check.question.options
+    table = jev_review.docs_question_table(checks, [""] * claim_count)
     return {
-        CLAIM_KEY.format(index=index): {
-            "type": "choice",
-            "instructions": OLD_INSTRUCTIONS.format(
-                question=claim_check.question.text, index=index
-            ),
-            "criteria": {option: OLD_CRITERIA[option] for option in options},
-        }
+        CLAIM_KEY.format(index=index): table[CLAIM_KEY.format(index=index)]
         for index in indices
     }
 
@@ -177,7 +143,6 @@ async def judge(
         questions = claim_questions(
             checks,
             max(asked) + 1,
-            old=True,
             indices=asked,
         )
         results, group_cost = await jev_review.decide_batch(

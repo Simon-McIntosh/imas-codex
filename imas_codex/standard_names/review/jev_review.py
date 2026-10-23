@@ -29,10 +29,10 @@ not reading a field it was shown to be absent.
 The documentation builder splits model-written prose into claims, excluding
 registry text and notation. Its question table asks one source-comparison Choice
 per claim and categorises three rubric dimensions. Code gives any contradictory
-claim a veto; a high dimension score cannot offset it. Only a source that denies
-the claim is a contradiction: a source that names a different quantity, an
-opposite sign or direction, an incompatible unit or dimension, or a different
-definition. One kind of text is therefore removed before a claim is held
+claim a veto; a high dimension score cannot offset it. The criterion the judge
+is given names what a denying source can be: an observed source, unit, link
+target, sibling meaning or source path that conflicts with any part of the
+claim. One kind of text is therefore removed before a claim is held
 against anything: a source whose wording carries no definition at all, only a
 field label, has that wording emptied out of the evidence. The source stays,
 with its path, unit and links, because the path names the field and can deny a
@@ -495,6 +495,20 @@ DOCS_SCORE_WEIGHTS: dict[str, float] = {
 DOCS_SCORE_INTERCEPT = -15.142945942036562
 CONTRADICTION_VETO_PROBABILITY = 0.30
 
+# The wording of the source-comparison choice the judge is given. It lives in
+# one place because the precision and recall bar was measured on this text: a
+# criterion retuned here without re-measuring it invalidates that measurement.
+_CLAIM_COMPARISON_CRITERIA: dict[str, str] = {
+    "supports": "The DD evidence directly supports this specific claim.",
+    "contradicts": (
+        "Any part of this claim conflicts with an observed source, unit, link "
+        "target, sibling meaning or source path."
+    ),
+    "says nothing": (
+        "The observed evidence neither supports nor contradicts this claim."
+    ),
+}
+
 _SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 _DISPLAY_MATH = re.compile(r"\$\$.*?\$\$", re.DOTALL)
 _INLINE_MATH = re.compile(r"(?<!\$)\$(?!\$)[^$\n]*\$(?!\$)")
@@ -808,12 +822,7 @@ def docs_question_table(
                 "'says nothing'."
             ),
             "criteria": {
-                option: {
-                    "supports": "The DD evidence directly supports this specific claim.",
-                    "contradicts": "Any part of this claim conflicts with an observed source that denies it: a different quantity, an opposite sign or direction, an incompatible unit or dimension, or a different definition.",
-                    "says nothing": "The observed evidence neither supports nor contradicts this claim.",
-                }[option]
-                for option in options
+                option: _CLAIM_COMPARISON_CRITERIA[option] for option in options
             },
         }
     for check in docs_checks:
