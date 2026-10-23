@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-10-23T08:58:35.984773+00:00",
+  "created_at": "2026-10-23T09:55:41.128680+00:00",
   "read_only": true,
   "live_name_control": {
     "names": 5137,
@@ -9449,5 +9449,16 @@
       ]
     }
   ],
+  "comparison_to_previous": {
+    "previous_json_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083551625568-srtj-docs-bracket-repair/dryrun-before-unit-fix.json",
+    "previous_full_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083551625568-srtj-docs-bracket-repair/dryrun-full-before-unit-fix.json",
+    "previous_unbracketed_actions": 870,
+    "current_unbracketed_actions": 870,
+    "removed_unbracketed_occurrences": 0,
+    "added_unbracketed_occurrences": 0,
+    "removed_unbracketed": [],
+    "added_unbracketed": [],
+    "live_text_matches_previous_snapshot": true
+  },
   "full_preview_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083551625568-srtj-docs-bracket-repair/dryrun-full.json"
 }
