@@ -412,6 +412,7 @@ def test_consumer_predicates_agree_with_rubric_route(
     """Execute persistence/export and the score predicate emitted by each claim."""
     import operator
     import re
+    from contextlib import contextmanager
 
     from imas_codex.standard_names import graph_ops
     from imas_codex.standard_names.export import _run_gate_c
@@ -451,12 +452,63 @@ def test_consumer_predicates_agree_with_rubric_route(
         accepted = score >= min_score
     assert accepted == expected_accept
 
-    gc = MagicMock()
-    gc.__enter__.return_value = gc
-    gc.query.side_effect = [
-        [{"chain_length": 0, "docs_chain_length": 0, "documentation": ""}],
-        [{"id": "temperature"}],
-    ]
+    class _PersistGraph:
+        """Answer both query boundaries the two persistence writers use.
+
+        The name writer reads and writes at the client level; the docs writer
+        runs its claim check, its hold reads and its score write inside one
+        ``gc.session()`` transaction, so a client-level ``query`` side effect
+        never reaches it. This answers by statement, and it is the open-hold
+        read that settles a passing-but-vetoed document.
+        """
+
+        def __init__(self, holds):
+            self._holds = holds
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        @contextmanager
+        def session(self):
+            yield self
+
+        def begin_transaction(self):
+            return self
+
+        def commit(self):
+            pass
+
+        def rollback(self):
+            return None
+
+        def close(self):
+            pass
+
+        def _answer(self, statement):
+            if "AS cleared" in statement:
+                return [{"cleared": 0}]
+            if "HAS_HOLD" in statement:
+                return list(self._holds)
+            if "AS chain_length" in statement or "AS docs_chain_length" in statement:
+                return [
+                    {
+                        "chain_length": 0,
+                        "docs_chain_length": 0,
+                        "documentation": "",
+                    }
+                ]
+            return [{"id": "temperature"}]
+
+        def query(self, statement, **_params):
+            return self._answer(statement)
+
+        def run(self, statement, **_params):
+            return self._answer(statement)
+
+    gc = _PersistGraph(open_rows)
     monkeypatch.setattr(graph_ops, "GraphClient", lambda: gc)
     monkeypatch.setattr(graph_ops, "write_reviews", lambda _rows: None)
     monkeypatch.setattr(graph_ops, "_doc_link_mismatches", lambda *_args: [])
@@ -487,12 +539,43 @@ def test_consumer_predicates_agree_with_rubric_route(
     eligible = {"<": operator.lt, ">=": operator.ge}[comparator[1]](
         score, captured["query_params"]["min_score"]
     )
+    # A held document keeps its judged score, so the score clause alone would
+    # never re-offer a passing-but-vetoed document. The docs claim predicate
+    # admits an open hold through the hold owner's own clause instead of a
+    # second copy of the rule written here.
+    if axis == "docs":
+        assert review_holds.has_open_docs_hold_where() in captured["eligibility_where"]
+        eligible = eligible or bool(route.holds)
     assert eligible == (not expected_accept)
     _, exported, below, _ = _run_gate_c(
         [{"id": "temperature", "reviewer_score_name": score}], min_score, False, None
     )
-    assert bool(exported) == expected_accept
-    assert below == int(not expected_accept)
+    # Gate C is a score gate: it refuses exactly the scores below the bound and
+    # keeps a held document's judged score. The export withholds that document
+    # at its stage gate, which is the stage the persistence arm above stored.
+    assert bool(exported) == (score >= min_score)
+    assert below == int(score < min_score)
+
+    from imas_codex.standard_names.export import _classify_export_population
+
+    published, _ = _classify_export_population(
+        [
+            {
+                "id": "temperature",
+                "name_stage": "accepted",
+                "validation_status": "valid",
+                "_validation_observed_at": "2026-10-23T00:00:00Z",
+                "review_quorum_shortfall": None,
+                "docs_stage": "accepted" if expected_accept else "reviewed",
+                "docs_review_quorum_shortfall": None,
+                "physics_domain": "general",
+                "_has_derived_producer": True,
+            }
+        ],
+        domain=None,
+        names_only=False,
+    )
+    assert bool(published) == expected_accept
 
 
 def test_rubric_uses_only_a_dimensions_own_answers():
