@@ -1,0 +1,114 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083551625568-srtj-docs-bracket-repair/unit-gate-committed.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Reverting the multi-word prose-span branch or the exact-id linking makes tests/standard_names/test_bare_doc_link_normalize.py:201 fail on the missing [poloidal flux](name:poloidal_flux) link, as negative-control.log records with EXIT=1.",
+      "lines": "194-212"
+    },
+    {
+      "failure_condition": "Making dry_run write would fail the readback at tests/standard_names/test_bare_doc_link_normalize.py:186, which requires the stored documentation to still equal the before text.",
+      "lines": "150-158"
+    },
+    {
+      "failure_condition": "Reverting the tightened unit predicate makes tests/standard_names/test_docs_gates.py:465 read [10^20 m^-3], [0.1 s] and [2 GeV] as prose and fail the pass assertion, as unit-predicate-red.log records.",
+      "lines": "465-477"
+    },
+    {
+      "failure_condition": "Removing documenting_name from review/audits.py:763 drops the self-link finding and fails test_live_documentation_audit_rejects_a_self_link, whose assertion reads the finding type and detail from the audit under test.",
+      "lines": "480-508"
+    },
+    {
+      "failure_condition": "The action-set assertion fails unless the run happens to exercise linked, unbracketed and self-link removed together, so it guards the doc fixture as much as the code.",
+      "lines": "203-205"
+    }
+  ],
+  "base_log_revision": "8e4327db0613216411dd244d1962fba2122496c6",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083551625568-srtj-docs-bracket-repair/base-gate-corrected.log",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/graph_ops.py:9815",
+    "imas_codex/standard_names/graph_ops.py:18001",
+    "imas_codex/standard_names/docs_gates.py:499",
+    "imas_codex/standard_names/review/audits.py:786",
+    "imas_codex/standard_names/review/jev_review.py:642"
+  ],
+  "completed_at": "2026-10-23T10:41:29.935Z",
+  "dispatched_at": "2026-10-23T10:15:06Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/doc_links.py",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new _UNIT_SYMBOLS set and _UNIT_PREFIXES frozenset (doc_links.py:59) duplicate the unit vocabulary imas_codex/units/__init__.py already owns, and imas_codex/standard_names/sources/dd.py:51 states the repository's own principle of deferring to normalize_unit_symbol so no logic is re-implemented; the list duplicates rather than extends that owner and will drift from data_dictionary_unit_aliases.txt."
+    },
+    {
+      "file": "tests/standard_names/test_bare_doc_link_normalize.py",
+      "line": "166",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert os.environ[\"IMAS_CODEX_TEST_NEO4J_EPHEMERAL\"] == \"1\" compares the environment the fixture itself pushed through patch.dict at line 152, so it holds whatever the code under test does; the companion assert at line 167 that graph.uri equals the same fixture's disposable_neo4j has the same shape, and neither can fail on a regression."
+    },
+    {
+      "file": "tests/standard_names/test_bare_doc_link_normalize.py",
+      "line": "246",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_persist_reviewed_docs_normalizes_on_accept and its sibling were rewritten onto the transaction API with forced docs_accepted and clear_holds_not_raised patches, repairing a pre-existing failure of persist_reviewed_docs, which the node did not touch and the goal does not imply; the same two failures reproduce at the base revision."
+    },
+    {
+      "file": "imas_codex/standard_names/doc_links.py",
+      "line": "141",
+      "severity": "non-blocking",
+      "text": "non-blocking: the numeric-interval test was moved ahead of the letter test to make it reachable, but _NUMERIC_INTERVAL_RE matches only digits, dots, commas and spaces, so the letter test immediately below returns False on exactly the same inputs and the branch still decides nothing; the brief offered removal where the earlier return already covered it."
+    }
+  ],
+  "head_log_revision": "5a9cb18b69ce523c7c52d592d59f1ecee5578fae",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read all five commits against base 8e4327db: the normaliser gains prose spans, exact-id linking, self-link removal and dry-run mode, doc_links tightens the unit predicate, audits.py passes documenting_name, both test files add disposable-graph, helium, numeric-unit and self-link cases, and d51fab879 is docs-only.",
+    "done_when": "The brief's done_when names the four-file delta gate, the kept negative-control log and an EXIT=0 dry-run JSON; unit-gate-committed.log records 52 passed with EXIT=0 at revision 5a9cb18b, base-gate-corrected.log records the only two base failures at 8e4327db, and dryrun-final.log ends EXIT=0.",
+    "goal": "The brief asks the normaliser to link a phrase whose snake-cased form is an exact live name id, to unbracket every other bracketed prose phrase, to tighten the unit exclusion and to pass documenting_name through the audit; imas_codex/standard_names/graph_ops.py:9723 restricts linking to a live id other than the documented name, graph_ops.py:9726 unbrackets the rest, doc_links.py:141-160 rebuilds the unit predicate, and review/audits.py:763 supplies documenting_name.",
+    "manifest": "Read manifest.md; it names five commits, the same eight changed paths, the negative-control log, readable baseline_suite and after_suite receipts, and zero added failures.",
+    "write_paths": "The brief grants eight paths; git diff --stat 8e4327db..d51fab8796 changes exactly those eight and jev_review.py, which the brief reserved for a concurrent node, is untouched."
+  },
+  "justifications": {
+    "durability": "negative-control.log records EXIT=1 with test_normalize_prose_against_disposable_graph failing on the reverted multi-word branch, and unit-predicate-red.log records the four numeric-unit cases red then green.",
+    "evidence": "base-gate-corrected.log records 2 failed/42 passed at 8e4327db and unit-gate-committed.log records 52 passed/EXIT=0, so the delta is zero added; the gate ran one commit before the docs-only head.",
+    "fit": "doc_links.py:167 defines find_prose_bracket_spans beside the existing find_prose_bracket_phrases, which it now delegates through, and no added name carries a plan, version or author token.",
+    "goal_fidelity": "graph_ops.py:9723 links only an exact live id other than the documented name and graph_ops.py:9726 leaves the brackets off every other phrase, which is the brief's rule.",
+    "reuse": "doc_links.py:29 and :59 hand-encode an SI symbol and prefix vocabulary that imas_codex/units/__init__.py already owns as its pint registry, whereas graph_ops.py:9666 and :9737 do reuse doc_links rather than re-parse.",
+    "scope_discipline": "git diff 8e4327db..d51fab8796 stays inside the eight declared paths, but tests/standard_names/test_bare_doc_link_normalize.py:246 also repairs two persist_reviewed_docs tests the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The brief asks the normaliser to link a phrase whose snake-cased form is an exact live name id, to unbracket every other bracketed prose phrase, to tighten the unit exclusion and to pass documenting_name through the audit; imas_codex/standard_names/graph_ops.py:9723 restricts linking to a live id other than the documented name, graph_ops.py:9726 unbrackets the rest, doc_links.py:141-160 rebuilds the unit predicate, and review/audits.py:763 supplies documenting_name.\nVERDICT done_when: The brief's done_when names the four-file delta gate, the kept negative-control log and an EXIT=0 dry-run JSON; unit-gate-committed.log records 52 passed with EXIT=0 at revision 5a9cb18b, base-gate-corrected.log records the only two base failures at 8e4327db, and dryrun-final.log ends EXIT=0.\nVERDICT write_paths: The brief grants eight paths; git diff --stat 8e4327db..d51fab8796 changes exactly those eight and jev_review.py, which the brief reserved for a concurrent node, is untouched.\nVERDICT manifest: Read manifest.md; it names five commits, the same eight changed paths, the negative-control log, readable baseline_suite and after_suite receipts, and zero added failures.\nVERDICT diff: Read all five commits against base 8e4327db: the normaliser gains prose spans, exact-id linking, self-link removal and dry-run mode, doc_links tightens the unit predicate, audits.py passes documenting_name, both test files add disposable-graph, helium, numeric-unit and self-link cases, and d51fab879 is docs-only.\nCALL_SITES: imas_codex/standard_names/graph_ops.py:9815 (resolve_doc_links), imas_codex/standard_names/graph_ops.py:18001 (persist_reviewed_docs accept path), imas_codex/standard_names/docs_gates.py:499 (_bracketed_prose_phrase), imas_codex/standard_names/review/audits.py:786 (run_lint_checks), imas_codex/standard_names/review/jev_review.py:642 (build_docs_audit_report)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: graph_ops.py:9723 links only an exact live id other than the documented name and graph_ops.py:9726 leaves the brackets off every other phrase, which is the brief's rule.\nSCORE evidence: 17\nJUSTIFICATION evidence: base-gate-corrected.log records 2 failed/42 passed at 8e4327db and unit-gate-committed.log records 52 passed/EXIT=0, so the delta is zero added; the gate ran one commit before the docs-only head.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: git diff 8e4327db..d51fab8796 stays inside the eight declared paths, but tests/standard_names/test_bare_doc_link_normalize.py:246 also repairs two persist_reviewed_docs tests the goal does not imply.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control.log records EXIT=1 with test_normalize_prose_against_disposable_graph failing on the reverted multi-word branch, and unit-predicate-red.log records the four numeric-unit cases red then green.\nSCORE fit: 17\nJUSTIFICATION fit: doc_links.py:167 defines find_prose_bracket_spans beside the existing find_prose_bracket_phrases, which it now delegates through, and no added name carries a plan, version or author token.\nSCORE reuse: 12\nJUSTIFICATION reuse: doc_links.py:29 and :59 hand-encode an SI symbol and prefix vocabulary that imas_codex/units/__init__.py already owns as its pint registry, whereas graph_ops.py:9666 and :9737 do reuse doc_links rather than re-parse.\nFINDING imas_codex/standard_names/doc_links.py:29 non-blocking: the new _UNIT_SYMBOLS set and _UNIT_PREFIXES frozenset (doc_links.py:59) duplicate the unit vocabulary imas_codex/units/__init__.py already owns, and imas_codex/standard_names/sources/dd.py:51 states the repository's own principle of deferring to normalize_unit_symbol \"so no logic is re-implemented\"; the list duplicates rather than extends that owner and will drift from data_dictionary_unit_aliases.txt.\nFINDING tests/standard_names/test_bare_doc_link_normalize.py:166 non-blocking: assert os.environ[\"IMAS_CODEX_TEST_NEO4J_EPHEMERAL\"] == \"1\" compares the environment the fixture itself pushed through patch.dict at line 152, so it holds whatever the code under test does; the companion assert at line 167 that graph.uri equals the same fixture's disposable_neo4j has the same shape, and neither can fail on a regression.\nFINDING tests/standard_names/test_bare_doc_link_normalize.py:246 non-blocking: test_persist_reviewed_docs_normalizes_on_accept and its sibling were rewritten onto the transaction API with forced docs_accepted and clear_holds_not_raised patches, repairing a pre-existing failure of persist_reviewed_docs, which the node did not touch and the goal does not imply; the same two failures reproduce at the base revision.\nFINDING imas_codex/standard_names/doc_links.py:141 non-blocking: the numeric-interval test was moved ahead of the letter test to make it reachable, but _NUMERIC_INTERVAL_RE matches only digits, dots, commas and spaces, so the letter test immediately below returns False on exactly the same inputs and the branch still decides nothing; the brief offered removal where the earlier return already covered it.\n",
+  "review_run_id": "r-20261023T100152849465-review-of-srtj-docs-bracket-repair-d51fab8796fc",
+  "reviewed_base_sha": "8e4327db0613216411dd244d1962fba2122496c6",
+  "reviewed_commits": [
+    "e4752d43cec71e03ee9944148c94f96f703c7cec",
+    "c315aa64ea826abae3574c911c91fe81a691abf5",
+    "46327807fede85127eafdab3e60141577b1ac87d",
+    "5a9cb18b69ce523c7c52d592d59f1ecee5578fae",
+    "d51fab8796fce69f72f485f63317c9997ec52549"
+  ],
+  "reviewed_head_sha": "d51fab8796fce69f72f485f63317c9997ec52549",
+  "reviewed_run_id": "r-20261023T083551625568-srtj-docs-bracket-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 16
+  },
+  "self_comparison_assertions": [
+    "tests/standard_names/test_bare_doc_link_normalize.py:166 assert os.environ[\"IMAS_CODEX_TEST_NEO4J_EPHEMERAL\"] == \"1\"",
+    "tests/standard_names/test_bare_doc_link_normalize.py:167 assert os.environ[\"IMAS_CODEX_TEST_NEO4J_URI\"] == disposable_neo4j"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T10:43:49.027867+00:00",
+  "total": 98
+}
