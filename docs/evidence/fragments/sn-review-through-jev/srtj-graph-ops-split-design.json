@@ -1,0 +1,4977 @@
+{
+  "cross_module_calls_policy": "Pass an explicit service object; domain modules import only their foundation module, never one another. The composition root wires services after imports.",
+  "import_dag_topological_order": [
+    "graph_foundation",
+    "graph_claim_scope",
+    "graph_lineage",
+    "graph_catalog",
+    "graph_catalog_reset",
+    "graph_doc_links",
+    "graph_source_bindings",
+    "graph_audits",
+    "graph_cost_and_claims",
+    "graph_review_persistence",
+    "graph_refinement",
+    "graph_supersession",
+    "graph_claim_release",
+    "graph_docs_persistence",
+    "graph_parent_lifecycle",
+    "worker_common",
+    "worker_extraction_and_enrichment",
+    "worker_compose_and_validate",
+    "worker_compose_batches",
+    "worker_refine_names",
+    "worker_review_names",
+    "worker_generate_docs",
+    "worker_enrich_parents",
+    "worker_review_docs",
+    "worker_refine_docs",
+    "graph_ops",
+    "workers"
+  ],
+  "inventories": {
+    "graph_ops.py": {
+      "cross_module_reference_examples": {
+        "graph_audits -> graph_catalog": [
+          "docs_review_eligibility_params",
+          "_docs_review_winner_query_body",
+          "_GRAMMAR_SEGMENT_COLUMNS"
+        ],
+        "graph_audits -> graph_foundation": [
+          "retry_on_deadlock",
+          "_CLAIM_TIMEOUT_SECONDS",
+          "GraphClient",
+          "logger",
+          "uuid",
+          "DEFAULT_MIN_SCORE"
+        ],
+        "graph_audits -> graph_source_bindings": [
+          "mark_sources_stale"
+        ],
+        "graph_catalog -> graph_audits": [
+          "isn_vocabulary_signature",
+          "bump_sn_run_counter"
+        ],
+        "graph_catalog -> graph_catalog_reset": [
+          "write_vocab_gaps"
+        ],
+        "graph_catalog -> graph_claim_scope": [
+          "ManifestDrainConflict"
+        ],
+        "graph_catalog -> graph_cost_and_claims": [
+          "_PIPELINE_FROZEN_NAME_STAGES"
+        ],
+        "graph_catalog -> graph_foundation": [
+          "Any",
+          "GraphClient",
+          "nullcontext",
+          "_scalar_domain",
+          "_ensure_list",
+          "logger"
+        ],
+        "graph_catalog -> graph_lineage": [
+          "_write_standard_name_edges",
+          "_query_skeleton_placeholders_for_cleanup",
+          "_SKELETON_PLACEHOLDER_PREDICATE"
+        ],
+        "graph_catalog -> graph_source_bindings": [
+          "_complete_source_fences",
+          "_lock_claimed_name_bindings"
+        ],
+        "graph_catalog -> graph_supersession": [
+          "supersede_prior_source_names"
+        ],
+        "graph_catalog_reset -> graph_catalog": [
+          "_GRAMMAR_SEGMENT_COLUMNS",
+          "_SEGMENT_EDGE_TYPES"
+        ],
+        "graph_catalog_reset -> graph_foundation": [
+          "retry_on_deadlock",
+          "Any",
+          "Counter",
+          "nullcontext",
+          "GraphClient",
+          "logger"
+        ],
+        "graph_claim_release -> graph_foundation": [
+          "retry_on_deadlock",
+          "GraphClient",
+          "logger",
+          "Any",
+          "json",
+          "hashlib"
+        ],
+        "graph_claim_release -> graph_review_persistence": [
+          "_authority_json_value",
+          "_authority_payload_hash",
+          "_SHA256_RE"
+        ],
+        "graph_claim_release -> graph_source_bindings": [
+          "_CLAIM_VERIFY_SETTLE_SECONDS"
+        ],
+        "graph_claim_scope -> graph_cost_and_claims": [
+          "_MAX_COMPOSE_CLAIM_ATTEMPTS"
+        ],
+        "graph_claim_scope -> graph_foundation": [
+          "Any",
+          "GraphClient",
+          "_pipeline_buckets_cache",
+          "_historical_cpi_cache",
+          "logger",
+          "_CLAIM_TIMEOUT_SECONDS"
+        ],
+        "graph_claim_scope -> graph_source_bindings": [
+          "_pin_dd_source_snapshots"
+        ],
+        "graph_cost_and_claims -> graph_audits": [
+          "_PHASE_TO_POOL",
+          "_PHASE_TO_SN_COST_FIELD"
+        ],
+        "graph_cost_and_claims -> graph_claim_release": [
+          "_verify_source_claim_winners",
+          "_verify_name_claim_winners"
+        ],
+        "graph_cost_and_claims -> graph_foundation": [
+          "retry_on_deadlock",
+          "Any",
+          "UTC",
+          "GraphClient",
+          "datetime",
+          "uuid"
+        ],
+        "graph_doc_links -> graph_catalog_reset": [
+          "_MAX_LINK_RETRIES"
+        ],
+        "graph_doc_links -> graph_foundation": [
+          "GraphClient",
+          "Any",
+          "uuid",
+          "logger",
+          "find_name_links",
+          "find_prose_bracket_spans"
+        ],
+        "graph_docs_persistence -> graph_audits": [
+          "bump_sn_run_counter"
+        ],
+        "graph_docs_persistence -> graph_catalog": [
+          "docs_review_eligibility_params",
+          "docs_review_eligibility_where"
+        ],
+        "graph_docs_persistence -> graph_claim_release": [
+          "_verify_docs_claim_winners"
+        ],
+        "graph_docs_persistence -> graph_cost_and_claims": [
+          "DEFAULT_POOL_BATCH_SIZE",
+          "_claim_sn_atomic"
+        ],
+        "graph_docs_persistence -> graph_doc_links": [
+          "_sanitize_doc_text"
+        ],
+        "graph_docs_persistence -> graph_foundation": [
+          "retry_on_deadlock",
+          "_CLAIM_TIMEOUT_SECONDS",
+          "logger",
+          "Any",
+          "GraphClient",
+          "_extract_links_from_docs"
+        ],
+        "graph_docs_persistence -> graph_source_bindings": [
+          "_record_persist_outcome"
+        ],
+        "graph_foundation -> graph_catalog": [
+          "_GRAMMAR_SEGMENT_COLUMNS",
+          "_coerce_segment_value"
+        ],
+        "graph_lineage -> graph_catalog": [
+          "_GRAMMAR_SEGMENT_COLUMNS"
+        ],
+        "graph_lineage -> graph_foundation": [
+          "GraphClient",
+          "Any",
+          "json",
+          "defaultdict",
+          "suppress",
+          "logger"
+        ],
+        "graph_lineage -> graph_review_persistence": [
+          "_authority_json_value"
+        ],
+        "graph_parent_lifecycle -> graph_cost_and_claims": [
+          "_MAX_COMPOSE_CLAIM_ATTEMPTS",
+          "DEFAULT_POOL_BATCH_SIZE",
+          "_claim_sn_atomic"
+        ],
+        "graph_parent_lifecycle -> graph_doc_links": [
+          "_sanitize_doc_text"
+        ],
+        "graph_parent_lifecycle -> graph_foundation": [
+          "retry_on_deadlock",
+          "GraphClient",
+          "Any",
+          "logger",
+          "_CLAIM_TIMEOUT_SECONDS",
+          "hashlib"
+        ],
+        "graph_parent_lifecycle -> graph_lineage": [
+          "_derived_parent_source_metadata"
+        ],
+        "graph_parent_lifecycle -> graph_review_persistence": [
+          "_authority_payload_hash"
+        ],
+        "graph_refinement -> graph_audits": [
+          "bump_sn_run_counter"
+        ],
+        "graph_refinement -> graph_claim_release": [
+          "_verify_name_claim_winners"
+        ],
+        "graph_refinement -> graph_cost_and_claims": [
+          "DEFAULT_POOL_BATCH_SIZE",
+          "_claim_sn_atomic"
+        ],
+        "graph_refinement -> graph_foundation": [
+          "Any",
+          "GraphClient",
+          "retry_on_deadlock",
+          "logger",
+          "DEFAULT_MIN_SCORE",
+          "DEFAULT_REFINE_ROTATIONS"
+        ],
+        "graph_refinement -> graph_review_persistence": [
+          "STAGE_DOCS_FOR_RESCORE_QUERY"
+        ],
+        "graph_review_persistence -> graph_audits": [
+          "bump_sn_run_counter"
+        ],
+        "graph_review_persistence -> graph_catalog": [
+          "write_reviews"
+        ],
+        "graph_review_persistence -> graph_claim_release": [
+          "_verify_docs_claim_winners"
+        ],
+        "graph_review_persistence -> graph_cost_and_claims": [
+          "QUORATE_RESOLUTION_METHODS",
+          "_ESCALATOR_CHAIN_SIZE",
+          "DEFAULT_POOL_BATCH_SIZE",
+          "_claim_sn_atomic"
+        ],
+        "graph_review_persistence -> graph_doc_links": [
+          "_normalize_bare_doc_links",
+          "_doc_link_mismatches"
+        ],
+        "graph_review_persistence -> graph_foundation": [
+          "Any",
+          "json",
+          "hashlib",
+          "retry_on_deadlock",
+          "DEFAULT_MIN_SCORE",
+          "DEFAULT_REFINE_ROTATIONS"
+        ],
+        "graph_source_bindings -> graph_catalog_reset": [
+          "write_vocab_gaps"
+        ],
+        "graph_source_bindings -> graph_cost_and_claims": [
+          "_MAX_COMPOSE_CLAIM_ATTEMPTS"
+        ],
+        "graph_source_bindings -> graph_foundation": [
+          "GraphClient",
+          "logger",
+          "Any",
+          "_compute_link_status",
+          "_TERMINAL_BINDING_NAME_STAGES",
+          "retry_on_deadlock"
+        ],
+        "graph_supersession -> graph_audits": [
+          "_standard_name_source_upstream_present_cypher"
+        ],
+        "graph_supersession -> graph_foundation": [
+          "retry_on_deadlock",
+          "_TransactionQuery",
+          "Any",
+          "nullcontext",
+          "GraphClient",
+          "logger"
+        ],
+        "graph_supersession -> graph_refinement": [
+          "_GENERATED_SUPERSESSION_PREFLIGHT_QUERY"
+        ],
+        "graph_supersession -> graph_review_persistence": [
+          "_authority_payload_hash",
+          "_SHA256_RE"
+        ]
+      },
+      "cross_module_references": {
+        "graph_audits -> graph_catalog": 8,
+        "graph_audits -> graph_foundation": 200,
+        "graph_audits -> graph_source_bindings": 4,
+        "graph_catalog -> graph_audits": 4,
+        "graph_catalog -> graph_catalog_reset": 4,
+        "graph_catalog -> graph_claim_scope": 2,
+        "graph_catalog -> graph_cost_and_claims": 1,
+        "graph_catalog -> graph_foundation": 167,
+        "graph_catalog -> graph_lineage": 5,
+        "graph_catalog -> graph_source_bindings": 4,
+        "graph_catalog -> graph_supersession": 2,
+        "graph_catalog_reset -> graph_catalog": 2,
+        "graph_catalog_reset -> graph_foundation": 84,
+        "graph_claim_release -> graph_foundation": 107,
+        "graph_claim_release -> graph_review_persistence": 9,
+        "graph_claim_release -> graph_source_bindings": 3,
+        "graph_claim_scope -> graph_cost_and_claims": 1,
+        "graph_claim_scope -> graph_foundation": 94,
+        "graph_claim_scope -> graph_source_bindings": 2,
+        "graph_cost_and_claims -> graph_audits": 2,
+        "graph_cost_and_claims -> graph_claim_release": 4,
+        "graph_cost_and_claims -> graph_foundation": 61,
+        "graph_doc_links -> graph_catalog_reset": 2,
+        "graph_doc_links -> graph_foundation": 26,
+        "graph_docs_persistence -> graph_audits": 4,
+        "graph_docs_persistence -> graph_catalog": 4,
+        "graph_docs_persistence -> graph_claim_release": 4,
+        "graph_docs_persistence -> graph_cost_and_claims": 6,
+        "graph_docs_persistence -> graph_doc_links": 8,
+        "graph_docs_persistence -> graph_foundation": 74,
+        "graph_docs_persistence -> graph_source_bindings": 4,
+        "graph_foundation -> graph_catalog": 20,
+        "graph_lineage -> graph_catalog": 2,
+        "graph_lineage -> graph_foundation": 140,
+        "graph_lineage -> graph_review_persistence": 4,
+        "graph_parent_lifecycle -> graph_cost_and_claims": 4,
+        "graph_parent_lifecycle -> graph_doc_links": 2,
+        "graph_parent_lifecycle -> graph_foundation": 89,
+        "graph_parent_lifecycle -> graph_lineage": 4,
+        "graph_parent_lifecycle -> graph_review_persistence": 6,
+        "graph_refinement -> graph_audits": 2,
+        "graph_refinement -> graph_claim_release": 2,
+        "graph_refinement -> graph_cost_and_claims": 3,
+        "graph_refinement -> graph_foundation": 62,
+        "graph_refinement -> graph_review_persistence": 1,
+        "graph_review_persistence -> graph_audits": 4,
+        "graph_review_persistence -> graph_catalog": 4,
+        "graph_review_persistence -> graph_claim_release": 2,
+        "graph_review_persistence -> graph_cost_and_claims": 5,
+        "graph_review_persistence -> graph_doc_links": 4,
+        "graph_review_persistence -> graph_foundation": 67,
+        "graph_source_bindings -> graph_catalog_reset": 2,
+        "graph_source_bindings -> graph_cost_and_claims": 6,
+        "graph_source_bindings -> graph_foundation": 140,
+        "graph_supersession -> graph_audits": 2,
+        "graph_supersession -> graph_foundation": 173,
+        "graph_supersession -> graph_refinement": 1,
+        "graph_supersession -> graph_review_persistence": 21
+      },
+      "modules": {
+        "graph_audits": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 30973
+        },
+        "graph_catalog": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 23121
+        },
+        "graph_catalog_reset": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 11639
+        },
+        "graph_claim_release": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 12142
+        },
+        "graph_claim_scope": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 13952
+        },
+        "graph_cost_and_claims": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 11087
+        },
+        "graph_doc_links": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 4487
+        },
+        "graph_docs_persistence": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 8407
+        },
+        "graph_foundation": {
+          "imports_from_new_modules": [],
+          "source_tokens": 4660
+        },
+        "graph_lineage": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 28996
+        },
+        "graph_parent_lifecycle": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 12604
+        },
+        "graph_refinement": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 13971
+        },
+        "graph_review_persistence": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 10019
+        },
+        "graph_source_bindings": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 20618
+        },
+        "graph_supersession": {
+          "imports_from_new_modules": [
+            "graph_foundation"
+          ],
+          "source_tokens": 34870
+        }
+      },
+      "path": "imas_codex/standard_names/graph_ops.py",
+      "source_tokens": 241545,
+      "symbols": {
+        "ANCESTOR_SUPERSESSION_MANIFEST_SCHEMA": {
+          "kind": "Assign",
+          "line": 23209,
+          "module": "graph_supersession"
+        },
+        "ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA": {
+          "kind": "Assign",
+          "line": 23212,
+          "module": "graph_supersession"
+        },
+        "Any": {
+          "kind": "ImportFrom",
+          "line": 27,
+          "module": "graph_foundation"
+        },
+        "CAP_PARKED_DISPOSITIONS": {
+          "kind": "Assign",
+          "line": 11506,
+          "module": "graph_source_bindings"
+        },
+        "Counter": {
+          "kind": "ImportFrom",
+          "line": 22,
+          "module": "graph_foundation"
+        },
+        "DEFAULT_MIN_SCORE": {
+          "kind": "ImportFrom",
+          "line": 33,
+          "module": "graph_foundation"
+        },
+        "DEFAULT_ORPHAN_SWEEP_TIMEOUT_S": {
+          "kind": "ImportFrom",
+          "line": 33,
+          "module": "graph_foundation"
+        },
+        "DEFAULT_POOL_BATCH_SIZE": {
+          "kind": "Assign",
+          "line": 16101,
+          "module": "graph_cost_and_claims"
+        },
+        "DEFAULT_REFINE_ROTATIONS": {
+          "kind": "ImportFrom",
+          "line": 33,
+          "module": "graph_foundation"
+        },
+        "DERIVED_PARENT_CLEANUP_DELETION_LIMIT": {
+          "kind": "Assign",
+          "line": 94,
+          "module": "graph_foundation"
+        },
+        "DOCS_AXIS_REDERIVE_NAME_WHERE": {
+          "kind": "Assign",
+          "line": 12719,
+          "module": "graph_audits"
+        },
+        "DerivedParentCleanupRefusal": {
+          "kind": "ClassDef",
+          "line": 97,
+          "module": "graph_foundation"
+        },
+        "EXHAUSTED_ORPHAN_SUPERSESSION_MANIFEST_SCHEMA": {
+          "kind": "Assign",
+          "line": 22671,
+          "module": "graph_supersession"
+        },
+        "EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA": {
+          "kind": "Assign",
+          "line": 22674,
+          "module": "graph_supersession"
+        },
+        "ExactNameScopeConflict": {
+          "kind": "ClassDef",
+          "line": 1818,
+          "module": "graph_claim_scope"
+        },
+        "ExhaustedOrphanSupersessionConflict": {
+          "kind": "ClassDef",
+          "line": 22679,
+          "module": "graph_supersession"
+        },
+        "GraphClient": {
+          "kind": "ImportFrom",
+          "line": 30,
+          "module": "graph_foundation"
+        },
+        "GraphSchema": {
+          "kind": "ImportFrom",
+          "line": 32,
+          "module": "graph_foundation"
+        },
+        "LIFECYCLELESS_STUB_MANIFEST_SCHEMA": {
+          "kind": "Assign",
+          "line": 4911,
+          "module": "graph_lineage"
+        },
+        "LIFECYCLELESS_STUB_RECEIPT_SCHEMA": {
+          "kind": "Assign",
+          "line": 4912,
+          "module": "graph_lineage"
+        },
+        "LifecyclelessStubConflict": {
+          "kind": "ClassDef",
+          "line": 4924,
+          "module": "graph_lineage"
+        },
+        "MANIFEST_DRAIN_DISPOSITIONS": {
+          "kind": "AnnAssign",
+          "line": 943,
+          "module": "graph_claim_scope"
+        },
+        "ManifestDrainConflict": {
+          "kind": "ClassDef",
+          "line": 1291,
+          "module": "graph_claim_scope"
+        },
+        "NameStage": {
+          "kind": "ImportFrom",
+          "line": 31,
+          "module": "graph_foundation"
+        },
+        "PROMOTE_STRANDED_DOCS_WHERE": {
+          "kind": "Assign",
+          "line": 12613,
+          "module": "graph_audits"
+        },
+        "PROMOTE_STRANDED_NAME_WHERE": {
+          "kind": "Assign",
+          "line": 12604,
+          "module": "graph_audits"
+        },
+        "Path": {
+          "kind": "ImportFrom",
+          "line": 26,
+          "module": "graph_foundation"
+        },
+        "ProtectedDeletionError": {
+          "kind": "ImportFrom",
+          "line": 44,
+          "module": "graph_foundation"
+        },
+        "QUORATE_RESOLUTION_METHODS": {
+          "kind": "AnnAssign",
+          "line": 17055,
+          "module": "graph_cost_and_claims"
+        },
+        "REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA": {
+          "kind": "Assign",
+          "line": 24341,
+          "module": "graph_claim_release"
+        },
+        "REFINE_CLAIM_RELEASE_PROJECTION_VERSION": {
+          "kind": "Assign",
+          "line": 24343,
+          "module": "graph_claim_release"
+        },
+        "REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA": {
+          "kind": "Assign",
+          "line": 24342,
+          "module": "graph_claim_release"
+        },
+        "REFINE_NAME_ATTEMPTS_SPENT": {
+          "kind": "Assign",
+          "line": 18250,
+          "module": "graph_refinement"
+        },
+        "REFINE_NAME_ELIGIBILITY_WHERE": {
+          "kind": "Assign",
+          "line": 18261,
+          "module": "graph_refinement"
+        },
+        "RESCORE_ELIGIBILITY_QUERY": {
+          "kind": "Assign",
+          "line": 24860,
+          "module": "graph_claim_release"
+        },
+        "REVIEW_NAME_ELIGIBILITY_WHERE": {
+          "kind": "Assign",
+          "line": 16938,
+          "module": "graph_cost_and_claims"
+        },
+        "RefineClaimReleaseConflict": {
+          "kind": "ClassDef",
+          "line": 24346,
+          "module": "graph_claim_release"
+        },
+        "RefineStopReason": {
+          "kind": "ImportFrom",
+          "line": 31,
+          "module": "graph_foundation"
+        },
+        "RefinedNamePersistenceRefusal": {
+          "kind": "ClassDef",
+          "line": 18631,
+          "module": "graph_refinement"
+        },
+        "RefinedNamePersistenceRefusalReason": {
+          "kind": "ClassDef",
+          "line": 18619,
+          "module": "graph_refinement"
+        },
+        "ReviewDimensionVoidRefused": {
+          "kind": "ClassDef",
+          "line": 6352,
+          "module": "graph_catalog"
+        },
+        "ReviewWriteResult": {
+          "kind": "ClassDef",
+          "line": 6027,
+          "module": "graph_catalog"
+        },
+        "SAFE_SCALAR_COCOS_UNITS": {
+          "kind": "AnnAssign",
+          "line": 7379,
+          "module": "graph_catalog"
+        },
+        "SCALAR_SELECTED_DEDUP_MANIFEST_SCHEMA": {
+          "kind": "Assign",
+          "line": 20409,
+          "module": "graph_supersession"
+        },
+        "SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA": {
+          "kind": "Assign",
+          "line": 20412,
+          "module": "graph_supersession"
+        },
+        "SEMANTIC_MIRROR_REPAIR_MANIFEST_SCHEMA": {
+          "kind": "Assign",
+          "line": 21835,
+          "module": "graph_supersession"
+        },
+        "SEMANTIC_MIRROR_REPAIR_RECEIPT_SCHEMA": {
+          "kind": "Assign",
+          "line": 21838,
+          "module": "graph_supersession"
+        },
+        "SIGNED_DUAL_AUTHORITY_RETIREMENT_MANIFEST_SCHEMA": {
+          "kind": "Assign",
+          "line": 22271,
+          "module": "graph_supersession"
+        },
+        "SIGNED_DUAL_AUTHORITY_RETIREMENT_RECEIPT_SCHEMA": {
+          "kind": "Assign",
+          "line": 22274,
+          "module": "graph_supersession"
+        },
+        "SIGNED_SOURCE_DISPOSITION_ADJUDICATION_SCHEMA": {
+          "kind": "Assign",
+          "line": 21028,
+          "module": "graph_supersession"
+        },
+        "SIGNED_SOURCE_DISPOSITION_MANIFEST_SCHEMA": {
+          "kind": "Assign",
+          "line": 21031,
+          "module": "graph_supersession"
+        },
+        "SIGNED_SOURCE_DISPOSITION_RECEIPT_SCHEMA": {
+          "kind": "Assign",
+          "line": 21034,
+          "module": "graph_supersession"
+        },
+        "SNRunStatus": {
+          "kind": "ImportFrom",
+          "line": 31,
+          "module": "graph_foundation"
+        },
+        "STAGE_DOCS_FOR_RESCORE_QUERY": {
+          "kind": "Assign",
+          "line": 18146,
+          "module": "graph_review_persistence"
+        },
+        "ScalarSelectedDedupConflict": {
+          "kind": "ClassDef",
+          "line": 20417,
+          "module": "graph_supersession"
+        },
+        "SemanticMirrorRepairConflict": {
+          "kind": "ClassDef",
+          "line": 21844,
+          "module": "graph_supersession"
+        },
+        "SignedDualAuthorityRetirementConflict": {
+          "kind": "ClassDef",
+          "line": 22279,
+          "module": "graph_supersession"
+        },
+        "SignedSourceDispositionConflict": {
+          "kind": "ClassDef",
+          "line": 21058,
+          "module": "graph_supersession"
+        },
+        "SourceClaimResult": {
+          "kind": "ClassDef",
+          "line": 10550,
+          "module": "graph_source_bindings"
+        },
+        "StrEnum": {
+          "kind": "ImportFrom",
+          "line": 25,
+          "module": "graph_foundation"
+        },
+        "StructuralAuthorityConflict": {
+          "kind": "ClassDef",
+          "line": 26755,
+          "module": "graph_parent_lifecycle"
+        },
+        "SupersedeIntoAncestorConflict": {
+          "kind": "ClassDef",
+          "line": 23217,
+          "module": "graph_supersession"
+        },
+        "UTC": {
+          "kind": "ImportFrom",
+          "line": 24,
+          "module": "graph_foundation"
+        },
+        "_CAP_DISPOSITION_READBACK": {
+          "kind": "Assign",
+          "line": 11734,
+          "module": "graph_source_bindings"
+        },
+        "_CAP_DISPOSITION_WRITE": {
+          "kind": "Assign",
+          "line": 11726,
+          "module": "graph_source_bindings"
+        },
+        "_CAP_PARKED_QUERY": {
+          "kind": "Assign",
+          "line": 11608,
+          "module": "graph_source_bindings"
+        },
+        "_CAP_UNDISPOSED_QUERY": {
+          "kind": "Assign",
+          "line": 11686,
+          "module": "graph_source_bindings"
+        },
+        "_CLAIM_ABSENT": {
+          "kind": "Assign",
+          "line": 1915,
+          "module": "graph_claim_scope"
+        },
+        "_CLAIM_HEARTBEAT_SECONDS": {
+          "kind": "Assign",
+          "line": 12572,
+          "module": "graph_audits"
+        },
+        "_CLAIM_HELD": {
+          "kind": "Assign",
+          "line": 1916,
+          "module": "graph_claim_scope"
+        },
+        "_CLAIM_RELEASED": {
+          "kind": "Assign",
+          "line": 1917,
+          "module": "graph_claim_scope"
+        },
+        "_CLAIM_TIMEOUT": {
+          "kind": "Assign",
+          "line": 8297,
+          "module": "graph_catalog_reset"
+        },
+        "_CLAIM_TIMEOUT_SECONDS": {
+          "kind": "Assign",
+          "line": 89,
+          "module": "graph_foundation"
+        },
+        "_CLAIM_VERIFY_SETTLE_SECONDS": {
+          "kind": "Assign",
+          "line": 12324,
+          "module": "graph_source_bindings"
+        },
+        "_COMPOSE_CAP_REASON": {
+          "kind": "Assign",
+          "line": 11500,
+          "module": "graph_source_bindings"
+        },
+        "_DD_LINK_RE": {
+          "kind": "Assign",
+          "line": 526,
+          "module": "graph_foundation"
+        },
+        "_DIMENSION_SCALE": {
+          "kind": "Assign",
+          "line": 6349,
+          "module": "graph_catalog"
+        },
+        "_DOCS_AXIS_MIRROR_AGREES": {
+          "kind": "Assign",
+          "line": 12724,
+          "module": "graph_audits"
+        },
+        "_DOCS_AXIS_MIRROR_DISAGREES": {
+          "kind": "Assign",
+          "line": 12730,
+          "module": "graph_audits"
+        },
+        "_DOC_LINK_RE": {
+          "kind": "Assign",
+          "line": 9581,
+          "module": "graph_doc_links"
+        },
+        "_DOC_TEXT_UNSET": {
+          "kind": "Assign",
+          "line": 9582,
+          "module": "graph_doc_links"
+        },
+        "_ESCALATOR_CHAIN_SIZE": {
+          "kind": "Assign",
+          "line": 17069,
+          "module": "graph_cost_and_claims"
+        },
+        "_EXACT_NAME_SCOPE_PREFLIGHT_QUERY": {
+          "kind": "Assign",
+          "line": 1822,
+          "module": "graph_claim_scope"
+        },
+        "_EXACT_NAME_SCOPE_RUN_STATUS_QUERY": {
+          "kind": "Assign",
+          "line": 1891,
+          "module": "graph_claim_scope"
+        },
+        "_EXACT_NAME_SCOPE_STAMP_QUERY": {
+          "kind": "Assign",
+          "line": 1862,
+          "module": "graph_claim_scope"
+        },
+        "_EXACT_SCOPE_TERMINAL_NAME_STAGES": {
+          "kind": "Assign",
+          "line": 1898,
+          "module": "graph_claim_scope"
+        },
+        "_EXACT_SCOPE_TERMINAL_STATUSES": {
+          "kind": "Assign",
+          "line": 1899,
+          "module": "graph_claim_scope"
+        },
+        "_EXPLICIT_SOURCE_CLAIM_QUERY": {
+          "kind": "Assign",
+          "line": 10563,
+          "module": "graph_source_bindings"
+        },
+        "_GENERATED_SUPERSESSION_PREFLIGHT_QUERY": {
+          "kind": "Assign",
+          "line": 19754,
+          "module": "graph_refinement"
+        },
+        "_GRAMMAR_FIELDS": {
+          "kind": "Assign",
+          "line": 7364,
+          "module": "graph_catalog"
+        },
+        "_GRAMMAR_SEGMENT_COLUMNS": {
+          "kind": "Assign",
+          "line": 7067,
+          "module": "graph_catalog"
+        },
+        "_JSON_ESCAPE_CTRL": {
+          "kind": "Assign",
+          "line": 9561,
+          "module": "graph_doc_links"
+        },
+        "_LIFECYCLELESS_STUB_LOCK_QUERY": {
+          "kind": "Assign",
+          "line": 4913,
+          "module": "graph_lineage"
+        },
+        "_LINK_RE": {
+          "kind": "Assign",
+          "line": 518,
+          "module": "graph_foundation"
+        },
+        "_LOCK_REFINE_CLAIM_RELEASE_QUERY": {
+          "kind": "Assign",
+          "line": 24350,
+          "module": "graph_claim_release"
+        },
+        "_MANIFEST_DRAIN_PLAN_QUERY": {
+          "kind": "Assign",
+          "line": 1100,
+          "module": "graph_claim_scope"
+        },
+        "_MAX_COMPOSE_CLAIM_ATTEMPTS": {
+          "kind": "Assign",
+          "line": 16116,
+          "module": "graph_cost_and_claims"
+        },
+        "_MAX_LINK_RETRIES": {
+          "kind": "Assign",
+          "line": 9392,
+          "module": "graph_catalog_reset"
+        },
+        "_MAX_SOURCE_COMPOSE_HINT_CHARS": {
+          "kind": "Assign",
+          "line": 10016,
+          "module": "graph_source_bindings"
+        },
+        "_MAX_SOURCE_COMPOSE_HINT_REASON_CHARS": {
+          "kind": "Assign",
+          "line": 10017,
+          "module": "graph_source_bindings"
+        },
+        "_NAME_LINK_RE": {
+          "kind": "Assign",
+          "line": 9552,
+          "module": "graph_doc_links"
+        },
+        "_ORPHAN_DISPOSITIONS": {
+          "kind": "Assign",
+          "line": 21048,
+          "module": "graph_supersession"
+        },
+        "_PHASE_TO_POOL": {
+          "kind": "AnnAssign",
+          "line": 15811,
+          "module": "graph_audits"
+        },
+        "_PHASE_TO_SN_COST_FIELD": {
+          "kind": "AnnAssign",
+          "line": 15437,
+          "module": "graph_audits"
+        },
+        "_PHYSICS_ABBREVIATIONS": {
+          "kind": "AnnAssign",
+          "line": 247,
+          "module": "graph_foundation"
+        },
+        "_PIPELINE_FROZEN_NAME_STAGES": {
+          "kind": "Assign",
+          "line": 16103,
+          "module": "graph_cost_and_claims"
+        },
+        "_PROJECTED_SEMANTIC_SOURCE_TYPES": {
+          "kind": "Assign",
+          "line": 21841,
+          "module": "graph_supersession"
+        },
+        "_ParentMaterializationCapture": {
+          "kind": "ClassDef",
+          "line": 4367,
+          "module": "graph_lineage"
+        },
+        "_READ_LIFECYCLELESS_STUBS_QUERY": {
+          "kind": "Assign",
+          "line": 4928,
+          "module": "graph_lineage"
+        },
+        "_READ_REFINE_CLAIM_RELEASE_QUERY": {
+          "kind": "Assign",
+          "line": 24363,
+          "module": "graph_claim_release"
+        },
+        "_RETIRE_FINALIZED_SOURCE_GAPS": {
+          "kind": "Assign",
+          "line": 7398,
+          "module": "graph_catalog"
+        },
+        "_SEGMENT_EDGE_TYPES": {
+          "kind": "AnnAssign",
+          "line": 7090,
+          "module": "graph_catalog"
+        },
+        "_SEGMENT_REALIGN_OPERATION": {
+          "kind": "Assign",
+          "line": 14964,
+          "module": "graph_audits"
+        },
+        "_SETTLED_SOURCE_BINDING_STAGES": {
+          "kind": "AnnAssign",
+          "line": 83,
+          "module": "graph_foundation"
+        },
+        "_SHA256_RE": {
+          "kind": "Assign",
+          "line": 17097,
+          "module": "graph_review_persistence"
+        },
+        "_SIGNED_ORPHAN_RETIREMENT_DISPOSITION": {
+          "kind": "Assign",
+          "line": 22185,
+          "module": "graph_supersession"
+        },
+        "_SIGNED_SOURCE_DISPOSITIONS": {
+          "kind": "Assign",
+          "line": 21037,
+          "module": "graph_supersession"
+        },
+        "_SKELETON_PLACEHOLDER_PREDICATE": {
+          "kind": "Assign",
+          "line": 5351,
+          "module": "graph_lineage"
+        },
+        "_STABLE_BINDING_NAME_STAGES": {
+          "kind": "AnnAssign",
+          "line": 68,
+          "module": "graph_foundation"
+        },
+        "_STRIP_CTRL_RE": {
+          "kind": "Assign",
+          "line": 9562,
+          "module": "graph_doc_links"
+        },
+        "_STRUCTURAL_AUTHORITY_CANONICALIZATION": {
+          "kind": "Assign",
+          "line": 26752,
+          "module": "graph_parent_lifecycle"
+        },
+        "_STRUCTURAL_AUTHORITY_MECHANISM": {
+          "kind": "Assign",
+          "line": 26750,
+          "module": "graph_parent_lifecycle"
+        },
+        "_STRUCTURAL_AUTHORITY_SCHEMA": {
+          "kind": "Assign",
+          "line": 26751,
+          "module": "graph_parent_lifecycle"
+        },
+        "_STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA": {
+          "kind": "Assign",
+          "line": 21044,
+          "module": "graph_supersession"
+        },
+        "_STRUCTURAL_LEGITIMACY_DISPOSITION": {
+          "kind": "Assign",
+          "line": 21047,
+          "module": "graph_supersession"
+        },
+        "_TERMINAL_BINDING_NAME_STAGES": {
+          "kind": "AnnAssign",
+          "line": 76,
+          "module": "graph_foundation"
+        },
+        "_TERMINAL_NAME_STAGES": {
+          "kind": "Assign",
+          "line": 14289,
+          "module": "graph_audits"
+        },
+        "_TERMINAL_REFINE_STOP_REASONS": {
+          "kind": "Assign",
+          "line": 25027,
+          "module": "graph_claim_release"
+        },
+        "_TERMINAL_RUN_STATUSES": {
+          "kind": "Assign",
+          "line": 1905,
+          "module": "graph_claim_scope"
+        },
+        "_TransactionQuery": {
+          "kind": "ClassDef",
+          "line": 101,
+          "module": "graph_foundation"
+        },
+        "_UNBACKED_SOURCE_PATH_SCALARS": {
+          "kind": "Assign",
+          "line": 27170,
+          "module": "graph_parent_lifecycle"
+        },
+        "_UNIT_SKIP_REASON_PREFIX": {
+          "kind": "Assign",
+          "line": 13660,
+          "module": "graph_audits"
+        },
+        "_VALID_PIPELINE_SOURCE_TYPES": {
+          "kind": "Assign",
+          "line": 10015,
+          "module": "graph_source_bindings"
+        },
+        "_VOID_REVIEW_DIMENSION_READ": {
+          "kind": "Assign",
+          "line": 6467,
+          "module": "graph_catalog"
+        },
+        "_VOID_REVIEW_DIMENSION_WRITE": {
+          "kind": "Assign",
+          "line": 6479,
+          "module": "graph_catalog"
+        },
+        "_WRITE_REFINE_CLAIM_RELEASE_QUERY": {
+          "kind": "Assign",
+          "line": 24426,
+          "module": "graph_claim_release"
+        },
+        "_ancestor_supersession_authority": {
+          "kind": "FunctionDef",
+          "line": 23221,
+          "module": "graph_supersession"
+        },
+        "_authority_json_value": {
+          "kind": "FunctionDef",
+          "line": 17100,
+          "module": "graph_review_persistence"
+        },
+        "_authority_payload_hash": {
+          "kind": "FunctionDef",
+          "line": 17118,
+          "module": "graph_review_persistence"
+        },
+        "_backfill_cluster_from_sources": {
+          "kind": "FunctionDef",
+          "line": 7876,
+          "module": "graph_catalog"
+        },
+        "_bootstrap_missing_derived_parent_targets": {
+          "kind": "FunctionDef",
+          "line": 2995,
+          "module": "graph_lineage"
+        },
+        "_canonicalize_lifecycleless_manifest_value": {
+          "kind": "FunctionDef",
+          "line": 5040,
+          "module": "graph_lineage"
+        },
+        "_catalog_edit_adjudication_signature_hash": {
+          "kind": "FunctionDef",
+          "line": 21062,
+          "module": "graph_supersession"
+        },
+        "_catalog_source_disposition_apply": {
+          "kind": "Assign",
+          "line": 21796,
+          "module": "graph_supersession"
+        },
+        "_catalog_source_disposition_parameters": {
+          "kind": "Assign",
+          "line": 21810,
+          "module": "graph_supersession"
+        },
+        "_catalog_source_disposition_signature": {
+          "kind": "Assign",
+          "line": 21807,
+          "module": "graph_supersession"
+        },
+        "_charge_refine_name_attempts": {
+          "kind": "FunctionDef",
+          "line": 18291,
+          "module": "graph_refinement"
+        },
+        "_claim_disposition": {
+          "kind": "FunctionDef",
+          "line": 1920,
+          "module": "graph_claim_scope"
+        },
+        "_claim_sn_atomic": {
+          "kind": "FunctionDef",
+          "line": 16119,
+          "module": "graph_cost_and_claims"
+        },
+        "_claimed_run_ids": {
+          "kind": "FunctionDef",
+          "line": 1943,
+          "module": "graph_claim_scope"
+        },
+        "_classify_refined_name_persistence_refusal": {
+          "kind": "FunctionDef",
+          "line": 18743,
+          "module": "graph_refinement"
+        },
+        "_clear_superseded_child_derived_parent_edges": {
+          "kind": "FunctionDef",
+          "line": 3457,
+          "module": "graph_lineage"
+        },
+        "_coerce_segment_value": {
+          "kind": "FunctionDef",
+          "line": 7107,
+          "module": "graph_catalog"
+        },
+        "_collect_run_statuses": {
+          "kind": "FunctionDef",
+          "line": 1955,
+          "module": "graph_claim_scope"
+        },
+        "_complete_source_fences": {
+          "kind": "FunctionDef",
+          "line": 10652,
+          "module": "graph_source_bindings"
+        },
+        "_compute_embed_hash": {
+          "kind": "FunctionDef",
+          "line": 18496,
+          "module": "graph_refinement"
+        },
+        "_compute_link_status": {
+          "kind": "FunctionDef",
+          "line": 505,
+          "module": "graph_foundation"
+        },
+        "_delete_derived_parent_nodes": {
+          "kind": "FunctionDef",
+          "line": 3829,
+          "module": "graph_lineage"
+        },
+        "_derived_parent_source_metadata": {
+          "kind": "FunctionDef",
+          "line": 3955,
+          "module": "graph_lineage"
+        },
+        "_derived_parent_unit_from_eligible_children": {
+          "kind": "FunctionDef",
+          "line": 5061,
+          "module": "graph_lineage"
+        },
+        "_detach_stale_ancestor_sources": {
+          "kind": "FunctionDef",
+          "line": 23466,
+          "module": "graph_supersession"
+        },
+        "_doc_link_mismatches": {
+          "kind": "FunctionDef",
+          "line": 9585,
+          "module": "graph_doc_links"
+        },
+        "_docs_axis_rederive_query": {
+          "kind": "FunctionDef",
+          "line": 12737,
+          "module": "graph_audits"
+        },
+        "_docs_rescore_ineligible": {
+          "kind": "FunctionDef",
+          "line": 18176,
+          "module": "graph_refinement"
+        },
+        "_docs_review_winner_query_body": {
+          "kind": "FunctionDef",
+          "line": 6684,
+          "module": "graph_catalog"
+        },
+        "_dual_authority_hidden_parameters": {
+          "kind": "Assign",
+          "line": 22637,
+          "module": "graph_supersession"
+        },
+        "_dual_authority_retirement_apply": {
+          "kind": "Assign",
+          "line": 22626,
+          "module": "graph_supersession"
+        },
+        "_eligible_derived_parent_unit_children": {
+          "kind": "FunctionDef",
+          "line": 4004,
+          "module": "graph_lineage"
+        },
+        "_embed_single_standard_name": {
+          "kind": "FunctionDef",
+          "line": 18452,
+          "module": "graph_refinement"
+        },
+        "_emit_magnitude_of_edges": {
+          "kind": "FunctionDef",
+          "line": 2959,
+          "module": "graph_lineage"
+        },
+        "_ensure_json": {
+          "kind": "FunctionDef",
+          "line": 112,
+          "module": "graph_foundation"
+        },
+        "_ensure_list": {
+          "kind": "FunctionDef",
+          "line": 121,
+          "module": "graph_foundation"
+        },
+        "_error_sibling_reconcile_apply": {
+          "kind": "Assign",
+          "line": 15238,
+          "module": "graph_audits"
+        },
+        "_exact_dd_source_id": {
+          "kind": "FunctionDef",
+          "line": 10020,
+          "module": "graph_source_bindings"
+        },
+        "_exact_name_scope_refusals": {
+          "kind": "FunctionDef",
+          "line": 1969,
+          "module": "graph_claim_scope"
+        },
+        "_exhausted_orphan_change_id": {
+          "kind": "FunctionDef",
+          "line": 22972,
+          "module": "graph_supersession"
+        },
+        "_exhausted_orphan_supersession_authority": {
+          "kind": "FunctionDef",
+          "line": 22896,
+          "module": "graph_supersession"
+        },
+        "_extract_links_from_docs": {
+          "kind": "FunctionDef",
+          "line": 535,
+          "module": "graph_foundation"
+        },
+        "_filter_admissible_parents": {
+          "kind": "FunctionDef",
+          "line": 2701,
+          "module": "graph_lineage"
+        },
+        "_finalize_generated_name_stage": {
+          "kind": "FunctionDef",
+          "line": 7929,
+          "module": "graph_catalog"
+        },
+        "_get_rich_source_name_mapping": {
+          "kind": "FunctionDef",
+          "line": 2184,
+          "module": "graph_lineage"
+        },
+        "_guard_existing_target_pairings": {
+          "kind": "FunctionDef",
+          "line": 10697,
+          "module": "graph_source_bindings"
+        },
+        "_guard_failed_source_reasons": {
+          "kind": "FunctionDef",
+          "line": 10681,
+          "module": "graph_source_bindings"
+        },
+        "_historical_cpi_cache": {
+          "kind": "AnnAssign",
+          "line": 592,
+          "module": "graph_foundation"
+        },
+        "_ineligible_source_retirement_apply": {
+          "kind": "Assign",
+          "line": 22149,
+          "module": "graph_supersession"
+        },
+        "_ineligible_source_retirement_parameters": {
+          "kind": "Assign",
+          "line": 22162,
+          "module": "graph_supersession"
+        },
+        "_ineligible_source_retirement_signature": {
+          "kind": "Assign",
+          "line": 22159,
+          "module": "graph_supersession"
+        },
+        "_is_live_structural_child": {
+          "kind": "FunctionDef",
+          "line": 21282,
+          "module": "graph_supersession"
+        },
+        "_isn_grammar_context": {
+          "kind": "FunctionDef",
+          "line": 13771,
+          "module": "graph_audits"
+        },
+        "_lifecycleless_stub_manifest": {
+          "kind": "FunctionDef",
+          "line": 5234,
+          "module": "graph_lineage"
+        },
+        "_lifecycleless_stub_reconcile_apply": {
+          "kind": "Assign",
+          "line": 5317,
+          "module": "graph_lineage"
+        },
+        "_lifecycleless_stub_reconcile_parameters": {
+          "kind": "Assign",
+          "line": 5333,
+          "module": "graph_lineage"
+        },
+        "_lifecycleless_stub_reconcile_signature": {
+          "kind": "Assign",
+          "line": 5330,
+          "module": "graph_lineage"
+        },
+        "_lock_ancestor_supersession_authority": {
+          "kind": "FunctionDef",
+          "line": 23395,
+          "module": "graph_supersession"
+        },
+        "_lock_claimed_name_bindings": {
+          "kind": "FunctionDef",
+          "line": 10752,
+          "module": "graph_source_bindings"
+        },
+        "_lock_manifest_drain_authority": {
+          "kind": "FunctionDef",
+          "line": 1316,
+          "module": "graph_claim_scope"
+        },
+        "_lock_scalar_selected_dedup_authority": {
+          "kind": "FunctionDef",
+          "line": 20612,
+          "module": "graph_supersession"
+        },
+        "_lock_semantic_mirror_repair_authority": {
+          "kind": "FunctionDef",
+          "line": 22020,
+          "module": "graph_supersession"
+        },
+        "_lock_signed_source_disposition_authority": {
+          "kind": "FunctionDef",
+          "line": 21615,
+          "module": "graph_supersession"
+        },
+        "_manifest_plan_fingerprint": {
+          "kind": "FunctionDef",
+          "line": 1295,
+          "module": "graph_claim_scope"
+        },
+        "_mark_refine_docs_exhausted": {
+          "kind": "FunctionDef",
+          "line": 25135,
+          "module": "graph_claim_release"
+        },
+        "_materialize_derived_parent_rows": {
+          "kind": "FunctionDef",
+          "line": 4022,
+          "module": "graph_lineage"
+        },
+        "_materialize_derived_parent_rows_batched": {
+          "kind": "FunctionDef",
+          "line": 4378,
+          "module": "graph_lineage"
+        },
+        "_meaning_preservation_assertion": {
+          "kind": "FunctionDef",
+          "line": 18653,
+          "module": "graph_refinement"
+        },
+        "_non_winning_review_resolution_methods": {
+          "kind": "FunctionDef",
+          "line": 6662,
+          "module": "graph_catalog"
+        },
+        "_normalization_peel_unit_repair_apply": {
+          "kind": "Assign",
+          "line": 4558,
+          "module": "graph_lineage"
+        },
+        "_normalize_bare_doc_links": {
+          "kind": "FunctionDef",
+          "line": 9615,
+          "module": "graph_doc_links"
+        },
+        "_normalize_pool": {
+          "kind": "FunctionDef",
+          "line": 15828,
+          "module": "graph_cost_and_claims"
+        },
+        "_open_graph_client": {
+          "kind": "FunctionDef",
+          "line": 15233,
+          "module": "graph_audits"
+        },
+        "_parse_grammar": {
+          "kind": "FunctionDef",
+          "line": 391,
+          "module": "graph_foundation"
+        },
+        "_parse_parent_grammar": {
+          "kind": "FunctionDef",
+          "line": 3681,
+          "module": "graph_lineage"
+        },
+        "_partition_lifecycleless_stub_rows": {
+          "kind": "FunctionDef",
+          "line": 5126,
+          "module": "graph_lineage"
+        },
+        "_persist_outcomes": {
+          "kind": "AnnAssign",
+          "line": 12334,
+          "module": "graph_source_bindings"
+        },
+        "_persist_structural_authority": {
+          "kind": "FunctionDef",
+          "line": 26946,
+          "module": "graph_parent_lifecycle"
+        },
+        "_pin_dd_source_snapshots": {
+          "kind": "FunctionDef",
+          "line": 10189,
+          "module": "graph_source_bindings"
+        },
+        "_pipeline_buckets_cache": {
+          "kind": "AnnAssign",
+          "line": 586,
+          "module": "graph_foundation"
+        },
+        "_predecessor_document_identity": {
+          "kind": "FunctionDef",
+          "line": 18675,
+          "module": "graph_refinement"
+        },
+        "_predicted_refine_claim_release_state": {
+          "kind": "FunctionDef",
+          "line": 24501,
+          "module": "graph_claim_release"
+        },
+        "_project_refine_claim_release_state": {
+          "kind": "FunctionDef",
+          "line": 24450,
+          "module": "graph_claim_release"
+        },
+        "_public_grammar_segment_order": {
+          "kind": "FunctionDef",
+          "line": 295,
+          "module": "graph_foundation"
+        },
+        "_public_segment_token_index": {
+          "kind": "FunctionDef",
+          "line": 273,
+          "module": "graph_foundation"
+        },
+        "_query_derived_parents_for_admission_cleanup": {
+          "kind": "FunctionDef",
+          "line": 3802,
+          "module": "graph_lineage"
+        },
+        "_query_legacy_repairable_derived_parents": {
+          "kind": "FunctionDef",
+          "line": 3752,
+          "module": "graph_lineage"
+        },
+        "_query_seedable_derived_parents": {
+          "kind": "FunctionDef",
+          "line": 3702,
+          "module": "graph_lineage"
+        },
+        "_query_skeleton_placeholders_for_cleanup": {
+          "kind": "FunctionDef",
+          "line": 5372,
+          "module": "graph_lineage"
+        },
+        "_quorum_admits_acceptance": {
+          "kind": "FunctionDef",
+          "line": 17072,
+          "module": "graph_review_persistence"
+        },
+        "_reconcile_spurious_stub_source_scalars": {
+          "kind": "FunctionDef",
+          "line": 5247,
+          "module": "graph_lineage"
+        },
+        "_record_persist_outcome": {
+          "kind": "FunctionDef",
+          "line": 12337,
+          "module": "graph_source_bindings"
+        },
+        "_refine_claim_no_change_receipt": {
+          "kind": "FunctionDef",
+          "line": 24537,
+          "module": "graph_claim_release"
+        },
+        "_refine_claim_release_manifest": {
+          "kind": "FunctionDef",
+          "line": 24515,
+          "module": "graph_claim_release"
+        },
+        "_refused_target_orphan_apply": {
+          "kind": "Assign",
+          "line": 22659,
+          "module": "graph_supersession"
+        },
+        "_require_failure_reason": {
+          "kind": "FunctionDef",
+          "line": 10663,
+          "module": "graph_source_bindings"
+        },
+        "_resolve_grammar_token_version": {
+          "kind": "FunctionDef",
+          "line": 7016,
+          "module": "graph_catalog"
+        },
+        "_resolve_synced_segments": {
+          "kind": "FunctionDef",
+          "line": 7129,
+          "module": "graph_catalog"
+        },
+        "_resolved_manifest_drain_plan": {
+          "kind": "FunctionDef",
+          "line": 1237,
+          "module": "graph_claim_scope"
+        },
+        "_review_tier": {
+          "kind": "FunctionDef",
+          "line": 6356,
+          "module": "graph_catalog"
+        },
+        "_rewire_has_parent_off_superseded": {
+          "kind": "FunctionDef",
+          "line": 3559,
+          "module": "graph_lineage"
+        },
+        "_sanitize_doc_text": {
+          "kind": "FunctionDef",
+          "line": 9565,
+          "module": "graph_doc_links"
+        },
+        "_scalar_domain": {
+          "kind": "FunctionDef",
+          "line": 135,
+          "module": "graph_foundation"
+        },
+        "_scalar_selected_dedup_authority": {
+          "kind": "FunctionDef",
+          "line": 20421,
+          "module": "graph_supersession"
+        },
+        "_scalar_selected_dedup_counts": {
+          "kind": "FunctionDef",
+          "line": 20692,
+          "module": "graph_supersession"
+        },
+        "_segment_drift_reason": {
+          "kind": "FunctionDef",
+          "line": 15154,
+          "module": "graph_audits"
+        },
+        "_segments_from_ir": {
+          "kind": "FunctionDef",
+          "line": 306,
+          "module": "graph_foundation"
+        },
+        "_semantic_ir_expression": {
+          "kind": "FunctionDef",
+          "line": 450,
+          "module": "graph_foundation"
+        },
+        "_semantic_mirror_repair_apply": {
+          "kind": "Assign",
+          "line": 22120,
+          "module": "graph_supersession"
+        },
+        "_semantic_mirror_repair_authority": {
+          "kind": "FunctionDef",
+          "line": 21848,
+          "module": "graph_supersession"
+        },
+        "_semantic_mirror_repair_counts": {
+          "kind": "FunctionDef",
+          "line": 22102,
+          "module": "graph_supersession"
+        },
+        "_semantic_mirror_repair_parameters": {
+          "kind": "Assign",
+          "line": 22131,
+          "module": "graph_supersession"
+        },
+        "_semantic_mirror_repair_signature": {
+          "kind": "Assign",
+          "line": 22130,
+          "module": "graph_supersession"
+        },
+        "_signed_dual_authority_change_id": {
+          "kind": "FunctionDef",
+          "line": 22621,
+          "module": "graph_supersession"
+        },
+        "_signed_dual_authority_retirement_manifest": {
+          "kind": "FunctionDef",
+          "line": 22346,
+          "module": "graph_supersession"
+        },
+        "_signed_source_disposition_authority": {
+          "kind": "FunctionDef",
+          "line": 21289,
+          "module": "graph_supersession"
+        },
+        "_signed_source_disposition_counts": {
+          "kind": "FunctionDef",
+          "line": 21711,
+          "module": "graph_supersession"
+        },
+        "_signed_source_disposition_execution_authority": {
+          "kind": "FunctionDef",
+          "line": 21729,
+          "module": "graph_supersession"
+        },
+        "_skipped_recovery_error": {
+          "kind": "FunctionDef",
+          "line": 12061,
+          "module": "graph_source_bindings"
+        },
+        "_sorted_refine_claim_projection": {
+          "kind": "FunctionDef",
+          "line": 24440,
+          "module": "graph_claim_release"
+        },
+        "_source_compose_hint_decision": {
+          "kind": "FunctionDef",
+          "line": 10035,
+          "module": "graph_source_bindings"
+        },
+        "_spurious_stub_binding_authority": {
+          "kind": "FunctionDef",
+          "line": 5070,
+          "module": "graph_lineage"
+        },
+        "_standard_name_source_upstream_present_cypher": {
+          "kind": "FunctionDef",
+          "line": 12854,
+          "module": "graph_audits"
+        },
+        "_structural_accept_route": {
+          "kind": "FunctionDef",
+          "line": 27173,
+          "module": "graph_parent_lifecycle"
+        },
+        "_structural_authority_identities": {
+          "kind": "FunctionDef",
+          "line": 26759,
+          "module": "graph_parent_lifecycle"
+        },
+        "_structural_authority_record": {
+          "kind": "FunctionDef",
+          "line": 26801,
+          "module": "graph_parent_lifecycle"
+        },
+        "_structural_authority_snapshot": {
+          "kind": "FunctionDef",
+          "line": 26767,
+          "module": "graph_parent_lifecycle"
+        },
+        "_structural_edge_reconcile_apply": {
+          "kind": "Assign",
+          "line": 3439,
+          "module": "graph_lineage"
+        },
+        "_validate_derived_parent_identity": {
+          "kind": "FunctionDef",
+          "line": 3970,
+          "module": "graph_lineage"
+        },
+        "_validate_signed_dual_authority_retirement": {
+          "kind": "FunctionDef",
+          "line": 22283,
+          "module": "graph_supersession"
+        },
+        "_validate_signed_orphan_retirement_authority": {
+          "kind": "FunctionDef",
+          "line": 22188,
+          "module": "graph_supersession"
+        },
+        "_validate_signed_source_adjudication": {
+          "kind": "FunctionDef",
+          "line": 21073,
+          "module": "graph_supersession"
+        },
+        "_validate_structural_legitimacy_authority": {
+          "kind": "FunctionDef",
+          "line": 21173,
+          "module": "graph_supersession"
+        },
+        "_verify_claim_winners": {
+          "kind": "FunctionDef",
+          "line": 25227,
+          "module": "graph_claim_release"
+        },
+        "_verify_docs_claim_winners": {
+          "kind": "FunctionDef",
+          "line": 25196,
+          "module": "graph_claim_release"
+        },
+        "_verify_enrich_parents_claim_winners": {
+          "kind": "FunctionDef",
+          "line": 26597,
+          "module": "graph_parent_lifecycle"
+        },
+        "_verify_name_claim_winners": {
+          "kind": "FunctionDef",
+          "line": 25305,
+          "module": "graph_claim_release"
+        },
+        "_verify_source_claim_winners": {
+          "kind": "FunctionDef",
+          "line": 25326,
+          "module": "graph_claim_release"
+        },
+        "_winning_review_resolution_methods": {
+          "kind": "FunctionDef",
+          "line": 6629,
+          "module": "graph_catalog"
+        },
+        "_write_grammar_decomposition": {
+          "kind": "FunctionDef",
+          "line": 7153,
+          "module": "graph_catalog"
+        },
+        "_write_segment_edges": {
+          "kind": "FunctionDef",
+          "line": 7348,
+          "module": "graph_catalog"
+        },
+        "_write_standard_name_edges": {
+          "kind": "FunctionDef",
+          "line": 3108,
+          "module": "graph_lineage"
+        },
+        "aggregate_calls_per_phase": {
+          "kind": "FunctionDef",
+          "line": 15985,
+          "module": "graph_cost_and_claims"
+        },
+        "aggregate_spend_for_run": {
+          "kind": "FunctionDef",
+          "line": 15962,
+          "module": "graph_cost_and_claims"
+        },
+        "aggregate_spend_per_name": {
+          "kind": "FunctionDef",
+          "line": 16002,
+          "module": "graph_cost_and_claims"
+        },
+        "aggregate_spend_per_phase": {
+          "kind": "FunctionDef",
+          "line": 15973,
+          "module": "graph_cost_and_claims"
+        },
+        "annotations": {
+          "kind": "ImportFrom",
+          "line": 11,
+          "module": "graph_foundation"
+        },
+        "apply_signed_manifest": {
+          "kind": "ImportFrom",
+          "line": 63,
+          "module": "graph_foundation"
+        },
+        "automatic_deletion_protections": {
+          "kind": "ImportFrom",
+          "line": 44,
+          "module": "graph_foundation"
+        },
+        "backfill_sn_run_telemetry": {
+          "kind": "FunctionDef",
+          "line": 15787,
+          "module": "graph_audits"
+        },
+        "backfill_structural_name_authorities": {
+          "kind": "FunctionDef",
+          "line": 27322,
+          "module": "graph_parent_lifecycle"
+        },
+        "build_manifest_drain_plan": {
+          "kind": "FunctionDef",
+          "line": 1262,
+          "module": "graph_claim_scope"
+        },
+        "bump_sn_run_counter": {
+          "kind": "FunctionDef",
+          "line": 15501,
+          "module": "graph_audits"
+        },
+        "canonicalize_manifest_drain_paths": {
+          "kind": "FunctionDef",
+          "line": 952,
+          "module": "graph_claim_scope"
+        },
+        "carry_accepted_documentation_across_rename": {
+          "kind": "FunctionDef",
+          "line": 19519,
+          "module": "graph_refinement"
+        },
+        "census_parked_dispositions": {
+          "kind": "FunctionDef",
+          "line": 11742,
+          "module": "graph_source_bindings"
+        },
+        "claim_compose_sources": {
+          "kind": "FunctionDef",
+          "line": 12371,
+          "module": "graph_audits"
+        },
+        "claim_embed_batch": {
+          "kind": "FunctionDef",
+          "line": 18507,
+          "module": "graph_refinement"
+        },
+        "claim_enrich_parents_batch": {
+          "kind": "FunctionDef",
+          "line": 26650,
+          "module": "graph_parent_lifecycle"
+        },
+        "claim_enrich_seed_and_expand": {
+          "kind": "FunctionDef",
+          "line": 16876,
+          "module": "graph_cost_and_claims"
+        },
+        "claim_explicit_standard_name_sources": {
+          "kind": "FunctionDef",
+          "line": 10596,
+          "module": "graph_source_bindings"
+        },
+        "claim_generate_docs_batch": {
+          "kind": "FunctionDef",
+          "line": 25394,
+          "module": "graph_docs_persistence"
+        },
+        "claim_generate_name_batch": {
+          "kind": "FunctionDef",
+          "line": 16448,
+          "module": "graph_cost_and_claims"
+        },
+        "claim_manifest_drain_scope": {
+          "kind": "FunctionDef",
+          "line": 1340,
+          "module": "graph_claim_scope"
+        },
+        "claim_names_for_embedding": {
+          "kind": "FunctionDef",
+          "line": 8407,
+          "module": "graph_catalog_reset"
+        },
+        "claim_names_for_validation": {
+          "kind": "FunctionDef",
+          "line": 8301,
+          "module": "graph_catalog_reset"
+        },
+        "claim_refine_docs_batch": {
+          "kind": "FunctionDef",
+          "line": 25710,
+          "module": "graph_docs_persistence"
+        },
+        "claim_refine_name_batch": {
+          "kind": "FunctionDef",
+          "line": 18354,
+          "module": "graph_refinement"
+        },
+        "claim_review_docs_batch": {
+          "kind": "FunctionDef",
+          "line": 17687,
+          "module": "graph_review_persistence"
+        },
+        "claim_review_name_batch": {
+          "kind": "FunctionDef",
+          "line": 16958,
+          "module": "graph_cost_and_claims"
+        },
+        "claim_review_names": {
+          "kind": "FunctionDef",
+          "line": 12485,
+          "module": "graph_audits"
+        },
+        "claim_review_names_seed_and_expand": {
+          "kind": "FunctionDef",
+          "line": 16903,
+          "module": "graph_cost_and_claims"
+        },
+        "claim_standard_name_source_batch": {
+          "kind": "FunctionDef",
+          "line": 10494,
+          "module": "graph_source_bindings"
+        },
+        "claim_unresolved_links": {
+          "kind": "FunctionDef",
+          "line": 9395,
+          "module": "graph_doc_links"
+        },
+        "classify_manifest_drain_item": {
+          "kind": "FunctionDef",
+          "line": 986,
+          "module": "graph_claim_scope"
+        },
+        "classify_orphan_parent_source_candidates": {
+          "kind": "FunctionDef",
+          "line": 27467,
+          "module": "graph_parent_lifecycle"
+        },
+        "classify_parked_source": {
+          "kind": "FunctionDef",
+          "line": 11532,
+          "module": "graph_source_bindings"
+        },
+        "classify_sourceless_standard_names": {
+          "kind": "FunctionDef",
+          "line": 22683,
+          "module": "graph_supersession"
+        },
+        "clear_holds_not_raised": {
+          "kind": "ImportFrom",
+          "line": 54,
+          "module": "graph_foundation"
+        },
+        "clear_manifest_drain_scope": {
+          "kind": "FunctionDef",
+          "line": 1657,
+          "module": "graph_claim_scope"
+        },
+        "clear_sn_subsystem": {
+          "kind": "FunctionDef",
+          "line": 9300,
+          "module": "graph_catalog_reset"
+        },
+        "clear_standard_names": {
+          "kind": "FunctionDef",
+          "line": 8756,
+          "module": "graph_catalog_reset"
+        },
+        "count_eligible_compose_sources": {
+          "kind": "FunctionDef",
+          "line": 12460,
+          "module": "graph_audits"
+        },
+        "count_extracted_for_domain": {
+          "kind": "FunctionDef",
+          "line": 12432,
+          "module": "graph_audits"
+        },
+        "create_sn_run_open": {
+          "kind": "FunctionDef",
+          "line": 15447,
+          "module": "graph_audits"
+        },
+        "datetime": {
+          "kind": "ImportFrom",
+          "line": 24,
+          "module": "graph_foundation"
+        },
+        "deduplicate_scalar_selected_sources": {
+          "kind": "FunctionDef",
+          "line": 20707,
+          "module": "graph_supersession"
+        },
+        "defaultdict": {
+          "kind": "ImportFrom",
+          "line": 22,
+          "module": "graph_foundation"
+        },
+        "deletion_change_cypher": {
+          "kind": "ImportFrom",
+          "line": 50,
+          "module": "graph_foundation"
+        },
+        "deletion_change_params": {
+          "kind": "ImportFrom",
+          "line": 50,
+          "module": "graph_foundation"
+        },
+        "deque": {
+          "kind": "ImportFrom",
+          "line": 22,
+          "module": "graph_foundation"
+        },
+        "disposition_parked_sources": {
+          "kind": "FunctionDef",
+          "line": 11657,
+          "module": "graph_source_bindings"
+        },
+        "docs_acceptance_set": {
+          "kind": "ImportFrom",
+          "line": 54,
+          "module": "graph_foundation"
+        },
+        "docs_acceptance_where": {
+          "kind": "ImportFrom",
+          "line": 54,
+          "module": "graph_foundation"
+        },
+        "docs_accepted": {
+          "kind": "ImportFrom",
+          "line": 54,
+          "module": "graph_foundation"
+        },
+        "docs_review_eligibility_params": {
+          "kind": "FunctionDef",
+          "line": 6674,
+          "module": "graph_catalog"
+        },
+        "docs_review_eligibility_where": {
+          "kind": "FunctionDef",
+          "line": 6725,
+          "module": "graph_catalog"
+        },
+        "docs_review_property_coverage": {
+          "kind": "FunctionDef",
+          "line": 6770,
+          "module": "graph_catalog"
+        },
+        "export_review_comments": {
+          "kind": "FunctionDef",
+          "line": 15321,
+          "module": "graph_audits"
+        },
+        "fetch_claimed_source_metadata": {
+          "kind": "FunctionDef",
+          "line": 11387,
+          "module": "graph_source_bindings"
+        },
+        "fetch_derived_parent_children": {
+          "kind": "FunctionDef",
+          "line": 26704,
+          "module": "graph_parent_lifecycle"
+        },
+        "fetch_docs_review_feedback_for_sns": {
+          "kind": "FunctionDef",
+          "line": 2686,
+          "module": "graph_lineage"
+        },
+        "fetch_docs_review_feedback_for_standard_names": {
+          "kind": "FunctionDef",
+          "line": 2599,
+          "module": "graph_lineage"
+        },
+        "fetch_low_score_sources": {
+          "kind": "FunctionDef",
+          "line": 2232,
+          "module": "graph_lineage"
+        },
+        "fetch_manifest_source_release_rows": {
+          "kind": "FunctionDef",
+          "line": 12996,
+          "module": "graph_audits"
+        },
+        "fetch_review_feedback_for_sources": {
+          "kind": "FunctionDef",
+          "line": 2357,
+          "module": "graph_lineage"
+        },
+        "fetch_reviewer_history_for_sources": {
+          "kind": "FunctionDef",
+          "line": 2490,
+          "module": "graph_lineage"
+        },
+        "fetch_vocab_gap_adjudications": {
+          "kind": "FunctionDef",
+          "line": 8248,
+          "module": "graph_catalog_reset"
+        },
+        "filter_automatic_deletion_candidates": {
+          "kind": "ImportFrom",
+          "line": 44,
+          "module": "graph_foundation"
+        },
+        "finalize_manifest_drain_scope": {
+          "kind": "FunctionDef",
+          "line": 1734,
+          "module": "graph_claim_scope"
+        },
+        "finalize_sn_run": {
+          "kind": "FunctionDef",
+          "line": 15594,
+          "module": "graph_audits"
+        },
+        "find_name_links": {
+          "kind": "ImportFrom",
+          "line": 38,
+          "module": "graph_foundation"
+        },
+        "find_name_references": {
+          "kind": "ImportFrom",
+          "line": 38,
+          "module": "graph_foundation"
+        },
+        "find_orphan_parent_source_candidates": {
+          "kind": "FunctionDef",
+          "line": 27416,
+          "module": "graph_parent_lifecycle"
+        },
+        "find_prose_bracket_spans": {
+          "kind": "ImportFrom",
+          "line": 38,
+          "module": "graph_foundation"
+        },
+        "functools": {
+          "kind": "Import",
+          "line": 13,
+          "module": "graph_foundation"
+        },
+        "get_existing_standard_names": {
+          "kind": "FunctionDef",
+          "line": 878,
+          "module": "graph_claim_scope"
+        },
+        "get_extraction_candidates_dd": {
+          "kind": "FunctionDef",
+          "line": 772,
+          "module": "graph_claim_scope"
+        },
+        "get_extraction_candidates_signals": {
+          "kind": "FunctionDef",
+          "line": 836,
+          "module": "graph_claim_scope"
+        },
+        "get_named_source_ids": {
+          "kind": "FunctionDef",
+          "line": 894,
+          "module": "graph_claim_scope"
+        },
+        "get_skipped_source_counts": {
+          "kind": "FunctionDef",
+          "line": 12268,
+          "module": "graph_source_bindings"
+        },
+        "get_source_name_mapping": {
+          "kind": "FunctionDef",
+          "line": 2143,
+          "module": "graph_lineage"
+        },
+        "get_standard_name_source_stats": {
+          "kind": "FunctionDef",
+          "line": 15254,
+          "module": "graph_audits"
+        },
+        "get_validated_names": {
+          "kind": "FunctionDef",
+          "line": 8487,
+          "module": "graph_catalog_reset"
+        },
+        "has_open_docs_hold_where": {
+          "kind": "ImportFrom",
+          "line": 54,
+          "module": "graph_foundation"
+        },
+        "hashlib": {
+          "kind": "Import",
+          "line": 14,
+          "module": "graph_foundation"
+        },
+        "inspect": {
+          "kind": "Import",
+          "line": 15,
+          "module": "graph_foundation"
+        },
+        "isn_vocabulary_signature": {
+          "kind": "FunctionDef",
+          "line": 13782,
+          "module": "graph_audits"
+        },
+        "json": {
+          "kind": "Import",
+          "line": 16,
+          "module": "graph_foundation"
+        },
+        "list_skipped_sources": {
+          "kind": "FunctionDef",
+          "line": 12230,
+          "module": "graph_source_bindings"
+        },
+        "logger": {
+          "kind": "Assign",
+          "line": 65,
+          "module": "graph_foundation"
+        },
+        "logging": {
+          "kind": "Import",
+          "line": 17,
+          "module": "graph_foundation"
+        },
+        "mark_for_refine_docs": {
+          "kind": "FunctionDef",
+          "line": 26269,
+          "module": "graph_docs_persistence"
+        },
+        "mark_names_consolidated": {
+          "kind": "FunctionDef",
+          "line": 8531,
+          "module": "graph_catalog_reset"
+        },
+        "mark_names_embedded": {
+          "kind": "FunctionDef",
+          "line": 8442,
+          "module": "graph_catalog_reset"
+        },
+        "mark_names_validated": {
+          "kind": "FunctionDef",
+          "line": 8350,
+          "module": "graph_catalog_reset"
+        },
+        "mark_orphaned_standard_name_runs_stale": {
+          "kind": "FunctionDef",
+          "line": 15683,
+          "module": "graph_audits"
+        },
+        "mark_source_skipped": {
+          "kind": "FunctionDef",
+          "line": 12075,
+          "module": "graph_source_bindings"
+        },
+        "mark_sources_attached": {
+          "kind": "FunctionDef",
+          "line": 11460,
+          "module": "graph_source_bindings"
+        },
+        "mark_sources_composed": {
+          "kind": "FunctionDef",
+          "line": 11422,
+          "module": "graph_source_bindings"
+        },
+        "mark_sources_failed": {
+          "kind": "FunctionDef",
+          "line": 11561,
+          "module": "graph_source_bindings"
+        },
+        "mark_sources_stale": {
+          "kind": "FunctionDef",
+          "line": 12129,
+          "module": "graph_source_bindings"
+        },
+        "merge_standard_name_sources": {
+          "kind": "FunctionDef",
+          "line": 10351,
+          "module": "graph_source_bindings"
+        },
+        "normalize_derived_parent_lifecycle": {
+          "kind": "FunctionDef",
+          "line": 4718,
+          "module": "graph_lineage"
+        },
+        "normalize_name_id": {
+          "kind": "FunctionDef",
+          "line": 253,
+          "module": "graph_foundation"
+        },
+        "normalize_stored_standard_name_kinds": {
+          "kind": "FunctionDef",
+          "line": 15738,
+          "module": "graph_audits"
+        },
+        "nullcontext": {
+          "kind": "ImportFrom",
+          "line": 23,
+          "module": "graph_foundation"
+        },
+        "open_holds": {
+          "kind": "ImportFrom",
+          "line": 54,
+          "module": "graph_foundation"
+        },
+        "os": {
+          "kind": "Import",
+          "line": 18,
+          "module": "graph_foundation"
+        },
+        "partition_focus_by_accepted": {
+          "kind": "FunctionDef",
+          "line": 908,
+          "module": "graph_claim_scope"
+        },
+        "persist_claimed_attachments": {
+          "kind": "FunctionDef",
+          "line": 11256,
+          "module": "graph_source_bindings"
+        },
+        "persist_claimed_source_outcomes": {
+          "kind": "FunctionDef",
+          "line": 11092,
+          "module": "graph_source_bindings"
+        },
+        "persist_claimed_vocab_gaps": {
+          "kind": "FunctionDef",
+          "line": 11132,
+          "module": "graph_source_bindings"
+        },
+        "persist_embed_batch": {
+          "kind": "FunctionDef",
+          "line": 18581,
+          "module": "graph_refinement"
+        },
+        "persist_enriched_parent": {
+          "kind": "FunctionDef",
+          "line": 27065,
+          "module": "graph_parent_lifecycle"
+        },
+        "persist_generated_docs": {
+          "kind": "FunctionDef",
+          "line": 25524,
+          "module": "graph_docs_persistence"
+        },
+        "persist_generated_name_batch": {
+          "kind": "FunctionDef",
+          "line": 7856,
+          "module": "graph_catalog"
+        },
+        "persist_generated_name_winners": {
+          "kind": "FunctionDef",
+          "line": 7438,
+          "module": "graph_catalog"
+        },
+        "persist_outcome_snapshot": {
+          "kind": "FunctionDef",
+          "line": 12346,
+          "module": "graph_source_bindings"
+        },
+        "persist_refined_docs": {
+          "kind": "FunctionDef",
+          "line": 25843,
+          "module": "graph_docs_persistence"
+        },
+        "persist_refined_name": {
+          "kind": "FunctionDef",
+          "line": 18818,
+          "module": "graph_refinement"
+        },
+        "persist_reviewed_docs": {
+          "kind": "FunctionDef",
+          "line": 17786,
+          "module": "graph_review_persistence"
+        },
+        "persist_reviewed_name": {
+          "kind": "FunctionDef",
+          "line": 17130,
+          "module": "graph_review_persistence"
+        },
+        "plan_review_dimension_void": {
+          "kind": "FunctionDef",
+          "line": 6367,
+          "module": "graph_catalog"
+        },
+        "pool_pending_counts": {
+          "kind": "FunctionDef",
+          "line": 26393,
+          "module": "graph_parent_lifecycle"
+        },
+        "prepare_manifest_drain_scope": {
+          "kind": "FunctionDef",
+          "line": 1627,
+          "module": "graph_claim_scope"
+        },
+        "promote_stranded_reviewed": {
+          "kind": "FunctionDef",
+          "line": 12624,
+          "module": "graph_audits"
+        },
+        "property_coverage": {
+          "kind": "FunctionDef",
+          "line": 6730,
+          "module": "graph_catalog"
+        },
+        "query_historical_cpi": {
+          "kind": "FunctionDef",
+          "line": 719,
+          "module": "graph_claim_scope"
+        },
+        "query_pipeline_buckets": {
+          "kind": "FunctionDef",
+          "line": 598,
+          "module": "graph_claim_scope"
+        },
+        "raise_hold": {
+          "kind": "ImportFrom",
+          "line": 54,
+          "module": "graph_foundation"
+        },
+        "re": {
+          "kind": "Import",
+          "line": 19,
+          "module": "graph_foundation"
+        },
+        "realign_grammar_segments_for_name": {
+          "kind": "FunctionDef",
+          "line": 15043,
+          "module": "graph_audits"
+        },
+        "reattach_produced_name_edges": {
+          "kind": "ImportFrom",
+          "line": 43,
+          "module": "graph_foundation"
+        },
+        "reclassify_standard_name_domain": {
+          "kind": "FunctionDef",
+          "line": 156,
+          "module": "graph_foundation"
+        },
+        "reconcile_catalog_edit_origins": {
+          "kind": "FunctionDef",
+          "line": 13978,
+          "module": "graph_audits"
+        },
+        "reconcile_catalog_status": {
+          "kind": "FunctionDef",
+          "line": 14369,
+          "module": "graph_audits"
+        },
+        "reconcile_constraint_fit_artifacts": {
+          "kind": "FunctionDef",
+          "line": 14238,
+          "module": "graph_audits"
+        },
+        "reconcile_descriptionless_composed_names": {
+          "kind": "FunctionDef",
+          "line": 14536,
+          "module": "graph_audits"
+        },
+        "reconcile_docs_axis_from_reviews": {
+          "kind": "FunctionDef",
+          "line": 12773,
+          "module": "graph_audits"
+        },
+        "reconcile_grammar_segments": {
+          "kind": "FunctionDef",
+          "line": 14967,
+          "module": "graph_audits"
+        },
+        "reconcile_orphan_parent_sources": {
+          "kind": "FunctionDef",
+          "line": 27507,
+          "module": "graph_parent_lifecycle"
+        },
+        "reconcile_orphan_parent_sources_batched": {
+          "kind": "FunctionDef",
+          "line": 27623,
+          "module": "graph_parent_lifecycle"
+        },
+        "reconcile_provenance": {
+          "kind": "FunctionDef",
+          "line": 13900,
+          "module": "graph_audits"
+        },
+        "reconcile_reviewable_name_stage": {
+          "kind": "FunctionDef",
+          "line": 14460,
+          "module": "graph_audits"
+        },
+        "reconcile_source_status_liveness": {
+          "kind": "FunctionDef",
+          "line": 13113,
+          "module": "graph_audits"
+        },
+        "reconcile_sourceless_pipeline_names": {
+          "kind": "FunctionDef",
+          "line": 14621,
+          "module": "graph_audits"
+        },
+        "reconcile_standard_name_cocos_links": {
+          "kind": "FunctionDef",
+          "line": 14089,
+          "module": "graph_audits"
+        },
+        "reconcile_standard_name_dd_edges": {
+          "kind": "FunctionDef",
+          "line": 14851,
+          "module": "graph_audits"
+        },
+        "reconcile_standard_name_kinds": {
+          "kind": "FunctionDef",
+          "line": 15163,
+          "module": "graph_audits"
+        },
+        "reconcile_standard_name_source_paths": {
+          "kind": "FunctionDef",
+          "line": 14292,
+          "module": "graph_audits"
+        },
+        "reconcile_standard_name_sources": {
+          "kind": "FunctionDef",
+          "line": 12872,
+          "module": "graph_audits"
+        },
+        "reconcile_standard_name_unit_edges": {
+          "kind": "FunctionDef",
+          "line": 14162,
+          "module": "graph_audits"
+        },
+        "reconcile_vocab_gaps": {
+          "kind": "FunctionDef",
+          "line": 13405,
+          "module": "graph_audits"
+        },
+        "record_dispositions_for_undisposed_parks": {
+          "kind": "FunctionDef",
+          "line": 11700,
+          "module": "graph_source_bindings"
+        },
+        "record_llm_cost": {
+          "kind": "FunctionDef",
+          "line": 15834,
+          "module": "graph_cost_and_claims"
+        },
+        "record_parked_dispositions": {
+          "kind": "FunctionDef",
+          "line": 11620,
+          "module": "graph_source_bindings"
+        },
+        "rederive_structural_edges": {
+          "kind": "FunctionDef",
+          "line": 3509,
+          "module": "graph_lineage"
+        },
+        "refresh_name_claims": {
+          "kind": "FunctionDef",
+          "line": 12575,
+          "module": "graph_audits"
+        },
+        "refuse_protected_automatic_deletion": {
+          "kind": "ImportFrom",
+          "line": 44,
+          "module": "graph_foundation"
+        },
+        "release_all_orphan_claims": {
+          "kind": "FunctionDef",
+          "line": 26340,
+          "module": "graph_parent_lifecycle"
+        },
+        "release_embed_claims": {
+          "kind": "FunctionDef",
+          "line": 18556,
+          "module": "graph_refinement"
+        },
+        "release_embedding_claims": {
+          "kind": "FunctionDef",
+          "line": 8473,
+          "module": "graph_catalog_reset"
+        },
+        "release_enrich_claims": {
+          "kind": "FunctionDef",
+          "line": 24031,
+          "module": "graph_claim_release"
+        },
+        "release_enrich_failed_claims": {
+          "kind": "FunctionDef",
+          "line": 24087,
+          "module": "graph_claim_release"
+        },
+        "release_enrich_parents_claims": {
+          "kind": "FunctionDef",
+          "line": 27691,
+          "module": "graph_parent_lifecycle"
+        },
+        "release_generate_docs_claims": {
+          "kind": "FunctionDef",
+          "line": 25619,
+          "module": "graph_docs_persistence"
+        },
+        "release_generate_docs_failed_claims": {
+          "kind": "FunctionDef",
+          "line": 25659,
+          "module": "graph_docs_persistence"
+        },
+        "release_generate_name_claims": {
+          "kind": "FunctionDef",
+          "line": 23971,
+          "module": "graph_claim_release"
+        },
+        "release_generate_name_failed_claims": {
+          "kind": "FunctionDef",
+          "line": 24012,
+          "module": "graph_claim_release"
+        },
+        "release_manifest_drain_claims": {
+          "kind": "FunctionDef",
+          "line": 1691,
+          "module": "graph_claim_scope"
+        },
+        "release_refine_docs_claims": {
+          "kind": "FunctionDef",
+          "line": 26179,
+          "module": "graph_docs_persistence"
+        },
+        "release_refine_docs_failed_claims": {
+          "kind": "FunctionDef",
+          "line": 26221,
+          "module": "graph_docs_persistence"
+        },
+        "release_refine_name_claims": {
+          "kind": "FunctionDef",
+          "line": 24756,
+          "module": "graph_claim_release"
+        },
+        "release_review_claims": {
+          "kind": "FunctionDef",
+          "line": 12542,
+          "module": "graph_audits"
+        },
+        "release_review_docs_claims": {
+          "kind": "FunctionDef",
+          "line": 24245,
+          "module": "graph_claim_release"
+        },
+        "release_review_docs_failed_claims": {
+          "kind": "FunctionDef",
+          "line": 24291,
+          "module": "graph_claim_release"
+        },
+        "release_review_names_claims": {
+          "kind": "FunctionDef",
+          "line": 24150,
+          "module": "graph_claim_release"
+        },
+        "release_review_names_failed_claims": {
+          "kind": "FunctionDef",
+          "line": 24195,
+          "module": "graph_claim_release"
+        },
+        "release_standard_name_source_claims": {
+          "kind": "FunctionDef",
+          "line": 12292,
+          "module": "graph_source_bindings"
+        },
+        "release_stranded_refine_claim": {
+          "kind": "FunctionDef",
+          "line": 24561,
+          "module": "graph_claim_release"
+        },
+        "release_validation_claims": {
+          "kind": "FunctionDef",
+          "line": 8392,
+          "module": "graph_catalog_reset"
+        },
+        "rename_preserves_meaning": {
+          "kind": "FunctionDef",
+          "line": 18681,
+          "module": "graph_refinement"
+        },
+        "reset_persist_outcomes": {
+          "kind": "FunctionDef",
+          "line": 12361,
+          "module": "graph_source_bindings"
+        },
+        "reset_standard_name_docs": {
+          "kind": "FunctionDef",
+          "line": 25987,
+          "module": "graph_docs_persistence"
+        },
+        "reset_standard_names": {
+          "kind": "FunctionDef",
+          "line": 8548,
+          "module": "graph_catalog_reset"
+        },
+        "resolve_doc_links": {
+          "kind": "FunctionDef",
+          "line": 9781,
+          "module": "graph_doc_links"
+        },
+        "resolve_links_batch": {
+          "kind": "FunctionDef",
+          "line": 9439,
+          "module": "graph_doc_links"
+        },
+        "restore_name_after_failed_rescore": {
+          "kind": "FunctionDef",
+          "line": 24986,
+          "module": "graph_claim_release"
+        },
+        "resubmit_pinned_rename_for_review": {
+          "kind": "FunctionDef",
+          "line": 24810,
+          "module": "graph_claim_release"
+        },
+        "retire_unreachable_hint_edits": {
+          "kind": "FunctionDef",
+          "line": 13367,
+          "module": "graph_audits"
+        },
+        "retry_failed_sources": {
+          "kind": "FunctionDef",
+          "line": 11779,
+          "module": "graph_source_bindings"
+        },
+        "retry_on_deadlock": {
+          "kind": "ImportFrom",
+          "line": 29,
+          "module": "graph_foundation"
+        },
+        "retry_skipped_sources": {
+          "kind": "FunctionDef",
+          "line": 11914,
+          "module": "graph_source_bindings"
+        },
+        "retry_vocab_gap_sources_on_grammar_change": {
+          "kind": "FunctionDef",
+          "line": 13815,
+          "module": "graph_audits"
+        },
+        "revive_unit_skipped_sources": {
+          "kind": "FunctionDef",
+          "line": 13663,
+          "module": "graph_audits"
+        },
+        "scope_exact_standard_names": {
+          "kind": "FunctionDef",
+          "line": 2026,
+          "module": "graph_claim_scope"
+        },
+        "scope_focus_names": {
+          "kind": "FunctionDef",
+          "line": 1764,
+          "module": "graph_claim_scope"
+        },
+        "scoped_terminal_residue": {
+          "kind": "FunctionDef",
+          "line": 26525,
+          "module": "graph_parent_lifecycle"
+        },
+        "seed_parent_sources": {
+          "kind": "FunctionDef",
+          "line": 4652,
+          "module": "graph_lineage"
+        },
+        "set_source_compose_hint": {
+          "kind": "FunctionDef",
+          "line": 10078,
+          "module": "graph_source_bindings"
+        },
+        "stage_claimed_generated_candidates": {
+          "kind": "FunctionDef",
+          "line": 11346,
+          "module": "graph_source_bindings"
+        },
+        "stage_docs_for_rescore": {
+          "kind": "FunctionDef",
+          "line": 18190,
+          "module": "graph_refinement"
+        },
+        "stage_name_for_rescore": {
+          "kind": "FunctionDef",
+          "line": 24894,
+          "module": "graph_claim_release"
+        },
+        "stamp_harmonized_families": {
+          "kind": "FunctionDef",
+          "line": 26124,
+          "module": "graph_docs_persistence"
+        },
+        "stamp_standard_name_units": {
+          "kind": "FunctionDef",
+          "line": 4575,
+          "module": "graph_lineage"
+        },
+        "stop_refine_name_attempt": {
+          "kind": "FunctionDef",
+          "line": 25038,
+          "module": "graph_claim_release"
+        },
+        "strict_review_grammar_context": {
+          "kind": "FunctionDef",
+          "line": 476,
+          "module": "graph_foundation"
+        },
+        "structural_accept_derived_parents": {
+          "kind": "FunctionDef",
+          "line": 27204,
+          "module": "graph_parent_lifecycle"
+        },
+        "supersede_exhausted_standard_name_orphans": {
+          "kind": "FunctionDef",
+          "line": 22978,
+          "module": "graph_supersession"
+        },
+        "supersede_into_ancestor": {
+          "kind": "FunctionDef",
+          "line": 23543,
+          "module": "graph_supersession"
+        },
+        "supersede_prior_source_names": {
+          "kind": "FunctionDef",
+          "line": 19805,
+          "module": "graph_supersession"
+        },
+        "suppress": {
+          "kind": "ImportFrom",
+          "line": 23,
+          "module": "graph_foundation"
+        },
+        "sweep_orphaned_docs_revisions": {
+          "kind": "FunctionDef",
+          "line": 3927,
+          "module": "graph_lineage"
+        },
+        "time": {
+          "kind": "Import",
+          "line": 20,
+          "module": "graph_foundation"
+        },
+        "tombstone_supersede_into": {
+          "kind": "FunctionDef",
+          "line": 20233,
+          "module": "graph_supersession"
+        },
+        "triage_vocab_gaps": {
+          "kind": "FunctionDef",
+          "line": 13540,
+          "module": "graph_audits"
+        },
+        "update_review_aggregates": {
+          "kind": "FunctionDef",
+          "line": 6306,
+          "module": "graph_catalog"
+        },
+        "update_sn_per_phase_costs": {
+          "kind": "FunctionDef",
+          "line": 16023,
+          "module": "graph_cost_and_claims"
+        },
+        "update_sn_run_progress": {
+          "kind": "FunctionDef",
+          "line": 15554,
+          "module": "graph_audits"
+        },
+        "uuid": {
+          "kind": "Import",
+          "line": 21,
+          "module": "graph_foundation"
+        },
+        "void_review_dimension": {
+          "kind": "FunctionDef",
+          "line": 6488,
+          "module": "graph_catalog"
+        },
+        "write_docs_review_results": {
+          "kind": "FunctionDef",
+          "line": 6904,
+          "module": "graph_catalog"
+        },
+        "write_enrichment_results": {
+          "kind": "FunctionDef",
+          "line": 9943,
+          "module": "graph_source_bindings"
+        },
+        "write_name_review_results": {
+          "kind": "FunctionDef",
+          "line": 6821,
+          "module": "graph_catalog"
+        },
+        "write_reviews": {
+          "kind": "FunctionDef",
+          "line": 6046,
+          "module": "graph_catalog"
+        },
+        "write_run_provenance": {
+          "kind": "FunctionDef",
+          "line": 15277,
+          "module": "graph_audits"
+        },
+        "write_skipped_sources": {
+          "kind": "FunctionDef",
+          "line": 12152,
+          "module": "graph_source_bindings"
+        },
+        "write_standard_names": {
+          "kind": "FunctionDef",
+          "line": 5393,
+          "module": "graph_catalog"
+        },
+        "write_vocab_gaps": {
+          "kind": "FunctionDef",
+          "line": 8020,
+          "module": "graph_catalog_reset"
+        }
+      }
+    },
+    "workers.py": {
+      "cross_module_reference_examples": {
+        "worker_compose_and_validate -> worker_common": [
+          "StandardNameBuildState",
+          "logger",
+          "provenance_canonical_names",
+          "asyncio",
+          "ExtractionBatch",
+          "model_provider_exposure"
+        ],
+        "worker_compose_and_validate -> worker_extraction_and_enrichment": [
+          "_retry_attempts",
+          "_enrich_batch_items",
+          "_rerank_comparators_for_worker",
+          "_compose_budget_phase",
+          "_process_attachments",
+          "_update_sources_after_compose"
+        ],
+        "worker_compose_batches -> worker_common": [
+          "model_provider_exposure",
+          "BudgetManager",
+          "_sanitize_compose_result_sources",
+          "logger",
+          "provenance_canonical_names",
+          "_claimed_source_ids"
+        ],
+        "worker_compose_batches -> worker_compose_and_validate": [
+          "_is_quarantined"
+        ],
+        "worker_compose_batches -> worker_extraction_and_enrichment": [
+          "_retry_attempts",
+          "_enrich_batch_items",
+          "_reranked_nearby_comparators",
+          "_enrich_ids_context",
+          "_collect_nearby_name_comparators",
+          "_is_attachment_consistent"
+        ],
+        "worker_enrich_parents -> worker_common": [
+          "BudgetManager",
+          "model_provider_exposure",
+          "asyncio",
+          "normalize_description_text",
+          "Callable",
+          "Any"
+        ],
+        "worker_extraction_and_enrichment -> worker_common": [
+          "StandardNameBuildState",
+          "logger",
+          "asyncio",
+          "Sequence",
+          "Callable",
+          "Any"
+        ],
+        "worker_generate_docs -> worker_common": [
+          "Any",
+          "logger",
+          "strip_dd_prefix",
+          "DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER",
+          "_re",
+          "normalize_prose_spelling"
+        ],
+        "worker_generate_docs -> worker_extraction_and_enrichment": [
+          "_search_nearby_names",
+          "_related_path_neighbours",
+          "_ANCESTOR_CONTEXT_QUERY"
+        ],
+        "worker_generate_docs -> worker_review_names": [
+          "_DD_PATH_CONTEXT_QUERY",
+          "_DOCS_GEN_ENRICH_QUERY",
+          "_DOCS_GEN_PARENT_CHILDREN_QUERY",
+          "_DOCS_GEN_NEARBY_QUERY",
+          "_DOCS_GEN_COCOS_PARAMS_QUERY"
+        ],
+        "worker_refine_docs -> worker_common": [
+          "BudgetManager",
+          "model_provider_exposure",
+          "asyncio",
+          "DEFAULT_ESCALATION_MODEL",
+          "Callable",
+          "Any"
+        ],
+        "worker_refine_docs -> worker_generate_docs": [
+          "_documentation_with_registry_form"
+        ],
+        "worker_refine_docs -> worker_refine_names": [
+          "_is_refine_docs_failure"
+        ],
+        "worker_refine_names -> worker_common": [
+          "Any",
+          "RefineStopReason",
+          "logger",
+          "BudgetManager",
+          "asyncio",
+          "model_provider_exposure"
+        ],
+        "worker_refine_names -> worker_compose_batches": [
+          "_GRAMMAR_FAILURE_MARKERS"
+        ],
+        "worker_refine_names -> worker_extraction_and_enrichment": [
+          "_hybrid_search_neighbours"
+        ],
+        "worker_refine_names -> worker_generate_docs": [
+          "_enrich_dd_path_context"
+        ],
+        "worker_review_docs -> worker_common": [
+          "Any",
+          "strip_dd_prefix",
+          "json",
+          "DD_PREFIX",
+          "DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER",
+          "Callable"
+        ],
+        "worker_review_docs -> worker_enrich_parents": [
+          "_DOCS_REVIEW_VOLATILE_ITEM_FIELDS"
+        ],
+        "worker_review_docs -> worker_generate_docs": [
+          "_enrich_dd_path_context"
+        ],
+        "worker_review_docs -> worker_review_names": [
+          "_persisting_quorum_cycles"
+        ],
+        "worker_review_names -> worker_common": [
+          "Any",
+          "strip_dd_prefix",
+          "logger",
+          "Callable",
+          "model_provider_exposure",
+          "charge_billable_exception"
+        ],
+        "worker_review_names -> worker_extraction_and_enrichment": [
+          "_enrich_batch_items"
+        ],
+        "worker_review_names -> worker_refine_names": [
+          "_NAME_REVIEW_SOURCE_CONTEXT_LIMIT"
+        ]
+      },
+      "cross_module_references": {
+        "worker_compose_and_validate -> worker_common": 117,
+        "worker_compose_and_validate -> worker_extraction_and_enrichment": 29,
+        "worker_compose_batches -> worker_common": 92,
+        "worker_compose_batches -> worker_compose_and_validate": 2,
+        "worker_compose_batches -> worker_extraction_and_enrichment": 30,
+        "worker_enrich_parents -> worker_common": 21,
+        "worker_extraction_and_enrichment -> worker_common": 103,
+        "worker_generate_docs -> worker_common": 47,
+        "worker_generate_docs -> worker_extraction_and_enrichment": 5,
+        "worker_generate_docs -> worker_review_names": 5,
+        "worker_refine_docs -> worker_common": 32,
+        "worker_refine_docs -> worker_generate_docs": 2,
+        "worker_refine_docs -> worker_refine_names": 2,
+        "worker_refine_names -> worker_common": 50,
+        "worker_refine_names -> worker_compose_batches": 1,
+        "worker_refine_names -> worker_extraction_and_enrichment": 2,
+        "worker_refine_names -> worker_generate_docs": 2,
+        "worker_review_docs -> worker_common": 75,
+        "worker_review_docs -> worker_enrich_parents": 1,
+        "worker_review_docs -> worker_generate_docs": 2,
+        "worker_review_docs -> worker_review_names": 1,
+        "worker_review_names -> worker_common": 78,
+        "worker_review_names -> worker_extraction_and_enrichment": 2,
+        "worker_review_names -> worker_refine_names": 1
+      },
+      "modules": {
+        "worker_common": {
+          "imports_from_new_modules": [],
+          "source_tokens": 13577
+        },
+        "worker_compose_and_validate": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 15905
+        },
+        "worker_compose_batches": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 9447
+        },
+        "worker_enrich_parents": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 1810
+        },
+        "worker_extraction_and_enrichment": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 20268
+        },
+        "worker_generate_docs": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 7340
+        },
+        "worker_refine_docs": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 3417
+        },
+        "worker_refine_names": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 7178
+        },
+        "worker_review_docs": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 7508
+        },
+        "worker_review_names": {
+          "imports_from_new_modules": [
+            "worker_common"
+          ],
+          "source_tokens": 12564
+        }
+      },
+      "path": "imas_codex/standard_names/workers.py",
+      "source_tokens": 99014,
+      "symbols": {
+        "Any": {
+          "kind": "ImportFrom",
+          "line": 27,
+          "module": "worker_common"
+        },
+        "BudgetLease": {
+          "kind": "If",
+          "line": 49,
+          "module": "worker_common"
+        },
+        "BudgetManager": {
+          "kind": "If",
+          "line": 49,
+          "module": "worker_common"
+        },
+        "Callable": {
+          "kind": "ImportFrom",
+          "line": 25,
+          "module": "worker_common"
+        },
+        "DD_PREFIX": {
+          "kind": "ImportFrom",
+          "line": 43,
+          "module": "worker_common"
+        },
+        "DEFAULT_ESCALATION_MODEL": {
+          "kind": "ImportFrom",
+          "line": 36,
+          "module": "worker_common"
+        },
+        "DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER": {
+          "kind": "ImportFrom",
+          "line": 36,
+          "module": "worker_common"
+        },
+        "ExtractionBatch": {
+          "kind": "If",
+          "line": 49,
+          "module": "worker_common"
+        },
+        "RefineCandidateValidationError": {
+          "kind": "ClassDef",
+          "line": 6960,
+          "module": "worker_refine_names"
+        },
+        "RefineScopeContinuityError": {
+          "kind": "ClassDef",
+          "line": 6964,
+          "module": "worker_refine_names"
+        },
+        "RefineStopReason": {
+          "kind": "ImportFrom",
+          "line": 29,
+          "module": "worker_common"
+        },
+        "SEMANTIC_SIM_GATE_MODEL": {
+          "kind": "ImportFrom",
+          "line": 36,
+          "module": "worker_common"
+        },
+        "SEMANTIC_SIM_GATE_RESOLUTION_METHOD": {
+          "kind": "ImportFrom",
+          "line": 36,
+          "module": "worker_common"
+        },
+        "Sequence": {
+          "kind": "ImportFrom",
+          "line": 25,
+          "module": "worker_common"
+        },
+        "StandardNameBuildState": {
+          "kind": "If",
+          "line": 49,
+          "module": "worker_common"
+        },
+        "TYPE_CHECKING": {
+          "kind": "ImportFrom",
+          "line": 27,
+          "module": "worker_common"
+        },
+        "_ANCESTOR_CONTEXT_QUERY": {
+          "kind": "Assign",
+          "line": 2160,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_AXIS_LEAVES": {
+          "kind": "Assign",
+          "line": 2907,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_COMPOSE_DOMAIN_STATE_QUERY": {
+          "kind": "Assign",
+          "line": 3856,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_CROSS_IDS_QUERY": {
+          "kind": "Assign",
+          "line": 2172,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_DD_CONTEXT_QUERY": {
+          "kind": "Assign",
+          "line": 2111,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_DD_DEVICE_EXPANSIONS": {
+          "kind": "AnnAssign",
+          "line": 3076,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_DD_PATH_CONTEXT_QUERY": {
+          "kind": "Assign",
+          "line": 9208,
+          "module": "worker_review_names"
+        },
+        "_DOCS_GEN_COCOS_PARAMS_QUERY": {
+          "kind": "Assign",
+          "line": 9247,
+          "module": "worker_review_names"
+        },
+        "_DOCS_GEN_ENRICH_QUERY": {
+          "kind": "Assign",
+          "line": 9232,
+          "module": "worker_review_names"
+        },
+        "_DOCS_GEN_NEARBY_QUERY": {
+          "kind": "Assign",
+          "line": 9265,
+          "module": "worker_review_names"
+        },
+        "_DOCS_GEN_PARENT_CHILDREN_QUERY": {
+          "kind": "Assign",
+          "line": 9255,
+          "module": "worker_review_names"
+        },
+        "_DOCS_REVIEW_VOLATILE_ITEM_FIELDS": {
+          "kind": "Assign",
+          "line": 10403,
+          "module": "worker_enrich_parents"
+        },
+        "_DOMAIN_UK_US": {
+          "kind": "AnnAssign",
+          "line": 217,
+          "module": "worker_common"
+        },
+        "_ERROR_FIELDS_QUERY": {
+          "kind": "Assign",
+          "line": 2194,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_GRAMMAR_FAILURE_MARKERS": {
+          "kind": "AnnAssign",
+          "line": 6944,
+          "module": "worker_compose_batches"
+        },
+        "_GRAMMAR_FIELDS": {
+          "kind": "Assign",
+          "line": 243,
+          "module": "worker_common"
+        },
+        "_GREEK_CMD_RE": {
+          "kind": "Assign",
+          "line": 155,
+          "module": "worker_common"
+        },
+        "_GREEK_CMD_TO_SYMBOL": {
+          "kind": "AnnAssign",
+          "line": 145,
+          "module": "worker_common"
+        },
+        "_GREEK_STRANDED_BACKSLASH_RE": {
+          "kind": "Assign",
+          "line": 158,
+          "module": "worker_common"
+        },
+        "_GREEK_WORD_RE": {
+          "kind": "Assign",
+          "line": 140,
+          "module": "worker_common"
+        },
+        "_GREEK_WORD_TO_SYMBOL": {
+          "kind": "AnnAssign",
+          "line": 135,
+          "module": "worker_common"
+        },
+        "_HARDWARE_LOCUS_WORDS": {
+          "kind": "Assign",
+          "line": 2924,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_IDS_CONTEXT_QUERY": {
+          "kind": "Assign",
+          "line": 2217,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_LATEX_CMD_ARG_RE": {
+          "kind": "Assign",
+          "line": 160,
+          "module": "worker_common"
+        },
+        "_LATEX_CMD_BARE_RE": {
+          "kind": "Assign",
+          "line": 162,
+          "module": "worker_common"
+        },
+        "_MATH_DELIM_RE": {
+          "kind": "Assign",
+          "line": 167,
+          "module": "worker_common"
+        },
+        "_MAX_MEMBER_DOCS": {
+          "kind": "Assign",
+          "line": 2212,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_MEMBER_DOC_MAX_CHARS": {
+          "kind": "Assign",
+          "line": 2215,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_MEMBER_DOC_QUERY": {
+          "kind": "Assign",
+          "line": 2204,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_NAME_REVIEW_SOURCE_CONTEXT_LIMIT": {
+          "kind": "Assign",
+          "line": 7820,
+          "module": "worker_refine_names"
+        },
+        "_NEARBY_COMPARATOR_HARD_CEILING": {
+          "kind": "Assign",
+          "line": 1884,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_NON_NAMEABLE_BARE_TOKENS": {
+          "kind": "AnnAssign",
+          "line": 1176,
+          "module": "worker_common"
+        },
+        "_OPTICAL_GEOMETRY_PATH_WORDS": {
+          "kind": "Assign",
+          "line": 2986,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_ORDINAL_POSITION_WORDS": {
+          "kind": "Assign",
+          "line": 2958,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_RELATED_MAX_RESULTS": {
+          "kind": "Assign",
+          "line": 2453,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_RERANK_LEASE_FLOOR_USD": {
+          "kind": "Assign",
+          "line": 1974,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_RETURN_UNSPENT_REFINE_ATTEMPT": {
+          "kind": "Assign",
+          "line": 7071,
+          "module": "worker_refine_names"
+        },
+        "_SCOPED_VALIDATION_CLAIM_TIMEOUT": {
+          "kind": "Assign",
+          "line": 5323,
+          "module": "worker_compose_and_validate"
+        },
+        "_SHAPE_PARAMETER_BASE_POLICY": {
+          "kind": "AnnAssign",
+          "line": 307,
+          "module": "worker_common"
+        },
+        "_SNAKE_CASE_RE": {
+          "kind": "Assign",
+          "line": 589,
+          "module": "worker_common"
+        },
+        "_SOLID_GEOMETRY_PATH_SEGMENTS": {
+          "kind": "Assign",
+          "line": 2979,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_SUBSCRIPT_BRACE_RE": {
+          "kind": "Assign",
+          "line": 165,
+          "module": "worker_common"
+        },
+        "_SUPERSCRIPT_BRACE_RE": {
+          "kind": "Assign",
+          "line": 164,
+          "module": "worker_common"
+        },
+        "_TIME_DERIVATIVE_SEGMENT_RE": {
+          "kind": "Assign",
+          "line": 2905,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_VERSION_HISTORY_QUERY": {
+          "kind": "Assign",
+          "line": 2185,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_VOCABULARY_GAP_MARKERS": {
+          "kind": "AnnAssign",
+          "line": 7034,
+          "module": "worker_refine_names"
+        },
+        "_active_editorial_gap_guidance": {
+          "kind": "FunctionDef",
+          "line": 1514,
+          "module": "worker_common"
+        },
+        "_auto_detect_physical_base_gaps": {
+          "kind": "FunctionDef",
+          "line": 1302,
+          "module": "worker_common"
+        },
+        "_book_rerank_spend": {
+          "kind": "FunctionDef",
+          "line": 2012,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_bound_docs_review_dd_paths": {
+          "kind": "FunctionDef",
+          "line": 10433,
+          "module": "worker_review_docs"
+        },
+        "_bounded_docs_escalation_factory": {
+          "kind": "FunctionDef",
+          "line": 10639,
+          "module": "worker_review_docs"
+        },
+        "_build_grammar_retry_reason": {
+          "kind": "FunctionDef",
+          "line": 1473,
+          "module": "worker_common"
+        },
+        "_build_token_reuse_retry_reason": {
+          "kind": "FunctionDef",
+          "line": 1492,
+          "module": "worker_common"
+        },
+        "_cache": {
+          "kind": "ImportFrom",
+          "line": 26,
+          "module": "worker_common"
+        },
+        "_candidate_source_node_id": {
+          "kind": "FunctionDef",
+          "line": 972,
+          "module": "worker_common"
+        },
+        "_canonical_docs_review_item": {
+          "kind": "FunctionDef",
+          "line": 10422,
+          "module": "worker_review_docs"
+        },
+        "_claimed_source_ids": {
+          "kind": "FunctionDef",
+          "line": 615,
+          "module": "worker_common"
+        },
+        "_claimed_source_outcome": {
+          "kind": "FunctionDef",
+          "line": 734,
+          "module": "worker_common"
+        },
+        "_closed_vocabulary_definitions": {
+          "kind": "Assign",
+          "line": 8609,
+          "module": "worker_review_names"
+        },
+        "_coerce_llm_metric": {
+          "kind": "FunctionDef",
+          "line": 1212,
+          "module": "worker_common"
+        },
+        "_collect_nearby_name_comparators": {
+          "kind": "FunctionDef",
+          "line": 1902,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_compose_budget_phase": {
+          "kind": "FunctionDef",
+          "line": 2074,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_compose_refined_candidate_name": {
+          "kind": "FunctionDef",
+          "line": 7004,
+          "module": "worker_refine_names"
+        },
+        "_compute_token_reuse_hits": {
+          "kind": "FunctionDef",
+          "line": 1381,
+          "module": "worker_common"
+        },
+        "_consume_claimed_vocab_gaps": {
+          "kind": "FunctionDef",
+          "line": 3540,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_content_tokens": {
+          "kind": "FunctionDef",
+          "line": 3039,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_convert_fields_to_grammar": {
+          "kind": "FunctionDef",
+          "line": 5561,
+          "module": "worker_compose_and_validate"
+        },
+        "_dd_standard_name_units_dimensionally_agree": {
+          "kind": "FunctionDef",
+          "line": 3131,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_dedup_adjacent_tokens": {
+          "kind": "FunctionDef",
+          "line": 255,
+          "module": "worker_common"
+        },
+        "_docs_review_request_identity": {
+          "kind": "FunctionDef",
+          "line": 10625,
+          "module": "worker_review_docs"
+        },
+        "_documentation_banned_prose_note": {
+          "kind": "AsyncFunctionDef",
+          "line": 10978,
+          "module": "worker_review_docs"
+        },
+        "_documentation_conformance_note": {
+          "kind": "FunctionDef",
+          "line": 10932,
+          "module": "worker_review_docs"
+        },
+        "_documentation_contradiction_note": {
+          "kind": "AsyncFunctionDef",
+          "line": 11019,
+          "module": "worker_review_docs"
+        },
+        "_documentation_with_registry_form": {
+          "kind": "FunctionDef",
+          "line": 9816,
+          "module": "worker_generate_docs"
+        },
+        "_enrich_batch_items": {
+          "kind": "FunctionDef",
+          "line": 2555,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_enrich_dd_path_context": {
+          "kind": "FunctionDef",
+          "line": 9279,
+          "module": "worker_generate_docs"
+        },
+        "_enrich_docs_review_dd_context": {
+          "kind": "FunctionDef",
+          "line": 10602,
+          "module": "worker_review_docs"
+        },
+        "_enrich_for_docs_gen": {
+          "kind": "FunctionDef",
+          "line": 9356,
+          "module": "worker_generate_docs"
+        },
+        "_enrich_ids_context": {
+          "kind": "FunctionDef",
+          "line": 2233,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_enrich_name_review_items": {
+          "kind": "FunctionDef",
+          "line": 7839,
+          "module": "worker_review_names"
+        },
+        "_expanded_path_tokens": {
+          "kind": "FunctionDef",
+          "line": 3045,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_extract_llm_telemetry": {
+          "kind": "FunctionDef",
+          "line": 1220,
+          "module": "worker_common"
+        },
+        "_fill_template_sentence": {
+          "kind": "FunctionDef",
+          "line": 9758,
+          "module": "worker_generate_docs"
+        },
+        "_filter_persist_candidates_to_claimed_sources": {
+          "kind": "FunctionDef",
+          "line": 880,
+          "module": "worker_common"
+        },
+        "_geometry_representation_conflicts": {
+          "kind": "FunctionDef",
+          "line": 3100,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_grammar_retry": {
+          "kind": "AsyncFunctionDef",
+          "line": 3651,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_grammar_round_trip_failures": {
+          "kind": "FunctionDef",
+          "line": 1414,
+          "module": "worker_common"
+        },
+        "_has_dd_source_reference": {
+          "kind": "FunctionDef",
+          "line": 10491,
+          "module": "worker_review_docs"
+        },
+        "_hybrid_search_neighbours": {
+          "kind": "FunctionDef",
+          "line": 2429,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_hybrid_search_neighbours_batch": {
+          "kind": "FunctionDef",
+          "line": 2261,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_inject_shape_parameter_surface": {
+          "kind": "FunctionDef",
+          "line": 553,
+          "module": "worker_common"
+        },
+        "_instantiated_template_sentences": {
+          "kind": "FunctionDef",
+          "line": 9773,
+          "module": "worker_generate_docs"
+        },
+        "_ir_claims_time_change_in_scope": {
+          "kind": "FunctionDef",
+          "line": 446,
+          "module": "worker_common"
+        },
+        "_ir_denotes_time_change": {
+          "kind": "FunctionDef",
+          "line": 419,
+          "module": "worker_common"
+        },
+        "_is_attachment_consistent": {
+          "kind": "FunctionDef",
+          "line": 3149,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_is_ordinal_point_sample": {
+          "kind": "FunctionDef",
+          "line": 2989,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_is_quarantined": {
+          "kind": "FunctionDef",
+          "line": 5124,
+          "module": "worker_compose_and_validate"
+        },
+        "_is_refine_docs_failure": {
+          "kind": "FunctionDef",
+          "line": 7049,
+          "module": "worker_refine_names"
+        },
+        "_is_refine_grammar_failure": {
+          "kind": "FunctionDef",
+          "line": 7017,
+          "module": "worker_refine_names"
+        },
+        "_isn_physical_bases": {
+          "kind": "FunctionDef",
+          "line": 328,
+          "module": "worker_common"
+        },
+        "_isn_segment_tokens": {
+          "kind": "FunctionDef",
+          "line": 315,
+          "module": "worker_common"
+        },
+        "_load_docs_review_examples": {
+          "kind": "FunctionDef",
+          "line": 10592,
+          "module": "worker_review_docs"
+        },
+        "_load_docs_review_parent_children": {
+          "kind": "FunctionDef",
+          "line": 10564,
+          "module": "worker_review_docs"
+        },
+        "_load_docs_review_source_item": {
+          "kind": "FunctionDef",
+          "line": 10519,
+          "module": "worker_review_docs"
+        },
+        "_load_known_physical_bases": {
+          "kind": "FunctionDef",
+          "line": 1276,
+          "module": "worker_common"
+        },
+        "_mark_source_prevalidation_failed": {
+          "kind": "FunctionDef",
+          "line": 1088,
+          "module": "worker_common"
+        },
+        "_mark_vocab_gap_sources": {
+          "kind": "FunctionDef",
+          "line": 2471,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_name_claims_time_change": {
+          "kind": "FunctionDef",
+          "line": 484,
+          "module": "worker_common"
+        },
+        "_name_denotes_rate": {
+          "kind": "FunctionDef",
+          "line": 409,
+          "module": "worker_common"
+        },
+        "_name_denotes_state": {
+          "kind": "FunctionDef",
+          "line": 399,
+          "module": "worker_common"
+        },
+        "_name_locus_token": {
+          "kind": "FunctionDef",
+          "line": 3085,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_nearby_names_for_docs_gen": {
+          "kind": "FunctionDef",
+          "line": 9712,
+          "module": "worker_generate_docs"
+        },
+        "_persist_claimed_skips": {
+          "kind": "FunctionDef",
+          "line": 3514,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_persist_dd_gap_evidence": {
+          "kind": "FunctionDef",
+          "line": 687,
+          "module": "worker_common"
+        },
+        "_persist_description_checked_candidates": {
+          "kind": "FunctionDef",
+          "line": 981,
+          "module": "worker_common"
+        },
+        "_persisting_quorum_cycles": {
+          "kind": "AsyncFunctionDef",
+          "line": 8593,
+          "module": "worker_review_names"
+        },
+        "_process_attachments": {
+          "kind": "FunctionDef",
+          "line": 3431,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_process_attachments_core": {
+          "kind": "FunctionDef",
+          "line": 3343,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_quorum_incomplete_deferrals": {
+          "kind": "AnnAssign",
+          "line": 8050,
+          "module": "worker_review_names"
+        },
+        "_rate_natured_bases": {
+          "kind": "FunctionDef",
+          "line": 362,
+          "module": "worker_common"
+        },
+        "_re": {
+          "kind": "Import",
+          "line": 24,
+          "module": "worker_common"
+        },
+        "_record_quorum_incomplete": {
+          "kind": "FunctionDef",
+          "line": 8053,
+          "module": "worker_review_names"
+        },
+        "_refine_batch_scope_id": {
+          "kind": "FunctionDef",
+          "line": 6968,
+          "module": "worker_refine_names"
+        },
+        "_refine_failure_stop_reason": {
+          "kind": "FunctionDef",
+          "line": 7037,
+          "module": "worker_refine_names"
+        },
+        "_related_path_neighbours": {
+          "kind": "FunctionDef",
+          "line": 2509,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_release_docs_review_claim": {
+          "kind": "AsyncFunctionDef",
+          "line": 10914,
+          "module": "worker_review_docs"
+        },
+        "_rerank_comparators_for_compose": {
+          "kind": "AsyncFunctionDef",
+          "line": 1977,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_rerank_comparators_for_worker": {
+          "kind": "AsyncFunctionDef",
+          "line": 2079,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_reranked_nearby_comparators": {
+          "kind": "AsyncFunctionDef",
+          "line": 2039,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_retry_attempts": {
+          "kind": "FunctionDef",
+          "line": 2459,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_retry_k_expansion": {
+          "kind": "FunctionDef",
+          "line": 2465,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_return_unspent_refine_attempt": {
+          "kind": "FunctionDef",
+          "line": 7081,
+          "module": "worker_refine_names"
+        },
+        "_review_dd_source_bindings": {
+          "kind": "FunctionDef",
+          "line": 629,
+          "module": "worker_common"
+        },
+        "_review_dd_source_ids": {
+          "kind": "FunctionDef",
+          "line": 641,
+          "module": "worker_common"
+        },
+        "_review_source_binding_sort_key": {
+          "kind": "FunctionDef",
+          "line": 7823,
+          "module": "worker_review_names"
+        },
+        "_run_rd_quorum_cycles": {
+          "kind": "AsyncFunctionDef",
+          "line": 8090,
+          "module": "worker_review_names"
+        },
+        "_sanitize_compose_result_sources": {
+          "kind": "FunctionDef",
+          "line": 771,
+          "module": "worker_common"
+        },
+        "_sanitize_dd_gap_evidence": {
+          "kind": "FunctionDef",
+          "line": 646,
+          "module": "worker_common"
+        },
+        "_search_nearby_names": {
+          "kind": "FunctionDef",
+          "line": 1887,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_search_reference_exemplars": {
+          "kind": "FunctionDef",
+          "line": 3608,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_self_refine_candidate": {
+          "kind": "AsyncFunctionDef",
+          "line": 3708,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_set_docs_review_dd_source_paths": {
+          "kind": "FunctionDef",
+          "line": 10475,
+          "module": "worker_review_docs"
+        },
+        "_shape_parameter_bases": {
+          "kind": "FunctionDef",
+          "line": 347,
+          "module": "worker_common"
+        },
+        "_shape_parameter_surface": {
+          "kind": "FunctionDef",
+          "line": 537,
+          "module": "worker_common"
+        },
+        "_stamp_dedup_decision": {
+          "kind": "FunctionDef",
+          "line": 1542,
+          "module": "worker_common"
+        },
+        "_state_resolution_tokens": {
+          "kind": "FunctionDef",
+          "line": 380,
+          "module": "worker_common"
+        },
+        "_strip_response_source_id": {
+          "kind": "FunctionDef",
+          "line": 624,
+          "module": "worker_common"
+        },
+        "_time_change_claim_is_binary_scoped": {
+          "kind": "FunctionDef",
+          "line": 512,
+          "module": "worker_common"
+        },
+        "_unfunded_cause": {
+          "kind": "FunctionDef",
+          "line": 8059,
+          "module": "worker_review_names"
+        },
+        "_update_sources_after_attach": {
+          "kind": "FunctionDef",
+          "line": 3471,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_update_sources_after_compose": {
+          "kind": "FunctionDef",
+          "line": 3454,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_update_sources_after_skip": {
+          "kind": "FunctionDef",
+          "line": 3500,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_update_sources_after_vocab_gap": {
+          "kind": "FunctionDef",
+          "line": 3483,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_validate_via_isn": {
+          "kind": "FunctionDef",
+          "line": 5002,
+          "module": "worker_compose_and_validate"
+        },
+        "_vector_fields_conflict": {
+          "kind": "FunctionDef",
+          "line": 3012,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "_withhold_binding_conflicted_sources": {
+          "kind": "FunctionDef",
+          "line": 902,
+          "module": "worker_common"
+        },
+        "_write_composed_name_domains": {
+          "kind": "AsyncFunctionDef",
+          "line": 3868,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "annotations": {
+          "kind": "ImportFrom",
+          "line": 18,
+          "module": "worker_common"
+        },
+        "asyncio": {
+          "kind": "Import",
+          "line": 20,
+          "module": "worker_common"
+        },
+        "backfill_semantic_similarity_gate_resolution_method": {
+          "kind": "FunctionDef",
+          "line": 57,
+          "module": "worker_common"
+        },
+        "bind_attempt_exposure": {
+          "kind": "ImportFrom",
+          "line": 31,
+          "module": "worker_common"
+        },
+        "charge_billable_exception": {
+          "kind": "ImportFrom",
+          "line": 31,
+          "module": "worker_common"
+        },
+        "claim_ids_for_validation": {
+          "kind": "FunctionDef",
+          "line": 5326,
+          "module": "worker_compose_and_validate"
+        },
+        "compose_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 5835,
+          "module": "worker_compose_batches"
+        },
+        "compose_worker": {
+          "kind": "AsyncFunctionDef",
+          "line": 3929,
+          "module": "worker_compose_and_validate"
+        },
+        "consolidate_worker": {
+          "kind": "AsyncFunctionDef",
+          "line": 5600,
+          "module": "worker_compose_and_validate"
+        },
+        "detect_value_provenance": {
+          "kind": "ImportFrom",
+          "line": 42,
+          "module": "worker_common"
+        },
+        "drain_validation_backlog": {
+          "kind": "AsyncFunctionDef",
+          "line": 5275,
+          "module": "worker_compose_and_validate"
+        },
+        "drain_validation_for_ids": {
+          "kind": "AsyncFunctionDef",
+          "line": 5380,
+          "module": "worker_compose_and_validate"
+        },
+        "encode_source_path": {
+          "kind": "ImportFrom",
+          "line": 43,
+          "module": "worker_common"
+        },
+        "extract_worker": {
+          "kind": "AsyncFunctionDef",
+          "line": 1582,
+          "module": "worker_extraction_and_enrichment"
+        },
+        "is_non_nameable_coordinate": {
+          "kind": "FunctionDef",
+          "line": 1192,
+          "module": "worker_common"
+        },
+        "is_well_formed_candidate": {
+          "kind": "FunctionDef",
+          "line": 592,
+          "module": "worker_common"
+        },
+        "json": {
+          "kind": "Import",
+          "line": 21,
+          "module": "worker_common"
+        },
+        "logger": {
+          "kind": "Assign",
+          "line": 54,
+          "module": "worker_common"
+        },
+        "logging": {
+          "kind": "Import",
+          "line": 22,
+          "module": "worker_common"
+        },
+        "lru_cache": {
+          "kind": "ImportFrom",
+          "line": 26,
+          "module": "worker_common"
+        },
+        "model_provider_exposure": {
+          "kind": "ImportFrom",
+          "line": 31,
+          "module": "worker_common"
+        },
+        "normalize_description_notation": {
+          "kind": "FunctionDef",
+          "line": 170,
+          "module": "worker_common"
+        },
+        "normalize_description_text": {
+          "kind": "FunctionDef",
+          "line": 211,
+          "module": "worker_common"
+        },
+        "normalize_prose_spelling": {
+          "kind": "FunctionDef",
+          "line": 105,
+          "module": "worker_common"
+        },
+        "normalize_spelling": {
+          "kind": "FunctionDef",
+          "line": 92,
+          "module": "worker_common"
+        },
+        "persist_worker": {
+          "kind": "AsyncFunctionDef",
+          "line": 5692,
+          "module": "worker_compose_and_validate"
+        },
+        "prepare_docs_review_request": {
+          "kind": "AsyncFunctionDef",
+          "line": 10702,
+          "module": "worker_review_docs"
+        },
+        "process_embed_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 11740,
+          "module": "worker_refine_docs"
+        },
+        "process_enrich_parents_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 10183,
+          "module": "worker_enrich_parents"
+        },
+        "process_generate_docs_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 9894,
+          "module": "worker_generate_docs"
+        },
+        "process_generate_name_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 6915,
+          "module": "worker_compose_batches"
+        },
+        "process_refine_docs_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 11370,
+          "module": "worker_refine_docs"
+        },
+        "process_refine_name_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 7111,
+          "module": "worker_refine_names"
+        },
+        "process_review_docs_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 11140,
+          "module": "worker_review_docs"
+        },
+        "process_review_name_batch": {
+          "kind": "AsyncFunctionDef",
+          "line": 8640,
+          "module": "worker_review_names"
+        },
+        "provenance_canonical_names": {
+          "kind": "FunctionDef",
+          "line": 1117,
+          "module": "worker_common"
+        },
+        "quorum_incomplete_snapshot": {
+          "kind": "FunctionDef",
+          "line": 8073,
+          "module": "worker_review_names"
+        },
+        "random": {
+          "kind": "Import",
+          "line": 23,
+          "module": "worker_common"
+        },
+        "reset_quorum_incomplete": {
+          "kind": "FunctionDef",
+          "line": 8081,
+          "module": "worker_review_names"
+        },
+        "semantic_gate_name_text": {
+          "kind": "FunctionDef",
+          "line": 8612,
+          "module": "worker_review_names"
+        },
+        "shape_parameter_base_drift": {
+          "kind": "FunctionDef",
+          "line": 333,
+          "module": "worker_common"
+        },
+        "strip_dd_prefix": {
+          "kind": "ImportFrom",
+          "line": 43,
+          "module": "worker_common"
+        },
+        "validate_name_candidate": {
+          "kind": "FunctionDef",
+          "line": 5180,
+          "module": "worker_compose_and_validate"
+        },
+        "validate_worker": {
+          "kind": "AsyncFunctionDef",
+          "line": 5444,
+          "module": "worker_compose_and_validate"
+        },
+        "vocabulary_source": {
+          "kind": "ImportFrom",
+          "line": 30,
+          "module": "worker_common"
+        }
+      }
+    }
+  },
+  "live_claims": [],
+  "live_claims_positive_control": {
+    "current_run_id": "r-20261023T130048028115-srtj-graph-ops-split-design",
+    "files_scanned": 40,
+    "known_current_run_seen": true
+  },
+  "max_module_tokens": 60000,
+  "patch_targets": {
+    "examples": {
+      "graph_audits": [
+        "tests/cli/test_sn_status_cli.py:84:get_standard_name_source_stats",
+        "tests/standard_names/test_atomic_refined_name_persistence.py:167:bump_sn_run_counter",
+        "tests/standard_names/test_atomic_refined_name_persistence.py:342:bump_sn_run_counter",
+        "tests/standard_names/test_atomic_refined_name_persistence.py:483:bump_sn_run_counter",
+        "tests/standard_names/test_comment_export.py:212:export_review_comments",
+        "tests/standard_names/test_comment_export.py:236:export_review_comments",
+        "tests/standard_names/test_comment_export.py:260:export_review_comments",
+        "tests/standard_names/test_comment_export.py:279:export_review_comments"
+      ],
+      "graph_catalog": [
+        "tests/standard_names/test_compose_supersede_dual_bound.py:220:persist_generated_name_batch",
+        "tests/standard_names/test_compose_supersede_dual_bound.py:293:persist_generated_name_batch",
+        "tests/standard_names/test_dd_gap_automated_writers.py:522:write_reviews",
+        "tests/standard_names/test_dd_gap_automated_writers.py:524:update_review_aggregates",
+        "tests/standard_names/test_dd_gap_automated_writers.py:696:persist_generated_name_batch",
+        "tests/standard_names/test_docs_supersede_safety.py:219:write_reviews",
+        "tests/standard_names/test_edit_engine.py:28:write_reviews",
+        "tests/standard_names/test_export_resolution_method.py:93:docs_review_property_coverage"
+      ],
+      "graph_catalog_reset": [
+        "tests/cli/test_sn_embed_preflight.py:123:clear_standard_names",
+        "tests/cli/test_sn_embed_preflight.py:126:reset_standard_names",
+        "tests/cli/test_sn_generate_cli.py:106:reset_standard_names",
+        "tests/cli/test_sn_generate_cli.py:128:reset_standard_names",
+        "tests/cli/test_sn_generate_cli.py:153:reset_standard_names",
+        "tests/cli/test_sn_generate_cli.py:173:clear_standard_names",
+        "tests/cli/test_sn_generate_cli.py:208:clear_standard_names",
+        "tests/cli/test_sn_generate_cli.py:238:reset_standard_names"
+      ],
+      "graph_claim_release": [
+        "tests/standard_names/test_cli_flags.py:56:release_stranded_refine_claim",
+        "tests/standard_names/test_compose_supersede_dual_bound.py:224:release_generate_name_failed_claims",
+        "tests/standard_names/test_compose_supersede_dual_bound.py:297:release_generate_name_failed_claims",
+        "tests/standard_names/test_dd_gap_automated_writers.py:660:_verify_source_claim_winners",
+        "tests/standard_names/test_dup_guard_integration.py:135:stop_refine_name_attempt",
+        "tests/standard_names/test_focus_flag.py:341:_verify_docs_claim_winners",
+        "tests/standard_names/test_generate_name_persist.py:159:release_generate_name_failed_claims",
+        "tests/standard_names/test_pool_batch_processors.py:1020:_mark_refine_docs_exhausted"
+      ],
+      "graph_claim_scope": [
+        "tests/standard_names/test_domain_seed_pinning.py:45:get_existing_standard_names",
+        "tests/standard_names/test_exact_name_scope.py:270:scope_exact_standard_names",
+        "tests/standard_names/test_exact_name_scope.py:349:scope_exact_standard_names",
+        "tests/standard_names/test_exact_name_scope.py:377:scope_exact_standard_names",
+        "tests/standard_names/test_exact_name_scope.py:416:scope_exact_standard_names",
+        "tests/standard_names/test_manifest_drain.py:265:build_manifest_drain_plan",
+        "tests/standard_names/test_manifest_drain.py:270:claim_manifest_drain_scope",
+        "tests/standard_names/test_manifest_drain.py:310:build_manifest_drain_plan"
+      ],
+      "graph_cost_and_claims": [
+        "tests/standard_names/test_budget_graph_backed.py:277:record_llm_cost",
+        "tests/standard_names/test_budget_graph_backed.py:308:record_llm_cost",
+        "tests/standard_names/test_budget_graph_backed.py:328:record_llm_cost",
+        "tests/standard_names/test_budget_graph_backed.py:359:record_llm_cost",
+        "tests/standard_names/test_budget_graph_backed.py:399:record_llm_cost",
+        "tests/standard_names/test_budget_graph_backed.py:428:aggregate_spend_for_run",
+        "tests/standard_names/test_budget_graph_backed.py:460:aggregate_spend_for_run",
+        "tests/standard_names/test_budget_graph_backed.py:80:record_llm_cost"
+      ],
+      "graph_docs_persistence": [
+        "tests/standard_names/test_docs_opening_insertion.py:56:persist_generated_docs",
+        "tests/standard_names/test_docs_opening_insertion.py:57:persist_refined_docs",
+        "tests/standard_names/test_family_harmonization_auto.py:103:stamp_harmonized_families",
+        "tests/standard_names/test_family_harmonization_auto.py:115:stamp_harmonized_families",
+        "tests/standard_names/test_family_harmonization_auto.py:139:stamp_harmonized_families",
+        "tests/standard_names/test_family_harmonization_auto.py:166:stamp_harmonized_families",
+        "tests/standard_names/test_pool_batch_processors.py:1023:release_refine_docs_failed_claims",
+        "tests/standard_names/test_refine_docs_chain.py:727:persist_refined_docs"
+      ],
+      "graph_foundation": [
+        "tests/cli/test_sn_generate_cli.py:72:GraphClient",
+        "tests/cli/test_sn_generate_cli.py:86:GraphClient",
+        "tests/standard_names/review/test_axis_split_schema.py:108:GraphClient",
+        "tests/standard_names/review/test_axis_split_schema.py:139:GraphClient",
+        "tests/standard_names/review/test_axis_split_schema.py:53:GraphClient",
+        "tests/standard_names/review/test_axis_split_schema.py:80:GraphClient",
+        "tests/standard_names/test_atomic_refined_name_persistence.py:152:GraphClient",
+        "tests/standard_names/test_atomic_refined_name_persistence.py:272:GraphClient"
+      ],
+      "graph_lineage": [
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py:1034:_query_seedable_derived_parents",
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py:1038:_query_legacy_repairable_derived_parents",
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py:1042:_query_derived_parents_for_admission_cleanup",
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py:1046:_materialize_derived_parent_rows",
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py:509:_query_seedable_derived_parents",
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py:513:_query_legacy_repairable_derived_parents",
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py:517:_query_derived_parents_for_admission_cleanup",
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py:525:_validate_derived_parent_identity"
+      ],
+      "graph_parent_lifecycle": [
+        "tests/standard_names/test_enrich_parents.py:259:fetch_derived_parent_children",
+        "tests/standard_names/test_enrich_parents.py:263:release_enrich_parents_claims",
+        "tests/standard_names/test_enrich_parents.py:270:persist_enriched_parent",
+        "tests/standard_names/test_enrich_parents.py:325:fetch_derived_parent_children",
+        "tests/standard_names/test_enrich_parents.py:341:persist_enriched_parent",
+        "tests/standard_names/test_provenance_orphan_retirement.py:64:find_orphan_parent_source_candidates",
+        "tests/standard_names/test_provenance_rebuild.py:408:find_orphan_parent_source_candidates"
+      ],
+      "graph_refinement": [
+        "tests/standard_names/test_dup_guard_integration.py:132:persist_refined_name",
+        "tests/standard_names/test_embed_worker.py:95:persist_embed_batch",
+        "tests/standard_names/test_refine_attempt_budget.py:448:persist_refined_name",
+        "tests/standard_names/test_refine_name_chain.py:1014:persist_refined_name",
+        "tests/standard_names/test_refine_name_chain.py:1086:persist_refined_name",
+        "tests/standard_names/test_refine_name_chain.py:1384:persist_refined_name",
+        "tests/standard_names/test_refine_name_chain.py:704:persist_refined_name",
+        "tests/standard_names/test_refine_name_chain.py:761:persist_refined_name"
+      ],
+      "graph_review_persistence": [
+        "tests/standard_names/test_gate_verdict_provenance.py:80:persist_reviewed_name",
+        "tests/standard_names/test_pool_batch_processors.py:773:persist_reviewed_name",
+        "tests/standard_names/test_pool_batch_processors.py:835:persist_reviewed_docs",
+        "tests/standard_names/test_rd_quorum_integrity.py:414:persist_reviewed_docs",
+        "tests/standard_names/test_review_cost_persistence.py:140:persist_reviewed_name",
+        "tests/standard_names/test_review_docs_stages.py:874:persist_reviewed_docs",
+        "tests/standard_names/test_review_name_stages.py:1049:persist_reviewed_name",
+        "tests/standard_names/test_review_name_stages.py:860:persist_reviewed_name"
+      ],
+      "graph_source_bindings": [
+        "tests/cli/test_sn_status_cli.py:88:get_skipped_source_counts",
+        "tests/standard_names/test_compose_source_scope.py:132:persist_claimed_source_outcomes",
+        "tests/standard_names/test_compose_source_scope.py:155:persist_claimed_source_outcomes",
+        "tests/standard_names/test_dd_sources.py:100:write_skipped_sources",
+        "tests/standard_names/test_dd_sources.py:115:write_skipped_sources",
+        "tests/standard_names/test_dd_sources.py:163:write_skipped_sources",
+        "tests/standard_names/test_dd_sources.py:197:write_skipped_sources",
+        "tests/standard_names/test_dd_sources.py:278:write_skipped_sources"
+      ],
+      "graph_supersession": [
+        "tests/standard_names/test_export_producer_predicate.py:92:classify_sourceless_standard_names",
+        "tests/standard_names/test_generate_name_persist.py:1069:supersede_prior_source_names",
+        "tests/standard_names/test_generate_name_persist.py:1561:supersede_prior_source_names",
+        "tests/standard_names/test_generate_name_persist.py:1590:supersede_prior_source_names",
+        "tests/standard_names/test_generate_name_persist.py:1646:supersede_prior_source_names",
+        "tests/standard_names/test_generate_name_persist.py:1701:supersede_prior_source_names",
+        "tests/standard_names/test_generate_name_persist.py:2045:supersede_prior_source_names",
+        "tests/standard_names/test_generate_name_persist.py:311:supersede_prior_source_names"
+      ],
+      "worker_common": [
+        "tests/standard_names/test_dd_gap_automated_writers.py:648:_compute_token_reuse_hits",
+        "tests/standard_names/test_dd_gap_automated_writers.py:654:_active_editorial_gap_guidance",
+        "tests/standard_names/test_dd_gap_automated_writers.py:666:is_well_formed_candidate",
+        "tests/standard_names/test_dd_gap_automated_writers.py:672:is_non_nameable_coordinate",
+        "tests/standard_names/test_dd_gap_automated_writers.py:684:_auto_detect_physical_base_gaps",
+        "tests/standard_names/test_pool_compose_retry.py:191:_auto_detect_physical_base_gaps",
+        "tests/standard_names/test_rd_quorum_integrity.py:313:model_provider_exposure",
+        "tests/standard_names/test_rd_quorum_integrity.py:480:model_provider_exposure"
+      ],
+      "worker_compose_and_validate": [
+        "tests/standard_names/test_audit_false_positives.py:95:_validate_via_isn",
+        "tests/standard_names/test_audits.py:1419:_validate_via_isn",
+        "tests/standard_names/test_audits.py:1439:_validate_via_isn",
+        "tests/standard_names/test_graph_state_machine.py:712:_validate_via_isn",
+        "tests/standard_names/test_graph_state_machine.py:759:_validate_via_isn",
+        "tests/standard_names/test_graph_state_machine.py:807:_validate_via_isn",
+        "tests/standard_names/test_graph_state_machine.py:842:_validate_via_isn",
+        "tests/standard_names/test_quarantine_reason.py:115:validate_name_candidate"
+      ],
+      "worker_extraction_and_enrichment": [
+        "tests/standard_names/test_benchmark_comparator_arms.py:109:_collect_nearby_name_comparators",
+        "tests/standard_names/test_benchmark_comparator_arms.py:121:_collect_nearby_name_comparators",
+        "tests/standard_names/test_benchmark_comparator_arms.py:86:_collect_nearby_name_comparators",
+        "tests/standard_names/test_dd_gap_automated_writers.py:635:_enrich_batch_items",
+        "tests/standard_names/test_dd_gap_automated_writers.py:639:_search_nearby_names",
+        "tests/standard_names/test_dd_gap_automated_writers.py:644:_enrich_ids_context",
+        "tests/standard_names/test_dd_gap_automated_writers.py:678:_is_attachment_consistent",
+        "tests/standard_names/test_dd_gap_automated_writers.py:702:_process_attachments_core"
+      ],
+      "worker_generate_docs": [
+        "tests/standard_names/test_docs_review_dd_context.py:42:_enrich_dd_path_context",
+        "tests/standard_names/test_pool_batch_processors.py:949:_enrich_dd_path_context",
+        "tests/standard_names/test_refine_scope_continuity.py:111:_enrich_dd_path_context",
+        "tests/standard_names/test_source_refresh_docs_requeue.py:97:process_generate_docs_batch"
+      ],
+      "worker_refine_docs": [
+        "tests/standard_names/test_scoped_run_embedding_drain.py:114:process_embed_batch",
+        "tests/standard_names/test_scoped_run_embedding_drain.py:64:process_embed_batch",
+        "tests/standard_names/test_sn_approve.py:409:process_refine_docs_batch"
+      ],
+      "worker_refine_names": [
+        "tests/standard_names/test_only_phase_skip_generate.py:423:process_refine_name_batch",
+        "tests/standard_names/test_refine_attempt_budget.py:440:_compose_refined_candidate_name",
+        "tests/standard_names/test_refine_name_chain.py:1006:_compose_refined_candidate_name",
+        "tests/standard_names/test_refine_name_chain.py:920:_compose_refined_candidate_name",
+        "tests/standard_names/test_refine_scope_continuity.py:318:process_refine_name_batch",
+        "tests/standard_names/test_sn_approve.py:406:process_refine_name_batch"
+      ],
+      "worker_review_names": [
+        "tests/standard_names/test_gate_verdict_provenance.py:73:_enrich_name_review_items",
+        "tests/standard_names/test_only_phase_skip_generate.py:419:process_review_name_batch",
+        "tests/standard_names/test_rd_quorum_integrity.py:406:_run_rd_quorum_cycles"
+      ]
+    },
+    "literal_occurrences": {
+      "graph_ops.py": 624,
+      "workers.py": 104
+    },
+    "moving_by_module": {
+      "graph_audits": 18,
+      "graph_catalog": 117,
+      "graph_catalog_reset": 34,
+      "graph_claim_release": 38,
+      "graph_claim_scope": 20,
+      "graph_cost_and_claims": 23,
+      "graph_docs_persistence": 11,
+      "graph_foundation": 235,
+      "graph_lineage": 44,
+      "graph_parent_lifecycle": 7,
+      "graph_refinement": 14,
+      "graph_review_persistence": 12,
+      "graph_source_bindings": 33,
+      "graph_supersession": 17,
+      "worker_common": 10,
+      "worker_compose_and_validate": 8,
+      "worker_extraction_and_enrichment": 70,
+      "worker_generate_docs": 4,
+      "worker_refine_docs": 3,
+      "worker_refine_names": 6,
+      "worker_review_names": 3
+    },
+    "moving_by_symbol": {
+      "graph_audits:bump_sn_run_counter": 12,
+      "graph_audits:export_review_comments": 4,
+      "graph_audits:get_standard_name_source_stats": 1,
+      "graph_audits:isn_vocabulary_signature": 1,
+      "graph_catalog:_backfill_cluster_from_sources": 12,
+      "graph_catalog:_finalize_generated_name_stage": 16,
+      "graph_catalog:_resolve_grammar_token_version": 10,
+      "graph_catalog:_resolve_synced_segments": 3,
+      "graph_catalog:_write_grammar_decomposition": 8,
+      "graph_catalog:docs_review_property_coverage": 1,
+      "graph_catalog:persist_generated_name_batch": 10,
+      "graph_catalog:update_review_aggregates": 4,
+      "graph_catalog:write_docs_review_results": 1,
+      "graph_catalog:write_name_review_results": 1,
+      "graph_catalog:write_reviews": 18,
+      "graph_catalog:write_standard_names": 33,
+      "graph_catalog_reset:claim_names_for_embedding": 2,
+      "graph_catalog_reset:claim_names_for_validation": 5,
+      "graph_catalog_reset:clear_sn_subsystem": 4,
+      "graph_catalog_reset:clear_standard_names": 4,
+      "graph_catalog_reset:get_validated_names": 2,
+      "graph_catalog_reset:mark_names_consolidated": 1,
+      "graph_catalog_reset:mark_names_embedded": 1,
+      "graph_catalog_reset:mark_names_validated": 4,
+      "graph_catalog_reset:release_validation_claims": 2,
+      "graph_catalog_reset:reset_standard_names": 6,
+      "graph_catalog_reset:write_vocab_gaps": 3,
+      "graph_claim_release:_mark_refine_docs_exhausted": 1,
+      "graph_claim_release:_verify_docs_claim_winners": 1,
+      "graph_claim_release:_verify_name_claim_winners": 1,
+      "graph_claim_release:_verify_source_claim_winners": 9,
+      "graph_claim_release:release_generate_name_failed_claims": 3,
+      "graph_claim_release:release_review_docs_failed_claims": 4,
+      "graph_claim_release:release_review_names_failed_claims": 3,
+      "graph_claim_release:release_stranded_refine_claim": 1,
+      "graph_claim_release:resubmit_pinned_rename_for_review": 3,
+      "graph_claim_release:stop_refine_name_attempt": 12,
+      "graph_claim_scope:build_manifest_drain_plan": 3,
+      "graph_claim_scope:claim_manifest_drain_scope": 1,
+      "graph_claim_scope:clear_manifest_drain_scope": 5,
+      "graph_claim_scope:get_existing_standard_names": 2,
+      "graph_claim_scope:prepare_manifest_drain_scope": 3,
+      "graph_claim_scope:release_manifest_drain_claims": 2,
+      "graph_claim_scope:scope_exact_standard_names": 4,
+      "graph_cost_and_claims:_claim_sn_atomic": 9,
+      "graph_cost_and_claims:aggregate_spend_for_run": 2,
+      "graph_cost_and_claims:record_llm_cost": 12,
+      "graph_docs_persistence:claim_generate_docs_batch": 1,
+      "graph_docs_persistence:claim_refine_docs_batch": 1,
+      "graph_docs_persistence:persist_generated_docs": 1,
+      "graph_docs_persistence:persist_refined_docs": 2,
+      "graph_docs_persistence:release_refine_docs_failed_claims": 2,
+      "graph_docs_persistence:stamp_harmonized_families": 4,
+      "graph_foundation:GraphClient": 229,
+      "graph_foundation:_parse_grammar": 2,
+      "graph_foundation:automatic_deletion_protections": 1,
+      "graph_foundation:logger": 1,
+      "graph_foundation:open_holds": 1,
+      "graph_foundation:reattach_produced_name_edges": 1,
+      "graph_lineage:_delete_derived_parent_nodes": 8,
+      "graph_lineage:_filter_admissible_parents": 7,
+      "graph_lineage:_materialize_derived_parent_rows": 3,
+      "graph_lineage:_query_derived_parents_for_admission_cleanup": 8,
+      "graph_lineage:_query_legacy_repairable_derived_parents": 8,
+      "graph_lineage:_query_seedable_derived_parents": 8,
+      "graph_lineage:_reconcile_spurious_stub_source_scalars": 1,
+      "graph_lineage:_validate_derived_parent_identity": 1,
+      "graph_parent_lifecycle:fetch_derived_parent_children": 2,
+      "graph_parent_lifecycle:find_orphan_parent_source_candidates": 2,
+      "graph_parent_lifecycle:persist_enriched_parent": 2,
+      "graph_parent_lifecycle:release_enrich_parents_claims": 1,
+      "graph_refinement:claim_refine_name_batch": 1,
+      "graph_refinement:persist_embed_batch": 1,
+      "graph_refinement:persist_refined_name": 12,
+      "graph_review_persistence:persist_reviewed_docs": 4,
+      "graph_review_persistence:persist_reviewed_name": 8,
+      "graph_source_bindings:_guard_existing_target_pairings": 3,
+      "graph_source_bindings:claim_explicit_standard_name_sources": 2,
+      "graph_source_bindings:get_skipped_source_counts": 1,
+      "graph_source_bindings:mark_sources_stale": 2,
+      "graph_source_bindings:merge_standard_name_sources": 9,
+      "graph_source_bindings:persist_claimed_attachments": 1,
+      "graph_source_bindings:persist_claimed_source_outcomes": 2,
+      "graph_source_bindings:persist_claimed_vocab_gaps": 1,
+      "graph_source_bindings:retry_failed_sources": 1,
+      "graph_source_bindings:retry_skipped_sources": 1,
+      "graph_source_bindings:set_source_compose_hint": 3,
+      "graph_source_bindings:write_skipped_sources": 7,
+      "graph_supersession:_lock_ancestor_supersession_authority": 1,
+      "graph_supersession:classify_sourceless_standard_names": 4,
+      "graph_supersession:supersede_prior_source_names": 12,
+      "worker_common:_active_editorial_gap_guidance": 1,
+      "worker_common:_auto_detect_physical_base_gaps": 3,
+      "worker_common:_compute_token_reuse_hits": 1,
+      "worker_common:is_non_nameable_coordinate": 1,
+      "worker_common:is_well_formed_candidate": 1,
+      "worker_common:model_provider_exposure": 3,
+      "worker_compose_and_validate:_validate_via_isn": 7,
+      "worker_compose_and_validate:validate_name_candidate": 1,
+      "worker_extraction_and_enrichment:_collect_nearby_name_comparators": 4,
+      "worker_extraction_and_enrichment:_consume_claimed_vocab_gaps": 1,
+      "worker_extraction_and_enrichment:_enrich_batch_items": 9,
+      "worker_extraction_and_enrichment:_enrich_ids_context": 8,
+      "worker_extraction_and_enrichment:_grammar_retry": 2,
+      "worker_extraction_and_enrichment:_hybrid_search_neighbours": 17,
+      "worker_extraction_and_enrichment:_hybrid_search_neighbours_batch": 3,
+      "worker_extraction_and_enrichment:_is_attachment_consistent": 4,
+      "worker_extraction_and_enrichment:_persist_claimed_skips": 1,
+      "worker_extraction_and_enrichment:_process_attachments_core": 1,
+      "worker_extraction_and_enrichment:_related_path_neighbours": 3,
+      "worker_extraction_and_enrichment:_retry_attempts": 9,
+      "worker_extraction_and_enrichment:_search_nearby_names": 8,
+      "worker_generate_docs:_enrich_dd_path_context": 3,
+      "worker_generate_docs:process_generate_docs_batch": 1,
+      "worker_refine_docs:process_embed_batch": 2,
+      "worker_refine_docs:process_refine_docs_batch": 1,
+      "worker_refine_names:_compose_refined_candidate_name": 3,
+      "worker_refine_names:process_refine_name_batch": 3,
+      "worker_review_names:_enrich_name_review_items": 1,
+      "worker_review_names:_run_rd_quorum_cycles": 1,
+      "worker_review_names:process_review_name_batch": 1
+    },
+    "test_file_tokens_by_module": {
+      "graph_audits": 38186,
+      "graph_catalog": 144342,
+      "graph_catalog_reset": 28320,
+      "graph_claim_release": 105580,
+      "graph_claim_scope": 12394,
+      "graph_cost_and_claims": 36790,
+      "graph_docs_persistence": 23767,
+      "graph_foundation": 340704,
+      "graph_lineage": 29383,
+      "graph_parent_lifecycle": 10947,
+      "graph_refinement": 38597,
+      "graph_review_persistence": 38470,
+      "graph_source_bindings": 31835,
+      "graph_supersession": 38279,
+      "worker_common": 20189,
+      "worker_compose_and_validate": 35128,
+      "worker_extraction_and_enrichment": 56060,
+      "worker_generate_docs": 11412,
+      "worker_refine_docs": 8207,
+      "worker_refine_names": 31166,
+      "worker_review_names": 12251
+    },
+    "test_files_by_module": {
+      "graph_audits": [
+        "tests/cli/test_sn_status_cli.py",
+        "tests/standard_names/test_atomic_refined_name_persistence.py",
+        "tests/standard_names/test_comment_export.py",
+        "tests/standard_names/test_embed_worker.py",
+        "tests/standard_names/test_generate_name_persist.py",
+        "tests/standard_names/test_refine_scope_continuity.py",
+        "tests/standard_names/test_refine_source_cohort_gate.py",
+        "tests/standard_names/test_rename_carries_documentation.py",
+        "tests/standard_names/test_review_dimension_void.py"
+      ],
+      "graph_catalog": [
+        "tests/standard_names/test_compose_supersede_dual_bound.py",
+        "tests/standard_names/test_dd_gap_automated_writers.py",
+        "tests/standard_names/test_docs_supersede_safety.py",
+        "tests/standard_names/test_edit_engine.py",
+        "tests/standard_names/test_export_resolution_method.py",
+        "tests/standard_names/test_generate_name_persist.py",
+        "tests/standard_names/test_grammar_writer.py",
+        "tests/standard_names/test_graph_edge_writers.py",
+        "tests/standard_names/test_graph_ops.py",
+        "tests/standard_names/test_graph_state_machine.py",
+        "tests/standard_names/test_parent_admission.py",
+        "tests/standard_names/test_persist_segment_edges.py",
+        "tests/standard_names/test_persist_stages.py",
+        "tests/standard_names/test_pool_batch_processors.py",
+        "tests/standard_names/test_pool_compose_retry.py",
+        "tests/standard_names/test_review_cost_persistence.py",
+        "tests/standard_names/test_review_docs_stages.py",
+        "tests/standard_names/test_review_name_stages.py",
+        "tests/standard_names/test_review_quorum_pool.py",
+        "tests/standard_names/test_self_refine.py",
+        "tests/standard_names/test_skeleton_placeholder_cleanup_graph.py",
+        "tests/standard_names/test_snrun_async_counters.py",
+        "tests/standard_names/test_typed_segment_edges.py",
+        "tests/standard_names/test_vocab_gaps.py"
+      ],
+      "graph_catalog_reset": [
+        "tests/cli/test_sn_embed_preflight.py",
+        "tests/cli/test_sn_generate_cli.py",
+        "tests/standard_names/test_comment_export.py",
+        "tests/standard_names/test_exact_reset_parent_cleanup.py",
+        "tests/standard_names/test_graph_state_machine.py",
+        "tests/standard_names/test_vocab_gaps.py"
+      ],
+      "graph_claim_release": [
+        "tests/standard_names/test_cli_flags.py",
+        "tests/standard_names/test_compose_supersede_dual_bound.py",
+        "tests/standard_names/test_dd_gap_automated_writers.py",
+        "tests/standard_names/test_dup_guard_integration.py",
+        "tests/standard_names/test_focus_flag.py",
+        "tests/standard_names/test_generate_name_persist.py",
+        "tests/standard_names/test_pool_batch_processors.py",
+        "tests/standard_names/test_pool_compose_retry.py",
+        "tests/standard_names/test_rd_quorum_integrity.py",
+        "tests/standard_names/test_refine_attempt_budget.py",
+        "tests/standard_names/test_refine_name_chain.py",
+        "tests/standard_names/test_refine_scope_continuity.py",
+        "tests/standard_names/test_review_docs_stages.py",
+        "tests/standard_names/test_review_name_stages.py",
+        "tests/standard_names/test_review_quorum_pool.py",
+        "tests/standard_names/test_seed_expand_claims.py",
+        "tests/standard_names/test_self_refine.py",
+        "tests/standard_names/test_source_compose_hint.py",
+        "tests/standard_names/test_unchanged_refine_attempt.py"
+      ],
+      "graph_claim_scope": [
+        "tests/standard_names/test_domain_seed_pinning.py",
+        "tests/standard_names/test_exact_name_scope.py",
+        "tests/standard_names/test_manifest_drain.py",
+        "tests/standard_names/test_sn_run_dry_run.py"
+      ],
+      "graph_cost_and_claims": [
+        "tests/standard_names/test_budget_graph_backed.py",
+        "tests/standard_names/test_cost_integration.py",
+        "tests/standard_names/test_finalize_on_signal.py",
+        "tests/standard_names/test_focus_flag.py",
+        "tests/standard_names/test_review_docs_stages.py",
+        "tests/standard_names/test_review_name_stages.py",
+        "tests/standard_names/test_writer_resilience.py"
+      ],
+      "graph_docs_persistence": [
+        "tests/standard_names/test_docs_opening_insertion.py",
+        "tests/standard_names/test_family_harmonization_auto.py",
+        "tests/standard_names/test_pool_batch_processors.py",
+        "tests/standard_names/test_refine_docs_chain.py",
+        "tests/standard_names/test_sn_approve.py",
+        "tests/standard_names/test_source_refresh_docs_requeue.py"
+      ],
+      "graph_foundation": [
+        "tests/cli/test_sn_generate_cli.py",
+        "tests/standard_names/review/test_axis_split_schema.py",
+        "tests/standard_names/test_atomic_refined_name_persistence.py",
+        "tests/standard_names/test_attachment_write_guards.py",
+        "tests/standard_names/test_bare_doc_link_normalize.py",
+        "tests/standard_names/test_catalog_status_reconcile.py",
+        "tests/standard_names/test_claim_atomic.py",
+        "tests/standard_names/test_comment_export.py",
+        "tests/standard_names/test_compose_claim_attempt_charge.py",
+        "tests/standard_names/test_compose_source_scope.py",
+        "tests/standard_names/test_cost_attribution.py",
+        "tests/standard_names/test_cost_graph_ops.py",
+        "tests/standard_names/test_deletion_provenance_integrity.py",
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py",
+        "tests/standard_names/test_docs_review_feedback_for_enrich.py",
+        "tests/standard_names/test_docs_supersede_safety.py",
+        "tests/standard_names/test_edit_engine.py",
+        "tests/standard_names/test_edit_scope_run.py",
+        "tests/standard_names/test_edits_scope_selection.py",
+        "tests/standard_names/test_embed_resilience.py",
+        "tests/standard_names/test_embed_worker.py",
+        "tests/standard_names/test_error_siblings.py",
+        "tests/standard_names/test_exact_name_scope.py",
+        "tests/standard_names/test_fetch_review_feedback_for_sources.py",
+        "tests/standard_names/test_focus_flag.py",
+        "tests/standard_names/test_frozen_stage_pool_guard.py",
+        "tests/standard_names/test_generate_docs.py",
+        "tests/standard_names/test_generate_name_persist.py",
+        "tests/standard_names/test_grammar_contract.py",
+        "tests/standard_names/test_grammar_segment_reconcile.py",
+        "tests/standard_names/test_graph_edge_writers.py",
+        "tests/standard_names/test_graph_ops.py",
+        "tests/standard_names/test_graph_ops_docs_order.py",
+        "tests/standard_names/test_graph_state_machine.py",
+        "tests/standard_names/test_integration.py",
+        "tests/standard_names/test_manifest_drain.py",
+        "tests/standard_names/test_metadata_invariants.py",
+        "tests/standard_names/test_ordered_operator_graph_projection.py",
+        "tests/standard_names/test_parent_admission.py",
+        "tests/standard_names/test_persist_segment_edges.py",
+        "tests/standard_names/test_persist_stages.py",
+        "tests/standard_names/test_pipeline_recovery_mechanics.py",
+        "tests/standard_names/test_polling_claims.py",
+        "tests/standard_names/test_pool_idle_exhaustion.py",
+        "tests/standard_names/test_pool_orchestration_contracts.py",
+        "tests/standard_names/test_protected_parent_edge_cleanup.py",
+        "tests/standard_names/test_provenance_ledger.py",
+        "tests/standard_names/test_rd_quorum.py",
+        "tests/standard_names/test_refine_attempt_budget.py",
+        "tests/standard_names/test_refine_claim_race.py",
+        "tests/standard_names/test_refine_context.py",
+        "tests/standard_names/test_refine_docs_chain.py",
+        "tests/standard_names/test_refine_name_chain.py",
+        "tests/standard_names/test_refine_scope_continuity.py",
+        "tests/standard_names/test_refine_source_cohort_gate.py",
+        "tests/standard_names/test_regen_count_increment.py",
+        "tests/standard_names/test_release_verify.py",
+        "tests/standard_names/test_rename_carries_documentation.py",
+        "tests/standard_names/test_rescore_terminal_status.py",
+        "tests/standard_names/test_review_axis_scoped_writes.py",
+        "tests/standard_names/test_review_cost.py",
+        "tests/standard_names/test_review_cost_persistence.py",
+        "tests/standard_names/test_review_dimension_void.py",
+        "tests/standard_names/test_review_docs_stages.py",
+        "tests/standard_names/test_review_feedback_suggested_name.py",
+        "tests/standard_names/test_review_name_stages.py",
+        "tests/standard_names/test_review_shadow_store.py",
+        "tests/standard_names/test_review_write.py",
+        "tests/standard_names/test_reviewable_name_stage.py",
+        "tests/standard_names/test_reviewer_per_dim.py",
+        "tests/standard_names/test_run_telemetry.py",
+        "tests/standard_names/test_seed_expand_claims.py",
+        "tests/standard_names/test_skeleton_placeholder_cleanup_graph.py",
+        "tests/standard_names/test_snrun_async_counters.py",
+        "tests/standard_names/test_source_claim_counter_fencing.py",
+        "tests/standard_names/test_source_compose_hint.py",
+        "tests/standard_names/test_source_invariants.py",
+        "tests/standard_names/test_source_linking.py",
+        "tests/standard_names/test_source_paths_reconcile.py",
+        "tests/standard_names/test_standard_name_source.py",
+        "tests/standard_names/test_supersede_into_ancestor.py",
+        "tests/standard_names/test_supersession.py",
+        "tests/standard_names/test_supersession_catalog_guard.py",
+        "tests/standard_names/test_supersession_source_migration.py",
+        "tests/standard_names/test_unit_consistency.py",
+        "tests/standard_names/test_validation_status.py",
+        "tests/standard_names/test_vocab_gap_gate.py",
+        "tests/standard_names/test_vocab_gaps.py"
+      ],
+      "graph_lineage": [
+        "tests/standard_names/test_derived_parent_lifecycle_repair.py",
+        "tests/standard_names/test_graph_edge_writers.py",
+        "tests/standard_names/test_ordered_operator_graph_projection.py",
+        "tests/standard_names/test_reconcile_lifecycleless_stubs.py",
+        "tests/standard_names/test_skeleton_placeholder_cleanup.py",
+        "tests/standard_names/test_skeleton_placeholder_cleanup_graph.py"
+      ],
+      "graph_parent_lifecycle": [
+        "tests/standard_names/test_enrich_parents.py",
+        "tests/standard_names/test_provenance_orphan_retirement.py",
+        "tests/standard_names/test_provenance_rebuild.py"
+      ],
+      "graph_refinement": [
+        "tests/standard_names/test_dup_guard_integration.py",
+        "tests/standard_names/test_embed_worker.py",
+        "tests/standard_names/test_refine_attempt_budget.py",
+        "tests/standard_names/test_refine_name_chain.py",
+        "tests/standard_names/test_refine_scope_continuity.py",
+        "tests/standard_names/test_review_cascade.py",
+        "tests/standard_names/test_sn_approve.py",
+        "tests/standard_names/test_unchanged_refine_attempt.py"
+      ],
+      "graph_review_persistence": [
+        "tests/standard_names/test_gate_verdict_provenance.py",
+        "tests/standard_names/test_pool_batch_processors.py",
+        "tests/standard_names/test_rd_quorum_integrity.py",
+        "tests/standard_names/test_review_cost_persistence.py",
+        "tests/standard_names/test_review_docs_stages.py",
+        "tests/standard_names/test_review_name_stages.py",
+        "tests/standard_names/test_review_quorum_pool.py"
+      ],
+      "graph_source_bindings": [
+        "tests/cli/test_sn_status_cli.py",
+        "tests/standard_names/test_compose_source_scope.py",
+        "tests/standard_names/test_dd_sources.py",
+        "tests/standard_names/test_dead_end_identity_revival.py",
+        "tests/standard_names/test_domain_seed_pinning.py",
+        "tests/standard_names/test_focus_flag.py",
+        "tests/standard_names/test_focus_reseed.py",
+        "tests/standard_names/test_pipeline_recovery_mechanics.py",
+        "tests/standard_names/test_pool_adapter_claims.py",
+        "tests/standard_names/test_pool_compose_helpers.py",
+        "tests/standard_names/test_qualify_sources.py",
+        "tests/standard_names/test_source_compose_hint.py",
+        "tests/standard_names/test_source_invariants.py",
+        "tests/standard_names/test_vocab_gap_source_persistence.py"
+      ],
+      "graph_supersession": [
+        "tests/standard_names/test_export_producer_predicate.py",
+        "tests/standard_names/test_generate_name_persist.py",
+        "tests/standard_names/test_graph_state_machine.py",
+        "tests/standard_names/test_provenance_ledger.py",
+        "tests/standard_names/test_source_audit_gate.py",
+        "tests/standard_names/test_supersede_into_ancestor.py"
+      ],
+      "worker_common": [
+        "tests/standard_names/test_dd_gap_automated_writers.py",
+        "tests/standard_names/test_pool_compose_retry.py",
+        "tests/standard_names/test_rd_quorum_integrity.py",
+        "tests/standard_names/test_refine_scope_continuity.py",
+        "tests/standard_names/test_self_refine.py"
+      ],
+      "worker_compose_and_validate": [
+        "tests/standard_names/test_audit_false_positives.py",
+        "tests/standard_names/test_audits.py",
+        "tests/standard_names/test_graph_state_machine.py",
+        "tests/standard_names/test_quarantine_reason.py"
+      ],
+      "worker_extraction_and_enrichment": [
+        "tests/standard_names/test_benchmark_comparator_arms.py",
+        "tests/standard_names/test_dd_gap_automated_writers.py",
+        "tests/standard_names/test_docs_contradiction_veto.py",
+        "tests/standard_names/test_dup_guard_integration.py",
+        "tests/standard_names/test_pool_batch_processors.py",
+        "tests/standard_names/test_pool_compose_helpers.py",
+        "tests/standard_names/test_pool_compose_retry.py",
+        "tests/standard_names/test_prompt_context_wiring.py",
+        "tests/standard_names/test_refine_attempt_budget.py",
+        "tests/standard_names/test_refine_name_chain.py",
+        "tests/standard_names/test_refine_scope_continuity.py",
+        "tests/standard_names/test_review_comparator_budget.py",
+        "tests/standard_names/test_self_refine.py",
+        "tests/standard_names/test_source_compose_hint.py",
+        "tests/standard_names/test_unchanged_refine_attempt.py"
+      ],
+      "worker_generate_docs": [
+        "tests/standard_names/test_docs_review_dd_context.py",
+        "tests/standard_names/test_pool_batch_processors.py",
+        "tests/standard_names/test_refine_scope_continuity.py",
+        "tests/standard_names/test_source_refresh_docs_requeue.py"
+      ],
+      "worker_refine_docs": [
+        "tests/standard_names/test_scoped_run_embedding_drain.py",
+        "tests/standard_names/test_sn_approve.py"
+      ],
+      "worker_refine_names": [
+        "tests/standard_names/test_only_phase_skip_generate.py",
+        "tests/standard_names/test_refine_attempt_budget.py",
+        "tests/standard_names/test_refine_name_chain.py",
+        "tests/standard_names/test_refine_scope_continuity.py",
+        "tests/standard_names/test_sn_approve.py"
+      ],
+      "worker_review_names": [
+        "tests/standard_names/test_gate_verdict_provenance.py",
+        "tests/standard_names/test_only_phase_skip_generate.py",
+        "tests/standard_names/test_rd_quorum_integrity.py"
+      ]
+    },
+    "test_files_scanned": 1113,
+    "unresolved_import_or_dynamic_targets": {
+      "graph_ops.py:__dict__": 1
+    }
+  },
+  "revision": "c315aa64ea826abae3574c911c91fe81a691abf5",
+  "tokenizer": "cl100k_base; original source ranges without repeated imports"
+}
