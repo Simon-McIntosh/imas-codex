@@ -20,21 +20,21 @@ def test_normalization_failure_refuses_docs_acceptance() -> None:
     """An unreadable reference authority cannot permit docs acceptance."""
     import imas_codex.standard_names.graph_ops as graph_ops
 
-    client = _graph_client(
-        [
-            [
-                {
-                    "docs_chain_length": 0,
-                    "documentation": "See [poloidal_magnetic_flux].",
-                    "edit_status": None,
-                }
-            ],
-            [{"id": "area_at_plasma_boundary"}],
-        ]
-    )
+    client = _graph_client([])
+    transaction = MagicMock()
+    transaction.run.return_value = [
+        {
+            "docs_chain_length": 0,
+            "documentation": "See [poloidal_magnetic_flux].",
+            "edit_status": None,
+        }
+    ]
+    client.session.return_value.__enter__.return_value.begin_transaction.return_value = transaction
 
     with (
         patch.object(graph_ops, "GraphClient", return_value=client),
+        patch.object(graph_ops, "clear_holds_not_raised", return_value=0),
+        patch.object(graph_ops, "docs_accepted", return_value=True),
         patch.object(
             graph_ops,
             "_normalize_bare_doc_links",
@@ -56,11 +56,9 @@ def test_normalization_failure_refuses_docs_acceptance() -> None:
             reviewer_chain_size=3,
         )
 
-    assert client.query.call_count == 1
-    assert all(
-        call.kwargs.get("target_stage") != "accepted"
-        for call in client.query.call_args_list
-    )
+    assert transaction.run.call_count == 1
+    transaction.rollback.assert_called_once()
+    transaction.commit.assert_not_called()
 
 
 def test_accept_normalizer_uses_shared_reference_parser() -> None:

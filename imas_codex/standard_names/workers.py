@@ -11222,14 +11222,37 @@ async def process_review_docs_batch(
             contradiction_note = await _documentation_contradiction_note(
                 request.get("veto_item", item), mgr
             )
-            if any(
-                note is not None
-                for note in (conformance_note, prose_note, contradiction_note)
-            ):
-                # Clamp below the accept threshold so the document is routed
-                # to refinement as a below-threshold score is, carrying the
-                # finding as the reason the refiner reads.
-                score = min(score, DEFAULT_MIN_SCORE - 0.001)
+            checked_holds = (
+                ("registry_conformance", conformance_note, "conventions-registry"),
+                ("banned_prose", prose_note, "prose-adjudicator"),
+                (
+                    "documentation_contradiction",
+                    contradiction_note,
+                    "jev-contradiction",
+                ),
+            )
+            review_holds: list[dict[str, str]] = []
+            for kind, note, raised_by in checked_holds:
+                if note is None:
+                    continue
+                evidence = json.dumps(
+                    {
+                        "claim": note,
+                        "documentation": item.get("documentation") or "",
+                        "dd_source_docs": item.get("dd_source_docs") or [],
+                    },
+                    sort_keys=True,
+                    default=str,
+                )
+                review_holds.append(
+                    {
+                        "kind": kind,
+                        "finding": note,
+                        "evidence": evidence,
+                        "raised_by": raised_by,
+                    }
+                )
+            if any(note is not None for _, note, _ in checked_holds):
                 notes = [
                     note
                     for note in (conformance_note, prose_note, contradiction_note)
@@ -11244,7 +11267,7 @@ async def process_review_docs_batch(
                 if contradiction_note is not None:
                     comments_per_dim["contradicts_source"] = contradiction_note
                 logger.info(
-                    "review_docs: %s held from acceptance — %s",
+                    "review_docs: %s found documentation veto — %s",
                     sn_id,
                     "; ".join(notes),
                 )
@@ -11257,6 +11280,8 @@ async def process_review_docs_batch(
                 scores=quorum["winning_scores"],
                 comments=comments,
                 comments_per_dim=comments_per_dim,
+                review_holds=review_holds,
+                checked_hold_kinds={kind for kind, _, _ in checked_holds},
                 model=quorum["canonical_model"],
                 min_score=DEFAULT_MIN_SCORE,
                 rotation_cap=DEFAULT_REFINE_ROTATIONS,

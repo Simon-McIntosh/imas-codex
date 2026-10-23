@@ -47,6 +47,15 @@ from imas_codex.standard_names.provenance_lifecycle import (
     deletion_change_cypher,
     deletion_change_params,
 )
+from imas_codex.standard_names.review.holds import (
+    clear_holds_not_raised,
+    docs_acceptance_set,
+    docs_acceptance_where,
+    docs_accepted,
+    has_open_docs_hold_where,
+    open_holds,
+    raise_hold,
+)
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
 logger = logging.getLogger(__name__)
@@ -12548,7 +12557,7 @@ PROMOTE_STRANDED_NAME_WHERE = (
 
 PROMOTE_STRANDED_DOCS_WHERE = (
     "sn.docs_stage = 'reviewed' "
-    "AND sn.reviewer_score_docs >= $min_score "
+    f"AND {docs_acceptance_where()} "
     "AND sn.name_stage = 'accepted' "
     "AND coalesce(sn.validation_status, '') <> 'quarantined' "
     f"AND {docs_review_eligibility_where()} "
@@ -12583,6 +12592,8 @@ def promote_stranded_reviewed(
       descendants atomically; a bare stage flip here would strand that cascade.
     * both axes exclude ``validation_status='quarantined'``.
     * docs axis requires ``name_stage='accepted'`` (docs is a post-name axis).
+    * docs axis excludes an open documentation hold even when its judged score
+      passes; an accepted open edit is marked applied with the stage write.
     * name axis excludes a recorded ``review_quorum_shortfall`` — a name held
       at ``'reviewed'`` because its reviewer chain never reached a verdict
       looks identical to one stranded by a lowered threshold, and its stored
@@ -12629,7 +12640,7 @@ def promote_stranded_reviewed(
             f"""
             MATCH (sn:StandardName)
             WHERE {docs_where}
-            SET sn.updated_at = datetime(), sn.docs_stage = 'accepted'
+            SET sn.updated_at = datetime(), {docs_acceptance_set()}
             RETURN count(sn) AS n
             """,
             min_score=min_score,
@@ -17092,7 +17103,7 @@ def persist_reviewed_name(
 
     1. Verify ``claim_token`` matches the stored token.
     2. Compute target stage:
-       - ``'accepted'`` if ``score >= min_score`` (score-canonical)
+       - ``'accepted'`` if ``score >= min_score`` and no docs hold is open
        - ``'exhausted'`` if a positive ``refine_attempts`` count has reached
          ``rotation_cap`` and the score is below min_score (every rotation
          spent, including the escalated final one)
@@ -17726,6 +17737,8 @@ def persist_reviewed_docs(
     scores: dict[str, Any] | None = None,
     comments: str | None = None,
     comments_per_dim: dict[str, Any] | None = None,
+    review_holds: list[dict[str, str]] | None = None,
+    checked_hold_kinds: set[str] | None = None,
     model: str,
     min_score: float = DEFAULT_MIN_SCORE,
     rotation_cap: int = DEFAULT_REFINE_ROTATIONS,
@@ -17758,7 +17771,10 @@ def persist_reviewed_docs(
        not reach a verdict. A would-be acceptance is withheld at
        ``'reviewed'``; a below-threshold stage decision is retained, but the
        marker prevents refinement from spending another rotation.
-    4. SET reviewer_docs fields, ``docs_stage``, clear claim state.
+    4. Raise and clear the checks' holds under the verified claim lock.
+       A held passing document stays reviewed, including at the rotation cap.
+    5. SET reviewer_docs fields, ``docs_stage``, clear claim state and commit
+       the score and hold changes together.
 
     Parameters
     ----------
@@ -17776,6 +17792,12 @@ def persist_reviewed_docs(
     comments_per_dim:
         Per-dimension comments dict (written as JSON to
         ``reviewer_comments_per_dim_docs``).
+    review_holds:
+        Findings from checks already run by the worker. They are written only
+        after this claim has been locked and verified.
+    checked_hold_kinds:
+        Kinds checked by this review. Open findings of those kinds absent from
+        ``review_holds`` are cleared in the same transaction.
     model:
         LLM model slug used for this review.
     min_score:
@@ -17800,169 +17822,195 @@ def persist_reviewed_docs(
     """
     import json as _json
 
-    # Read current docs_chain_length — needed for exhaustion check.
-    # Relax claim_token guard (same rationale as persist_reviewed_name).
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            WHERE (($claim_seq IS NULL
-                    AND (sn.claim_token = $token OR sn.claim_token IS NULL))
-                   OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
-              AND sn.docs_stage = 'drafted'
-              AND sn.name_stage = 'accepted'
-            RETURN coalesce(sn.docs_chain_length, 0) AS docs_chain_length,
-                   sn.documentation AS documentation,
-                   sn.edit_status AS edit_status
-            """,
-            id=sn_id,
-            token=claim_token,
-            claim_seq=claim_seq,
-        )
-
-    if not rows:
-        logger.debug(
-            "persist_reviewed_docs: stage/token mismatch for %s (token=%s) — no-op",
-            sn_id,
-            claim_token[:8],
-        )
-        return ""
-
-    docs_chain_length: int = int(rows[0]["docs_chain_length"])
-    edit_status_before: str | None = rows[0].get("edit_status")
-
-    # ── Stage decision ────────────────────────────────────────────────
-    # Score is canonical (see persist_reviewed_name for rationale,
-    # including the rotation_cap-1 vs rotation_cap escalator gate).
-    if score >= min_score:
-        target_stage = "accepted"
-    elif docs_chain_length >= rotation_cap:
-        target_stage = "exhausted"
-    else:
-        target_stage = "reviewed"
-
     quorum_shortfall = _quorum_admits_acceptance(resolution_method, reviewer_chain_size)
-    if quorum_shortfall is not None and target_stage == "accepted":
-        target_stage = "reviewed"
-
-    # ── Link label/target gate (accept path only) ─────────────────────
-    # A markdown link whose text names one standard name while its target
-    # resolves to a different one is a physics-referencing error the LLM
-    # reviewers systematically miss. Block promotion and route through
-    # refine_docs with the findings in the comments; never exhaust a doc
-    # over a link nit (accept at the cap and leave it to the batch lint).
-    if target_stage == "accepted":
-        try:
-            with GraphClient() as gc:
-                mismatches = _doc_link_mismatches(gc, rows[0].get("documentation"))
-        except Exception:
-            logger.debug(
-                "persist_reviewed_docs: link-mismatch scan failed for %s "
-                "(non-fatal; accepting)",
-                sn_id,
-                exc_info=True,
-            )
-            mismatches = []
-        if mismatches and docs_chain_length < rotation_cap:
-            target_stage = "reviewed"
-            # Clamp below the accept threshold so claim_refine_docs_batch
-            # (gated on reviewer_score_docs < min_score) picks the doc up.
-            score = min(score, min_score - 0.001)
-            note = (
-                "link text names a different standard name than its target "
-                "resolves to — make each label match its target id (or "
-                "reword to plain prose): " + "; ".join(mismatches)
-            )
-            comments = f"{comments}\n{note}" if comments else note
-            # Per-dim comments are what the refine prompt renders — the
-            # free-text field is not in its context.
-            comments_per_dim = {**(comments_per_dim or {}), "link_integrity": note}
-            logger.info(
-                "persist_reviewed_docs: %s demoted to reviewed — %d mismatched "
-                "doc link(s)",
-                sn_id,
-                len(mismatches),
-            )
-
-    # Normalize bare references before the accepting write. The shared parser
-    # excludes mathematical notation, code, images, and formed Markdown links.
-    # Graph/parser failures propagate so unavailable reference authority cannot
-    # promote a document whose references were not normalized.
-    if target_stage == "accepted":
-        with GraphClient() as gc:
-            _normalize_bare_doc_links(
-                gc,
-                sn_id=sn_id,
-                documentation=rows[0].get("documentation"),
-            )
-
-    # ── Edit lifecycle decision (docs axis) ────────────────────────────
-    # Computed after the link-mismatch demotion above so a demoted
-    # 'accepted' → 'reviewed' correctly keeps the edit 'open' rather than
-    # prematurely marking it 'applied'. Same open → applied | exhausted |
-    # (stays open) lifecycle as persist_reviewed_name. Docs edits never
-    # cascade — the transition is purely a lifecycle stamp on this node.
-    new_edit_status = edit_status_before
-    if edit_status_before == "open":
-        if target_stage == "accepted":
-            new_edit_status = "applied"
-        elif target_stage == "exhausted":
-            new_edit_status = "exhausted"
-        else:
-            new_edit_status = "open"
-
+    pending_holds = list(review_holds or [])
+    checked_kinds = set(checked_hold_kinds or ())
     scores_json = _json.dumps(scores) if scores is not None else None
-    comments_per_dim_json = (
-        _json.dumps(comments_per_dim) if comments_per_dim is not None else None
-    )
 
+    # The preflight SET takes the name's write lock. A stale claimant cannot
+    # mutate holds, and the final score and hold changes commit together.
     with GraphClient() as gc:
-        write_rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            WHERE (($claim_seq IS NULL
-                    AND (sn.claim_token = $token OR sn.claim_token IS NULL))
-                   OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
-              AND sn.name_stage = 'accepted'
-              AND sn.docs_stage = 'drafted'
-            SET sn.updated_at = datetime(), sn.reviewer_score_docs        = $score,
-                sn.reviewer_scores_docs       = $scores_json,
-                sn.reviewer_comments_docs     = $comments,
-                sn.reviewer_comments_per_dim_docs = $comments_per_dim_json,
-                sn.reviewer_model_docs        = $model,
-                sn.docs_review_quorum_shortfall = $quorum_shortfall,
-                sn.docs_review_quorum_shortfall_at =
-                    CASE WHEN $quorum_shortfall IS NULL THEN null ELSE datetime() END,
-                sn.reviewed_docs_at           = datetime(),
-                sn.docs_stage                 = $target_stage,
-                sn.edit_status                = $new_edit_status,
-                sn.claim_token                = null,
-                sn.claimed_at                 = null
-            RETURN sn.id AS id
-            """,
-            id=sn_id,
-            token=claim_token,
-            claim_seq=claim_seq,
-            score=score,
-            scores_json=scores_json,
-            comments=comments,
-            comments_per_dim_json=comments_per_dim_json,
-            model=model,
-            resolution_method=resolution_method,
-            quorum_shortfall=quorum_shortfall,
-            target_stage=target_stage,
-            new_edit_status=new_edit_status,
-        )
-    # A concurrent reviewer already transitioned this node out of 'drafted'
-    # between our readback and this SET — our review is a duplicate; report a
-    # no-op so the worker does not double-count or emit a spurious event.
-    if not write_rows:
-        logger.debug(
-            "persist_reviewed_docs: %s already transitioned out of 'drafted' "
-            "(concurrent reviewer won) — no-op",
-            sn_id,
-        )
-        return ""
+        with gc.session() as session:
+            tx = session.begin_transaction()
+            graph = _TransactionQuery(tx)
+            try:
+                rows = graph.query(
+                    """
+                    MATCH (sn:StandardName {id: $id})
+                    WHERE (($claim_seq IS NULL
+                            AND (sn.claim_token = $token OR sn.claim_token IS NULL))
+                           OR (sn.claim_token = $token
+                               AND sn.claim_seq = $claim_seq))
+                      AND sn.docs_stage = 'drafted'
+                      AND sn.name_stage = 'accepted'
+                    SET sn.updated_at = datetime()
+                    RETURN coalesce(sn.docs_chain_length, 0) AS docs_chain_length,
+                           sn.documentation AS documentation,
+                           sn.edit_status AS edit_status
+                    """,
+                    id=sn_id,
+                    token=claim_token,
+                    claim_seq=claim_seq,
+                )
+                if not rows:
+                    tx.rollback()
+                    logger.debug(
+                        "persist_reviewed_docs: stage/token mismatch for %s "
+                        "(token=%s) — no-op",
+                        sn_id,
+                        claim_token[:8],
+                    )
+                    return ""
+
+                docs_chain_length = int(rows[0]["docs_chain_length"])
+                documentation = rows[0].get("documentation")
+                edit_status_before = rows[0].get("edit_status")
+
+                if score >= min_score:
+                    target_stage = "accepted"
+                elif docs_chain_length >= rotation_cap:
+                    target_stage = "exhausted"
+                else:
+                    target_stage = "reviewed"
+                if quorum_shortfall is not None and target_stage == "accepted":
+                    target_stage = "reviewed"
+
+                # Link findings join the worker findings in this exact review
+                # transaction. A failed scan did not check the link kind.
+                if target_stage == "accepted":
+                    try:
+                        mismatches = _doc_link_mismatches(graph, documentation)
+                    except Exception:
+                        logger.debug(
+                            "persist_reviewed_docs: link-mismatch scan failed for %s "
+                            "(non-fatal; accepting)",
+                            sn_id,
+                            exc_info=True,
+                        )
+                        mismatches = []
+                    else:
+                        checked_kinds.add("link_target_mismatch")
+                    if mismatches:
+                        note = (
+                            "link text names a different standard name than its target "
+                            "resolves to — make each label match its target id (or "
+                            "reword to plain prose): " + "; ".join(mismatches)
+                        )
+                        comments = f"{comments}\n{note}" if comments else note
+                        comments_per_dim = {
+                            **(comments_per_dim or {}),
+                            "link_integrity": note,
+                        }
+                        pending_holds.append(
+                            {
+                                "kind": "link_target_mismatch",
+                                "finding": note,
+                                "evidence": "; ".join(mismatches),
+                                "raised_by": "doc-link-target-check",
+                            }
+                        )
+                        logger.info(
+                            "persist_reviewed_docs: %s held — %d mismatched doc link(s)",
+                            sn_id,
+                            len(mismatches),
+                        )
+
+                raised_keys: set[str] = set()
+                for hold in pending_holds:
+                    recorded = raise_hold(
+                        sn_id,
+                        "docs",
+                        hold["kind"],
+                        hold["finding"],
+                        hold["evidence"],
+                        hold["raised_by"],
+                        graph=graph,
+                    )
+                    raised_keys.add(recorded["finding_key"])
+                if checked_kinds:
+                    clear_holds_not_raised(
+                        sn_id,
+                        "docs",
+                        checked_kinds,
+                        raised_keys,
+                        graph=graph,
+                    )
+
+                if target_stage == "accepted" and not docs_accepted(
+                    score, min_score, sn_id, graph=graph
+                ):
+                    # Keep a held passing document triageable even at the cap.
+                    target_stage = "reviewed"
+
+                if target_stage == "accepted":
+                    _normalize_bare_doc_links(
+                        graph, sn_id=sn_id, documentation=documentation
+                    )
+
+                new_edit_status = edit_status_before
+                if edit_status_before == "open" and target_stage == "exhausted":
+                    new_edit_status = "exhausted"
+                stage_assignments = (
+                    docs_acceptance_set()
+                    if target_stage == "accepted"
+                    else "sn.docs_stage = $target_stage, sn.edit_status = $new_edit_status"
+                )
+
+                comments_per_dim_json = (
+                    _json.dumps(comments_per_dim)
+                    if comments_per_dim is not None
+                    else None
+                )
+                write_rows = graph.query(
+                    f"""
+                    MATCH (sn:StandardName {{id: $id}})
+                    WHERE (($claim_seq IS NULL
+                            AND (sn.claim_token = $token OR sn.claim_token IS NULL))
+                           OR (sn.claim_token = $token
+                               AND sn.claim_seq = $claim_seq))
+                      AND sn.name_stage = 'accepted'
+                      AND sn.docs_stage = 'drafted'
+                    SET sn.updated_at = datetime(), sn.reviewer_score_docs = $score,
+                        sn.reviewer_scores_docs = $scores_json,
+                        sn.reviewer_comments_docs = $comments,
+                        sn.reviewer_comments_per_dim_docs = $comments_per_dim_json,
+                        sn.reviewer_model_docs = $model,
+                        sn.docs_review_quorum_shortfall = $quorum_shortfall,
+                        sn.docs_review_quorum_shortfall_at =
+                            CASE WHEN $quorum_shortfall IS NULL
+                                 THEN null ELSE datetime() END,
+                        sn.reviewed_docs_at = datetime(),
+                        {stage_assignments},
+                        sn.claim_token = null,
+                        sn.claimed_at = null
+                    RETURN sn.id AS id
+                    """,
+                    id=sn_id,
+                    token=claim_token,
+                    claim_seq=claim_seq,
+                    score=score,
+                    scores_json=scores_json,
+                    comments=comments,
+                    comments_per_dim_json=comments_per_dim_json,
+                    model=model,
+                    quorum_shortfall=quorum_shortfall,
+                    target_stage=target_stage,
+                    new_edit_status=new_edit_status,
+                )
+                if not write_rows:
+                    tx.rollback()
+                    logger.debug(
+                        "persist_reviewed_docs: %s transitioned before the "
+                        "claim-locked write — no-op",
+                        sn_id,
+                    )
+                    return ""
+                tx.commit()
+            except BaseException:
+                tx.rollback()
+                raise
+            finally:
+                tx.close()
 
     logger.info(
         "persist_reviewed_docs: %s → docs_stage=%s "
@@ -25596,7 +25644,7 @@ def release_generate_docs_failed_claims(
 # =============================================================================
 # refine_docs — claim / persist / release (DocsRevision snapshot architecture)
 # =============================================================================
-# Stage gate: docs_stage='reviewed' AND reviewer_score_docs < min_score
+# Stage gate: docs_stage='reviewed' AND (score below threshold OR open docs hold)
 #             AND docs_chain_length < rotation_cap
 # Fundamentally different from refine_name: docs refine is IN-PLACE on the
 # existing SN node.  The OLD docs are snapshotted into a DocsRevision node
@@ -25617,7 +25665,7 @@ def claim_refine_docs_batch(
     """Claim StandardName nodes for docs refinement.
 
     Eligibility: ``docs_stage = 'reviewed'`` AND
-    ``reviewer_score_docs < min_score`` AND
+    ``(reviewer_score_docs < min_score OR an open docs hold)`` AND
     ``docs_chain_length < rotation_cap``.
 
     The claim atomically transitions ``docs_stage`` from ``'reviewed'``
@@ -25649,7 +25697,9 @@ def claim_refine_docs_batch(
     where = (
         "sn.docs_stage = 'reviewed'"
         " AND sn.reviewer_score_docs IS NOT NULL"
-        " AND sn.reviewer_score_docs < $min_score"
+        " AND (sn.reviewer_score_docs < $min_score OR "
+        + has_open_docs_hold_where()
+        + ")"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
         f" AND {docs_review_eligibility_where()}"
@@ -25717,6 +25767,9 @@ def claim_refine_docs_batch(
             "reviewer_comments_per_dim": per_dim,
             "documentation": item.get("documentation", ""),
         }
+        for hold in open_holds(item["id"], "docs"):
+            per_dim[f"hold:{hold['kind']}:{hold['finding_key'][:12]}"] = hold["finding"]
+        current_review["reviewer_comments_per_dim"] = per_dim
         item["prior_docs_reviews"] = item["docs_chain_history"] + [current_review]
 
     logger.debug(
