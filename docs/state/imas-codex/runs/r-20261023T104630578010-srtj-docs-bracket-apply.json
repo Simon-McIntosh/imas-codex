@@ -1,0 +1,406 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "499265002b3823dd244caa4c2160e27e4589f37e",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T104630578010-srtj-docs-bracket-apply/brief.md",
+    "sha256": "242b70d47faddf84598276675bbb13727452eda8cf758a133c5fad5bbec91d90"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 9757569,
+      "input_tokens_cumulative": 9757569,
+      "output_tokens": 57953,
+      "output_tokens_cumulative": 57953,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 478,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "main",
+        "path": "tests/llm/measure_signal_role.py"
+      },
+      "run_function": {
+        "line": 165,
+        "name": "main",
+        "path": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py"
+      },
+      "window_line": 182
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "68de868bfeb5f30599ff7a83fb84635f5d0af384",
+    "45bd92fae0baca43b894c5a5ad9ffef484744168",
+    "254f82d4e49c3ad693032c35726cc7395d969ee1"
+  ],
+  "completed_at": "2026-10-23T11:18:13.071Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-23T10:47:19Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "power/torque"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5714285714285715,
+    "plan": "sn-review-through-jev",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-23T11:46:35.591897+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-23T10:46:35Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 12,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 6,
+    "headroom": 3,
+    "mean_context": 120000,
+    "observed_at": "2026-10-23T10:46:29Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 12,
+      "aggregate_tokens_per_second": 384.027,
+      "detail": "",
+      "mean_tokens_per_second": 66.212,
+      "observed_at": "2026-10-23T10:46:29Z",
+      "runs": 5.8,
+      "state": "measured"
+    },
+    "waiting": 1
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T11:18:13.071Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T104630578010-srtj-docs-bracket-apply/manifest.md",
+  "member": "disposable-r-20261023T104630578010-srtj-docs-bracket-apply",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "srtj-docs-bracket-apply",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/srtj-docs-bracket-apply.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T104630578010-srtj-docs-bracket-apply/brief.md",
+    "brief_sha256": "242b70d47faddf84598276675bbb13727452eda8cf758a133c5fad5bbec91d90",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1857,
+          "cached_input_tokens": 590843,
+          "input_tokens": 592702,
+          "output_tokens": 2346,
+          "reasoning_output_tokens": 330,
+          "total_tokens": 595048,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "srtj-docs-bracket-apply-restore.json holds every changed document before and after, srtj-docs-bracket-apply.json written with a log ending EXIT=0 shows the updated count against the fresh dry run, every stored text equal to its dry-run after text, zero accepted documents failing link hygiene, a second normaliser call returning 0, and ten quoted examples",
+    "estimated_hours": null,
+    "goal": "Apply the fixed bare-link normaliser to the live catalogue once",
+    "id": "srtj-docs-bracket-apply",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-23T10:46:35Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 12,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 6,
+      "headroom": 3,
+      "mean_context": 120000,
+      "observed_at": "2026-10-23T10:46:29Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 12,
+        "aggregate_tokens_per_second": 384.027,
+        "detail": "",
+        "mean_tokens_per_second": 66.212,
+        "observed_at": "2026-10-23T10:46:29Z",
+        "runs": 5.8,
+        "state": "measured"
+      },
+      "waiting": 1
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T104630578010-srtj-docs-bracket-apply/manifest.md",
+    "negative_control": "",
+    "plan": "sn-review-through-jev",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply.html",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply.json",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-restore.json",
+      "docs/figures/sn-review-through-jev/srtj-docs-bracket-apply"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1636423.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "srtj-docs-bracket-apply",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-23T10:46:57.615740+00:00",
+    "score": 0.71875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "s6 authored body unchanged since its stored content review; edits since are landing comments and lead rulings",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.67,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5714285714285715,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "254f82d4e49c3ad693032c35726cc7395d969ee1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "499265002b3823dd244caa4c2160e27e4589f37e",
+    "reviewed_head_sha": "254f82d4e49c3ad693032c35726cc7395d969ee1",
+    "scores": {
+      "durability": 14,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 106
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261023T104630578010-srtj-docs-bracket-apply",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "340a8c89-ff96-4053-b0e2-2b9b755dd12c",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 9757569,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1834.355,
+    "generated_tokens": 57953,
+    "generation_seconds": 1347.792,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 70.7,
+    "machine_seconds": 486.563,
+    "peak_input_tokens": 162659,
+    "tokens_per_second": 43.0,
+    "wall_tokens_per_second": 31.59
+  },
+  "time_budget": "60m",
+  "tool_steps": 91.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1854,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T11:18:18Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-23T10:47:32Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261023T104630578010-srtj-docs-bracket-apply",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 9230,
+    "worker_pid": 3379658
+  },
+  "worker_seconds": 1807,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

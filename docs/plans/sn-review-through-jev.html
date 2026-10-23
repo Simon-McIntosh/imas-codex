@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="203">
+<meta name="plan-version" content="204">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -901,7 +901,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>review record for r-20261023T083739598887-srtj-holds-route-remaining at head 50bd96ef31be scored parsed over all six dimensions (goal_fidelity 18, evidence 12, scope_discipline 13, durability 18, fit 18, reuse 16), delta 0 added failures, one blocking finding on the lint-cap reconciliation path</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T111901545248-review-of-srtj-docs-bracket-apply-254f82d4e49c" data-who="reckon-build" data-when="2026-10-23T11:32:20.660Z">
-    <div class="r-comment-body"><p>review-of-srtj-docs-bracket-apply-254f82d4e49c — reviewed r-20261023T104630578010-srtj-docs-bracket-apply at 254f82d4e49c3ad693032c35726cc7395d969ee1 (base 499265002b3823dd244caa4c2160e27e4589f37e): parsed record, six dimensions scored, two non-blocking findings on weak assertions in the runner&#x27;s checks dict. The landed work is sound: the normaliser is applied once unscoped through the product function, the restore record is committed and its restore path was exercised (restored=814 wrong=0), every stored text equals its dry-run after text, the prose rule fails 0 of 2530 accepted documents, and a second call returns 0.</p></div>
+    <div class="r-comment-body"><p>review-of-srtj-docs-bracket-apply-254f82d4e49c — reviewed r-20261023T104630578010-srtj-docs-bracket-apply at 254f82d4e49c3ad693032c35726cc7395d969ee1 (base 499265002b3823dd244caa4c2160e27e4589f37e): parsed record, six dimensions scored, two non-blocking findings on weak assertions in the runner's checks dict. The landed work is sound: the normaliser is applied once unscoped through the product function, the restore record is committed and its restore path was exercised (restored=814 wrong=0), every stored text equals its dry-run after text, the prose rule fails 0 of 2530 accepted documents, and a second call returns 0.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T104630578010-srtj-docs-bracket-apply" data-who="reckon-build" data-when="2026-10-23T11:18:13.071Z">
+    <div class="r-comment-body"><p>srtj-docs-bracket-apply — applied the fixed bare-link normaliser to the live catalogue once: 814 documents rewritten (124 linked, 870 brackets removed, 66 self-links made plain), a fresh dry run identical to the repair head&#x27;s 814/124/870/66, every stored text equal to its dry-run after text, 0 accepted documents failing the prose rule, a second call returning 0; restore record committed and the restore path exercised (restored=814 wrong=0).</p></div>
 </div>
 </section>
 </main>
