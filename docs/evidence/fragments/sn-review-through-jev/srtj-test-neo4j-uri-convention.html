@@ -1,0 +1,40 @@
+<article id="srtj-test-neo4j-uri-convention-record">
+<h2 id="srtj-test-neo4j-uri-convention-title">One disposable-Neo4j convention for the standard-names tests</h2>
+
+<h3 id="srtj-test-neo4j-uri-convention-outcome">Outcome</h3>
+<p>Two test files demanded opposite values of <code>NEO4J_URI</code>, so no session could run both: <code>test_source_refresh.py</code> refused any endpoint equal to the project graph, while <code>test_panel_audit_sample.py</code> demanded <code>NEO4J_URI</code> name the disposable one. Worse, the refusing guard resolved the &ldquo;project graph&rdquo; <em>through</em> <code>NEO4J_URI</code>, so once a run pointed that variable at a disposable endpoint the guard compared the endpoint against itself and refused everything. The five source-drift tests therefore errored at setup in the merged graph gate.</p>
+<p>One session-scoped fixture in <code>tests/standard_names/conftest.py</code> now owns the convention for the package: it attaches to a supplied disposable endpoint or starts an empty instance of its own, names that endpoint in <strong>both</strong> <code>NEO4J_URI</code> and <code>IMAS_CODEX_TEST_NEO4J_URI</code> for the test's duration, and refuses loudly when the endpoint is the project graph&rsquo;s. Both files&rsquo; local guards are deleted. The five drift tests run and pass.</p>
+
+<h3 id="srtj-test-neo4j-uri-convention-convention">The convention</h3>
+<table><thead><tr><th>Element</th><th>What it does</th></tr></thead><tbody>
+<tr><td id="srtj-test-neo4j-uri-convention-c1"><code>disposable_neo4j_uri</code> (session)</td><td>Attaches to <code>IMAS_CODEX_TEST_NEO4J_URI</code> when a run supplies one and it carries <code>IMAS_CODEX_TEST_NEO4J_EPHEMERAL=1</code>; otherwise starts an empty Neo4j through <code>imas_codex.graph.temp_neo4j</code>. Sets <code>NEO4J_URI</code>, <code>NEO4J_PASSWORD</code>, <code>IMAS_CODEX_TEST_NEO4J_URI</code> and <code>IMAS_CODEX_TEST_NEO4J_EPHEMERAL</code>, restores the previous values afterwards, and copies the server log to <code>IMAS_CODEX_TEST_NEO4J_LOG</code> when that is set.</td></tr>
+<tr><td id="srtj-test-neo4j-uri-convention-c2"><code>disposable_neo4j_empty</code> (function)</td><td>The same endpoint with every node removed, so each test starts from a known-empty graph.</td></tr>
+<tr><td id="srtj-test-neo4j-uri-convention-c3">The refusal</td><td>Resolves the project graph&rsquo;s own address with <code>NEO4J_URI</code> withheld &mdash; both the loopback spelling a login node uses and the scheduled service node a SLURM step uses &mdash; and fails the run if the endpoint is either one. Resolving it with the override in place is what made the old guard vacuous.</td></tr>
+<tr><td id="srtj-test-neo4j-uri-convention-c4">Profile check</td><td>After the environment is set the fixture re-resolves the profile and fails if it does not land on the disposable endpoint, so a test that builds its own <code>GraphClient()</code> cannot be written outside the instance it was given.</td></tr>
+</tbody></table>
+<p>An empty instance carries no DD-resolution authority, and the drift scan reads one to stamp each source snapshot. The scan&rsquo;s Cypher is what those tests prove, so <code>test_source_refresh.py</code>&rsquo;s <code>graph</code> fixture serves the authority from the package&rsquo;s synthetic rows &mdash; the same boundary the mock tier uses &mdash; while every query still runs on the disposable graph.</p>
+
+<h3 id="srtj-test-neo4j-uri-convention-reproduction">The defect, before the change</h3>
+<p>Run at base <code>fa65d7c71</code> with <code>NEO4J_URI</code> and <code>IMAS_CODEX_TEST_NEO4J_URI</code> both naming one empty instance:</p>
+<pre id="srtj-test-neo4j-uri-convention-repro">tests/standard_names/test_source_refresh.py:446: in disposable_neo4j
+E   Failed: source-drift refresh refuses the project graph URI</pre>
+<p>Five occurrences, one per drift test, each an error at setup.</p>
+
+<h3 id="srtj-test-neo4j-uri-convention-arms">Arms</h3>
+<table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+<tr><td id="srtj-test-neo4j-uri-convention-a1">base, graph markers</td><td><code>fa65d7c71</code>, <code>git archive</code> tree</td><td class="bad">19 passed, 5 errors &mdash; EXIT=1</td></tr>
+<tr><td id="srtj-test-neo4j-uri-convention-a2">head, graph markers</td><td>head worktree</td><td class="ok">24 passed, 0 skipped &mdash; EXIT=0</td></tr>
+<tr><td id="srtj-test-neo4j-uri-convention-a3">base, default markers</td><td><code>fa65d7c71</code>, <code>git archive</code> tree</td><td class="ok">35 passed &mdash; EXIT=0</td></tr>
+<tr><td id="srtj-test-neo4j-uri-convention-a4">head, default markers</td><td>head worktree</td><td class="ok">35 passed &mdash; EXIT=0</td></tr>
+<tr><td id="srtj-test-neo4j-uri-convention-a5">negative control</td><td>head, <code>IMAS_CODEX_TEST_NEO4J_URI=bolt://98dci4-gpu-0002:7687</code> (the project graph)</td><td class="ok">6 errors, every one the refusal &mdash; EXIT=1, as intended</td></tr>
+</tbody></table>
+<p id="srtj-test-neo4j-uri-convention-delta">Added failures at head: <strong>0</strong>. Resolved: <strong>5</strong>. The five resolved ids are <code>test_scoped_drift_scan_touches_only_the_runs_names</code>, <code>test_scoped_refresh_leaves_an_out_of_scope_name_unsteered</code>, <code>test_rename_is_reported_only_when_lineage_moved_the_anchor</code>, <code>test_source_without_a_dd_node_is_reported_unchecked</code> and <code>test_multi_source_name_is_compared_against_every_source</code>.</p>
+
+<h3 id="srtj-test-neo4j-uri-convention-refusal">The refusal, shown firing</h3>
+<pre id="srtj-test-neo4j-uri-convention-refusal-log">tests/standard_names/test_source_refresh.py: in disposable_neo4j_uri
+E   Failed: refusing to run against the project graph URI (bolt://98dci4-gpu-0002:7687): these tests need a disposable graph</pre>
+<p>Six setup errors &mdash; five drift tests and the panel-audit contract test &mdash; and no test ran, so the protection is not merely present but load-bearing: both files reach it, and neither can write to the shared graph.</p>
+
+<h3 id="srtj-test-neo4j-uri-convention-measure">Measure</h3>
+<p>Graph-marked drift tests passing at head: <strong>5 of 5</strong> (0 at base, where they errored at setup). Default-marker failures added against base: <strong>0</strong>. Live-graph endpoints accepted by the shared fixture: <strong>0</strong>, shown by the refusal arm above. No write to the live graph and no LLM call; the only graph written was the disposable instance, and scratch is under the run&rsquo;s <code>TMPDIR</code>.</p>
+</article>

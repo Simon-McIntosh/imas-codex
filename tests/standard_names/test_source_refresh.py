@@ -8,10 +8,8 @@ from collections.abc import Iterator
 from unittest.mock import MagicMock
 
 import pytest
-from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.graph.profiles import resolve_neo4j
 from imas_codex.graph.schema import GraphSchema
 from imas_codex.standard_names import source_refresh as sr
 
@@ -430,36 +428,36 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
 
 # ── Disposable-Neo4j contract ────────────────────────────────────────────────
 # The scan is Cypher, so it is proved on a real graph: an empty Neo4j the test
-# seeds itself. It refuses the project graph's URI and requires the ephemeral
-# marker, because a test that can reach production is not a test.
-
-
-@pytest.fixture(scope="module")
-def disposable_neo4j() -> Iterator[tuple[str, str]]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("source-drift refresh requires a disposable graph")
-    project_uri = resolve_neo4j(auto_tunnel=False).uri
-    if uri.rstrip("/") == project_uri.rstrip("/"):
-        pytest.fail("source-drift refresh refuses the project graph URI")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
-    auth = ("neo4j", password) if password else None
-    print(f"disposable_bolt_uri={uri}")
-    with GraphDatabase.driver(uri, auth=auth) as driver:
-        driver.verify_connectivity()
-        driver.execute_query("MATCH (node) DETACH DELETE node")
-    yield uri, password
+# seeds itself. The endpoint, the environment naming it and the refusal of the
+# project graph's URI are owned by the package's shared disposable fixture.
 
 
 @pytest.fixture
-def graph(disposable_neo4j: tuple[str, str]) -> Iterator[GraphClient]:
-    uri, password = disposable_neo4j
+def graph(disposable_neo4j_uri: str, monkeypatch) -> Iterator[GraphClient]:
+    # An empty instance carries no DD-resolution authority, and the drift scan
+    # reads one to stamp each source snapshot. The scan's Cypher is what these
+    # tests prove, so the authority comes from the package's synthetic rows —
+    # the same boundary the mock tier uses — while every query still runs on
+    # the disposable graph.
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_GRAPH_RESOLUTION_ROWS,
+    )
+
+    class _SyntheticResolutionReader:
+        def read_resolutions(self):
+            return SYNTHETIC_GRAPH_RESOLUTION_ROWS
+
+    from imas_codex.standard_names import dd_resolutions
+
+    monkeypatch.setattr(
+        dd_resolutions,
+        "dd_resolution_graph_reader",
+        lambda: _SyntheticResolutionReader(),
+    )
     client = GraphClient(
-        uri=uri,
+        uri=disposable_neo4j_uri,
         username="neo4j",
-        password=password,
+        password=os.environ.get("NEO4J_PASSWORD", ""),
         graph_name="source-drift-refresh",
     )
     client.query("MATCH (node) DETACH DELETE node")
