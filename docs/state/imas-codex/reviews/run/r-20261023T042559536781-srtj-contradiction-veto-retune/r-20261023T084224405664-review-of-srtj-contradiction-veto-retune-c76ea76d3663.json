@@ -4,6 +4,13 @@
   "call_sites": "imas_codex/standard_names/workers.py:11062, imas_codex/standard_names/workers.py:11070, imas_codex/standard_names/workers.py:11105, imas_codex/standard_names/review/cascade.py:525, imas_codex/standard_names/review/cascade.py:537, imas_codex/standard_names/review/cascade.py:544, imas_codex/standard_names/review/cascade_calibration.py:314",
   "completed_at": "2026-10-23T09:01:07.240Z",
   "dispatched_at": "2026-10-23T08:43:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-srtj-contradiction-veto-retune-c76ea76d3663",
+      "recorded_at": "2026-10-23T10:14:24.356520+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/review/jev_review.py",
