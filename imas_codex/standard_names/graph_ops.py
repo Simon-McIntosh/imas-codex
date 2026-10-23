@@ -17856,7 +17856,7 @@ def persist_reviewed_docs(
     # resolves to a different one is a physics-referencing error the LLM
     # reviewers systematically miss. Block promotion and route through
     # refine_docs with the findings in the comments; never exhaust a doc
-    # over a link nit (accept at the cap and leave it to the batch lint).
+    # over a link finding; a held document at the cap remains triageable.
     if target_stage == "accepted":
         link_scan_succeeded = False
         try:
@@ -17902,7 +17902,7 @@ def persist_reviewed_docs(
             )
 
     if target_stage == "accepted" and not docs_accepted(score, min_score, sn_id):
-        target_stage = "exhausted" if docs_chain_length >= rotation_cap else "reviewed"
+        target_stage = "reviewed"
 
     # Normalize bare references before the accepting write. The shared parser
     # excludes mathematical notation, code, images, and formed Markdown links.

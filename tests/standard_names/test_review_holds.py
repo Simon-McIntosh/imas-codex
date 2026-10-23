@@ -196,6 +196,20 @@ def test_clearing_hold_accepts_passing_document(planted_name: str) -> None:
     assert holds.docs_accepted(0.875, 0.85, planted_name)
 
 
+def test_cap_hold_can_be_dismissed_into_acceptance(planted_name: str) -> None:
+    """A terminal rotation must leave a held passing document triageable."""
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (sn:StandardName {id: $id}) SET sn.docs_chain_length = 3",
+            id=planted_name,
+        )
+    hold = _raise(planted_name)
+    assert _review(planted_name) == "reviewed"
+    assert _state(planted_name) == {"stage": "reviewed", "score": 0.875}
+    assert holds.dismiss_hold(hold["id"], "triager", "Source confirms the claim")
+    assert _state(planted_name) == {"stage": "accepted", "score": 0.875}
+
+
 def test_dismissed_finding_stays_dismissed_and_does_not_block(
     planted_name: str,
 ) -> None:
