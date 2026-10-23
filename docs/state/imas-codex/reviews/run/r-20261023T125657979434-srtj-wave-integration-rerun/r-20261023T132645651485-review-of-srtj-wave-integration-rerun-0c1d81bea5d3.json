@@ -23,6 +23,13 @@
   "call_sites": [],
   "completed_at": "2026-10-23T14:05:56.711Z",
   "dispatched_at": "2026-10-23T13:43:49Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-srtj-wave-integration-rerun-0c1d81bea5d3",
+      "recorded_at": "2026-10-23T14:14:43.613317+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html",
