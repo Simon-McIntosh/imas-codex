@@ -440,6 +440,20 @@ source-only, DD-only, or read-only checks:
 | `structural_accept_derived_parents` | Derived/source-free parents with substantive descriptions and `name_stage IN ['drafted', 'reviewed', 'exhausted', 'refining']` | **Yes:** an exhausted derived parent can be promoted to accepted |
 | `reconcile_orphan_parent_sources` | Parent write requires `NOT coalesce(parent.name_stage, '') IN ['superseded', 'exhausted', 'contested']` | No terminal rows |
 
+**Every documentation hold kind is owned by the check that raises it, and that
+check reconciles it on every pass.** The lint cap raises `docs_lint_error` when
+an error-severity finding stands against a name and clears it on a later pass
+over the same names that finds none; a deciding cascade route raises
+`cascade_contradiction` when the contradiction veto fires and clears it when a
+later route reports no contradiction. A kind that is raised but never re-checked
+holds the document for the check's own reasons but for the life of the name: the
+refine pool re-claims a passing row with an open documentation hold, holds it
+again, and walks `docs_chain_length` to the rotation cap, ending `exhausted`.
+So a new hold kind ships with the pass that clears it — either by adding it to
+the kinds that pass re-checks, or by the check reconciling its own kinds as both
+of these do. `clear_holds_not_raised` run by an unrelated re-check does not touch
+them, because it clears only the kinds it was told that check covers.
+
 The post-drain path is covered by the same flag as well: it suppresses
 `release_all_orphan_claims`, the repeated structural parent fixups,
 `resolve_doc_links`, and `restamp_harmonized_families` when they are invoked

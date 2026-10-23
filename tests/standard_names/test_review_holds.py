@@ -438,10 +438,126 @@ def test_cascade_veto_raises_a_hold_and_keeps_the_decision_score(
     )
     assert route.failed_checks == ("claim_contradicts_source",)
 
-    raised = cascade.raise_route_holds(planted_name, route)
+    raised = cascade.sync_route_holds(planted_name, route)
     assert len(raised) == 1
     records = holds.open_holds(planted_name, "docs")
     assert [record["kind"] for record in records] == ["cascade_contradiction"]
+
+
+def _route_pair(monkeypatch) -> tuple[object, object]:
+    """A vetoing docs route and a clean one, from the same stub calibration."""
+    from imas_codex.standard_names.review import cascade
+    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS
+
+    thresholds = {
+        "accept_threshold": 0.4,
+        "score_kind": "rubric",
+        "rubric": {},
+    }
+    monkeypatch.setattr(
+        cascade, "_calibration", lambda: {"name": thresholds, "docs": thresholds}
+    )
+    monkeypatch.setattr(
+        cascade,
+        "rubric_scores",
+        lambda axis, judgment, fit: dict.fromkeys(DOCS_DIMENSIONS, 0.96 * 20),
+    )
+    vetoed = cascade.route_docs(
+        {"contradiction_veto": True, "checks": {}, "quality": 0.96}, probability=0.96
+    )
+    clean = cascade.route_docs(
+        {"contradiction_veto": False, "checks": {}, "quality": 0.96}, probability=0.96
+    )
+    return vetoed, clean
+
+
+def test_resolved_cascade_veto_clears_the_hold(planted_name: str, monkeypatch) -> None:
+    """A later pass that reports no contradiction releases the document.
+
+    The veto is reconciled on every deciding pass, so the refusal ends with the
+    finding: a hold left open would re-claim the document on each pass and walk
+    it to the rotation cap.
+    """
+    from imas_codex.standard_names.review import cascade
+
+    vetoed, clean = _route_pair(monkeypatch)
+    assert vetoed.holds
+    assert clean.holds == ()
+
+    cascade.sync_route_holds(planted_name, vetoed)
+    assert [r["kind"] for r in holds.open_holds(planted_name, "docs")] == [
+        "cascade_contradiction"
+    ]
+
+    cascade.sync_route_holds(planted_name, clean)
+    assert holds.open_holds(planted_name, "docs") == []
+
+
+def test_resolved_lint_error_clears_the_hold_and_releases_the_document(
+    planted_name: str,
+) -> None:
+    """The lint check clears the hold its next pass no longer justifies.
+
+    A pass runs the lint check over every scored entry for the batch, so an
+    entry with no error finding reconciles: the hold is cleared and the
+    document is released through the canonical gate, at the score the reviewer
+    gave it. The refusal therefore lasts exactly as long as the finding does,
+    which is what the score clamp this replaces also did.
+    """
+    from imas_codex.standard_names.review import pipeline
+
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (sn:StandardName {id: $id}) SET sn.edit_status = 'open'",
+            id=planted_name,
+        )
+    holds.raise_hold(
+        planted_name,
+        "docs",
+        "docs_lint_error",
+        LINT_FINDING,
+        f"error-severity lint finding on {planted_name}",
+        "review-lint",
+    )
+    assert _review(planted_name) == "reviewed"
+    assert [r["kind"] for r in holds.open_holds(planted_name, "docs")] == [
+        "docs_lint_error"
+    ]
+
+    wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
+    pipeline._cap_docs_scores_for_lint_errors(
+        [{"id": planted_name, "reviewer_score": 0.875}], {}, wlog
+    )
+
+    assert holds.open_holds(planted_name, "docs") == []
+    assert _state(planted_name) == {"stage": "accepted", "score": 0.875}
+    assert _edit_status(planted_name) == "applied"
+
+
+def test_a_lint_hold_is_not_cleared_when_the_checks_did_not_run(
+    planted_name: str,
+) -> None:
+    """A pass that ran no lint check reports ``None`` and reconciles nothing.
+
+    Clearing on an absent check would release every held document the moment a
+    caller omitted the map, so the two cases are kept distinct.
+    """
+    from imas_codex.standard_names.review import pipeline
+
+    hold = holds.raise_hold(
+        planted_name,
+        "docs",
+        "docs_lint_error",
+        LINT_FINDING,
+        "error-severity lint finding",
+        "review-lint",
+    )
+    wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
+    pipeline._cap_docs_scores_for_lint_errors(
+        [{"id": planted_name, "reviewer_score": 0.875}], None, wlog
+    )
+
+    assert [r["id"] for r in holds.open_holds(planted_name, "docs")] == [hold["id"]]
 
 
 def test_dismissal_does_not_accept_a_quarantined_document(

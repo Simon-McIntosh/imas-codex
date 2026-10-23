@@ -57,9 +57,54 @@
       <strong>After:</strong> <code>mapped</code> keeps its mapped value,
       <code>decision_score</code> and <code>selected_score</code> keep the
       judged values, and the route carries a
-      <code>cascade_contradiction</code> hold. <code>raise_route_holds</code>
-      raises it against the name in the deciding branch, beside the route
+      <code>cascade_contradiction</code> hold. <code>sync_route_holds</code>
+      reconciles it against the name in the deciding branch, beside the route
       record. <code>jev_review.py</code> was not edited.
+    </li>
+    <li id="srtj-holds-route-remaining-cascade-veto-scope">
+      The hold is raised only for the contradiction veto itself. Every failed
+      check also routes to <code>refine</code>, so a nonconforming answer that
+      is not a contradiction refuses the document without raising a hold whose
+      finding text says the claim contradicts its source.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-reconcile">Every hold ends with the check that raised it</h3>
+  <p id="srtj-holds-route-remaining-reconcile-finding">
+    A review of the first revision found that both kinds added above were
+    raised and never cleared. <code>clear_holds_not_raised</code> is the only
+    writer of <code>status='cleared'</code>, and the documentation review's own
+    re-check passes the set <code>registry_conformance</code>,
+    <code>banned_prose</code>, <code>documentation_contradiction</code> — so
+    neither new kind appeared in any re-check. A hold would then outlive the
+    finding that produced it: the refine pool re-claims a passing row with an
+    open documentation hold, holds it again on its next pass, and walks
+    <code>docs_chain_length</code> to the rotation cap, ending
+    <code>exhausted</code>. That is a permanent refusal where the score clamp
+    it replaced recomputed on every pass.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-reconcile-fix">
+      <strong>Repair:</strong> each check now reconciles its own kinds on every
+      pass, in both directions. The lint cap raises <code>docs_lint_error</code>
+      when a finding stands and clears it on a later pass over the same names
+      that finds none; a deciding cascade route raises
+      <code>cascade_contradiction</code> when the veto fires and clears it when
+      a later route reports none. Both call
+      <code>clear_holds_not_raised</code> with exactly their own kind, so
+      neither asserts anything about another check's holds.
+    </li>
+    <li id="srtj-holds-route-remaining-reconcile-none">
+      <strong>An absent check is not a passing check.</strong> The lint map is
+      <code>None</code> when the checks did not run for a batch, distinct from
+      an empty mapping, which means the checks ran and found nothing. Only the
+      empty mapping reconciles; a caller that omits the map releases nothing.
+    </li>
+    <li id="srtj-holds-route-remaining-reconcile-dev">
+      The release runs through the same promotion the hold channel already
+      used, so a document whose only blocker was the resolved finding is
+      accepted at the score the reviewer gave it, and one that is quarantined
+      or has no winning review is still left at <code>reviewed</code>.
     </li>
   </ul>
 
@@ -152,6 +197,12 @@
       <code>_cap_docs_scores_for_lint_errors</code> reddens three lint-cap
       tests, including the new hold test, and the source was restored byte-
       identical afterwards.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-reconcile">
+      <strong>Reconciliation controls.</strong> Removing the clearing call from
+      the cascade route reddens the cascade release test; removing it from the
+      lint cap reddens the lint release test. Each site's guard fails on its
+      own revert, and the sources were restored byte-identical.
     </li>
   </ul>
 </section>
