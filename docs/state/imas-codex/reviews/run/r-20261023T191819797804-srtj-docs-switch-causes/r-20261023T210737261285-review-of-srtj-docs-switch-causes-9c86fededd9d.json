@@ -16,6 +16,13 @@
     }
   },
   "dispatched_at": "2026-10-23T21:09:18Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-srtj-docs-switch-causes-9c86fededd9d",
+      "recorded_at": "2026-10-23T21:50:20.487115+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json",
