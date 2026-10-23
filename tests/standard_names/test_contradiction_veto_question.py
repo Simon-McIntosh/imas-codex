@@ -1,8 +1,10 @@
 """The contradiction veto fires only on a real contradiction.
 
 Three failure modes are covered here. A DD source that carries a field label
-instead of a definition is not evidence, so it is dropped before the claim is
-compared and the claim answers "says nothing". A claim that disclaims fixing a
+instead of a definition has that label emptied from the evidence before the
+claim is compared, while the source and its path stay, so the claim answers
+"says nothing" about a label and can still be denied by the field the path
+names. A claim that disclaims fixing a
 locus or an aggregation is settled in code as "says nothing" when the evidence
 specialises the quantity, because one locus, average or component instance of a
 generic quantity agrees with the claim rather than denying it. A source that
@@ -49,7 +51,8 @@ def test_a_definition_stays_evidence(text: str) -> None:
     assert jev_review.label_only_source(text) is False
 
 
-def test_label_only_source_is_dropped_from_the_evidence() -> None:
+def test_a_field_label_is_emptied_from_the_evidence() -> None:
+    """The label text goes; the source and its path stay."""
     item = {
         "id": "gap_at_outboard_midplane",
         "documentation": "The quantity has no mandatory locus or aggregation.",
@@ -63,7 +66,10 @@ def test_label_only_source_is_dropped_from_the_evidence() -> None:
 
     state = jev_review.build_docs_state(item)
 
-    assert state["dd_source_docs"] == {"observed": False, "value": None}
+    assert state["dd_source_docs"] == {
+        "observed": True,
+        "value": [{"id": "summary/boundary/distance_inner_outer_separatrices/value"}],
+    }
 
 
 def test_a_definition_beside_a_label_is_kept() -> None:
@@ -83,7 +89,43 @@ def test_a_definition_beside_a_label_is_kept() -> None:
 
     kept = state["dd_source_docs"]
     assert kept["observed"] is True
-    assert [source["id"] for source in kept["value"]] == ["b/r_outboard"]
+    assert [source["id"] for source in kept["value"]] == ["a/value", "b/r_outboard"]
+    assert [source.get("documentation") for source in kept["value"]] == [
+        None,
+        "Radial coordinate (major radius) on the outboard side",
+    ]
+
+
+def test_a_label_source_keeps_the_field_path_that_can_deny_a_claim() -> None:
+    """The path names the field, so a claim about the axis is still compared.
+
+    Every word of this source's text is a field label, but its path ends in the
+    axis coordinate the label repeats, and a claim that fixes a direction is
+    denied by a source whose path fixes another one.
+    """
+    item = {
+        "id": "spi_injector_shatter_cone_unit_vector_major_component_x",
+        "documentation": "The shatter-cone major-axis component is along X.",
+        "dd_source_docs": [
+            {
+                "id": "spi/injector/shatter_cone/unit_vector_major/y",
+                "documentation": "Component along Y axis",
+            }
+        ],
+    }
+
+    state = jev_review.build_docs_state(item)
+
+    assert state["dd_source_docs"] == {
+        "observed": True,
+        "value": [{"id": "spi/injector/shatter_cone/unit_vector_major/y"}],
+    }
+
+    verdict = jev_review.aggregate_docs_review(
+        state, jev_review._default_checks(), _claim_only("contradicts")
+    )
+
+    assert verdict["contradiction_veto"] is True
 
 
 DISCLAIMER_CLAIMS = [
@@ -183,7 +225,11 @@ def test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial() -> None:
 
 
 def test_the_judge_never_sees_a_field_label(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Drive the same sequence the acceptance path drives, with Jev mocked."""
+    """Drive the same sequence the acceptance path drives, with Jev mocked.
+
+    The label's words are gone from the state the judge is handed; the source's
+    path stays, which is the field name and the only coordinate it carries.
+    """
     seen: dict[str, Any] = {}
 
     async def fake_decide_batch(
@@ -236,4 +282,7 @@ def test_the_judge_never_sees_a_field_label(monkeypatch: pytest.MonkeyPatch) -> 
 
     anyio.run(run)
 
-    assert seen["states"][0]["dd_source_docs"] == {"observed": False, "value": None}
+    assert seen["states"][0]["dd_source_docs"] == {
+        "observed": True,
+        "value": [{"id": "camera_ir/channel/camera/up/x"}],
+    }

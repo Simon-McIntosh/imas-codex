@@ -32,10 +32,12 @@ per claim and categorises three rubric dimensions. Code gives any contradictory
 claim a veto; a high dimension score cannot offset it. Only a source that denies
 the claim is a contradiction: a source that names a different quantity, an
 opposite sign or direction, an incompatible unit or dimension, or a different
-definition. Two kinds of source are therefore removed before a claim is held
+definition. Two kinds of text are therefore removed before a claim is held
 against anything. A source whose wording carries no definition at all, only a
-field label, is dropped from the evidence, so a claim left with none answers
-"says nothing". A claim that disclaims fixing a locus or an aggregation — it
+field label, has that wording emptied out of the evidence; the source stays,
+with its path, unit and links, because the path names the field and can deny a
+claim about a locus or an axis where the label alone could not. A claim that
+disclaims fixing a locus or an aggregation — it
 asserts the quantity at any locus and under any averaging — is settled in code
 as "says nothing" when the evidence specialises the quantity, because one locus,
 average or component instance of a generic quantity agrees with it rather than
@@ -539,20 +541,34 @@ def source_text(source: Mapping[str, Any]) -> str:
     return str(source.get("documentation") or source.get("description") or "")
 
 
+_SOURCE_TEXT_FIELDS = ("documentation", "description")
+
+
 def comparison_sources(
     sources: Sequence[Mapping[str, Any]] | None,
 ) -> list[Mapping[str, Any]]:
-    """Drop the DD sources that carry a field label instead of a definition.
+    """Take the field labels out of the DD sources the judge is given.
 
-    The dropped source is absent from the returned list, never empty, so a claim
-    left with no source is compared against nothing and answers "says nothing"
-    rather than being held against a label.
+    A label names where the number lives rather than defining the DD quantity,
+    so its words are not evidence and are removed from the source. Everything
+    else the source carries stays: its path names the field, and a field path
+    is exactly what a claim about a locus, an axis or a component can be
+    denied by — ``.../unit_vector_major/y`` denies a claim that the major-axis
+    component is along X. Dropping the whole source would delete that denial
+    along with the label, so only the source's own words are emptied.
     """
-    return [
-        source
-        for source in (sources or ())
-        if not label_only_source(source_text(source))
-    ]
+    kept: list[Mapping[str, Any]] = []
+    for source in sources or ():
+        empty = {
+            field
+            for field in _SOURCE_TEXT_FIELDS
+            if field in source and label_only_source(source[field])
+        }
+        if not empty:
+            kept.append(source)
+            continue
+        kept.append({key: value for key, value in source.items() if key not in empty})
+    return kept
 
 
 # A claim that denies fixing a locus or an aggregation states that its quantity
