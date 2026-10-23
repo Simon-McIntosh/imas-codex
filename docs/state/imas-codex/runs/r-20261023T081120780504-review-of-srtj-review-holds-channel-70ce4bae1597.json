@@ -762,16 +762,11 @@
     "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
     "process_signalled": false,
     "process_withheld": "process is not alive",
-    "scratch_bytes": 16382,
+    "scratch_bytes": null,
     "scratch_path": "/tmp/reckon-crew-scratch/r-20261023T081120780504-review-of-srtj-review-holds-channel-70ce4bae1597",
-    "scratch_removed": true,
-    "scratch_removed_paths": [
-      {
-        "bytes": 16382,
-        "path": "/tmp/reckon-crew-scratch/r-20261023T081120780504-review-of-srtj-review-holds-channel-70ce4bae1597"
-      }
-    ],
-    "scratch_withheld": "",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
     "worktree_audit": {
       "counts": {
         "dirty": 0,
@@ -790,7 +785,8 @@
         }
       ]
     },
-    "worktree_released": true
+    "worktree_released": false,
+    "worktree_withheld": "tree is no longer available"
   },
   "resume_waiver": null,
   "review": {
