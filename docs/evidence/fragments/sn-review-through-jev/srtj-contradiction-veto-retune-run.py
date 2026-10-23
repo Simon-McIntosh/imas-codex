@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-"""Replay three candidate contradiction questions against two sets.
+"""Replay two candidate contradiction questions against two sets, twice each.
 
-The arms differ in two independent ways: whether a DD source that carries only
-a field label is dropped from the claim's evidence (the ``label_only_source``
-predicate), and whether the question text states that specialisation is
-compatible (the rewritten criterion) or whether a claim that disclaims a locus
-or an aggregation is settled in code before the judge is asked.
+The arms differ in one way: whether a claim that disclaims fixing a locus or an
+aggregation, compared against a source that specialises the quantity, is settled
+in code before the judge is asked.
 
-* Arm A is the base question text plus the label-only predicate.
-* Arm B is arm A plus the deterministic determination: a claim that denies
-  fixing a locus or an aggregation, compared against a source that specialises
-  the quantity, is answered "says nothing" in code and the judge is never asked
-  about that claim.
-* Arm C is the retuned question text, which states that rule to the judge
-  instead.
+* Arm A is the base question text plus the label-only predicate, which empties a
+  field label out of the evidence while keeping the source's path.
+* Arm B is arm A plus the deterministic determination: such a claim is answered
+  "says nothing" in code and the judge is never asked about it.
+
+Both arms carry the predicate and the base question text; the wording that
+states the specialisation rule to the judge was removed from the runner after it
+was ruled out.
+
+Every arm is scored twice on the same rows in one process. The judge is not
+deterministic run to run, so an arm's recall is the pair of counts, and the arm
+is only kept when both passes meet the bar. Rows are matched between passes by
+row id, never by position in a sorted list.
 
 Set A is the recorded firings: every (name, claim, DD text) triple the
 contradiction veto held on, read from the diagnosis
@@ -29,10 +33,9 @@ documentation set itself carries no contradiction-labelled row (its label is a
 binary accept/reject, and its ``label_check`` values are subject and
 house-style checks), so the planted rows are the whole recall set.
 
-Every arm is asked on the same rows in one process through the same
-``decide_batch`` the cascade uses under the ``sn-judge`` seat, so the arms are
-comparable call for call. The base revision's question text is captured
-verbatim from c5b7f76ed.
+Every arm is asked through the same ``decide_batch`` the cascade uses under the
+``sn-judge`` seat, so the arms are comparable call for call. The base revision's
+question text is captured verbatim from c5b7f76ed.
 
 Read-only: no graph write, no LLM other than the named seat.
 """
@@ -61,12 +64,13 @@ OUT = HERE / "srtj-contradiction-veto-retune.json"
 
 CLAIM_KEY = "check:claim_contradicts_source:{index}"
 CEILING_USD = 1.00
+RECORDED_CEILING = 3
 BASE_REVISION = "c5b7f76ed"
-ARMS = ("a", "b", "c")
+ARMS = ("a", "b")
+PASSES = (1, 2)
 ARM_NOTES = {
     "a": "base question text plus the label-only predicate",
     "b": "arm A plus the locus/aggregation disclaimer settled in code before Jev",
-    "c": "retuned question text that states the specialisation rule to the judge",
 }
 
 # The base revision's source-comparison question, verbatim from
@@ -166,7 +170,7 @@ async def judge(
         questions = claim_questions(
             checks,
             max(asked) + 1,
-            old=arm in ("a", "b"),
+            old=True,
             indices=asked,
         )
         results, group_cost = await jev_review.decide_batch(
@@ -231,6 +235,7 @@ def summarise(rows: list[dict[str, Any] | None]) -> dict[str, Any]:
         "rows": len(rows),
         "unscored": sum(1 for row in rows if row is None),
         "fired": sum(1 for row in rows if row and row["fired"]),
+        "fired_ids": sorted(row["name"] for row in rows if row and row["fired"]),
     }
 
 
@@ -300,27 +305,41 @@ def planted_states() -> list[dict[str, Any]]:
     return states
 
 
-def keep_arm(arms: dict[str, Any], recall_total: int) -> tuple[str, str]:
-    """The arm to keep: the best that meets the bar, else the best recall."""
-    met = [
-        arm
-        for arm in ARMS
-        if arms[arm]["at_most_three_recorded_fire"]
-        and arms[arm]["recall"] >= recall_total
-    ]
+def arm_meets_bar(arm: dict[str, Any], recall_total: int, ceiling: int) -> bool:
+    """True only when every pass holds both legs of the bar."""
+    return all(
+        pass_result["recorded_still_fire"] <= ceiling
+        and pass_result["recall"] >= recall_total
+        for pass_result in arm["passes"].values()
+    )
+
+
+def keep_arm(arms: dict[str, Any], recall_total: int, ceiling: int) -> tuple[str, str]:
+    """The arm to keep: one that meets the bar, else no revision at all.
+
+    An arm may stay only when it holds both legs on every pass. When none does,
+    no revision is kept, whatever its numbers: an arm with better precision and
+    lower recall than the base question is a recall regression, not a trade.
+    """
+    met = [arm for arm in ARMS if arms[arm]["meets_bar"]]
     if met:
         return (
-            min(met, key=lambda arm: (arms[arm]["recorded_still_fire"], arm)),
-            "best arm that meets the bar",
+            min(
+                met,
+                key=lambda arm: (
+                    max(
+                        pass_result["recorded_still_fire"]
+                        for pass_result in arms[arm]["passes"].values()
+                        if pass_result["recorded_still_fire"] is not None
+                    ),
+                    arm,
+                ),
+            ),
+            "best arm that meets the bar on every pass",
         )
-    recall_floor = max(arms[arm]["recall"] for arm in ARMS)
-    if recall_floor >= recall_total:
-        candidates = [arm for arm in ARMS if arms[arm]["recall"] == recall_floor]
-        return (
-            min(candidates, key=lambda arm: (arms[arm]["recorded_still_fire"], arm)),
-            "no arm meets the bar; best recall that does not lower it",
-        )
-    return "", "no arm meets the bar and no arm preserves the old question's recall"
+    return "", (
+        "no arm meets the bar on every pass; the base question is restored with no change"
+    )
 
 
 def main() -> int:
@@ -343,9 +362,15 @@ def main() -> int:
         ):
             arms: dict[str, Any] = {}
             for arm in ARMS:
-                judged, cost = await judge(rows, arm=arm)
-                spend += cost
-                arms[arm] = {"summary": summarise(judged), "rows": list(judged)}
+                passes: dict[str, Any] = {}
+                for number in PASSES:
+                    judged, cost = await judge(rows, arm=arm)
+                    spend += cost
+                    passes[str(number)] = {
+                        "summary": summarise(judged),
+                        "rows": list(judged),
+                    }
+                arms[arm] = passes
             out[label] = arms
         out["spend_usd"] = spend
         return out
@@ -354,22 +379,33 @@ def main() -> int:
 
     arms_report: dict[str, Any] = {}
     for arm in ARMS:
+        passes: dict[str, Any] = {}
+        for number in PASSES:
+            key = str(number)
+            passes[key] = {
+                "recorded_still_fire": result["recorded"][arm][key]["summary"]["fired"],
+                "recall": result["contradictions"][arm][key]["summary"]["fired"],
+                "false_alarms": result["controls"][arm][key]["summary"]["fired"],
+                "unscored": sum(
+                    result[label][arm][key]["summary"]["unscored"]
+                    for label in ("recorded", "contradictions", "controls")
+                ),
+                "recall_ids": result["contradictions"][arm][key]["summary"][
+                    "fired_ids"
+                ],
+                "recorded_ids": result["recorded"][arm][key]["summary"]["fired_ids"],
+            }
         arms_report[arm] = {
             "note": ARM_NOTES[arm],
-            "recorded_still_fire": result["recorded"][arm]["summary"]["fired"],
-            "recall": result["contradictions"][arm]["summary"]["fired"],
-            "false_alarms": result["controls"][arm]["summary"]["fired"],
-            "unscored": sum(
-                result[label][arm]["summary"]["unscored"]
-                for label in ("recorded", "contradictions", "controls")
-            ),
+            "passes": passes,
+            "meets_bar": False,
         }
-        arms_report[arm]["at_most_three_recorded_fire"] = (
-            arms_report[arm]["recorded_still_fire"] <= 3
+        arms_report[arm]["meets_bar"] = arm_meets_bar(
+            arms_report[arm], len(contradictions), RECORDED_CEILING
         )
 
     recall_total = len(contradictions)
-    kept, because = keep_arm(arms_report, recall_total)
+    kept, because = keep_arm(arms_report, recall_total, RECORDED_CEILING)
 
     result["arms"] = arms_report
     result["kept_arm"] = kept
@@ -378,13 +414,9 @@ def main() -> int:
         "recorded_total": len(recorded),
         "recall_total": recall_total,
         "control_total": len(controls),
-        "recorded_ceiling": 3,
-        "arms_meeting": [
-            arm
-            for arm in ARMS
-            if arms_report[arm]["at_most_three_recorded_fire"]
-            and arms_report[arm]["recall"] >= recall_total
-        ],
+        "recorded_ceiling": RECORDED_CEILING,
+        "passes": len(PASSES),
+        "arms_meeting": [arm for arm in ARMS if arms_report[arm]["meets_bar"]],
     }
     result["spend_usd"] = round(result["spend_usd"], 6)
     result["spend_ceiling_usd"] = CEILING_USD
