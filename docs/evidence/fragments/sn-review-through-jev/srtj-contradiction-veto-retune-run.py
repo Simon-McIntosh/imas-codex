@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Replay two candidate contradiction questions against two sets, twice each.
 
-The arms differ in one way: whether a claim that disclaims fixing a locus or an
-aggregation, compared against a source that specialises the quantity, is settled
-in code before the judge is asked.
+The arms differ in one way: whether a claim that states a non-requirement of a
+quantity whose name carries no locus or aggregation qualifier of its own is
+settled in code before the judge is asked.
 
 * Arm A is the base question text plus the label-only predicate, which empties a
   field label out of the evidence while keeping the source's path.
-* Arm B is arm A plus the deterministic determination: such a claim is answered
-  "says nothing" in code and the judge is never asked about it.
+* Arm B2 is arm A plus the narrowed deterministic settlement: such a claim is
+  answered "says nothing" in code and the judge is never asked about it. A
+  sentence that asserts the quantity's own combination — that it is not
+  averaged, holds at one place only, or excludes what the source states — is
+  left to the judge.
 
 Both arms carry the predicate and the base question text; the wording that
 states the specialisation rule to the judge was removed from the runner after it
@@ -66,11 +69,15 @@ CLAIM_KEY = "check:claim_contradicts_source:{index}"
 CEILING_USD = 1.00
 RECORDED_CEILING = 3
 BASE_REVISION = "c5b7f76ed"
-ARMS = ("a", "b")
+ARMS = ("a", "b2")
 PASSES = (1, 2)
 ARM_NOTES = {
     "a": "base question text plus the label-only predicate",
-    "b": "arm A plus the locus/aggregation disclaimer settled in code before Jev",
+    "b2": (
+        "arm A plus the narrowed settlement: a sentence stating a non-requirement "
+        "of a quantity whose name carries no locus or aggregation qualifier of its "
+        "own is answered 'says nothing' in code"
+    ),
 }
 
 # The base revision's source-comparison question, verbatim from
@@ -139,20 +146,20 @@ async def judge(
 ) -> tuple[list[dict[str, Any] | None], float]:
     """Ask one arm's question of every state through ``decide_batch``.
 
-    For arm B the settled claims are removed from the question set before the
+    For arm b2 the settled claims are removed from the question set before the
     call, so the judge is never asked about them; their answers are the settled
-    ones. Every other arm asks every claim.
+    ones. Arm A asks every claim.
     """
     checks = jev_review._default_checks()
     built = [jev_review.build_docs_state(state["item"]) for state in states]
     counts = [len(state["documentation_claims"]) for state in built]
     settled: list[dict[int, str]] = [{} for _ in built]
-    if arm == "b":
+    if arm == "b2":
         for row, built_state in zip(settled, built, strict=True):
             row.update(
                 jev_review.deterministic_claim_determinations(
                     built_state["documentation_claims"],
-                    built_state["dd_source_docs"]["value"] or [],
+                    str(built_state.get("name_id") or ""),
                 )
             )
 

@@ -1,128 +1,165 @@
 <section class="fragment" id="srtj-contradiction-veto-retune">
 <h2 id="srtj-contradiction-veto-retune-h">The contradiction veto after the retune</h2>
 
-<p id="srtj-contradiction-veto-retune-v"><strong>The bar is not met, and the clause it
-carries therefore keeps the smaller revision.</strong> Two candidate arms were measured
-twice each on the same rows in one run. The arm that ships is the base question
-wording plus the field-label predicate alone: it fires on <strong>10 of the 46 recorded
-firings</strong> against a ceiling of 3, and recalls <strong>all 60</strong> planted
-contradictions. The arm that adds a deterministic settlement of a locus-or-aggregation
-disclaimer reaches the ceiling — 3 firings — but recalls 59 of 60, one below the floor.
-Neither holds both legs at once, and the settlement is the arm that lowers recall below
-the base question's 60, so it does not ship. The clause this retune was given says the
-product keeps the base question with no change unless an arm meets the bar; a lower
-recall bought with better precision is a regression, not a trade.</p>
+<p id="srtj-contradiction-veto-retune-v"><strong>The bar is met, and the narrowed settlement
+therefore ships.</strong> The base wording plus the field-label predicate (arm A) and the
+narrowed settlement (arm B2) were scored twice each on the same rows in one run, beside the
+wider settlement (arm B) measured twice in the preceding run of this retune. A fires on
+<strong>10 of the 46 recorded firings</strong> against a ceiling of 3, and recalls
+<strong>all 60</strong> planted contradictions. B reaches the ceiling of 3 but recalls 59: it
+swallows <code>contradicts-484</code>, whose claim denies the averaging that the documented
+name and the DD source both state, so a settlement that answers a claim the evidence can deny
+is a recall regression. B2 settles only a claim that
+<em>states a non-requirement</em>, and only where the documented name carries no locus or
+aggregation qualifier of its own. It holds both legs on both passes: <strong>3 of the 46
+recorded firings</strong> and <strong>all 60</strong> planted contradictions, with none of
+the 20 controls firing.</p>
 
 <table id="srtj-contradiction-veto-retune-table">
 <thead>
 <tr><th>Arm</th><th>Pass</th><th>Recorded firings still fire (46)</th><th>Planted recall (60)</th><th>Controls firing (20)</th><th>Both legs held</th></tr>
 </thead>
 <tbody>
-<tr><td rowspan="2"><strong>A</strong> — base wording plus the field-label predicate (<strong>shipped</strong>)</td><td>1</td><td><strong>10</strong></td><td><strong>60</strong></td><td>0</td><td rowspan="2">no (precision)</td></tr>
-<tr><td>2</td><td><strong>10</strong></td><td><strong>60</strong></td><td>0</td></tr>
-<tr><td rowspan="2">B — A plus the disclaimer settled in code before the judge</td><td>1</td><td>3</td><td>59</td><td>0</td><td rowspan="2">no (recall)</td></tr>
+<tr><td rowspan="2"><strong>B2</strong> — predicate plus the non-requirement settlement (<strong>shipped</strong>)</td><td>1</td><td><strong>3</strong></td><td><strong>60</strong></td><td>0</td><td rowspan="2"><strong>yes</strong></td></tr>
+<tr><td>2</td><td><strong>3</strong></td><td><strong>60</strong></td><td>0</td></tr>
+<tr><td rowspan="2">A — base wording plus the field-label predicate only</td><td>1</td><td>10</td><td>60</td><td>0</td><td rowspan="2">no (precision)</td></tr>
+<tr><td>2</td><td>10</td><td>60</td><td>0</td></tr>
+<tr><td rowspan="2">B — the wider settlement: any denial of locus or aggregation (earlier run)</td><td>1</td><td>3</td><td>59</td><td>0</td><td rowspan="2">no (recall)</td></tr>
 <tr><td>2</td><td>3</td><td>59</td><td>0</td></tr>
 </tbody>
 </table>
 
 <p id="srtj-contradiction-veto-retune-two-passes">Each arm is scored twice because the
 judge is not deterministic run to run: an earlier pass of the same question read 32 of 60
-where a later one read 55. Both arms here held their counts across the two passes, so the
-difference between them is a property of the arms and not of the judge's variance.</p>
+where a later one read 55. All three arms held their counts across the two passes, so the
+differences between them are properties of the arms and not of the judge's variance.</p>
 
 <figure id="srtj-contradiction-veto-retune-figure">
 <img src="/imas-codex/figures/sn-review-through-jev/srtj-contradiction-veto-retune/arm-comparison.svg"
-     alt="The two arms placed by recorded firings still firing and planted contradictions recalled, against the ceiling of 3 and the floor of 60">
-<figcaption>The two legs of the bar for each arm, from the two-pass measurement. The dashed
+     alt="The three arms placed by recorded firings still firing and planted contradictions recalled, against the ceiling of 3 and the floor of 60">
+<figcaption>Both legs of the bar for each arm, from the two-pass measurement. The dashed
 lines are the bar: at most 3 of the 46 recorded firings may still fire, and all 60 planted
-contradictions must be recalled. Arm A sits on the floor line with all 60 and to the right
-of the ceiling, and so fires on ten recorded rows. Arm B reaches the ceiling of 3 and stops
-<code>contradicts-484</code> short of the floor. The acceptable corner — left of the ceiling
-and on or above the floor — is empty for both.</figcaption>
+contradictions must be recalled. Arm B2 sits exactly on the ceiling of 3 and on the floor of
+60, inside the acceptable corner. Arm A sits on the floor and to the right of the ceiling,
+firing on ten recorded rows. Arm B reaches the ceiling but stops one short of the floor.</figcaption>
 </figure>
+
+<h3 id="srtj-contradiction-veto-retune-settlement">The settlement, and the case that sets its limit</h3>
+
+<p id="srtj-contradiction-veto-retune-settlement-body">A sentence saying that the quantity
+does not prescribe, impose, require or mandate a locus, an averaging or an aggregation
+carries nothing a source can contradict: the quantity holds wherever it is measured, so a
+source that names one locus of it agrees rather than denies. Code answers those sentences
+"says nothing" with <code>settled_by: "non_requirement_sentence"</code>, and the judge is
+never asked. Two conditions bound it: the documented name must carry no locus or aggregation
+qualifier of its own, and the sentence must state a non-requirement rather than assert the
+quantity's own combination. The second condition is what the wider settlement lacked, and
+<code>contradicts-484</code> is the row that measures it:</p>
+
+<table id="srtj-contradiction-veto-retune-settlement-table">
+<thead><tr><th>Field</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Name</td><td><code>electron_field_line_average_temperature_over_scrape_off_layer</code></td></tr>
+<tr><td>Claim</td><td>The temperature is only the upstream value without downstream averaging.</td></tr>
+<tr><td>DD source</td><td><code>langmuir_probes/reciprocating/plunge/t_e_average</code> — "Electron temperature (upstream to downstream average)"</td></tr>
+</tbody>
+</table>
+
+<p id="srtj-contradiction-veto-retune-settlement-484">The name is itself an average along a
+field line and the source states the averaging, so the claim negates both. The wider
+settlement read "without downstream averaging" as a disclaimer rather than as an assertion
+and answered it "says nothing", which is how arm B lost the row. B2 sends it to the judge on
+two independent grounds: the name carries the averaging (<code>_average</code>), and the
+sentence asserts the quantity's own combination (<code>without … averaging</code>,
+<code>only the upstream value</code>). Sentences that assert a combination — is not averaged,
+pointwise, <code>excludes</code>, <code>omits</code> — are never settled, whatever their name.</p>
 
 <h3 id="srtj-contradiction-veto-retune-fix">The predicate defect, and what it cost</h3>
 
-<p id="srtj-contradiction-veto-retune-fix-body">The first measurement of arm A lost six
-planted contradictions to the label-only predicate alone, and that was a defect rather than
-a trade. The predicate removed the whole DD source whose text was only a field label. A
-label repeats a coordinate the source path already carries, so the row's path went with
-the label, and a claim fixing a direction was then compared against nothing at all. All six
-rows are rule <code>direction</code>, and in every one the denying evidence is the source
-path:</p>
+<p id="srtj-contradiction-veto-retune-fix-body">The first measurement lost six planted
+contradictions to the label-only predicate alone, and that was a defect rather than a trade.
+The predicate removed the whole DD source whose text was only a field label. A label repeats
+a coordinate the source path already carries, so the row's path went with the label, and a
+claim fixing a direction was then compared against nothing at all. Seven planted rows have a
+field label as the whole of their source text; all are rule <code>direction</code>, and in
+every one the denying evidence is the source path. Six of the seven moved from missed to
+recalled when the fix landed, and the seventh, <code>contradicts-251</code>
+(<code>camera_ir/channel/camera/direction/x</code>), is the one the count does not move.</p>
 
 <table id="srtj-contradiction-veto-retune-fix-table">
 <thead><tr><th>Planted row</th><th>DD source path, the field the contradiction lives in</th><th>Planted sentence</th></tr></thead>
 <tbody>
 <tr><td><code>contradicts-146</code></td><td><code>spi/injector/shatter_cone/unit_vector_major/y</code></td><td>The shatter-cone major-axis component is along X instead of Y.</td></tr>
+<tr><td><code>contradicts-228</code></td><td><code>spi/injector/shatter_cone/unit_vector_minor/x</code></td><td>The minor-axis vector component is along Y instead of X.</td></tr>
 <tr><td><code>contradicts-34</code></td><td><code>camera_ir/channel/camera/up/y</code></td><td>The image-up vector component is along the X axis.</td></tr>
 <tr><td><code>contradicts-115</code></td><td><code>camera_ir/channel/target_surface_center/z</code></td><td>The divertor-target coordinate is along the X axis.</td></tr>
 <tr><td><code>contradicts-287</code></td><td><code>camera_ir/channel/camera/direction/z</code></td><td>The camera unit-vector component is along X instead of Z.</td></tr>
 <tr><td><code>contradicts-166</code></td><td><code>ec_launchers/mirror/movement/direction/x</code></td><td>The mirror vector component is along Y instead of X.</td></tr>
-<tr><td><code>contradicts-228</code></td><td><code>spi/injector/shatter_cone/unit_vector_minor/x</code></td><td>The minor-axis vector component is along Y instead of X.</td></tr>
 </tbody>
 </table>
 
 <p id="srtj-contradiction-veto-retune-fix-effect">The predicate now empties only the
 label's own words out of the evidence and keeps the source, its path, unit and other
-<code>comparison_sources</code> fields. Every one of the six rows fires again in the arm
-that ships, and arm A's recall moves from 54 to <strong>60</strong>. The same fix returned
-its recorded firings from 9 to 10: the path that now denies a planted contradiction can
-also deny a claim in the recorded set, which is the cost of keeping the evidence a claim is
+<code>comparison_sources</code> fields. Recall moves from 54 to <strong>60</strong>, and
+recorded firings from 9 to 10: the path that now denies a planted contradiction can also
+deny a claim in the recorded set, which is the cost of keeping the evidence a claim is
 supposed to be weighed against.</p>
 
 <h3 id="srtj-contradiction-veto-retune-what">What changed in the product</h3>
 
 <p id="srtj-contradiction-veto-retune-changing">The question text is the base revision's,
 unchanged. <code>label_only_source</code> is true when a DD source's every word belongs to
-the vocabulary of field placement, so the text names no quantity; <code>comparison_sources</code>
-empties that text and leaves the source in place, and a claim left with no evidence at all
-still answers "says nothing". The deterministic settlement of a locus-or-aggregation
-disclaimer, which the first record of this retune kept, is removed: it is the arm that
-lowers recall, and no arm that lowers recall may stay. <code>claim_contradicts</code> and
-<code>CONTRADICTION_VETO_PROBABILITY</code> (0.30) are unchanged, and nothing in either
-measurement implicates the threshold.</p>
+the vocabulary of field placement, so the text names no quantity;
+<code>comparison_sources</code> empties that text and leaves the source in place, and a claim
+left with no evidence at all still answers "says nothing". <code>claim_settlement</code>
+answers a non-requirement sentence "says nothing" only under a name with no locus or
+aggregation qualifier, and never when the sentence asserts the quantity's own combination;
+conditional answers from either source are removed from the claims the judge scores.
+<code>claim_contradicts</code> and <code>CONTRADICTION_VETO_PROBABILITY</code> (0.30) are
+unchanged, and nothing in any of the three measurements implicates the threshold.</p>
 
 <h3 id="srtj-contradiction-veto-retune-failing">What still fires</h3>
 
-<p id="srtj-contradiction-veto-retune-failing-recorded">Ten recorded (name, claim, DD
-source) triples still fire, over five names. Both are shown with the claim the judge held:</p>
+<p id="srtj-contradiction-veto-retune-failing-recorded">Three recorded (name, claim, DD
+source) triples still fire under the arm that ships, and each is a name that fixes a locus
+of its own, which is exactly what condition (1) leaves to the judge:</p>
 
 <table id="srtj-contradiction-veto-retune-failing-table">
 <thead><tr><th>Name</th><th>DD source</th><th>Claim</th></tr></thead>
 <tbody>
-<tr><td><code>electrostatic_potential</code> (4 triples)</td><td><code>{edge,core,plasma}_profiles/profiles_1d/phi_potential</code></td><td>The quantity has no mandatory locus or aggregation. / The unqualified physical quantity imposes no intrinsic spatial averaging.</td></tr>
-<tr><td><code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code> (3)</td><td><code>gyrokinetics_local/non_linear/fluxes_{2d_k_x_sum,2d_k_x_k_y_sum,3d_k_x_sum}/momentum_phi_perpendicular_phi_potential</code></td><td>It does not prescribe a wavenumber sum or time or flux-surface average.</td></tr>
 <tr><td><code>gap_at_outboard_midplane</code></td><td><code>summary/boundary/distance_inner_outer_separatrices/value</code></td><td>where [equation] is the gap at the outboard midplane, [equation] is the major-radius coordinate of the mapped measurement position at the outboard midplane…</td></tr>
-<tr><td><code>toroidal_angle_of_control_surface</code></td><td><code>b_field_non_axisymmetric/time_slice/control_surface/phi</code></td><td>This quantity applies to each individual control-surface member and represents toroidal location only.</td></tr>
 <tr><td><code>radial_separatrix_distance_at_outboard_midplane</code></td><td><code>thomson_scattering/channel/distance_separatrix_midplane</code></td><td>The offset vanishes on the separatrix and is negative inside it.</td></tr>
+<tr><td><code>toroidal_angle_of_control_surface</code></td><td><code>b_field_non_axisymmetric/time_slice/control_surface/phi</code></td><td>This quantity applies to each individual control-surface member and represents toroidal location only.</td></tr>
 </tbody>
 </table>
 
-<p id="srtj-contradiction-veto-retune-failing-note">Seven of the ten are the generic-name
-disclaimers the retune set out to remove — a claim that the quantity has no mandatory locus
-or aggregation, held against a source that specialises it. They are exactly what the
-settlement removed and what the base question wording leaves standing. The arm that ships
-therefore meets neither leg on the recorded set, and the row-level record is in the JSON
-beside this page.</p>
+<p id="srtj-contradiction-veto-retune-failing-note">The seven generic-name disclaimers that
+made the base wording fail the precision leg — a claim that the quantity has no mandatory
+locus or aggregation, held against a source that specialises it — are settled by B2 and no
+longer fire. The three that remain assert something about a locus the name itself fixes, so
+the source that contradicts them is real evidence and the veto is doing its job. The
+row-level record for every row, arm and pass is in the JSON beside this page.</p>
 
 <h3 id="srtj-contradiction-veto-retune-tests">Tests and guards</h3>
 
 <p id="srtj-contradiction-veto-retune-tests-body"><code>tests/standard_names/test_contradiction_veto_question.py</code>
-holds 12 tests: the three mandated label strings, a definition that must stay evidence, a
-label emptied from the evidence, a definition beside a label kept, a label-only source whose
-path still denies a claim fixing the other axis, and the veto and no-veto paths. They pass,
-and 7 of the 12 fail with the predicate reverted — run through a plugin that patches the
-module, so the repository is never edited to make them fail. The gate over that file and the
-existing <code>jev_review</code> tests reads 48 passed and 5 failed, the same five
-<code>test_claim_verdict_controls_acceptance</code> ids that fail at the base revision, so
-the node adds no failure. The replay ran read-only: no graph write and no LLM other than the
-<code>sn-judge</code> seat.</p>
+holds 29 tests and all pass: the three mandated label strings, a definition that must stay
+evidence, a label emptied from the evidence, a definition beside a label kept, a label-only
+source whose path still denies a claim fixing the other axis, the four non-requirement
+sentences that settle, the four sentences that assert a combination and must reach the
+judge, the names that fix a locus or an aggregation of their own, and the veto and no-veto
+paths. Two negative controls run against a copy of the module patched in memory, so the
+repository is never edited to make a test fail: forcing the non-requirement test to find
+nothing fails 5 tests, and reverting the label predicate failed 7 of the 12 tests then in the
+file. The gate over that file and the existing <code>jev_review</code> tests reads 65 passed
+and 5 failed, the same five <code>test_claim_verdict_controls_acceptance</code> ids that fail
+at the base revision, so the node adds no failure. The replay ran read-only: no graph write
+and no LLM other than the <code>sn-judge</code> seat.</p>
 
 <h3 id="srtj-contradiction-veto-retune-spend">Spend</h3>
 
-<p id="srtj-contradiction-veto-retune-cost">Jev spend USD 0.036860 of the authorised USD
-1.00, over two arms scored twice on all three sets. The ceiling was not approached: the
-measurement needs one call per claim, and the replay's expense is set by the row count
-rather than by the number of arms.</p>
+<p id="srtj-contradiction-veto-retune-cost">Jev spend USD 0.037108 for the final two-pass
+replay, USD 0.073971 in total across both attempts of this retune, of the authorised USD
+1.00. The ceiling was not approached: the measurement needs one call per claim, and the
+replay's expense is set by the row count rather than by the number of arms.</p>
 </section>
