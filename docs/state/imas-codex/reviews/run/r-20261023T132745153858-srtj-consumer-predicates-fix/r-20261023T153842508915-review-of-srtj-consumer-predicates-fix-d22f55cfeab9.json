@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T15:57:38.925Z",
+  "dispatched_at": "2026-10-23T15:39:12Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": 569,
+      "severity": "non-blocking",
+      "text": "The export-population assertion derives its input from the same flag it asserts on: docs_stage is set to \"accepted\" if expected_accept else \"reviewed\" at line 569 and the assertion at line 578 requires bool(published) == expected_accept, so both sides move with expected_accept and the pair guards only that _classify_export_population maps docs_stage \"accepted\" to published. It cannot redden if the export consumer's stage contract loosened to any other stage value, and it never exercises a held row carrying docs_stage \"accepted\" (the shape a regression in docs_acceptance_where would produce), because the test builds that row from the outcome it expects rather than from what the persistence arm at line 528 actually returned."
+    },
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": 548,
+      "severity": "non-blocking",
+      "text": "The claim-predicate arm reconstructs the product predicate's disjunction in the test: eligible = eligible or bool(route.holds) at line 548 supplies the hold term rather than reading it from the emitted where clause beyond the substring check at line 547. The substring check proves the hold owner's clause is present, but a product change from OR to AND (or a nesting the substring still matches) would leave both lines green while the predicate stopped re-offering held documents, so the OR semantics the test exists to pin is asserted by the test's own copy of it."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to make the docs cases of the consumer-predicate test agree with the hold-aware route; the landed change is confined to tests/standard_names/test_review_cascade.py:455-578, which now serves the persistence writer's own gc.session() transaction and asserts the hold contract through the hold owner, and the product lines it targets are already hold-aware (imas_codex/standard_names/graph_ops.py:17993 drops target_stage from accepted when docs_accepted() is false; imas_codex/standard_names/graph_ops.py:25756 emits has_open_docs_hold_where() in the refine claim predicate), so the goal is met by the test, as diagnosed.\nVERDICT done_when: the brief's done_when requires the nine docs cases to pass and to fail with the fix reverted, and the gate to add no failures; logs/neg-control.log records 9 failed / 9 deselected, EXIT=1 with only tests/standard_names/test_review_cascade.py restored to 5de775901^, logs/probe2.log records 18 passed at head, and logs/gate-head.log (1 failed, 298 passed) against logs/gate-base.log (10 failed, 289 passed) adds none over the 36 named files.\nVERDICT write_paths: the source manifest declares five write paths; git diff db59b6d66a073ab5ffbaf03f4f9f63b483c8f57b..d22f55cfeab9d0335c76e39b87f35d14a8cf5208 touches tests/standard_names/test_review_cascade.py and docs/evidence/fragments/sn-review-through-jev/srtj-consumer-predicates-fix.html, both inside the declared set, and imas_codex/standard_names/review/cascade.py, review/holds.py and export.py are untouched.\nVERDICT manifest: read; status complete, with the tests: line naming the literal two-arm pytest command over 36 files, negative_control_log naming logs/neg-control.log alone, and a checkpoint stating the diagnosis (the wrong side is the test, no product line changed) which the product reads above corroborate.\nVERDICT diff: read commit by commit against db59b6d66; 5de775901 replaces the test's client-level MagicMock query side effect with a _PersistGraph fake that answers the session transaction (+91/-8, one file) and d22f55cfe adds the 31-line evidence fragment (one file), both inside the declared scope with no product or generated file touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/test_review_cascade.py:455-578 makes the nine docs cases pass by running persist_reviewed_docs through the gc.session() boundary it uses and asserting the route's holds, matching the goal, though the landed diff is test-only.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done_when's two arms and the negative control are recorded with EXIT lines (logs/gate-head.log, logs/gate-base.log, logs/neg-control.log) and I reproduced the delta from both arms: head's single failure test_export_empty_refusal.py::test_export_over_empty_candidate_set_exits_non_zero also fails at base.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only tests/standard_names/test_review_cascade.py and docs/evidence/fragments/sn-review-through-jev/srtj-consumer-predicates-fix.html, and every declared write path outside the test file carries no change.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_review_cascade.py:547 and :528 are genuine guards (the hold owner's clause presence and the writer's stage through the real transaction fail if the product stops honouring holds), but the assertions at :548 and :569-578 are not independent of what the same test supplies, so the export side is guarded only by the product's own stage value.\nSCORE fit: 19\nJUSTIFICATION fit: the added _PersistGraph at tests/standard_names/test_review_cascade.py:455 follows the surrounding monkeypatch-and-fake idiom and names itself by what it does, introducing no plan or ticket token.\nSCORE reuse: 18\nJUSTIFICATION reuse: the test calls the hold owner's own clause (imas_codex/standard_names/review/holds.py:212) and the export owner's classifier (imas_codex/standard_names/export.py:840) rather than defining a new capability, with the small exception that the OR semantics is re-expressed at tests/standard_names/test_review_cascade.py:548.\nFINDING tests/standard_names/test_review_cascade.py:569 non-blocking: the export-population assertion builds its docs_stage input from expected_accept and asserts published == expected_accept, so the two sides move with one flag and it cannot redden for any stage contract looser than dropping docs_stage entirely.\nFINDING tests/standard_names/test_review_cascade.py:548 non-blocking: the claim-predicate arm supplies the hold term itself (eligible = eligible or bool(route.holds)) rather than reading the emitted predicate's disjunction, so a product change from OR to AND would leave the assertion green while the predicate stopped re-offering held documents.\n",
+  "review_run_id": "r-20261023T153842508915-review-of-srtj-consumer-predicates-fix-d22f55cfeab9",
+  "reviewed_base_sha": "db59b6d66a073ab5ffbaf03f4f9f63b483c8f57b",
+  "reviewed_head_sha": "d22f55cfeab9d0335c76e39b87f35d14a8cf5208",
+  "reviewed_run_id": "r-20261023T132745153858-srtj-consumer-predicates-fix",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T18:07:19.596128+00:00",
+  "total": 108
+}
