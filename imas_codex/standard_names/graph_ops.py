@@ -52,13 +52,12 @@ from imas_codex.standard_names.provenance_lifecycle import (
     deletion_change_params,
 )
 from imas_codex.standard_names.review.holds import (
-    clear_holds_not_raised,
     docs_acceptance_set,
     docs_acceptance_where,
     docs_accepted,
     has_open_docs_hold_where,
     open_holds,
-    raise_hold,
+    sync_holds,
 )
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
@@ -17970,26 +17969,7 @@ def persist_reviewed_docs(
                             len(mismatches),
                         )
 
-                raised_keys: set[str] = set()
-                for hold in pending_holds:
-                    recorded = raise_hold(
-                        sn_id,
-                        "docs",
-                        hold["kind"],
-                        hold["finding"],
-                        hold["evidence"],
-                        hold["raised_by"],
-                        graph=graph,
-                    )
-                    raised_keys.add(recorded["finding_key"])
-                if checked_kinds:
-                    clear_holds_not_raised(
-                        sn_id,
-                        "docs",
-                        checked_kinds,
-                        raised_keys,
-                        graph=graph,
-                    )
+                sync_holds(sn_id, "docs", checked_kinds, pending_holds, graph=graph)
 
                 if target_stage == "accepted" and not docs_accepted(
                     score, min_score, sn_id, graph=graph

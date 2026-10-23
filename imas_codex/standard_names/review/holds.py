@@ -95,6 +95,35 @@ def raise_hold(
     return rows[0]["hold"]
 
 
+def sync_holds(
+    name_id: str,
+    axis: str,
+    kinds: set[str] | frozenset[str],
+    pending: list[dict[str, str]] | tuple[dict[str, str], ...],
+    *,
+    graph: Any | None = None,
+) -> list[str]:
+    """Raise current findings and clear stale findings owned by these checks."""
+    raised: list[str] = []
+    raised_keys: set[str] = set()
+    with _client(graph) as client:
+        for hold in pending:
+            record = raise_hold(
+                name_id,
+                axis,
+                hold["kind"],
+                hold["finding"],
+                hold["evidence"],
+                hold["raised_by"],
+                graph=client,
+            )
+            raised.append(record["id"])
+            raised_keys.add(finding_key(hold["kind"], hold["finding"]))
+        if kinds:
+            clear_holds_not_raised(name_id, axis, set(kinds), raised_keys, graph=client)
+    return raised
+
+
 def clear_holds_not_raised(
     name_id: str,
     axis: str,

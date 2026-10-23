@@ -240,6 +240,7 @@ def _patch_persist_gc(gc):
 def test_persist_reviewed_docs_normalizes_on_accept():
     """On accept, persist_reviewed_docs invokes the scoped bare-link normalize."""
     import imas_codex.standard_names.graph_ops as g
+    from imas_codex.standard_names.review import holds
 
     gc = MagicMock()
     gc.__enter__ = MagicMock(return_value=gc)
@@ -261,7 +262,7 @@ def test_persist_reviewed_docs_normalizes_on_accept():
         patch.object(g, "write_reviews"),
         patch.object(g, "bump_sn_run_counter"),
         patch.object(g, "docs_accepted", return_value=True),
-        patch.object(g, "clear_holds_not_raised", return_value=0),
+        patch.object(holds, "clear_holds_not_raised", return_value=0),
     ):
         result = g.persist_reviewed_docs(
             sn_id="area_at_plasma_boundary",

@@ -193,6 +193,7 @@ def test_review_stage_decision(
     target stage; we assert it matches the documented value.
     """
     from imas_codex.standard_names import graph_ops
+    from imas_codex.standard_names.review import holds
 
     fn = getattr(graph_ops, fn_name)
 
@@ -224,7 +225,7 @@ def test_review_stage_decision(
     with (
         _patch_gc(gc),
         _no_write_reviews(),
-        patch.object(graph_ops, "clear_holds_not_raised", return_value=0),
+        patch.object(holds, "clear_holds_not_raised", return_value=0),
         patch.object(
             graph_ops,
             "docs_accepted",
