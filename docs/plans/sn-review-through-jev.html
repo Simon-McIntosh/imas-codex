@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="193">
+<meta name="plan-version" content="194">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -872,6 +872,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T041800161321-srtj-review-holds-channel" data-who="reckon-build" data-when="2026-10-23T08:10:17Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-review-holds-channel.html — Hold acceptance now gates stranded pool promotion and resolves edit_status through one shared acceptance write; committed gates 10+61+24 passed, guard-reverted control 1 failed, zero added failures against base.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-holds-channel-landed" data-who="reckon-build" data-when="2026-10-23T08:40:00Z">
+    <div class="r-comment-body"><p>A documentation veto is now a <code>ReviewHold</code> beside the judged score (merge <code>8e4327db0</code>, built on codex). How it works:</p><ul><li>Acceptance, refine eligibility and stranded promotion all read open holds.</li><li>Holds change only after the claim is confirmed.</li><li>A cleared hold releases an exhausted document.</li><li>A dismissed finding is not raised again.</li></ul><p>Three review rounds closed two blocking findings and a promotion bypass. The lint cap in <code>review/pipeline.py</code> and the cascade veto are routed next by <code>srtj-holds-route-remaining</code>, which also makes dismissal use the canonical acceptance gate. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-review-holds-channel.html">evidence</a></p></div>
 </div>
 </section>
 </main>
