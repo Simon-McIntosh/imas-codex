@@ -168,7 +168,8 @@ def test_normalize_prose_against_disposable_graph(disposable_neo4j):
     doc = (
         "Related [poloidal flux], [unknown phrase], and [dead name]. "
         "The [documented name](name:documented_name) is this quantity. "
-        "Math $[a b]$ and unit [m^2 s^-1] remain; [co-passing] is prose."
+        "Math $[a b]$ and units [10^20 m^-3], [0.1 s], [2 GeV], "
+        "[m^-3], [K], and [m^2 s^-1] remain; [co-passing] is prose."
     )
     with GraphClient() as graph:
         assert graph.uri == disposable_neo4j
@@ -202,7 +203,16 @@ def test_normalize_prose_against_disposable_graph(disposable_neo4j):
         assert "unknown phrase" in after and "[unknown phrase]" not in after
         assert "dead name" in after and "[dead name]" not in after
         assert "documented name is this quantity" in after
-        assert "$[a b]$" in after and "[m^2 s^-1]" in after
+        assert "$[a b]$" in after
+        for notation in (
+            "[10^20 m^-3]",
+            "[0.1 s]",
+            "[2 GeV]",
+            "[m^-3]",
+            "[K]",
+            "[m^2 s^-1]",
+        ):
+            assert notation in after
         assert "co-passing is prose" in after
         assert {action["action"] for action in changes[0]["actions"]} == {
             "linked",

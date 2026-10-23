@@ -7,6 +7,9 @@ import re
 from collections import Counter
 from pathlib import Path
 
+import pytest
+
+from imas_codex.standard_names.doc_links import _is_prose_bracket
 from imas_codex.standard_names.docs_gates import (
     DOCUMENTATION_GATE_NAMES,
     MIN_DOCUMENTATION_WORDS,
@@ -457,6 +460,21 @@ def test_unit_brackets_do_not_fail_hygiene() -> None:
             f"[density at a limiter](name:density_at_limiter) in {notation}",
         )
         assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS, notation
+
+
+@pytest.mark.parametrize(
+    "notation",
+    ("[10^20 m^-3]", "[0.1 s]", "[2 GeV]", "[m^-3]", "[K]"),
+)
+def test_numeric_magnitude_and_plain_unit_brackets_are_not_prose(
+    notation: str,
+) -> None:
+    assert not _is_prose_bracket(notation[1:-1])
+    text = _LIMITER_PROSE.replace(
+        "[ion density at a limiter]",
+        f"[density at a limiter](name:density_at_limiter) in {notation}",
+    )
+    assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS
 
 
 def test_helium_phrases_are_prose_despite_a_digit() -> None:

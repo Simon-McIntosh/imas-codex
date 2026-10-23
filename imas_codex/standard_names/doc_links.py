@@ -22,6 +22,9 @@ _INLINE_NAME_RE = re.compile(r"(?<![A-Za-z0-9_])name:([a-z][a-z0-9_]+)\b")
 _NAME_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(name:([a-z][a-z0-9_]+)\)")
 _BRACKET_CONTENT_RE = re.compile(r"\[([^\[\]\n]+)\]")
 _NUMERIC_INTERVAL_RE = re.compile(r"-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?")
+_UNIT_MAGNITUDE_RE = re.compile(
+    r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:\^[+-]?\d+|[eE][+-]?\d+)?"
+)
 _UNIT_FACTOR_RE = re.compile(r"([A-Za-zµμ]+)(?:\^-?\d+)?")
 _UNIT_SYMBOLS = frozenset(
     {
@@ -127,7 +130,7 @@ def find_name_references(
 def _is_prose_bracket(content: str) -> bool:
     """Return whether a bracket's content is documentation prose, not notation.
 
-    A bracket holding a unit (``m^-3``, ``K``, ``m^2 s^-1``) or a numeric
+    A bracket holding a unit (``m^-3``, ``K``, ``10^20 m^-3``) or a numeric
     interval (``0, 1``) carries notation a reader reads directly, so it names
     nothing and makes no claim about a standard name. Anything else that holds
     words is prose: it is either a named identity the gate's reference rule
@@ -142,6 +145,8 @@ def _is_prose_bracket(content: str) -> bool:
     tokens = stripped.split()
     if not tokens:
         return False
+    if len(tokens) > 1 and _UNIT_MAGNITUDE_RE.fullmatch(tokens[0]):
+        tokens = tokens[1:]
     factors = [factor for token in tokens for factor in re.split(r"[*/]", token)]
     if factors and all(
         (match := _UNIT_FACTOR_RE.fullmatch(factor))
