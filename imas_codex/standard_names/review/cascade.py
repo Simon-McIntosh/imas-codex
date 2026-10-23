@@ -29,6 +29,12 @@ from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 logger = logging.getLogger(__name__)
 _THRESHOLDS = Path(__file__).with_name("cascade_thresholds.json")
 
+# The hold kinds this module's checks raise. A deciding pass reconciles exactly
+# these on the name it judged, so a failure it no longer reports stops holding
+# the document without this module asserting anything about another check's
+# holds.
+ROUTE_HOLD_KINDS = frozenset({"cascade_contradiction"})
+
 
 @dataclass(frozen=True)
 class CascadeRoute:
@@ -222,7 +228,7 @@ def _route(
         raise ValueError("a decided review requires the selected Jev score")
     mapped = map_decision_score(selected, thresholds["accept_threshold"], min_score)
     holds: tuple[Mapping[str, str], ...] = ()
-    if failed:
+    if "claim_contradicts_source" in failed:
         detail = details.get("claim_contradicts_source", {})
         holds = (
             {
@@ -343,18 +349,30 @@ def _judgment_payload(
     return payload
 
 
-def raise_route_holds(
+def sync_route_holds(
     name_id: str, route: CascadeRoute, *, graph: Any | None = None
 ) -> list[str]:
-    """Raise the documentation holds a deciding route carries on its name.
+    """Reconcile the documentation holds a deciding route carries on its name.
 
     A veto reaches the graph as its own review hold rather than as a lowered
     score: the judged score is unchanged, so the refusal is visible as a
     distinct dimension a triager can act on and can dismiss.
+
+    The reconciliation runs in both directions on every deciding pass, mirroring
+    the per-pass recomputation the score mapping used to do. A check the route
+    still fails raises its hold; a check it no longer fails clears the hold
+    previously raised for it. Without the second direction a resolved
+    contradiction would keep the document held for the life of the name — the
+    hold would outlive the finding that produced it.
     """
-    from imas_codex.standard_names.review.holds import raise_hold
+    from imas_codex.standard_names.review.holds import (
+        clear_holds_not_raised,
+        finding_key,
+        raise_hold,
+    )
 
     raised: list[str] = []
+    raised_keys: set[str] = set()
     for hold in route.holds:
         record = raise_hold(
             name_id,
@@ -366,6 +384,10 @@ def raise_route_holds(
             graph=graph,
         )
         raised.append(record["id"])
+        raised_keys.add(finding_key(hold["kind"], hold["finding"]))
+    clear_holds_not_raised(
+        name_id, "docs", set(ROUTE_HOLD_KINDS), raised_keys, graph=graph
+    )
     return raised
 
 
@@ -757,15 +779,15 @@ async def adjudicate_review(
             logger.exception(
                 "Jev cascade route could not be stored for %s", item.get("id")
             )
-        if route.holds:
-            try:
-                await asyncio.to_thread(
-                    raise_route_holds, str(item.get("id", "")), route
-                )
-            except Exception:
-                logger.exception(
-                    "Jev cascade hold could not be raised for %s", item.get("id")
-                )
+        try:
+            # Run for every deciding pass, not only a vetoing one: a pass that
+            # reports no contradiction is what clears the hold an earlier pass
+            # raised.
+            await asyncio.to_thread(sync_route_holds, str(item.get("id", "")), route)
+        except Exception:
+            logger.exception(
+                "Jev cascade holds could not be reconciled for %s", item.get("id")
+            )
         try:
             await _run_panel_audit(axis, item, models, incumbent, route, mgr=mgr)
         except Exception:
