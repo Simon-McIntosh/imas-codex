@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-23T05:50:50Z",
   "dispatched_at": "2026-10-23T05:41:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-srtj-review-holds-channel-98ecc1e91302",
+      "recorded_at": "2026-10-23T06:42:33.887679+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/graph_ops.py",
