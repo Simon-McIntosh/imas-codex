@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-10-23T07:19:59.877Z",
+  "dispatched_at": "2026-10-23T07:06:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py",
+      "line": "335",
+      "severity": "follow-on",
+      "text": "follow-on: class_counts.notation_should_be_excluded (srtj-docs-bracket-census-run.py:335) is built as `[entry for entry in prose if not entry[\"gate_predicate_says_prose\"]]`, but `prose` is the set whose reason starts with PROSE_REASON and so comes from find_prose_bracket_phrases, which at doc_links.py:121/:102 emits only phrases that already pass _is_prose_bracket; every member therefore has gate_predicate_says_prose True and the class is 0 by construction and cannot redden on any regression, so the HTML's \u00a72 table row presenting the 0 as `_is_prose_bracket` re-run over each flagged phrase is a restatement of the selecting predicate rather than evidence the exclusions work."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py",
+      "line": "417",
+      "severity": "follow-on",
+      "text": "follow-on: dd_token_scan_positive_control (srtj-docs-bracket-census-run.py:417-434) evaluates only the Python predicate contains_dd_token on the constant _DD_PLANTED, while the node's load-bearing zero accepted_documents_containing_any_dd_token (0 of 2,530) is produced by the Cypher `MATCH (sn:StandardName) WHERE sn.documentation CONTAINS 'dd:'` at :203-208, which the control never executes; the `method: \"plant in a disposable copy\"` label is inaccurate because no document is planted in the graph, so the CONTAINS path that actually returns the zero remains unproven."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py",
+      "line": "437",
+      "severity": "follow-on",
+      "text": "follow-on: dd_link_syntax_is_a_valid_gate_target (srtj-docs-bracket-census-run.py:437-441) records its result under a `valid` key and carries no `passed` key, so census.log prints `passed= None` for it while the other eight controls print a boolean; a reader that reads the nine controls by their passed key cannot tell this one passed, and it persists unchanged from the prior review's fourth finding."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the single gained commit 6e34f1e5 against base 0d18022e0: srtj-docs-bracket-census-run.py drops its copy of the notation-class helper and the unit/interval regexes and imports the owner's predicate, adds the independent instrument and its census (run.py:83-110, :221-300), and the HTML (+161/-94) corrects the \u00a71 citations and adds the independent-exclusion table; every changed path is inside the declared scope.",
+    "done_when": "the brief's done-when asks for the JSON written by the runner with a log ending EXIT=0 plus the fragment answering all three questions with cited lines, per-class counts and examples; census.log:14 ends in EXIT=0, srtj-docs-bracket-census.json records documents_read 2530 and class_counts {bare_prose_bracket 613, self_link 24, other 10}, and the HTML carries five verbatim examples per class.",
+    "goal": "the increment exists to make the census's exclusion count independent evidence rather than a restatement of the rule; srtj-docs-bracket-census-run.py:52-54 now imports _is_prose_bracket and find_prose_bracket_phrases from the owner and :83-110 adds the independent instrument, and the HTML keeps answering the node's three questions with the counts unchanged at 613 prose, 24 self-link and 10 other over 2,530 documents.",
+    "manifest": "read; it states status complete, records the gate command, the census log path, the imported gate module path and the headline counts, and carries the same three follow-ons the runner's own output names.",
+    "write_paths": "the source manifest declares three write paths under docs/evidence/fragments/sn-review-through-jev/; the diff 0d18022e0..6e34f1e55 touches exactly those three files (census-run.py, census.html, census.json) and no other."
+  },
+  "justifications": {
+    "durability": "the only guards are the runner's inline controls, which redden if the gate stops failing a prose bracket or a self-link (run.py:390-416), but no assertion covers the census counts and the notation class (run.py:335) and the dd: zero (run.py:203-208) cannot redden on any regression.",
+    "evidence": "census.log records EXIT=0 and the counts, the dd: scan now carries a positive control (run.py:417) and the exclusions a second instrument (run.py:280-300), but the notation_should_be_excluded class (run.py:335) is 0 by construction and the dd: control exercises the Python predicate rather than the Cypher CONTAINS that produced the zero.",
+    "fit": "the three files keep the sibling *-run.py / .json / .html evidence-fragment idiom, the added functions follow the module's own docstring-and-type-hint style, and every graph_ops.py and doc_links.py citation in the HTML was re-verified against the worktree source (e.g. _extract_links_from_docs graph_ops.py:522, _BARE_BRACKET_RE doc_links.py:20 with its lookbehind and lookahead).",
+    "goal_fidelity": "srtj-docs-bracket-census-run.py:83-110 adds the independent instrument the increment exists to add and :52-54 imports the owner predicate, and the HTML \u00a71-\u00a73 keep answering the node's three questions with counts unchanged (613 / 24 / 10 over 2,530).",
+    "reuse": "srtj-docs-bracket-census-run.py:52-54 now imports _is_prose_bracket and find_prose_bracket_phrases from the owner instead of carrying the base's copy, resolving the prior duplication; the only re-implemented patterns left are the deliberately independent instrument at run.py:83-110, whose independence is the evidence method rather than a capability fork.",
+    "scope_discipline": "the diff 0d18022e0..6e34f1e55 changes only srtj-docs-bracket-census-run.py, srtj-docs-bracket-census.html and srtj-docs-bracket-census.json, the three paths the manifest declares and the brief's write scope names."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the increment exists to make the census's exclusion count independent evidence rather than a restatement of the rule; srtj-docs-bracket-census-run.py:52-54 now imports _is_prose_bracket and find_prose_bracket_phrases from the owner and :83-110 adds the independent instrument, and the HTML keeps answering the node's three questions with the counts unchanged at 613 prose, 24 self-link and 10 other over 2,530 documents.\nVERDICT done_when: the brief's done-when asks for the JSON written by the runner with a log ending EXIT=0 plus the fragment answering all three questions with cited lines, per-class counts and examples; census.log:14 ends in EXIT=0, srtj-docs-bracket-census.json records documents_read 2530 and class_counts {bare_prose_bracket 613, self_link 24, other 10}, and the HTML carries five verbatim examples per class.\nVERDICT write_paths: the source manifest declares three write paths under docs/evidence/fragments/sn-review-through-jev/; the diff 0d18022e0..6e34f1e55 touches exactly those three files (census-run.py, census.html, census.json) and no other.\nVERDICT manifest: read; it states status complete, records the gate command, the census log path, the imported gate module path and the headline counts, and carries the same three follow-ons the runner's own output names.\nVERDICT diff: read the single gained commit 6e34f1e5 against base 0d18022e0: srtj-docs-bracket-census-run.py drops its copy of the notation-class helper and the unit/interval regexes and imports the owner's predicate, adds the independent instrument and its census (run.py:83-110, :221-300), and the HTML (+161/-94) corrects the section-1 citations and adds the independent-exclusion table; every changed path is inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: srtj-docs-bracket-census-run.py:83-110 adds the independent instrument the increment exists to add and :52-54 imports the owner predicate, and the HTML sections 1-3 keep answering the node's three questions with counts unchanged (613 / 24 / 10 over 2,530).\nSCORE evidence: 16\nJUSTIFICATION evidence: census.log records EXIT=0 and the counts, the dd: scan now carries a positive control (run.py:417) and the exclusions a second instrument (run.py:280-300), but the notation_should_be_excluded class (run.py:335) is 0 by construction and the dd: control exercises the Python predicate rather than the Cypher CONTAINS that produced the zero.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff 0d18022e0..6e34f1e55 changes only srtj-docs-bracket-census-run.py, srtj-docs-bracket-census.html and srtj-docs-bracket-census.json, the three paths the manifest declares and the brief's write scope names.\nSCORE durability: 13\nJUSTIFICATION durability: the only guards are the runner's inline controls, which redden if the gate stops failing a prose bracket or a self-link (run.py:390-416), but no assertion covers the census counts and the notation class (run.py:335) and the dd: zero (run.py:203-208) cannot redden on any regression.\nSCORE fit: 18\nJUSTIFICATION fit: the three files keep the sibling *-run.py / .json / .html evidence-fragment idiom, the added functions follow the module's own docstring-and-type-hint style, and every graph_ops.py and doc_links.py citation in the HTML was re-verified against the worktree source (e.g. _extract_links_from_docs graph_ops.py:522, _BARE_BRACKET_RE doc_links.py:20 with its lookbehind and lookahead).\nSCORE reuse: 15\nJUSTIFICATION reuse: srtj-docs-bracket-census-run.py:52-54 now imports _is_prose_bracket and find_prose_bracket_phrases from the owner instead of carrying the base's copy, resolving the prior duplication; the only re-implemented patterns left are the deliberately independent instrument at run.py:83-110, whose independence is the evidence method rather than a capability fork.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py:335 follow-on: class_counts.notation_should_be_excluded is built as prose entries whose gate predicate is false, but prose comes from find_prose_bracket_phrases which emits only phrases passing _is_prose_bracket (doc_links.py:121), so the class is 0 by construction and cannot redden on a regression; the HTML section-2 table row presenting it as _is_prose_bracket re-run is a restatement of the selecting predicate.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py:417 follow-on: dd_token_scan_positive_control evaluates only the Python predicate contains_dd_token on the constant _DD_PLANTED, while the load-bearing zero accepted_documents_containing_any_dd_token (0 of 2,530) is produced by the Cypher MATCH ... WHERE sn.documentation CONTAINS 'dd:' at run.py:203-208, which the control never executes; no document is planted in the graph, so the CONTAINS path that returns the zero remains unproven.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py:437 follow-on: dd_link_syntax_is_a_valid_gate_target records its result under a valid key and carries no passed key, so census.log prints passed= None for it while the other eight controls print a boolean; a reader that reads the nine controls by their passed key cannot tell this one passed, and it persists unchanged from the prior review.",
+  "review_run_id": "r-20261023T064716308198-review-of-srtj-docs-bracket-census-6e34f1e55f4d",
+  "reviewed_base_sha": "0d18022e02134e4e49105e6b79bdbd3652cdc865",
+  "reviewed_head_sha": "6e34f1e55f4ddac6610ebdd24ef4c13b9f157e35",
+  "reviewed_run_id": "r-20261023T053544773019-srtj-docs-bracket-census",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T07:15:31+00:00",
+  "total": 101
+}
