@@ -11,7 +11,7 @@ retune.
 Set B is the planted contradictions: the 60 rows of
 ``golden-documentation-planted.json`` labelled ``contradicts`` and the 20
 labelled ``says_nothing``, joined to the golden documentation set by source
-unit so each state carries the entry's own description. The §4 golden
+unit so each state carries the entry's own description. The golden
 documentation set itself carries no contradiction-labelled row (its label is a
 binary accept/reject, and its ``label_check`` values are subject and
 house-style checks), so the planted rows are the whole recall set.
