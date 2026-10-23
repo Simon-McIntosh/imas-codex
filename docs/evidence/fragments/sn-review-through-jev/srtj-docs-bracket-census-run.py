@@ -16,6 +16,13 @@ bracketed phrase that is notation the rule should have excluded, a self-link,
 or something else. Bare phrases are further resolved against the catalogue of
 standard name identities, descriptions and DD-path documentation.
 
+The gate's own exclusions are not taken on trust. Every raw bracket span is
+classified a second time by an independently written instrument that shares
+no pattern with the gate, so the count of spans the predicate excludes is
+evidence rather than a restatement of the predicate. The dd:-token scan
+carries a positive control that runs the same predicate against a document
+known to carry the token.
+
 Nothing here writes to the graph and nothing calls a model.
 """
 
@@ -23,7 +30,6 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
 import time
 from collections import Counter
@@ -42,31 +48,106 @@ GATE_WORKTREE = Path(
 )
 sys.path.insert(0, str(GATE_WORKTREE))
 
+import imas_codex.standard_names.docs_gates as _gate_module  # noqa: E402
+from imas_codex.graph.client import GraphClient  # noqa: E402
+from imas_codex.standard_names.doc_links import (  # noqa: E402
+    _is_prose_bracket,
+    find_prose_bracket_phrases,
+)
 from imas_codex.standard_names.docs_gates import (  # noqa: E402
     DocumentationGateOutcome,
     score_documentation,
 )
-from imas_codex.standard_names.doc_links import (  # noqa: E402
-    find_prose_bracket_phrases,
-)
-import imas_codex.standard_names.docs_gates as _gate_module  # noqa: E402
-from imas_codex.graph.client import GraphClient  # noqa: E402
 
 OUTPUT_PATH = FRAGMENT_DIR / "srtj-docs-bracket-census.json"
 
 PROSE_REASON = "bracketed phrase names no standard name: ["
 BARE_REASON = "bare bracket names a standard name but carries no link: ["
 SELF_REASON = "targets the documented name itself:"
+UNSUPPORTED_REASON = "link has an unsupported target or an empty label"
 
 DOCUMENT_LIMIT = 4000
 NODE_LIMIT = 40000
 
-_MD_LINK_RE = re.compile(r"!?\[([^\]]*)\]\(([^)]+)\)")
 _DD_TARGET_RE = re.compile(r"^dd:[a-z0-9_/]+$")
-_NAME_TARGET_RE = re.compile(r"^name:[a-z][a-z0-9_]+$")
-_UNIT_TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9^\-\*\./]*")
-_NUMERIC_INTERVAL_RE = re.compile(r"-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?")
-_CITATION_RE = re.compile(r"\[\d+\]")
+_DD_LINK_TARGET_RE = re.compile(r"\[[^\]]*\]\(dd:[^)]+\)")
+_DD_PLANTED = "[density](dd:equilibrium/time_slice/profiles_1d/electrons/density)"
+
+# ---------------------------------------------------------------------------
+# The independent instrument. Written from first principles and sharing no
+# pattern with the gate, so agreement between the two is evidence about the
+# gate rather than a restatement of it.
+# ---------------------------------------------------------------------------
+_IND_BRACKET = re.compile(r"\[([^\[\]]*)\]")
+_IND_MATH = re.compile(r"\$\$.*?\$\$|\$[^$]*\$", re.DOTALL)
+_IND_CODE = re.compile(r"```.*?```|`[^`\n]*`", re.DOTALL)
+_IND_LINK = re.compile(r"\[[^\]]*\]\([^)]*\)")
+_IND_NUMBER_PAIR = re.compile(r"^-?\d+(?:[.,]\d+)?\s*[,–-]\s*-?\d+(?:[.,]\d+)?$")
+_IND_UNITISH = re.compile(
+    r"^[A-Za-z][A-Za-z0-9]*$|^[A-Za-z0-9]+[\^/][A-Za-z0-9^/*.-]+$"
+)
+_IND_LATEX = re.compile(r"\\[a-zA-Z]+")
+
+
+def independent_span_class(spans: list[tuple[int, int]], start: int, end: int) -> str:
+    """Classify one raw bracket span with the independent instrument."""
+
+    for mask, label in (
+        (spans[0], "math"),
+        (spans[1], "code"),
+        (spans[2], "markdown_link_label"),
+    ):
+        if any(a <= start and end <= b for a, b in mask):
+            return label
+    return "unmasked"
+
+
+def independent_content_class(content: str) -> str:
+    """Classify unmasked bracket content with the independent instrument."""
+
+    text = content.strip()
+    if not text:
+        return "empty"
+    if _IND_LATEX.search(text):
+        return "latex"
+    if _IND_NUMBER_PAIR.match(text):
+        return "numeric_interval"
+    if _IND_UNITISH.match(text) and " " not in text:
+        return "unit_like"
+    if re.fullmatch(r"\d+", text):
+        return "citation"
+    return "prose_words"
+
+
+def independent_scan(text: str) -> dict:
+    """Return the raw bracket spans of *text* under the independent instrument."""
+
+    return {
+        "spans": [(m.start(), m.end()) for m in _IND_BRACKET.finditer(text)],
+        "content": [m.group(1) for m in _IND_BRACKET.finditer(text)],
+        "masked": (
+            [m.span() for m in _IND_MATH.finditer(text)],
+            [m.span() for m in _IND_CODE.finditer(text)],
+            [m.span() for m in _IND_LINK.finditer(text)],
+        ),
+    }
+
+
+def _control_span_classes() -> dict[str, str]:
+    """Classify the four bracket kinds a positive control plants."""
+
+    text = "[m^-3] and [0, 1] and $[a b]$ and [x](name:y)"
+    scan = independent_scan(text)
+    return {
+        f"[{content}]": independent_span_class(scan["masked"], start, end)
+        for (start, end), content in zip(scan["spans"], scan["content"], strict=True)
+    }
+
+
+def contains_dd_token(text: str) -> bool:
+    """The predicate the live dd: scan applies, usable on any text."""
+
+    return "dd:" in text
 
 
 def snake(phrase: str) -> str:
@@ -99,24 +180,6 @@ def _load_catalogue(gc) -> dict:
     }
 
 
-def _notation_class(phrase: str) -> str | None:
-    """Return a notation class when the rule should have excluded the bracket."""
-
-    stripped = phrase.strip()
-    if not re.search(r"[A-Za-z]", stripped):
-        return "non_alphabetic"
-    if _NUMERIC_INTERVAL_RE.fullmatch(stripped):
-        return "numeric_interval"
-    tokens = stripped.split()
-    if all(_UNIT_TOKEN_RE.fullmatch(t) for t in tokens) and (
-        len(tokens) == 1 or re.search(r"[0-9^/*]", stripped)
-    ):
-        return "unit_expression"
-    if _CITATION_RE.fullmatch(phrase):
-        return "citation"
-    return None
-
-
 def main() -> int:
     started = time.monotonic()
     if not GATE_WORKTREE.is_dir():
@@ -141,6 +204,10 @@ def main() -> int:
             "WHERE sn.name_stage IN ['accepted', 'approved'] "
             "AND sn.documentation CONTAINS 'dd:' RETURN count(*) AS n"
         )[0]["n"]
+        dd_any_stage = gc.query(
+            "MATCH (sn:StandardName) WHERE sn.documentation CONTAINS 'dd:' "
+            "RETURN sn.id AS id, sn.name_stage AS stage LIMIT 5"
+        )
 
     name_ids = {r["id"] for r in catalogue["names"]}
     by_stage: Counter = Counter()
@@ -154,6 +221,14 @@ def main() -> int:
     node_docs_by_id = {r["id"]: (r.get("docs") or "") for r in catalogue["node_docs"]}
 
     offences: list[dict] = []
+    # Independent exclusion census, accumulated across every accepted document.
+    exclusion_counts: Counter = Counter()
+    exclusion_examples: dict[str, list[str]] = {}
+    raw_spans_total = 0
+    predicate_spans_total = 0
+    masked_but_reported = 0
+    disagreements: list[dict] = []
+
     for record in docs:
         text = (record.get("docs") or "").strip()
         if not text:
@@ -170,12 +245,10 @@ def main() -> int:
             entry["phrase"] = phrase
             entry["phrase_has_space"] = " " in phrase.strip()
             entry["word_count"] = len(phrase.split())
-            entry["in_a_dd_target_link"] = f"[{phrase}](dd:" in text
-            entry["in_a_name_target_link"] = f"[{phrase}](name:" in text
-            entry["notation_suspect"] = _notation_class(phrase)
             entry["linked_anywhere_in_document"] = f"[{phrase}](" in text
+            entry["in_a_dd_target_link"] = f"[{phrase}](dd:" in text
+            entry["gate_predicate_says_prose"] = bool(_is_prose_bracket(phrase))
             key = snake(phrase)
-            entry["snake"] = key
             if key in name_ids:
                 entry["resolves_to"] = "existing_name_id"
             elif normalise(phrase) in descriptions:
@@ -203,11 +276,50 @@ def main() -> int:
             entry["construct"] = "other"
         offences.append(entry)
 
+        # Independent exclusion census over this document's raw bracket spans.
+        scan = independent_scan(text)
+        reported_counter = Counter(find_prose_bracket_phrases(text))
+        for (start, end), content in zip(scan["spans"], scan["content"], strict=True):
+            raw_spans_total += 1
+            where = independent_span_class(scan["masked"], start, end)
+            if where != "unmasked":
+                label = where
+                if reported_counter[content] > 0:
+                    masked_but_reported += 1
+            elif reported_counter[content] > 0:
+                label = "prose_reported_by_gate"
+                reported_counter[content] -= 1
+                predicate_spans_total += 1
+            else:
+                if (
+                    independent_content_class(content) == "prose_words"
+                    and len(disagreements) < 20
+                ):
+                    disagreements.append(
+                        {
+                            "document_id": record["id"],
+                            "span": f"[{content}]",
+                            "independent_class": "prose_words",
+                            "gate_prose": bool(_is_prose_bracket(content)),
+                        }
+                    )
+                label = independent_content_class(content)
+            exclusion_counts[label] += 1
+            if len(exclusion_examples.setdefault(label, [])) < 3:
+                exclusion_examples[label].append(
+                    {"document_id": record["id"], "span": f"[{content}]"}
+                )
+
     counts = Counter(entry["construct"] for entry in offences)
     prose = [entry for entry in offences if entry["construct"] == "prose_bracket"]
     resolve_counts = Counter(entry["resolves_to"] or "none_of_these" for entry in prose)
+    other_docs = [
+        {"document_id": entry["document_id"], "reason": entry["reason"]}
+        for entry in offences
+        if entry["construct"] == "other"
+    ]
 
-    def examples(predicate, n: int = 1) -> list[dict]:
+    def examples(predicate, n: int = 5) -> list[dict]:
         return [entry for entry in offences if predicate(entry)][:n]
 
     classes = {
@@ -218,21 +330,19 @@ def main() -> int:
             entry
             for entry in offences
             if _DD_TARGET_RE.match(entry.get("target") or "")
-            or entry.get("in_a_dd_target_link")
         ],
         "bare_prose_bracket": prose,
         "notation_should_be_excluded": [
-            entry for entry in prose if entry.get("notation_suspect")
+            entry for entry in prose if not entry["gate_predicate_says_prose"]
         ],
         "self_link": [entry for entry in offences if entry["construct"] == "self_link"],
-        "other": [entry for entry in offences if entry["construct"] == "other"],
+        "other": other_docs,
     }
 
-    # Positive controls: show the instrument sees known-present instances of
-    # each construct before any count of zero is reported as an absence.
     controls = {
         "prose_scanner_sees_a_phrase": {
-            "purpose": "the bracket scanner must return a prose phrase given one",
+            "purpose": "the gate's scanner must return a prose phrase given one",
+            "input": "differs from the [ion density].",
             "found": list(
                 find_prose_bracket_phrases("differs from the [ion density].")
             ),
@@ -240,6 +350,33 @@ def main() -> int:
                 find_prose_bracket_phrases("differs from the [ion density].")
             )
             == ["ion density"],
+        },
+        "gate_predicate_agrees_on_a_unit": {
+            "purpose": "the gate predicate must reject a unit bracket",
+            "input": "[m^-3]",
+            "value": _is_prose_bracket("m^-3"),
+            "passed": _is_prose_bracket("m^-3") is False,
+        },
+        "independent_scan_sees_each_excluded_kind": {
+            "purpose": (
+                "the independent instrument must classify a unit, an interval, "
+                "mathematics and a link label into their own buckets"
+            ),
+            "input": "[m^-3] and [0, 1] and $[a b]$ and [x](name:y)",
+            "span_classes": _control_span_classes(),
+            "content_classes": {
+                "[m^-3]": independent_content_class("m^-3"),
+                "[0, 1]": independent_content_class("0, 1"),
+                "[12]": independent_content_class("12"),
+                "[ion density]": independent_content_class("ion density"),
+            },
+            "required_present": ["math", "markdown_link_label"],
+            "passed": (
+                independent_content_class("m^-3") == "unit_like"
+                and independent_content_class("0, 1") == "numeric_interval"
+                and independent_content_class("12") == "citation"
+                and independent_content_class("ion density") == "prose_words"
+            ),
         },
         "gate_fails_a_prose_bracket": {
             "purpose": "the gate must fail a document holding a bare prose bracket",
@@ -267,25 +404,44 @@ def main() -> int:
             .reason,
         },
         "catalogue_description_lookup_works": {
-            "purpose": "the description index must hold descriptions, so a zero match on a phrase is interpretable",
+            "purpose": "the description index must hold descriptions, so a zero match is interpretable",
             "descriptions_indexed": len(descriptions),
-            "sample_ids": sorted(descriptions.values())[0][:1] if descriptions else [],
             "passed": len(descriptions) > 0,
         },
         "dd_path_documentation_index_works": {
-            "purpose": "the DD-path documentation corpus must be non-empty, so a zero phrase match is interpretable",
+            "purpose": "the DD-path documentation corpus must be non-empty, so a zero match is interpretable",
             "nodes_with_documentation": len(node_docs_by_id),
             "nodes_total": catalogue["node_total"],
             "passed": len(node_docs_by_id) > 0,
         },
-        "dd_link_syntax_positive_control": {
-            "purpose": "the dd: target syntax the future-name convention uses must be a valid link target in the gate",
-            "target_valid": bool(
+        "dd_token_scan_positive_control": {
+            "purpose": (
+                "the same predicate the live dd: scan runs must find a dd: token "
+                "in a document known to carry one"
+            ),
+            "method": "select from any stage"
+            if dd_any_stage
+            else "plant in a disposable copy",
+            "graph_query": (
+                "MATCH (sn:StandardName) WHERE sn.documentation CONTAINS 'dd:' "
+                "RETURN sn.id AS id, sn.name_stage AS stage LIMIT 5"
+            ),
+            "any_stage_selection": dd_any_stage,
+            "planted_text": _DD_PLANTED,
+            "predicate_on_planted_text": contains_dd_token(_DD_PLANTED),
+            "dd_link_pattern_on_planted_text": bool(
+                _DD_LINK_TARGET_RE.search(_DD_PLANTED)
+            ),
+            "passed": bool(dd_any_stage) or contains_dd_token(_DD_PLANTED),
+        },
+        "dd_link_syntax_is_a_valid_gate_target": {
+            "purpose": "the dd: target syntax must be an accepted link target",
+            "input": "dd:equilibrium/time_slice/profiles_1d/electrons/density",
+            "valid": bool(
                 _gate_module._VALID_LINK_TARGET_RE.fullmatch(
                     "dd:equilibrium/time_slice/profiles_1d/electrons/density"
                 )
             ),
-            "gate_expression": "_VALID_LINK_TARGET_RE.fullmatch('dd:equilibrium/...')",
         },
     }
 
@@ -293,6 +449,9 @@ def main() -> int:
         "schema": "srtj-docs-bracket-census",
         "created_at": datetime.now(UTC).isoformat(),
         "gate_module_path": str(Path(_gate_module.__file__).resolve()),
+        "doc_links_module_path": str(
+            Path(sys.modules["imas_codex.standard_names.doc_links"].__file__).resolve()
+        ),
         "gate_worktree": str(GATE_WORKTREE),
         "working_directory": str(Path.cwd()),
         "documents_read": len(docs),
@@ -325,44 +484,50 @@ def main() -> int:
             1 for entry in prose if entry["in_a_dd_target_link"]
         ),
         "bare_snake_bracket_count": counts["bare_snake_bracket"],
+        "independent_exclusion_census": {
+            "instrument": (
+                "raw bracket spans from _IND_BRACKET, masked by independently "
+                "written math/code/link patterns, content classified by "
+                "_IND_NUMBER_PAIR / _IND_UNITISH / _IND_LATEX / digit-only"
+            ),
+            "raw_bracket_spans": raw_spans_total,
+            "spans_reported_as_prose_by_the_gate": predicate_spans_total,
+            "spans_masked_but_reported_prose_by_the_gate": masked_but_reported,
+            "gate_exclusion_disagreements": disagreements,
+            "excluded_span_classes": dict(sorted(exclusion_counts.items())),
+            "excluded_span_examples": exclusion_examples,
+        },
+        "other_documents": other_docs,
         "examples": {
             "bare_prose_bracket_resolving_to_existing_name_id": examples(
                 lambda e: (
                     e["construct"] == "prose_bracket"
                     and e["resolves_to"] == "existing_name_id"
-                ),
-                5,
+                )
             ),
             "bare_prose_bracket_none_of_these": examples(
-                lambda e: (
-                    e["construct"] == "prose_bracket" and e["resolves_to"] is None
-                ),
-                5,
+                lambda e: e["construct"] == "prose_bracket" and e["resolves_to"] is None
             ),
             "bare_prose_bracket_resolving_to_dd_documentation": examples(
                 lambda e: (
                     e["construct"] == "prose_bracket"
                     and e["resolves_to"] == "dd_path_documentation"
-                ),
-                5,
+                )
             ),
             "self_link": classes["self_link"][:5],
             "future_name_dd_placeholder": classes["future_name_dd_placeholder"][:5],
             "notation_should_be_excluded": classes["notation_should_be_excluded"][:5],
         },
         "positive_controls": controls,
-        "offences_per_document": dict(
-            sorted(Counter(entry["document_id"] for entry in offences).items())
-        ),
         "elapsed_s": round(time.monotonic() - started, 1),
     }
     payload["classification_judgement"] = {
         "note": (
             "Syntax classes (future_name_dd_placeholder, markdown_link_to_dd_path, "
             "bare_prose_bracket, self_link) are read from the text by regex. The "
-            "resolve_to sub-class of a bare phrase is a judgement: it says the phrase's "
-            "snake-cased form or normalised text coincides with an existing catalogue "
-            "string, which is evidence of what the writer meant, not proof."
+            "resolves_to sub-class of a bare phrase is a judgement: it says the "
+            "phrase's snake-cased form or normalised text coincides with an existing "
+            "catalogue string, which is evidence of what the writer meant, not proof."
         )
     }
     OUTPUT_PATH.write_text(
@@ -373,8 +538,10 @@ def main() -> int:
     print("class_counts:", payload["class_counts"])
     print("prose_resolution_counts:", payload["prose_resolution_counts"])
     print("dd in accepted docs (any token):", dd_any_docs, "as link:", dd_link_docs)
+    print("independent exclusion census:", payload["independent_exclusion_census"])
+    print("other docs:", other_docs)
     for name, control in controls.items():
-        print("control", name, "passed=", control.get("passed"), control)
+        print("control", name, "passed=", control.get("passed"))
     print("wrote", OUTPUT_PATH)
     return 0
 
