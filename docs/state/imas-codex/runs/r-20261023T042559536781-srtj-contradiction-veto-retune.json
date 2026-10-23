@@ -1,0 +1,2550 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 6,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/brief.md",
+    "sha256": "df1278a91390b68c0c7f4d35113efe8cff9893801bb94558d2952ad8f2dad5e5"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 11585777,
+      "input_tokens_cumulative": 11585777,
+      "output_tokens": 47169,
+      "output_tokens_cumulative": 47169,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 21216,
+    "files": 7,
+    "removed": 15
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 517,
+        "name": "test_the_site_guard_rejects_a_wrapped_partial",
+        "path": "tests/standard_names/test_panel_audit_sample.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "_write_taxonomy",
+        "path": "tests/standard_names/test_review_checks.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "docs_question_table",
+        "path": "imas_codex/standard_names/review/jev_review.py"
+      },
+      "window_line": 812
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "test_remote_check_uses_class_reader",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_remote_check_refuses_unresolved_class",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 477,
+        "name": "test_raw_check_reads_value_and_rejects_unknown_pid",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_returns_sorted_groups",
+        "path": "tests/discovery/test_parallel.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 1354,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 1536,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_rebuilds_sources_from_yaml_block_via_binder",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 208,
+        "name": "test_dry_run_performs_no_writes",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 895,
+        "name": "test_docs_prompt_renders_child_section",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 95
+    },
+    {
+      "existing_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 95
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_cocos_source_path_supplies_label_from_dd_reader",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_checks_bench_case_carries_its_instruction_list",
+        "path": "tests/standard_names/test_refine_failed_checks.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "_make_docs_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 490,
+        "name": "test_appends_to_last_text_block_when_multiple",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_a_definition_beside_a_label_is_kept",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 117
+    },
+    {
+      "existing_function": {
+        "line": 1040,
+        "name": "test_lineages_section_present_when_populated",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_a_definition_beside_a_label_is_kept",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 120
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "test_remote_check_uses_class_reader",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_remote_check_refuses_unresolved_class",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 477,
+        "name": "test_raw_check_reads_value_and_rejects_unknown_pid",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_returns_sorted_groups",
+        "path": "tests/discovery/test_parallel.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 1354,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 1536,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_rebuilds_sources_from_yaml_block_via_binder",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 208,
+        "name": "test_dry_run_performs_no_writes",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 895,
+        "name": "test_docs_prompt_renders_child_section",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 145
+    },
+    {
+      "existing_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 145
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 148
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_cocos_source_path_supplies_label_from_dd_reader",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 148
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_checks_bench_case_carries_its_instruction_list",
+        "path": "tests/standard_names/test_refine_failed_checks.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "_make_docs_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_accept_normalizer_uses_shared_reference_parser",
+        "path": "tests/standard_names/test_doc_link_accept_gate.py"
+      },
+      "run_function": {
+        "line": 191,
+        "name": "test_a_settled_claim_is_never_vetoed_or_failed_wherever_the_answers_are_read",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 221,
+        "name": "test_highest_scored_accepted_wins_over_longer_sibling",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 191,
+        "name": "test_a_settled_claim_is_never_vetoed_or_failed_wherever_the_answers_are_read",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_docs_state_excludes_rendered_template_note",
+        "path": "tests/standard_names/test_jev_docs_review.py"
+      },
+      "run_function": {
+        "line": 191,
+        "name": "test_a_settled_claim_is_never_vetoed_or_failed_wherever_the_answers_are_read",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 202
+    },
+    {
+      "existing_function": {
+        "line": 367,
+        "name": "test_nested_ratio_difference_round_trips_semantically",
+        "path": "tests/standard_names/test_lossless_grammar_adapter.py"
+      },
+      "run_function": {
+        "line": 191,
+        "name": "test_a_settled_claim_is_never_vetoed_or_failed_wherever_the_answers_are_read",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 427,
+        "name": "test_preview_refuses_an_omitted_live_target",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 191,
+        "name": "test_a_settled_claim_is_never_vetoed_or_failed_wherever_the_answers_are_read",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "test_remote_check_uses_class_reader",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_remote_check_refuses_unresolved_class",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 477,
+        "name": "test_raw_check_reads_value_and_rejects_unknown_pid",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_returns_sorted_groups",
+        "path": "tests/discovery/test_parallel.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_format_error_fields_report",
+        "path": "tests/llm/test_dd_version_reports.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 261
+    },
+    {
+      "existing_function": {
+        "line": 1354,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 1536,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 2503,
+        "name": "test_search_docs_includes_matching_signals",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 261
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_rebuilds_sources_from_yaml_block_via_binder",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 208,
+        "name": "test_dry_run_performs_no_writes",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 895,
+        "name": "test_docs_prompt_renders_child_section",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_unclaimed_sibling_is_removed_from_every_result_projection",
+        "path": "tests/standard_names/test_compose_source_scope.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 261
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_cocos_source_path_supplies_label_from_dd_reader",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_checks_bench_case_carries_its_instruction_list",
+        "path": "tests/standard_names/test_refine_failed_checks.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "_make_docs_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 257
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_prior_reviews_iteration_uses_dict_index",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 261
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "test_remote_check_uses_class_reader",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_remote_check_refuses_unresolved_class",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 477,
+        "name": "test_raw_check_reads_value_and_rejects_unknown_pid",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_returns_sorted_groups",
+        "path": "tests/discovery/test_parallel.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 1354,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 1536,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_rebuilds_sources_from_yaml_block_via_binder",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 208,
+        "name": "test_dry_run_performs_no_writes",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 895,
+        "name": "test_docs_prompt_renders_child_section",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 299
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 299
+    },
+    {
+      "existing_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 302
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_cocos_source_path_supplies_label_from_dd_reader",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 302
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_checks_bench_case_carries_its_instruction_list",
+        "path": "tests/standard_names/test_refine_failed_checks.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "_make_docs_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "test_remote_check_uses_class_reader",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_remote_check_refuses_unresolved_class",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 477,
+        "name": "test_raw_check_reads_value_and_rejects_unknown_pid",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_returns_sorted_groups",
+        "path": "tests/discovery/test_parallel.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 437
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_format_error_fields_report",
+        "path": "tests/llm/test_dd_version_reports.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 442
+    },
+    {
+      "existing_function": {
+        "line": 1354,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 1536,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 2503,
+        "name": "test_search_docs_includes_matching_signals",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 442
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_rebuilds_sources_from_yaml_block_via_binder",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 208,
+        "name": "test_dry_run_performs_no_writes",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 895,
+        "name": "test_docs_prompt_renders_child_section",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_unclaimed_sibling_is_removed_from_every_result_projection",
+        "path": "tests/standard_names/test_compose_source_scope.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 442
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 436
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 440
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_cocos_source_path_supplies_label_from_dd_reader",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 440
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_checks_bench_case_carries_its_instruction_list",
+        "path": "tests/standard_names/test_refine_failed_checks.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "_make_docs_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 438
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_prior_reviews_iteration_uses_dict_index",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 437
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 437
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 442
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_format_error_fields_report",
+        "path": "tests/llm/test_dd_version_reports.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 486
+    },
+    {
+      "existing_function": {
+        "line": 2503,
+        "name": "test_search_docs_includes_matching_signals",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 486
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_unclaimed_sibling_is_removed_from_every_result_projection",
+        "path": "tests/standard_names/test_compose_source_scope.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 486
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 484
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 484
+    },
+    {
+      "existing_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 484
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 484
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 484
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_cocos_source_path_supplies_label_from_dd_reader",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 484
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 484
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "window_line": 486
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "46d901fc439d1a4242a3553eed9e32ee211039d4",
+    "de6637e71ff95a18d77f71e1fbe11482d2d91009",
+    "ead2575d9030b43a08b878744c7e098278ee89a0",
+    "d03430836ccd0281050799661e755b4ca1344f42",
+    "67cf79255a72032f308c3c8088165f6d52a37996",
+    "e735ad24ad29aea4d5e94c91654f7aca356485cb",
+    "a3ed22e9238258803613789250d228c6c7aaa294",
+    "21ba3e4a4546b088d473e53dd85282874aa0926d",
+    "1d0f5f13d597553c7e56e80a638a789208e8cc37",
+    "7a28fd55cfb4429baab6bb94866e17e50873572c",
+    "ef022bfc52b16cab3b2981650de0c7e09222f0f4",
+    "7b6f8723c97d0e5d07c3e803fc92cb1743d77e7c",
+    "cd0f3b45ed5ee9bbc7498c648b8b85b97351df2e",
+    "ba7a338838df1af8349e6ed381dd8082121cefa5",
+    "c76ea76d3663b93f4ba06db61f2dc469d12315c8",
+    "208fedb38bba4e1b937a925e467392bd15aa3624",
+    "0c82826f363f2da3d6dcdde94e7f5c8c996bd1d4",
+    "8671df150fc93836e5fffd52e8d12c5bb64146fe"
+  ],
+  "completed_at": "2026-10-23T10:12:26Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-23T04:27:27Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "pre-existing-failure",
+  "follow_on_paths": [
+    "tests/standard_names/test_docs_contradiction_veto.py::test_claim_verdict_controls_acceptance",
+    "imas_codex/standard_names/review/cascade_calibration.py"
+  ],
+  "gate": "failed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync python -m pytest -p no:cacheprovider --timeout=120 -q tests/standard_names/test_contradiction_veto_question.py tests/standard_names/test_docs_contradiction_veto.py tests/standard_names/test_jev_docs_review.py tests/standard_names/test_refine_failed_checks.py",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/gate-head-settlement-routed.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5714285714285715,
+    "plan": "sn-review-through-jev",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-23T05:26:02.247377+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-23T04:26:02Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 32,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 10,
+    "mean_context": 133333,
+    "observed_at": "2026-10-23T04:25:38Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 32,
+      "aggregate_tokens_per_second": 257.624,
+      "detail": "",
+      "mean_tokens_per_second": 71.562,
+      "observed_at": "2026-10-23T04:25:38Z",
+      "runs": 3.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T10:12:26Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/manifest.md",
+  "member": "disposable-r-20261023T042559536781-srtj-contradiction-veto-retune",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/standard_names/test_contradiction_veto_question.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "srtj-contradiction-veto-retune",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/srtj-contradiction-veto-retune.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/brief.md",
+    "brief_sha256": "df1278a91390b68c0c7f4d35113efe8cff9893801bb94558d2952ad8f2dad5e5",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1552,
+          "cached_input_tokens": 400486,
+          "input_tokens": 402040,
+          "output_tokens": 2945,
+          "reasoning_output_tokens": 48,
+          "total_tokens": 404985,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "srtj-contradiction-veto-retune.json, written by its runner with a log ending EXIT=0, reports how many of the 45 recorded firings still fire and the old and new recall on the planted contradictions in one run, states whether at most 3 of 45 fire with recall not lower, records spend under USD 1.00, and tests/standard_names/test_contradiction_veto_question.py passes and fails with the change reverted",
+    "estimated_hours": null,
+    "goal": "Retune the documentation contradiction question to fire only on a real contradiction",
+    "id": "srtj-contradiction-veto-retune",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-23T04:26:02Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 32,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 10,
+      "mean_context": 133333,
+      "observed_at": "2026-10-23T04:25:38Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 32,
+        "aggregate_tokens_per_second": 257.624,
+        "detail": "",
+        "mean_tokens_per_second": 71.562,
+        "observed_at": "2026-10-23T04:25:38Z",
+        "runs": 3.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/manifest.md",
+    "negative_control": "revert the label-only predicate; the label-only-source test must fail",
+    "plan": "sn-review-through-jev",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/standard_names/review/jev_review.py",
+      "tests/standard_names/test_contradiction_veto_question.py",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-retune.html",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-retune.json",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-retune-run.py",
+      "docs/figures/sn-review-through-jev/srtj-contradiction-veto-retune",
+      "docs/figures/sn-review-through-jev/srtj-contradiction-veto-retune.svg",
+      "docs/figures/sn-review-through-jev/srtj-contradiction-veto-retune/arm-comparison.svg"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2562868.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "srtj-contradiction-veto-retune",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-23T04:26:30.429736+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "s6 authored body unchanged since its stored content review; edits since are landing comments and lead rulings",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.467,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5714285714285715,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "8671df150fc93836e5fffd52e8d12c5bb64146fe",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+    "reviewed_head_sha": "8671df150fc93836e5fffd52e8d12c5bb64146fe",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261023T042559536781-srtj-contradiction-veto-retune",
+  "scope_acceptances": [
+    {
+      "path": "docs/figures/sn-review-through-jev/srtj-contradiction-veto-retune.svg",
+      "reason": "the measured-arm figure the evidence fragment embeds; rendered and inspected by the coordinator (its first location, moved in a later commit)"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§6",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "6a352c6d-f3f6-47ac-a680-441317452fa4",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 80764305,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2094.137,
+    "generated_tokens": 409901,
+    "generation_seconds": 1427.347,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.6,
+    "machine_seconds": 666.79,
+    "peak_input_tokens": 176274,
+    "tokens_per_second": 287.18,
+    "wall_tokens_per_second": 195.74
+  },
+  "time_budget": "60m",
+  "tool_steps": 94.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 20699,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T10:12:36Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-23T09:37:28Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261023T042559536781-srtj-contradiction-veto-retune",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 57196,
+    "worker_pid": 2942292
+  },
+  "worker_seconds": 16320,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-23T10:12:26Z",
+    "session_id": "6a352c6d-f3f6-47ac-a680-441317452fa4",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-contradiction-veto-retune"
+  }
+}
