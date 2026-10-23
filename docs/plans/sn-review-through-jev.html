@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="200">
+<meta name="plan-version" content="201">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -893,6 +893,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T100152849465-review-of-srtj-docs-bracket-repair-d51fab8796fc" data-who="reckon-build" data-when="2026-10-23T10:41:29.935Z">
     <div class="r-comment-body"><p>Independently reviewed run r-20261023T083551625568-srtj-docs-bracket-repair at base 8e4327db and head d51fab8796: a parsed record scoring all six dimensions (goal_fidelity 18, evidence 17, scope_discipline 16, durability 18, fit 17, reuse 12) with four non-blocking findings is stored at both declared paths, carrying added_failure_count 0 and added_failure_ids [] derived from base-gate-corrected.log (2 failures at 8e4327db) and unit-gate-committed.log (0 failures at 5a9cb18b). Head wrote to no live graph and the reviewed worktree is clean.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T083551625568-srtj-docs-bracket-repair" data-who="reckon-build" data-when="2026-10-23T10:01:04Z">
+    <div class="r-comment-body"><p>The bracket normaliser now preserves a leading numeric magnitude followed by recognised unit factors while still treating the helium-3 phrases as prose. The committed four-file gate passes 52 tests; a read-only replay verified the same 814 live source documents, with 0 of the previous 870 unbracketed actions changed and an explicitly empty changed-action list in docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-repair.html#srtj-docs-bracket-repair-unit-repair. No live graph write occurred.</p></div>
 </div>
 </section>
 </main>
