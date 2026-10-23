@@ -550,7 +550,7 @@ def comparison_sources(
     ]
 
 
-def _registry_texts(item: Mapping[str,Any]) -> tuple[str, ...]:
+def _registry_texts(item: Mapping[str, Any]) -> tuple[str, ...]:
     """Find exact registry text inserted into this documentation entry."""
     from imas_standard_names.grammar.terms import AppliedConventions
 
@@ -686,11 +686,12 @@ def docs_question_table(
                 option: {
                     "supports": "The DD evidence directly supports this specific claim.",
                     "contradicts": (
-                        "A source denies this claim: it names a different "
-                        "quantity, an opposite sign or direction, an incompatible "
-                        "unit or dimension, or a different definition. A source "
-                        "that only specialises the quantity — one locus, average "
-                        "or component instance of it — does not deny it."
+                        "Any part of this claim conflicts with an observed source "
+                        "that denies it: a source naming a different quantity, an "
+                        "opposite sign or direction, an incompatible unit or "
+                        "dimension, or a different definition. A source that only "
+                        "specialises the quantity — one locus, average or "
+                        "component instance of it — does not deny it."
                     ),
                     "says nothing": (
                         "The observed evidence neither supports nor contradicts "
