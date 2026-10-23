@@ -78,7 +78,7 @@
 <tr><td><code>tests/standard_names/test_source_refresh.py::test_scoped_refresh_never_steers_a_name_outside_its_scope</code></td><td class="na">ABSENT</td><td class="ok">PASS</td></tr>
 <tr><td><code>tests/standard_names/test_source_refresh.py::test_unscoped_refresh_still_steers_every_drifted_name</code></td><td class="na">ABSENT</td><td class="ok">PASS</td></tr>
 </tbody></table>
-<p>All remaining ids are <code>PASS</code> at both revisions, and are omitted here for length. The full per-id state is derivable from the two logs named above.</p>
+<p>The rows above are every id that is not <code>PASS</code> at both revisions: the 5 base failures, the 11 head failures, and the 45 ids that exist only at head. The remaining 173 ids (234 collected at head minus the 61 listed) pass at both. The counts in each arm's summary line are the receipt for those omitted rows; the base arm collected 189 ids and the head arm 234.</p>
 <h3 id="srtj-wave-integration-gate-added">Added failures and attribution</h3>
 <p>Failures present at base: <strong>5</strong> (all in <code>test_docs_contradiction_veto.py::test_claim_verdict_controls_acceptance</code>, all resolved at head by the contradiction-veto retune merge <code>c71dd6056</code>). Failures present at both: <strong>0</strong>. Added at head: <strong>11</strong>.</p>
 <table><thead><tr><th>Test id</th><th>Base</th><th>Head</th><th>Attributed merge</th><th>Traceback line</th></tr></thead><tbody>
