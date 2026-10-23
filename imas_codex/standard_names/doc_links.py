@@ -20,6 +20,9 @@ _MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]]*\]\([^)]+\)")
 _BARE_BRACKET_RE = re.compile(r"(?<![!\\A-Za-z0-9_])\[([a-z][a-z0-9_]+)\](?!\()")
 _INLINE_NAME_RE = re.compile(r"(?<![A-Za-z0-9_])name:([a-z][a-z0-9_]+)\b")
 _NAME_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(name:([a-z][a-z0-9_]+)\)")
+_BRACKET_CONTENT_RE = re.compile(r"\[([^\[\]\n]+)\]")
+_NUMERIC_INTERVAL_RE = re.compile(r"-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?")
+_UNIT_TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9^\-\*\./]*")
 
 
 @dataclass(frozen=True)
@@ -88,6 +91,49 @@ def find_name_references(
 
     references.extend(bare_candidates)
     return tuple(sorted(references, key=lambda reference: reference.start))
+
+
+def _is_prose_bracket(content: str) -> bool:
+    """Return whether a bracket's content is documentation prose, not notation.
+
+    A bracket holding a unit (``m^-3``, ``K``, ``m^2 s^-1``) or a numeric
+    interval (``0, 1``) carries notation a reader reads directly, so it names
+    nothing and makes no claim about a standard name. Anything else that holds
+    words is prose: it is either a named identity the gate's reference rule
+    already governs, or a phrase that should have been written as a link.
+    """
+
+    stripped = content.strip()
+    if not re.search(r"[A-Za-z]", stripped):
+        return False
+    if _NUMERIC_INTERVAL_RE.fullmatch(stripped):
+        return False
+    tokens = stripped.split()
+    if not tokens:
+        return False
+    if all(_UNIT_TOKEN_RE.fullmatch(token) for token in tokens) and (
+        len(tokens) == 1 or re.search(r"[0-9^/*]", stripped)
+    ):
+        return False
+    return True
+
+
+def find_prose_bracket_phrases(text: str) -> tuple[str, ...]:
+    """Return the bracketed prose phrases in *text*.
+
+    A bracketed phrase is prose when it is not inside mathematics or code and
+    not the label of an already formed Markdown link — those brackets are
+    notation and link text, not documentation prose — and its content is not a
+    unit or a numeric interval.
+    """
+
+    masked = _masked_spans(text)
+    return tuple(
+        match.group(1)
+        for match in _BRACKET_CONTENT_RE.finditer(text)
+        if not _inside_any_span(*match.span(), masked)
+        and _is_prose_bracket(match.group(1))
+    )
 
 
 @dataclass(frozen=True)

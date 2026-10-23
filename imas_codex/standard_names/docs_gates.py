@@ -18,7 +18,12 @@ from imas_codex.standard_names.audits import (
     _unit_dimensions,
     latex_def_check,
 )
-from imas_codex.standard_names.doc_links import find_name_references
+from imas_codex.standard_names.doc_links import (
+    NameLink,
+    find_name_references,
+    find_prose_bracket_phrases,
+    find_self_links,
+)
 from imas_codex.units import resolve_dd_unit
 from imas_codex.units.dd_unit_exceptions import canonical_or_none
 
@@ -482,15 +487,85 @@ def _sign_convention_result(
     )
 
 
-def _links_are_hygienic(text: str) -> bool:
+def _bracketed_prose_phrase(text: str) -> str | None:
+    """Return the first bracketed phrase that names no standard name, if any.
+
+    A bracket that holds notation — a unit such as ``[m^-3]`` or ``[K]``, a
+    numeric interval such as ``[0, 1]`` — or that sits inside mathematics or
+    code, or that is the label of an already formed Markdown link, is not a
+    documentation prose bracket and raises nothing here.
+    """
+
+    phrases = find_prose_bracket_phrases(text)
+    return phrases[0] if phrases else None
+
+
+def _self_referential_link(text: str, documenting_name: str | None) -> NameLink | None:
+    """Return the first name link pointing at the documented name itself."""
+
+    if not documenting_name:
+        return None
+    links = find_self_links(text, documenting_name)
+    return links[0] if links else None
+
+
+def _link_hygiene_result(
+    text: str,
+    documenting_name: str | None = None,
+) -> DocumentationGateResult:
+    """Report the first link defect in *text*, naming the offending construct.
+
+    A link is defective when its target syntax is unsupported or its label is
+    empty, when a bare ``[identity]`` bracket is written instead of a link,
+    when a bracketed phrase stands where a link belongs, or when a ``name:``
+    link targets the documented name itself. The reason carries the offending
+    phrase or link so a refiner can act on it without re-reading the document.
+    """
+
     for match in _MARKDOWN_LINK_RE.finditer(text):
         label, target = match.groups()
         if not label.strip() or not _VALID_LINK_TARGET_RE.fullmatch(target.strip()):
-            return False
+            return DocumentationGateResult(
+                outcome=DocumentationGateOutcome.FAIL,
+                reason=(
+                    "link has an unsupported target or an empty label: "
+                    f"[{label}]({target})"
+                ),
+            )
     without_links = _MARKDOWN_LINK_RE.sub("", text)
-    return not any(
-        reference.syntax == "bare_bracket"
-        for reference in find_name_references(without_links)
+    bare = next(
+        (
+            reference
+            for reference in find_name_references(without_links)
+            if reference.syntax == "bare_bracket"
+        ),
+        None,
+    )
+    if bare is not None:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason=(
+                f"bare bracket names a standard name but carries no link: [{bare.name}]"
+            ),
+        )
+    phrase = _bracketed_prose_phrase(text)
+    if phrase is not None:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason=f"bracketed phrase names no standard name: [{phrase}]",
+        )
+    self_link = _self_referential_link(text, documenting_name)
+    if self_link is not None:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason=(
+                f"link '{self_link.label}' targets the documented name itself: "
+                f"name:{self_link.target}"
+            ),
+        )
+    return DocumentationGateResult(
+        outcome=DocumentationGateOutcome.PASS,
+        reason="all links resolve through supported target syntax",
     )
 
 
@@ -1104,6 +1179,7 @@ def score_documentation(
     documentation: str,
     *,
     physics_context: DocumentationPhysicsContext | None = None,
+    documenting_name: str | None = None,
 ) -> DocumentationGateScore:
     """Score one documentation body against the live deterministic gates.
 
@@ -1111,6 +1187,8 @@ def score_documentation(
     are required for COCOS-sensitive transformation classes, forbidden for the
     invariant class, and unevaluable when the transformation class is absent.
     Catalog-visible text must not expose COCOS numbers or transformation labels.
+    The hygiene gate reads *documenting_name*, when the caller supplies it, to
+    catch a link that points back at the name it documents.
     """
 
     text = documentation.strip()
@@ -1119,7 +1197,6 @@ def score_documentation(
     predicates = {
         "symbol_definitions": _symbols_are_defined(text),
         "relationship_link": _has_relationship_link(text),
-        "link_hygiene": _links_are_hygienic(text),
         "minimum_word_count": words >= MIN_DOCUMENTATION_WORDS,
     }
     reasons = {
@@ -1130,10 +1207,6 @@ def score_documentation(
         "relationship_link": (
             "documentation contains a standard-name relationship link",
             "documentation contains no standard-name relationship link",
-        ),
-        "link_hygiene": (
-            "all links resolve through supported target syntax",
-            "documentation contains malformed or bare name references",
         ),
         "minimum_word_count": (
             "documentation meets the minimum word count",
@@ -1153,11 +1226,7 @@ def score_documentation(
             fail_reason=reasons["relationship_link"][1],
         ),
         "sign_convention": _sign_convention_result(text, physics_context),
-        "link_hygiene": _predicate_result(
-            predicates["link_hygiene"],
-            pass_reason=reasons["link_hygiene"][0],
-            fail_reason=reasons["link_hygiene"][1],
-        ),
+        "link_hygiene": _link_hygiene_result(text, documenting_name),
         "minimum_word_count": _predicate_result(
             predicates["minimum_word_count"],
             pass_reason=reasons["minimum_word_count"][0],
