@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="180">
+<meta name="plan-version" content="181">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -821,6 +821,15 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261022T201413789080-srtj-contradiction-veto-hold" data-who="reckon-build" data-when="2026-10-22T20:57:58.996Z">
     <div class="r-comment-body"><p>srtj-contradiction-veto-hold — read back every recorded contradiction hold (29 log lines, 10 names, 45 claim/DD triples) with pre-clamp panel scores and outcomes, showed every claim</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lint-replay-landed" data-who="reckon-build" data-when="2026-10-23T05:40:00Z">
+    <div class="r-comment-body"><p>The incumbent's error-severity lint does not meet the link-cap bar (merge <code>a606588bc</code>). It flags 6 of the 19 labelled link defects, and none of them for a link reason; it misses 13 and falsely flags 1 of the 30 acceptable rows. Every miss is a missing check, not a wrong severity: a bracketed prose phrase with no <code>name:</code> target, or a link to the name itself. So the cap needs a new deterministic check, <code>srtj-docs-prose-link-check</code>, before it can refine the 19. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-lint-replay.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-veto-history-landed" data-who="reckon-build" data-when="2026-10-23T05:40:00Z">
+    <div class="r-comment-body"><p>The documentation contradiction veto's firing history (merge <code>f0ae2d8b8</code>): 45 claim checks on 10 names, and none is a true contradiction. 28 check a generic name against a specialised instance, and 17 check against a DD field label such as "Value". Two other findings:</p><ul><li><code>electrostatic_potential</code> is the only refine-eligible document and waits only for an unscoped documentation run.</li><li>Its family apply halts behind an anchor that does not converge, which strands the other members.</li></ul><p><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-veto-retune" data-who="lead" data-when="2026-10-23T05:35:00Z">
+    <div class="r-comment-body"><p>Lead ruling: "Retune, then measure." The veto's question will skip DD sources that carry only a label and treat a specialised instance as compatible with its generic name. It is then replayed over the 45 firings and §4's labelled set, and kept only if it clears the false firings and still catches true contradictions. Until then it raises visible, dismissable holds through the hold channel.</p></div>
 </div>
 </section>
 </main>
