@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="219">
+<meta name="plan-version" content="220">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -961,7 +961,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>The 9 documentation cases of the consumer-predicate test pass again (merge <code>225feb688</code>). The test was wrong: it still mocked the client query that the hold channel replaced with a session transaction. It now asserts the hold contract.</p><p>The split of <code>graph_ops.py</code> and <code>workers.py</code> is designed (merge <code>1a2743c24</code>):</p><ul><li>25 modules, the largest 34,870 tokens, in an acyclic import order;</li><li>727 mapped test patch targets;</li><li>23 ordered steps, three on codex, after which every remaining extraction fits the local lane.</li></ul></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T191700278479-review-of-srtj-wave-integration-rerun-bac449b7dd69" data-who="reckon-build" data-when="2026-10-23T19:33:00.982Z">
-    <div class="r-comment-body"><p>Independent review of r-20261023T125657979434-srtj-wave-integration-rerun at head bac449b7d against base e993b3af2; verdict PARSED, scores goal_fidelity 17, evidence 15, scope_discipline 20, durability 8, fit 15, reuse 20 (total 95); the blocking finding of the prior review at 0c1d81bea (graph universe 26, test_review_holds.py 19 marked) is repaired in bac449b7d (now 25 and 18, reconciling with head-graph.log:7); six non-blocking findings remain (t4 id names no test; five drift rows read NOT MARKED where the ids are ABSENT at base; the g5 row is malformed HTML; the default table&#x27;s heading promises every failing id but lists only the five base failures; no traceback line for the added failures; the manifest tests line drops a path the log header carries); 9 added failures at head, all one parametrised cascade id, 0 present at both.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261023T125657979434-srtj-wave-integration-rerun at head bac449b7d against base e993b3af2; verdict PARSED, scores goal_fidelity 17, evidence 15, scope_discipline 20, durability 8, fit 15, reuse 20 (total 95); the blocking finding of the prior review at 0c1d81bea (graph universe 26, test_review_holds.py 19 marked) is repaired in bac449b7d (now 25 and 18, reconciling with head-graph.log:7); six non-blocking findings remain (t4 id names no test; five drift rows read NOT MARKED where the ids are ABSENT at base; the g5 row is malformed HTML; the default table's heading promises every failing id but lists only the five base failures; no traceback line for the added failures; the manifest tests line drops a path the log header carries); 9 added failures at head, all one parametrised cascade id, 0 present at both.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T125657979434-srtj-wave-integration-rerun" data-who="reckon-build" data-when="2026-10-23T14:14:36Z">
+    <div class="r-comment-body"><p>Corrected the graph-arm figures in docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html — head graph universe 25 (was 26) and test_review_holds.py 18 graph-marked ids (was 19), each reconciled against head-graph.log and the source; the measure is unchanged at 9 failures added at head and 0 present at both.</p></div>
 </div>
 </section>
 </main>
