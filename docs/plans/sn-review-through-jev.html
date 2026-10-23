@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="213">
+<meta name="plan-version" content="214">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -937,7 +937,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>review of r-20261023T130235070374-srtj-docs-switch-measure at e62ea5654c3fd7993119586b1f20e3f13532d558; verdict the switched documentation decision does not meet the bar on either Jev pass (19 of 19 link defects refined, 4 of 30 acceptable rows over-refined in pass A and 5 in pass B, by the retuned contradiction veto and one false defining_equation lint hold), scores goal_fidelity 17 evidence 18 scope_discipline 19 durability 13 fit 16 reuse 5</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T153842508915-review-of-srtj-consumer-predicates-fix-d22f55cfeab9" data-who="reckon-build" data-when="2026-10-23T15:57:38.925Z">
-    <div class="r-comment-body"><p>review of r-20261023T132745153858-srtj-consumer-predicates-fix at d22f55cfeab9 — parsed record with all six dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 20, durability 15, fit 19, reuse 18), 0 added failures, two non-blocking findings on the test&#x27;s self-referential assertions; the node&#x27;s own diagnosis (test was the wrong side; no product line changed) is confirmed against the product.</p></div>
+    <div class="r-comment-body"><p>review of r-20261023T132745153858-srtj-consumer-predicates-fix at d22f55cfeab9 — parsed record with all six dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 20, durability 15, fit 19, reuse 18), 0 added failures, two non-blocking findings on the test's self-referential assertions; the node's own diagnosis (test was the wrong side; no product line changed) is confirmed against the product.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T132745153858-srtj-consumer-predicates-fix" data-who="reckon-build" data-when="2026-10-23T15:38:19.764Z">
+    <div class="r-comment-body"><p>test_review_cascade.py — the nine docs consumer cases now run the persistence writer through the session transaction the hold channel introduced and assert the hold contract: a vetoed document keeps its judged score, is re-offered through the hold owner&#x27;s own clause, and is never published</p></div>
 </div>
 </section>
 </main>
