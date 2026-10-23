@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="217">
+<meta name="plan-version" content="218">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -950,6 +950,15 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T130048028115-srtj-graph-ops-split-design" data-who="reckon-build" data-when="2026-10-23T13:37:49Z">
     <div class="r-comment-body"><p>srtj-graph-ops-split-design — 25 modules (largest 34,870 tokens), acyclic 27-node import order, 727 mapped patch targets and zero conflicting live write claims; 23 measured steps use Codex for two repairs and one graph bootstrap, after which graph_ops.py has 161,024 original-source tokens and all remaining extractions are local; workers.py is local from the start at 99,014 tokens.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-switch-measure-landed" data-who="reckon-build" data-when="2026-10-23T18:30:00Z">
+    <div class="r-comment-body"><p>The switched documentation decision (Jev route plus any hold) was measured on the 77 blind-labelled rows (merge <code>bf902079e</code>, USD 0.024).</p><ul><li>It refines all 19 link defects on both passes; the lint cap catches 16 or 17 of them, the route the rest.</li><li>It refines 4 of the 30 acceptable rows on pass A and 5 on pass B. The panel refines all 30.</li><li>3 or 4 of those come from the contradiction veto (S0010, S0031, S0055, and S0015 on pass B); 1 from the single-defining-relation lint (S0062).</li></ul><p>The bar of 0 of 30 is not met. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-fix-causes" data-who="lead" data-when="2026-10-23T18:00:00Z">
+    <div class="r-comment-body"><p>Lead ruling: "Fix the two causes first." Documentation stays with the panel. <code>srtj-docs-switch-causes</code> will diagnose the 4–5 over-refined rows, fix the veto and the defining-relation check at their owners while keeping the veto's recall, and re-measure the switch against the 0-of-30 bar on two passes.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-consumer-fix-split-design" data-who="reckon-build" data-when="2026-10-23T18:30:00Z">
+    <div class="r-comment-body"><p>The 9 documentation cases of the consumer-predicate test pass again (merge <code>225feb688</code>). The test was wrong: it still mocked the client query that the hold channel replaced with a session transaction. It now asserts the hold contract.</p><p>The split of <code>graph_ops.py</code> and <code>workers.py</code> is designed (merge <code>1a2743c24</code>):</p><ul><li>25 modules, the largest 34,870 tokens, in an acyclic import order;</li><li>727 mapped test patch targets;</li><li>23 ordered steps, three on codex, after which every remaining extraction fits the local lane.</li></ul></div>
 </div>
 </section>
 </main>
