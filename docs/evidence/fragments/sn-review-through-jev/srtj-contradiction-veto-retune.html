@@ -122,7 +122,11 @@ and the replay asks the product's own <code>docs_question_table</code> instead o
 private copy of the question — the two are the same text, checked rather than assumed. One
 test asserts the shipped table emits exactly the measured wording, so a future retune of
 this criterion fails the gate rather than silently invalidating the measurement beside it;
-restoring the retuned wording in memory fails that test and no other.</p>
+restoring the retuned wording in memory fails that test and no other. The counts
+above were then re-measured on the shipped code, two passes over both sets with the questions
+built by that same table: arm B2 holds <strong>3 of the 46</strong> and <strong>all
+60</strong> on both passes, and arm A holds 10 of 46 with recall 59 on the first pass and 60
+on the second.</p>
 
 <h3 id="srtj-contradiction-veto-retune-what">What changed in the product</h3>
 
@@ -135,7 +139,12 @@ the vocabulary of field placement, so the text names no quantity;
 left with no evidence at all still answers "says nothing". <code>claim_settlement</code>
 answers a non-requirement sentence "says nothing" only under a name with no locus or
 aggregation qualifier, and never when the sentence asserts the quantity's own combination;
-conditional answers from either source are removed from the claims the judge scores.
+conditional answers from either source are removed from the claims the judge scores. The
+settlement is a property of the state, not of one reader, so every reader that scores or
+vetoes a claim takes its answers through <code>effective_claim_answers</code>, which puts the
+code's answer in place of the judge's for a settled claim. The documentation route scores
+through <code>score_docs_review</code>, so before that routing a settled claim whose judge
+answer was a contradiction could still zero the score.
 <code>claim_contradicts</code> and <code>CONTRADICTION_VETO_PROBABILITY</code> (0.30) are
 unchanged, and nothing in any of the three measurements implicates the threshold.</p>
 
@@ -164,25 +173,29 @@ row-level record for every row, arm and pass is in the JSON beside this page.</p
 <h3 id="srtj-contradiction-veto-retune-tests">Tests and guards</h3>
 
 <p id="srtj-contradiction-veto-retune-tests-body"><code>tests/standard_names/test_contradiction_veto_question.py</code>
-holds 30 tests and all pass: the three mandated label strings, a definition that must stay
+holds 31 tests and all pass: the three mandated label strings, a definition that must stay
 evidence, a label emptied from the evidence, a definition beside a label kept, a label-only
 source whose path still denies a claim fixing the other axis, the source-comparison criterion
 pinned to the measured wording, the four non-requirement
 sentences that settle, the four sentences that assert a combination and must reach the
-judge, the names that fix a locus or an aggregation of their own, and the veto and no-veto
-paths. Three negative controls run against a copy of the module patched in memory, so the
-repository is never edited to make a test fail: forcing the non-requirement test to find
-nothing fails 5 tests, restoring the retuned comparison criterion fails the criterion test
-and no other, and reverting the label predicate failed 7 of the 12 tests then in the
-file. The gate over that file and the existing <code>jev_review</code> tests reads 66 passed
-and 5 failed, the same five <code>test_claim_verdict_controls_acceptance</code> ids that fail
-at the base revision, so the node adds no failure. The replay ran read-only: no graph write
-and no LLM other than the <code>sn-judge</code> seat.</p>
+judge, the names that fix a locus or an aggregation of their own, the settled claim every
+reader takes up the same way, and the veto and no-veto paths. Four negative controls run
+against a copy of the module patched in memory, so the repository is never edited to make a
+test fail: forcing the non-requirement test to find nothing fails 5 tests, restoring the
+retuned comparison criterion fails the criterion test and no other, restoring the raw-answer
+veto scan in <code>score_docs_review</code> fails the settlement test alone, and dropping a
+label-only source whole rather than emptying the label's words fails the field-path test along
+with the three evidence tests. The gate over that file and the existing <code>jev_review</code>
+tests reads 67 passed and 5 failed, the same five
+<code>test_claim_verdict_controls_acceptance</code> ids that fail at the base revision, so the
+node adds no failure. The replay ran read-only: no graph write and no LLM other than the
+<code>sn-judge</code> seat.</p>
 
 <h3 id="srtj-contradiction-veto-retune-spend">Spend</h3>
 
-<p id="srtj-contradiction-veto-retune-cost">Jev spend USD 0.037108 for the final two-pass
-replay, USD 0.073968 in total across both attempts of this retune, of the authorised USD
-1.00. The ceiling was not approached: the measurement needs one call per claim, and the
-replay's expense is set by the row count rather than by the number of arms.</p>
+<p id="srtj-contradiction-veto-retune-cost">Jev spend USD 0.037108 for the replay that
+re-measured the shipped code, and USD 0.111076 in total across the three arm measurements of
+this retune, of the authorised USD 1.00. The ceiling was not approached: the measurement needs
+one call per claim, and the replay's expense is set by the row count rather than by the number
+of arms.</p>
 </section>
