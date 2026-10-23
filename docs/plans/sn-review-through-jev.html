@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="182">
+<meta name="plan-version" content="183">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -836,6 +836,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s6-veto-retune-first-pass" data-who="reckon-build" data-when="2026-10-23T05:30:00Z">
     <div class="r-comment-body"><p>First pass of the veto retune. Replayed today, the old question still fires on 10 of the 46 recorded firings and catches all 60 planted contradictions. The retuned wording fires on 6 and catches 32 of 60, so the specialisation wording admits real contradictions and will not land. The node is measuring separate arms: the label-only filter alone, and a deterministic disclaimer rule in place of new wording.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T051849520689-review-of-srtj-contradiction-veto-retune-d03430836ccd" data-who="reckon-build" data-when="2026-10-23T05:46:53.107Z">
+    <div class="r-comment-body"><p>independent review of r-20261023T042559536781-srtj-contradiction-veto-retune at head d03430836ccd: the retune is landed in jev_review.py and is honest about its own failure, but it loses 28 of 60 planted true contradictions and still fires on 6 of the recorded firings, so the bar it was gated on is not met and the change should not be promoted as it stands; scores goal_fidelity 11, evidence 14, scope_discipline 19, durability 15, fit 17, reuse 19 (total 95), added failures 0.</p></div>
 </div>
 </section>
 </main>
