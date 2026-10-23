@@ -27,11 +27,7 @@ from imas_codex.standard_names.budget import (
     model_provider_exposure,
 )
 from imas_codex.standard_names.review.audits import AuditReport, LintFinding
-from imas_codex.standard_names.review.holds import (
-    clear_holds_not_raised,
-    raise_hold,
-    sync_holds,
-)
+from imas_codex.standard_names.review.holds import sync_holds
 from imas_codex.standard_names.review.judge_stage import judge_review_stage
 
 # The hold kinds the documentation lint check owns. A review pass reconciles
@@ -2039,15 +2035,7 @@ def _reconcile_docs_lint_holds(
                 entry.get("reviewer_score"),
                 finding,
             )
-        sync_holds(
-            entry_id,
-            "docs",
-            LINT_HOLD_KINDS,
-            pending,
-            graph=graph,
-            raise_fn=raise_hold,
-            clear_fn=clear_holds_not_raised,
-        )
+        sync_holds(entry_id, "docs", LINT_HOLD_KINDS, pending, graph=graph)
 
 
 async def _review_single_batch(

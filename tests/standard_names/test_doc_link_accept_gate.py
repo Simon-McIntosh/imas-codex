@@ -19,6 +19,7 @@ def _graph_client(responses: list[list[dict[str, Any]]]) -> MagicMock:
 def test_normalization_failure_refuses_docs_acceptance() -> None:
     """An unreadable reference authority cannot permit docs acceptance."""
     import imas_codex.standard_names.graph_ops as graph_ops
+    from imas_codex.standard_names.review import holds
 
     client = _graph_client([])
     transaction = MagicMock()
@@ -33,7 +34,7 @@ def test_normalization_failure_refuses_docs_acceptance() -> None:
 
     with (
         patch.object(graph_ops, "GraphClient", return_value=client),
-        patch.object(graph_ops, "clear_holds_not_raised", return_value=0),
+        patch.object(holds, "clear_holds_not_raised", return_value=0),
         patch.object(graph_ops, "docs_accepted", return_value=True),
         patch.object(
             graph_ops,

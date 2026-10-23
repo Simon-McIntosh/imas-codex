@@ -102,17 +102,13 @@ def sync_holds(
     pending: list[dict[str, str]] | tuple[dict[str, str], ...],
     *,
     graph: Any | None = None,
-    raise_fn: Any = None,
-    clear_fn: Any = None,
 ) -> list[str]:
     """Raise current findings and clear stale findings owned by these checks."""
-    raise_fn = raise_hold if raise_fn is None else raise_fn
-    clear_fn = clear_holds_not_raised if clear_fn is None else clear_fn
     raised: list[str] = []
     raised_keys: set[str] = set()
     with _client(graph) as client:
         for hold in pending:
-            record = raise_fn(
+            record = raise_hold(
                 name_id,
                 axis,
                 hold["kind"],
@@ -124,7 +120,7 @@ def sync_holds(
             raised.append(record["id"])
             raised_keys.add(finding_key(hold["kind"], hold["finding"]))
         if kinds:
-            clear_fn(name_id, axis, set(kinds), raised_keys, graph=client)
+            clear_holds_not_raised(name_id, axis, set(kinds), raised_keys, graph=client)
     return raised
 
 
