@@ -1,0 +1,134 @@
+<!doctype html>
+<html><head><meta charset='utf-8'>
+<title>A link-hygiene rule for bracketed prose and self-referential name links
+</title></head><body>
+<h1 id="srtj-docs-prose-link-check">A link-hygiene rule for bracketed prose and self-referential name links</h1>
+
+<p><strong>Verdict: the bar is met.</strong> The changed <code>link_hygiene</code> gate fails
+<strong>all 13</strong> rows the incumbent's error-severity lint missed, and together with the
+incumbent's own error findings it refines <strong>all 19</strong> labelled link-defect rows, while
+adding <strong>no failure</strong> to the <strong>30</strong> acceptable disagreement rows. The measurement is
+<code>srtj-docs-prose-link-check.json</code>, written by
+<code>srtj-docs-prose-link-check-run.py</code> with a log ending in <code>EXIT=0</code>. No graph
+write, no model call, USD 0.</p>
+
+<h2 id="srtj-docs-prose-link-check-rule">The rule</h2>
+<p>Two defects, both checked inside the existing <code>link_hygiene</code> gate
+(<code>_link_hygiene_result</code>, <code>imas_codex/standard_names/docs_gates.py</code>), so the
+one link parser in <code>doc_links.py</code> remains the only one:</p>
+<ul>
+<li><strong>Bracketed prose.</strong> <code>_bracketed_prose_phrase</code> reports the first bracketed
+phrase that names no standard name. The rule is one predicate: a bracket holds prose when its content
+carries at least one letter, is not a numeric interval (<code>[0, 1]</code>), and is either more than
+one whitespace-separated token or carries a digit or an operator, so a unit or symbol sequence
+(<code>[m^-3]</code>, <code>[K]</code>, <code>[m^2 s^-1]</code>, <code>[m/s]</code>) is notation and
+raises nothing. Brackets inside <code>$…$</code>, <code>$$…$$</code>, <code>\(…\)</code>, inline
+code, and the label of an already formed Markdown link are masked before the scan, by the same
+<code>_masked_spans</code> the reference parser uses.</li>
+<li><strong>Self-referential link.</strong> A <code>name:</code> link whose target is the documented
+name's own id is a hygiene failure, read from <code>find_name_links</code> through
+<code>find_self_links</code>. <code>score_documentation</code> takes the documenting name as
+<code>documenting_name</code>; with no name supplied the check is silent rather than guessing.</li>
+</ul>
+<p>Every failure reason names the offending construct, so a refiner acts without re-reading the
+document. Two recorded defects reproduce verbatim:</p>
+<pre>S0027  bracketed phrase names no standard name: [ion density at a limiter]
+S0060  link 'tungsten density at the plasma boundary' targets the documented name itself:
+       name:tungsten_density_flux_surface_averaged_at_plasma_boundary
+S0071  link 'polarization_angle' targets the documented name itself:
+       name:polarization_angle_at_constraint_position</pre>
+
+<h2 id="srtj-docs-prose-link-check-bar">Per-class counts against the bar</h2>
+<table border='1' cellpadding='4' cellspacing='0'>
+<tr><th>class</th><th>label</th><th>rows</th><th>changed gate fails</th>
+<th>new rule fails</th><th>cap refines (changed gate &cup; incumbent errors)</th></tr>
+<tr><td>disagreement</td><td>not acceptable (link defect)</td><td>19</td>
+<td><strong>19</strong></td><td><strong>19</strong></td><td><strong>19</strong></td></tr>
+<tr><td>disagreement</td><td>acceptable</td><td>30</td><td><strong>0</strong></td><td><strong>0</strong></td>
+<td>1 (S0062, pre-existing <code>defining_equation</code> error)</td></tr>
+<tr><td>control</td><td>not acceptable</td><td>11</td><td>8</td><td>7</td><td>8</td></tr>
+<tr><td>control</td><td>acceptable</td><td>17</td><td>1</td><td>0</td><td>2</td></tr>
+</table>
+<ul>
+<li><strong>13 of 13 misses repaired</strong> (S0006, S0025, S0027, S0029, S0030, S0033, S0040,
+S0049, S0050, S0060, S0064, S0071, S0074) — every one by a link reason, never by another gate.</li>
+<li><strong>19 of 19 defect rows</strong> refined by the cap's selector. The 6 the incumbent already
+flagged are flagged for a different reason (<code>relationship_link</code>, no <code>name:</code>
+link at all), so the union is 19 and both halves are needed.</li>
+<li><strong>0 of 30 acceptable rows</strong> fail the changed gate. The single acceptable row the cap
+refines is S0062, from the incumbent's pre-existing <code>defining_equation</code> error, unchanged
+by this node.</li>
+<li>The 11 seeded control rows labelled not acceptable hold the same defect shapes: 7 carry the new
+rule, 8 fail the changed gate. The one acceptable control row that fails
+(S0022, <code>link_hygiene</code>) fails on the pre-existing malformed-target branch: its
+documentation holds <code>[f_{\mathrm{fast}}](\mathbf{x},\mathbf{v},t)</code>, which the incumbent
+already flagged.</li>
+</ul>
+<p>Four positive controls run before any absence is reported: the scanner returns the prose bracket it
+is handed; units, an interval and mathematics raise none; the gate fails a document holding a prose
+bracket; the gate fails a link to its own name. All four pass in the JSON.</p>
+
+<h2 id="srtj-docs-prose-link-check-live">False-positive estimate on the live catalog</h2>
+<p><strong>Marked unlabelled.</strong> The changed gate was run read-only over the live catalog's
+accepted documentation (2530 documents with documentation on <code>name_stage</code> accepted or
+approved, ordered by id, read-only, 4.7 s): <strong>637 documents newly fail</strong> — 613 on the
+prose-bracket rule and 24 on the self-link rule. 137 of those 637 also fail another gate, so the cap
+already refines them for a different reason; the remaining 500 are documents the new rule alone would
+add to the refine route. Ten examples:</p>
+<table border='1' cellpadding='4' cellspacing='0'>
+<tr><th>rule</th><th>name</th><th>reason</th></tr>
+<tr><td>prose bracket</td><td><code>absorbed_power_due_to_neutral_beam_injection</code></td>
+<td>bracketed phrase names no standard name: <code>[power due to neutral-beam injection]</code></td></tr>
+<tr><td>prose bracket</td><td><code>absorbed_radiated_power_at_divertor_target</code></td>
+<td><code>[power of the divertor due to radiation]</code></td></tr>
+<tr><td>prose bracket</td><td><code>absorbed_wave_power</code></td>
+<td><code>[ion charge-state absorbed wave power]</code></td></tr>
+<tr><td>prose bracket</td><td><code>accumulated_ammonia_count</code></td>
+<td><code>[ammonia count]</code></td></tr>
+<tr><td>prose bracket</td><td><code>accumulated_carbon_count_due_to_gas_injection</code></td>
+<td><code>[carbon count due to gas injection]</code></td></tr>
+<tr><td>prose bracket</td><td><code>accumulated_ethane_count</code></td>
+<td><code>[ethane count]</code></td></tr>
+<tr><td>prose bracket</td><td><code>accumulated_hydrogen_count_due_to_gas_injection</code></td>
+<td><code>[hydrogen count due to gas injection]</code></td></tr>
+<tr><td>prose bracket</td><td><code>accumulated_hydrogen_prefill_count</code></td>
+<td><code>[hydrogen prefill count]</code></td></tr>
+<tr><td>prose bracket</td><td><code>accumulated_neon_count</code></td>
+<td><code>[neon count]</code></td></tr>
+<tr><td>prose bracket</td><td><code>accumulated_particle_count_at_pellet_path_due_to_pellet_injection</code></td>
+<td><code>[count of pellet]</code></td></tr>
+</table>
+<p><strong>Read the 25% figure as a shape count, not as a false-positive rate.</strong> The excluded
+shapes are single-token brackets and notation, and the ten examples above are the same shape the
+label set calls a defect: a prose phrase written where a name link belongs. On the only labelled
+population available the rule is exact — 19 of 19 defects, 0 of 30 acceptable — and the 30 acceptable
+disagreement rows carry no such phrase at all. What the live count shows is that the shape is common
+in accepted documentation, so routing 500 further documents to refinement is a real cost the lead
+should weigh when the cap is wired. Tightening to a word-list of quantity nouns would trade that
+count for a rule that no longer reads as one predicate; the exclusion that matters is the notation
+one, and it is tested.</p>
+
+<h2 id="srtj-docs-prose-link-check-tests">Tests and gate</h2>
+<p>Eight tests were added to <code>tests/standard_names/test_docs_gates.py</code>: the prose bracket
+failing with its phrase in the reason; each of the four exclusions (units, numeric intervals,
+mathematics, Markdown link labels); the self-link failing with the link named; a link to another name
+not being a self-link; and the self-link check staying silent when no documenting name is supplied.
+The gate over the three declared test files passes with no added failures — base
+<strong>32 passed</strong> (pristine archive at the base revision), head <strong>40 passed</strong>
+(the same files plus the eight new tests).</p>
+<p>The declared mutation — revert the prose-bracket predicate — turns the head arm red:
+<code>test_bracketed_prose_phrase_fails_hygiene_naming_the_phrase</code> fails and the run exits 1
+(<code>negative-control.log</code> in the run directory).</p>
+<pre>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync python docs/evidence/fragments/sn-review-through-jev/srtj-docs-prose-link-check-run.py</pre>
+
+<h2 id="srtj-docs-prose-link-check-wiring">One wiring gap, outside this node's scope</h2>
+<p>The self-link rule reads the documenting name through a new <code>documenting_name</code>
+argument. The pipeline call site that would supply it is
+<code>run_documentation_gate_checks</code> (<code>imas_codex/standard_names/review/audits.py</code>),
+which already holds <code>name["id"]</code>, and the Jev route reaches the same function through
+<code>jev_review.build_docs_audit_report</code>. Neither file is in this node's write scope, so the
+prose-bracket half fires live today and the self-link half fires only where the name is passed, as in
+this measurement. Passing <code>name.get("id")</code> at that one call site completes it.</p>
+
+</body></html>

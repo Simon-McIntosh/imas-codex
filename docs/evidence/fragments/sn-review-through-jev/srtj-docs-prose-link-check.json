@@ -1,0 +1,1221 @@
+{
+  "schema": "srtj-docs-prose-link-check",
+  "created_at": "2026-10-23T05:13:50.992698+00:00",
+  "code_revision": "a977f43b211ab0de30611999eb78207bb5bd05be",
+  "gate": "imas_codex/standard_names/docs_gates.py::link_hygiene",
+  "module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-prose-link-check/imas_codex/standard_names/docs_gates.py",
+  "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-prose-link-check",
+  "rows_measurement": {
+    "rows": [
+      {
+        "sheet_id": "S0001",
+        "name": "line_averaged_tungsten_density",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0002",
+        "name": "helium_4_density_at_pedestal_top",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0003",
+        "name": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [particle flux at the wall due to recombination]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0004",
+        "name": "hydrogen_density_at_pedestal_top",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0005",
+        "name": "parallel_fast_neutral_pressure",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0006",
+        "name": "line_averaged_lithium_density",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [flux-surface-averaged lithium density at the plasma boundary]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0007",
+        "name": "current_due_to_non_inductive_current_drive",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [plasma current due to ohmic induction]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0008",
+        "name": "current_at_divertor_target",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0009",
+        "name": "second_local_tangential_back_surface_radius_of_optical_element",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0010",
+        "name": "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0011",
+        "name": "surface_current_per_toroidal_and_poloidal_mode_number_of_ion_cyclotron_heating_antenna",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "relationship_link",
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [wave current of an antenna strap]",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0012",
+        "name": "radial_perturbed_plasma_magnetic_field_imaginary_part",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0013",
+        "name": "normal_coordinate_of_correction_coil",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0014",
+        "name": "krypton_source_rate_due_to_gas_injection",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0015",
+        "name": "total_heating_power_due_to_fusion_reactions",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0016",
+        "name": "maximum_angle_of_electron_cyclotron_launcher_mirror",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "relationship_link",
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [angle of electron-cyclotron launcher mirror]",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0017",
+        "name": "ratio_of_vertical_vorticity_to_major_radius",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0018",
+        "name": "per_toroidal_mode_fast_ion_charge_state_power",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0019",
+        "name": "resistance_of_shunt",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0020",
+        "name": "second_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0021",
+        "name": "alpha_angle_of_plasma_filament",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0022",
+        "name": "trapped_fast_ion_power_density_due_to_collisions",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": null,
+        "hygiene_reason": "link has an unsupported target or an empty label: [f_{\\mathrm{fast}}](\\mathbf{x},\\mathbf{v},t)",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0023",
+        "name": "nuclear_power_density_of_limiter_tile",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [power density of a limiter tile]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0024",
+        "name": "current_of_divertor_tile",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0025",
+        "name": "perpendicular_power_normalized_of_beam_tracing_beam",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [parallel normalized beam power]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0026",
+        "name": "width_of_iron_core_segment",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0027",
+        "name": "lithium_density_at_limiter",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [ion density at a limiter]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0028",
+        "name": "ion_charge_state_particle_flux_limiter_coefficient",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0029",
+        "name": "etendue_of_spectrometer",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [viewing etendue of a spectrometer channel]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0030",
+        "name": "parallel_ion_heat_convection_velocity",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [effective thermal ion charge-state energy velocity due to convection]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0031",
+        "name": "toroidal_ion_charge_state_momentum_convection_velocity",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0032",
+        "name": "maximum_of_back_surface_neutron_flux",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0033",
+        "name": "ion_energy_diffusion_coefficient",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [Radial ion energy diffusion coefficient]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0034",
+        "name": "electron_particle_flux_at_wall_due_to_pumping",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0035",
+        "name": "electron_density_at_pellet_path",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0036",
+        "name": "nuclear_heating_power_of_breeder_blanket_layer",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [heating power of a breeder-blanket layer]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0037",
+        "name": "outer_radius_of_poloidal_field_coil",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [radius of a poloidal-field-coil arc]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0038",
+        "name": "vertical_back_surface_curvature_of_optical_element",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "relationship_link",
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [optical-element curvature]",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0039",
+        "name": "radial_perturbed_plasma_magnetic_vector_potential_imaginary_part",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0040",
+        "name": "deposited_power_at_divertor_target_due_to_halo_current",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [power of divertor]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0041",
+        "name": "accumulated_deuterated_methane_prefill_count",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0042",
+        "name": "toroidal_conductivity",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0043",
+        "name": "vertical_total_current_density",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "relationship_link",
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [total current density]",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0044",
+        "name": "second_local_tangential_coordinate_of_hard_xray_detector",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "relationship_link",
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [first local tangential coordinate of a hard X-ray detector]",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0045",
+        "name": "normalized_particle_mass",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "relationship_link",
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [particle mass]",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0046",
+        "name": "vertical_conductivity",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0047",
+        "name": "neutral_particle_flux_at_wall_due_to_recombination",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0048",
+        "name": "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [co-passing torque density due to the J cross B force]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0049",
+        "name": "plasma_energy",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [total plasma energy]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0050",
+        "name": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [co-passing fast ion torque density due to collisions]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0051",
+        "name": "ion_average_temperature_at_post_sawtooth_crash",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0052",
+        "name": "first_local_tangential_width_of_soft_xray_detector",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0053",
+        "name": "radial_volumetric_force",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0054",
+        "name": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0055",
+        "name": "volume_integrated_particle_source_rate",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0056",
+        "name": "implicit_ion_energy_source_rate",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0057",
+        "name": "vertical_vorticity",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0058",
+        "name": "tilt_angle_of_passive_loop",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0059",
+        "name": "y_direction_unit_vector_of_neutron_detector",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "relationship_link"
+        ],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0060",
+        "name": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "self_link",
+        "hygiene_reason": "link 'tungsten density at the plasma boundary' targets the documented name itself: name:tungsten_density_flux_surface_averaged_at_plasma_boundary",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0061",
+        "name": "toroidal_helium_4_velocity_at_magnetic_axis",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0062",
+        "name": "vertical_coordinate_of_antenna_strap",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0063",
+        "name": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "relationship_link",
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [accumulated total gas count at midplane due to gas injection]",
+        "incumbent_error": true,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0064",
+        "name": "toroidal_magnetic_field_at_flux_surface",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [poloidal magnetic field at a flux surface]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0065",
+        "name": "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0066",
+        "name": "oxygen_count_accumulated_due_to_gas_injection",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0067",
+        "name": "first_local_tangential_width_of_filter_window",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0068",
+        "name": "line_averaged_helium_4_density",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0069",
+        "name": "accumulated_deuterium_count_due_to_gas_injection",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0070",
+        "name": "electron_absorbed_wave_power",
+        "class": "control",
+        "acceptable": false,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0071",
+        "name": "polarization_angle_at_constraint_position",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "self_link",
+        "hygiene_reason": "link 'polarization_angle' targets the documented name itself: name:polarization_angle_at_constraint_position",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0072",
+        "name": "poloidal_neutral_energy_diffusivity",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0073",
+        "name": "external_loop_voltage",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0074",
+        "name": "neutral_internal_state_particle_flux_at_wall",
+        "class": "disagreement",
+        "acceptable": false,
+        "changed_gate_fails": true,
+        "changed_gate_failed_gates": [
+          "link_hygiene"
+        ],
+        "new_rule": "prose_bracket",
+        "hygiene_reason": "bracketed phrase names no standard name: [neutral particle flux at the wall]",
+        "incumbent_error": false,
+        "cap_refines": true
+      },
+      {
+        "sheet_id": "S0075",
+        "name": "toroidal_carbon_velocity_at_pedestal_top",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0076",
+        "name": "alfven_frequency_real_part",
+        "class": "control",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      },
+      {
+        "sheet_id": "S0077",
+        "name": "vertical_current_density_due_to_ion_inertia",
+        "class": "disagreement",
+        "acceptable": true,
+        "changed_gate_fails": false,
+        "changed_gate_failed_gates": [],
+        "new_rule": null,
+        "hygiene_reason": "all links resolve through supported target syntax",
+        "incumbent_error": false,
+        "cap_refines": false
+      }
+    ],
+    "per_class": [
+      {
+        "class": "control",
+        "label": "not acceptable",
+        "rows": 11,
+        "changed_gate_fails": 8,
+        "new_rule_fails": 7,
+        "cap_refines": 8
+      },
+      {
+        "class": "control",
+        "label": "acceptable",
+        "rows": 17,
+        "changed_gate_fails": 1,
+        "new_rule_fails": 0,
+        "cap_refines": 2
+      },
+      {
+        "class": "disagreement",
+        "label": "not acceptable",
+        "rows": 19,
+        "changed_gate_fails": 19,
+        "new_rule_fails": 19,
+        "cap_refines": 19
+      },
+      {
+        "class": "disagreement",
+        "label": "acceptable",
+        "rows": 30,
+        "changed_gate_fails": 0,
+        "new_rule_fails": 0,
+        "cap_refines": 1
+      }
+    ],
+    "bar": {
+      "missed_defects": 13,
+      "missed_defects_failed_by_new_rule": 13,
+      "missed_defects_unrepaired": [],
+      "defect_rows": 19,
+      "defect_rows_cap_refines": 19,
+      "defect_rows_unrefined": [],
+      "acceptable_rows": 30,
+      "acceptable_rows_changed_gate_fails": 0,
+      "acceptable_rows_changed_gate_fail_ids": [],
+      "acceptable_rows_cap_refines": 1,
+      "acceptable_rows_cap_refine_ids": [
+        "S0062"
+      ],
+      "meets_bar": true
+    },
+    "fail_counts": {
+      "changed_gate_any_class": {
+        "control / acceptable": 1,
+        "control / not acceptable": 8,
+        "disagreement / not acceptable": 19
+      },
+      "new_rule_any_class": {
+        "control / not acceptable": 7,
+        "disagreement / not acceptable": 19
+      },
+      "cap_refines_any_class": {
+        "control / acceptable": 2,
+        "control / not acceptable": 8,
+        "disagreement / acceptable": 1,
+        "disagreement / not acceptable": 19
+      }
+    },
+    "new_rule_failure_sample": [
+      {
+        "sheet_id": "S0003",
+        "name": "ion_charge_state_energy_flux_at_wall_due_to_recombination",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [particle flux at the wall due to recombination]"
+      },
+      {
+        "sheet_id": "S0006",
+        "name": "line_averaged_lithium_density",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [flux-surface-averaged lithium density at the plasma boundary]"
+      },
+      {
+        "sheet_id": "S0007",
+        "name": "current_due_to_non_inductive_current_drive",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [plasma current due to ohmic induction]"
+      },
+      {
+        "sheet_id": "S0011",
+        "name": "surface_current_per_toroidal_and_poloidal_mode_number_of_ion_cyclotron_heating_antenna",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [wave current of an antenna strap]"
+      },
+      {
+        "sheet_id": "S0016",
+        "name": "maximum_angle_of_electron_cyclotron_launcher_mirror",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [angle of electron-cyclotron launcher mirror]"
+      },
+      {
+        "sheet_id": "S0023",
+        "name": "nuclear_power_density_of_limiter_tile",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [power density of a limiter tile]"
+      }
+    ],
+    "reproductions": {
+      "S0027": "bracketed phrase names no standard name: [ion density at a limiter]",
+      "S0060": "link 'tungsten density at the plasma boundary' targets the documented name itself: name:tungsten_density_flux_surface_averaged_at_plasma_boundary",
+      "S0071": "link 'polarization_angle' targets the documented name itself: name:polarization_angle_at_constraint_position",
+      "S0074": "bracketed phrase names no standard name: [neutral particle flux at the wall]"
+    }
+  },
+  "positive_controls": {
+    "prose_phrase_seen": {
+      "purpose": "the scanner must return a prose bracket it is given",
+      "input": "differs from the [ion density at a limiter].",
+      "found": [
+        "ion density at a limiter"
+      ],
+      "passed": true
+    },
+    "notation_brackets_pass": {
+      "purpose": "units, a numeric interval and mathematics must raise no phrase",
+      "input": "in [m^-3] over [0, 1] and $[a b]$",
+      "found": [],
+      "passed": true
+    },
+    "prose_bracket_gate_fails": {
+      "purpose": "the hygiene gate must fail a document holding a prose bracket",
+      "outcome": "FAIL",
+      "reason": "bracketed phrase names no standard name: [ion density at a limiter]",
+      "passed": true
+    },
+    "self_link_gate_fails": {
+      "purpose": "the hygiene gate must fail a link to the documented name",
+      "outcome": "FAIL",
+      "reason": "link 'lithium density at a limiter' targets the documented name itself: name:lithium_density_at_limiter",
+      "passed": true
+    }
+  },
+  "live_catalog": {
+    "available": true,
+    "source": "live graph: accepted StandardName documentation",
+    "documents_read": 2530,
+    "limit": 4000,
+    "newly_failing_documents": 637,
+    "newly_failing_by_rule": {
+      "prose_bracket": 613,
+      "self_link": 24
+    },
+    "newly_failing_also_failing_another_gate": 137,
+    "examples": [
+      {
+        "id": "absorbed_power_due_to_neutral_beam_injection",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [power due to neutral-beam injection]",
+        "other_failed_gates": []
+      },
+      {
+        "id": "absorbed_radiated_power_at_divertor_target",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [power of the divertor due to radiation]",
+        "other_failed_gates": [
+          "relationship_link"
+        ]
+      },
+      {
+        "id": "absorbed_wave_power",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [ion charge-state absorbed wave power]",
+        "other_failed_gates": []
+      },
+      {
+        "id": "accumulated_ammonia_count",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [ammonia count]",
+        "other_failed_gates": []
+      },
+      {
+        "id": "accumulated_carbon_count_due_to_gas_injection",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [carbon count due to gas injection]",
+        "other_failed_gates": []
+      },
+      {
+        "id": "accumulated_ethane_count",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [ethane count]",
+        "other_failed_gates": []
+      },
+      {
+        "id": "accumulated_hydrogen_count_due_to_gas_injection",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [hydrogen count due to gas injection]",
+        "other_failed_gates": []
+      },
+      {
+        "id": "accumulated_hydrogen_prefill_count",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [hydrogen prefill count]",
+        "other_failed_gates": [
+          "relationship_link"
+        ]
+      },
+      {
+        "id": "accumulated_neon_count",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [neon count]",
+        "other_failed_gates": []
+      },
+      {
+        "id": "accumulated_particle_count_at_pellet_path_due_to_pellet_injection",
+        "rule": "prose_bracket",
+        "reason": "bracketed phrase names no standard name: [count of pellet]",
+        "other_failed_gates": [
+          "relationship_link"
+        ]
+      }
+    ],
+    "labelled": false,
+    "elapsed_s": 1.8
+  },
+  "status": "accepted"
+}
