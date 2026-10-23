@@ -1,0 +1,32 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T21:30:34.509Z",
+  "dispatched_at": "2026-10-23T21:16:30Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/holds.py",
+      "line": "98",
+      "severity": "non-blocking",
+      "text": "No assertion pins the property this delta exists to establish: sync_holds now calls holds.raise_hold and holds.clear_holds_not_raised directly and accepts no writer overrides, but reintroducing raise_fn/clear_fn and having a caller pass them would leave every test green, because the tests patch the holds module the production path already uses."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is one hold synchroniser owning every raise-and-clear across three sites; imas_codex/standard_names/review/holds.py:98 sync_holds is that owner, and the gained commit ecf6476b5 strips its raise_fn/clear_fn overrides so no caller can supply a different writer.\nVERDICT done_when: the done_when asks for one owner, no clear_holds_not_raised call outside holds.py and its tests, committed tests, no added failures against main, and an evidence fragment recording each site and control; git grep at 5fbf87d66 finds the clear call only in holds.py:123 and tests, and resume-combined-base-default.log and resume-combined-final-default.log carry identical 18-failure id sets, so zero failures are added.\nVERDICT write_paths: the node declared holds.py, cascade.py, pipeline.py, graph_ops.py, test_review_holds.py, test_review_cascade.py, test_review_findings_cap.py, test_persist_stages.py, test_bare_doc_link_normalize.py, test_doc_link_accept_gate.py and the evidence fragment; git diff --stat 34bb6f97e..5fbf87d66 touches eight paths, every one inside that list.\nVERDICT manifest: read at status complete; commits end at 5fbf87d66, tests: carries the literal nine-file command, baseline_suite (65c2d7cc9, 18 failures) and after_suite (ecf6476b5, the same 18 ids) reconcile exactly with the FAILED lines of the two logs, and negative_control_log names resume-control-negative-final-graph.log (1 failed, EXIT=1).\nVERDICT diff: read commit by commit over 34bb6f97e..5fbf87d66; ecf6476b5 removes the override parameters from sync_holds and retargets four test patches to the holds module, d2ba91aa0 records the three omitted consumer files and the nine-file base/head totals, and 5fbf87d66 re-runs the clearing mutation at the final code head; the two post-code commits touch only the evidence fragment.\nCALL_SITES: imas_codex/standard_names/review/cascade.py:385, imas_codex/standard_names/review/pipeline.py:2038, imas_codex/standard_names/graph_ops.py:17972, imas_codex/standard_names/promote.py:775, imas_codex/standard_names/workers.py:11275\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/holds.py:98 sync_holds owns the raise-then-clear loop, all three production sites call it (cascade.py:385, pipeline.py:2038, graph_ops.py:17972) and the gained commit removes the last way to substitute a writer.\nSCORE evidence: 18\nJUSTIFICATION evidence: resume-combined-base-default.log and resume-combined-final-default.log record 18 versus 18 failures with identical ids and resume-combined-*-graph.log record 19 versus 20 passed, so the done_when's no-added-failures measure is a recorded result rather than a claim, though the head arm ran at ecf6476b5 rather than the final docs head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 34bb6f97e..5fbf87d66 lists exactly eight files, all inside the write paths declared at tests/standard_names and imas_codex/standard_names/review.\nSCORE durability: 15\nJUSTIFICATION durability: the delta adds no assertion, so the only control for its change is resume-control-negative-final-graph.log (test_resolved_cascade_veto_clears_the_hold fails at the final code head), and the four retargeted patch lines in tests/standard_names/test_review_findings_cap.py:156 would only error if the owner patch itself disappeared.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/review/holds.py:98 keeps the module's mechanism-named idiom and the delta introduces no plan, version or ticket identifier beyond the existing evidence-fragment path.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no definition; sync_holds remains the single owner of the raise-then-clear capability and the change removes a parameter surface rather than forking a replacement.\nFINDING imas_codex/standard_names/review/holds.py:98 non-blocking: no assertion pins the property this delta exists to establish, so reintroducing raise_fn/clear_fn parameters and having a caller pass them would leave every test green because each test patches the holds module the production path now uses.\n",
+  "review_run_id": "r-20261023T211526720975-review-of-srtj-holds-sync-owner-5fbf87d665c2",
+  "reviewed_base_sha": "34bb6f97e43d199c414d86d045b7e7504b6c34a0",
+  "reviewed_head_sha": "5fbf87d665c2fc9c83cd00bf54dab1b71de2e51b",
+  "reviewed_run_id": "r-20261023T192008106471-srtj-holds-sync-owner",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:36:38.828603+00:00",
+  "total": 110
+}
