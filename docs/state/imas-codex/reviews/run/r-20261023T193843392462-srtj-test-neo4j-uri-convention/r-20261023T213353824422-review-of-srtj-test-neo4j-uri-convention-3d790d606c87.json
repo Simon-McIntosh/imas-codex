@@ -1,0 +1,77 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T21:52:39.712Z",
+  "dispatched_at": "2026-10-23T21:35:02Z",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "308",
+      "severity": "non-blocking",
+      "text": "_project_graph_uris calls resolve_neo4j() with the default auto_tunnel=True purely to read an address, and imas_codex/graph/profiles.py:446 starts an SSH tunnel as a side effect when the location is remote, so merely collecting a graph test can open a tunnel; use auto_tunnel=False for the address-only comparison."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "402",
+      "severity": "non-blocking",
+      "text": "_start_empty_neo4j's exception path calls pytest.skip, so an unrunnable disposable instance hides as a skip across every dependent test instead of failing visibly; the brief requires the drift tests to run and pass, not skip, and the gate never exercised this branch because it attached to a supplied endpoint."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "375",
+      "severity": "non-blocking",
+      "text": "the live-graph refusal at conftest.py:411 is the protection the brief calls out, but it is proven only by a manual negative-control log (logs/negative-control-live-graph.log) and no committed test asserts it, so a regression that drops the refusal would leave every test green."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_source_refresh.py",
+      "line": "446",
+      "severity": "non-blocking",
+      "text": "the graph fixture re-declares the _SyntheticResolutionReader patch that tests/standard_names/conftest.py:127-135 already owns for _block_live_graph, so the same synthetic-authority wiring exists in two places and could drift; the session fixture _synthetic_dd_resolution_rows already loads the same rows."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "420",
+      "severity": "non-blocking",
+      "text": "the fixture sets NEO4J_PASSWORD to the empty string while _auth at conftest.py:360 reads IMAS_CODEX_TEST_NEO4J_PASSWORD, so attaching to a password-protected supplied instance would authenticate the wipe differently from the GraphClient the tests use; no gate arm exercises a password-run instance."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against fa65d7c71; the single commit 3d790d606 adds _project_graph_uris, _start_empty_neo4j, _auth, _wipe and the two fixtures to tests/standard_names/conftest.py, deletes the local disposable_neo4j guard from test_source_refresh.py and the body of disposable_graph_uri from test_panel_audit_sample.py, and adds the evidence html, all inside the declared paths.",
+    "done_when": "The done-when at brief.md:44-50 requires the shared fixture committed with both local guards deleted, one graph command running all three files with the drift tests passing, the refusal logged, and the evidence html recording both arms; logs/head-graph.log records 24 passed EXIT=0, logs/negative-control-live-graph.log records 6 errors EXIT=1, and the html records every arm, so the gate asserts the measure.",
+    "goal": "The node goal is 'one disposable-Neo4j convention for the standard-names tests' (brief.md:1); the landed change adds a session-scoped disposable_neo4j_uri in tests/standard_names/conftest.py:375, points both NEO4J_URI and IMAS_CODEX_TEST_NEO4J_URI at it, and refuses the project graph, so the goal is met.",
+    "manifest": "Read; manifest.md:15 records the literal head graph command and manifest.md:16 names six logs, manifest.md:21 states 24/0/EXIT=0 at head against 19/5 errors at base with 0 added default failures, and manifest.md:19 names the negative-control log.",
+    "write_paths": "The declared write paths (tests/standard_names/conftest.py, test_source_refresh.py, test_panel_audit_sample.py, docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html) cover every path in the diff; git diff --stat fa65d7c71..3d790d606c lists exactly those four."
+  },
+  "justifications": {
+    "durability": "The five drift tests fail at setup if tests/standard_names/conftest.py regresses (the base arm's failure), but no committed test exercises the live-graph refusal at conftest.py:411 and the only assertion added at conftest.py:371 checks an independent literal 0.",
+    "evidence": "logs/head-graph.log and logs/base-graph.log record the arms as pytest summary lines with a bare EXIT line, but the head log's header declares '# revision=fa65d7c71' (the base SHA), so the after arm's own log does not name 3d790d606c.",
+    "fit": "tests/standard_names/conftest.py:375 and its siblings follow the module's existing fixture idioms and introduce no plan, sprint or ticket label in any symbol, comment or filename.",
+    "goal_fidelity": "tests/standard_names/conftest.py:375 is the one fixture both producing files now depend on, and tests/standard_names/test_source_refresh.py:436 and test_panel_audit_sample.py:704 carry only a thin wrapper with no local guard.",
+    "reuse": "_start_empty_neo4j at tests/standard_names/conftest.py:321 reuses write_temp_neo4j_conf, _wait_for_bolt_ready, _neo4j_image and stop_temp_neo4j from imas_codex/graph/temp_neo4j.py:207, which cannot start an empty instance because start_temp_neo4j loads a dump; the only duplication is the synthetic-resolution reader re-declared at test_source_refresh.py:446 against conftest.py:133.",
+    "scope_discipline": "Every path in git diff --stat fa65d7c71..3d790d606c is inside the declared write scope, though tests/standard_names/test_source_refresh.py:443-455 additionally substitutes synthetic DD-resolution rows, a change to what the drift tests prove beyond routing the guard."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is 'one disposable-Neo4j convention for the standard-names tests' (brief.md:1); the landed change adds a session-scoped disposable_neo4j_uri in tests/standard_names/conftest.py:375, points both NEO4J_URI and IMAS_CODEX_TEST_NEO4J_URI at it, and refuses the project graph, so the goal is met.\nVERDICT done_when: The done-when at brief.md:44-50 requires the shared fixture committed with both local guards deleted, one graph command running all three files with the drift tests passing, the refusal logged, and the evidence html recording both arms; logs/head-graph.log records 24 passed EXIT=0, logs/negative-control-live-graph.log records 6 errors EXIT=1, and the html records every arm, so the gate asserts the measure.\nVERDICT write_paths: The declared write paths (tests/standard_names/conftest.py, test_source_refresh.py, test_panel_audit_sample.py, docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html) cover every path in the diff; git diff --stat fa65d7c71..3d790d606c lists exactly those four.\nVERDICT manifest: Read; manifest.md:15 records the literal head graph command and manifest.md:16 names six logs, manifest.md:21 states 24/0/EXIT=0 at head against 19/5 errors at base with 0 added default failures, and manifest.md:19 names the negative-control log.\nVERDICT diff: Read commit by commit against fa65d7c71; the single commit 3d790d606 adds _project_graph_uris, _start_empty_neo4j, _auth, _wipe and the two fixtures to tests/standard_names/conftest.py, deletes the local disposable_neo4j guard from test_source_refresh.py and the body of disposable_graph_uri from test_panel_audit_sample.py, and adds the evidence html, all inside the declared paths.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/conftest.py:375 is the one fixture both producing files now depend on, and tests/standard_names/test_source_refresh.py:436 and test_panel_audit_sample.py:704 carry only a thin wrapper with no local guard.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/head-graph.log and logs/base-graph.log record the arms as pytest summary lines with a bare EXIT line, but the head log's header declares '# revision=fa65d7c71' (the base SHA), so the after arm's own log does not name 3d790d606c.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: Every path in git diff --stat fa65d7c71..3d790d606c is inside the declared write scope, though tests/standard_names/test_source_refresh.py:443-455 additionally substitutes synthetic DD-resolution rows, a change to what the drift tests prove beyond routing the guard.\nSCORE durability: 13\nJUSTIFICATION durability: The five drift tests fail at setup if tests/standard_names/conftest.py regresses (the base arm's failure), but no committed test exercises the live-graph refusal at conftest.py:411 and the only assertion added at conftest.py:371 checks an independent literal 0.\nSCORE fit: 16\nJUSTIFICATION fit: tests/standard_names/conftest.py:375 and its siblings follow the module's existing fixture idioms and introduce no plan, sprint or ticket label in any symbol, comment or filename.\nSCORE reuse: 14\nJUSTIFICATION reuse: _start_empty_neo4j at tests/standard_names/conftest.py:321 reuses write_temp_neo4j_conf, _wait_for_bolt_ready, _neo4j_image and stop_temp_neo4j from imas_codex/graph/temp_neo4j.py:207, which cannot start an empty instance because start_temp_neo4j loads a dump; the only duplication is the synthetic-resolution reader re-declared at test_source_refresh.py:446 against conftest.py:133.\nFINDING tests/standard_names/conftest.py:308 non-blocking: _project_graph_uris calls resolve_neo4j() with the default auto_tunnel=True purely to read an address, and imas_codex/graph/profiles.py:446 starts an SSH tunnel as a side effect when the location is remote, so merely collecting a graph test can open a tunnel; use auto_tunnel=False for the address-only comparison.\nFINDING tests/standard_names/conftest.py:402 non-blocking: _start_empty_neo4j's exception path calls pytest.skip, so an unrunnable disposable instance hides as a skip across every dependent test instead of failing visibly; the brief requires the drift tests to run and pass, not skip, and the gate never exercised this branch because it attached to a supplied endpoint.\nFINDING tests/standard_names/conftest.py:375 non-blocking: the live-graph refusal at conftest.py:411 is the protection the brief calls out, but it is proven only by a manual negative-control log (logs/negative-control-live-graph.log) and no committed test asserts it, so a regression that drops the refusal would leave every test green.\nFINDING tests/standard_names/test_source_refresh.py:446 non-blocking: the graph fixture re-declares the _SyntheticResolutionReader patch that tests/standard_names/conftest.py:127-135 already owns for _block_live_graph, so the same synthetic-authority wiring exists in two places and could drift; the session fixture _synthetic_dd_resolution_rows already loads the same rows.\nFINDING tests/standard_names/conftest.py:420 non-blocking: the fixture sets NEO4J_PASSWORD to the empty string while _auth at conftest.py:360 reads IMAS_CODEX_TEST_NEO4J_PASSWORD, so attaching to a password-protected supplied instance would authenticate the wipe differently from the GraphClient the tests use; no gate arm exercises a password-run instance.\n",
+  "review_run_id": "r-20261023T213353824422-review-of-srtj-test-neo4j-uri-convention-3d790d606c87",
+  "reviewed_base_sha": "fa65d7c71472f57ebf0ef8f65ac5d0615f6aa139",
+  "reviewed_head_sha": "3d790d606c8717efa5cf1d70e03e83bc24446188",
+  "reviewed_run_id": "r-20261023T193843392462-srtj-test-neo4j-uri-convention",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T21:47:00+00:00",
+  "total": 93
+}

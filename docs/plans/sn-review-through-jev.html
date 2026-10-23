@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="224">
+<meta name="plan-version" content="225">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -977,6 +977,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T192008106471-srtj-holds-sync-owner" data-who="reckon-build" data-when="2026-10-23T21:13:35Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-holds-sync-owner.html — hold sync owns raise and clear with no writer overrides; nine-file default gate adds zero failures (18 versus 18), graph gate rises 19 to 20 passes, final-head clearing mutation fails.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T213353824422-review-of-srtj-test-neo4j-uri-convention-3d790d606c87" data-who="reckon-build" data-when="2026-10-23T21:52:39.712Z">
+    <div class="r-comment-body"><p>Independent review of r-20261023T193843392462-srtj-test-neo4j-uri-convention at head 3d790d606c: the one-fixture disposable-Neo4j convention is faithful to its goal and its gate (24 passed at head against 19 passed + 5 setup errors at base, 0 added default-marker failures, live-graph refusal shown firing), scored 18/15/17/13/16/14 with five non-blocking findings (auto-tunnel side effect, skip-on-failure hiding, no committed test for the refusal, duplicated synthetic-reader patch, password/auth mismatch).</p></div>
 </div>
 </section>
 </main>
