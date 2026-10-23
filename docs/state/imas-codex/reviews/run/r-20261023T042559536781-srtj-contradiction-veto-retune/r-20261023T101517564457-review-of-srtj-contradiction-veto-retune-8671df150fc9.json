@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "imas_codex/standard_names/workers.py:11062, imas_codex/standard_names/workers.py:11070, imas_codex/standard_names/workers.py:11105, imas_codex/standard_names/review/cascade.py:525, imas_codex/standard_names/review/cascade.py:526, imas_codex/standard_names/review/cascade.py:537, imas_codex/standard_names/review/cascade.py:544, imas_codex/standard_names/review/cascade_calibration.py:280, imas_codex/standard_names/review/cascade_calibration.py:314",
+  "completed_at": "2026-10-23T10:31:41.015Z",
+  "dispatched_at": "2026-10-23T10:16:08Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-retune-run.py",
+      "line": "180",
+      "severity": "non-blocking",
+      "text": "the replay decides each row's fired flag with its own settlement skip plus jev_review.claim_contradicts, not through the product's aggregate_docs_review veto path, so '3 of the 46 still fire' is the runner's arithmetic rather than the product's decision. The reader this node repaired, score_docs_review's raw-answer veto scan, is never called by the replay, so a regression there would leave the recorded 3 unmoved. The counts still measure the shipped question (the questions come from jev_review.docs_question_table) and arm b2 imports the settlement predicate rather than re-implementing it, so this is a fidelity gap in the veto route, not in the criterion."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/brief.md",
+      "line": "56",
+      "severity": "non-blocking",
+      "text": "the brief and the done_when state 'at most 3 of the 45 recorded firings' while the replay, the plan comment c-s6-veto-history-landed and the JSON key bar.recorded_total all read 46; the ceiling of 3 is met either way, but a reader comparing the bar statement to the measurement cannot tell whether one row was added or a row dropped."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-retune.html",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "the arm A row of the results table, and the opening paragraph that summarises it, report arm A recalling 'all 60' planted contradictions, while the JSON records arms.a.passes.1.recall as 59 and arms.a.passes.2.recall as 60; the page's own criterion section then states 59 and 60. The page and the record disagree on one of the two numbers the bar is read from, and the table is the surface a reader takes at face value."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is the retune of the documentation contradiction question recorded in its live pointer; imas_codex/standard_names/review/jev_review.py:535 adds label_only_source, :561 empties that label out of the dd_source_docs evidence, :666 settles a non-requirement claim in code, and the shipped source-comparison criterion is pinned at the measured wording (:501), so the retune lands and the replay on the shipped code records 3 of the 46 recorded firings still firing at 60 of 60 planted contradictions recalled, with 0 of 20 controls (srtj-contradiction-veto-retune.json kept_arm b2, bar_met true).\nVERDICT done_when: the done_when names a JSON written by its runner with a log ending EXIT=0 reporting still-fire and old and new recall, the bar, spend under USD 1.00, and a test file that fails on revert; replay-shipped-question.log ends EXIT=0, the JSON carries recorded 3 of 46 with recall 59 and 60 for arm a and 60 and 60 for arm b2, spend_usd 0.037108 of 1.00, and the controls (negative-control-retuned-criterion.log, negative-control-veto_scan_control.log, negative-control-label_source_drop_control.log) each end EXIT=1 with named failing ids the head arm does not fail.\nVERDICT write_paths: the manifest's orientation_write_paths declare the five source and evidence files plus docs/figures/sn-review-through-jev/srtj-contradiction-veto-retune; git diff --stat c5b7f76ed..8671df150 lists exactly those six paths and nothing else, so every changed path is inside the declared set.\nVERDICT manifest: read; it states the shipped arm b2 at 3 of 46 and 60 of 60 on both passes with 0 of 20 controls, the gate over the four test files at 67 passed with the same 5 pre-existing failure ids as the base revision, spend 0.037108 of 1.00, and every negative-control log by bare path.\nVERDICT diff: read commit by commit against c5b7f76ed; the range is 19 commits, of which 8671df150 is docs-only (html and json) after the code head 0c82826f3, so the gate at 0c82826f3 covers the code that ships; 208fedb38 adds the criterion pin and its test, 0c82826f3 routes every claim-answer reader through effective_claim_answers and deletes the dead source_text helper, and every hunk is inside the declared scope.\nCALL_SITES: imas_codex/standard_names/workers.py:11062, imas_codex/standard_names/workers.py:11070, imas_codex/standard_names/workers.py:11105, imas_codex/standard_names/review/cascade.py:525, imas_codex/standard_names/review/cascade.py:526, imas_codex/standard_names/review/cascade.py:537, imas_codex/standard_names/review/cascade.py:544, imas_codex/standard_names/review/cascade_calibration.py:280, imas_codex/standard_names/review/cascade_calibration.py:314\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: jev_review.py:535 and :666 land the retune the goal names and the replayed shipped code holds 3 of 46 recorded firings at 60 of 60 recall, though the retune is carried in code rather than in the judge's question text, which the plan comment c-s6-lead-ruling-veto-retune measured and ruled out.\nSCORE evidence: 17\nJUSTIFICATION evidence: replay-shipped-question.log ends EXIT=0 and srtj-contradiction-veto-retune.json records both sets on both passes with spend 0.037108 of 1.00 and questions_from jev_review.docs_question_table, so the counts cover the shipped question; the runner decides 'fired' itself rather than through aggregate_docs_review, which the first FINDING records.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat c5b7f76ed..8671df150 touches six paths and all six are in the manifest's declared write paths, and the out-of-scope work the node lists (cascade_calibration.py and the pre-existing test_docs_contradiction_veto failures) was left untouched and reported under follow_ons instead.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control-veto_scan_control.log shows tests/standard_names/test_contradiction_veto_question.py:251 failing with 0.0 not above 0.0 when the raw-answer veto scan is restored, and negative-control-retuned-criterion.log shows :423 failing alone when the retuned criterion is restored, so those assertions redden on the exact regressions they guard.\nSCORE fit: 19\nJUSTIFICATION fit: the added names (label_only_source :535, comparison_sources :561, states_non_requirement :634, claim_settlement :666, effective_claim_answers :974) carry no plan, ticket or version label and extend the module's own frozen-regex and deterministic-decision idiom.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search over imas_codex/standard_names for a label-only predicate or a deterministic claim settlement found no owner, and the one near-duplicate the prior review named, source_text beside imas_codex/standard_names/segment_selection.py:812, was deleted in 0c82826f3.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-retune-run.py:180 non-blocking: the replay decides each row's fired flag with its own settlement skip plus jev_review.claim_contradicts rather than through the product's aggregate_docs_review veto, so a regression in the reader this node repaired (score_docs_review's raw-answer veto scan) would not move the recorded 3 of 46.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T042559536781-srtj-contradiction-veto-retune/brief.md:56 non-blocking: the brief and done_when state 45 recorded firings where the replay, the plan comment and the JSON bar all read 46, so a reader cannot tell whether a row was added or dropped.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-retune.html:24 non-blocking: the arm A row reports 'all 60' planted contradictions recalled where the JSON records arm a pass 1 recall 59, so the page and the record disagree on one of the numbers the bar is read from.\n",
+  "review_run_id": "r-20261023T101517564457-review-of-srtj-contradiction-veto-retune-8671df150fc9",
+  "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "reviewed_head_sha": "8671df150fc93836e5fffd52e8d12c5bb64146fe",
+  "reviewed_run_id": "r-20261023T042559536781-srtj-contradiction-veto-retune",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T10:50:00Z",
+  "total": 110
+}
