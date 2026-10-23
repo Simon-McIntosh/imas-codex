@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-10-23T10:09:33.078Z",
   "dispatched_at": "2026-10-23T09:40:59Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-srtj-holds-route-remaining-d93b086a1d8a",
+      "recorded_at": "2026-10-23T10:46:55.877171+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/review/cascade.py",
