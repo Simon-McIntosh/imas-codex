@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:10104",
+    "imas_codex/standard_names/workers.py:11623",
+    "imas_codex/standard_names/edit.py:3597",
+    "imas_codex/standard_names/source_refresh.py:469"
+  ],
+  "completed_at": "2026-10-23T22:20:29.241Z",
+  "dispatched_at": "2026-10-23T22:10:10Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_source_refresh_docs_requeue.py",
+      "line": "283",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion that a refused write leaves the snapshot unchanged cannot fail if the code stamps before the claim check, because the preceding successful write already set the snapshot to \"Regeneration source.\" and the source does not change between the two calls, so an out-of-order stamp would write the same value; change the IMASNode documentation between the two writes and assert the earlier value survives."
+    },
+    {
+      "file": "tests/standard_names/test_source_refresh_docs_requeue.py",
+      "line": "159",
+      "severity": "non-blocking",
+      "text": "non-blocking: the disposable-Neo4j launch block is a third copy of the same apptainer/Popen/readiness sequence already carried by tests/standard_names/test_review_holds.py:40 and tests/standard_names/test_bare_doc_link_normalize.py:114, and no shared disposable_neo4j_uri fixture exists although the node brief named that convention; a shared fixture would remove the copy."
+    },
+    {
+      "file": "imas_codex/standard_names/source_refresh.py",
+      "line": "116",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added \"or []\" is unreachable because GraphClient.query returns list[dict[str, Any]] at imas_codex/graph/client.py:1004 and never None, so the hunk changes no behaviour and no test would fail if it were reverted."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit from 728532beb to 796550294; b4753226f carries the whole production and test change and 796550294 adds the evidence fragment alone, with no unrelated hunk.",
+    "done_when": "the done_when names three test files on default and -m graph arms, a logged negative control and the evidence fragment; gate-base-default.log, gate-head-default.log, gate-base-graph-absolute.log and gate-head-graph-absolute.log all end EXIT=0, negative-control.log ends EXIT=1 with two failing ids, and docs/evidence/fragments/sn-harmonize-command/shc-docs-regen-restamp.html records the before/after write path.",
+    "goal": "the goal is that a regenerated document re-stamps its source snapshot; imas_codex/standard_names/graph_ops.py:25580 and imas_codex/standard_names/graph_ops.py:25940 call stamp_source_snapshots(sn_ids=[sn_id], gc=gc) after the claim-guarded write succeeds in persist_generated_docs and persist_refined_docs.",
+    "manifest": "read; it reports status complete, commits b4753226f and 796550294, default 50 to 50 passed, graph 5 to 7 passed, zero added failures, and names four gate logs and a mutation log that all exist and reconcile with their own summary lines and EXIT codes.",
+    "write_paths": "the manifest declares five write paths; git diff 728532beb..796550294 touches four files (imas_codex/standard_names/graph_ops.py, imas_codex/standard_names/source_refresh.py, tests/standard_names/test_source_refresh_docs_requeue.py, docs/evidence/fragments/sn-harmonize-command/shc-docs-regen-restamp.html), every one inside the declared set, and the declared workers.py is untouched."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_source_refresh_docs_requeue.py:263 fails when the stamp is removed, but the refused-write assertion at :283 cannot fail if the code stamps before the claim check.",
+    "evidence": "the four gate logs named in the manifest each carry their revision, tree, command, a summary line and a bare EXIT=0, and negative-control.log shows the same tests failing when both stamp calls are removed.",
+    "fit": "the change follows the existing lazy-import style against imas_codex/standard_names/source_refresh.py and reuses its stamp owner rather than forking a stamping path.",
+    "goal_fidelity": "imas_codex/standard_names/graph_ops.py:25580 stamps after the guarded generated write and :25940 stamps only after persist_refined_docs returns a revision, so a refused write never reaches the stamp.",
+    "reuse": "imas_codex/standard_names/source_refresh.py:82 is the owner of the stamp and is extended rather than duplicated, though the test re-hand-rolls an empty disposable Neo4j launch that two other test modules already carry.",
+    "scope_discipline": "every diff path is inside the declared write paths, but imas_codex/standard_names/source_refresh.py:116 changes the function under test with no behaviour and no test of its own."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that a regenerated document re-stamps its source snapshot; imas_codex/standard_names/graph_ops.py:25580 and imas_codex/standard_names/graph_ops.py:25940 call stamp_source_snapshots(sn_ids=[sn_id], gc=gc) after the claim-guarded write succeeds in persist_generated_docs and persist_refined_docs.\nVERDICT done_when: the done_when names three test files on default and -m graph arms, a logged negative control and the evidence fragment; gate-base-default.log, gate-head-default.log, gate-base-graph-absolute.log and gate-head-graph-absolute.log all end EXIT=0, negative-control.log ends EXIT=1 with two failing ids, and docs/evidence/fragments/sn-harmonize-command/shc-docs-regen-restamp.html records the before/after write path.\nVERDICT write_paths: the manifest declares five write paths; git diff 728532beb..796550294 touches four files (imas_codex/standard_names/graph_ops.py, imas_codex/standard_names/source_refresh.py, tests/standard_names/test_source_refresh_docs_requeue.py, docs/evidence/fragments/sn-harmonize-command/shc-docs-regen-restamp.html), every one inside the declared set, and the declared workers.py is untouched.\nVERDICT manifest: read; it reports status complete, commits b4753226f and 796550294, default 50 to 50 passed, graph 5 to 7 passed, zero added failures, and names four gate logs and a mutation log that all exist and reconcile with their own summary lines and EXIT codes.\nVERDICT diff: read commit by commit from 728532beb to 796550294; b4753226f carries the whole production and test change and 796550294 adds the evidence fragment alone, with no unrelated hunk.\nCALL_SITES: imas_codex/standard_names/workers.py:10104, imas_codex/standard_names/workers.py:11623, imas_codex/standard_names/edit.py:3597, imas_codex/standard_names/source_refresh.py:469\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_ops.py:25580 stamps after the guarded generated write and :25940 stamps only after persist_refined_docs returns a revision, so a refused write never reaches the stamp.\nSCORE evidence: 18\nJUSTIFICATION evidence: the four gate logs named in the manifest each carry their revision, tree, command, a summary line and a bare EXIT=0, and negative-control.log shows the same tests failing when both stamp calls are removed.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every diff path is inside the declared write paths, but imas_codex/standard_names/source_refresh.py:116 changes the function under test with no behaviour and no test of its own.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_source_refresh_docs_requeue.py:263 fails when the stamp is removed, but the refused-write assertion at :283 cannot fail if the code stamps before the claim check.\nSCORE fit: 17\nJUSTIFICATION fit: the change follows the existing lazy-import style against imas_codex/standard_names/source_refresh.py and reuses its stamp owner rather than forking a stamping path.\nSCORE reuse: 17\nJUSTIFICATION reuse: imas_codex/standard_names/source_refresh.py:82 is the owner of the stamp and is extended rather than duplicated, though the test re-hand-rolls an empty disposable Neo4j launch that two other test modules already carry.\nFINDING tests/standard_names/test_source_refresh_docs_requeue.py:283 non-blocking: the assertion that a refused write leaves the snapshot unchanged cannot fail if the code stamps before the claim check, because the preceding successful write already set the snapshot to \"Regeneration source.\" and the source does not change between the two calls, so an out-of-order stamp would write the same value; change the IMASNode documentation between the two writes and assert the earlier value survives.\nFINDING tests/standard_names/test_source_refresh_docs_requeue.py:159 non-blocking: the disposable-Neo4j launch block is a third copy of the same apptainer/Popen/readiness sequence already carried by tests/standard_names/test_review_holds.py:40 and tests/standard_names/test_bare_doc_link_normalize.py:114, and no shared disposable_neo4j_uri fixture exists although the node brief named that convention; a shared fixture would remove the copy.\nFINDING imas_codex/standard_names/source_refresh.py:116 non-blocking: the added \"or []\" is unreachable because GraphClient.query returns list[dict[str, Any]] at imas_codex/graph/client.py:1004 and never None, so the hunk changes no behaviour and no test would fail if it were reverted.",
+  "review_run_id": "r-20261023T220937894328-review-of-shc-docs-regen-restamp-7965502941de",
+  "reviewed_base_sha": "728532beb0527023647ab734e32d4a1c50edf071",
+  "reviewed_head_sha": "7965502941de794627b03d0880d55e4e9f8b98d8",
+  "reviewed_run_id": "r-20261023T214514437841-shc-docs-regen-restamp",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T22:16:55.950127+00:00",
+  "total": 100
+}

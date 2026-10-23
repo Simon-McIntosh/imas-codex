@@ -25,8 +25,8 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="182">
-<meta name="plan-modified" content="2026-10-23">
+<meta name="plan-version" content="183">
+<meta name="plan-modified" content="2026-10-24">
 </head>
 <body>
   <main class="plan-doc">
@@ -642,6 +642,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-drift-fix-grammar-landed" data-who="reckon-build" data-when="2026-10-23T08:40:00Z">
     <div class="r-comment-body"><p>A scoped run now refreshes and steers only its own names (merge <code>06ec80e4c</code>). Path changes are no longer called renames, unresolvable sources are reported as unchecked, and every source of a multi-source name is compared. The graph serves the ISN 0.10.1 grammar (merge <code>35f82a0c3</code>): one active version, 983 tokens, and the midplane loci at maximum and minimum major radius. The shared environment was rebuilt to report 0.10.1, and the embedding service restores its CUDA stack from the uv cache on its next start. The re-stamp after documentation regeneration lives in <code>graph_ops.py</code> and follows later.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261023T220937894328-review-of-shc-docs-regen-restamp-7965502941de" data-who="reckon-build" data-when="2026-10-23T22:20:29.241Z">
+    <div class="r-comment-body"><p>Review of r-20261023T214514437841-shc-docs-regen-restamp at 7965502941de scored 100/120 across all six dimensions with zero added failures and three non-blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
