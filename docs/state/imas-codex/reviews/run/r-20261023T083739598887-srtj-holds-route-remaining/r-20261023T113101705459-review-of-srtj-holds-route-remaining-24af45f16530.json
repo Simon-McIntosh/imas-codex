@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083739598887-srtj-holds-route-remaining/gate3-head.log",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083739598887-srtj-holds-route-remaining/gate3-base.log",
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:2210",
+    "imas_codex/standard_names/review/pipeline.py:1132",
+    "imas_codex/standard_names/review/cascade.py:786",
+    "imas_codex/standard_names/review/holds.py:127",
+    "imas_codex/standard_names/review/holds.py:151",
+    "imas_codex/standard_names/promote.py:710"
+  ],
+  "completed_at": "2026-10-23T11:48:01.154Z",
+  "dispatched_at": "2026-10-23T11:31:38Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/cascade.py",
+      "line": "786",
+      "severity": "blocking",
+      "text": "blocking: sync_route_holds hardcodes the docs axis (cascade.py:388 calls clear_holds_not_raised(name_id, 'docs', {cascade_contradiction}, ...)) and adjudicate_review calls it for every deciding pass whatever the axis (cascade.py:786, inside `if deciding_enabled(axis)`), so a name-axis pass - whose CascadeRoute.holds is always empty - clears any open docs cascade_contradiction hold on that name it did not examine and releases the document. That is the mirror of the skipped-audit defect this node repaired as blocking in round 3 (a check that did not run must not report a verdict on the holds it owns). Reachable when [sn-review].cascade-deciding includes 'name' and a name carries an open docs contradiction hold from an earlier docs pass."
+    },
+    {
+      "file": "tests/standard_names/test_review_holds.py",
+      "line": "624",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_dismissal_does_not_accept_a_quarantined_document plants a StandardName with no HAS_REVIEW edge, so PROMOTE_STRANDED_DOCS_WHERE (graph_ops.py:12558) refuses it on docs_review_eligibility_where() alone; deleting the coalesce(validation_status,'') <> 'quarantined' clause leaves the test green, so the quarantine half of the gate this node adopted is taken on the owner's word and not measured by this change. Carried unchanged from the prior review at 50bd96ef3."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-holds-route-remaining.html",
+      "line": "248",
+      "severity": "non-blocking",
+      "text": "non-blocking: the Reconciliation-controls bullet states 'Removing the clearing call from the cascade route reddens the cascade release test', but the logged control (negative-control-reconcile.log, control 1) reverted the whole answering commit 53f60f382 in place, so the test reddens with 'module ... has no attribute sync_route_holds' (AttributeError) rather than on the clearing direction. The cascade release test does guard that direction by its own assertion; the logged control simply does not show it. The sibling lint-cap control (control 2, an assertion failure) and the round-3 skipped-audit control are correct."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T083739598887-srtj-holds-route-remaining/manifest.md",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest's changed_paths block omits imas_codex/standard_names/review/holds.py, which the reviewed diff changes (git diff --stat 0ef17240c..24af45f16 lists 'imas_codex/standard_names/review/holds.py | 18 +-', _promote_if_eligible rebound to PROMOTE_STRANDED_DOCS_WHERE). The receipt understates the landed scope the gate read."
+    },
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "2210",
+      "severity": "non-blocking",
+      "text": "non-blocking: _cap_docs_scores_for_lint_errors is called from _review_single_batch at pipeline.py:2210 without graph=, so its raise_hold and clear_holds_not_raised each open a fresh GraphClient (holds.py:43-48) per entry - up to 2N client constructions for an N-entry docs batch on the production review path, where base touched no graph at all. Threading one client from the batch would void it."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from base 0ef17240c to head 24af45f16 over 9 files: d93b086a1 routes both vetoes through raise_hold, 53f60f382/a645d8b3b add per-pass reconciliation via clear_holds_not_raised, 468ceb180/50bd96ef3 widen the covering tests, and 34ddf3a8f/24af45f16 make a skipped audit report None rather than an empty mapping and record it. The reconciliation call in cascade.py:786 runs for every deciding axis.",
+    "done_when": "The brief's done-when (brief.md:70-77) requires the change and tests committed, no added failures on the named gate, the negative-control log kept, and the fragment recording each site before/after plus the no-clamp statement. The manifest names gate3-head.log (9 failed, 95->102 passed) whose nine failing ids are identical to gate3-base.log's nine test_consumer_predicates_agree_with_rubric_route[...-docs] ids, so the delta is zero added failures; the three negative-control logs are on disk. The measure is silent, however, on the name-axis clearing path this change introduces.",
+    "goal": "The reviewed node's brief (brief.md:13-47) is to route the two remaining documentation vetoes - the lint cap in imas_codex/standard_names/review/pipeline.py and the Jev contradiction veto in imas_codex/standard_names/review/cascade.py - through the hold owner imas_codex/standard_names/review/holds.py as raised holds instead of lowered scores, and to release a document on hold-clear or dismiss only through the canonical stranded-docs gate. The landed diff does that: pipeline.py:2024 raises docs_lint_error, cascade.py:388 raises cascade_contradiction, and holds.py:158 binds _promote_if_eligible to PROMOTE_STRANDED_DOCS_WHERE.",
+    "manifest": "Read the reviewed run's manifest (status complete). It reports three rounds of work, the base/head gate arms at zero added failures, three negative-control logs, and self-declares scope_widening and kind_name_deviation. Its changed_paths block omits imas_codex/standard_names/review/holds.py, which the diff changes, and its after_suite arm was run at 34ddf3a8f (the code parent of head) while reviewed_head_sha is 24af45f16; the docs-only commit between them changes no Python source.",
+    "write_paths": "The brief declares imas_codex/standard_names/review/pipeline.py, cascade.py, holds.py, imas_codex/standard_names/AGENTS.md, tests/standard_names/test_review_holds.py and the evidence fragment (brief.md:80-86). The diff changes all of those and additionally tests/standard_names/test_review_cascade.py, test_review_findings_cap.py and test_judge_stage.py, which the brief does not declare; the manifest records them under scope_widening. It also changes imas_codex/standard_names/review/holds.py, which is declared."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_holds.py:472 fails when the score clamp returns (negative-control.log, 3 failed), and test_a_skipped_audit_reports_no_lint_verdict_and_leaves_the_hold reddens on its first assertion when the empty mapping returns (negative-control-round3.log, EXIT=1), so those guards are verified by reinstating the regression; but the new name-axis clearing behaviour has no test, and test_review_holds.py:624 does not isolate the quarantine clause it is named for.",
+    "evidence": "The done-when's delta is measured (gate3-base.log 9 failed/95 passed vs gate3-head.log 9 failed/102 passed, the same nine pre-existing ids) and the controls are on disk (negative-control-round3.log EXIT=1), but the manifest's after arm ran at 34ddf3a8f while reviewed_head_sha is 24af45f16, and no gate arm covers the name-axis clearing path the diff introduces.",
+    "fit": "The added symbols (sync_route_holds, LINT_HOLD_KINDS, ROUTE_HOLD_KINDS, _NoGraph) follow the module idiom of holds.py:14 HOLD_KINDS and carry no plan, ticket or version label; sync_route_holds takes no axis parameter while writing the docs axis, which is the shape that hides the blocking defect.",
+    "goal_fidelity": "pipeline.py:2024 raises docs_lint_error and leaves the judged score untouched (pipeline.py:2015); cascade.py:388 raises cascade_contradiction while decision_score keeps its mapped value (cascade.py:246); holds.py:158 rebinds _promote_if_eligible to the canonical PROMOTE_STRANDED_DOCS_WHERE - the objective, docked because the cascade hold is raised on the name axis too (cascade.py:786), which the goal does not imply and which clears holds it did not examine.",
+    "reuse": "Both sites reconcile through the existing owner clear_holds_not_raised (holds.py:98) rather than forking it, and _promote_if_eligible now reuses graph_ops.PROMOTE_STRANDED_DOCS_WHERE and docs_review_eligibility_params instead of a second copy of the acceptance terms, so no repository capability is duplicated.",
+    "scope_discipline": "The diff changes three test files outside the brief's declared write paths (tests/standard_names/test_review_cascade.py, test_review_findings_cap.py, test_judge_stage.py), all documented in the manifest's scope_widening, and lands holds.py:_promote_if_eligible - the node's own stated follow-on - so the changes are goal-implied and caveated, but the fault lies with a declaration the node did not widen."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The reviewed node's brief (brief.md:13-47) asks that the two remaining documentation vetoes - the lint cap in imas_codex/standard_names/review/pipeline.py and the Jev contradiction veto in imas_codex/standard_names/review/cascade.py - travel as holds raised through imas_codex/standard_names/review/holds.py instead of lowered scores, and that clearing or dismissing the last hold releases a document only through the canonical stranded-docs gate; the landed diff does exactly that.\nVERDICT done_when: The brief's done-when (brief.md:70-77) requires the change and tests committed, no added failures on the named gate, the negative-control log kept, and the fragment recording each site before/after plus the no-clamp statement; the manifest names gate3-head.log (9 failed, 102 passed, 1 skipped, whose nine failing ids equal gate3-base.log's nine test_consumer_predicates_agree_with_rubric_route[...-docs] ids) so the delta is zero added failures, and the negative-control logs are on disk - but no gate asserts the name-axis clearing path the change introduces.\nVERDICT write_paths: The brief declares imas_codex/standard_names/review/pipeline.py, cascade.py, holds.py, imas_codex/standard_names/AGENTS.md, tests/standard_names/test_review_holds.py and the evidence fragment (brief.md:80-86); the diff changes all of those plus three undeclared test files (test_review_cascade.py, test_review_findings_cap.py, test_judge_stage.py), recorded in the manifest's scope_widening.\nVERDICT manifest: Read the reviewed run's manifest (status complete); it records three rounds, the base/head gate arms at zero added failures, three negative-control logs and its own scope_widening and kind_name_deviation caveats, but its changed_paths omits imas_codex/standard_names/review/holds.py, which the diff changes.\nVERDICT diff: Read commit by commit from base 0ef17240c to head 24af45f16 over 9 files; the two veto sites now call raise_hold, holds.py:158 binds acceptance to PROMOTE_STRANDED_DOCS_WHERE, and the audit-skipped batch maps to None, but cascade.py:786 runs the docs-axis reconciliation on every deciding axis.\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:2210, imas_codex/standard_names/review/pipeline.py:1132, imas_codex/standard_names/review/cascade.py:786, imas_codex/standard_names/review/holds.py:127, imas_codex/standard_names/review/holds.py:151, imas_codex/standard_names/promote.py:710",
+  "review_run_id": "r-20261023T113101705459-review-of-srtj-holds-route-remaining-24af45f16530",
+  "reviewed_base_sha": "0ef17240c635d87d5dc506363ce147e0045fc00b",
+  "reviewed_commits": [
+    "d93b086a1d8a2661379b86e1ab5bf9a403f1b6f9",
+    "53f60f3824f84b0526b6719a3cf7940654a9623",
+    "a645d8b3bfb33a269b625ffd0f05c20bcef1ffe0",
+    "468ceb18007dde1627c5bb66d738e09367f8a014",
+    "50bd96ef31be103a0d2f5aac86a2674087befee6",
+    "34ddf3a8fa633590d9dda5b7365f4b1633cb2fcb",
+    "24af45f1653079836ab303565b99accf2ee1b15a"
+  ],
+  "reviewed_head_sha": "24af45f1653079836ab303565b99accf2ee1b15a",
+  "reviewed_run_id": "r-20261023T083739598887-srtj-holds-route-remaining",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T11:53:10.971058+00:00",
+  "total": 92
+}
