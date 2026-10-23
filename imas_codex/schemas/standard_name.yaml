@@ -553,6 +553,26 @@ enums:
       rolled_back:
         description: Prior documentation authority restored and owned partial Reviews removed.
 
+  ReviewHoldAxis:
+    permissible_values:
+      name:
+      docs:
+
+  ReviewHoldKind:
+    permissible_values:
+      registry_conformance:
+      banned_prose:
+      documentation_contradiction:
+      link_target_mismatch:
+      docs_lint_error:
+      cascade_contradiction:
+
+  ReviewHoldStatus:
+    permissible_values:
+      open:
+      cleared:
+      dismissed:
+
   SNRunStatus:
     description: SNRun lifecycle. `started` is in-progress; others are terminal.
     permissible_values:
@@ -916,6 +936,7 @@ classes:
         - HAS_UNIT -> Unit (canonical units for this quantity)
         - HAS_COCOS -> COCOS (COCOS convention this quantity follows)
         - HAS_REVIEW -> StandardNameReview (quality review records)
+        - HAS_HOLD -> ReviewHold (independent acceptance vetoes)
 
       Inbound relationships:
         - (IMASNode)-[:HAS_STANDARD_NAME]->(StandardName)
@@ -2081,6 +2102,13 @@ classes:
         inlined: false
         annotations:
           relationship_type: HAS_REVIEW
+      holds:
+        description: Review vetoes independent of the judged score.
+        multivalued: true
+        range: ReviewHold
+        inlined: false
+        annotations:
+          relationship_type: HAS_HOLD
       structural_authorities:
         description: >-
           Durable child-set authorities supporting an unscored structural
@@ -2233,6 +2261,45 @@ classes:
         required: true
       description:
         description: Human-readable description of this locus.
+
+  ReviewHold:
+    description: A separately triageable finding that blocks acceptance while open.
+    class_uri: sn:ReviewHold
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Deterministic identity for a name, axis and finding key.
+      axis:
+        required: true
+        range: ReviewHoldAxis
+      kind:
+        required: true
+        range: ReviewHoldKind
+      finding:
+        required: true
+        description: Actionable text given to the refiner and triager.
+      evidence:
+        required: true
+        description: Claim and source text or the lint line supporting the finding.
+      raised_by:
+        required: true
+        description: Check, model or rule that raised the hold.
+      raised_at:
+        required: true
+        range: datetime
+      status:
+        required: true
+        range: ReviewHoldStatus
+      finding_key:
+        required: true
+        description: SHA-256 digest of kind and normalized finding.
+      triaged_by:
+        description: Identity that cleared or dismissed the hold.
+      triaged_at:
+        range: datetime
+      triage_reason:
+        description: Reason supplied for a manual dismissal.
 
   DocsReviewAdmission:
     description: >-

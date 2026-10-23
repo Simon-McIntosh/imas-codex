@@ -11165,6 +11165,10 @@ async def process_review_docs_batch(
         persist_reviewed_docs,
         update_review_aggregates,
     )
+    from imas_codex.standard_names.review.holds import (
+        clear_holds_not_raised,
+        raise_hold,
+    )
 
     processed = 0
 
@@ -11222,14 +11226,40 @@ async def process_review_docs_batch(
             contradiction_note = await _documentation_contradiction_note(
                 request.get("veto_item", item), mgr
             )
-            if any(
-                note is not None
-                for note in (conformance_note, prose_note, contradiction_note)
-            ):
-                # Clamp below the accept threshold so the document is routed
-                # to refinement as a below-threshold score is, carrying the
-                # finding as the reason the refiner reads.
-                score = min(score, DEFAULT_MIN_SCORE - 0.001)
+            checked_holds = (
+                ("registry_conformance", conformance_note, "conventions-registry"),
+                ("banned_prose", prose_note, "prose-adjudicator"),
+                (
+                    "documentation_contradiction",
+                    contradiction_note,
+                    "jev-contradiction",
+                ),
+            )
+            raised_keys: set[str] = set()
+            for kind, note, raised_by in checked_holds:
+                if note is None:
+                    continue
+                evidence = json.dumps(
+                    {
+                        "claim": note,
+                        "documentation": item.get("documentation") or "",
+                        "dd_source_docs": item.get("dd_source_docs") or [],
+                    },
+                    sort_keys=True,
+                    default=str,
+                )
+                hold = await _asyncio.to_thread(
+                    raise_hold, sn_id, "docs", kind, note, evidence, raised_by
+                )
+                raised_keys.add(hold["finding_key"])
+            await _asyncio.to_thread(
+                clear_holds_not_raised,
+                sn_id,
+                "docs",
+                {kind for kind, _, _ in checked_holds},
+                raised_keys,
+            )
+            if any(note is not None for _, note, _ in checked_holds):
                 notes = [
                     note
                     for note in (conformance_note, prose_note, contradiction_note)

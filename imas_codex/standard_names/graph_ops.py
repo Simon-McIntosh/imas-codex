@@ -47,6 +47,13 @@ from imas_codex.standard_names.provenance_lifecycle import (
     deletion_change_cypher,
     deletion_change_params,
 )
+from imas_codex.standard_names.review.holds import (
+    clear_holds_not_raised,
+    docs_accepted,
+    has_open_docs_hold_where,
+    open_holds,
+    raise_hold,
+)
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
 logger = logging.getLogger(__name__)
@@ -17832,8 +17839,7 @@ def persist_reviewed_docs(
     edit_status_before: str | None = rows[0].get("edit_status")
 
     # ── Stage decision ────────────────────────────────────────────────
-    # Score is canonical (see persist_reviewed_name for rationale,
-    # including the rotation_cap-1 vs rotation_cap escalator gate).
+    # Keep the panel score as judged; holds are independent acceptance vetoes.
     if score >= min_score:
         target_stage = "accepted"
     elif docs_chain_length >= rotation_cap:
@@ -17852,9 +17858,11 @@ def persist_reviewed_docs(
     # refine_docs with the findings in the comments; never exhaust a doc
     # over a link nit (accept at the cap and leave it to the batch lint).
     if target_stage == "accepted":
+        link_scan_succeeded = False
         try:
             with GraphClient() as gc:
                 mismatches = _doc_link_mismatches(gc, rows[0].get("documentation"))
+            link_scan_succeeded = True
         except Exception:
             logger.debug(
                 "persist_reviewed_docs: link-mismatch scan failed for %s "
@@ -17863,11 +17871,8 @@ def persist_reviewed_docs(
                 exc_info=True,
             )
             mismatches = []
-        if mismatches and docs_chain_length < rotation_cap:
-            target_stage = "reviewed"
-            # Clamp below the accept threshold so claim_refine_docs_batch
-            # (gated on reviewer_score_docs < min_score) picks the doc up.
-            score = min(score, min_score - 0.001)
+        raised_link_keys: set[str] = set()
+        if mismatches:
             note = (
                 "link text names a different standard name than its target "
                 "resolves to — make each label match its target id (or "
@@ -17877,12 +17882,27 @@ def persist_reviewed_docs(
             # Per-dim comments are what the refine prompt renders — the
             # free-text field is not in its context.
             comments_per_dim = {**(comments_per_dim or {}), "link_integrity": note}
+            hold = raise_hold(
+                sn_id,
+                "docs",
+                "link_target_mismatch",
+                note,
+                "; ".join(mismatches),
+                "doc-link-target-check",
+            )
+            raised_link_keys.add(hold["finding_key"])
             logger.info(
-                "persist_reviewed_docs: %s demoted to reviewed — %d mismatched "
-                "doc link(s)",
+                "persist_reviewed_docs: %s held — %d mismatched doc link(s)",
                 sn_id,
                 len(mismatches),
             )
+        if link_scan_succeeded:
+            clear_holds_not_raised(
+                sn_id, "docs", {"link_target_mismatch"}, raised_link_keys
+            )
+
+    if target_stage == "accepted" and not docs_accepted(score, min_score, sn_id):
+        target_stage = "exhausted" if docs_chain_length >= rotation_cap else "reviewed"
 
     # Normalize bare references before the accepting write. The shared parser
     # excludes mathematical notation, code, images, and formed Markdown links.
@@ -25596,7 +25616,7 @@ def release_generate_docs_failed_claims(
 # =============================================================================
 # refine_docs — claim / persist / release (DocsRevision snapshot architecture)
 # =============================================================================
-# Stage gate: docs_stage='reviewed' AND reviewer_score_docs < min_score
+# Stage gate: docs_stage='reviewed' AND (score below threshold OR open docs hold)
 #             AND docs_chain_length < rotation_cap
 # Fundamentally different from refine_name: docs refine is IN-PLACE on the
 # existing SN node.  The OLD docs are snapshotted into a DocsRevision node
@@ -25617,7 +25637,7 @@ def claim_refine_docs_batch(
     """Claim StandardName nodes for docs refinement.
 
     Eligibility: ``docs_stage = 'reviewed'`` AND
-    ``reviewer_score_docs < min_score`` AND
+    ``(reviewer_score_docs < min_score OR an open docs hold)`` AND
     ``docs_chain_length < rotation_cap``.
 
     The claim atomically transitions ``docs_stage`` from ``'reviewed'``
@@ -25649,7 +25669,9 @@ def claim_refine_docs_batch(
     where = (
         "sn.docs_stage = 'reviewed'"
         " AND sn.reviewer_score_docs IS NOT NULL"
-        " AND sn.reviewer_score_docs < $min_score"
+        " AND (sn.reviewer_score_docs < $min_score OR "
+        + has_open_docs_hold_where()
+        + ")"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
         f" AND {docs_review_eligibility_where()}"
@@ -25717,6 +25739,9 @@ def claim_refine_docs_batch(
             "reviewer_comments_per_dim": per_dim,
             "documentation": item.get("documentation", ""),
         }
+        for hold in open_holds(item["id"], "docs"):
+            per_dim[f"hold:{hold['kind']}:{hold['finding_key'][:12]}"] = hold["finding"]
+        current_review["reviewer_comments_per_dim"] = per_dim
         item["prior_docs_reviews"] = item["docs_chain_history"] + [current_review]
 
     logger.debug(
