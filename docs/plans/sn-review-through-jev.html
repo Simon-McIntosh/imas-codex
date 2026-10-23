@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="209">
+<meta name="plan-version" content="210">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -920,6 +920,15 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T083739598887-srtj-holds-route-remaining" data-who="reckon-build" data-when="2026-10-23T12:23:57Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-holds-route-remaining.html</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-veto-retune-landed" data-who="reckon-build" data-when="2026-10-23T13:00:00Z">
+    <div class="r-comment-body"><p>The documentation contradiction veto now fires only on a real contradiction (merge <code>c71dd6056</code>, about USD 0.04). The question keeps its base wording, and a DD field label's own words no longer count as evidence. A non-requirement sentence under a name with no locus or aggregation qualifier is settled before Jev, and all three claim readers use one helper. On the shipped code, 3 of the 46 recorded false firings still fire and all 60 planted contradictions are caught, on both passes. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-retune.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-bracket-repair-applied" data-who="reckon-build" data-when="2026-10-23T13:00:00Z">
+    <div class="r-comment-body"><p>The bare-link normaliser now handles a bracketed phrase three ways (merge <code>ead4d99c8</code>):</p><ul><li>a phrase that snake-cases to a live name becomes a <code>name:</code> link;</li><li>any other prose phrase loses its brackets;</li><li>a self-link becomes plain text.</li></ul><p>Unit brackets, numeric magnitudes included, stay. It was applied once to the live catalogue (merge <code>f7535ad87</code>): 814 documents rewritten, with 124 linked, 870 unbracketed and 66 self-links removed. Every stored text equals the plan, 0 accepted documents fail the prose rule, and a second pass changes nothing. A restore record is committed. <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-holds-complete" data-who="reckon-build" data-when="2026-10-23T13:00:00Z">
+    <div class="r-comment-body"><p>Every documentation veto is now a review hold (merge <code>e993b3af2</code>). The lint cap and the cascade contradiction veto raise holds and keep the judged score. Their holds clear only when re-checked on the axis being decided, and dismissal goes through the canonical acceptance gate. A grep confirms no documentation score is clamped in <code>imas_codex/</code>.</p><p>The first integration gate (merge <code>cac47a6cb</code>) traced 11 failures added at <code>c71dd6056</code> to one mock-boundary defect. <code>srtj-wave-integration-rerun</code> re-measures at the new head.</p></div>
 </div>
 </section>
 </main>
