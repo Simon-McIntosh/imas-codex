@@ -137,9 +137,36 @@
       defect — that the pass never produced one — in place.
     </li>
     <li id="srtj-holds-route-remaining-skip-graph">
-      The cap takes its graph injected, and the default-tier tests that drive
-      it pass a double rather than reaching a live client, so no unmarked test
-      opens a database.
+      The cap takes its graph injected; otherwise one client serves the whole
+      batch. The reconciliation touches every scored entry, so a client per
+      raise or clear opened a graph session for each of them. The
+      default-tier tests that drive the cap stand in for that client, so no
+      unmarked test reaches a database.
+    </li>
+  </ul>
+
+  <h3 id="srtj-holds-route-remaining-axis">Which axis may reconcile</h3>
+  <p id="srtj-holds-route-remaining-axis-finding">
+    The cascade reconciliation named the documentation axis in the callee and
+    ran on every deciding pass. A pass that decides the name axis carries no
+    documentation verdict at all — its route holds nothing about the document —
+    and a route that holds none is indistinguishable from a route that found none, so
+    the pass cleared every open <code>cascade_contradiction</code> it could
+    reach. A document whose claim still contradicts its source was released by a
+    pass that never looked at it.
+  </p>
+  <ul>
+    <li id="srtj-holds-route-remaining-axis-fix">
+      <strong>Repair:</strong> the reconciliation takes the axis the pass
+      decided, and a pass on any other axis returns without touching these
+      holds. The axis those checks run on is declared once, beside the kinds
+      they raise.
+    </li>
+    <li id="srtj-holds-route-remaining-axis-test">
+      <strong>Test and control.</strong> A name-axis pass over a clean
+      documentation route leaves an open <code>cascade_contradiction</code> open
+      on the disposable graph; with the axis guard removed the same pass clears it
+      and the test reddens.
     </li>
   </ul>
 
@@ -165,6 +192,14 @@
       predicate, imported, not a second copy of its terms. Two tests now plant
       exactly those two excluded rows and assert dismissal leaves them at
       <code>reviewed</code>.
+    </li>
+    <li id="srtj-holds-route-remaining-promotion-quarantine-test">
+      <strong>The quarantine case was not actually tested.</strong> The planted
+      row carried no <code>HAS_REVIEW</code> edge, so the gate refused it on
+      review eligibility and the quarantine clause was never reached — deleting
+      that clause left the test green. The row now carries a passing score and a
+      reachable winning documentation review, leaving the quarantine as the only
+      clause able to refuse it, and the test reddens when the clause is removed.
     </li>
     <li id="srtj-holds-route-remaining-promotion-doc">
       The <code>promote_stranded_reviewed</code> row in the standard-names
@@ -218,13 +253,14 @@
     <li id="srtj-holds-route-remaining-verification-delta">
       <strong>Gate by delta.</strong> The gate covers the holds, cascade, panel,
       lint-cap and judge-stage test files. Each arm runs from its own
-      <code>git archive</code> tree with its own temporary directory and
+      <code>git archive</code> tree and its own temporary directory and
       <code>--basetemp</code>, so a deleted basetemp in one arm cannot put the
       other's fixtures into setup error. The base arm (the revision before this
       change) shows <code>9 failed, 95 passed, 1 skipped</code>; the head arm
-      shows the same <code>9 failed</code>, <code>102 passed, 1 skipped</code>.
-      The delta is zero added failures, and the seven extra passes are the hold
-      tests this work adds. All nine failures are the same pre-existing
+      shows the same <code>9 failed</code>, <code>103 passed, 1 skipped</code>.
+      The delta is zero added failures, and the eight extra passes are the hold
+      tests this work adds — ten in that file at base, eighteen at head. The
+      two arms' failure id lists are identical. All nine are the same pre-existing
       <code>test_consumer_predicates_agree_with_rubric_route</code>
       documentation ids in both arms.
     </li>
@@ -243,6 +279,13 @@
       the audit-skipped branch reddens the covering hold test on its first
       assertion; the same test passes with the source unmodified, and the
       source was restored byte-identical afterwards.
+    </li>
+    <li id="srtj-holds-route-remaining-verification-axis">
+      <strong>Axis and quarantine controls.</strong> Removing the axis guard
+      reddens the name-axis test, and deleting the quarantine clause from the
+      promotion predicate reddens the dismissal test — which the earlier
+      revision of that test could not do, because its row was refused on review
+      eligibility first. Both sources were restored byte-identical.
     </li>
     <li id="srtj-holds-route-remaining-verification-reconcile">
       <strong>Reconciliation controls.</strong> Removing the clearing call from
