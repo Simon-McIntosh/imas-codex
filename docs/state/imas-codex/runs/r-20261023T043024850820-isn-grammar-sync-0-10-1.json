@@ -1,0 +1,389 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T043024850820-isn-grammar-sync-0-10-1/brief.md",
+    "sha256": "eb34954a1dcd4e899affb0113884a1eb2d594bfa2c05bf42eaff2c90a347a1a3"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3844354,
+      "input_tokens_cumulative": 3844354,
+      "output_tokens": 28852,
+      "output_tokens_cumulative": 28852,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 304,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "599d22a630935a5a7d03995447770b163e585a0d",
+    "f7411a5ca0ae604d155233b1e631ad11c3575bf1"
+  ],
+  "completed_at": "2026-10-23T05:27:05Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-23T04:31:11Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "0.10.1",
+    "956/781"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9380952380952381,
+    "plan": "sn-harmonize-command",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-23T05:30:28.630137+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-23T04:30:28Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 19,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 7,
+    "mean_context": 112000,
+    "observed_at": "2026-10-23T04:30:09Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 19,
+      "aggregate_tokens_per_second": 316.526,
+      "detail": "",
+      "mean_tokens_per_second": 58.616,
+      "observed_at": "2026-10-23T04:30:09Z",
+      "runs": 5.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-23T05:27:05Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T043024850820-isn-grammar-sync-0-10-1/manifest.md",
+  "member": "disposable-r-20261023T043024850820-isn-grammar-sync-0-10-1",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "isn-grammar-sync-0-10-1",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/isn-grammar-sync-0-10-1.node.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T043024850820-isn-grammar-sync-0-10-1/brief.md",
+    "brief_sha256": "eb34954a1dcd4e899affb0113884a1eb2d594bfa2c05bf42eaff2c90a347a1a3",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 421,
+          "cached_input_tokens": 408356,
+          "input_tokens": 408779,
+          "output_tokens": 440,
+          "reasoning_output_tokens": 78,
+          "total_tokens": 409219,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "the shared environment reports imas_standard_names 0.10.1, exactly one ISNGrammarVersion is active and it is 0.10.1 with a GrammarToken count at least the previous active version and a separatrix_distance physical_base token, the midplane locus definitions are quoted, and the fragment records each readback with its property control",
+    "estimated_hours": null,
+    "goal": "Serve the ISN 0.10.1 grammar from the graph",
+    "id": "isn-grammar-sync-0-10-1",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-23T04:30:28Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 19,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 7,
+      "mean_context": 112000,
+      "observed_at": "2026-10-23T04:30:09Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 19,
+        "aggregate_tokens_per_second": 316.526,
+        "detail": "",
+        "mean_tokens_per_second": 58.616,
+        "observed_at": "2026-10-23T04:30:09Z",
+        "runs": 5.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T043024850820-isn-grammar-sync-0-10-1/manifest.md",
+    "negative_control": "",
+    "plan": "sn-harmonize-command",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-harmonize-command/isn-grammar-sync-0-10-1.html",
+      "docs/figures/sn-harmonize-command/isn-grammar-sync-0-10-1"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3349307.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "isn-grammar-sync-0-10-1",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-23T04:30:45.995473+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "s4 authored body unchanged since its stored content review; edits since are landing comments and lead rulings",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.409,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.9380952380952381,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f7411a5ca0ae604d155233b1e631ad11c3575bf1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+    "reviewed_head_sha": "f7411a5ca0ae604d155233b1e631ad11c3575bf1",
+    "scores": {
+      "durability": 5,
+      "evidence": 19,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 101
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261023T043024850820-isn-grammar-sync-0-10-1",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "1850b5bd-568d-49af-b263-04ab4db7361a",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 9562090,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1023.852,
+    "generated_tokens": 78129,
+    "generation_seconds": 794.046,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 64.0,
+    "machine_seconds": 229.806,
+    "peak_input_tokens": 147242,
+    "tokens_per_second": 98.39,
+    "wall_tokens_per_second": 76.31
+  },
+  "time_budget": "60m",
+  "tool_steps": 60.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3354,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-23T05:27:15Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-23T05:09:56Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261023T043024850820-isn-grammar-sync-0-10-1",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 11287,
+    "worker_pid": 1285964
+  },
+  "worker_seconds": 2647,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
