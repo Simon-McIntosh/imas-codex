@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-drift-refresh-scope-fix">
+  <title>Binding the source-drift refresh to the run that asked for it</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-drift-refresh-scope-fix-title">Binding the source-drift refresh to the run that asked for it</h1>
+
+  <p id="shc-drift-refresh-scope-fix-summary">
+    <code>sn harmonize --family electrostatic_potential --apply</code> spent all
+    twelve of its model calls on two names outside the family because the
+    docs-only flush carried the family's run id into
+    <code>run_sn_pools</code>, which handed that id to a graph-wide drift
+    refresh. The refresh found drifted sources anywhere in the graph, steered
+    them, and attached each one to the active run id — after which the family
+    drain, whose claim predicate is that same run id, regenerated them inside
+    the family's cost ceiling. Four changes land here: the refresh is scoped to
+    the run's own names, a path change is no longer reported as a rename, a
+    source the detector cannot resolve is reported rather than dropped, and a
+    name with several sources is compared against every one of them.
+  </p>
+
+  <p id="shc-drift-refresh-scope-fix-authority">
+    Plan authority: <code>imas-codex:sn-harmonize-command</code> §4, anchor
+    <code>c-s4-drift-scope-landed</code>, and the diagnosis
+    <code>docs/evidence/fragments/sn-harmonize-command/shc-apply-drift-scope.html</code>.
+  </p>
+
+  <h2 id="shc-drift-refresh-scope-fix-q1">1. The scope now binds the refresh</h2>
+
+  <p id="shc-drift-refresh-scope-fix-q1-before">
+    <strong>Before.</strong> <code>detect_source_drift</code> had no target set
+    at all; it scanned every <code>(src:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn:StandardName)</code>
+    row in the graph. <code>refresh_drifted_sources</code> therefore steered
+    whatever it found, and because the loop passed only
+    <code>scope_run_id=run_id</code>, every steered name came away tagged with
+    the active run — which is precisely the predicate the docs pool claims on.
+    A scoped run could not avoid owning names it had never selected.
+  </p>
+
+  <p id="shc-drift-refresh-scope-fix-q1-after">
+    <strong>After.</strong> <code>detect_source_drift</code> takes
+    <code>sn_ids=None</code> and adds <code>AND sn.id IN $sn_ids</code> to its
+    scan when that set is supplied
+    (<code>imas_codex/standard_names/source_refresh.py:280</code>);
+    <code>refresh_drifted_sources</code> threads it through, and the loop
+    resolves the set once per drain and passes it
+    (<code>imas_codex/standard_names/loop.py:2103&#8211;2111</code>).
+  </p>
+
+  <pre id="shc-drift-refresh-scope-fix-q1-loop-code"><code>_refresh_ids = (
+    await asyncio.to_thread(_scope_name_ids, scope_run_id)
+    if scope_run_id
+    else None
+)
+sr = await _global_maintenance_call(
+    refresh_drifted_sources,
+    scope_run_id=run_id,
+    sn_ids=_refresh_ids,
+    default={},
+)</code></pre>
+
+  <p id="shc-drift-refresh-scope-fix-q1-scope-ids">
+    <code>_scope_name_ids(scope_run_id)</code>
+    (<code>imas_codex/standard_names/loop.py:331</code>) returns
+    <code>MATCH (sn:StandardName) WHERE sn.run_id = $rid OR exists {
+    (:StandardNameSource {run_id: $rid})-[:PRODUCED_NAME]-&gt;(sn) } RETURN
+    DISTINCT sn.id</code>. Both halves are needed: a family apply marks its
+    members by setting <code>sn.run_id</code>, while focus mode seeds sources
+    carrying the run id and produces names through them. The helper returns an
+    <strong>empty list on any query error</strong>, so a scope whose size cannot
+    be read fails closed into a no-op refresh rather than open into a graph-wide
+    sweep.
+  </p>
+
+  <p id="shc-drift-refresh-scope-fix-q1-unscoped">
+    <strong>Unscoped runs did not change.</strong> With
+    <code>scope_run_id is None</code> the loop passes
+    <code>sn_ids=None</code>, the filter is absent from the query, and
+    <code>refresh_drifted_sources(gc=…)</code> steers every drifted name in the
+    graph exactly as before. The graph test asserts both directions: a scoped
+    scan returns only the run's name, and the same graph unscoped returns both.
+  </p>
+
+  <h2 id="shc-drift-refresh-scope-fix-q2">2. A path change is a path change, a rename only when lineage says so</h2>
+
+  <p id="shc-drift-refresh-scope-fix-q2-before">
+    <strong>Before.</strong> The reason string called every <code>source_path</code>
+    delta a rename, whatever happened: a source re-pointed to an unrelated path
+    read in the log as a rename, which is a claim about lineage the detector had
+    never checked.
+  </p>
+
+  <p id="shc-drift-refresh-scope-fix-q2-after">
+    <strong>After.</strong> The scan resolves the source's anchor through
+    <code>RENAMED_TO*1..12</code> to its terminal node and returns both the
+    anchor id and the resolved id, so <code>renamed</code> is true only when the
+    two differ (<code>source_refresh.py:336</code>).
+    <code>_format_reason(…, renamed=…)</code> then emits
+    <strong>path renamed</strong> for a lineage move and <strong>path
+    changed</strong> otherwise (<code>source_refresh.py:366</code>).
+  </p>
+
+  <h2 id="shc-drift-refresh-scope-fix-q3">3. A source the detector cannot compare is reported, not dropped</h2>
+
+  <p id="shc-drift-refresh-scope-fix-q3-before">
+    <strong>Before.</strong> A source whose id does not resolve to an
+    <code>IMASNode</code> produced no drift row and no mention. The refresh
+    reported a smaller drift count with no way to tell a clean name from one it
+    had never managed to look at — a name could be silently unmaintained
+    indefinitely.
+  </p>
+
+  <p id="shc-drift-refresh-scope-fix-q3-after">
+    <strong>After.</strong> The scan reaches the source with an
+    <code>OPTIONAL MATCH (o:IMASNode {id: src.source_id})</code> and records
+    <code>{"sn_id", "source_id"}</code> into the caller's <code>unchecked</code>
+    list when the comparison yields no resolved path
+    (<code>source_refresh.py:316</code>). The summary gains
+    <code>unchecked</code> and <code>unchecked_count</code>
+    (<code>source_refresh.py:439&#8211;440</code>) and a warning names the first
+    few pairs (<code>source_refresh.py:444&#8211;449</code>); the loop's log line
+    carries the count (<code>loop.py:2117&#8211;2122</code>).
+  </p>
+
+  <h2 id="shc-drift-refresh-scope-fix-q4">4. Every source of a name is compared</h2>
+
+  <p id="shc-drift-refresh-scope-fix-q4-before">
+    <strong>Before.</strong> The scan emitted one row per
+    <code>(name, source)</code> pair and the caller's grouping took what it got,
+    so a name produced by several sources was not guaranteed to be judged
+    against each of them — a second source that had drifted could be invisible
+    behind a first that had not.
+  </p>
+
+  <p id="shc-drift-refresh-scope-fix-q4-after">
+    <strong>After.</strong> Rows are grouped per name, each source is compared,
+    and the name is reported as drifted when <em>any</em> source has drifted, with
+    the drifting source as the representative
+    (<code>source_refresh.py:245&#8211;340</code>, ordered
+    <code>ORDER BY sn.id, src.id</code>). The graph test seeds one clean and one
+    drifted source on a single name and asserts exactly one drift row, naming
+    the drifted source.
+  </p>
+
+  <h2 id="shc-drift-refresh-scope-fix-evidence">Evidence</h2>
+
+  <table id="shc-drift-refresh-scope-fix-gates">
+    <thead>
+      <tr><th>gate</th><th>arm</th><th>result</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>disposable-Neo4j graph tests (<code>-m graph</code>)</td>
+        <td>head <code>de6532dbb</code></td>
+        <td>5 passed, 17 deselected, <code>EXIT=0</code>; instance started empty,
+            <code>bolt://127.0.0.1:…</code></td>
+      </tr>
+      <tr>
+        <td>declared negative control (scope filter dropped)</td>
+        <td>head with the guard reverted</td>
+        <td>1 failed, 4 passed —
+            <code>test_scoped_refresh_leaves_an_out_of_scope_name_unsteered</code> —
+            <code>EXIT=1</code></td>
+      </tr>
+      <tr>
+        <td><code>tests/standard_names/test_source_refresh.py</code> +
+            <code>test_source_refresh_docs_requeue.py</code> (default markers)</td>
+        <td>base <code>c5b7f76ed</code></td>
+        <td>13 passed, 0 failed, <code>EXIT=0</code></td>
+      </tr>
+      <tr>
+        <td>same selection</td>
+        <td>head <code>de6532dbb</code></td>
+        <td>18 passed, 5 deselected, 0 failed, <code>EXIT=0</code> — +5, none added
+            failures</td>
+      </tr>
+      <tr>
+        <td><code>tests/graph/test_cypher_property_check.py</code></td>
+        <td>head</td>
+        <td>4 passed, <code>EXIT=0</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="shc-drift-refresh-scope-fix-negative-control">
+    The negative control is the one that matters: the guard's whole point is
+    that it <em>stops</em> steering, and a green suite never shows a guard
+    firing. Dropping the <code>AND sn.id IN $sn_ids</code> filter left the
+    scoped test red on the assertion that the out-of-scope name keeps its stale
+    documentation and a null <code>run_id</code>, with the outsider steered
+    instead. The filter was then restored and
+    <code>git diff --exit-code imas_codex/standard_names/source_refresh.py</code>
+    confirmed the tree matched the commit.
+  </p>
+
+  <h2 id="shc-drift-refresh-scope-fix-left-out">Left for a later node</h2>
+
+  <p id="shc-drift-refresh-scope-fix-left-out-restamp">
+    Re-stamping source snapshots after documentation regeneration in
+    <code>imas_codex/standard_names/graph_ops.py</code> is <strong>not</strong>
+    addressed here and remains open. This node scopes the refresh and corrects
+    what it reports; it does not change when a snapshot is written once a name's
+    documentation has been regenerated, so a name regenerated but not
+    re-stamped can still be reported as drifted on the next drain.
+  </p>
+</main>
+</body>
+</html>

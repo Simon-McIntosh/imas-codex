@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
+import os
 import re
+from collections.abc import Iterator
 from unittest.mock import MagicMock
 
+import pytest
+from neo4j import GraphDatabase
+
+from imas_codex.graph.client import GraphClient
+from imas_codex.graph.profiles import resolve_neo4j
 from imas_codex.graph.schema import GraphSchema
 from imas_codex.standard_names import source_refresh as sr
 
@@ -73,11 +80,19 @@ def test_format_reason_truncates_long_documentation():
 
 
 def _row(
-    old_unit, new_unit, old_doc="d", new_doc="d", old_path="wall/x", new_path="wall/x"
+    old_unit,
+    new_unit,
+    old_doc="d",
+    new_doc="d",
+    old_path="wall/x",
+    new_path="wall/x",
+    anchor_id=None,
 ):
     current = sr._resolved_source_context(new_path, new_unit, new_doc)
     return {
         "sn_id": "some_name",
+        "source_id": f"dd:{anchor_id or new_path}",
+        "anchor_id": anchor_id if anchor_id is not None else new_path,
         "name_stage": "accepted",
         "docs_stage": "accepted",
         "old_unit": old_unit,
@@ -119,6 +134,7 @@ def test_detect_drift_path_rename():
                     "W.m^-2",
                     old_path="x/torque_fast_tor",
                     new_path="x/torque_fast_phi",
+                    anchor_id="x/torque_fast_tor",
                 )
             ]
         )
@@ -131,15 +147,150 @@ def test_detect_drift_path_rename():
 
 def test_format_reason_rename_labelled():
     reason = sr._format_reason(
-        "x", [{"field": "source_path", "old": "a/tor", "new": "a/phi"}]
+        "x",
+        [{"field": "source_path", "old": "a/tor", "new": "a/phi"}],
+        renamed=True,
     )
     assert "path renamed" in reason
+
+
+def test_format_reason_path_change_is_not_a_rename():
+    # A source re-pointed to a different path with no RENAMED_TO lineage is a
+    # path change; calling it a rename misdescribes the graph.
+    reason = sr._format_reason(
+        "x", [{"field": "source_path", "old": "wall/a", "new": "wall/b"}]
+    )
+    assert "path changed" in reason
+    assert "renamed" not in reason
+
+
+def test_detect_drift_upgrades_source_report_for_every_producing_source():
+    # One drifted source is enough; the reported delta must come from the source
+    # that drifted rather than from an arbitrary one of the name's sources.
+    clean = _row(
+        "W.m^-2",
+        "W.m^-2",
+        "same doc",
+        "same doc",
+        old_path="wall/clean",
+        new_path="wall/clean",
+    )
+    clean["source_id"] = "dd:wall/clean"
+    drifted = _row(
+        "W.m^-2",
+        "W.m^-2",
+        "old doc",
+        "new doc",
+        old_path="wall/drifted",
+        new_path="wall/drifted",
+    )
+    drifted["source_id"] = "dd:wall/drifted"
+
+    out = sr.detect_source_drift(gc=_FakeGC([clean, drifted]))
+
+    assert len(out) == 1
+    assert out[0]["sn_id"] == "some_name"
+    assert out[0]["source_id"] == "dd:wall/drifted"
+    assert out[0]["new_path"] == "wall/drifted"
+    assert [d["field"] for d in out[0]["deltas"]] == ["documentation"]
+
+
+def test_detect_drift_reports_unresolvable_source_instead_of_dropping_it():
+    unresolved = _row("W.m^-2", "W.m^-2", "old doc", "new doc")
+    # source_id is not a DD path in the graph, so the OPTIONAL MATCH binds no
+    # node: new_path/anchor_id come back null and there is nothing to compare.
+    unresolved["new_path"] = None
+    unresolved["anchor_id"] = None
+    unchecked: list[dict[str, str]] = []
+
+    out = sr.detect_source_drift(gc=_FakeGC([unresolved]), unchecked=unchecked)
+
+    assert out == []
+    assert unchecked == [{"sn_id": "some_name", "source_id": "dd:wall/x"}]
 
 
 def test_detect_drift_ignores_whitespace_only_change():
     # normalised-equal values must not be reported as drift (idempotency guard)
     out = sr.detect_source_drift(gc=_FakeGC([_row("W.m^-2 ", "W.m^-2", "d ", " d")]))
     assert out == []
+
+
+class _ScopeGraph:
+    """Graph double that honours the ``sn.id IN $sn_ids`` scope filter.
+
+    Two names have drifted; *in_scope* holds the one the run owns. The detect
+    query returns only what the caller's id filter admits, exactly as Cypher
+    does, so the refresh's scoping is exercised rather than assumed.
+    """
+
+    def __init__(self, in_scope: list[str] | None):
+        self.in_scope = in_scope
+        self.writes: list[tuple[str, dict]] = []
+        self.detected_ids: list[str] = []
+
+    def query(self, cypher, **kw):
+        if "sn.source_path IS NULL" in cypher:
+            return []  # nothing is unstamped: the baseline pass writes nothing
+        if "n.id AS new_path" in cypher:
+            admitted = kw.get("sn_ids")
+            rows = [
+                _row("W.m^-2", "W.m^-2", "old doc", "new doc", new_path="wall/x"),
+                _row("W.m^-2", "W.m^-2", "old doc", "new doc", new_path="wall/other"),
+            ]
+            rows[0]["sn_id"] = "in_scope_name"
+            rows[1]["sn_id"] = "out_of_scope_name"
+            rows[0]["source_id"] = "dd:wall/x"
+            rows[1]["source_id"] = "dd:wall/other"
+            if admitted is not None:
+                rows = [r for r in rows if r["sn_id"] in admitted]
+            self.detected_ids = [r["sn_id"] for r in rows]
+            return rows
+        self.writes.append((cypher, kw))
+        return []
+
+    def close(self):
+        pass
+
+
+def test_scoped_refresh_never_steers_a_name_outside_its_scope(monkeypatch):
+    graph = _ScopeGraph(in_scope=["in_scope_name"])
+    steered: list[str] = []
+    monkeypatch.setattr(
+        "imas_codex.standard_names.edit.apply_edit",
+        lambda **kw: steered.append(kw["target"]),
+    )
+
+    summary = sr.refresh_drifted_sources(
+        sn_ids=["in_scope_name"], scope_run_id="scope-1", gc=graph
+    )
+
+    assert graph.detected_ids == ["in_scope_name"]
+    assert steered == ["in_scope_name"]
+    assert summary["detected"] == 1
+    assert summary["steered"] == 1
+    assert summary["names"] == ["in_scope_name"]
+    # The outsider is neither stamped nor attached to this run.
+    assert all("out_of_scope_name" not in str(kw) for _, kw in graph.writes), (
+        graph.writes
+    )
+
+
+def test_unscoped_refresh_still_steers_every_drifted_name(monkeypatch):
+    graph = _ScopeGraph(in_scope=None)
+    steered: list[str] = []
+    monkeypatch.setattr(
+        "imas_codex.standard_names.edit.apply_edit",
+        lambda **kw: steered.append(kw["target"]),
+    )
+
+    summary = sr.refresh_drifted_sources(gc=graph)
+
+    assert sorted(graph.detected_ids) == ["in_scope_name", "out_of_scope_name"]
+    assert sorted(steered) == ["in_scope_name", "out_of_scope_name"]
+    assert summary["detected"] == 2
+    for _, kw in graph.writes:
+        updates = kw.get("updates") or []
+        assert "out_of_scope_name" not in str(updates)
 
 
 def test_refresh_no_drift_is_noop():
@@ -212,6 +363,8 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
     }
     drift_row = {
         "sn_id": "x_direction_unit_vector",
+        "source_id": "dd:camera_ir/channel/camera/direction/x",
+        "anchor_id": "camera_ir/channel/camera/direction/x",
         "name_stage": "accepted",
         "docs_stage": "accepted",
         "old_unit": "1",
@@ -273,3 +426,350 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
     assert update["raw_unit"] == "m"
     assert update["resolution_ids"] == []
     assert update["converged_ids"] == [resolution_id]
+
+
+# ── Disposable-Neo4j contract ────────────────────────────────────────────────
+# The scan is Cypher, so it is proved on a real graph: an empty Neo4j the test
+# seeds itself. It refuses the project graph's URI and requires the ephemeral
+# marker, because a test that can reach production is not a test.
+
+
+@pytest.fixture(scope="module")
+def disposable_neo4j() -> Iterator[tuple[str, str]]:
+    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    if not uri:
+        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.fail("source-drift refresh requires a disposable graph")
+    project_uri = resolve_neo4j(auto_tunnel=False).uri
+    if uri.rstrip("/") == project_uri.rstrip("/"):
+        pytest.fail("source-drift refresh refuses the project graph URI")
+    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    auth = ("neo4j", password) if password else None
+    print(f"disposable_bolt_uri={uri}")
+    with GraphDatabase.driver(uri, auth=auth) as driver:
+        driver.verify_connectivity()
+        driver.execute_query("MATCH (node) DETACH DELETE node")
+    yield uri, password
+
+
+@pytest.fixture
+def graph(disposable_neo4j: tuple[str, str]) -> Iterator[GraphClient]:
+    uri, password = disposable_neo4j
+    client = GraphClient(
+        uri=uri,
+        username="neo4j",
+        password=password,
+        graph_name="source-drift-refresh",
+    )
+    client.query("MATCH (node) DETACH DELETE node")
+    yield client
+    client.query("MATCH (node) DETACH DELETE node")
+    client.close()
+
+
+def _seed_name(
+    graph: GraphClient,
+    name_id: str,
+    *,
+    live_path: str,
+    live_doc: str,
+    snapshot_doc: str,
+    snapshot_path: str | None = None,
+    unit: str = "1",
+    run_id: str | None = None,
+) -> None:
+    """Create a name carrying the snapshot of the live source it was built from.
+
+    The snapshot's raw and resolution fields are read back from the resolver, so
+    the only difference a test has to state is the documentation or path it wants
+    to look drifted.
+    """
+    ctx = sr._resolved_source_context(live_path, unit, live_doc)
+    published = ctx["published_dd_context"]
+    graph.query(
+        """
+        MERGE (sn:StandardName {id: $name_id})
+        SET sn.name_stage = 'accepted', sn.docs_stage = 'accepted',
+            sn.run_id = $run_id,
+            sn.source_path = $snapshot_path, sn.source_unit = $unit,
+            sn.source_documentation = $snapshot_doc,
+            sn.source_raw_unit = $raw_unit,
+            sn.source_raw_documentation = $raw_doc,
+            sn.source_dd_resolution_ids = $ids,
+            sn.source_dd_resolution_converged_ids = $converged,
+            sn.source_dd_resolution_manifest_digest = $digest,
+            sn.source_dd_resolution_marker = $marker
+        """,
+        name_id=name_id,
+        run_id=run_id,
+        snapshot_path=snapshot_path or live_path,
+        unit=unit,
+        snapshot_doc=snapshot_doc,
+        raw_unit=published["unit"],
+        raw_doc=published["documentation"],
+        ids=ctx["dd_resolution_ids"],
+        converged=ctx["dd_resolution_converged_ids"],
+        digest=ctx["dd_resolution_manifest_digest"],
+        marker=ctx["_dd_resolution_marker"],
+    )
+
+
+def _attach_source(
+    graph: GraphClient,
+    name_id: str,
+    *,
+    source_id: str,
+    live_path: str | None,
+    live_doc: str = "",
+    anchor_path: str | None = None,
+    unit: str = "1",
+) -> None:
+    """Attach one producing source to a name.
+
+    *anchor_path* makes the source's ``source_id`` an earlier identity that
+    ``RENAMED_TO`` links to *live_path*, which is what a rename looks like.
+    *live_path* of ``None`` leaves the source id unresolved in the graph.
+    """
+    if live_path is not None:
+        graph.query(
+            "CREATE (:IMASNode {id: $id, unit: $unit, documentation: $doc})",
+            id=live_path,
+            unit=unit,
+            doc=live_doc,
+        )
+    if anchor_path is not None:
+        graph.query("CREATE (:IMASNode {id: $id})", id=anchor_path)
+        graph.query(
+            """
+            MATCH (o:IMASNode {id: $old}), (n:IMASNode {id: $new})
+            CREATE (o)-[:RENAMED_TO]->(n)
+            """,
+            old=anchor_path,
+            new=live_path,
+        )
+    graph.query(
+        """
+        MATCH (sn:StandardName {id: $name_id})
+        CREATE (src:StandardNameSource {
+          id: $source_id, source_type: 'dd', source_id: $source_id_body
+        })
+        CREATE (src)-[:PRODUCED_NAME]->(sn)
+        """.replace("{id: $name_id)", "{id: $name_id}"),
+        name_id=name_id,
+        source_id=source_id,
+        source_id_body=source_id[3:] if source_id.startswith("dd:") else source_id,
+    )
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(180)
+def test_scoped_drift_scan_touches_only_the_runs_names(graph: GraphClient) -> None:
+    _seed_name(
+        graph,
+        "in_scope_name",
+        live_path="wall/a",
+        live_doc="live a",
+        snapshot_doc="stale a",
+        run_id="scope-1",
+    )
+    _attach_source(
+        graph,
+        "in_scope_name",
+        source_id="dd:wall/a",
+        live_path="wall/a",
+        live_doc="live a",
+    )
+    _seed_name(
+        graph,
+        "out_of_scope_name",
+        live_path="wall/b",
+        live_doc="live b",
+        snapshot_doc="stale b",
+    )
+    _attach_source(
+        graph,
+        "out_of_scope_name",
+        source_id="dd:wall/b",
+        live_path="wall/b",
+        live_doc="live b",
+    )
+
+    scoped = sr.detect_source_drift(sn_ids=["in_scope_name"], gc=graph)
+
+    assert [d["sn_id"] for d in scoped] == ["in_scope_name"]
+    unscoped = sr.detect_source_drift(gc=graph)
+    assert sorted(d["sn_id"] for d in unscoped) == [
+        "in_scope_name",
+        "out_of_scope_name",
+    ]
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(180)
+def test_scoped_refresh_leaves_an_out_of_scope_name_unsteered(
+    graph: GraphClient, monkeypatch
+) -> None:
+    _seed_name(
+        graph,
+        "in_scope_name",
+        live_path="wall/a",
+        live_doc="live a",
+        snapshot_doc="stale a",
+        run_id="scope-1",
+    )
+    _attach_source(
+        graph,
+        "in_scope_name",
+        source_id="dd:wall/a",
+        live_path="wall/a",
+        live_doc="live a",
+    )
+    _seed_name(
+        graph,
+        "out_of_scope_name",
+        live_path="wall/b",
+        live_doc="live b",
+        snapshot_doc="stale b",
+    )
+    _attach_source(
+        graph,
+        "out_of_scope_name",
+        source_id="dd:wall/b",
+        live_path="wall/b",
+        live_doc="live b",
+    )
+    steered: list[str] = []
+    monkeypatch.setattr(
+        "imas_codex.standard_names.edit.apply_edit",
+        lambda **kw: steered.append(kw["target"]),
+    )
+
+    scoped = sr.refresh_drifted_sources(
+        sn_ids=["in_scope_name"], scope_run_id="scope-1", gc=graph
+    )
+
+    assert steered == ["in_scope_name"]
+    assert scoped["detected"] == 1
+    rows = graph.query(
+        """
+        MATCH (sn:StandardName)
+        RETURN sn.id AS id, sn.source_documentation AS doc, sn.run_id AS run_id
+        ORDER BY sn.id
+        """
+    )
+    by_id = {r["id"]: r for r in rows}
+    # The outsider is neither re-stamped nor attached to the run.
+    assert by_id["out_of_scope_name"]["doc"] == "stale b"
+    assert by_id["out_of_scope_name"]["run_id"] is None
+    # The in-scope name was steered and re-stamped so the change is idempotent.
+    assert by_id["in_scope_name"]["doc"] == "live a"
+
+    steered.clear()
+    unscoped = sr.refresh_drifted_sources(gc=graph)
+
+    assert steered == ["out_of_scope_name"]
+    assert unscoped["detected"] == 1
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(180)
+def test_rename_is_reported_only_when_lineage_moved_the_anchor(
+    graph: GraphClient,
+) -> None:
+    # A source re-anchored through RENAMED_TO is a rename.
+    _seed_name(
+        graph,
+        "renamed_name",
+        live_path="new/path",
+        live_doc="doc",
+        snapshot_doc="doc",
+        snapshot_path="old/path",
+    )
+    _attach_source(
+        graph,
+        "renamed_name",
+        source_id="dd:old/path",
+        live_path="new/path",
+        live_doc="doc",
+        anchor_path="old/path",
+    )
+    # A source re-pointed to an unrelated path is a path change, not a rename.
+    _seed_name(
+        graph,
+        "repointed_name",
+        live_path="other/path",
+        live_doc="doc",
+        snapshot_doc="doc",
+        snapshot_path="first/path",
+    )
+    _attach_source(
+        graph,
+        "repointed_name",
+        source_id="dd:other/path",
+        live_path="other/path",
+        live_doc="doc",
+    )
+
+    out = {d["sn_id"]: d for d in sr.detect_source_drift(gc=graph)}
+
+    assert out["renamed_name"]["renamed"] is True
+    assert out["renamed_name"]["new_path"] == "new/path"
+    assert "path renamed" in sr._format_reason(
+        "renamed_name", out["renamed_name"]["deltas"], renamed=True
+    )
+    assert out["repointed_name"]["renamed"] is False
+    assert "path changed" in sr._format_reason(
+        "repointed_name", out["repointed_name"]["deltas"]
+    )
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(180)
+def test_source_without_a_dd_node_is_reported_unchecked(graph: GraphClient) -> None:
+    _seed_name(
+        graph,
+        "orphan_source_name",
+        live_path="wall/a",
+        live_doc="doc",
+        snapshot_doc="stale",
+    )
+    _attach_source(
+        graph, "orphan_source_name", source_id="dd:absent/path", live_path=None
+    )
+
+    unchecked: list[dict[str, str]] = []
+    out = sr.detect_source_drift(gc=graph, unchecked=unchecked)
+
+    assert out == []
+    assert unchecked == [{"sn_id": "orphan_source_name", "source_id": "dd:absent/path"}]
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(180)
+def test_multi_source_name_is_compared_against_every_source(
+    graph: GraphClient,
+) -> None:
+    _seed_name(
+        graph,
+        "multi_source_name",
+        live_path="multi/a",
+        live_doc="doc a",
+        snapshot_doc="doc a",
+    )
+    _attach_source(graph, "multi_source_name", source_id="dd:multi/a", live_path=None)
+    # Only the second source drifted; the first still matches the snapshot.
+    _attach_source(
+        graph,
+        "multi_source_name",
+        source_id="dd:multi/b",
+        live_path="multi/b",
+        live_doc="doc b",
+    )
+
+    out = sr.detect_source_drift(gc=graph)
+
+    assert len(out) == 1
+    assert out[0]["sn_id"] == "multi_source_name"
+    assert out[0]["source_id"] == "dd:multi/b"
+    assert "documentation" in [d["field"] for d in out[0]["deltas"]]
