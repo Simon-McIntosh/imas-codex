@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 9,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.65-accept-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.65-low-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.65-veto-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.75-accept-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.75-low-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.75-veto-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.85-accept-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.85-low-docs]",
+    "tests/standard_names/test_review_cascade.py::test_consumer_predicates_agree_with_rubric_route[0.85-veto-docs]"
+  ],
+  "added_failures_note": "Derived from the reviewed run's own arm logs: base-default.fails lists 5 ids (test_docs_contradiction_veto.py test_claim_verdict_controls_acceptance[reviewed] params), head-default.fails lists 9 (the cascade id, nine params); the intersection is empty, so 9 added and 0 present at both. The stable id set is identical to the one the first gate (srtj-wave-integration-gate.html) attributed to the hold-channel merge 8e4327db0. The reviewed run's manifest carries baseline_suite/after_suite empty, so the derivation is taken from the logs its test_logs field names.",
+  "call_site_count": 0,
+  "call_sites": null,
+  "completed_at": "2026-10-23T19:33:00.982Z",
+  "dispatched_at": "2026-10-23T19:23:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html",
+      "line": 23,
+      "severity": "non-blocking",
+      "text": "non-blocking: the t4 row writes the id as test_claim_*_acceptance[missing-reviewed], which names no test; base-default.fails:9 gives the real id test_claim_verdict_controls_acceptance[missing-reviewed]. A citation that resolves to nothing is worse than none in an evidence record."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "non-blocking: the base column for the five test_source_refresh.py drift rows reads NOT MARKED, but none of those ids exists at c5b7f76ed (0 test defs; the file carries 12 defs at base and 22 at head). The value consistent with this same table's g2/g3 rows is ABSENT."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html",
+      "line": 35,
+      "severity": "non-blocking",
+      "text": "non-blocking: the g5 row is malformed HTML \u2014 <tr><td><td id=\"srtj-wave-integration-rerun-g5\"> opens two cells, rendering the id cell outside the row's column structure. Every sibling row opens one <td>."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "non-blocking: the heading promises 'every failing test id, base and head' over a table that lists only the five base failures; the nine head failing ids appear only in the following prose paragraph, so the table does not carry what its heading states."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html",
+      "line": 27,
+      "severity": "non-blocking",
+      "text": "non-blocking: the added-failure paragraph names the traceback SITE and points at logs/head-default.log's FAILED block but quotes no traceback line, whereas the brief's report asks for the traceback line per added failure (the log carries it at head-default.log:265 'test_review_cascade.py:473 in test_consumer_predicates_agree_with_rubric_route')."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T125657979434-srtj-wave-integration-rerun/manifest.md",
+      "line": 16,
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest tests line is documented as the literal command a shell was handed, but it lists test_source_refresh_docs_requeue.py once while the gate log's own # command= header carries it twice; the recorded command is not byte-identical to the one that ran."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Two commits on base e993b3af2: 0c1d81bea adds the 57-line fragment, bac449b7d corrects the graph universe 26->25 and the marked-id count 19->18; one file, all inside the declared scope.",
+    "done_when": "The done_when quantifies per-arm commands, log paths, a per-test table, the added-failure count and attribution of each added failure; the fragment records all five and each reconciles with the cited logs (head-default.fails carries the 9 ids, base-default.fails the 5, intersection empty).",
+    "goal": "The node's goal is to record the merged-head re-run of the fifteen named review files \u2014 per-arm commands, log paths, per-test results and the added-failure count with attribution \u2014 as a docs evidence fragment; docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html at bac449b7d does that.",
+    "manifest": "Read the reviewed run's manifest.md; it records status complete, the five arms with their EXIT codes, 9 added / 0 shared, and names its logs, but its tests line drops a duplicate path the log header carries and its baseline_suite/after_suite fields are empty.",
+    "write_paths": "Declared paths are the fragment HTML and docs/figures/sn-review-through-jev/; git diff e993b3af2 bac449b7d touches only docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html."
+  },
+  "justifications": {
+    "durability": "No test file is added: the only guard, check_graph_figures.py, is run-local and uncommitted, though its negative control (logs/negative-control-graph-figures.log, EXIT=1) genuinely reddens on the pre-repair blob and greens on bac449b7d.",
+    "evidence": "head-graph.log:7 'collected 278 items / 253 deselected / 25 selected' and head-default.log:117 '9 failed, 244 passed' match the fragment's figures, but line 23 cites an id that names no test and line 34 reads NOT MARKED for ids absent at base.",
+    "fit": "The fragment follows the sibling evidence-fragment idiom and id scheme, but its g5 row at line 35 is malformed HTML and line 17's table does not carry what its heading states.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html:1-57 records the five arms, their logs, the per-test tables and the 9 added / 0 shared counts, all reconciling with the cited logs.",
+    "reuse": "The diff adds no function, class or module, so no capability is forked; a search over docs/evidence/fragments and the reckon plan loader found no owner this duplicates, only the sibling gate fragment it supersedes in measurement.",
+    "scope_discipline": "git diff e993b3af27aee9bffaf885dc9f170da1d8017cce bac449b7dd69426cdc42dc696c649ae1068ea477 touches only the declared fragment path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal is to record the merged-head re-run of the fifteen named review files \u2014 per-arm commands, log paths, per-test results and the added-failure count with attribution \u2014 as a docs evidence fragment; docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html at bac449b7d does that.\nVERDICT done_when: The done_when quantifies per-arm commands, log paths, a per-test table, the added-failure count and attribution of each added failure; the fragment records all five and each reconciles with the cited logs (head-default.fails carries the 9 ids, base-default.fails the 5, intersection empty).\nVERDICT write_paths: Declared paths are the fragment HTML and docs/figures/sn-review-through-jev/; git diff e993b3af2 bac449b7d touches only docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html.\nVERDICT manifest: Read the reviewed run's manifest.md; it records status complete, the five arms with their EXIT codes, 9 added / 0 shared, and names its logs, but its tests line drops a duplicate path the log header carries and its baseline_suite/after_suite fields are empty.\nVERDICT diff: Two commits on base e993b3af2: 0c1d81bea adds the 57-line fragment, bac449b7d corrects the graph universe 26->25 and the marked-id count 19->18; one file, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html:1-57 records the five arms, their logs, the per-test tables and the 9 added / 0 shared counts, all reconciling with the cited logs.\nSCORE evidence: 15\nJUSTIFICATION evidence: head-graph.log:7 'collected 278 items / 253 deselected / 25 selected' and head-default.log:117 '9 failed, 244 passed' match the fragment's figures, but line 23 cites an id that names no test and line 34 reads NOT MARKED for ids absent at base.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff e993b3af27aee9bffaf885dc9f170da1d8017cce bac449b7dd69426cdc42dc696c649ae1068ea477 touches only the declared fragment path.\nSCORE durability: 8\nJUSTIFICATION durability: No test file is added: the only guard, check_graph_figures.py, is run-local and uncommitted, though its negative control (logs/negative-control-graph-figures.log, EXIT=1) genuinely reddens on the pre-repair blob and greens on bac449b7d.\nSCORE fit: 15\nJUSTIFICATION fit: The fragment follows the sibling evidence-fragment idiom and id scheme, but its g5 row at line 35 is malformed HTML and line 17's table does not carry what its heading states.\nSCORE reuse: 20\nJUSTIFICATION reuse: The diff adds no function, class or module, so no capability is forked; a search over docs/evidence/fragments and the reckon plan loader found no owner this duplicates, only the sibling gate fragment it supersedes in measurement.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html:23 non-blocking: non-blocking: the t4 row writes the id as test_claim_*_acceptance[missing-reviewed], which names no test; base-default.fails:9 gives the real id test_claim_verdict_controls_acceptance[missing-reviewed]. A citation that resolves to nothing is worse than none in an evidence record.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html:34 non-blocking: non-blocking: the base column for the five test_source_refresh.py drift rows reads NOT MARKED, but none of those ids exists at c5b7f76ed (0 test defs; the file carries 12 defs at base and 22 at head). The value consistent with this same table's g2/g3 rows is ABSENT.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html:35 non-blocking: non-blocking: the g5 row is malformed HTML \u2014 <tr><td><td id=\"srtj-wave-integration-rerun-g5\"> opens two cells, rendering the id cell outside the row's column structure. Every sibling row opens one <td>.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html:17 non-blocking: non-blocking: the heading promises 'every failing test id, base and head' over a table that lists only the five base failures; the nine head failing ids appear only in the following prose paragraph, so the table does not carry what its heading states.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-rerun.html:27 non-blocking: non-blocking: the added-failure paragraph names the traceback SITE and points at logs/head-default.log's FAILED block but quotes no traceback line, whereas the brief's report asks for the traceback line per added failure (the log carries it at head-default.log:265 'test_review_cascade.py:473 in test_consumer_predicates_agree_with_rubric_route').\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T125657979434-srtj-wave-integration-rerun/manifest.md:16 non-blocking: non-blocking: the manifest tests line is documented as the literal command a shell was handed, but it lists test_source_refresh_docs_requeue.py once while the gate log's own # command= header carries it twice; the recorded command is not byte-identical to the one that ran.",
+  "review_run_id": "r-20261023T191700278479-review-of-srtj-wave-integration-rerun-bac449b7dd69",
+  "reviewed_base_sha": "e993b3af27aee9bffaf885dc9f170da1d8017cce",
+  "reviewed_commits": [
+    "0c1d81bea5d33ede363fcb43e4f7d73fe051314f",
+    "bac449b7dd69426cdc42dc696c649ae1068ea477"
+  ],
+  "reviewed_head_sha": "bac449b7dd69426cdc42dc696c649ae1068ea477",
+  "reviewed_run_id": "r-20261023T125657979434-srtj-wave-integration-rerun",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T19:31:52.854300+00:00",
+  "total": 95
+}
