@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-23T06:22:56.109Z",
+  "dispatched_at": "2026-10-23T06:10:01Z",
+  "error": "",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py",
+      "line": "67",
+      "severity": "follow-on",
+      "text": "follow-on: _UNIT_TOKEN_RE and _NUMERIC_INTERVAL_RE at :67-68 and the predicate at :102 re-implement doc_links.py:95 _is_prose_bracket, the owner of the notation exclusion, which this runner already imports from the same gate worktree; the copy also reproduces the branch doc_links.py:107-109 renders unreachable, so the census's zero measures the copy rather than the owner and goes stale if the owner changes."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py",
+      "line": "224",
+      "severity": "follow-on",
+      "text": "follow-on: the notation_should_be_excluded class at :224 cannot come out non-zero - its members are the phrases returned by find_prose_bracket_phrases, which at doc_links.py:131-132 emits only phrases that pass _is_prose_bracket - so the HTML's claim at :63 and :152 that 0 flagged phrase is a unit or interval is a restatement of the selecting predicate and is not evidence the exclusions work."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py",
+      "line": "281",
+      "severity": "follow-on",
+      "text": "follow-on: dd_link_syntax_positive_control carries no 'passed' key (census.log:11 prints passed= None) and exercises only the gate's link-target regex, so nothing shows the CONTAINS 'dd:' scan at :139-144 - which returns the node's load-bearing zero, 0 of 2530 accepted documents - can see a dd: token known to be present."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py",
+      "line": "203",
+      "severity": "follow-on",
+      "text": "follow-on: the 'other' class is counted but neither its reason string nor its document ids are recorded, so the HTML's explanation at :75 that the 10 are math brackets followed by a parenthesised argument is an assertion the JSON cannot be checked against; the reason at docs_gates.py:531 is 'link has an unsupported target or an empty label' and the runner discards it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census.html",
+      "line": "54",
+      "severity": "follow-on",
+      "text": "follow-on: four \u00a71 citations point at the wrong statement - _extract_links_from_docs is cited as graph_ops.py:513 but its def is at graph_ops.py:522 (513 is _DD_LINK_RE), the same :513 is cited again at :141 for the 'self-loop is meaningless' docstring that sits at graph_ops.py:536, _LINK_RE (:509) and _DD_LINK_RE (:515) are at 505 and 513, and _compute_link_status (:490) is at 492 - so a reader following any of them lands on a different symbol in a deliverable whose evidence is its citations."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census.html",
+      "line": "66",
+      "severity": "follow-on",
+      "text": "follow-on: _BARE_BRACKET_RE is cited as doc_links.py:25 both here and at :181, but the constant is defined at doc_links.py:20 in the prose-link worktree, in the census worktree and on main; the pattern is also quoted without its leading (?<![!\\A-Za-z0-9_]) guard, which is the clause that keeps the node's argument about masked spans intact."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the three commits against base c5b7f76ed commit by commit: 76aaabb98 adds the runner (383 lines) and the JSON (1054), a24e1d818 rewrites the JSON in place after a formatter mangled it (+1056/-1046), 0d18022e0 adds the HTML fragment (204).",
+    "done_when": "the review brief's done-when asks for the JSON written by the runner with a log ending EXIT=0 plus the fragment answering all three questions with cited lines, per-class counts and examples; census.log:13 ends in EXIT=0, srtj-docs-bracket-census.json records documents_read 2530 and class_counts {bare_prose_bracket 613, self_link 24, others 0/0/0/10}, and the fragment carries five verbatim examples per class.",
+    "goal": "the node's goal is to diagnose the 637 accepted documents the prose-link rule would newly fail - quote the future-name convention, classify every failing bracket, trace the writer of the bare phrases; srtj-docs-bracket-census.html:20-43 quotes syntax, writer, swapper and reader, :45-63 carries the per-class table and :152-190 traces the writer to generate_docs_system.md:315-321 and _normalize_bare_doc_links.",
+    "manifest": "read; it states status complete, records the gate command, the census log path, the imported gate module path, the headline counts and the three per-class resolutions, and names the 10 unsupported-target documents and the single-token _BARE_BRACKET_RE gap as follow-ons.",
+    "write_paths": "the source manifest declares three write paths under docs/evidence/fragments/sn-review-through-jev/; the diff at c5b7f76ed..0d18022e0 touches exactly those three files (census-run.py, census.json, census.html) and no other."
+  },
+  "justifications": {
+    "durability": "no test exists and none was in scope; the durable artefact is the re-runnable runner, whose controls at srtj-docs-bracket-census-run.py:196-290 fail if the prose scanner or the gate stops firing, but the dd: zero at :139-144 and the notation class at :224 cannot redden on any regression.",
+    "evidence": "srtj-docs-bracket-census.json records the measurement, its positive controls and the gate module path, and census.log:13 ends EXIT=0; but the load-bearing zero (0 of 2530 documents contain 'dd:') has no positive control that the CONTAINS scan can see a token known present, and the notation class is 0 by construction.",
+    "fit": "the three files match the sibling evidence-fragment idiom (a *-run.py, its JSON and its HTML) and the mandated file name, and the naming checks over the three changed paths return no plan label; only refine_docs_user.md:185 is cited one line off at srtj-docs-bracket-census.html:173.",
+    "goal_fidelity": "srtj-docs-bracket-census.html:20-43 answers Q1 with the four defining sites and :45-63 answers Q2 with per-class counts, but four of the \u00a71 code citations (graph_ops.py:490, :509, :513, :515) point a few lines off the symbols they name.",
+    "reuse": "srtj-docs-bracket-census-run.py:67-68 and :102 re-implement the gate's own notation exclusion, doc_links.py:95 _is_prose_bracket with its regexes at doc_links.py:24-25, which the runner already imports from that same worktree, and duplicate the unreachable numeric-interval branch a sibling review flagged at doc_links.py:109.",
+    "scope_discipline": "the diff at c5b7f76ed..0d18022e0 changes only srtj-docs-bracket-census-run.py, srtj-docs-bracket-census.json and srtj-docs-bracket-census.html, the three paths the manifest declares and the brief's write scope names."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to diagnose the 637 accepted documents the prose-link rule would newly fail - quote the future-name convention, classify every failing bracket, trace the writer of the bare phrases; srtj-docs-bracket-census.html:20-43 quotes syntax, writer, swapper and reader, :45-63 carries the per-class table and :152-190 traces the writer to generate_docs_system.md:315-321 and _normalize_bare_doc_links.\nVERDICT done_when: the review brief's done-when asks for the JSON written by the runner with a log ending EXIT=0 plus the fragment answering all three questions with cited lines, per-class counts and examples; census.log:13 ends in EXIT=0, srtj-docs-bracket-census.json records documents_read 2530 and class_counts {bare_prose_bracket 613, self_link 24, others 0/0/0/10}, and the fragment carries five verbatim examples per class.\nVERDICT write_paths: the source manifest declares three write paths under docs/evidence/fragments/sn-review-through-jev/; the diff at c5b7f76ed..0d18022e0 touches exactly those three files (census-run.py, census.json, census.html) and no other.\nVERDICT manifest: read; it states status complete, records the gate command, the census log path, the imported gate module path, the headline counts and the three per-class resolutions, and names the 10 unsupported-target documents and the single-token _BARE_BRACKET_RE gap as follow-ons.\nVERDICT diff: read the three commits against base c5b7f76ed commit by commit: 76aaabb98 adds the runner (383 lines) and the JSON (1054), a24e1d818 rewrites the JSON in place after a formatter mangled it (+1056/-1046), 0d18022e0 adds the HTML fragment (204).\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: srtj-docs-bracket-census.html:20-43 answers Q1 with the four defining sites and :45-63 answers Q2 with per-class counts, but four of the \u00a71 code citations (graph_ops.py:490, :509, :513, :515) point a few lines off the symbols they name.\nSCORE evidence: 14\nJUSTIFICATION evidence: srtj-docs-bracket-census.json records the measurement, its positive controls and the gate module path, and census.log:13 ends EXIT=0; but the load-bearing zero (0 of 2530 documents contain 'dd:') has no positive control that the CONTAINS scan can see a token known present, and the notation class is 0 by construction.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff at c5b7f76ed..0d18022e0 changes only srtj-docs-bracket-census-run.py, srtj-docs-bracket-census.json and srtj-docs-bracket-census.html, the three paths the manifest declares and the brief's write scope names.\nSCORE durability: 10\nJUSTIFICATION durability: no test exists and none was in scope; the durable artefact is the re-runnable runner, whose controls at srtj-docs-bracket-census-run.py:196-290 fail if the prose scanner or the gate stops firing, but the dd: zero at :139-144 and the notation class at :224 cannot redden on any regression.\nSCORE fit: 17\nJUSTIFICATION fit: the three files match the sibling evidence-fragment idiom (a *-run.py, its JSON and its HTML) and the mandated file name, and the naming checks over the three changed paths return no plan label; only refine_docs_user.md:185 is cited one line off at srtj-docs-bracket-census.html:173.\nSCORE reuse: 5\nJUSTIFICATION reuse: srtj-docs-bracket-census-run.py:67-68 and :139 re-implement the gate's own notation exclusion, doc_links.py:95 _is_prose_bracket with its regexes at doc_links.py:24-25, which the runner already imports from that same worktree, and duplicate the unreachable numeric-interval branch a sibling review flagged at doc_links.py:109.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py:67 follow-on: _UNIT_TOKEN_RE and _NUMERIC_INTERVAL_RE at :67-68 and the predicate at :102 re-implement doc_links.py:95 _is_prose_bracket, the owner of the notation exclusion, which this runner already imports from the same gate worktree; the copy also reproduces the branch doc_links.py:107-109 renders unreachable, so the census's zero measures the copy rather than the owner and goes stale if the owner changes.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py:224 follow-on: the notation_should_be_excluded class at :224 cannot come out non-zero - its members are the phrases returned by find_prose_bracket_phrases, which at doc_links.py:131-132 emits only phrases that pass _is_prose_bracket - so the HTML's claim at :63 and :152 that 0 flagged phrase is a unit or interval is a restatement of the selecting predicate and is not evidence the exclusions work.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py:281 follow-on: dd_link_syntax_positive_control carries no 'passed' key (census.log:11 prints passed= None) and exercises only the gate's link-target regex, so nothing shows the CONTAINS 'dd:' scan at :139-144 - which returns the node's load-bearing zero, 0 of 2530 accepted documents - can see a dd: token known to be present.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census-run.py:203 follow-on: the 'other' class is counted but neither its reason string nor its document ids are recorded, so the HTML's explanation at :75 that the 10 are math brackets followed by a parenthesised argument is an assertion the JSON cannot be checked against; the reason at docs_gates.py:531 is 'link has an unsupported target or an empty label' and the runner discards it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census.html:54 follow-on: four \u00a71 citations point at the wrong statement - _extract_links_from_docs is cited as graph_ops.py:513 but its def is at graph_ops.py:522 (513 is _DD_LINK_RE), the same :513 is cited again at :141 for the 'self-loop is meaningless' docstring that sits at graph_ops.py:536, _LINK_RE (:509) and _DD_LINK_RE (:515) are at 505 and 513, and _compute_link_status (:490) is at 492 - so a reader following any of them lands on a different symbol in a deliverable whose evidence is its citations.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-census.html:66 follow-on: _BARE_BRACKET_RE is cited as doc_links.py:25 both here and at :181, but the constant is defined at doc_links.py:20 in the prose-link worktree, in the census worktree and on main; the pattern is also quoted without its leading (?<![!\\\\A-Za-z0-9_]) guard, which is the clause that keeps the node's argument about masked spans intact.",
+  "review_run_id": "r-20261023T060831773441-review-of-srtj-docs-bracket-census-0d18022e0213",
+  "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "reviewed_head_sha": "0d18022e02134e4e49105e6b79bdbd3652cdc865",
+  "reviewed_run_id": "r-20261023T053544773019-srtj-docs-bracket-census",
+  "scores": {
+    "durability": 10,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T06:32:00+00:00",
+  "total": 83
+}
