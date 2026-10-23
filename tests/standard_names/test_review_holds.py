@@ -372,6 +372,17 @@ def test_refine_claims_passing_score_with_open_hold(planted_name: str) -> None:
     assert _state(planted_name) == {"stage": "refining", "score": 0.875}
 
 
+def test_refine_does_not_claim_passing_score_without_hold(planted_name: str) -> None:
+    _review(planted_name)
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (sn:StandardName {id: $id}) SET sn.docs_stage = 'reviewed'",
+            id=planted_name,
+        )
+    assert graph_ops.claim_refine_docs_batch(batch_size=1, min_score=0.85) == []
+    assert _state(planted_name) == {"stage": "reviewed", "score": 0.875}
+
+
 LINT_FINDING = (
     "[error:lint:round_trip_failure] plasma_current: "
     "name does not survive parser round-trip"
