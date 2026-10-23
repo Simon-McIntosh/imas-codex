@@ -1,98 +1,117 @@
 <section class="fragment" id="srtj-contradiction-veto-retune">
 <h2 id="srtj-contradiction-veto-retune-h">The contradiction veto after the retune</h2>
 
-<p id="srtj-contradiction-veto-retune-v">The retune is implemented and measured. <strong>The bar is not met.</strong>
-6 of the 46 recorded firings still fire (the bar allows at most 3), and recall on
-the planted contradictions falls from 60 of 60 to 32 of 60 (the bar requires no
-lower than the old question). Both legs fail, so this record reports the failing
-rows rather than a pass.</p>
+<p id="srtj-contradiction-veto-retune-v">Three candidate questions were measured on the
+same rows in one run. <strong>The recall leg of the bar is met by no arm</strong>, and the
+precision leg is met by one: the arm kept settles a locus or aggregation disclaimer in code
+before the judge is asked. It fires on <strong>2 of the 46 recorded firings</strong> against a
+ceiling of 3, and its recall is <strong>53 of 60</strong> planted contradictions against a floor
+of 60. The floor is not reachable by any arm that carries the mandated label-only predicate.
+
+<table id="srtj-contradiction-veto-retune-table">
+<thead>
+<tr><th>Arm</th><th>Recorded firings still fire (46)</th><th>Planted recall (60)</th><th>Controls firing (20)</th><th>Precision leg</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>B</strong> — base wording, label-only predicate, disclaimer settled in code (<strong>kept</strong>)</td><td><strong>2</strong></td><td><strong>53</strong></td><td>0</td><td>met</td></tr>
+<tr><td>A — base wording plus the label-only predicate</td><td>9</td><td>54</td><td>0</td><td>not met</td></tr>
+<tr><td>C — the wording that states the specialisation rule to the judge</td><td>5</td><td>55</td><td>0</td><td>not met</td></tr>
+</tbody>
+</table>
+
+<figure id="srtj-contradiction-veto-retune-figure">
+<img src="/imas-codex/figures/sn-review-through-jev/srtj-contradiction-veto-retune.svg"
+     alt="Three arms placed by recorded firings and planted recall against the ceiling and the floor">
+<figcaption>The two legs of the bar for each arm, measured on the same rows in one run. The
+dashed lines are the bar: at most 3 of the 46 recorded firings may still fire, and at least 60
+of the 60 planted contradictions must be recalled. Arm B, kept, is the only arm inside the
+precision leg; it sits short of the bar by 7 rows, and so do arms A and C. The acceptable
+corner is empty for all three arms.</figcaption>
+</figure>
+
+<p id="srtj-contradiction-veto-retune-why">The arm was chosen because the fallback clause
+cannot select one on its own terms. Every arm lowers recall below the old question's, so no
+arm "does not lower it", and only arm B meets the precision leg. B is the best
+precision-for-recall trade available: against arm A, which differs only by the settlement, it
+removes 7 of the 9 recorded firings and loses one planted contradiction. Arm C keeps one more
+row of recall than B and four more than A, but leaves five false firings, and the rewording
+was ruled out for exactly that reason.</p>
 
 <h3 id="srtj-contradiction-veto-retune-changing">What changed</h3>
 
 <p id="srtj-contradiction-veto-retune-what">All of it in
-<code>imas_codex/standard_names/review/jev_review.py</code>. A new
-<code>label_only_source</code> predicate is true when a DD source's every word
-belongs to the vocabulary of field placement, so the text names no quantity.
-<code>comparison_sources</code> drops those sources and
-<code>build_docs_state</code> records the remainder as the claim's evidence,
-unobserved when none is left, so the claim answers "says nothing".
-<code>docs_question_table</code>'s source-comparison instruction and its
-<code>contradicts</code> criterion now state that specialisation is compatible
-and that a contradiction is a source that denies the claim: a different
-quantity, an opposite sign or direction, an incompatible unit or dimension, or
-a different definition. <code>claim_contradicts</code> and
-<code>CONTRADICTION_VETO_PROBABILITY</code> were left unchanged, and the
-measurement does not implicate the threshold: the new arm's surviving firings
-lose the veto through the answer's probability, not through a threshold miss.</p>
+<code>imas_codex/standard_names/review/jev_review.py</code>. Two decisions are now
+made in code, both properties of the two texts rather than of the judge's reading.
 
-<h3 id="srtj-contradiction-veto-retune-sets">The two sets, before and after</h3>
+<code>label_only_source</code> is true when a DD source's every word belongs to the vocabulary
+of field placement, so the text names no quantity. <code>comparison_sources</code> drops those
+sources and <code>build_docs_state</code> records the remainder as the claim's evidence,
+unobserved when none is left.
 
-<table id="srtj-contradiction-veto-retune-table">
-<thead>
-<tr><th>Set</th><th>Rows</th><th>Old question fires</th><th>New question fires</th><th>Bar</th></tr>
-</thead>
-<tbody>
-<tr><td>Recorded firings (should stop firing)</td><td>46</td><td>10</td><td>6</td><td>at most 3 → <strong>not met</strong></td></tr>
-<tr><td>Planted contradictions (should keep firing)</td><td>60</td><td>60</td><td>32</td><td>no lower than old → <strong>not met</strong></td></tr>
-<tr><td>Planted "says nothing" controls (should not fire)</td><td>20</td><td>0</td><td>0</td><td>—</td></tr>
-</tbody>
-</table>
+<code>disclaims_locus_or_aggregation</code> is true when a claim denies fixing a locus or an
+aggregation — "The quantity has no mandatory locus or aggregation", "It does not prescribe a
+wavenumber sum or time or flux-surface average" — and <code>source_specialises</code> is true
+when the evidence names one instance of the quantity. When both hold,
+<code>claim_determination</code> returns "says nothing", and
+<code>settled_claim_answers</code> applies that at the aggregation boundary: the claim cannot
+veto the entry and it is excluded from the claim-support mean, because there is no denial to
+report.
 
-<p id="srtj-contradiction-veto-retune-recorded">Both sets were asked the old
-question and the new one in one process through the old
-<code>decide_batch</code>, under the <code>sn-judge</code> seat, on the same
-rows. The recorded set is the stored (name, claim, DD text) triples, 34 after
-deduplication; the old arm restores the base revision's question text and its
-unfiltered DD sources, both captured from <code>c5b7f76ed</code>.</p>
+The question text is back to its base form. Stating the specialisation rule to the judge cost
+recall without removing the false firings, so the rule is applied deterministically instead.
+<code>claim_contradicts</code> and <code>CONTRADICTION_VETO_PROBABILITY</code> are unchanged,
+and nothing implicates the threshold.</p>
 
-<p id="srtj-contradiction-veto-retune-caveat">Two caveats that bound the
-recorded set. The old arm reproduces only 10 of the 46 recorded firings, so the
-reconstructed state — the stored claim and its one stored DD source, without the
-entry's description, links and siblings — is thinner than the state the
-pipeline built, and the 6 that still fire are a lower bound on what the retune
-would leave firing in the pipeline. The planted set carries the golden entry's
-description, so its arm is the stronger of the two.</p>
+<h3 id="srtj-contradiction-veto-retune-failing">What still fires</h3>
 
-<h3 id="srtj-contradiction-veto-retune-failing">The failing rows</h3>
-
-<p id="srtj-contradiction-veto-retune-failing-recorded">Still firing on the
-recorded set, with the claim and the source it was compared against:</p>
+<p id="srtj-contradiction-veto-retune-failing-recorded">Two recorded firings survive the kept
+arm, with the claim the judge held and its answer:</p>
 
 <table id="srtj-contradiction-veto-retune-failing-table">
-<thead><tr><th>Name</th><th>DD source</th><th>DD text</th><th>Answer</th></tr></thead>
+<thead><tr><th>Name</th><th>DD source</th><th>Claim</th><th>Answer</th></tr></thead>
 <tbody>
-<tr><td><code>electrostatic_potential</code></td><td><code>edge_profiles/profiles_1d/phi_potential</code></td><td>Electrostatic potential, averaged on the magnetic flux surface</td><td>says nothing, contradictory probability above the veto threshold</td></tr>
-<tr><td><code>toroidal_angle_of_control_surface</code></td><td><code>b_field_non_axisymmetric/time_slice/control_surface/phi</code></td><td>Toroidal angle array, on which the Fourier decomposition is carried out</td><td>contradicts</td></tr>
-<tr><td><code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code></td><td><code>gyrokinetics_local/non_linear/fluxes_2d_k_x_k_y_sum/momentum_phi_perpendicular_phi_potential</code></td><td>Contribution of the perturbed electrostatic potential to the perpendicular component of the normalized toroidal momentum flux</td><td>contradicts</td></tr>
-<tr><td><code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code></td><td><code>gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/momentum_phi_perpendicular_phi_potential</code></td><td>same source text at another channel</td><td>contradicts</td></tr>
-<tr><td><code>perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift</code></td><td><code>gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_phi_potential</code></td><td>same source text at another channel</td><td>contradicts</td></tr>
-<tr><td><code>radial_separatrix_distance_at_outboard_midplane</code></td><td><code>thomson_scattering/channel/distance_separatrix_midplane</code></td><td>Distance between the measurement position and the separatrix, mapped along flux surfaces to the outboard midplane, in the major radius direction</td><td>contradicts</td></tr>
+<tr><td><code>toroidal_angle_of_control_surface</code></td><td><code>b_field_non_axisymmetric/time_slice/control_surface/phi</code></td><td>This quantity applies to each individual control-surface member and represents toroidal location only.</td><td>contradicts</td></tr>
+<tr><td><code>radial_separatrix_distance_at_outboard_midplane</code></td><td><code>thomson_scattering/channel/distance_separatrix_midplane</code></td><td>The offset vanishes on the separatrix and is negative inside it.</td><td>contradicts</td></tr>
 </tbody>
 </table>
 
-<p id="srtj-contradiction-veto-retune-failing-recall">28 of the 60 planted
-contradictions are lost, 14 in the <code>direction</code> family and 14 in the
-<code>relation</code> family. Only 6 of the 28 lost rows had a label-only DD
-source, so the label-only exclusion accounts for a fifth of the loss: the other
-22 are suppressed by the specialisation-compatibility wording itself, which
-makes the judge read a genuine denial as a specialisation. That is the finding
-the next revision of this question has to answer, and no row was written off to
-the threshold.</p>
+<p id="srtj-contradiction-veto-retune-lost">The settlement costs exactly one planted
+contradiction, <code>contradicts-484</code> (rule <code>relation</code>), whose claims at
+indices 3 and 6 are disclaimers compared against a specialising source. The other six planted
+contradictions lost by the kept arm are lost by arm A as well, so they are not the
+settlement's cost.</p>
+
+<h3 id="srtj-contradiction-veto-retune-caveat">A corrected harness, and what it corrects</h3>
+
+<p id="srtj-contradiction-veto-retune-harness">The first run of this replay measured the base
+question's recall as 60 of 60 and the rewording's as 32 of 60. Both numbers were wrong. The
+question table was built from the first row's claim list, so any row with more claims than
+that row had was asked only about the truncated indices and scored as not fired. The table is
+now built over placeholder claims, which is possible because a claim question depends only on
+its index, not on the claim's words. The numbers reported above are from the corrected
+harness, and the earlier 32 is not a measurement of the rewording's recall.</p>
+
+<p id="srtj-contradiction-veto-retune-recorded">The recorded set is the stored (name, claim,
+DD text) triples, 46 after deduplication, rebuilt from the stored claim and its one stored DD
+source. The base arm's question text is captured verbatim from <code>c5b7f76ed</code>. The
+reconstruction is thinner than the state the pipeline builds — it carries no description,
+links or siblings — so the count that still fires is a lower bound on what the arm would leave
+firing in the pipeline, and the planted set, which carries the golden entry's description, is
+the stronger of the two.</p>
 
 <h3 id="srtj-contradiction-veto-retune-spend">Spend</h3>
 
-<p id="srtj-contradiction-veto-retune-cost">Jev spend USD 0.025651 of the
-authorised USD 1.00, over 228 calls (114 states, two arms each), all under the
-<code>sn-judge</code> seat through the existing <code>decide_batch</code>.
-No second client was written and the graph was read only.</p>
+<p id="srtj-contradiction-veto-retune-cost">Jev spend USD 0.030936 of the authorised USD
+1.00, over three arms on all three sets, all under the <code>sn-judge</code> seat through the
+existing <code>decide_batch</code>. No second client was written and the graph was read
+only.</p>
 
 <h3 id="srtj-contradiction-veto-retune-tests">Tests and guards</h3>
 
-<p id="srtj-contradiction-veto-retune-tests-body"><code>tests/standard_names/test_contradiction_veto_question.py</code> passes
-(11 tests) and fails with the change reverted: reverting the label-only
-predicate fails 6 of its 11 tests. The gate over that file and the existing
-<code>jev_review</code> tests adds no failure against the base: 5 failures in
-<code>tests/standard_names/test_docs_contradiction_veto.py</code> sit at both
-arms, and are pre-existing rather than this node's. The replay ran read-only and
-spent no graph write.</p>
+<p id="srtj-contradiction-veto-retune-tests-body"><code>tests/standard_names/test_contradiction_veto_question.py</code>
+passes (21 tests) and fails with the change reverted: disabling
+<code>label_only_source</code> fails 6 of its 21 tests. The gate over that file and the
+existing <code>jev_review</code> tests adds no failure against the base: 5 failures in
+<code>tests/standard_names/test_docs_contradiction_veto.py</code> sit at both arms, and are
+pre-existing rather than this arm's. The replay ran read-only and spent no graph write.</p>
 </section>

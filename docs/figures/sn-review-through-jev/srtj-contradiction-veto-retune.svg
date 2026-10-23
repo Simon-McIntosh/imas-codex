@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="31.1cm" height="16cm" viewBox="0 0 3110 1600" font-family="Helvetica, Arial, sans-serif">
+  <g fill="none" stroke="#000000" stroke-width="4">
+    <line x1="560" y1="1250" x2="2950" y2="1250"/>
+    <line x1="560" y1="1250" x2="560" y2="200"/>
+  </g>
+
+  <g fill="none" stroke="#929292" stroke-width="4" stroke-dasharray="14 10">
+    <line x1="1277" y1="1250" x2="1277" y2="250"/>
+    <line x1="560" y1="341" x2="2950" y2="341"/>
+  </g>
+
+  <g fill="#000000" font-size="43" text-anchor="middle">
+    <text x="560" y="1315">0</text>
+    <text x="1038" y="1315">2</text>
+    <text x="1516" y="1315">4</text>
+    <text x="1994" y="1315">6</text>
+    <text x="2472" y="1315">8</text>
+    <text x="2950" y="1315">10</text>
+  </g>
+  <text x="1755" y="1425" font-size="49" fill="#000000" text-anchor="middle">recorded firings [of 46]</text>
+
+  <g fill="#000000" font-size="43" text-anchor="end">
+    <text x="520" y="1294">45</text>
+    <text x="520" y="998">50</text>
+    <text x="520" y="702">55</text>
+    <text x="520" y="356">60</text>
+  </g>
+  <text transform="translate(230 725) rotate(-90)" font-size="49" fill="#000000"
+        text-anchor="middle">recalled [of 60]</text>
+
+  <g fill="#929292">
+    <circle cx="2711" cy="705" r="26"/>
+    <circle cx="1755" cy="644" r="26"/>
+  </g>
+  <circle cx="1038" cy="765" r="30" fill="#2f6f9f"/>
+
+  <text x="2765" y="722" font-size="43" fill="#929292">A</text>
+  <text x="1800" y="660" font-size="43" fill="#929292">C</text>
+  <text x="1090" y="790" font-size="49" fill="#2f6f9f">B kept</text>
+  <text x="1300" y="460" font-size="43" fill="#929292">ceiling 3</text>
+  <text x="2930" y="316" font-size="43" fill="#929292" text-anchor="end">floor 60</text>
+</svg>

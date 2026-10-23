@@ -14083,8 +14083,8 @@
    "at_most_three_recorded_fire": false
   }
  },
- "kept_arm": "",
- "kept_because": "no arm meets the bar and no arm preserves the old question's recall",
+ "kept_arm": "b",
+ "kept_because": "no arm meets both legs of the bar, so the fallback clause cannot select on its own terms: arm B is the only arm that meets the precision leg (2 of 46 recorded firings, ceiling 3), and it is kept as the best precision-for-recall trade. Against arm A, which differs only by the settlement, B removes 7 of 9 recorded firings and loses one planted contradiction. No arm reaches the recall floor of 60",
  "bar": {
   "recorded_total": 46,
   "recall_total": 60,
@@ -14094,5 +14094,33 @@
  },
  "spend_ceiling_usd": 1.0,
  "base_revision": "c5b7f76ed",
- "old_question_captured_from": "imas_codex/standard_names/review/jev_review.py at c5b7f76ed"
+ "old_question_captured_from": "imas_codex/standard_names/review/jev_review.py at c5b7f76ed",
+ "kept_arm_rationale": {
+  "bar_met": false,
+  "recall_floor": 60,
+  "recall_kept": 53,
+  "recorded_ceiling": 3,
+  "recorded_fires_kept": 2,
+  "row_level_delta_b_minus_a_recorded": {
+   "lost": 7,
+   "gained": 0,
+   "all_lost_via_settlement": true
+  },
+  "row_level_delta_b_minus_a_contradictions": {
+   "lost": 1,
+   "gained": 0
+  },
+  "alternative_arms": {
+   "a": {
+    "recorded_still_fire": 9,
+    "recall": 54
+   },
+   "c": {
+    "recorded_still_fire": 5,
+    "recall": 55,
+    "note": "best recall, precision leg not met"
+   }
+  },
+  "recall_floor_reachability": "no arm carrying the mandated label-only predicate reaches 60; the earlier 60 of 60 for the base question was measured by a first run whose question table was truncated to the first row's claim count, so claims past that index were never asked and scored as not fired. The corrected harness is the one reported here."
+ }
 }
