@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T20:30:45.518Z",
+  "dispatched_at": "2026-10-23T19:59:13Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/holds.py",
+      "line": "104",
+      "severity": "non-blocking",
+      "text": "sync_holds accepts raise_fn/clear_fn override parameters that exist only to preserve caller-module monkeypatching; a future caller can pass a different writer and reintroduce the drift the node removes, and the parameters are undocumented (typed Any)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T192008106471-srtj-holds-sync-owner/manifest.md",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "The recorded gate names six test files, but tests/standard_names/test_docs_contradiction_veto.py:151, tests/standard_names/test_bare_doc_link_normalize.py:264 and tests/standard_names/test_doc_link_accept_gate.py:36 patch clear_holds_not_raised on the boundary this change reroutes, and none of those arms appear in a base or head log, so a regression at the injected boundary in that path is unmeasured."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is one sync function owning every review-hold raise-and-clear across three sites; imas_codex/standard_names/review/holds.py:98 adds sync_holds and all three callers route through it, with the routing returning before the call for a non-decided axis at cascade.py:380.\nVERDICT done_when: the done_when requires one owner, the three inline loops gone, tests committed, no added failures against main, and an evidence fragment recording each site and control; the manifest and fragment record base 18 failed/127 passed vs head 18 failed/128 passed default, and 18 vs 19 graph, with identical failure IDs.\nVERDICT write_paths: the manifest declares holds.py, cascade.py, pipeline.py, graph_ops.py, test_review_holds.py, test_review_cascade.py and the evidence fragment; git diff 65c2d7cc9..34bb6f97e touches exactly those seven paths and nothing else.\nVERDICT manifest: read at 34bb6f97e; status complete, four commits listed (57cefb84f, a0e0241f6, 0e99b40ab, 34bb6f97e), a literal tests: command, base_suite and after_suite JSON, and negative controls naming negative-clear-graph.log, negative-axis.log and negative-quarantine-graph.log.\nVERDICT diff: read commit by commit against 65c2d7cc9; 57cefb84f centralizes the three loops into holds.sync_holds, a0e0241f6 adds raise_fn/clear_fn passthroughs so caller-module patches still bind, 0e99b40ab fixes the consumer-predicate and claim tests plus adds the axis-guard test, and 34bb6f97e adds the evidence fragment only.\nCALL_SITES: imas_codex/standard_names/workers.py:9061, imas_codex/standard_names/workers.py:11187, imas_codex/standard_names/promote.py:775, imas_codex/standard_names/review/pipeline.py:2234\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/holds.py:98 sync_holds now owns the raise-then-clear sequence and git grep shows no clear_holds_not_raised call outside holds.py and tests, so the three-copy defect the goal names is gone.\nSCORE evidence: 16\nJUSTIFICATION evidence: base-default.log and final-default.log carry identical 18-failure id sets (added_failure_count 0) and base-graph.log/final-graph.log show 18 vs 19 passed, but the six-file gate omits test_docs_contradiction_veto.py and test_bare_doc_link_normalize.py, which patch the same hold writers the change reroutes.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 65c2d7cc9..34bb6f97e lists exactly the seven declared write paths, with the final commit 34bb6f97e being the evidence HTML alone.\nSCORE durability: 18\nJUSTIFICATION durability: test_deciding_name_pass_does_not_reconcile_docs_holds at tests/standard_names/test_review_cascade.py:579 reddens when the axis guard is removed (negative-axis.log:1 failed) and test_resolved_cascade_veto_clears_the_hold reddens when an inline loop drops its clear (negative-axis/negative-clear-graph.log), so both behaviours have a failing control.\nSCORE fit: 17\nJUSTIFICATION fit: holds.py:98 sync_holds and its docstring follow the module's mechanism-named idiom and introduce no plan, version or ticket identifier, though the raise_fn/clear_fn parameters are typed Any and undocumented.\nSCORE reuse: 20\nJUSTIFICATION reuse: sync_holds is the first owner of the raise-then-clear sequence; a search over imas_codex/standard_names found only the three inline copies it replaces, so it consolidates rather than forks a capability.\nFINDING imas_codex/standard_names/review/holds.py:104 non-blocking: sync_holds accepts raise_fn/clear_fn overrides that exist only to preserve caller-module monkeypatching, so a future caller can pass a different writer, reintroducing the drift the node removes unless the passthrough is understood as test-only.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T192008106471-srtj-holds-sync-owner/manifest.md:15 non-blocking: the recorded gate names six files but tests/standard_names/test_docs_contradiction_veto.py:151, test_bare_doc_link_normalize.py:264 and test_doc_link_accept_gate.py:36 patch clear_holds_not_raised on the very boundary the change reroutes, and those arms are not measured in either base or head log.\n",
+  "review_run_id": "r-20261023T195604468794-review-of-srtj-holds-sync-owner-34bb6f97e43d",
+  "reviewed_base_sha": "65c2d7cc9af4af88455d17e2407e1a10fe02c0f1",
+  "reviewed_head_sha": "34bb6f97e43d199c414d86d045b7e7504b6c34a0",
+  "reviewed_run_id": "r-20261023T192008106471-srtj-holds-sync-owner",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T20:32:05.122176+00:00",
+  "total": 110
+}
