@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="183">
+<meta name="plan-version" content="184">
 <meta name="plan-modified" content="2026-10-23">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -839,6 +839,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T051849520689-review-of-srtj-contradiction-veto-retune-d03430836ccd" data-who="reckon-build" data-when="2026-10-23T05:46:53.107Z">
     <div class="r-comment-body"><p>independent review of r-20261023T042559536781-srtj-contradiction-veto-retune at head d03430836ccd: the retune is landed in jev_review.py and is honest about its own failure, but it loses 28 of 60 planted true contradictions and still fires on 6 of the recorded firings, so the bar it was gated on is not met and the change should not be promoted as it stands; scores goal_fidelity 11, evidence 14, scope_discipline 19, durability 15, fit 17, reuse 19 (total 95), added failures 0.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T052651715570-review-of-srtj-docs-prose-link-check-e33277221dfe" data-who="reckon-build" data-when="2026-10-23T05:47:29.375Z">
+    <div class="r-comment-body"><p>reviewed r-20261023T043609157082-srtj-docs-prose-link-check at head e33277221dfec3b6440117ed5dcde9f2cd541309 against base c5b7f76ed429c79ee4797a2b202e3e9985a85e8e; verdict SOUND WITH FINDINGS, scores goal_fidelity 17, evidence 17, scope_discipline 20, durability 16, fit 19, reuse 20 (total 109), 0 added failures, with two follow-on findings (the _NUMERIC_INTERVAL_RE branch in doc_links.py:109 is unreachable and its test cannot redden on deleting it; score_documentation is called at audits.py:760 without documenting_name so the self-link rule does not fire in production) and no blocking finding.</p></div>
 </div>
 </section>
 </main>

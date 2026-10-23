@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/review/audits.py:760",
+    "imas_codex/standard_names/docs_holdout_eval.py:501",
+    "imas_codex/standard_names/docs_holdout_eval.py:512"
+  ],
+  "completed_at": "2026-10-23T05:47:29.375Z",
+  "dispatched_at": "2026-10-23T05:28:36Z",
+  "error": "",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/doc_links.py",
+      "line": "109",
+      "severity": "follow-on",
+      "text": "follow-on: the _NUMERIC_INTERVAL_RE branch is unreachable - line 107 returns False for any content with no ASCII letter and the regex itself contains none, so the named numeric-interval exclusion never executes and the interval test passes on the earlier return, leaving that line unguarded."
+    },
+    {
+      "file": "imas_codex/standard_names/review/audits.py",
+      "line": "760",
+      "severity": "follow-on",
+      "text": "follow-on: score_documentation is called without documenting_name, so the self-link rule added at docs_gates.py:557 never fires through cascade -> build_docs_audit_report -> run_documentation_gate_checks and the labelled self-link defects S0060 and S0071 are not caught live until the argument is wired; the worker records this as a follow-on."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both commits against base c5b7f76ed commit by commit: a977f43b2 changes doc_links.py (+46) and docs_gates.py (link_hygiene reworked to _link_hygiene_result, score_documentation gains documenting_name) and test_docs_gates.py (+90); e33277221 adds the runner, JSON and fragment.",
+    "done_when": "the done_when asks the changed gate to fail all 13 incumbent misses, refine all 19 link-defect rows and add no failure on the 30 acceptable ones; srtj-docs-prose-link-check.json bar records 13/13, 19/19, 0/30 with meets_bar true, and the manifest records base 32 passed / head 40 passed EXIT=0.",
+    "goal": "the node's goal is a deterministic link-hygiene check that fails a bracketed prose phrase and a name: link to the documented name; docs_gates.py:496-568 adds _bracketed_prose_phrase and _self_referential_link inside _link_hygiene_result, both reached from score_documentation.",
+    "manifest": "read; it states status complete, records the gate commands, both suite results and the negative control, and names the unwired self-link wiring as a follow-on.",
+    "write_paths": "read the manifest's six declared paths; the base..head diff touches exactly those six files and no other."
+  },
+  "justifications": {
+    "durability": "negative-control.log reddens test_bracketed_prose_phrase_fails_hygiene_naming_the_phrase when _bracketed_prose_phrase is reverted, but the numeric-interval test at test_docs_gates.py:461 cannot redden on deleting the _NUMERIC_INTERVAL_RE branch it appears to guard.",
+    "evidence": "srtj-docs-prose-link-check.json records the bar (13/13, 19/19, 0/30) with four positive controls, and gate-base.log and gate-head.log carry real EXIT=0 lines at their named revisions.",
+    "fit": "doc_links.py:96-136 follows the module's tuple-returning scanner idiom and reuses _masked_spans, and the naming checks over the three changed source and test files return clean.",
+    "goal_fidelity": "docs_gates.py:557 and :561 add both rules and name the offender in the reason, but audits.py:760 calls score_documentation without documenting_name, so the self-link rule does not fire in production.",
+    "reuse": "find_prose_bracket_phrases extends doc_links.py, the module that owns the one link parser, and a search of imas_codex for an existing prose-bracket or unit-bracket owner found none.",
+    "scope_discipline": "all six files in the diff at c5b7f76ed..e33277221 are inside the manifest's declared write paths and nothing outside the goal is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a deterministic link-hygiene check that fails a bracketed prose phrase and a name: link to the documented name; docs_gates.py:496-568 adds _bracketed_prose_phrase and _self_referential_link inside _link_hygiene_result, both reached from score_documentation.\nVERDICT done_when: the done_when asks the changed gate to fail all 13 incumbent misses, refine all 19 link-defect rows and add no failure on the 30 acceptable ones; srtj-docs-prose-link-check.json bar records 13/13, 19/19, 0/30 with meets_bar true, and the manifest records base 32 passed / head 40 passed EXIT=0.\nVERDICT write_paths: read the manifest's six declared paths; the base..head diff touches exactly those six files and no other.\nVERDICT manifest: read; it states status complete, records the gate commands, both suite results and the negative control, and names the unwired self-link wiring as a follow-on.\nVERDICT diff: read both commits against base c5b7f76ed commit by commit: a977f43b2 changes doc_links.py (+46) and docs_gates.py (link_hygiene reworked to _link_hygiene_result, score_documentation gains documenting_name) and test_docs_gates.py (+90); e33277221 adds the runner, JSON and fragment.\nCALL_SITES: imas_codex/standard_names/review/audits.py:760, imas_codex/standard_names/docs_holdout_eval.py:501, imas_codex/standard_names/docs_holdout_eval.py:512\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs_gates.py:557 and :561 add both rules and name the offender in the reason, but audits.py:760 calls score_documentation without documenting_name, so the self-link rule does not fire in production.\nSCORE evidence: 17\nJUSTIFICATION evidence: srtj-docs-prose-link-check.json records the bar (13/13, 19/19, 0/30) with four positive controls, and gate-base.log and gate-head.log carry real EXIT=0 lines at their named revisions.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all six files in the diff at c5b7f76ed..e33277221 are inside the manifest's declared write paths and nothing outside the goal is touched.\nSCORE durability: 16\nJUSTIFICATION durability: negative-control.log reddens test_bracketed_prose_phrase_fails_hygiene_naming_the_phrase when _bracketed_prose_phrase is reverted, but the numeric-interval test at test_docs_gates.py:461 cannot redden on deleting the _NUMERIC_INTERVAL_RE branch it appears to guard.\nSCORE fit: 19\nJUSTIFICATION fit: doc_links.py:96-136 follows the module's tuple-returning scanner idiom and reuses _masked_spans, and the naming checks over the three changed source and test files return clean.\nSCORE reuse: 20\nJUSTIFICATION reuse: find_prose_bracket_phrases extends doc_links.py, the module that owns the one link parser, and a search of imas_codex for an existing prose-bracket or unit-bracket owner found none.\nFINDING imas_codex/standard_names/doc_links.py:109 follow-on: the _NUMERIC_INTERVAL_RE branch is unreachable - line 107 returns False for any content with no ASCII letter and the regex itself contains none, so the named numeric-interval exclusion never executes and the interval test passes on the earlier return, leaving that line unguarded.\nFINDING imas_codex/standard_names/review/audits.py:760 follow-on: score_documentation is called without documenting_name, so the self-link rule added at docs_gates.py:557 never fires through cascade -> build_docs_audit_report -> run_documentation_gate_checks and the labelled self-link defects S0060 and S0071 are not caught live until the argument is wired; the worker records this as a follow-on.",
+  "review_run_id": "r-20261023T052651715570-review-of-srtj-docs-prose-link-check-e33277221dfe",
+  "reviewed_base_sha": "c5b7f76ed429c79ee4797a2b202e3e9985a85e8e",
+  "reviewed_head_sha": "e33277221dfec3b6440117ed5dcde9f2cd541309",
+  "reviewed_run_id": "r-20261023T043609157082-srtj-docs-prose-link-check",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T05:41:52.996918+00:00",
+  "total": 109
+}
