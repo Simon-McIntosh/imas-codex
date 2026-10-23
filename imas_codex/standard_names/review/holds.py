@@ -156,16 +156,12 @@ def _promote_if_eligible(client: Any, name_id: str, axis: str) -> None:
     if axis != "docs":
         return
     client.query(
-        """
-        MATCH (sn:StandardName {id: $name_id})
+        f"""
+        MATCH (sn:StandardName {{id: $name_id}})
         WHERE sn.docs_stage = 'reviewed'
-          AND sn.reviewer_score_docs >= $min_score
           AND sn.docs_review_quorum_shortfall IS NULL
-          AND NOT EXISTS {
-              MATCH (sn)-[:HAS_HOLD]->(hold:ReviewHold)
-              WHERE hold.axis = 'docs' AND hold.status = 'open'
-          }
-        SET sn.docs_stage = 'accepted', sn.updated_at = datetime()
+          AND {docs_acceptance_where()}
+        SET sn.updated_at = datetime(), {docs_acceptance_set()}
         RETURN sn.id AS id
         """,
         name_id=name_id,
@@ -206,6 +202,17 @@ def has_open_docs_hold_where(alias: str = "sn") -> str:
 def docs_acceptance_where(alias: str = "sn") -> str:
     """Cypher fragment shared by acceptance decisions and downstream readers."""
     return f"({alias}.reviewer_score_docs >= $min_score AND NOT {has_open_docs_hold_where(alias)})"
+
+
+def docs_acceptance_set(alias: str = "sn") -> str:
+    """Apply acceptance and resolve an open edit in the same graph write."""
+    if not alias.isidentifier():
+        raise ValueError("Cypher alias must be an identifier")
+    return (
+        f"{alias}.docs_stage = 'accepted', "
+        f"{alias}.edit_status = CASE WHEN {alias}.edit_status = 'open' "
+        f"THEN 'applied' ELSE {alias}.edit_status END"
+    )
 
 
 def docs_accepted(

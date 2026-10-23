@@ -194,6 +194,17 @@ def test_held_document_keeps_judged_score_and_is_not_accepted(
     assert len(holds.open_holds(planted_name, "docs")) == 1
 
 
+def test_unheld_review_acceptance_applies_open_edit(planted_name: str) -> None:
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (sn:StandardName {id: $id}) SET sn.edit_status = 'open'",
+            id=planted_name,
+        )
+    assert _review(planted_name) == "accepted"
+    assert _state(planted_name) == {"stage": "accepted", "score": 0.875}
+    assert _edit_status(planted_name) == "applied"
+
+
 def test_clearing_hold_accepts_passing_document(planted_name: str) -> None:
     with GraphClient() as graph:
         graph.query(

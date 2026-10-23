@@ -2082,7 +2082,8 @@ async def run_sn_pools(
         # later lowered, names that scored between the old and new thresholds
         # sit stuck at 'reviewed' — refine only claims BELOW-threshold names, so
         # a stored score that already clears the current threshold is never
-        # re-touched. Promote those (both name and docs axes) to 'accepted'.
+        # re-touched. Promote those (both name and docs axes) to 'accepted'
+        # only when the docs axis has no open review hold.
         # No-op when nothing is stranded. Names carrying an unapplied edit
         # (edit_status='open') are left for the normal accept path so their
         # rename / descendant cascade still applies.

@@ -49,6 +49,8 @@ from imas_codex.standard_names.provenance_lifecycle import (
 )
 from imas_codex.standard_names.review.holds import (
     clear_holds_not_raised,
+    docs_acceptance_set,
+    docs_acceptance_where,
     docs_accepted,
     has_open_docs_hold_where,
     open_holds,
@@ -12555,7 +12557,7 @@ PROMOTE_STRANDED_NAME_WHERE = (
 
 PROMOTE_STRANDED_DOCS_WHERE = (
     "sn.docs_stage = 'reviewed' "
-    "AND sn.reviewer_score_docs >= $min_score "
+    f"AND {docs_acceptance_where()} "
     "AND sn.name_stage = 'accepted' "
     "AND coalesce(sn.validation_status, '') <> 'quarantined' "
     f"AND {docs_review_eligibility_where()} "
@@ -12590,6 +12592,8 @@ def promote_stranded_reviewed(
       descendants atomically; a bare stage flip here would strand that cascade.
     * both axes exclude ``validation_status='quarantined'``.
     * docs axis requires ``name_stage='accepted'`` (docs is a post-name axis).
+    * docs axis excludes an open documentation hold even when its judged score
+      passes; an accepted open edit is marked applied with the stage write.
     * name axis excludes a recorded ``review_quorum_shortfall`` — a name held
       at ``'reviewed'`` because its reviewer chain never reached a verdict
       looks identical to one stranded by a lowered threshold, and its stored
@@ -12636,7 +12640,7 @@ def promote_stranded_reviewed(
             f"""
             MATCH (sn:StandardName)
             WHERE {docs_where}
-            SET sn.updated_at = datetime(), sn.docs_stage = 'accepted'
+            SET sn.updated_at = datetime(), {docs_acceptance_set()}
             RETURN count(sn) AS n
             """,
             min_score=min_score,
@@ -17944,13 +17948,13 @@ def persist_reviewed_docs(
                     )
 
                 new_edit_status = edit_status_before
-                if edit_status_before == "open":
-                    if target_stage == "accepted":
-                        new_edit_status = "applied"
-                    elif target_stage == "exhausted":
-                        new_edit_status = "exhausted"
-                    else:
-                        new_edit_status = "open"
+                if edit_status_before == "open" and target_stage == "exhausted":
+                    new_edit_status = "exhausted"
+                stage_assignments = (
+                    docs_acceptance_set()
+                    if target_stage == "accepted"
+                    else "sn.docs_stage = $target_stage, sn.edit_status = $new_edit_status"
+                )
 
                 comments_per_dim_json = (
                     _json.dumps(comments_per_dim)
@@ -17958,8 +17962,8 @@ def persist_reviewed_docs(
                     else None
                 )
                 write_rows = graph.query(
-                    """
-                    MATCH (sn:StandardName {id: $id})
+                    f"""
+                    MATCH (sn:StandardName {{id: $id}})
                     WHERE (($claim_seq IS NULL
                             AND (sn.claim_token = $token OR sn.claim_token IS NULL))
                            OR (sn.claim_token = $token
@@ -17976,8 +17980,7 @@ def persist_reviewed_docs(
                             CASE WHEN $quorum_shortfall IS NULL
                                  THEN null ELSE datetime() END,
                         sn.reviewed_docs_at = datetime(),
-                        sn.docs_stage = $target_stage,
-                        sn.edit_status = $new_edit_status,
+                        {stage_assignments},
                         sn.claim_token = null,
                         sn.claimed_at = null
                     RETURN sn.id AS id
