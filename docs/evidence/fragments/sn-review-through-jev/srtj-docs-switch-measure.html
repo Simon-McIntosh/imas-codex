@@ -1,0 +1,99 @@
+<h1>srtj-docs-switch-measure</h1>
+
+<p>
+Measurement of the decision <code>main</code>'s code would make on the 77 blind-labelled
+rows of the disagreement sheet if documentation decided by Jev, under the lead's ruling
+<em>add the link cap, then switch</em>. Node <code>srtj-docs-switch-measure</code>,
+revision <code>b26dece4b</code>, code unchanged. Artifacts: <code>srtj-docs-switch-measure.json</code>
+(written by <code>srtj-docs-switch-measure-run.py</code>, log ending <code>EXIT=0</code>).
+</p>
+
+<h2>Verdict</h2>
+
+<p><strong>No — the switched decision does not meet the bar, on either pass.</strong>
+All 19 link-defect rows are refined on both passes, but 4 acceptable rows are over-refined
+in pass A and 5 in pass B, so the switch would refine rows the paid panel judged sound.</p>
+
+<h2>Method</h2>
+
+<p>
+Each row was rebuilt the way the cascade expects it: documentation, name and unit from the
+sheet the labeller saw, the remainder (description, links, DD source text, related
+neighbours) from the archived export <code>record.archive</code>, loaded into a disposable
+scratch Neo4j. The sheet's documentation matched the archive for all 77 rows (0 mismatches),
+so the measurement runs on the text that distinguishes the switch. Each item then went
+through the product path: <code>review.cascade._docs_judgment</code> (state build, docs
+question table, <code>_route</code>) for the Jev route and any route hold, plus the
+error-severity lint findings (<code>run_house_style_checks</code> +
+<code>run_documentation_gate_checks</code>) that the lint cap in
+<code>review/pipeline.py</code> turns into a <code>docs_lint_error</code> hold.
+A row is accepted only when the route accepts <em>and</em> no hold is open. The Jev calls
+ran twice (model <code>typesafe/jev-1.13</code>).
+</p>
+
+<p>
+Positive control: the deterministic instrument fires on an injected bare snake_case bracket
+(<code>link_hygiene: bare bracket names a standard name but carries no link</code>), so the
+absences below are not an unrun instrument.
+</p>
+
+<h2>Per-class table, both passes</h2>
+
+<table>
+<tr><th>class</th><th>label</th><th>rows</th><th>accepted</th><th>refined</th><th>pass B accepted</th><th>pass B refined</th></tr>
+<tr><td>disagreement</td><td>acceptable</td><td>30</td><td>26</td><td>4</td><td>25</td><td>5</td></tr>
+<tr><td>disagreement</td><td>not acceptable</td><td>19</td><td>0</td><td>19</td><td>0</td><td>19</td></tr>
+<tr><td>control</td><td>acceptable</td><td>17</td><td>12</td><td>5</td><td>13</td><td>4</td></tr>
+<tr><td>control</td><td>not acceptable</td><td>11</td><td>0</td><td>11</td><td>0</td><td>11</td></tr>
+</table>
+
+<p>
+Bar rows only (the 49 disagreements): <strong>19 of 19</strong> link-defect rows refined on
+both passes; <strong>4 of 30</strong> acceptable rows refined in pass A and <strong>5 of 30</strong>
+in pass B. Bar met: pass A <strong>no</strong>, pass B <strong>no</strong>.
+The 28 controls are reported so over-refinement shows; they are not part of the bar.
+</p>
+
+<h2>How the 19 link defects were caught</h2>
+
+<p>
+Of the 19 defect rows, only 3 are refined by the Jev route itself. The other 16 are
+<b>accepted by the route and refined solely by the deterministic lint cap</b>. The cap, not
+the route, is carrying the link axis — which is exactly what the ruling "add the link cap,
+then switch" relies on, and it works: no defect row survives the switched decision.
+</p>
+
+<h2>Rows the switched decision gets wrong</h2>
+
+<table>
+<tr><th>sheet_id</th><th>pass</th><th>route</th><th>failed check / hold</th><th>reason</th></tr>
+<tr><td>S0010</td><td>A, B</td><td>refine</td><td><code>claim_contradicts_source</code> &rarr; <code>cascade_contradiction</code> hold</td><td>labelled acceptable: documents the flux-surface- and time-averaged normalized perturbed parallel field magnitude named</td></tr>
+<tr><td>S0031</td><td>A, B</td><td>refine</td><td><code>claim_contradicts_source</code> &rarr; <code>cascade_contradiction</code> hold</td><td>labelled acceptable: documents the toroidal ion charge-state momentum convection velocity named</td></tr>
+<tr><td>S0055</td><td>A, B</td><td>refine</td><td><code>claim_contradicts_source</code> &rarr; <code>cascade_contradiction</code> hold</td><td>labelled acceptable: documents the volume-integrated particle source rate named</td></tr>
+<tr><td>S0015</td><td>B</td><td>refine</td><td><code>claim_contradicts_source</code> &rarr; <code>cascade_contradiction</code> hold</td><td>labelled acceptable: documents the fusion-attributed heating power named</td></tr>
+<tr><td>S0062</td><td>A, B</td><td>accept</td><td>lint cap <code>docs_lint_error</code> (<code>defining_equation</code>)</td><td>labelled acceptable but the cap holds it: documentation lacks exactly one dimensionally checkable defining relation</td></tr>
+</table>
+
+<p>
+Two distinct mechanisms over-refine. The retuned contradiction veto still fires on 3
+acceptable rows in pass A and 4 in pass B (S0015 joins only in pass B, so the veto varies
+between runs). The lint cap falsely holds 1 of the 30 acceptable rows in both passes (S0062,
+a <code>defining_equation</code> error) — the same single false flag the earlier lint replay
+recorded.
+</p>
+
+<h2>Spend</h2>
+
+<p>
+Total <strong>&#36;0.02407</strong> (pass A &#36;0.012035, pass B &#36;0.012035) against the
+&#36;1.00 ceiling — 2.4 % of the authorized spend, bounded by the 154 Jev calls the two
+passes require and nothing else. No live graph write: the archive was loaded into a scratch
+instance, stopped and removed on exit (<code>scratch_removed.exists_after = false</code>).
+</p>
+
+<h2>Verdict</h2>
+
+<p><strong>Does the switched decision meet the bar on both passes? No.</strong>
+The link cap refines all 19 link defects on both passes, but the contradiction veto and one
+false <code>defining_equation</code> cap hold refine 4 (pass A) and 5 (pass B) of the 30
+acceptable rows, so the switch is not yet safe to land.</p>
