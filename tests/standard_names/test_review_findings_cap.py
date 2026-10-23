@@ -136,6 +136,14 @@ async def _run_docs_review(
         return {"id": f"{name_id}:{axis}:{kind}", "finding_key": kind}
 
     monkeypatch.setattr(pl, "raise_hold", record_hold)
+    # The cap reconciles as well as raises: a pass that finds no error clears a
+    # hold an earlier pass raised. Stub the writer so the pass runs without a
+    # graph and the clearing call is not an unrecorded graph write.
+    monkeypatch.setattr(
+        pl,
+        "clear_holds_not_raised",
+        lambda name_id, axis, kinds, raised_keys, *, graph=None: 0,
+    )
 
     def fake_render_prompt(prompt_name: str, context: dict) -> str:
         return "stub"
