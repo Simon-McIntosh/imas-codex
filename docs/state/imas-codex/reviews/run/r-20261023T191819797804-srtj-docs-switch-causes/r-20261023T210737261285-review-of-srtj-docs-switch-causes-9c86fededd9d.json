@@ -8,6 +8,13 @@
     "imas_codex/standard_names/review/jev_review.py:1091"
   ],
   "completed_at": "2026-10-23T21:24:00.351Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "srtj-docs-switch-causes",
+      "recorded_at": "2026-10-23T21:34:13.270288+00:00"
+    }
+  },
   "dispatched_at": "2026-10-23T21:09:18Z",
   "findings": [
     {
