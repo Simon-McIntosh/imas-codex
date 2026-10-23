@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-23T14:55:33.699Z",
+  "dispatched_at": "2026-10-23T14:21:34Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py",
+      "line": "155",
+      "severity": "non-blocking",
+      "text": "non-blocking: documentation_error_lint folds only run_house_style_checks and run_documentation_gate_checks, omitting run_lexical_lint and the registry-conformance family that run_lint_checks (imas_codex/standard_names/review/audits.py:778) gives run_all_audits, whose error findings _extract_error_lint_ids (imas_codex/standard_names/review/pipeline.py:1831) turns into the docs_lint_error hold; the reported accept counts are therefore an upper bound on production's, so measure the cap through its own composition."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure.html",
+      "line": "60",
+      "severity": "non-blocking",
+      "text": "non-blocking: the section on how the link defects were caught states 3 and 16 as the route-versus-lint split without naming a pass, but per_row shows pass B is 2 route-refined and 17 lint-only, so a per-pass figure is presented as pass-invariant."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure.html",
+      "line": "40",
+      "severity": "non-blocking",
+      "text": "non-blocking: no figure was produced although docs/figures/sn-review-through-jev/srtj-docs-switch-measure was a declared write path and sixteen sibling fragments in this family embed one, leaving over-refinement, the point of the report, to a table alone."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py",
+      "line": "190",
+      "severity": "non-blocking",
+      "text": "non-blocking: jev_pass converts any Jev call failure into route unjudged, which accepted() counts as a refinement, so an outage would be recorded as over-refinement and a failed bar rather than as an instrument failure; no row hit it on this run."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the single commit e62ea5654 against b26dece4b; it adds only srtj-docs-switch-measure-run.py (484 lines), srtj-docs-switch-measure.html (99 lines) and srtj-docs-switch-measure.json (1941 lines) and changes no product code, which matches the brief's statement that this node measures the decision the switch would make.",
+    "done_when": "The source done_when names the JSON written by its runner with a log ending EXIT=0, giving per-class counts for both passes, a named hold or route reason for every wrong row, spend under USD 1.00 and a statement on both bar halves; the run log srtj-docs-switch-measure.log ends with a bare EXIT=0, and srtj-docs-switch-measure.json carries passes.pass_a and passes.pass_b, wrong_rows with hold_reasons, spend_usd 0.02407 and verdict.meets_bar_both_passes false, so the gate measures the measure its done_when asserts.",
+    "goal": "The source brief asks whether Jev's documentation decision with review holds meets the lead's switch bar on the 77 blind-labelled rows; docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py measures exactly that, and srtj-docs-switch-measure.json records the per-class accept and refine counts for both Jev passes with payload.verdict.meets_bar_both_passes false.",
+    "manifest": "Read the source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T130235070374-srtj-docs-switch-measure/manifest.md; status complete, commit e62ea5654, the three changed paths, the literal runner command with its EXIT=0 log, and a checkpoint disclosing that the committed runner was reformatted by ruff after the measured run with the committed JSON from the pre-format revision.",
+    "write_paths": "The source node declares four write paths, the runner, the HTML, the JSON and docs/figures/sn-review-through-jev/srtj-docs-switch-measure; git show --name-only e62ea5654c3fd7993119586b1f20e3f13532d558 lists exactly three files and every one of them is inside that scope."
+  },
+  "justifications": {
+    "durability": "srtj-docs-switch-measure-run.py:335 raises when the injected bare-bracket control fails to make the deterministic instrument fire, but nothing falsifies the Jev-route half and :190 turns a failed call into route unjudged, which :211 counts as a refinement.",
+    "evidence": "srtj-docs-switch-measure.json carries both passes' per-class counts, wrong_rows with named route and lint hold reasons, spend_usd 0.02407 and positive_controls.instrument_fires_on_injected_bracket true, and the gate log ends EXIT=0.",
+    "fit": "the runner follows the idiom of its siblings such as docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py, though its own path carries the plan abbreviation the repository naming rule forbids, inherited from the coordinator-assigned path.",
+    "goal_fidelity": "srtj-docs-switch-measure-run.py:207-211 accepts a row only when the product route accepts and no hold is open, and :186 calls the product path cascade._docs_judgment so the route carries _route's own holds.",
+    "reuse": "srtj-docs-switch-measure-run.py:154-167 re-composes the lint cap from run_house_style_checks and run_documentation_gate_checks alone, duplicating in a narrower form the composition that imas_codex/standard_names/review/audits.py:778 run_lint_checks owns.",
+    "scope_discipline": "git show --name-only e62ea5654 lists only the runner, the HTML and the JSON, all inside the declared write paths, with no product or schema file touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks whether Jev's documentation decision with review holds meets the lead's switch bar on the 77 blind-labelled rows; docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py measures exactly that, and srtj-docs-switch-measure.json records the per-class accept and refine counts for both Jev passes with payload.verdict.meets_bar_both_passes false.\nVERDICT done_when: The source done_when names the JSON written by its runner with a log ending EXIT=0, giving per-class counts for both passes, a named hold or route reason for every wrong row, spend under USD 1.00 and a statement on both bar halves; the run log srtj-docs-switch-measure.log ends with a bare EXIT=0, and srtj-docs-switch-measure.json carries passes.pass_a and passes.pass_b, wrong_rows with hold_reasons, spend_usd 0.02407 and verdict.meets_bar_both_passes false, so the gate measures the measure its done_when asserts.\nVERDICT write_paths: The source node declares four write paths, the runner, the HTML, the JSON and docs/figures/sn-review-through-jev/srtj-docs-switch-measure; git show --name-only e62ea5654c3fd7993119586b1f20e3f13532d558 lists exactly three files and every one of them is inside that scope.\nVERDICT manifest: Read the source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T130235070374-srtj-docs-switch-measure/manifest.md; status complete, commit e62ea5654, the three changed paths, the literal runner command with its EXIT=0 log, and a checkpoint disclosing that the committed runner was reformatted by ruff after the measured run with the committed JSON from the pre-format revision.\nVERDICT diff: Read the single commit e62ea5654 against b26dece4b; it adds only srtj-docs-switch-measure-run.py (484 lines), srtj-docs-switch-measure.html (99 lines) and srtj-docs-switch-measure.json (1941 lines) and changes no product code, which matches the brief's statement that this node measures the decision the switch would make.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: srtj-docs-switch-measure-run.py:207-211 accepts a row only when the product route accepts and no hold is open, and :186 calls the product path cascade._docs_judgment so the route carries _route's own holds.\nSCORE evidence: 18\nJUSTIFICATION evidence: srtj-docs-switch-measure.json carries both passes' per-class counts, wrong_rows with named route and lint hold reasons, spend_usd 0.02407 and positive_controls.instrument_fires_on_injected_bracket true, and the gate log ends EXIT=0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --name-only e62ea5654 lists only the runner, the HTML and the JSON, all inside the declared write paths, with no product or schema file touched.\nSCORE durability: 13\nJUSTIFICATION durability: srtj-docs-switch-measure-run.py:335 raises when the injected bare-bracket control fails to make the deterministic instrument fire, but nothing falsifies the Jev-route half and :190 turns a failed call into route unjudged, which :211 counts as a refinement.\nSCORE fit: 16\nJUSTIFICATION fit: the runner follows the idiom of its siblings such as docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py, though its own path carries the plan abbreviation the repository naming rule forbids, inherited from the coordinator-assigned path.\nSCORE reuse: 5\nJUSTIFICATION reuse: srtj-docs-switch-measure-run.py:154-167 re-composes the lint cap from run_house_style_checks and run_documentation_gate_checks alone, duplicating in a narrower form the composition that imas_codex/standard_names/review/audits.py:778 run_lint_checks owns.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py:155 non-blocking: documentation_error_lint folds only run_house_style_checks and run_documentation_gate_checks, omitting run_lexical_lint and the registry-conformance family that run_lint_checks (imas_codex/standard_names/review/audits.py:778) gives run_all_audits, whose error findings _extract_error_lint_ids (imas_codex/standard_names/review/pipeline.py:1831) turns into the docs_lint_error hold; the reported accept counts are therefore an upper bound on production's, so measure the cap through its own composition.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure.html:60 non-blocking: the section on how the link defects were caught states 3 and 16 as the route-versus-lint split without naming a pass, but per_row shows pass B is 2 route-refined and 17 lint-only, so a per-pass figure is presented as pass-invariant.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure.html:40 non-blocking: no figure was produced although docs/figures/sn-review-through-jev/srtj-docs-switch-measure was a declared write path and sixteen sibling fragments in this family embed one, leaving over-refinement, the point of the report, to a table alone.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py:190 non-blocking: jev_pass converts any Jev call failure into route unjudged, which accepted() counts as a refinement, so an outage would be recorded as over-refinement and a failed bar rather than as an instrument failure; no row hit it on this run.",
+  "review_run_id": "r-20261023T135648253164-review-of-srtj-docs-switch-measure-e62ea5654c3f",
+  "reviewed_base_sha": "b26dece4b062795f69001e4cc1900697431e259e",
+  "reviewed_head_sha": "e62ea5654c3fd7993119586b1f20e3f13532d558",
+  "reviewed_run_id": "r-20261023T130235070374-srtj-docs-switch-measure",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-23T14:46:05.827512+00:00",
+  "total": 88
+}
