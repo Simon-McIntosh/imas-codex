@@ -1,0 +1,37 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T23:44:46.620Z",
+  "dispatched_at": "2026-10-24T23:39:18Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_review_write.py",
+      "line": 79,
+      "severity": "non-blocking",
+      "text": "The 38-file gate omits test files that import a moved symbol from the graph_ops facade and therefore exercise the new forwarders at runtime: this file imports write_reviews from graph_ops but is not in gate-logs/targets.txt, and an independent name scan finds 41 such files absent from the gate list (including test_property_coverage_helper.py:49, which asserts graph_ops.property_coverage exists). The patch-target criterion the brief states does not cover them, so the forwarder's services injection is exercised at runtime by only part of its callers."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step14.html",
+      "line": 5,
+      "severity": "non-blocking",
+      "text": "The boundary paragraph states the new module 'imports graph_foundation and no other graph storage module', but graph_catalog.py imports no graph storage module at all: it has no graph_foundation import and takes GraphClient, GraphSchema and retry_on_deadlock directly from imas_codex.graph.client, imas_codex.graph.schema and imas_codex.discovery.base.claims, matching the sibling storage modules."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261024T233835792028-review-of-srtj-graph-ops-split-step14-51824f5a01d1",
+  "reviewed_base_sha": "4b1547251efb724fc264f2845c0891b466faf093",
+  "reviewed_head_sha": "51824f5a01d156d5fe4de7431b629968d2d137fb",
+  "reviewed_run_id": "r-20261024T224528278651-srtj-graph-ops-split-step14",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T23:45:39.386616+00:00",
+  "total": 107
+}
