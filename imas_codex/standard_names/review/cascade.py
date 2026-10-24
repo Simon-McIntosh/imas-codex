@@ -607,10 +607,6 @@ async def _docs_judgment(
     if not results or results[0] is None:
         raise ValueError("no usable judgment for documentation review")
     answers, _ = results[0]
-    answers, recheck_cost, _rechecked = await jev_review.ask_again_at_the_cutoff(
-        state, checks, answers, model=model
-    )
-    batch_cost += recheck_cost
     related = item.get("sibling_names") or []
     audit = jev_review.build_docs_audit_report(
         item, catalog_names=[item], known_ids={str(item["id"]), *map(str, related)}
