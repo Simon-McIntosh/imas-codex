@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import ExitStack
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -16,15 +17,27 @@ _GO = "imas_codex.standard_names.graph_ops"
 _LOOP = "imas_codex.standard_names.loop"
 
 
-def _graph_context() -> tuple[MagicMock, MagicMock]:
+def _graph_context(
+    scope_rows: list[dict[str, Any]] | None = None,
+    scope_error: Exception | None = None,
+) -> tuple[MagicMock, MagicMock]:
+    """A graph double, with the scope query answering *scope_rows*.
+
+    The drift refresh resolves the run's own names first, so its answer is
+    the one a caller can vary: an id row is a readable scope, no rows is an
+    empty one, and a row without an id is an answer the selector cannot use.
+    """
     graph = MagicMock()
-    # The drift refresh resolves the run's own names first; a row with no id
-    # would make the scope unreadable and the refresh correctly skip itself.
-    graph.query.side_effect = lambda cypher, **kw: (
-        [{"id": "scoped_name"}]
-        if "RETURN DISTINCT sn.id AS id" in cypher
-        else [{"cnt": 1}]
-    )
+    rows = [{"id": "scoped_name"}] if scope_rows is None else scope_rows
+
+    def _answer(cypher: str, **kwargs: Any) -> list[dict[str, Any]]:
+        if "RETURN DISTINCT sn.id AS id" not in cypher:
+            return [{"cnt": 1}]
+        if scope_error is not None:
+            raise scope_error
+        return rows
+
+    graph.query.side_effect = _answer
     context = MagicMock()
     context.__enter__.return_value = graph
     context.__exit__.return_value = False
@@ -125,9 +138,16 @@ async def _run_loop(
     skip_global_maintenance: bool,
     terminal_residue: dict | None = None,
     catalog_status: dict[str, int] | None = None,
+    scope_run_id: str | None = "bounded-run",
+    scope_rows: list[dict[str, Any]] | None = None,
+    graph_error: Exception | None = None,
 ):
-    """Run the orchestrator with graph and worker boundaries mocked."""
-    graph_context, _ = _graph_context()
+    """Run the orchestrator with graph and worker boundaries mocked.
+
+    *scope_run_id* of ``None`` runs unscoped. *scope_rows* and *graph_error*
+    drive what the drift refresh's scope read answers, or how it fails.
+    """
+    graph_context, _ = _graph_context(scope_rows, graph_error)
     with ExitStack() as stack:
         maintenance = _maintenance_mocks(stack)
         if catalog_status is not None:
@@ -201,7 +221,7 @@ async def _run_loop(
         stop.set()
         summary = await run_sn_pools(
             cost_limit=5.0,
-            scope_run_id="bounded-run",
+            scope_run_id=scope_run_id,
             stop_event=stop,
             skip_global_maintenance=skip_global_maintenance,
         )
