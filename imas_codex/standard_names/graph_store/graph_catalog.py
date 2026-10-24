@@ -1294,7 +1294,7 @@ def _winning_review_resolution_methods(
     import yaml
 
     if schema_path is None:
-        schema_path = Path(__file__).parents[1] / "schemas" / "standard_name.yaml"
+        schema_path = Path(__file__).parents[2] / "schemas" / "standard_name.yaml"
     schema = yaml.safe_load(schema_path.read_text(encoding="utf-8"))
     enum = schema["enums"]["ReviewResolutionMethod"]
     permissible = frozenset(enum["permissible_values"])
@@ -1322,7 +1322,7 @@ def _non_winning_review_resolution_methods(
     """Return schema enum values not admitted as winning methods."""
     import yaml
 
-    schema_path = Path(__file__).parents[1] / "schemas" / "standard_name.yaml"
+    schema_path = Path(__file__).parents[2] / "schemas" / "standard_name.yaml"
     schema = yaml.safe_load(schema_path.read_text(encoding="utf-8"))
     permissible = frozenset(
         schema["enums"]["ReviewResolutionMethod"]["permissible_values"]
