@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T07:03:06.481Z",
+  "dispatched_at": "2026-10-24T06:50:33Z",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "353",
+      "severity": "non-blocking",
+      "text": "_free_port_pair fixes a real defect -- two sockets held at once so the pair cannot collide -- but nothing exercises it: reverting to the two sequential _free_port() calls leaves every gate green, and the evidence page states the pair 'cannot collide' as a measured property. The claim is unguarded, so the durability of the fix rests on reading the code rather than on an assertion."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_review_holds.py",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "This file and tests/standard_names/test_bare_doc_link_normalize.py:100 each still define _free_port() and call it twice in a row (test_review_holds.py:39), which is exactly the same-port hazard the landed _free_port_pair was written to remove; test_review_holds.py is in the node's own gate, so the hazard stays live in a file that gate runs. Both are outside the declared write paths and are already recorded under outside_scope, so the repair belongs to a follow-on node."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "447",
+      "severity": "non-blocking",
+      "text": "The attach branch honours a supplied IMAS_CODEX_TEST_NEO4J_URI but then forces NEO4J_PASSWORD to the empty string rather than neo4j_test_password() from conftest.py:393, so a supplied disposable endpoint that requires the password the rest of tests/standard_names/ reads (30-odd files use IMAS_CODEX_TEST_NEO4J_PASSWORD) would have every bare GraphClient() authenticate with an empty credential. It is correct for the auth-free instance start_temp_neo4j writes (imas_codex/graph/temp_neo4j.py:129 disables auth) and wrong for any other, and nothing states which the attach branch assumes."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_source_refresh.py",
+      "line": "463",
+      "severity": "non-blocking",
+      "text": "The default-tier arm builds its address as bolt://localhost:{_project_bolt_port()} and conftest.py:317 builds the guard's loopback spelling from the same resolve_neo4j(auto_tunnel=False) port, so a change to that resolver moves both sides of the assertion together; the scheduled arm at :495 compensates by reading the host from squeue rather than from the resolver, which is why the pair still catches the loopback-only regression, but the default arm alone does not stand independent of the guard it tests."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "imas_codex/cli/graph/data.py:134 (start_temp_neo4j caller, load_dump defaulted to True so its behaviour is unchanged), imas_codex/graph/temp_neo4j.py:794 and :836 (filter_dump and create_facility_dump local fallbacks, same default), plus the owners the fixture consumes unchanged: imas_codex/graph/profiles.py:380 resolve_neo4j and imas_codex/remote/locations.py:213 resolve_service_url; the added fixtures and refusal are reached only from tests/standard_names/, so no production module calls them.",
+    "diff": "Read commit by commit against fa65d7c71; 3d790d606 adds the fixture family to tests/standard_names/conftest.py, 7351413cb adds the refusal and its test, 0cf3e4489 widens the refusal to both address spellings and adds the scheduled arm, f3f8ba9c3 routes the launch through temp_neo4j and adds SyntheticDDResolutionReader, b3c566ff3 adds _free_port_pair and the failed-start test, f124bfe87 changes only the evidence page (9 insertions, 2 deletions).",
+    "done_when": "The done_when (brief.md 'Gate' and 'Done when') asks for one graph command over the three files with the five drift tests passing rather than skipping, the same command at base, a logged refusal control, and an evidence page recording both arms; logs/head-graph.log:11-15 shows the five drift ids PASSED and :54 the totals '25 passed, 37 deselected' with EXIT=0 at b3c566ff3, logs/base-graph.log ends '19 passed ... 5 errors' with EXIT=1, and logs/head-default.log 37 passed / logs/base-default.log 35 passed both EXIT=0 give 0 added failures.",
+    "goal": "The node goal is one disposable-Neo4j convention owned in one place, built on imas_codex/graph/temp_neo4j.py, that starts or attaches an instance, names the endpoint in both NEO4J_URI and IMAS_CODEX_TEST_NEO4J_URI, and refuses the live graph (brief.md 'What to change'); tests/standard_names/conftest.py:414 disposable_neo4j_uri does all four, its launch now goes through imas_codex/graph/temp_neo4j.py:207 start_temp_neo4j with load_dump=False at conftest.py:382, and both files' local guards are deleted (test_source_refresh.py no longer defines disposable_neo4j; test_panel_audit_sample.py:704 delegates to disposable_neo4j_empty).",
+    "manifest": "Read manifest.md in the reviewed run directory; it records the literal head graph command with absolute paths and basetemp, the six commits, four gate logs at head and base, four negative-control arms, and the reason for splitting the refusal tests by tier, but it carries no baseline_suite/after_suite keys, so added_failure_count here is derived from logs/base-default.log and logs/head-default.log, and its checkpoint line ('a committed test holds it') overstates the port pair, which no test exercises.",
+    "write_paths": "The diff touches imas_codex/graph/temp_neo4j.py, tests/standard_names/conftest.py, tests/standard_names/test_source_refresh.py, tests/standard_names/test_panel_audit_sample.py and docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html, every one inside the write paths the reviewed manifest declares (orientation_write_paths), with temp_neo4j's entry recorded as the coordinator's deliberate widening in manifest evidence_inputs and blockers."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_source_refresh.py:463 and :495 redden when the refusal is a no-op (logs/negative-control-guard-removed.log, 2 failed) and when only the loopback spelling is collected (:495, logs/negative-control-loopback-only-guard.log, DID NOT RAISE), and test_source_refresh.py:513 reddens when the owner's stop is removed (logs/negative-control-start-cleanup-removed.log, 1 failed); tests/standard_names/conftest.py:353 _free_port_pair has no such assertion.",
+    "evidence": "logs/head-graph.log:10-15 is the named gate with the five drift tests PASSED and :54 its 25-passed EXIT=0 totals against logs/base-graph.log's 5 setup errors, and the gate ran at b3c566ff3 rather than at f124bfe87, which is acceptable only because f124bfe87 is docs-only (git show --stat f124bfe87: one HTML file).",
+    "fit": "The changed files pass the repository's own linter (`ruff check` on all four: 'All checks passed'), the fixture follows the module's existing conftest idiom, and the two unusual choices (importing helpers from tests/standard_names/conftest and driving the fixture generator body at test_source_refresh.py:456) are documented in the code they appear in.",
+    "goal_fidelity": "tests/standard_names/conftest.py:444-451 sets NEO4J_URI, NEO4J_PASSWORD, IMAS_CODEX_TEST_NEO4J_URI and IMAS_CODEX_TEST_NEO4J_EPHEMERAL together and restores them at :466-471, so a bare GraphClient() and an explicitly addressed one reach the same instance, which is the whole goal.",
+    "reuse": "The launch is no longer a copy: conftest.py:382 calls imas_codex/graph/temp_neo4j.py:207, whose empty-instance keyword and directory creation this change added, and the address lookup reuses resolve_neo4j and resolve_service_url rather than re-deriving them; _free_port_pair at conftest.py:353 nevertheless adds a third free-port helper beside tests/standard_names/test_review_holds.py:25 and tests/standard_names/test_bare_doc_link_normalize.py:100.",
+    "scope_discipline": "git diff --stat fa65d7c71..f124bfe87 lists the five files named in the manifest's orientation_write_paths and nothing else, and the evidence page carries no figure even though the figures directory was declared, so no undeclared path was written."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261024T064722630204-review-of-srtj-test-neo4j-uri-convention-f124bfe87c26",
+  "reviewed_base_sha": "fa65d7c71472f57ebf0ef8f65ac5d0615f6aa139",
+  "reviewed_head_sha": "f124bfe87c26e7142db679be0e07f12cf88a2162",
+  "reviewed_run_id": "r-20261023T193843392462-srtj-test-neo4j-uri-convention",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T07:05:08.369122+00:00",
+  "total": 104
+}
