@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_pool_orchestration_contracts.py::TestPoolLoopReleaseOnFailure::test_pool_loop_no_release_when_process_succeeds"
+  ],
+  "added_failures_note": "The single added id is a pytest timeout above 30 s in the 23-file importer arm, which ran 2.6 times slower than the base arm; rerunning that file at head passes 37 of 37 in 13.31 s with the named test at 0.30 s (logs/head_pool_contracts_retry.log), and the 28 failing ids are identical in both arms, so no regression is attributable to this change.",
+  "call_site_count": 8,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:7631 persist_refined_name",
+    "imas_codex/standard_names/workers.py:11765 _compute_embed_hash",
+    "imas_codex/standard_names/workers.py:11782 persist_embed_batch",
+    "imas_codex/standard_names/edit.py:3397 persist_refined_name",
+    "imas_codex/standard_names/promote.py:797 stage_docs_for_rescore",
+    "imas_codex/standard_names/loop.py:844 claim_refine_name_batch",
+    "imas_codex/standard_names/loop.py:390 claim_embed_batch",
+    "imas_codex/standard_names/loop.py:405 release_embed_claims"
+  ],
+  "completed_at": "2026-10-24T11:48:54.293Z",
+  "dispatched_at": "2026-10-24T11:27:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step12.html",
+      "line": "9",
+      "severity": "non-blocking",
+      "text": "the gate paragraph states the AST scan found one test file patching a moved symbol, but an independent scan finds six more (tests/standard_names/test_attachment_audit.py:1043, tests/standard_names/test_component_system.py:614, tests/standard_names/test_dup_guard_integration.py:130, tests/standard_names/test_pinned_rename_refine.py:503, tests/standard_names/test_refine_scope_continuity.py:127, tests/standard_names/test_sn_approve.py:399); none ran in either arm, so the brief's required selection is unmet even though the finding by inspection is that the forwarders keep those files passing."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+      "line": "776",
+      "severity": "non-blocking",
+      "text": "persist_refined_name now calls rename_preserves_meaning and _meaning_preservation_assertion as module-local names (also at :278, :1039, :1347, :1402, :1490), so patching graph_ops.<that symbol> no longer reaches it; the forwarders preserved the public patch surface but not the intra-module one."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step12.html",
+      "line": "10",
+      "severity": "non-blocking",
+      "text": "the sentence says head completed 28 failed, 344 passed on a rerun, but only tests/standard_names/test_pool_orchestration_contracts.py was rerun (logs/head_pool_contracts_retry.log, 37 passed), so it describes an arm-level rerun that was never performed."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T104718682950-srtj-graph-ops-split-step12/logs/base_cypher_property_check.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the base arm's header records revision ec4257ab3, the head revision, while its tree line names the base tree, so the base Cypher check's provenance cannot be read from its own header; its result matches the head arm (4 passed each), so no conclusion changes."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T104718682950-srtj-graph-ops-split-step12/logs/head_importers.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T104718682950-srtj-graph-ops-split-step12/logs/base_importers.log"
+  },
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/workers.py:7631 persist_refined_name, imas_codex/standard_names/workers.py:11765 _compute_embed_hash, imas_codex/standard_names/workers.py:11782 persist_embed_batch, imas_codex/standard_names/edit.py:3397 persist_refined_name, imas_codex/standard_names/promote.py:797 stage_docs_for_rescore, imas_codex/standard_names/loop.py:844 claim_refine_name_batch, imas_codex/standard_names/loop.py:390 claim_embed_batch, imas_codex/standard_names/loop.py:405 release_embed_claims",
+    "diff": "Read all three commits against base 8d88b14ee; ec4257ab3 moves 1690 lines of graph_ops.py into a 1665-line module with 20 symbols, 15 forwarders and 15 __wrapped__ bindings, and an AST source comparison of the 15 moved functions shows six bodies identical and nine changed only by threading services and resolving batch_size at call time; the two docs commits add and then correct the evidence fragment.",
+    "done_when": "The node's measure is no added failures over a gate the brief defines as tests/standard_names/test_refine_name_chain.py plus every test file patching a moved symbol, base and head from separate archive trees; logs/base__.log and logs/head__.log both end 99 passed EXIT=0, but the scan reported at docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step12.html:9 found one patching file where an independent AST scan finds six more (tests/standard_names/test_attachment_audit.py:1043, tests/standard_names/test_component_system.py:614, tests/standard_names/test_dup_guard_integration.py:130, tests/standard_names/test_pinned_rename_refine.py:503, tests/standard_names/test_refine_scope_continuity.py:127, tests/standard_names/test_sn_approve.py:399), and none of those ran in either arm.",
+    "goal": "The source brief asks for the graph_refinement symbols to move into graph_store/graph_refinement.py with graph_foundation as their only graph-store dependency, facade forwarders preserving every patch target, and the service object passed explicitly; imas_codex/standard_names/graph_store/graph_refinement.py:1-21 defines all 20 design-mapped symbols, and imas_codex/standard_names/graph_ops.py:6886-7025 carries the 15 forwarders plus 4 re-exports.",
+    "manifest": "The source manifest names commits ec4257ab3 (extraction), b9c1a503c (evidence) and ea8607bd2 (head-timeout correction), records the base and head importer results and the 37-of-37 rerun at logs/head_pool_contracts_retry.log, and claims the failing id sets are identical; comparing logs/base_importers.log with logs/head_importers.log, the base-only set is empty and the single head-only id is that named pytest timeout.",
+    "write_paths": "The brief grants imas_codex/standard_names/graph_ops.py, imas_codex/standard_names/graph_store/graph_refinement.py, imas_codex/graph/cypher_property_check.py and the evidence fragment; git diff 8d88b14ee3c667b6a199e517b4764ba13fac4242..ea8607bd2901666f742e7857330f844d48ef8e32 changes only the first, the second and the fragment, and cypher_property_check.py is unmodified with the reason recorded at srtj-graph-ops-split-step12-checks."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_cascade.py:977 fails if the persist_refined_name forwarder disappears and tests/standard_names/test_rename_meaning_preservation.py:95 fails if its __wrapped__ binding is dropped, but the six other files that assert the same surface were never run.",
+    "evidence": "logs/base__.log and logs/head__.log record 99 passed EXIT=0 on each side, but the gate ran one patching file where the brief required every one, so the recorded no-added-failure result does not cover the selection the brief names.",
+    "fit": "imas_codex/standard_names/graph_store/graph_refinement.py follows the shape of the eleven existing graph_store modules, each forwarder at imas_codex/standard_names/graph_ops.py:6907-7025 carries a one-line ownership docstring, and no added name carries a plan, stage or version identifier.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_refinement.py:1-21 holds all 20 design-mapped symbols with graph_foundation as its only graph_store import, and imas_codex/standard_names/graph_ops.py:6886-7025 keeps every existing patch target live through a documented forwarder.",
+    "reuse": "the search over imas_codex/standard_names found imas_codex/standard_names/graph_ops.py as the existing owner of refined-name persistence, and the change relocates that capability into graph_store rather than adding a second implementation, leaving one definition per symbol.",
+    "scope_discipline": "every path in git diff 8d88b14ee3c667b6a199e517b4764ba13fac4242..ea8607bd2901666f742e7857330f844d48ef8e32 is inside the declared write paths, and imas_codex/graph/cypher_property_check.py is untouched as the fragment explains."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks for the graph_refinement symbols to move into graph_store/graph_refinement.py with graph_foundation as their only graph-store dependency, facade forwarders preserving every patch target, and the service object passed explicitly; imas_codex/standard_names/graph_store/graph_refinement.py:1-21 defines all 20 design-mapped symbols, and imas_codex/standard_names/graph_ops.py:6886-7025 carries the 15 forwarders plus 4 re-exports.\nVERDICT done_when: The node's measure is no added failures over a gate the brief defines as tests/standard_names/test_refine_name_chain.py plus every test file patching a moved symbol, base and head from separate archive trees; logs/base__.log and logs/head__.log both end 99 passed EXIT=0, but the scan reported at docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step12.html:9 found one patching file where an independent AST scan finds six more (tests/standard_names/test_attachment_audit.py:1043, tests/standard_names/test_component_system.py:614, tests/standard_names/test_dup_guard_integration.py:130, tests/standard_names/test_pinned_rename_refine.py:503, tests/standard_names/test_refine_scope_continuity.py:127, tests/standard_names/test_sn_approve.py:399), and none of those ran in either arm.\nVERDICT write_paths: The brief grants imas_codex/standard_names/graph_ops.py, imas_codex/standard_names/graph_store/graph_refinement.py, imas_codex/graph/cypher_property_check.py and the evidence fragment; git diff 8d88b14ee3c667b6a199e517b4764ba13fac4242..ea8607bd2901666f742e7857330f844d48ef8e32 changes only the first, the second and the fragment, and cypher_property_check.py is unmodified with the reason recorded at srtj-graph-ops-split-step12-checks.\nVERDICT manifest: The source manifest names commits ec4257ab3 (extraction), b9c1a503c (evidence) and ea8607bd2 (head-timeout correction), records the base and head importer results and the 37-of-37 rerun at logs/head_pool_contracts_retry.log, and claims the failing id sets are identical; comparing logs/base_importers.log with logs/head_importers.log, the base-only set is empty and the single head-only id is that named pytest timeout.\nVERDICT diff: Read all three commits against base 8d88b14ee; ec4257ab3 moves 1690 lines of graph_ops.py into a 1665-line module with 20 symbols, 15 forwarders and 15 __wrapped__ bindings, and an AST source comparison of the 15 moved functions shows six bodies identical and nine changed only by threading services and resolving batch_size at call time; the two docs commits add and then correct the evidence fragment.\nCALL_SITES: imas_codex/standard_names/workers.py:7631 persist_refined_name, imas_codex/standard_names/workers.py:11765 _compute_embed_hash, imas_codex/standard_names/workers.py:11782 persist_embed_batch, imas_codex/standard_names/edit.py:3397 persist_refined_name, imas_codex/standard_names/promote.py:797 stage_docs_for_rescore, imas_codex/standard_names/loop.py:844 claim_refine_name_batch, imas_codex/standard_names/loop.py:390 claim_embed_batch, imas_codex/standard_names/loop.py:405 release_embed_claims\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_refinement.py:1-21 holds all 20 design-mapped symbols with graph_foundation as its only graph_store import, and imas_codex/standard_names/graph_ops.py:6886-7025 keeps every existing patch target live through a documented forwarder.\nSCORE evidence: 12\nJUSTIFICATION evidence: logs/base__.log and logs/head__.log record 99 passed EXIT=0 on each side, but the gate ran one patching file where the brief required every one, so the recorded no-added-failure result does not cover the selection the brief names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 8d88b14ee3c667b6a199e517b4764ba13fac4242..ea8607bd2901666f742e7857330f844d48ef8e32 is inside the declared write paths, and imas_codex/graph/cypher_property_check.py is untouched as the fragment explains.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_review_cascade.py:977 fails if the persist_refined_name forwarder disappears and tests/standard_names/test_rename_meaning_preservation.py:95 fails if its __wrapped__ binding is dropped, but the six other files that assert the same surface were never run.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/graph_store/graph_refinement.py follows the shape of the eleven existing graph_store modules, each forwarder at imas_codex/standard_names/graph_ops.py:6907-7025 carries a one-line ownership docstring, and no added name carries a plan, stage or version identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the search over imas_codex/standard_names found imas_codex/standard_names/graph_ops.py as the existing owner of refined-name persistence, and the change relocates that capability into graph_store rather than adding a second implementation, leaving one definition per symbol.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step12.html:9 non-blocking: the gate paragraph states the AST scan found one test file patching a moved symbol, but an independent scan finds six more (tests/standard_names/test_attachment_audit.py:1043, tests/standard_names/test_component_system.py:614, tests/standard_names/test_dup_guard_integration.py:130, tests/standard_names/test_pinned_rename_refine.py:503, tests/standard_names/test_refine_scope_continuity.py:127, tests/standard_names/test_sn_approve.py:399); none ran in either arm, so the brief's required selection is unmet even though the finding by inspection is that the forwarders keep those files passing.\nFINDING imas_codex/standard_names/graph_store/graph_refinement.py:776 non-blocking: persist_refined_name now calls rename_preserves_meaning and _meaning_preservation_assertion as module-local names (also at :278, :1039, :1347, :1402, :1490), so patching graph_ops.<that symbol> no longer reaches it; the forwarders preserved the public patch surface but not the intra-module one.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step12.html:10 non-blocking: the sentence says head completed 28 failed, 344 passed on a rerun, but only tests/standard_names/test_pool_orchestration_contracts.py was rerun (logs/head_pool_contracts_retry.log, 37 passed), so it describes an arm-level rerun that was never performed.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T104718682950-srtj-graph-ops-split-step12/logs/base_cypher_property_check.log:1 non-blocking: the base arm's header records revision ec4257ab3, the head revision, while its tree line names the base tree, so the base Cypher check's provenance cannot be read from its own header; its result matches the head arm (4 passed each), so no conclusion changes.\n",
+  "review_run_id": "r-20261024T112715604309-review-of-srtj-graph-ops-split-step12-ea8607bd2901",
+  "reviewed_base_sha": "8d88b14ee3c667b6a199e517b4764ba13fac4242",
+  "reviewed_head_sha": "ea8607bd2901666f742e7857330f844d48ef8e32",
+  "reviewed_run_id": "r-20261024T104718682950-srtj-graph-ops-split-step12",
+  "scores": {
+    "durability": 15,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T11:46:30.131293+00:00",
+  "total": 104
+}
