@@ -17,6 +17,13 @@
   ],
   "completed_at": "2026-10-24T11:48:54.293Z",
   "dispatched_at": "2026-10-24T11:27:51Z",
+  "finding_dispositions": {
+    "1": {
+      "kind": "folded",
+      "node": "srtj-graph-store-structure",
+      "recorded_at": "2026-10-24T20:10:33.726394+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step12.html",
