@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="256">
+<meta name="plan-version" content="257">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1091,6 +1091,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261024T202111088181-srtj-docs-cascade-switch" data-who="reckon-build" data-when="2026-10-24T20:40:22.244Z">
     <div class="r-comment-body"><p>`[sn-review].cascade-deciding` is now `true`, so Jev decides both review axes while `panel-audit-rate = 0.05` keeps the non-deciding panel audit, with a shipped-configuration test reading `cascade.deciding_enabled()` for both axes and `panel_audit.panel_audit_rate()` (base 80 passed / head 81 passed / 0 failures in both / negative control 1 failed, EXIT=1) — evidence at docs/evidence/fragments/sn-review-through-jev/srtj-docs-cascade-switch.html</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-docs-switch-landed" data-who="reckon-build" data-when="2026-10-24T21:00:00Z">
+    <div class="r-comment-body"><p>The documentation switch has landed (merge <code>a4461ab5e</code>, review 116). <code>cascade-deciding = true</code>, so Jev now decides both the name and documentation review axes. The paid panel audits 5% of decided items and decides none. A test pins the shipped setting through the cascade's own resolver. As the lead ruled, S0010 is the recorded precision miss. Still open in §6: the coordinate-decision owner, the fixture teardown, and the rest of the <code>graph_ops.py</code> and <code>workers.py</code> split.</p></div>
 </div>
 </section>
 </main>
