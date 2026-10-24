@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "a deselect count copied across arms; both arms select nothing under -m graph and exit 5",
       "recorded_at": "2026-10-24T20:11:52.131495+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "a rewrite of the predicate would turn the tests red loudly, a false alarm rather than a hidden defect",
+      "recorded_at": "2026-10-24T20:11:59.393575+00:00"
     }
   },
   "findings": [
