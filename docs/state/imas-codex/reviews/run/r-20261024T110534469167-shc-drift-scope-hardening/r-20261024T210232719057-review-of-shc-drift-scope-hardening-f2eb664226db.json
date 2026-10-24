@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "promotion reads every commit from the worktree; the manifest list is a convenience",
       "recorded_at": "2026-10-24T22:00:37.095358+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "a duplicate warning line for one unreadable scope; the first carries the exception, and the skip is correct",
+      "recorded_at": "2026-10-24T22:00:44.379823+00:00"
     }
   },
   "findings": [
