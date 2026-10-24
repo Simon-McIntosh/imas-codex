@@ -10,6 +10,7 @@ Relationship direction: entity → concept
 
 from __future__ import annotations
 
+# ruff: noqa: F401
 import functools
 import hashlib
 import inspect
@@ -1772,88 +1773,22 @@ def scope_exact_standard_names(
             client.close()
 
 
-def get_source_name_mapping(*, rich: bool = False) -> dict[str, dict]:
-    """Return mapping of source_id → previous standard name details.
+def get_source_name_mapping(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.get_source_name_mapping."""
+    from .graph_store import graph_lineage
 
-    Used by extract_worker in --force mode to inject per-path
-    previous_name context so the LLM can improve on prior names.
-
-    Args:
-        rich: If True, return full SN metadata including documentation,
-            links, and all linked DD paths. Used by --paths mode.
-
-    Returns:
-        Dict mapping source entity ID to dict with keys:
-        name, description, kind, name_stage (and more if rich=True).
-        If a source has multiple names, prefers the accepted one.
-    """
-    if rich:
-        return _get_rich_source_name_mapping()
-
-    with GraphClient() as gc:
-        results = gc.query("""
-            MATCH (src)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-            RETURN src.id AS source_id,
-                   sn.id AS name,
-                   sn.description AS description,
-                   sn.kind AS kind,
-                   sn.name_stage AS name_stage
-        """)
-        mapping: dict[str, dict] = {}
-        for r in results:
-            sid = r["source_id"]
-            # If multiple names exist for same source, prefer accepted
-            if sid not in mapping or r.get("name_stage") == "accepted":
-                mapping[sid] = {
-                    "name": r["name"],
-                    "description": r.get("description"),
-                    "kind": r.get("kind"),
-                    "name_stage": r.get("name_stage"),
-                }
-        return mapping
+    return graph_lineage.get_source_name_mapping(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def _get_rich_source_name_mapping() -> dict[str, dict]:
-    """Full SN metadata with documentation + all linked DD paths."""
-    with GraphClient() as gc:
-        results = gc.query("""
-            MATCH (src)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-            OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-            OPTIONAL MATCH (other_src)-[:HAS_STANDARD_NAME]->(sn)
-            WHERE other_src <> src
-            RETURN src.id AS source_id,
-                   sn.id AS name,
-                   sn.description AS description,
-                   sn.documentation AS documentation,
-                   sn.kind AS kind,
-                   sn.links AS links,
-                   sn.name_stage AS name_stage,
-                   sn.reviewer_score_name AS reviewer_score,
-                   sn.review_tier AS review_tier,
-                   sn.validation_issues AS validation_issues,
-                   u.id AS unit,
-                   collect(DISTINCT other_src.id) AS linked_dd_paths
-        """)
-        mapping: dict[str, dict] = {}
-        for r in results:
-            sid = r["source_id"]
-            if sid not in mapping or r.get("name_stage") == "accepted":
-                mapping[sid] = {
-                    "name": r["name"],
-                    "description": r.get("description"),
-                    "documentation": r.get("documentation"),
-                    "kind": r.get("kind"),
-                    "links": r.get("links"),
-                    "name_stage": r.get("name_stage"),
-                    "reviewer_score": r.get("reviewer_score"),
-                    "review_tier": r.get("review_tier"),
-                    "validation_issues": r.get("validation_issues"),
-                    "unit": r.get("unit"),
-                    "linked_dd_paths": [
-                        p for p in (r.get("linked_dd_paths") or []) if p != sid
-                    ],
-                }
-        return mapping
+def _get_rich_source_name_mapping(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._get_rich_source_name_mapping."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._get_rich_source_name_mapping(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -1861,451 +1796,40 @@ def _get_rich_source_name_mapping() -> dict[str, dict]:
 # =============================================================================
 
 
-def fetch_low_score_sources(
-    *,
-    min_score: float | None = None,
-    domain: str | None = None,
-    ids: str | None = None,
-    limit: int | None = None,
-    source_type: str = "dd",
-) -> list[dict[str, Any]]:
-    """Enumerate sources whose linked StandardName has ``reviewer_score_name < min_score``.
+def fetch_low_score_sources(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.fetch_low_score_sources."""
+    from .graph_store import graph_lineage
 
-    Walks ``(:IMASNode|:FacilitySignal)-[:HAS_STANDARD_NAME]->(:StandardName)``
-    and returns the originating source IDs along with the reviewer feedback
-    needed to prompt a targeted regeneration. Used by the extract worker's
-    regen mode (``sn run --min-score F``) to re-queue the exact sources
-    whose names scored below the threshold.
-
-    Only reviewed names are considered (``reviewer_score_name IS NOT NULL``), so
-    unreviewed names are never pulled into regen. Duplicates per source_id
-    are collapsed, keeping the lowest-scoring entry ("worst critique wins").
-
-    Args:
-        min_score: Reviewer-score threshold (0-1). Names with
-            ``reviewer_score_name < min_score`` are returned. Required for any
-            results; None short-circuits to an empty list.
-        domain: Optional physics-domain filter applied to the StandardName.
-        ids: Optional IDS-name filter (DD source only).
-        limit: Optional cap on rows returned (ordered by worst score first).
-        source_type: ``"dd"`` or ``"signals"``.
-
-    Returns:
-        List of dicts with ``source_id``, ``source_type``, ``review_feedback``.
-    """
-    if min_score is None:
-        return []
-
-    if source_type == "dd":
-        match_clause = "MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)"
-    elif source_type == "signals":
-        match_clause = (
-            "MATCH (src:FacilitySignal)-[:HAS_STANDARD_NAME]->(sn:StandardName)"
-        )
-    else:
-        raise ValueError(f"source_type must be 'dd' or 'signals', got {source_type!r}")
-
-    where_clauses = [
-        "sn.reviewer_score_name IS NOT NULL",
-        "sn.reviewer_score_name < $min_score",
-        "coalesce(sn.regen_count, 0) < 1",
-    ]
-    params: dict[str, Any] = {"min_score": float(min_score)}
-
-    if domain:
-        where_clauses.append("sn.physics_domain = $domain")
-        params["domain"] = domain
-
-    if ids and source_type == "dd":
-        match_clause += "\n            MATCH (src)-[:IN_IDS]->(ids_node:IDS)"
-        where_clauses.append("ids_node.id = $ids")
-        params["ids"] = ids
-
-    query = f"""
-        {match_clause}
-        WHERE {" AND ".join(where_clauses)}
-        RETURN src.id AS source_id,
-               sn.id AS previous_name,
-               sn.description AS previous_description,
-               sn.documentation AS previous_documentation,
-               sn.reviewer_score_name AS reviewer_score,
-               sn.review_tier AS review_tier,
-               sn.reviewer_comments_name AS reviewer_comments,
-               sn.reviewer_scores_name AS reviewer_scores_json,
-               sn.validation_status AS validation_status
-        ORDER BY coalesce(sn.reviewer_score_name, 1.0) ASC, src.id ASC
-    """
-    if limit is not None and limit > 0:
-        query += "\n        LIMIT $limit"
-        params["limit"] = int(limit)
-
-    with GraphClient() as gc:
-        rows = list(gc.query(query, **params))
-
-    # Collapse duplicates: keep the worst-scoring feedback per source_id.
-    by_source: dict[str, dict[str, Any]] = {}
-    order: list[str] = []
-    for row in rows:
-        sid = row.get("source_id")
-        if not sid:
-            continue
-        scores_json = row.get("reviewer_scores_json")
-        scores: dict[str, Any] | None = None
-        if scores_json:
-            try:
-                scores = json.loads(scores_json)
-            except (TypeError, ValueError):
-                scores = None
-        feedback = {
-            "previous_name": row.get("previous_name"),
-            "previous_description": row.get("previous_description"),
-            "previous_documentation": row.get("previous_documentation"),
-            "reviewer_score": row.get("reviewer_score"),
-            "review_tier": row.get("review_tier"),
-            "reviewer_comments": row.get("reviewer_comments"),
-            "reviewer_scores": scores,
-            "validation_status": row.get("validation_status"),
-        }
-        existing = by_source.get(sid)
-        if existing is None:
-            by_source[sid] = feedback
-            order.append(sid)
-        else:
-            prev = existing.get("reviewer_score")
-            cur = feedback.get("reviewer_score")
-            if prev is None or (cur is not None and cur < prev):
-                by_source[sid] = feedback
-
-    return [
-        {
-            "source_id": sid,
-            "source_type": source_type,
-            "review_feedback": by_source[sid],
-        }
-        for sid in order
-    ]
+    return graph_lineage.fetch_low_score_sources(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def fetch_review_feedback_for_sources(
-    source_ids: list[str] | set[str] | None,
-) -> dict[str, dict[str, Any]]:
-    """Fetch prior reviewer feedback for a batch of StandardNameSource ids.
+def fetch_review_feedback_for_sources(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.fetch_review_feedback_for_sources."""
+    from .graph_store import graph_lineage
 
-    Used by the compose worker when a regeneration run is invoked with
-    ``--min-score F``. Each returned dict carries enough context
-    to let the LLM understand what the previous reviewer objected to and
-    adjust the new candidate accordingly.
-
-    Args:
-        source_ids: Iterable of source node ids (e.g. ``dd:equilibrium/...``
-            or ``signals:tcv:...``). ``None`` or empty input returns ``{}``
-            without hitting the graph.
-
-    Returns:
-        ``{source_id: feedback_dict}`` where feedback_dict has keys:
-
-        - ``previous_name`` (str | None): prior standard-name id
-        - ``previous_description`` (str | None)
-        - ``previous_documentation`` (str | None)
-        - ``reviewer_score`` (float | None): composite 0–1 score
-        - ``review_tier`` (str | None): ``outstanding|good|inadequate|poor``
-        - ``reviewer_comments`` (str | None): free-form reviewer critique
-        - ``reviewer_scores`` (dict | None): parsed name-axis dimensional scores
-        - ``validation_status`` (str | None): graph lifecycle state at
-          fetch time
-
-        A source's link to its name is read over ``PRODUCED_NAME`` — the
-        authority — with ``HAS_STANDARD_NAME`` unioned in for callers that pass
-        an upstream ``IMASNode``/``FacilitySignal`` id instead. Reading only
-        ``HAS_STANDARD_NAME`` silently returned nothing for every
-        ``StandardNameSource`` id, since that edge originates from the DD node
-        (keyed on the bare path) and never from the source node (keyed
-        ``dd:<path>``) — so an operator's ``sn edit --hint`` never reached the
-        compose prompt.
-
-        An entry is returned when the name carries prior review data OR an open
-        edit. A hint is the operator's intent and does not depend on a review
-        having happened, so requiring ``reviewer_score_name`` would drop the
-        steering on exactly the names an edit just staged for regeneration.
-        Sources with neither are omitted (a cold start; the caller skips
-        feedback injection).
-    """
-    if not source_ids:
-        return {}
-
-    ids = sorted({sid for sid in source_ids if sid})
-    if not ids:
-        return {}
-
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            UNWIND $ids AS source_id
-            MATCH (src {id: source_id})
-            CALL {
-                WITH src
-                MATCH (src)-[:PRODUCED_NAME]->(sn:StandardName)
-                RETURN sn
-              UNION
-                WITH src
-                MATCH (src)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                RETURN sn
-            }
-            WITH source_id, sn
-            WHERE sn.reviewer_score_name IS NOT NULL
-               OR coalesce(sn.edit_mode, '') <> ''
-            RETURN source_id AS source_id,
-                   sn.id AS previous_name,
-                   sn.description AS previous_description,
-                   sn.documentation AS previous_documentation,
-                   sn.reviewer_score_name AS reviewer_score,
-                   sn.review_tier AS review_tier,
-                   sn.reviewer_comments_name AS reviewer_comments,
-                   sn.reviewer_scores_name AS reviewer_scores_json,
-                   sn.reviewer_suggested_name AS reviewer_suggested_name,
-                   sn.reviewer_suggestion_justification_name
-                       AS reviewer_suggestion_justification,
-                   sn.validation_status AS validation_status,
-                   sn.edit_mode AS edit_mode,
-                   sn.name_hint AS name_hint,
-                   sn.docs_hint AS docs_hint,
-                   sn.edit_reason AS edit_reason,
-                   sn.edit_origin AS edit_origin
-            """,
-            ids=ids,
-        )
-
-    mapping: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        sid = row.get("source_id")
-        if not sid:
-            continue
-        scores_json = row.get("reviewer_scores_json")
-        scores_dict: dict[str, Any] | None = None
-        if scores_json:
-            try:
-                scores_dict = json.loads(scores_json)
-            except (TypeError, ValueError):
-                scores_dict = None
-        # If a source_id has multiple linked SNs, prefer the one with the
-        # lowest reviewer_score (the one most in need of revision).
-        new_entry = {
-            "previous_name": row.get("previous_name"),
-            "previous_description": row.get("previous_description"),
-            "previous_documentation": row.get("previous_documentation"),
-            "reviewer_score": row.get("reviewer_score"),
-            "review_tier": row.get("review_tier"),
-            "reviewer_comments": row.get("reviewer_comments"),
-            "reviewer_scores": scores_dict,
-            "reviewer_suggested_name": row.get("reviewer_suggested_name") or None,
-            "reviewer_suggestion_justification": (
-                row.get("reviewer_suggestion_justification") or None
-            ),
-            "validation_status": row.get("validation_status"),
-            "edit_mode": row.get("edit_mode"),
-            "name_hint": row.get("name_hint"),
-            "docs_hint": row.get("docs_hint"),
-            "edit_reason": row.get("edit_reason"),
-            "edit_origin": row.get("edit_origin"),
-        }
-        existing = mapping.get(sid)
-        if existing is None:
-            mapping[sid] = new_entry
-            continue
-        prev = existing.get("reviewer_score")
-        cur = new_entry.get("reviewer_score")
-        if prev is None or (cur is not None and cur < prev):
-            mapping[sid] = new_entry
-    return mapping
+    return graph_lineage.fetch_review_feedback_for_sources(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def fetch_reviewer_history_for_sources(
-    source_ids: list[str] | set[str] | None,
-) -> dict[str, dict[str, Any]]:
-    """Fetch full StandardNameReview-node history per source for compose prompt enrichment.
+def fetch_reviewer_history_for_sources(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.fetch_reviewer_history_for_sources."""
+    from .graph_store import graph_lineage
 
-    For each source that currently links to a StandardName with ≥1
-    StandardNameReview node, returns:
-
-    - ``latest``: the most recent StandardNameReview (score, comment ≤800 chars, model).
-    - ``prior_themes``: n-gram theme extraction from older StandardNameReview comments,
-      rendered as ``[{theme, count, example}]``.
-
-    This complements :func:`fetch_review_feedback_for_sources` which injects
-    only the denormalised aggregates from the StandardName node itself.  The
-    history variant drills into *all* StandardNameReview nodes for richer compose context.
-
-    Args:
-        source_ids: Iterable of source-node ids (e.g. ``dd:equilibrium/...``).
-            ``None`` or empty input returns ``{}`` without hitting the graph.
-
-    Returns:
-        ``{source_id: history_dict}`` where history_dict has keys:
-
-        - ``latest`` (dict): ``{score, comment, model}`` of newest review.
-        - ``prior_themes`` (list[dict]): theme summaries from older reviews,
-          each ``{theme, count, example}``.  Empty when only one review exists.
-    """
-    if not source_ids:
-        return {}
-
-    ids = sorted({sid for sid in source_ids if sid})
-    if not ids:
-        return {}
-
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            UNWIND $ids AS source_id
-            MATCH (src {id: source_id})-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                  -[:HAS_REVIEW]->(r:StandardNameReview)
-            RETURN source_id,
-                   sn.id AS sn_id,
-                   r.score AS score,
-                   r.comments AS full_comment,
-                   r.model AS model,
-                   r.reviewed_at AS ts
-            ORDER BY source_id, ts DESC
-            """,
-            ids=ids,
-        )
-
-    # Group rows by source_id
-    by_source: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for row in rows:
-        sid = row.get("source_id")
-        if sid:
-            by_source[sid].append(row)
-
-    mapping: dict[str, dict[str, Any]] = {}
-    for sid, reviews in by_source.items():
-        if not reviews:
-            continue
-
-        # Latest review
-        latest = reviews[0]
-        comment_text = latest.get("full_comment") or ""
-        history: dict[str, Any] = {
-            "latest": {
-                "score": latest.get("score"),
-                "comment": comment_text[:800],
-                "model": latest.get("model"),
-            },
-            "prior_themes": [],
-        }
-
-        # Extract themes from older reviews (N-1)
-        if len(reviews) > 1:
-            prior_comments = [
-                r.get("full_comment") or ""
-                for r in reviews[1:]
-                if r.get("full_comment")
-            ]
-            if prior_comments:
-                from imas_codex.standard_names.review.themes import (
-                    _extract_themes_from_texts,
-                )
-
-                themes = _extract_themes_from_texts(prior_comments, top_n=5)
-                # Build theme entries with count and example
-                for theme in themes:
-                    # Find matching example comment (first containing theme words)
-                    example = ""
-                    theme_words = set(theme.lower().split())
-                    for c in prior_comments:
-                        c_lower = c.lower()
-                        if any(w in c_lower for w in theme_words):
-                            example = c[:160]
-                            break
-                    history["prior_themes"].append(
-                        {"theme": theme, "count": 1, "example": example}
-                    )
-
-        mapping[sid] = history
-
-    return mapping
+    return graph_lineage.fetch_reviewer_history_for_sources(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def fetch_docs_review_feedback_for_standard_names(
-    sn_ids: list[str] | set[str] | None,
-) -> dict[str, dict[str, Any]]:
-    """Fetch prior docs-axis reviewer feedback keyed by StandardName id.
+def fetch_docs_review_feedback_for_standard_names(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.fetch_docs_review_feedback_for_standard_names."""
+    from .graph_store import graph_lineage
 
-    Used by the enrich contextualise worker when re-enriching SNs that
-    already have a docs-axis review on file.  Lets the LLM target the
-    specific weaknesses (description quality, documentation_quality,
-    completeness, physics_accuracy) the reviewer flagged previously
-    instead of running blind.
-
-    This is the docs-axis analogue of
-    :func:`fetch_review_feedback_for_sources` — it keys on SN id (since
-    enrich operates on SN nodes directly, not on sources) and pulls the
-    ``*_docs`` reviewer fields plus ``validation_issues``.
-
-    Args:
-        sn_ids: Iterable of StandardName ids. ``None`` or empty returns
-            ``{}`` without hitting the graph.
-
-    Returns:
-        ``{sn_id: feedback_dict}`` where feedback_dict has keys:
-
-        - ``reviewer_score`` (float | None): docs-axis 0–1 score.
-        - ``reviewer_comments`` (str | None): free-form docs critique.
-        - ``reviewer_scores`` (dict | None): parsed docs-axis dimensional
-          scores (description_quality / documentation_quality /
-          completeness / physics_accuracy).
-        - ``validation_issues`` (list[str] | None): tagged ISN validation
-          issue strings, when present.
-
-        Only SNs with ``reviewer_score_docs IS NOT NULL`` are returned —
-        cold-start enrichments are silently omitted.
-    """
-    if not sn_ids:
-        return {}
-
-    ids = sorted({sid for sid in sn_ids if sid})
-    if not ids:
-        return {}
-
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            UNWIND $ids AS sn_id
-            MATCH (sn:StandardName {id: sn_id})
-            WHERE sn.reviewer_score_docs IS NOT NULL
-            RETURN sn_id AS sn_id,
-                   sn.reviewer_score_docs AS reviewer_score,
-                   sn.reviewer_comments_docs AS reviewer_comments,
-                   sn.reviewer_scores_docs AS reviewer_scores_json,
-                   sn.validation_issues AS validation_issues
-            """,
-            ids=ids,
-        )
-
-    mapping: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        sid = row.get("sn_id")
-        if not sid:
-            continue
-        scores_json = row.get("reviewer_scores_json")
-        scores_dict: dict[str, Any] | None = None
-        if scores_json:
-            try:
-                scores_dict = json.loads(scores_json)
-            except (TypeError, ValueError):
-                scores_dict = None
-        issues = row.get("validation_issues")
-        if isinstance(issues, str):
-            issues = [issues]
-        elif issues is None:
-            issues = None
-        mapping[sid] = {
-            "reviewer_score": row.get("reviewer_score"),
-            "reviewer_comments": row.get("reviewer_comments"),
-            "reviewer_scores": scores_dict,
-            "validation_issues": issues if issues else None,
-        }
-    return mapping
+    return graph_lineage.fetch_docs_review_feedback_for_standard_names(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # Public rename. The canonical name is
@@ -2313,2656 +1837,316 @@ def fetch_docs_review_feedback_for_standard_names(
 # ``fetch_docs_review_feedback_for_sns`` alias is retained for one
 # release with a DeprecationWarning. Package-internal callers have already
 # moved to the canonical name.
-def fetch_docs_review_feedback_for_sns(
-    sn_ids: list[str] | set[str] | None,
-) -> dict[str, dict[str, Any]]:
-    """Deprecated alias of :func:`fetch_docs_review_feedback_for_standard_names`."""
-    import warnings
+def fetch_docs_review_feedback_for_sns(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.fetch_docs_review_feedback_for_sns."""
+    from .graph_store import graph_lineage
 
-    warnings.warn(
-        "fetch_docs_review_feedback_for_sns is deprecated; "
-        "use fetch_docs_review_feedback_for_standard_names.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return fetch_docs_review_feedback_for_standard_names(sn_ids)
-
-
-def _filter_admissible_parents(
-    co_batch: list[dict[str, Any]],
-    gc: Any,
-    *,
-    full_rebuild: bool = False,
-) -> list[dict[str, Any]]:
-    """Drop HAS_PARENT edges whose target fails the admission gate.
-
-    Two-clause gate (see the admission gate in ``parents.py``):
-      A. IR specificity — keep if the target name has qualifiers, locus,
-         operators, projection, or mechanism in its ISN parse.
-      B. Vector-like topology — keep bare-base targets if they have or
-         will have ≥2 distinct-axis projection children. Considers
-         both already-in-graph projections and the current batch.
-
-    Skips legacy entries: if a parent has ``origin='catalog_edit'`` or
-    is already ``name_stage='accepted'``, the edge is preserved unless the
-    parent is superseded.
-
-    ``full_rebuild`` (set by ``rederive_structural_edges``, which passes the
-    COMPLETE set of live names) makes admission **batch-authoritative**: Clause
-    B axes and the single-child shadow veto are evaluated from the batch alone,
-    ignoring transient graph topology. This is essential for idempotency — the
-    stale, pre-reconcile graph children would otherwise flip the shadow-veto
-    verdict for qualifier single-child parents (admitted one startup, vetoed
-    and reaped the next), an unbounded mint/reap oscillation. With the batch as
-    the sole source of truth, the verdict is a pure function of the live-name
-    set, so the re-derivation reaches a fixpoint.
-    """
-    from imas_codex.standard_names.parents import (
-        is_admissible_parent_name,
-        is_algebraic_decomposition_edge,
-        superseded_parent_names,
-    )
-
-    if not co_batch:
-        return co_batch
-
-    targets = {e["to_name"] for e in co_batch}
-
-    # Count batch-level projection axes per target (for Clause B with batch info)
-    batch_axes: dict[str, set[str]] = {}
-    # Distinct children proposed for each target within THIS batch.  Combined
-    # with graph children so the single-child shadow veto sees the full child
-    # set even before any edge is persisted.
-    batch_children: dict[str, set[str]] = {}
-    for e in co_batch:
-        if e.get("operator_kind") == "projection" and e.get("axis"):
-            batch_axes.setdefault(e["to_name"], set()).add(e["axis"])
-        if e.get("from_name"):
-            batch_children.setdefault(e["to_name"], set()).add(e["from_name"])
-
-    # Bulk topology probe: pull existing graph state for all targets at once.
-    # Besides projection axes (Clause B) and legacy protection, collect each
-    # target's distinct graph children and, when it has exactly one child,
-    # that child's DD sources vs the parent's own DD sources — the inputs to
-    # the single-child shadow veto (Class-B duplicate suppression).
-    graph_axes: dict[str, set[str]] = {t: set() for t in targets}
-    graph_children: dict[str, set[str]] = {t: set() for t in targets}
-    shadow_info: dict[str, dict[str, Any]] = {}
-    legacy_protected: set[str] = set()
-    try:
-        rows = list(
-            gc.query(
-                """
-                UNWIND $names AS nm
-                OPTIONAL MATCH (child:StandardName)-[r:HAS_PARENT]->(p:StandardName {id: nm})
-                  WHERE r.operator_kind = 'projection' AND r.axis IS NOT NULL
-                WITH nm, collect(DISTINCT r.axis) AS axes
-                OPTIONAL MATCH (anychild:StandardName)-[:HAS_PARENT]->(p3:StandardName {id: nm})
-                WITH nm, axes, collect(DISTINCT anychild) AS children
-                OPTIONAL MATCH (psrc:IMASNode)-[:HAS_STANDARD_NAME]->(p4:StandardName {id: nm})
-                WITH nm, axes, children, collect(DISTINCT psrc.id) AS parent_sources
-                OPTIONAL MATCH (csrc:IMASNode)-[:HAS_STANDARD_NAME]->(lone)
-                  WHERE size(children) = 1 AND lone = children[0]
-                WITH nm, axes, children, parent_sources,
-                     collect(DISTINCT csrc.id) AS lone_child_sources
-                OPTIONAL MATCH (p2:StandardName {id: nm})
-                RETURN nm AS name, axes,
-                       [c IN children | c.id] AS child_ids,
-                       CASE WHEN size(children) = 1
-                            THEN children[0].id ELSE null END AS lone_child_id,
-                       CASE WHEN size(children) = 1
-                            THEN coalesce(children[0].name_stage, '')
-                            ELSE null END AS lone_child_stage,
-                       CASE WHEN size(children) = 1
-                            THEN coalesce(children[0].origin, 'pipeline')
-                            ELSE null END AS lone_child_origin,
-                       parent_sources,
-                       lone_child_sources,
-                       p2.origin AS origin,
-                       p2.name_stage AS name_stage
-                """,
-                names=list(targets),
-            )
-        )
-    except Exception:  # pragma: no cover - defensive
-        logger.exception("Parent-admission topology probe failed; aborting reconcile")
-        raise
-
-    superseded_targets = superseded_parent_names(gc, targets, lifecycle_rows=rows)
-    for r in rows:
-        nm = r.get("name")
-        if not nm:
-            continue
-        graph_axes[nm] = set(r.get("axes") or [])
-        graph_children[nm] = {c for c in (r.get("child_ids") or []) if c}
-        if r.get("origin") == "catalog_edit" or r.get("name_stage") == "accepted":
-            legacy_protected.add(nm)
-        if r.get("lone_child_id"):
-            shadow_info[nm] = {
-                "child_id": r.get("lone_child_id"),
-                "child_stage": r.get("lone_child_stage") or "",
-                "child_origin": r.get("lone_child_origin") or "pipeline",
-                "child_sources": {s for s in (r.get("lone_child_sources") or []) if s},
-                "parent_sources": {s for s in (r.get("parent_sources") or []) if s},
-            }
-
-    if full_rebuild:
-        # Batch-authoritative admission. The batch is the complete live
-        # derivation, so discard transient graph topology (stale, pre-reconcile
-        # children/axes) — using it makes the shadow-veto/Clause-B verdict
-        # depend on graph state that this very pass rewrites, which oscillates.
-        # Clause B then reads batch_axes only; the shadow veto reads
-        # batch_children only, with each target's lone-batch-child DD sources
-        # re-fetched from the static HAS_STANDARD_NAME edges (which the
-        # re-derivation never touches, so the verdict is stable across passes).
-        graph_axes = {t: set() for t in targets}
-        graph_children = {t: set() for t in targets}
-        shadow_info = {}
-
-    # The child node and its DD ownership are written before this structural
-    # edge pass. A target receiving its first HAS_PARENT edge therefore has no
-    # graph child yet, but its lone batch child can already prove the target is
-    # a source-equivalent shadow. Probe that child explicitly. The same probe
-    # makes full rebuilds batch-authoritative after graph topology is discarded.
-    lone_pairs = []
-    for target in targets:
-        all_children = graph_children.get(target, set()) | batch_children.get(
-            target, set()
-        )
-        if len(all_children) == 1 and target not in shadow_info:
-            lone_pairs.append({"target": target, "child": next(iter(all_children))})
-    if lone_pairs:
-        try:
-            srows = list(
-                gc.query(
-                    """
-                    UNWIND $pairs AS pr
-                    MATCH (child:StandardName {id: pr.child})
-                    OPTIONAL MATCH (csrc:IMASNode)-[:HAS_STANDARD_NAME]->(child)
-                    OPTIONAL MATCH (psrc:IMASNode)-[:HAS_STANDARD_NAME]->
-                          (:StandardName {id: pr.target})
-                    RETURN pr.target AS target, pr.child AS child,
-                           coalesce(child.name_stage, '') AS child_stage,
-                           coalesce(child.origin, 'pipeline') AS child_origin,
-                           collect(DISTINCT csrc.id) AS child_sources,
-                           collect(DISTINCT psrc.id) AS parent_sources
-                    """,
-                    pairs=lone_pairs,
-                )
-            )
-        except Exception as exc:  # pragma: no cover - defensive
-            logger.warning("Batch shadow-source probe failed: %s; skipping veto", exc)
-            srows = []
-        for r in srows:
-            shadow_info[r["target"]] = {
-                "child_id": r["child"],
-                "child_stage": r.get("child_stage") or "",
-                "child_origin": r.get("child_origin") or "pipeline",
-                "child_sources": {s for s in (r.get("child_sources") or []) if s},
-                "parent_sources": {s for s in (r.get("parent_sources") or []) if s},
-            }
-
-    def _is_single_child_shadow(target: str) -> tuple[bool, str]:
-        """Batch-aware single-child shadow veto (mirrors parents.is_single_child_shadow).
-
-        Combines graph children with the children proposed in THIS batch so a
-        parent that genuinely groups ≥2 names is never vetoed, even before the
-        sibling edges are written.
-        """
-        all_children = graph_children.get(target, set()) | batch_children.get(
-            target, set()
-        )
-        if len(all_children) != 1:
-            return False, "not a single-child parent"
-        info = shadow_info.get(target)
-        if not info:
-            return False, "single child source probe returned no match"
-        if is_algebraic_decomposition_edge(info["child_id"], target):
-            return False, "single child requires this algebraic decomposition target"
-        if info["child_stage"] in ("superseded", "exhausted"):
-            return False, "lone child superseded/exhausted"
-        if info["child_origin"] == "derived":
-            return False, "lone child is itself derived"
-        child_sources = info["child_sources"]
-        parent_sources = info["parent_sources"]
-        if not child_sources:
-            return False, "lone child has no DD source"
-        if parent_sources - child_sources:
-            return False, "parent independently sourced — not a shadow"
-        return True, f"single-child shadow of {info['child_id']}"
-
-    def _admit(target: str) -> tuple[bool, str]:
-        if target in superseded_targets:
-            return False, "superseded parent"
-        # Legacy protection: don't disturb catalog-authoritative entries.
-        if target in legacy_protected:
-            return True, "legacy (catalog_edit or accepted)"
-        # An exact strict-IR operator/projection peel is a required expression
-        # tree edge. The lossless compose equality proves the target is itself
-        # a canonical identity, including otherwise-bare vector leaves.
-        algebraic_children = graph_children.get(target, set()) | batch_children.get(
-            target, set()
-        )
-        if any(
-            is_algebraic_decomposition_edge(child, target)
-            for child in algebraic_children
-        ):
-            return True, "strict algebraic decomposition target"
-        # Suppression veto (Class-B): a less-specific shadow of a single
-        # accepted sibling sourced from the same DD path is dropped even if it
-        # would otherwise admit on Clause A/B.
-        suppress, suppress_reason = _is_single_child_shadow(target)
-        if suppress:
-            return False, f"suppressed: {suppress_reason}"
-        result = is_admissible_parent_name(target, gc=None)
-        if result.admit:
-            return True, f"clause A: {result.reason}"
-        # Clause B with batch + graph topology
-        combined = graph_axes.get(target, set()) | batch_axes.get(target, set())
-        if len(combined) >= 2:
-            return True, f"clause B: vector-like ({len(combined)} axes)"
-        return False, result.reason
-
-    kept: list[dict[str, Any]] = []
-    dropped_count = 0
-    dropped_targets: set[str] = set()
-    for e in co_batch:
-        admit, reason = _admit(e["to_name"])
-        if admit:
-            kept.append(e)
-        else:
-            dropped_count += 1
-            dropped_targets.add(e["to_name"])
-
-    if dropped_count:
-        logger.info(
-            "Parent admission gate: dropped %d HAS_PARENT edges to %d "
-            "inadmissible targets (sample: %s)",
-            dropped_count,
-            len(dropped_targets),
-            sorted(dropped_targets)[:5],
-        )
-
-    return kept
-
-
-def _emit_magnitude_of_edges(names: list[dict[str, Any]], gc: Any) -> None:
-    """Emit MAGNITUDE_OF edges for ``magnitude_of_<X>`` names.
-
-    Passive — only fires when:
-      1. The name being written matches the pattern ``magnitude_of_<X>``.
-      2. ``<X>`` already exists in the graph as a ``kind='vector'`` SN.
-      3. ``<X>`` is an admitted parent (not catalog-only metadata).
-
-    Never speculatively creates magnitude SNs; the magnitude must already
-    be sourced from a DD path or facility signal.
-    """
-    candidates: list[dict[str, str]] = []
-    for n in names:
-        name_id = n.get("id")
-        if not name_id or not name_id.startswith("magnitude_of_"):
-            continue
-        vector = name_id[len("magnitude_of_") :]
-        if not vector:
-            continue
-        candidates.append({"magnitude": name_id, "vector": vector})
-
-    if not candidates:
-        return
-
-    gc.query(
-        """
-        UNWIND $rows AS r
-        MATCH (m:StandardName {id: r.magnitude})
-        MATCH (v:StandardName {id: r.vector})
-        WHERE v.kind = 'vector'
-        MERGE (m)-[:MAGNITUDE_OF]->(v)
-        """,
-        rows=candidates,
+    return graph_lineage.fetch_docs_review_feedback_for_sns(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-def _bootstrap_missing_derived_parent_targets(
-    gc: Any,
-    parent_edges: list[dict[str, Any]],
-    missing_parent_ids: set[str],
-) -> set[str]:
-    """Fully materialize absent admitted parents before writing their edges.
+def _filter_admissible_parents(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._filter_admissible_parents."""
+    from .graph_store import graph_lineage
 
-    Parents are prepared from already-authorized child nodes, one dependency
-    layer at a time. The canonical materializer performs unit derivation and
-    strict identity validation; a row it cannot prove is left absent and its
-    relationships are filtered by the caller.
-    """
-    remaining = set(missing_parent_ids)
-    materialized: set[str] = set()
-    edges_by_parent: dict[str, list[dict[str, Any]]] = {}
-    for edge in parent_edges:
-        if edge["to_name"] in remaining:
-            edges_by_parent.setdefault(edge["to_name"], []).append(edge)
-
-    while remaining:
-        pairs = [
-            {
-                "parent_id": parent_id,
-                "child_id": edge["from_name"],
-                "operator_kind": edge.get("operator_kind"),
-            }
-            for parent_id in sorted(remaining)
-            for edge in edges_by_parent.get(parent_id, [])
-        ]
-        child_rows = list(
-            gc.query(
-                """
-                // STANDARD_NAME_PARENT_BOOTSTRAP_CHILDREN
-                UNWIND $pairs AS pair
-                MATCH (child:StandardName {id: pair.child_id})
-                RETURN pair.parent_id AS parent_id,
-                       child.id AS id,
-                       child.name_stage AS name_stage,
-                       child.unit AS unit,
-                       child.cocos_transformation_type AS cocos,
-                       child.physics_domain AS physics_domain,
-                       child.kind AS kind,
-                       pair.operator_kind AS op_kind
-                """,
-                pairs=pairs,
-            )
-        )
-        by_parent: dict[str, list[dict[str, Any]]] = {}
-        for row in child_rows:
-            by_parent.setdefault(str(row["parent_id"]), []).append(dict(row))
-
-        progressed = False
-        for parent_id in sorted(remaining):
-            expected_children = {
-                edge["from_name"] for edge in edges_by_parent.get(parent_id, [])
-            }
-            child_data = by_parent.get(parent_id, [])
-            if {str(row["id"]) for row in child_data} != expected_children:
-                continue
-            inherited_units = {
-                str(row["unit"])
-                for row in child_data
-                if row.get("unit") and row.get("op_kind") != "binary"
-            }
-            authorized_unit = (
-                next(iter(inherited_units)) if len(inherited_units) == 1 else None
-            )
-            child_by_id = {str(child["id"]): child for child in child_data}
-            bootstrap_edges = []
-            for edge in edges_by_parent.get(parent_id, []):
-                child = child_by_id[edge["from_name"]]
-                bootstrap_edges.append(
-                    {
-                        **edge,
-                        "expected_name_stage": child.get("name_stage"),
-                        "expected_unit": child.get("unit"),
-                        "expected_cocos": child.get("cocos"),
-                        "expected_physics_domain": child.get("physics_domain"),
-                        "expected_kind": child.get("kind"),
-                    }
-                )
-            seeded = _materialize_derived_parent_rows(
-                gc,
-                [
-                    {
-                        "parent_id": parent_id,
-                        "child_data": child_data,
-                        "edge_kinds": [
-                            edge.get("operator_kind")
-                            for edge in edges_by_parent.get(parent_id, [])
-                        ],
-                        "authorized_unit": authorized_unit,
-                        "bootstrap_edges": bootstrap_edges,
-                    }
-                ],
-                bootstrap_missing=True,
-            )
-            if seeded == 1:
-                materialized.add(parent_id)
-                remaining.remove(parent_id)
-                progressed = True
-        if not progressed:
-            break
-
-    if remaining:
-        logger.warning(
-            "Refused %d missing derived-parent target(s) without complete authority: %s",
-            len(remaining),
-            ", ".join(sorted(remaining)[:5]),
-        )
-    return materialized
-
-
-def _write_standard_name_edges(
-    gc: Any,
-    names: list[dict[str, Any]],
-    *,
-    full_rebuild: bool = False,
-    expand_closure: bool = True,
-) -> set[str]:
-    """Emit all structural edges for a batch of StandardName nodes.
-
-    Called as a tail pass **after** all nodes in the batch have been
-    written. Forward-reference parents are admitted and fully materialized
-    before relationship persistence. No relationship writer creates a
-    ``StandardName`` endpoint.
-
-    Ordered operator trees are expanded to closure in this pass.  Each
-    ``derive_edges`` call peels exactly one outer layer; newly discovered
-    structural parents are queued until every ordered unary/binary branch has
-    been projected.  This makes the graph lossless even when intermediate
-    parent nodes have not yet appeared in a source batch.
-
-    Handles the following edge types:
-
-    - ``HAS_PARENT``: derived from the ISN grammar parser (one layer
-      per call: unary prefix/postfix, binary, or projection).
-    - ``HAS_ERROR``: uncertainty siblings — direction inverted relative to
-      the derivation (inner → uncertainty form).
-    - ``HAS_PREDECESSOR``: from ``predecessor`` or ``deprecates`` field.
-    - Successor edges are written by signed supersede mutations.
-    - ``IN_CLUSTER``: from ``primary_cluster_id`` field.
-    - ``HAS_PHYSICS_DOMAIN``: from ``physics_domain`` field.
-
-    Parameters
-    ----------
-    gc:
-        Active ``GraphClient`` context (already open — do not open a new
-        one inside this function).
-    names:
-        List of name dicts, each containing at minimum ``id``.  All other
-        fields are optional; missing fields produce no edges.
-    expand_closure:
-        Also reconcile structural parent identities discovered while deriving
-        the requested names.  Disable for exact-name repair callers.
-
-    Returns
-    -------
-    The finite set of authorized ``StandardName`` identities involved in this
-    relation projection.
-    """
-    from imas_codex.standard_names.derivation import derive_edges
-
-    co_batch: list[dict[str, Any]] = []  # HAS_PARENT
-    he_batch: list[dict[str, Any]] = []  # HAS_ERROR
-    geo_batch: list[dict[str, Any]] = []  # HAS_LOCUS
-
-    pending = [n["id"] for n in names if n.get("id")]
-    processed: set[str] = set()
-    while pending:
-        name_id = pending.pop()
-        if name_id in processed:
-            continue
-        processed.add(name_id)
-        for edge in derive_edges(name_id):
-            if edge.edge_type == "HAS_PARENT":
-                co_batch.append(
-                    {
-                        "from_name": edge.from_name,
-                        "to_name": edge.to_name,
-                        "operator": edge.props.get("operator"),
-                        "operator_kind": edge.props.get("operator_kind"),
-                        "role": edge.props.get("role"),
-                        "separator": edge.props.get("separator"),
-                        "axis": edge.props.get("axis"),
-                        "shape": edge.props.get("shape"),
-                    }
-                )
-                if expand_closure and edge.to_name not in processed:
-                    pending.append(edge.to_name)
-            elif edge.edge_type == "HAS_ERROR":
-                he_batch.append(
-                    {
-                        "from_name": edge.from_name,
-                        "to_name": edge.to_name,
-                        "error_type": edge.props.get("error_type"),
-                    }
-                )
-                if expand_closure and edge.from_name not in processed:
-                    pending.append(edge.from_name)
-            elif edge.edge_type == "HAS_LOCUS":
-                geo_batch.append(
-                    {
-                        "from_name": edge.from_name,
-                        "locus_token": edge.props.get("locus_token"),
-                        "locus_relation": edge.props.get("locus_relation"),
-                    }
-                )
-
-    # Admission gate: drop HAS_PARENT edges to inadmissible parents
-    # (bare-base category labels). The two clauses live in ``parents.py``.
-    co_batch = _filter_admissible_parents(co_batch, gc, full_rebuild=full_rebuild)
-
-    explicit_ids = {n["id"] for n in names if n.get("id")}
-    endpoint_ids = set(explicit_ids)
-    for batch in (co_batch, he_batch):
-        for row in batch:
-            endpoint_ids.update((row["from_name"], row["to_name"]))
-    endpoint_ids.update(row["from_name"] for row in geo_batch if row.get("from_name"))
-
-    pred_batch: list[dict[str, str]] = []
-    for n in names:
-        name_id = n.get("id")
-        if not name_id:
-            continue
-        predecessor = n.get("predecessor") or n.get("deprecates")
-        if predecessor:
-            pred_batch.append({"from_name": name_id, "to_name": predecessor})
-            endpoint_ids.add(predecessor)
-
-    discovered = list(
-        gc.query(
-            """
-            // STANDARD_NAME_EDGE_IDENTITY_DISCOVERY
-            UNWIND $ids AS requested
-            OPTIONAL MATCH (sn:StandardName {id: requested})
-            RETURN sn.id AS id, sn.name_stage AS name_stage
-            """,
-            ids=sorted(endpoint_ids),
-        )
-    )
-    if endpoint_ids and not discovered:
-        # Neo4j's UNWIND + OPTIONAL MATCH projection returns one row per
-        # requested identity, including missing nodes. An empty result can only
-        # come from an opaque query adapter (notably structural unit-test
-        # doubles). Keep those adapters read-only: MATCH-only writers may
-        # attempt the relationships, but no endpoint is bootstrapped without
-        # an explicit missing-node projection and child authority.
-        lifecycle_ids = set(endpoint_ids)
-    else:
-        lifecycle_ids = {
-            str(row["id"])
-            for row in discovered
-            if row.get("id")
-            and ("name_stage" not in row or row.get("name_stage") is not None)
-        }
-    unmaterialized_parent_ids = {
-        row["to_name"] for row in co_batch if row["to_name"] not in lifecycle_ids
-    }
-    materialized_ids = _bootstrap_missing_derived_parent_targets(
-        gc,
-        co_batch,
-        unmaterialized_parent_ids,
-    )
-    authorized_ids = explicit_ids | lifecycle_ids | materialized_ids
-    admitted_parent_ids = {row["to_name"] for row in co_batch}
-    structural_ids = explicit_ids | (
-        admitted_parent_ids & (lifecycle_ids | materialized_ids)
+    return graph_lineage._filter_admissible_parents(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    # Admission controls the closure. A rejected intermediate must not retain
-    # independently derived locus/error rows that could make it look like an
-    # authorized identity.
-    co_batch = [
-        row
-        for row in co_batch
-        if row["from_name"] in structural_ids and row["to_name"] in structural_ids
-    ]
-    he_batch = [
-        row
-        for row in he_batch
-        if row["from_name"] in authorized_ids and row["to_name"] in authorized_ids
-    ]
-    geo_batch = [row for row in geo_batch if row["from_name"] in structural_ids]
-    pred_batch = [
-        row
-        for row in pred_batch
-        if row["from_name"] in authorized_ids and row["to_name"] in authorized_ids
-    ]
-    # Reconcile (NOT accrete) each processed child's structural HAS_PARENT
-    # edges to EXACTLY the current admitted derivation. ``derive_edges`` is a
-    # deterministic function of the child name, but the rule that computes the
-    # structural parent has changed over the pipeline's life; MERGE-only writes
-    # left a child pointing at a parent the CURRENT derivation no longer emits
-    # (the ``toroidal_mhd_mode_number`` / diffusivity tangles). Without this
-    # step every startup keeps the stale edge alive and, when the rule moved a
-    # child to a new parent, orphans the old parent into a childless zombie —
-    # the source of the derived-parent churn. Deleting structural HAS_PARENT
-    # edges (those carrying an ``operator_kind`` — all HAS_PARENT edges are
-    # derivation-produced) whose target is not in the freshly admitted set
-    # makes the edge topology a pure function of the current grammar. Runs for
-    # EVERY child in this batch, including those whose derivation now yields no
-    # admissible parent (so their last stale edge is cleared).
-    desired_by_child: dict[str, set[str]] = {}
-    for e in co_batch:
-        if e.get("from_name"):
-            desired_by_child.setdefault(e["from_name"], set()).add(e["to_name"])
-    recon = [
-        {"child": child, "keep": sorted(desired_by_child.get(child, set()))}
-        for child in sorted(processed)
-    ]
-    if recon:
-        gc.query(
-            """
-            UNWIND $recon AS rc
-            MATCH (c:StandardName {id: rc.child})-[r:HAS_PARENT]->(p:StandardName)
-            WHERE r.operator_kind IS NOT NULL AND NOT (p.id IN rc.keep)
-            DELETE r
-            """,
-            recon=recon,
-        )
 
-    if co_batch:
-        gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (src:StandardName {id: b.from_name})
-            MATCH (tgt:StandardName {id: b.to_name})
-            MERGE (src)-[r:HAS_PARENT]->(tgt)
-            SET r.operator      = b.operator,
-                r.operator_kind = b.operator_kind,
-                r.role          = b.role,
-                r.separator     = b.separator,
-                r.axis          = b.axis,
-                r.shape         = b.shape
-            WITH tgt, b.operator_kind AS ok
-            WHERE tgt.name_stage IS NULL OR tgt.name_stage = 'pending'
-            WITH tgt, ok
-            WHERE ok IN ['projection', 'coordinate', 'unary_postfix']
-            SET tgt.updated_at = datetime(), tgt.needs_composition = true
-            """,
-            batch=co_batch,
-        )
+def _emit_magnitude_of_edges(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._emit_magnitude_of_edges."""
+    from .graph_store import graph_lineage
 
-        # MAGNITUDE_OF passive materialisation. When a written
-        # name matches "magnitude_of_<X>" and X is an admitted vector
-        # parent in the graph, emit (this)-[:MAGNITUDE_OF]->(X). Never
-        # create the magnitude node speculatively — only links existing.
-        _emit_magnitude_of_edges([{"id": name_id} for name_id in processed], gc)
-
-    if he_batch:
-        gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (src:StandardName {id: b.from_name})
-            MATCH (tgt:StandardName {id: b.to_name})
-            MERGE (src)-[r:HAS_ERROR]->(tgt)
-            SET r.error_type = b.error_type
-            """,
-            batch=he_batch,
-        )
-
-    if geo_batch:
-        gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (src:StandardName {id: b.from_name})
-            MERGE (loc:Locus {id: b.locus_token})
-            MERGE (src)-[r:HAS_LOCUS]->(loc)
-            SET r.locus_token = b.locus_token,
-                r.locus_relation = b.locus_relation
-            """,
-            batch=geo_batch,
-        )
-
-    # --- HAS_PREDECESSOR ---
-    # The predecessor projection accepts pipeline and catalog payloads.
-    if pred_batch:
-        gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (src:StandardName {id: b.from_name})
-            MATCH (tgt:StandardName {id: b.to_name})
-            MERGE (src)-[:HAS_PREDECESSOR]->(tgt)
-            """,
-            batch=pred_batch,
-        )
-
-    # --- IN_CLUSTER ---
-    cluster_batch = [
-        {"sn_id": n["id"], "cluster_id": n["primary_cluster_id"]}
-        for n in names
-        if n.get("id") and n.get("primary_cluster_id")
-    ]
-    if cluster_batch:
-        gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (sn:StandardName {id: b.sn_id})
-            MERGE (c:IMASSemanticCluster {id: b.cluster_id})
-            MERGE (sn)-[:IN_CLUSTER]->(c)
-            """,
-            batch=cluster_batch,
-        )
-
-    # --- HAS_PHYSICS_DOMAIN (one edge per source domain) ---
-    # Post-refactor: ``physics_domain`` is the scalar primary; the full
-    # set of contributing domains lives in ``source_domains``.  Edges are
-    # MERGEd from ``source_domains`` (plus the scalar primary as a
-    # fallback for legacy callers) so that cross-domain discoverability
-    # is preserved at the graph level.
-    domain_batch = []
-    for n in names:
-        if not n.get("id"):
-            continue
-        domains: set[str] = set(_ensure_list(n.get("source_domains")))
-        primary = _scalar_domain(n.get("physics_domain"))
-        if primary:
-            domains.add(primary)
-        for d in domains:
-            domain_batch.append({"sn_id": n["id"], "domain_id": d})
-    if domain_batch:
-        gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (sn:StandardName {id: b.sn_id})
-            MERGE (d:PhysicsDomain {id: b.domain_id})
-            MERGE (sn)-[:HAS_PHYSICS_DOMAIN]->(d)
-            """,
-            batch=domain_batch,
-        )
-
-    candidate_name_ids = {n["id"] for n in names if n.get("id")}
-    for batch in (co_batch, he_batch, pred_batch):
-        for row in batch:
-            candidate_name_ids.update((row["from_name"], row["to_name"]))
-    candidate_name_ids.update(
-        row["from_name"] for row in geo_batch if row.get("from_name")
+    return graph_lineage._emit_magnitude_of_edges(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    candidate_name_ids.update(row["sn_id"] for row in cluster_batch if row.get("sn_id"))
-    candidate_name_ids.update(row["sn_id"] for row in domain_batch if row.get("sn_id"))
-    return candidate_name_ids
 
 
-_structural_edge_reconcile_apply = functools.partial(
-    apply_signed_manifest,
-    {},
-    authority_adapter="structural-edge-reconcile",
-    mutation_kind="recompute-canonical-structural-edges",
-    guard_set=(
-        "exact-request-scope",
-        "canonical-structural-derivation",
-        "out-of-allowlist-immutability",
-    ),
-    reason="exact structural-edge reconciliation for requested Standard Names",
-    apply=True,
-)
+def _bootstrap_missing_derived_parent_targets(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._bootstrap_missing_derived_parent_targets."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._bootstrap_missing_derived_parent_targets(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _write_standard_name_edges(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._write_standard_name_edges."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._write_standard_name_edges(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+_structural_edge_reconcile_apply = import_module(
+    ".graph_store.graph_lineage", __package__
+)._structural_edge_reconcile_apply
+
 globals()["reconcile_structural_edges_for_" + "standard_names"] = (
     _structural_edge_reconcile_apply
 )
 
 
-def _clear_superseded_child_derived_parent_edges(gc: Any) -> int:
-    """Delete derived HAS_PARENT edges FROM superseded/exhausted children.
+def _clear_superseded_child_derived_parent_edges(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._clear_superseded_child_derived_parent_edges."""
+    from .graph_store import graph_lineage
 
-    A dead (superseded/exhausted) child must not keep propping up a zombie
-    parent, so its derived edges are ordinarily reaped. But the edge is also
-    provenance for the identity it points INTO: deleting an incoming edge
-    strips that identity of a relationship it carries. An edge whose target
-    holds durable authority — recorded spend, ratification, a catalog binding
-    — therefore survives even though the child that carries it is dead. The
-    write path asks the same question of its candidates via
-    :func:`automatic_deletion_protections`; this cleanup asks it of the edge's
-    targets before deleting. Returns the number of edges actually deleted.
-    """
-    rows = gc.query(
-        """
-        MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
-        WHERE coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
-          AND r.operator_kind IS NOT NULL
-        RETURN c.id AS child, p.id AS parent
-        """
-    )
-    pairs = [
-        (str(row["child"]), str(row["parent"]))
-        for row in (rows or [])
-        if row.get("child") and row.get("parent")
-    ]
-    if not pairs:
-        return 0
-    protected_parents = set(
-        automatic_deletion_protections(gc, sorted({parent for _c, parent in pairs}))
-    )
-    to_delete = [
-        {"child": child, "parent": parent}
-        for child, parent in pairs
-        if parent not in protected_parents
-    ]
-    if not to_delete:
-        return 0
-    gc.query(
-        """
-        UNWIND $pairs AS pair
-        MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
-        WHERE c.id = pair.child AND p.id = pair.parent
-          AND coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
-          AND r.operator_kind IS NOT NULL
-        DELETE r
-        """,
-        pairs=to_delete,
-    )
-    return len(to_delete)
-
-
-def rederive_structural_edges() -> dict[str, int]:
-    """Reconcile HAS_PARENT/HAS_ERROR edges to the current derivation of LIVE names.
-
-    Structure is defined by **live** names only. Superseded/exhausted names are
-    dead (refined away) and must not contribute structural parents: deriving
-    edges from a dead name re-mints a parent that the childless reaper then
-    deletes — an unbounded mint/reap churn across startups. So this:
-
-    1. derives + reconciles edges for non-superseded/-exhausted names only
-       (``_write_standard_name_edges`` deletes each child's stale derived edges
-       and writes the current admitted set — idempotent);
-    2. deletes any derived (``operator_kind``-bearing) HAS_PARENT edge still
-       originating FROM a superseded/exhausted name, so dead names stop
-       propping up zombie parents (those parents become reapable, then drain)
-       — unless the edge's target carries durable authority, in which case the
-       edge is kept as provenance (``_clear_superseded_child_derived_parent_edges``);
-    3. migrates inbound HAS_PARENT edges off superseded PARENTS to their live
-       successor (``_rewire_has_parent_off_superseded``, which skips
-       projection-of-self successors).
-
-    The result is a fixpoint: re-running on a stable live name set mints no new
-    parents and orphans none. Returns processed/dead-edge/migrated counts.
-    """
-    with GraphClient() as gc:
-        live = gc.query(
-            "MATCH (sn:StandardName) "
-            "WHERE sn.name_stage IS NOT NULL "
-            "AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested']) "
-            "RETURN sn.id AS id"
-        )
-        names = [{"id": r["id"]} for r in live if r.get("id")]
-        if not names:
-            return {"processed": 0, "dead_edges_cleared": 0, "migrated": 0}
-        _write_standard_name_edges(gc, names, full_rebuild=True)
-        dead_cleared = _clear_superseded_child_derived_parent_edges(gc)
-        migrated = _rewire_has_parent_off_superseded(gc)
-    logger.info(
-        "rederive_structural_edges: processed %d live names, cleared %d "
-        "dead-name edges, migrated %d HAS_PARENT edges",
-        len(names),
-        dead_cleared,
-        migrated,
-    )
-    return {
-        "processed": len(names),
-        "dead_edges_cleared": dead_cleared,
-        "migrated": migrated,
-    }
-
-
-def _rewire_has_parent_off_superseded(gc: Any) -> int:
-    """Rewire HAS_PARENT edges from superseded parents to their successors.
-
-    A name that supersedes another carries a ``REFINED_FROM`` edge back
-    to its predecessor. We walk the chain to find the live tip (the SN
-    at the head whose ``name_stage`` is not ``superseded``) and migrate
-    each inbound ``HAS_PARENT`` edge to that tip, preserving edge
-    properties. The child's current ``derive_edges`` result must authorize
-    both the tip identity and the complete edge-property map; refinement
-    lineage cannot change grammar topology by itself. If no authorized live
-    tip exists, the edge is left alone so manual review can investigate.
-
-    Self-loop guard: if a refine step renamed the *child* into the same
-    name as its (now-superseded) parent — e.g. ``minimum_magnetic_field``
-    got refined into ``minimum_magnetic_field_magnitude`` while
-    ``minimum_magnetic_field_magnitude`` was already its HAS_PARENT
-    parent — naive migration produces ``child -[HAS_PARENT]-> child``,
-    a structural impossibility that crashes ISNC's
-    ``validate_catalog`` topological sort with
-    ``CycleError: nodes are in a cycle, ['x', 'x']``. In that case the
-    edge is deleted outright; the new structural parent (if any) will
-    be re-emitted next time ``derive_edges`` runs.
-
-    Returns the number of HAS_PARENT edges actually migrated (delete-
-    only self-loops are reported under ``deleted_self_loops`` in the
-    logger but excluded from the migrated count).
-    """
-    from imas_codex.standard_names.derivation import derive_edges
-
-    child_rows = list(
-        gc.query(
-            """
-            MATCH (child:StandardName)-[:HAS_PARENT]->(old:StandardName)
-            WHERE old.name_stage = 'superseded'
-            RETURN DISTINCT child.id AS child_id
-            """
-        )
-    )
-    authorized_parent_edges: list[dict[str, Any]] = []
-    for row in child_rows:
-        child_id = row.get("child_id")
-        if not child_id:
-            continue
-        for edge in derive_edges(str(child_id)):
-            if edge.edge_type != "HAS_PARENT":
-                continue
-            authorized_parent_edges.append(
-                {
-                    "child_id": edge.from_name,
-                    "parent_id": edge.to_name,
-                    "edge_properties": {
-                        key: value
-                        for key, value in edge.props.items()
-                        if value is not None
-                    },
-                }
-            )
-    if not authorized_parent_edges:
-        return 0
-
-    # The live successor is the chain-head: the node reachable from
-    # ``old`` by following ``<-[:REFINED_FROM]-`` zero or more times,
-    # whose own ``name_stage`` is not 'superseded'. Cypher's variable-
-    # length pattern returns paths; we pick the longest hop count to
-    # land at the tip of the chain.
-    result = list(
-        gc.query(
-            """
-            MATCH (child:StandardName)-[c:HAS_PARENT]->(old:StandardName)
-            WHERE old.name_stage = 'superseded'
-            MATCH path = (tip:StandardName)-[:REFINED_FROM*1..]->(old)
-            WHERE tip.name_stage <> 'superseded'
-              // Migrate ONLY to a true rename of `old` — a successor with the
-              // SAME identity segments (physical/geometric base, subject,
-              // component). A REFINED_FROM "successor" that ADDS a qualifier/
-              // projection or CHANGES the subject (e.g. ion_convection_velocity
-              // -> radial_electron_convection_velocity, or major_radius ->
-              // major_radius_of_flux_surface) is a more-specific CHILD, not a
-              // rename; migrating `old`'s children onto it recreates the
-              // domain/locus-mismatched tangle this function exists to repair.
-              // The correct remedy for those is to un-supersede `old` (it is the
-              // legitimate generic parent), so leave the edge in place here.
-              // Conservative on NULL columns: if identity cannot be confirmed
-              // equal, do not migrate.
-              AND coalesce(tip.physical_base, '')  = coalesce(old.physical_base, '')
-              AND coalesce(tip.geometric_base, '') = coalesce(old.geometric_base, '')
-              AND coalesce(tip.subject, '')        = coalesce(old.subject, '')
-              AND coalesce(tip.component, '')       = coalesce(old.component, '')
-              AND any(authorized IN $authorized_parent_edges
-                      WHERE authorized.child_id = child.id
-                        AND authorized.parent_id = tip.id
-                        AND authorized.edge_properties = properties(c))
-            WITH old, child, c, properties(c) AS props, tip,
-                 length(path) AS hops
-            ORDER BY hops DESC
-            WITH old, child, c, props, head(collect(tip)) AS tip
-            WHERE tip IS NOT NULL
-            DELETE c
-            // Drop the edge if migration would produce a self-loop;
-            // any legitimate structural parent for `child` will be
-            // re-emitted by the next derive_edges pass.
-            WITH tip, child, props
-            WHERE tip.id <> child.id
-              // Re-assert current derivation authority at the mutation
-              // boundary. Refinement lineage alone never authorizes moving a
-              // grammar edge onto a target the child does not derive.
-              AND any(authorized IN $authorized_parent_edges
-                      WHERE authorized.child_id = child.id
-                        AND authorized.parent_id = tip.id
-                        AND authorized.edge_properties = props)
-            MERGE (child)-[c_new:HAS_PARENT]->(tip)
-            SET c_new = props
-            RETURN count(c_new) AS migrated
-            """,
-            authorized_parent_edges=authorized_parent_edges,
-        )
-    )
-    if not result:
-        return 0
-    return int(result[0].get("migrated") or 0)
-
-
-def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
-    """Attempt ISN parse on a parent name to extract grammar fields.
-
-    Returns a dict with compatibility segment keys. On strict parse failure,
-    all values are None. Uses the same lossless IR authority as
-    ``_parse_grammar`` and ``_write_grammar_decomposition``.
-    """
-    try:
-        from imas_standard_names import compose, parse
-
-        result = parse(name_id, strict=True)
-        if compose(result.ir) != name_id:
-            return dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
-        return _segments_from_ir(result.ir)
-    except ImportError:
-        logger.debug("ISN unavailable — no grammar for parent %s", name_id)
-    except Exception:  # noqa: BLE001
-        logger.debug("ISN strict grammar rejected parent %s", name_id)
-    return dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
-
-
-def _query_seedable_derived_parents(
-    gc: Any,
-    *,
-    state_where: str,
-) -> list[dict[str, Any]]:
-    """Return structurally seedable derived-parent candidates."""
-    return list(
-        gc.query(
-            f"""
-            MATCH (parent:StandardName)
-            WHERE (parent.origin IS NULL OR parent.origin = 'derived')
-              AND ({state_where})
-            MATCH (child)-[comp:HAS_PARENT]->(parent)
-            WHERE comp.operator_kind IN
-                  ['projection', 'coordinate', 'unary_postfix']
-            WITH parent,
-                 collect(DISTINCT child) AS children
-            MATCH (any_child)-[any_comp:HAS_PARENT]->(parent)
-            WITH parent, children,
-                 collect(any_comp.operator_kind) AS edge_kinds,
-                 count(any_child) AS total_children,
-                 count(CASE WHEN any_child.name_stage IS NOT NULL
-                       THEN 1 END) AS composed_children
-            WHERE total_children = composed_children
-              AND total_children >= 1
-            UNWIND children AS child
-            OPTIONAL MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(child)
-            OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(imas:IMASNode)
-            OPTIONAL MATCH (child)-[cedge:HAS_PARENT]->(parent)
-            WITH parent, edge_kinds,
-                 collect(DISTINCT {{
-                     id: child.id,
-                     unit: child.unit,
-                     cocos: child.cocos_transformation_type,
-                     physics_domain: child.physics_domain,
-                     kind: child.kind,
-                     op_kind: cedge.operator_kind
-                 }}) AS child_data,
-                 collect(DISTINCT imas.id) AS dd_paths
-            RETURN parent.id AS parent_id,
-                   parent.origin AS origin,
-                   parent.name_stage AS name_stage,
-                   child_data,
-                   dd_paths,
-                   edge_kinds
-            """
-        )
+    return graph_lineage._clear_superseded_child_derived_parent_edges(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-def _query_legacy_repairable_derived_parents(
-    gc: Any,
-    *,
-    state_where: str,
-) -> list[dict[str, Any]]:
-    """Return already-admitted legacy derived parents eligible for lifecycle repair."""
-    return list(
-        gc.query(
-            f"""
-            MATCH (parent:StandardName)
-            WHERE (parent.origin IS NULL OR parent.origin = 'derived')
-              AND ({state_where})
-            MATCH (child)-[comp:HAS_PARENT]->(parent)
-            WITH parent,
-                 collect(DISTINCT child) AS children,
-                 collect(comp.operator_kind) AS edge_kinds,
-                 count(child) AS total_children,
-                 count(CASE WHEN child.name_stage IS NOT NULL
-                       THEN 1 END) AS composed_children,
-                 count(CASE WHEN comp.operator_kind IN
-                       ['projection', 'coordinate', 'unary_postfix']
-                       THEN 1 END) AS seedable_edges
-            WHERE total_children = composed_children
-              AND total_children >= 1
-              AND seedable_edges = 0
-            UNWIND children AS child
-            OPTIONAL MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(child)
-            OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(imas:IMASNode)
-            OPTIONAL MATCH (child)-[cedge:HAS_PARENT]->(parent)
-            WITH parent, edge_kinds,
-                 collect(DISTINCT {{
-                     id: child.id,
-                     unit: child.unit,
-                     cocos: child.cocos_transformation_type,
-                     physics_domain: child.physics_domain,
-                     kind: child.kind,
-                     op_kind: cedge.operator_kind
-                 }}) AS child_data,
-                 collect(DISTINCT imas.id) AS dd_paths
-            RETURN parent.id AS parent_id,
-                   parent.origin AS origin,
-                   parent.name_stage AS name_stage,
-                   child_data,
-                   dd_paths,
-                   edge_kinds
-            """
-        )
+def rederive_structural_edges(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.rederive_structural_edges."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage.rederive_structural_edges(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-def _query_derived_parents_for_admission_cleanup(gc: Any) -> list[str]:
-    """Return materialized derived-parent ids to re-check for admission.
+def _rewire_has_parent_off_superseded(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._rewire_has_parent_off_superseded."""
+    from .graph_store import graph_lineage
 
-    Accepted nodes can predate the current admission gate. Pending nodes can be
-    born before their first batch child has a graph edge, when the shadow veto
-    has no topology to inspect. Both states must pass the current gate before
-    lifecycle materialization or structural acceptance can promote them.
-    Restrict to ``origin='derived'`` and exclude identities carrying durable
-    authority before admission is evaluated.  The deletion path repeats the
-    authority check as a backstop against changes between selection and write.
-
-    Re-check regardless of ``docs_stage``. A single-child shadow can otherwise
-    survive either pending materialization or an accepted names-only run.
-    """
-    rows = gc.query(
-        """
-        MATCH (parent:StandardName)
-        WHERE parent.origin = 'derived'
-          AND parent.name_stage IN ['pending', 'accepted']
-        MATCH (:StandardName)-[:HAS_PARENT]->(parent)
-        RETURN DISTINCT parent.id AS parent_id
-        """
+    return graph_lineage._rewire_has_parent_off_superseded(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    candidate_ids = [str(r["parent_id"]) for r in rows if r.get("parent_id")]
-    return filter_automatic_deletion_candidates(gc, candidate_ids)
 
 
-def _delete_derived_parent_nodes(
-    gc: Any,
-    parent_ids: list[str],
-    *,
-    manifest_sha256: str | None = None,
-    reason: str | None = None,
-    expected_producer_ids_by_parent: dict[str, list[str]] | None = None,
-) -> int:
-    """Delete only unprotected structural placeholders with recovery material.
+def _parse_parent_grammar(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._parse_parent_grammar."""
+    from .graph_store import graph_lineage
 
-    Admission determines whether scaffolding is warranted. It is not a licence
-    to delete a physics identity, so this path requires the explicit
-    ``needs_composition`` placeholder marker and refuses a complete batch when
-    it contains publication evidence or an unusual candidate volume.
-    """
-    parent_ids = sorted(set(parent_ids))
-    if not parent_ids:
-        return 0
-    if len(parent_ids) > DERIVED_PARENT_CLEANUP_DELETION_LIMIT:
-        raise DerivedParentCleanupRefusal(
-            "Refused structural derived-parent cleanup: "
-            f"{len(parent_ids)} candidate identities exceeds the "
-            f"{DERIVED_PARENT_CLEANUP_DELETION_LIMIT}-identity ceiling"
-        )
-
-    try:
-        refuse_protected_automatic_deletion(
-            gc, parent_ids, operation="structural derived-parent cleanup"
-        )
-    except ProtectedDeletionError as exc:
-        raise DerivedParentCleanupRefusal(str(exc)) from exc
-
-    deleted = 0
-    deletion_clause = deletion_change_cypher("sn")
-    deletion_params = deletion_change_params(
-        "remove_derived_parent",
-        reason=reason
-        or "structural derived parent no longer satisfies lifecycle admission",
+    return graph_lineage._parse_parent_grammar(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    for parent_id in parent_ids:
-        expected_producer_ids = (
-            sorted(set(expected_producer_ids_by_parent[parent_id]))
-            if expected_producer_ids_by_parent is not None
-            and parent_id in expected_producer_ids_by_parent
-            else None
-        )
-        rows = list(
-            gc.query(
-                f"""
-                MATCH (sn:StandardName {{id: $parent_id}})
-                WHERE sn.needs_composition = true
-                CALL (sn) {{
-                  OPTIONAL MATCH (producer:StandardNameSource)
-                  WHERE producer.produced_sn_id = sn.id
-                     OR EXISTS {{ (producer)-[:PRODUCED_NAME]->(sn) }}
-                     OR (producer.source_type = 'derived'
-                         AND producer.source_id = sn.id)
-                  RETURN collect(DISTINCT producer.id) AS current_producer_ids
-                }}
-                OPTIONAL MATCH (derived_source:StandardNameSource
-                  {{source_type: 'derived', source_id: $parent_id}})
-                OPTIONAL MATCH (mirror_source:StandardNameSource)
-                WHERE mirror_source.produced_sn_id = $parent_id
-                OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(rv:StandardNameReview)
-                OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(dr:DocsRevision)
-                WITH sn,
-                     current_producer_ids,
-                     collect(DISTINCT derived_source) AS derived_sources,
-                     collect(DISTINCT mirror_source) AS mirror_sources,
-                     collect(DISTINCT rv) AS reviews,
-                     collect(DISTINCT dr) AS revisions
-                WHERE $expected_producer_ids IS NULL
-                   OR (size(current_producer_ids) = size($expected_producer_ids)
-                       AND all(id IN current_producer_ids
-                               WHERE id IN $expected_producer_ids)
-                       AND all(id IN $expected_producer_ids
-                               WHERE id IN current_producer_ids))
-                {deletion_clause}
-                SET change.manifest_sha256 = $stub_manifest_sha256
-                FOREACH (source IN mirror_sources |
-                  SET source.produced_sn_id = null)
-                FOREACH (source IN derived_sources | DETACH DELETE source)
-                FOREACH (r IN reviews | DETACH DELETE r)
-                FOREACH (d IN revisions | DETACH DELETE d)
-                DETACH DELETE sn
-                RETURN 1 AS deleted
-                """,
-                parent_id=parent_id,
-                expected_producer_ids=expected_producer_ids,
-                stub_manifest_sha256=manifest_sha256,
-                **deletion_params,
-            )
-        )
-        if rows:
-            deleted += int(rows[0].get("deleted", 0))
-    return deleted
 
 
-def sweep_orphaned_docs_revisions(gc: Any) -> int:
-    """Delete DocsRevision snapshots no longer linked to any StandardName.
+def _query_seedable_derived_parents(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._query_seedable_derived_parents."""
+    from .graph_store import graph_lineage
 
-    A ``DocsRevision`` is owned by exactly one ``StandardName`` via
-    ``(sn)-[:DOCS_REVISION_OF]->(dr)``. When the owning name is reaped its
-    revisions become unreachable scaffolding. Although ``_delete_derived_parent_nodes``
-    now deletes a parent's revisions inline, this sweep is the idempotent
-    backstop: it clears any revision orphaned by an earlier reap (or a future
-    deletion path that forgets to). Runs every startup so orphaned docs content
-    can never accumulate. Returns the number deleted.
-    """
-    rows = list(
-        gc.query(
-            """
-            MATCH (dr:DocsRevision)
-            WHERE NOT EXISTS { (:StandardName)-[:DOCS_REVISION_OF]->(dr) }
-            WITH dr LIMIT 50000
-            DETACH DELETE dr
-            RETURN count(dr) AS n
-            """
-        )
+    return graph_lineage._query_seedable_derived_parents(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    n = int(rows[0]["n"]) if rows else 0
-    if n:
-        logger.info("sweep_orphaned_docs_revisions: deleted %d orphaned revisions", n)
-    return n
 
 
-def _derived_parent_source_metadata(parent_id: str) -> dict[str, str]:
-    """Build the distinct structural provenance identity for a derived parent.
+def _query_legacy_repairable_derived_parents(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._query_legacy_repairable_derived_parents."""
+    from .graph_store import graph_lineage
 
-    A common child DD path is evidence about the children, not a realization of
-    the parent. Structural sources therefore neither reuse a ``dd:<path>``
-    identity nor carry a ``FROM_DD_PATH`` relationship.
-    """
-    return {
-        "source_node_id": f"derived:{parent_id}",
-        "source_type": "derived",
-        "source_id": parent_id,
-        "batch_key": "derived_parent",
-    }
-
-
-def _validate_derived_parent_identity(
-    parent_id: str,
-    *,
-    kind: str,
-    unit: str,
-) -> list[str]:
-    """Validate a parent name and unit through ISN's public authority surface."""
-    try:
-        from imas_standard_names.grammar import compose, parse
-        from imas_standard_names.models import create_standard_name_entry
-        from imas_standard_names.validation.semantic import run_semantic_checks
-
-        from imas_codex.standard_names.kind_derivation import to_isn_kind
-
-        parsed = parse(parent_id, strict=True)
-        if compose(parsed.ir) != parent_id:
-            return ["strict grammar round-trip changed the parent name"]
-        entry = create_standard_name_entry(
-            {
-                "name": parent_id,
-                "kind": to_isn_kind(kind),
-                "unit": unit,
-            },
-            name_only=True,
-        )
-        return [
-            issue
-            for issue in run_semantic_checks({parent_id: entry})
-            if " ERROR - " in issue
-        ]
-    except Exception as exc:  # ISN reports heterogeneous parse/model failures.
-        return [str(exc)]
-
-
-def _eligible_derived_parent_unit_children(
-    parent_id: str, child_data: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
-    """Select children whose units authoritatively constrain a parent."""
-    eligible = [child for child in child_data if child.get("op_kind") != "binary"]
-    normalization_markers = ("normalized", "normalised")
-    if not any(marker in parent_id.split("_") for marker in normalization_markers):
-        eligible = [
-            child
-            for child in eligible
-            if not any(
-                marker in str(child.get("id") or "").split("_")
-                for marker in normalization_markers
-            )
-        ]
-    return eligible
-
-
-def _materialize_derived_parent_rows(
-    gc: Any,
-    parents: list[dict[str, Any]],
-    *,
-    infer_kind_from_existing_topology: bool = False,
-    rejected_pending_parent_ids: list[str] | None = None,
-    bootstrap_missing: bool = False,
-) -> int:
-    """Materialize structurally eligible derived parents onto the docs lifecycle."""
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    return graph_lineage._query_legacy_repairable_derived_parents(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    from imas_codex.standard_names.parents import recompute_parent_kind
-
-    seeded = 0
-    for row in parents:
-        parent_id = row["parent_id"]
-        child_data = row.get("child_data") or []
-        edge_kinds = row.get("edge_kinds") or []
-        authorized_unit = row.get("authorized_unit")
-        if authorized_unit is None:
-            eligible_unit_children = _eligible_derived_parent_unit_children(
-                parent_id, child_data
-            )
-            eligible_units = {
-                str(child["unit"])
-                for child in eligible_unit_children
-                if child.get("unit")
-            }
-            if len(eligible_units) == 1:
-                authorized_unit = next(iter(eligible_units))
-        is_geometric = any(k == "coordinate" for k in edge_kinds)
-
-        if infer_kind_from_existing_topology:
-            kind = recompute_parent_kind(parent_id, gc)
-        else:
-            seedable_edge_kinds = {"projection", "coordinate", "unary_postfix"}
-            if authorized_unit is None and not any(
-                k in seedable_edge_kinds for k in edge_kinds
-            ):
-                logger.debug(
-                    "Parent %s has only non-seedable edges (%s) — skipping",
-                    parent_id,
-                    edge_kinds,
-                )
-                continue
-
-            is_magnitude_parent = all(k == "unary_postfix" for k in edge_kinds)
-            kind = "scalar" if is_magnitude_parent else "vector"
-
-        # Binary-operand children (e.g. ``ratio_of_X_to_Y``) carry a HAS_PARENT
-        # edge to each operand, so the parent is an OPERAND of the ratio, not a
-        # unit-sharing generalization of it. A dimensionless ratio child must
-        # NOT constrain the parent's unit/cocos — otherwise a parent whose
-        # qualifier/projection children all share a unit (e.g. m^-3) is wrongly
-        # flagged heterogeneous by the ratio's '1' and skipped. Exclude binary
-        # children from unit/cocos inheritance.
-        unit_children = _eligible_derived_parent_unit_children(parent_id, child_data)
-        # Normalization-peel children must not constrain the parent's unit
-        # either: a child carrying a normalization marker the parent lacks
-        # (``normalized_particle_mass`` → ``particle_mass``) is the
-        # dimensionless variant of the parent's PHYSICAL concept, so its
-        # unit '1' is correct for the child and wrong for the parent. With
-        # no other unit signal the parent stays unit-less rather than
-        # inheriting a dimensionless stamp it cannot honour.
-        child_units = {c["unit"] for c in unit_children if c.get("unit")}
-        if authorized_unit is not None:
-            unit = str(authorized_unit)
-        elif is_geometric:
-            unit = None
-        elif len(child_units) > 1:
-            logger.warning(
-                "Parent %s has children with heterogeneous units: %s — "
-                "skipping (needs manual review)",
-                parent_id,
-                child_units,
-            )
-            continue
-        else:
-            unit = next(iter(child_units)) if child_units else None
-
-        child_cocos = {c["cocos"] for c in unit_children if c.get("cocos")}
-        cocos = next(iter(child_cocos)) if len(child_cocos) == 1 else None
-
-        # Inherit the children's physics domain(s). A parent whose children
-        # span MULTIPLE domains (e.g. torque across transport + mhd) must still
-        # be scoped — pick the primary (most-frequent child domain, ties broken
-        # alphabetically for determinism) and record the full provenance set in
-        # source_domains. Leaving it None would export the parent as 'unscoped'.
-        from collections import Counter
-
-        child_domain_list = [
-            c["physics_domain"] for c in child_data if c.get("physics_domain")
-        ]
-        if child_domain_list:
-            _domain_counts = Counter(child_domain_list)
-            _top = max(_domain_counts.values())
-            physics_domain = sorted(d for d, n in _domain_counts.items() if n == _top)[
-                0
-            ]
-            source_domains = sorted(set(child_domain_list))
-        else:
-            physics_domain = None
-            source_domains = []
-
-        grammar_fields = _parse_parent_grammar(parent_id)
-
-        props: dict[str, Any] = {
-            "parent_id": parent_id,
-            "unit": unit,
-            "cocos_transformation_type": cocos,
-            "physics_domain": physics_domain,
-            "source_domains": source_domains,
-            "kind": kind,
-            "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-            "is_geometric_coordinate": is_geometric,
-        }
-        props.update(grammar_fields)
-        props.update(_derived_parent_source_metadata(parent_id))
-        props["bootstrap_edges"] = row.get("bootstrap_edges") or []
-
-        # A derived parent is quantitative catalog data, even when it has no
-        # DD realization of its own.  It must therefore carry an explicit unit
-        # and pass the same validity oracle as a pipeline-authored name before
-        # it can enter an accepted lifecycle.  A normalization or binary child
-        # may erase the only useful unit signal; in that case the parent is
-        # unresolved and must not be minted from guesswork.
-        if not unit:
-            logger.warning(
-                "Parent %s has no authoritative unit — skipping materialization",
-                parent_id,
-            )
-            continue
-
-        validation_issues = _validate_derived_parent_identity(
-            parent_id,
-            kind=kind,
-            unit=unit,
-        )
-        if validation_issues:
-            logger.warning(
-                "Parent %s failed the name-validity oracle — skipping: %s",
-                parent_id,
-                "; ".join(validation_issues),
-            )
-            if (
-                rejected_pending_parent_ids is not None
-                and row.get("origin") == "derived"
-                and row.get("name_stage") == "pending"
-            ):
-                rejected_pending_parent_ids.append(parent_id)
-            continue
-
-        parent_match = (
-            "UNWIND $bootstrap_edges AS authorized_edge "
-            "MATCH (authorized_child:StandardName {id: authorized_edge.from_name}) "
-            "WHERE ((authorized_child.name_stage IS NULL AND "
-            "authorized_edge.expected_name_stage IS NULL) OR "
-            "authorized_child.name_stage = authorized_edge.expected_name_stage) "
-            "AND ((authorized_child.unit IS NULL AND "
-            "authorized_edge.expected_unit IS NULL) OR "
-            "authorized_child.unit = authorized_edge.expected_unit) "
-            "AND ((authorized_child.kind IS NULL AND "
-            "authorized_edge.expected_kind IS NULL) OR "
-            "authorized_child.kind = authorized_edge.expected_kind) "
-            "AND ((authorized_child.physics_domain IS NULL AND "
-            "authorized_edge.expected_physics_domain IS NULL) OR "
-            "authorized_child.physics_domain = "
-            "authorized_edge.expected_physics_domain) "
-            "AND ((authorized_child.cocos_transformation_type IS NULL "
-            "AND authorized_edge.expected_cocos IS NULL) OR "
-            "authorized_child.cocos_transformation_type = "
-            "authorized_edge.expected_cocos) "
-            "WITH collect({child: authorized_child, edge: authorized_edge}) "
-            "AS authorized_children "
-            "WHERE size(authorized_children) = size($bootstrap_edges) "
-            "MERGE (parent:StandardName {id: $parent_id}) "
-            "ON CREATE SET parent.updated_at = datetime(), parent.created_at = datetime()"
-            if bootstrap_missing
-            else "MATCH (parent:StandardName {id: $parent_id}) "
-            "WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }"
-        )
-        parent_scope = (
-            "WITH parent, authorized_children" if bootstrap_missing else "WITH parent"
-        )
-        materialize_cypher = """
-            __PARENT_MATCH__
-            SET parent.name_stage = CASE
-                    // Already name-reviewed → stays accepted (idempotent).
-                    WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'
-                    // Unreviewed but review-ready (real description + embedding)
-                    // → route through REVIEW_NAME before it can earn docs.
-                    WHEN trim(coalesce(parent.description, '')) <> ''
-                         AND parent.description <> $description
-                         AND parent.embedding IS NOT NULL THEN 'drafted'
-                    // Unreviewed with only the placeholder description → hold at
-                    // accepted; the docs gate (reviewer_score_name IS NOT NULL)
-                    // keeps it out of docs until enrichment + review fill it in.
-                    ELSE 'accepted'
-                END,
-                parent.docs_stage = coalesce(parent.docs_stage, 'pending'),
-                parent.validation_status = coalesce(parent.validation_status, 'valid'),
-                parent.origin = 'derived',
-                parent.kind = $kind,
-                parent.unit = coalesce($unit, parent.unit),
-                parent.cocos_transformation_type = $cocos_transformation_type,
-                parent.cocos = CASE
-                    WHEN $cocos_transformation_type IS NULL THEN null
-                    ELSE parent.cocos
-                END,
-                parent.physics_domain =
-                    coalesce($physics_domain, parent.physics_domain),
-                parent.source_domains = CASE
-                    WHEN $source_domains IS NOT NULL AND size($source_domains) > 0
-                    THEN $source_domains ELSE parent.source_domains
-                END,
-                parent.description = CASE
-                    WHEN trim(coalesce(parent.description, '')) = ''
-                    THEN $description
-                    ELSE parent.description
-                END,
-                parent.needs_composition = null,
-                parent.chain_length = coalesce(parent.chain_length, 0),
-                parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),
-                parent.physical_base =
-                    coalesce($physical_base, parent.physical_base),
-                parent.geometric_base =
-                    coalesce($geometric_base, parent.geometric_base),
-                parent.subject =
-                    coalesce($subject, parent.subject),
-                parent.transformation =
-                    coalesce($transformation, parent.transformation),
-                parent.component =
-                    coalesce($component, parent.component),
-                parent.coordinate =
-                    coalesce($coordinate, parent.coordinate),
-                parent.position =
-                    coalesce($position, parent.position),
-                parent.process =
-                    coalesce($process, parent.process),
-                parent.device =
-                    coalesce($device, parent.device),
-                parent.region =
-                    coalesce($region, parent.region),
-                parent.aggregation =
-                    coalesce($aggregation, parent.aggregation),
-                parent.orbit =
-                    coalesce($orbit, parent.orbit),
-                parent.population =
-                    coalesce($population, parent.population),
-                parent.object =
-                    coalesce($object, parent.object),
-                parent.geometry =
-                    coalesce($geometry, parent.geometry),
-                parent.is_geometric_coordinate =
-                    coalesce(parent.is_geometric_coordinate,
-                             $is_geometric_coordinate),
-                parent.status = coalesce(parent.status, 'draft')
-            __PARENT_SCOPE__
-            CALL (parent) {
-                OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)
-                WITH collect(stored_cocos) AS stored_cocos_edges
-                FOREACH (stored_cocos IN CASE
-                    WHEN $cocos_transformation_type IS NULL
-                    THEN stored_cocos_edges ELSE []
-                END | DELETE stored_cocos)
-                RETURN size(stored_cocos_edges) AS stored_cocos_edge_count
-            }
-            __PARENT_SCOPE__
-            MERGE (sns:StandardNameSource {id: $source_node_id})
-            ON CREATE SET sns.created_at = datetime(),
-                          sns.attempt_count = 0
-            SET sns.status = 'composed',
-                sns.source_type = $source_type,
-                sns.source_id = $source_id,
-                sns.batch_key = coalesce(sns.batch_key, $batch_key),
-                sns.description = CASE
-                    WHEN trim(coalesce(sns.description, '')) = ''
-                    THEN parent.description
-                    ELSE sns.description
-                END,
-                sns.physics_domain = coalesce(parent.physics_domain, sns.physics_domain),
-                sns.composed_at = coalesce(sns.composed_at, datetime()),
-                sns.produced_sn_id = parent.id,
-                sns.claimed_at = null,
-                sns.claim_token = null
-            MERGE (sns)-[:PRODUCED_NAME]->(parent)
-            """.replace("__PARENT_MATCH__", parent_match).replace(
-            "__PARENT_SCOPE__", parent_scope
-        )
-        if bootstrap_missing:
-            materialize_cypher += """
-            WITH parent, authorized_children
-            OPTIONAL MATCH (parent)-[old_unit:HAS_UNIT]->(:Unit)
-            DELETE old_unit
-            WITH parent, authorized_children
-            MERGE (unit:Unit {id: $unit})
-            MERGE (parent)-[:HAS_UNIT]->(unit)
-            WITH parent, authorized_children
-            UNWIND authorized_children AS binding
-            WITH parent, binding.child AS child, binding.edge AS edge
-            MERGE (child)-[relation:HAS_PARENT]->(parent)
-            SET relation.operator = edge.operator,
-                relation.operator_kind = edge.operator_kind,
-                relation.role = edge.role,
-                relation.separator = edge.separator,
-                relation.axis = edge.axis,
-                relation.shape = edge.shape
-            RETURN parent.id AS parent_id
-            """
-        result = list(gc.query(materialize_cypher, **props))
-
-        if bootstrap_missing and not any(
-            returned.get("parent_id") == parent_id for returned in result
-        ):
-            logger.warning(
-                "Parent %s bootstrap authority changed before persistence — refusing",
-                parent_id,
-            )
-            continue
-
-        if unit and not bootstrap_missing:
-            # Self-heal: drop any pre-existing HAS_UNIT edge (possibly to a
-            # different Unit) before re-creating, so a unit correction replaces
-            # the edge rather than leaving a stale one alongside the new one.
-            # An SN must carry at most one HAS_UNIT edge, matching sn.unit.
-            gc.query(
-                """
-                MATCH (sn:StandardName {id: $parent_id})
-                WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(sn) }
-                OPTIONAL MATCH (sn)-[r:HAS_UNIT]->(:Unit)
-                DELETE r
-                WITH sn
-                MERGE (u:Unit {id: $unit})
-                MERGE (sn)-[:HAS_UNIT]->(u)
-                """,
-                parent_id=parent_id,
-                unit=unit,
-            )
-
-        seeded += 1
-
-    return seeded
 
 
-class _ParentMaterializationCapture:
-    """Capture sanctioned materializer parameters without graph access."""
+def _query_derived_parents_for_admission_cleanup(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._query_derived_parents_for_admission_cleanup."""
+    from .graph_store import graph_lineage
 
-    def __init__(self) -> None:
-        self.calls: list[dict[str, Any]] = []
-
-    def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
-        self.calls.append({"cypher": cypher, "params": params})
-        return []
-
-
-def _materialize_derived_parent_rows_batched(
-    gc: Any,
-    parents: list[dict[str, Any]],
-    *,
-    event_by_parent: dict[str, dict[str, Any]] | None = None,
-) -> int:
-    """Run the sanctioned parent materializer in two cohort-wide queries."""
-    capture = _ParentMaterializationCapture()
-    prepared_count = _materialize_derived_parent_rows(capture, parents)
-    if prepared_count != len(parents):
-        raise RuntimeError("authorized derived-parent materialization row was dropped")
-    if len(capture.calls) != 2 * prepared_count:
-        raise RuntimeError("derived-parent materialization preparation is incomplete")
-    rows = []
-    for index in range(0, len(capture.calls), 2):
-        properties = dict(capture.calls[index]["params"])
-        parent_id = str(properties["parent_id"])
-        properties["event"] = (event_by_parent or {}).get(parent_id)
-        rows.append(properties)
-
-    materialized = gc.query(
-        """
-        // STRUCTURAL_CLOSURE_BATCH_MATERIALIZE
-        UNWIND $rows AS row
-        MATCH (parent:StandardName {id: row.parent_id})
-        WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }
-        SET parent.updated_at = datetime(), parent.name_stage = CASE
-                WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'
-                WHEN trim(coalesce(parent.description, '')) <> ''
-                     AND parent.description <> row.description
-                     AND parent.embedding IS NOT NULL THEN 'drafted'
-                ELSE 'accepted'
-            END,
-            parent.docs_stage = coalesce(parent.docs_stage, 'pending'),
-            parent.validation_status = coalesce(parent.validation_status, 'valid'),
-            parent.origin = 'derived',
-            parent.kind = row.kind,
-            parent.unit = coalesce(row.unit, parent.unit),
-            parent.cocos_transformation_type = row.cocos_transformation_type,
-            parent.cocos = CASE
-                WHEN row.cocos_transformation_type IS NULL THEN null
-                ELSE parent.cocos
-            END,
-            parent.physics_domain =
-                coalesce(row.physics_domain, parent.physics_domain),
-            parent.source_domains = CASE
-                WHEN row.source_domains IS NOT NULL AND size(row.source_domains) > 0
-                THEN row.source_domains ELSE parent.source_domains
-            END,
-            parent.description = CASE
-                WHEN trim(coalesce(parent.description, '')) = ''
-                THEN row.description ELSE parent.description
-            END,
-            parent.needs_composition = null,
-            parent.chain_length = coalesce(parent.chain_length, 0),
-            parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),
-            parent.physical_base = coalesce(row.physical_base, parent.physical_base),
-            parent.geometric_base = coalesce(row.geometric_base, parent.geometric_base),
-            parent.subject = coalesce(row.subject, parent.subject),
-            parent.transformation = coalesce(row.transformation, parent.transformation),
-            parent.component = coalesce(row.component, parent.component),
-            parent.coordinate = coalesce(row.coordinate, parent.coordinate),
-            parent.position = coalesce(row.position, parent.position),
-            parent.process = coalesce(row.process, parent.process),
-            parent.device = coalesce(row.device, parent.device),
-            parent.region = coalesce(row.region, parent.region),
-            parent.aggregation = coalesce(row.aggregation, parent.aggregation),
-            parent.orbit = coalesce(row.orbit, parent.orbit),
-            parent.population = coalesce(row.population, parent.population),
-            parent.object = coalesce(row.object, parent.object),
-            parent.geometry = coalesce(row.geometry, parent.geometry),
-            parent.is_geometric_coordinate =
-                coalesce(parent.is_geometric_coordinate,
-                         row.is_geometric_coordinate),
-            parent.status = coalesce(parent.status, 'draft')
-        WITH parent, row
-        CALL (parent, row) {
-            OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)
-            WITH collect(stored_cocos) AS stored_cocos_edges
-            FOREACH (stored_cocos IN CASE
-                WHEN row.cocos_transformation_type IS NULL
-                THEN stored_cocos_edges ELSE []
-            END | DELETE stored_cocos)
-            RETURN size(stored_cocos_edges) AS stored_cocos_edge_count
-        }
-        MERGE (source:StandardNameSource {id: row.source_node_id})
-          ON CREATE SET source.created_at = datetime(), source.attempt_count = 0
-        SET source.status = 'composed',
-            source.source_type = row.source_type,
-            source.source_id = row.source_id,
-            source.batch_key = coalesce(source.batch_key, row.batch_key),
-            source.description = CASE
-                WHEN trim(coalesce(source.description, '')) = ''
-                THEN parent.description ELSE source.description
-            END,
-            source.physics_domain =
-                coalesce(parent.physics_domain, source.physics_domain),
-            source.composed_at = coalesce(source.composed_at, datetime()),
-            source.produced_sn_id = parent.id,
-            source.claimed_at = null,
-            source.claim_token = null
-        MERGE (source)-[:PRODUCED_NAME]->(parent)
-        FOREACH (_ IN CASE WHEN row.event IS NULL THEN [] ELSE [1] END |
-          CREATE (change:StandardNameChange)
-          SET change = row.event
-          CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change)
-        )
-        WITH parent, row
-        OPTIONAL MATCH (parent)-[internal_change:HAS_INTERNAL_CHANGE]->
-                       (change:StandardNameChange {id: row.event.id})
-        RETURN collect(DISTINCT parent.id) AS ids,
-               collect(DISTINCT change.id) AS event_ids,
-               collect(DISTINCT CASE
-                   WHEN change IS NULL THEN null
-                   ELSE {event_id: change.id, parent_id: parent.id}
-               END) AS event_links,
-               count(DISTINCT change) AS event_count,
-               count(DISTINCT internal_change) AS event_link_count
-        """,
-        rows=rows,
+    return graph_lineage._query_derived_parents_for_admission_cleanup(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    linked_units = gc.query(
-        """
-        // STRUCTURAL_CLOSURE_BATCH_PARENT_UNITS
-        UNWIND $rows AS row
-        MATCH (parent:StandardName {id: row.parent_id})
-        WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }
-        OPTIONAL MATCH (parent)-[old_unit:HAS_UNIT]->(:Unit)
-        DELETE old_unit
-        WITH parent, row
-        MERGE (unit:Unit {id: row.unit})
-        MERGE (parent)-[:HAS_UNIT]->(unit)
-        RETURN collect(parent.id) AS ids
-        """,
-        rows=rows,
-    )
-    expected = {str(row["parent_id"]) for row in rows}
-    expected_event_links = {
-        (str(row["event"]["id"]), str(row["parent_id"]))
-        for row in rows
-        if row["event"] is not None
-    }
-    expected_event_ids = {event_id for event_id, _ in expected_event_links}
-    materialized_ids = (
-        set(materialized[0].get("ids") or []) if len(materialized) == 1 else set()
-    )
-    materialized_event_ids = (
-        set(materialized[0].get("event_ids") or []) if len(materialized) == 1 else set()
-    )
-    materialized_event_links = (
-        {
-            (str(link["event_id"]), str(link["parent_id"]))
-            for link in materialized[0].get("event_links") or []
-        }
-        if len(materialized) == 1
-        else set()
-    )
-    event_count = (
-        int(materialized[0].get("event_count") or 0) if len(materialized) == 1 else 0
-    )
-    event_link_count = (
-        int(materialized[0].get("event_link_count") or 0)
-        if len(materialized) == 1
-        else 0
-    )
-    unit_ids = (
-        set(linked_units[0].get("ids") or []) if len(linked_units) == 1 else set()
-    )
-    if (
-        materialized_ids != expected
-        or unit_ids != expected
-        or materialized_event_ids != expected_event_ids
-        or materialized_event_links != expected_event_links
-        or event_count != len(expected_event_ids)
-        or event_link_count != len(expected_event_links)
-    ):
-        raise RuntimeError("batched derived-parent materialization cardinality changed")
-    return len(expected)
 
 
-_normalization_peel_unit_repair_apply = functools.partial(
-    apply_signed_manifest,
-    {},
-    authority_adapter="normalization-peel-unit-repair",
-    mutation_kind="clear-normalization-peel-parent-unit",
-    guard_set=(
-        "corrected-normalization-peel-unit-authority",
-        "out-of-allowlist-immutability",
-    ),
-    reason="clear mis-inherited units from normalization-peel parents",
-    apply=True,
-)
+def _delete_derived_parent_nodes(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._delete_derived_parent_nodes."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._delete_derived_parent_nodes(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def sweep_orphaned_docs_revisions(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.sweep_orphaned_docs_revisions."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage.sweep_orphaned_docs_revisions(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _derived_parent_source_metadata(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._derived_parent_source_metadata."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._derived_parent_source_metadata(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _validate_derived_parent_identity(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._validate_derived_parent_identity."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._validate_derived_parent_identity(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _eligible_derived_parent_unit_children(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._eligible_derived_parent_unit_children."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._eligible_derived_parent_unit_children(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _materialize_derived_parent_rows(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._materialize_derived_parent_rows."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._materialize_derived_parent_rows(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+_ParentMaterializationCapture = import_module(
+    ".graph_store.graph_lineage", __package__
+)._ParentMaterializationCapture
+
+
+def _materialize_derived_parent_rows_batched(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._materialize_derived_parent_rows_batched."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._materialize_derived_parent_rows_batched(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+_normalization_peel_unit_repair_apply = import_module(
+    ".graph_store.graph_lineage", __package__
+)._normalization_peel_unit_repair_apply
+
 globals()["repair_normalization_peel_parent_" + "units"] = (
     _normalization_peel_unit_repair_apply
 )
 
 
-def stamp_standard_name_units(
-    gc: Any,
-    unit_by_name: dict[str, str],
-    *,
-    reason: str,
-    origin: str = "unit_authority_repair",
-) -> list[str]:
-    """Apply reviewed unit corrections with one durable ledger row per name.
+def stamp_standard_name_units(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.stamp_standard_name_units."""
+    from .graph_store import graph_lineage
 
-    This is the sanctioned repair instrument for a small, explicitly
-    adjudicated set.  It does not infer units: callers supply the reviewed
-    mapping, and ISN canonicalizes every value before any graph write.  The
-    scalar, ``HAS_UNIT`` edge, and ``StandardNameChange`` record are updated in
-    one transaction.  Missing targets are rejected before mutation.
-    """
-    if not unit_by_name:
-        return []
-    if not reason.strip():
-        raise ValueError("a non-empty unit-repair reason is required")
-
-    from imas_standard_names import canonical_unit
-
-    rows = [
-        {"id": name, "unit": canonical_unit(unit)}
-        for name, unit in sorted(unit_by_name.items())
-    ]
-    existing = {
-        str(row["id"])
-        for row in gc.query(
-            """
-            UNWIND $ids AS id
-            MATCH (sn:StandardName {id: id})
-            RETURN sn.id AS id
-            """,
-            ids=[row["id"] for row in rows],
-        )
-    }
-    missing = [row["id"] for row in rows if row["id"] not in existing]
-    if missing:
-        raise ValueError(
-            "cannot stamp units on missing StandardName nodes: " + ", ".join(missing)
-        )
-
-    changed = list(
-        gc.query(
-            """
-            UNWIND $rows AS row
-            MATCH (sn:StandardName {id: row.id})
-            OPTIONAL MATCH (sn)-[old_unit:HAS_UNIT]->(:Unit)
-            WITH sn, row, collect(old_unit) AS old_units
-            FOREACH (edge IN old_units | DELETE edge)
-            CREATE (change:StandardNameChange {
-              id: 'sn-change:' + randomUUID(),
-              from_name: sn.id,
-              to_name: sn.id,
-              operation: 'repair_unit_authority',
-              reason: $reason,
-              origin: $origin,
-              changed_at: datetime(),
-              internal: true
-            })
-            MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
-            SET sn.unit = row.unit,
-                sn.updated_at = datetime()
-            MERGE (unit:Unit {id: row.unit})
-            MERGE (sn)-[:HAS_UNIT]->(unit)
-            RETURN sn.id AS id
-            ORDER BY id
-            """,
-            rows=rows,
-            reason=reason,
-            origin=origin,
-        )
+    return graph_lineage.stamp_standard_name_units(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return [str(row["id"]) for row in changed]
 
 
-def seed_parent_sources(gc: Any | None = None) -> int:
-    """Fully populate parent StandardName nodes from their children.
+def seed_parent_sources(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.seed_parent_sources."""
+    from .graph_store import graph_lineage
 
-    Selects placeholder parents structurally: any ``StandardName`` node
-    with ``name_stage IS NULL`` that is the target of at least one
-    HAS_PARENT edge whose ``operator_kind`` is seedable
-    (``projection``, ``coordinate``, ``unary_postfix``).
-
-    This deliberately does NOT require the ``needs_composition`` flag.
-    That flag is set by ``_write_standard_name_edges`` at edge-write
-    time, but the seedable-edge-kinds set has grown over time
-    (``unary_postfix`` was added later); placeholders created before
-    the set expanded were never flagged and would otherwise stay
-    orphaned even though the pipeline now considers them seedable.
-    Matching structurally lets the pipeline self-heal on every run.
-
-    Parent names are DETERMINISTIC — the name itself is grammar-derived
-    from the components' shared base (e.g. ``magnetic_field`` is the
-    only sensible parent of ``poloidal_magnetic_field`` /
-    ``toroidal_magnetic_field`` / …). The name has no alternative to
-    refine to: REVIEW_NAME produces noise scores on the placeholder
-    description, REFINE_NAME has nothing to write. We therefore skip
-    the name-axis pipeline entirely for deterministic parents — the
-    quality-bearing work happens on the description+docs axis.
-
-    1. Waits until ALL children of a parent have a ``name_stage`` set.
-    2. Copies unit and cocos from children (asserts uniformity).
-    3. Sets ``name_stage='accepted'`` directly. The children are
-       already REVIEW_NAME-validated standard names; their structural
-       parent inherits that validity by construction.
-    4. Stamps ``origin='deterministic'`` so the semantic-sim gate,
-       REFINE_NAME claim, and pool-pending counters all know to leave
-       this node alone on the name axis.
-    5. Sets ``description = DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER``
-       so the export-time guard can refuse to publish until
-       ``GENERATE_DOCS`` rewrites it with LLM-quality content.
-    6. Sets ``docs_stage='pending'`` so the parent enters
-       ``GENERATE_DOCS`` → ``REVIEW_DOCS`` immediately. The
-       description+docs go through full RD-quorum review on the docs
-       axis — that is the quality gate for these names.
-    7. Creates a ``StandardNameSource`` with ``status='composed'`` for audit.
-    8. Runs ISN parse to populate grammar fields.
-    9. Clears ``needs_composition`` on the parent.
-
-    Returns the number of parents fully populated.
-    """
-    _own_gc = gc is None
-    if _own_gc:
-        gc = GraphClient().__enter__()
-    try:
-        parents = _query_seedable_derived_parents(
-            gc,
-            state_where="parent.name_stage IS NULL",
-        )
-
-        if not parents:
-            return 0
-
-        seeded = _materialize_derived_parent_rows(gc, parents)
-        logger.info("seed_parent_sources: populated %d parent SNs", seeded)
-        return seeded
-    finally:
-        if _own_gc:
-            gc.__exit__(None, None, None)
-
-
-def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
-    """Repair eligible derived parents onto the docs lifecycle, idempotently."""
-    _own_gc = gc is None
-    if _own_gc:
-        gc = GraphClient().__enter__()
-    try:
-        from imas_codex.standard_names.parents import is_admissible_parent_name
-
-        state_where = (
-            "parent.name_stage IS NULL "
-            "OR parent.name_stage = 'pending' "
-            "OR (parent.name_stage = 'accepted' AND parent.docs_stage IS NULL)"
-        )
-        seedable_parents = _query_seedable_derived_parents(
-            gc,
-            state_where=state_where,
-        )
-        legacy_parents = _query_legacy_repairable_derived_parents(
-            gc,
-            state_where=state_where,
-        )
-        accepted_unit_gap_where = (
-            "parent.origin = 'derived' "
-            "AND parent.name_stage = 'accepted' "
-            "AND parent.docs_stage = 'accepted' "
-            "AND parent.unit IS NULL"
-        )
-        accepted_seedable_unit_gaps = _query_seedable_derived_parents(
-            gc,
-            state_where=accepted_unit_gap_where,
-        )
-        accepted_legacy_unit_gaps = _query_legacy_repairable_derived_parents(
-            gc,
-            state_where=accepted_unit_gap_where,
-        )
-        cleanup_candidates = _query_derived_parents_for_admission_cleanup(gc)
-        invalid_parents = []
-        for parent_id in cleanup_candidates:
-            result = is_admissible_parent_name(parent_id, gc)
-            if not result.admit:
-                invalid_parents.append(parent_id)
-
-        deleted = _delete_derived_parent_nodes(gc, invalid_parents)
-        if deleted:
-            logger.info(
-                "normalize_derived_parent_lifecycle: deleted %d inadmissible "
-                "derived parents",
-                deleted,
-            )
-        if invalid_parents:
-            invalid_parent_set = set(invalid_parents)
-            seedable_parents = [
-                row
-                for row in seedable_parents
-                if row["parent_id"] not in invalid_parent_set
-            ]
-            legacy_parents = [
-                row
-                for row in legacy_parents
-                if row["parent_id"] not in invalid_parent_set
-            ]
-            accepted_seedable_unit_gaps = [
-                row
-                for row in accepted_seedable_unit_gaps
-                if row["parent_id"] not in invalid_parent_set
-            ]
-            accepted_legacy_unit_gaps = [
-                row
-                for row in accepted_legacy_unit_gaps
-                if row["parent_id"] not in invalid_parent_set
-            ]
-
-        # Reap childless derived "zombie" parents. A derived parent is a
-        # structural abstraction over its children; once it has no incoming
-        # HAS_PARENT edge at all it abstracts over nothing. The cleanup query
-        # above only re-checks parents that STILL have a child, so orphaned
-        # derived parents accumulated unboundedly (often carrying orphaned
-        # docs). Reap those with ZERO incoming HAS_PARENT (truly orphaned):
-        # ``rederive_structural_edges`` has already cleared edges from dead
-        # (superseded/exhausted) names, so a parent of only-dead children is
-        # now zero-incoming and reaps cleanly WITHOUT being re-minted next
-        # startup (no live name derives it). Reaping on a "no LIVE child"
-        # predicate instead would ping-pong: dead children keep re-deriving the
-        # parent every startup. Scoped to ``origin='derived'`` so pipeline- and
-        # catalog-authored names are never touched, even when momentarily
-        # orphaned. Delete docs/reviews/derived-source scaffolding too.
-        reaped_parent_ids: set[str] = set()
-        while True:
-            childless_candidates = [
-                r["id"]
-                for r in gc.query(
-                    """
-                    MATCH (p:StandardName {origin: 'derived'})
-                    WHERE NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }
-                    RETURN p.id AS id
-                    """
-                )
-                or []
-                if r["id"] not in reaped_parent_ids
-            ]
-            childless = filter_automatic_deletion_candidates(gc, childless_candidates)
-            if not childless:
-                break
-            reaped_parent_ids.update(childless)
-            reaped = _delete_derived_parent_nodes(gc, childless)
-            if reaped:
-                deleted += reaped
-                logger.info(
-                    "normalize_derived_parent_lifecycle: reaped %d childless "
-                    "derived parents",
-                    reaped,
-                )
-        if reaped_parent_ids:
-            # Candidate rows are snapshotted before admission cleanup. Reaping
-            # a childless node can detach the last edge from its own parent, so
-            # iterate to closure and exclude every removed identity from the
-            # earlier candidate sets.
-            seedable_parents = [
-                row
-                for row in seedable_parents
-                if row["parent_id"] not in reaped_parent_ids
-            ]
-            legacy_parents = [
-                row
-                for row in legacy_parents
-                if row["parent_id"] not in reaped_parent_ids
-            ]
-            accepted_seedable_unit_gaps = [
-                row
-                for row in accepted_seedable_unit_gaps
-                if row["parent_id"] not in reaped_parent_ids
-            ]
-            accepted_legacy_unit_gaps = [
-                row
-                for row in accepted_legacy_unit_gaps
-                if row["parent_id"] not in reaped_parent_ids
-            ]
-
-        # Automatic orphaned-content cleanup: clear any DocsRevision left
-        # dangling by a past reap (idempotent backstop — no orphaned docs
-        # content can accumulate across startups).
-        sweep_orphaned_docs_revisions(gc)
-
-        if (
-            not seedable_parents
-            and not legacy_parents
-            and not accepted_seedable_unit_gaps
-            and not accepted_legacy_unit_gaps
-        ):
-            return deleted
-        rejected_pending_parent_ids: list[str] = []
-        repaired = _materialize_derived_parent_rows(
-            gc,
-            seedable_parents,
-            rejected_pending_parent_ids=rejected_pending_parent_ids,
-        )
-        repaired += _materialize_derived_parent_rows(
-            gc,
-            legacy_parents,
-            infer_kind_from_existing_topology=True,
-            rejected_pending_parent_ids=rejected_pending_parent_ids,
-        )
-        repaired += _materialize_derived_parent_rows(
-            gc,
-            accepted_seedable_unit_gaps,
-            rejected_pending_parent_ids=rejected_pending_parent_ids,
-        )
-        repaired += _materialize_derived_parent_rows(
-            gc,
-            accepted_legacy_unit_gaps,
-            infer_kind_from_existing_topology=True,
-            rejected_pending_parent_ids=rejected_pending_parent_ids,
-        )
-        rejected_pending_parent_ids = list(dict.fromkeys(rejected_pending_parent_ids))
-        if rejected_pending_parent_ids:
-            rejected = _delete_derived_parent_nodes(gc, rejected_pending_parent_ids)
-            deleted += rejected
-            if rejected:
-                logger.info(
-                    "normalize_derived_parent_lifecycle: deleted %d "
-                    "identity-invalid pending derived parents",
-                    rejected,
-                )
-        logger.info(
-            "normalize_derived_parent_lifecycle: repaired %d derived parent SNs",
-            repaired,
-        )
-        return repaired + deleted
-    finally:
-        if _own_gc:
-            gc.__exit__(None, None, None)
-
-
-LIFECYCLELESS_STUB_MANIFEST_SCHEMA = "imas-codex.lifecycleless-stub-manifest"
-LIFECYCLELESS_STUB_RECEIPT_SCHEMA = "imas-codex.lifecycleless-stub-receipt"
-_LIFECYCLELESS_STUB_LOCK_QUERY = (
-    "MATCH (stub:StandardName) "
-    "WHERE stub.name_stage IS NULL "
-    "AND (stub.status IS NULL OR stub.status = 'draft') "
-    "AND stub.origin IS NULL "
-    "SET stub._lifecycleless_reconcile_lock = true "
-    "REMOVE stub._lifecycleless_reconcile_lock "
-    "RETURN count(stub) AS locked"
-)
-
-
-class LifecyclelessStubConflict(RuntimeError):
-    """A lifecycle-less StandardName cohort changed or lacks authority."""
-
-
-_READ_LIFECYCLELESS_STUBS_QUERY = """
-// LIFECYCLELESS_STUB_AUTHORITY_READ
-MATCH (stub:StandardName)
-WHERE stub.name_stage IS NULL
-  AND (stub.status IS NULL OR stub.status = 'draft')
-  AND stub.origin IS NULL
-CALL (stub) {
-  OPTIONAL MATCH (child:StandardName)-[edge:HAS_PARENT]->(stub)
-  RETURN collect(CASE WHEN child IS NULL THEN null ELSE {
-    id: child.id,
-    name_stage: child.name_stage,
-    unit: child.unit,
-    cocos: child.cocos_transformation_type,
-    physics_domain: child.physics_domain,
-    kind: child.kind,
-    op_kind: edge.operator_kind,
-    operator: edge.operator,
-    role: edge.role,
-    separator: edge.separator,
-    axis: edge.axis,
-    shape: edge.shape
-  } END) AS child_data,
-  collect(CASE WHEN edge IS NULL THEN null ELSE edge.operator_kind END) AS edge_kinds
-}
-CALL (stub) {
-  OPTIONAL MATCH (stub)-[edge]-(related)
-  RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
-    direction: CASE WHEN startNode(edge) = stub THEN 'out' ELSE 'in' END,
-    type: type(edge),
-    properties: properties(edge),
-    related_labels: labels(related),
-    related_properties: properties(related)
-  } END) AS incident_relationships
-}
-CALL (stub) {
-  OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(stub)
-  WHERE source.source_type = 'dd' OR EXISTS { (source)-[:FROM_DD_PATH]->(:IMASNode) }
-  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
-  OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
-  WITH source, dd, collect(DISTINCT {
-    id: bound.id,
-    name_stage: bound.name_stage,
-    validation_status: bound.validation_status
-  }) AS binding_targets
-  RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
-    source_id: source.id,
-    expected_status: source.status,
-    expected_scalar: source.produced_sn_id,
-    expected_bindings: [target IN binding_targets WHERE target.id IS NOT NULL |
-                        target.id],
-    binding_targets: [target IN binding_targets WHERE target.id IS NOT NULL |
-                      target],
-    dd_path: dd.id,
-    unit: coalesce(dd.unit, source.dd_unit, dd['units'])
-  } END) AS dd_sources
-}
-CALL (stub) {
-  OPTIONAL MATCH (source:StandardNameSource)
-  WHERE source.produced_sn_id = stub.id
-     OR EXISTS { (source)-[:PRODUCED_NAME]->(stub) }
-     OR (source.source_type = 'derived' AND source.source_id = stub.id)
-  CALL (source) {
-    OPTIONAL MATCH (source)-[edge]-(related)
-    RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
-      direction: CASE WHEN startNode(edge) = source THEN 'out' ELSE 'in' END,
-      type: type(edge), properties: properties(edge),
-      related_labels: labels(related),
-      related_properties: properties(related)
-    } END) AS incident
-  }
-  RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
-    properties: properties(source), incident: incident
-  } END) AS source_closure,
-  collect(DISTINCT source.id) AS producer_ids
-}
-CALL (stub) {
-  OPTIONAL MATCH (stub)-[:HAS_REVIEW]->(review:StandardNameReview)
-  CALL (review) {
-    OPTIONAL MATCH (review)-[edge]-(related)
-    RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
-      direction: CASE WHEN startNode(edge) = review THEN 'out' ELSE 'in' END,
-      type: type(edge), properties: properties(edge),
-      related_labels: labels(related),
-      related_properties: properties(related)
-    } END) AS incident
-  }
-  RETURN collect(CASE WHEN review IS NULL THEN null ELSE {
-    properties: properties(review), incident: incident
-  } END) AS review_closure
-}
-CALL (stub) {
-  OPTIONAL MATCH (stub)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
-  CALL (revision) {
-    OPTIONAL MATCH (revision)-[edge]-(related)
-    RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
-      direction: CASE WHEN startNode(edge) = revision THEN 'out' ELSE 'in' END,
-      type: type(edge), properties: properties(edge),
-      related_labels: labels(related),
-      related_properties: properties(related)
-    } END) AS incident
-  }
-  RETURN collect(CASE WHEN revision IS NULL THEN null ELSE {
-    properties: properties(revision), incident: incident
-  } END) AS revision_closure
-}
-RETURN stub.id AS id, properties(stub) AS properties,
-       child_data, edge_kinds, dd_sources, incident_relationships,
-       source_closure, producer_ids, review_closure, revision_closure
-ORDER BY id
-"""
-
-
-def _canonicalize_lifecycleless_manifest_value(value: Any) -> Any:
-    """Canonicalize nested graph collections for stable authority hashes."""
-    normalized = _authority_json_value(value)
-    if isinstance(normalized, dict):
-        return {
-            key: _canonicalize_lifecycleless_manifest_value(item)
-            for key, item in sorted(normalized.items())
-        }
-    if isinstance(normalized, list):
-        items = [
-            _canonicalize_lifecycleless_manifest_value(item) for item in normalized
-        ]
-        return sorted(
-            items,
-            key=lambda item: json.dumps(
-                item, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-            ),
-        )
-    return normalized
-
-
-def _derived_parent_unit_from_eligible_children(
-    parent_id: str, child_data: list[dict[str, Any]]
-) -> str | None:
-    """Apply the sanctioned binary and normalization unit exclusions."""
-    eligible = _eligible_derived_parent_unit_children(parent_id, child_data)
-    units = {str(child["unit"]) for child in eligible if child.get("unit")}
-    return next(iter(units)) if len(units) == 1 else None
-
-
-def _spurious_stub_binding_authority(
-    name_id: str,
-    dd_sources: list[dict[str, Any]],
-    producer_ids: list[str],
-) -> list[dict[str, Any]]:
-    """Return accepted-sibling authority only for the complete producer set."""
-    authorities: list[dict[str, Any]] = []
-    for source in dd_sources:
-        bindings = sorted(set(source.get("expected_bindings") or ()))
-        targets = [dict(target) for target in source.get("binding_targets") or ()]
-        accepted_siblings = [
-            target
-            for target in targets
-            if target.get("id") != name_id
-            and target.get("name_stage") == "accepted"
-            and target.get("validation_status") == "valid"
-        ]
-        if (
-            not source.get("source_id")
-            or not source.get("expected_status")
-            or not source.get("dd_path")
-            or not source.get("unit")
-            or len(bindings) != 2
-            or name_id not in bindings
-            or sorted(target.get("id") for target in targets) != bindings
-            or len(accepted_siblings) != 1
-            or source.get("expected_scalar") not in (None, accepted_siblings[0]["id"])
-        ):
-            return []
-        sibling = accepted_siblings[0]
-        authorities.append(
-            {
-                "source_id": source["source_id"],
-                "expected_status": source["expected_status"],
-                "expected_scalar": source.get("expected_scalar"),
-                "expected_bindings": bindings,
-                "authoritative_target_id": sibling["id"],
-                "authoritative_name_stage": sibling["name_stage"],
-                "authoritative_validation_status": sibling["validation_status"],
-            }
-        )
-    expected_producer_ids = sorted(set(producer_ids))
-    qualifying_source_ids = sorted(
-        {str(authority["source_id"]) for authority in authorities}
+    return graph_lineage.seed_parent_sources(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    if (
-        len(authorities) != len(dd_sources)
-        or len(authorities) != len(qualifying_source_ids)
-        or qualifying_source_ids != expected_producer_ids
-    ):
-        return []
-    for authority in authorities:
-        authority["expected_producer_ids"] = expected_producer_ids
-    return authorities
 
 
-def _partition_lifecycleless_stub_rows(
-    rows: list[dict[str, Any]],
-    *,
-    admission_by_id: dict[str, Any] | None = None,
-) -> dict[str, list[dict[str, Any]]]:
-    """Partition a fresh lifecycle-less cohort without inventing authority."""
-    partitions: dict[str, list[dict[str, Any]]] = {
-        "materialize-as-derived-parent": [],
-        "delete-as-dead-link-stub": [],
-        "rebind-source": [],
-        "refused": [],
-    }
-    for raw in rows:
-        row = _authority_json_value(dict(raw))
-        name_id = str(row.get("id") or "").strip()
-        children = [dict(child) for child in row.get("child_data") or []]
-        dd_sources = [dict(source) for source in row.get("dd_sources") or []]
-        producer_ids = sorted(set(row.get("producer_ids") or ()))
-        row["id"] = name_id
-        if not name_id:
-            row["refusal_reason"] = "missing StandardName identity"
-            partitions["refused"].append(row)
-            continue
-        if dd_sources:
-            spurious_authority = (
-                _spurious_stub_binding_authority(name_id, dd_sources, producer_ids)
-                if not children
-                else []
-            )
-            if spurious_authority:
-                row["spurious_binding_authority"] = spurious_authority
-                partitions["delete-as-dead-link-stub"].append(row)
-                continue
-            incomplete = [
-                source
-                for source in dd_sources
-                if not source.get("source_id")
-                or not source.get("expected_status")
-                or source.get("expected_scalar") != name_id
-                or sorted(source.get("expected_bindings") or []) != [name_id]
-                or not source.get("dd_path")
-                or not source.get("unit")
-            ]
-            if incomplete:
-                row["refusal_reason"] = "incomplete DD source or unit authority"
-                partitions["refused"].append(row)
-            elif (
-                children
-                and _derived_parent_unit_from_eligible_children(name_id, children)
-                is None
-            ):
-                row["refusal_reason"] = "no parent-owned unit authority"
-                partitions["refused"].append(row)
-            elif (
-                children
-                and admission_by_id is not None
-                and not admission_by_id[name_id].admit
-            ):
-                row["refusal_reason"] = (
-                    "structural parent admission refused: "
-                    f"{admission_by_id[name_id].reason}"
-                )
-                partitions["refused"].append(row)
-            else:
-                partitions["rebind-source"].append(row)
-            continue
-        if children:
-            authorized_unit = _derived_parent_unit_from_eligible_children(
-                name_id, children
-            )
-            if any(child.get("name_stage") is None for child in children):
-                row["refusal_reason"] = "incomplete child lifecycle or unit authority"
-                partitions["refused"].append(row)
-            elif authorized_unit is None:
-                row["refusal_reason"] = "no parent-owned unit authority"
-                partitions["refused"].append(row)
-            elif admission_by_id is not None and not admission_by_id[name_id].admit:
-                row["refusal_reason"] = (
-                    "structural parent admission refused: "
-                    f"{admission_by_id[name_id].reason}"
-                )
-                partitions["refused"].append(row)
-            else:
-                row["parent_id"] = name_id
-                row["bootstrap_edges"] = [
-                    {
-                        "from_name": child["id"],
-                        "to_name": name_id,
-                        "operator": child.get("operator"),
-                        "operator_kind": child.get("op_kind"),
-                        "role": child.get("role"),
-                        "separator": child.get("separator"),
-                        "axis": child.get("axis"),
-                        "shape": child.get("shape"),
-                        "expected_name_stage": child.get("name_stage"),
-                        "expected_unit": child.get("unit"),
-                        "expected_cocos": child.get("cocos"),
-                        "expected_physics_domain": child.get("physics_domain"),
-                        "expected_kind": child.get("kind"),
-                    }
-                    for child in children
-                ]
-                partitions["materialize-as-derived-parent"].append(row)
-            continue
-        partitions["delete-as-dead-link-stub"].append(row)
-    return partitions
+def normalize_derived_parent_lifecycle(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage.normalize_derived_parent_lifecycle."""
+    from .graph_store import graph_lineage
 
-
-def _lifecycleless_stub_manifest(
-    partitions: dict[str, list[dict[str, Any]]],
-) -> dict[str, Any]:
-    return {
-        "schema": LIFECYCLELESS_STUB_MANIFEST_SCHEMA,
-        "operation": "reconcile_lifecycleless_standard_name_stubs",
-        "rows": {
-            action: _canonicalize_lifecycleless_manifest_value(items)
-            for action, items in sorted(partitions.items())
-        },
-    }
-
-
-def _reconcile_spurious_stub_source_scalars(
-    transaction: Any, partitions: dict[str, list[dict[str, Any]]]
-) -> int:
-    """CAS null source mirrors to the accepted sibling signed by the manifest."""
-    repairs = [
-        {"stub_id": row["id"], **authority}
-        for row in partitions["delete-as-dead-link-stub"]
-        for authority in row.get("spurious_binding_authority") or ()
-    ]
-    if not repairs:
-        return 0
-    rows = list(
-        transaction.run(
-            """
-            UNWIND $repairs AS repair
-            MATCH (source:StandardNameSource {id: repair.source_id})
-            MATCH (stub:StandardName {id: repair.stub_id})
-            MATCH (accepted:StandardName {id: repair.authoritative_target_id})
-            WHERE source.status = repair.expected_status
-              AND source.claimed_at IS NULL
-              AND source.claim_token IS NULL
-              AND ((repair.expected_scalar IS NULL
-                    AND source.produced_sn_id IS NULL)
-                   OR source.produced_sn_id = repair.expected_scalar)
-              AND stub.name_stage IS NULL
-              AND (stub.status IS NULL OR stub.status = 'draft')
-              AND stub.origin IS NULL
-              AND accepted.name_stage = repair.authoritative_name_stage
-              AND accepted.validation_status =
-                  repair.authoritative_validation_status
-              AND EXISTS { (source)-[:PRODUCED_NAME]->(stub) }
-              AND EXISTS { (source)-[:PRODUCED_NAME]->(accepted) }
-            CALL (stub) {
-              OPTIONAL MATCH (producer:StandardNameSource)
-              WHERE producer.produced_sn_id = stub.id
-                 OR EXISTS { (producer)-[:PRODUCED_NAME]->(stub) }
-                 OR (producer.source_type = 'derived'
-                     AND producer.source_id = stub.id)
-              RETURN collect(DISTINCT producer.id) AS current_producer_ids
-            }
-            CALL (source) {
-              MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
-              RETURN collect(DISTINCT bound.id) AS current_bindings
-            }
-            WITH repair, source, accepted, current_bindings,
-                 current_producer_ids
-            WHERE size(current_producer_ids) = size(repair.expected_producer_ids)
-              AND all(id IN current_producer_ids
-                      WHERE id IN repair.expected_producer_ids)
-              AND all(id IN repair.expected_producer_ids
-                      WHERE id IN current_producer_ids)
-              AND size(current_bindings) = size(repair.expected_bindings)
-              AND all(id IN current_bindings WHERE id IN repair.expected_bindings)
-              AND all(id IN repair.expected_bindings WHERE id IN current_bindings)
-            SET source.produced_sn_id = accepted.id
-            RETURN count(*) AS repairs,
-                   count(DISTINCT CASE WHEN repair.expected_scalar IS NULL
-                                      THEN source END) AS sources
-            """,
-            repairs=repairs,
-        )
+    return graph_lineage.normalize_derived_parent_lifecycle(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    repaired = int(rows[0].get("repairs", 0)) if rows else 0
-    if repaired != len(repairs):
-        raise LifecyclelessStubConflict(
-            "accepted sibling authority changed before stub deletion"
-        )
-    return int(rows[0].get("sources", 0))
 
 
-_lifecycleless_stub_reconcile_apply = functools.partial(
-    apply_signed_manifest,
-    {},
-    authority_adapter="lifecycleless-stub-reconcile",
-    mutation_kind="reconcile-lifecycleless-stub",
-    guard_set=(
-        "materialize-derived-parent",
-        "delete-dead-link-stub",
-        "rebind-source",
-        "refused",
-    ),
-    reason="exact lifecycle-less StandardName stub reconciliation",
-)
-_lifecycleless_stub_reconcile_signature = inspect.signature(
-    _lifecycleless_stub_reconcile_apply
-)
-_lifecycleless_stub_reconcile_parameters = (
-    _lifecycleless_stub_reconcile_signature.parameters
-)
+LIFECYCLELESS_STUB_MANIFEST_SCHEMA = import_module(
+    ".graph_store.graph_lineage", __package__
+).LIFECYCLELESS_STUB_MANIFEST_SCHEMA
+
+LIFECYCLELESS_STUB_RECEIPT_SCHEMA = import_module(
+    ".graph_store.graph_lineage", __package__
+).LIFECYCLELESS_STUB_RECEIPT_SCHEMA
+
+_LIFECYCLELESS_STUB_LOCK_QUERY = import_module(
+    ".graph_store.graph_lineage", __package__
+)._LIFECYCLELESS_STUB_LOCK_QUERY
+
+
+LifecyclelessStubConflict = import_module(
+    ".graph_store.graph_lineage", __package__
+).LifecyclelessStubConflict
+
+
+_READ_LIFECYCLELESS_STUBS_QUERY = import_module(
+    ".graph_store.graph_lineage", __package__
+)._READ_LIFECYCLELESS_STUBS_QUERY
+
+
+def _canonicalize_lifecycleless_manifest_value(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._canonicalize_lifecycleless_manifest_value."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._canonicalize_lifecycleless_manifest_value(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _derived_parent_unit_from_eligible_children(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._derived_parent_unit_from_eligible_children."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._derived_parent_unit_from_eligible_children(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _spurious_stub_binding_authority(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._spurious_stub_binding_authority."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._spurious_stub_binding_authority(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _partition_lifecycleless_stub_rows(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._partition_lifecycleless_stub_rows."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._partition_lifecycleless_stub_rows(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _lifecycleless_stub_manifest(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._lifecycleless_stub_manifest."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._lifecycleless_stub_manifest(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _reconcile_spurious_stub_source_scalars(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._reconcile_spurious_stub_source_scalars."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._reconcile_spurious_stub_source_scalars(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+_lifecycleless_stub_reconcile_apply = import_module(
+    ".graph_store.graph_lineage", __package__
+)._lifecycleless_stub_reconcile_apply
+
+_lifecycleless_stub_reconcile_signature = import_module(
+    ".graph_store.graph_lineage", __package__
+)._lifecycleless_stub_reconcile_signature
+
+_lifecycleless_stub_reconcile_parameters = import_module(
+    ".graph_store.graph_lineage", __package__
+)._lifecycleless_stub_reconcile_parameters
+
 _lifecycleless_stub_reconcile_apply.__signature__ = inspect.Signature(
     [
         _lifecycleless_stub_reconcile_parameters["apply"],
@@ -4978,45 +2162,17 @@ del _lifecycleless_stub_reconcile_signature
 del _lifecycleless_stub_reconcile_parameters
 
 
-_SKELETON_PLACEHOLDER_PREDICATE = """
-sn.created_at IS NULL
-  AND sn.generated_at IS NULL
-  AND sn.validation_status IS NULL
-  AND sn.unit IS NULL
-  AND sn.kind IS NULL
-  AND sn.needs_composition IS NULL
-  AND coalesce(sn.name_stage, '') IN ['', 'pending']
-  AND NOT EXISTS { ()-[:HAS_PARENT]->(sn) }
-  AND NOT EXISTS { ()-[:HAS_ERROR]->(sn) }
-  AND NOT EXISTS { ()-[:HAS_STANDARD_NAME]->(sn) }
-  AND NOT EXISTS {
-      (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-  }
-  AND NOT EXISTS {
-      MATCH (source:StandardNameSource)
-      WHERE source.produced_sn_id = sn.id
-  }
-"""
+_SKELETON_PLACEHOLDER_PREDICATE = import_module(
+    ".graph_store.graph_lineage", __package__
+)._SKELETON_PLACEHOLDER_PREDICATE
 
 
-def _query_skeleton_placeholders_for_cleanup(
-    gc: Any, candidate_ids: set[str]
-) -> list[str]:
-    """Return relationship endpoints that positively match placeholder state."""
-    if not candidate_ids:
-        return []
-    rows = gc.query(
-        f"""
-        // STANDARD_NAME_SKELETON_PLACEHOLDER_SELECTION
-        MATCH (sn:StandardName)
-        WHERE sn.id IN $candidate_ids
-          AND {_SKELETON_PLACEHOLDER_PREDICATE}
-        RETURN sn.id AS candidate_id
-        """,
-        candidate_ids=sorted(candidate_ids),
-    )
-    return sorted(
-        {str(row["candidate_id"]) for row in rows or [] if row.get("candidate_id")}
+def _query_skeleton_placeholders_for_cleanup(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_lineage._query_skeleton_placeholders_for_cleanup."""
+    from .graph_store import graph_lineage
+
+    return graph_lineage._query_skeleton_placeholders_for_cleanup(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
@@ -9022,156 +6178,22 @@ def clear_sn_subsystem(
 _MAX_LINK_RETRIES = 5
 
 
-def claim_unresolved_links(limit: int = 20) -> list[dict[str, Any]]:
-    """Claim StandardName nodes with unresolved links for resolution.
+def claim_unresolved_links(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_doc_links.claim_unresolved_links."""
+    from .graph_store import graph_doc_links
 
-    Uses age-weighted random selection: nodes not checked recently have
-    higher priority, preventing spin on temporarily unresolvable links.
-
-    Returns list of dicts with ``id``, ``links``, ``link_retry_count``.
-    """
-    import uuid
-
-    token = str(uuid.uuid4())
-    with GraphClient() as gc:
-        gc.query(
-            """
-            MATCH (sn:StandardName)
-            WHERE sn.link_status = 'unresolved'
-              AND sn.claimed_at IS NULL
-              AND coalesce(sn.link_retry_count, 0) < $max_retries
-            WITH sn,
-                 duration.between(
-                     coalesce(sn.link_checked_at, datetime('2020-01-01')),
-                     datetime()
-                 ).minutes + 1.0 AS age_minutes
-            ORDER BY rand() * age_minutes DESC
-            LIMIT $limit
-            SET sn.updated_at = datetime(), sn.claimed_at = datetime(), sn.claim_token = $token
-            """,
-            limit=limit,
-            max_retries=_MAX_LINK_RETRIES,
-            token=token,
-        )
-        rows = list(
-            gc.query(
-                """
-                MATCH (sn:StandardName {claim_token: $token})
-                RETURN sn.id AS id, sn.links AS links,
-                       coalesce(sn.link_retry_count, 0) AS retry_count
-                """,
-                token=token,
-            )
-        )
-    return [dict(r) for r in rows]
-
-
-def resolve_links_batch(
-    items: list[dict[str, Any]],
-    *,
-    override: bool = False,
-    override_names: set[str] | None = None,
-) -> dict[str, Any]:
-    """Resolve dd: links to name: links for a batch of names.
-
-    For each ``dd:path`` link, checks if a StandardName exists that was
-    generated from that path. If found, replaces with ``name:sn_id``.
-
-    Parameters
-    ----------
-    override:
-        When ``True``, bypass pipeline protection on catalog-edited names.
-    override_names:
-        Selective override — set of name IDs that should bypass protection
-        even if they have ``origin='catalog_edit'``.
-    """
-    # Pipeline protection — links is a protected field
-    from imas_codex.standard_names.protection import filter_protected
-
-    items, skipped = filter_protected(
-        items, override=override, override_names=override_names
+    return graph_doc_links.claim_unresolved_links(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    if skipped:
-        logger.warning(
-            "resolve_links_batch: stripped protected fields from %d name(s): %s",
-            len(skipped),
-            ", ".join(skipped[:5]),
-        )
 
-    resolved_count = 0
-    still_unresolved = 0
-    failed_count = 0
 
-    with GraphClient() as gc:
-        # Build lookup: dd_path -> standard_name_id
-        all_dd_paths = set()
-        for item in items:
-            for link in item.get("links") or []:
-                if link.startswith("dd:"):
-                    all_dd_paths.add(link[3:])
+def resolve_links_batch(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_doc_links.resolve_links_batch."""
+    from .graph_store import graph_doc_links
 
-        path_to_name: dict[str, str] = {}
-        if all_dd_paths:
-            rows = gc.query(
-                """
-                UNWIND $paths AS path
-                MATCH (n:IMASNode {id: path})-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                RETURN path AS dd_path, sn.id AS sn_id
-                """,
-                paths=list(all_dd_paths),
-            )
-            for r in rows:
-                path_to_name[r["dd_path"]] = r["sn_id"]
-
-        for item in items:
-            links = list(item.get("links") or [])
-            new_links = []
-            any_unresolved = False
-
-            for link in links:
-                if link.startswith("dd:"):
-                    dd_path = link[3:]
-                    if dd_path in path_to_name:
-                        new_links.append(f"name:{path_to_name[dd_path]}")
-                    else:
-                        new_links.append(link)
-                        any_unresolved = True
-                else:
-                    new_links.append(link)
-
-            retry_count = item.get("retry_count", 0) + 1
-
-            if any_unresolved and retry_count >= _MAX_LINK_RETRIES:
-                status = "failed"
-                failed_count += 1
-            elif any_unresolved:
-                status = "unresolved"
-                still_unresolved += 1
-            else:
-                status = "resolved"
-                resolved_count += 1
-
-            gc.query(
-                """
-                MATCH (sn:StandardName {id: $id})
-                SET sn.updated_at = datetime(), sn.links = $links,
-                    sn.link_status = $status,
-                    sn.link_checked_at = datetime(),
-                    sn.link_retry_count = $retry_count,
-                    sn.claimed_at = null,
-                    sn.claim_token = null
-                """,
-                id=item["id"],
-                links=new_links,
-                status=status,
-                retry_count=retry_count,
-            )
-
-    return {
-        "resolved": resolved_count,
-        "unresolved": still_unresolved,
-        "failed": failed_count,
-    }
+    return graph_doc_links.resolve_links_batch(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -9179,7 +6201,8 @@ def resolve_links_batch(
 # =============================================================================
 
 
-_NAME_LINK_RE = re.compile(r"\(name:([^)]+)\)")
+_NAME_LINK_RE = import_module(".graph_store.graph_doc_links", __package__)._NAME_LINK_RE
+
 
 # When the LLM emits LaTeX with single backslashes inside its JSON output
 # (e.g. ``$\theta$``, ``$\rho$``, ``\frac``), a lenient JSON decoder turns the
@@ -9188,381 +6211,60 @@ _NAME_LINK_RE = re.compile(r"\(name:([^)]+)\)")
 # These control chars never appear legitimately in physics documentation, so map
 # them back to the backslash form to reconstruct the command; any OTHER control
 # char (NUL, ETX, …) is unrecoverable corruption and is stripped. Newline is kept.
-_JSON_ESCAPE_CTRL = {"\b": r"\b", "\t": r"\t", "\f": r"\f", "\r": r"\r", "\v": r"\v"}
-_STRIP_CTRL_RE = re.compile(r"[\x00-\x08\x0b-\x1f]")  # all control chars except \n
+_JSON_ESCAPE_CTRL = import_module(
+    ".graph_store.graph_doc_links", __package__
+)._JSON_ESCAPE_CTRL
+
+_STRIP_CTRL_RE = import_module(
+    ".graph_store.graph_doc_links", __package__
+)._STRIP_CTRL_RE
 
 
-def _sanitize_doc_text(text: str | None) -> str | None:
-    """Repair JSON-escape-mangled LaTeX control characters in LLM doc text."""
-    if not text:
-        return text
-    for ctrl, repl in _JSON_ESCAPE_CTRL.items():
-        if ctrl in text:
-            text = text.replace(ctrl, repl)
-    if _STRIP_CTRL_RE.search(text):
-        text = _STRIP_CTRL_RE.sub("", text)
-    return text
+def _sanitize_doc_text(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_doc_links._sanitize_doc_text."""
+    from .graph_store import graph_doc_links
+
+    return graph_doc_links._sanitize_doc_text(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # This matcher parses an already-resolved Markdown link into both its visible
 # label and its target so the accept gate can compare their meanings.
 # ``find_name_references`` owns reference discovery instead; it intentionally
 # returns only identity/span/syntax and does not expose a Markdown link's label.
-_DOC_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
-_DOC_TEXT_UNSET = object()
+_DOC_LINK_RE = import_module(".graph_store.graph_doc_links", __package__)._DOC_LINK_RE
+
+_DOC_TEXT_UNSET = import_module(
+    ".graph_store.graph_doc_links", __package__
+)._DOC_TEXT_UNSET
 
 
-def _doc_link_mismatches(gc: Any, documentation: str | None) -> list[str]:
-    """Return ``[label](name:target)`` mismatches in *documentation*.
+def _doc_link_mismatches(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_doc_links._doc_link_mismatches."""
+    from .graph_store import graph_doc_links
 
-    A link is a mismatch when its snake_cased label is itself an EXISTING
-    StandardName id different from the link target — the text promises one
-    quantity while the href resolves to another. Human-readable labels that
-    are not themselves ids are fine. Returns human-readable findings like
-    ``"[radial_current_density] -> name:radial_total_current_density"``.
-    """
-    if not documentation:
-        return []
-    pairs = [
-        (label.strip().lower().replace(" ", "_").replace("-", "_"), target, label)
-        for label, target in _DOC_LINK_RE.findall(documentation)
-    ]
-    candidates = {lid for lid, target, _ in pairs if lid != target}
-    if not candidates:
-        return []
-    rows = gc.query(
-        "MATCH (x:StandardName) WHERE x.id IN $ids RETURN x.id AS id",
-        ids=sorted(candidates),
+    return graph_doc_links._doc_link_mismatches(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    existing = {r["id"] for r in (rows or [])}
-    return [
-        f"[{label}] -> name:{target}"
-        for lid, target, label in pairs
-        if lid != target and lid in existing
-    ]
 
 
-def _normalize_bare_doc_links(
-    gc: Any,
-    sn_id: str | None = None,
-    documentation: str | None | object = _DOC_TEXT_UNSET,
-    *,
-    dry_run: bool = False,
-) -> int | list[dict[str, Any]]:
-    """Convert bare prose brackets to exact-name links or plain text.
+def _normalize_bare_doc_links(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_doc_links._normalize_bare_doc_links."""
+    from .graph_store import graph_doc_links
 
-    A bare bracketed phrase links only when its snake-case form is an exact live
-    StandardName id other than the documented name. Otherwise its brackets are
-    stripped. A ``name:`` link to the documented name becomes plain text.
-    Idempotent. Return the number updated, or per-document changes in dry-run mode.
-
-    When *sn_id* is given the pass is scoped to that single node (the cheap
-    accept-path variant — see :func:`persist_reviewed_docs`): only the tokens
-    present in that one doc are checked for liveness, so no full-catalogue scan
-    is performed.  When *sn_id* is ``None`` (the post-drain reconcile) it scans
-    every doc and resolves token liveness against the whole catalogue. The
-    accept path passes its already-read *documentation* so docs without bare
-    candidates need no second graph read.
-    """
-    if documentation is not _DOC_TEXT_UNSET:
-        if sn_id is None:
-            raise ValueError("documentation requires a scoped standard name id")
-        if not documentation or "[" not in documentation:
-            return [] if dry_run else 0
-        rows = [{"id": sn_id, "docs": documentation}]
-    elif sn_id is not None:
-        rows = list(
-            gc.query(
-                "MATCH (sn:StandardName {id: $id}) "
-                "WHERE sn.documentation IS NOT NULL AND sn.documentation CONTAINS '[' "
-                "RETURN sn.id AS id, sn.documentation AS docs",
-                id=sn_id,
-            )
-        )
-    else:
-        rows = list(
-            gc.query(
-                "MATCH (sn:StandardName) "
-                "WHERE sn.documentation IS NOT NULL AND sn.documentation CONTAINS '[' "
-                "RETURN sn.id AS id, sn.documentation AS docs"
-            )
-        )
-    if not rows:
-        return [] if dry_run else 0
-    bare_phrases = {
-        row["id"]: tuple(
-            dict.fromkeys(
-                (
-                    *find_prose_bracket_spans(row["docs"]),
-                    *(
-                        (reference.name, reference.start, reference.end)
-                        for reference in find_name_references(row["docs"], known=None)
-                        if reference.syntax == "bare_bracket"
-                    ),
-                )
-            )
-        )
-        for row in rows
-    }
-
-    def candidate_id(phrase: str) -> str:
-        return re.sub(r"[^a-z0-9]+", "_", phrase.strip().lower()).strip("_")
-
-    # Only link to a NON-dead standard name (drafted/reviewed/accepted); a bare
-    # token that is superseded/exhausted or not a name at all → strip brackets.
-    if sn_id is not None:
-        # Single-node scope: check liveness only for the bare tokens that
-        # actually appear in this one doc — avoids a full-catalogue scan on
-        # every accept.
-        candidate_tokens = {
-            candidate_id(phrase)
-            for phrases in bare_phrases.values()
-            for phrase, _, _ in phrases
-        }
-        names = (
-            {
-                r["id"]
-                for r in gc.query(
-                    "MATCH (s:StandardName) "
-                    "WHERE s.id IN $toks "
-                    "AND NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted', 'contested'] "
-                    "RETURN s.id AS id",
-                    toks=list(candidate_tokens),
-                )
-            }
-            if candidate_tokens
-            else set()
-        )
-    else:
-        names = {
-            r["id"]
-            for r in gc.query(
-                "MATCH (s:StandardName) "
-                "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted', 'contested'] "
-                "RETURN s.id AS id"
-            )
-        }
-
-    updates: list[dict[str, Any]] = []
-    for r in rows:
-        before = r["docs"]
-        new = before
-        changes: list[tuple[int, int, str, dict[str, str]]] = []
-        for phrase, start, end in bare_phrases[r["id"]]:
-            target = candidate_id(phrase)
-            linked = target in names and target != r["id"]
-            replacement = f"[{phrase}](name:{target})" if linked else phrase
-            changes.append(
-                (
-                    start,
-                    end,
-                    replacement,
-                    {
-                        "action": "linked" if linked else "unbracketed",
-                        "phrase": phrase,
-                        **({"target": target} if linked else {}),
-                    },
-                )
-            )
-        for link in find_name_links(before):
-            if link.target == r["id"]:
-                changes.append(
-                    (
-                        link.start,
-                        link.end,
-                        link.label,
-                        {
-                            "action": "self-link removed",
-                            "phrase": link.label,
-                        },
-                    )
-                )
-        for start, end, replacement, _ in sorted(changes, reverse=True):
-            new = new[:start] + replacement + new[end:]
-        if new != r["docs"]:
-            updates.append(
-                {
-                    "id": r["id"],
-                    "before": before,
-                    "after": new,
-                    "actions": [change[3] for change in sorted(changes)],
-                }
-            )
-    if dry_run:
-        return updates
-    for i in range(0, len(updates), 200):
-        gc.query(
-            "UNWIND $items AS it MATCH (sn:StandardName {id: it.id}) "
-            "SET sn.updated_at = datetime(), sn.documentation = it.doc",
-            items=[
-                {"id": update["id"], "doc": update["after"]}
-                for update in updates[i : i + 200]
-            ],
-        )
-    if updates:
-        logger.info(
-            "resolve_doc_links: normalized bare [name] brackets in %d doc(s)%s",
-            len(updates),
-            f" (scoped to {sn_id})" if sn_id else "",
-        )
-    return len(updates)
+    return graph_doc_links._normalize_bare_doc_links(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
-    """Rewrite stale (name:xxx) references in documentation text.
+def resolve_doc_links(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_doc_links.resolve_doc_links."""
+    from .graph_store import graph_doc_links
 
-    Scans accepted StandardName documentation for ``(name:xxx)`` markdown
-    links.  When a referenced name is superseded or exhausted:
-
-    1. **Superseded with accepted successor** (via ``REFINED_FROM`` chain):
-       rewrite the link to point to the accepted successor.
-    2. **Dead-end** (exhausted/superseded with no accepted successor):
-       remove the hyperlink, keeping the descriptive text intact.
-
-    Also updates the cached ``links`` list and ``link_status`` to match
-    the cleaned documentation.
-
-    Parameters
-    ----------
-    gc:
-        Optional active GraphClient.  A new one is opened if None.
-
-    Returns
-    -------
-    Dict with keys: ``resolved`` (rewritten to successor), ``removed``
-    (dead link stripped), ``unchanged`` (already valid).
-    """
-    _own_gc = gc is None
-    if _own_gc:
-        gc = GraphClient().__enter__()
-    try:
-        # Pass 0: normalize bare ``[name]`` brackets across ALL docs (any stage).
-        # The LLM writes related-name mentions as bare ``[name]`` despite the
-        # prompt rule; Markdown renders these broken. Deterministically convert
-        # ``[x]`` → ``[x](name:x)`` when x is a real standard name, else strip the
-        # brackets to plain text. Runs every rotation (this fn is called from the
-        # pool loop's post-rotation reconcile).
-        _normalize_bare_doc_links(gc)
-
-        # Fetch all accepted names with documentation
-        rows = list(
-            gc.query(
-                """
-                MATCH (sn:StandardName)
-                WHERE sn.name_stage IN ['accepted', 'approved']
-                  AND sn.documentation IS NOT NULL
-                RETURN sn.id AS id, sn.documentation AS docs, sn.links AS links
-                """
-            )
-        )
-        if not rows:
-            return {"resolved": 0, "removed": 0, "unchanged": 0}
-
-        # Valid link targets = every StandardName that is NOT genuinely dead
-        # (superseded / exhausted). A link to a drafted/reviewed/accepted name
-        # is valid and must be KEPT — only superseded/exhausted targets are
-        # rewritten to an accepted successor or removed. (Using accepted-only
-        # here wrongly stripped links to not-yet-accepted names — a link to a
-        # drafted SN is a legitimate cross-reference that will publish.)
-        valid_targets = {
-            r["id"]
-            for r in gc.query(
-                "MATCH (s:StandardName) "
-                "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted', 'contested'] "
-                "RETURN s.id AS id"
-            )
-        }
-
-        # Build dead-target→accepted-successor resolution map via REFINED_FROM
-        superseded_ids: set[str] = set()
-        for row in rows:
-            docs = row.get("docs") or ""
-            for match in _NAME_LINK_RE.finditer(docs):
-                target = match.group(1)
-                if target not in valid_targets:
-                    superseded_ids.add(target)
-
-        if not superseded_ids:
-            return {"resolved": 0, "removed": 0, "unchanged": 0}
-
-        # Resolve each stale target to its accepted successor
-        resolution_map: dict[str, str | None] = {}
-        for target in superseded_ids:
-            successors = gc.query(
-                """
-                MATCH (new:StandardName)-[:REFINED_FROM*]->(old:StandardName {id: $target})
-                WHERE new.name_stage IN ['accepted', 'approved']
-                RETURN new.id AS successor
-                LIMIT 1
-                """,
-                target=target,
-            )
-            resolution_map[target] = successors[0]["successor"] if successors else None
-
-        # Rewrite documentation and update graph
-        resolved = 0
-        removed = 0
-        unchanged = 0
-
-        for row in rows:
-            docs = row.get("docs") or ""
-            original_docs = docs
-
-            def _replace_link(m: re.Match) -> str:
-                nonlocal resolved, removed
-                target = m.group(1)
-                if target in valid_targets:
-                    return m.group(0)  # valid (non-dead) link, keep as-is
-                successor = resolution_map.get(target)
-                if successor:
-                    resolved += 1
-                    return f"(name:{successor})"
-                else:
-                    removed += 1
-                    return ""  # remove dead link marker
-
-            new_docs = _NAME_LINK_RE.sub(_replace_link, docs)
-
-            if new_docs != original_docs:
-                # Extract updated links list from documentation. Order-
-                # preserving dedup, drop self-references — the ISNC
-                # SQLite UNIQUE(name, link) constraint trips on repeats
-                # (e.g. plasma_stored_energy referencing itself three
-                # times across separate paragraphs) and a self-link in
-                # the structured `links` index is meaningless.
-                self_link = f"name:{row['id']}"
-                seen: set[str] = set()
-                new_links: list[str] = []
-                for m in _NAME_LINK_RE.finditer(new_docs):
-                    ref = f"name:{m.group(1)}"
-                    if ref == self_link or ref in seen:
-                        continue
-                    seen.add(ref)
-                    new_links.append(ref)
-                gc.query(
-                    """
-                    MATCH (sn:StandardName {id: $id})
-                    SET sn.updated_at = datetime(), sn.documentation = $docs,
-                        sn.links = $links,
-                        sn.link_status = 'resolved'
-                    """,
-                    id=row["id"],
-                    docs=new_docs,
-                    links=new_links,
-                )
-            else:
-                unchanged += 1
-
-        logger.info(
-            "resolve_doc_links: resolved=%d rewritten, %d removed, %d unchanged",
-            resolved,
-            removed,
-            unchanged,
-        )
-        return {"resolved": resolved, "removed": removed, "unchanged": unchanged}
-    finally:
-        if _own_gc:
-            gc.__exit__(None, None, None)
+    return graph_doc_links.resolve_doc_links(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -12415,265 +9117,67 @@ def backfill_sn_run_telemetry(*args: Any, **kwargs: Any):
 _PHASE_TO_POOL = import_module(".graph_store.graph_audits", __package__)._PHASE_TO_POOL
 
 
-def _normalize_pool(phase: str) -> str:
-    """Map a raw phase string to a canonical pool name."""
-    return _PHASE_TO_POOL.get(phase, phase)
+def _normalize_pool(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims._normalize_pool."""
+    from .graph_store import graph_cost_and_claims
 
-
-@retry_on_deadlock()
-def record_llm_cost(
-    *,
-    run_id: str,
-    phase: str,
-    cycle: str | None = None,
-    sn_ids: list[str] | None = None,
-    model: str,
-    cost: float,
-    tokens_in: int,
-    tokens_out: int,
-    tokens_cached_read: int = 0,
-    tokens_cached_write: int = 0,
-    service: str = "standard-names",
-    batch_id: str | None = None,
-    overspend: float = 0.0,
-    llm_at: Any | None = None,
-) -> str:
-    """Write an atomic ``LLMCost`` node and ``FOR_RUN`` edge.
-
-    **Idempotency contract**: ``id`` is a deterministic UUID-5 over
-    ``(run_id, phase, batch_id, model, llm_at_iso, cost, tokens_in,
-    tokens_out)``.  The node is written with ``CREATE`` (not MERGE).
-    If a uniqueness constraint violation fires (duplicate id), the
-    exception is swallowed — the previous write already succeeded.
-
-    Returns:
-        The deterministic ``id`` string.
-    """
-    from datetime import UTC
-
-    if llm_at is None:
-        llm_at = datetime.now(UTC)
-    llm_at_iso = llm_at.isoformat() if not isinstance(llm_at, str) else llm_at
-
-    # Deterministic id — uuid5 over immutable call identity
-    id_seed = (
-        f"{run_id}|{phase}|{batch_id}|{model}"
-        f"|{llm_at_iso}|{cost}|{tokens_in}|{tokens_out}"
+    return graph_cost_and_claims._normalize_pool(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    spend_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, id_seed))
-
-    sn_ids_clean = list(sn_ids) if sn_ids else []
-
-    # Guard: reject obvious test fixture leaks. Tests that monkeypatch
-    # ``get_model`` to return ``"test-model"`` have leaked ~50 orphan
-    # LLMCost nodes into the production graph. Refuse them at the write
-    # boundary unless the fixture author EXPLICITLY opts in via
-    # ``IMAS_CODEX_ALLOW_TEST_MODEL=1`` (and uses a test-scoped graph
-    # profile, never `codex`).
-    #
-    # NOTE: ``PYTEST_CURRENT_TEST`` does NOT bypass this guard. Tests
-    # should mock ``record_llm_cost`` / ``GraphClient.query`` rather
-    # than write fixture rows into a live graph.
-    if model == "test-model" and os.environ.get("IMAS_CODEX_ALLOW_TEST_MODEL") != "1":
-        logger.warning(
-            "record_llm_cost: refusing model='test-model' (run=%s phase=%s) — "
-            "fixture leak guard. Mock the write or set "
-            "IMAS_CODEX_ALLOW_TEST_MODEL=1 against a test-scoped graph "
-            "profile (never `codex`).",
-            run_id,
-            phase,
-        )
-        return spend_id
-
-    cypher = """
-        CREATE (c:LLMCost {
-            id: $id,
-            run_id: $run_id,
-            phase: $phase,
-            pool: $pool,
-            event_type: $event_type,
-            cycle: $cycle,
-            standard_name_ids: $standard_name_ids,
-            batch_id: $batch_id,
-            overspend: $overspend,
-            llm_model: $llm_model,
-            llm_cost: $llm_cost,
-            llm_tokens_in: $llm_tokens_in,
-            llm_tokens_out: $llm_tokens_out,
-            llm_tokens_cached_read: $llm_tokens_cached_read,
-            llm_tokens_cached_write: $llm_tokens_cached_write,
-            llm_service: $llm_service,
-            llm_at: datetime($llm_at),
-            for_run: $run_id
-        })
-        WITH c
-        MATCH (rr:SNRun {id: $run_id})
-        MERGE (c)-[:FOR_RUN]->(rr)
-    """
-    params = {
-        "id": spend_id,
-        "run_id": run_id,
-        "phase": phase,
-        "pool": _normalize_pool(phase),
-        "event_type": phase,
-        "cycle": cycle,
-        "standard_name_ids": sn_ids_clean,
-        "batch_id": batch_id,
-        "overspend": round(overspend, 6),
-        "llm_model": model,
-        "llm_cost": round(cost, 6),
-        "llm_tokens_in": tokens_in,
-        "llm_tokens_out": tokens_out,
-        "llm_tokens_cached_read": tokens_cached_read,
-        "llm_tokens_cached_write": tokens_cached_write,
-        "llm_service": service,
-        "llm_at": llm_at_iso,
-    }
-
-    try:
-        with GraphClient() as gc:
-            gc.query(cypher, **params)
-    except Exception as exc:
-        # Swallow constraint violation (idempotent duplicate) —
-        # the original write already succeeded.
-        from neo4j.exceptions import ConstraintError
-
-        if isinstance(exc, ConstraintError):
-            logger.debug(
-                "record_llm_cost: duplicate id=%s (idempotent), skipping",
-                spend_id,
-            )
-        else:
-            raise
-
-    return spend_id
 
 
-def aggregate_spend_for_run(run_id: str) -> float:
-    """Return total LLM cost for a run by summing ``LLMCost`` nodes."""
-    with GraphClient() as gc:
-        result = gc.query(
-            "MATCH (c:LLMCost {run_id: $run_id}) "
-            "RETURN coalesce(sum(c.llm_cost), 0.0) AS total",
-            run_id=run_id,
-        )
-        return float(result[0]["total"]) if result else 0.0
+def record_llm_cost(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.record_llm_cost."""
+    from .graph_store import graph_cost_and_claims
+
+    return graph_cost_and_claims.record_llm_cost(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def aggregate_spend_per_phase(run_id: str) -> dict[str, float]:
-    """Return ``{phase: total_cost}`` for a run."""
-    with GraphClient() as gc:
-        rows = gc.query(
-            "MATCH (c:LLMCost {run_id: $run_id}) "
-            "RETURN c.phase AS phase, sum(c.llm_cost) AS total "
-            "ORDER BY phase",
-            run_id=run_id,
-        )
-        return {r["phase"]: float(r["total"]) for r in rows}
+def aggregate_spend_for_run(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.aggregate_spend_for_run."""
+    from .graph_store import graph_cost_and_claims
+
+    return graph_cost_and_claims.aggregate_spend_for_run(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def aggregate_calls_per_phase(run_id: str) -> dict[str, int]:
-    """Return ``{phase: call_count}`` for a run, the spend owner's own rows.
+def aggregate_spend_per_phase(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.aggregate_spend_per_phase."""
+    from .graph_store import graph_cost_and_claims
 
-    The call count is the row count behind
-    :func:`aggregate_spend_per_phase`, so a run's calls and its per-phase
-    spend are read from one row set under the same exact-run-id predicate.
-    """
-    with GraphClient() as gc:
-        rows = gc.query(
-            "MATCH (c:LLMCost {run_id: $run_id}) "
-            "RETURN c.phase AS phase, count(*) AS calls "
-            "ORDER BY phase",
-            run_id=run_id,
-        )
-        return {r["phase"]: int(r["calls"]) for r in rows}
+    return graph_cost_and_claims.aggregate_spend_per_phase(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def aggregate_spend_per_name(run_id: str) -> dict[str, float]:
-    """Return ``{sn_id: apportioned_cost}`` for a run.
+def aggregate_calls_per_phase(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.aggregate_calls_per_phase."""
+    from .graph_store import graph_cost_and_claims
 
-    Per-name cost share is ``llm_cost / size(standard_name_ids)`` — each name
-    in the ``standard_name_ids`` list gets an equal share. Rows with an empty
-    list are skipped (for example, audit calls with no names).
-    """
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (c:LLMCost {run_id: $run_id})
-            WHERE size(c.standard_name_ids) > 0
-            UNWIND c.standard_name_ids AS sn_id
-            RETURN sn_id,
-                   sum(c.llm_cost / size(c.standard_name_ids)) AS apportioned
-            """,
-            run_id=run_id,
-        )
-        return {r["sn_id"]: float(r["apportioned"]) for r in rows}
+    return graph_cost_and_claims.aggregate_calls_per_phase(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def update_sn_per_phase_costs(run_id: str) -> int:
-    """Push aggregated per-name costs into ``StandardName.llm_cost_*`` fields.
+def aggregate_spend_per_name(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.aggregate_spend_per_name."""
+    from .graph_store import graph_cost_and_claims
 
-    For each ``LLMCost`` row in the run, apportions
-    ``llm_cost / size(standard_name_ids)`` to each name, grouped by phase.
-    Then writes the per-phase totals and overall ``llm_cost`` onto the
-    ``StandardName`` node.
+    return graph_cost_and_claims.aggregate_spend_per_name(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
-    Returns:
-        Number of ``StandardName`` nodes updated.
-    """
-    # Build per-(name, phase) apportionment
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (c:LLMCost {run_id: $run_id})
-            WHERE size(c.standard_name_ids) > 0
-            UNWIND c.standard_name_ids AS sn_id
-            RETURN sn_id, c.phase AS phase,
-                   sum(c.llm_cost / size(c.standard_name_ids)) AS apportioned
-            """,
-            run_id=run_id,
-        )
 
-    if not rows:
-        return 0
+def update_sn_per_phase_costs(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.update_sn_per_phase_costs."""
+    from .graph_store import graph_cost_and_claims
 
-    # Aggregate: {sn_id: {field: cost, ...}}
-    per_name: dict[str, dict[str, float]] = {}
-    for r in rows:
-        sn_id = r["sn_id"]
-        phase = r["phase"]
-        cost = float(r["apportioned"])
-        if sn_id not in per_name:
-            per_name[sn_id] = {}
-        field = _PHASE_TO_SN_COST_FIELD.get(phase)
-        if field:
-            per_name[sn_id][field] = per_name[sn_id].get(field, 0.0) + cost
-
-    # Write back — batch all names in a single Cypher per phase-field
-    updated_ids: set[str] = set()
-
-    with GraphClient() as gc:
-        for sn_id, fields in per_name.items():
-            total_cost = sum(fields.values())
-            set_parts = ["sn.llm_cost = $total"]
-            params: dict[str, Any] = {
-                "sn_id": sn_id,
-                "total": round(total_cost, 6),
-            }
-            for field_name, field_cost in fields.items():
-                set_parts.append(f"sn.{field_name} = ${field_name}")
-                params[field_name] = round(field_cost, 6)
-
-            result = gc.query(
-                "MATCH (sn:StandardName {id: $sn_id}) "
-                "SET " + ", ".join(set_parts) + " "
-                "RETURN sn.id AS id",
-                **params,
-            )
-            if result:
-                updated_ids.add(sn_id)
-
-    return len(updated_ids)
+    return graph_cost_and_claims.update_sn_per_phase_costs(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -12688,9 +9192,15 @@ def update_sn_per_phase_costs(run_id: str) -> int:
 # Compose targets StandardNameSource; the other four target StandardName.
 # =============================================================================
 
-DEFAULT_POOL_BATCH_SIZE = 25
+DEFAULT_POOL_BATCH_SIZE = import_module(
+    ".graph_store.graph_cost_and_claims", __package__
+).DEFAULT_POOL_BATCH_SIZE
 
-_PIPELINE_FROZEN_NAME_STAGES = ("approved", "contested")
+
+_PIPELINE_FROZEN_NAME_STAGES = import_module(
+    ".graph_store.graph_cost_and_claims", __package__
+)._PIPELINE_FROZEN_NAME_STAGES
+
 
 # Maximum times a single StandardNameSource may be CLAIMED for name generation
 # before it is treated as un-composable and excluded from further claims and
@@ -12703,839 +9213,63 @@ _PIPELINE_FROZEN_NAME_STAGES = ("approved", "contested")
 # this bounds the loop regardless of WHICH release path returned the source; the
 # excluded residue stays ``extracted`` and is revived by ``--reset-to extracted``
 # (which clears ``attempt_count``) once compose/grammar improves.
-_MAX_COMPOSE_CLAIM_ATTEMPTS = 5
+_MAX_COMPOSE_CLAIM_ATTEMPTS = import_module(
+    ".graph_store.graph_cost_and_claims", __package__
+)._MAX_COMPOSE_CLAIM_ATTEMPTS
 
 
-def _claim_sn_atomic(
-    *,
-    eligibility_where: str,
-    query_params: dict[str, Any],
-    batch_size: int,
-    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-    extra_return_fields: str = "",
-    stage_field: str | None = None,
-    to_stage: str | None = None,
-    domain: str | None = None,
-    scope_run_id: str | None = None,
-    drain_scope_id: str | None = None,
-    edits_only: bool = False,
-    restage_review_axis: str | None = None,
-    seed_extra_where: str = "",
-    seed_with_extras: str = "",
-    seed_order_by: str = "rand()",
-) -> list[dict[str, Any]]:
-    """Single-transaction stage-aware claim for StandardName nodes.
+def _claim_sn_atomic(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims._claim_sn_atomic."""
+    from .graph_store import graph_cost_and_claims
 
-    All steps — seed, expand, and read-back — execute inside **one** Neo4j
-    transaction.  If any step fails, the entire transaction rolls back and
-    no partial claim state leaks into the graph.
-
-    Callers should wrap this with ``@retry_on_deadlock()`` so that a
-    ``TransientError`` (deadlock) causes the whole function — including
-    token generation — to retry cleanly.
-
-    Parameters
-    ----------
-    eligibility_where:
-        Cypher WHERE fragment applied to ``sn`` (must NOT include ``WHERE``
-        keyword itself).  May reference parameters in *query_params* via
-        ``$name`` syntax.
-    query_params:
-        Extra Cypher parameters consumed by *eligibility_where*.
-    batch_size:
-        Maximum batch size (seed + expand).
-    timeout_seconds:
-        Stale-claim recovery window.
-    extra_return_fields:
-        Additional ``RETURN`` columns appended after the common set.
-        Must start with a comma if non-empty, e.g.
-        ``", sn.enriched_at AS enriched_at"``.
-    stage_field:
-        Optional stage property to transition at claim time
-        (``'name_stage'`` or ``'docs_stage'``).  When *None* (default),
-        no stage transition occurs — only ``claim_token`` and
-        ``claimed_at`` are written.
-    to_stage:
-        Target stage value for the transition (e.g. ``'refining'``).
-        Ignored when *stage_field* is *None*.
-    domain:
-        Optional physics domain to scope the claim.  When set, only
-        StandardName nodes with ``physics_domain = $domain`` are
-        considered eligible.  Used by ``sn run --physics-domain`` to
-        prevent concurrent domain-specific runs from competing for
-        each other's items.
-    edits_only:
-        When ``True``, restrict eligibility to StandardName nodes carrying
-        ``edit_status = 'open'`` — the pending successors of a ``sn edit``.
-        Composed exactly like *scope_run_id*'s ``scope_where`` and ANDed
-        alongside it; the common use is *edits_only* alone (an edit is
-        already focused, so no ``--focus``/DD-path is required).
-    seed_extra_where:
-        Optional additional Cypher WHERE conditions injected into the seed
-        step after *eligibility_where* and *domain_where*.  Must begin
-        with ``AND`` if non-empty.  Used to implement ordering-specific
-        eligibility filters (e.g. parent-first escape hatches).
-    seed_with_extras:
-        Optional extra WITH columns computed before the ORDER BY in the
-        seed step.  Must begin with a comma if non-empty, e.g.
-        ``", CASE WHEN ... END AS priority"``.  Used alongside
-        *seed_order_by* to express multi-column ordering.
-    seed_order_by:
-        ORDER BY expression for the seed step.  Defaults to ``rand()``
-        (uniform random selection).  Override to implement priority-based
-        claim ordering, e.g. ``"priority ASC, rand()"``.
-
-    Returns
-    -------
-    list[dict]
-        Claimed items as plain dicts.  Empty list when no eligible seed
-        exists.
-    """
-    token = str(uuid.uuid4())
-    cutoff = f"PT{timeout_seconds}S"
-    params: dict[str, Any] = {
-        **query_params,
-        "token": token,
-        "cutoff": cutoff,
-        "frozen_name_stages": list(_PIPELINE_FROZEN_NAME_STAGES),
-    }
-
-    # Build optional SET clause for atomic stage transition.
-    stage_set = ""
-    if stage_field and to_stage:
-        stage_set = f", sn.{stage_field} = $to_stage"
-        params["to_stage"] = to_stage
-    if restage_review_axis:
-        if restage_review_axis not in {"name", "docs"}:
-            raise ValueError("restage_review_axis must be 'name' or 'docs'")
-        stage_property = f"{restage_review_axis}_stage"
-        score_property = f"reviewer_score_{restage_review_axis}"
-        stage_set += (
-            f", sn.{stage_property} = CASE "
-            f"WHEN sn.{stage_property} = 'reviewed' "
-            f"AND sn.{score_property} >= $min_score "
-            f"THEN 'drafted' ELSE sn.{stage_property} END"
-        )
-    if drain_scope_id:
-        stage_set += ", sn.drain_claim_scope_id = $drain_scope_id"
-        params["drain_scope_id"] = drain_scope_id
-
-    # Optional physics-domain scope (scalar comparison post-refactor).
-    domain_where = ""
-    if domain:
-        domain_where = " AND sn.physics_domain = $domain"
-        params["domain"] = domain
-
-    # Optional run-id scope for --focus mode, plus an edit-scope predicate for
-    # --edits mode. Both are ANDed into the same fragment and injected at every
-    # seed/expand step, so they combine cleanly (edits_only is the common case).
-    scope_where = ""
-    if scope_run_id:
-        scope_where += " AND sn.run_id = $scope_run_id"
-        params["scope_run_id"] = scope_run_id
-    if drain_scope_id:
-        scope_where += " AND sn.drain_scope_id = $drain_scope_id"
-        params["drain_scope_id"] = drain_scope_id
-    if edits_only:
-        scope_where += " AND coalesce(sn.edit_status, '') = 'open'"
-
-    with GraphClient() as gc:
-        with gc.session() as session:
-            tx = session.begin_transaction()
-            try:
-                # ── Step 1: Seed ─────────────────────────────────
-                seed_result = list(
-                    tx.run(
-                        f"""
-                        MATCH (sn:StandardName)
-                        WHERE {eligibility_where}
-                          AND NOT (coalesce(sn.name_stage, '')
-                                   IN $frozen_name_stages)
-                          AND (sn.claimed_at IS NULL
-                               OR sn.claimed_at < datetime()
-                                    - duration($cutoff))
-                          {domain_where}
-                          {scope_where}
-                          {seed_extra_where}
-                        WITH sn{seed_with_extras}
-                        ORDER BY {seed_order_by} LIMIT 1
-                        SET sn.updated_at = datetime(),
-                            sn.claimed_at = datetime(),
-                            sn.claim_token = $token,
-                            sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
-                            {stage_set}
-                        WITH sn
-                        OPTIONAL MATCH (sn)-[:IN_CLUSTER]
-                            ->(c:IMASSemanticCluster)
-                        OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-                        RETURN c.id AS _cluster_id, u.id AS _unit,
-                               sn.physics_domain AS _physics_domain
-                        """,
-                        **params,
-                    )
-                )
-
-                if not seed_result:
-                    tx.close()
-                    return []
-
-                seed = dict(seed_result[0])
-                cluster_id = seed.get("_cluster_id")
-                unit = seed.get("_unit")
-                # Defensive scalar coerce: legacy nodes may still hold a
-                # list-valued physics_domain until ``sn clear`` has run.
-                physics_domain = _scalar_domain(seed.get("_physics_domain"))
-                expand_limit = batch_size - 1
-
-                # ── Step 2: Expand ───────────────────────────────
-                if expand_limit > 0:
-                    expand_params: dict[str, Any] = {
-                        **params,
-                        "expand_limit": expand_limit,
-                    }
-                    if cluster_id is not None and unit is not None:
-                        expand_params.update(cluster_id=cluster_id, unit=unit)
-                        tx.run(
-                            f"""
-                            MATCH (sn:StandardName)
-                            WHERE {eligibility_where}
-                              AND NOT (coalesce(sn.name_stage, '')
-                                       IN $frozen_name_stages)
-                              AND sn.claimed_at IS NULL
-                              {scope_where}
-                            MATCH (sn)-[:IN_CLUSTER]
-                                ->(:IMASSemanticCluster
-                                    {{id: $cluster_id}})
-                            MATCH (sn)-[:HAS_UNIT]
-                                ->(:Unit {{id: $unit}})
-                            WITH sn LIMIT $expand_limit
-                            SET sn.updated_at = datetime(),
-                                sn.claimed_at = datetime(),
-                                sn.claim_token = $token,
-                                sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
-                                {stage_set}
-                            """,
-                            **expand_params,
-                        )
-                    elif cluster_id is not None:
-                        expand_params["cluster_id"] = cluster_id
-                        tx.run(
-                            f"""
-                            MATCH (sn:StandardName)
-                            WHERE {eligibility_where}
-                              AND NOT (coalesce(sn.name_stage, '')
-                                       IN $frozen_name_stages)
-                              AND sn.claimed_at IS NULL
-                              {scope_where}
-                            MATCH (sn)-[:IN_CLUSTER]
-                                ->(:IMASSemanticCluster
-                                    {{id: $cluster_id}})
-                            WITH sn LIMIT $expand_limit
-                            SET sn.updated_at = datetime(),
-                                sn.claimed_at = datetime(),
-                                sn.claim_token = $token,
-                                sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
-                                {stage_set}
-                            """,
-                            **expand_params,
-                        )
-                    elif physics_domain is not None and unit is not None:
-                        expand_params.update(fallback_domain=physics_domain, unit=unit)
-                        tx.run(
-                            f"""
-                            MATCH (sn:StandardName)
-                            WHERE {eligibility_where}
-                              AND NOT (coalesce(sn.name_stage, '')
-                                       IN $frozen_name_stages)
-                              AND sn.claimed_at IS NULL
-                              {scope_where}
-                              AND sn.physics_domain = $fallback_domain
-                            MATCH (sn)-[:HAS_UNIT]
-                                ->(:Unit {{id: $unit}})
-                            WITH sn LIMIT $expand_limit
-                            SET sn.updated_at = datetime(),
-                                sn.claimed_at = datetime(),
-                                sn.claim_token = $token,
-                                sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
-                                {stage_set}
-                            """,
-                            **expand_params,
-                        )
-                    elif physics_domain is not None:
-                        expand_params["fallback_domain"] = physics_domain
-                        tx.run(
-                            f"""
-                            MATCH (sn:StandardName)
-                            WHERE {eligibility_where}
-                              AND NOT (coalesce(sn.name_stage, '')
-                                       IN $frozen_name_stages)
-                              AND sn.claimed_at IS NULL
-                              {scope_where}
-                              AND sn.physics_domain = $fallback_domain
-                            WITH sn LIMIT $expand_limit
-                            SET sn.updated_at = datetime(),
-                                sn.claimed_at = datetime(),
-                                sn.claim_token = $token,
-                                sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
-                                {stage_set}
-                            """,
-                            **expand_params,
-                        )
-                    # else: no grouping key — seed-only batch
-
-                # ── Step 3: Read-back by token ───────────────────
-                results = list(
-                    tx.run(
-                        f"""
-                        MATCH (sn:StandardName {{claim_token: $token}})
-                        WHERE $drain_scope_id IS NULL
-                           OR sn.drain_scope_id = $drain_scope_id
-                        WITH sn
-                        WHERE NOT (coalesce(sn.name_stage, '')
-                                   IN $frozen_name_stages)
-                        OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-                        OPTIONAL MATCH (sn)-[:IN_CLUSTER]
-                            ->(c:IMASSemanticCluster)
-                        RETURN sn.id AS id,
-                               sn.description AS description,
-                               sn.documentation AS documentation,
-                               sn.kind AS kind,
-                               coalesce(u.id, sn.unit) AS unit,
-                               c.id AS cluster_id,
-                               sn.physics_domain AS physics_domain,
-                               sn.validation_status
-                                   AS validation_status,
-                               sn.claim_token AS claim_token,
-                               sn.claim_seq AS claim_seq
-                               {extra_return_fields}
-                        """,
-                        token=token,
-                        drain_scope_id=drain_scope_id,
-                        frozen_name_stages=list(_PIPELINE_FROZEN_NAME_STAGES),
-                    )
-                )
-
-                items = [dict(r) for r in results]
-                tx.commit()
-
-            except BaseException:
-                if tx.closed is False:
-                    tx.close()
-                raise
-
-    logger.debug(
-        "_claim_sn_atomic: claimed %d (token=%s)",
-        len(items),
-        token[:8],
+    return graph_cost_and_claims._claim_sn_atomic(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return items
 
 
 # -- generate_name (StandardNameSource) -------------------------------------
 
 
-@retry_on_deadlock()
-def claim_generate_name_batch(
-    facility: str | None = None,
-    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
-    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-    domain: str | None = None,
-    scope_run_id: str | None = None,
-    drain_scope_id: str | None = None,
-    edits_only: bool = False,
-) -> list[dict[str, Any]]:
-    """Claim StandardNameSource nodes (status='extracted') for name generation.
+def claim_generate_name_batch(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.claim_generate_name_batch."""
+    from .graph_store import graph_cost_and_claims
 
-    Seed-and-expand: one random seed is claimed, then up to
-    ``batch_size - 1`` additional sources sharing the same
-    ``(cluster_id, unit)`` (via ``FROM_DD_PATH``→``IN_CLUSTER`` /
-    ``HAS_UNIT``).  When no cluster exists the fallback key is
-    ``(physics_domain, unit)``.
-
-    All three steps (seed, expand, read-back) execute inside a **single**
-    Neo4j transaction so that no partial claim state leaks on deadlock
-    retry. Each selected source takes a write lock through a transient
-    property before claim eligibility is re-checked; only the transaction
-    that still sees an eligible source increments its durable counters.
-
-    Parameters
-    ----------
-    facility:
-        Optional facility id to restrict claims to signal-backed sources
-        from that facility.  ``None`` means all sources.
-    batch_size:
-        Maximum batch size including the seed.
-    timeout_seconds:
-        Stale-claim recovery window.
-    domain:
-        Optional physics domain to restrict claims to DD-backed sources
-        whose linked IMASNode has ``physics_domain = domain``.  When set,
-        the seed step only claims items from that domain, so concurrent
-        ``--physics-domain`` runs do not compete for each other's seeds.
-
-    Returns
-    -------
-    list[dict]
-        Claimed sources as dicts with keys ``id``, ``source_id``,
-        ``source_type``, ``batch_key``, ``description``.
-    """
-    token = str(uuid.uuid4())
-    cutoff = f"PT{timeout_seconds}S"
-
-    # Optional facility filter (only applies to signal sources).
-    facility_where = ""
-    facility_where_sns2 = ""
-    extra_params: dict[str, Any] = {}
-    extra_params["frozen_name_stages"] = list(_PIPELINE_FROZEN_NAME_STAGES)
-    if facility:
-        facility_where = (
-            "AND (sns.source_type = 'dd' OR EXISTS {"
-            "  MATCH (sns)-[:FROM_SIGNAL]->(:FacilitySignal)"
-            "    -[:AT_FACILITY]->(:Facility {id: $facility})"
-            "})"
-        )
-        facility_where_sns2 = (
-            "AND (sns2.source_type = 'dd' OR EXISTS {"
-            "  MATCH (sns2)-[:FROM_SIGNAL]->(:FacilitySignal)"
-            "    -[:AT_FACILITY]->(:Facility {id: $facility})"
-            "})"
-        )
-        extra_params["facility"] = facility
-
-    # Optional domain filter for DD sources — restricts seed to the target domain
-    # so concurrent domain-specific runs don't compete for each other's items.
-    domain_where = ""
-    if domain:
-        domain_where = (
-            "AND (NOT (sns.source_type = 'dd') OR EXISTS {"
-            "  MATCH (sns)-[:FROM_DD_PATH]->(n:IMASNode)"
-            "  WHERE n.physics_domain = $domain"
-            "})"
-        )
-        extra_params["domain"] = domain
-
-    # Optional run-id scope for --focus mode (StandardNameSource).
-    # edits_only additionally gates on the source's edit_status. Sources are
-    # never edit successors (edit successors are already-composed StandardName
-    # nodes), so this predicate makes an edit-scoped run claim NO new sources —
-    # i.e. it correctly blocks fresh composition while draining pending edits.
-    scope_sns_where = ""
-    scope_sns2_where = ""
-    if scope_run_id:
-        scope_sns_where += " AND sns.run_id = $scope_run_id"
-        scope_sns2_where += " AND sns2.run_id = $scope_run_id"
-        extra_params["scope_run_id"] = scope_run_id
-    if drain_scope_id:
-        scope_sns_where += (
-            " AND sns.drain_scope_id = $drain_scope_id"
-            " AND sns.drain_scope_actionable = true"
-        )
-        scope_sns2_where += (
-            " AND sns2.drain_scope_id = $drain_scope_id"
-            " AND sns2.drain_scope_actionable = true"
-        )
-        extra_params["drain_scope_id"] = drain_scope_id
-    claim_owner_set = (
-        ", sns.drain_claim_scope_id = $drain_scope_id" if drain_scope_id else ""
+    return graph_cost_and_claims.claim_generate_name_batch(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    if edits_only:
-        scope_sns_where += " AND coalesce(sns.edit_status, '') = 'open'"
-        scope_sns2_where += " AND coalesce(sns2.edit_status, '') = 'open'"
-
-    with GraphClient() as gc:
-        with gc.session() as session:
-            tx = session.begin_transaction()
-            try:
-                # ── Step 1: Seed (domain-uniform sampling) ───────
-                # Two-level random selection: pick a random domain
-                # first, then a random source within it.  This
-                # prevents large domains (e.g. transport ~28% of
-                # all sources) from dominating early batches.
-                # When --domain is set, this collapses to a single-
-                # domain rand() which is the desired behaviour.
-                seed_result = list(
-                    tx.run(
-                        f"""
-                        MATCH (sns:StandardNameSource)
-                        WHERE sns.status = 'extracted'
-                          AND NOT EXISTS {{
-                            MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
-                            WHERE frozen.name_stage IN $frozen_name_stages
-                          }}
-                          AND coalesce(sns.attempt_count, 0) < $max_attempts
-                          AND (sns.claimed_at IS NULL
-                               OR sns.claimed_at < datetime()
-                                    - duration($cutoff))
-                          {facility_where}
-                          {domain_where}
-                          {scope_sns_where}
-                        MATCH (sns)-[:FROM_DD_PATH]->(imas0:IMASNode)
-                        WITH DISTINCT coalesce(imas0.physics_domain, 'general') AS pd
-                        WITH pd ORDER BY rand() LIMIT 1
-                        MATCH (sns2:StandardNameSource)
-                              -[:FROM_DD_PATH]->(imas2:IMASNode)
-                        WHERE sns2.status = 'extracted'
-                          AND NOT EXISTS {{
-                            MATCH (sns2)-[:PRODUCED_NAME]->(frozen:StandardName)
-                            WHERE frozen.name_stage IN $frozen_name_stages
-                          }}
-                          AND coalesce(sns2.attempt_count, 0) < $max_attempts
-                          AND (sns2.claimed_at IS NULL
-                               OR sns2.claimed_at < datetime()
-                                    - duration($cutoff))
-                          AND coalesce(imas2.physics_domain, 'general') = pd
-                          {facility_where_sns2}
-                          {scope_sns2_where}
-                        WITH sns2 ORDER BY rand() LIMIT 1
-                        SET sns2._claim_lock = true
-                        REMOVE sns2._claim_lock
-                        WITH sns2
-                        WHERE sns2.status = 'extracted'
-                          AND NOT EXISTS {{
-                            MATCH (sns2)-[:PRODUCED_NAME]->(frozen:StandardName)
-                            WHERE frozen.name_stage IN $frozen_name_stages
-                          }}
-                          AND coalesce(sns2.attempt_count, 0) < $max_attempts
-                          AND (sns2.claimed_at IS NULL
-                               OR sns2.claimed_at < datetime()
-                                    - duration($cutoff))
-                        SET sns2.claimed_at = datetime(),
-                            sns2.claim_token = $token,
-                            sns2.claim_seq = coalesce(sns2.claim_seq, 0) + 1,
-                            sns2.attempt_count = coalesce(sns2.attempt_count, 0) + 1
-                            {claim_owner_set.replace("sns.", "sns2.")}
-                        WITH sns2 AS sns
-                        OPTIONAL MATCH (sns)-[:FROM_DD_PATH]
-                            ->(imas:IMASNode)
-                        OPTIONAL MATCH (imas)-[:IN_CLUSTER]
-                            ->(c:IMASSemanticCluster)
-                        OPTIONAL MATCH (imas)-[:HAS_UNIT]->(u:Unit)
-                        OPTIONAL MATCH (sns)-[:FROM_SIGNAL]
-                            ->(sig:FacilitySignal)
-                        RETURN c.id AS _cluster_id,
-                               CASE WHEN u IS NOT NULL THEN u.id
-                                    WHEN sig IS NOT NULL
-                                    THEN sig.unit
-                                    ELSE null END AS _unit,
-                               CASE WHEN imas IS NOT NULL
-                                    THEN imas.physics_domain
-                                    WHEN sig IS NOT NULL
-                                    THEN sig.physics_domain
-                                    ELSE null END
-                                        AS _physics_domain,
-                               sns.batch_key AS _batch_key
-                        """,
-                        token=token,
-                        cutoff=cutoff,
-                        max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
-                        **extra_params,
-                    )
-                )
-
-                if not seed_result:
-                    tx.close()
-                    return []
-
-                seed = dict(seed_result[0])
-                cluster_id = seed.get("_cluster_id")
-                unit = seed.get("_unit")
-                physics_domain = seed.get("_physics_domain")
-                batch_key = seed.get("_batch_key")
-                expand_limit = batch_size - 1
-
-                # ── Step 2: Expand ───────────────────────────────
-                if expand_limit > 0:
-                    expanded = False
-                    if cluster_id is not None and unit is not None:
-                        tx.run(
-                            f"""
-                            MATCH (sns:StandardNameSource)
-                            WHERE sns.status = 'extracted'
-                              AND NOT EXISTS {{
-                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
-                                WHERE frozen.name_stage IN $frozen_name_stages
-                              }}
-                              AND coalesce(sns.attempt_count, 0) < $max_attempts
-                              AND sns.claimed_at IS NULL
-                              {facility_where}
-                              {scope_sns_where}
-                            MATCH (sns)-[:FROM_DD_PATH]
-                                ->(imas:IMASNode)
-                            MATCH (imas)-[:IN_CLUSTER]
-                                ->(:IMASSemanticCluster
-                                    {{id: $cluster_id}})
-                            MATCH (imas)-[:HAS_UNIT]
-                                ->(:Unit {{id: $unit}})
-                            WITH sns ORDER BY rand() LIMIT $expand_limit
-                            WITH sns ORDER BY sns.id
-                            SET sns._claim_lock = true
-                            REMOVE sns._claim_lock
-                            WITH sns
-                            WHERE sns.status = 'extracted'
-                              AND NOT EXISTS {{
-                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
-                                WHERE frozen.name_stage IN $frozen_name_stages
-                              }}
-                              AND coalesce(sns.attempt_count, 0) < $max_attempts
-                              AND (sns.claimed_at IS NULL
-                                   OR sns.claimed_at < datetime()
-                                        - duration($cutoff))
-                            SET sns.claimed_at = datetime(),
-                                sns.claim_token = $token,
-                                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
-                                sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
-                                {claim_owner_set}
-                            """,
-                            token=token,
-                            cluster_id=cluster_id,
-                            unit=unit,
-                            expand_limit=expand_limit,
-                            cutoff=cutoff,
-                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
-                            **extra_params,
-                        )
-                        expanded = True
-                    elif physics_domain is not None and unit is not None:
-                        # IMASNode.physics_domain is a scalar String;
-                        # use = not IN.
-                        tx.run(
-                            f"""
-                            MATCH (sns:StandardNameSource)
-                            WHERE sns.status = 'extracted'
-                              AND NOT EXISTS {{
-                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
-                                WHERE frozen.name_stage IN $frozen_name_stages
-                              }}
-                              AND coalesce(sns.attempt_count, 0) < $max_attempts
-                              AND sns.claimed_at IS NULL
-                              {facility_where}
-                              {scope_sns_where}
-                            MATCH (sns)-[:FROM_DD_PATH]
-                                ->(imas:IMASNode)
-                            WHERE imas.physics_domain
-                                = $fallback_domain
-                            MATCH (imas)-[:HAS_UNIT]
-                                ->(:Unit {{id: $unit}})
-                            WITH sns ORDER BY rand() LIMIT $expand_limit
-                            WITH sns ORDER BY sns.id
-                            SET sns._claim_lock = true
-                            REMOVE sns._claim_lock
-                            WITH sns
-                            WHERE sns.status = 'extracted'
-                              AND NOT EXISTS {{
-                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
-                                WHERE frozen.name_stage IN $frozen_name_stages
-                              }}
-                              AND coalesce(sns.attempt_count, 0) < $max_attempts
-                              AND (sns.claimed_at IS NULL
-                                   OR sns.claimed_at < datetime()
-                                        - duration($cutoff))
-                            SET sns.claimed_at = datetime(),
-                                sns.claim_token = $token,
-                                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
-                                sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
-                                {claim_owner_set}
-                            """,
-                            token=token,
-                            fallback_domain=physics_domain,
-                            unit=unit,
-                            expand_limit=expand_limit,
-                            cutoff=cutoff,
-                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
-                            **extra_params,
-                        )
-                        expanded = True
-
-                    if not expanded and batch_key:
-                        # Last resort: group by batch_key.
-                        tx.run(
-                            f"""
-                            MATCH (sns:StandardNameSource)
-                            WHERE sns.status = 'extracted'
-                              AND NOT EXISTS {{
-                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
-                                WHERE frozen.name_stage IN $frozen_name_stages
-                              }}
-                              AND coalesce(sns.attempt_count, 0) < $max_attempts
-                              AND sns.claimed_at IS NULL
-                              AND sns.batch_key = $batch_key
-                              {facility_where}
-                              {scope_sns_where}
-                            WITH sns ORDER BY rand() LIMIT $expand_limit
-                            WITH sns ORDER BY sns.id
-                            SET sns._claim_lock = true
-                            REMOVE sns._claim_lock
-                            WITH sns
-                            WHERE sns.status = 'extracted'
-                              AND NOT EXISTS {{
-                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
-                                WHERE frozen.name_stage IN $frozen_name_stages
-                              }}
-                              AND coalesce(sns.attempt_count, 0) < $max_attempts
-                              AND (sns.claimed_at IS NULL
-                                   OR sns.claimed_at < datetime()
-                                        - duration($cutoff))
-                            SET sns.claimed_at = datetime(),
-                                sns.claim_token = $token,
-                                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
-                                sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
-                                {claim_owner_set}
-                            """,
-                            token=token,
-                            batch_key=batch_key,
-                            expand_limit=expand_limit,
-                            cutoff=cutoff,
-                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
-                            **extra_params,
-                        )
-
-                # ── Step 3: Read-back ────────────────────────────
-                results = list(
-                    tx.run(
-                        """
-                        MATCH (sns:StandardNameSource
-                               {claim_token: $token})
-                        WHERE $drain_scope_id IS NULL
-                           OR sns.drain_scope_id = $drain_scope_id
-                        OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(im:IMASNode)
-                        OPTIONAL MATCH (sns)-[:FROM_SIGNAL]->(fs:FacilitySignal)
-                        CALL (sns) {
-                          OPTIONAL MATCH (sns)-[:PRODUCED_NAME]
-                              ->(hinted:StandardName)
-                          WHERE hinted.name_hint IS NOT NULL
-                            AND hinted.edit_reason IS NOT NULL
-                            AND hinted.edit_status = 'open'
-                          WITH hinted
-                          ORDER BY hinted.edit_requested_at DESC, hinted.id ASC
-                          RETURN head(collect(hinted.id)) AS previous_name,
-                                 head(collect(hinted.name_hint)) AS name_hint,
-                                 head(collect(hinted.edit_reason)) AS edit_reason,
-                                 head(collect(hinted.edit_origin)) AS edit_origin
-                        }
-                        RETURN sns.id AS id,
-                               sns.source_id AS source_id,
-                               sns.source_type AS source_type,
-                               sns.batch_key AS batch_key,
-                               sns.description AS description,
-                               coalesce(sns.physics_domain, im.physics_domain, fs.physics_domain) AS physics_domain,
-                               sns.claim_token AS claim_token,
-                               sns.claim_seq AS claim_seq,
-                               sns.attempt_count AS attempt_count,
-                               sns.compose_hint AS compose_hint,
-                               sns.compose_hint_reason AS compose_hint_reason,
-                               sns.compose_hint_status AS compose_hint_status,
-                               sns.compose_hint_requested_at
-                                   AS compose_hint_requested_at,
-                               sns.compose_hint_consumed_at
-                                   AS compose_hint_consumed_at,
-                               previous_name,
-                               name_hint,
-                               edit_reason,
-                               edit_origin
-                        """,
-                        token=token,
-                        drain_scope_id=drain_scope_id,
-                    )
-                )
-
-                items = [dict(r) for r in results]
-                tx.commit()
-
-            except BaseException:
-                if tx.closed is False:
-                    tx.close()
-                raise
-
-    # Drop claim-race losers BEFORE the (paid) name-composition LLM call (see
-    # _verify_source_claim_winners). generate_name is gated on
-    # StandardNameSource.status='extracted'.
-    items = _verify_source_claim_winners(items)
-
-    logger.debug(
-        "claim_generate_name_batch: claimed %d (token=%s)",
-        len(items),
-        token[:8],
-    )
-    return items
 
 
 # -- enrich (StandardName, enriched_at IS NULL) -------------------------------
 
 
-@retry_on_deadlock()
-def claim_enrich_seed_and_expand(
-    min_score_threshold: float = 0.0,
-    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
-    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-) -> list[dict[str, Any]]:
-    """Claim StandardName nodes that lack documentation enrichment.
+def claim_enrich_seed_and_expand(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.claim_enrich_seed_and_expand."""
+    from .graph_store import graph_cost_and_claims
 
-    Eligibility: ``validation_status = 'valid'`` AND ``enriched_at IS NULL``.
-
-    Returns claimed items as dicts.
-    """
-    where = "sn.validation_status = 'valid' AND sn.enriched_at IS NULL"
-    params: dict[str, Any] = {}
-
-    return _claim_sn_atomic(
-        eligibility_where=where,
-        query_params=params,
-        batch_size=batch_size,
-        timeout_seconds=timeout_seconds,
-        extra_return_fields=", sn.enriched_at AS enriched_at",
+    return graph_cost_and_claims.claim_enrich_seed_and_expand(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
 # -- review names (StandardName, reviewed_name_at IS NULL) --------------------
 
 
-@retry_on_deadlock()
-def claim_review_names_seed_and_expand(
-    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
-    min_score: float = DEFAULT_MIN_SCORE,
-    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-) -> list[dict[str, Any]]:
-    """Claim StandardName nodes for name-axis review scoring.
+def claim_review_names_seed_and_expand(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.claim_review_names_seed_and_expand."""
+    from .graph_store import graph_cost_and_claims
 
-    Eligibility: ``reviewed_name_at IS NULL`` AND
-    ``validation_status = 'valid'``.
-
-    Review/refine exclusivity: names with
-    ``reviewer_score_name < min_score`` are reserved for the regeneration pool
-    and excluded here via
-    ``coalesce(sn.reviewer_score_name, 1.0) >= $min_score``.
-    """
-    where = (
-        "sn.reviewed_name_at IS NULL"
-        " AND sn.validation_status = 'valid'"
-        " AND coalesce(sn.reviewer_score_name, 1.0) >= $min_score"
-    )
-    return _claim_sn_atomic(
-        eligibility_where=where,
-        query_params={"min_score": min_score},
-        batch_size=batch_size,
-        timeout_seconds=timeout_seconds,
-        extra_return_fields=(
-            ", sn.reviewer_score_name AS reviewer_score_name"
-            ", sn.reviewed_name_at AS reviewed_name_at"
-        ),
+    return graph_cost_and_claims.claim_review_names_seed_and_expand(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
 # -- review_name (name_stage='drafted', claim only) ---------------------------
 
 
-REVIEW_NAME_ELIGIBILITY_WHERE = (
-    "(sn.name_stage = 'drafted' OR "
-    "($drain_scope_id IS NOT NULL AND sn.name_stage = 'reviewed' "
-    "AND sn.reviewer_score_name >= $min_score))"
-    " AND sn.validation_status = 'valid'"
-    " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-    " AND sn.description IS NOT NULL"
-    " AND sn.description <> $parent_desc_placeholder"
-    " AND coalesce(sn.origin, '') <> 'derived'"
-    " AND ($facility IS NULL OR sn.facility = $facility)"
-)
+REVIEW_NAME_ELIGIBILITY_WHERE = import_module(
+    ".graph_store.graph_cost_and_claims", __package__
+).REVIEW_NAME_ELIGIBILITY_WHERE
+
 """Canonical graph predicate for name-review eligibility.
 
 The drain clause permits an explicitly scoped, already-passing review to be
@@ -13544,95 +9278,13 @@ parents and all derived names remain outside the review pool.
 """
 
 
-@retry_on_deadlock()
-def claim_review_name_batch(
-    facility: str | None = None,
-    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
-    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-    domain: str | None = None,
-    scope_run_id: str | None = None,
-    drain_scope_id: str | None = None,
-    edits_only: bool = False,
-    min_score: float = DEFAULT_MIN_SCORE,
-) -> list[dict[str, Any]]:
-    """Claim StandardName nodes for name review.
+def claim_review_name_batch(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_cost_and_claims.claim_review_name_batch."""
+    from .graph_store import graph_cost_and_claims
 
-    Eligibility: ``name_stage = 'drafted'``, ``validation_status = 'valid'``,
-    and ``claimed_at IS NULL``.
-
-    Does NOT transition stage at claim time — stage remains ``'drafted'``
-    until :func:`persist_reviewed_name` writes the final outcome.  Only
-    ``claim_token`` and ``claimed_at`` are set so the orphan sweep can
-    recover stuck claims.
-
-    Returns claimed items as dicts with keys:
-    ``id``, ``name``, ``description``, ``documentation``, ``kind``,
-    ``unit``, ``tags``, ``physics_domain``, ``chain_length``,
-    ``claim_token``, ``source_paths``, and ``source_bindings``.  Each source
-    binding carries the immutable DD snapshot captured on the exact
-    ``StandardNameSource`` that produced the name.
-    """
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    return graph_cost_and_claims.claim_review_name_batch(
+        *args, services=_graph_foundation.services, **kwargs
     )
-
-    query_params: dict[str, Any] = {
-        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-        "drain_scope_id": drain_scope_id,
-        "min_score": min_score,
-        "facility": facility,
-    }
-    items = _claim_sn_atomic(
-        eligibility_where=REVIEW_NAME_ELIGIBILITY_WHERE,
-        query_params=query_params,
-        batch_size=batch_size,
-        timeout_seconds=timeout_seconds,
-        extra_return_fields=(
-            ", sn.name AS name"
-            ", sn.tags AS tags"
-            ", coalesce(sn.chain_length, 0) AS chain_length"
-            ", sn.name_stage AS name_stage"
-            ", sn.origin AS origin"
-            ", sn.edit_mode AS edit_mode"
-            ", sn.name_hint AS name_hint"
-            ", sn.docs_hint AS docs_hint"
-            ", sn.edit_reason AS edit_reason"
-            ", sn.edit_origin AS edit_origin"
-            ", sn.physical_base AS physical_base"
-            ", sn.geometry AS geometry"
-            ", sn.grammar_parse_version AS grammar_parse_version"
-            ", sn.source_paths AS source_paths"
-            ", [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {"
-            "     id: source.id,"
-            "     source_type: source.source_type,"
-            "     source_id: source.source_id,"
-            "     status: source.status,"
-            "     description: source.description,"
-            "     physics_domain: source.physics_domain,"
-            "     compose_hint: source.compose_hint,"
-            "     compose_hint_reason: source.compose_hint_reason,"
-            "     dd_path: source.dd_path,"
-            "     dd_version: source.dd_version,"
-            "     dd_documentation: source.dd_documentation,"
-            "     dd_snapshot_pinned: source.dd_snapshot_pinned,"
-            "     dd_parent_path: source.dd_parent_path,"
-            "     dd_parent_documentation: source.dd_parent_documentation,"
-            "     dd_data_type: source.dd_data_type,"
-            "     dd_unit: source.dd_unit,"
-            "     dd_coordinates: source.dd_coordinates,"
-            "     dd_lifecycle_status: source.dd_lifecycle_status,"
-            "     enhanced_description: source.enhanced_description"
-            " }] AS source_bindings"
-        ),
-        domain=domain,
-        scope_run_id=scope_run_id,
-        drain_scope_id=drain_scope_id,
-        edits_only=edits_only,
-        restage_review_axis="name" if drain_scope_id else None,
-    )
-    # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
-    # _verify_name_claim_winners). review_name is gated on name_stage='drafted'.
-    return _verify_name_claim_winners(items, eligible_stage="drafted")
 
 
 # -- persist_reviewed_name (write the review + the stage transition) ----------
@@ -13642,21 +9294,17 @@ def claim_review_name_batch(
 #: represent completed reviewer chains; the cascade methods represent a
 #: calibrated Jev decision or its explicit single-reviewer route. Other methods
 #: scored with fewer seats than the configured chain requires.
-QUORATE_RESOLUTION_METHODS: frozenset[str] = frozenset(
-    {
-        "quorum_consensus",
-        "authoritative_escalation",
-        "jev_cascade_accept",
-        "jev_cascade_refine",
-        "jev_cascade_chat_review",
-        "jev_cascade_chat_below_reject",
-    }
-)
+QUORATE_RESOLUTION_METHODS = import_module(
+    ".graph_store.graph_cost_and_claims", __package__
+).QUORATE_RESOLUTION_METHODS
+
 
 #: ``max_cycles_reached`` merges two blind seats that never agreed.  On a
 #: two-seat chain that is the designed terminal outcome; on a chain that
 #: defines an escalator it means the escalator itself did not answer.
-_ESCALATOR_CHAIN_SIZE = 3
+_ESCALATOR_CHAIN_SIZE = import_module(
+    ".graph_store.graph_cost_and_claims", __package__
+)._ESCALATOR_CHAIN_SIZE
 
 
 def _quorum_admits_acceptance(*args: Any, **kwargs: Any):
@@ -17176,302 +12824,40 @@ def _verify_source_claim_winners(
 # The claim does NOT transition docs_stage (persist_generated_docs does that).
 
 
-@retry_on_deadlock()
-def claim_generate_docs_batch(
-    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
-    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-    domain: str | None = None,
-    scope_run_id: str | None = None,
-    drain_scope_id: str | None = None,
-    edits_only: bool = False,
-) -> list[dict[str, Any]]:
-    """Claim StandardName nodes ready for generate_docs.
+def claim_generate_docs_batch(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.claim_generate_docs_batch."""
+    from .graph_store import graph_docs_persistence
 
-    Eligibility: ``name_stage = 'accepted'`` AND ``docs_stage = 'pending'``
-    AND ``claimed_at IS NULL`` (or stale).
-
-    The claim does NOT transition ``docs_stage`` — that happens in
-    :func:`persist_generated_docs` so that a failed worker leaves the node
-    cleanly at ``'pending'``.
-
-    Each claimed item is enriched with REFINED_FROM chain history via
-    :func:`~imas_codex.standard_names.chain_history.name_chain_history`
-    and the name-review feedback fields so the LLM understands why this
-    name was accepted.
-
-    Returns claimed items as dicts.
-    """
-    from imas_codex.standard_names.chain_history import name_chain_history
-
-    # Docs-eligibility gate: the name's FORM must be vetted before we spend
-    # docs effort. Two ways to be vetted:
-    #   - a regular name earns a ``reviewer_score_name`` by passing
-    #     REVIEW_NAME (RD-quorum), OR
-    #   - a derived parent's name is a deterministic grammar peel vetted by
-    #     the admission gate (``is_admissible_parent_name``) — it is never
-    #     name-reviewed/refined and carries NO name score by design (scoring
-    #     a name we never change is meaningless). It is docs-eligible by
-    #     being a structurally-accepted derived parent.
-    #
-    # CURATIVE-SCOPE EXCEPTION: when a ``scope_run_id`` is supplied the run is a
-    # curative family-docs wave (``sn run --families`` / ``--scope-run-id``) that
-    # has EXPLICITLY reset the docs of a bounded set of ALREADY-ACCEPTED names.
-    # Those names are accepted (their form is authoritative — many are derived
-    # leaves auto-accepted without a name score), so the operator has authorised
-    # re-docs'ing them. Drop the name-score gate inside the scope so derived
-    # leaf families (e.g. <species>_density_at_limiter) can be curatively
-    # regenerated; the ``scope_run_id`` filter keeps the global backlog untouched.
-    # The same operator authorisation holds under edits_only (an open sn-edit
-    # is an explicit steered proposal; catalog-imported names carry no
-    # reviewer_score_name and would otherwise never draft).
-    score_gate = (
-        ""
-        if (scope_run_id or edits_only)
-        else (
-            " AND (sn.reviewer_score_name IS NOT NULL"
-            " OR (coalesce(sn.origin, '') = 'derived'"
-            "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-            "       WHERE NOT coalesce(kid.name_stage, '') IN"
-            "       ['superseded', 'exhausted', 'contested'] }))"
-        )
-    )
-    where = (
-        "sn.name_stage = 'accepted' AND sn.docs_stage = 'pending'"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-        + score_gate
+    return graph_docs_persistence.claim_generate_docs_batch(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    items = _claim_sn_atomic(
-        eligibility_where=where,
-        query_params={},
-        batch_size=batch_size,
-        timeout_seconds=timeout_seconds,
-        extra_return_fields=(
-            # description, kind, physics_domain already in base readback —
-            # listing them again would raise Neo4j 42N38 (duplicate return
-            # item name).  Only add fields not present in _claim_sn_atomic's
-            # fixed RETURN list.
-            ", sn.tags AS tags"
-            ", sn.reviewer_score_name AS reviewer_score_name"
-            ", sn.reviewer_comments_name AS reviewer_comments_name"
-            ", sn.chain_length AS chain_length"
-            ", sn.docs_stage AS docs_stage"
-            ", sn.name_stage AS name_stage"
-            ", sn.edit_mode AS edit_mode"
-            ", sn.name_hint AS name_hint"
-            ", sn.docs_hint AS docs_hint"
-            ", sn.edit_reason AS edit_reason"
-            ", sn.edit_origin AS edit_origin"
-        ),
-        # stage_field=None → claim only, no stage transition
-        domain=domain,
-        scope_run_id=scope_run_id,
-        drain_scope_id=drain_scope_id,
-        edits_only=edits_only,
-        # Parent-first ordering: nodes that have incoming HAS_PARENT edges
-        # (i.e. nodes which are parents) receive priority 0 so they are
-        # documented before their children.
-        #
-        # Escape hatch: do NOT block a child whose parent is still pending
-        # but has never been claimed (claimed_at IS NULL) — the parent may
-        # simply not have been seeded, and we should not wait indefinitely.
-        # We only block when the parent is *actively* in-progress
-        # (docs_stage='pending' AND claimed_at IS NOT NULL).
-        seed_extra_where=(
-            "AND NOT EXISTS {"
-            " MATCH (sn)-[:HAS_PARENT]->(parent:StandardName)"
-            " WHERE parent.docs_stage = 'pending'"
-            " AND parent.claimed_at IS NOT NULL"
-            " }"
-        ),
-        seed_with_extras=(
-            ", CASE WHEN EXISTS { ()-[:HAS_PARENT]->(sn) }"
-            " THEN 0 ELSE 1 END AS _docs_priority"
-        ),
-        seed_order_by="_docs_priority ASC, rand()",
+
+def persist_generated_docs(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.persist_generated_docs."""
+    from .graph_store import graph_docs_persistence
+
+    return graph_docs_persistence.persist_generated_docs(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    # Drop claim-race losers BEFORE enrichment / LLM spend (see
-    # _verify_docs_claim_winners). generate_docs is gated on docs_stage='pending'.
-    items = _verify_docs_claim_winners(items, eligible_stage="pending")
 
-    # Enrich each claimed item with REFINED_FROM chain history.
-    for item in items:
-        item["chain_history"] = name_chain_history(item["id"])
+def release_generate_docs_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.release_generate_docs_claims."""
+    from .graph_store import graph_docs_persistence
 
-    logger.debug(
-        "claim_generate_docs_batch: claimed %d",
-        len(items),
+    return graph_docs_persistence.release_generate_docs_claims(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return items
 
 
-@retry_on_deadlock()
-def persist_generated_docs(
-    *,
-    sn_id: str,
-    claim_token: str,
-    description: str,
-    documentation: str,
-    model: str,
-    run_id: str | None = None,
-) -> str:
-    """Persist generate_docs results and transition ``docs_stage`` to ``'drafted'``.
+def release_generate_docs_failed_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.release_generate_docs_failed_claims."""
+    from .graph_store import graph_docs_persistence
 
-    Single-transaction write:
-
-    1. Verify ``claim_token`` matches the stored token.
-    2. SET ``description``, ``documentation``, ``docs_stage = 'drafted'``,
-       ``docs_chain_length = 0``, ``docs_model``, ``docs_generated_at``,
-       clear ``claim_token`` and ``claimed_at``.
-
-    Parameters
-    ----------
-    sn_id:
-        StandardName node id.
-    claim_token:
-        Token written at claim time — verified before any write.
-    description:
-        Short description (1–3 sentences) from the LLM.
-    documentation:
-        Rich markdown documentation from the LLM.
-    model:
-        LLM model identifier used for generation.
-
-    Returns the new ``docs_stage`` value (``'drafted'``).
-    Raises :exc:`ValueError` if token verification fails (no matching node).
-    """
-    # Repair any JSON-escape-mangled LaTeX control chars before persisting.
-    description = _sanitize_doc_text(description)
-    documentation = _sanitize_doc_text(documentation)
-    with GraphClient() as gc:
-        # Extract cross-references from documentation text. Pass the
-        # SN id so self-references in prose do not land in the
-        # structured `links` index.
-        links = _extract_links_from_docs(documentation, self_name=sn_id)
-        link_status = _compute_link_status(links) if links else None
-        result = gc.query(
-            """
-            MATCH (sn:StandardName {id: $sn_id})
-            WHERE sn.claim_token = $token
-              AND sn.name_stage = 'accepted'
-            SET sn.updated_at = datetime(), sn.description      = $description,
-                sn.documentation    = $documentation,
-                sn.docs_stage       = 'drafted',
-                sn.docs_chain_length = 0,
-                sn.docs_model       = $model,
-                sn.docs_generated_at = datetime(),
-                sn.generate_docs_count = coalesce(sn.generate_docs_count, 0) + 1,
-                sn.claim_token      = null,
-                sn.claimed_at       = null,
-                sn.links            = $links,
-                sn.link_status      = $link_status,
-                sn.embed_text_hash  = null
-            RETURN sn.docs_stage AS docs_stage
-            """,
-            sn_id=sn_id,
-            token=claim_token,
-            description=description,
-            documentation=documentation,
-            model=model,
-            links=links,
-            link_status=link_status,
-        )
-        if not result:
-            raise ValueError(
-                f"persist_generated_docs: token mismatch or node not found for {sn_id!r}"
-            )
-        from imas_codex.standard_names.source_refresh import stamp_source_snapshots
-
-        stamp_source_snapshots(sn_ids=[sn_id], gc=gc)
-    new_stage: str = result[0]["docs_stage"]
-    logger.debug("persist_generated_docs: %s → docs_stage=%s", sn_id, new_stage)
-
-    # Async counter bump — live progress visibility for ``sn status``
-    bump_sn_run_counter(run_id, "names_enriched")
-
-    return new_stage
-
-
-@retry_on_deadlock()
-def release_generate_docs_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-) -> int:
-    """Release generate_docs claims IFF token matches.
-
-    Called after successful persist to clear any nodes whose claim state
-    was not already cleared inside :func:`persist_generated_docs`
-    (e.g., skipped items in a multi-item batch).
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $ids AS sid
-            MATCH (n:StandardName {id: sid})
-            WHERE n.claim_token = $token
-            SET n.updated_at = datetime(), n.claimed_at = null, n.claim_token = null
-            RETURN count(n) AS released
-            """,
-            ids=sn_ids,
-            token=claim_token,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_generate_docs_claims: %d/%d released (token=%s) — "
-            "remainder already cleared or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
-
-
-@retry_on_deadlock()
-def release_generate_docs_failed_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-) -> int:
-    """Release generate_docs claims after LLM or processing failure.
-
-    Token-verified: only clears ``claim_token`` and ``claimed_at`` on nodes
-    where ``claim_token = $token``.  Does NOT change ``docs_stage`` (it
-    stays at ``'pending'`` since the claim never transitioned it).
-
-    Returns the count of nodes released.
-    """
-    if not sn_ids:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $sn_ids AS sid
-            MATCH (sn:StandardName {id: sid})
-            WHERE sn.claim_token = $token
-            SET sn.updated_at = datetime(), sn.claim_token = null,
-                sn.claimed_at  = null
-            RETURN count(sn) AS released
-            """,
-            sn_ids=sn_ids,
-            token=claim_token,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_generate_docs_failed_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
+    return graph_docs_persistence.release_generate_docs_failed_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -17484,132 +12870,13 @@ def release_generate_docs_failed_claims(
 # linked via DOCS_REVISION_OF before the SN is updated.
 
 
-@retry_on_deadlock()
-def claim_refine_docs_batch(
-    min_score: float = DEFAULT_MIN_SCORE,
-    rotation_cap: int = DEFAULT_REFINE_ROTATIONS,
-    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
-    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-    domain: str | None = None,
-    scope_run_id: str | None = None,
-    drain_scope_id: str | None = None,
-    edits_only: bool = False,
-) -> list[dict[str, Any]]:
-    """Claim StandardName nodes for docs refinement.
+def claim_refine_docs_batch(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.claim_refine_docs_batch."""
+    from .graph_store import graph_docs_persistence
 
-    Eligibility: ``docs_stage = 'reviewed'`` AND
-    ``(reviewer_score_docs < min_score OR an open docs hold)`` AND
-    ``docs_chain_length < rotation_cap``.
-
-    The claim atomically transitions ``docs_stage`` from ``'reviewed'``
-    to ``'refining'`` via :func:`_claim_sn_atomic`.
-
-    After claiming, each item is enriched with DOCS_REVISION_OF chain
-    history via :func:`~imas_codex.standard_names.chain_history.docs_chain_history`.
-
-    Returns claimed items as dicts with docs_chain_history appended.
-    """
-    from imas_codex.standard_names.chain_history import docs_chain_history
-
-    # Name-form vetted gate (same invariant as generate_docs). CURATIVE-SCOPE
-    # EXCEPTION: dropped under a scope_run_id so curatively-reset derived-leaf
-    # families can refine (mirrors claim_generate_docs_batch/claim_review_docs_batch).
-    # Also dropped under edits_only — staged docs edits on catalog-imported
-    # names carry no reviewer_score_name and would otherwise never refine.
-    score_gate = (
-        ""
-        if (scope_run_id or edits_only)
-        else (
-            " AND (sn.reviewer_score_name IS NOT NULL"
-            " OR (coalesce(sn.origin, '') = 'derived'"
-            "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-            "       WHERE NOT coalesce(kid.name_stage, '') IN"
-            "       ['superseded', 'exhausted', 'contested'] }))"
-        )
+    return graph_docs_persistence.claim_refine_docs_batch(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    where = (
-        "sn.docs_stage = 'reviewed'"
-        " AND sn.reviewer_score_docs IS NOT NULL"
-        " AND (sn.reviewer_score_docs < $min_score OR "
-        + has_open_docs_hold_where()
-        + ")"
-        " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-        f" AND {docs_review_eligibility_where()}"
-        " AND sn.docs_review_quorum_shortfall IS NULL" + score_gate
-    )
-    query_params: dict[str, Any] = {
-        "min_score": min_score,
-        "rotation_cap": rotation_cap,
-        **docs_review_eligibility_params(),
-    }
-    items = _claim_sn_atomic(
-        eligibility_where=where,
-        query_params=query_params,
-        batch_size=batch_size,
-        timeout_seconds=timeout_seconds,
-        extra_return_fields=(
-            # description, documentation, kind, physics_domain already in base
-            # readback — listing them again raises Neo4j 42N38 (duplicate
-            # return item name).  Only add fields not present in
-            # _claim_sn_atomic's fixed RETURN list.
-            ", sn.tags AS tags"
-            ", sn.docs_stage AS docs_stage"
-            ", sn.docs_chain_length AS docs_chain_length"
-            ", sn.docs_model AS docs_model"
-            ", sn.docs_generated_at AS docs_generated_at"
-            ", sn.reviewer_score_docs AS reviewer_score_docs"
-            ", sn.reviewer_comments_per_dim_docs"
-            "     AS reviewer_comments_per_dim_docs"
-            ", sn.reviewer_comments_docs AS reviewer_comments_docs"
-            ", sn.edit_mode AS edit_mode"
-            ", sn.name_hint AS name_hint"
-            ", sn.docs_hint AS docs_hint"
-            ", sn.edit_reason AS edit_reason"
-            ", sn.edit_origin AS edit_origin"
-        ),
-        stage_field="docs_stage",
-        to_stage="refining",
-        domain=domain,
-        scope_run_id=scope_run_id,
-        drain_scope_id=drain_scope_id,
-        edits_only=edits_only,
-    )
-
-    # Drop claim-race losers BEFORE the (paid) refine LLM call. The claim
-    # transitions docs_stage 'reviewed'→'refining', but the shared seed's
-    # MATCH-bound row + lock-serialised SET still let concurrent replicas
-    # each transition the same node; only the claim_token winner truly owns
-    # it. See _verify_docs_claim_winners.
-    items = _verify_docs_claim_winners(items, eligible_stage="refining")
-
-    # Enrich each claimed item with its DOCS_REVISION_OF chain history and build
-    # a unified prior_docs_reviews list that also includes the current node's own
-    # reviewer feedback.  Without this, docs cycled >1 time lose intermediate
-    # reviewer verdict when the next refine-docs prompt is rendered.
-    for item in items:
-        item["docs_chain_history"] = docs_chain_history(item["id"], limit=5)
-        raw = item.get("reviewer_comments_per_dim_docs") or "{}"
-        try:
-            per_dim: dict = json.loads(raw) if isinstance(raw, str) else (raw or {})
-        except (ValueError, TypeError):
-            per_dim = {}
-        current_review: dict[str, Any] = {
-            "model": item.get("docs_model", "unknown"),
-            "reviewer_score": item.get("reviewer_score_docs"),
-            "reviewer_comments_per_dim": per_dim,
-            "documentation": item.get("documentation", ""),
-        }
-        for hold in open_holds(item["id"], "docs"):
-            per_dim[f"hold:{hold['kind']}:{hold['finding_key'][:12]}"] = hold["finding"]
-        current_review["reviewer_comments_per_dim"] = per_dim
-        item["prior_docs_reviews"] = item["docs_chain_history"] + [current_review]
-
-    logger.debug(
-        "claim_refine_docs_batch: claimed %d",
-        len(items),
-    )
-    return items
 
 
 # =============================================================================
@@ -17617,428 +12884,49 @@ def claim_refine_docs_batch(
 # =============================================================================
 
 
-@retry_on_deadlock()
-def persist_refined_docs(
-    *,
-    sn_id: str,
-    claim_token: str,
-    description: str,
-    documentation: str,
-    model: str,
-    current_description: str,
-    current_documentation: str,
-    current_model: str | None = None,
-    current_generated_at: str | None = None,
-    reviewer_score_to_snapshot: float | None = None,
-    reviewer_comments_to_snapshot: str | None = None,
-    reviewer_comments_per_dim_to_snapshot: str | None = None,
-    run_id: str | None = None,
-) -> dict[str, Any]:
-    """Persist a refined docs revision with DocsRevision snapshot.
+def persist_refined_docs(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.persist_refined_docs."""
+    from .graph_store import graph_docs_persistence
 
-    Single-transaction:
-
-    1. Verify ``claim_token`` + ``docs_stage = 'refining'``.
-    2. CREATE ``DocsRevision`` snapshot of CURRENT state (before this refine):
-       ``id = "{sn_id}#rev-{docs_chain_length}"`` (deterministic key).
-    3. CREATE ``(sn)-[:DOCS_REVISION_OF]->(rev)`` edge.
-    4. SET new description/documentation on SN, advance chain, clear claim.
-    5. Clear ``reviewer_*_docs`` fields on the SN (new docs need fresh review).
-
-    Returns ``{"docs_chain_length": <new>, "revision_id": <id>}``.
-    Returns ``{"docs_chain_length": -1, "revision_id": ""}`` on token/stage
-    mismatch (no-op).
-    """
-    # Repair any JSON-escape-mangled LaTeX control chars before persisting.
-    description = _sanitize_doc_text(description)
-    documentation = _sanitize_doc_text(documentation)
-    with GraphClient() as gc:
-        with gc.session() as session:
-            tx = session.begin_transaction()
-            try:
-                result = list(
-                    tx.run(
-                        """
-                        // 1. Match + verify
-                        MATCH (sn:StandardName {id: $sn_id})
-                        WHERE sn.claim_token = $token
-                          AND sn.docs_stage = 'refining'
-                          AND sn.name_stage = 'accepted'
-                        WITH sn, coalesce(sn.docs_chain_length, 0) AS cur_chain
-
-                        // 2. Create DocsRevision snapshot (deterministic id)
-                        WITH sn, cur_chain,
-                             $sn_id + '#rev-' + toString(cur_chain) AS rev_id
-                        MERGE (rev:DocsRevision {id: rev_id})
-                        ON CREATE SET
-                          rev.standard_name_id                = $sn_id,
-                          rev.revision_number                = cur_chain,
-                          rev.description                    = $cur_desc,
-                          rev.documentation                  = $cur_doc,
-                          rev.model                          = $cur_model,
-                          rev.generated_at                   = $cur_gen_at,
-                          rev.reviewer_score_docs            = $snap_score,
-                          rev.reviewer_comments_docs         = $snap_comments,
-                          rev.reviewer_comments_per_dim_docs = $snap_comments_dim,
-                          rev.created_at                     = datetime()
-
-                        // 3. Link SN → revision
-                        WITH sn, rev, cur_chain
-                        MERGE (sn)-[:DOCS_REVISION_OF]->(rev)
-
-                        // 4. Update SN with new docs + advance chain
-                        WITH sn, rev, cur_chain
-                        SET sn.updated_at = datetime(), sn.description       = $new_desc,
-                            sn.documentation     = $new_doc,
-                            sn.docs_stage        = 'drafted',
-                            sn.docs_chain_length = cur_chain + 1,
-                            sn.docs_model        = $model,
-                            sn.docs_generated_at = datetime(),
-                            sn.refine_docs_count = coalesce(sn.refine_docs_count, 0) + 1,
-                            sn.claim_token       = null,
-                            sn.claimed_at        = null,
-                            // 5. Clear reviewer_*_docs — new docs need fresh review
-                            sn.reviewer_score_docs            = null,
-                            sn.reviewer_scores_docs           = null,
-                            sn.reviewer_comments_per_dim_docs = null,
-                            sn.reviewer_comments_docs         = null,
-                            sn.reviewer_model_docs            = null,
-                            sn.reviewed_docs_at               = null
-
-                        RETURN cur_chain + 1 AS docs_chain_length,
-                               rev.id        AS revision_id
-                        """,
-                        sn_id=sn_id,
-                        token=claim_token,
-                        cur_desc=current_description or "",
-                        cur_doc=current_documentation or "",
-                        cur_model=current_model,
-                        cur_gen_at=current_generated_at,
-                        snap_score=reviewer_score_to_snapshot,
-                        snap_comments=reviewer_comments_to_snapshot,
-                        snap_comments_dim=reviewer_comments_per_dim_to_snapshot,
-                        new_desc=description,
-                        new_doc=documentation,
-                        model=model,
-                    )
-                )
-                tx.commit()
-            except BaseException:
-                if tx.closed is False:
-                    tx.close()
-                raise
-
-    if result:
-        row = dict(result[0])
-        logger.debug(
-            "persist_refined_docs: %s (chain_length=%d, rev=%s)",
-            sn_id,
-            row["docs_chain_length"],
-            row["revision_id"],
-        )
-
-        # Re-embed: refined docs change the description, so update the
-        # embedding to reflect the latest "name — description" text.
-        # Clear embed_text_hash so the dedicated embed worker picks it up.
-        with GraphClient() as gc:
-            from imas_codex.standard_names.source_refresh import stamp_source_snapshots
-
-            stamp_source_snapshots(sn_ids=[sn_id], gc=gc)
-            gc.query(
-                """
-                MATCH (sn:StandardName {id: $id})
-                SET sn.updated_at = datetime(), sn.embed_text_hash = null
-                """,
-                id=sn_id,
-            )
-
-        # Async counter bump — live progress visibility for ``sn status``
-        bump_sn_run_counter(run_id, "names_regenerated")
-        _record_persist_outcome(run_id, "refine_docs", persisted=True)
-        return row
-    _record_persist_outcome(run_id, "refine_docs", persisted=False)
-    logger.debug(
-        "persist_refined_docs: no-op for %s (token/stage mismatch)",
-        sn_id,
+    return graph_docs_persistence.persist_refined_docs(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return {"docs_chain_length": -1, "revision_id": ""}
 
 
-@retry_on_deadlock()
-def reset_standard_name_docs(
-    *,
-    sn_ids: list[str],
-    run_id: str | None = None,
-    dry_run: bool = False,
-) -> dict[str, int]:
-    """Reset the docs pipeline for an explicit set of StandardNames.
+def reset_standard_name_docs(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.reset_standard_name_docs."""
+    from .graph_store import graph_docs_persistence
 
-    The family-harmonization mark step: each eligible member has its
-    current docs snapshotted to a :class:`DocsRevision` (same deterministic
-    ``{id}#rev-{chain}`` scheme as :func:`persist_refined_docs`, advancing
-    ``docs_chain_length`` so revision ids never collide), then its
-    ``docs_stage`` is reset to ``'pending'`` and all reviewer-docs state is
-    cleared so the generate_docs → review_docs gate re-runs from scratch.
-    ``description``/``documentation`` are left in place — the generate_docs
-    prompt treats them as untrusted scaffolding and rewrites them.
-
-    Eligible: ``name_stage='accepted'`` AND ``docs_stage`` in
-    accepted/exhausted/reviewed/drafted. Names already ``pending`` (or not
-    in the docs pipeline) are skipped — they regenerate anyway.
-
-    Args:
-        sn_ids: Explicit StandardName ids to reset.
-        run_id: When set, stamped onto ``sn.run_id`` so a subsequent
-            pool run with ``scope_run_id=run_id`` claims ONLY these names
-            (leaving the global docs-pending backlog untouched).
-        dry_run: Report the eligible count without writing.
-
-    Returns:
-        ``{"eligible": n, "reset": n_or_0}``.
-    """
-    if not sn_ids:
-        return {"eligible": 0, "reset": 0}
-
-    eligibility = """
-        UNWIND $sn_ids AS sid
-        MATCH (sn:StandardName {id: sid})
-        WHERE sn.name_stage = 'accepted'
-          AND coalesce(sn.docs_stage, '')
-              IN ['accepted', 'exhausted', 'reviewed', 'drafted']
-    """
-    with GraphClient() as gc:
-        rows = gc.query(eligibility + " RETURN count(sn) AS eligible", sn_ids=sn_ids)
-        eligible: int = rows[0]["eligible"] if rows else 0
-        if dry_run or eligible == 0:
-            return {"eligible": eligible, "reset": 0}
-
-        result = gc.query(
-            eligibility
-            + """
-            WITH sn, coalesce(sn.docs_chain_length, 0) AS cur_chain,
-                 (sn.documentation IS NOT NULL AND sn.documentation <> '')
-                 AS has_docs
-
-            // The chain counter can lag stored history after an authority
-            // import. Derive the append position from both sources so an
-            // existing deterministic id is never reused.
-            OPTIONAL MATCH (prior:DocsRevision)
-            WHERE has_docs
-              AND prior.id STARTS WITH sn.id + '#rev-'
-            WITH sn, cur_chain, has_docs,
-                 max(toInteger(split(prior.id, '#rev-')[1]))
-                 AS latest_revision
-            WITH sn, cur_chain, has_docs,
-                 CASE
-                   WHEN latest_revision IS NULL OR cur_chain > latest_revision
-                   THEN cur_chain
-                   ELSE latest_revision + 1
-                 END AS revision_number
-
-            // Snapshot current docs (when present) exactly like a refine
-            // pass would, so the pre-harmonization text stays recoverable.
-            FOREACH (_ IN CASE WHEN has_docs THEN [1] ELSE [] END |
-              CREATE (rev:DocsRevision {
-                id: sn.id + '#rev-' + toString(revision_number)
-              })
-              SET
-                rev.standard_name_id                = sn.id,
-                rev.revision_number                = revision_number,
-                rev.description                    = coalesce(sn.description, ''),
-                rev.documentation                  = coalesce(sn.documentation, ''),
-                rev.model                          = sn.docs_model,
-                rev.generated_at                   = sn.docs_generated_at,
-                rev.reviewer_score_docs            = sn.reviewer_score_docs,
-                rev.reviewer_comments_docs         = sn.reviewer_comments_docs,
-                rev.reviewer_comments_per_dim_docs = sn.reviewer_comments_per_dim_docs,
-                rev.created_at                     = datetime()
-              MERGE (sn)-[:DOCS_REVISION_OF]->(rev)
-            )
-
-            SET sn.docs_stage        = 'pending',
-                sn.docs_chain_length =
-                    CASE WHEN has_docs THEN revision_number + 1 ELSE cur_chain END,
-                sn.docs_model        = null,
-                sn.docs_generated_at = null,
-                sn.claim_token       = null,
-                sn.claimed_at        = null,
-                sn.reviewer_score_docs            = null,
-                sn.reviewer_scores_docs           = null,
-                sn.reviewer_comments_per_dim_docs = null,
-                sn.reviewer_comments_docs         = null,
-                sn.reviewer_model_docs            = null,
-                sn.reviewed_docs_at               = null,
-                sn.embed_text_hash                = null,
-                sn.run_id = CASE WHEN $run_id IS NULL
-                                 THEN sn.run_id ELSE $run_id END
-            RETURN count(sn) AS reset
-            """,
-            sn_ids=sn_ids,
-            run_id=run_id,
-        )
-
-        # Members already docs-pending (stubs) need no reset — but they DO
-        # need the scope stamp so they join the same scoped pool run.
-        if run_id:
-            gc.query(
-                """
-                UNWIND $sn_ids AS sid
-                MATCH (sn:StandardName {id: sid})
-                WHERE sn.name_stage = 'accepted'
-                  AND coalesce(sn.docs_stage, 'pending') = 'pending'
-                SET sn.updated_at = datetime(), sn.run_id = $run_id
-                """,
-                sn_ids=sn_ids,
-                run_id=run_id,
-            )
-    reset: int = result[0]["reset"] if result else 0
-    logger.info(
-        "reset_standard_name_docs: %d/%d reset to docs pending (run_id=%s)",
-        reset,
-        len(sn_ids),
-        run_id,
+    return graph_docs_persistence.reset_standard_name_docs(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return {"eligible": eligible, "reset": reset}
 
 
-@retry_on_deadlock()
-def stamp_harmonized_families(
-    families: list[dict[str, Any]],
-) -> int:
-    """Stamp the family idempotency scalars on fully docs-accepted families.
+def stamp_harmonized_families(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.stamp_harmonized_families."""
+    from .graph_store import graph_docs_persistence
 
-    For each family dict (``{"parent": id|None, "members": [ids],
-    "signature": str}``) whose live members are ALL ``docs_stage='accepted'``,
-    set ``harmonized_at`` + ``harmonized_group_signature`` on every member
-    AND on the shared parent (the harmonize worklist reads the stored
-    signature off the parent node). Families with any non-accepted member
-    are skipped (stamp after the next rotation).
-
-    Returns the number of families stamped.
-    """
-    stamped = 0
-    with GraphClient() as gc:
-        for fam in families:
-            member_ids = fam.get("members") or []
-            signature = fam.get("signature") or ""
-            if not member_ids or not signature:
-                continue
-            rows = gc.query(
-                """
-                UNWIND $ids AS sid
-                MATCH (sn:StandardName {id: sid})
-                WITH collect(sn) AS members,
-                     sum(CASE WHEN sn.docs_stage = 'accepted' THEN 0 ELSE 1 END)
-                     AS not_accepted
-                WHERE not_accepted = 0 AND size(members) = size($ids)
-                FOREACH (sn IN members |
-                  SET sn.updated_at = datetime(), sn.harmonized_at = datetime(),
-                      sn.harmonized_group_signature = $sig
-                )
-                RETURN size(members) AS stamped_members
-                """,
-                ids=member_ids,
-                sig=signature,
-            )
-            if rows and rows[0].get("stamped_members"):
-                stamped += 1
-                parent_id = fam.get("parent")
-                if parent_id:
-                    gc.query(
-                        """
-                        MATCH (p:StandardName {id: $pid})
-                        SET p.updated_at = datetime(), p.harmonized_at = datetime(),
-                            p.harmonized_group_signature = $sig
-                        """,
-                        pid=parent_id,
-                        sig=signature,
-                    )
-    return stamped
+    return graph_docs_persistence.stamp_harmonized_families(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-@retry_on_deadlock()
-def release_refine_docs_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-) -> int:
-    """Release refine-docs claims, reverting ``docs_stage`` to ``'reviewed'``.
+def release_refine_docs_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.release_refine_docs_claims."""
+    from .graph_store import graph_docs_persistence
 
-    Token-and-stage verified: only reverts nodes where
-    ``claim_token = $token AND docs_stage = 'refining'``.
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $sn_ids AS sid
-            MATCH (sn:StandardName {id: sid})
-            WHERE sn.claim_token = $token
-              AND sn.docs_stage = 'refining'
-            SET sn.updated_at = datetime(), sn.docs_stage  = 'reviewed',
-                sn.claim_token = null,
-                sn.claimed_at  = null
-            RETURN count(sn) AS released
-            """,
-            sn_ids=sn_ids,
-            token=claim_token,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_refine_docs_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
+    return graph_docs_persistence.release_refine_docs_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-@retry_on_deadlock()
-def release_refine_docs_failed_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-) -> int:
-    """Release refine-docs claims after LLM or processing failure.
+def release_refine_docs_failed_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.release_refine_docs_failed_claims."""
+    from .graph_store import graph_docs_persistence
 
-    Token-and-stage verified: only reverts nodes where
-    ``claim_token = $token AND docs_stage = 'refining'``.  Prevents
-    late-release from clobbering an SN already swept by orphan recovery.
-
-    Returns the count of nodes released.
-    """
-    if not sn_ids:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $sn_ids AS sid
-            MATCH (sn:StandardName {id: sid})
-            WHERE sn.claim_token = $token
-              AND sn.docs_stage = 'refining'
-            SET sn.updated_at = datetime(), sn.docs_stage  = 'reviewed',
-                sn.claim_token = null,
-                sn.claimed_at  = null
-            RETURN count(sn) AS released
-            """,
-            sn_ids=sn_ids,
-            token=claim_token,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_refine_docs_failed_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
+    return graph_docs_persistence.release_refine_docs_failed_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -18046,75 +12934,13 @@ def release_refine_docs_failed_claims(
 # =============================================================================
 
 
-@retry_on_deadlock()
-def mark_for_refine_docs(
-    sn_id: str,
-    *,
-    desc_name_similarity: float,
-    claim_token: str,
-    synthetic_score: float = 0.30,
-) -> bool:
-    """Route a derived parent to REFINE_DOCS by writing a synthetic docs-review score.
+def mark_for_refine_docs(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_docs_persistence.mark_for_refine_docs."""
+    from .graph_store import graph_docs_persistence
 
-    Called from the REVIEW_NAME pre-step when ``origin='derived'`` AND
-    ``desc_name_similarity < threshold``.  The node's description is
-    considered misaligned with the name; we skip name scoring and instead
-    push the item into the REFINE_DOCS pool.
-
-    Mechanics:
-
-    1. Verify ``claim_token`` so no other worker has claimed this node.
-    2. Transition ``name_stage`` back to the pre-review state that allows
-       the node to wait until ``name_stage='accepted'`` is later confirmed.
-       Because ``seed_parent_sources`` already set ``name_stage='accepted'``
-       for admitted parents, we restore that here so the node can still
-       reach ``GENERATE_DOCS``.
-    3. Set ``docs_stage='reviewed'`` with a synthetic ``reviewer_score_docs``
-       below ``min_score`` so ``claim_refine_docs_batch`` picks it up.
-    4. Store ``desc_name_similarity`` on the node for audit / reviewer context.
-    5. Clear the name-review claim token.
-
-    Returns ``True`` if the node was updated, ``False`` if the claim_token
-    no longer matches (race condition — caller should skip).
-
-    Args:
-        sn_id: StandardName node id.
-        desc_name_similarity: Cosine similarity value to store on the node.
-        claim_token: Token set by the REVIEW_NAME claim step; used to
-            confirm ownership before writing.
-        synthetic_score: ``reviewer_score_docs`` value written (default
-            ``0.30``, well below any ``min_score``).
-    """
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
-            SET sn.updated_at = datetime(), sn.desc_name_similarity  = $sim,
-                sn.docs_stage            = 'reviewed',
-                sn.reviewer_score_docs   = $synthetic_score,
-                sn.reviewer_model_docs   = '(desc_name_similarity_gate)',
-                sn.reviewer_comments_docs =
-                    '(desc-name similarity ' + toString($sim) +
-                    ' below threshold; routed to REFINE_DOCS)',
-                sn.name_stage            = 'accepted',
-                sn.claimed_at            = null,
-                sn.claim_token           = null
-            RETURN count(sn) AS updated
-            """,
-            id=sn_id,
-            token=claim_token,
-            sim=desc_name_similarity,
-            synthetic_score=synthetic_score,
-        )
-    updated = result[0]["updated"] if result else 0
-    logger.debug(
-        "mark_for_refine_docs: %s sim=%.3f updated=%d",
-        sn_id,
-        desc_name_similarity,
-        updated,
+    return graph_docs_persistence.mark_for_refine_docs(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return bool(updated)
 
 
 @retry_on_deadlock()
@@ -19723,3 +14549,164 @@ _detach_stale_ancestor_sources.__wrapped__ = (
     _moved_graph_supersession._detach_stale_ancestor_sources
 )
 supersede_into_ancestor.__wrapped__ = _moved_graph_supersession.supersede_into_ancestor
+
+_moved_graph_doc_links = import_module(".graph_store.graph_doc_links", __package__)
+claim_unresolved_links.__wrapped__ = _moved_graph_doc_links.claim_unresolved_links
+resolve_links_batch.__wrapped__ = _moved_graph_doc_links.resolve_links_batch
+_sanitize_doc_text.__wrapped__ = _moved_graph_doc_links._sanitize_doc_text
+_doc_link_mismatches.__wrapped__ = _moved_graph_doc_links._doc_link_mismatches
+_normalize_bare_doc_links.__wrapped__ = _moved_graph_doc_links._normalize_bare_doc_links
+resolve_doc_links.__wrapped__ = _moved_graph_doc_links.resolve_doc_links
+_moved_graph_docs_persistence = import_module(
+    ".graph_store.graph_docs_persistence", __package__
+)
+claim_generate_docs_batch.__wrapped__ = (
+    _moved_graph_docs_persistence.claim_generate_docs_batch
+)
+persist_generated_docs.__wrapped__ = (
+    _moved_graph_docs_persistence.persist_generated_docs
+)
+release_generate_docs_claims.__wrapped__ = (
+    _moved_graph_docs_persistence.release_generate_docs_claims
+)
+release_generate_docs_failed_claims.__wrapped__ = (
+    _moved_graph_docs_persistence.release_generate_docs_failed_claims
+)
+claim_refine_docs_batch.__wrapped__ = (
+    _moved_graph_docs_persistence.claim_refine_docs_batch
+)
+persist_refined_docs.__wrapped__ = _moved_graph_docs_persistence.persist_refined_docs
+reset_standard_name_docs.__wrapped__ = (
+    _moved_graph_docs_persistence.reset_standard_name_docs
+)
+stamp_harmonized_families.__wrapped__ = (
+    _moved_graph_docs_persistence.stamp_harmonized_families
+)
+release_refine_docs_claims.__wrapped__ = (
+    _moved_graph_docs_persistence.release_refine_docs_claims
+)
+release_refine_docs_failed_claims.__wrapped__ = (
+    _moved_graph_docs_persistence.release_refine_docs_failed_claims
+)
+mark_for_refine_docs.__wrapped__ = _moved_graph_docs_persistence.mark_for_refine_docs
+_moved_graph_cost_and_claims = import_module(
+    ".graph_store.graph_cost_and_claims", __package__
+)
+_normalize_pool.__wrapped__ = _moved_graph_cost_and_claims._normalize_pool
+record_llm_cost.__wrapped__ = _moved_graph_cost_and_claims.record_llm_cost
+aggregate_spend_for_run.__wrapped__ = (
+    _moved_graph_cost_and_claims.aggregate_spend_for_run
+)
+aggregate_spend_per_phase.__wrapped__ = (
+    _moved_graph_cost_and_claims.aggregate_spend_per_phase
+)
+aggregate_calls_per_phase.__wrapped__ = (
+    _moved_graph_cost_and_claims.aggregate_calls_per_phase
+)
+aggregate_spend_per_name.__wrapped__ = (
+    _moved_graph_cost_and_claims.aggregate_spend_per_name
+)
+update_sn_per_phase_costs.__wrapped__ = (
+    _moved_graph_cost_and_claims.update_sn_per_phase_costs
+)
+_claim_sn_atomic.__wrapped__ = _moved_graph_cost_and_claims._claim_sn_atomic
+claim_generate_name_batch.__wrapped__ = (
+    _moved_graph_cost_and_claims.claim_generate_name_batch
+)
+claim_enrich_seed_and_expand.__wrapped__ = (
+    _moved_graph_cost_and_claims.claim_enrich_seed_and_expand
+)
+claim_review_names_seed_and_expand.__wrapped__ = (
+    _moved_graph_cost_and_claims.claim_review_names_seed_and_expand
+)
+claim_review_name_batch.__wrapped__ = (
+    _moved_graph_cost_and_claims.claim_review_name_batch
+)
+_moved_graph_lineage = import_module(".graph_store.graph_lineage", __package__)
+get_source_name_mapping.__wrapped__ = _moved_graph_lineage.get_source_name_mapping
+_get_rich_source_name_mapping.__wrapped__ = (
+    _moved_graph_lineage._get_rich_source_name_mapping
+)
+fetch_low_score_sources.__wrapped__ = _moved_graph_lineage.fetch_low_score_sources
+fetch_review_feedback_for_sources.__wrapped__ = (
+    _moved_graph_lineage.fetch_review_feedback_for_sources
+)
+fetch_reviewer_history_for_sources.__wrapped__ = (
+    _moved_graph_lineage.fetch_reviewer_history_for_sources
+)
+fetch_docs_review_feedback_for_standard_names.__wrapped__ = (
+    _moved_graph_lineage.fetch_docs_review_feedback_for_standard_names
+)
+fetch_docs_review_feedback_for_sns.__wrapped__ = (
+    _moved_graph_lineage.fetch_docs_review_feedback_for_sns
+)
+_filter_admissible_parents.__wrapped__ = _moved_graph_lineage._filter_admissible_parents
+_emit_magnitude_of_edges.__wrapped__ = _moved_graph_lineage._emit_magnitude_of_edges
+_bootstrap_missing_derived_parent_targets.__wrapped__ = (
+    _moved_graph_lineage._bootstrap_missing_derived_parent_targets
+)
+_write_standard_name_edges.__wrapped__ = _moved_graph_lineage._write_standard_name_edges
+_clear_superseded_child_derived_parent_edges.__wrapped__ = (
+    _moved_graph_lineage._clear_superseded_child_derived_parent_edges
+)
+rederive_structural_edges.__wrapped__ = _moved_graph_lineage.rederive_structural_edges
+_rewire_has_parent_off_superseded.__wrapped__ = (
+    _moved_graph_lineage._rewire_has_parent_off_superseded
+)
+_parse_parent_grammar.__wrapped__ = _moved_graph_lineage._parse_parent_grammar
+_query_seedable_derived_parents.__wrapped__ = (
+    _moved_graph_lineage._query_seedable_derived_parents
+)
+_query_legacy_repairable_derived_parents.__wrapped__ = (
+    _moved_graph_lineage._query_legacy_repairable_derived_parents
+)
+_query_derived_parents_for_admission_cleanup.__wrapped__ = (
+    _moved_graph_lineage._query_derived_parents_for_admission_cleanup
+)
+_delete_derived_parent_nodes.__wrapped__ = (
+    _moved_graph_lineage._delete_derived_parent_nodes
+)
+sweep_orphaned_docs_revisions.__wrapped__ = (
+    _moved_graph_lineage.sweep_orphaned_docs_revisions
+)
+_derived_parent_source_metadata.__wrapped__ = (
+    _moved_graph_lineage._derived_parent_source_metadata
+)
+_validate_derived_parent_identity.__wrapped__ = (
+    _moved_graph_lineage._validate_derived_parent_identity
+)
+_eligible_derived_parent_unit_children.__wrapped__ = (
+    _moved_graph_lineage._eligible_derived_parent_unit_children
+)
+_materialize_derived_parent_rows.__wrapped__ = (
+    _moved_graph_lineage._materialize_derived_parent_rows
+)
+_materialize_derived_parent_rows_batched.__wrapped__ = (
+    _moved_graph_lineage._materialize_derived_parent_rows_batched
+)
+stamp_standard_name_units.__wrapped__ = _moved_graph_lineage.stamp_standard_name_units
+seed_parent_sources.__wrapped__ = _moved_graph_lineage.seed_parent_sources
+normalize_derived_parent_lifecycle.__wrapped__ = (
+    _moved_graph_lineage.normalize_derived_parent_lifecycle
+)
+_canonicalize_lifecycleless_manifest_value.__wrapped__ = (
+    _moved_graph_lineage._canonicalize_lifecycleless_manifest_value
+)
+_derived_parent_unit_from_eligible_children.__wrapped__ = (
+    _moved_graph_lineage._derived_parent_unit_from_eligible_children
+)
+_spurious_stub_binding_authority.__wrapped__ = (
+    _moved_graph_lineage._spurious_stub_binding_authority
+)
+_partition_lifecycleless_stub_rows.__wrapped__ = (
+    _moved_graph_lineage._partition_lifecycleless_stub_rows
+)
+_lifecycleless_stub_manifest.__wrapped__ = (
+    _moved_graph_lineage._lifecycleless_stub_manifest
+)
+_reconcile_spurious_stub_source_scalars.__wrapped__ = (
+    _moved_graph_lineage._reconcile_spurious_stub_source_scalars
+)
+_query_skeleton_placeholders_for_cleanup.__wrapped__ = (
+    _moved_graph_lineage._query_skeleton_placeholders_for_cleanup
+)
