@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs: baseline_suite at f657a98dc records 2 failures (test_scoped_drift_loop.py::test_an_unreadable_scope_skips_the_refresh and test_scoped_drift_loop.py::test_scope_selector_lets_the_default_tier_live_graph_guard_raise), after_suite at b4641857b records 0, so the added-failure set is empty; logs/gate-base-graph.log and logs/gate-head-graph.log both report 6 passed EXIT=0 over identical ids, adding none.",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/sn.py:1108",
+    "imas_codex/standard_names/edit.py:3899"
+  ],
+  "completed_at": "2026-10-24T19:59:13.163Z",
+  "dispatched_at": "2026-10-24T19:49:57Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_scoped_global_maintenance.py",
+      "line": 21,
+      "text": "non-blocking: the diff edits a file outside the declared write paths (brief.md:39-44); the edit is gate-implied (the gate names this file and reverting the double repair restores four added failures) and is self-reported at manifest.md:22-23, so it needs the coordinator to extend the fence rather than a repair here."
+    },
+    {
+      "file": "tests/standard_names/test_scoped_drift_loop.py",
+      "line": 56,
+      "text": "non-blocking: _maintenance_mocks re-implements the 23-entry patch set already owned by tests/standard_names/test_scoped_global_maintenance.py:38 (and _graph_context at line 36 is a third copy of the helper at test_scoped_global_maintenance.py:19; test_bypassed_maintenance_is_named.py:13 imports the owner rather than copying it), so a maintenance pass added to run_sn_pools will be patched in one copy and silently unpatched in the others, turning the new guard red for a reason unrelated to its subject."
+    },
+    {
+      "file": "imas_codex/standard_names/loop.py",
+      "line": 378,
+      "text": "non-blocking: the narrowed handler catches ServiceUnavailable/OSError/TimeoutError but not SessionExpired or TransientError, which both imas_codex/discovery/base/supervision.py:127 is_infrastructure_error and imas_codex/graph/client.py:1105 _is_connection_error classify as connection failures; those now escape the async to_thread call at loop.py:2128 and abort run_sn_pools, where the previous handler kept the run alive, so a lock timeout during a scoped drain is a new run-killing path rather than a skipped refresh."
+    },
+    {
+      "file": "imas_codex/standard_names/loop.py",
+      "line": 367,
+      "text": "non-blocking: the rows-without-id branch and the OSError/TimeoutError alternatives of the new handler are exercised by no test \u2014 tests/standard_names/test_scoped_drift_loop.py:236 supplies only ServiceUnavailable and the doubles always answer with a well-formed row \u2014 so a regression that dropped either guard would leave every added test green."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-drift-scope-hardening.html",
+      "line": 58,
+      "text": "non-blocking: the fragment asserts the broad-except defect was 'Reproduced first' and the manifest's artifacts line reports '1 failed EXIT=1', but test_logs names only the four gate logs and negative-control-head.log, so no reader can open the reproduction the contract on confirming a defect asks for."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from f657a98dc: a45ed3f83 adds the loop-side tests and narrows the selector, b4641857b answers the scoped maintenance double's scope query with a name id, and 22104a44c adds only the evidence fragment (git show --stat: one file, +153), so the measured head tree b4641857b is product-equivalent to the reviewed head 22104a44c.",
+    "done_when": "The source brief.md:32-38 requires the tests and narrowed handler committed, a no-added-failure gate and a logged negative control; the reviewed manifest's baseline_suite (f657a98dc, exit 1, completed true, 2 failures) and after_suite (b4641857b, exit 0, completed true, 0 failures) reconcile with logs/gate-base-default.log ('2 failed, 40 passed') and logs/gate-head-default.log ('42 passed'), and logs/negative-control-head.log shows 3 failed EXIT=1 against the declared mutation, so the gate does assert the stated measure \u2014 though the head arm ran at b4641857b, one docs-only commit before the reviewed head.",
+    "goal": "The source brief.md:1-21 names four findings on the scoped drift refresh's loop half; the landed diff repairs each one at imas_codex/standard_names/loop.py:331-386 (selector, None-vs-empty contract), loop.py:2135-2148 (skip on an unreadable scope with a logged reason), tests/standard_names/test_scoped_drift_loop.py (six new tests reaching the selector and the sn_ids hand-off), tests/standard_names/test_source_refresh.py:255-261 (docstring corrected to name the forwarding it guards) and test_source_refresh.py:663 (no-op replace deleted).",
+    "manifest": "The reviewed manifest.md:5-23 records status complete, three commits, five changed paths, four gate logs, the negative control and its note, and self-declares at line 22 (outside_scope) and line 23 (blockers) that the maintenance-double repair lies outside the write fence.",
+    "write_paths": "The source brief.md:39-44 grants imas_codex/standard_names/loop.py, tests/standard_names/test_source_refresh.py, tests/standard_names/test_scoped_drift_loop.py and the evidence fragment; the base-to-head diff changes those four plus tests/standard_names/test_scoped_global_maintenance.py, which the fence does not grant."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_scoped_drift_loop.py:209 reddens when sn_ids=_refresh_ids is dropped (logs/negative-control-head.log: 3 failed, EXIT=1) and test_scoped_drift_loop.py:293 reddens when the broad handler is restored (logs/gate-base-default.log: 2 failed against base), while the rows-without-id branch at loop.py:367 and the OSError/TimeoutError arms have no test.",
+    "evidence": "logs/gate-base-default.log reconciles with the manifest's baseline_suite (2 failed, 40 passed, EXIT=1) and logs/gate-head-default.log with after_suite (42 passed, EXIT=0), but the base arm's composition \u2014 the new test file copied into the f657a98dc archive \u2014 is recorded only in manifest.md:21 and not on the log header, and the broad-except reproduction cited at shc-drift-scope-hardening.html:58 has no log path in test_logs.",
+    "fit": "imas_codex/standard_names/loop.py:366-386 follows the surrounding module idiom (module logger, typed return, mechanism comments) and the new test and evidence file names describe behaviour with no plan, issue or version label.",
+    "goal_fidelity": "imas_codex/standard_names/loop.py:2135-2148 skips the drift refresh when the scoped read returns None and passes an empty list through untouched, which is the fail-closed behaviour finding 2 of brief.md:11-14 asks for.",
+    "reuse": "tests/standard_names/test_scoped_drift_loop.py:56 _maintenance_mocks duplicates the patch list of tests/standard_names/test_scoped_global_maintenance.py:38, which tests/standard_names/test_bypassed_maintenance_is_named.py:13 already imports as an owner rather than copying.",
+    "scope_discipline": "tests/standard_names/test_scoped_global_maintenance.py:21-27 is edited by b4641857b but is absent from the write paths at brief.md:39-44, and the reviewed manifest.md:23 records that reverting it restores four added failures."
+  },
+  "node": "review-of-shc-drift-scope-hardening-22104a44cc68",
+  "node:reviewed": "shc-drift-scope-hardening",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read brief.md:1-21 against the landed diff, which repairs all four named findings \u2014 imas_codex/standard_names/loop.py:331-386 returns None for an unreadable scope, loop.py:2135-2148 skips the refresh on it with a logged reason, tests/standard_names/test_scoped_drift_loop.py adds six tests over the selector and the sn_ids hand-off, tests/standard_names/test_source_refresh.py:255-261 corrects the docstring and :663 deletes the no-op replace.\nVERDICT done_when: brief.md:32-38 asks for committed tests and handler, a no-added-failure gate and a logged negative control; manifest.md:11-20 records base 2 failed/40 passed (EXIT=1) and head 42 passed (EXIT=0), which logs/gate-base-default.log and logs/gate-head-default.log reproduce, and logs/negative-control-head.log records 3 failed EXIT=1 under the declared mutation, so the gate asserts the stated measure \u2014 at head b4641857b, one docs-only commit before the reviewed head.\nVERDICT write_paths: brief.md:39-44 grants four paths; the base-to-head diff (git diff --stat f657a98dc..22104a44c) changes those four plus tests/standard_names/test_scoped_global_maintenance.py, which the fence does not grant though the gate names it.\nVERDICT manifest: read manifest.md \u2014 it records three commits, five changed paths, four gate logs, the negative-control log and note, the added-failure delta, and self-declares the out-of-fence repair at lines 22-23.\nVERDICT diff: read commit by commit \u2014 a45ed3f83 carries the product change and the new tests, b4641857b carries a one-line scope answer in a test double and b4641857b's second hunk the max(len) check, 22104a44c touches only docs/evidence/fragments/sn-harmonize-command/shc-drift-scope-hardening.html (+153).\nCALL_SITES: imas_codex/cli/sn.py:1108, imas_codex/standard_names/edit.py:3899\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/loop.py:2135-2148 skips the refresh on an unreadable scope and forwards a readable one, which is the fail-closed contract finding 2 of brief.md:11-14 asks for.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/gate-base-default.log (2 failed, 40 passed, EXIT=1) and logs/gate-head-default.log (42 passed, EXIT=0) reconcile with manifest.md:17-18, but the base arm's composition is recorded only in manifest.md:21 and the broad-except reproduction cited at shc-drift-scope-hardening.html:58 has no log path.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: tests/standard_names/test_scoped_global_maintenance.py:21-27 is edited by b4641857b outside the write paths at brief.md:39-44, gate-implied and self-reported at manifest.md:22-23 but not authorised by the fence.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_scoped_drift_loop.py:209 reddens when sn_ids=_refresh_ids is dropped per logs/negative-control-head.log and :293 reddens when the broad handler is restored per logs/gate-base-default.log, while the rows-without-id branch at loop.py:367 and the OSError/TimeoutError arms stay unexercised.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/loop.py:366-386 follows the module's existing logger and comment idiom and introduces no plan, issue or version label in the new test and evidence names.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/standard_names/test_scoped_drift_loop.py:56 _maintenance_mocks duplicates the patch list owned by tests/standard_names/test_scoped_global_maintenance.py:38, which tests/standard_names/test_bypassed_maintenance_is_named.py:13 already imports, and _graph_context at :36 is a third copy of that file's helper.\nFINDING tests/standard_names/test_scoped_global_maintenance.py:21 non-blocking: the diff edits a file outside the declared write paths, gate-implied and self-reported, needing the coordinator to extend the fence rather than a repair here.\nFINDING tests/standard_names/test_scoped_drift_loop.py:56 non-blocking: _maintenance_mocks re-implements the 23-entry patch set already owned by tests/standard_names/test_scoped_global_maintenance.py:38, so a maintenance pass added to the loop will be patched in one copy and silently unpatched in the others.\nFINDING imas_codex/standard_names/loop.py:378 non-blocking: the handler omits SessionExpired and TransientError, which imas_codex/graph/client.py:1105 and imas_codex/discovery/base/supervision.py:127 both classify as connection failures, so those abort run_sn_pools at loop.py:2128 where the previous handler kept it alive.\nFINDING imas_codex/standard_names/loop.py:367 non-blocking: the rows-without-id branch and the OSError/TimeoutError arms of the new handler are reached by no test, so a regression in either would leave every added test green.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-drift-scope-hardening.html:58 non-blocking: the claimed broad-except reproduction has no log path in test_logs, so a reader cannot open the evidence the contract asks for.\n",
+  "review_run_id": "r-20261024T194753336634-review-of-shc-drift-scope-hardening-22104a44cc68",
+  "reviewed_base_sha": "f657a98dc491189be7c310ec8065b5eea057868e",
+  "reviewed_commits": [
+    "a45ed3f83ddfa2cc117400b814c41a346d8e2d41",
+    "b4641857b498eaecf1875d50b3d9e693464be0fa",
+    "22104a44cc6818091b63758b94260554022766c0"
+  ],
+  "reviewed_head_sha": "22104a44cc6818091b63758b94260554022766c0",
+  "reviewed_run_id": "r-20261024T110534469167-shc-drift-scope-hardening",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T19:58:00Z",
+  "total": 89
+}
