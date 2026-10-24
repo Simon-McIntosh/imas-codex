@@ -328,16 +328,22 @@ def _count_scope_names(
         return 0
 
 
-def _scope_name_ids(scope_run_id: str) -> list[str]:
+def _scope_name_ids(scope_run_id: str) -> list[str] | None:
     """Return the ids of the standard names a scoped run owns.
 
     A scoped run binds its target set two ways: the names it marks directly
     (``sn.run_id``) and the sources it seeds (``StandardNameSource.run_id``),
     whose produced names belong to the scope too. Both are returned so a
-    caller can confine itself to exactly the run's own names. Returns an empty
-    list on any query error — a scope whose size cannot be read must not fall
-    open into a graph-wide sweep.
+    caller can confine itself to exactly the run's own names.
+
+    An empty list means the scope was read and owns no names. ``None`` means
+    the graph could not be reached, which is a different fact: the caller
+    skips its scoped work and logs why, because an unreadable scope must
+    never fall open into a graph-wide sweep and must not read as an empty
+    one either.
     """
+    from neo4j.exceptions import ServiceUnavailable
+
     from imas_codex.graph.client import GraphClient
 
     try:
@@ -357,9 +363,15 @@ def _scope_name_ids(scope_run_id: str) -> list[str]:
                 )
             )
         return [row["id"] for row in rows]
-    except Exception as exc:  # noqa: BLE001 — best-effort scoping, never fatal
-        logger.warning("_scope_name_ids(%s) failed: %s", scope_run_id, exc)
-        return []
+    except (ServiceUnavailable, OSError, TimeoutError) as exc:
+        logger.warning(
+            "run_sn_pools: scope %s could not be read (%s: %s); the "
+            "source-drift refresh is skipped rather than run unscoped",
+            scope_run_id,
+            type(exc).__name__,
+            exc,
+        )
+        return None
 
 
 async def _drain_scoped_standard_name_embeddings(
@@ -2105,12 +2117,23 @@ async def run_sn_pools(
                 if scope_run_id
                 else None
             )
-            sr = await _global_maintenance_call(
-                refresh_drifted_sources,
-                scope_run_id=run_id,
-                sn_ids=_refresh_ids,
-                default={},
-            )
+            # ``None`` from a scoped read means the graph was unreachable and
+            # the run's own names are unknown: skip the refresh rather than
+            # pass ``None`` on, which the refresh reads as "sweep everything".
+            if scope_run_id and _refresh_ids is None:
+                logger.warning(
+                    "run_sn_pools: source-drift refresh skipped — the scope "
+                    "%s could not be read",
+                    scope_run_id,
+                )
+                sr = {}
+            else:
+                sr = await _global_maintenance_call(
+                    refresh_drifted_sources,
+                    scope_run_id=run_id,
+                    sn_ids=_refresh_ids,
+                    default={},
+                )
             if sr.get("baselined") or sr.get("detected") or sr.get("unchecked"):
                 logger.info(
                     "run_sn_pools: source-drift refresh — %d baselined, "
