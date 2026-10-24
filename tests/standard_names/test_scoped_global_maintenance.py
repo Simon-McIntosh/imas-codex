@@ -18,7 +18,13 @@ _LOOP = "imas_codex.standard_names.loop"
 
 def _graph_context() -> tuple[MagicMock, MagicMock]:
     graph = MagicMock()
-    graph.query.return_value = [{"cnt": 1}]
+    # The drift refresh resolves the run's own names first; a row with no id
+    # would make the scope unreadable and the refresh correctly skip itself.
+    graph.query.side_effect = lambda cypher, **kw: (
+        [{"id": "scoped_name"}]
+        if "RETURN DISTINCT sn.id AS id" in cypher
+        else [{"cnt": 1}]
+    )
     context = MagicMock()
     context.__enter__.return_value = graph
     context.__exit__.return_value = False

@@ -337,10 +337,11 @@ def _scope_name_ids(scope_run_id: str) -> list[str] | None:
     caller can confine itself to exactly the run's own names.
 
     An empty list means the scope was read and owns no names. ``None`` means
-    the graph could not be reached, which is a different fact: the caller
-    skips its scoped work and logs why, because an unreadable scope must
-    never fall open into a graph-wide sweep and must not read as an empty
-    one either.
+    the scope could not be read — the graph was unreachable, or its answer
+    carried no name ids. That is a different fact from owning nothing: the
+    caller skips its scoped work and logs why, because an unreadable scope
+    must never fall open into a graph-wide sweep and must not read as an
+    empty one either.
     """
     from neo4j.exceptions import ServiceUnavailable
 
@@ -362,7 +363,18 @@ def _scope_name_ids(scope_run_id: str) -> list[str] | None:
                     rid=scope_run_id,
                 )
             )
-        return [row["id"] for row in rows]
+        ids = [row["id"] for row in rows if "id" in row]
+        if len(ids) != len(rows):
+            logger.warning(
+                "run_sn_pools: scope %s could not be read — %d of %d rows "
+                "carry no name id; the source-drift refresh is skipped rather "
+                "than run unscoped",
+                scope_run_id,
+                len(rows) - len(ids),
+                len(rows),
+            )
+            return None
+        return ids
     except (ServiceUnavailable, OSError, TimeoutError) as exc:
         logger.warning(
             "run_sn_pools: scope %s could not be read (%s: %s); the "
