@@ -22,6 +22,11 @@
       "kind": "exempted",
       "reason": "the shared disposable_neo4j_uri fixture is landing in srtj-test-neo4j-uri-convention; the copies move onto it there",
       "recorded_at": "2026-10-24T05:53:28.341444+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "a harmless defensive default",
+      "recorded_at": "2026-10-24T05:53:30.670647+00:00"
     }
   },
   "findings": [
