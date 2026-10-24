@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "logs/gate-base.log (base arm, main 041f31120, 49 passed / 0 failed, EXIT=0) and logs/gate-head.log (head arm, e1e4c58f9, 53 passed / 0 failed, EXIT=0); neither arm carries a failing test id, so the delta is empty. The reviewed manifest's baseline_suite and after_suite blocks record the same two runs.",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/review/audits.py:760 (run_documentation_gate_checks calling score_documentation with documenting_name)",
+    "imas_codex/standard_names/review/jev_review.py:893 (review path calling run_documentation_gate_checks)",
+    "imas_codex/standard_names/docs_gates.py:1237 (_defining_equation_result, the gate the exemption lives in)",
+    "imas_codex/standard_names/docs_holdout_eval.py:501 (score_documentation with documenting_name, catalog arm)",
+    "imas_codex/standard_names/docs_holdout_eval.py:513 (score_documentation with documenting_name, generated arm)"
+  ],
+  "completed_at": "2026-10-24T21:30:40.342Z",
+  "dispatched_at": "2026-10-24T21:16:01Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/derivation.py",
+      "line": "491",
+      "severity": "non-blocking",
+      "text": "non-blocking: the model-level fallback is reached only when _parse_structural_ir raises, and that helper has already retried the non-strict parser, so for a name the strict parser rejects but the legacy parser accepts losslessly the new predicate evaluates the base kind where the deleted _names_a_position returned False; no name widens the class today (poloidal_flux is False on both) but the evidence fragment's claim that 'the structural branch is the old predicate' is not exact and no test pins the exemption class against the old predicate."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits from 265cf9946 to 13e9638a9; e1e4c58f9 is the production change (one owner added, second copy deleted, documenting_name passed on both holdout calls) and 13e9638a9 adds only the evidence fragment, 162 insertions / 34 deletions across the five fenced paths.",
+    "done_when": "the done_when requires grep -n _names_a_position to find no definition, committed tests, a gate with no added failures and a logged control; at 13e9638a9 a tree-wide grep finds no definition (only prose in evidence fragments), logs/gate-head.log records 53 passed at EXIT=0 against logs/gate-base.log's 49 at EXIT=0 with no failing id, and logs/negative-control.log records 1 failed / 3 passed at EXIT=1.",
+    "goal": "the node goal is that one owner decides coordinate-ness and the holdout scores with the name it scores; derivation.py:472 is_coordinate_name now owns the decision, docs_gates.py:375 asks it, and docs_holdout_eval.py:501 and :513 pass documenting_name.",
+    "manifest": "read at completion; it reports complete status, both gate arms with their revisions and log paths, the negative control and its red test id, spend USD 0, and is honest that the review's probed name magnetic_axis_position does not reproduce the model-only condition at this base.",
+    "write_paths": "the source manifest declares five paths; every path in git diff 265cf9946..13e9638a9 is inside them (derivation.py, docs_gates.py, docs_holdout_eval.py, the new test file, the evidence fragment)."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_coordinate_decision_owner.py:73 reddens when the model-level fallback is removed, and the negative control shows test_holdout_and_lint_agree_on_a_coordinate_document reddens when documenting_name is dropped again, but derivation.py:491's legacy-retry difference from the deleted function, and the exemption class as a set, are pinned by no test.",
+    "evidence": "the gate is by delta over separate git archive arms whose logs record 49 and 53 passed at EXIT=0 with no failing ids, and logs/negative-control.log records the declared mutation failing at EXIT=1; the base arm ran main 041f31120, which differs from the diff base 265cf9946 only in two plan HTML files (git diff --stat over imas_codex/ and tests/ is empty).",
+    "fit": "is_coordinate_name at derivation.py:472 keeps the deleted function's structure and docstring voice and follows the deferred-import idiom the file's callers already use, with no plan, ticket or version name introduced.",
+    "goal_fidelity": "derivation.py:472 is the single owner and both call paths now ask it (docs_gates.py:377, docs_holdout_eval.py:501), which is what the goal states, with the caveat that the motivating model-only name did not reproduce.",
+    "reuse": "the change deletes the second owner and wraps the existing owner derivation.py:391 _geometric_coordinate_check; the search over imas_codex/standard_names for a coordinate predicate found families.py:269 and audits.py:2580 position_coordinate_check, which decide family type and vocabulary respectively rather than coordinate-ness.",
+    "scope_discipline": "every path in git diff 265cf9946..13e9638a9 is inside the manifest's declared write paths, and the declared docs/figures directory was not used."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that one owner decides coordinate-ness and the holdout scores with the name it scores; derivation.py:472 is_coordinate_name now owns the decision, docs_gates.py:375 asks it, and docs_holdout_eval.py:501 and :513 pass documenting_name.\nVERDICT done_when: the done_when requires grep -n _names_a_position to find no definition, committed tests, a gate with no added failures and a logged control; at 13e9638a9 a tree-wide grep finds no definition (only prose in evidence fragments), logs/gate-head.log records 53 passed at EXIT=0 against logs/gate-base.log's 49 at EXIT=0 with no failing id, and logs/negative-control.log records 1 failed / 3 passed at EXIT=1.\nVERDICT write_paths: the source manifest declares five paths; every path in git diff 265cf9946..13e9638a9 is inside them (derivation.py, docs_gates.py, docs_holdout_eval.py, the new test file, the evidence fragment).\nVERDICT manifest: read at completion; it reports complete status, both gate arms with their revisions and log paths, the negative control and its red test id, spend USD 0, and is honest that the review's probed name magnetic_axis_position does not reproduce the model-only condition at this base.\nVERDICT diff: read both commits from 265cf9946 to 13e9638a9; e1e4c58f9 is the production change (one owner added, second copy deleted, documenting_name passed on both holdout calls) and 13e9638a9 adds only the evidence fragment, 162 insertions / 34 deletions across the five fenced paths.\nCALL_SITES: imas_codex/standard_names/review/audits.py:760, imas_codex/standard_names/review/jev_review.py:893, imas_codex/standard_names/docs_gates.py:1237, imas_codex/standard_names/docs_holdout_eval.py:501, imas_codex/standard_names/docs_holdout_eval.py:513\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: derivation.py:472 is the single owner and both call paths now ask it (docs_gates.py:377, docs_holdout_eval.py:501), which is what the goal states, with the caveat that the motivating model-only name did not reproduce.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is by delta over separate git archive arms whose logs record 49 and 53 passed at EXIT=0 with no failing ids, and logs/negative-control.log records the declared mutation failing at EXIT=1; the base arm ran main 041f31120, which differs from the base arm's tested files only in two plan HTML files.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 265cf9946..13e9638a9 is inside the manifest's declared write paths, and the declared docs/figures directory was not used.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_coordinate_decision_owner.py:73 reddens when the model-level fallback is removed, and the negative control shows test_holdout_and_lint_agree_on_a_coordinate_document reddens when documenting_name is dropped again, but derivation.py:491's legacy-retry difference from the deleted function, and the exemption class as a set, are pinned by no test.\nSCORE fit: 18\nJUSTIFICATION fit: is_coordinate_name at derivation.py:472 keeps the deleted function's structure and docstring voice and follows the deferred-import idiom the file's callers already use, with no plan, ticket or version name introduced.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change deletes the second owner and wraps the existing owner derivation.py:391 _geometric_coordinate_check; the search over imas_codex/standard_names for a coordinate predicate found families.py:269 and audits.py:2580 position_coordinate_check, which decide family type and vocabulary respectively rather than coordinate-ness.\nFINDING imas_codex/standard_names/derivation.py:491 non-blocking: the model-level fallback is reached only when _parse_structural_ir raises, and that helper has already retried the non-strict parser, so for a name the strict parser rejects but the legacy parser accepts losslessly the new predicate evaluates the base kind where the deleted _names_a_position returned False; no name widens the class today (poloidal_flux is False on both) but the evidence fragment's claim that 'the structural branch is the old predicate' is not exact and no test pins the exemption class against the old predicate.\n",
+  "review_run_id": "r-20261024T210443013551-review-of-srtj-coordinate-decision-owner-13e9638a9f83",
+  "reviewed_base_sha": "265cf9946820c3e3a407ef6ad57a2617eeb30f55",
+  "reviewed_head_sha": "13e9638a9f8351a5e9e65e4cf59eefbef46ffd8c",
+  "reviewed_run_id": "r-20261024T202354913819-srtj-coordinate-decision-owner",
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T21:42:29.891888+00:00",
+  "total": 110
+}
