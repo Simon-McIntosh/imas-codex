@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-23T22:40:00.948Z",
+  "dispatched_at": "2026-10-23T22:29:59Z",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "306",
+      "severity": "blocking",
+      "text": "project_graph_uri() now returns only resolve_neo4j(auto_tunnel=False).uri, which by construction is always bolt://localhost:<port> (imas_codex/graph/profiles.py:452); on this cluster that is not the project graph, whose SLURM-discovered address is bolt://98dci4-gpu-0002:7687 (squeue: codex-neo4j RUNNING on 98dci4-gpu-0002) and where nothing listens on localhost:7687. Measured at 7351413cb: refuse_project_graph('bolt://98dci4-gpu-0002:7687') returns without refusing while refuse_project_graph('bolt://localhost:7687') fails; the set refused at base 3d790d60 contained both spellings. Since the fixture sets NEO4J_URI to the supplied endpoint before its own profile check, that check compares the override with itself (measured: with NEO4J_URI=bolt://98dci4-gpu-0002:7687, resolve_neo4j(auto_tunnel=False) returns that same string), so nothing stops disposable_neo4j_uri reaching _wipe(uri) against the live graph. Restore the tunnel/SLURM-resolved address in the refused set and make the profile check independent of the endpoint it was handed."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_source_refresh.py",
+      "line": "452",
+      "severity": "blocking",
+      "text": "The new test takes its input from project_graph_uri() and hands it back to the fixture whose guard compares against that same function, so the two sides move together: the assertion holds for whatever address the function returns and cannot detect that the address is wrong. That is exactly the regression this commit introduced, and the test stayed green through all six runs it was exercised in. Assert against an independent source of the project graph's address (the SLURM-discovered service URL, as the base arm's a5 control used) and add an arm at bolt://98dci4-gpu-0002:7687 that must be refused."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_source_refresh.py",
+      "line": "463",
+      "severity": "non-blocking",
+      "text": "The same refuse_project_graph('bolt://127.0.0.1:1') call is made twice in a row (lines 461 and 463); the second observes nothing the first did not, and the duplication suggests a distinct positive control was intended and lost."
+    },
+    {
+      "disposition": null,
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html",
+      "line": "40",
+      "severity": "non-blocking",
+      "text": "The page states the removed-guard arm failed with 'Failed: DID NOT RAISE'; the log it cites, logs/negative-control-guard-removed.log, records neo4j.exceptions.ServiceUnavailable at conftest.py:452 _wipe ('Couldn't connect to localhost:7687'), and no log in the run contains 'DID NOT RAISE'. The conclusion that the test reddens holds, but the stated mechanism is contradicted by its own evidence, and the same claim is repeated in manifest.md:20."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The landed change is test-only, so no production module imports it; the production boundaries it drives are imas_codex/graph/profiles.py:resolve_neo4j and imas_codex/standard_names/dd_resolutions.py:dd_resolution_graph_reader, neither of which the diff modifies.",
+    "diff": "Read commit by commit against 3d790d60; 7351413cb adds SyntheticDDResolutionReader and project_graph_uri/refuse_project_graph/neo4j_test_password to tests/standard_names/conftest.py, adds test_the_shared_fixture_refuses_the_project_graph_uri and routes the graph fixture through the shared reader and password helper in test_source_refresh.py, imports the password helper in test_panel_audit_sample.py, and updates the evidence page, all inside the declared scope.",
+    "done_when": "The done-when (brief.md:44-50) asks for the shared fixture committed, one graph command running all three files with the five drift tests passing, the refusal logged, and the evidence page recording both arms; logs/head-graph.log records 24 passed EXIT=0 at revision 7351413cb with the five drift tests PASSED by id, logs/base-graph.log records 19 passed and 5 errors, logs/base-default.log 35 passed and logs/head-default.log 36 passed, so the gate does assert the recorded measure.",
+    "goal": "The reviewed increment's goal is to test the shared fixture's live-graph refusal, remove the address-only tunnel side effect, and fail rather than skip when no disposable instance can start (brief.md:31-35); the commit does all three, but it narrows the refusal to one spelling of the project graph's address and thereby weakens the protection the node exists for (tests/standard_names/conftest.py:306).",
+    "manifest": "Read manifest.md in the reviewed run directory; it records the literal head graph command with absolute paths and basetemp, six test logs, head 24 passed/0 skipped/EXIT=0 against base 19 passed/5 errors, 0 added default-marker failures, and neutralizes findings on auto_tunnel and the skip path, though manifest.md:20 credits the removed-guard arm with a 'DID NOT RAISE' failure its own log does not show.",
+    "write_paths": "The declared write paths are tests/standard_names/conftest.py, tests/standard_names/test_source_refresh.py, tests/standard_names/test_panel_audit_sample.py and docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html; git diff --stat 3d790d60..7351413cb lists exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_source_refresh.py:452 feeds project_graph_uri() back into the fixture the guard compares against, so the test passes for whatever address that function returns and stayed green through the regression that landed.",
+    "evidence": "logs/negative-control-live-graph.log exercises only bolt://localhost:7687, the one spelling the narrowed guard still knows, and docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html:40 reports a DID NOT RAISE failure that logs/negative-control-guard-removed.log contradicts.",
+    "fit": "tests/standard_names/conftest.py:109 and its neighbours follow the module's fixture and helper idiom and introduce no plan, sprint or ticket label in any symbol or comment.",
+    "goal_fidelity": "The increment is meant to make the refusal measurable without weakening it, yet tests/standard_names/conftest.py:306 now returns only the auto_tunnel=False address, so the guard no longer names the graph's real address.",
+    "reuse": "SyntheticDDResolutionReader at tests/standard_names/conftest.py:109 replaces the inline copy that tests/standard_names/test_source_refresh.py:474 previously re-declared, so the duplicate is folded into the one owner; no prior owner exists for the refusal helper, whose only near neighbour is the different capability in tests/conftest.py:_graph_credential_is_configured.",
+    "scope_discipline": "Every path in git diff --stat 3d790d60..7351413cb is inside the declared write scope and the commit carries no unrelated edit."
+  },
+  "project": "imas-codex",
+  "reproduction_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T222937004726-review-of-srtj-test-neo4j-uri-convention-7351413cba0e/reproduction.log",
+  "review_run_id": "r-20261023T222937004726-review-of-srtj-test-neo4j-uri-convention-7351413cba0e",
+  "reviewed_base_sha": "3d790d606c8717efa5cf1d70e03e83bc24446188",
+  "reviewed_head_sha": "7351413cba0ecbe182e41b7ef29d0dc707e80844",
+  "reviewed_run_id": "r-20261023T193843392462-srtj-test-neo4j-uri-convention",
+  "scores": {
+    "durability": 7,
+    "evidence": 7,
+    "fit": 17,
+    "goal_fidelity": 8,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T05:58:02.813028+00:00",
+  "total": 75
+}

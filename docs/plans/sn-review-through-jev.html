@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="226">
+<meta name="plan-version" content="227">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -986,6 +986,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s6-split-steps-1-2" data-who="reckon-build" data-when="2026-10-24T05:30:00Z">
     <div class="r-comment-body"><p>Split steps 1 and 2 landed on codex. <code>holds.sync_holds</code> owns raising and clearing review holds, replacing three inline copies (merge <code>728532beb</code>). A documentation regeneration now re-stamps the source snapshot (merge <code>24f4d55a8</code>). Step 3, the first <code>graph_store</code> extraction, is running.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T222937004726-review-of-srtj-test-neo4j-uri-convention-7351413cba0e" data-who="reckon-build" data-when="2026-10-23T22:40:00.948Z">
+    <div class="r-comment-body"><p>Reviewed 3d790d60..7351413cb and stored a parsed record (base 3d790d606c8717efa5cf1d70e03e83bc24446188, head 7351413cba0ecbe182e41b7ef29d0dc707e80844) scoring goal_fidelity 8, evidence 7, scope_discipline 18, durability 7, fit 17, reuse 18 with 0 added failures; two blocking findings: project_graph_uri() now refuses only bolt://localhost:7687, a dead address here, and no longer refuses the project graph&#x27;s real bolt://98dci4-gpu-0002:7687, and the new test takes its input from the same function the guard compares against so it cannot catch that regression.</p></div>
 </div>
 </section>
 </main>

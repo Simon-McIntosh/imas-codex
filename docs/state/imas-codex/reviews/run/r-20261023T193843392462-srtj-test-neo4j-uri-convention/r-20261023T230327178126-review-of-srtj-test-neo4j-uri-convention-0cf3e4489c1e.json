@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-23T23:03:56Z",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "The page states the guard-removed arm failed with 'Failed: DID NOT RAISE', but logs/negative-control-guard-removed.log:55 records neo4j.exceptions.AuthError raised from _wipe at conftest.py:473 and contains no 'DID NOT RAISE' for that arm; the test does redden, so the conclusion holds, but the stated mechanism is contradicted by the evidence it cites, and this same sentence was flagged at 7351413cb and was left unchanged."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_source_refresh.py",
+      "line": "479",
+      "severity": "non-blocking",
+      "text": "test_the_shared_fixture_refuses_every_project_graph_address carries no graph marker, so it runs in the default-marker tier (head-default.log:23 shows it there), yet it now fails whenever squeue is absent or reports no codex-neo4j job instead of skipping; the default tier is defined as needing no live infrastructure, so an unrelated scheduler outage reddens the default suite. Marking the test graph, or skipping when the scheduler itself is unavailable while still failing when the job is listed but unreachable, would keep the arm honest without moving the dependency into the default tier."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_source_refresh.py",
+      "line": "475",
+      "severity": "non-blocking",
+      "text": "The loopback address's port is read from resolve_neo4j(auto_tunnel=False).bolt_port, the same profile function conftest.py:306 uses to build the loopback spelling, so that half of the address still moves with the resolver under test: only the host comes from an independent source (squeue at line 436), and a resolver regression in the port would keep the loopback arm green. The scheduled-instance arm, which is the regression that landed, is independent."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The landed change is test-and-docs only, so no production module reaches it; the production owners it relies on are imas_codex/graph/profiles.py:resolve_neo4j (resolve_neo4j) and imas_codex/remote/locations.py:213 resolve_service_url, neither modified by the increment.",
+    "diff": "Read 0cf3e448 against 7351413cb; conftest.py replaces project_graph_uri() with project_graph_uris() that collects the loopback port plus the scheduler-discovered address and restates the profile check as proof the override is honoured, test_source_refresh.py adds _scheduled_graph_node and requires the refusal for both addresses through both the check and the fixture body, and the evidence page records the widened refusal with updated a5 and a new a7 row.",
+    "done_when": "The done-when (brief.md:44-50) asks for the shared fixture committed, one graph command running all three files with the five drift tests passing, the refusal logged, and the evidence page recording both arms; logs/head-graph.log:53 records 24 passed EXIT=0 at 0cf3e448 with the five drift tests PASSED by id, logs/base-graph.log 19 passed and 5 errors, the default arms 36 vs 35 passed, and logs/negative-control-live-graph.log plus logs/negative-control-loopback-only-guard.log record the refusal and its falsifier.",
+    "goal": "The reviewed increment is the repair the prior review's blocking findings named: the live-graph refusal collected only the loopback spelling and its test sourced its input from the resolver it tested (brief.md:31-35, and the blocking findings recorded at 7351413cb); 0cf3e448 collects both addresses in tests/standard_names/conftest.py:306-335 and takes the scheduled host from squeue at tests/standard_names/test_source_refresh.py:436.",
+    "manifest": "Read manifest.md in the reviewed run directory; it records the literal head graph command with absolute paths and basetemp, head 24 passed/0 skipped/EXIT=0 against base 19 passed/5 errors, 0 added default-marker failures, and three negative-control arms, but it carries no baseline_suite/after_suite keys, so added_failure_count here is derived from logs/base-default.log and logs/head-default.log.",
+    "write_paths": "The declared write paths are tests/standard_names/conftest.py, tests/standard_names/test_source_refresh.py, tests/standard_names/test_panel_audit_sample.py and docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html (plus docs/figures/sn-review-through-jev/srtj-test-neo4j-uri-convention); git diff --stat 7351413cb..0cf3e4489 lists exactly conftest.py, test_source_refresh.py and the evidence page, and test_panel_audit_sample.py is untouched by this increment."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_source_refresh.py:458 reddens both when the loopback-only guard is reinstated (line 489, DID NOT RAISE) and when the refusal call is replaced by a no-op (AuthError raised from conftest.py:473), so the guard and its address set are measured rather than asserted.",
+    "evidence": "logs/negative-control-loopback-only-guard.log fails DID NOT RAISE at test_source_refresh.py:489 and logs/negative-control-live-graph.log:10-11 records both addresses refused, though the evidence page at line 42 misstates the guard-removed arm's mechanism.",
+    "fit": "tests/standard_names/conftest.py:306 and the helper at test_source_refresh.py:436 follow the module's fixture idiom and carry no plan, sprint or ticket label, though the unmarked test now fails in the default tier when the scheduler is absent (test_source_refresh.py:479).",
+    "goal_fidelity": "tests/standard_names/conftest.py:306 now collects both the loopback port and the service-discovered address via resolve_service_url at conftest.py:327, which is the protection the prior blocking finding said had been lost.",
+    "reuse": "tests/standard_names/conftest.py:321 reuses imas_codex/remote/locations.py:213 resolve_service_url rather than reimplementing service discovery, and no existing test helper owns a live squeue read that the inline reader at test_source_refresh.py:436 duplicates.",
+    "scope_discipline": "git diff --stat 7351413cb..0cf3e4489 lists only tests/standard_names/conftest.py, tests/standard_names/test_source_refresh.py and the evidence page, all inside the declared write paths, with no unrelated edit."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261023T230327178126-review-of-srtj-test-neo4j-uri-convention-0cf3e4489c1e",
+  "reviewed_base_sha": "7351413cba0ecbe182e41b7ef29d0dc707e80844",
+  "reviewed_head_sha": "0cf3e4489c1e4f1fc367ca4780aed426b3e2ecb9",
+  "reviewed_run_id": "r-20261023T193843392462-srtj-test-neo4j-uri-convention",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T05:58:02.796684+00:00",
+  "total": 105
+}
