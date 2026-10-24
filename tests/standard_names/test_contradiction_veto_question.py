@@ -590,15 +590,17 @@ def test_a_direction_word_label_is_not_evidence() -> None:
     )
 
 
-# The judge's own readings of one planted contradiction, sampled twice through
-# the shipped question. Both answer "says nothing" with the silence mass
-# leading, so neither is a denial; the former 0.30 probability cutoff fired on
-# the one whose contradiction mass reached it, which is why both are pinned
-# rather than described: they are the evidence that the fixed rule's narrower
-# reading decides this row. The row is the veto bar's named recall gap.
+# The judge's own readings of one planted contradiction, sampled through the
+# shipped question. Both lead with "says nothing" beside a larger silence mass,
+# so neither is a denial. The first carries a contradiction mass below the
+# cutoff, so the cutoff clause spares it; the second carries one above the
+# cutoff with the silence mass still leading, so only the silence-mass clause
+# spares that one. A rule reading the contradiction mass alone vetoes the
+# second, which is why both readings are pinned. Their masses are what the
+# recheck margin is measured from.
 SAMPLED_PLANTED_READINGS = [
-    {"supports": 0.12, "contradicts": 0.38, "says nothing": 0.50},
     {"supports": 0.33, "contradicts": 0.25, "says nothing": 0.42},
+    {"supports": 0.12, "contradicts": 0.38, "says nothing": 0.50},
 ]
 
 
@@ -609,3 +611,133 @@ def test_a_sampled_reading_whose_silence_mass_leads_does_not_veto(
     answer = {"choice": "says nothing", "probabilities": probabilities}
 
     assert jev_review.claim_contradicts(answer) is False
+
+
+def _answer(choice: str, contradicts: float, silence: float) -> dict[str, Any]:
+    return {
+        "choice": choice,
+        "probabilities": {
+            "supports": round(1.0 - contradicts - silence, 2),
+            "contradicts": contradicts,
+            "says nothing": silence,
+        },
+    }
+
+
+def test_an_answer_at_the_cutoff_is_asked_again_and_a_far_one_is_not() -> None:
+    """The recheck reads the leading answer and the distance from the cutoff.
+
+    A "says nothing" answer within the margin is undecided enough to put to the
+    judge twice. One that already vetoes, one whose leading answer is a
+    decision, and one whose contradiction mass sits far from the boundary are
+    all left alone.
+    """
+    assert jev_review.claim_answer_sits_at_the_cutoff(
+        _answer("says nothing", 0.29, 0.42)
+    )
+    assert jev_review.claim_answer_sits_at_the_cutoff(
+        _answer("says nothing", 0.34, 0.45)
+    )
+    assert not jev_review.claim_answer_sits_at_the_cutoff(
+        _answer("says nothing", 0.18, 0.60)
+    )
+    assert not jev_review.claim_answer_sits_at_the_cutoff(
+        _answer("supports", 0.30, 0.20)
+    )
+    assert not jev_review.claim_answer_sits_at_the_cutoff(
+        _answer("contradicts", 0.90, 0.05)
+    )
+
+
+def test_a_second_reading_that_contradicts_vetoes_the_claim() -> None:
+    """Either reading denies the claim, so a vetoing second reading stands."""
+    first = {
+        "choice": "says nothing",
+        "probabilities": {"supports": 0.12, "contradicts": 0.34, "says nothing": 0.54},
+    }
+    again = {
+        "choice": "contradicts",
+        "probabilities": {"supports": 0.05, "contradicts": 0.85, "says nothing": 0.10},
+    }
+
+    rechecked = jev_review.second_reading(first, again)
+
+    assert jev_review.claim_contradicts(rechecked) is True
+    assert rechecked["first_reading"]["choice"] == "says nothing"
+    assert rechecked["second_reading"]["choice"] == "contradicts"
+
+
+def test_a_second_reading_that_stays_undecided_leaves_the_first_answer() -> None:
+    """Two undecided readings are still undecided, and the first one stands."""
+    first = {
+        "choice": "says nothing",
+        "probabilities": {"supports": 0.30, "contradicts": 0.28, "says nothing": 0.42},
+    }
+    again = {
+        "choice": "says nothing",
+        "probabilities": {"supports": 0.25, "contradicts": 0.27, "says nothing": 0.48},
+    }
+
+    rechecked = jev_review.second_reading(first, again)
+
+    assert jev_review.claim_contradicts(rechecked) is False
+    assert rechecked["second_reading"]["probabilities"]["contradicts"] == 0.27
+
+
+async def test_only_the_cutoff_claims_are_sent_back_to_the_judge(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The recheck asks the same batch path for the cutoff claims alone.
+
+    Two claims go to the judge at once: one whose answer sits at the cutoff and
+    one whose contradiction mass is far below it. The second ask names the
+    first claim's question and nothing else, and the contradiction it returns is
+    what vetoes the document.
+    """
+    asked: dict[str, Any] = {}
+
+    async def fake_decide_batch(
+        states: list[dict[str, Any]],
+        questions: dict[str, Any],
+        **_kwargs: Any,
+    ) -> tuple[list[Any], float]:
+        asked["questions"] = sorted(questions)
+        answers = {
+            key: {
+                "choice": "contradicts",
+                "probabilities": {"contradicts": 0.8, "says nothing": 0.1},
+            }
+            for key in questions
+        }
+        return [(answers, 0.0) for _ in states], 0.25
+
+    state = jev_review.build_docs_state(
+        {
+            "id": "electron_temperature",
+            "documentation": (
+                "The electron temperature is measured by Thomson scattering. "
+                "Its calibration assumes a linear detector response."
+            ),
+        }
+    )
+    keys = [
+        jev_review.check_question_name(f"claim_contradicts_source:{index}")
+        for index in range(len(state["documentation_claims"]))
+    ]
+    assert len(keys) == 2, state["documentation_claims"]
+    first = {
+        keys[0]: _answer("says nothing", 0.29, 0.42),
+        keys[1]: _answer("says nothing", 0.15, 0.55),
+    }
+    assert jev_review.claims_to_ask_again(state, first) == [0]
+
+    monkeypatch.setattr(jev_review, "decide_batch", fake_decide_batch)
+    rechecked_answers, cost, rechecked = await jev_review.ask_again_at_the_cutoff(
+        state, jev_review._default_checks(), first, model="sn-judge"
+    )
+
+    assert rechecked == [0]
+    assert asked["questions"] == [keys[0]]
+    assert cost == 0.25
+    assert jev_review.claim_contradicts(rechecked_answers[keys[0]]) is True
+    assert rechecked_answers[keys[1]] == first[keys[1]]

@@ -495,6 +495,15 @@ DOCS_SCORE_WEIGHTS: dict[str, float] = {
 DOCS_SCORE_INTERCEPT = -15.142945942036562
 CONTRADICTION_VETO_PROBABILITY = 0.30
 
+# How close to the cutoff a "says nothing" answer has to sit before the claim is
+# put to the judge a second time. The figure comes from the sampled readings of
+# the claim the veto has missed: its contradiction masses among the readings
+# that answer "says nothing" are 0.25, 0.25 and 0.29, so the furthest is 0.05
+# below the cutoff and a margin of 0.05 is the smallest one that returns every
+# one of those readings to the judge. A wider margin buys no additional reading
+# of that claim and only puts settled-looking answers to a second draw.
+CONTRADICTION_RECHECK_MARGIN = 0.05
+
 # The wording of the source-comparison choice the judge is given. It lives in
 # one place because the precision and recall bar was measured on this text: a
 # criterion retuned here without re-measuring it invalidates that measurement.
@@ -702,7 +711,7 @@ def states_scope_non_requirement(sentence: str) -> bool:
     )
 
 
-def claim_settlement(claim: str, name: str, documentation: str = "") -> str | None:
+def claim_settlement(claim: str, name: str) -> str | None:
     """The category code settles for one claim without asking the judge.
 
     The claim is settled code-side in two families. A scope disclaimer settles on
@@ -724,13 +733,13 @@ def claim_settlement(claim: str, name: str, documentation: str = "") -> str | No
 
 
 def deterministic_claim_determinations(
-    claims: Sequence[str], name: str, documentation: str = ""
+    claims: Sequence[str], name: str
 ) -> dict[int, str]:
     """The claims code decides itself, keyed by their index in the claim list."""
     return {
         index: outcome
         for index, claim in enumerate(claims)
-        if (outcome := claim_settlement(claim, name, documentation)) is not None
+        if (outcome := claim_settlement(claim, name)) is not None
     }
 
 
@@ -1026,7 +1035,6 @@ def settled_claim_answers(state: Mapping[str, Any]) -> dict[int, dict[str, Any]]
         for index, outcome in deterministic_claim_determinations(
             state["documentation_claims"],
             str(state.get("name_id") or ""),
-            str(state.get("documentation") or ""),
         ).items()
     }
 
@@ -1049,6 +1057,106 @@ def effective_claim_answers(
         else answers.get(check_question_name(f"claim_contradicts_source:{index}"))
         for index, _claim in enumerate(state["documentation_claims"])
     ]
+
+
+def claim_answer_sits_at_the_cutoff(answer: Mapping[str, Any]) -> bool:
+    """True when a claim answer led with "says nothing" and sits at the cutoff.
+
+    That is where a single draw can decide a claim the judge has not settled:
+    the leading answer is that the evidence says nothing, yet the contradiction
+    mass lands within :data:`CONTRADICTION_RECHECK_MARGIN` of the cutoff the
+    veto reads, on either side of it. Such an answer is measuring an undecided
+    distribution, so the claim is worth a second reading. An answer that already
+    vetoes is never re-asked, and neither is one whose mass is far from the
+    boundary in either direction.
+    """
+    if answer.get("choice") != "says nothing":
+        return False
+    if claim_contradicts(answer):
+        return False
+    contradicts = float(answer.get("probabilities", {}).get("contradicts", 0.0))
+    distance = abs(contradicts - CONTRADICTION_VETO_PROBABILITY)
+    return distance <= CONTRADICTION_RECHECK_MARGIN
+
+
+def claims_to_ask_again(
+    state: Mapping[str, Any], answers: Mapping[str, Mapping[str, Any]]
+) -> list[int]:
+    """The claim indices a reader should put to the judge a second time."""
+    settled = settled_claim_answers(state)
+    indices: list[int] = []
+    for index in range(len(state["documentation_claims"])):
+        if index in settled:
+            continue
+        answer = answers.get(check_question_name(f"claim_contradicts_source:{index}"))
+        if answer is not None and claim_answer_sits_at_the_cutoff(answer):
+            indices.append(index)
+    return indices
+
+
+def second_reading(
+    first: Mapping[str, Any], again: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Merge a second reading of one claim, keeping both on the record.
+
+    The claim is denied when either reading denies it, so a reading that vetoes
+    stands as the answer. A second reading that does not veto leaves the first
+    answer in place: two undecided draws are still undecided, and the read is
+    the same one under either merge.
+    """
+    if claim_contradicts(again):
+        merged = dict(again)
+    else:
+        merged = dict(first)
+    merged["rechecked"] = True
+    merged["first_reading"] = {
+        "choice": first.get("choice"),
+        "probabilities": dict(first.get("probabilities", {})),
+    }
+    merged["second_reading"] = {
+        "choice": again.get("choice"),
+        "probabilities": dict(again.get("probabilities", {})),
+    }
+    return merged
+
+
+async def ask_again_at_the_cutoff(
+    state: Mapping[str, Any],
+    checks: Sequence[ReviewCheck],
+    answers: Mapping[str, Mapping[str, Any]],
+    *,
+    model: str,
+    service: str | None = None,
+) -> tuple[dict[str, Mapping[str, Any]], float, list[int]]:
+    """Put the cutoff answers to the judge once more and merge what comes back.
+
+    The second ask is the same batch path and the same question text as the
+    first, so a second reading is comparable with the one it rechecks. The
+    returned cost is what the extra batch spent, and the indices are the claims
+    that were re-asked.
+    """
+    indices = claims_to_ask_again(state, answers)
+    if not indices:
+        return dict(answers), 0.0, []
+    table = docs_question_table(checks, state["documentation_claims"])
+    keys = {
+        index: check_question_name(f"claim_contradicts_source:{index}")
+        for index in indices
+    }
+    questions = {key: table[key] for key in keys.values()}
+    results, cost = await decide_batch(
+        [state], questions, model=model, service=service or SERVICE
+    )
+    if not results or results[0] is None:
+        return dict(answers), cost, []
+    second, _ = results[0]
+    merged = dict(answers)
+    for key in keys.values():
+        again = second.get(key)
+        if again is None:
+            continue
+        merged[key] = second_reading(merged[key], again)
+    return merged, cost, indices
 
 
 def aggregate_docs_review(

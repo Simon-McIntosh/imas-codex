@@ -380,11 +380,11 @@ def _names_a_position(name: str | None) -> bool:
     """
     if not name:
         return False
-    from imas_standard_names import parse
+    from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
     try:
-        parsed = parse(name)
-    except Exception:
+        parsed = parse_canonical_name(name)
+    except (TypeError, ValueError):
         return False
     ir = getattr(parsed, "ir", None)
     if ir is None:

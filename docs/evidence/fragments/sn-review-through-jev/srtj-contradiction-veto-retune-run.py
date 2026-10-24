@@ -159,6 +159,41 @@ async def judge(
             else:
                 answers[position] = result[0]
 
+    # Answers that sit at the cutoff go back to the judge once more, through the
+    # same batch path and question text as the first ask. A row is vetoed when
+    # either reading denies it.
+    rechecked: dict[int, list[int]] = {}
+    recheck_groups: dict[tuple[int, ...], list[int]] = {}
+    for position, built_state in enumerate(built):
+        if position in failed:
+            continue
+        indices = tuple(jev_review.claims_to_ask_again(built_state, answers[position]))
+        if indices:
+            recheck_groups.setdefault(indices, []).append(position)
+    for indices, positions in recheck_groups.items():
+        questions = claim_questions(checks, max(indices) + 1, indices=indices)
+        results, group_cost = await jev_review.decide_batch(
+            [built[position] for position in positions],
+            questions,
+            model=get_model("sn-judge"),
+            service=jev_review.SERVICE,
+            concurrency=8,
+        )
+        cost += group_cost
+        for position, result in zip(positions, results, strict=True):
+            if result is None:
+                continue
+            second = result[0]
+            for index in indices:
+                key = CLAIM_KEY.format(index=index)
+                again = second.get(key)
+                if again is None:
+                    continue
+                answers[position][key] = jev_review.second_reading(
+                    answers[position][key], again
+                )
+                rechecked.setdefault(position, []).append(index)
+
     out: list[dict[str, Any] | None] = []
     for position, (state, built_state, count) in enumerate(
         zip(states, built, counts, strict=True)
@@ -191,6 +226,7 @@ async def judge(
                 "claims": built_state["documentation_claims"],
                 "choices": choices,
                 "settled": sorted(row),
+                "rechecked": sorted(rechecked.get(position, [])),
                 "fired": bool(fired),
                 "fired_indices": fired,
                 "sources_seen": [
@@ -208,6 +244,8 @@ def summarise(rows: list[dict[str, Any] | None]) -> dict[str, Any]:
         "unscored": sum(1 for row in rows if row is None),
         "fired": sum(1 for row in rows if row and row["fired"]),
         "fired_ids": sorted(row["name"] for row in rows if row and row["fired"]),
+        "rechecked_rows": sum(1 for row in rows if row and row["rechecked"]),
+        "rechecked_claims": sum(len(row["rechecked"]) for row in rows if row),
     }
 
 
