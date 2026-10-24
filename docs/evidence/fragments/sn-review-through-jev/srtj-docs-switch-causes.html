@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>srtj-docs-switch-causes</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:60rem;margin:2rem auto;line-height:1.5;color:#1a1a1a}
+h1,h2,h3{line-height:1.25}
+table{border-collapse:collapse;margin:1rem 0}
+th,td{border-bottom:1px solid #ccc;padding:.3rem .6rem;text-align:left}
+code{background:#f4f4f4;padding:0 .2rem}
+.diag{border-left:3px solid #929292;padding-left:1rem;margin:1rem 0}
+.mode{color:#555;font-variant:small-caps}
+.bar{font-weight:600}
+</style>
+</head>
+<body id="srtj-docs-switch-causes">
+<h1 id="srtj-docs-switch-causes-title">Documentation switch: why the panel vetoed acceptable documents</h1>
+
+<h2 id="srtj-docs-switch-causes-verdict">Verdict</h2>
+<p class="bar" id="srtj-docs-switch-causes-verdict-line">MISSED on pass 1,
+met on pass 2. The switch bar is all 19 link-defect rows refined and none of the 30
+acceptable rows refined, on both passes. Measured at <code>a942ed6df</code>, the
+commit that ships, pass 1 refines all 19 link-defect rows and also refines 1 of the
+30 acceptable rows, sheet row <code>S0010</code>, so it fails the bar; pass 2 refines
+all 19 and none of the 30, so it meets it. The rule was met on both passes at
+<code>588c96b0</code> before the relation-replacement settlement was withdrawn, so
+the withdrawal costs one acceptable document on one of the two passes. The bar as
+stated requires both passes, so the switch bar is not met at the shipping commit.</p>
+<p id="srtj-docs-switch-causes-verdict-recall">The recall bar is met as the lead
+stated it: the replay fires on 59 of 60 planted contradictions on both passes, and
+the single row it misses both times is <code>contradicts-354</code>, the
+field-current relation row, which is the known gap the lead accepted. A miss on any
+other row would fail the bar. That row's claim was put to the judge twice in the
+sampled reading — once as shipped and once under a re-ask rule that has since been
+dropped — and both readings answer "says nothing", so the gap is the judge's reading
+rather than a rule waiting to be measured more often. On the ten stored answers from
+that row the base veto fires on 7 and the shipped veto on 1, and every firing the
+shipped rule makes is one the base makes.</p>
+<h2 id="srtj-docs-switch-causes-diagnosis">Per-row diagnosis</h2>
+
+<div class="diag" id="srtj-docs-switch-causes-diag-s0010">
+<h3>S0010 &mdash; flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</h3>
+<p class="mode">mode: flat-distribution probability veto</p>
+<ul>
+<li><code>For each retained wavevector component [equation], the quantity is defined by</code> &mdash; judge answered <em>says nothing</em> (contradicts 0.30, says nothing 0.47, supports 0.23)</li>
+<li><code>where [equation] is the normalized fluctuation amplitude, [equation] and [equation] are wavevector components, [equation] is time, [equation] is the perturbed magnetic-field component and [equation] is the equilibrium field</code> &mdash; judge answered <em>says nothing</em> (contradicts 0.32, says nothing 0.35, supports 0.33)</li>
+</ul>
+<p>The label calls this document acceptable because it defines the quantity and
+binds every symbol. The judge agreed on both claims, answering "says nothing",
+and the veto fired anyway on the probability channel at a contradiction mass of
+0.30 and 0.32. An answer whose leading mass is "says nothing" is an undecided
+distribution, not a denial.</p>
+</div>
+
+<div class="diag" id="srtj-docs-switch-causes-diag-s0031">
+<h3>S0031 &mdash; toroidal_ion_charge_state_momentum_convection_velocity</h3>
+<p class="mode">mode: field-label source</p>
+<p>The DD text compared against this document is "Toroidal component, one scalar
+value is provided per element in the grid subset" &mdash; a field label, which
+states placement rather than a definition. It was kept as evidence because the
+placement vocabulary held no direction word, so the judge was asked whether prose
+claims are contradicted by a label. The label calls the document acceptable
+because the document defines the quantity, gives its unit and binds its symbols.</p>
+</div>
+
+<div class="diag" id="srtj-docs-switch-causes-diag-s0055">
+<h3>S0055 &mdash; volume_integrated_particle_source_rate</h3>
+<p class="mode">mode: generic-against-specialised, and a flat-distribution probability veto</p>
+<ul>
+<li><code>where [equation] is the volume-integrated particle source rate, [equation] is the local net particle source rate density, [equation] is spatial position</code> &mdash; <em>says nothing</em> (contradicts 0.34, says nothing 0.43, supports 0.23)</li>
+<li><code>The quantity applies to the particular distribution or source represented and does not impose a species, charge-state, or thermal-population restriction.</code> &mdash; <em>contradicts</em>, selected (contradicts 0.61, says nothing 0.21, supports 0.18)</li>
+<li><code>External particle injection, wave-particle interaction, and transfer between nonthermal and thermal populations may contribute when they define the underlying source.</code> &mdash; <em>says nothing</em> (contradicts 0.36, says nothing 0.48, supports 0.16)</li>
+</ul>
+<p>The label calls the document acceptable because it defines the quantity, gives
+its integral and states the population it covers. The selected "contradicts"
+answers a DD source that specialises the generic quantity
+("Source rate of thermal particles due to the thermalization of fast particles")
+against a claim that disclaims a population restriction. A specialised source
+agrees with the disclaimer, so it cannot deny it.</p>
+</div>
+
+<div class="diag" id="srtj-docs-switch-causes-diag-s0015">
+<h3>S0015 &mdash; total_heating_power_due_to_fusion_reactions</h3>
+<p class="mode">mode: flat-distribution probability veto, one pass only</p>
+<p>A claim in this document sat at a contradiction mass of 0.29 and crossed the
+0.30 cutoff on the pass that over-refined it, on the same channel and with the
+same leading "says nothing" answer as S0010. A mass at the cutoff is a coin toss
+in the judge's reading, not a denial. The label calls the document acceptable
+because it defines the quantity and its sum over reactions.</p>
+</div>
+
+<div class="diag" id="srtj-docs-switch-causes-diag-s0062">
+<h3>S0062 &mdash; vertical_coordinate_of_antenna_strap</h3>
+<p class="mode">mode: deterministic cap from the defining-relation gate</p>
+<p>No veto fired here. The row was held by the deterministic cap: the
+defining-relation gate returned FAIL with "documentation lacks exactly one
+dimensionally checkable defining relation", which the product turned into an
+error-severity link finding and a docs_lint_error hold.</p>
+<p>The documentation reads: "The vertical coordinate of the centre of the antenna
+strap in the right-handed cylindrical (R, &#966;, Z) frame, where R is the major
+radius, &#966; the toroidal angle and Z the vertical direction". It binds every
+symbol and states a position; it carries no display equation and no relation
+between dimensional quantities, so it genuinely had no defining relation the check
+could have missed. The lead ruled that a coordinate, position or locus needs its
+frame and axes rather than a defining relation, and the gate's exemption
+now accepts the document on both passes.</p>
+</div>
+
+<h2 id="srtj-docs-switch-causes-fixes">The fixes</h2>
+<div id="srtj-docs-switch-causes-fix-veto">
+<h3>Claim veto: an undecided distribution is not a denial</h3>
+<p>The veto had two channels: the selected choice and a contradiction probability
+at or above 0.30. The second fired on answers whose leading mass was "says
+nothing", so a judge that had just said the sources do not bear on a claim still
+vetoed it. It now requires the contradiction mass to reach the silence mass as
+well. The selected-choice channel is untouched, and a support-selected answer
+whose contradiction mass leads the silence mass still vetoes.</p>
+</div>
+<div id="srtj-docs-switch-causes-fix-label">
+<h3>Evidence: a direction word is placement</h3>
+<p>A DD field label naming a component stayed evidence because the placement
+vocabulary held no direction word. Toroidal, poloidal, radial, vertical,
+horizontal, parallel, perpendicular and axial now empty the label, while the
+source path and the unit stay.</p>
+</div>
+<div id="srtj-docs-switch-causes-fix-scope">
+<h3>Settlement: a population disclaimer is a different axis</h3>
+<p>A sentence disclaiming a species, charge-state or population restriction was
+withheld from settlement whenever the name fixed a locus or an aggregation. The
+population axis is independent of both, so the name's qualifier cannot turn the
+disclaimer into a claim a source denies. Scope disclaimers now settle before that
+guard; every other claim still goes to the judge.</p>
+</div>
+<div id="srtj-docs-switch-causes-fix-recheck">
+<h3>Recall: the one missed row is an accepted gap, not a rule to widen</h3>
+<p>A second ask at the cutoff was measured and then dropped by the lead's ruling.
+It put every "says nothing" answer within 0.05 of the cutoff back to the judge
+through the same <code>decide_batch</code> path and vetoed when either reading
+denied. It moved nothing. In the replay that carried it, the missed row's claim was
+re-asked on both passes and the judge answered "says nothing" again; on the ten
+stored answers from that row, eight sat at the cutoff, all eight were re-asked, and
+not one second reading denied the claim. The rule cost a second batch on every claim
+near the boundary and bought no firing, so it is removed with its four tests. The
+recall bar is the 59 of 60 planted contradictions the shipped rule fires on, with
+<code>contradicts-354</code>, the field-current relation row, named as the known gap
+the lead accepted; a miss on any other row fails the bar.</p>
+</div>
+<div id="srtj-docs-switch-causes-fix-instrument">
+<h3>Instrument: the hold set and a call that never decided</h3>
+<p>The deterministic hold set now reads the lexical lint family as well as the
+house-style and documentation-gate families, so it matches the product's audit. A
+Jev call that fails to decide is retried, then reported as an instrument failure
+that aborts the run; it is never counted as a refine.</p>
+</div>
+
+<h2 id="srtj-docs-switch-causes-defining">The defining-relation gate is the lead's call</h2>
+<div id="srtj-docs-switch-causes-defining-body">
+<p>The gate passed only a document carrying exactly one display equation whose
+dimensions check, and S0062 carries none, so the gate held it. The lead ruled
+that a name whose value is a coordinate, a position or a locus needs no defining
+relation, only its frame and axes. The gate now decides that class from the
+grammar's own parse rather than from words in the text: it reads
+<code>base.kind</code>, which is <code>geometry</code> for a geometric base token
+such as <code>coordinate</code>, and
+<code>projection.shape</code>, which is <code>coordinate</code> for a coordinate
+projection of a quantity. <code>vertical_coordinate_of_antenna_strap</code> parses
+to base <code>coordinate</code> of kind <code>geometry</code> with a vertical
+coordinate projection, so it is in the class; a coordinate document that names
+no frame or axes still fails, and every quantity keeps the dimensional rule.</p>
+</div>
+<h2 id="srtj-docs-switch-causes-rows">Rows still on the wrong side</h2>
+<p id="srtj-docs-switch-causes-rows-empty">One row is on the wrong side of the bar in
+the measurement at <code>a942ed6df</code>: sheet row <code>S0010</code>, the
+flux-surface- and time-averaged normalized perturbed parallel magnetic field
+magnitude, which the disagreement sheet labels acceptable. Pass 1 refines it, pass 2
+does not. That single refinement is what fails the bar.</p>
+<h2 id="srtj-docs-switch-causes-remeasured">The bar's populations at the shipping commit</h2>
+<table id="srtj-docs-switch-causes-remeasured-table">
+<tbody>
+<tr><td>pass</td><td>1</td><td>2</td></tr>
+<tr><td>link-defect rows refined</td><td>19 / 19</td><td>19 / 19</td></tr>
+<tr><td>acceptable rows refined</td><td>1 / 30</td><td>0 / 30</td></tr>
+<tr><td>meets the bar</td><td>no</td><td>yes</td></tr>
+</tbody>
+</table>
+<p id="srtj-docs-switch-causes-remeasured-note">Each cell counts the bar's own
+populations: the 19 disagreement rows labelled link defects and the 30 labelled
+acceptable. The other 28 of the 77 measured rows carry no label in the disagreement
+sheet, so they enter no count here.</p>
+<p id="srtj-docs-switch-causes-remeasured-revision">These switch figures were
+measured at <code>a942ed6df</code>, the commit that ships, on 2026-10-24. The dump
+was loaded only after the login node's 1-minute load average fell below 30: the gate
+polled once a minute, read 70.67 at the start and 120.80 at its highest, and opened
+at 26.71 after 34 minutes of waiting, inside the 40 minutes the brief allowed. The
+dump loaded into node-local temporary storage and the archive returned all 77 of its
+77 items; the judging passes took a little over three minutes each and the
+measurement spent 0.024066 USD.</p>
+<p id="srtj-docs-switch-causes-measured-revision">Every other figure in
+this fragment was measured at <code>2f9b8cd02f78</code>: the replay, the matched-answer
+scoring, the gate and the negative control. Only the switch measurement postdates it,
+at <code>a942ed6df</code>, and no source file changed between the two, so the code
+both ran against is the code in the tree. The commit that carries this fragment
+changes documentation only, so the measured code is still the shipped code.</p>
+<h2 id="srtj-docs-switch-causes-replay">The veto's recall after the fix</h2>
+<p id="srtj-docs-switch-causes-replay-note">The replay asks the shipped criterion
+over the 46 recorded firings, the 60 planted contradictions and the 20 planted
+controls, on two passes. The bar is 59 of the 60 planted contradictions firing, with
+<code>contradicts-354</code> named as the accepted gap and a miss on any other row
+failing it; no more than 3 of the 46 recorded firings may fire; and no planted
+control may fire.</p>
+<table id="srtj-docs-switch-causes-replay-table">
+<thead><tr><th>pass</th><th>recorded still firing</th><th>planted contradictions</th><th>missed row</th><th>controls fired</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>3 / 46</td><td>59 / 60</td><td>contradicts-354</td><td>0 / 20</td></tr>
+<tr><td>2</td><td>3 / 46</td><td>59 / 60</td><td>contradicts-354</td><td>0 / 20</td></tr>
+</tbody>
+</table>
+<p id="srtj-docs-switch-causes-replay-miss">The one missed row is "Calibration
+assumes a quadratic field-current relation instead of a linear one." Its claim was
+sampled ten times through the shipped question, and every stored answer is scored by
+the base veto, as it stands on main, and by the shipped rule, which vetoes when the
+contradiction mass reaches the cutoff and does not trail the silence mass. The base
+fires on 7 of the 10 and the shipped rule on 1; every shipped firing is also a base
+firing. The row is not recovered by asking the judge again either: the re-ask rule
+that was measured and then dropped put all eight of these answers that sat at the
+cutoff back to the judge, and not one second reading denied the claim. The miss is
+therefore the judge's reading rather than a rule that needs a wider net, and it is
+the gap the lead accepted by row id.</p>
+<table id="srtj-docs-switch-causes-replay-miss-table">
+<thead><tr><th>sample</th><th>choice</th><th>contradicts</th><th>says nothing</th><th>supports</th><th>base veto</th><th>shipped veto</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>says nothing</td><td>0.29</td><td>0.42</td><td>0.29</td><td>does not fire</td><td>does not fire</td></tr>
+<tr><td>2</td><td>says nothing</td><td>0.25</td><td>0.53</td><td>0.22</td><td>does not fire</td><td>does not fire</td></tr>
+<tr><td>3</td><td>says nothing</td><td>0.31</td><td>0.46</td><td>0.23</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>4</td><td>says nothing</td><td>0.31</td><td>0.40</td><td>0.29</td><td>does not fire</td><td>does not fire</td></tr>
+<tr><td>5</td><td>says nothing</td><td>0.25</td><td>0.45</td><td>0.30</td><td>does not fire</td><td>does not fire</td></tr>
+<tr><td>6</td><td>says nothing</td><td>0.33</td><td>0.54</td><td>0.13</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>7</td><td>says nothing</td><td>0.33</td><td>0.47</td><td>0.20</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>8</td><td>contradicts</td><td>0.51</td><td>0.44</td><td>0.05</td><td>fires</td><td>fires</td></tr>
+<tr><td>9</td><td>says nothing</td><td>0.40</td><td>0.45</td><td>0.15</td><td>fires</td><td>does not fire</td></tr>
+<tr><td>10</td><td>says nothing</td><td>0.31</td><td>0.52</td><td>0.17</td><td>fires</td><td>does not fire</td></tr>
+<tr><td colspan="5">samples fired</td><td>7 / 10</td><td>1 / 10</td></tr>
+</tbody>
+</table>
+<p id="srtj-docs-switch-causes-replay-miss-controls">The two veto columns are a
+re-score of the ten stored probability distributions, not a fresh sampling: the ten
+answers are the ones the question returned, and the field-label change and the
+withdrawn settlements do not touch this claim's answer. Sample 8 is the only one whose
+leading choice denies the claim, so it is the only sample the shipped rule fires on.</p>
+
+<figure id="srtj-docs-switch-causes-replay-miss-figure">
+<img src="/imas-codex/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg" alt="Contradiction and says-nothing masses for ten samples of the missed row, and the two firing counts">
+<figcaption>Ten samples of the one missed row. Grey is the judge's "says nothing"
+mass and blue its "contradicts" mass; a ring marks a sample the base veto fires on.
+The base fires whenever the contradiction mass reaches 0.30, which is 7 of 10 here.
+The shipped rule also requires the contradiction mass not to trail the silence mass,
+so it fires on sample 8 alone, labelled above: that is the only answer whose leading
+choice denies the claim. The right panel counts both vetoes. Every shipped firing is
+a base firing.</figcaption>
+</figure>
+
+<h2 id="srtj-docs-switch-causes-tests">Tests and the negative control</h2>
+<p id="srtj-docs-switch-causes-tests-head">The gate is the three test files the
+change can reach. The base arm is an archived tree of main at
+<code>40a5898071</code>, the head arm is the worktree at
+<code>2f9b8cd02f78</code>. On main the three collect 90 tests: 71 pass, 19 are
+marker-deselected, none fails. At the head they collect 106: 88 pass, 18 are
+marker-deselected, none fails. The head collects 16 more tests than main: the new
+coverage for the narrowed veto, the field-label settlement, the scope settlement, the
+coordinate exemption and the claim reader. None of them covers the re-ask, because the
+lead dropped that rule and its four tests with it. Five of the veto file's functions
+went with the two settlements that were withdrawn, so the head carries fewer tests than
+an earlier head did.</p>
+<p id="srtj-docs-switch-causes-tests-control">The declared mutation is to withdraw the
+coordinate exemption, leaving the tests unchanged: <code>_names_a_position</code>
+returns False for every name in a copy of the head tree at
+<code>2f9b8cd02f78</code>. The gate then fails 2 tests, the coordinate that states its
+frame and the coordinate without a frame, with 86 passing, and exits 1. The 2 failures
+are the exemption's own tests, so the mutation reaches the exemption and nothing else.
+An earlier mutation returning the narrowed veto criterion to its former form failed 10
+tests and exited 1.</p>
+<h2 id="srtj-docs-switch-causes-spend">Spend</h2>
+<p id="srtj-docs-switch-causes-spend-line">Switch measurement at the shipping commit 0.024066 USD, the round-two switch measurement 0.024066 USD, the earlier veto replay 0.019192 USD, this round's replay 0.018181 USD, the second readings of the ten stored answers 0.000517 USD, diagnosis and sampling probes at most 0.020000 USD; total upper bound 0.106022 USD against the 1.00 USD ceiling. The aborted measurement attempts and the load-gate waits made no Jev call, so they add nothing.</p>
+</body>
+</html>
