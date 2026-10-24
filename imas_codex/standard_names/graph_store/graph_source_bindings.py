@@ -11,16 +11,6 @@ from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import NameStage
-
-from .graph_foundation import (
-    _SETTLED_SOURCE_BINDING_STAGES,
-    _STABLE_BINDING_NAME_STAGES,
-    _TERMINAL_BINDING_NAME_STAGES,
-    _compute_link_status,
-    _TransactionQuery,
-    logger,
-)
 
 
 def write_enrichment_results(
@@ -52,7 +42,7 @@ def write_enrichment_results(
 
     results, skipped = filter_protected(results, override=override)
     if skipped:
-        logger.warning(
+        services.logger.warning(
             "write_enrichment_results: stripped protected fields from %d name(s): %s",
             len(skipped),
             ", ".join(skipped[:5]),
@@ -60,7 +50,7 @@ def write_enrichment_results(
     if not results:
         return 0
 
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         gc.query(
             """
             UNWIND $batch AS b
@@ -82,13 +72,13 @@ def write_enrichment_results(
                     "links": r.get("links") or None,
                     "validity_domain": r.get("validity_domain"),
                     "constraints": r.get("constraints") or None,
-                    "link_status": _compute_link_status(r.get("links")),
+                    "link_status": services._compute_link_status(r.get("links")),
                 }
                 for r in results
             ],
         )
 
-    logger.info("Enriched %d StandardName nodes", len(results))
+    services.logger.info("Enriched %d StandardName nodes", len(results))
     return len(results)
 
 
@@ -154,7 +144,7 @@ def _source_compose_hint_decision(
         source_id=source_id,
         replace=replace,
         attempt_cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
-        terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+        terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
     )
     return dict(rows[0]) if rows else {"decision": "missing_source", "id": None}
 
@@ -176,27 +166,27 @@ def set_source_compose_hint(
     live-binding predicates. A claim turnover between classification and write
     therefore refuses the update rather than steering an in-flight worker.
     """
-    source_id, source_path = _exact_dd_source_id(dd_path)
+    source_id, source_path = services._exact_dd_source_id(dd_path)
     hint = str(hint).strip()
     reason = str(reason).strip()
     if not hint:
         raise ValueError("source-hint requires a non-empty hint")
     if not reason:
         raise ValueError("source-hint requires a non-empty reason")
-    if len(hint) > _MAX_SOURCE_COMPOSE_HINT_CHARS:
+    if len(hint) > services._MAX_SOURCE_COMPOSE_HINT_CHARS:
         raise ValueError(
-            f"source hint exceeds {_MAX_SOURCE_COMPOSE_HINT_CHARS} characters"
+            f"source hint exceeds {services._MAX_SOURCE_COMPOSE_HINT_CHARS} characters"
         )
-    if len(reason) > _MAX_SOURCE_COMPOSE_HINT_REASON_CHARS:
+    if len(reason) > services._MAX_SOURCE_COMPOSE_HINT_REASON_CHARS:
         raise ValueError(
             "source hint reason exceeds "
-            f"{_MAX_SOURCE_COMPOSE_HINT_REASON_CHARS} characters"
+            f"{services._MAX_SOURCE_COMPOSE_HINT_REASON_CHARS} characters"
         )
 
     own = gc is None
-    client = GraphClient() if own else gc
+    client = services.GraphClient() if own else gc
     try:
-        current = _source_compose_hint_decision(
+        current = services._source_compose_hint_decision(
             client,
             source_id=source_id,
             replace=replace,
@@ -243,7 +233,7 @@ def set_source_compose_hint(
             reason=reason,
             replace=replace,
             attempt_cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
-            terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+            terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
         )
         if rows:
             result.update(
@@ -253,7 +243,7 @@ def set_source_compose_hint(
             )
             return result
 
-        latest = _source_compose_hint_decision(
+        latest = services._source_compose_hint_decision(
             client,
             source_id=source_id,
             replace=replace,
@@ -466,11 +456,13 @@ def merge_standard_name_sources(
     if not sources:
         return 0
 
-    invalid = {s.get("source_type") for s in sources} - _VALID_PIPELINE_SOURCE_TYPES
+    invalid = {
+        s.get("source_type") for s in sources
+    } - services._VALID_PIPELINE_SOURCE_TYPES
     if invalid:
         raise ValueError(
             f"Invalid source_type(s) for pipeline: {invalid}. "
-            f"Only {_VALID_PIPELINE_SOURCE_TYPES} are valid."
+            f"Only {services._VALID_PIPELINE_SOURCE_TYPES} are valid."
         )
 
     # Birth-invariant: a 'dd' source with no dd_path cannot have a FROM_DD_PATH
@@ -484,7 +476,7 @@ def merge_standard_name_sources(
     valid_sources: list[dict] = []
     for s in sources:
         if s.get("source_type") == "dd" and not s.get("dd_path"):
-            logger.warning(
+            services.logger.warning(
                 "merge_standard_name_sources: skipping dd source %r — "
                 "no dd_path supplied; writing would create an orphan "
                 "(birth invariant violation).",
@@ -499,8 +491,8 @@ def merge_standard_name_sources(
     if not sources:
         return 0
 
-    with GraphClient() as gc:
-        sources = _pin_dd_source_snapshots(
+    with services.GraphClient() as gc:
+        sources = services._pin_dd_source_snapshots(
             gc, sources, default_dd_version=default_dd_version
         )
         result = gc.query(
@@ -596,7 +588,7 @@ def claim_standard_name_source_batch(
     id, source_id, source_type, batch_key, description.
     """
     token = str(uuid.uuid4())
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         # Step 1: Claim
         gc.query(
             """
@@ -697,16 +689,16 @@ def claim_explicit_standard_name_sources(
     superseded or exhausted identities remain claimable.
     """
     if not source_ids:
-        return SourceClaimResult([], withheld=[])
+        return services.SourceClaimResult([], withheld=[])
     token = str(uuid.uuid4())
     sns_ids = [f"dd:{source_id}" for source_id in dict.fromkeys(source_ids)]
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         rows = gc.query(
-            _EXPLICIT_SOURCE_CLAIM_QUERY,
+            services._EXPLICIT_SOURCE_CLAIM_QUERY,
             ids=sns_ids,
             token=token,
             timeout=timeout_minutes,
-            settled_stages=sorted(_SETTLED_SOURCE_BINDING_STAGES),
+            settled_stages=sorted(services._SETTLED_SOURCE_BINDING_STAGES),
         )
     claimed: list[dict[str, Any]] = []
     withheld: list[dict[str, Any]] = []
@@ -727,7 +719,7 @@ def claim_explicit_standard_name_sources(
                 }
             )
     if withheld:
-        logger.warning(
+        services.logger.warning(
             "Withheld %d explicit source claim conflict(s): %s",
             len(withheld),
             ", ".join(
@@ -736,7 +728,7 @@ def claim_explicit_standard_name_sources(
                 for entry in withheld
             ),
         )
-    return SourceClaimResult(claimed, withheld=withheld)
+    return services.SourceClaimResult(claimed, withheld=withheld)
 
 
 def _complete_source_fences(
@@ -781,7 +773,7 @@ def _guard_failed_source_reasons(batch: list[dict[str, Any]], *, services: Any) 
     for item in batch:
         if item.get("status") != "failed":
             continue
-        item["last_error"] = _require_failure_reason(
+        item["last_error"] = services._require_failure_reason(
             item.get("sns_id"), item.get("last_error")
         )
 
@@ -879,7 +871,7 @@ def _lock_claimed_name_bindings(
     query runs through the caller's transaction, a later rich-write failure
     rolls the release back with every other graph effect.
     """
-    attachment_refusals = _guard_existing_target_pairings(
+    attachment_refusals = services._guard_existing_target_pairings(
         gc, batch, targets_may_be_missing=allow_missing
     )
     if attachment_refusals:
@@ -1056,16 +1048,16 @@ def _lock_claimed_name_bindings(
         batch=batch,
         allow_own_pending=allow_own_pending_reservation,
         allow_dead_end_revival=allow_dead_end_revival,
-        stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
+        stable_stages=sorted(services._STABLE_BINDING_NAME_STAGES),
         revivable_stages=sorted(
             {
-                NameStage.superseded.value,
-                NameStage.exhausted.value,
+                services.NameStage.superseded.value,
+                services.NameStage.exhausted.value,
             }
         ),
-        terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
-        pending_stage=NameStage.pending.value,
-        reviewable_stage=NameStage.drafted.value,
+        terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
+        pending_stage=services.NameStage.pending.value,
+        reviewable_stage=services.NameStage.drafted.value,
     )
 
     outcomes_by_source = {row["id"]: row.get("outcome", "winner") for row in rows}
@@ -1121,7 +1113,7 @@ def _lock_claimed_name_bindings(
             )
             """,
             batch=fenced_batch,
-            pending_stage=NameStage.pending.value,
+            pending_stage=services.NameStage.pending.value,
         )
 
     collision_ids = {
@@ -1162,13 +1154,13 @@ def _lock_claimed_name_bindings(
                 END
             """,
             batch=collision_batch,
-            stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
+            stable_stages=sorted(services._STABLE_BINDING_NAME_STAGES),
         )
     for row in rows:
         if row.get("outcome", "winner") == "winner":
             continue
         reason = attachment_refusals.get(row.get("id") or "")
-        logger.warning(
+        services.logger.warning(
             "Released source %s after %s for candidate %s at name stage %s "
             "(attempt %s retained)%s",
             row.get("id"),
@@ -1191,11 +1183,11 @@ def persist_claimed_source_outcomes(
     complete fence, and terminal failures without a reason, are rejected
     before opening the graph.
     """
-    batch = _complete_source_fences(outcomes)
+    batch = services._complete_source_fences(outcomes)
     if not batch:
         return []
-    _guard_failed_source_reasons(batch)
-    with GraphClient() as gc:
+    services._guard_failed_source_reasons(batch)
+    with services.GraphClient() as gc:
         rows = gc.query(
             """
             UNWIND $batch AS b
@@ -1230,10 +1222,10 @@ def persist_claimed_vocab_gaps(
     source_type: str,
 ) -> list[str]:
     """Write gaps and consume their exact source claims in one transaction."""
-    batch = _complete_source_fences(outcomes)
+    batch = services._complete_source_fences(outcomes)
     if not batch:
         return []
-    _guard_failed_source_reasons(batch)
+    services._guard_failed_source_reasons(batch)
     gaps_by_source: dict[str, list[dict[str, Any]]] = {}
     for gap in gaps:
         source_id = gap.get("source_id")
@@ -1241,10 +1233,10 @@ def persist_claimed_vocab_gaps(
             gaps_by_source.setdefault(source_id, []).append(gap)
 
     winner_ids: list[str] = []
-    with GraphClient() as graph:
+    with services.GraphClient() as graph:
         with graph.session() as session:
             tx = session.begin_transaction()
-            tx_gc = _TransactionQuery(tx)
+            tx_gc = services._TransactionQuery(tx)
             try:
                 locked_rows = tx_gc.query(
                     """
@@ -1359,18 +1351,18 @@ def persist_claimed_attachments(
     """
     batch = [
         {**item, "sn_id": item.get("standard_name")}
-        for item in _complete_source_fences(attachments)
+        for item in services._complete_source_fences(attachments)
         if item.get("standard_name")
     ]
     if not batch:
         return []
     winner_ids: list[str] = []
-    with GraphClient() as graph:
+    with services.GraphClient() as graph:
         with graph.session() as session:
             tx = session.begin_transaction()
-            tx_gc = _TransactionQuery(tx)
+            tx_gc = services._TransactionQuery(tx)
             try:
-                locked_rows = _lock_claimed_name_bindings(
+                locked_rows = services._lock_claimed_name_bindings(
                     tx_gc,
                     batch,
                     allow_missing=False,
@@ -1420,7 +1412,7 @@ def persist_claimed_attachments(
                         RETURN sns.id AS id
                         """,
                         batch=winner_batch,
-                        stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
+                        stable_stages=sorted(services._STABLE_BINDING_NAME_STAGES),
                     )
                     winner_ids = [row["id"] for row in rows]
                     if set(winner_ids) != locked_ids:
@@ -1448,16 +1440,16 @@ def stage_claimed_generated_candidates(
     A rich-write crash therefore leaves a pending, automatically retryable
     reservation rather than a composed source stranded on an incomplete name.
     """
-    batch = _complete_source_fences(candidates)
+    batch = services._complete_source_fences(candidates)
     if not batch:
         return []
     winner_ids: list[str] = []
-    with GraphClient() as graph:
+    with services.GraphClient() as graph:
         with graph.session() as session:
             tx = session.begin_transaction()
-            tx_gc = _TransactionQuery(tx)
+            tx_gc = services._TransactionQuery(tx)
             try:
-                locked_rows = _lock_claimed_name_bindings(
+                locked_rows = services._lock_claimed_name_bindings(
                     tx_gc,
                     batch,
                     allow_missing=True,
@@ -1486,7 +1478,7 @@ def fetch_claimed_source_metadata(token: str, *, services: Any) -> list[dict]:
 
     Returns list of dicts with source + joined metadata.
     """
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         return list(
             gc.query(
                 """
@@ -1528,7 +1520,7 @@ def mark_sources_composed(
     Creates PRODUCED_NAME relationship to the StandardName.
     Returns count of updated sources.
     """
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         result = gc.query(
             """
             UNWIND $source_ids AS sid
@@ -1567,7 +1559,7 @@ def mark_sources_attached(
     Exact-fence verified. Creates PRODUCED_NAME relationship.
     Returns count of updated sources.
     """
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         result = gc.query(
             """
             UNWIND $source_ids AS sid
@@ -1647,7 +1639,7 @@ def classify_parked_source(evidence: dict[str, Any], *, services: Any) -> str:
     if str(evidence.get("lifecycle_status") or "").strip() == "removed":
         return "upstream_quantity_removed"
     reason = str(evidence.get("last_error") or "").strip()
-    if reason and reason != _COMPOSE_CAP_REASON:
+    if reason and reason != services._COMPOSE_CAP_REASON:
         if "vocabulary gap" in reason.lower():
             return "vocabulary_gap"
         return "attempt_budget_exhausted"
@@ -1674,8 +1666,8 @@ def mark_sources_failed(
     one is refused before the graph is opened rather than parking an
     untriageable source.
     """
-    error = _require_failure_reason(source_ids, error)
-    with GraphClient() as gc:
+    error = services._require_failure_reason(source_ids, error)
+    with services.GraphClient() as gc:
         result = gc.query(
             """
             UNWIND $source_ids AS sid
@@ -1733,16 +1725,16 @@ def record_parked_dispositions(
     end with a row carrying an unclassified disposition.
     """
     own = gc is None
-    client = GraphClient() if own else gc
+    client = services.GraphClient() if own else gc
     try:
         written: list[dict[str, str]] = []
         for row in rows:
-            disposition = classify_parked_source(row)
-            if disposition not in CAP_PARKED_DISPOSITIONS:
+            disposition = services.classify_parked_source(row)
+            if disposition not in services.CAP_PARKED_DISPOSITIONS:
                 raise ValueError(f"row {row['id']!r} has no triage disposition")
             written.append({"id": row["id"], "disposition": disposition})
         if not dry_run and written:
-            client.query(_CAP_DISPOSITION_WRITE, rows=written)
+            client.query(services._CAP_DISPOSITION_WRITE, rows=written)
         counts = Counter(row["disposition"] for row in written)
         return {
             "parked": len(written),
@@ -1768,15 +1760,15 @@ def disposition_parked_sources(
     predates that write path or was parked around it.
     """
     own = gc is None
-    client = GraphClient() if own else gc
+    client = services.GraphClient() if own else gc
     try:
         rows = [
             dict(r)
             for r in client.query(
-                _CAP_PARKED_QUERY, cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS
+                services._CAP_PARKED_QUERY, cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS
             )
         ]
-        return record_parked_dispositions(rows, dry_run=dry_run, gc=client)
+        return services.record_parked_dispositions(rows, dry_run=dry_run, gc=client)
     finally:
         if own:
             client.close()
@@ -1815,13 +1807,15 @@ def record_dispositions_for_undisposed_parks(
     parks nothing and a tick that parks an already-disposed row both do nothing.
     """
     own = gc is None
-    client = GraphClient() if own else gc
+    client = services.GraphClient() if own else gc
     try:
         rows = [
             dict(r)
-            for r in client.query(_CAP_UNDISPOSED_QUERY, cap_reason=_COMPOSE_CAP_REASON)
+            for r in client.query(
+                services._CAP_UNDISPOSED_QUERY, cap_reason=services._COMPOSE_CAP_REASON
+            )
         ]
-        return record_parked_dispositions(rows, dry_run=dry_run, gc=client)
+        return services.record_parked_dispositions(rows, dry_run=dry_run, gc=client)
     finally:
         if own:
             client.close()
@@ -1856,12 +1850,13 @@ def census_parked_dispositions(
     then a statement about the graph and not about the classifier.
     """
     own = gc is None
-    client = GraphClient() if own else gc
+    client = services.GraphClient() if own else gc
     try:
         rows = [
             dict(r)
             for r in client.query(
-                _CAP_DISPOSITION_READBACK, cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS
+                services._CAP_DISPOSITION_READBACK,
+                cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
             )
         ]
     finally:
@@ -1872,7 +1867,7 @@ def census_parked_dispositions(
     unexpected = sorted(
         r["id"]
         for r in rows
-        if r["disposition"] and r["disposition"] not in CAP_PARKED_DISPOSITIONS
+        if r["disposition"] and r["disposition"] not in services.CAP_PARKED_DISPOSITIONS
     )
     return {
         "parked": len(rows),
@@ -1920,7 +1915,7 @@ def retry_failed_sources(
         raise ValueError("a non-empty retry reason is required")
 
     own = gc is None
-    client = GraphClient() if own else gc
+    client = services.GraphClient() if own else gc
     try:
         candidates = list(
             client.query(
@@ -2056,7 +2051,7 @@ def retry_skipped_sources(
         raise ValueError("a non-empty retry reason is required")
 
     own = gc is None
-    client = GraphClient() if own else gc
+    client = services.GraphClient() if own else gc
     try:
         candidates = list(
             client.query(
@@ -2107,7 +2102,7 @@ def retry_skipped_sources(
                 "source_id": row["id"],
                 "previous_status": row["status"],
                 "previous_attempt_count": int(row["attempt_count"]),
-                "previous_error": _skipped_recovery_error(row),
+                "previous_error": services._skipped_recovery_error(row),
                 "previous_skip_reason": row.get("skip_reason"),
                 "previous_skip_reason_detail": row.get("skip_reason_detail"),
                 "event_id": f"source-retry:{uuid.uuid4()}",
@@ -2243,7 +2238,7 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
     """
     if not source_ids:
         return 0
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         result = gc.query(
             """
             UNWIND $source_ids AS sid
@@ -2298,7 +2293,7 @@ def write_skipped_sources(records: list[dict], *, services: Any) -> int:
             }
         )
 
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         result = gc.query(
             """
             UNWIND $sources AS src
@@ -2354,7 +2349,7 @@ def list_skipped_sources(
         where += " AND sns.skip_reason = $reason"
         params["reason"] = reason
 
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         result = gc.query(
             f"""
             MATCH (sns:StandardNameSource)
@@ -2383,7 +2378,7 @@ def get_skipped_source_counts(
         where += " AND sns.source_type = $source_type"
         params["source_type"] = source_type
 
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         result = gc.query(
             f"""
             MATCH (sns:StandardNameSource)
@@ -2403,7 +2398,7 @@ def release_standard_name_source_claims(token: str, *, services: Any) -> int:
     Used for error recovery — release claims so other workers can pick them up.
     Returns count of released sources.
     """
-    with GraphClient() as gc:
+    with services.GraphClient() as gc:
         result = gc.query(
             """
             MATCH (sns:StandardNameSource {claim_token: $token})
@@ -2447,7 +2442,7 @@ def _record_persist_outcome(
 ) -> None:
     """Record one paid-call persist outcome for the (run_id, pool) tallies."""
     key = (run_id or "", pool)
-    entry = _persist_outcomes.setdefault(key, [0, 0])
+    entry = services._persist_outcomes.setdefault(key, [0, 0])
     entry[0] += 1
     if not persisted:
         entry[1] += 1
@@ -2465,7 +2460,7 @@ def persist_outcome_snapshot(
     rid = run_id or ""
     return {
         pool: {"attempts": a, "wasted": w}
-        for (r, pool), (a, w) in _persist_outcomes.items()
+        for (r, pool), (a, w) in services._persist_outcomes.items()
         if r == rid
     }
 
@@ -2473,7 +2468,7 @@ def persist_outcome_snapshot(
 def reset_persist_outcomes(run_id: str | None = None, *, services: Any) -> None:
     """Clear persist-outcome tallies (all runs, or just *run_id*)."""
     if run_id is None:
-        _persist_outcomes.clear()
+        services._persist_outcomes.clear()
         return
-    for key in [k for k in _persist_outcomes if k[0] == (run_id or "")]:
-        del _persist_outcomes[key]
+    for key in [k for k in services._persist_outcomes if k[0] == (run_id or "")]:
+        del services._persist_outcomes[key]
