@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "suite_base_default.log/suite_head_final_default.log and suite_base_graph.log/suite_head_final_graph.log; identical failure-id sets in both arms (20 default, 1 graph), delta empty",
+  "call_site_count": 10,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:claim_generate_name_batch",
+    "imas_codex/standard_names/workers.py:get_source_name_mapping",
+    "imas_codex/standard_names/signed_manifest.py:_lifecycleless_stub_manifest",
+    "imas_codex/standard_names/orphan_sweep.py:_MAX_COMPOSE_CLAIM_ATTEMPTS",
+    "imas_codex/standard_names/budget.py:aggregate_spend_for_run",
+    "imas_codex/standard_names/harmonize.py:stamp_harmonized_families",
+    "imas_codex/standard_names/edit.py:persist_refined_docs",
+    "imas_codex/standard_names/provenance_rebuild.py:normalize_derived_parent_lifecycle",
+    "imas_codex/standard_names/audits.py:_eligible_derived_parent_unit_children",
+    "imas_codex/cli/sn.py:aggregate_spend_for_run"
+  ],
+  "completed_at": "2026-10-24T08:11:00.860Z",
+  "dispatched_at": "2026-10-24T07:50:32Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/cypher_property_check.py",
+      "line": "139",
+      "severity": "non-blocking",
+      "text": "non-blocking: three runtime adjudication rows were re-pointed in a file outside this node's declared write paths; the edit is necessary to keep the named Cypher gate honest and preserves each row's category, property and occurrence count, but it should have been a reported scope blocker or a granted path."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "14626",
+      "severity": "non-blocking",
+      "text": "non-blocking: __wrapped__ now binds the moved decorated implementation, so inspect.signature(graph_ops.get_source_name_mapping) reports a required keyword-only services: Any that the facade never exposed before, and any signature-driven consumer of the facade would advertise or demand that internal plumbing parameter."
+    },
+    {
+      "file": "tests/standard_names/test_seed_expand_claims.py",
+      "line": "794",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only test that asserts the __wrapped__ facade seam covers five claim functions, three of them moved by this node, and it is absent from the recorded 22-file gate, so the seam the fix commit repaired was gated by a probe that left no log."
+    }
+  ],
+  "findings_verified": [
+    {
+      "check": "three rows re-pointed outside the declared write scope; occurrence counts preserved; cypher_property_resumed_head.log is the red control with reason=stale_adjudication",
+      "path": "imas_codex/graph/cypher_property_check.py:139"
+    },
+    {
+      "check": "inspect.signature(graph_ops.get_source_name_mapping) prints (*, rich='bool'=False, services: 'Any') at head",
+      "path": "imas_codex/standard_names/graph_ops.py:14626"
+    },
+    {
+      "check": "ran at head: 5 passed, 21 deselected",
+      "path": "tests/standard_names/test_seed_expand_claims.py:794"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 10 production call site(s)",
+    "diff": "read commit by commit from a701540ca to 2fb03289e; four extraction commits, one wrapped-binding fix, two Cypher-path fixes and two evidence commits, with all 261 non-moved graph_ops definitions byte-identical to base and all 87 moved symbols present.",
+    "done_when": "the done_when names the design's gate files, zero added failures, fresh imports, the Cypher check and three size counts; the manifest records each and its logs reproduce them (suite_base_default.log vs suite_head_final_default.log, suite_base_graph.log vs suite_head_final_graph.log, imports.log, cypher_property_final_head.log).",
+    "goal": "the goal is four graph storage modules holding the design's symbols; all 87 design-mapped symbols (11/11/18/47) are defined in imas_codex/standard_names/graph_store/graph_doc_links.py, graph_docs_persistence.py, graph_cost_and_claims.py and graph_lineage.py, verified against docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.json.",
+    "manifest": "read; it states 22-file default and graph arms with zero added failures, nine fresh imports, the Cypher check 4/4 at 2fb03289e, and 820838 to 607604 bytes, all of which I re-derived.",
+    "write_paths": "read the manifest's declared paths against the diff; six of the seven changed paths are inside them and imas_codex/graph/cypher_property_check.py is not, which is finding 1."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion of my reading to test, because test files were out of scope, so durability rests on pre-existing tests such as tests/standard_names/test_seed_expand_claims.py:794, which I ran at head and which passes 5/5 and would redden on a forwarder without __wrapped__.",
+    "evidence": "the 22 gate files match the design union exactly and suite_head_final_default.log ends \"20 failed, 339 passed\" identically to suite_base_default.log after I recomputed both failure-id sets, but that head arm ran at 4dc25fe52 and the two later Cypher-path commits are outside it.",
+    "fit": "imas_codex/standard_names/graph_store/graph_lineage.py:14 follows the sibling module idiom with a keyword-only services parameter, the forwarders carry the one-line owner docstring the brief asks for, and ruff check is clean on all five changed Python files.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_lineage.py:1 holds all 47 design-mapped lineage symbols while graph_ops.py:1776 keeps the forwarder, and the moved bodies differ from a701540ca:imas_codex/standard_names/graph_ops.py only by services threading and equivalent re-wrapping of Cypher literals whose concatenated text is identical.",
+    "reuse": "the forwarder-plus-__wrapped__ facade already exists 94 times at a701540ca:imas_codex/standard_names/graph_ops.py and the node extends it while reusing _GraphServices at imas_codex/standard_names/graph_ops.py:70 rather than adding a second slot, so no capability is forked.",
+    "scope_discipline": "imas_codex/graph/cypher_property_check.py:139 is outside the six declared write paths, and every other changed path is inside them with no test file touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is four graph storage modules holding the design's symbols; all 87 design-mapped symbols (11/11/18/47) are defined in imas_codex/standard_names/graph_store/graph_doc_links.py, graph_docs_persistence.py, graph_cost_and_claims.py and graph_lineage.py, verified against docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.json.\nVERDICT done_when: the done_when names the design's gate files, zero added failures, fresh imports, the Cypher check and three size counts; the manifest records each and its logs reproduce them (suite_base_default.log vs suite_head_final_default.log, suite_base_graph.log vs suite_head_final_graph.log, imports.log, cypher_property_final_head.log).\nVERDICT write_paths: read the manifest's declared paths against the diff; six of the seven changed paths are inside them and imas_codex/graph/cypher_property_check.py is not, which is finding 1.\nVERDICT manifest: read; it states 22-file default and graph arms with zero added failures, nine fresh imports, the Cypher check 4/4 at 2fb03289e, and 820838 to 607604 bytes, all of which I re-derived.\nVERDICT diff: read commit by commit from a701540ca to 2fb03289e; four extraction commits, one wrapped-binding fix, two Cypher-path fixes and two evidence commits, with all 261 non-moved graph_ops definitions byte-identical to base and all 87 moved symbols present.\nCALL_SITES: imas_codex/standard_names/loop.py:claim_generate_name_batch, imas_codex/standard_names/workers.py:get_source_name_mapping, imas_codex/standard_names/signed_manifest.py:_lifecycleless_stub_manifest, imas_codex/standard_names/orphan_sweep.py:_MAX_COMPOSE_CLAIM_ATTEMPTS, imas_codex/standard_names/budget.py:aggregate_spend_for_run, imas_codex/standard_names/harmonize.py:stamp_harmonized_families, imas_codex/standard_names/edit.py:persist_refined_docs, imas_codex/standard_names/provenance_rebuild.py:normalize_derived_parent_lifecycle, imas_codex/standard_names/audits.py:_eligible_derived_parent_unit_children, imas_codex/cli/sn.py:aggregate_spend_for_run\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_lineage.py:1 holds all 47 design-mapped lineage symbols while graph_ops.py:1776 keeps the forwarder, and the moved bodies differ from a701540ca:imas_codex/standard_names/graph_ops.py only by services threading and equivalent re-wrapping of Cypher literals whose concatenated text is identical.\nSCORE evidence: 16\nJUSTIFICATION evidence: the 22 gate files match the design union exactly and suite_head_final_default.log ends \"20 failed, 339 passed\" identically to suite_base_default.log after I recomputed both failure-id sets, but that head arm ran at 4dc25fe52 and the two later Cypher-path commits are outside it.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: imas_codex/graph/cypher_property_check.py:139 is outside the six declared write paths, and every other changed path is inside them with no test file touched.\nSCORE durability: 13\nJUSTIFICATION durability: the diff adds no assertion of my reading to test, because test files were out of scope, so durability rests on pre-existing tests such as tests/standard_names/test_seed_expand_claims.py:794, which I ran at head and which passes 5/5 and would redden on a forwarder without __wrapped__.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/standard_names/graph_store/graph_lineage.py:14 follows the sibling module idiom with a keyword-only services parameter, the forwarders carry the one-line owner docstring the brief asks for, and ruff check is clean on all five changed Python files.\nSCORE reuse: 20\nJUSTIFICATION reuse: the forwarder-plus-__wrapped__ facade already exists 94 times at a701540ca:imas_codex/standard_names/graph_ops.py and the node extends it while reusing _GraphServices at imas_codex/standard_names/graph_ops.py:70 rather than adding a second slot, so no capability is forked.\nFINDING imas_codex/graph/cypher_property_check.py:139 non-blocking: three runtime adjudication rows were re-pointed in a file outside this node's declared write paths; the edit is necessary to keep the named Cypher gate honest and preserves each row's category, property and occurrence count, but it should have been a reported scope blocker or a granted path.\nFINDING imas_codex/standard_names/graph_ops.py:14626 non-blocking: __wrapped__ now binds the moved decorated implementation, so inspect.signature(graph_ops.get_source_name_mapping) reports a required keyword-only services: Any that the facade never exposed before, and any signature-driven consumer of the facade would advertise or demand that internal plumbing parameter.\nFINDING tests/standard_names/test_seed_expand_claims.py:794 non-blocking: the only test that asserts the __wrapped__ facade seam covers five claim functions, three of them moved by this node, and it is absent from the recorded 22-file gate, so the seam the fix commit repaired was gated by a probe that left no log.\n",
+  "review_run_id": "r-20261024T075009944587-review-of-srtj-graph-ops-split-steps4-7-2fb03289e473",
+  "reviewed_base_sha": "a701540ca47f1211101ab1ec429f08c027067bc9",
+  "reviewed_head_sha": "2fb03289e4736b306aa2681b007dabf302df8ddb",
+  "reviewed_run_id": "r-20261024T071022353681-srtj-graph-ops-split-steps4-7",
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T08:13:57.192439+00:00",
+  "total": 96
+}
