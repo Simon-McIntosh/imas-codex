@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: baseline_suite (revision cc8592b71) records exit_status 0 and failure_count 0 over logs/gate-base.log (44 passed, 1 deselected), after_suite (revision c40ce88fd) records exit_status 0 and failure_count 0 over logs/gate-head.log (59 passed, 1 deselected); the difference is zero added failures, no ids.",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/doc_links.py:185",
+    "imas_codex/standard_names/docs_gates.py:499"
+  ],
+  "completed_at": "2026-10-24T11:43:30.563Z",
+  "dispatched_at": "2026-10-24T11:29:59Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T110815455703-srtj-doc-links-units-owner/logs/gate-head.log",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the `# module:` header in gate-head.log, gate-base.log and negative-control.log names the worker worktree module (/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-doc-links-units-owner/imas_codex/standard_names/doc_links.py) rather than each arm's own tree, while manifest.md:15 records measurement_module as /tmp/.../gate/head/imas_codex/standard_names/doc_links.py, and the base tree at /tmp/.../gate/base contains no imas_codex/ at all; no log line therefore evidences which module an arm imported, though the results themselves stand because the head arm's explicit PYTHONPATH plus its 15 new passing tests prove the head tree ran and the control's 4 failures prove the mutation took effect."
+    },
+    {
+      "file": "/tmp/reckon-crew-scratch/r-20261024T110815455703-srtj-doc-links-units-owner/gate",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: 542 MB of the run's scratch trees (head, control, bt-head, bt-head2, bt-base, bt-control and a drained base) remain under the run's own TMPDIR path after the run reported complete, although the brief requires the scratch to be removed before finishing."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/docs_gates.py:499 calls find_prose_bracket_phrases (public entry point imas_codex/standard_names/doc_links.py:185) from _bracketed_prose_phrase, which the documentation gate calls at docs_gates.py:551.",
+    "diff": "read both commits against base f657a98dc: c40ce88fd rewrites the unit test to validate_unit and deletes the sets and the dead interval branch (+10/-48 in doc_links.py, +38 test lines), d3b8c214b adds the 15-line evidence fragment; nothing else changed.",
+    "done_when": "the five conditions are each observable: no local vocabulary or dead branch remains in doc_links.py (diff hunk at line 100), 15 new tests in tests/standard_names/test_doc_links_units.py, base 44 passed and head 59 passed both at EXIT=0 (logs/gate-base.log, logs/gate-head.log), control 4 failed 11 passed at EXIT=1 (logs/negative-control.log), and the evidence fragment records the change.",
+    "goal": "the node goal is to make the prose-bracket predicate take its unit verdict from the units owner and delete the local vocabulary and the dead numeric branch; imas_codex/standard_names/doc_links.py:10 imports validate_unit and the diff deletes _UNIT_SYMBOLS, _UNIT_PREFIXES, _NUMERIC_INTERVAL_RE and its branch, so the goal is met.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T110815455703-srtj-doc-links-units-owner/manifest.md; status complete, commits c40ce88fd and d3b8c214b, after_suite 59 passed EXIT=0 and baseline_suite 44 passed EXIT=0 with zero failure ids, control 4 failed EXIT=1; the counts match the logs read, but its measurement_module field is contradicted by the gate log headers (finding 1).",
+    "write_paths": "read the brief's three declared paths (imas_codex/standard_names/doc_links.py, tests/standard_names/test_doc_links_units.py, docs/evidence/fragments/sn-review-through-jev/srtj-doc-links-units-owner.html); git diff --stat f657a98dc d3b8c214b lists exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_doc_links_units.py:15 fails when the local set is restored without the owner unit (logs/negative-control.log reddens S, ohm, kohm and the multi-bracket tuple), but no test reddens if a test-local set were re-added beside the validate_unit call, so 'no unit vocabulary of its own' rests on the diff rather than a guard.",
+    "evidence": "the gate's arms and control are recorded and their summary lines match the logs (44 passed / 59 passed / 4 failed at EXIT=1), but the logs' `# module:` headers name the worker worktree rather than each arm's tree and the /tmp gate/base tree holds no imas_codex/, so the recorded provenance cannot be reproduced from the logs even though head's 15 new tests and the control's 4 failures prove those two arms ran their intended code.",
+    "fit": "imas_codex/standard_names/doc_links.py:10 takes a module-level import as imas_codex/standard_names/docs_gates.py already does for the units package, the private helpers keep the file's shape and the added names carry no plan, sprint or version label.",
+    "goal_fidelity": "imas_codex/standard_names/doc_links.py:122 decides each factor with validate_unit(factor) and the diff deletes _UNIT_SYMBOLS, _UNIT_PREFIXES, _NUMERIC_INTERVAL_RE and the numeric-interval branch, so the bracket check reads its unit verdicts from imas_codex/units/__init__.py:266 and holds no vocabulary of its own.",
+    "reuse": "the change deletes the duplicate vocabulary and delegates to imas_codex/units/__init__.py:266 validate_unit, which wraps normalize_unit_symbol at :155; a search of imas_codex for a second unit-vocabulary owner found only that pair, so the addition extends the owner rather than forking it.",
+    "scope_discipline": "git diff --stat f657a98dc d3b8c214b lists only imas_codex/standard_names/doc_links.py, tests/standard_names/test_doc_links_units.py and the evidence fragment, all declared write paths, with no incidental edit and no concurrent node's file touched."
+  },
+  "node": "review-of-srtj-doc-links-units-owner-d3b8c214bcb3",
+  "node:reviewed": "srtj-doc-links-units-owner",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make the prose-bracket predicate take its unit verdict from the units owner and delete the local vocabulary and the dead numeric branch; imas_codex/standard_names/doc_links.py:10 imports validate_unit and the diff deletes _UNIT_SYMBOLS, _UNIT_PREFIXES, _NUMERIC_INTERVAL_RE and its branch, so the goal is met.\nVERDICT done_when: the five conditions are each observable: no local vocabulary or dead branch remains in doc_links.py (diff hunk at line 100), 15 new tests in tests/standard_names/test_doc_links_units.py, base 44 passed and head 59 passed both at EXIT=0 (logs/gate-base.log, logs/gate-head.log), control 4 failed 11 passed at EXIT=1 (logs/negative-control.log), and the evidence fragment records the change.\nVERDICT write_paths: read the brief's three declared paths (imas_codex/standard_names/doc_links.py, tests/standard_names/test_doc_links_units.py, docs/evidence/fragments/sn-review-through-jev/srtj-doc-links-units-owner.html); git diff --stat f657a98dc d3b8c214b lists exactly those three files and nothing else.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T110815455703-srtj-doc-links-units-owner/manifest.md; status complete, commits c40ce88fd and d3b8c214b, after_suite 59 passed EXIT=0 and baseline_suite 44 passed EXIT=0 with zero failure ids, control 4 failed EXIT=1; the counts match the logs read, but its measurement_module field is contradicted by the gate log headers (finding 1).\nVERDICT diff: read both commits against base f657a98dc: c40ce88fd rewrites the unit test to validate_unit and deletes the sets and the dead interval branch (+10/-48 in doc_links.py, +38 test lines), d3b8c214b adds the 15-line evidence fragment; nothing else changed.\nCALL_SITES: imas_codex/standard_names/doc_links.py:185, imas_codex/standard_names/docs_gates.py:499\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/doc_links.py:122 decides each factor with validate_unit(factor) and the diff deletes _UNIT_SYMBOLS, _UNIT_PREFIXES, _NUMERIC_INTERVAL_RE and the numeric-interval branch, so the bracket check reads its unit verdicts from imas_codex/units/__init__.py:266 and holds no vocabulary of its own.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate's arms and control are recorded and their summary lines match the logs (44 passed / 59 passed / 4 failed at EXIT=1), but the logs' `# module:` headers name the worker worktree rather than each arm's tree and the /tmp gate/base tree holds no imas_codex/, so the recorded provenance cannot be reproduced from the logs even though head's 15 new tests and the control's 4 failures prove those two arms ran their intended code.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat f657a98dc d3b8c214b lists only imas_codex/standard_names/doc_links.py, tests/standard_names/test_doc_links_units.py and the evidence fragment, all declared write paths, with no incidental edit and no concurrent node's file touched.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_doc_links_units.py:15 fails when the local set is restored without the owner unit (logs/negative-control.log reddens S, ohm, kohm and the multi-bracket tuple), but no test reddens if a local set were re-added beside the validate_unit call, so 'no unit vocabulary of its own' rests on the diff rather than a guard.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/doc_links.py:10 takes a module-level import as imas_codex/standard_names/docs_gates.py already does for the units package, the private helpers keep the file's shape and the added names carry no plan, sprint or version label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change deletes the duplicate vocabulary and delegates to imas_codex/units/__init__.py:266 validate_unit, which wraps normalize_unit_symbol at :155; a search of imas_codex for a second unit-vocabulary owner found only that pair, so the addition extends the owner rather than forking it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T110815455703-srtj-doc-links-units-owner/logs/gate-head.log:5 non-blocking: the `# module:` header in gate-head.log, gate-base.log and negative-control.log names the worker worktree module rather than each arm's own tree, while manifest.md:15 records measurement_module as the /tmp gate/head path, and the base tree contains no imas_codex/ at all, so no log line evidences which module an arm imported; the results stand because the head arm's explicit PYTHONPATH plus its 15 new passing tests prove the head tree ran and the control's 4 failures prove the mutation took effect.\nFINDING /tmp/reckon-crew-scratch/r-20261024T110815455703-srtj-doc-links-units-owner/gate:1 non-blocking: 542 MB of the run's scratch trees remain under the run's own TMPDIR path after the run reported complete, although the brief requires the scratch to be removed before finishing.",
+  "review_run_id": "r-20261024T112921653195-review-of-srtj-doc-links-units-owner-d3b8c214bcb3",
+  "reviewed_base_sha": "f657a98dc491189be7c310ec8065b5eea057868e",
+  "reviewed_head_sha": "d3b8c214bcb3f6a0b2e00d072d0856e633274506",
+  "reviewed_run_id": "r-20261024T110815455703-srtj-doc-links-units-owner",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T11:55:00+00:00",
+  "total": 111
+}
