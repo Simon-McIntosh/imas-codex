@@ -18,6 +18,11 @@
   "completed_at": "2026-10-24T11:48:54.293Z",
   "dispatched_at": "2026-10-24T11:27:51Z",
   "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "evidence-page wording on a pure move; the gate logs and the review's own scan carry the correct figures",
+      "recorded_at": "2026-10-24T20:10:39.207348+00:00"
+    },
     "1": {
       "kind": "folded",
       "node": "srtj-graph-store-structure",
