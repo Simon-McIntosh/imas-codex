@@ -18,6 +18,13 @@
     }
   },
   "dispatched_at": "2026-10-24T19:49:57Z",
+  "finding_dispositions": {
+    "1": {
+      "kind": "folded",
+      "node": "shc-drift-scope-hardening",
+      "recorded_at": "2026-10-24T20:03:24.419210+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_scoped_global_maintenance.py",
