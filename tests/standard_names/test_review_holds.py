@@ -3,18 +3,10 @@
 from __future__ import annotations
 
 import logging
-import os
-import shutil
-import socket
-import subprocess
-import tempfile
 from collections.abc import Iterator
-from pathlib import Path
 
 import pytest
-from neo4j import GraphDatabase
 
-from imas_codex.graph import temp_neo4j
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import graph_ops
 from imas_codex.standard_names.review import holds
@@ -22,92 +14,8 @@ from imas_codex.standard_names.review import holds
 pytestmark = [pytest.mark.graph, pytest.mark.timeout(180)]
 
 
-def _free_port() -> int:
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        return int(sock.getsockname()[1])
-
-
-@pytest.fixture(scope="module")
-def disposable_neo4j() -> Iterator[str]:
-    """Start one empty graph, and refuse any connection to the project graph."""
-    scratch = Path(os.environ["TMPDIR"])
-    with tempfile.TemporaryDirectory(prefix="review-holds-", dir=scratch) as directory:
-        root = Path(directory)
-        for part in ("data", "logs", "conf", "run", "tmp"):
-            (root / part).mkdir()
-        bolt_port, http_port = _free_port(), _free_port()
-        temp_neo4j.write_temp_neo4j_conf(root / "conf", bolt_port, http_port)
-        image = temp_neo4j._neo4j_image()
-        command = [
-            "apptainer",
-            "exec",
-            "--bind",
-            f"{root}/data:/data",
-            "--bind",
-            f"{root}/logs:/logs",
-            "--bind",
-            f"{root}/conf:/var/lib/neo4j/conf",
-            "--bind",
-            f"{root}/run:/var/lib/neo4j/run",
-            "--bind",
-            f"{root}/tmp:/tmp",
-            "--writable-tmpfs",
-            str(image),
-            "neo4j",
-            "console",
-        ]
-        server_log = root / "logs" / "neo4j-temp.log"
-        with server_log.open("w") as output:
-            process = subprocess.Popen(
-                command,
-                stdout=output,
-                stderr=subprocess.STDOUT,
-                start_new_session=True,
-            )
-        try:
-            temp_neo4j._wait_for_bolt_ready(process, bolt_port, server_log)
-            uri = f"bolt://127.0.0.1:{bolt_port}"
-            with GraphDatabase.driver(uri, auth=None) as driver:
-                records, _, _ = driver.execute_query(
-                    "MATCH (node) RETURN count(node) AS n"
-                )
-                assert records[0]["n"] == 0
-            previous = {
-                key: os.environ.get(key)
-                for key in (
-                    "NEO4J_URI",
-                    "NEO4J_PASSWORD",
-                    "IMAS_CODEX_TEST_NEO4J_URI",
-                    "IMAS_CODEX_TEST_NEO4J_EPHEMERAL",
-                )
-            }
-            os.environ.update(
-                {
-                    "NEO4J_URI": uri,
-                    "NEO4J_PASSWORD": "",
-                    "IMAS_CODEX_TEST_NEO4J_URI": uri,
-                    "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
-                }
-            )
-            try:
-                with GraphClient() as graph:
-                    assert graph.uri == uri
-                yield uri
-            finally:
-                for key, value in previous.items():
-                    if value is None:
-                        os.environ.pop(key, None)
-                    else:
-                        os.environ[key] = value
-        finally:
-            temp_neo4j.stop_temp_neo4j(process)
-            if destination := os.environ.get("IMAS_CODEX_TEST_NEO4J_LOG"):
-                shutil.copyfile(server_log, destination)
-
-
 @pytest.fixture
-def planted_name(disposable_neo4j: str) -> Iterator[str]:
+def planted_name(disposable_neo4j_empty: str) -> Iterator[str]:
     name_id = "electrostatic_potential"
     with GraphClient() as graph:
         graph.query("MATCH (node) DETACH DELETE node")
@@ -693,7 +601,7 @@ def test_dismissal_does_not_accept_a_quarantined_document(
 
 
 def test_dismissal_does_not_accept_a_document_without_a_winning_review(
-    disposable_neo4j: str,
+    disposable_neo4j_empty: str,
 ) -> None:
     """A passing score and an empty hold set are not sufficient for acceptance.
 

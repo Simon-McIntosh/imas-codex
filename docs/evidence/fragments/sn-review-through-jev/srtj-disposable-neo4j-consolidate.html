@@ -1,0 +1,34 @@
+<article id="srtj-disposable-neo4j-consolidate-record">
+<h2 id="srtj-disposable-neo4j-consolidate-title">Every disposable Neo4j starter now goes through the shared fixture</h2>
+
+<h3 id="srtj-disposable-neo4j-consolidate-outcome">Outcome</h3>
+<p>Three standard-names test files still launched their own Neo4j, each choosing two ports with a local <code>_free_port()</code> called twice in a row &mdash; the same-port hazard <code>_free_port_pair</code> exists to remove. <code>test_review_holds.py</code>, <code>test_bare_doc_link_normalize.py</code> and <code>test_source_refresh_docs_requeue.py</code> now take the package&rsquo;s <code>disposable_neo4j_empty</code> fixture; their local launchers and the imports only they used are deleted. <code>grep -rn "_free_port()" tests/standard_names/</code> returns nothing: the only port chooser left in the package is <code>_free_port_pair</code> in <code>conftest.py</code>.</p>
+<p>The pair routine itself had no test, so a revert to two sequential single-port calls would have been silent. A committed test now models the kernel&rsquo;s behaviour that makes the two forms differ: a port becomes free again when its socket closes, so a sequential pair collides in the model while a pair held open at once does not.</p>
+
+<h3 id="srtj-disposable-neo4j-consolidate-pair">The pair test, and what it would catch</h3>
+<p><code>test_the_shared_fixture_asks_for_two_distinct_ports</code> replaces the <code>socket</code> module in the conftest namespace with a fake pool. <code>bind</code> allocates the lowest free port in the pool and keeps it allocated until <code>close</code>, so the pool hands the same number back exactly when the previous holder has closed. The test first drives two single-port cycles itself and requires them to collide &mdash; without that, a distinct pair would prove nothing about the fixture&rsquo;s order of operations, because the fake might be handing out distinct ports regardless. It then calls <code>_free_port_pair()</code> through the patched module and requires the two ports that come back to differ.</p>
+<table><thead><tr><th>Form of <code>_free_port_pair</code></th><th>Result</th></tr></thead><tbody>
+<tr><td id="srtj-disposable-neo4j-consolidate-p1">both sockets bound before either is read (head)</td><td class="ok">(<code>49152</code>, <code>49153</code>) &mdash; distinct, test passes</td></tr>
+<tr><td id="srtj-disposable-neo4j-consolidate-p2">two sequential single-port calls (declared mutation)</td><td class="bad">(<code>49152</code>, <code>49152</code>) &mdash; <code>assert 49152 != 49152</code>, test fails, EXIT=1</td></tr>
+</tbody></table>
+<p>The mutation was applied to <code>conftest.py</code> in the worktree, its run captured to the negative-control log, and the file restored byte-for-byte (<code>git diff --stat</code> on the file shows nothing afterwards).</p>
+
+<h3 id="srtj-disposable-neo4j-consolidate-arms">Arms</h3>
+<p>All four arms ran one command each. The base arm ran from a <code>git archive f657a98dc</code> tree with its own <code>--basetemp</code>; the head arms ran from the worktree at <code>8206b3554</code>.</p>
+<table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+<tr><td id="srtj-disposable-neo4j-consolidate-a1">base, <code>-m graph</code></td><td><code>f657a98dc</code>, archive tree</td><td class="ok">29 passed, 42 deselected &mdash; EXIT=0</td></tr>
+<tr><td id="srtj-disposable-neo4j-consolidate-a2">head, <code>-m graph</code>, first run</td><td><code>8206b3554</code>, worktree</td><td class="bad">29 passed, 43 deselected, 1 error &mdash; EXIT=1</td></tr>
+<tr><td id="srtj-disposable-neo4j-consolidate-a3">head, <code>-m graph</code>, rerun</td><td><code>8206b3554</code>, worktree</td><td class="ok">29 passed, 43 deselected &mdash; EXIT=0</td></tr>
+<tr><td id="srtj-disposable-neo4j-consolidate-a4">base, default markers</td><td><code>f657a98dc</code>, archive tree</td><td class="ok">42 passed, 29 deselected &mdash; EXIT=0</td></tr>
+<tr><td id="srtj-disposable-neo4j-consolidate-a5">head, default markers</td><td><code>8206b3554</code>, worktree</td><td class="ok">43 passed, 29 deselected &mdash; EXIT=0</td></tr>
+</tbody></table>
+<p>The graph selection ran rather than skipped in every arm &mdash; the totals carry no skip count and the fixture started its own instance, so the tests exercised real Cypher. The one-test difference in the default arm is the new pair test; the one-test difference in the deselected count of the graph arms is the same test, which carries no graph marker.</p>
+
+<h3 id="srtj-disposable-neo4j-consolidate-teardown">The one head error, and why it is not a test outcome</h3>
+<p>Head arm a2 recorded <code>ERROR at teardown of test_the_real_writer_stores_the_audit_row_and_the_aggregate_ignores_it</code>: <code>Failed: Timeout (&gt;30.0s) from pytest-timeout</code>, raised inside <code>disposable_neo4j_uri</code>&rsquo;s <code>directory.cleanup()</code> &rarr; <code>shutil.rmtree</code>. It is the scratch store being removed, not an assertion. The same cleanup of the same test took <strong>15.01 s</strong> in the base arm (base a1), and head arm a3 completed the identical selection with EXIT=0 in 167 s, so the shared instance&rsquo;s tree sits near the 30 s teardown budget the test carries and crossed it once under node load (<code>/tmp</code> held 37 GB from other sessions at the time). It did not reproduce, and the fixture was not changed on the strength of a single crossing.</p>
+<p>This is the one residue of consolidating four module-scoped instances into one session instance: the shared store is larger when it is removed, so its cleanup has less margin against the default per-test timeout. A node that owns the fixture&rsquo;s cleanup should give it a background removal or a larger teardown budget; repairing it was not this node&rsquo;s brief, and the defect did not reproduce when checked.</p>
+
+<h3 id="srtj-disposable-neo4j-consolidate-measure">Measure</h3>
+<p>Local <code>_free_port()</code> starters remaining outside <code>conftest.py</code>: <strong>0</strong> (three removed, <code>grep</code> clean). Tests that fail when <code>_free_port_pair</code> reverts to sequential calls: <strong>1</strong> (<code>test_the_shared_fixture_asks_for_two_distinct_ports</code>, shown failing under the declared mutation). Graph-marked tests passing: <strong>29 of 29</strong> at head against <strong>29 of 29</strong> at base. Default-marker tests passing: <strong>43</strong> at head against <strong>42</strong> at base. Failures added at head: <strong>0</strong> in each marker set, by the rerun arm and by the default arm.</p>
+<p>No live graph was written and no LLM was called; the only graphs written were the fixtures&rsquo; disposable instances, and all scratch was under the run&rsquo;s <code>TMPDIR</code>.</p>
+</article>
