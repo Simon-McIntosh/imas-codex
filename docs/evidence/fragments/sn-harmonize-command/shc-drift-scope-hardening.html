@@ -28,7 +28,9 @@
     two outcomes had no test, the new test file duplicated the orchestrator
     patch set instead of importing the file that owns it, one evidence claim
     named no log that could be opened, and one edited path sat outside the
-    fence.
+    fence. A final pass removed the handler's hand-written exception list: the
+    repository already classifies a connection failure, and asking it picks up
+    the cases a local list misses.
   </p>
 
   <p id="shc-drift-scope-hardening-authority">
@@ -73,14 +75,9 @@
   </p>
 
   <p id="shc-drift-scope-hardening-f2-after">
-    <strong>After.</strong> The handler catches only the connection errors
-    production can meet — <code>ServiceUnavailable</code>,
-    <code>SessionExpired</code>, <code>TransientError</code>, <code>OSError</code>
-    and <code>TimeoutError</code> — and returns <code>None</code>, which is
-    distinct from an empty list. <code>SessionExpired</code> has to be named:
-    in the installed driver it is a sibling of <code>TransientError</code> under
-    <code>DriverError</code>, not a subclass, so catching the parent alone let
-    an expired session escape and fail the whole drain.
+    <strong>After.</strong> The handler returns <code>None</code> only when the
+    repository's own classifier says the failure was a connection failure, and
+    re-raises otherwise — see the last section before the gate.
     <code>run_sn_pools</code> reads <code>None</code> as "skip the refresh" and
     logs the scope id and the reason, so an unreadable scope neither sweeps the
     graph nor claims to own nothing. A response carrying no name ids is treated
@@ -162,6 +159,40 @@
     <code>negative-control-dedupe.log</code>.
   </p>
 
+  <h2 id="shc-drift-scope-hardening-f7">7. The handler hand-listed the exception list instead of asking the repository</h2>
+
+  <p id="shc-drift-scope-hardening-f7-before">
+    <strong>Before.</strong> The handler named five exception types. That is a
+    second, independent answer to a question
+    <code>imas_codex/discovery/base/supervision.py</code> already answers for
+    the whole pipeline: <code>is_infrastructure_error</code> recognises the
+    three Neo4j connection failures, a <code>DatabaseError</code> whose message
+    says the database needs a restart, and connection failures carried
+    by other exception types through their message. The local list matched the
+    first three by name and missed the rest, so a server reporting a restart —
+    how a transaction log corrupted on shared storage presents — failed the
+    drain instead of skipping the refresh.
+  </p>
+
+  <p id="shc-drift-scope-hardening-f7-after">
+    <strong>After.</strong> The handler catches <code>Exception</code> and asks
+    that classifier. A connection failure skips the refresh with the same
+    logged reason as before; anything else re-raises, which is what keeps the
+    default-tier live-graph guard's <code>RuntimeError</code> propagating. The
+    list and the comment about driver class hierarchy are gone: one owner
+    decides, and the selector follows it.
+  </p>
+
+  <p id="shc-drift-scope-hardening-f7-evidence">
+    <strong>Evidence.</strong> The parametrised failures now carry messages the
+    classifier recognises rather than relying on their class, and
+    <code>test_a_graph_that_needs_a_restart_skips_the_refresh</code> covers the
+    <code>DatabaseError</code> case. Restoring a local
+    <code>isinstance</code> list in place of the classifier fails that test, and
+    only that one — <code>negative-control-restart-error.log</code>, 1 failed,
+    EXIT=1.
+  </p>
+
   <h2 id="shc-drift-scope-hardening-gate">Gate</h2>
 
   <p id="shc-drift-scope-hardening-gate-default">
@@ -170,10 +201,11 @@
     <code>tests/standard_names/test_source_refresh.py</code>,
     <code>tests/standard_names/test_scoped_global_maintenance.py</code> and the
     new <code>tests/standard_names/test_scoped_drift_loop.py</code>:
-    base <code>f657a98dc</code> <strong>7 failed, 40 passed</strong> (EXIT=1),
-    head <code>f3c194660</code> <strong>47 passed</strong> (EXIT=0). Every base
+    base <code>f657a98dc</code> <strong>8 failed, 40 passed</strong> (EXIT=1),
+    head <code>0a39e40fb</code> <strong>48 passed</strong> (EXIT=0). Every base
     failure is one of the new discrimination tests — the guard, the
-    rows-without-id case and all five parametrised connection classes — so the
+    rows-without-id case, the restart case and all five parametrised connection
+    classes — so the
     delta is zero added failures and the new tests do discriminate. Both trees
     run the head's copies of the three test files, so the delta measures
     product code alone.
@@ -198,16 +230,17 @@
     <code>test_scoped_loop_forwards_its_own_name_set_to_the_refresh</code>,
     <code>test_unscoped_loop_leaves_the_refresh_graph_wide</code> and
     <code>test_a_scope_that_owns_nothing_refreshes_nothing</code> fail — 3
-    failed, EXIT=1, <code>negative-control-forwarding.log</code>. Dropping
-    <code>SessionExpired</code> from the handler tuple fails its parametrised
-    <code>[SessionExpired]</code> case — 1 failed, EXIT=1,
-    <code>negative-control-session-expired.log</code>. Disabling the
+    failed, EXIT=1, <code>negative-control-forwarding.log</code>. Disabling the
     rows-without-id guard fails
     <code>test_a_scope_answer_without_name_ids_skips_the_refresh</code> — 1
     failed, EXIT=1, <code>negative-control-rows-without-id.log</code>.
-    Restoring <code>except Exception</code> fails the guard test — 1 failed,
-    EXIT=1, <code>negative-control-broad-except.log</code>. Every one of those
-    tests passes in the head arm.
+    Deleting the handler's re-raise, which restores a swallow-everything
+    handler, fails the guard test — 1 failed, EXIT=1,
+    <code>negative-control-broad-except.log</code>. Replacing a local
+    <code>isinstance</code> list for the repository classifier fails the
+    restart test — 1 failed, EXIT=1,
+    <code>negative-control-restart-error.log</code>. Every one of those tests
+    passes in the head arm.
   </p>
 
   <h2 id="shc-drift-scope-hardening-scope">Scope note</h2>
