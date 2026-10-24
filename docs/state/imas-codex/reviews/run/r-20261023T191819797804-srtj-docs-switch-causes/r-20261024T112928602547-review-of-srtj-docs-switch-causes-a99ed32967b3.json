@@ -25,6 +25,11 @@
       "kind": "exempted",
       "reason": "the lead ruled to switch with S0010 recorded as a known precision miss; the pass-1 hold reason is in the run's JSON wrong_rows",
       "recorded_at": "2026-10-24T20:11:25.293159+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the coordinator supplied the gate command, log and exit from gate-delta-5.log at promotion",
+      "recorded_at": "2026-10-24T20:11:32.220656+00:00"
     }
   },
   "findings": [
