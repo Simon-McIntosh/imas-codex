@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-24T23:44:46.620Z",
   "dispatched_at": "2026-10-24T23:39:18Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-graph-store-structure",
+      "recorded_at": "2026-10-24T23:47:10.626941+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_review_write.py",
