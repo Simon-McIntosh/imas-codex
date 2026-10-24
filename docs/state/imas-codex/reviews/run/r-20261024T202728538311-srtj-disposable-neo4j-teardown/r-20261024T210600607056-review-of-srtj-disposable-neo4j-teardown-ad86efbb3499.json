@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "",
   "dispatched_at": "2026-10-24T20:29:12Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-srtj-disposable-neo4j-teardown-ad86efbb3499",
+      "recorded_at": "2026-10-24T22:06:06.295315+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/conftest.py",
