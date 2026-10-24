@@ -27,6 +27,11 @@
       "kind": "folded",
       "node": "srtj-graph-store-structure",
       "recorded_at": "2026-10-24T20:10:33.726394+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "evidence-page wording on a pure move; the gate logs and the review's own scan carry the correct figures",
+      "recorded_at": "2026-10-24T20:10:44.753380+00:00"
     }
   },
   "findings": [
