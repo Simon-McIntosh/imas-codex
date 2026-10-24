@@ -875,6 +875,44 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "62158ff27783fede251164a2fd19b7f16f552d64",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 260186522,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261024T063019610800-review-of-srtj-docs-switch-causes-588c96b01112",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 260186522,
+        "path": "/tmp/reckon-crew-scratch/r-20261024T063019610800-review-of-srtj-docs-switch-causes-588c96b01112"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-srtj-docs-switch-causes-588c96b01112",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
