@@ -28,6 +28,11 @@
       "kind": "folded",
       "node": "shc-drift-scope-hardening",
       "recorded_at": "2026-10-24T20:03:27.601481+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "shc-drift-scope-hardening",
+      "recorded_at": "2026-10-24T20:03:31.136896+00:00"
     }
   },
   "findings": [
