@@ -501,6 +501,7 @@ async def evaluate_docs_holdout(
         score_documentation(
             row["catalog_documentation"],
             physics_context=physics_context,
+            documenting_name=row["catalog_name"],
         )
         for row, physics_context in zip(
             scored_rows,
@@ -512,10 +513,12 @@ async def evaluate_docs_holdout(
         score_documentation(
             documentation,
             physics_context=physics_context,
+            documenting_name=row["catalog_name"],
         )
-        for documentation, physics_context in zip(
+        for documentation, physics_context, row in zip(
             arm_documents,
             physics_contexts,
+            scored_rows,
             strict=True,
         )
     ]
