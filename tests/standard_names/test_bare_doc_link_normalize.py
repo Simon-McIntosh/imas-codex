@@ -18,17 +18,11 @@ Covers:
 from __future__ import annotations
 
 import os
-import socket
-import subprocess
-import tempfile
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from neo4j import GraphDatabase
 
-from imas_codex.graph import temp_neo4j
 from imas_codex.graph.client import GraphClient
 
 _GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
@@ -97,74 +91,74 @@ def test_scoped_normalize_noop_when_no_brackets():
     assert _normalize_bare_doc_links(gc, sn_id="plasma_current") == 0
 
 
-def _free_port() -> int:
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        return int(sock.getsockname()[1])
+def test_the_shared_fixture_asks_for_two_distinct_ports(monkeypatch):
+    """The port pair must be two ports held at once, not one asked for twice.
 
+    The kernel is free to hand an ephemeral port back once the socket that
+    held it is closed, so two single-port calls in a row can return the same
+    number twice. The fake pool below models exactly that: a port becomes
+    available again only when its socket closes. A pair chosen one socket at
+    a time therefore collides in the model, while a pair chosen with both
+    sockets still open does not -- so this test fails if ``_free_port_pair``
+    reverts to two sequential single-port calls.
+    """
+    from types import SimpleNamespace
 
-@pytest.fixture(scope="module")
-def disposable_neo4j():
-    """Start an empty graph; the test may write only inside this instance."""
-    with tempfile.TemporaryDirectory(dir=os.environ["TMPDIR"]) as directory:
-        root = Path(directory)
-        for part in ("data", "logs", "conf", "run", "tmp"):
-            (root / part).mkdir()
-        bolt_port, http_port = _free_port(), _free_port()
-        temp_neo4j.write_temp_neo4j_conf(root / "conf", bolt_port, http_port)
-        command = [
-            "apptainer",
-            "exec",
-            "--bind",
-            f"{root}/data:/data",
-            "--bind",
-            f"{root}/logs:/logs",
-            "--bind",
-            f"{root}/conf:/var/lib/neo4j/conf",
-            "--bind",
-            f"{root}/run:/var/lib/neo4j/run",
-            "--bind",
-            f"{root}/tmp:/tmp",
-            "--writable-tmpfs",
-            str(temp_neo4j._neo4j_image()),
-            "neo4j",
-            "console",
-        ]
-        log = root / "logs" / "neo4j-temp.log"
-        with log.open("w") as output:
-            process = subprocess.Popen(
-                command, stdout=output, stderr=subprocess.STDOUT, start_new_session=True
-            )
-        try:
-            temp_neo4j._wait_for_bolt_ready(process, bolt_port, log)
-            uri = f"bolt://127.0.0.1:{bolt_port}"
-            with GraphDatabase.driver(uri, auth=None) as driver:
-                records, _, _ = driver.execute_query(
-                    "MATCH (n) RETURN count(n) AS total"
-                )
-                assert records[0]["total"] == 0
-            with patch.dict(
-                os.environ,
-                {
-                    "NEO4J_URI": uri,
-                    "NEO4J_PASSWORD": "",
-                    "IMAS_CODEX_TEST_NEO4J_URI": uri,
-                    "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
-                },
-            ):
-                yield uri
-        finally:
-            temp_neo4j.stop_temp_neo4j(process)
+    from tests.standard_names import conftest as sn_conftest
+
+    class _PoolSocket:
+        _live: set = set()
+
+        def __init__(self) -> None:
+            self._port: int | None = None
+
+        def bind(self, _address) -> None:
+            port = 49152
+            while port in {sock._port for sock in _PoolSocket._live}:
+                port += 1
+            self._port = port
+            _PoolSocket._live.add(self)
+
+        def getsockname(self):
+            return ("127.0.0.1", self._port)
+
+        def close(self) -> None:
+            _PoolSocket._live.discard(self)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_exc) -> None:
+            self.close()
+
+    def two_ports_one_socket_at_a_time() -> list[int]:
+        ports = []
+        for _ in range(2):
+            with _PoolSocket() as sock:
+                sock.bind(("127.0.0.1", 0))
+                ports.append(sock.getsockname()[1])
+        return ports
+
+    # The model reproduces the hazard: the sequential pattern it penalises
+    # really does return one port twice. Without this, a distinct pair would
+    # prove nothing about the fixture's order of operations, because the fake
+    # could be handing out distinct ports regardless.
+    assert two_ports_one_socket_at_a_time() == [49152, 49152]
+
+    monkeypatch.setattr(sn_conftest, "socket", SimpleNamespace(socket=_PoolSocket))
+    bolt_port, http_port = sn_conftest._free_port_pair()
+
+    assert bolt_port != http_port
 
 
 @pytest.mark.graph
 @pytest.mark.timeout(180)
-def test_normalize_prose_against_disposable_graph(disposable_neo4j):
+def test_normalize_prose_against_disposable_graph(disposable_neo4j_empty):
     """The real Cypher reads exact live ids and writes only changed documentation."""
     from imas_codex.standard_names.graph_ops import _normalize_bare_doc_links
 
     assert os.environ["IMAS_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
-    assert os.environ["IMAS_CODEX_TEST_NEO4J_URI"] == disposable_neo4j
+    assert os.environ["IMAS_CODEX_TEST_NEO4J_URI"] == disposable_neo4j_empty
     doc = (
         "Related [poloidal flux], [unknown phrase], and [dead name]. "
         "The [documented name](name:documented_name) is this quantity. "
@@ -172,7 +166,7 @@ def test_normalize_prose_against_disposable_graph(disposable_neo4j):
         "[m^-3], [K], and [m^2 s^-1] remain; [co-passing] is prose."
     )
     with GraphClient() as graph:
-        assert graph.uri == disposable_neo4j
+        assert graph.uri == disposable_neo4j_empty
         graph.query(
             "UNWIND $names AS item CREATE (n:StandardName) "
             "SET n.id = item.id, n.name_stage = item.stage, "

@@ -4,17 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import os
-import socket
-import subprocess
-import tempfile
 from collections.abc import Iterator
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from neo4j import GraphDatabase
 
-from imas_codex.graph import temp_neo4j
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import graph_ops, loop, source_refresh
 
@@ -119,64 +113,6 @@ async def test_drift_refresh_is_claimable_by_docs_pool_in_same_run(
     assert claim_calls == [active_run]
     assert claimed is not None
     assert claimed["items"][0]["id"] == graph.name["id"]
-
-
-def _free_port() -> int:
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        return int(sock.getsockname()[1])
-
-
-@pytest.fixture(scope="module")
-def disposable_neo4j_uri() -> Iterator[str]:
-    """Run the documentation writes against an empty, private graph."""
-    with tempfile.TemporaryDirectory(dir=os.environ["TMPDIR"]) as directory:
-        root = Path(directory)
-        for part in ("data", "logs", "conf", "run", "tmp"):
-            (root / part).mkdir()
-        bolt_port, http_port = _free_port(), _free_port()
-        temp_neo4j.write_temp_neo4j_conf(root / "conf", bolt_port, http_port)
-        command = [
-            "apptainer",
-            "exec",
-            "--bind",
-            f"{root}/data:/data",
-            "--bind",
-            f"{root}/logs:/logs",
-            "--bind",
-            f"{root}/conf:/var/lib/neo4j/conf",
-            "--bind",
-            f"{root}/run:/var/lib/neo4j/run",
-            "--bind",
-            f"{root}/tmp:/tmp",
-            "--writable-tmpfs",
-            str(temp_neo4j._neo4j_image()),
-            "neo4j",
-            "console",
-        ]
-        log = root / "logs" / "neo4j-temp.log"
-        with log.open("w") as output:
-            process = subprocess.Popen(
-                command, stdout=output, stderr=subprocess.STDOUT, start_new_session=True
-            )
-        try:
-            temp_neo4j._wait_for_bolt_ready(process, bolt_port, log)
-            uri = f"bolt://127.0.0.1:{bolt_port}"
-            with GraphDatabase.driver(uri, auth=None) as driver:
-                records, _, _ = driver.execute_query("MATCH (n) RETURN count(n) AS n")
-                assert records[0]["n"] == 0
-            with patch.dict(
-                os.environ,
-                {
-                    "NEO4J_URI": uri,
-                    "NEO4J_PASSWORD": "",
-                    "IMAS_CODEX_TEST_NEO4J_URI": uri,
-                    "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
-                },
-            ):
-                yield uri
-        finally:
-            temp_neo4j.stop_temp_neo4j(process)
 
 
 @pytest.fixture
