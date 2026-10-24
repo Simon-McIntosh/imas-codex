@@ -19492,3 +19492,230 @@ def release_enrich_parents_claims(
             token=claim_token,
         )
     return result[0]["released"] if result else 0
+
+
+# Preserve the moved callables for signature and source inspection.
+_moved_graph_foundation = import_module(".graph_store.graph_foundation", __package__)
+_ensure_json.__wrapped__ = _moved_graph_foundation._ensure_json
+_ensure_list.__wrapped__ = _moved_graph_foundation._ensure_list
+_scalar_domain.__wrapped__ = _moved_graph_foundation._scalar_domain
+reclassify_standard_name_domain.__wrapped__ = (
+    _moved_graph_foundation.reclassify_standard_name_domain
+)
+normalize_name_id.__wrapped__ = _moved_graph_foundation.normalize_name_id
+_public_segment_token_index.__wrapped__ = (
+    _moved_graph_foundation._public_segment_token_index
+)
+_public_grammar_segment_order.__wrapped__ = (
+    _moved_graph_foundation._public_grammar_segment_order
+)
+_segments_from_ir.__wrapped__ = _moved_graph_foundation._segments_from_ir
+_parse_grammar.__wrapped__ = _moved_graph_foundation._parse_grammar
+_semantic_ir_expression.__wrapped__ = _moved_graph_foundation._semantic_ir_expression
+strict_review_grammar_context.__wrapped__ = (
+    _moved_graph_foundation.strict_review_grammar_context
+)
+_compute_link_status.__wrapped__ = _moved_graph_foundation._compute_link_status
+_extract_links_from_docs.__wrapped__ = _moved_graph_foundation._extract_links_from_docs
+_moved_graph_audits = import_module(".graph_store.graph_audits", __package__)
+claim_compose_sources.__wrapped__ = _moved_graph_audits.claim_compose_sources
+count_extracted_for_domain.__wrapped__ = _moved_graph_audits.count_extracted_for_domain
+count_eligible_compose_sources.__wrapped__ = (
+    _moved_graph_audits.count_eligible_compose_sources
+)
+claim_review_names.__wrapped__ = _moved_graph_audits.claim_review_names
+release_review_claims.__wrapped__ = _moved_graph_audits.release_review_claims
+refresh_name_claims.__wrapped__ = _moved_graph_audits.refresh_name_claims
+promote_stranded_reviewed.__wrapped__ = _moved_graph_audits.promote_stranded_reviewed
+_docs_axis_rederive_query.__wrapped__ = _moved_graph_audits._docs_axis_rederive_query
+reconcile_docs_axis_from_reviews.__wrapped__ = (
+    _moved_graph_audits.reconcile_docs_axis_from_reviews
+)
+_standard_name_source_upstream_present_cypher.__wrapped__ = (
+    _moved_graph_audits._standard_name_source_upstream_present_cypher
+)
+reconcile_standard_name_sources.__wrapped__ = (
+    _moved_graph_audits.reconcile_standard_name_sources
+)
+fetch_manifest_source_release_rows.__wrapped__ = (
+    _moved_graph_audits.fetch_manifest_source_release_rows
+)
+reconcile_source_status_liveness.__wrapped__ = (
+    _moved_graph_audits.reconcile_source_status_liveness
+)
+retire_unreachable_hint_edits.__wrapped__ = (
+    _moved_graph_audits.retire_unreachable_hint_edits
+)
+reconcile_vocab_gaps.__wrapped__ = _moved_graph_audits.reconcile_vocab_gaps
+triage_vocab_gaps.__wrapped__ = _moved_graph_audits.triage_vocab_gaps
+revive_unit_skipped_sources.__wrapped__ = (
+    _moved_graph_audits.revive_unit_skipped_sources
+)
+_isn_grammar_context.__wrapped__ = _moved_graph_audits._isn_grammar_context
+isn_vocabulary_signature.__wrapped__ = _moved_graph_audits.isn_vocabulary_signature
+retry_vocab_gap_sources_on_grammar_change.__wrapped__ = (
+    _moved_graph_audits.retry_vocab_gap_sources_on_grammar_change
+)
+reconcile_provenance.__wrapped__ = _moved_graph_audits.reconcile_provenance
+reconcile_catalog_edit_origins.__wrapped__ = (
+    _moved_graph_audits.reconcile_catalog_edit_origins
+)
+reconcile_standard_name_cocos_links.__wrapped__ = (
+    _moved_graph_audits.reconcile_standard_name_cocos_links
+)
+reconcile_standard_name_unit_edges.__wrapped__ = (
+    _moved_graph_audits.reconcile_standard_name_unit_edges
+)
+reconcile_constraint_fit_artifacts.__wrapped__ = (
+    _moved_graph_audits.reconcile_constraint_fit_artifacts
+)
+reconcile_standard_name_source_paths.__wrapped__ = (
+    _moved_graph_audits.reconcile_standard_name_source_paths
+)
+reconcile_catalog_status.__wrapped__ = _moved_graph_audits.reconcile_catalog_status
+reconcile_reviewable_name_stage.__wrapped__ = (
+    _moved_graph_audits.reconcile_reviewable_name_stage
+)
+reconcile_descriptionless_composed_names.__wrapped__ = (
+    _moved_graph_audits.reconcile_descriptionless_composed_names
+)
+reconcile_sourceless_pipeline_names.__wrapped__ = (
+    _moved_graph_audits.reconcile_sourceless_pipeline_names
+)
+reconcile_standard_name_dd_edges.__wrapped__ = (
+    _moved_graph_audits.reconcile_standard_name_dd_edges
+)
+reconcile_grammar_segments.__wrapped__ = _moved_graph_audits.reconcile_grammar_segments
+realign_grammar_segments_for_name.__wrapped__ = (
+    _moved_graph_audits.realign_grammar_segments_for_name
+)
+_segment_drift_reason.__wrapped__ = _moved_graph_audits._segment_drift_reason
+reconcile_standard_name_kinds.__wrapped__ = (
+    _moved_graph_audits.reconcile_standard_name_kinds
+)
+_open_graph_client.__wrapped__ = _moved_graph_audits._open_graph_client
+get_standard_name_source_stats.__wrapped__ = (
+    _moved_graph_audits.get_standard_name_source_stats
+)
+write_run_provenance.__wrapped__ = _moved_graph_audits.write_run_provenance
+export_review_comments.__wrapped__ = _moved_graph_audits.export_review_comments
+create_sn_run_open.__wrapped__ = _moved_graph_audits.create_sn_run_open
+bump_sn_run_counter.__wrapped__ = _moved_graph_audits.bump_sn_run_counter
+update_sn_run_progress.__wrapped__ = _moved_graph_audits.update_sn_run_progress
+finalize_sn_run.__wrapped__ = _moved_graph_audits.finalize_sn_run
+mark_orphaned_standard_name_runs_stale.__wrapped__ = (
+    _moved_graph_audits.mark_orphaned_standard_name_runs_stale
+)
+normalize_stored_standard_name_kinds.__wrapped__ = (
+    _moved_graph_audits.normalize_stored_standard_name_kinds
+)
+backfill_sn_run_telemetry.__wrapped__ = _moved_graph_audits.backfill_sn_run_telemetry
+_moved_graph_review_persistence = import_module(
+    ".graph_store.graph_review_persistence", __package__
+)
+_quorum_admits_acceptance.__wrapped__ = (
+    _moved_graph_review_persistence._quorum_admits_acceptance
+)
+_authority_json_value.__wrapped__ = (
+    _moved_graph_review_persistence._authority_json_value
+)
+_authority_payload_hash.__wrapped__ = (
+    _moved_graph_review_persistence._authority_payload_hash
+)
+persist_reviewed_name.__wrapped__ = (
+    _moved_graph_review_persistence.persist_reviewed_name
+)
+claim_review_docs_batch.__wrapped__ = (
+    _moved_graph_review_persistence.claim_review_docs_batch
+)
+persist_reviewed_docs.__wrapped__ = (
+    _moved_graph_review_persistence.persist_reviewed_docs
+)
+_moved_graph_supersession = import_module(
+    ".graph_store.graph_supersession", __package__
+)
+supersede_prior_source_names.__wrapped__ = (
+    _moved_graph_supersession.supersede_prior_source_names
+)
+tombstone_supersede_into.__wrapped__ = (
+    _moved_graph_supersession.tombstone_supersede_into
+)
+_scalar_selected_dedup_authority.__wrapped__ = (
+    _moved_graph_supersession._scalar_selected_dedup_authority
+)
+_lock_scalar_selected_dedup_authority.__wrapped__ = (
+    _moved_graph_supersession._lock_scalar_selected_dedup_authority
+)
+_scalar_selected_dedup_counts.__wrapped__ = (
+    _moved_graph_supersession._scalar_selected_dedup_counts
+)
+deduplicate_scalar_selected_sources.__wrapped__ = (
+    _moved_graph_supersession.deduplicate_scalar_selected_sources
+)
+_catalog_edit_adjudication_signature_hash.__wrapped__ = (
+    _moved_graph_supersession._catalog_edit_adjudication_signature_hash
+)
+_validate_signed_source_adjudication.__wrapped__ = (
+    _moved_graph_supersession._validate_signed_source_adjudication
+)
+_validate_structural_legitimacy_authority.__wrapped__ = (
+    _moved_graph_supersession._validate_structural_legitimacy_authority
+)
+_is_live_structural_child.__wrapped__ = (
+    _moved_graph_supersession._is_live_structural_child
+)
+_signed_source_disposition_authority.__wrapped__ = (
+    _moved_graph_supersession._signed_source_disposition_authority
+)
+_lock_signed_source_disposition_authority.__wrapped__ = (
+    _moved_graph_supersession._lock_signed_source_disposition_authority
+)
+_signed_source_disposition_counts.__wrapped__ = (
+    _moved_graph_supersession._signed_source_disposition_counts
+)
+_signed_source_disposition_execution_authority.__wrapped__ = (
+    _moved_graph_supersession._signed_source_disposition_execution_authority
+)
+_semantic_mirror_repair_authority.__wrapped__ = (
+    _moved_graph_supersession._semantic_mirror_repair_authority
+)
+_lock_semantic_mirror_repair_authority.__wrapped__ = (
+    _moved_graph_supersession._lock_semantic_mirror_repair_authority
+)
+_semantic_mirror_repair_counts.__wrapped__ = (
+    _moved_graph_supersession._semantic_mirror_repair_counts
+)
+_validate_signed_orphan_retirement_authority.__wrapped__ = (
+    _moved_graph_supersession._validate_signed_orphan_retirement_authority
+)
+_validate_signed_dual_authority_retirement.__wrapped__ = (
+    _moved_graph_supersession._validate_signed_dual_authority_retirement
+)
+_signed_dual_authority_retirement_manifest.__wrapped__ = (
+    _moved_graph_supersession._signed_dual_authority_retirement_manifest
+)
+_signed_dual_authority_change_id.__wrapped__ = (
+    _moved_graph_supersession._signed_dual_authority_change_id
+)
+classify_sourceless_standard_names.__wrapped__ = (
+    _moved_graph_supersession.classify_sourceless_standard_names
+)
+_exhausted_orphan_supersession_authority.__wrapped__ = (
+    _moved_graph_supersession._exhausted_orphan_supersession_authority
+)
+_exhausted_orphan_change_id.__wrapped__ = (
+    _moved_graph_supersession._exhausted_orphan_change_id
+)
+supersede_exhausted_standard_name_orphans.__wrapped__ = (
+    _moved_graph_supersession.supersede_exhausted_standard_name_orphans
+)
+_ancestor_supersession_authority.__wrapped__ = (
+    _moved_graph_supersession._ancestor_supersession_authority
+)
+_lock_ancestor_supersession_authority.__wrapped__ = (
+    _moved_graph_supersession._lock_ancestor_supersession_authority
+)
+_detach_stale_ancestor_sources.__wrapped__ = (
+    _moved_graph_supersession._detach_stale_ancestor_sources
+)
+supersede_into_ancestor.__wrapped__ = _moved_graph_supersession.supersede_into_ancestor
