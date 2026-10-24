@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T06:22:07.772Z",
+  "dispatched_at": "2026-10-24T06:09:39Z",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "360",
+      "severity": "non-blocking",
+      "text": "_start_empty_neo4j re-implements the instance launch that imas_codex/graph/temp_neo4j.py:207 start_temp_neo4j already owns: the same apptainer exec with the same five bind mounts, assembled against that module's private _neo4j_image (conftest.py:385) and _wait_for_bolt_ready (conftest.py:394). start_temp_neo4j is not directly callable for an empty instance because it first loads a dump, so the clean fix is a public empty-instance start in temp_neo4j.py; that file is outside this node's declared write paths, so the repair belongs to a follow-on node rather than here."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "394",
+      "severity": "non-blocking",
+      "text": "When the started instance never reaches Bolt readiness, _wait_for_bolt_ready raises before _start_empty_neo4j returns, so the caller's process local is never bound and disposable_neo4j_uri:489 never runs stop_temp_neo4j: the apptainer process and its JVM are left running and their TemporaryDirectory is deleted underneath them. The owner this duplicates stops the process on any failure at imas_codex/graph/temp_neo4j.py:287-289, so the reimplementation drops the cleanup the original has."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/conftest.py",
+      "line": "369",
+      "severity": "non-blocking",
+      "text": "bolt_port, http_port = _free_port(), _free_port() takes each port from a socket that _free_port (conftest.py:354) closes before returning, so the second call can be handed the same ephemeral port as the first; the instance then cannot bind its HTTP listener and the fixture fails with a start error that reads as an environment fault rather than as the port collision it is. Holding both sockets open until the instance has bound would remove it."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_source_refresh.py",
+      "line": "474",
+      "severity": "non-blocking",
+      "text": "The unmarked arm's address is f\"bolt://localhost:{_project_bolt_port()}\", and _project_bolt_port (line 436) reads resolve_neo4j(auto_tunnel=False).bolt_port, which is precisely how conftest.py:326 builds the expected loopback spelling; the assertion's input and the guard's expectation therefore move together, and a resolver regression in the port leaves the assertion true. The worker's own loopback-only arm confirms the consequence: with the discovered-address refusal removed this test passes (logs/negative-control-loopback-only-guard.log:9) while the graph-marked arm at line 495 fails. It is a weaker guard than it appears, not a false one, because the graph-marked arm is independent and does redden."
+    },
+    {
+      "disposition": null,
+      "file": "logs/base-graph.log",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "The base arm's header reads '# revision=none', so the log cannot be tied to the commit it measured; a reader has to take the evidence page's 'fa65d7c71' on trust. The recorded manifest explains that the git archive tree was removed at close, which is honest, but a base arm whose revision is unreadable from its own log is not reproducible from the artefact."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The landed change is test-and-docs only; git grep at f3f8ba9c3 finds every reference to disposable_neo4j_uri, refuse_project_graph, SyntheticDDResolutionReader, neo4j_test_password and disposable_neo4j_empty inside tests/, so no production module reaches it; the production owners it consumes and does not modify are imas_codex/graph/temp_neo4j.py:108 write_temp_neo4j_conf, imas_codex/graph/profiles.py resolve_neo4j and imas_codex/remote/locations.py:213 resolve_service_url.",
+    "diff": "Read 3d790d606, 7351413cb, 0cf3e4489 and f3f8ba9c3 against fa65d7c71; 3d790d606 adds the session fixture, the refusal and the helper trio to conftest.py and deletes both local guards, 7351413cb adds the two committed refusal tests, 0cf3e4489 widens the refusal from the loopback spelling to the scheduler-discovered address and fixes its own docstring's claim, and f3f8ba9c3 splits the refusal test into an unmarked profile arm and a graph-marked squeue arm, which is the repair of the prior review's finding at test_source_refresh.py:479.",
+    "done_when": "The done_when (brief.md:44-50) asks for the shared fixture committed, one graph command running all three files with the five drift tests passing, the refusal logged and the fragment recording both arms; logs/head-graph.log:54 records 25 passed / 36 deselected / EXIT=0 at f3f8ba9c3 with all five drift test ids PASSED at lines 11-15, logs/base-graph.log:53 records 19 passed / 5 setup errors EXIT=1 at base, the default arms are logs/base-default.log 35 passed and logs/head-default.log 36 passed, and logs/negative-control-live-graph.log, -loopback-only-guard.log and -guard-removed.log are the three refusal arms.",
+    "goal": "The node goal is one shared disposable-Neo4j convention, owned in tests/standard_names/conftest.py and built on imas_codex/graph/temp_neo4j.py, that starts or attaches an instance, names it in both NEO4J_URI and IMAS_CODEX_TEST_NEO4J_URI, and refuses the live graph (brief.md:17-26); tests/standard_names/conftest.py:419 disposable_neo4j_uri does exactly that, and both files' local guards are gone from tests/standard_names/test_source_refresh.py and tests/standard_names/test_panel_audit_sample.py:704.",
+    "manifest": "Read manifest.md in the reviewed run directory; it records the literal head graph command with absolute paths and basetemp, 25 passed/0 skipped/EXIT=0 against base 19 passed/5 errors, 0 added default-marker failures, the four commits and three negative-control arms, but it carries no baseline_suite/after_suite keys, so added_failure_count here is derived from the reviewed run's own gate logs logs/base-default.log:31 and logs/head-default.log:31.",
+    "write_paths": "The declared write paths are tests/standard_names/conftest.py, tests/standard_names/test_source_refresh.py, tests/standard_names/test_panel_audit_sample.py, docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html and docs/figures/sn-review-through-jev/srtj-test-neo4j-uri-convention; git diff --stat fa65d7c71..f3f8ba9c3 lists exactly the first four, all inside scope, and the figures directory was not needed because the page carries no figure."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_source_refresh.py:495 reddens when the discovered-address refusal is removed (logs/negative-control-loopback-only-guard.log:17 DID NOT RAISE) and tests/standard_names/conftest.py:458 reddens when the fixture-body call is made a no-op (logs/negative-control-guard-removed.log:122 2 failed), but the unmarked arm at test_source_refresh.py:474 takes its address from the same resolver the guard uses and stays green under the first mutation.",
+    "evidence": "logs/head-graph.log:11-15 shows the node's named measure (five drift tests passing, not skipping) and :54 the totals, and logs/base-graph.log:10-34 shows the same five erroring at base; the base log's identity is weaker because logs/base-graph.log:3 reads revision=none, so the base arm cannot be attributed to a commit from the log alone.",
+    "fit": "tests/standard_names/conftest.py:419 follows the module's session-fixture idiom and carries no plan, sprint or ticket label, though conftest.py:385 and :394 reach into temp_neo4j's private helpers and test_panel_audit_sample.py:725 imports the conftest module by path to get one accessor, both slightly off the surrounding idiom.",
+    "goal_fidelity": "tests/standard_names/conftest.py:419 owns the whole convention and sets both variables at lines 449-456, so a bare GraphClient() and an explicitly addressed one reach the same instance; the drift tests' DD authority is served from synthetic rows at test_source_refresh.py:531-533, which is recorded at docs/evidence/fragments/sn-review-through-jev/srtj-test-neo4j-uri-convention.html line 21 and narrows what a graph-marked drift run now exercises.",
+    "reuse": "tests/standard_names/conftest.py:326 and :330 reuse resolve_neo4j and imas_codex/remote/locations.py:213 resolve_service_url rather than re-deriving either, and conftest.py:370 and :489 reuse write_temp_neo4j_conf and stop_temp_neo4j, but conftest.py:360 repeats the launch sequence owned by imas_codex/graph/temp_neo4j.py:207 start_temp_neo4j and calls its private _neo4j_image and _wait_for_bolt_ready to do it.",
+    "scope_discipline": "git diff --stat fa65d7c71..f3f8ba9c3 lists only tests/standard_names/conftest.py, tests/standard_names/test_source_refresh.py, tests/standard_names/test_panel_audit_sample.py and the evidence fragment, every one inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261024T060916072088-review-of-srtj-test-neo4j-uri-convention-f3f8ba9c3362",
+  "reviewed_base_sha": "fa65d7c71472f57ebf0ef8f65ac5d0615f6aa139",
+  "reviewed_head_sha": "f3f8ba9c33622bd26cb5cd8f7a14636aac004498",
+  "reviewed_run_id": "r-20261023T193843392462-srtj-test-neo4j-uri-convention",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T06:24:03.296575+00:00",
+  "total": 102
+}
