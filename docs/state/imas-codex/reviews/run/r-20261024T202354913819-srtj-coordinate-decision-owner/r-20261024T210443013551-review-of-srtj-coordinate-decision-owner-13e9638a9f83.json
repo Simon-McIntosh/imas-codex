@@ -14,6 +14,13 @@
   ],
   "completed_at": "2026-10-24T21:30:40.342Z",
   "dispatched_at": "2026-10-24T21:16:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the review confirms no name changes class today; the derivation module is now the single owner of the decision, so any change there is reviewed where it is made",
+      "recorded_at": "2026-10-24T21:47:23.562411+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/derivation.py",
