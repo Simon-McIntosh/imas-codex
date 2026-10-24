@@ -2,8 +2,8 @@
  "schema": "srtj-docs-switch-measure",
  "node": "srtj-docs-switch-causes",
  "artifact": "srtj-docs-switch-causes.json",
- "created_at": "2026-10-24T07:07:55.911290+00:00",
- "code_revision": "588c96b011120982af20613f725e5b3d7383aff4",
+ "created_at": "2026-10-24T11:11:34.666902+00:00",
+ "code_revision": "a942ed6dfce130c4d183e5caf168f21153f585d3",
  "module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-switch-causes/docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py",
  "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-switch-causes/docs/evidence/fragments/sn-review-through-jev",
  "archive": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
@@ -12,9 +12,9 @@
  "decision_rule": "accepted = the Jev docs route is accept AND no hold is open; a hold is open when the route raised one or the deterministic error-severity lint cap raised a docs_lint_error hold",
  "bar": "all 19 disagreement rows labelled not acceptable (link defects) refined, and none of the 30 disagreement rows labelled acceptable refined, on both Jev passes",
  "scratch_instance": {
-  "path": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-afhshyqc/instance",
-  "uri": "bolt://127.0.0.1:58085",
-  "log": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-afhshyqc/instance/logs/neo4j-temp.log"
+  "path": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/load-239/srtj-docs-switch-measure-2tqsxrrk/instance",
+  "uri": "bolt://127.0.0.1:50675",
+  "log": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/load-239/srtj-docs-switch-measure-2tqsxrrk/instance/logs/neo4j-temp.log"
  },
  "documentation_match": {
   "compared": 77,
@@ -62,10 +62,10 @@
    "link_defect_rows": 19,
    "link_defects_refined": 19,
    "acceptable_rows": 30,
-   "acceptable_rows_refined": 0,
+   "acceptable_rows_refined": 1,
    "all_defects_refined": true,
-   "no_acceptable_refined": true,
-   "meets_bar": true,
+   "no_acceptable_refined": false,
+   "meets_bar": false,
    "spend_usd": 0.012033
   },
   "pass_b": {
@@ -92,7 +92,33 @@
   }
  },
  "wrong_rows": {
-  "pass_a": [],
+  "pass_a": [
+   {
+    "sheet_id": "S0010",
+    "item_id": "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+    "label_acceptable": true,
+    "label_reason": "acceptable: documents the flux-surface- and time-averaged normalized perturbed parallel field magnitude named, source gyrokinetics_local/.../b_field_parallel_perturbed_norm matches, links resolve.",
+    "expected": "accept",
+    "actual": "refine",
+    "route": "refine",
+    "failed_checks": [
+     "claim_contradicts_source"
+    ],
+    "route_holds": [
+     {
+      "kind": "cascade_contradiction",
+      "finding": "contradicts source: where [equation] is the normalized fluctuation amplitude, [equation] and [equation] are wavevector components, [equation] is time, [equation] is the perturbed magnetic-field component, [equation] is the unit vector along the local equilibrium magnetic field, [equation] is the reference magnetic-field magnitude, and the angle brackets denote time and flux-surface averages.",
+      "evidence": "Jev contradiction veto on claim_contradicts_source",
+      "raised_by": "jev-cascade"
+     }
+    ],
+    "lint_hold": null,
+    "hold_reasons": [
+     "route hold cascade_contradiction: contradicts source: where [equation] is the normalized fluctuation amplitude, [equation] and [equation] are wavevector components, [equation] is time, [equation] is the perturbed magnetic-field component, [equation] is the unit vector along the local equilibrium magnetic field, [equation] is the reference magnetic-field magnitude, and the angle brackets denote time and flux-surface averages."
+    ],
+    "route_failure_reason": null
+   }
+  ],
   "pass_b": []
  },
  "per_row": [
@@ -275,9 +301,18 @@
    "label_reason": "acceptable: documents the flux-surface- and time-averaged normalized perturbed parallel field magnitude named, source gyrokinetics_local/.../b_field_parallel_perturbed_norm matches, links resolve.",
    "error_lint": [],
    "lint_hold": null,
-   "pass_a_route": "accept",
-   "pass_a_failed_checks": [],
-   "pass_a_holds": [],
+   "pass_a_route": "refine",
+   "pass_a_failed_checks": [
+    "claim_contradicts_source"
+   ],
+   "pass_a_holds": [
+    {
+     "kind": "cascade_contradiction",
+     "finding": "contradicts source: where [equation] is the normalized fluctuation amplitude, [equation] and [equation] are wavevector components, [equation] is time, [equation] is the perturbed magnetic-field component, [equation] is the unit vector along the local equilibrium magnetic field, [equation] is the reference magnetic-field magnitude, and the angle brackets denote time and flux-surface averages.",
+     "evidence": "Jev contradiction veto on claim_contradicts_source",
+     "raised_by": "jev-cascade"
+    }
+   ],
    "pass_b_route": "accept",
    "pass_b_failed_checks": [],
    "pass_b_holds": []
@@ -387,21 +422,21 @@
     }
    ],
    "lint_hold": "[error:lint:relationship_link] relationship_link: relationship_link: documentation contains no standard-name relationship link",
-   "pass_a_route": "refine",
-   "pass_a_failed_checks": [
+   "pass_a_route": "accept",
+   "pass_a_failed_checks": [],
+   "pass_a_holds": [],
+   "pass_b_route": "refine",
+   "pass_b_failed_checks": [
     "claim_contradicts_source"
    ],
-   "pass_a_holds": [
+   "pass_b_holds": [
     {
      "kind": "cascade_contradiction",
      "finding": "contradicts source: The upper mechanical travel limit is the greatest permitted value of the mirror\u2019s signed rotation angle, bounding the accessible steering range of the launcher.",
      "evidence": "Jev contradiction veto on claim_contradicts_source",
      "raised_by": "jev-cascade"
     }
-   ],
-   "pass_b_route": "accept",
-   "pass_b_failed_checks": [],
-   "pass_b_holds": []
+   ]
   },
   {
    "sheet_id": "S0017",
@@ -513,18 +548,9 @@
    "pass_a_route": "accept",
    "pass_a_failed_checks": [],
    "pass_a_holds": [],
-   "pass_b_route": "refine",
-   "pass_b_failed_checks": [
-    "claim_contradicts_source"
-   ],
-   "pass_b_holds": [
-    {
-     "kind": "cascade_contradiction",
-     "finding": "contradicts source: Trapped fast-ion power density due to collisions is the local rate at which Coulomb collisions transfer kinetic energy to fast ions on trapped guiding-center orbits per unit volume.",
-     "evidence": "Jev contradiction veto on claim_contradicts_source",
-     "raised_by": "jev-cascade"
-    }
-   ]
+   "pass_b_route": "accept",
+   "pass_b_failed_checks": [],
+   "pass_b_holds": []
   },
   {
    "sheet_id": "S0023",
@@ -1564,18 +1590,9 @@
    "label_reason": "acceptable: documents the real part of the Alfven frequency named, source mhd_linear/.../alfven_frequency_spectrum/real matches, links resolve.",
    "error_lint": [],
    "lint_hold": null,
-   "pass_a_route": "refine",
-   "pass_a_failed_checks": [
-    "claim_contradicts_source"
-   ],
-   "pass_a_holds": [
-    {
-     "kind": "cascade_contradiction",
-     "finding": "contradicts source: The scope is one local shear-Alfv\u00e9n continuum root at one position across the magnetic flux surfaces and one toroidal mode number; it is not an average, envelope, or sum over roots, positions, or mode numbers.",
-     "evidence": "Jev contradiction veto on claim_contradicts_source",
-     "raised_by": "jev-cascade"
-    }
-   ],
+   "pass_a_route": "accept",
+   "pass_a_failed_checks": [],
+   "pass_a_holds": [],
    "pass_b_route": "refine",
    "pass_b_failed_checks": [
     "claim_contradicts_source"
@@ -1606,17 +1623,17 @@
   }
  ],
  "verdict": {
-  "pass_a_meets_bar": true,
+  "pass_a_meets_bar": false,
   "pass_b_meets_bar": true,
-  "meets_bar_both_passes": true
+  "meets_bar_both_passes": false
  },
  "status": "accepted",
  "scratch_stopped": true,
  "scratch_removed": {
-  "path": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-afhshyqc",
+  "path": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/load-239/srtj-docs-switch-measure-2tqsxrrk",
   "exists_after": false
  },
- "finished_at": "2026-10-24T07:21:18.592851+00:00",
+ "finished_at": "2026-10-24T11:23:18.075306+00:00",
  "supporting_evidence": {
   "veto_replay": {
    "bar": {
@@ -1875,7 +1892,7 @@
   },
   "head_arm": {
    "base_revision": "40a5898071e6edabeed1b92fa350beb97dd0e4c2",
-   "head_revision": "2f9b8cd02f787d9791c2f721ffea22f5d3064f87",
+   "head_revision": "a942ed6dfce130c4d183e5caf168f21153f585d3",
    "base": {
     "passed": 71,
     "deselected": 19,
@@ -1906,6 +1923,42 @@
    "veto_replay": 0.018181,
    "reask_probe": 0.000517,
    "ceiling": 1.0
+  },
+  "switch_measurement": {
+   "status": "measured_at_shipping_commit",
+   "verdict": {
+    "pass_a_meets_bar": false,
+    "pass_b_meets_bar": true,
+    "meets_bar_both_passes": false
+   },
+   "rows_measured": 77,
+   "passes": {
+    "pass_a": {
+     "link_defects_refined": 19,
+     "link_defect_rows": 19,
+     "acceptable_rows_refined": 1,
+     "acceptable_rows": 30,
+     "meets_bar": false,
+     "spend_usd": 0.012033
+    },
+    "pass_b": {
+     "link_defects_refined": 19,
+     "link_defect_rows": 19,
+     "acceptable_rows_refined": 0,
+     "acceptable_rows": 30,
+     "meets_bar": true,
+     "spend_usd": 0.012033
+    }
+   },
+   "wrong_rows": {
+    "pass_a": [
+     "S0010"
+    ],
+    "pass_b": []
+   },
+   "spend_usd": 0.024066,
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/measure-srtj-docs-switch-causes-6.log",
+   "revision": "a942ed6dfce130c4d183e5caf168f21153f585d3"
   }
  }
 }
