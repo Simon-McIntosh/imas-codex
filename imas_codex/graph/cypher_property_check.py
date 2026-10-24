@@ -140,12 +140,12 @@ imas_codex/standard_names/graph_store/graph_lineage.py|StandardName|_lifecyclele
 imas_codex/standard_names/graph_store/graph_claim_release.py|StandardName|_refine_claim_release_lock|405,406
 imas_codex/standard_names/graph_store/graph_parent_lifecycle.py|StandardName|_structural_authority_lock|647,648
 imas_codex/standard_names/graph_store/graph_lineage.py|StandardName|needs_composition|3083,4094,5822
-imas_codex/standard_names/graph_ops.py|StandardName|reservation_claim_seq|10221
-imas_codex/standard_names/graph_ops.py|StandardName|reservation_claim_token|10220
-imas_codex/standard_names/graph_ops.py|StandardName|reservation_source_id|10219
 imas_codex/standard_names/graph_store/graph_cost_and_claims.py|StandardNameSource|_claim_lock|14557,14558,14630,14631,14672,14673,14709,14710
 imas_codex/standard_names/graph_store/graph_claim_scope.py|StandardNameSource|_drain_scope_lock|923,924
-imas_codex/standard_names/graph_ops.py|StandardNameSource|skipped_at|10461,10462,11106
+imas_codex/standard_names/graph_store/graph_source_bindings.py|StandardName|reservation_source_id|888
+imas_codex/standard_names/graph_store/graph_source_bindings.py|StandardName|reservation_claim_token|889
+imas_codex/standard_names/graph_store/graph_source_bindings.py|StandardName|reservation_claim_seq|890
+imas_codex/standard_names/graph_store/graph_source_bindings.py|StandardNameSource|skipped_at|1207,1208,2145
 imas_codex/standard_names/provenance_lifecycle.py|StandardNameSource|standard_name_id|176
 imas_codex/standard_names/signed_manifest.py|StandardNameChange|authority_rows_sha256|3556,4181
 imas_codex/standard_names/signed_manifest.py|StandardNameChange|detached_target_ids|4179
