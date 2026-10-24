@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="node-id" content="shc-drift-scope-hardening">
+  <title>Guarding the loop half of the scoped drift refresh</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-drift-scope-hardening-title">Guarding the loop half of the scoped drift refresh</h1>
+
+  <p id="shc-drift-scope-hardening-summary">
+    The scope fix that stopped a family apply steering names outside its
+    family was never tested from the side that decides the scope.
+    <code>_scope_name_ids</code> resolves a scoped run's own names and
+    <code>run_sn_pools</code> hands that set to the drift refresh; deleting
+    the hand-off would have passed the whole suite. The selector also caught
+    every exception and returned an empty list, so an unreachable graph read
+    as "this run owns nothing" and the default-tier live-graph guard's own
+    refusal was swallowed, surfacing as a passing test. Four findings are
+    repaired here: no test reached the selector or the hand-off, the handler
+    swallowed the conftest guard, one test's docstring claimed a guard its
+    double cannot provide, and one string replace was a no-op.
+  </p>
+
+  <p id="shc-drift-scope-hardening-authority">
+    Plan authority: <code>imas-codex:sn-harmonize-command</code> §4, from the
+    four follow-on findings on
+    <code>docs/evidence/fragments/sn-harmonize-command/shc-drift-refresh-scope-fix.html</code>.
+  </p>
+
+  <h2 id="shc-drift-scope-hardening-f1">1. No test reached the scope selector or its call site</h2>
+
+  <p id="shc-drift-scope-hardening-f1-before">
+    <strong>Before.</strong> <code>_scope_name_ids</code> and the
+    <code>sn_ids=_refresh_ids</code> argument at the refresh call had no test.
+    Nothing asserted which names a scoped run owns, and nothing noticed if the
+    resolved set was never passed.
+  </p>
+
+  <p id="shc-drift-scope-hardening-f1-after">
+    <strong>After.</strong> <code>tests/standard_names/test_scoped_drift_loop.py</code>
+    drives <code>run_sn_pools</code> and asserts the refresh receives the
+    resolved set, that an unscoped run still passes <code>None</code>, and that
+    a scope owning no names passes an empty list rather than falling open.
+    A separate test pins the selector's Cypher to both ways a run binds a name
+    — <code>sn.run_id</code> and a <code>StandardNameSource</code> of that run
+    through <code>PRODUCED_NAME</code> — because one arm alone returns a
+    silently smaller scope.
+  </p>
+
+  <h2 id="shc-drift-scope-hardening-f2">2. The handler swallowed the live-graph guard</h2>
+
+  <p id="shc-drift-scope-hardening-f2-before">
+    <strong>Before.</strong> <code>except Exception</code> returned
+    <code>[]</code>. Reproduced first: restoring that handler against the new
+    guard test fails with
+    <code>test_scope_selector_lets_the_default_tier_live_graph_guard_raise</code>
+    — the <code>RuntimeError</code> raised by <code>conftest.py</code> when a
+    default-tier test opens a live <code>GraphClient</code> was converted into
+    an empty scope, so the guard reported nothing and the test passed on
+    nothing.
+  </p>
+
+  <p id="shc-drift-scope-hardening-f2-after">
+    <strong>After.</strong> The handler catches only the connection errors
+    production can meet (<code>ServiceUnavailable</code>, <code>OSError</code>,
+    <code>TimeoutError</code>) and returns <code>None</code>, which is
+    distinct from an empty list.
+    <code>run_sn_pools</code> reads <code>None</code> as "skip the refresh" and
+    logs the scope id and the reason, so an unreadable scope neither sweeps the
+    graph nor claims to own nothing. A response carrying no name ids is treated
+    the same way, which keeps a selector defect from failing the whole drain
+    while still skipping the refresh and saying why.
+  </p>
+
+  <h2 id="shc-drift-scope-hardening-f3">3. A docstring claimed a guard its double cannot give</h2>
+
+  <p id="shc-drift-scope-hardening-f3-before">
+    <strong>Before.</strong>
+    <code>test_scoped_refresh_never_steers_a_name_outside_its_scope</code> said
+    it exercised the <code>sn.id IN $sn_ids</code> clause, but its double
+    filters on the ids it is handed, so it would pass with the clause deleted.
+  </p>
+
+  <p id="shc-drift-scope-hardening-f3-after">
+    <strong>After.</strong> The docstring now states that it guards the
+    forwarding, names the two graph-marked tests that do guard the clause —
+    <code>test_scoped_drift_scan_touches_only_the_runs_names</code> and
+    <code>test_scoped_refresh_leaves_an_out_of_scope_name_unsteered</code> —
+    and says why the double cannot see the clause.
+  </p>
+
+  <h2 id="shc-drift-scope-hardening-f4">4. A no-op replace in the test helper</h2>
+
+  <p id="shc-drift-scope-hardening-f4-before">
+    <strong>Before.</strong> <code>_attach_source</code> in
+    <code>test_source_refresh.py</code> ended its Cypher with
+    <code>.replace("{id: $name_id)", "{id: $name_id}")</code>, which replaces
+    nothing and reads as though the template were parametrised.
+  </p>
+
+  <p id="shc-drift-scope-hardening-f4-after">
+    <strong>After.</strong> Deleted; the query string stands as written.
+  </p>
+
+  <h2 id="shc-drift-scope-hardening-gate">Gate</h2>
+
+  <p id="shc-drift-scope-hardening-gate-default">
+    Default markers, separate <code>git archive</code> trees each with its own
+    <code>--basetemp</code>, over
+    <code>tests/standard_names/test_source_refresh.py</code>,
+    <code>tests/standard_names/test_scoped_global_maintenance.py</code> and the
+    new <code>tests/standard_names/test_scoped_drift_loop.py</code>:
+    base <code>f657a98dc</code> <strong>2 failed, 40 passed</strong> (EXIT=1),
+    head <code>b4641857b</code> <strong>42 passed</strong> (EXIT=0). The two
+    base failures are the new guard and unreadable-scope tests, so the delta
+    is zero added failures and the new tests do discriminate.
+  </p>
+
+  <p id="shc-drift-scope-hardening-gate-graph">
+    <code>-m graph</code> against the shared <code>disposable_neo4j_uri</code>
+    fixture, same trees and separate basetemps: base <strong>6 passed</strong>
+    (EXIT=0) and head <strong>6 passed</strong> (EXIT=0); identical test ids,
+    zero added failures.
+  </p>
+
+  <p id="shc-drift-scope-hardening-gate-nc">
+    <strong>Negative control.</strong> Removing
+    <code>sn_ids=_refresh_ids</code> from the loop's refresh call makes
+    <code>test_scoped_loop_forwards_its_own_name_set_to_the_refresh</code>,
+    <code>test_unscoped_loop_leaves_the_refresh_graph_wide</code> and
+    <code>test_a_scope_that_owns_nothing_refreshes_nothing</code> fail
+    (3 failed, EXIT=1), each of which the head arm passes. Log:
+    <code>negative-control-head.log</code> in the run directory.
+  </p>
+
+  <h2 id="shc-drift-scope-hardening-scope">Scope note</h2>
+
+  <p id="shc-drift-scope-hardening-scope-double">
+    Narrowing the handler surfaced a stale test double in
+    <code>tests/standard_names/test_scoped_global_maintenance.py</code>:
+    its <code>GraphClient</code> answered every query with a count row, which
+    the old catch-all had been converting into an empty scope. Answering the
+    scope query with a name id, and leaving every other query as it was, is the
+    repair; it lies outside this node's write fence and is recorded in the
+    manifest's <code>outside_scope</code> for the coordinator.
+  </p>
+</main>
+</body>
+</html>
