@@ -1,0 +1,62 @@
+<section>
+  <h2 id="shc-calls-per-phase-test">Per-phase call counts: exact per-run counts under test</h2>
+  <p id="shc-calls-per-phase-test-summary">
+    <code>aggregate_calls_per_phase</code> had only its spend siblings under test. Five tests now
+    seed a row set holding one run's phases, another run's rows and a phase with no rows for the named
+    run, and assert the exact counts through the moved module function and the <code>graph_ops</code>
+    forwarder. Head arm 20 passed against the base arm's 15; the declared mutation fails 5 new test ids.
+  </p>
+  <h3 id="shc-calls-per-phase-test-cases">Cases</h3>
+  <table>
+    <thead><tr><th>test</th><th>path exercised</th><th>assertion</th></tr></thead>
+    <tbody>
+      <tr><td><code>test_counts_by_phase_for_the_named_run</code></td><td><code>graph_store.graph_cost_and_claims.aggregate_calls_per_phase</code></td><td>exactly <code>{"docs": 2, "generate_name": 3, "review_name": 1}</code>; the other run's <code>enrich</code> and <code>generate_name</code> rows are excluded; <code>enrich</code> (zero rows for this run) is absent; every value is an <code>int</code></td></tr>
+      <tr><td><code>test_binds_the_run_id_it_counts</code></td><td>same</td><td>one query; it carries <code>count(*)</code> and <code>c.phase</code> and binds <code>run_id</code> to the run named in the call</td></tr>
+      <tr><td><code>test_run_without_rows_returns_empty_mapping</code></td><td>same</td><td>a run present only in another run's rows returns <code>{}</code></td></tr>
+      <tr><td><code>test_graph_ops_forwarder_returns_exact_counts</code></td><td><code>standard_names.graph_ops.aggregate_calls_per_phase</code> (forwarder)</td><td>same exact counts, and the forwarded query binds <code>run_id</code></td></tr>
+      <tr><td><code>test_graph_ops_forwarder_empty_run</code></td><td>forwarder</td><td><code>{}</code></td></tr>
+    </tbody>
+  </table>
+  <p id="shc-calls-per-phase-test-double">
+    The double is a seeded row set, not a fixed return value: it applies exactly the scoping the executed
+    statement declares, so a statement binding <code>{run_id: $run_id}</code> sees one run's rows and a
+    statement without that predicate sees every run's rows. A lost predicate therefore changes the returned
+    counts instead of passing unnoticed — which is what makes the negative control below a real measurement.
+    Rows: <code>generate_name</code> 3, <code>review_name</code> 1, <code>docs</code> 2 for
+    <code>run-cost-test-001</code> and <code>generate_name</code> 2, <code>enrich</code> 2 for
+    <code>run-cost-test-002</code>. The tests are pure unit tests in the file's existing style (its module
+    docstring reserves <code>graph</code> for integration tests), so they follow the siblings' doubles
+    rather than the disposable-graph fixture.
+  </p>
+  <h3 id="shc-calls-per-phase-test-gate">Gate by delta against main</h3>
+  <table>
+    <thead><tr><th>arm</th><th>revision</th><th>selection</th><th>result</th><th>log</th></tr></thead>
+    <tbody>
+      <tr><td>base</td><td><code>cc8592b7</code> (main)</td><td>default markers</td><td>15 passed, <code>EXIT=0</code></td><td><code>gate/base-default.log</code></td></tr>
+      <tr><td>head</td><td><code>e6cfdf2d</code></td><td>default markers</td><td>20 passed, <code>EXIT=0</code></td><td><code>gate/head-default.log</code></td></tr>
+      <tr><td>base</td><td><code>cc8592b7</code> (main)</td><td><code>-m graph</code></td><td>20 deselected (no graph-marked test in this file), <code>EXIT=5</code></td><td><code>gate/base-graph.log</code></td></tr>
+      <tr><td>head</td><td><code>e6cfdf2d</code></td><td><code>-m graph</code></td><td>20 deselected, <code>EXIT=5</code></td><td><code>gate/head-graph.log</code></td></tr>
+    </tbody>
+  </table>
+  <p id="shc-calls-per-phase-test-gate-body">
+    Added failures: 0. Each arm is its own <code>git archive</code> extraction under
+    <code>/tmp/reckon-crew-scratch/&lt;run id&gt;/gate/</code> with its own <code>--basetemp</code>, and each log's
+    header names the tree, the revision, the command, the imported module path and the resolved working
+    directory. The <code>-m graph</code> pair is recorded for completeness: the file carries no
+    graph-marked test, so both arms select nothing and exit 5 identically — a zero delta, not a failure of
+    the change under test.
+  </p>
+  <h3 id="shc-calls-per-phase-test-control">Negative control</h3>
+  <p id="shc-calls-per-phase-test-control-body">
+    Declared mutation: make <code>aggregate_calls_per_phase</code> count every run's rows. Applied by
+    dropping the <code>{run_id: $run_id}</code> predicate and its parameter from the statement in the head
+    tree, then running the same file: <strong>5 failed, 15 passed, EXIT=1</strong>. Every failing id is a
+    test this node added, and the head arm fails none of them:
+    <code>TestAggregateCallsPerPhase::test_counts_by_phase_for_the_named_run</code>,
+    <code>::test_binds_the_run_id_it_counts</code>, <code>::test_run_without_rows_returns_empty_mapping</code>,
+    <code>TestAggregateCallsPerPhaseForwarder::test_graph_ops_forwarder_returns_exact_counts</code>,
+    <code>::test_graph_ops_forwarder_empty_run</code>. Log <code>gate/negative-control.log</code>, ending
+    <code>EXIT=1</code>. The head tree's module was restored from <code>HEAD</code> after the run and compared
+    back to it.
+  </p>
+</section>
