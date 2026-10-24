@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/review/audits.py:760 (run_documentation_gate_checks calls score_documentation with documenting_name, reaching docs_gates.py:407)",
+    "imas_codex/standard_names/docs_holdout_eval.py:501",
+    "imas_codex/standard_names/docs_holdout_eval.py:512",
+    "imas_codex/standard_names/review/cascade_calibration.py:286 (calls jev_review.claim_contradicts)",
+    "imas_codex/standard_names/review/jev_review.py:1033 (effective_claim_answers calls claim_contradicts for every unsettled claim)"
+  ],
+  "completed_at": "2026-10-24T07:52:49.067Z",
+  "dispatched_at": "2026-10-24T07:41:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json",
+      "line": "6",
+      "severity": "blocking",
+      "text": "the measured artifact records code_revision 588c96b011120982af20613f725e5b3d7383aff4, but the reviewed head is 12d09f3edd29 and commit 719d2cc13 landed two minutes after the run began (measure-srtj-docs-switch-causes-3.log starts 07:07:55Z, the commit is 07:09:12Z), removing replaces_document_relation from claim_settlement; a veto path that settles a claim as 'contradicts' was therefore live for the whole measurement and is absent from the shipped code, so the 19 of 19 link defects and 0 of 30 acceptable rows figure the verdict rests on is not a measurement of the shipped revision."
+    },
+    {
+      "file": "veto-replay-3.json",
+      "line": "9823",
+      "severity": "non-blocking",
+      "text": "the artifact redefines the recall bar it is scored against ('every planted contradiction fires ... except the documented known gap contradicts-354') while brief.md:39-41 requires all 60 planted contradictions on two passes, and supporting_evidence.matched_answers records the shipped veto firing on 1 of 10 stored answers for that row against the base veto's 7 of 10, so a real recall loss is recorded as a permitted gap by the artifact that declares meets_bar true."
+    },
+    {
+      "file": "manifest.md",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "outside_scope states 'the veto replay's own settlement cannot conclude a contradiction, so its 59 of 60 understates ... the product', but supporting_evidence.matched_answers in the same measurement shows the shipped rule scoring the row's own stored judge answers at 1 of 10 against the base rule's 7 of 10, so the miss is the shipped criterion's narrower reading and not a harness limit; the manifest's account of its own gap is contradicted by its artifact."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "705",
+      "severity": "non-blocking",
+      "text": "claim_settlement and deterministic_claim_determinations at jev_review.py:727 both accept a documentation argument that neither reads, left behind when 719d2cc13 removed the only branch that used it; settled_claim_answers still threads state['documentation'] into it at jev_review.py:1026, so a reader is told documentation informs the settlement when it does not."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "383",
+      "severity": "non-blocking",
+      "text": "_names_a_position calls imas_standard_names.parse directly, bypassing the repository's owner for lossless name parsing at imas_codex/standard_names/grammar_adapter.py:parse_canonical_name (used by audits.py:478 _parse_audit_ir, which also resolves retired operator spellings); a name carrying a retired spelling parses to None here and silently loses the coordinate exemption, so the addition wraps the same capability through a second, weaker entry point rather than extending the owner."
+    },
+    {
+      "file": "tests/standard_names/test_contradiction_veto_question.py",
+      "line": "601",
+      "severity": "non-blocking",
+      "text": "the second parametrised reading supplies contradicts 0.25, below the 0.30 CONTRADICTION_VETO_PROBABILITY cutoff at jev_review.py:496, so it returns False before reaching the 'at least the silence mass' clause the test is named for and passes under the reverted bare-cutoff rule too; only the first reading at tests/standard_names/test_contradiction_veto_question.py:600 exercises the new criterion."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from cd52b01c to 12d09f3ed: eleven commits changing two production modules, two test files, the measurement runner, the evidence HTML/JSON and one figure, 5396 insertions and 36 deletions, all inside the declared scope.",
+    "done_when": "brief.md:59-69 requires committed fixes and tests, a two-pass veto replay meeting all-60 planted recall, a measurement JSON with a real EXIT=0 holding both passes, and an HTML with the per-row diagnosis, fixes, re-measured table and verdict; all four artifacts exist and the measurement log ends EXIT=0, but the measurement was taken at 588c96b0, before the settlement removal that ships.",
+    "goal": "the goal is to fix the two causes of over-refinement (the claim veto and the defining_equation lint cap) and re-measure the switch; the diff changes the veto criterion at jev_review.py:989-1010, the placement vocabulary at jev_review.py:531, the scope settlement at jev_review.py:683, and the defining-relation gate at docs_gates.py:407, so both causes are addressed at their owners.",
+    "manifest": "read in full; it records status complete, the gate command with gate-delta.log (base 71 passed, head 88 passed), the 59/60 replay, the negative control and spend 0.062247 USD of 1.00, but it carries no baseline_suite/after_suite block and its outside_scope at manifest.md:18 disagrees with supporting_evidence.matched_answers.",
+    "write_paths": "the fence at prompt.txt:150-158 lists jev_review.py, docs_gates.py, the two test files, the measure runner, the causes HTML and JSON, and docs/figures/sn-review-through-jev/srtj-docs-switch-causes; every path in the diff lies inside that list."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_docs_gates.py:575 and tests/standard_names/test_docs_gates.py:610 redden when the coordinate exemption is withdrawn (negative-control-4.log, 2 failed, EXIT=1), and tests/standard_names/test_contradiction_veto_question.py:514 pins literal probability triples that the former bare-cutoff rule would fire, though test_contradiction_veto_question.py:601 cannot exercise the new criterion.",
+    "evidence": "the measurement the bar rests on is recorded at docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json:6 as code_revision 588c96b0, but the shipped code is 12d09f3ed whose 719d2cc13 removed the relation-replacement settlement that was live during that run, so the 19/19 and 0/30 result is not a measurement of the landed revision.",
+    "fit": "states_scope_non_requirement at jev_review.py:683 follows the existing states_non_requirement family and reuses _NEGATED_REQUIREMENT and _REQUIREMENT_WITH_NO_OBJECT, while jev_review.py:705 keeps a dead documentation argument from the settlement 719d2cc13 removed.",
+    "goal_fidelity": "the two causes the goal names are fixed at imas_codex/standard_names/review/jev_review.py:989-1010 (the probability veto; jev_review.py:531 direction-word placement and jev_review.py:683 population scope) and imas_codex/standard_names/docs_gates.py:407 (coordinate exemption), and the evidence HTML diagnoses all five wrong rows.",
+    "reuse": "the runner fix correctly reuses audits.py:778 run_lint_checks instead of carrying its own lint copy, but docs_gates.py:383 parses names through raw imas_standard_names.parse rather than the repository's owner imas_codex/standard_names/grammar_adapter.py:parse_canonical_name used by audits.py:478.",
+    "scope_discipline": "every path in the diff, including docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg, is inside the fence listed at prompt.txt:150-158."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to fix the two causes of over-refinement and re-measure the switch; imas_codex/standard_names/review/jev_review.py:989-1010 rewrites the probability veto and imas_codex/standard_names/docs_gates.py:407 exempts coordinates from the defining-relation rule, so both named causes are addressed at their owners.\nVERDICT done_when: brief.md:59-69 requires committed fixes and tests, a two-pass veto replay meeting all-60 planted recall, a measurement JSON with a real EXIT=0 holding both passes, and an HTML with the diagnosis, fixes, table and verdict; all four exist, but the measurement ran at 588c96b0, before the settlement removal that ships.\nVERDICT write_paths: the fence at prompt.txt:150-158 lists the two source files, two test files, the runner, the HTML/JSON and the figure directory; every path in the diff is inside it.\nVERDICT manifest: read; it records status complete, gate-delta.log at 71 base and 88 head passed, the 59/60 replay and spend 0.062247 USD, but carries no baseline_suite/after_suite block and its outside_scope at manifest.md:18 is contradicted by the artifact's matched answers.\nVERDICT diff: read commit by commit from cd52b01c to 12d09f3ed; eleven commits, 5396 insertions, two production modules, two test files, the runner, the evidence HTML/JSON and one figure, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/review/audits.py:760, imas_codex/standard_names/docs_holdout_eval.py:501, imas_codex/standard_names/docs_holdout_eval.py:512, imas_codex/standard_names/review/cascade_calibration.py:286, imas_codex/standard_names/review/jev_review.py:1033\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: jev_review.py:989-1010 and docs_gates.py:407 fix the two causes the goal names, and the evidence HTML diagnoses all five wrong rows.\nSCORE evidence: 9\nJUSTIFICATION evidence: srtj-docs-switch-causes.json:6 records code_revision 588c96b0 while the shipped code removes a live veto path at 719d2cc13, so the 19/19 and 0/30 result measures code that does not ship.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every diff path, including matched-answers.svg, is inside the fence at prompt.txt:150-158.\nSCORE durability: 16\nJUSTIFICATION durability: negative-control-4.log shows test_docs_gates.py:575 and :610 reddening when the exemption is withdrawn, and test_contradiction_veto_question.py:514 pins literals the old rule fires on, though :601 cannot exercise the new criterion.\nSCORE fit: 16\nJUSTIFICATION fit: states_scope_non_requirement at jev_review.py:683 follows the states_non_requirement family, while jev_review.py:705 keeps a dead documentation argument.\nSCORE reuse: 12\nJUSTIFICATION reuse: the runner reuses audits.py:778 run_lint_checks, but docs_gates.py:383 bypasses the repository's parse owner at grammar_adapter.py:parse_canonical_name.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json:6 blocking: the measurement records code_revision 588c96b0, before 719d2cc13 removed replaces_document_relation from claim_settlement, so the bar was measured on a veto path the shipped code no longer has.\nFINDING veto-replay-3.json:9823 non-blocking: the artifact redefines the recall bar to permit contradicts-354 while brief.md:39-41 required all 60, and matched_answers record a real 7-of-10 to 1-of-10 recall loss on that row.\nFINDING manifest.md:18 non-blocking: outside_scope calls the 59/60 a harness artifact while supporting_evidence.matched_answers shows the shipped rule genuinely fires on 1 of 10 stored answers.\nFINDING imas_codex/standard_names/review/jev_review.py:705 non-blocking: the documentation argument at :705 and :727 is never read, residue of the settlement 719d2cc13 removed.\nFINDING imas_codex/standard_names/docs_gates.py:383 non-blocking: raw imas_standard_names.parse bypasses grammar_adapter.parse_canonical_name and its retired-spelling resolution, so such names silently lose the exemption.\nFINDING tests/standard_names/test_contradiction_veto_question.py:601 non-blocking: contradicts 0.25 is below the 0.30 cutoff, so this case cannot exercise the silence-mass clause it is named for.",
+  "review_run_id": "r-20261024T074121323475-review-of-srtj-docs-switch-causes-12d09f3edd29",
+  "reviewed_base_sha": "cd52b01cd9c0de92742166f2a194b8173c92b6b4",
+  "reviewed_head_sha": "12d09f3edd29f6ba69f5552089438fc1bf9952ff",
+  "reviewed_run_id": "r-20261023T191819797804-srtj-docs-switch-causes",
+  "scores": {
+    "durability": 16,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T07:55:44.677708+00:00",
+  "total": 88
+}
