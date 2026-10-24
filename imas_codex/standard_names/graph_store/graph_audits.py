@@ -271,7 +271,7 @@ PROMOTE_STRANDED_DOCS_WHERE = (
     f"AND {docs_acceptance_where()} "
     "AND sn.name_stage = 'accepted' "
     "AND coalesce(sn.validation_status, '') <> 'quarantined' "
-    f"AND {foundation.services.docs_review_eligibility_where()} "
+    "AND {docs_review_eligibility_where} "
     "AND sn.docs_review_quorum_shortfall IS NULL"
 )
 

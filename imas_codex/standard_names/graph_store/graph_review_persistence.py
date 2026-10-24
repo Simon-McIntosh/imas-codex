@@ -639,8 +639,8 @@ def persist_reviewed_name(
 @retry_on_deadlock()
 def claim_review_docs_batch(
     facility: str | None = None,
-    batch_size: int = foundation.services.DEFAULT_POOL_BATCH_SIZE,
-    timeout_seconds: int = foundation.services._CLAIM_TIMEOUT_SECONDS,
+    batch_size: int = 25,
+    timeout_seconds: int = foundation._CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
     drain_scope_id: str | None = None,

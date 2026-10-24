@@ -12055,9 +12055,13 @@ PROMOTE_STRANDED_NAME_WHERE = import_module(
 
 """Canonical graph predicate for name-axis stranded promotion."""
 
-PROMOTE_STRANDED_DOCS_WHERE = import_module(
-    ".graph_store.graph_audits", __package__
-).PROMOTE_STRANDED_DOCS_WHERE
+_graph_audits = import_module(".graph_store.graph_audits", __package__)
+_graph_audits.PROMOTE_STRANDED_DOCS_WHERE = (
+    _graph_audits.PROMOTE_STRANDED_DOCS_WHERE.replace(
+        "{docs_review_eligibility_where}", docs_review_eligibility_where()
+    )
+)
+PROMOTE_STRANDED_DOCS_WHERE = _graph_audits.PROMOTE_STRANDED_DOCS_WHERE
 
 """Canonical graph predicate for docs-axis stranded promotion."""
 
