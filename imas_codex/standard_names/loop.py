@@ -343,7 +343,11 @@ def _scope_name_ids(scope_run_id: str) -> list[str] | None:
     must never fall open into a graph-wide sweep and must not read as an
     empty one either.
     """
-    from neo4j.exceptions import ServiceUnavailable
+    # SessionExpired and TransientError are siblings under DriverError, not
+    # SessionExpired under TransientError, and they carry the failures a
+    # concurrent drain meets — an expired session and a lock timeout. Each
+    # means the scope was not read, and none may abort the run.
+    from neo4j.exceptions import ServiceUnavailable, SessionExpired, TransientError
 
     from imas_codex.graph.client import GraphClient
 
@@ -375,7 +379,13 @@ def _scope_name_ids(scope_run_id: str) -> list[str] | None:
             )
             return None
         return ids
-    except (ServiceUnavailable, OSError, TimeoutError) as exc:
+    except (
+        ServiceUnavailable,
+        SessionExpired,
+        TransientError,
+        OSError,
+        TimeoutError,
+    ) as exc:
         logger.warning(
             "run_sn_pools: scope %s could not be read (%s: %s); the "
             "source-drift refresh is skipped rather than run unscoped",
