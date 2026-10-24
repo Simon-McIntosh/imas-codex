@@ -197,13 +197,15 @@ async def compose_worker(
     async def _compose_batch_body(
         batch: ExtractionBatch, lease_box: list[BudgetLease]
     ) -> list[dict] | None:
+        _collect_nearby_name_comparators = _worker_dependency(
+            "_collect_nearby_name_comparators"
+        )
+        _rerank_comparators_for_worker = _worker_dependency(
+            "_rerank_comparators_for_worker"
+        )
         # Search for nearby existing names with a bounded share per item.
-        nearby = await asyncio.to_thread(
-            _worker_dependency("_collect_nearby_name_comparators"), batch.items
-        )
-        nearby = await _worker_dependency("_rerank_comparators_for_worker")(
-            state, batch.items, nearby
-        )
+        nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch.items)
+        nearby = await _rerank_comparators_for_worker(state, batch.items, nearby)
 
         # IDS-level context — collect for each IDS present in batch
         ids_names = sorted(
