@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/benchmark.py:581",
+    "imas_codex/standard_names/benchmark.py:1650",
+    "imas_codex/standard_names/campaign_pricing.py:365",
+    "imas_codex/standard_names/docs_holdout_eval.py:207",
+    "imas_codex/standard_names/review/enrichment.py:301",
+    "imas_codex/standard_names/pool_adapter.py:47",
+    "imas_codex/standard_names/graph_store/graph_audits.py:2550",
+    "imas_codex/standard_names/attachment_audit.py:755",
+    "imas_codex/standard_names/attachment_audit.py:808",
+    "imas_codex/standard_names/catalog_import.py:315",
+    "imas_codex/standard_names/review/pipeline.py:719",
+    "imas_codex/standard_names/review/panel_audit.py:103"
+  ],
+  "completed_at": "2026-10-24T11:41:37.367Z",
+  "dispatched_at": "2026-10-24T11:25:22Z",
+  "findings": [
+    "FINDING imas_codex/standard_names/worker_tasks/worker_common.py:34 non-blocking: an empty `if TYPE_CHECKING: pass` block is retained only because the design symbol map names TYPE_CHECKING as a symbol owned by this module; it is dead code that a later reader will copy without knowing why it is there.",
+    "FINDING imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:9 non-blocking: the standard-library `re` module is imported through the sibling module (`from .worker_common import _re`) so the task module depends on the foundation for an import alias that carries no meaning; a local `import re as _re` keeps the module self-contained and leaves the foundation's surface smaller.",
+    "FINDING imas_codex/standard_names/worker_tasks/worker_common.py:36 non-blocking: `__all__` publishes imported stdlib and module objects (Any, annotations, asyncio, json, logging, random, _cache, _re, lru_cache, TYPE_CHECKING), so `from worker_common import *` leaks them into a caller's namespace; the design's symbol map lists them as owned symbols, but a symbol map is not an API surface.",
+    "FINDING imas_codex/standard_names/workers.py:8720 non-blocking: no test asserts the facade invariant this change rests on \u2014 the 82 forwarders, their stripped signatures and the resolver threading were proved by scratch scripts under /tmp that the run deleted, so a later edit that drops a forwarder or calls a moved function directly is caught only where one of the 19 test-patched names happens to be exercised."
+  ],
+  "justifications": {
+    "durability": "The gate is 22 pre-existing test files whose 94 patch calls on 19 distinct moved names fail loudly if a forwarder is removed or a resolver substitution is dropped, but the facade invariant itself (imas_codex/standard_names/workers.py:8720 forwarder block) has no retained test and its proving scripts lived in deleted scratch.",
+    "evidence": "head_final-default.log records revision 9c77211f0, a completed summary (5 failed, 316 passed) and EXIT=1 in the same shape as base-default.log; the graph arm selected 0 of 321 and says so, and the manifest's signature-parity claim carries no log of its own though 82 of 82 facade signatures were re-measured equal to base during this review.",
+    "fit": "The node follows the graph_ops facade idiom and the repo's naming rules, but worker_common.py:34 keeps an empty TYPE_CHECKING block and worker_common.py:36 publishes stdlib imports.",
+    "goal_fidelity": "imas_codex/standard_names/workers.py:49 imports both task modules and every one of the 82 moved callables resolves through a forwarder whose body calls the moved implementation.",
+    "reuse": "No new capability was written: all 82 functions moved with identical bodies, and the only added construct, `_worker_dependency` at imas_codex/standard_names/workers.py:55, mirrors the globals()-backed facade resolver at imas_codex/standard_names/graph_ops.py:71 but is argument-passed as the brief requires rather than reusing graph_ops's module-global `services` slot; a search of imas_codex/ for `__wrapped__`, `_dependency` and a shared global-resolver helper found no shared owner to extend.",
+    "scope_discipline": "The diff touches only the five declared paths; no test file, graph_ops.py or graph_store/ file appears in `git show --stat` for any of the four commits."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261024T112451399995-review-of-srtj-workers-split-step15-05d5246564d8",
+  "reviewed_base_sha": "8d88b14ee3c667b6a199e517b4764ba13fac4242",
+  "reviewed_head_sha": "05d5246564d8ddbe3f00cae1454bfacbfdb9174a",
+  "reviewed_run_id": "r-20261024T104951381231-srtj-workers-split-step15",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T19:58:26.933316+00:00",
+  "total": 103,
+  "verdicts": {
+    "diff": "Read commit by commit against 8d88b14ee: 835e7b813 extracts worker_common, cbd3184ea extracts extraction/enrichment, 9c77211f0 restores the original logger identity and strips the injected collaborator from facade signatures, 05d524656 adds the evidence fragment; all 82 moved function bodies are AST-identical to base once `_worker_dependency(\"X\")` is read as `X` and the injected positional parameter is dropped, and no bare-name cross-call to a moved symbol remains inside the new modules.",
+    "done_when": "The done_when asks for committed modules and forwarders, zero added gate failures, passing import and patch-target scans, and a fragment recording symbols, forwarders and three size counts; base-default.log and head_final-default.log each record 5 failed / 316 passed with identical failure IDs (final-gate-comparison.log: added 0 removed 0), fresh-imports.log and patch-target-scan.log exit 0, and docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step15.html records 91/56 symbols, 82 forwarders and base/head bytes 481572/372123.",
+    "goal": "The node's goal is to extract worker_common and worker_extraction_and_enrichment into imas_codex/standard_names/worker_tasks/ and keep workers.py working; the landed change does exactly that, with 82 function forwarders at imas_codex/standard_names/workers.py:68-8700 and 147 design-mapped symbols at their mapped owners (architecture-check.log: 91 common + 56 extraction, none missing).",
+    "manifest": "The manifest reports status complete with four commits and 82 forwarders; its baseline_suite and after_suite both record 5 failures with the same five IDs, and its size and gate-unit figures reconcile with the files on disk (481572 and 372123 bytes).",
+    "write_paths": "The declared write paths are workers.py, worker_tasks/__init__.py, worker_tasks/worker_common.py, worker_tasks/worker_extraction_and_enrichment.py and the evidence fragment; `git diff --stat 8d88b14ee..05d524656` names exactly those five paths and nothing else."
+  }
+}
