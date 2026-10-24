@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "gate-base5.log (base arm, main 40a5898071, 71 passed / 19 deselected / 0 failed) and gate-delta-5.log (head arm, 2f9b8cd02, 88 passed / 18 deselected / 0 failed); neither arm carries a failing test id, so the delta is empty. The reviewed manifest carries no baseline_suite/after_suite blocks, so these gate logs are the source.",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/review/cascade_calibration.py:286 (claim_contradicts)",
+    "imas_codex/standard_names/review/jev_review.py:1033 (batch veto loop calling claim_contradicts)",
+    "imas_codex/standard_names/review/jev_review.py:688 (deterministic_claim_determinations calling claim_settlement)",
+    "imas_codex/standard_names/review/audits.py:760 (run_documentation_gate_checks calling score_documentation with documenting_name)",
+    "imas_codex/standard_names/docs_holdout_eval.py:501 (score_documentation without documenting_name)"
+  ],
+  "completed_at": "2026-10-24T10:53:35.328Z",
+  "dispatched_at": "2026-10-24T10:35:33Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html",
+      "line": "189",
+      "severity": "blocking",
+      "text": "blocking: the committed fragment carries the literal token SWITCH_REVISION_PLACEHOLDER and states the switch figures were measured at 588c96b0, before commit 719d2cc13 withdrew the relation-replacement settlement, so the one-line verdict that the bar is met on both passes is not a measurement of the shipping commit; the two attempts at the shipping head (measure-srtj-docs-switch-causes-5.log and -6.log) ended while still waiting on the load gate, having invoked neither the runner nor a Jev call."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the artifact records code_revision 588c96b011120982af20613f725e5b3d7383aff4 on a rule that changed twice afterwards (719d2cc13 withdrew the relation-replacement settlement; aaf6ebefc added and 2f9b8cd02 removed the second ask), so its 19/19 and 0/30 pass figures describe neither the shipped veto nor the shipped settlement."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "1267",
+      "severity": "non-blocking",
+      "text": "non-blocking: the coordinate exemption decides from documenting_name, and imas_codex/standard_names/docs_holdout_eval.py:501 and :512 call score_documentation without it, so the evaluation path still fails coordinate documents on defining_equation while the production audit at imas_codex/standard_names/review/audits.py:760 passes them."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "370",
+      "severity": "non-blocking",
+      "text": "non-blocking: _names_a_position is a second owner of the 'is this name a geometric coordinate' decision, alongside imas_codex/standard_names/derivation.py:390 _geometric_coordinate_check (model parser, parsed.coordinate) and the graph property is_geometric_coordinate; the strict canonical parser and the model parser can disagree, so a name can be exempt from the gate and not a coordinate in the graph, or the reverse."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html",
+      "line": "273",
+      "severity": "non-blocking",
+      "text": "non-blocking: the spend line quotes the veto replay at 0.019192 USD from the withdrawn aaf6ebefc replay while the shipped artifact records 0.018181 USD at 2f9b8cd02, and the fragment's 0.063775 upper bound disagrees with the 0.081956 USD the manifest records, so no one figure reconciles with the run's own ledger."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read all fifteen commits against cd52b01cd9c0de92742166f2a194b8173c92b6b4; the landed change is four production edits, two test files with thirteen added tests, the measurement runner's lint composition and instrument-failure handling, and the evidence fragment, and the two re-ask commits (aaf6ebefc, 2f9b8cd02) withdraw the rule they added.",
+    "done_when": "the done_when requires the veto replay to hold its bar on two passes, the switch JSON to be written by the updated runner with an EXIT=0 log and both passes, and the fragment to record the diagnosis, fixes, re-measured table and a one-line verdict; the replay bar is met at 2f9b8cd02 (59 of 60 planted, 3 of 46 recorded, 0 of 20 controls on both passes) and the three-file gate is recorded (71 base / 88 head, 0 failed), but the fragment states its switch figures were measured at 588c96b0 and are not a measurement of the shipping commit (docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html:187-189).",
+    "goal": "the goal is to fix the two causes of over-refinement and re-measure the switch; the diff fixes the flat-distribution veto in claim_contradicts (imas_codex/standard_names/review/jev_review.py:987), the field-label source (jev_review.py:531), the generic-against-specialised mode (jev_review.py:683) and the defining-relation cap (imas_codex/standard_names/docs_gates.py:370), which are the four causes the diagnosis names.",
+    "manifest": "read; it reports the gate and negative-control results (71 passed at main, 88 passed at head, withdrawing the exemption fails 2 and exits 1) and the replay figures, and it is honest that the switch measurement did not run at the shipping commit, but its checkpoint line carries an unsubstituted SWITCH_STATE_PLACEHOLDER token and it names the aborted load-wait log measure-srtj-docs-switch-causes-5.log as a test log.",
+    "write_paths": "the manifest declares eight paths plus the figure directory; every path in the landed diff (jev_review.py, docs_gates.py, the two test files, the measure runner, the fragment HTML and JSON, and matched-answers.svg under docs/figures) is inside them, and the two files edited outside the fence (cascade.py and the retune runner) net to no change across the range and are recorded under outside_scope."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_contradiction_veto_question.py asserts an undecided distribution does not veto and would redden if the silence-mass clause at jev_review.py:1006 were removed, and negative-control-5.log shows the exemption at the head of docs_gates.py:407 is the thing the two coordinate tests fail on when withdrawn; the runner's judgment_failed handling has no test.",
+    "evidence": "gate-base5.log and gate-delta-5.log record 71 and 88 passed with 0 failures and negative-control-5.log records the 2-failure refusal, but the committed srtj-docs-switch-causes.json carries code_revision 588c96b011120982af20613f725e5b3d7383aff4 while commit 719d2cc13 later withdrew the relation-replacement settlement it measured, and both attempts at the shipping head ended without a runner invocation.",
+    "fit": "_names_a_position mirrors the existing is_canonical_name handling at imas_codex/standard_names/grammar_adapter.py:153 and the added helpers carry no plan, ticket or version identifier.",
+    "goal_fidelity": "the four diagnosed causes map one-to-one onto jev_review.py:531, jev_review.py:683, jev_review.py:987 and docs_gates.py:407, but the re-measured switch table the goal turns on is not a measurement of the shipping code.",
+    "reuse": "states_scope_non_requirement extends the existing claim_settlement family in the same module, but _names_a_position at docs_gates.py:370 re-implements the geometric-coordinate classification that imas_codex/standard_names/derivation.py:390 already owns from a different parser.",
+    "scope_discipline": "every path in git diff cd52b01..2c596a345 is inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to fix the two causes of over-refinement and re-measure the switch; the diff fixes the flat-distribution veto in claim_contradicts (imas_codex/standard_names/review/jev_review.py:987), the field-label source (jev_review.py:531), the generic-against-specialised mode (jev_review.py:683) and the defining-relation cap (imas_codex/standard_names/docs_gates.py:370), which are the four causes the diagnosis names.\nVERDICT done_when: the done_when requires the veto replay to hold its bar on two passes, the switch JSON to be written by the updated runner with an EXIT=0 log and both passes, and the fragment to record the diagnosis, fixes, re-measured table and a one-line verdict; the replay bar is met at 2f9b8cd02 (59 of 60 planted, 3 of 46 recorded, 0 of 20 controls on both passes) and the three-file gate is recorded (71 base / 88 head, 0 failed), but the fragment states its switch figures were measured at 588c96b0 and are not a measurement of the shipping commit (docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html:187-189).\nVERDICT write_paths: the manifest declares eight paths plus the figure directory; every path in the landed diff (jev_review.py, docs_gates.py, the two test files, the measure runner, the fragment HTML and JSON, and matched-answers.svg under docs/figures) is inside them, and the two files edited outside the fence (cascade.py and the retune runner) net to no change across the range and are recorded under outside_scope.\nVERDICT manifest: read; it reports the gate and negative-control results (71 passed at main, 88 passed at head, withdrawing the exemption fails 2 and exits 1) and the replay figures, and it is honest that the switch measurement did not run at the shipping commit, but its checkpoint line carries an unsubstituted SWITCH_STATE_PLACEHOLDER token and it names the aborted load-wait log measure-srtj-docs-switch-causes-5.log as a test log.\nVERDICT diff: read all fifteen commits against cd52b01cd9c0de92742166f2a194b8173c92b6b4; the landed change is four production edits, two test files with thirteen added tests, the measurement runner's lint composition and instrument-failure handling, and the evidence fragment, and the two re-ask commits (aaf6ebefc, 2f9b8cd02) withdraw the rule they added.\nCALL_SITES: imas_codex/standard_names/review/cascade_calibration.py:286 (claim_contradicts), imas_codex/standard_names/review/jev_review.py:1033 (batch veto loop calling claim_contradicts), imas_codex/standard_names/review/jev_review.py:688 (deterministic_claim_determinations calling claim_settlement), imas_codex/standard_names/review/audits.py:760 (run_documentation_gate_checks calling score_documentation with documenting_name), imas_codex/standard_names/docs_holdout_eval.py:501 (score_documentation without documenting_name)\nSCORE goal_fidelity: 17\nSCORE evidence: 8\nSCORE scope_discipline: 18\nSCORE durability: 17\nSCORE fit: 18\nSCORE reuse: 15\nJUSTIFICATION goal_fidelity: the four diagnosed causes map one-to-one onto jev_review.py:531, jev_review.py:683, jev_review.py:987 and docs_gates.py:407, but the re-measured switch table the goal turns on is not a measurement of the shipping code.\nJUSTIFICATION evidence: gate-base5.log and gate-delta-5.log record 71 and 88 passed with 0 failures and negative-control-5.log records the 2-failure refusal, but the committed srtj-docs-switch-causes.json carries code_revision 588c96b011120982af20613f725e5b3d7383aff4 while commit 719d2cc13 later withdrew the relation-replacement settlement it measured, and both attempts at the shipping head ended without a runner invocation.\nJUSTIFICATION scope_discipline: every path in git diff cd52b01..2c596a345 is inside the manifest's declared write paths.\nJUSTIFICATION durability: tests/standard_names/test_contradiction_veto_question.py asserts an undecided distribution does not veto and would redden if the silence-mass clause at jev_review.py:1006 were removed, and negative-control-5.log shows the exemption at the head of docs_gates.py:407 is the thing the two coordinate tests fail on when withdrawn; the runner's judgment_failed handling has no test.\nJUSTIFICATION fit: _names_a_position mirrors the existing is_canonical_name handling at imas_codex/standard_names/grammar_adapter.py:153 and the added helpers carry no plan, ticket or version identifier.\nJUSTIFICATION reuse: states_scope_non_requirement extends the existing claim_settlement family in the same module, but _names_a_position at docs_gates.py:370 re-implements the geometric-coordinate classification that imas_codex/standard_names/derivation.py:390 already owns from a different parser.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html:189 blocking: the committed fragment carries the literal token SWITCH_REVISION_PLACEHOLDER and states the switch figures were measured at 588c96b0, before commit 719d2cc13 withdrew the relation-replacement settlement, so the one-line verdict that the bar is met on both passes is not a measurement of the shipping commit; the two attempts at the shipping head (measure-srtj-docs-switch-causes-5.log and -6.log) ended while still waiting on the load gate, having invoked neither the runner nor a Jev call.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json:1 non-blocking: the artifact records code_revision 588c96b011120982af20613f725e5b3d7383aff4 on a rule that changed twice afterwards (719d2cc13 withdrew the relation-replacement settlement; aaf6ebefc added and 2f9b8cd02 removed the second ask), so its 19/19 and 0/30 pass figures describe neither the shipped veto nor the shipped settlement.\nFINDING imas_codex/standard_names/docs_gates.py:1267 non-blocking: the coordinate exemption decides from documenting_name, and imas_codex/standard_names/docs_holdout_eval.py:501 and :512 call score_documentation without it, so the evaluation path still fails coordinate documents on defining_equation while the production audit at imas_codex/standard_names/review/audits.py:760 passes them.\nFINDING imas_codex/standard_names/docs_gates.py:370 non-blocking: _names_a_position is a second owner of the 'is this name a geometric coordinate' decision, alongside imas_codex/standard_names/derivation.py:390 _geometric_coordinate_check (model parser, parsed.coordinate) and the graph property is_geometric_coordinate; the strict canonical parser and the model parser can disagree, so a name can be exempt from the gate and not a coordinate in the graph, or the reverse.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html:273 non-blocking: the spend line quotes the veto replay at 0.019192 USD from the withdrawn aaf6ebefc replay while the shipped artifact records 0.018181 USD at 2f9b8cd02, and the fragment's 0.063775 upper bound disagrees with the 0.081956 USD the manifest records, so no one figure reconciles with the run's own ledger.\n",
+  "review_run_id": "r-20261024T103434289770-review-of-srtj-docs-switch-causes-2c596a3459bf",
+  "reviewed_base_sha": "cd52b01cd9c0de92742166f2a194b8173c92b6b4",
+  "reviewed_head_sha": "2c596a3459bf72d34696e071ddfac380aed15727",
+  "reviewed_run_id": "r-20261023T191819797804-srtj-docs-switch-causes",
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 8,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T10:52:00.000000+00:00",
+  "total": 93
+}
