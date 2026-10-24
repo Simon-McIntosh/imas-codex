@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="187">
+<meta name="plan-version" content="188">
 <meta name="plan-modified" content="2026-10-24">
 </head>
 <body>
@@ -719,7 +719,10 @@
     <div class="r-comment-body"><p>shc-calls-per-phase-test — added TestAggregateCallsPerPhase and TestAggregateCallsPerPhaseForwarder to tests/standard_names/test_cost_graph_ops.py, five tests asserting exact per-run per-phase call counts (docs 2, generate_name 3, review_name 1) with another run's rows excluded and the zero-call phase absent; base (main cc8592b7) 15 passed, head (e6cfdf2d) 20 passed, 0 added failures; declared mutation (count every run's rows) failed 5 new ids, EXIT=1</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261024T194753336634-review-of-shc-drift-scope-hardening-22104a44cc68" data-who="reckon-build" data-when="2026-10-24T19:59:13.163Z">
-    <div class="r-comment-body"><p>review of run r-20261024T110534469167-shc-drift-scope-hardening at head 22104a44c against base f657a98dc scores goal_fidelity 19, evidence 16, scope_discipline 13, durability 18, fit 18, reuse 5; added_failure_count 0 with an empty id set derived from the reviewed run&#x27;s own baseline 2 failed/40 passed at f657a98dc and after 42 passed at b4641857b; five non-blocking findings, the load-bearing ones being a third copy of the scoped-maintenance patch harness, an exception tuple narrower than the repository&#x27;s own connection-error classifier, and a repair landed outside the reviewed node&#x27;s write fence that needs the fence extended.</p></div>
+    <div class="r-comment-body"><p>review of run r-20261024T110534469167-shc-drift-scope-hardening at head 22104a44c against base f657a98dc scores goal_fidelity 19, evidence 16, scope_discipline 13, durability 18, fit 18, reuse 5; added_failure_count 0 with an empty id set derived from the reviewed run's own baseline 2 failed/40 passed at f657a98dc and after 42 passed at b4641857b; five non-blocking findings, the load-bearing ones being a third copy of the scoped-maintenance patch harness, an exception tuple narrower than the repository's own connection-error classifier, and a repair landed outside the reviewed node's write fence that needs the fence extended.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-calls-per-phase-test-landed" data-who="reckon-build" data-when="2026-10-24T20:05:00Z">
+    <div class="r-comment-body"><p><code>aggregate_calls_per_phase</code> now has tests (merge <code>917e26cfb</code>, review 108). Five tests seed cost rows across phases and runs. They assert the exact per-phase call counts for one run, through <code>graph_store</code> and through the <code>graph_ops</code> forwarder. The run record's call counts are now checked, not trusted. <code>shc-drift-scope-hardening</code> is back with its worker. Its review found that the narrowed handler lets <code>SessionExpired</code> and <code>TransientError</code> abort the run, where the refresh should be skipped. The worker is moving the decision to the repository's connection-failure classifier.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>

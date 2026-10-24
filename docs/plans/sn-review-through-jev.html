@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="253">
+<meta name="plan-version" content="254">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1073,6 +1073,18 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T191819797804-srtj-docs-switch-causes" data-who="reckon-build" data-when="2026-10-24T11:27:56Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-switch-now" data-who="lead" data-when="2026-10-24T13:35:00Z">
+    <div class="r-comment-body"><p>"Switch now, record S0010." At the shipping commit the documentation switch refines 19 of 19 link defects on both passes. It refines 1 of 30 acceptable documents on pass 1 and 0 of 30 on pass 2. The one is sheet row S0010, the flux-surface- and time-averaged normalized perturbed parallel field magnitude, held by a contradiction veto on its symbol-binding clause. Recall is 59 of 60, with the accepted gap. The lead ruled to switch with S0010 recorded as a known precision miss: one wrong refine in 60 acceptable readings, visible as a <code>cascade_contradiction</code> hold. The 5% panel audit stays. <code>srtj-docs-cascade-switch</code> makes the change.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-switch-causes-landed" data-who="reckon-build" data-when="2026-10-24T20:05:00Z">
+    <div class="r-comment-body"><p>The fixes for the switch causes are in (merge <code>4bea8b681</code>, review 84). The contradiction veto no longer fires when the judge's leading answer is "says nothing". DD field labels are not read as requirements. Coordinate and position names need no defining equation. The second ask was dropped. Measured at the shipping commit, the switch result is the one recorded in the lead's ruling above. The review left two defects, folded into <code>srtj-coordinate-decision-owner</code>:</p><ul><li>the gate keeps a second copy of the decision whether a name is a coordinate, instead of asking <code>derivation.py</code>;</li><li>the holdout evaluation scores documents without the name, so it fails coordinate documents that production passes.</li></ul></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-split-steps-12-15" data-who="reckon-build" data-when="2026-10-24T20:05:00Z">
+    <div class="r-comment-body"><p>Split step 12 landed on the local lane (merge <code>96f824ccc</code>, review 104). <code>graph_refinement</code> moved into <code>graph_store</code>, and <code>graph_ops.py</code> went from 417 KB to 347 KB. Step 15 landed on codex (merge <code>6664996c6</code>, review 103). It created <code>worker_tasks/</code> with <code>worker_common</code> and <code>worker_extraction_and_enrichment</code>, and <code>workers.py</code> went from 481 KB to 372 KB. Neither added a failure. Both tracks now run locally: step 13 (<code>graph_source_bindings</code>) and step 16 (<code>worker_compose_and_validate</code>) are running. Structure findings from both reviews are folded into <code>srtj-graph-store-structure</code>: intra-module calls that bypass the facade patch surface, re-exported stdlib names, and the missing test of the facade invariant.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-followups-landed-1024" data-who="reckon-build" data-when="2026-10-24T20:05:00Z">
+    <div class="r-comment-body"><p>Two follow-ups landed:</p><ul><li><code>doc_links.py</code> now reads units from <code>imas_codex.units.validate_unit</code>, not its own list (merge <code>f68f8d805</code>, review 111);</li><li>the three tests that started their own disposable Neo4j now use the shared fixture, and a test guards the port-pair allocator (merge <code>215b8114c</code>, review 111).</li></ul><p>The shared fixture's teardown once took 37 s against a 30 s timeout; <code>srtj-disposable-neo4j-teardown</code> fixes that.</p></div>
 </div>
 </section>
 </main>
