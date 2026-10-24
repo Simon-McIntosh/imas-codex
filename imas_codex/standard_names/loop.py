@@ -328,16 +328,22 @@ def _count_scope_names(
         return 0
 
 
-def _scope_name_ids(scope_run_id: str) -> list[str]:
+def _scope_name_ids(scope_run_id: str) -> list[str] | None:
     """Return the ids of the standard names a scoped run owns.
 
     A scoped run binds its target set two ways: the names it marks directly
     (``sn.run_id``) and the sources it seeds (``StandardNameSource.run_id``),
     whose produced names belong to the scope too. Both are returned so a
-    caller can confine itself to exactly the run's own names. Returns an empty
-    list on any query error — a scope whose size cannot be read must not fall
-    open into a graph-wide sweep.
+    caller can confine itself to exactly the run's own names.
+
+    An empty list means the scope was read and owns no names. ``None`` means
+    the scope could not be read — the graph was unreachable, or its answer
+    carried no name ids. That is a different fact from owning nothing: the
+    caller skips its scoped work and logs why, because an unreadable scope
+    must never fall open into a graph-wide sweep and must not read as an
+    empty one either.
     """
+    from imas_codex.discovery.base.supervision import is_infrastructure_error
     from imas_codex.graph.client import GraphClient
 
     try:
@@ -356,10 +362,35 @@ def _scope_name_ids(scope_run_id: str) -> list[str]:
                     rid=scope_run_id,
                 )
             )
-        return [row["id"] for row in rows]
-    except Exception as exc:  # noqa: BLE001 — best-effort scoping, never fatal
-        logger.warning("_scope_name_ids(%s) failed: %s", scope_run_id, exc)
-        return []
+        ids = [row["id"] for row in rows if "id" in row]
+        if len(ids) != len(rows):
+            logger.warning(
+                "run_sn_pools: scope %s could not be read — %d of %d rows "
+                "carry no name id; the source-drift refresh is skipped rather "
+                "than run unscoped",
+                scope_run_id,
+                len(rows) - len(ids),
+                len(rows),
+            )
+            return None
+        return ids
+    except Exception as exc:
+        # The repository owns the decision about what counts as a connection
+        # failure — an expired session, a lock timeout, a database that needs a
+        # restart and a wrapped socket error all arrive here. Anything else is a
+        # defect in the read, not a scope that could not be read, and must
+        # surface: the default-tier live-graph guard raises RuntimeError here
+        # and has to keep doing so.
+        if not is_infrastructure_error(exc):
+            raise
+        logger.warning(
+            "run_sn_pools: scope %s could not be read (%s: %s); the "
+            "source-drift refresh is skipped rather than run unscoped",
+            scope_run_id,
+            type(exc).__name__,
+            exc,
+        )
+        return None
 
 
 async def _drain_scoped_standard_name_embeddings(
@@ -2105,12 +2136,23 @@ async def run_sn_pools(
                 if scope_run_id
                 else None
             )
-            sr = await _global_maintenance_call(
-                refresh_drifted_sources,
-                scope_run_id=run_id,
-                sn_ids=_refresh_ids,
-                default={},
-            )
+            # ``None`` from a scoped read means the graph was unreachable and
+            # the run's own names are unknown: skip the refresh rather than
+            # pass ``None`` on, which the refresh reads as "sweep everything".
+            if scope_run_id and _refresh_ids is None:
+                logger.warning(
+                    "run_sn_pools: source-drift refresh skipped — the scope "
+                    "%s could not be read",
+                    scope_run_id,
+                )
+                sr = {}
+            else:
+                sr = await _global_maintenance_call(
+                    refresh_drifted_sources,
+                    scope_run_id=run_id,
+                    sn_ids=_refresh_ids,
+                    default={},
+                )
             if sr.get("baselined") or sr.get("detected") or sr.get("unchecked"):
                 logger.info(
                     "run_sn_pools: source-drift refresh — %d baselined, "

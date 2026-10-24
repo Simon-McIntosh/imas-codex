@@ -252,6 +252,14 @@ class _ScopeGraph:
 
 
 def test_scoped_refresh_never_steers_a_name_outside_its_scope(monkeypatch):
+    """The refresh forwards its ``sn_ids`` target set to the detect query.
+
+    This guards the forwarding, not the Cypher: the double filters on the
+    ``sn_ids`` it is handed, so it would pass even if the query dropped its
+    ``sn.id IN $sn_ids`` clause. That clause is what the graph-marked tests
+    guard — ``test_scoped_drift_scan_touches_only_the_runs_names`` and
+    ``test_scoped_refresh_leaves_an_out_of_scope_name_unsteered`` below.
+    """
     graph = _ScopeGraph(in_scope=["in_scope_name"])
     steered: list[str] = []
     monkeypatch.setattr(
@@ -663,7 +671,7 @@ def _attach_source(
           id: $source_id, source_type: 'dd', source_id: $source_id_body
         })
         CREATE (src)-[:PRODUCED_NAME]->(sn)
-        """.replace("{id: $name_id)", "{id: $name_id}"),
+        """,
         name_id=name_id,
         source_id=source_id,
         source_id_body=source_id[3:] if source_id.startswith("dd:") else source_id,
