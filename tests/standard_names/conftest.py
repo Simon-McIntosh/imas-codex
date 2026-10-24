@@ -461,11 +461,14 @@ def _detach_store_removal(directory: tempfile.TemporaryDirectory) -> str:
         waited = time.monotonic() - started - renamed
     if remover.poll() is None:
         return (
-            f"store {root} handed to pid {remover.pid} "
+            f"store {root} handed to pid {remover.pid}, detached "
             f"({renamed:.2f}s rename, {waited:.2f}s waited)"
         )
     remover_log.unlink(missing_ok=True)
-    return f"store {root} removed in {renamed + waited:.2f}s"
+    return (
+        f"store {root} removed in {renamed + waited:.2f}s, "
+        f"detached to pid {remover.pid}"
+    )
 
 
 @pytest.fixture(scope="session")
