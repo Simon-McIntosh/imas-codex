@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-10-23T22:20:29.241Z",
   "dispatched_at": "2026-10-23T22:10:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "shc-drift-scope-hardening",
+      "recorded_at": "2026-10-24T05:53:26.239851+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_source_refresh_docs_requeue.py",
