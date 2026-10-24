@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="185">
+<meta name="plan-version" content="186">
 <meta name="plan-modified" content="2026-10-24">
 </head>
 <body>
@@ -713,7 +713,10 @@
     <div class="r-comment-body"><p>generated and refined documentation writes now re-stamp the current producing source after success; default gate 50 to 50 passed, graph gate 5 to 7 passed, zero added failures; removing the calls fails both new graph tests.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261024T113523219764-review-of-shc-calls-per-phase-test-b29f52f1c2ca" data-who="reckon-build" data-when="2026-10-24T11:48:16.419Z">
-    <div class="r-comment-body"><p>review-of-shc-calls-per-phase-test-b29f52f1c2ca — independent review of run r-20261024T110620532362-shc-calls-per-phase-test at head b29f52f1c2ca (base f657a98dc); scores goal_fidelity 20, evidence 15, scope_discipline 20, durability 18, fit 17, reuse 18 (total 108); 0 added failures derived from the run&#x27;s own baseline_suite (15 passed, EXIT=0) and after_suite (20 passed, EXIT=0) arms; two non-blocking findings (a fragment figure that contradicts its cited log, and a double that recognises one literal predicate spelling); record passes `crew check --review`</p></div>
+    <div class="r-comment-body"><p>review-of-shc-calls-per-phase-test-b29f52f1c2ca — independent review of run r-20261024T110620532362-shc-calls-per-phase-test at head b29f52f1c2ca (base f657a98dc); scores goal_fidelity 20, evidence 15, scope_discipline 20, durability 18, fit 17, reuse 18 (total 108); 0 added failures derived from the run's own baseline_suite (15 passed, EXIT=0) and after_suite (20 passed, EXIT=0) arms; two non-blocking findings (a fragment figure that contradicts its cited log, and a double that recognises one literal predicate spelling); record passes `crew check --review`</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261024T110620532362-shc-calls-per-phase-test" data-who="reckon-build" data-when="2026-10-24T11:34:58.586Z">
+    <div class="r-comment-body"><p>shc-calls-per-phase-test — added TestAggregateCallsPerPhase and TestAggregateCallsPerPhaseForwarder to tests/standard_names/test_cost_graph_ops.py, five tests asserting exact per-run per-phase call counts (docs 2, generate_name 3, review_name 1) with another run&#x27;s rows excluded and the zero-call phase absent; base (main cc8592b7) 15 passed, head (e6cfdf2d) 20 passed, 0 added failures; declared mutation (count every run&#x27;s rows) failed 5 new ids, EXIT=1</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
