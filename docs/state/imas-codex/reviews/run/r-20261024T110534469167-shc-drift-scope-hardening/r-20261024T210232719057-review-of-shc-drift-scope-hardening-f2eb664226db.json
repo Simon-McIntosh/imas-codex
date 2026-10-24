@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "a duplicate warning line for one unreadable scope; the first carries the exception, and the skip is correct",
       "recorded_at": "2026-10-24T22:00:44.379823+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the graph arm's log is listed in test_logs and recorded in the fragment",
+      "recorded_at": "2026-10-24T22:00:52.812590+00:00"
     }
   },
   "findings": [
