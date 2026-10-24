@@ -18,15 +18,13 @@ code{background:#f4f4f4;padding:0 .2rem}
 <h1 id="srtj-docs-switch-causes-title">Documentation switch: why the panel vetoed acceptable documents</h1>
 
 <h2 id="srtj-docs-switch-causes-verdict">Verdict</h2>
-<p class="bar" id="srtj-docs-switch-causes-verdict-line">measured at the round-two
-commit, the switch bar is
-met on both passes: 19 of
-19 link-defect rows refine on pass A and
-19 of 19 on pass B, and
-0 of 30 acceptable rows refine on
-pass A and 0 of 30 on pass B. The
-bar is all 19 link defects refined and none of the 30 acceptable rows refined, on
-both passes.</p>
+<p class="bar" id="srtj-docs-switch-causes-verdict-line">NOT MEASURED at the final
+commit. The switch bar is all 19 link-defect rows refined and none of the 30
+acceptable rows refined, on both passes. That bar was last measured at
+<code>588c96b0</code>, where it was met on both passes (19 of 19 link defects and 0
+of 30 acceptable rows on each), and that measurement predates the settlement
+withdrawal, so it is not evidence about the commit that ships and is not cited
+here as current.</p>
 <p id="srtj-docs-switch-causes-verdict-recall">The recall bar is met as the lead
 stated it: the replay fires on 59 of 60 planted contradictions on both passes, and
 the single row it misses both times is <code>contradicts-354</code>, the
@@ -170,8 +168,10 @@ coordinate projection, so it is in the class; a coordinate document that names
 no frame or axes still fails, and every quantity keeps the dimensional rule.</p>
 </div>
 <h2 id="srtj-docs-switch-causes-rows">Rows still on the wrong side</h2>
-<p id="srtj-docs-switch-causes-rows-empty">No row is on the wrong side of the bar on either pass.</p>
-<h2 id="srtj-docs-switch-causes-remeasured">The bar's populations, re-measured</h2>
+<p id="srtj-docs-switch-causes-rows-empty">No row is on the wrong side of the bar in the round-two run at
+<code>588c96b0</code>. Nothing in this fragment says the same of the shipping
+commit, which was not measured.</p>
+<h2 id="srtj-docs-switch-causes-remeasured">The bar's populations at the round-two commit</h2>
 <table id="srtj-docs-switch-causes-remeasured-table">
 <tbody>
 <tr><td>pass</td><td>1</td><td>2</td></tr>
@@ -184,9 +184,14 @@ no frame or axes still fails, and every quantity keeps the dimensional rule.</p>
 populations: the 19 disagreement rows labelled link defects and the 30 labelled
 acceptable. The other 28 of the 77 measured rows carry no label in the disagreement
 sheet, so they enter no count here.</p>
-<p id="srtj-docs-switch-causes-remeasured-revision">These switch figures were measured
-at <code>588c96b0</code>, before the withdrawal of the relation-replacement settlement,
-so they are not a measurement of the shipping commit. SWITCH_REVISION_PLACEHOLDER</p>
+<p id="srtj-docs-switch-causes-remeasured-revision">These switch figures are the
+round-two run at <code>588c96b0</code>, before the withdrawal of the
+relation-replacement settlement, so they are not a measurement of the shipping
+commit. A re-measurement at the shipping commit is running behind a load gate: it
+loads the dump into a temporary Neo4j instance only once the login node's
+1-minute load average falls below 30, polling once a minute, and the outcome is
+recorded here when that wait resolves. The switch verdict stays NOT MEASURED at
+the final commit until then.</p>
 <p id="srtj-docs-switch-causes-measured-revision">Every other figure in this fragment
 was measured at <code>2f9b8cd02f78</code>, the commit that ships: the replay, the
 matched-answer scoring, the gate and the negative control. No source file changed
@@ -270,6 +275,6 @@ are the exemption's own tests, so the mutation reaches the exemption and nothing
 An earlier mutation returning the narrowed veto criterion to its former form failed 10
 tests and exited 1.</p>
 <h2 id="srtj-docs-switch-causes-spend">Spend</h2>
-<p id="srtj-docs-switch-causes-spend-line">Measurement 0.024066 USD, veto replay 0.019192 USD, the second readings of the ten stored answers 0.000517 USD, diagnosis and sampling probes at most 0.020000 USD; total upper bound 0.063775 USD against the 1.00 USD ceiling. The two aborted measurement attempts made no Jev call, so they add nothing.</p>
+<p id="srtj-docs-switch-causes-spend-line">Switch measurement 0.024066 USD, the earlier veto replay 0.019192 USD, this round's replay 0.018181 USD, the second readings of the ten stored answers 0.000517 USD, diagnosis and sampling probes at most 0.020000 USD; total upper bound 0.081956 USD against the 1.00 USD ceiling. The aborted measurement attempts made no Jev call, so they add nothing.</p>
 </body>
 </html>
