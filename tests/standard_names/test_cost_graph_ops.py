@@ -316,6 +316,129 @@ class TestAggregateSpendPerPhase:
 
 
 # ---------------------------------------------------------------------------
+# aggregate_calls_per_phase
+# ---------------------------------------------------------------------------
+
+
+_OTHER_RUN_ID = "run-cost-test-002"
+
+# (run_id, phase) rows seeded into the double.  The named run has no
+# ``enrich`` row at all — a phase with zero calls yields no group in the
+# query, so it must not appear in the result.
+_SEEDED_COST_ROWS: list[tuple[str, str]] = [
+    (_RUN_ID, "generate_name"),
+    (_RUN_ID, "generate_name"),
+    (_RUN_ID, "generate_name"),
+    (_RUN_ID, "review_name"),
+    (_RUN_ID, "docs"),
+    (_RUN_ID, "docs"),
+    (_OTHER_RUN_ID, "generate_name"),
+    (_OTHER_RUN_ID, "generate_name"),
+    (_OTHER_RUN_ID, "enrich"),
+    (_OTHER_RUN_ID, "enrich"),
+]
+
+
+class _SeededCostRows:
+    """In-memory ``LLMCost`` row set answering the per-phase call-count query.
+
+    The double applies exactly the scoping the executed statement declares: a
+    statement binding ``{run_id: $run_id}`` sees one run's rows, a statement
+    without that predicate sees every run's rows.  A lost predicate therefore
+    changes the returned counts instead of passing unnoticed.
+    """
+
+    def __init__(self, rows: list[tuple[str, str]]) -> None:
+        self.rows = list(rows)
+        self.queries: list[tuple[str, dict]] = []
+
+    def query(self, cypher: str, **params) -> list[dict]:
+        self.queries.append((cypher, params))
+        scoped = "run_id:$run_id" in cypher.replace(" ", "")
+        run_id = params.get("run_id")
+        counts: dict[str, int] = {}
+        for row_run_id, phase in self.rows:
+            if scoped and row_run_id != run_id:
+                continue
+            counts[phase] = counts.get(phase, 0) + 1
+        return [{"phase": phase, "calls": counts[phase]} for phase in sorted(counts)]
+
+
+def _module_services(graph) -> MagicMock:
+    """A ``services`` double exposing the seeded graph through ``GraphClient``."""
+    services = MagicMock()
+    services.GraphClient.return_value.__enter__.return_value = graph
+    services.GraphClient.return_value.__exit__.return_value = False
+    return services
+
+
+class TestAggregateCallsPerPhase:
+    def test_counts_by_phase_for_the_named_run(self):
+        graph = _SeededCostRows(_SEEDED_COST_ROWS)
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            aggregate_calls_per_phase,
+        )
+
+        result = aggregate_calls_per_phase(_RUN_ID, services=_module_services(graph))
+
+        assert result == {"docs": 2, "generate_name": 3, "review_name": 1}
+        assert "enrich" not in result
+        assert all(isinstance(n, int) for n in result.values())
+
+    def test_binds_the_run_id_it_counts(self):
+        graph = _SeededCostRows(_SEEDED_COST_ROWS)
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            aggregate_calls_per_phase,
+        )
+
+        aggregate_calls_per_phase(_RUN_ID, services=_module_services(graph))
+
+        assert len(graph.queries) == 1
+        cypher, params = graph.queries[0]
+        assert "count(*)" in cypher
+        assert "c.phase" in cypher
+        assert params["run_id"] == _RUN_ID
+
+    def test_run_without_rows_returns_empty_mapping(self):
+        graph = _SeededCostRows([row for row in _SEEDED_COST_ROWS if row[0] != _RUN_ID])
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            aggregate_calls_per_phase,
+        )
+
+        assert (
+            aggregate_calls_per_phase(_RUN_ID, services=_module_services(graph)) == {}
+        )
+
+
+class TestAggregateCallsPerPhaseForwarder:
+    def test_graph_ops_forwarder_returns_exact_counts(self):
+        graph = _SeededCostRows(_SEEDED_COST_ROWS)
+        patcher, mock_gc = _mock_gc_ctx()
+        mock_gc.query.side_effect = graph.query
+        try:
+            from imas_codex.standard_names.graph_ops import aggregate_calls_per_phase
+
+            result = aggregate_calls_per_phase(_RUN_ID)
+
+            assert result == {"docs": 2, "generate_name": 3, "review_name": 1}
+            assert "enrich" not in result
+            assert mock_gc.query.call_args[1]["run_id"] == _RUN_ID
+        finally:
+            patcher.stop()
+
+    def test_graph_ops_forwarder_empty_run(self):
+        graph = _SeededCostRows([row for row in _SEEDED_COST_ROWS if row[0] != _RUN_ID])
+        patcher, mock_gc = _mock_gc_ctx()
+        mock_gc.query.side_effect = graph.query
+        try:
+            from imas_codex.standard_names.graph_ops import aggregate_calls_per_phase
+
+            assert aggregate_calls_per_phase(_RUN_ID) == {}
+        finally:
+            patcher.stop()
+
+
+# ---------------------------------------------------------------------------
 # aggregate_spend_per_name
 # ---------------------------------------------------------------------------
 
