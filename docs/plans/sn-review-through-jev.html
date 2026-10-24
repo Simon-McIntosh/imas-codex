@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="234">
+<meta name="plan-version" content="235">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1009,7 +1009,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step3.html — four modules, 94 function forwarders, graph_ops.py 241424 to 172879 tokens, zero added failures across 96 gate files, imports 5/5, Cypher property 4/4.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261024T064722630204-review-of-srtj-test-neo4j-uri-convention-f124bfe87c26" data-who="reckon-build" data-when="2026-10-24T07:03:06.481Z">
-    <div class="r-comment-body"><p>Independent review of r-20261023T193843392462-srtj-test-neo4j-uri-convention at head f124bfe87c (base fa65d7c71): the one-fixture disposable-Neo4j convention is faithful to its goal and its gate — the fixture owns the endpoint, publishes it in both NEO4J_URI and IMAS_CODEX_TEST_NEO4J_URI, launches through imas_codex.graph.temp_neo4j with load_dump=False, refuses both project-graph address spellings with the override withheld, and both files&#x27; local guards are deleted; the five source-drift tests PASSED under -m graph (25 passed, EXIT=0, against 19 passed plus 5 setup errors at base) with 0 added default-marker failures. Scored 19/18/18/16/17/16 with four non-blocking findings: _free_port_pair has no test, two sibling test files still bind ports sequentially (outside this node&#x27;s write scope), the attach branch hard-codes an empty NEO4J_PASSWORD, and the default-tier refusal arm moves with the resolver both it and the guard read.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261023T193843392462-srtj-test-neo4j-uri-convention at head f124bfe87c (base fa65d7c71): the one-fixture disposable-Neo4j convention is faithful to its goal and its gate — the fixture owns the endpoint, publishes it in both NEO4J_URI and IMAS_CODEX_TEST_NEO4J_URI, launches through imas_codex.graph.temp_neo4j with load_dump=False, refuses both project-graph address spellings with the override withheld, and both files' local guards are deleted; the five source-drift tests PASSED under -m graph (25 passed, EXIT=0, against 19 passed plus 5 setup errors at base) with 0 added default-marker failures. Scored 19/18/18/16/17/16 with four non-blocking findings: _free_port_pair has no test, two sibling test files still bind ports sequentially (outside this node's write scope), the attach branch hard-codes an empty NEO4J_PASSWORD, and the default-tier refusal arm moves with the resolver both it and the guard read.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261023T193843392462-srtj-test-neo4j-uri-convention" data-who="reckon-build" data-when="2026-10-24T06:47:04Z">
+    <div class="r-comment-body"><p>One session-scoped fixture `disposable_neo4j_uri` in tests/standard_names/conftest.py owns the disposable-Neo4j convention (attach or start, name it in NEO4J_URI and IMAS_CODEX_TEST_NEO4J_URI, refuse the project graph at both of its addresses with the override withheld, fail rather than skip when the instance cannot start, and start and stop it through imas_codex.graph.temp_neo4j rather than a local copy of the launch); both files&#x27; local guards are deleted; the five source-drift tests pass under `-m graph` (25 passed, EXIT=0, against 19 passed and 5 setup errors at base) with 0 added default-marker failures; the refusal is asserted by two committed tests, the loopback one in the default tier and the scheduler-derived one under the graph marker, and a third asserts a failed start leaves no process behind.</p></div>
 </div>
 </section>
 </main>
