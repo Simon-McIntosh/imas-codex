@@ -1,0 +1,32 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T20:58:48.737Z",
+  "dispatched_at": "2026-10-24T20:44:31Z",
+  "findings": [
+    {
+      "file": "logs/gate-head.log",
+      "line": 7,
+      "severity": "non-blocking",
+      "summary": "the head arm of the gate ran at the code commit 3d591f9f7, one commit before the reviewed head eb5e9f94d; the intervening commit adds only the evidence fragment, so the delta holds, but the landed head itself carries no gate receipt"
+    }
+  ],
+  "project": "imas-codex",
+  "review": "VERDICT goal: the node goal is that Jev decides the documentation axis in the shipped configuration; pyproject.toml:681 now sets cascade-deciding = true and imas_codex/standard_names/review/cascade.py:152-154 returns True for both axes on a boolean, so the goal is met.\nVERDICT done_when: the done_when asks for both axes deciding with the 5 percent audit kept, a test reading the shipped setting through the cascade resolver, and a gate with no added failures and a red control; tests/standard_names/test_cascade_deciding_axes.py:47-58 asserts both axes and panel_audit.panel_audit_rate() == 0.05, and logs/gate-base.log, logs/gate-head.log and logs/gate-negative-control.log record 80 passed EXIT=0, 81 passed EXIT=0 and 1 failed 80 passed EXIT=1.\nVERDICT write_paths: the manifest declares pyproject.toml, tests/standard_names/test_cascade_deciding_axes.py, docs/evidence/fragments/sn-review-through-jev/srtj-docs-cascade-switch.html and docs/figures/sn-review-through-jev/srtj-docs-cascade-switch; git diff --name-status over 265cf9946..eb5e9f94d lists exactly the first three and nothing else.\nVERDICT manifest: read; it reports status complete, the switch plus test at 3d591f9f7 and the evidence fragment at eb5e9f94d, and names the base, head and negative-control logs whose tails I read and which carry the stated totals.\nVERDICT diff: read both commits against the base 265cf9946; 3d591f9f7 changes pyproject.toml:676-681 (comment rewritten, cascade-deciding [\"name\"] -> true) and adds one test at tests/standard_names/test_cascade_deciding_axes.py:47, and eb5e9f94d adds only the new fragment docs/evidence/fragments/sn-review-through-jev/srtj-docs-cascade-switch.html with the setting table before/after and S0010 as the recorded precision miss.\nCALL_SITES: imas_codex/standard_names/workers.py:8108 (adjudicate_review(\"docs\", ...) is the production docs review entry), imas_codex/standard_names/workers.py:5982 (adjudicate_review(\"name\", ...)), imas_codex/standard_names/review/cascade.py:771 (deciding_enabled(axis) forks the decide/shadow path per axis), imas_codex/standard_names/review/cascade.py:653 (panel_audit.panel_audit_rate read by _run_panel_audit)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: pyproject.toml:681 sets cascade-deciding = true and cascade.py:152 returns the boolean straight through, so both axes decide as the goal requires.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate runs the two named test files at base and head with the results recorded in logs/gate-base.log and logs/gate-head.log (80 vs 81 passed, EXIT=0 both), with the head arm at 3d591f9f7 rather than the reviewed head eb5e9f94d.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 265cf9946..eb5e9f94d touches only pyproject.toml, tests/standard_names/test_cascade_deciding_axes.py and the declared evidence fragment.\nSCORE durability: 20\nJUSTIFICATION durability: tests/standard_names/test_cascade_deciding_axes.py:57 reddens when pyproject switch is restored to [\"name\"], which logs/gate-negative-control.log shows as the one failing id at EXIT=1.\nSCORE fit: 19\nJUSTIFICATION fit: the new test at tests/standard_names/test_cascade_deciding_axes.py:47 follows the file's in-function import idiom (line 87) and the comment at pyproject.toml:679-680 states the mechanism with no plan or row labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: the test adds no mechanism, reading shipped configuration through the existing resolvers cascade.deciding_enabled and panel_audit.panel_audit_rate; a search of tests/standard_names and imas_codex for shipped-configuration reads found the settings module as the owner and no duplicate reader.\nFINDING logs/gate-head.log:7 non-blocking: the head arm ran at 3d591f9f7, one commit before the reviewed head eb5e9f94d, so the landed head itself carries no gate receipt even though the intervening commit is documentation-only.",
+  "review_run_id": "r-20261024T204229584999-review-of-srtj-docs-cascade-switch-eb5e9f94da94",
+  "reviewed_base_sha": "265cf9946820c3e3a407ef6ad57a2617eeb30f55",
+  "reviewed_head_sha": "eb5e9f94da94b7dc8e9d216afa7f540ec477ff3b",
+  "reviewed_run_id": "r-20261024T202111088181-srtj-docs-cascade-switch",
+  "scores": {
+    "durability": 20,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T20:59:29.720910+00:00",
+  "total": 116
+}
