@@ -413,8 +413,10 @@ def _wipe(uri: str) -> None:
         assert records[0]["n"] == 0
 
 
-#: Seconds the session may block on the store removal before leaving the rest
-#: to the detached remover.  The common filesystem finishes inside this.
+#: How long the session may wait for the detached remover to finish. It bounds
+#: the guarantee in both directions: a removal that fails inside the wait fails
+#: the session's teardown, and one still running when the wait ends is left
+#: detached with its log beside the renamed tree under the job's own TMPDIR.
 _STORE_REMOVAL_BUDGET_SECONDS = 2.0
 
 #: The detached remover.  No ``ignore_errors``: a removal that fails keeps its
@@ -561,7 +563,9 @@ def disposable_neo4j_uri() -> Iterator[str]:
             blocking = time.monotonic() - stopped
             print(
                 f"disposable Neo4j teardown: database stopped and "
-                f"{store_removal}; {blocking:.2f}s blocking",
+                f"{store_removal}; {blocking:.2f}s blocking; store path "
+                f"{directory.name} absent after session: "
+                f"{not Path(directory.name).exists()}",
                 flush=True,
             )
 
