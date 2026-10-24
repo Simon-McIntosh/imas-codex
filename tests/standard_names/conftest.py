@@ -13,7 +13,10 @@ from __future__ import annotations
 import dataclasses
 import os
 import socket
+import subprocess
+import sys
 import tempfile
+import time
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -410,6 +413,61 @@ def _wipe(uri: str) -> None:
         assert records[0]["n"] == 0
 
 
+#: Seconds the session may block on the store removal before leaving the rest
+#: to the detached remover.  The common filesystem finishes inside this.
+_STORE_REMOVAL_BUDGET_SECONDS = 2.0
+
+#: The detached remover.  No ``ignore_errors``: a removal that fails leaves its
+#: traceback in the log beside the trash rather than passing off an error.
+_STORE_REMOVER = "import shutil, sys; shutil.rmtree(sys.argv[1])"
+
+
+def _detach_store_removal(directory: tempfile.TemporaryDirectory) -> str:
+    """Remove the store directory without making the session wait for it.
+
+    Neo4j's store is thousands of small files -- one per property, label and
+    segment -- so deleting it costs one metadata operation per file.  On a
+    shared filesystem every unlink is a network round trip, which is why a
+    recursive delete of a temporary store takes tens of seconds.  That cost
+    belongs to no test: the tree is renamed away in one step (the store path is
+    gone at once) and a detached process removes it afterwards.
+
+    Returns one line naming what happened, for the gate log.
+    """
+    root = Path(directory.name)
+    trash = root.with_name(f"{root.name}-removing")
+    started = time.monotonic()
+    try:
+        os.replace(root, trash)
+    except OSError:
+        # A tree that cannot be renamed still has to go; there is nothing to
+        # detach, so the removal stays in the fixture's own teardown.
+        directory.cleanup()
+        return f"store {root} removed in place in {time.monotonic() - started:.2f}s"
+    directory.cleanup()  # detach the finalizer: the tree no longer exists
+    renamed = time.monotonic() - started
+    remover_log = Path(f"{trash}.removal.log")
+    with open(remover_log, "w") as handle:
+        remover = subprocess.Popen(
+            [sys.executable, "-I", "-c", _STORE_REMOVER, str(trash)],
+            stdin=subprocess.DEVNULL,
+            stdout=handle,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+    waited = 0.0
+    while remover.poll() is None and waited < _STORE_REMOVAL_BUDGET_SECONDS:
+        time.sleep(0.05)
+        waited = time.monotonic() - started - renamed
+    if remover.poll() is None:
+        return (
+            f"store {root} handed to pid {remover.pid} "
+            f"({renamed:.2f}s rename, {waited:.2f}s waited)"
+        )
+    remover_log.unlink(missing_ok=True)
+    return f"store {root} removed in {renamed + waited:.2f}s"
+
+
 @pytest.fixture(scope="session")
 def disposable_neo4j_uri() -> Iterator[str]:
     """The one empty graph this package's real-Cypher tests share.
@@ -481,10 +539,18 @@ def disposable_neo4j_uri() -> Iterator[str]:
                 import shutil
 
                 shutil.copyfile(log, destination)
+            stopped = time.monotonic()
+            store_removal = "store removal not attempted"
             try:
                 temp_neo4j.stop_temp_neo4j(process)
             finally:
-                directory.cleanup()
+                store_removal = _detach_store_removal(directory)
+            blocking = time.monotonic() - stopped
+            print(
+                f"disposable Neo4j teardown: database stopped and "
+                f"{store_removal}; {blocking:.2f}s blocking",
+                flush=True,
+            )
 
 
 @pytest.fixture()
