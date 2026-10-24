@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite objects in its manifest.md, both pointing at logs/base-suite-default.log and logs/head-suite-default.log: base 1 failed, 538 passed, 39 deselected at 265cf9946820c3e3a407ef6ad57a2617eeb30f55 with tests/standard_names/test_source_invariants.py::TestExtractWorkerEmitsDdPath::test_extract_worker_dd_source_includes_dd_path, head the identical single id at c19be58944d078d047dff9b7a13239224b9be87b; the -m graph pair (logs/base-suite-graph.log, logs/head-suite-graph.log) reports 4 failed at both with the identical four ids. No head-only failure exists, so the added count is zero.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-24T22:39:04.213Z",
+  "dispatched_at": "2026-10-24T22:23:58Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html",
+      "line": "9",
+      "severity": "non-blocking",
+      "text": "the checks paragraph attributes the reachability of the four facade-attribute patches (persist_outcome_snapshot, reset_persist_outcomes, write_enrichment_results, merge_standard_name_sources) to the service object \u2014 'the mechanism every one of those attribute-string patches relies on' \u2014 but graph_store/graph_source_bindings.py never calls any of the four through services (its only services.* references are the client, logger, stage enums, _persist_outcomes and the helpers listed) and never calls them at all, so what those patches rely on is the name being resolved on the graph_ops module at call time (imas_codex/standard_names/loop.py:2554-2559 and imas_codex/standard_names/harmonize.py:1073 import it inside the calling function, e.g.), not the _GraphServices delegation the probe exercised."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "the fragment states the seven new files were run 'at both revisions' and the checks paragraph leans on a wiring probe, but logs/head-new7-default.log, logs/head-new7-graph.log, logs/head-cypher-final.log and logs/head-wiring-probe.log all name head revision c1e6351dfb \u2014 one commit before the reviewed head c19be5894 \u2014 and the fragment names no revision for them, so a reader cannot tell which of the quoted counts were measured at the reviewed head (the 36-file arms were, at c19be589) and this one was at the prior head."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read c1e6351dfb..c19be5894 commit by commit \u2014 one commit, c19be5894, changing three lines of docs/evidence/fragments... of docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html: the moved-symbol and forwarder lists at the table row, the gate paragraph, and the checks paragraph; no code, test or configuration changed.",
+    "done_when": "read brief.md:54-62 \u2014 a committed module with the forwarders listed, no added gate files, passing import and Cypher checks, and a fragment recording the moved symbols and three size counts; the fragment now lists the exact 51 symbols and 38 forwarders, logs/head-suite-default.log and logs/base-suite-default.log carry the same single pre-existing failure at 265cf9946 and c19be5894 \u2014 zero added failures \u2014 and logs/head-cypher-final.log ends '4 passed' with EXIT=0.",
+    "goal": "read the node's goal in the reviewed run's brief.md:14-22 \u2014 move the graph_source_bindings symbols from imas_codex/standard_names/graph_ops.py into imas_codex/standard_names/graph_store/graph_source_bindings.py with transitional forwarders; at the reviewed head the new module defines all 51 design-mapped names, graph_ops.py holds all 38 delegating forwarders, and the 13 non-function names are bound on the facade, which is the extraction the goal states.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/manifest.md; status complete; it records five commits, the 36-file gate command and its four log paths, and baseline_suite/after_suite objects that both carry failure_count 1 with the identical test id, so the zero added-failure claim is reducible from the manifest itself.",
+    "write_paths": "read brief.md:63-68 \u2014 four fenced paths; `git diff --stat c1e6351dfb c19be5894` is only docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html, inside that set."
+  },
+  "justifications": {
+    "durability": "no assertion was added, so nothing fails if the fragment's symbol table or its 36-file gate claim drifts from the design JSON or the logs again; the correction is documentation only and the previous wrong names would have survived the whole suite unchanged.",
+    "evidence": "the four gate logs at the reviewed revisions agree with the fragment line for line (logs/base-suite-default.log and logs/head-suite-default.log both end '1 failed, 538 passed, 39 deselected' at 265cf9946 and c19be5894, the graph pair both '4 failed, 16 passed, 19 skipped, 539 deselected', each command line naming 36 test files with distinct --basetemp), but the seven-file isolated arms, the Cypher arm and the wiring probe were run at c1e6351dfb, one commit before the reviewed head, and the fragment names no revision for them.",
+    "fit": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html:8-9 keeps the established fragment idiom \u2014 a <p id> per section, <code> for paths and shas, sibling <details> blocks for the two symbol lists \u2014 and introduces no name the repository naming rules forbid.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_source_bindings.py defines exactly the 51 names the design JSON maps to graph_source_bindings (verified by AST set equality against docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.json inventories.graph_ops.py.symbols) and the fragment's <tr id=\"srtj-graph-ops-split-step13-graph_source_bindings\"> line now lists exactly those 51 and exactly the module's 38 functions as forwarders, each of which imas_codex/standard_names/graph_ops.py defines as a delegating forwarder.",
+    "reuse": "the commit adds no definition and no capability; it corrects an existing evidence fragment in place, and a search over docs/evidence/fragments/sn-review-through-jev/ found no second owner of this extraction's record to extend instead.",
+    "scope_discipline": "`git diff --stat c1e6351dfb c19be5894` is one file, docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html, 3 insertions and 3 deletions, inside the brief's four declared write paths and touching no test, config, generated or source file."
+  },
+  "node": "review-of-srtj-graph-ops-split-step13-c19be58944d0",
+  "node:reviewed": "srtj-graph-ops-split-step13",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the reviewed node's goal; the landed head defines all 51 design-mapped graph_source_bindings symbols in imas_codex/standard_names/graph_store/graph_source_bindings.py and 38 delegating forwarders in imas_codex/standard_names/graph_ops.py.\nVERDICT done_when: the done_when asks for a committed module with listed forwarders, no added gate failures, passing import and Cypher checks and a fragment carrying the moved list and three size counts; logs/base-suite-default.log and logs/head-suite-default.log hold the same single pre-existing failure at 265cf9946 and c19be5894 and logs/head-cypher-final.log ends 4 passed / EXIT=0.\nVERDICT write_paths: the brief fences four paths and `git diff --stat c1e6351dfb c19be5894` is one of them, docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html.\nVERDICT manifest: read the reviewed manifest.md; status complete, five commits, 36-file gate command and four log paths, and baseline_suite/after_suite objects both carrying failure_count 1 with the same id.\nVERDICT diff: read c1e6351dfb..c19be5894 commit by commit; one docs commit changing three lines of the evidence fragment \u2014 the symbol and forwarder lists, the gate paragraph and the checks paragraph \u2014 with no code, test or config change.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the fragment's <tr id=\"srtj-graph-ops-split-step13-graph_source_bindings\"> now lists exactly the 51 names the design JSON maps and exactly the 38 functions imas_codex/standard_names/graph_ops.py forwards; set equality verified by AST against both.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/base-suite-default.log and logs/head-suite-default.log match the fragment's 1 failed / 538 passed / 39 deselected at 265cf9946 and c19be5894 with distinct basetemps and 36 files, but the isolated seven-file, Cypher and wiring-probe arms ran at c1e6351dfb and the fragment names no revision for them (line 8).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat c1e6351dfb c19be5894` is one file inside the brief's four declared write paths, with no test, config, generated or source file touched.\nSCORE durability: 7\nJUSTIFICATION durability: nothing in the diff adds an assertion, so no test fails if docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html drifts from the design JSON or the gate logs again.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html:8-9 keeps the fragment idiom of <p id> sections, <code> paths and <details> symbol lists and adds no forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the commit adds no definition or capability, and a search over docs/evidence/fragments/sn-review-through-jev/ found no other record of this extraction to extend instead.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html:9 non-blocking: the checks paragraph calls the service object 'the mechanism every one of those attribute-string patches relies on', but graph_store/graph_source_bindings.py never calls persist_outcome_snapshot, reset_persist_outcomes, write_enrichment_results or merge_standard_name_sources through services or otherwise, so those patches reach through the name being resolved on graph_ops at call time (imas_codex/standard_names/loop.py:2554-2559, imas_codex/standard_names/harmonize.py:1073).\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html:8 non-blocking: the seven-file arms and the wiring probe were run at head c1e6351dfb, one commit before the reviewed head, and the fragment names no revision for them, so its 'at both revisions' and 'A wiring probe then asserted' counts cannot be told apart from measurements at c19be5894.\n",
+  "review_run_id": "r-20261024T222249703591-review-of-srtj-graph-ops-split-step13-c19be58944d0",
+  "reviewed_base_sha": "c1e6351dfb6874eefd0e66f0ec11988edc2c1d27",
+  "reviewed_head_sha": "c19be58944d078d047dff9b7a13239224b9be87b",
+  "reviewed_run_id": "r-20261024T201334977166-srtj-graph-ops-split-step13",
+  "scores": {
+    "durability": 7,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T22:39:53.764611+00:00",
+  "total": 100
+}
