@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/review/audits.py:760 (run_documentation_gate_checks -> score_documentation(documenting_name=name.get('id')) -> docs_gates.py:370)",
+    "imas_codex/standard_names/docs_holdout_eval.py:501 (score_documentation without documenting_name)",
+    "imas_codex/standard_names/docs_holdout_eval.py:512 (score_documentation without documenting_name)",
+    "imas_codex/standard_names/review/cascade_calibration.py:286 (jev_review.claim_contradicts)",
+    "imas_codex/standard_names/review/jev_review.py:943 (effective_claim_answers -> claim_contradicts for every unsettled claim)"
+  ],
+  "completed_at": "2026-10-24T11:46:12.461Z",
+  "dispatched_at": "2026-10-24T11:30:08Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "370",
+      "severity": "non-blocking",
+      "text": "_names_a_position is a second owner of the decision 'is this name a geometric coordinate', duplicating imas_codex/standard_names/derivation.py:390 _geometric_coordinate_check rather than extending it: it uses the strict IR parser, whose ParseError the derivation owner's docstring records as the reason a model-level fallback exists, so names that parse only at model level (probed at this head: magnetic_axis_position and plasma_boundary_position) return False and their documents still fail defining_equation although the lead's ruling at srtj-docs-switch-causes.html:155-170 covers 'a coordinate, a position or a locus'."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "1267",
+      "severity": "non-blocking",
+      "text": "the coordinate exemption decides from documenting_name, and imas_codex/standard_names/docs_holdout_eval.py:501 and :512 call score_documentation without it, so the same document PASSes defining_equation on the production lint path (review/audits.py:760) and FAILs it in the holdout evaluation the docs gate is measured through."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html",
+      "line": "51",
+      "severity": "non-blocking",
+      "text": "the per-row diagnosis for S0010, the one row that still fails the bar, quotes judge readings (contradicts 0.30 against says nothing 0.47, and 0.32 against 0.35) that the shipped rule at jev_review.py:1005-1010 cannot veto, so the artifact never shows the reading that produced the pass-1 refinement it reports; the verdict at srtj-docs-switch-causes.html:26-29 attributes that refinement to the withdrawn settlement without any evidence tying S0010's claim to it, and the quoted readings are not dated to the measurement they came from."
+    },
+    {
+      "file": "manifest.md",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "the manifest carries no baseline_suite or after_suite block, so its gate facts exist only in prose and logs; gate-delta-5.log's own base arm never ran (worktree add exit=128, pytest exit=1 on a missing directory) and the base figure comes from the separate gate-base5.log, which a promotion gate reading the manifest's structured fields cannot discover."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "see the CALL_SITES line: the production lint path review/audits.py:760 passes documenting_name so the coordinate exemption fires, while docs_holdout_eval.py:501 and :512 omit it, and claim_contradicts is reached from review/cascade_calibration.py:286 and jev_review.py:943.",
+    "diff": "read all 17 commits from cd52b01c to a99ed3296; eight paths change, three production modules, two test files, two evidence artifacts and one figure, 3124 insertions and 33 deletions, and every commit subject matches what its hunk does.",
+    "done_when": "read brief.md:57-69; the gate command at manifest.md:13 is the three-file delta gate, its head arm records 88 passed / 0 failed in gate-delta-5.log with EXIT=0, the measurement log measure-srtj-docs-switch-causes-6.log ends EXIT=0 and the JSON holds both passes, and srtj-docs-switch-causes.html carries the per-row diagnosis, the fixes, the re-measured table and a one-line verdict.",
+    "goal": "read the goal at prompt.txt:31-32 ('Fix the veto and defining-relation causes of documentation over-refinement'); the diff changes claim_contradicts at jev_review.py:987, the placement vocabulary at jev_review.py:526, the scope settlement at jev_review.py:683 and the defining-relation gate at docs_gates.py:370, so both named causes are addressed at their owners.",
+    "manifest": "read in full at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/manifest.md; status is complete, it records the gate, the two-pass replay (3 of 46 recorded, 59 of 60 planted with contradicts-354 accepted, 0 of 20 controls), the negative control and spend 0.106022 USD of 1.00, but it carries no baseline_suite or after_suite block.",
+    "write_paths": "read the fence at manifest.md:3 and brief.md:71-79; the diff stays inside it except imas_codex/standard_names/review/cascade.py and srtj-contradiction-veto-retune-run.py, which manifest.md:18 declares and explains."
+  },
+  "justifications": {
+    "durability": "negative-control-revert.log reddens ten assertions including test_an_undecided_distribution_does_not_veto and the scope-disclaimer tests under a full revert of jev_review.py, and negative-control-5.log reddens the two coordinate tests with _names_a_position withdrawn (2 failed, EXIT=1).",
+    "evidence": "gate-delta-5.log records the head arm at 2f9b8cd02 with 88 passed and EXIT=0 and its own base arm failed to materialize (worktree add exit=128), the base figure coming instead from the separate gate-base5.log (71 passed, EXIT=0), and measure-srtj-docs-switch-causes-6.log ends EXIT=0 with both Jev passes in the JSON.",
+    "fit": "states_scope_non_requirement at jev_review.py:683 reuses the file's existing _ASSERTED_COMBINATION, _NEGATED_REQUIREMENT and _REQUIREMENT_WITH_NO_OBJECT patterns, and the new symbols name the mechanism with no plan or ticket identifier.",
+    "goal_fidelity": "the two causes the goal names are fixed at their owners, jev_review.py:1005-1010 (silence-mass veto channel) and docs_gates.py:370 (coordinate exemption), and the four diagnosed rows S0031, S0055, S0015 and S0062 accept on both passes in srtj-docs-switch-causes.json, while one acceptable row S0010 still refines on pass 1.",
+    "reuse": "the runner correctly reuses review/audits.py:778 run_lint_checks instead of copying the lint families, but docs_gates.py:370 _names_a_position re-derives the repository's geometric-coordinate classification owned at imas_codex/standard_names/derivation.py:390 rather than extending it, with a narrower parser.",
+    "scope_discipline": "the diff touches imas_codex/standard_names/review/cascade.py and srtj-contradiction-veto-retune-run.py, which are outside brief.md's seven-path write scope and disclosed at manifest.md:18; every other path is inside the brief."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read prompt.txt:31-32; the diff fixes the veto at imas_codex/standard_names/review/jev_review.py:987-1010 and the defining-relation cause at imas_codex/standard_names/docs_gates.py:370, so both causes the goal names are repaired at their owners.\nVERDICT done_when: brief.md:57-69 requires committed fixes, a two-pass recall replay, a measurement JSON with a real EXIT=0 holding both passes, and an HTML with diagnosis, fixes, table and verdict; all are present, with measure-srtj-docs-switch-causes-6.log ending EXIT=0.\nVERDICT write_paths: read the fence at manifest.md:3 and brief.md:71-79; the diff is inside it except imas_codex/standard_names/review/cascade.py and srtj-contradiction-veto-retune-run.py, declared and explained at manifest.md:18.\nVERDICT manifest: read in full; it reports status complete, gate-delta-5.log at 88 passed / 0 failed, the two-pass replay at 3 of 46 recorded and 59 of 60 planted with contradicts-354 accepted, spend 0.106022 USD of 1.00, and no baseline_suite or after_suite block.\nVERDICT diff: read all 17 commits from cd52b01c to a99ed3296; eight paths change, every commit's hunks match its subject, and one acceptable row S0010 still refines on pass 1 in docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json.\nCALL_SITES: imas_codex/standard_names/review/audits.py:760, imas_codex/standard_names/docs_holdout_eval.py:501, imas_codex/standard_names/docs_holdout_eval.py:512, imas_codex/standard_names/review/cascade_calibration.py:286, imas_codex/standard_names/review/jev_review.py:943\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: jev_review.py:1005-1010 and docs_gates.py:370 fix both named causes, and in srtj-docs-switch-causes.json rows S0031, S0055, S0015 and S0062 accept on both passes while S0010 still refines on pass 1.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-delta-5.log records the head arm at 88 passed with EXIT=0 but its own base arm failed with worktree add exit=128, the base figure being supplied separately in gate-base5.log (71 passed, EXIT=0).\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: two paths outside brief.md's scope, imas_codex/standard_names/review/cascade.py and srtj-contradiction-veto-retune-run.py, are in the diff and disclosed at manifest.md:18.\nSCORE durability: 17\nJUSTIFICATION durability: negative-control-revert.log reddens ten assertions including tests/standard_names/test_contradiction_veto_question.py:514 under a revert of jev_review.py, and negative-control-5.log reddens the two coordinate tests with _names_a_position withdrawn.\nSCORE fit: 17\nJUSTIFICATION fit: jev_review.py:683 follows the file's existing states_non_requirement family and reuses its regexes, and the added names describe the mechanism with no plan or ticket identifier.\nSCORE reuse: 5\nJUSTIFICATION reuse: docs_gates.py:370 _names_a_position duplicates the geometric-coordinate classification owned at imas_codex/standard_names/derivation.py:390 with a narrower parser, though the runner correctly reuses review/audits.py:778 run_lint_checks.\nFINDING imas_codex/standard_names/docs_gates.py:370 non-blocking: _names_a_position duplicates the repository's geometric-coordinate classification owned at imas_codex/standard_names/derivation.py:390 through the strict IR parser, so names that parse only at model level (magnetic_axis_position, plasma_boundary_position) get no exemption and their documents still fail defining_equation.\nFINDING imas_codex/standard_names/docs_gates.py:1267 non-blocking: the coordinate exemption reads documenting_name, and docs_holdout_eval.py:501 and :512 omit it, so one document PASSes defining_equation on the production lint path at review/audits.py:760 and FAILs it in the holdout evaluation.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html:51 non-blocking: the diagnosis of S0010, the only row still failing the bar, quotes readings (0.30 against 0.47, 0.32 against 0.35) that the shipped rule at jev_review.py:1005-1010 cannot veto, so the artifact never shows the reading behind its pass-1 refinement.\nFINDING manifest.md:18 non-blocking: the manifest carries no baseline_suite or after_suite block, and gate-delta-5.log's own base arm never ran (worktree add exit=128), the base figure coming from the separate gate-base5.log.",
+  "review_run_id": "r-20261024T112928602547-review-of-srtj-docs-switch-causes-a99ed32967b3",
+  "reviewed_base_sha": "cd52b01cd9c0de92742166f2a194b8173c92b6b4",
+  "reviewed_head_sha": "a99ed32967b3f1ed62476bed6845485dc2255c03",
+  "reviewed_run_id": "r-20261023T191819797804-srtj-docs-switch-causes",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T11:48:46.181556+00:00",
+  "total": 84
+}
