@@ -676,9 +676,9 @@ escalation-reasoning-effort = "high"
 # audit, so the two judges' drift can be watched. 0 disables the audit.
 panel-audit-rate = 0.05
 # Which axes Jev decides alone: true (both), false (neither) or a list
-# drawn from "name" and "docs". Documentation stays with the paid panel
-# until its disagreement with Jev is labelled.
-cascade-deciding = ["name"]
+# drawn from "name" and "docs". Both review axes are decided by Jev; the paid
+# panel runs only the 5% audit above, which decides nothing.
+cascade-deciding = true
 
 [tool.imas-codex.sn-review.names]
 # Mixed-vendor RD-quorum chain.

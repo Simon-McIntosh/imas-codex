@@ -44,6 +44,20 @@ def test_an_absent_setting_shadows_both_axes(monkeypatch):
     assert cascade.deciding_enabled("docs") is False
 
 
+def test_the_shipped_configuration_makes_both_axes_deciding():
+    """The configuration this checkout ships has Jev decide both axes.
+
+    The paid panel runs at the configured audit rate over decided items and
+    decides nothing, so its verdicts stay a drift watch rather than a second
+    decider.
+    """
+    from imas_codex.standard_names.review import panel_audit
+
+    assert cascade.deciding_enabled("name") is True
+    assert cascade.deciding_enabled("docs") is True
+    assert panel_audit.panel_audit_rate() == 0.05
+
+
 class _Lease:
     def charge_event(self, *_args):
         pass
