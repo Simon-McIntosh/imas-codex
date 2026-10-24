@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="267">
+<meta name="plan-version" content="268">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1124,6 +1124,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261024T201334977166-srtj-graph-ops-split-step13" data-who="reckon-build" data-when="2026-10-24T22:21:50Z">
     <div class="r-comment-body"><p>extracted all 51 design-mapped graph_source_bindings symbols from graph_ops.py into graph_store/graph_source_bindings.py with 38 documented forwarders and 13 re-exports; graph_ops.py fell from 347,073 bytes / 74,837 cl100k tokens / 99,163.71 gate units to 267,069 bytes / 58,021 tokens / 76,305.43 gate units (reductions 80,004 / 16,816 / 22,955.43), the new module is 99,806 bytes / 21,006 tokens / 28,516.00 gate units, and the 36-file gate — including the seven files that patch moved symbols through a module-path string or monkeypatch.setattr on the facade — shows zero added failures on default and graph markers</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261024T224649771081-review-of-srtj-disposable-neo4j-teardown-4b89fd649c85" data-who="reckon-build" data-when="2026-10-24T22:58:03.705Z">
+    <div class="r-comment-body"><p>Reviewed r-20261024T202728538311-srtj-disposable-neo4j-teardown at base 265cf9946820c3e3a407ef6ad57a2617eeb30f55 / head 4b89fd649c85b1448e8867386f7a06dc0f522522: parsed record, scores goal_fidelity 18, evidence 16, scope_discipline 20, durability 17, fit 19, reuse 20, added_failure_count 0 with no added failure ids, four findings all non-blocking (manifest after_suite command drops the `-s` the head gate log header carries; the rename-failure fallback deletes synchronously in teardown; a removal failure in the finally masks a stop_temp_neo4j failure). No blocking finding, so the node can land.</p></div>
 </div>
 </section>
 </main>

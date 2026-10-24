@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T22:58:03.705Z",
+  "dispatched_at": "2026-10-24T22:47:41Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T202728538311-srtj-disposable-neo4j-teardown/manifest.md",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "after_suite.command records `pytest -m graph --durations=0 ...` but logs/gate-head.log's own header line records `pytest -m graph -s --durations=0 ...`; the recorded command, re-run, would capture the fixture's receipt line instead of printing it, so the one log line the fragment cites as the post-session check would not appear."
+    },
+    {
+      "file": "tests/standard_names/conftest.py",
+      "line": 448,
+      "severity": "non-blocking",
+      "text": "the OSError fallback to a rename failure calls directory.cleanup(), which performs the same unbounded recursive delete inside the session's teardown that the node exists to take off that path; the failure is reported only after it has blocked, so on a filesystem where the rename fails the budget the node claims is not held."
+    },
+    {
+      "file": "tests/standard_names/conftest.py",
+      "line": 560,
+      "severity": "non-blocking",
+      "text": "the store removal runs in a finally around temp_neo4j.stop_temp_neo4j, so when the stop itself raises (it can, after its SIGKILL timeout) a removal failure raised from the finally replaces the stop's exception; the teardown still fails, but the traceback named is the removal's and the stop failure is lost."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that the shared Neo4j session fixture tears down within its budget without hiding a real hang; brief.md states it and tests/standard_names/conftest.py:560-562 stops the database first and then hands the store removal to a detached process, so the goal is met.\nVERDICT done_when: the done_when asks for `pytest -m graph --durations=0` at head and base from separate archived trees each with its own basetemp, no added failures, no teardown past 30 s, and a logged removal check; logs/gate-base.log and logs/gate-head.log each record 26 passed EXIT=0, max teardown 15.57 s and 15.27 s, and the head fixture prints \"absent after session: True\".\nVERDICT write_paths: the manifest declares tests/standard_names/conftest.py, tests/standard_names/test_disposable_neo4j_teardown.py, the evidence fragment and an unused figures directory; `git diff --stat` 265cf9946..4b89fd649 shows exactly the first three files, +281/-1.\nVERDICT manifest: read; it names six commits and twelve logs, records both arms green, and its evidence_inputs states plainly that the recorded 37.1 s does not reproduce on this node's node-local xfs TMPDIR.\nVERDICT diff: read commit by commit \u2014 fcea53b0 and 37f2bed3 add the detached removal and its log line, fa6082acb judges the remover by exit status, b58580592 adds the four tests, ad86efbb3 and 4b89fd64 carry the evidence fragment alone; no production runtime path reaches the change, only the graph-marked test files that consume the fixture.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/conftest.py:560-562 stops the database and then detaches the removal, but the OSError fallback at conftest.py:448 still performs the recursive delete synchronously inside teardown.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/gate-head.log and logs/gate-base.log are archived-tree runs with per-arm basetemps recording 26 passed EXIT=0 and every teardown under 30 s, though the manifest's after_suite command drops the `-s` the head log header carries.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (conftest.py, test_disposable_neo4j_teardown.py, the evidence fragment) is inside the manifest's declared write paths, and the global pytest timeout is untouched.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_disposable_neo4j_teardown.py:79 and :92 each redden with EXIT=1 under the recorded guard removals in logs/guard-guard-a.log and logs/guard-guard-b.log, though :79 is a source-text assertion and :71's `elapsed < 2.0` is an upper bound far looser than the 0.2 s budget it patches, so only the handoff assertion carries the failure.\nSCORE fit: 19\nJUSTIFICATION fit: `_detach_store_removal` at tests/standard_names/conftest.py:428 follows the repository's existing `start_new_session=True` subprocess pattern at imas_codex/graph/temp_neo4j.py:289 and names no plan, ticket or stage identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of imas_codex/ and tests/ for `shutil.rmtree`, `start_new_session` and any detached-removal helper found no owner of store-directory removal \u2014 imas_codex/graph/temp_neo4j.py:304 cleans stale processes only \u2014 so the fixture module owns the capability and this addition extends it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T202728538311-srtj-disposable-neo4j-teardown/manifest.md:21 non-blocking: after_suite.command omits the `-s` that logs/gate-head.log's header carries, so a re-run of the recorded command would capture the fixture's receipt line instead of printing it.\nFINDING tests/standard_names/conftest.py:448 non-blocking: the OSError fallback performs the same unbounded recursive delete in teardown that the node exists to remove from that path.\nFINDING tests/standard_names/conftest.py:560 non-blocking: a removal failure raised from the finally replaces a stop_temp_neo4j failure as the teardown's traceback, losing the stop's diagnosis.\n",
+  "review_run_id": "r-20261024T224649771081-review-of-srtj-disposable-neo4j-teardown-4b89fd649c85",
+  "reviewed_base_sha": "265cf9946820c3e3a407ef6ad57a2617eeb30f55",
+  "reviewed_head_sha": "4b89fd649c85b1448e8867386f7a06dc0f522522",
+  "reviewed_run_id": "r-20261024T202728538311-srtj-disposable-neo4j-teardown",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T22:58:54.226089+00:00",
+  "total": 110
+}
