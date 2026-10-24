@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/review/cascade.py:767",
+    "imas_codex/standard_names/review/cascade.py:213",
+    "imas_codex/standard_names/review/cascade_calibration.py:286",
+    "imas_codex/standard_names/review/jev_review.py:1145",
+    "imas_codex/standard_names/review/audits.py:760",
+    "imas_codex/standard_names/docs_holdout_eval.py:501",
+    "imas_codex/standard_names/docs_gates.py:405"
+  ],
+  "completed_at": "2026-10-24T06:59:43.046Z",
+  "dispatched_at": "2026-10-24T06:30:50Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "743",
+      "severity": "blocking",
+      "text": "replaces_document_relation settles a claim as contradicts whenever any relation form after a contrast also appears anywhere in the documentation, without checking the relation the claim actually asserts, so a document that describes its own design choice with the same construction vetoes itself; claim_settlement on \"The calibration uses a linear relation instead of a quadratic one, and the linear coefficient is stated below.\" with that same text as the documentation returns \"contradicts\", and settled_claim_answers yields choice contradicts via document_relation_replaced on that code, which hard-vetoes an internally consistent document and is the over-refinement this node exists to remove; the amended 59/60 bar does not depend on this settlement."
+    },
+    {
+      "file": "tests/standard_names/test_contradiction_veto_question.py",
+      "line": "593",
+      "severity": "non-blocking",
+      "text": "the comment describes six samples and a former cutoff that fired on four, while supporting_evidence.matched_answers records ten samples and base_fires 7 and the test pins only two readings, so the source that pins the evidence states the wrong sample population."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html",
+      "line": "194",
+      "severity": "non-blocking",
+      "text": "the recall section points a reader at veto_replay.matched_answers, but the sampled answers are stored at supporting_evidence.matched_answers in srtj-docs-switch-causes.json and veto_replay has no such key, so the pointer resolves to nothing."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "381",
+      "severity": "non-blocking",
+      "text": "_names_a_position imports and calls imas_standard_names.parse inside the function on every invocation, with no cache, so score_documentation re-parses each name on each call and a catalog-wide lint sweep pays that parse per name per pass; the review package already imports the same library at audits.py:310, so the import belongs at module scope and the result belongs in a cache."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "supporting_evidence.head_arm.revision is null and gate-delta.log names only the scratch tree paths, so the 71-versus-91 delta the manifest records cannot be tied to a revision by a later reader."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read by commit from cd52b01cd to 588c96b01; 040e16a16 changes the veto, label vocabulary, settlement and runner, a32a96160 adds the matched-answer evidence, 1d667cc62 adds the relation settlement, the coordinate exemption and the run_lint_checks reuse, and 61e2e95e8, f459643d1 and 588c96b01 are evidence, figure and size declaration; the new figure at docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg renders at 31.1 cm by 16 cm with no clipped or overlapping label.",
+    "done_when": "the brief requires both passes to refine all 19 link-defect rows and none of the 30 acceptable rows, the veto replay to keep its bar, the runner-written JSON to end in EXIT=0 with both passes, and the HTML to record the diagnosis, fixes, re-measured table and a one-line verdict; srtj-docs-switch-causes.json passes.pass_a and passes.pass_b record 19/19 and 0/30, per_row recomputes to the same, the replay records 59/60 with contradicts-354 as the lead-ruled known gap, measure-srtj-docs-switch-causes-2.log ends EXIT=0, and the HTML carries all four sections.",
+    "goal": "the goal at prompt.txt:30 is to fix the veto and defining-relation causes of documentation over-refinement; the landed change fixes the veto at jev_review.py:1035 (undecided distributions), jev_review.py:531 (direction-word labels), jev_review.py:683 (population scope) and jev_review.py:726 (relation replacement), and the defining-relation cause at docs_gates.py:368, so the four veto rows and S0062 are all addressed.",
+    "manifest": "read at completion; it records status complete, eight commits, the three-file gate command, gate-delta.log, negative-control-fix.log, spend 0.062247 USD and the recall position, but carries no baseline_suite or after_suite record and no per-arm revision.",
+    "write_paths": "the reviewed fence at prompt.txt:150-158 grants the seven files plus docs/figures/sn-review-through-jev/srtj-docs-switch-causes, and all eight paths in the diff are inside it."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_contradiction_veto_question.py:624 and tests/standard_names/test_contradiction_veto_question.py:636 and tests/standard_names/test_docs_gates.py:575 redden when 1d667cc62 is undone (negative-control-fix.log, 5 failed, EXIT=1) and each added assertion pins a literal input to a literal expectation, but no test covers a contrastive sentence whose rejected relation the document itself names.",
+    "evidence": "srtj-docs-switch-causes.json passes.pass_a and passes.pass_b record 19/19 link defects and 0/30 acceptable with per_row backing the counts and measure-srtj-docs-switch-causes-2.log ends EXIT=0, but supporting_evidence.head_arm.revision is null and manifest.md:14 carries no baseline_suite or after_suite record.",
+    "fit": "states_scope_non_requirement at jev_review.py:683 follows the states_non_requirement family and reuses _NEGATED_REQUIREMENT and _REQUIREMENT_WITH_NO_OBJECT rather than restating them, while the comment at tests/standard_names/test_contradiction_veto_question.py:593 still describes six samples where the artefact records ten.",
+    "goal_fidelity": "jev_review.py:1035 removes the undecided-distribution veto and docs_gates.py:368 exempts coordinates from the defining-relation rule, the two causes the goal names, and srtj-docs-switch-causes.json passes.pass_a records 0 of 30 acceptable rows refined.",
+    "reuse": "srtj-docs-switch-measure-run.py:157 now calls audits.py:778 run_lint_checks rather than carrying its own lint copy, but docs_gates.py:381 imports and calls imas_standard_names.parse on every score_documentation call with no cache, so a catalog-wide sweep re-parses the same names repeatedly.",
+    "scope_discipline": "every path in the diff, including docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg, is inside the fence at prompt.txt:150-158, though jev_review.py:726 adds a settlement the amended 59/60 bar does not require."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal at prompt.txt:30 is to fix the veto and defining-relation causes of documentation over-refinement; the landed change fixes the veto at jev_review.py:1035 (undecided distributions), jev_review.py:531 (direction-word labels), jev_review.py:683 (population scope) and jev_review.py:726 (relation replacement), and the defining-relation cause at docs_gates.py:368, so the four veto rows and S0062 are all addressed.\nVERDICT done_when: the brief requires both passes to refine all 19 link-defect rows and none of the 30 acceptable rows, the veto replay to keep its bar, the runner-written JSON to end in EXIT=0 with both passes, and the HTML to record the diagnosis, fixes, re-measured table and a one-line verdict; srtj-docs-switch-causes.json passes.pass_a and passes.pass_b record 19/19 and 0/30, per_row recomputes to the same, the replay records 59/60 with contradicts-354 as the lead-ruled known gap, measure-srtj-docs-switch-causes-2.log ends EXIT=0, and the HTML carries all four sections.\nVERDICT write_paths: the reviewed fence at prompt.txt:150-158 grants the seven files plus docs/figures/sn-review-through-jev/srtj-docs-switch-causes, and all eight paths in the diff are inside it.\nVERDICT manifest: read at completion; it records status complete, eight commits, the three-file gate command, gate-delta.log, negative-control-fix.log, spend 0.062247 USD and the recall position, but carries no baseline_suite or after_suite record and no per-arm revision.\nVERDICT diff: read by commit from cd52b01cd to 588c96b01; 040e16a16 changes the veto, label vocabulary, settlement and runner, a32a96160 adds the matched-answer evidence, 1d667cc62 adds the relation settlement, the coordinate exemption and the run_lint_checks reuse, and 61e2e95e8, f459643d1 and 588c96b01 are evidence, figure and size declaration; the new figure at docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg renders at 31.1 cm by 16 cm with no clipped or overlapping label.\nCALL_SITES: imas_codex/standard_names/review/cascade.py:767, imas_codex/standard_names/review/cascade.py:213, imas_codex/standard_names/review/cascade_calibration.py:286, imas_codex/standard_names/review/jev_review.py:1145, imas_codex/standard_names/review/audits.py:760, imas_codex/standard_names/docs_holdout_eval.py:501, imas_codex/standard_names/docs_gates.py:405\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: jev_review.py:1035 removes the undecided-distribution veto and docs_gates.py:368 exempts coordinates from the defining-relation rule, the two causes the goal names, and srtj-docs-switch-causes.json passes.pass_a records 0 of 30 acceptable rows refined.\nSCORE evidence: 15\nJUSTIFICATION evidence: srtj-docs-switch-causes.json passes.pass_a and passes.pass_b record 19/19 link defects and 0/30 acceptable with per_row backing the counts and measure-srtj-docs-switch-causes-2.log ends EXIT=0, but supporting_evidence.head_arm.revision is null and manifest.md:14 carries no baseline_suite or after_suite record.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in the diff, including docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg, is inside the fence at prompt.txt:150-158, though jev_review.py:726 adds a settlement the amended 59/60 bar does not require.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_contradiction_veto_question.py:624 and tests/standard_names/test_contradiction_veto_question.py:636 and tests/standard_names/test_docs_gates.py:575 redden when 1d667cc62 is undone (negative-control-fix.log, 5 failed, EXIT=1) and each added assertion pins a literal input to a literal expectation, but no test covers a contrastive sentence whose rejected relation the document itself names.\nSCORE fit: 16\nJUSTIFICATION fit: states_scope_non_requirement at jev_review.py:683 follows the states_non_requirement family and reuses _NEGATED_REQUIREMENT and _REQUIREMENT_WITH_NO_OBJECT rather than restating them, while the comment at tests/standard_names/test_contradiction_veto_question.py:593 still describes six samples where the artefact records ten.\nSCORE reuse: 14\nJUSTIFICATION reuse: srtj-docs-switch-measure-run.py:157 now calls audits.py:778 run_lint_checks rather than carrying its own lint copy, but docs_gates.py:381 imports and calls imas_standard_names.parse on every score_documentation call with no cache, so a catalog-wide sweep re-parses the same names repeatedly.\nFINDING imas_codex/standard_names/review/jev_review.py:743 blocking: replaces_document_relation settles a claim as contradicts whenever any relation form after a contrast also appears anywhere in the documentation, without checking the relation the claim actually asserts, so a document that describes its own design choice with the same construction vetoes itself; claim_settlement on \"The calibration uses a linear relation instead of a quadratic one, and the linear coefficient is stated below.\" with that same text as the documentation returns \"contradicts\", and settled_claim_answers yields choice contradicts via document_relation_replaced on that code, which hard-vetoes an internally consistent document and is the over-refinement this node exists to remove; the amended 59/60 bar does not depend on this settlement.\nFINDING tests/standard_names/test_contradiction_veto_question.py:593 non-blocking: the comment describes six samples and a former cutoff that fired on four, while supporting_evidence.matched_answers records ten samples and base_fires 7 and the test pins only two readings, so the source that pins the evidence states the wrong sample population.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.html:194 non-blocking: the recall section points a reader at veto_replay.matched_answers, but the sampled answers are stored at supporting_evidence.matched_answers in srtj-docs-switch-causes.json and veto_replay has no such key, so the pointer resolves to nothing.\nFINDING imas_codex/standard_names/docs_gates.py:381 non-blocking: _names_a_position imports and calls imas_standard_names.parse inside the function on every invocation, with no cache, so score_documentation re-parses each name on each call and a catalog-wide lint sweep pays that parse per name per pass; the review package already imports the same library at audits.py:310, so the import belongs at module scope and the result belongs in a cache.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-causes.json:1 non-blocking: supporting_evidence.head_arm.revision is null and gate-delta.log names only the scratch tree paths, so the 71-versus-91 delta the manifest records cannot be tied to a revision by a later reader.\n",
+  "review_run_id": "r-20261024T063019610800-review-of-srtj-docs-switch-causes-588c96b01112",
+  "reviewed_base_sha": "cd52b01cd9c0de92742166f2a194b8173c92b6b4",
+  "reviewed_head_sha": "588c96b011120982af20613f725e5b3d7383aff4",
+  "reviewed_run_id": "r-20261023T191819797804-srtj-docs-switch-causes",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 14,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T07:02:36.855914+00:00",
+  "total": 94
+}
