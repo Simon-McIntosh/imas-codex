@@ -1,0 +1,34 @@
+<section id="srtj-docs-cascade-switch">
+<h2 id="srtj-docs-cascade-switch-title">Jev decides the documentation axis</h2>
+<p id="srtj-docs-cascade-switch-summary">The deciding switch named the name axis alone, so the paid panel still decided documentation. The documentation replay now measures the switch on both passes, and the lead ruled on 2026-10-24 to hand that axis to Jev with one known precision miss recorded. <code>[sn-review].cascade-deciding</code> becomes <code>true</code>, both axes are Jev's, and the panel's 5% audit is kept so its drift against Jev stays watched. Nothing else about the panel changes: it audits decided items and decides none.</p>
+
+<h3 id="srtj-docs-cascade-switch-setting-title">1. The setting, before and after</h3>
+<p id="srtj-docs-cascade-switch-setting">In <code>pyproject.toml</code>, <code>[tool.imas-codex.sn-review]</code>:</p>
+<table id="srtj-docs-cascade-switch-setting-table">
+<thead><tr><th>key</th><th>before</th><th>after</th></tr></thead>
+<tbody>
+<tr><td><code>cascade-deciding</code></td><td><code>["name"]</code></td><td><code>true</code></td></tr>
+<tr><td><code>panel-audit-rate</code></td><td><code>0.05</code></td><td><code>0.05</code> (unchanged)</td></tr>
+</tbody>
+</table>
+<p id="srtj-docs-cascade-switch-setting-comment">The comment above the audit key keeps its meaning — a fraction of decided items that also run the paid panel as a non-deciding audit. The comment above the deciding key is rewritten to state what is now true: both review axes are decided by Jev, and the panel runs only the 5% audit. Neither comment cites a plan or a sheet row.</p>
+
+<h3 id="srtj-docs-cascade-switch-evidence-title">2. Why the documentation axis moves</h3>
+<p id="srtj-docs-cascade-switch-evidence">The replay at the shipping commit (merge <code>4bea8b681</code>) measures two bars on two passes.</p>
+<ul id="srtj-docs-cascade-switch-evidence-bars">
+<li id="srtj-docs-cascade-switch-evidence-links"><strong>Link defects:</strong> all 19 planted link-defect documents refined on both passes.</li>
+<li id="srtj-docs-cascade-switch-evidence-precision"><strong>Acceptable documents:</strong> 1 of 30 refined on pass 1 and 0 of 30 on pass 2. The single row refined is sheet row <code>S0010</code>, so the stated bar — every link defect caught and no acceptable document refined, on both passes — is met on pass 2 and missed on pass 1 by that one document.</li>
+<li id="srtj-docs-cascade-switch-evidence-recall"><strong>Recall:</strong> 59 of 60 planted contradictions fire on both passes. The one miss is <code>contradicts-354</code>, the field-current relation row, which the lead accepted as a known gap: the judge answers "says nothing" to that claim under every reading tried, so it is a judge reading rather than an untested rule.</li>
+</ul>
+<p id="srtj-docs-cascade-switch-evidence-s0010"><strong>S0010 is the recorded precision miss.</strong> The document is <code>flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</code>. Its veto fired on the probability channel at contradiction masses of 0.30 and 0.32 for two claims whose leading answer was "says nothing" (silence 0.47 and 0.35 against those contradiction masses) — an undecided distribution at the cutoff, not a denial. The veto now requires the contradiction mass to reach the silence mass as well, so this class of firing is what the fix targets. Recording the row keeps the miss visible rather than tuning the bar to it, and the 5% panel audit is what continues to price that firing in production.</p>
+<p id="srtj-docs-cascade-switch-evidence-ruling">The lead's ruling on 2026-10-24 is to switch now with S0010 recorded as a known precision miss, and to keep the 5% panel audit. The name axis was handed over on 2026-10-22 with the same audit retained; this change makes the two axes agree.</p>
+
+<h3 id="srtj-docs-cascade-switch-test-title">3. The shipped setting is asserted, not assumed</h3>
+<p id="srtj-docs-cascade-switch-test">A configuration switch is invisible to code review, so <code>tests/standard_names/test_cascade_deciding_axes.py</code> gains <code>test_the_shipped_configuration_makes_both_axes_deciding</code>. It reads the configuration through the same resolvers the product calls — <code>cascade.deciding_enabled()</code> for both axes and <code>panel_audit.panel_audit_rate()</code>, which the cascade invokes when it samples the audit — and asserts both axes decide and that the rate equals <code>0.05</code>. The rest of the file drives the resolver's accepted and refused forms by stubbing the settings section, so those tests are unaffected by the shipped value; the new test is the one place the shipped file itself is the subject.</p>
+
+<h3 id="srtj-docs-cascade-switch-gate-title">4. Gate</h3>
+<p id="srtj-docs-cascade-switch-gate">Base and head are separate <code>git archive</code> trees, each run with its own <code>--basetemp</code> and default markers, over <code>tests/standard_names/test_cascade_deciding_axes.py</code> and <code>tests/standard_names/test_review_cascade.py</code>. Base arm at <code>265cf9946</code> ran <code>80 passed</code> at <code>EXIT=0</code>; head arm at <code>3d591f9f</code> ran <code>81 passed</code> at <code>EXIT=0</code>. The one extra test is the new assertion. <strong>No added failures.</strong> Both arms print the module they imported, and each resolves to its own scratch tree rather than a shared checkout, so the configuration each arm read is the tree it ran in.</p>
+
+<h3 id="srtj-docs-cascade-switch-control-title">5. The declared negative control</h3>
+<p id="srtj-docs-cascade-switch-control">The declared mutation restores <code>cascade-deciding</code> to the name axis only — <code>true</code> becomes <code>["name"]</code> in a scratch copy of the head tree. The run reports <code>1 failed, 80 passed</code> at <code>EXIT=1</code>; the red id is <code>test_the_shipped_configuration_makes_both_axes_deciding</code>, which fails on the documentation axis assertion. So the new test fails on exactly the regression it exists to catch, and the other eighty stay green, meaning the red is the assertion and not the harness. The log is <code>logs/gate-negative-control.log</code>.</p>
+</section>
