@@ -7,6 +7,8 @@ from collections.abc import Callable, Collection
 from dataclasses import dataclass
 from typing import Any, Literal
 
+from imas_codex.units import validate_unit
+
 ReferenceSyntax = Literal["bare_bracket", "inline_name"]
 KnownNameResolver = Callable[[tuple[str, ...]], Collection[str]]
 
@@ -21,42 +23,10 @@ _BARE_BRACKET_RE = re.compile(r"(?<![!\\A-Za-z0-9_])\[([a-z][a-z0-9_]+)\](?!\()"
 _INLINE_NAME_RE = re.compile(r"(?<![A-Za-z0-9_])name:([a-z][a-z0-9_]+)\b")
 _NAME_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(name:([a-z][a-z0-9_]+)\)")
 _BRACKET_CONTENT_RE = re.compile(r"\[([^\[\]\n]+)\]")
-_NUMERIC_INTERVAL_RE = re.compile(r"-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?")
 _UNIT_MAGNITUDE_RE = re.compile(
     r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:\^[+-]?\d+|[eE][+-]?\d+)?"
 )
 _UNIT_FACTOR_RE = re.compile(r"([A-Za-zµμ]+)(?:\^-?\d+)?")
-_UNIT_SYMBOLS = frozenset(
-    {
-        "m",
-        "s",
-        "g",
-        "kg",
-        "A",
-        "K",
-        "mol",
-        "cd",
-        "Hz",
-        "N",
-        "Pa",
-        "J",
-        "W",
-        "C",
-        "V",
-        "F",
-        "T",
-        "Wb",
-        "H",
-        "eV",
-        "rad",
-        "sr",
-        "Bq",
-        "Gy",
-        "Sv",
-        "L",
-    }
-)
-_UNIT_PREFIXES = frozenset("YZEPTGMkhdcmunpf") | {"µ", "μ"}
 
 
 @dataclass(frozen=True)
@@ -130,16 +100,16 @@ def find_name_references(
 def _is_prose_bracket(content: str) -> bool:
     """Return whether a bracket's content is documentation prose, not notation.
 
-    A bracket holding a unit (``m^-3``, ``K``, ``10^20 m^-3``) or a numeric
-    interval (``0, 1``) carries notation a reader reads directly, so it names
-    nothing and makes no claim about a standard name. Anything else that holds
-    words is prose: it is either a named identity the gate's reference rule
-    already governs, or a phrase that should have been written as a link.
+    A bracket holding a unit (``m^-3``, ``K``, ``10^20 m^-3``) carries notation
+    a reader reads directly, so it names nothing and makes no claim about a
+    standard name. Whether a factor is a unit is the unit owner's judgment
+    (``imas_codex.units.validate_unit``), not a vocabulary repeated here.
+    Anything else that holds words is prose: it is either a bracket of numbers
+    and symbols with no letter in it, a named identity the gate's reference
+    rule already governs, or a phrase that should have been written as a link.
     """
 
     stripped = content.strip()
-    if _NUMERIC_INTERVAL_RE.fullmatch(stripped):
-        return False
     if not re.search(r"[A-Za-z]", stripped):
         return False
     tokens = stripped.split()
@@ -149,15 +119,7 @@ def _is_prose_bracket(content: str) -> bool:
         tokens = tokens[1:]
     factors = [factor for token in tokens for factor in re.split(r"[*/]", token)]
     if factors and all(
-        (match := _UNIT_FACTOR_RE.fullmatch(factor))
-        and (
-            match.group(1) in _UNIT_SYMBOLS
-            or (
-                len(match.group(1)) > 1
-                and match.group(1)[0] in _UNIT_PREFIXES
-                and match.group(1)[1:] in _UNIT_SYMBOLS
-            )
-        )
+        _UNIT_FACTOR_RE.fullmatch(factor) and validate_unit(factor)
         for factor in factors
     ):
         return False
