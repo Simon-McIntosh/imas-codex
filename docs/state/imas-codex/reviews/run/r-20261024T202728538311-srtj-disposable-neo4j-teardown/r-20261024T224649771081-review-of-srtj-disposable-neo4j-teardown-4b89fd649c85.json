@@ -8,6 +8,11 @@
       "kind": "exempted",
       "reason": "the -s flag only shows the receipt line on the console; the check runs either way",
       "recorded_at": "2026-10-24T23:02:47.021221+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the rename is within one directory on one filesystem and fails only when the filesystem itself is failing, which the teardown then reports",
+      "recorded_at": "2026-10-24T23:02:52.090543+00:00"
     }
   },
   "findings": [
