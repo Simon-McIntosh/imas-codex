@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms: baseline_suite at f657a98dc fails 8 ids (the new discrimination tests run against base product code) and after_suite at 0a39e40fb fails none, so after-minus-baseline is empty. The graph arm is flat at 6 passed either side per logs/gate-base-graph.log and logs/gate-head-graph.log.",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/sn.py:1108",
+    "imas_codex/standard_names/edit.py:3899",
+    "imas_codex/standard_names/loop.py:2135",
+    "imas_codex/standard_names/loop.py:2150"
+  ],
+  "completed_at": "2026-10-24T21:52:07.173Z",
+  "dispatched_at": "2026-10-24T21:32:42Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "non-blocking: the commits field names seven of the eight commits in f657a98dc..f2eb66422, omitting ed127f9ed, the evidence-fragment commit that adds every negative-control citation, so the node's recorded history under-reports what it shipped."
+    },
+    {
+      "file": "imas_codex/standard_names/loop.py",
+      "line": 2142,
+      "severity": "non-blocking",
+      "text": "non-blocking: the call site logs a second \"could not be read\" warning for a scope the selector has already warned about at loop.py:386, and this second line drops the exception type and message, so one unreadable scope emits two differently worded warnings a log scan must de-duplicate."
+    },
+    {
+      "file": "manifest.md",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests field names only the default-marker arm, so the -m graph arm the brief's gate also requires (logs/gate-head-graph.log, 6 passed EXIT=0) lives only inside that log's header and the fragment, and a promotion-time gate receipt re-runs half of the gate the done_when names."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all eight commits f657a98dc..f2eb66422 commit by commit; two add the loop tests and the readable scope answer, three move the handler onto the is_infrastructure_error classifier at imas_codex/discovery/base/supervision.py:108 with its restart case, and three write the evidence fragment, with no product file outside imas_codex/standard_names/loop.py touched.",
+    "done_when": "the brief's done-when asks for committed tests, a no-added-failure gate with a logged negative control, and a fragment recording each finding and repair; logs/gate-base-default.log ends \"8 failed, 40 passed\" EXIT=1, logs/gate-head-default.log ends \"48 passed\" EXIT=0, four negative-control logs each carry a declared mutation and a non-zero EXIT, and docs/evidence/fragments/sn-harmonize-command/shc-drift-scope-hardening.html:196-244 records each control beside its test ids.",
+    "goal": "the node goal is to test and fail-close the loop half of the scoped drift refresh; the brief's four findings are each landed, at tests/standard_names/test_scoped_drift_loop.py, imas_codex/standard_names/loop.py:377-393, tests/standard_names/test_source_refresh.py:255-261 and test_source_refresh.py:671.",
+    "manifest": "read in full; it states status complete, records baseline_suite 8 failed at f657a98dc and after_suite 0 failed at 0a39e40fb each with a log whose last line is a bare EXIT=, but its commits field names seven of the eight commits actually added (manifest.md:7).",
+    "write_paths": "manifest.md:1-5 lists the brief's four paths plus the coordinator-extended tests/standard_names/test_scoped_global_maintenance.py; git diff --stat f657a98dc..f2eb66422 names five files and every one is inside that set, so nothing landed outside the granted scope."
+  },
+  "justifications": {
+    "durability": "logs/negative-control-forwarding.log fails the three wiring tests when sn_ids=_refresh_ids is deleted and logs/negative-control-restart-error.log fails only the restart test when the classifier is replaced by a local isinstance list, so each added assertion has a shown condition under which it reddens.",
+    "evidence": "logs/gate-head-default.log ends \"48 passed\" EXIT=0 and logs/gate-base-default.log \"8 failed, 40 passed\" EXIT=1, the eight being exactly the new discrimination tests named in manifest.md:23.",
+    "fit": "imas_codex/standard_names/loop.py:377-393 follows the surrounding module idiom and delegates the decision to an owner, and ruff reports no findings across the four changed Python files.",
+    "goal_fidelity": "imas_codex/standard_names/loop.py:2142-2148 skips the refresh when the selector returns None, so an unreadable scope neither sweeps the graph nor reads as a scope that owns nothing.",
+    "reuse": "loop.py:346 imports is_infrastructure_error from imas_codex/discovery/base/supervision.py:108 rather than re-listing connection failures, and tests/standard_names/test_scoped_drift_loop.py:43 imports the orchestrator harness from test_scoped_global_maintenance.py:19 instead of copying its 23-entry patch set.",
+    "scope_discipline": "git diff --stat f657a98dc..f2eb66422 names five paths and all five appear in manifest.md:4 orientation_write_paths, including the harness file the coordinator added to the fence."
+  },
+  "node": "review-of-shc-drift-scope-hardening-f2eb664226db",
+  "node:reviewed": "shc-drift-scope-hardening",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to test and fail-close the loop half of the scoped drift refresh; the brief's four findings are each landed, at tests/standard_names/test_scoped_drift_loop.py, imas_codex/standard_names/loop.py:377-393, tests/standard_names/test_source_refresh.py:255-261 and test_source_refresh.py:671.\nVERDICT done_when: the brief's done-when asks for committed tests, a no-added-failure gate with a logged negative control, and a fragment recording each finding and repair; logs/gate-base-default.log ends \"8 failed, 40 passed\" EXIT=1, logs/gate-head-default.log ends \"48 passed\" EXIT=0, four negative-control logs each carry a declared mutation and a non-zero EXIT, and docs/evidence/fragments/sn-harmonize-command/shc-drift-scope-hardening.html:196-244 records each control beside its test ids.\nVERDICT write_paths: manifest.md:1-5 lists the brief's four paths plus the coordinator-extended tests/standard_names/test_scoped_global_maintenance.py; git diff --stat f657a98dc..f2eb66422 names five files and every one is inside that set, so nothing landed outside the granted scope.\nVERDICT manifest: read in full; it states status complete, records baseline_suite 8 failed at f657a98dc and after_suite 0 failed at 0a39e40fb each with a log whose last line is a bare EXIT=, but its commits field names seven of the eight commits actually added (manifest.md:7).\nVERDICT diff: read all eight commits f657a98dc..f2eb66422 commit by commit; two add the loop tests and the readable scope answer, three move the handler onto the is_infrastructure_error classifier at imas_codex/discovery/base/supervision.py:108 with its restart case, and three write the evidence fragment, with no product file outside imas_codex/standard_names/loop.py touched.\nCALL_SITES: imas_codex/cli/sn.py:1108, imas_codex/standard_names/edit.py:3899, imas_codex/standard_names/loop.py:2135, imas_codex/standard_names/loop.py:2150\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/loop.py:2142-2148 skips the refresh when the selector returns None, so an unreadable scope neither sweeps the graph nor reads as a scope that owns nothing.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/gate-head-default.log ends \"48 passed\" EXIT=0 and logs/gate-base-default.log \"8 failed, 40 passed\" EXIT=1, the eight being exactly the new discrimination tests named in manifest.md:23.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat f657a98dc..f2eb66422 names five paths and all five appear in manifest.md:4 orientation_write_paths, including the harness file the coordinator added to the fence.\nSCORE durability: 19\nJUSTIFICATION durability: logs/negative-control-forwarding.log fails the three wiring tests when sn_ids=_refresh_ids is deleted and logs/negative-control-restart-error.log fails only the restart test when the classifier is replaced by a local isinstance list, so each added assertion has a shown condition under which it reddens.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/loop.py:377-393 follows the surrounding module idiom and delegates the decision to an owner, and ruff reports no findings across the four changed Python files.\nSCORE reuse: 19\nJUSTIFICATION reuse: loop.py:346 imports is_infrastructure_error from imas_codex/discovery/base/supervision.py:108 rather than re-listing connection failures, and tests/standard_names/test_scoped_drift_loop.py:43 imports the orchestrator harness from test_scoped_global_maintenance.py:19 instead of copying its 23-entry patch set.\nFINDING manifest.md:7 non-blocking: the commits field names seven of the eight commits in f657a98dc..f2eb66422, omitting ed127f9ed, the evidence-fragment commit that adds every negative-control citation, so the node's recorded history under-reports what it shipped.\nFINDING imas_codex/standard_names/loop.py:2142 non-blocking: the call site logs a second \"could not be read\" warning for a scope the selector has already warned about at loop.py:386, and this second line drops the exception type and message, so one unreadable scope emits two differently worded warnings a log scan must de-duplicate.\nFINDING manifest.md:17 non-blocking: the tests field names only the default-marker arm, so the -m graph arm the brief's gate also requires (logs/gate-head-graph.log, 6 passed EXIT=0) lives only inside that log's header and the fragment, and a promotion-time gate receipt re-runs half of the gate the done_when names.",
+  "review_run_id": "r-20261024T210232719057-review-of-shc-drift-scope-hardening-f2eb664226db",
+  "reviewed_base_sha": "f657a98dc491189be7c310ec8065b5eea057868e",
+  "reviewed_commits": [
+    "a45ed3f83ddfa2cc117400b814c41a346d8e2d41",
+    "b4641857b498eaecf1875d50b3d9e693464be0fa",
+    "22104a44cc6818091b63758b94260554022766c0",
+    "abc2e877931fb12ff4a16d30a2f0352238768e1a",
+    "f3c194660ba0d8655b66861b5a8b822286e755e6",
+    "ed127f9ed3df32a43ed5fcdfe808b7fa554b218b",
+    "0a39e40fbfa0cd8fc38dba4cff5be7b7b97277b8",
+    "f2eb664226dbd7f00592b48d29669abb6648a99b"
+  ],
+  "reviewed_head_sha": "f2eb664226dbd7f00592b48d29669abb6648a99b",
+  "reviewed_run_id": "r-20261024T110534469167-shc-drift-scope-hardening",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T21:55:00Z",
+  "total": 111
+}
