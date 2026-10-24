@@ -2,8 +2,8 @@
   "schema": "srtj-docs-switch-measure",
   "node": "srtj-docs-switch-causes",
   "artifact": "srtj-docs-switch-causes.json",
-  "created_at": "2026-10-24T06:10:08.050173+00:00",
-  "code_revision": "1d667cc62507383e6d8295a0cdeadcdb3f359365",
+  "created_at": "2026-10-24T07:07:55.911290+00:00",
+  "code_revision": "588c96b011120982af20613f725e5b3d7383aff4",
   "module_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-switch-causes/docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py",
   "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-docs-switch-causes/docs/evidence/fragments/sn-review-through-jev",
   "archive": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz",
@@ -12,9 +12,9 @@
   "decision_rule": "accepted = the Jev docs route is accept AND no hold is open; a hold is open when the route raised one or the deterministic error-severity lint cap raised a docs_lint_error hold",
   "bar": "all 19 disagreement rows labelled not acceptable (link defects) refined, and none of the 30 disagreement rows labelled acceptable refined, on both Jev passes",
   "scratch_instance": {
-    "path": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-5e_hsl6e/instance",
-    "uri": "bolt://127.0.0.1:51157",
-    "log": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-5e_hsl6e/instance/logs/neo4j-temp.log"
+    "path": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-afhshyqc/instance",
+    "uri": "bolt://127.0.0.1:58085",
+    "log": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-afhshyqc/instance/logs/neo4j-temp.log"
   },
   "documentation_match": {
     "compared": 77,
@@ -72,8 +72,8 @@
       "per_class": {
         "acceptable": {
           "rows": 47,
-          "accepted": 43,
-          "refined": 4
+          "accepted": 42,
+          "refined": 5
         },
         "not-acceptable": {
           "rows": 30,
@@ -387,21 +387,21 @@
         }
       ],
       "lint_hold": "[error:lint:relationship_link] relationship_link: relationship_link: documentation contains no standard-name relationship link",
-      "pass_a_route": "accept",
-      "pass_a_failed_checks": [],
-      "pass_a_holds": [],
-      "pass_b_route": "refine",
-      "pass_b_failed_checks": [
+      "pass_a_route": "refine",
+      "pass_a_failed_checks": [
         "claim_contradicts_source"
       ],
-      "pass_b_holds": [
+      "pass_a_holds": [
         {
           "kind": "cascade_contradiction",
           "finding": "contradicts source: The upper mechanical travel limit is the greatest permitted value of the mirror\u2019s signed rotation angle, bounding the accessible steering range of the launcher.",
           "evidence": "Jev contradiction veto on claim_contradicts_source",
           "raised_by": "jev-cascade"
         }
-      ]
+      ],
+      "pass_b_route": "accept",
+      "pass_b_failed_checks": [],
+      "pass_b_holds": []
     },
     {
       "sheet_id": "S0017",
@@ -513,9 +513,18 @@
       "pass_a_route": "accept",
       "pass_a_failed_checks": [],
       "pass_a_holds": [],
-      "pass_b_route": "accept",
-      "pass_b_failed_checks": [],
-      "pass_b_holds": []
+      "pass_b_route": "refine",
+      "pass_b_failed_checks": [
+        "claim_contradicts_source"
+      ],
+      "pass_b_holds": [
+        {
+          "kind": "cascade_contradiction",
+          "finding": "contradicts source: Trapped fast-ion power density due to collisions is the local rate at which Coulomb collisions transfer kinetic energy to fast ions on trapped guiding-center orbits per unit volume.",
+          "evidence": "Jev contradiction veto on claim_contradicts_source",
+          "raised_by": "jev-cascade"
+        }
+      ]
     },
     {
       "sheet_id": "S0023",
@@ -1567,9 +1576,18 @@
           "raised_by": "jev-cascade"
         }
       ],
-      "pass_b_route": "accept",
-      "pass_b_failed_checks": [],
-      "pass_b_holds": []
+      "pass_b_route": "refine",
+      "pass_b_failed_checks": [
+        "claim_contradicts_source"
+      ],
+      "pass_b_holds": [
+        {
+          "kind": "cascade_contradiction",
+          "finding": "contradicts source: The scope is one local shear-Alfv\u00e9n continuum root at one position across the magnetic flux surfaces and one toroidal mode number; it is not an average, envelope, or sum over roots, positions, or mode numbers.",
+          "evidence": "Jev contradiction veto on claim_contradicts_source",
+          "raised_by": "jev-cascade"
+        }
+      ]
     },
     {
       "sheet_id": "S0077",
@@ -1595,10 +1613,10 @@
   "status": "accepted",
   "scratch_stopped": true,
   "scratch_removed": {
-    "path": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-5e_hsl6e",
+    "path": "/tmp/reckon-crew-scratch/r-20261023T191819797804-srtj-docs-switch-causes/srtj-docs-switch-measure-afhshyqc",
     "exists_after": false
   },
-  "finished_at": "2026-10-24T06:21:45.572300+00:00",
+  "finished_at": "2026-10-24T07:21:18.592851+00:00",
   "supporting_evidence": {
     "veto_replay": {
       "bar": {
@@ -1864,7 +1882,7 @@
                   "This quantity applies to each individual control-surface member and represents toroidal location only."
                 ],
                 "choices": {
-                  "check:claim_contradicts_source:0": "supports"
+                  "check:claim_contradicts_source:0": "contradicts"
                 },
                 "settled": [],
                 "fired": true,
@@ -4093,7 +4111,7 @@
       "controls": 1,
       "spend_usd": 0.018181,
       "base_revision": "c5b7f76ed",
-      "harness_note": "the replay settles a claim by withdrawing it from the question and recording 'says nothing', so it cannot carry a settlement that concludes a contradiction; its 59 of 60 on the gap row is the harness's reading, and matched_answers is the direct measure of the product on that row"
+      "harness_note": "the replay settles a claim by withdrawing it from the question and recording 'says nothing'; the named gap row is measured directly at matched_answers instead"
     },
     "matched_answers": {
       "row": "contradicts-354",
@@ -4102,11 +4120,10 @@
       "question": "the shipped claim-comparison question, unchanged",
       "samples": 10,
       "base_fires": 7,
-      "fixed_fires": 10,
-      "fixed_probability_channel_fires": 1,
-      "base_fires_where_fixed_does_not": 0,
-      "fixed_fires_where_base_does_not": 3,
-      "settlement": "contradicts",
+      "shipped_fires": 1,
+      "base_fires_where_shipped_does_not": 6,
+      "shipped_fires_where_base_does_not": 0,
+      "scoring": "the stored answers, scored through the shipped criterion as it now ships; no new judgement was requested",
       "answers": [
         {
           "choice": "says nothing",
@@ -4116,9 +4133,7 @@
             "says nothing": 0.42
           },
           "base_fires": false,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         },
         {
           "choice": "says nothing",
@@ -4128,9 +4143,7 @@
             "says nothing": 0.53
           },
           "base_fires": false,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         },
         {
           "choice": "says nothing",
@@ -4140,9 +4153,7 @@
             "says nothing": 0.46
           },
           "base_fires": true,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         },
         {
           "choice": "says nothing",
@@ -4152,9 +4163,7 @@
             "says nothing": 0.4
           },
           "base_fires": true,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         },
         {
           "choice": "says nothing",
@@ -4164,9 +4173,7 @@
             "says nothing": 0.45
           },
           "base_fires": false,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         },
         {
           "choice": "says nothing",
@@ -4176,9 +4183,7 @@
             "says nothing": 0.54
           },
           "base_fires": true,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         },
         {
           "choice": "says nothing",
@@ -4188,9 +4193,7 @@
             "says nothing": 0.47
           },
           "base_fires": true,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         },
         {
           "choice": "contradicts",
@@ -4200,8 +4203,6 @@
             "says nothing": 0.44
           },
           "base_fires": true,
-          "head_criterion_fires": true,
-          "head_settlement": "contradicts",
           "head_fires": true
         },
         {
@@ -4212,9 +4213,7 @@
             "says nothing": 0.45
           },
           "base_fires": true,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         },
         {
           "choice": "says nothing",
@@ -4224,63 +4223,39 @@
             "says nothing": 0.52
           },
           "base_fires": true,
-          "head_criterion_fires": false,
-          "head_settlement": "contradicts",
-          "head_fires": true
+          "head_fires": false
         }
       ],
-      "reading": "the base veto fires on 7 of the 10 sampled answers and the fixed veto on 10 of 10; no answer fires for the base and not for the fixed one, so the fix raises recall on this row rather than lowering it. Three of the ten get their firing only under the fixed veto, and the fixed veto reaches all ten through the settlement that a claim replacing a relation its own document states is a contradiction; its probability channel fires on 1 of 10."
+      "reading": "the base veto fires on 7 of 10 stored answers and the shipped rule on 1; every shipped firing is one the base makes, so the shipped rule never fires where the base is silent. The difference is the flat-distribution criterion, which declines the answers whose contradiction mass trails their silence mass. This row is the bar's named recall gap."
     },
     "head_arm": {
-      "gate": "tests/standard_names/test_contradiction_veto_question.py tests/standard_names/test_docs_gates.py tests/standard_names/test_review_holds.py",
-      "arms": {
-        "base": {
-          "tree": "git archive of main",
-          "revision": null,
-          "passed": 71,
-          "deselected": 19,
-          "failed": 0
-        },
-        "head": {
-          "tree": "git archive of the node's head",
-          "passed": 91,
-          "deselected": 18,
-          "failed": 0
-        }
+      "base_revision": "a701540ca47f1211101ab1ec429f08c027067bc9",
+      "head_revision": "719d2cc13dc9adf25235fe1d79a3a9872cda9816",
+      "base": {
+        "passed": 71,
+        "deselected": 19
       },
-      "delta": {
-        "added_passing": 20,
-        "removed_passing": 0,
-        "added_failing": 0
+      "head": {
+        "passed": 88,
+        "deselected": 18
       },
-      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/gate-delta.log",
-      "note": "the head adds 14 test functions across the two files it changes (test_contradiction_veto_question +11, test_docs_gates +3) and removes none; the one function present on main and absent at the head is graph-marked and comes from a main commit made after the branch point, deselected on both arms"
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/gate-delta.log"
     },
     "negative_control": {
-      "declared": "undo the commit that answers the review; the coordinate exemption and the relation-replacement settlement must lose their tests",
-      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/negative-control-fix.log",
-      "exit": 1,
-      "failed": 5,
+      "mutation": "withdraw the coordinate exemption: _names_a_position returns False in an archived head tree, tests unchanged",
+      "failed": 2,
       "passed": 86,
-      "failing_test_ids": [
-        "tests/standard_names/test_contradiction_veto_question.py::test_a_claim_that_replaces_the_documents_relation_contradicts_it",
-        "tests/standard_names/test_contradiction_veto_question.py::test_a_contrast_that_rejects_no_stated_relation_stays_with_the_judge",
-        "tests/standard_names/test_contradiction_veto_question.py::test_a_settled_relation_replacement_vetoes_the_document",
+      "exit": 1,
+      "failed_tests": [
         "tests/standard_names/test_docs_gates.py::test_a_coordinate_states_its_frame_and_needs_no_defining_relation",
         "tests/standard_names/test_docs_gates.py::test_a_coordinate_without_a_frame_states_nothing_checkable"
       ],
-      "earlier_mutation": {
-        "declared": "return the narrowed veto criterion to its former form",
-        "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/negative-control-revert.log",
-        "exit": 1,
-        "failed": 10,
-        "passed": 33
-      }
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/negative-control-4.log"
     },
     "spend_usd": {
       "measurement": 0.024066,
       "veto_replay": 0.018181,
-      "matched_answers_upper_bound": 0.02,
+      "matched_answers_and_probes_upper_bound": 0.02,
       "total_upper_bound": 0.062247,
       "ceiling": 1.0
     }
