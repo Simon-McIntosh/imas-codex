@@ -17,6 +17,13 @@
   ],
   "completed_at": "2026-10-24T11:41:37.367Z",
   "dispatched_at": "2026-10-24T11:25:22Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-graph-store-structure",
+      "recorded_at": "2026-10-24T20:10:07.336543+00:00"
+    }
+  },
   "findings": [
     "FINDING imas_codex/standard_names/worker_tasks/worker_common.py:34 non-blocking: an empty `if TYPE_CHECKING: pass` block is retained only because the design symbol map names TYPE_CHECKING as a symbol owned by this module; it is dead code that a later reader will copy without knowing why it is there.",
     "FINDING imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:9 non-blocking: the standard-library `re` module is imported through the sibling module (`from .worker_common import _re`) so the task module depends on the foundation for an import alias that carries no meaning; a local `import re as _re` keeps the module self-contained and leaves the foundation's surface smaller.",
